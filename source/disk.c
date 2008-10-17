@@ -42,6 +42,8 @@ struct stat details;
 char *block;
 FILE *fp;
 
+if (filename == NULL)
+	return NULL;
 if (stat(filename, &details) != 0)
 	return NULL;
 if (details.st_size == 0)
