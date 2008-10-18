@@ -18,6 +18,8 @@ public:
 	~ANT_string_pair() {}
 
 	char *str(void) { return strnnew(start, length); }
+	long length(void) { return length; }
+	long operator[](long pos) { return start[pos]; }
 };
 
 
