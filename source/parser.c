@@ -49,7 +49,7 @@ if (*start == '\0')
 	return NULL;
 
 current_token.start = start;
-current_token.length = current - start;
+current_token.string_length = current - start;
 
 return &current_token;
 }

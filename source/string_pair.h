@@ -11,14 +11,14 @@ class ANT_string_pair
 {
 public:
 	char *start;
-	long length;
+	long string_length;
 
 public:
 	ANT_string_pair() {}
 	~ANT_string_pair() {}
 
-	char *str(void) { return strnnew(start, length); }
-	long length(void) { return length; }
+	char *str(void) { return strnnew(start, string_length); }
+	long length(void) { return string_length; }
 	long operator[](long pos) { return start[pos]; }
 };
 
