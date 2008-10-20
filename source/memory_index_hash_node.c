@@ -2,32 +2,33 @@
 	MEMORY_INDEX_HASH_NODE.C
 	------------------------
 */
-
-
-class ANT_memory_index_hash_node
-{
-private:
-	static ANT_memory_index_hash_node *all_nodes;
-	static long last_allocated_node;
-
-public:
-	ANT_string_pair *string;
-	ANT_memory_index_hash_node *left, *right;
-
-public:
-	ANT_memory_index_hash_node(ANT_string_pair *string);
-	~ANT_memory_index_hash_node() {}
-	void *operator new(size_t count);
-} ;
-
-ANT_memory_index_hash_node *ANT_memory_index_hash_node::all_nodes = NULL;
-long ANT_memory_index_hash_node::last_allocated_node = 0;
+#include <stdio.h>
+#include "string_pair.h"
+#include "memory.h"
+#include "memory_index_hash_node.h"
+#include "postings_piece.h"
 
 /*
 	ANT_MEMORY_INDEX_HASH_NODE::ANT_MEMORY_INDEX_HASH_NODE()
 	--------------------------------------------------------
 */
-ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_string_pair string)
+ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string)
+{
+left = right = NULL;
+this->memory = memory;
+string.start = (char *)memory->malloc(original_string->length());
+original_string->strcpy(string.start);
+string.string_length = original_string->length();
+docid_list_head = docid_list_tail = new (memory) ANT_postings_piece(memory, 16);
+tf_list_head = tf_list_tail = new (memory) ANT_postings_piece(memory, 16);
+current_docno = 0;
+}
+
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::~ANT_MEMORY_INDEX_HASH_NODE()
+	---------------------------------------------------------
+*/
+ANT_memory_index_hash_node::~ANT_memory_index_hash_node()
 {
 }
 
@@ -35,15 +36,28 @@ ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_string_pair string)
 	ANT_MEMORY_INDEX_HAS_NODE::OPERATOR NEW ()
 	------------------------------------------
 */
-void *ANT_memory_index_hash_node::operator new (size_t count)
+void *ANT_memory_index_hash_node::operator new (size_t count, ANT_memory *memory)
 {
-void *answer;
-
-#pragma omp critical
-	{
-	if (all_nodes == NULL)
-		all_nodes = realloc(all_nodes, sizeof(*all_nodes) * max_nodes);
-	answer = (void *)all_nodes[last_allocated_node++];
-	}
-return answer;
+return memory->malloc(count);
 }
+
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
+	-----------------------------------------
+*/
+void ANT_memory_index_hash_node::add_posting(long long docno)
+{
+if (docno == current_docno)
+	{
+	if (tf_list_tail->data[tf_list_tail->used]++ > 254)
+		tf_list_tail->data[tf_list_tail->used] = 254;
+	}
+else
+	{
+	// diff = docno - current_docno
+	// compress diff
+	// stuff on the end of docid_list_tail (if it fits)
+	// set tf_list_tail to zero (if it fits)
+	}
+}
+

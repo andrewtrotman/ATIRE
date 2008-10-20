@@ -2,13 +2,17 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-CFLAGS = /openmp /W4 -D_CRT_SECURE_NO_WARNINGS /nologo
+CFLAGS = /openmp /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi
 CC = @cl
 
 PARTS = \
 	$(OBJDIR)\disk.obj \
 	$(OBJDIR)\disk_internals.obj \
-	$(OBJDIR)\parser.obj
+	$(OBJDIR)\parser.obj \
+	$(OBJDIR)\memory_index_hash_node.obj\
+	$(OBJDIR)\memory.obj \
+	$(OBJDIR)\memory_index.obj \
+	$(OBJDIR)\postings_piece.obj
 
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
