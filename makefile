@@ -2,7 +2,7 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-CFLAGS = /openmp /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  /O2 /Oi 
 CC = @cl
 
 PARTS = \

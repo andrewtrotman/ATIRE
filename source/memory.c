@@ -42,7 +42,7 @@ void *ans;
 	ans = at;
 	at += bytes;
 	if (at > chunk_end)
-		exit(printf("Out of memory:%d bytes requested %d bytes used", bytes, used));
+		exit(printf("Out of memory:%I64d bytes requested %I64d bytes used", (long long)bytes, used));
 	used += bytes;
 	}
 return ans;

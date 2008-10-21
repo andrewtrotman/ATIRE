@@ -2,6 +2,7 @@
 	MEMORY_INDEX.C
 	--------------
 */
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include "memory_index_hash_node.h"
@@ -35,14 +36,33 @@ delete memory;
 long ANT_memory_index::hash(ANT_string_pair *string)
 {
 long ans, len;
+const unsigned char base = 'a' - 1;
 
-ans = tolower((*string)[0]) - 'a';
+ans = (tolower((*string)[0]) - base) * 27 * 27 * 27;
+
 if ((len = string->length()) > 1)
-	ans += (tolower((*string)[1]) - 'a') * 27;
+	ans += (tolower((*string)[1]) - base) * 27 * 27;
 if (len > 2)
-	ans += (tolower((*string)[2]) - 'a') * 27 * 27;
+	ans += (tolower((*string)[2]) - base) * 27;
 if (len > 3)
-	ans += (tolower((*string)[3]) - 'a') * 27 * 27 * 27;
+	ans += (tolower((*string)[3]) - base);
+
+return ans;
+}
+
+/*
+	ANT_MEMORY_INDEX::DEHASH()
+	--------------------------
+*/
+unsigned long ANT_memory_index::dehash(long hash_val)
+{
+unsigned long ans;
+const unsigned char base = 'a' - 1;
+
+ans  = ((hash_val % 27) + base) << 24;
+ans |= ((hash_val / 27) % 27 + base) << 16;
+ans |= ((hash_val / (27*27)) % 27 + base) << 8;
+ans |= ((hash_val / (27*27*27)) % 27 + base);
 
 return ans;
 }
@@ -55,7 +75,7 @@ ANT_memory_index_hash_node *ANT_memory_index::find_add_node(ANT_memory_index_has
 {
 long cmp;
 
-cmp = string->strcmp(&(root->string));
+cmp = string->stricmp(&(root->string));
 if (cmp == 0)
 	return root;
 else if (cmp > 0)
@@ -67,7 +87,7 @@ else
 	if (root->right == NULL)
 		return root->right = new (memory) ANT_memory_index_hash_node(memory, string);
 	else
-		return root->right;
+		return find_add_node(root->right, string);
 }
 
 /*
@@ -86,4 +106,44 @@ else
 	node = find_add_node(hash_table[hash_value], string);
 node->add_posting(docno);
 }
+
+/*
+	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
+	---------------------------------------
+*/
+long long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root)
+{
+long long bytes = 0, doc_size, tf_size;
+
+if (root->right != NULL)
+	bytes += serialise_all_nodes(root->right);
+
+printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
+//root->serialise_postings(docs, &doc_size, tfs, &tf_size);
+
+if (root->left != NULL)
+	bytes += serialise_all_nodes(root->left);
+
+return bytes;
+}
+
+/*
+	ANT_MEMORY_INDEX::SERIALISE()
+	-----------------------------
+*/
+long long ANT_memory_index::serialise()
+{
+long long bytes = 0;
+long hash_val;
+
+for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
+	if (hash_table[hash_val] != NULL)
+		{
+		unsigned long dehash_val = dehash(hash_val);
+//		printf("NODE:%d %c%c%c%c\n", hash_val, dehash_val & 0xFF, (dehash_val >> 8) & 0xFF, (dehash_val >> 16) & 0xFF, (dehash_val >> 24) & 0xFF);
+		bytes += serialise_all_nodes(hash_table[hash_val]);
+		}
+return bytes;
+}
+
 

@@ -34,13 +34,11 @@ for (param = 0; param < argc; param++)
 		while ((token = parser.get_next_token()) != NULL)
 			{
 			if (isalpha(*token->start))
-				{
-				printf("\t%s\n", token->str());
 				index->add_term(token, doc);
-				}
-			else
-				puts(token->str());
+			else if (token->length() == 5 && strncmp(token->start, "<DOC>", 5) == 0)
+				doc++;
 			}
 		}
+index->serialise();
 }
 

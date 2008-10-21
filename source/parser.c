@@ -41,9 +41,19 @@ char *start;
 
 while (!isheadchar(*current))
 	current++;
-start = current++;
-while (isallowable(*current))
-	current++;
+
+if (isalpha(*current))
+	{
+	start = current++;
+	while (isalpha(*current))
+		current++;
+	}
+else
+	{
+	start = current++;
+	while (isallowable(*current))
+		current++;
+	}
 
 if (*start == '\0')
 	return NULL;
