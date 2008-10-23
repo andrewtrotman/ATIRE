@@ -30,9 +30,29 @@ public:
 	~ANT_memory_index_hash_node();
 	void *operator new(size_t count, ANT_memory *memory);
 	void add_posting(long long docno);
-	long serialise_postings(char *doc_into, long *doc_size, char *tf_into, long *tf_size);
+	long serialise_postings(unsigned char *doc_into, long *doc_size, unsigned char *tf_into, long *tf_size);
+
+	long decompress(unsigned char **from);
 } ;
 
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::DECOMPRESS()
+	----------------------------------------
+*/
+inline long ANT_memory_index_hash_node::decompress(unsigned char **from)
+{
+long ans = 0;
 
+while ((**from & 0x80) == 0)
+	{
+	ans = (ans << 7) + **from;
+	(*from)++;
+	}
+
+ans = (ans << 7) + (**from & 0x7F);
+(*from)++;
+
+return ans;
+}
 
 #endif __MEMORY_INDEX_HASH_NODE_H__

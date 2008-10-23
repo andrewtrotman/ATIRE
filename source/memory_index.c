@@ -18,6 +18,10 @@ ANT_memory_index::ANT_memory_index()
 {
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
+serialised_docids_size = 1;
+serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
+serialised_tfs_size = 1;
+serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 }
 
 /*
@@ -113,13 +117,32 @@ node->add_posting(docno);
 */
 long long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root)
 {
-long long bytes = 0, doc_size, tf_size;
+long long bytes = 0;
+long doc_size, tf_size, total;
 
 if (root->right != NULL)
 	bytes += serialise_all_nodes(root->right);
 
-printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
-//root->serialise_postings(docs, &doc_size, tfs, &tf_size);
+//printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
+doc_size = serialised_docids_size;
+tf_size = serialised_tfs_size;
+while ((total = root->serialise_postings(serialised_docids, &doc_size, serialised_tfs, &tf_size)) == 0)
+	{
+	if (doc_size > serialised_docids_size)
+		{
+		serialised_docids_size = doc_size;
+		serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
+		}
+	if (tf_size > serialised_tfs_size)
+		{
+		serialised_tfs_size = tf_size;
+		serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
+		}
+	}
+
+//
+text_render(root, serialised_docids, doc_size, serialised_tfs, tf_size);
+//
 
 if (root->left != NULL)
 	bytes += serialise_all_nodes(root->left);
@@ -139,11 +162,31 @@ long hash_val;
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
 		{
-		unsigned long dehash_val = dehash(hash_val);
+//		unsigned long dehash_val = dehash(hash_val);
 //		printf("NODE:%d %c%c%c%c\n", hash_val, dehash_val & 0xFF, (dehash_val >> 8) & 0xFF, (dehash_val >> 16) & 0xFF, (dehash_val >> 24) & 0xFF);
 		bytes += serialise_all_nodes(hash_table[hash_val]);
 		}
 return bytes;
 }
 
+/*
+	ANT_MEMORY_INDEX::TEXT_RENDER()
+	-------------------------------
+*/
+void ANT_memory_index::text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size)
+{
+unsigned char *pos;
+long tf, doc = 0;
+
+tf = tf_size;		// this does nothing but was added to remove a compiler warning about an unused parameter
+printf("\t%s (df:%I64d cf:%I64d):", root->string.str(), root->document_frequency, root->collection_frequency);
+pos = serialised_docids;
+while (pos < serialised_docids + doc_size)
+	{
+	doc += root->decompress(&pos);
+	tf = *serialised_tfs++;
+	printf("(%d,%d),", doc, tf);
+	}
+putchar('\n');
+}
 

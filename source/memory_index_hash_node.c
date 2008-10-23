@@ -8,6 +8,13 @@
 #include "memory_index_hash_node.h"
 #include "postings_piece.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	ANT_MEMORY_INDEX_HASH_NODE::ANT_MEMORY_INDEX_HASH_NODE()
 	--------------------------------------------------------
@@ -99,8 +106,8 @@ long needed;
 collection_frequency++;
 if (docno == current_docno)
 	{
-	if (tf_list_tail->data[tf_list_tail->used]++ > 254)
-		tf_list_tail->data[tf_list_tail->used] = 254;
+	if (tf_list_tail->data[tf_list_tail->used - 1]++ > 254)
+		tf_list_tail->data[tf_list_tail->used - 1] = 254;
 	}
 else
 	{
@@ -121,6 +128,7 @@ else
 		tf_list_tail = tf_list_tail->next;
 		}
 	tf_list_tail->data[tf_list_tail->used] = 1;
+	tf_list_tail->used++;
 	}
 }
 
@@ -128,29 +136,37 @@ else
 	ANT_MEMORY_INDEX_HASH_NODE::SERIALISE_POSTINGS()
 	------------------------------------------------
 */
-long ANT_memory_index_hash_node::serialise_postings(char *doc_into, long *doc_size, char *tf_into, long *tf_size)
+long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, long *doc_size, unsigned char *tf_into, long *tf_size)
 {
 ANT_postings_piece *where;
+long err;
 long doc_bytes, tf_bytes;
 
+err = FALSE;
 doc_bytes = 0;
 for (where = docid_list_head; where != NULL; where = where->next)
 	{
-	memcpy(doc_into + doc_bytes, where->data, where->used);
+	if (doc_bytes + where->used <= *doc_size)
+		memcpy(doc_into + doc_bytes, where->data, where->used);
+	else
+		err = TRUE;
 	doc_bytes += where->used;
 	}
 
 tf_bytes = 0;
 for (where = tf_list_head; where != NULL; where = where->next)
 	{
-	memcpy(tf_into + tf_bytes, where->data, where->used);
+	if (tf_bytes + where->used <= *tf_size)
+		memcpy(tf_into + tf_bytes, where->data, where->used);
+	else
+		err = TRUE;
 	tf_bytes += where->used;
 	}
 
 *doc_size = doc_bytes;
 *tf_size = tf_bytes;
 
-return doc_bytes + tf_bytes;
+return err ? 0 : doc_bytes + tf_bytes;
 }
 
 

@@ -2,12 +2,13 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  /O2 /Oi 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi 
 CC = @cl
 
 PARTS = \
 	$(OBJDIR)\disk.obj \
 	$(OBJDIR)\disk_internals.obj \
+	$(OBJDIR)\file.obj\
 	$(OBJDIR)\parser.obj \
 	$(OBJDIR)\memory_index_hash_node.obj\
 	$(OBJDIR)\memory.obj \
