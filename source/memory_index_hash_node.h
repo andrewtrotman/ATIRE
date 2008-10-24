@@ -10,6 +10,7 @@
 
 class ANT_memory;
 class ANT_postings_piece;
+class ANT_memory_index_stats;
 
 class ANT_memory_index_hash_node
 {
@@ -20,13 +21,14 @@ public:
 	long long current_docno;
 	long long collection_frequency, document_frequency;
 	ANT_memory *memory;
+	ANT_memory_index_stats *stats;
 
 private:
 	long compress_bytes_needed(long long val);
 	void compress_into(unsigned char *dest, long long docno);
 
 public:
-	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string);
+	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_memory_index_stats *stats);
 	~ANT_memory_index_hash_node();
 	void *operator new(size_t count, ANT_memory *memory);
 	void add_posting(long long docno);

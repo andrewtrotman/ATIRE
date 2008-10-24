@@ -62,15 +62,45 @@ return block;
 }
 
 /*
+	ANT_DISK::CONSTRUCT_FULL_PATH()
+	-------------------------------
+*/
+inline char *ANT_disk::construct_full_path(char *filename)
+{
+strcpy(internals->fully_qualified_filename, internals->pathname);
+strcat(internals->fully_qualified_filename, filename);
+
+return internals->fully_qualified_filename;
+}
+
+/*
 	ANT_DISK::GET_FIRST_FILENAME()
 	------------------------------
 */
 char *ANT_disk::get_first_filename(char *wildcard)
 {
+char *slash, *colon, *backslash, *max;
+
 if ((internals->file_list = FindFirstFile(wildcard, &internals->file_data)) == INVALID_HANDLE_VALUE)
 	return NULL;
-else
-	return internals->file_data.cFileName;
+
+strcpy(internals->pathname, wildcard);
+
+slash = strrchr(internals->pathname, '/');
+backslash = strrchr(internals->pathname, '\\');
+colon = strrchr(internals->pathname, ':');
+
+max = internals->pathname - 1;
+if (slash > max)
+	max = slash;
+if (backslash > max)
+	max = backslash;
+if (colon > max)
+	max = colon;
+
+*(max + 1) = '\0';
+
+return construct_full_path(internals->file_data.cFileName);
 }
 
 /*
@@ -84,6 +114,8 @@ if (FindNextFile(internals->file_list, &internals->file_data) == 0)
 	FindClose(internals->file_list);
 	return NULL;
 	}
-else
-	return internals->file_data.cFileName;
+
+return construct_full_path(internals->file_data.cFileName);
 }
+
+

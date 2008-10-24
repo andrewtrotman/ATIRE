@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "memory_index_hash_node.h"
 #include "memory_index.h"
+#include "memory_index_stats.h"
 #include "memory.h"
 #include "string_pair.h"
 
@@ -22,6 +23,7 @@ serialised_docids_size = 1;
 serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
+stats = new ANT_memory_index_stats;
 }
 
 /*
@@ -30,7 +32,9 @@ serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 */
 ANT_memory_index::~ANT_memory_index()
 {
+stats->render();
 delete memory;
+delete stats;
 }
 
 /*
@@ -84,12 +88,12 @@ if (cmp == 0)
 	return root;
 else if (cmp > 0)
 	if (root->left == NULL)
-		return root->left = new (memory) ANT_memory_index_hash_node(memory, string);
+		return root->left = new_memory_index_hash_node(string);
 	else
 		return find_add_node(root->left, string);
 else
 	if (root->right == NULL)
-		return root->right = new (memory) ANT_memory_index_hash_node(memory, string);
+		return root->right = new_memory_index_hash_node(string);
 	else
 		return find_add_node(root->right, string);
 }
@@ -103,9 +107,14 @@ void ANT_memory_index::add_term(ANT_string_pair *string, long long docno)
 long hash_value;
 ANT_memory_index_hash_node *node;
 
+stats->documents = docno;
+
 hash_value = hash(string);
 if (hash_table[hash_value] == NULL)
-	node = hash_table[hash_value] = new (memory) ANT_memory_index_hash_node(memory, string);
+	{
+	stats->hash_nodes++;
+	node = hash_table[hash_value] = new_memory_index_hash_node(string);
+	}
 else
 	node = find_add_node(hash_table[hash_value], string);
 node->add_posting(docno);

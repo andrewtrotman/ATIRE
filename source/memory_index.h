@@ -1,4 +1,3 @@
-
 /*
 	MEMORY_INDEX.H
 	--------------
@@ -6,6 +5,9 @@
 
 #ifndef __MEMORY_INDEX_H__
 #define __MEMORY_INDEX_H__
+
+#include "memory_index_stats.h"
+#include "memory_index_hash_node.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -20,6 +22,7 @@ private:
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
 	long serialised_docids_size, serialised_tfs_size;
+	ANT_memory_index_stats *stats;
 
 private:
 	long hash(ANT_string_pair *string);
@@ -27,6 +30,7 @@ private:
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long long serialise_all_nodes(ANT_memory_index_hash_node *root);
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
+	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
 
 public:
 	ANT_memory_index();
@@ -37,5 +41,15 @@ public:
 } ;
 
 
+/*
+	ANT_MEMORY_INDEX::NEW_MEMORY_INDEX_HASH_NODE()
+	----------------------------------------------
+*/
+inline ANT_memory_index_hash_node *ANT_memory_index::new_memory_index_hash_node(ANT_string_pair *string)
+{
+stats->unique_terms++;
+
+return new (memory) ANT_memory_index_hash_node(memory, string, stats);
+}
 
 #endif __MEMORY_INDEX_H__

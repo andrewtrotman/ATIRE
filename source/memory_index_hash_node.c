@@ -6,6 +6,7 @@
 #include "string_pair.h"
 #include "memory.h"
 #include "memory_index_hash_node.h"
+#include "memory_index_stats.h"
 #include "postings_piece.h"
 
 #ifndef FALSE
@@ -19,7 +20,7 @@
 	ANT_MEMORY_INDEX_HASH_NODE::ANT_MEMORY_INDEX_HASH_NODE()
 	--------------------------------------------------------
 */
-ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string)
+ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_memory_index_stats *stats)
 {
 left = right = NULL;
 this->memory = memory;
@@ -29,6 +30,7 @@ string.string_length = original_string->length();
 docid_list_head = docid_list_tail = new (memory) ANT_postings_piece(memory, 16);
 tf_list_head = tf_list_tail = new (memory) ANT_postings_piece(memory, 16);
 collection_frequency = document_frequency = current_docno = 0;
+this->stats = stats;
 }
 
 /*
@@ -102,10 +104,12 @@ one:
 void ANT_memory_index_hash_node::add_posting(long long docno)
 {
 long needed;
+long wanted;
 
 collection_frequency++;
 if (docno == current_docno)
 	{
+	stats->term_occurences++;
 	if (tf_list_tail->data[tf_list_tail->used - 1]++ > 254)
 		tf_list_tail->data[tf_list_tail->used - 1] = 254;
 	}
@@ -113,9 +117,12 @@ else
 	{
 	document_frequency++;
 	needed = compress_bytes_needed(docno - current_docno);
+	stats->bytes_to_store_docids += needed;
 	if (docid_list_tail->used + needed > docid_list_tail->length)
 		{
-		docid_list_tail->next = new (memory) ANT_postings_piece(memory, 2 * docid_list_tail->length);
+		wanted = 2 * docid_list_tail->length;
+		stats->bytes_allocated_for_docids += wanted;
+		docid_list_tail->next = new (memory) ANT_postings_piece(memory, wanted);
 		docid_list_tail = docid_list_tail->next;
 		}
 	compress_into(docid_list_tail->data + docid_list_tail->used, docno - current_docno);

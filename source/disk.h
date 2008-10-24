@@ -12,6 +12,9 @@ class ANT_disk
 {
 private:
 	ANT_disk_internals *internals;
+private:
+	char *construct_full_path(char *filename);
+	
 public:
 	ANT_disk();
 	~ANT_disk();

@@ -12,6 +12,8 @@ class ANT_disk_internals
 public:
 	HANDLE file_list;
 	WIN32_FIND_DATA file_data;
+	char pathname[MAX_PATH];
+	char fully_qualified_filename[MAX_PATH];
 
 public:
 	ANT_disk_internals();
