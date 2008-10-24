@@ -20,6 +20,8 @@ public:
 	~ANT_memory();
 
 	void *malloc(size_t bytes);
+	long long bytes_allocated(void) { return allocated; }
+	long long bytes_used(void) { return used; }
 } ;
 
 /*

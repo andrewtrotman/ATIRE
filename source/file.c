@@ -15,6 +15,7 @@ ANT_file::ANT_file(ANT_memory *memory)
 this->memory = memory;
 buffer = NULL;
 buffer_size = 0;
+buffer_used = 0;
 file_position = 0;
 }
 

@@ -7,6 +7,8 @@
 #define __MEMORY_INDEX_HASH_NODE_H__
 
 #include "string_pair.h"
+#include "postings_piece.h"
+#include "memory_index_stats.h"
 
 class ANT_memory;
 class ANT_postings_piece;
@@ -22,10 +24,12 @@ public:
 	long long collection_frequency, document_frequency;
 	ANT_memory *memory;
 	ANT_memory_index_stats *stats;
+	long long docids_pos_on_disk, tfs_pos_on_disk, end_pos_on_disk;
 
 private:
 	long compress_bytes_needed(long long val);
 	void compress_into(unsigned char *dest, long long docno);
+	ANT_postings_piece *new_postings_piece(long length_in_bytes);
 
 public:
 	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_memory_index_stats *stats);
@@ -36,6 +40,17 @@ public:
 
 	long decompress(unsigned char **from);
 } ;
+
+
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::NEW_POSTINGS_PIECE()
+	------------------------------------------------
+*/
+inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(long length_in_bytes)
+{
+stats->posting_fragments++;
+return new (memory) ANT_postings_piece(memory, length_in_bytes);
+}
 
 /*
 	ANT_MEMORY_INDEX_HASH_NODE::DECOMPRESS()

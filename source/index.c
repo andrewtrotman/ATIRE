@@ -52,8 +52,9 @@ for (param = 1; param < argc; param++)
 				if (done_work)
 					doc++;
 			}
+		delete [] file;
 		}
-index->serialise();
+index->serialise("index.aspt");
 delete index;
 }
 

@@ -22,15 +22,29 @@
 */
 ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_memory_index_stats *stats)
 {
+const long initial = 16;
+
+this->stats = stats;
 left = right = NULL;
 this->memory = memory;
+
 string.start = (char *)memory->malloc(original_string->length());
+stats->strings++;
+stats->bytes_in_string_pool += original_string->length();
+
 original_string->strcpy(string.start);
 string.string_length = original_string->length();
-docid_list_head = docid_list_tail = new (memory) ANT_postings_piece(memory, 16);
-tf_list_head = tf_list_tail = new (memory) ANT_postings_piece(memory, 16);
+
+docid_list_head = docid_list_tail = new_postings_piece(initial);
+stats->bytes_allocated_for_docids += initial;
+
+tf_list_head = tf_list_tail = new_postings_piece(initial);
+stats->bytes_allocated_for_tfs += initial;
+
 collection_frequency = document_frequency = current_docno = 0;
-this->stats = stats;
+docids_pos_on_disk = 0;
+tfs_pos_on_disk = 0;
+end_pos_on_disk = 0;
 }
 
 /*
@@ -42,8 +56,8 @@ ANT_memory_index_hash_node::~ANT_memory_index_hash_node()
 }
 
 /*
-	ANT_MEMORY_INDEX_HAS_NODE::OPERATOR NEW ()
-	------------------------------------------
+	ANT_MEMORY_INDEX_HASH_NODE::OPERATOR NEW ()
+	-------------------------------------------
 */
 void *ANT_memory_index_hash_node::operator new (size_t count, ANT_memory *memory)
 {
@@ -122,7 +136,7 @@ else
 		{
 		wanted = 2 * docid_list_tail->length;
 		stats->bytes_allocated_for_docids += wanted;
-		docid_list_tail->next = new (memory) ANT_postings_piece(memory, wanted);
+		docid_list_tail->next = new_postings_piece(wanted);
 		docid_list_tail = docid_list_tail->next;
 		}
 	compress_into(docid_list_tail->data + docid_list_tail->used, docno - current_docno);
@@ -131,10 +145,14 @@ else
 
 	if (tf_list_tail->used + 1 > tf_list_tail->length)
 		{
-		tf_list_tail->next = new (memory) ANT_postings_piece(memory, 2 * tf_list_tail->length);
+		wanted = 2 * tf_list_tail->length;
+		stats->bytes_allocated_for_tfs += wanted;
+		tf_list_tail->next = new_postings_piece(wanted);
 		tf_list_tail = tf_list_tail->next;
 		}
+	stats->bytes_to_store_tfs++;
 	tf_list_tail->data[tf_list_tail->used] = 1;
+	stats->term_occurences++;
 	tf_list_tail->used++;
 	}
 }

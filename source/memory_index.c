@@ -10,6 +10,9 @@
 #include "memory_index_stats.h"
 #include "memory.h"
 #include "string_pair.h"
+#include "file.h"
+
+#define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
 /*
 	ANT_MEMORY_INDEX::ANT_MEMORY_INDEX()
@@ -19,11 +22,11 @@ ANT_memory_index::ANT_memory_index()
 {
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
+stats = new ANT_memory_index_stats(memory);
 serialised_docids_size = 1;
 serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
-stats = new ANT_memory_index_stats;
 }
 
 /*
@@ -32,7 +35,7 @@ stats = new ANT_memory_index_stats;
 */
 ANT_memory_index::~ANT_memory_index()
 {
-stats->render();
+stats->text_render();
 delete memory;
 delete stats;
 }
@@ -124,13 +127,13 @@ node->add_posting(docno);
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */
-long long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root)
+long long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root, ANT_file *file)
 {
 long long bytes = 0;
 long doc_size, tf_size, total;
 
 if (root->right != NULL)
-	bytes += serialise_all_nodes(root->right);
+	bytes += serialise_all_nodes(root->right, file);
 
 //printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
 doc_size = serialised_docids_size;
@@ -152,9 +155,11 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 //
 text_render(root, serialised_docids, doc_size, serialised_tfs, tf_size);
 //
+// write to disk and update the three pos_on_disk members.
+//
 
 if (root->left != NULL)
-	bytes += serialise_all_nodes(root->left);
+	bytes += serialise_all_nodes(root->left, file);
 
 return bytes;
 }
@@ -163,18 +168,28 @@ return bytes;
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
-long long ANT_memory_index::serialise()
+long long ANT_memory_index::serialise(char *filename)
 {
 long long bytes = 0;
 long hash_val;
+ANT_file *file;
+
+
+//stats->render();
+
+file = new ANT_file(memory);
+file->open(filename, "w+b");
+file->setvbuff(DISK_BUFFER_SIZE);
+stats->disk_buffer = DISK_BUFFER_SIZE;
 
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
 		{
 //		unsigned long dehash_val = dehash(hash_val);
 //		printf("NODE:%d %c%c%c%c\n", hash_val, dehash_val & 0xFF, (dehash_val >> 8) & 0xFF, (dehash_val >> 16) & 0xFF, (dehash_val >> 24) & 0xFF);
-		bytes += serialise_all_nodes(hash_table[hash_val]);
+		bytes += serialise_all_nodes(hash_table[hash_val], file);
 		}
+file->close();
 return bytes;
 }
 
