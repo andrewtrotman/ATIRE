@@ -38,4 +38,4 @@ $(OBJDIR)\disk.obj : $(SRCDIR)\disk.c  $(SRCDIR)\disk.h $(SRCDIR)\disk_internals
 $(OBJDIR)\parse.obj : $(SRCDIR)\parse.c $(SRCDIR)\parse.h $(SRCDIR)\string_pair.h
 
 clean :
-	del $(OBJDIR)\*.obj $(BINDIR)\*.exe
+	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb

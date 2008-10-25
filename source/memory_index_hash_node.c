@@ -22,7 +22,8 @@
 */
 ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_memory_index_stats *stats)
 {
-const long initial = 16;
+postings_initial_length = 8;
+postings_growth_factor = 1.5;
 
 this->stats = stats;
 left = right = NULL;
@@ -35,11 +36,11 @@ stats->bytes_in_string_pool += original_string->length();
 original_string->strcpy(string.start);
 string.string_length = original_string->length();
 
-docid_list_head = docid_list_tail = new_postings_piece(initial);
-stats->bytes_allocated_for_docids += initial;
+docid_list_head = docid_list_tail = new_postings_piece(postings_initial_length);
+stats->bytes_allocated_for_docids += postings_initial_length;
 
-tf_list_head = tf_list_tail = new_postings_piece(initial);
-stats->bytes_allocated_for_tfs += initial;
+tf_list_head = tf_list_tail = new_postings_piece(postings_initial_length);
+stats->bytes_allocated_for_tfs += postings_initial_length;
 
 collection_frequency = document_frequency = current_docno = 0;
 docids_pos_on_disk = 0;
@@ -134,7 +135,7 @@ else
 	stats->bytes_to_store_docids += needed;
 	if (docid_list_tail->used + needed > docid_list_tail->length)
 		{
-		wanted = 2 * docid_list_tail->length;
+		wanted = (long)(postings_growth_factor * docid_list_tail->length);
 		stats->bytes_allocated_for_docids += wanted;
 		docid_list_tail->next = new_postings_piece(wanted);
 		docid_list_tail = docid_list_tail->next;
@@ -145,7 +146,7 @@ else
 
 	if (tf_list_tail->used + 1 > tf_list_tail->length)
 		{
-		wanted = 2 * tf_list_tail->length;
+		wanted = (long)(postings_growth_factor * tf_list_tail->length);
 		stats->bytes_allocated_for_tfs += wanted;
 		tf_list_tail->next = new_postings_piece(wanted);
 		tf_list_tail = tf_list_tail->next;

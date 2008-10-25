@@ -16,6 +16,9 @@ class ANT_memory_index_stats;
 
 class ANT_memory_index_hash_node
 {
+private:
+	long postings_initial_length;
+	double postings_growth_factor;
 public:
 	ANT_string_pair string;
 	ANT_memory_index_hash_node *left, *right;

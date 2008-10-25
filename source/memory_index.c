@@ -127,13 +127,13 @@ node->add_posting(docno);
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */
-long long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root, ANT_file *file)
+long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root, ANT_file *file)
 {
-long long bytes = 0;
+long terms = 1;
 long doc_size, tf_size, total;
 
 if (root->right != NULL)
-	bytes += serialise_all_nodes(root->right, file);
+	terms += serialise_all_nodes(root->right, file);
 
 //printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
 doc_size = serialised_docids_size;
@@ -152,45 +152,51 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 		}
 	}
 
-//
-text_render(root, serialised_docids, doc_size, serialised_tfs, tf_size);
-//
-// write to disk and update the three pos_on_disk members.
-//
+/*
+	text_render(root, serialised_docids, doc_size, serialised_tfs, tf_size);
+*/
+root->docids_pos_on_disk = file->tell();
+file->write(serialised_docids, doc_size);
+root->tfs_pos_on_disk = file->tell();
+file->write(serialised_tfs, tf_size);
+root->end_pos_on_disk = file->tell();
 
 if (root->left != NULL)
-	bytes += serialise_all_nodes(root->left, file);
+	terms += serialise_all_nodes(root->left, file);
 
-return bytes;
+return terms;
 }
 
 /*
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
-long long ANT_memory_index::serialise(char *filename)
+long ANT_memory_index::serialise(char *filename)
 {
-long long bytes = 0;
+long terms_in_node, max_terms_in_node = 0;
 long hash_val;
 ANT_file *file;
-
-
-//stats->render();
 
 file = new ANT_file(memory);
 file->open(filename, "w+b");
 file->setvbuff(DISK_BUFFER_SIZE);
 stats->disk_buffer = DISK_BUFFER_SIZE;
 
+/*
+	Write the postings
+*/
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
-		{
-//		unsigned long dehash_val = dehash(hash_val);
-//		printf("NODE:%d %c%c%c%c\n", hash_val, dehash_val & 0xFF, (dehash_val >> 8) & 0xFF, (dehash_val >> 16) & 0xFF, (dehash_val >> 24) & 0xFF);
-		bytes += serialise_all_nodes(hash_table[hash_val], file);
-		}
+		if ((terms_in_node = serialise_all_nodes(hash_table[hash_val], file)) > max_terms_in_node)
+			max_terms_in_node = terms_in_node;
+//
+// Write the term list
+//
+//
+// finally (to do) write the head of the vocab file
+//
 file->close();
-return bytes;
+return 1;
 }
 
 /*
