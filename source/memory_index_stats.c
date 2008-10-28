@@ -28,6 +28,7 @@ bytes_allocated_for_tfs = 0;
 strings = 0;
 bytes_in_string_pool = 0;
 disk_buffer = 0;
+bytes_used_to_sort_term_list = 0;
 }
 
 /*
@@ -79,7 +80,7 @@ printf("Term occurences      :%10I64d occurences\n", term_occurences);
 printf("\nINTERNAL MEMORY BREAKDOWN\n-------------------------\n");
 printf("Hash nodes total     :%10d nodes\n", HASH_TABLE_SIZE);
 printf("Hash nodes used      :%10d nodes\n", hash_nodes);
-printf("Hash nodes used      :%10d buyes\n", hash_nodes * sizeof(ANT_memory_index_hash_node));
+printf("Hash nodes used      :%10d bytes\n", hash_nodes * sizeof(ANT_memory_index_hash_node));
 printf("HASH utilisation     :%10.2f%%\n", ((double)hash_nodes / (double)HASH_TABLE_SIZE) * 100);
 
 printf("Mem used for docIDs  :%10I64d bytes\n", bytes_to_store_docids);
@@ -117,6 +118,8 @@ if (memory != NULL)
 	printf("DocIDs               :%10I64d bytes\n", used = bytes_allocated_for_docids);
 	sum += used;
 	printf("TFs                  :%10I64d bytes\n", used = bytes_allocated_for_tfs);
+	sum += used;
+	printf("Term List (uniq sort):%10I64d bytes\n", used = bytes_used_to_sort_term_list);
 	sum += used;
 	printf("Disk Output Buffer   :%10I64d bytes\n", used = disk_buffer);
 	sum += used;

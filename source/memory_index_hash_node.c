@@ -195,5 +195,16 @@ for (where = tf_list_head; where != NULL; where = where->next)
 return err ? 0 : doc_bytes + tf_bytes;
 }
 
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::TERM_COMPARE()
+	------------------------------------------
+*/
+int ANT_memory_index_hash_node::term_compare(const void *a, const void *b)
+{
+ANT_memory_index_hash_node **one, **two;
+one = (ANT_memory_index_hash_node **)a;
+two = (ANT_memory_index_hash_node **)b;
 
+return (*one)->string.strcmp(&(*two)->string);
+}
 

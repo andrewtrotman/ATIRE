@@ -19,6 +19,7 @@ public:
 	long long bytes_allocated_for_docids;
 	long long bytes_to_store_tfs;
 	long long bytes_allocated_for_tfs;
+	long long bytes_used_to_sort_term_list;
 	long long posting_fragments;
 	long long strings;
 	long long bytes_in_string_pool;

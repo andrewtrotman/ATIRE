@@ -42,6 +42,7 @@ public:
 	long serialise_postings(unsigned char *doc_into, long *doc_size, unsigned char *tf_into, long *tf_size);
 
 	long decompress(unsigned char **from);
+	static int term_compare(const void *a, const void *b);
 } ;
 
 

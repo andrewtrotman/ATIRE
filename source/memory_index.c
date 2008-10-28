@@ -168,14 +168,75 @@ return terms;
 }
 
 /*
+	ANT_MEMORY_INDEX::GENERATE_TERM_LIST()
+	--------------------------------------
+*/
+long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where)
+{
+long terms = 0;
+
+if (root->right != NULL)
+	terms = generate_term_list(root->right, into, where);
+
+into[where + terms] = root;
+
+if (root->left != NULL)
+	terms += generate_term_list(root->left, into, where + terms + 1);
+
+return terms + 1;
+}
+
+/*
+	ANT_MEMORY_INDEX::WRITE_NODE()
+	------------------------------
+*/
+ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_memory_index_hash_node **start)
+{
+long head_size = 4;
+ANT_memory_index_hash_node **current;
+
+current = start;
+
+if ((*current)->string.length() < head_size)
+	current++;
+else
+	while (*current != NULL)
+		{
+		if ((*current)->string.length() < head_size)
+			break;
+		if ((*current)->string.strnicmp(&(*start)->string, head_size) != 0)
+			break;
+		current++;
+		}
+
+if ((*start)->string.length() == 0)
+	printf("HEAD: (%d terms)\n", current - start);
+if ((*start)->string.length() == 1)
+	printf("HEAD:%c (%d terms)\n", (*start)->string[0], current - start);
+if ((*start)->string.length() == 2)
+	printf("HEAD:%c%c (%d terms)\n", (*start)->string[0], (*start)->string[1], current - start);
+if ((*start)->string.length() == 3)
+	printf("HEAD:%c%c%c (%d terms)\n", (*start)->string[0], (*start)->string[1], (*start)->string[2], current - start);
+if ((*start)->string.length() >= 4)
+	printf("HEAD:%c%c%c%c (%d terms)\n", (*start)->string[0], (*start)->string[1], (*start)->string[2], (*start)->string[3], current - start);
+
+ANT_memory_index_hash_node **end = current;
+for (current = start; current < end; current++)
+	printf("\t#%s\n", (*current)->string.str());
+
+return end;
+}
+
+/*
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
 long ANT_memory_index::serialise(char *filename)
 {
-long terms_in_node, max_terms_in_node = 0;
-long hash_val;
+long terms_in_node, unique_terms = 0, max_terms_in_node = 0;
+long hash_val, where, bytes;
 ANT_file *file;
+ANT_memory_index_hash_node **term_list;
 
 file = new ANT_file(memory);
 file->open(filename, "w+b");
@@ -187,11 +248,39 @@ stats->disk_buffer = DISK_BUFFER_SIZE;
 */
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
+		{
 		if ((terms_in_node = serialise_all_nodes(hash_table[hash_val], file)) > max_terms_in_node)
 			max_terms_in_node = terms_in_node;
+		unique_terms += terms_in_node;
+		}
+
+/*
+	Generate a list of all the unique terms in the collection
+*/
+bytes = sizeof(*term_list) * (unique_terms + 1);
+stats->bytes_used_to_sort_term_list = bytes;
+term_list = (ANT_memory_index_hash_node **)memory->malloc(bytes);
+where = 0;
+for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
+	if (hash_table[hash_val] != NULL)
+		where += generate_term_list(hash_table[hash_val], term_list, where);
+term_list[unique_terms] = NULL;
+
+/*
+	Sort the term list
+*/
+qsort(term_list, unique_terms, sizeof(*term_list), ANT_memory_index_hash_node::term_compare);
+
 //
 // Write the term list
+// The details we want for each term are:
+//		term, cf, df. doc_start, tf_start, length;
 //
+
+ANT_memory_index_hash_node **here = term_list;
+while (*here != NULL)
+	here = write_node(here);
+
 //
 // finally (to do) write the head of the vocab file
 //
