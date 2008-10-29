@@ -29,11 +29,11 @@ private:
 	long hash(ANT_string_pair *string);
 	unsigned long dehash(long hash_val);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
-	long serialise_all_nodes(ANT_memory_index_hash_node *root, ANT_file *file);
+	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where);
-	ANT_memory_index_hash_node **write_node(ANT_memory_index_hash_node **start);
+	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
 
 public:
 	ANT_memory_index();

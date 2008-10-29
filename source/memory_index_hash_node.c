@@ -1,6 +1,11 @@
 /*
 	MEMORY_INDEX_HASH_NODE.C
 	------------------------
+	TO DO:
+		compress the posting into a temporary buffer then split across two posting_piece objects if necessary
+		remove the used from the posting_piece and place it in the node
+		remove the length from the posting_piece as it is unnecessary
+		what if a term occurrs more than 255 times?
 */
 #include <stdio.h>
 #include "string_pair.h"
@@ -205,6 +210,6 @@ ANT_memory_index_hash_node **one, **two;
 one = (ANT_memory_index_hash_node **)a;
 two = (ANT_memory_index_hash_node **)b;
 
-return (*one)->string.strcmp(&(*two)->string);
+return (*one)->string.stricmp(&(*two)->string);
 }
 

@@ -13,6 +13,7 @@
 #include "file.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
+#define B_TREE_PREFIX_SIZE 4
 
 /*
 	ANT_MEMORY_INDEX::ANT_MEMORY_INDEX()
@@ -127,13 +128,13 @@ node->add_posting(docno);
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */
-long ANT_memory_index::serialise_all_nodes(ANT_memory_index_hash_node *root, ANT_file *file)
+long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
 long terms = 1;
 long doc_size, tf_size, total;
 
 if (root->right != NULL)
-	terms += serialise_all_nodes(root->right, file);
+	terms += serialise_all_nodes(file, root->right);
 
 //printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
 doc_size = serialised_docids_size;
@@ -162,7 +163,7 @@ file->write(serialised_tfs, tf_size);
 root->end_pos_on_disk = file->tell();
 
 if (root->left != NULL)
-	terms += serialise_all_nodes(root->left, file);
+	terms += serialise_all_nodes(file, root->left);
 
 return terms;
 }
@@ -190,39 +191,71 @@ return terms + 1;
 	ANT_MEMORY_INDEX::WRITE_NODE()
 	------------------------------
 */
-ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_memory_index_hash_node **start)
+ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_file *file, ANT_memory_index_hash_node **start)
 {
-long head_size = 4;
-ANT_memory_index_hash_node **current;
+unsigned char zero = 0;
+unsigned long long eight_byte;
+unsigned long four_byte, string_pos;
+long terms_in_node, current_node_head_length;
+ANT_memory_index_hash_node **current, **end;
 
 current = start;
-
-if ((*current)->string.length() < head_size)
+/*
+	Find the end of the node
+*/
+if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
 	current++;
 else
 	while (*current != NULL)
 		{
-		if ((*current)->string.length() < head_size)
+		if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
 			break;
-		if ((*current)->string.strnicmp(&(*start)->string, head_size) != 0)
+		if ((*current)->string.strnicmp(&(*start)->string, B_TREE_PREFIX_SIZE) != 0)
 			break;
 		current++;
 		}
+/*
+	Number of terms in a node
+*/
+eight_byte = (unsigned long long)(terms_in_node = current - start);
+file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));	// 8 bytes
 
-if ((*start)->string.length() == 0)
-	printf("HEAD: (%d terms)\n", current - start);
-if ((*start)->string.length() == 1)
-	printf("HEAD:%c (%d terms)\n", (*start)->string[0], current - start);
-if ((*start)->string.length() == 2)
-	printf("HEAD:%c%c (%d terms)\n", (*start)->string[0], (*start)->string[1], current - start);
-if ((*start)->string.length() == 3)
-	printf("HEAD:%c%c%c (%d terms)\n", (*start)->string[0], (*start)->string[1], (*start)->string[2], current - start);
-if ((*start)->string.length() >= 4)
-	printf("HEAD:%c%c%c%c (%d terms)\n", (*start)->string[0], (*start)->string[1], (*start)->string[2], (*start)->string[3], current - start);
-
-ANT_memory_index_hash_node **end = current;
+/*
+	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
+*/
+current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (*start)->string.length();
+end = current;
+string_pos = (current - start) * (2 * 8 + 4 * 4) + 8;
 for (current = start; current < end; current++)
-	printf("\t#%s\n", (*current)->string.str());
+	{
+	four_byte = (unsigned long)(*current)->collection_frequency;
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	four_byte = (unsigned long)(*current)->document_frequency;
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	eight_byte = (unsigned long long)((*current)->docids_pos_on_disk);
+	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
+
+	eight_byte = (unsigned long long)((*current)->tfs_pos_on_disk - (*current)->docids_pos_on_disk);
+	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
+
+	four_byte = (unsigned long)((*current)->end_pos_on_disk - (*current)->docids_pos_on_disk);
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	four_byte = (unsigned long)string_pos;
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	string_pos += (*current)->string.length() + 1 - current_node_head_length;
+	}
+/*
+	Finally the strings ('\0' terminated)
+*/
+for (current = start; current < end; current++)
+	{
+	file->write((unsigned char *)((*current)->string.string() + current_node_head_length), (*current)->string.length() - current_node_head_length);
+	file->write(&zero, 1);
+	}
 
 return end;
 }
@@ -233,10 +266,11 @@ return end;
 */
 long ANT_memory_index::serialise(char *filename)
 {
+long long file_position;
 long terms_in_node, unique_terms = 0, max_terms_in_node = 0;
 long hash_val, where, bytes;
 ANT_file *file;
-ANT_memory_index_hash_node **term_list;
+ANT_memory_index_hash_node **term_list, **here;
 
 file = new ANT_file(memory);
 file->open(filename, "w+b");
@@ -249,7 +283,7 @@ stats->disk_buffer = DISK_BUFFER_SIZE;
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
 		{
-		if ((terms_in_node = serialise_all_nodes(hash_table[hash_val], file)) > max_terms_in_node)
+		if ((terms_in_node = serialise_all_nodes(file, hash_table[hash_val])) > max_terms_in_node)
 			max_terms_in_node = terms_in_node;
 		unique_terms += terms_in_node;
 		}
@@ -271,19 +305,37 @@ term_list[unique_terms] = NULL;
 */
 qsort(term_list, unique_terms, sizeof(*term_list), ANT_memory_index_hash_node::term_compare);
 
-//
-// Write the term list
-// The details we want for each term are:
-//		term, cf, df. doc_start, tf_start, length;
-//
-
-ANT_memory_index_hash_node **here = term_list;
+/*
+	Write the term list
+*/
+here = term_list;
 while (*here != NULL)
-	here = write_node(here);
+	{
+	file_position = file->tell();
+	if ((*here)->string.length() == 0)
+		printf("HEAD:");
+	if ((*here)->string.length() == 1)
+		printf("HEAD:%c", (*here)->string[0]);
+	if ((*here)->string.length() == 2)
+		printf("HEAD:%c%c", (*here)->string[0], (*here)->string[1]);
+	if ((*here)->string.length() == 3)
+		printf("HEAD:%c%c%c", (*here)->string[0], (*here)->string[1], (*here)->string[2]);
+	if ((*here)->string.length() >= 4)
+		printf("HEAD:%c%c%c%c", (*here)->string[0], (*here)->string[1], (*here)->string[2], (*here)->string[3]);
+
+	printf(" %I64d\n", file_position);
+
+	here = write_node(file, here);
+	}
 
 //
 // finally (to do) write the head of the vocab file
+//	write: node_header, location_on_disk (len is unnecessary as it can be computed through subtraction)
 //
+
+/*
+	Close (and flush) the file
+*/
 file->close();
 return 1;
 }

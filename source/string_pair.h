@@ -19,6 +19,7 @@ public:
 
 	char *str(void) { return strnnew(start, string_length); }
 	long length(void) { return string_length; }
+	char *string(void) { return start; }
 	char operator[](long pos) { return start[pos]; }
 	char *strcpy(char *dest) { *(strncpy(dest, start, string_length) + string_length + 1) = '\0'; return dest; }
 	int strcmp(ANT_string_pair *with);
