@@ -14,6 +14,7 @@ PARTS = \
 	$(OBJDIR)\memory.obj \
 	$(OBJDIR)\memory_index.obj \
 	$(OBJDIR)\memory_index_stats.obj\
+	$(OBJDIR)\ctypes.obj \
 	$(OBJDIR)\postings_piece.obj
 
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:

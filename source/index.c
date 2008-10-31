@@ -45,7 +45,7 @@ ANT_memory_index_stats stats;
 ANT_disk disk;
 ANT_parser parser;
 ANT_string_pair *token;
-char *file;
+unsigned char *file;
 long param, done_work;
 ANT_memory_index *index;
 long long doc;
@@ -61,7 +61,7 @@ index = new ANT_memory_index;
 for (param = 1; param < argc; param++)
 	{
 	now = stats.get_clock_tick();
-	file = disk.read_entire_file(disk.get_first_filename(argv[param]));
+	file = (unsigned char *)disk.read_entire_file(disk.get_first_filename(argv[param]));
 	input_time += stats.get_clock_tick() - now;
 	while (file != NULL)
 		{
@@ -70,7 +70,7 @@ for (param = 1; param < argc; param++)
 		parser.set_document(file);
 		while ((token = parser.get_next_token()) != NULL)
 			{
-			if (isalpha(*token->start))
+			if (ANT_isalpha(*token->start))
 				{
 				index->add_term(token, doc);
 				done_work = TRUE;
@@ -81,7 +81,7 @@ for (param = 1; param < argc; param++)
 			}
 		delete [] file;
 		now = stats.get_clock_tick();
-		file = disk.read_entire_file(disk.get_next_filename());
+		file = (unsigned char *)disk.read_entire_file(disk.get_next_filename());
 		input_time += stats.get_clock_tick() - now;
 		}
 	}

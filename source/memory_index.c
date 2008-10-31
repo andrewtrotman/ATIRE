@@ -312,6 +312,7 @@ here = term_list;
 while (*here != NULL)
 	{
 	file_position = file->tell();
+/*
 	if ((*here)->string.length() == 0)
 		printf("HEAD:");
 	if ((*here)->string.length() == 1)
@@ -324,6 +325,7 @@ while (*here != NULL)
 		printf("HEAD:%c%c%c%c", (*here)->string[0], (*here)->string[1], (*here)->string[2], (*here)->string[3]);
 
 	printf(" %I64d\n", file_position);
+*/
 
 	here = write_node(file, here);
 	}

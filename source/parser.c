@@ -2,7 +2,6 @@
 	PARSER.C
 	--------
 */
-#include <ctype.h>
 #include "parser.h"
 
 /*
@@ -26,7 +25,7 @@ ANT_parser::~ANT_parser()
 	ANT_PARSER::SET_DOCUMENT()
 	--------------------------
 */
-void ANT_parser::set_document(char *document)
+void ANT_parser::set_document(unsigned char *document)
 {
 this->document = current = document;
 }
@@ -37,16 +36,20 @@ this->document = current = document;
 */
 ANT_string_pair *ANT_parser::get_next_token(void)
 {
-char *start;
+unsigned char *start;
 
 while (!isheadchar(*current))
 	current++;
 
-if (isalpha(*current))
+if (ANT_isalpha(*current))
 	{
+//	*current = ANT_tolower(*current);
 	start = current++;
-	while (isalpha(*current))
+	while (ANT_isalpha(*current))
+		{
+//		*current = ANT_tolower(*current);
 		current++;
+		}
 	}
 else
 	{
@@ -58,7 +61,7 @@ else
 if (*start == '\0')
 	return NULL;
 
-current_token.start = start;
+current_token.start = (char *)start;
 current_token.string_length = current - start;
 
 return &current_token;
