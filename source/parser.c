@@ -41,13 +41,15 @@ unsigned char *start;
 while (!isheadchar(*current))
 	current++;
 
-if (ANT_isalpha(*current))
+if (*current == '\0')
+	return NULL;
+else if (ANT_isalpha(*current))
 	{
-//	*current = ANT_tolower(*current);
+	*current = ANT_tolower(*current);
 	start = current++;
 	while (ANT_isalpha(*current))
 		{
-//		*current = ANT_tolower(*current);
+		*current = ANT_tolower(*current);
 		current++;
 		}
 	}
@@ -57,9 +59,6 @@ else
 	while (isallowable(*current))
 		current++;
 	}
-
-if (*start == '\0')
-	return NULL;
 
 current_token.start = (char *)start;
 current_token.string_length = current - start;

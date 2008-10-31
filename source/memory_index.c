@@ -52,14 +52,14 @@ long ANT_memory_index::hash(ANT_string_pair *string)
 long ans, len;
 const unsigned char base = 'a' - 1;
 
-ans = (tolower((*string)[0]) - base) * 27 * 27 * 27;
+ans = (string->string()[0] - base) * 27 * 27 * 27;
 
 if ((len = string->length()) > 1)
-	ans += (tolower((*string)[1]) - base) * 27 * 27;
+	ans += (string->string()[1] - base) * 27 * 27;
 if (len > 2)
-	ans += (tolower((*string)[2]) - base) * 27;
+	ans += (string->string()[2] - base) * 27;
 if (len > 3)
-	ans += (tolower((*string)[3]) - base);
+	ans += (string->string()[3] - base);
 
 return ans;
 }
@@ -89,7 +89,7 @@ ANT_memory_index_hash_node *ANT_memory_index::find_add_node(ANT_memory_index_has
 {
 long cmp;
 
-cmp = string->stricmp(&(root->string));
+cmp = string->strcmp(&(root->string));
 if (cmp == 0)
 	return root;
 else if (cmp > 0)
@@ -212,7 +212,7 @@ else
 		{
 		if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
 			break;
-		if ((*current)->string.strnicmp(&(*start)->string, B_TREE_PREFIX_SIZE) != 0)
+		if ((*current)->string.strncmp(&(*start)->string, B_TREE_PREFIX_SIZE) != 0)
 			break;
 		current++;
 		}
@@ -351,6 +351,8 @@ file->write((unsigned char *)&file_position, sizeof(file_position));
 	Close (and flush) the file
 */
 file->close();
+delete file;
+
 return 1;
 }
 

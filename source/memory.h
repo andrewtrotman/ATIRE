@@ -35,14 +35,23 @@ void *ans;
 	{
 	if (chunk == NULL)
 		{
-		allocated = 1024 * 1024 * 1024;
-		at = chunk = new char [(size_t)allocated];
+		allocated = 512 * 1024 * 1024;
+		try
+			{
+			at = chunk = new char [(size_t)allocated];
+			}
+		catch (...)
+			{
+			at = chunk = NULL;
+			}
+		if (chunk == NULL)
+			exit(printf("Out of memory:%I64d bytes requested\n", allocated));
 		chunk_end = chunk + allocated;
 		}
 	ans = at;
 	at += bytes;
 	if (at > chunk_end)
-		exit(printf("Out of memory:%I64d bytes requested %I64d bytes used", (long long)bytes, used));
+		exit(printf("Out of memory:%I64d bytes requested %I64d bytes used\n", (long long)bytes, used));
 	used += bytes;
 	}
 return ans;

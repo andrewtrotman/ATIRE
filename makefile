@@ -2,7 +2,7 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /O2  /Zi 
 CC = @cl
 
 PARTS = \
@@ -26,7 +26,7 @@ $(BINDIR)\main.exe : $(PARTS) $(OBJDIR)\main.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\main.obj $(PARTS) /Fe$@
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
-	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@
+	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /INCREMENTAL:NO
 
 $(OBJDIR)\index.obj : $(SRCDIR)\index.c
 
