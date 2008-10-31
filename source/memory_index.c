@@ -5,12 +5,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 #include "memory_index_hash_node.h"
 #include "memory_index.h"
 #include "memory_index_stats.h"
 #include "memory.h"
 #include "string_pair.h"
 #include "file.h"
+#include "btree_head_node.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 #define B_TREE_PREFIX_SIZE 4
@@ -266,11 +268,14 @@ return end;
 */
 long ANT_memory_index::serialise(char *filename)
 {
-long long file_position;
+unsigned char zero = 0;
+long btree_root_worst_case;
+long long file_position, terms_in_root;
 long terms_in_node, unique_terms = 0, max_terms_in_node = 0;
 long hash_val, where, bytes;
 ANT_file *file;
 ANT_memory_index_hash_node **term_list, **here;
+ANT_btree_head_node *header, *current_header, *last_header;
 
 file = new ANT_file(memory);
 file->open(filename, "w+b");
@@ -306,34 +311,41 @@ term_list[unique_terms] = NULL;
 qsort(term_list, unique_terms, sizeof(*term_list), ANT_memory_index_hash_node::term_compare);
 
 /*
-	Write the term list
+	Write the term list and generate the header list
 */
+btree_root_worst_case = (long)pow((double)27, (double)B_TREE_PREFIX_SIZE);
+current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree_head_node) * btree_root_worst_case);
 here = term_list;
 while (*here != NULL)
 	{
-	file_position = file->tell();
-/*
-	if ((*here)->string.length() == 0)
-		printf("HEAD:");
-	if ((*here)->string.length() == 1)
-		printf("HEAD:%c", (*here)->string[0]);
-	if ((*here)->string.length() == 2)
-		printf("HEAD:%c%c", (*here)->string[0], (*here)->string[1]);
-	if ((*here)->string.length() == 3)
-		printf("HEAD:%c%c%c", (*here)->string[0], (*here)->string[1], (*here)->string[2]);
-	if ((*here)->string.length() >= 4)
-		printf("HEAD:%c%c%c%c", (*here)->string[0], (*here)->string[1], (*here)->string[2], (*here)->string[3]);
-
-	printf(" %I64d\n", file_position);
-*/
-
+	current_header->disk_pos = file->tell();
+	current_header->node = *here;
+	current_header++;
 	here = write_node(file, here);
 	}
+last_header = current_header;
+terms_in_root = last_header - header;
 
-//
-// finally (to do) write the head of the vocab file
-//	write: node_header, location_on_disk (len is unnecessary as it can be computed through subtraction)
-//
+/*
+	Take note of where the header will be located on disk
+*/
+file_position = file->tell();
+
+/*
+	Write the header to disk N then N * (string, offset) pairs
+*/
+file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));
+for (current_header = header; current_header < last_header; current_header++)
+	{
+	file->write((unsigned char *)current_header->node->string.string(), current_header->node->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : current_header->node->string.length());
+	file->write(&zero, sizeof(zero));
+	file->write((unsigned char *)&(current_header->disk_pos), sizeof(current_header->disk_pos));
+	}
+
+/*
+	Write the location of the header to file
+*/
+file->write((unsigned char *)&file_position, sizeof(file_position));
 
 /*
 	Close (and flush) the file
