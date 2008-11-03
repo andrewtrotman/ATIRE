@@ -83,13 +83,14 @@ delete stats;
 	return ans;
 	}
 #else
+
 	/*
 		LONG ANT_MEMORY_INDEX::HASH()
 		-----------------------------
 	*/
 	long ANT_memory_index::hash(ANT_string_pair *string)
 	{
-	return ANT_hash_24(string);
+	return SuperFastHash(string->string(), string->length()) & 0xffffff;
 	}
 
 	/*
@@ -111,19 +112,20 @@ ANT_memory_index_hash_node *ANT_memory_index::find_add_node(ANT_memory_index_has
 {
 long cmp;
 
-cmp = string->strcmp(&(root->string));
-if (cmp == 0)
-	return root;
-else if (cmp > 0)
-	if (root->left == NULL)
-		return root->left = new_memory_index_hash_node(string);
+while ((cmp = string->strcmp(&(root->string))) != 0)
+	{
+	if (cmp > 0)
+		if (root->left == NULL)
+			return root->left = new_memory_index_hash_node(string);
+		else
+			root = root->left;
 	else
-		return find_add_node(root->left, string);
-else
-	if (root->right == NULL)
-		return root->right = new_memory_index_hash_node(string);
-	else
-		return find_add_node(root->right, string);
+		if (root->right == NULL)
+			return root->right = new_memory_index_hash_node(string);
+		else
+			root = root->right;
+	}
+return root;
 }
 
 /*

@@ -210,6 +210,6 @@ ANT_memory_index_hash_node **one, **two;
 one = (ANT_memory_index_hash_node **)a;
 two = (ANT_memory_index_hash_node **)b;
 
-return (*one)->string.strcmp(&(*two)->string);
+return (*one)->string.true_strcmp(&(*two)->string);
 }
 
