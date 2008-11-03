@@ -2,7 +2,7 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /O2  /Zi 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi /O2 -DHEADER_HASHER
 CC = @cl
 
 PARTS = \
@@ -15,6 +15,7 @@ PARTS = \
 	$(OBJDIR)\memory_index.obj \
 	$(OBJDIR)\memory_index_stats.obj\
 	$(OBJDIR)\ctypes.obj \
+	$(OBJDIR)\hash_table.obj\
 	$(OBJDIR)\postings_piece.obj
 
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:

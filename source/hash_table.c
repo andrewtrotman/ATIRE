@@ -1,17 +1,21 @@
 /*
 	HASH_TABLE.C
 	------------
+	Pearson's random hash
+
+	Pearson, Peter K., Fast hashing of variable-length text strings,
+	CACM Volume 33, No. 6 (June 1990),  pp. 677-680
+
+	http://ourworld.compuserve.com/homepages/bob_jenkins/doobs.htm
+	has some interesting stuff on hashing and hash algorithms.
+
 */
-#include <stdio.h>
-#include <string.h>
 #include "hash_table.h"
-#include "tree.h"
-#include "str.h"
 
 /*
 	Table of random numbers (each unique) for Pearson's random hash function.
 */
-static unsigned char hash_table[] = 
+unsigned char ANT_hash_table[] = 
 	{
 	0xE0, 0x16, 0xC0, 0x9E, 0xC2, 0xBD, 0x48, 0xB9, 0x6B, 0x43, 0x93, 0x28, 0x06, 0xBC, 0x70, 0x88,
 	0xCA, 0xB7, 0xF1, 0x1D, 0x51, 0x7D, 0x96, 0x5C, 0x53, 0x34, 0xC6, 0x67, 0x61, 0x69, 0x95, 0x4C,
@@ -32,247 +36,46 @@ static unsigned char hash_table[] =
 	};
 
 #ifdef NEVER
-/*
-	Use this program to generate the random table above.
-*/
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+	/*
+		Use this program to generate the random table above.
+	*/
+	/*
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <time.h>
 
-unsigned char table[0x100];
+	unsigned char table[0x100];
 
 
-int main(void)
-{
-int x, y, val, tmp;
-
-srand((unsigned)time(NULL));
-rand();
-
-for (x = 0; x < 0x100; x++)
-	table[x] = x;
-
-for (x = 0; x < 0x100; x++)
+	int main(void)
 	{
-	val = (int)((double)rand() / (double)RAND_MAX * (double)(0x100 - x));
-	if (x + val > 0x100)
-		printf("oops\n");
-	tmp = table[x];
-	table[x] = table[x + val];
-	table[x + val] = tmp;
-	}
+	int x, y, val, tmp;
 
-for (x = 0; x < 16; x++)
-	{
-	for (y = 0; y < 16; y++)
-		printf("0x%02X, ", table[x * 16 + y]);
-	printf("\n");
-	}
+	srand((unsigned)time(NULL));
+	rand();
 
-return 0;
-}
-*/
+	for (x = 0; x < 0x100; x++)
+		table[x] = x;
+
+	for (x = 0; x < 0x100; x++)
+		{
+		val = (int)((double)rand() / (double)RAND_MAX * (double)(0x100 - x));
+		if (x + val > 0x100)
+			printf("oops\n");
+		tmp = table[x];
+		table[x] = table[x + val];
+		table[x + val] = tmp;
+		}
+
+	for (x = 0; x < 16; x++)
+		{
+		for (y = 0; y < 16; y++)
+			printf("0x%02X, ", table[x * 16 + y]);
+		printf("\n");
+		}
+
+	return 0;
+	}
+	*/
 #endif
 
-/*
-	NCBI_RANDOM_HASH()
-	------------------
-	Pearson's random hash
-
-	Pearson, Peter K., Fast hashing of variable-length text strings,
-	CACM Volume 33, No. 6 (June 1990),  pp. 677-680
-
-	http://ourworld.compuserve.com/homepages/bob_jenkins/doobs.htm
-	has some interesting stuff on hashing and hash algorythms.
-
-*/
-
-/*
-	NCBI_HASH()
-	-----------
-*/
-unsigned int NCBI_hash(const char *string, long len, unsigned int seed)
-{
-unsigned char *ch;
-long pos;
-
-ch = (unsigned char *)string;
-
-for (pos = 0; pos < len; pos++)
-	seed = hash_table[seed ^ *ch++];
-
-return seed;
-}
-
-/*
-	NCBI_HASH()
-	-----------
-*/
-unsigned int NCBI_hash(const char *string, unsigned int seed)
-{
-return NCBI_hash(string, strlen(string), seed);
-}
-
-/*
-	NCBI_RANDOM_HASH()
-	------------------
-*/
-unsigned int NCBI_random_hash(const char *string, long len)
-{
-return NCBI_hash(string, len, len);
-}
-
-/*
-	NCBI_RANDOM_HASH()
-	------------------
-*/
-unsigned int NCBI_random_hash(const char *string)
-{
-return NCBI_random_hash(string, strlen(string));
-}
-
-/*
-	NCBI_RANDOM_HASH_16()
-	---------------------
-*/
-unsigned long NCBI_random_hash_16(const char *string, long len)
-{
-long hash1, hash2;
-
-hash1 = NCBI_hash(string, len, len);
-hash2 = len == 0 ? 0 : NCBI_hash(string + 1, len - 1, len - 1);
-
-return (hash1 << 8) + hash2;
-}
-
-/*
-	NCBI_RANDOM_HASH_16()
-	---------------------
-*/
-unsigned long NCBI_random_hash_16(const char *string)
-{
-return NCBI_random_hash_16(string, strlen(string));
-}
-
-/*
-	NCBI_HASH_TABLE::NCBI_HASH_TABLE()
-	----------------------------------
-*/
-NCBI_hash_table::NCBI_hash_table()
-{
-memset(chain, 0, sizeof(chain));
-}
-
-/*
-	NCBI_HASH_TABLE::~NCBI_HASH_TABLE()
-	-----------------------------------
-*/
-NCBI_hash_table::~NCBI_hash_table()
-{
-int index;
-NCBI_tree **which;
-
-which = chain;
-for (index = 0; index < NCBI_HASH_TABLE_SIZE; index++)
-	{
-	delete *which;
-	which++;
-	}
-}
-
-/*
-	INT NCBI_HASH_TABLE::RANDOM_HASH()
-	----------------------------------
-*/
-unsigned int NCBI_hash_table::random_hash(const char *text)
-{
-return NCBI_random_hash(text);
-}
-
-/*
-	NCBI_HASH_TABLE::ADD()
-	----------------------
-*/
-void NCBI_hash_table::add(const char *name, void *data)
-{
-unsigned int hash;
-NCBI_tree *branch;
-
-hash = random_hash(name);
-
-branch = chain[hash] == NULL ? chain[hash] = new NCBI_tree : chain[hash];
-
-branch->add(name, data);
-}
-
-/*
-	NCBI_HASH_TABLE::SET()
-	----------------------
-*/
-void NCBI_hash_table::set(const char *name, void *data, int kill, int kill_name)
-{
-unsigned int hash;
-NCBI_tree *branch;
-
-hash = random_hash(name);
-
-branch = chain[hash] == NULL ? chain[hash] = new NCBI_tree : chain[hash];
-
-branch->set(name, data, kill, kill_name);
-}
-
-/*
-	NCBI_HASH_TABLE::SET()
-	----------------------
-*/
-void NCBI_hash_table::set(const char *name, const char *data, int kill, int kill_name)
-{
-set(name, (void *)data, kill, kill_name);
-}
-
-/*
-	NCBI_HASH_TABLE::GET()
-	----------------------
-*/
-void *NCBI_hash_table::get(const char *name)
-{
-unsigned int hash;
-
-hash = random_hash(name);
-
-return chain[hash] == NULL ? NULL : chain[hash]->find(name);
-}
-
-/*
-	NCBI_HASH_TABLE::SET()
-	----------------------
-*/
-void NCBI_hash_table::set(const char *name, long value)
-{
-char buffer[30];
-
-sprintf(buffer, "%d", value);
-set(name, (void *)strnew(buffer), 1);
-}
-
-/*
-	NCBI_HASH_TABLE::REMOVE()
-	-------------------------
-*/
-void NCBI_hash_table::remove(const char *name)
-{
-unsigned int hash;
-
-hash = random_hash(name);
-
-if (chain[hash] != NULL)
-	{
-	chain[hash]->remove(name);
-	if (chain[hash]->empty())
-		{
-		delete chain[hash];
-		chain[hash] = NULL;
-		}      
-	}
-}

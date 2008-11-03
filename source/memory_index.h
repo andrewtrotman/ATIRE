@@ -14,7 +14,11 @@ class ANT_memory;
 class ANT_string_pair;
 class ANT_file;
 
-#define HASH_TABLE_SIZE (27*27*27*27)
+#ifdef HEADER_HASHER
+	#define HASH_TABLE_SIZE (27*27*27*27)
+#else
+	#define HASH_TABLE_SIZE (0x1000000)
+#endif
 
 class ANT_memory_index
 {
