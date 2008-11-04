@@ -33,6 +33,7 @@ public:
 	long read(unsigned char *data, long size);
 	long long tell(void);
 	void seek(long long offset_from_start_of_file);
+	long long file_length(void);
 } ;
 
 

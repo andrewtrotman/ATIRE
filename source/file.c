@@ -3,6 +3,7 @@
 	------
 */
 #include <string.h>
+#include <io.h>
 #include "file.h"
 #include "memory.h"
 
@@ -61,6 +62,7 @@ long ANT_file::close(void)
 {
 flush();
 fclose(fp);
+fp = NULL;
 return 1;
 }
 
@@ -139,5 +141,17 @@ void ANT_file::seek(long long offset_from_start_of_file)
 flush();
 _fseeki64(fp, offset_from_start_of_file, SEEK_SET);
 file_position = offset_from_start_of_file;
+}
+
+/*
+	ANT_FILE::FILE_LENGTH()
+	-----------------------
+*/
+long long ANT_file::file_length(void)
+{
+if (fp == NULL)
+	return 0;
+else
+	return _filelengthi64(_fileno(fp));
 }
 
