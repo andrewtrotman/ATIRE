@@ -1,11 +1,6 @@
 /*
 	MEMORY_INDEX_HASH_NODE.C
 	------------------------
-	TO DO:
-		compress the posting into a temporary buffer then split across two posting_piece objects if necessary
-		remove the used from the posting_piece and place it in the node
-		remove the length from the posting_piece as it is unnecessary
-		what if a term occurrs more than 255 times?
 */
 #include <stdio.h>
 #include "string_pair.h"
@@ -125,7 +120,7 @@ one:
 	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
 	-----------------------------------------
 */
-void ANT_memory_index_hash_node::add_posting(long long docno)
+void ANT_memory_index_hash_node::add_posting(ANT_string_pair *keyword, long long docno)
 {
 unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
 long needed, remain;
@@ -135,7 +130,14 @@ if (docno == current_docno)
 	{
 	stats->term_occurences++;
 	if (tf_list_tail->data[tf_node_used - 1]++ > 254)
+		{
 		tf_list_tail->data[tf_node_used - 1] = 254;
+#ifdef NEVER
+		printf("Doc:%I64d, '%*.*s': TF trimmed at 255 occurences\n", docno, keyword->length(), keyword->length(), keyword->string());
+#else
+		keyword = keyword;		// this gets around the compiler warning about parameter "keyword" not being used
+#endif
+		}
 	}
 else
 	{
@@ -195,51 +197,47 @@ else
 long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, long *doc_size, unsigned char *tf_into, long *tf_size)
 {
 ANT_postings_piece *where;
-long err;
-long doc_bytes, tf_bytes;
-long size;
+long err, size, doc_bytes, tf_bytes, more;
 
 err = FALSE;
 doc_bytes = 0;
 size = postings_initial_length;
 for (where = docid_list_head; where != NULL; where = where->next)
-	if (doc_bytes + (where->next == NULL ? docid_node_used : size) <= *doc_size)
+	{
+	more = where->next == NULL ? docid_node_used : size;
+	if (doc_bytes + more <= *doc_size)
 		{
 		if (where->next == NULL)
-			{
 			memcpy(doc_into + doc_bytes, where->data, docid_node_used);			// final block many not be full
-			doc_bytes += docid_node_used;
-			}
 		else
 			{
 			memcpy(doc_into + doc_bytes, where->data, size);
-			doc_bytes += size;
 			size = (long)(postings_growth_factor * size);
 			}
 		}
 	else
 		err = TRUE;
+	doc_bytes += more;
+	}
 
 tf_bytes = 0;
 size = postings_initial_length;
 for (where = tf_list_head; where != NULL; where = where->next)
 	{
-	if (tf_bytes + (where->next == NULL ? tf_node_used : size) <= *tf_size)
+	more = where->next == NULL ? tf_node_used : size;
+	if (tf_bytes + more <= *tf_size)
 		{
 		if (where->next == NULL)
-			{
 			memcpy(tf_into + tf_bytes, where->data, tf_node_used);
-			tf_bytes += tf_node_used;
-			}
 		else
 			{
 			memcpy(tf_into + tf_bytes, where->data, size);
-			tf_bytes += size;
 			size = (long)(postings_growth_factor * size);
 			}
 		}
 	else
 		err = TRUE;
+	tf_bytes += more;
 	}
 
 *doc_size = doc_bytes;

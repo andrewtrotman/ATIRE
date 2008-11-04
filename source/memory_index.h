@@ -2,7 +2,6 @@
 	MEMORY_INDEX.H
 	--------------
 */
-
 #ifndef __MEMORY_INDEX_H__
 #define __MEMORY_INDEX_H__
 
@@ -14,11 +13,7 @@ class ANT_memory;
 class ANT_string_pair;
 class ANT_file;
 
-#ifdef HEADER_HASHER
-	#define HASH_TABLE_SIZE (27*27*27*27)
-#else
-	#define HASH_TABLE_SIZE (0x1000000)
-#endif
+#define HASH_TABLE_SIZE (0x1000000)
 
 class ANT_memory_index
 {
@@ -31,7 +26,6 @@ private:
 
 private:
 	long hash(ANT_string_pair *string);
-	unsigned long dehash(long hash_val);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);

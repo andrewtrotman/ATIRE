@@ -24,9 +24,9 @@
 void print_elapsed_time(char *message, long long time_taken)
 {
 if (time_taken > 60)
-	printf("%s%I64d:%I64d:%I64d\n", message, (time_taken / (60 * 60) ), time_taken / 60, time_taken);
+	printf("%s%I64d:%I64d:%I64d\n", message, (time_taken / (60 * 60)), (time_taken / 60) % 60, time_taken % 60);
 else if (time_taken > 60)
-	printf("%s%I64d:%I64d\n", message, time_taken / 60, time_taken);
+	printf("%s%I64d:%I64d\n", message, time_taken / 60, time_taken % 60);
 else if (time_taken > 1)
 	printf("%s%I64d seconds\n", message, time_taken);
 else if (time_taken == 1)

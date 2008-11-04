@@ -11,10 +11,10 @@
 extern unsigned char ANT_hash_table[];
 
 /*
-	ANT_HASH()
-	----------
+	ANT_RANDOM_HASH()
+	-----------------
 */
-inline static unsigned int ANT_hash(char *string, long length, unsigned int seed)
+inline static unsigned int ANT_random_hash(char *string, long length, unsigned int seed)
 {
 unsigned char *ch;
 long pos;
@@ -28,39 +28,16 @@ return seed;
 }
 
 /*
-	ANT_HASH_8()
-	------------
+	ANT_RANDOM_HASH_24()
+	--------------------
 */
-inline static unsigned int ANT_hash_8(ANT_string_pair *string)
-{
-return ANT_hash(string->string(), string->length(), (unsigned char)(string->length() & 0xFF));
-}
-
-/*
-	ANT_HASH_16()
-	-------------
-*/
-inline static unsigned long ANT_hash_16(ANT_string_pair *string)
-{
-long hash1, hash2;
-
-hash1 = ANT_hash_8(string);
-hash2 = string->length() <= 1 ? 0 : ANT_hash(string->string() + 1, string->length() - 1, (unsigned char)((string->length() - 1) & 0xFF));
-
-return (hash1 << 8) + hash2;
-}
-
-/*
-	ANT_HASH_24()
-	-------------
-*/
-inline static unsigned long ANT_hash_24(ANT_string_pair *string)
+inline static unsigned long ANT_random_hash_24(ANT_string_pair *string)
 {
 long hash1, hash2, hash3;
 
-hash1 = ANT_hash_8(string);
-hash2 = string->length() <= 1 ? 0 : ANT_hash(string->string() + 1, string->length() - 1, (unsigned char)((string->length() - 1) & 0xFF));
-hash3 = string->length() <= 2 ? 0 : ANT_hash(string->string() + 2, string->length() - 2, (unsigned char)((string->length() - 2) & 0xFF));
+hash1 = ANT_random_hash(string->string(), string->length(), (unsigned char)(string->length() & 0xFF));
+hash2 = string->length() <= 1 ? 0 : ANT_random_hash(string->string() + 1, string->length() - 1, (unsigned char)((string->length() - 1) & 0xFF));
+hash3 = string->length() <= 2 ? 0 : ANT_random_hash(string->string() + 2, string->length() - 2, (unsigned char)((string->length() - 2) & 0xFF));
 return (hash1 << 16) + (hash2 << 8) + hash3;
 }
 
@@ -130,10 +107,54 @@ return hash;
 	ANT_SUPER_FAST_HASH_24()
 	------------------------
 */
-inline static unsigned long ANT_super_fast_hash_24(char *data, int len)
+inline static unsigned long ANT_super_fast_hash_24(ANT_string_pair *string)
 {
-return ANT_super_fast_hash(data, len) & 0xffffff;
+return ANT_super_fast_hash(string->string(), string->length()) & 0xffffff;
 }
 
+/*
+	ANT_MEMORY_INDEX::ANT_HEADER_HASH_24()
+	--------------------------------------
+*/
+inline static unsigned long ANT_header_hash_24(ANT_string_pair *string)
+{
+long ans, len;
+const unsigned char base = 'a' - 1;
+
+ans = (string->string()[0] - base) * 27 * 27 * 27;
+
+if ((len = string->length()) > 1)
+	ans += (string->string()[1] - base) * 27 * 27;
+if (len > 2)
+	ans += (string->string()[2] - base) * 27;
+if (len > 3)
+	ans += (string->string()[3] - base);
+
+ans += (string->length() & 0x0F) << 20;	// top 4 bits are the length
+
+return ans;
+}
+
+
+/*
+	ANT_HASH_24()
+	-------------
+*/
+inline static unsigned long ANT_hash_24(ANT_string_pair *string)
+{
+#ifndef HASHER
+	#error "HASHER must be defined so a hash_table function can be chosen"
+#else
+	#if HASHER == RANDOM_HASHER
+		return ANT_random_hash_24(string);
+	#elif HASHER == HEADER_HASHER
+		return ANT_header_hash_24(string);
+	#elif HASHER == FAST_HASHER
+		return ANT_super_fast_hash_24(string);
+	#else
+		#error "Don't know which hash function to use - aborting"
+	#endif
+#endif
+}
 
 #endif __HASH_TABLE_H__

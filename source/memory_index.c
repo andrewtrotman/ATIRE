@@ -44,68 +44,14 @@ delete memory;
 delete stats;
 }
 
-#ifdef HEADER_HASHER
-	/*
-		ANT_MEMORY_INDEX::HASH()
-		------------------------
-	*/
-	long ANT_memory_index::hash(ANT_string_pair *string)
-	{
-	long ans, len;
-	const unsigned char base = 'a' - 1;
-
-	ans = (string->string()[0] - base) * 27 * 27 * 27;
-
-	if ((len = string->length()) > 1)
-		ans += (string->string()[1] - base) * 27 * 27;
-	if (len > 2)
-		ans += (string->string()[2] - base) * 27;
-	if (len > 3)
-		ans += (string->string()[3] - base);
-
-	return ans;
-	}
-
-	/*
-		ANT_MEMORY_INDEX::DEHASH()
-		--------------------------
-	*/
-	unsigned long ANT_memory_index::dehash(long hash_val)
-	{
-	unsigned long ans;
-	const unsigned char base = 'a' - 1;
-
-	ans  = ((hash_val % 27) + base) << 24;
-	ans |= ((hash_val / 27) % 27 + base) << 16;
-	ans |= ((hash_val / (27*27)) % 27 + base) << 8;
-	ans |= ((hash_val / (27*27*27)) % 27 + base);
-
-	return ans;
-	}
-#else
-	/*
-		LONG ANT_MEMORY_INDEX::HASH()
-		-----------------------------
-	*/
-	long ANT_memory_index::hash(ANT_string_pair *string)
-	{
-	#ifdef RANDOM_HASHER
-		return ANT_hash_24(string);
-	#else
-		return ANT_super_fast_hash_24(string->string(), string->length());
-	#endif
-	}
-
-	/*
-		ANT_MEMORY_INDEX::DEHASH()
-		--------------------------
-	*/
-	unsigned long ANT_memory_index::dehash(long hash_val)
-	{
-	puts("Cannot dehash using this hash function");
-	exit(1);
-	}
-#endif
+/*
+	ANT_MEMORY_INDEX::HASH()
+	------------------------
+*/
+inline long ANT_memory_index::hash(ANT_string_pair *string)
+{
+return ANT_hash_24(string);
+}
 
 /*
 	ANT_MEMORY_INDEX::FIND_ADD_NODE()
@@ -150,7 +96,7 @@ if (hash_table[hash_value] == NULL)
 	}
 else
 	node = find_add_node(hash_table[hash_value], string);
-node->add_posting(docno);
+node->add_posting(string, docno);
 }
 
 /*

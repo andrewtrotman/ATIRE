@@ -7,6 +7,7 @@
 #define __MEMORY_H__
 
 #include <stdlib.h>
+#include <new.h>
 
 class ANT_memory
 {
@@ -36,14 +37,7 @@ void *ans;
 	if (chunk == NULL)
 		{
 		allocated = 512 * 1024 * 1024;
-		try
-			{
-			at = chunk = new char [(size_t)allocated];
-			}
-		catch (...)
-			{
-			at = chunk = NULL;
-			}
+		at = chunk = new (std::nothrow) char [(size_t)allocated];
 		if (chunk == NULL)
 			exit(printf("Out of memory:%I64d bytes requested\n", allocated));
 		chunk_end = chunk + allocated;
