@@ -123,8 +123,8 @@ one:
 */
 void ANT_memory_index_hash_node::add_posting(long long docno)
 {
-long needed;
-long wanted;
+unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
+long needed, wanted, remain;
 
 collection_frequency++;
 if (docno == current_docno)
@@ -138,15 +138,36 @@ else
 	document_frequency++;
 	needed = compress_bytes_needed(docno - current_docno);
 	stats->bytes_to_store_docids += needed;
+
 	if (docid_list_tail->used + needed > docid_list_tail->length)
 		{
+		/*
+			Fill to the end of the block
+		*/
+		compress_into(holding_pen, docno - current_docno);
+		memcpy(docid_list_tail->data + docid_list_tail->used, holding_pen, docid_list_tail->length - docid_list_tail->used);
+		remain = needed - (docid_list_tail->length - docid_list_tail->used);
+		docid_list_tail->used = docid_list_tail->length;
+		/*
+			Allocate the new block
+		*/
 		wanted = (long)(postings_growth_factor * docid_list_tail->length);
 		stats->bytes_allocated_for_docids += wanted;
 		docid_list_tail->next = new_postings_piece(wanted);
 		docid_list_tail = docid_list_tail->next;
+
+		/*
+			And place the "extra" into the beginning of the new block
+		*/
+		memcpy(docid_list_tail->data, holding_pen + remain, remain);
+		docid_list_tail->used = remain;
 		}
-	compress_into(docid_list_tail->data + docid_list_tail->used, docno - current_docno);
-	docid_list_tail->used += needed;
+	else
+		{
+		compress_into(docid_list_tail->data + docid_list_tail->used, docno - current_docno);
+		docid_list_tail->used += needed;
+		}
+
 	current_docno = docno;
 
 	if (tf_list_tail->used + 1 > tf_list_tail->length)

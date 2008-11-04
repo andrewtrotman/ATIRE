@@ -5,10 +5,6 @@
 
 	Pearson, Peter K., Fast hashing of variable-length text strings,
 	CACM Volume 33, No. 6 (June 1990),  pp. 677-680
-
-	http://ourworld.compuserve.com/homepages/bob_jenkins/doobs.htm
-	has some interesting stuff on hashing and hash algorithms.
-
 */
 #include "hash_table.h"
 

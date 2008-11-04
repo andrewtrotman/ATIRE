@@ -83,14 +83,17 @@ delete stats;
 	return ans;
 	}
 #else
-
 	/*
 		LONG ANT_MEMORY_INDEX::HASH()
 		-----------------------------
 	*/
 	long ANT_memory_index::hash(ANT_string_pair *string)
 	{
-	return SuperFastHash(string->string(), string->length()) & 0xffffff;
+	#ifdef RANDOM_HASHER
+		return ANT_hash_24(string);
+	#else
+		return ANT_super_fast_hash_24(string->string(), string->length());
+	#endif
 	}
 
 	/*
