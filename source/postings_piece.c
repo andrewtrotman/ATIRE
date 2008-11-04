@@ -23,8 +23,6 @@ return allocator->malloc(bytes);
 ANT_postings_piece::ANT_postings_piece(ANT_memory *allocator, long bytes_wanted)
 {
 data = (unsigned char *)allocator->malloc(bytes_wanted);
-length = bytes_wanted;
-used = 0;
 next = NULL;
 }
 

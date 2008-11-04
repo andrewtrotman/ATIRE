@@ -12,7 +12,6 @@ class ANT_postings_piece
 {
 public:
 	unsigned char *data;
-	long length, used;
 	ANT_postings_piece *next;
 
 public:

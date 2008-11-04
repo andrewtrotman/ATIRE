@@ -42,9 +42,13 @@ original_string->strcpy(string.start);
 string.string_length = original_string->length();
 
 docid_list_head = docid_list_tail = new_postings_piece(postings_initial_length);
+docid_node_length = postings_initial_length;
+docid_node_used = 0;
 stats->bytes_allocated_for_docids += postings_initial_length;
 
 tf_list_head = tf_list_tail = new_postings_piece(postings_initial_length);
+tf_node_length = postings_initial_length;
+tf_node_used = 0;
 stats->bytes_allocated_for_tfs += postings_initial_length;
 
 collection_frequency = document_frequency = current_docno = 0;
@@ -124,14 +128,14 @@ one:
 void ANT_memory_index_hash_node::add_posting(long long docno)
 {
 unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
-long needed, wanted, remain;
+long needed, remain;
 
 collection_frequency++;
 if (docno == current_docno)
 	{
 	stats->term_occurences++;
-	if (tf_list_tail->data[tf_list_tail->used - 1]++ > 254)
-		tf_list_tail->data[tf_list_tail->used - 1] = 254;
+	if (tf_list_tail->data[tf_node_used - 1]++ > 254)
+		tf_list_tail->data[tf_node_used - 1] = 254;
 	}
 else
 	{
@@ -139,48 +143,48 @@ else
 	needed = compress_bytes_needed(docno - current_docno);
 	stats->bytes_to_store_docids += needed;
 
-	if (docid_list_tail->used + needed > docid_list_tail->length)
+	if (docid_node_used + needed > docid_node_length)
 		{
 		/*
 			Fill to the end of the block
 		*/
 		compress_into(holding_pen, docno - current_docno);
-		memcpy(docid_list_tail->data + docid_list_tail->used, holding_pen, docid_list_tail->length - docid_list_tail->used);
-		remain = needed - (docid_list_tail->length - docid_list_tail->used);
-		docid_list_tail->used = docid_list_tail->length;
+		memcpy(docid_list_tail->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
+		remain = needed - (docid_node_length - docid_node_used);
 		/*
 			Allocate the new block
 		*/
-		wanted = (long)(postings_growth_factor * docid_list_tail->length);
-		stats->bytes_allocated_for_docids += wanted;
-		docid_list_tail->next = new_postings_piece(wanted);
+		docid_node_length = (long)(postings_growth_factor * docid_node_length);
+		stats->bytes_allocated_for_docids += docid_node_length;
+		docid_list_tail->next = new_postings_piece(docid_node_length);
 		docid_list_tail = docid_list_tail->next;
 
 		/*
 			And place the "extra" into the beginning of the new block
 		*/
 		memcpy(docid_list_tail->data, holding_pen + remain, remain);
-		docid_list_tail->used = remain;
+		docid_node_used = remain;
 		}
 	else
 		{
-		compress_into(docid_list_tail->data + docid_list_tail->used, docno - current_docno);
-		docid_list_tail->used += needed;
+		compress_into(docid_list_tail->data + docid_node_used, docno - current_docno);
+		docid_node_used += needed;
 		}
 
 	current_docno = docno;
 
-	if (tf_list_tail->used + 1 > tf_list_tail->length)
+	if (tf_node_used + 1 > tf_node_length)
 		{
-		wanted = (long)(postings_growth_factor * tf_list_tail->length);
-		stats->bytes_allocated_for_tfs += wanted;
-		tf_list_tail->next = new_postings_piece(wanted);
+		tf_node_length = (long)(postings_growth_factor * tf_node_length);
+		stats->bytes_allocated_for_tfs += tf_node_length;
+		tf_list_tail->next = new_postings_piece(tf_node_length);
 		tf_list_tail = tf_list_tail->next;
+		tf_node_used = 0;
 		}
 	stats->bytes_to_store_tfs++;
-	tf_list_tail->data[tf_list_tail->used] = 1;
+	tf_list_tail->data[tf_node_used] = 1;
 	stats->term_occurences++;
-	tf_list_tail->used++;
+	tf_node_used++;
 	}
 }
 
@@ -193,26 +197,49 @@ long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, lon
 ANT_postings_piece *where;
 long err;
 long doc_bytes, tf_bytes;
+long size;
 
 err = FALSE;
 doc_bytes = 0;
+size = postings_initial_length;
 for (where = docid_list_head; where != NULL; where = where->next)
-	{
-	if (doc_bytes + where->used <= *doc_size)
-		memcpy(doc_into + doc_bytes, where->data, where->used);
+	if (doc_bytes + (where->next == NULL ? docid_node_used : size) <= *doc_size)
+		{
+		if (where->next == NULL)
+			{
+			memcpy(doc_into + doc_bytes, where->data, docid_node_used);			// final block many not be full
+			doc_bytes += docid_node_used;
+			}
+		else
+			{
+			memcpy(doc_into + doc_bytes, where->data, size);
+			doc_bytes += size;
+			size = (long)(postings_growth_factor * size);
+			}
+		}
 	else
 		err = TRUE;
-	doc_bytes += where->used;
-	}
 
 tf_bytes = 0;
+size = postings_initial_length;
 for (where = tf_list_head; where != NULL; where = where->next)
 	{
-	if (tf_bytes + where->used <= *tf_size)
-		memcpy(tf_into + tf_bytes, where->data, where->used);
+	if (tf_bytes + (where->next == NULL ? tf_node_used : size) <= *tf_size)
+		{
+		if (where->next == NULL)
+			{
+			memcpy(tf_into + tf_bytes, where->data, tf_node_used);
+			tf_bytes += tf_node_used;
+			}
+		else
+			{
+			memcpy(tf_into + tf_bytes, where->data, size);
+			tf_bytes += size;
+			size = (long)(postings_growth_factor * size);
+			}
+		}
 	else
 		err = TRUE;
-	tf_bytes += where->used;
 	}
 
 *doc_size = doc_bytes;

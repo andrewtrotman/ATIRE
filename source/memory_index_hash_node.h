@@ -23,6 +23,9 @@ public:
 	ANT_string_pair string;
 	ANT_memory_index_hash_node *left, *right;
 	ANT_postings_piece *docid_list_head, *docid_list_tail, *tf_list_head, *tf_list_tail;
+	long docid_node_used, docid_node_length;
+	long tf_node_used, tf_node_length;
+
 	long long current_docno;
 	long long collection_frequency, document_frequency;
 	ANT_memory *memory;
