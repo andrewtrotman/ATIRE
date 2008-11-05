@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  -DHEADER_HASHER /O2
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2  /analyze
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi /O2
 CC = @cl
 
@@ -29,7 +29,7 @@ $(BINDIR)\main.exe : $(PARTS) $(OBJDIR)\main.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\main.obj $(PARTS) /Fe$@
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
-	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /INCREMENTAL:NO
+	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
 
 $(OBJDIR)\index.obj : $(SRCDIR)\index.c
 

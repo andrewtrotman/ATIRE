@@ -3,6 +3,7 @@
 	------
 */
 #include <windows.h>
+#include <new.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -48,7 +49,7 @@ if (stat(filename, &details) != 0)
 	return NULL;
 if (details.st_size == 0)
 	return NULL;
-if ((block = new char [details.st_size + 1]) == NULL)
+if ((block = new (std::nothrow) char [details.st_size + 1]) == NULL)
 	return NULL;
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
@@ -57,8 +58,8 @@ if (fread(block, details.st_size, 1, fp) != 1)
 	delete [] block;
 	block = NULL;
 	}
-
-block[details.st_size] = '\0';
+else
+	block[details.st_size] = '\0';
 
 fclose(fp);
 return block;
