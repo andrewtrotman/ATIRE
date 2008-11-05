@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  -DHEADER_HASHER /O2
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2  /analyze
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi /O2
 CC = @cl
 
@@ -20,16 +20,22 @@ PARTS = \
 	$(OBJDIR)\hash_table.obj\
 	$(OBJDIR)\postings_piece.obj
 
+ANT_PARTS = \
+	$(OBJDIR)\file.obj\
+	$(OBJDIR)\memory.obj \
+	$(OBJDIR)\search_engine.obj
+	
+
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
-all : $(BINDIR)\main.exe $(BINDIR)\index.exe
-
-$(BINDIR)\main.exe : $(PARTS) $(OBJDIR)\main.obj
-	$(CC) $(CFLAGS) $(OBJDIR)\main.obj $(PARTS) /Fe$@
+all : $(BINDIR)\index.exe $(BINDIR)\ant.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
+
+$(BINDIR)\ant.exe : $(ANT_PARTS) $(OBJDIR)\ant.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\ant.obj $(ANT_PARTS) /Fe$@ 
 
 $(OBJDIR)\index.obj : $(SRCDIR)\index.c
 

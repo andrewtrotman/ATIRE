@@ -308,6 +308,9 @@ file_position = file->tell();
 	Write the header to disk N then N * (string, offset) pairs
 */
 file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));
+
+printf("Terms in root:%I64d\n", terms_in_root);
+
 for (current_header = header; current_header < last_header; current_header++)
 	{
 	file->write((unsigned char *)current_header->node->string.string(), current_header->node->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : current_header->node->string.length());
@@ -318,6 +321,7 @@ for (current_header = header; current_header < last_header; current_header++)
 /*
 	Write the location of the header to file
 */
+printf("Root pos on disk:%I64d\n", file_position);
 file->write((unsigned char *)&file_position, sizeof(file_position));
 
 /*

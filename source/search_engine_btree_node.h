@@ -11,7 +11,7 @@
 class ANT_search_engine_btree_node
 {
 public:
-	char node[B_TREE_PREFIX_SIZE + 1];
+	char *term;
 	long long disk_pos;
 } ;
 

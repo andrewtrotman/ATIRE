@@ -31,6 +31,7 @@ public:
 	long close(void);
 	long write(unsigned char *data, long size);
 	long read(unsigned char *data, long size);
+	long read(long long *data) { return read((unsigned char *)data, sizeof(long long)); }
 	long long tell(void);
 	void seek(long long offset_from_start_of_file);
 	long long file_length(void);
