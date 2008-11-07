@@ -88,6 +88,7 @@ long ANT_file::write(unsigned char *data, long size)
 unsigned char *from;
 long block_size;
 
+file_position += size;
 if (buffer_used + size < buffer_size)
 	{
 	memcpy(buffer + buffer_used, data, size);
@@ -107,7 +108,6 @@ else
 		}
 	while (size > 0);
 	}
-file_position += size;
 
 return 1;
 }

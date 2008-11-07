@@ -10,6 +10,13 @@
 #include "memory.h"
 #include "search_engine_btree_node.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
 	--------------------------------------
@@ -42,8 +49,8 @@ index->read(block, (long)(end - term_header));
 /*
 	The first sizeof(long long) bytes of the header are the number of nodes in the root
 */
-btree_nodes = get_long_long(block) + 1;		// +1 because were going to add a sentinal at the start
-block += sizeof(btree_nodes);
+btree_nodes = (long)(get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
+block += sizeof(long long);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 
 /*
@@ -94,9 +101,9 @@ delete index;
 	ANT_SEARCH_ENGINE::GET_BTREE_LEAF_POSITION()
 	--------------------------------------------
 */
-long long ANT_search_engine::get_btree_leaf_position(char *term, long long *length)
+long long ANT_search_engine::get_btree_leaf_position(char *term, long long *length, long *exact_match)
 {
-long long low, high, mid;
+long low, high, mid;
 
 /*
 	Binary search to find the block containing the term
@@ -116,6 +123,7 @@ if ((low < btree_nodes) && (strcmp(btree_root[low].term, term) == 0))
 	/*
 		Found, so we're either a short string or we're the name of a header
 	*/
+	*exact_match = TRUE;
 	*length = btree_root[low + 1].disk_pos - btree_root[low].disk_pos;
 	return btree_root[low].disk_pos;
 	}
@@ -124,26 +132,60 @@ else
 	/*
 		Not Found, so we're one past the header node
 	*/
+	*exact_match = FALSE;
 	*length = btree_root[low].disk_pos - btree_root[low - 1].disk_pos;
 	return btree_root[low - 1].disk_pos;
 	}
 }
 
 /*
-	ANT_SEARCH_ENGINE::GET_POSTINGS_POSITION()
-	------------------------------------------
+	ANT_SEARCH_ENGINE::GET_POSTINGS_DETAILS()
+	-----------------------------------------
 */
-void *ANT_search_engine::get_postings_position(char *term)
+ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term)
 {
 long long node_position, node_length;
+long low, high, mid;
+long leaf_size, exact_match;
+unsigned char *base;
 
-if ((node_position = get_btree_leaf_position(term, &node_length)) == 0)
-	return NULL;
+if ((node_position = get_btree_leaf_position(term, &node_length, &exact_match)) == 0)
+	return NULL;		// before the first term in the term list
+
+if (!exact_match && strlen(term) < B_TREE_PREFIX_SIZE)
+	return NULL;		// we have a short string (less then the length of the head node) and did not find it as a node
 
 index->seek(node_position);
 index->read(btree_leaf_buffer, (long)node_length);
 /*
-	Next we have to do the inplace binary search.
+	First 4 bytes are the number of terms in the node
+	then there are N loads of:
+		CF (4), DF (4), Offset_in_postings (8), DocIDs_Len (4), Postings_len (4), String_pos_in_node (4)
 */
-return NULL;
+low = 0;
+high = (long)get_long(btree_leaf_buffer);
+leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
+
+term += B_TREE_PREFIX_SIZE;		// it must be at least this long as we checked earlier
+
+while (low < high)
+	{
+	mid = (low + high) / 2;
+	if (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (mid + 1)))), term) < 0)
+		low = mid + 1;
+	else
+		high = mid;
+	}
+if ((low < btree_nodes) && (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
+	{
+	base = btree_leaf_buffer + leaf_size * low;
+	term_details.collection_frequency = get_long(base);
+	term_details.document_frequency = get_long(base + 4);
+	term_details.postings_position_on_disk = get_long_long(base + 8);
+	term_details.docid_length = get_long(base + 16);
+	term_details.postings_length = get_long(base + 20);
+	return &term_details;
+	}
+else
+	return NULL;
 }

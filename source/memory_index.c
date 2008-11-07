@@ -192,15 +192,15 @@ else
 /*
 	Number of terms in a node
 */
-eight_byte = (unsigned long long)(terms_in_node = current - start);
-file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));	// 8 bytes
+terms_in_node = current - start;
+file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));	// 4 bytes
 
 /*
 	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
 */
 current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (*start)->string.length();
 end = current;
-string_pos = (current - start) * (2 * 8 + 4 * 4) + 8;
+string_pos = (current - start) * (1 * 8 + 5 * 4) + 4;
 for (current = start; current < end; current++)
 	{
 	four_byte = (unsigned long)(*current)->collection_frequency;
@@ -212,8 +212,8 @@ for (current = start; current < end; current++)
 	eight_byte = (unsigned long long)((*current)->docids_pos_on_disk);
 	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
 
-	eight_byte = (unsigned long long)((*current)->tfs_pos_on_disk - (*current)->docids_pos_on_disk);
-	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
+	four_byte = (unsigned long)((*current)->tfs_pos_on_disk - (*current)->docids_pos_on_disk);
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 	four_byte = (unsigned long)((*current)->end_pos_on_disk - (*current)->docids_pos_on_disk);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));

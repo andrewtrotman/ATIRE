@@ -32,6 +32,7 @@ long long buffer_pos, buffer_length;
 ANT_memory memory;
 char query[1024];
 long more;
+long exact_match;
 
 puts("Ant");
 puts("---");
@@ -53,8 +54,9 @@ while (more)
 			more = special_command(query);
 		else
 			{
-			buffer_pos = search_engine.get_btree_leaf_position(query, &buffer_length);
+			buffer_pos = search_engine.get_btree_leaf_position(query, &buffer_length, &exact_match);
 			printf("%s : pos:%I64d Len:%I64d\n", query, buffer_pos, buffer_length);
+			search_engine.get_postings_details(query);
 			}
 		}
 	}
