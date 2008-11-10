@@ -1,6 +1,10 @@
 /*
 	SEARCH_ENGINE.C
 	---------------
+	TO DO:
+		get the number of docs from the index
+		get the length of the longest postings list from the index
+		store the document lengths in the index
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +31,7 @@ unsigned char *block;
 long long end, term_header, max_header_block_size, this_header_block_size;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 
+documents = 200000;
 this->memory = memory;
 index = new ANT_file(memory);
 if (index->open("index.aspt", "rb") == 0)
@@ -85,6 +90,11 @@ for (current = btree_root + 1; current < end_of_node_list; current++)
 //	printf("%s : %I64d (size:%I64d bytes)\n", current->term, current->disk_pos, this_header_block_size);
 	}
 btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size);
+
+/*
+	Allocate the accumulators array
+*/
+accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
 }
 
 /*
@@ -95,6 +105,24 @@ ANT_search_engine::~ANT_search_engine()
 {
 index->close();
 delete index;
+}
+
+/*
+	ANT_SEARCH_ENGINE::INIT_ACCUMULATORS()
+	--------------------------------------
+*/
+void ANT_search_engine::init_accumulators(void)
+{
+ANT_search_engine_accumulator *current, *end;
+long id;
+
+id = 0;
+end = accumulator + documents;
+for (current = accumulator; current < end; current++)
+	{
+	current->docid = id++;
+	current->rsv = 0
+	}
 }
 
 /*
@@ -142,7 +170,7 @@ else
 	ANT_SEARCH_ENGINE::GET_POSTINGS_DETAILS()
 	-----------------------------------------
 */
-ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term)
+ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details)
 {
 long long node_position, node_length;
 long low, high, mid;
@@ -179,13 +207,37 @@ while (low < high)
 if ((low < btree_nodes) && (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
 	{
 	base = btree_leaf_buffer + leaf_size * low;
-	term_details.collection_frequency = get_long(base);
-	term_details.document_frequency = get_long(base + 4);
-	term_details.postings_position_on_disk = get_long_long(base + 8);
-	term_details.docid_length = get_long(base + 16);
-	term_details.postings_length = get_long(base + 20);
-	return &term_details;
+	term_details->collection_frequency = get_long(base);
+	term_details->document_frequency = get_long(base + 4);
+	term_details->postings_position_on_disk = get_long_long(base + 8);
+	term_details->docid_length = get_long(base + 16);
+	term_details->postings_length = get_long(base + 20);
+	return term_details;
 	}
 else
 	return NULL;
+}
+
+
+/*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
+	--------------------------------------------
+*/
+void ANT_search_engine::process_one_search_term(char *term)
+{
+ANT_search_engine_btree_leaf term_details;
+
+if (get_postings_details(term, &term_details) == NULL)
+	return;
+
+disk->seek(term_details->postings_position_on_disk);
+disk->read(postings_buffer, term_details->postings_length);
+
+/* 
+	NEXT...
+	decompress the docids
+	decompress the tfs
+	compute BM25 vals
+*/
+
 }

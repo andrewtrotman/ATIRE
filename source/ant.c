@@ -28,6 +28,7 @@ return TRUE;
 */
 int main(int argc, char *argv[])
 {
+ANT_search_engine_btree_leaf term_details;
 long long buffer_pos, buffer_length;
 ANT_memory memory;
 char query[1024];
@@ -56,7 +57,7 @@ while (more)
 			{
 			buffer_pos = search_engine.get_btree_leaf_position(query, &buffer_length, &exact_match);
 			printf("%s : pos:%I64d Len:%I64d\n", query, buffer_pos, buffer_length);
-			search_engine.get_postings_details(query);
+			search_engine.get_postings_details(query, &term_details);
 			}
 		}
 	}
