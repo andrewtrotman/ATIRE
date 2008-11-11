@@ -2,6 +2,7 @@
 #include <string.h>
 #include "memory.h"
 #include "search_engine.h"
+#include "search_engine_btree_leaf.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -58,10 +59,11 @@ while (more)
 			buffer_pos = search_engine.get_btree_leaf_position(query, &buffer_length, &exact_match);
 			printf("%s : pos:%I64d Len:%I64d\n", query, buffer_pos, buffer_length);
 			search_engine.get_postings_details(query, &term_details);
+			search_engine.process_one_search_term(query);
 			}
 		}
 	}
-	puts("Bye");
+puts("Bye");
 
 return 0;
 }

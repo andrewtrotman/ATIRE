@@ -4,7 +4,7 @@
 	TO DO:
 		get the number of docs from the index
 		get the length of the longest postings list from the index
-		store the document lengths in the index
+		store the document lengths in the index (including the sum of lengths)
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +13,8 @@
 #include "file.h"
 #include "memory.h"
 #include "search_engine_btree_node.h"
+#include "search_engine_btree_leaf.h"
+#include "search_engine_accumulator.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -92,9 +94,12 @@ for (current = btree_root + 1; current < end_of_node_list; current++)
 btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size);
 
 /*
-	Allocate the accumulators array
+	Allocate the accumulators array, the docid array, and the term_frequency array
 */
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
+postings_buffer = (unsigned char *)memory->malloc(documents * 5);
+posting.docid = (long *)memory->malloc(sizeof(*posting.docid) * documents);
+posting.tf = (long *)memory->malloc(sizeof(*posting.tf) * documents);
 }
 
 /*
@@ -121,7 +126,7 @@ end = accumulator + documents;
 for (current = accumulator; current < end; current++)
 	{
 	current->docid = id++;
-	current->rsv = 0
+	current->rsv = 0.0;
 	}
 }
 
@@ -173,15 +178,21 @@ else
 ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details)
 {
 long long node_position, node_length;
-long low, high, mid;
-long leaf_size, exact_match;
+long low, high, mid, nodes;
+long leaf_size, exact_match, length_of_term;
 unsigned char *base;
 
 if ((node_position = get_btree_leaf_position(term, &node_length, &exact_match)) == 0)
 	return NULL;		// before the first term in the term list
 
-if (!exact_match && strlen(term) < B_TREE_PREFIX_SIZE)
-	return NULL;		// we have a short string (less then the length of the head node) and did not find it as a node
+length_of_term = strlen(term);
+if (length_of_term < B_TREE_PREFIX_SIZE)
+	if (!exact_match)
+		return NULL;		// we have a short string (less then the length of the head node) and did not find it as a node
+	else
+		term += length_of_term;
+else
+	term += B_TREE_PREFIX_SIZE;
 
 index->seek(node_position);
 index->read(btree_leaf_buffer, (long)node_length);
@@ -191,10 +202,8 @@ index->read(btree_leaf_buffer, (long)node_length);
 		CF (4), DF (4), Offset_in_postings (8), DocIDs_Len (4), Postings_len (4), String_pos_in_node (4)
 */
 low = 0;
-high = (long)get_long(btree_leaf_buffer);
+high = nodes = (long)get_long(btree_leaf_buffer);
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
-
-term += B_TREE_PREFIX_SIZE;		// it must be at least this long as we checked earlier
 
 while (low < high)
 	{
@@ -204,9 +213,9 @@ while (low < high)
 	else
 		high = mid;
 	}
-if ((low < btree_nodes) && (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
+if ((low < nodes) && (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
 	{
-	base = btree_leaf_buffer + leaf_size * low;
+	base = btree_leaf_buffer + leaf_size * low + sizeof(long);		// sizeof(long) is for the number of terms in the node
 	term_details->collection_frequency = get_long(base);
 	term_details->document_frequency = get_long(base + 4);
 	term_details->postings_position_on_disk = get_long_long(base + 8);
@@ -218,6 +227,35 @@ else
 	return NULL;
 }
 
+/*
+	ANT_SEARCH_ENGINE::GET_POSTINGS()
+	---------------------------------
+*/
+unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
+{
+index->seek(term_details->postings_position_on_disk);
+index->read(destination, term_details->postings_length);
+
+return destination;
+}
+
+/*
+	ANT_SEARCH_ENGINE::DECOMPRESS()
+	-------------------------------
+*/
+void ANT_search_engine::decompress(unsigned char *start, unsigned char *end, long *into)
+{
+while (start < end)
+	if (*start & 0x80)
+		*into++ = *start++ & 0x7F;
+	else
+		{
+		*into = *start++;
+		while (!(*start & 0x80))
+		   *into = (*into << 7) | *start++;
+		*into++ = (*into << 7) | (*start++ & 0x7F);
+		}
+}
 
 /*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
@@ -230,14 +268,27 @@ ANT_search_engine_btree_leaf term_details;
 if (get_postings_details(term, &term_details) == NULL)
 	return;
 
-disk->seek(term_details->postings_position_on_disk);
-disk->read(postings_buffer, term_details->postings_length);
+if (get_postings(&term_details, postings_buffer) == NULL)
+	return;
 
-/* 
-	NEXT...
-	decompress the docids
-	decompress the tfs
-	compute BM25 vals
-*/
+decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid);
 
+#ifdef NEVER
+	decompress(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
+#else
+	{
+	unsigned char *from;
+	long *into;
+	into = posting.tf;
+
+	for (from = postings_buffer + term_details.docid_length; from < postings_buffer + term_details.postings_length; from++)
+		*into++ = *from;
+	}
+#endif
+
+printf("%s:", term);
+long current = 0;
+for (long which = 0; which < term_details.document_frequency; which++)
+	printf("<%d,%d>", current += posting.docid[which], posting.tf[which]);
+printf("\n");
 }

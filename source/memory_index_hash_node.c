@@ -164,7 +164,7 @@ else
 		/*
 			And place the "extra" into the beginning of the new block
 		*/
-		memcpy(docid_list_tail->data, holding_pen + remain, remain);
+		memcpy(docid_list_tail->data, holding_pen + (needed - remain), remain);
 		docid_node_used = remain;
 		}
 	else
