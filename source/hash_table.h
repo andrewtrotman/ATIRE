@@ -121,7 +121,7 @@ inline static unsigned long ANT_header_hash_24(ANT_string_pair *string)
 long ans, len;
 const unsigned char base = 'a' - 1;
 
-ans = (string->string()[0] - base) * 27 * 27 * 27;
+ans = (string->string()[0] - base) * 27 * 27 * 27;		// the first char can be a '~' signifying a special term (document lengths etc.)
 
 if ((len = string->length()) > 1)
 	ans += (string->string()[1] - base) * 27 * 27;

@@ -51,12 +51,15 @@ ANT_memory_index *index;
 long long doc;
 long long frequency, program_start_time, program_end_time;
 long long now, input_time, output_time;
+long terms_in_document;
 
 program_start_time = stats.get_clock_tick();
 
 if (argc < 2)
 	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
 input_time = doc = 0;
+terms_in_document = 0;
+done_work = FALSE;
 index = new ANT_memory_index;
 for (param = 1; param < argc; param++)
 	{
@@ -72,13 +75,19 @@ for (param = 1; param < argc; param++)
 			{
 			if (ANT_isalpha(*token->start))
 				{
+				terms_in_document++;
 				index->add_term(token, doc);
 				done_work = TRUE;
 				}
 			else if (token->length() == 5 && strncmp(token->start, "<DOC>", 5) == 0)
 				if (done_work)
+					{
+					index->set_document_length(doc, terms_in_document);
 					doc++;
+					terms_in_document = 0;
+					}
 			}
+		index->set_document_length(doc, terms_in_document);
 		delete [] file;
 		now = stats.get_clock_tick();
 		file = (unsigned char *)disk.read_entire_file(disk.get_next_filename());

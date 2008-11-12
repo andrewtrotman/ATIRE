@@ -1,10 +1,6 @@
 /*
 	SEARCH_ENGINE.C
 	---------------
-	TO DO:
-		get the number of docs from the index
-		get the length of the longest postings list from the index
-		store the document lengths in the index (including the sum of lengths)
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,8 +28,8 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 unsigned char *block;
 long long end, term_header, max_header_block_size, this_header_block_size;
 ANT_search_engine_btree_node *current, *end_of_node_list;
+ANT_search_engine_btree_leaf collection_details;
 
-documents = 200000;
 this->memory = memory;
 index = new ANT_file(memory);
 if (index->open("index.aspt", "rb") == 0)
@@ -96,10 +92,17 @@ btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size)
 /*
 	Allocate the accumulators array, the docid array, and the term_frequency array
 */
+get_postings_details("~length", &collection_details);
+documents = collection_details.document_frequency;
+
+postings_buffer = (unsigned char *)memory->malloc(documents * 5);	// worst case is that it takes 5 bytes for each integer
+document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
-postings_buffer = (unsigned char *)memory->malloc(documents * 5);
 posting.docid = (long *)memory->malloc(sizeof(*posting.docid) * documents);
 posting.tf = (long *)memory->malloc(sizeof(*posting.tf) * documents);
+
+get_postings(&collection_details, postings_buffer);
+decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths);
 }
 
 /*
@@ -258,6 +261,26 @@ while (start < end)
 }
 
 /*
+	ANT_SEARCH_ENGINE::BM25_RANK()
+	------------------------------
+*/
+void ANT_search_engine::bm25_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
+{
+long docid, which, tf;
+double idf;
+
+docid = -1;
+idf = (double)documents / (double)term_details->document_frequency;
+for (which = 0; which < term_details->document_frequency; which++)
+	{
+	docid += postings->docid[which];
+	tf = postings->tf[which];
+
+	accumulator[docid].rsv += idf * ((double)tf / document_lengths[docid]);
+	}
+}
+
+/*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
 */
@@ -286,9 +309,32 @@ decompress(postings_buffer, postings_buffer + term_details.docid_length, posting
 	}
 #endif
 
-printf("%s:", term);
-long current = 0;
-for (long which = 0; which < term_details.document_frequency; which++)
-	printf("<%d,%d>", current += posting.docid[which], posting.tf[which]);
+bm25_rank(&term_details, &posting);
+}
+
+/*
+	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
+	------------------------------------------
+*/
+ANT_search_engine_accumulator *ANT_search_engine::generate_results_list(long *hits)
+{
+ANT_search_engine_accumulator *current, *end;
+
+qsort(accumulator, documents, sizeof(*accumulator), ANT_search_engine_accumulator::compare);
+
+end = accumulator + documents;
+for (current = accumulator; current < end; current++)
+	if (current->rsv == 0.0)
+		{
+		printf("NR:<%d,%f>\n", current->docid, current->rsv);
+		break;
+		}
+	else
+		if (current - accumulator < 10)		// first page
+			printf("%d <%d,%f>\n", current - accumulator + 1, current->docid, current->rsv);
+
 printf("\n");
+
+*hits = current - accumulator;
+return accumulator;
 }

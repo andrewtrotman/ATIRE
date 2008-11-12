@@ -39,6 +39,7 @@ public:
 
 	void add_term(ANT_string_pair *string, long long docno);
 	long serialise(char *filename);
+	void set_document_length(long long docid, long length);
 } ;
 
 

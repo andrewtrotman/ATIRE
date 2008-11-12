@@ -100,6 +100,28 @@ node->add_posting(string, docno);
 }
 
 /*
+	ANT_MEMORY_INDEX::SET_DOCUMENT_LENGTH()
+	---------------------------------------
+*/
+void ANT_memory_index::set_document_length(long long docno, long length)
+{
+ANT_string_pair string = {{"~length"}, {7}};
+long hash_value;
+ANT_memory_index_hash_node *node;
+
+hash_value = hash(&string);
+if (hash_table[hash_value] == NULL)
+	{
+	stats->hash_nodes++;
+	node = hash_table[hash_value] = new_memory_index_hash_node(&string);
+	}
+else
+	node = find_add_node(hash_table[hash_value], &string);
+node->current_docno = 0;
+node->add_posting(&string, length);
+}
+
+/*
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */

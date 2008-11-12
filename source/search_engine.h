@@ -20,6 +20,7 @@ private:
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
 	long btree_nodes, documents;
+	long *document_lengths;
 	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_posting posting;
@@ -28,6 +29,7 @@ private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
 	long get_long(unsigned char *from) { return *((long *)from); }
 
+	void bm25_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
 public:
 	ANT_search_engine(ANT_memory *memory);
 	~ANT_search_engine();
@@ -38,6 +40,8 @@ public:
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 	void decompress(unsigned char *start, unsigned char *end, long *into);
 	void process_one_search_term(char *term);
+	ANT_search_engine_accumulator *generate_results_list(long *hits);
+	long document_count(void) { return documents; }
 };
 
 #endif __SEARCH_ENGINE_H__

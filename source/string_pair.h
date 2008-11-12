@@ -14,9 +14,6 @@ public:
 	long string_length;
 
 public:
-	ANT_string_pair() {}
-	~ANT_string_pair() {}
-
 	char *str(void) { return strnnew(start, string_length); }
 	long length(void) { return string_length; }
 	char *string(void) { return start; }
