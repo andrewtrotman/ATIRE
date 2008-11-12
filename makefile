@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  -DHEADER_HASHER /O2
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi /O2
 CC = @cl
 
@@ -23,7 +23,8 @@ PARTS = \
 ANT_PARTS = \
 	$(OBJDIR)\file.obj\
 	$(OBJDIR)\memory.obj \
-	$(OBJDIR)\search_engine.obj
+	$(OBJDIR)\search_engine.obj \
+	$(OBJDIR)\search_engine_accumulator.obj
 	
 
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
