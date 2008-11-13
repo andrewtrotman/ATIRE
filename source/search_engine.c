@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <limits>
 #include "search_engine.h"
 #include "file.h"
 #include "memory.h"
@@ -19,6 +21,8 @@
 	#define TRUE (!FALSE)
 #endif
 
+const double DOUBLE_INFINITY = std::numeric_limits<double>::infinity();
+
 /*
 	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
 	--------------------------------------
@@ -26,7 +30,8 @@
 ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
 unsigned char *block;
-long long end, term_header, max_header_block_size, this_header_block_size;
+long long end, term_header, max_header_block_size, this_header_block_size, sum;
+long current_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 
@@ -103,6 +108,11 @@ posting.tf = (long *)memory->malloc(sizeof(*posting.tf) * documents);
 
 get_postings(&collection_details, postings_buffer);
 decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths);
+
+sum = 0;
+for (current_length = 0; current_length < documents; current_length++)
+	sum += document_lengths[current_length];
+mean_document_length = (double)sum / (double)documents;
 }
 
 /*
@@ -266,17 +276,37 @@ while (start < end)
 */
 void ANT_search_engine::bm25_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
 {
-long docid, which, tf;
-double idf;
+const double k1 = 2.0;
+const double b = 0.75;
+const double k1_plus_1 = k1 + 1.0;
+const double one_minus_b = 1.0 - b;
+long docid, which;
+double tf, idf;
 
 docid = -1;
-idf = (double)documents / (double)term_details->document_frequency;
+
+/*
+	          N - n + 0.5
+	IDF = log -----------
+	            n + 0.5
+
+	It is not clear from the BM25 papers what base should be used, so this implementation uses the natural log of x.  
+*/
+idf = log(((double)documents - (double)term_details->document_frequency + 0.5) / ((double)term_details->document_frequency + 0.5));
+
+/*
+	               tf(td) * (k1 + 1)
+	rsv = ----------------------------------- * IDF
+	                                  len(d)
+	      tf(td) + k1 * (1 - b + b * --------)
+                                    av_len_d
+*/
+
 for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid += postings->docid[which];
 	tf = postings->tf[which];
-
-	accumulator[docid].rsv += idf * ((double)tf / document_lengths[docid]);
+	accumulator[docid].rsv += idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
 	}
 }
 
@@ -319,22 +349,22 @@ bm25_rank(&term_details, &posting);
 ANT_search_engine_accumulator *ANT_search_engine::generate_results_list(long *hits)
 {
 ANT_search_engine_accumulator *current, *end;
+long found;
 
 qsort(accumulator, documents, sizeof(*accumulator), ANT_search_engine_accumulator::compare);
 
+found = 0;
 end = accumulator + documents;
 for (current = accumulator; current < end; current++)
-	if (current->rsv == 0.0)
+	if (current->rsv != 0.0)
 		{
-		printf("NR:<%d,%f>\n", current->docid, current->rsv);
-		break;
-		}
-	else
-		if (current - accumulator < 10)		// first page
+		found++;
+		if (found <= 10)		// first page
 			printf("%d <%d,%f>\n", current - accumulator + 1, current->docid, current->rsv);
+		}
 
 printf("\n");
 
-*hits = current - accumulator;
+*hits = found;
 return accumulator;
 }

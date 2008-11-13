@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "memory.h"
+#include "ctypes.h"
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
 
@@ -29,12 +30,10 @@ return TRUE;
 */
 int main(int argc, char *argv[])
 {
-ANT_search_engine_btree_leaf term_details;
-long long buffer_pos, buffer_length;
 ANT_memory memory;
-char query[1024];
+char query[1024], token[1024];
 long more, hits;
-long exact_match;
+char *token_start, *token_end;
 
 puts("Ant");
 puts("---");
@@ -58,10 +57,23 @@ while (more)
 		else
 			{
 			search_engine.init_accumulators();
-			buffer_pos = search_engine.get_btree_leaf_position(query, &buffer_length, &exact_match);
-//			printf("%s : pos:%I64d Len:%I64d\n", query, buffer_pos, buffer_length);
-			search_engine.get_postings_details(query, &term_details);
-			search_engine.process_one_search_term(query);
+			token_end = query;
+			while (*token_end != '\0')
+				{
+				token_start = token_end;
+				while (!ANT_isalpha(*token_start) && *token_start != '\0')
+					token_start++;
+				if (*token_start == '\0')
+					break;
+				token_end = token_start;
+				while (ANT_isalpha(*token_end))
+					token_end++;
+				strncpy(token, token_start, token_end - token_start);
+				token[token_end - token_start] = '\0';
+				
+				search_engine.process_one_search_term(token);
+				}
+
 			search_engine.generate_results_list(&hits);
 			printf("Query '%s' found %d documents\n", query, hits);
 			}

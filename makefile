@@ -21,6 +21,7 @@ PARTS = \
 	$(OBJDIR)\postings_piece.obj
 
 ANT_PARTS = \
+	$(OBJDIR)\ctypes.obj \
 	$(OBJDIR)\file.obj\
 	$(OBJDIR)\memory.obj \
 	$(OBJDIR)\search_engine.obj \
