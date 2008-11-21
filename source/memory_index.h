@@ -17,6 +17,7 @@ class ANT_file;
 
 class ANT_memory_index
 {
+friend int main(int argc, char *argv[]);			// delete this line
 private:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;

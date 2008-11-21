@@ -11,6 +11,7 @@
 
 class ANT_memory
 {
+friend int main(int argc, char *argv[]);			// delete this line
 private:
 	char *chunk, *at, *chunk_end;
 	long long used;
@@ -36,7 +37,7 @@ void *ans;
 	{
 	if (chunk == NULL)
 		{
-		allocated = 512 * 1024 * 1024;
+		allocated = 1024 * 1024 * 1024;
 		at = chunk = new (std::nothrow) char [(size_t)allocated];
 		if (chunk == NULL)
 			exit(printf("Out of memory:%I64d bytes requested\n", allocated));
