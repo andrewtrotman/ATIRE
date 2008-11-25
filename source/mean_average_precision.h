@@ -1,0 +1,33 @@
+
+/*
+	MEAN_AVERAGE_PRECISION.H
+	------------------------
+*/
+
+#ifndef __MEAN_AVERAGE_PRECISION_H__
+#define __MEAN_AVERAGE_PRECISION_H__
+
+class ANT_memory;
+class ANT_relevant_document;
+class ANT_relevant_topic;
+class ANT_search_engine_accumulator;
+
+class ANT_mean_average_precision
+{
+private:
+	ANT_memory *memory;
+	ANT_relevant_document *relevance_list;
+	long relevance_list_length;
+	ANT_relevant_topic *topics;
+	long topics_list_length;
+
+public:
+	ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long relevance_list_length);
+	~ANT_mean_average_precision() {}
+	
+	double average_precision(long topic, ANT_search_engine_accumulator *results_list, long results_list_length);
+} ;
+
+
+
+#endif __MEAN_AVERAGE_PRECISION_H__

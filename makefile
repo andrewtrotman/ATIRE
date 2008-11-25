@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  -DHEADER_HASHER /O2
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2 
 #CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi /O2
 CC = @cl
 
@@ -25,7 +25,10 @@ ANT_PARTS = \
 	$(OBJDIR)\file.obj\
 	$(OBJDIR)\memory.obj \
 	$(OBJDIR)\search_engine.obj \
-	$(OBJDIR)\search_engine_accumulator.obj
+	$(OBJDIR)\search_engine_accumulator.obj \
+	$(OBJDIR)\mean_average_precision.obj \
+	$(OBJDIR)\relevant_document.obj \
+	$(OBJDIR)\relevant_topic.obj
 	
 
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:

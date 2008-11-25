@@ -113,8 +113,8 @@ return 1;
 }
 
 /*
-	CHAR *ANT_FILE::READ()
-	----------------------
+	ANT_FILE::READ()
+	----------------
 */
 long ANT_file::read(unsigned char *data, long size)
 {
