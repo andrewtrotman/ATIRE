@@ -86,7 +86,7 @@ for (current = 0; current < results_list_length; current++)
 		if (bsearch(&key, relevance_list, relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare) != NULL)
 			{
 			found_and_relevant++;
-			precision += (double)found_and_relevant / (double)current;
+			precision += (double)found_and_relevant / (double)(current + 1);
 			}
 		}
 

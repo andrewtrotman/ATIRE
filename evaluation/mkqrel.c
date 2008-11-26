@@ -101,7 +101,7 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	if (got == NULL)
 		exit(printf("Docid '%s' not in <doc_id_file>\n", key.name));
 
-	printf("%d %d\n", topic, got - docid_list);
+	printf("%d %d\n", topic, got->id);
 	}
 
 fclose(qrel);
