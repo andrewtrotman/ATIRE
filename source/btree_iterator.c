@@ -1,0 +1,143 @@
+/*
+	BTREE_ITERATOR.C
+	----------------
+*/
+#include <stdio.h>
+#include <string.h>
+#include "file.h"
+#include "search_engine.h"
+#include "search_engine_btree_node.h"
+#include "btree_iterator.h"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
+/*
+	ANT_BTREE_ITERATOR::ANT_BTREE_ITERATOR()
+	----------------------------------------
+*/
+ANT_btree_iterator::ANT_btree_iterator(ANT_search_engine *search_engine)
+{
+this->search_engine = search_engine;
+btree_leaf_buffer = new unsigned char [(long)search_engine->max_header_block_size];
+}
+
+/*
+	ANT_BTREE_ITERATOR::~ANT_BTREE_ITERATOR()
+	-----------------------------------------
+*/
+ANT_btree_iterator::~ANT_btree_iterator()
+{
+delete [] btree_leaf_buffer;
+}
+
+/*
+	ANT_BTREE_ITERATOR::FIRST()
+	---------------------------
+*/
+char *ANT_btree_iterator::first(char *term)
+{
+long long node_length, node_position;
+long exact_match, length_of_term;
+long low, high, mid, leaf_size;
+long before_first_term = FALSE;
+long terms_in_leaf;
+
+if (term == NULL)
+	node_position = node_length = exact_match = node = 0;
+else
+	node_position = search_engine->get_btree_leaf_position(term, &node_length, &exact_match, &node);
+
+if (node_position == 0)		// then we are before the first term (or term == NULL)
+	{
+	before_first_term = TRUE;
+	node = 1;
+	node_position = search_engine->btree_root[node].disk_pos;
+	node_length = search_engine->btree_root[node + 1].disk_pos - node_position;
+	}
+
+keyword_head_length = strlen(search_engine->btree_root[node].term);
+strcpy(keyword, search_engine->btree_root[node].term);
+
+search_engine->index->seek(node_position);
+search_engine->index->read(btree_leaf_buffer, (long)node_length);
+
+if (before_first_term)	// then we are before the first term so use the first term in the node
+	leaf = 0;
+else
+	{
+	length_of_term = strlen(term);
+	if (length_of_term < B_TREE_PREFIX_SIZE)
+		if (!exact_match)
+			{
+			leaf = (long)search_engine->get_long(btree_leaf_buffer);		// we have a short string (less then the length of the head node) and did not find it as a node
+			return next();
+			}
+		else
+			term += length_of_term;
+	else
+		if (strncmp(search_engine->btree_root[node].term, term, B_TREE_PREFIX_SIZE) != 0)
+			{
+			leaf = (long)search_engine->get_long(btree_leaf_buffer);		// there is no node in the list that starts with the head of the string.
+			return next();
+			}
+		else
+			term += B_TREE_PREFIX_SIZE;
+
+	low = 0;
+	high = terms_in_leaf = (long)search_engine->get_long(btree_leaf_buffer);
+	leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
+
+	while (low < high)
+		{
+		mid = (low + high) / 2;
+		if (strcmp((char *)(btree_leaf_buffer + search_engine->get_long(btree_leaf_buffer + (leaf_size * (mid + 1)))), term) < 0)
+			low = mid + 1;
+		else
+			high = mid;
+		}
+	leaf = low;
+	if (leaf >= terms_in_leaf)
+		return next();
+	else
+		strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + search_engine->get_long(btree_leaf_buffer + (leaf_size * (leaf + 1)))));
+	}
+return keyword;
+}
+
+/*
+	ANT_BTREE_ITERATOR::NEXT()
+	--------------------------
+*/
+char *ANT_btree_iterator::next(void)
+{
+long long node_length, node_position;
+long leaf_size;
+
+leaf++;
+
+if (leaf >= (long)search_engine->get_long(btree_leaf_buffer))
+	{
+	node++;
+	if (search_engine->btree_root[node].term == NULL)		// then we are at the end of the term list
+		return NULL;
+	leaf = 0;
+
+	node_position = search_engine->btree_root[node].disk_pos;
+	node_length = search_engine->btree_root[node + 1].disk_pos - node_position;
+
+	keyword_head_length = strlen(search_engine->btree_root[node].term);
+	strcpy(keyword, search_engine->btree_root[node].term);
+
+	search_engine->index->seek(node_position);
+	search_engine->index->read(btree_leaf_buffer, (long)node_length);
+	}
+
+leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
+strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + search_engine->get_long(btree_leaf_buffer + (leaf_size * (leaf + 1)))));
+return keyword;
+}

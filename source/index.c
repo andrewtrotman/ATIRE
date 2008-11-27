@@ -15,7 +15,7 @@
 	#define FALSE 0
 #endif
 #ifndef TRUE
-	#define TRUE 1
+	#define TRUE (!FALSE)
 #endif
 
 /*
@@ -53,6 +53,7 @@ long long doc;
 long long frequency, program_start_time, program_end_time;
 long long now, input_time, output_time;
 long terms_in_document;
+long first_param = TRUE;
 
 program_start_time = stats.get_clock_tick();
 frequency = stats.get_clock_tick_frequency();
@@ -67,7 +68,9 @@ for (param = 1; param < argc; param++)
 	{
 	puts("--");
 	puts(argv[param]);
-	index->stats->text_render();
+	if (!first_param)
+		index->stats->text_render();
+	first_param = FALSE;
 
 	now = stats.get_clock_tick();
 	file = (unsigned char *)disk.read_entire_file(disk.get_first_filename(argv[param]));

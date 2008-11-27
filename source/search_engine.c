@@ -30,7 +30,7 @@ const double DOUBLE_INFINITY = std::numeric_limits<double>::infinity();
 ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
 unsigned char *block;
-long long end, term_header, max_header_block_size, this_header_block_size, sum;
+long long end, term_header, this_header_block_size, sum;
 long current_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
@@ -147,7 +147,7 @@ for (current = accumulator; current < end; current++)
 	ANT_SEARCH_ENGINE::GET_BTREE_LEAF_POSITION()
 	--------------------------------------------
 */
-long long ANT_search_engine::get_btree_leaf_position(char *term, long long *length, long *exact_match)
+long long ANT_search_engine::get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node)
 {
 long low, high, mid;
 
@@ -162,13 +162,14 @@ while (low < high)
 	if (strcmp(btree_root[mid].term, term) < 0)
 		low = mid + 1;
 	else
-		high = mid; 
+		high = mid;
 	}
 if ((low < btree_nodes) && (strcmp(btree_root[low].term, term) == 0))
 	{
 	/*
 		Found, so we're either a short string or we're the name of a header
 	*/
+	*btree_root_node = low;
 	*exact_match = TRUE;
 	*length = btree_root[low + 1].disk_pos - btree_root[low].disk_pos;
 	return btree_root[low].disk_pos;
@@ -178,6 +179,7 @@ else
 	/*
 		Not Found, so we're one past the header node
 	*/
+	*btree_root_node = low - 1;
 	*exact_match = FALSE;
 	*length = btree_root[low].disk_pos - btree_root[low - 1].disk_pos;
 	return btree_root[low - 1].disk_pos;
@@ -192,10 +194,10 @@ ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term
 {
 long long node_position, node_length;
 long low, high, mid, nodes;
-long leaf_size, exact_match, length_of_term;
+long leaf_size, exact_match, length_of_term, root_node_element;
 unsigned char *base;
 
-if ((node_position = get_btree_leaf_position(term, &node_length, &exact_match)) == 0)
+if ((node_position = get_btree_leaf_position(term, &node_length, &exact_match, &root_node_element)) == 0)
 	return NULL;		// before the first term in the term list
 
 length_of_term = strlen(term);
@@ -205,7 +207,10 @@ if (length_of_term < B_TREE_PREFIX_SIZE)
 	else
 		term += length_of_term;
 else
-	term += B_TREE_PREFIX_SIZE;
+	if (strncmp(btree_root[root_node_element].term, term, B_TREE_PREFIX_SIZE) != 0)
+		return NULL;		// there is no node in the list that starts with the head of the string.
+	else
+		term += B_TREE_PREFIX_SIZE;
 
 index->seek(node_position);
 index->read(btree_leaf_buffer, (long)node_length);

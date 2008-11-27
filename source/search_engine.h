@@ -15,6 +15,7 @@ class ANT_search_engine_accumulator;
 
 class ANT_search_engine
 {
+friend class ANT_btree_iterator;
 private:
 	ANT_memory *memory;
 	ANT_file *index;
@@ -25,6 +26,8 @@ private:
 	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_posting posting;
+	long long max_header_block_size;
+
 
 private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
@@ -36,7 +39,7 @@ public:
 	~ANT_search_engine();
 
 	void init_accumulators(void);
-	long long get_btree_leaf_position(char *term, long long *length, long *exact_match);
+	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 	void decompress(unsigned char *start, unsigned char *end, long *into);
