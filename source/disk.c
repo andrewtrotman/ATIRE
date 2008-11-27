@@ -10,8 +10,8 @@
 #include "disk.h"
 #include "disk_internals.h"
 
-#ifdef _MSC_DEV
-	#define stat(a,b) _stat(a,b)
+#ifdef _MSC_VER
+	#define stat _stat64
 #endif
 
 /*
@@ -49,11 +49,11 @@ if (stat(filename, &details) != 0)
 	return NULL;
 if (details.st_size == 0)
 	return NULL;
-if ((block = new (std::nothrow) char [details.st_size + 1]) == NULL)
+if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) == NULL)
 	return NULL;
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
-if (fread(block, details.st_size, 1, fp) != 1)
+if (fread(block, (long)details.st_size, 1, fp) != 1)
 	{
 	delete [] block;
 	block = NULL;

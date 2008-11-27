@@ -25,13 +25,13 @@
 void print_elapsed_time(char *message, long long time_taken)
 {
 if (time_taken > 60)
-	printf("%s%I64d:%I64d:%I64d\n", message, (time_taken / (60 * 60)), (time_taken / 60) % 60, time_taken % 60);
+	printf("%s%lld:%lld:%lld\n", message, (time_taken / (60 * 60)), (time_taken / 60) % 60, time_taken % 60);
 else if (time_taken > 60)
-	printf("%s%I64d:%I64d\n", message, time_taken / 60, time_taken % 60);
+	printf("%s%lld:%lld\n", message, time_taken / 60, time_taken % 60);
 else if (time_taken > 1)
-	printf("%s%I64d seconds\n", message, time_taken);
+	printf("%s%lld seconds\n", message, time_taken);
 else if (time_taken == 1)
-	printf("%s%I64d second\n", message, time_taken);
+	printf("%s%lld second\n", message, time_taken);
 else
 	printf("%s<1 second\n", message);
 }
@@ -78,7 +78,7 @@ for (param = 1; param < argc; param++)
 		doc++;
 		if (doc % 10000 == 0)
 			{
-			printf("Documents Indexed:%I64d Memory used:%I64d\n", doc, index->memory->used);
+			printf("Documents Indexed:%lld Memory used:%lld\n", doc, index->memory->used);
 			program_end_time = stats.get_clock_tick();
 			print_elapsed_time("Total Elapsed Time:", (program_end_time - program_start_time) / frequency);
 			}

@@ -133,7 +133,7 @@ long doc_size, tf_size, total;
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
 
-//printf("\t%s (df:%I64d cf:%I64d)\n", root->string.str(), root->document_frequency, root->collection_frequency);
+//printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
 doc_size = serialised_docids_size;
 tf_size = serialised_tfs_size;
 while ((total = root->serialise_postings(serialised_docids, &doc_size, serialised_tfs, &tf_size)) == 0)
@@ -331,7 +331,7 @@ file_position = file->tell();
 */
 file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));
 
-printf("Terms in root:%I64d\n", terms_in_root);
+printf("Terms in root:%lld\n", terms_in_root);
 
 for (current_header = header; current_header < last_header; current_header++)
 	{
@@ -343,7 +343,7 @@ for (current_header = header; current_header < last_header; current_header++)
 /*
 	Write the location of the header to file
 */
-printf("Root pos on disk:%I64d\n", file_position);
+printf("Root pos on disk:%lld\n", file_position);
 file->write((unsigned char *)&file_position, sizeof(file_position));
 
 /*
@@ -365,7 +365,7 @@ unsigned char *pos;
 long tf, doc = 0;
 
 tf = tf_size;		// this does nothing but was added to remove a compiler warning about an unused parameter
-printf("\t%s (df:%I64d cf:%I64d):", root->string.str(), root->document_frequency, root->collection_frequency);
+printf("\t%s (df:%lld cf:%lld):", root->string.str(), root->document_frequency, root->collection_frequency);
 pos = serialised_docids;
 while (pos < serialised_docids + doc_size)
 	{

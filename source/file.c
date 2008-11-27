@@ -3,9 +3,27 @@
 	------
 */
 #include <string.h>
-#include <io.h>
 #include "file.h"
 #include "memory.h"
+
+#ifdef linux
+	#define _LARGEFILE_SOURCE
+	#define _LARGEFILE64_SOURCE
+	#define FILE_OFFSET_BITS 64
+	#define ftell ftello
+	#define fseek fseeko
+	#define fstat _fstat64
+	#define stat stat64
+#elif defined(_MSC_VER)
+	#include <sys/types.h>
+	#include <sys/stat.h>
+
+	#define fseek _fseeki64
+	#define fileno _fileno
+	#define stat _stat64
+	#define fstat _fstat64
+#endif
+
 
 /*
 	ANT_FILE::ANT_FILE()
@@ -139,7 +157,7 @@ return file_position;
 void ANT_file::seek(long long offset_from_start_of_file)
 {
 flush();
-_fseeki64(fp, offset_from_start_of_file, SEEK_SET);
+fseek(fp, offset_from_start_of_file, SEEK_SET);
 file_position = offset_from_start_of_file;
 }
 
@@ -149,9 +167,15 @@ file_position = offset_from_start_of_file;
 */
 long long ANT_file::file_length(void)
 {
-if (fp == NULL)
-	return 0;
-else
-	return _filelengthi64(_fileno(fp));
+struct stat details;
+long ans;
+
+if (fp != NULL)
+	{
+	ans = fstat(fileno(fp), &details);
+	return details.st_size;
+	}
+
+return 0;
 }
 

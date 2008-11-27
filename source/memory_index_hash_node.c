@@ -133,7 +133,7 @@ if (docno == current_docno)
 		{
 		tf_list_tail->data[tf_node_used - 1] = 254;
 #ifdef NEVER
-		printf("Doc:%I64d, '%*.*s': TF trimmed at 255 occurences\n", docno, keyword->length(), keyword->length(), keyword->string());
+		printf("Doc:%lld, '%*.*s': TF trimmed at 255 occurences\n", docno, keyword->length(), keyword->length(), keyword->string());
 #else
 		keyword = keyword;		// this gets around the compiler warning about parameter "keyword" not being used
 #endif

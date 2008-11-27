@@ -90,7 +90,7 @@ for (current = btree_root + 1; current < end_of_node_list; current++)
 	this_header_block_size = (current + 1)->disk_pos - current->disk_pos;
 	if (this_header_block_size > max_header_block_size)
 		max_header_block_size = this_header_block_size;
-//	printf("%s : %I64d (size:%I64d bytes)\n", current->term, current->disk_pos, this_header_block_size);
+//	printf("%s : %lld (size:%lld bytes)\n", current->term, current->disk_pos, this_header_block_size);
 	}
 btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size);
 

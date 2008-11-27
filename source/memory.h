@@ -40,13 +40,13 @@ if (chunk == NULL)
 	allocated = 1024 * 1024 * 1024;
 	at = chunk = new (std::nothrow) char [(size_t)allocated];
 	if (chunk == NULL)
-		exit(printf("Out of memory:%I64d bytes requested\n", allocated));
+		exit(printf("Out of memory:%lld bytes requested\n", allocated));
 	chunk_end = chunk + allocated;
 	}
 ans = at;
 at += bytes;
 if (at > chunk_end)
-	exit(printf("Out of memory:%I64d bytes requested %I64d bytes used\n", (long long)bytes, used));
+	exit(printf("Out of memory:%lld bytes requested %lld bytes used\n", (long long)bytes, used));
 used += bytes;
 
 return ans;
