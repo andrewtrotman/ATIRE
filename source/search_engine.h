@@ -28,12 +28,13 @@ private:
 	ANT_search_engine_posting posting;
 	long long max_header_block_size;
 
-
 private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
 	long get_long(unsigned char *from) { return *((long *)from); }
+	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 
 	void bm25_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
+
 public:
 	ANT_search_engine(ANT_memory *memory);
 	~ANT_search_engine();

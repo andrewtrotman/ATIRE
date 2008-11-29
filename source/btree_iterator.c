@@ -42,10 +42,9 @@ delete [] btree_leaf_buffer;
 char *ANT_btree_iterator::first(char *term)
 {
 long long node_length, node_position;
-long exact_match, length_of_term;
+long exact_match, length_of_term, terms_in_leaf;
 long low, high, mid, leaf_size;
 long before_first_term = FALSE;
-long terms_in_leaf;
 
 if (term == NULL)
 	node_position = node_length = exact_match = node = 0;
@@ -140,4 +139,13 @@ if (leaf >= (long)search_engine->get_long(btree_leaf_buffer))
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
 strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + search_engine->get_long(btree_leaf_buffer + (leaf_size * (leaf + 1)))));
 return keyword;
+}
+
+/*
+	ANT_BTREE_ITERATOR::GET_POSTINGS_DETAILS()
+	------------------------------------------
+*/
+ANT_search_engine_btree_leaf *ANT_btree_iterator::get_postings_details(ANT_search_engine_btree_leaf *term_details)
+{
+return search_engine->get_leaf(btree_leaf_buffer, leaf, term_details);
 }

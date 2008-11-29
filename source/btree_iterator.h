@@ -9,6 +9,7 @@
 #define MAX_TERM_LENGTH 1024
 
 class ANT_search_engine;
+class ANT_search_engine_btree_leaf;
 
 class ANT_btree_iterator
 {
@@ -25,6 +26,7 @@ public:
 
 	char *first(char *term);
 	char *next(void);
+	ANT_search_engine_btree_leaf *get_postings_details(ANT_search_engine_btree_leaf *term_details);
 } ;
 
 

@@ -12,6 +12,7 @@ class ANT_search_engine_btree_node
 {
 public:
 	char *term;
+	long term_length;		// strlen(term)
 	long long disk_pos;
 } ;
 

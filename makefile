@@ -1,10 +1,9 @@
 SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
+TOOLDIR = tools
 
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi  -DHEADER_HASHER /O2
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
 CC = @cl
 
 PARTS = \
@@ -33,20 +32,30 @@ ANT_PARTS = \
 	$(OBJDIR)\btree_iterator.obj \
 	$(OBJDIR)\relevant_topic.obj
 	
-
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
-all : $(BINDIR)\index.exe $(BINDIR)\ant.exe $(BINDIR)\ant_dictionary.exe
+{$(TOOLDIR)\}.c{$(OBJDIR)\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+
+
+all : $(BINDIR)\index.exe $(BINDIR)\ant.exe $(BINDIR)\ant_dictionary.exe $(BINDIR)\link_extract.exe $(BINDIR)\link_index.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
 
 $(BINDIR)\ant.exe : $(ANT_PARTS) $(OBJDIR)\ant.obj
-	$(CC) $(CFLAGS) $(OBJDIR)\ant.obj $(ANT_PARTS) /Fe$@ 
+	$(CC) $(CFLAGS) $(OBJDIR)\ant.obj $(ANT_PARTS) /Fe$@
 
 $(BINDIR)\ant_dictionary.exe : $(ANT_PARTS) $(OBJDIR)\ant_dictionary.obj
-	$(CC) $(CFLAGS) $(OBJDIR)\ant_dictionary.obj $(ANT_PARTS) /Fe$@ 
+	$(CC) $(CFLAGS) $(OBJDIR)\ant_dictionary.obj $(ANT_PARTS) /Fe$@
+
+$(BINDIR)\link_extract.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_extract.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\link_extract.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
+
+$(BINDIR)\link_index.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_index.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\link_index.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
+
 
 $(OBJDIR)\index.obj : $(SRCDIR)\index.c
 

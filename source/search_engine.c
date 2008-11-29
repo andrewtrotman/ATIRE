@@ -50,6 +50,7 @@ index->read(&term_header);
 /*
 	Load the b-tree header
 */
+printf("Btree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
 block = (unsigned char *)memory->malloc((long)(end - term_header));
 index->read(block, (long)(end - term_header));
@@ -58,6 +59,7 @@ index->read(block, (long)(end - term_header));
 	The first sizeof(long long) bytes of the header are the number of nodes in the root
 */
 btree_nodes = (long)(get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
+printf("There are %d nodes in the root of the btree\n", btree_nodes - 1);
 block += sizeof(long long);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 
@@ -73,6 +75,7 @@ end_of_node_list = btree_root + btree_nodes;
 for (current++; current < end_of_node_list; current++)
 	{
 	current->term = (char *)block;
+	current->term_length = strlen((char *)block);
 	while (*block != '\0')
 		block++;
 	block++;
@@ -187,6 +190,26 @@ else
 }
 
 /*
+	ANT_SEARCH_ENGINE::GET_LEAF()
+	-----------------------------
+*/
+ANT_search_engine_btree_leaf *ANT_search_engine::get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details)
+{
+long leaf_size;
+unsigned char *base;
+
+leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
+base = leaf + leaf_size * term_in_leaf + sizeof(long);		// sizeof(long) is for the number of terms in the node
+term_details->collection_frequency = get_long(base);
+term_details->document_frequency = get_long(base + 4);
+term_details->postings_position_on_disk = get_long_long(base + 8);
+term_details->docid_length = get_long(base + 16);
+term_details->postings_length = get_long(base + 20);
+
+return term_details;
+}
+
+/*
 	ANT_SEARCH_ENGINE::GET_POSTINGS_DETAILS()
 	-----------------------------------------
 */
@@ -195,7 +218,6 @@ ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term
 long long node_position, node_length;
 long low, high, mid, nodes;
 long leaf_size, exact_match, length_of_term, root_node_element;
-unsigned char *base;
 
 if ((node_position = get_btree_leaf_position(term, &node_length, &exact_match, &root_node_element)) == 0)
 	return NULL;		// before the first term in the term list
@@ -232,15 +254,7 @@ while (low < high)
 		high = mid;
 	}
 if ((low < nodes) && (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
-	{
-	base = btree_leaf_buffer + leaf_size * low + sizeof(long);		// sizeof(long) is for the number of terms in the node
-	term_details->collection_frequency = get_long(base);
-	term_details->document_frequency = get_long(base + 4);
-	term_details->postings_position_on_disk = get_long_long(base + 8);
-	term_details->docid_length = get_long(base + 16);
-	term_details->postings_length = get_long(base + 20);
-	return term_details;
-	}
+	return get_leaf(btree_leaf_buffer, low, term_details);
 else
 	return NULL;
 }
