@@ -39,7 +39,7 @@ ANT_PARTS = \
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 
-all : $(BINDIR)\index.exe $(BINDIR)\ant.exe $(BINDIR)\ant_dictionary.exe $(BINDIR)\link_extract.exe $(BINDIR)\link_index.exe
+all : $(BINDIR)\index.exe $(BINDIR)\ant.exe $(BINDIR)\ant_dictionary.exe $(BINDIR)\link_extract.exe $(BINDIR)\link_index.exe $(BINDIR)\remove_head.exe $(BINDIR)\link_this.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
@@ -56,16 +56,11 @@ $(BINDIR)\link_extract.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(O
 $(BINDIR)\link_index.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_index.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
 
+$(BINDIR)\link_this.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_this.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\link_this.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
 
-$(OBJDIR)\index.obj : $(SRCDIR)\index.c
-
-$(OBJDIR)\main.obj : $(SRCDIR)\main.c
-
-$(OBJDIR)\disk_internals.obj : $(SRCDIR)\disk_internals.c $(SRCDIR)\disk_internals.h
-
-$(OBJDIR)\disk.obj : $(SRCDIR)\disk.c  $(SRCDIR)\disk.h $(SRCDIR)\disk_internals.h
-
-$(OBJDIR)\parse.obj : $(SRCDIR)\parse.c $(SRCDIR)\parse.h $(SRCDIR)\string_pair.h
+$(BINDIR)\remove_head.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\remove_head.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\remove_head.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
 
 clean :
 	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb
