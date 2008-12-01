@@ -45,17 +45,15 @@ int main(int argc, char *argv[])
 {
 ANT_link_element *link_list;
 ANT_disk disk;
-long lines, current, last_docid, times;
+long lines, current, last_docid, times, unique_terms;
 char *file, *ch, *into, *tmp, *last_string;
 
 if (argc != 2)
 	exit(printf("Usage:%s <infile>\n", argv[0]));
 
-puts("Loading File");
 if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open file:%s\n", argv[1]));
 
-puts("Count number of links");
 lines = 0;
 for (ch = file; *ch != '\0'; ch++)
 	if (*ch == '\n')
@@ -63,10 +61,8 @@ for (ch = file; *ch != '\0'; ch++)
 	else if (*ch == '\r')
 		*ch = ' ';		// convert '\r' into ' '
 
-printf("File:%s has %d links and is %d in length\n", argv[1], lines, ch - file);
 link_list = new ANT_link_element[lines];
 
-puts("Loading links");
 lines = 0;
 ch  = file;
 while (*ch != '\0')
@@ -93,10 +89,18 @@ while (*ch != '\0')
 //	*ch = '\0';			// NULL terminate the string
 	ch++;
 	}
-printf("Sort %d links\n", lines);
 qsort(link_list, lines, sizeof(*link_list), ANT_link_element::compare);
 
-puts("Write out the answers");
+last_string = "\n";
+unique_terms = 0;
+for (current = 0; current < lines; current++)
+	{
+	if (strcmp(link_list[current].term, last_string) != 0)
+		unique_terms++;
+	last_string = link_list[current].term;
+	}
+printf("%d terms\n", unique_terms);
+
 last_string = "Z";
 last_docid = -1;
 times = 0;
