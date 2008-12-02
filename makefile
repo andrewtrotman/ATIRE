@@ -39,7 +39,14 @@ ANT_PARTS = \
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 
-all : $(BINDIR)\index.exe $(BINDIR)\ant.exe $(BINDIR)\ant_dictionary.exe $(BINDIR)\link_extract.exe $(BINDIR)\link_index.exe $(BINDIR)\remove_head.exe $(BINDIR)\link_this.exe
+all : $(BINDIR)\index.exe 				\
+	  $(BINDIR)\ant.exe 				\
+	  $(BINDIR)\ant_dictionary.exe 		\
+	  $(BINDIR)\link_extract.exe 		\
+	  $(BINDIR)\link_index.exe 			\
+	  $(BINDIR)\remove_head.exe 		\
+	  $(BINDIR)\link_this.exe			\
+	  $(BINDIR)\link_extract_pass2.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
@@ -52,6 +59,9 @@ $(BINDIR)\ant_dictionary.exe : $(ANT_PARTS) $(OBJDIR)\ant_dictionary.obj
 
 $(BINDIR)\link_extract.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_extract.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_extract.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
+
+$(BINDIR)\link_extract_pass2.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_extract_pass2.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\link_extract_pass2.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
 
 $(BINDIR)\link_index.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_index.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@

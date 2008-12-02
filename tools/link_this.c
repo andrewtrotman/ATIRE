@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "../source/disk.h"
+#include "link_parts.h"
 
 class ANT_link_posting
 {
@@ -100,7 +101,6 @@ int ANT_link::final_compare(const void *a, const void *b)
 {
 ANT_link *one, *two;
 double diff;
-long cmp, one_words, two_words, one_len, two_len;
 
 one = (ANT_link *)a;
 two = (ANT_link *)b;
@@ -112,21 +112,6 @@ else if (diff > 0)
 	return 1;
 else
 	return one->place_in_file - two->place_in_file;
-}
-
-/*
-	STRNNEW()
-	---------
-*/
-char *strnnew(char *source, long length)
-{
-char *ans;
-
-ans = new char [length + 1];
-strncpy(ans, source, length);
-ans[length] = '\0';
-
-return ans;
 }
 
 /*
@@ -201,30 +186,6 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 return all_terms;
 }
 
-/*
-	CLEAN()
-	-------
-*/
-char *clean(char *file)
-{
-char *ch;
-
-ch = file;
-while (*ch != '\0')
-	{
-	if (*ch == '<')			// remove the XML tags
-		{
-		while (*ch != '>')
-			*ch++ = ' ';
-		*ch++ = ' ';
-		}
-	else if (!isalnum(*ch))
-		*ch++ = ' ';
-	else
-		ch++;
-	}
-return file;
-}
 
 /*
 	PUSH_LINK()
@@ -307,7 +268,7 @@ puts("Read Index");
 link_index = read_index(argv[1], &terms_in_index);
 
 file = disk.read_entire_file(argv[2]);
-clean(file);
+string_clean(file);
 //puts(file);
 
 current = term_list = new char *[strlen(file)];		// this is the worst case by far

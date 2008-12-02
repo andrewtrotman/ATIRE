@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "../source/disk.h"
+#include "link_parts.h"
 
 char buffer[1024 * 1024];
 
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
 ANT_link_element *link_list;
 ANT_disk disk;
 long lines, current, last_docid, times, unique_terms;
-char *file, *ch, *into, *tmp, *last_string;
+char *file, *ch, *into, *last_string;
 
 if (argc != 2)
 	exit(printf("Usage:%s <infile>\n", argv[0]));
@@ -76,17 +77,14 @@ while (*ch != '\0')
 		printf("Warning Line %d:Cannot extract DOC_ID (text:%s)\n", lines, buffer);
 		}
 	link_list[lines].term = strchr(ch, ':') + 1;
-	lines++;
 	if ((ch = strchr(ch, '\n')) == NULL)
 		break;
-	tmp = ch;
-	while (isspace(*ch))
-		{
-		*ch = '\0';
-		*ch--;
-		}
-	ch = tmp;
-//	*ch = '\0';			// NULL terminate the string
+	*ch = '\0';			// NULL terminate the string
+//	printf("%s->", link_list[lines].term);
+	string_clean(link_list[lines].term);
+//	printf("%s\n", link_list[lines].term);
+
+	lines++;
 	ch++;
 	}
 qsort(link_list, lines, sizeof(*link_list), ANT_link_element::compare);

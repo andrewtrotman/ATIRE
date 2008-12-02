@@ -32,7 +32,6 @@ ANT_disk::~ANT_disk()
 delete internals;
 }
 
-
 /*
 	ANT_DISK::READ_ENTIRE_FILE()
 	----------------------------

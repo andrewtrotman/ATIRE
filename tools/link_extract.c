@@ -42,8 +42,7 @@ int main(int argc, char *argv[])
 ANT_disk disk;
 char *file, *start, *end, *from, *ch;
 char *target_start, *target_end, *target_dot;
-long param;
-long file_number;
+long param, file_number;
 
 if (argc < 2)
 	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
