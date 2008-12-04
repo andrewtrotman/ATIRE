@@ -8,6 +8,7 @@
 #include <ctype.h>
 
 #include "../source/disk.h"
+#include "link_parts.h"
 
 char target[1024];
 char anchor_text[1024 * 1024];
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
 ANT_disk disk;
 char *file, *start, *end, *from, *ch;
 char *target_start, *target_end, *target_dot;
-long param, file_number;
+long param, file_number, current_docid;
 
 if (argc < 2)
 	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
@@ -53,6 +54,7 @@ for (param = 1; param < argc; param++)
 	file = disk.read_entire_file(disk.get_first_filename(argv[param]));
 	while (file != NULL)
 		{
+		current_docid = get_doc_id(file);
 		from = file;
 		while (from != NULL)
 			{
@@ -75,7 +77,7 @@ for (param = 1; param < argc; param++)
 					for (ch = anchor_text; *ch != '\0'; ch++)
 						if (isspace(*ch))
 							*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
-					printf("%s:%s\n", target, anchor_text);
+					printf("%d:%s:%s\n", current_docid, target, anchor_text);
 
 					start = end;		// for the next time around the loop
 					}
@@ -90,6 +92,8 @@ for (param = 1; param < argc; param++)
 		file = disk.read_entire_file(disk.get_next_filename());
 		}
 	}
+
+fprintf(stderr, "%s Completed\n", argv[0]);
 return 0;
 }
 

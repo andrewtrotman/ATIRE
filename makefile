@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 TOOLDIR = tools
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
 CC = @cl
 
 PARTS = \
@@ -46,6 +46,7 @@ all : $(BINDIR)\index.exe 				\
 	  $(BINDIR)\link_index.exe 			\
 	  $(BINDIR)\remove_head.exe 		\
 	  $(BINDIR)\link_this.exe			\
+	  $(BINDIR)\link_index_merge.exe	\
 	  $(BINDIR)\link_extract_pass2.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
@@ -65,6 +66,9 @@ $(BINDIR)\link_extract_pass2.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.o
 
 $(BINDIR)\link_index.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_index.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
+
+$(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\link_index_merge.obj /Fe$@
 
 $(BINDIR)\link_this.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_this.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_this.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@

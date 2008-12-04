@@ -1,6 +1,6 @@
 /*
-	LINK_THIS.C
-	-----------
+	LINK_EXTRACT_PASS2.C
+	--------------------
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,20 +85,33 @@ for (current = 0; current < terms_in_index; current++)
 }
 
 /*
-	GET_DOC_ID()
-	------------
+	FIND_TERM_IN_LIST()
+	-------------------
 */
-long get_doc_id(char *file)
+ANT_link_extract_term *find_term_in_list(char *value, ANT_link_extract_term *list, long list_length)
 {
-char *pos;
+long low, high, mid;
 
-pos = strstr(file, "<name id=");
-if (pos == NULL)
-	exit(printf("Cannot find DOC id <name id=...> in file\n"));
-while (!isdigit(*pos))
-	pos++;
+low = 0;
+high = list_length;
+while (low < high)
+	{
+	mid = (low + high) / 2;
+	if (strcmp(list[mid].term, value) < 0)
+		low = mid + 1;
+	else
+		high = mid;
+	}
 
-return atol(pos);
+if ((low < list_length) && (strcmp(value, list[low].term) == 0))
+	return &list[low];		// match
+else
+	{
+	if (low < list_length)
+		return &list[low];		// not found in list but not after the last term in the list
+	else
+		return NULL;
+	}
 }
 
 /*
@@ -111,15 +124,13 @@ static char *seperators = " ";
 ANT_disk disk;
 char *file, *token, *where_to, *filename;
 char **term_list, **first, **last, **current;
-ANT_link_extract_term *link_index, key, *index_term;
+ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
 
 if (argc < 3)
 	exit(printf("Usage:%s <index> <file_to_link> ...\n", argv[0]));
 
 link_index = read_index(argv[1], &terms_in_index);
-
-fprintf(stderr, "Processing Files...\n");
 
 file_number = 1;
 for (param = 2; param < argc; param++)
@@ -154,11 +165,12 @@ for (param = 2; param < argc; param++)
 					where_to += strlen(*last);
 					}
 
-				key.term = buffer;
-				index_term = (ANT_link_extract_term *)bsearch(&key, link_index, terms_in_index, sizeof(*link_index), ANT_link_extract_term::compare);
+				index_term = find_term_in_list(buffer, link_index, terms_in_index);
+
 				if (index_term == NULL)
-					break;
-				else 
+					break;		// we're after the last term in the list so can stop because we can't be a substring
+
+				if (strcmp(buffer, index_term->term) == 0)		// we're a term in the list
 					{
 					index_term->total_occurences++;
 					if (index_term->last_docid != current_docid)
@@ -166,6 +178,11 @@ for (param = 2; param < argc; param++)
 						index_term->last_docid = current_docid;
 						index_term->docs_containing_term++;
 						}
+					}
+				else
+					{
+					if (strncmp(buffer, index_term->term, strlen(buffer)) != 0)
+						break;		// we're a not a substring so we can't find a longer term
 					}
 				}
 			}
@@ -182,6 +199,8 @@ for (param = 2; param < argc; param++)
 	}
 
 print_answer(link_index, terms_in_index);
+
+fprintf(stderr, "%s Completed\n", argv[0]);
 
 return 0;
 }

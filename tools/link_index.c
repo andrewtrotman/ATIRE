@@ -16,6 +16,7 @@ class ANT_link_element
 public:
 	char *term;
 	long docid;
+	long anchor_docid;
 public:
 	static int compare(const void *a, const void *b);
 } ;
@@ -32,8 +33,9 @@ int cmp;
 one = (ANT_link_element *)a;
 two = (ANT_link_element *)b;
 
-if ((cmp = strcmp(one->term, two->term)) == 0)
-	cmp = one->docid - two->docid;
+if ((cmp = strcmp(one->term, two->term)) == 0)				// first by term
+	if ((cmp = one->docid - two->docid) == 0)				// then by destination document ID
+		cmp = one->anchor_docid - two->anchor_docid;		// then by source document ID
 
 return cmp;
 }
@@ -46,8 +48,8 @@ int main(int argc, char *argv[])
 {
 ANT_link_element *link_list;
 ANT_disk disk;
-long lines, current, last_docid, times, unique_terms;
-char *file, *ch, *into, *last_string;
+long lines, current, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
+char *file, *ch, *last_string;
 
 if (argc != 2)
 	exit(printf("Usage:%s <infile>\n", argv[0]));
@@ -68,21 +70,14 @@ lines = 0;
 ch  = file;
 while (*ch != '\0')
 	{
-	if ((link_list[lines].docid = atol(ch)) == 0)
-		{
-		into = buffer;
-		while (*ch != '\n' && *ch != '\r')
-			*into++ = *ch++;
-		*into = '\0';
-		printf("Warning Line %d:Cannot extract DOC_ID (text:%s)\n", lines, buffer);
-		}
+	link_list[lines].anchor_docid = atol(ch);
+	ch = strchr(ch, ':') + 1;
+	link_list[lines].docid = atol(ch);
 	link_list[lines].term = strchr(ch, ':') + 1;
 	if ((ch = strchr(ch, '\n')) == NULL)
 		break;
 	*ch = '\0';			// NULL terminate the string
-//	printf("%s->", link_list[lines].term);
 	string_clean(link_list[lines].term);
-//	printf("%s\n", link_list[lines].term);
 
 	lines++;
 	ch++;
@@ -101,29 +96,41 @@ printf("%d terms\n", unique_terms);
 
 last_string = "Z";
 last_docid = -1;
+last_anchor_docid = -1;
 times = 0;
+anchor_times = 0;
 for (current = 0; current < lines; current++)
 	{
 	if (strcmp(link_list[current].term, last_string) != 0)
 		{
 		if (current != 0)
-			printf("<%d,%d>\n", last_docid, times);
+			printf("<%d,%d,%d>\n", last_docid, anchor_times, times);
 		printf("%s:", link_list[current].term);
 		last_docid = link_list[current].docid;
+		last_anchor_docid = link_list[current].anchor_docid;
 		times = 1;
+		anchor_times = 1;
 		}
 	else
 		if (last_docid == link_list[current].docid)
+			{
 			times++;
+			if (last_anchor_docid != link_list[current].anchor_docid)
+				anchor_times++;				// different source documents
+			}
 		else
 			{
-			printf("<%d,%d>", last_docid, times);
+			printf("<%d,%d,%d>", last_docid, anchor_times, times);
 			times = 1;
+			anchor_times = 1;
 			}
 
 	last_string = link_list[current].term;
 	last_docid = link_list[current].docid;
+	last_anchor_docid = link_list[current].anchor_docid;
 	}
-printf("<%d,%d>", last_docid, times);
-}
+printf("<%d,%d,%d>", last_docid, anchor_times, times);
 
+fprintf(stderr, "%s Completed\n", argv[0]);
+return 0;
+}

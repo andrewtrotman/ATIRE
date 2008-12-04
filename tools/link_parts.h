@@ -70,4 +70,22 @@ ans[length] = '\0';
 return ans;
 }
 
+/*
+	GET_DOC_ID()
+	------------
+*/
+inline static long get_doc_id(char *file)
+{
+char *pos;
+
+pos = strstr(file, "<name id=");
+if (pos == NULL)
+	exit(printf("Cannot find DOC id <name id=...> in file\n"));
+while (!isdigit(*pos))
+	pos++;
+
+return atol(pos);
+}
+
 #endif __LINK_PARTS_H__
+
