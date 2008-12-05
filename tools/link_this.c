@@ -16,6 +16,13 @@
 	#define SUBTRACT_ORPHAN_LINKS (-1)
 #endif
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 class ANT_link_posting
 {
 public:
@@ -59,6 +66,8 @@ long all_links_in_file_length = 0;
 
 ANT_link links_in_orphan[MAX_LINKS_IN_FILE];
 long links_in_orphan_length = 0;
+
+long lowercase_only;					// are we in lowercase or mixed-case matching mode?
 
 static char buffer[1024 * 1024];
 
@@ -310,7 +319,7 @@ puts("</topic>");
 	FIND_TERM_IN_LIST()
 	-------------------
 */
-ANT_link_term *find_term_in_list(char *value, ANT_link_term *list, long list_length)
+ANT_link_term *find_term_in_list(char *value, ANT_link_term *list, long list_length, long this_docid)
 {
 long low, high, mid;
 
@@ -326,8 +335,19 @@ while (low < high)
 	}
 
 #ifdef REMOVE_ORPHAN_LINKS
+/*
+	remove terms that are in the anchor list but have no postings because the only document used the anchor was this one.
+*/
 while (low < list_length)
 	if (list[low].postings[0].doc_link_frequency == 0)		// we've been deleted so this is a miss
+		low++;
+	else
+		break;
+/*
+	remove terms that point to this document
+*/
+while (low < list_length)
+	if (list[low].postings_length == 1 && list[low].postings[0].docid == this_docid)		// we point to this document so we delete it
 		low++;
 	else
 		break;
@@ -365,7 +385,7 @@ while (pos != NULL)
 	end = strstr(pos, "</collectionlink");
 
 	copy = strnnew(pos + 1, end - pos - 1);
-	string_clean(copy);
+	string_clean(copy, lowercase_only);
 
 	links_in_orphan[links_in_orphan_length].term = copy;
 	links_in_orphan[links_in_orphan_length].gamma = 0;	
@@ -412,6 +432,15 @@ for (current = 0; current < links_in_orphan_length; current++)
 }
 
 /*
+	USAGE()
+	-------
+*/
+void usage(char *exename)
+{
+exit(printf("Usage:%s [-lowercase] <index> <file_to_link> ...\n", exename));
+}
+
+/*
 	MAIN()
 	------
 */
@@ -422,17 +451,30 @@ ANT_disk disk;
 char *file, *token, *where_to;
 char **term_list, **first, **last, **current;
 ANT_link_term *link_index, *index_term, *last_index_term;
-long terms_in_index, orphan_docid, param;
+long terms_in_index, orphan_docid, param, noom, index_argv_param;
 double gamma, numerator, denominator;
 
-if (argc != 3)
-	exit(printf("Usage:%s <index> <file_to_link> ...\n", argv[0]));
+if (argc < 3)
+	usage(argv[0]);		// and exit
 
-link_index = read_index(argv[1], &terms_in_index);
+lowercase_only = FALSE;
+index_argv_param = 1;
+
+if (*argv[1] == '-')
+	{
+	if (strcmp(argv[1], "-lowercase") == 0)
+		{
+		lowercase_only = TRUE;
+		index_argv_param = 2;
+		}
+	else
+		usage(argv[0]);		// and exit
+	}
+link_index = read_index(argv[index_argv_param], &terms_in_index);
 
 print_header();
 
-for (param = 2; param < argc; param++)
+for (param = index_argv_param + 1; param < argc; param++)
 	for (file = disk.read_entire_file(disk.get_first_filename(argv[param])); file != NULL; file = disk.read_entire_file(disk.get_next_filename()))
 		{
 		all_links_in_file_length = 0;
@@ -441,7 +483,7 @@ for (param = 2; param < argc; param++)
 		generate_collection_link_set(file);
 		add_or_subtract_orphan_links(SUBTRACT_ORPHAN_LINKS, link_index, terms_in_index);
 #endif
-		string_clean(file);
+		string_clean(file, lowercase_only);
 
 		current = term_list = new char *[strlen(file)];		// this is the worst case by far
 		for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
@@ -466,7 +508,7 @@ for (param = 2; param < argc; param++)
 					where_to += strlen(*last);
 					}
 
-				index_term = find_term_in_list(buffer, link_index, terms_in_index);
+				index_term = find_term_in_list(buffer, link_index, terms_in_index, orphan_docid);
 
 				if (index_term == NULL)
 					break;									// we're after the last term in the list
@@ -480,11 +522,15 @@ for (param = 2; param < argc; param++)
 
 			if (last_index_term != NULL)
 				{
-				numerator = (double)last_index_term->postings[0].doc_link_frequency;
+				noom = 0;
 				denominator = (double)last_index_term->document_frequency;
 #ifdef REMOVE_ORPHAN_LINKS
 				denominator--;
+
+				if (last_index_term->postings[noom].docid == orphan_docid)			// not alowed to use links that point to the orphan
+					noom = 1;
 #endif
+				numerator = (double)last_index_term->postings[noom].doc_link_frequency;
 				gamma = numerator / denominator;
 				push_link(*first, last_index_term->term, last_index_term->postings[0].docid, gamma);
 //				printf("%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);

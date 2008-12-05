@@ -9,6 +9,13 @@
 #include "../source/disk.h"
 #include "link_parts.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 static char buffer[1024 * 1024];
 
 /*
@@ -126,14 +133,29 @@ char *file, *token, *where_to, *filename;
 char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
+long lowercase_only, first_param;
 
 if (argc < 3)
-	exit(printf("Usage:%s <index> <file_to_link> ...\n", argv[0]));
+	exit(printf("Usage:%s [-lowercase] <index> <file_to_link> ...\n", argv[0]));
 
-link_index = read_index(argv[1], &terms_in_index);
+first_param = 1;
+lowercase_only = FALSE;
+if (*argv[1] == '-')
+	{
+	if (strcmp(argv[1], "-lowercase") == 0)
+		{
+		lowercase_only = TRUE;
+		first_param = 2;
+		}
+	else
+		exit(printf("Unknown parameter:%s\n", argv[1]));
+	}
+
+
+link_index = read_index(argv[first_param], &terms_in_index);
 
 file_number = 1;
-for (param = 2; param < argc; param++)
+for (param = first_param + 1; param < argc; param++)
 	{
 	filename = disk.get_first_filename(argv[param]);
 	file = disk.read_entire_file(filename);
@@ -141,7 +163,7 @@ for (param = 2; param < argc; param++)
 		{
 		current_docid = get_doc_id(file);
 //		printf("ID:%d\n", current_docid);
-		string_clean(file);
+		string_clean(file, lowercase_only);
 
 		current = term_list = new char *[strlen(file)];		// this is the worst case by far
 		for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))

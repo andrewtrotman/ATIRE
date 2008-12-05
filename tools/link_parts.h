@@ -6,11 +6,13 @@
 #ifndef __LINK_PARTS_H__
 #define __LINK_PARTS_H__
 
+#include <ctype.h>
+
 /*
 	STRING_CLEAN()
 	--------------
 */
-inline static char *string_clean(char *file)
+inline static char *string_clean(char *file, long lower_case_only)
 {
 char *ch, *from, *to;
 
@@ -29,7 +31,15 @@ while (*ch != '\0')
 	else if (!isalnum(*ch))	// then remove it
 		*ch++ = ' ';
 	else
-		ch++;
+		{
+		if (lower_case_only)
+			{
+			*ch = (char)tolower(*ch);
+			ch++;
+			}
+		else
+			ch++;
+		}
 	}
 
 /*

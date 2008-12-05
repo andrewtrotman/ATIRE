@@ -9,6 +9,13 @@
 #include "../source/disk.h"
 #include "link_parts.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 char buffer[1024 * 1024];
 
 class ANT_link_element
@@ -50,9 +57,19 @@ ANT_link_element *link_list;
 ANT_disk disk;
 long lines, current, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
 char *file, *ch, *last_string;
+long lowercase_only;
 
-if (argc != 2)
-	exit(printf("Usage:%s <infile>\n", argv[0]));
+if (argc != 2 && argc != 3)
+	exit(printf("Usage:%s <infile> [-lowercase]\n", argv[0]));
+
+lowercase_only = FALSE;
+if (argc == 3)
+	{
+	if (strcmp(argv[2], "-lowercase") == 0)
+		lowercase_only = TRUE;
+	else
+		exit(printf("unknown parameter:%s\n", argv[2]));
+	}
 
 if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open file:%s\n", argv[1]));
@@ -77,7 +94,7 @@ while (*ch != '\0')
 	if ((ch = strchr(ch, '\n')) == NULL)
 		break;
 	*ch = '\0';			// NULL terminate the string
-	string_clean(link_list[lines].term);
+	string_clean(link_list[lines].term, lowercase_only);
 
 	lines++;
 	ch++;
