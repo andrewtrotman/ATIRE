@@ -276,9 +276,9 @@ all_links_in_file_length = to - all_links_in_file;
 	PRINT_HEADER()
 	--------------
 */
-void print_header(void)
+void print_header(char *runname)
 {
-puts("<inex-submission participant-id=\"4\" run-id=\"ASPT\" task=\"LinkTheWiki\" format=\"FOL\"><details><machine><cpu>Pentium 4</cpu><speed>2992 MHz</speed><cores>2</cores><hyperthreads>1</hyperthreads><memory>1GB</memory></machine><time>TBC</time></details><description>This is the description</description><collections><collection>wikipedia</collection></collections>");
+printf("<inex-submission participant-id=\"4\" run-id=\"%s\" task=\"LinkTheWiki\" format=\"FOL\"><details><machine><cpu>Pentium 4</cpu><speed>2992 MHz</speed><cores>2</cores><hyperthreads>1</hyperthreads><memory>1GB</memory></machine><time>TBC</time></details><description>This is the description</description><collections><collection>wikipedia</collection></collections>", runname);
 }
 
 /*
@@ -437,7 +437,7 @@ for (current = 0; current < links_in_orphan_length; current++)
 */
 void usage(char *exename)
 {
-exit(printf("Usage:%s [-lowercase] <index> <file_to_link> ...\n", exename));
+exit(printf("Usage:%s [-lowercase] [-runname:name] <index> <file_to_link> ...\n", exename));
 }
 
 /*
@@ -453,26 +453,26 @@ char **term_list, **first, **last, **current;
 ANT_link_term *link_index, *index_term, *last_index_term;
 long terms_in_index, orphan_docid, param, noom, index_argv_param;
 double gamma, numerator, denominator;
+char *runname = "Unknown";
 
 if (argc < 3)
 	usage(argv[0]);		// and exit
 
 lowercase_only = FALSE;
-index_argv_param = 1;
 
-if (*argv[1] == '-')
+for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
 	{
-	if (strcmp(argv[1], "-lowercase") == 0)
-		{
+	if (strcmp(argv[index_argv_param], "-lowercase") == 0)
 		lowercase_only = TRUE;
-		index_argv_param = 2;
-		}
+	else if (strncmp(argv[index_argv_param], "-runname:", 9) == 0)
+		runname = strchr(argv[index_argv_param], ':') + 1;
 	else
 		usage(argv[0]);		// and exit
 	}
+
 link_index = read_index(argv[index_argv_param], &terms_in_index);
 
-print_header();
+print_header(runname);
 
 for (param = index_argv_param + 1; param < argc; param++)
 	for (file = disk.read_entire_file(disk.get_first_filename(argv[param])); file != NULL; file = disk.read_entire_file(disk.get_next_filename()))
