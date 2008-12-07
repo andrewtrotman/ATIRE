@@ -53,6 +53,7 @@ public:
 	char *term;
 	double gamma;
 	long target_document;
+	ANT_link_term *link_term;
 
 public:
 	static int compare(const void *a, const void *b);
@@ -233,7 +234,7 @@ return all_terms;
 	PUSH_LINK()
 	-----------
 */
-void push_link(char *place_in_file, char *buffer, long docid, double gamma)
+void push_link(char *place_in_file, char *buffer, long docid, double gamma, ANT_link_term *node)
 {
 ANT_link *current;
 
@@ -242,6 +243,7 @@ current->place_in_file = place_in_file;
 current->term = _strdup(buffer);
 current->gamma = gamma;
 current->target_document = docid;
+current->link_term = node;
 
 all_links_in_file_length++;
 if (all_links_in_file_length >= MAX_LINKS_IN_FILE)
@@ -294,21 +296,22 @@ puts("</inex-submission>");
 	PRINT_LINKS()
 	-------------
 */
-void print_links(long orphan_docid)
+void print_links(long orphan_docid, long links_to_print, long max_targets_per_anchor)
 {
-long links_to_print = 250;
-long result;
-char *s1 = "<link><anchor><file>";
-char *s2 = ".xml</file><offset>0</offset><length>0</length></anchor><linkto><file>";
-char *s3 = ".xml</file><bep>0</bep></linkto></link>";
+long result, current_anchor, targets;
 char *orphan_name = "Unknown";
 
 printf("<topic file=\"%d.xml\" name=\"%s\"><outgoing>\n", orphan_docid, orphan_name);
-
-for (result = 0; result < (all_links_in_file_length < links_to_print ? all_links_in_file_length : links_to_print); result++)
+result = 0;
+links_to_print = all_links_in_file_length < links_to_print ? all_links_in_file_length : links_to_print;
+while (result < links_to_print)
 	{
-//	printf("%s %d (gamma:%2.2f)\n", all_links_in_file[result].term, all_links_in_file[result].target_document, all_links_in_file[result].gamma);
-	printf("%s%d%s%d%s\n", s1, orphan_docid, s2, all_links_in_file[result].target_document, s3);
+	printf("<link><anchor><file>%d.xml</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
+	targets = max_targets_per_anchor < all_links_in_file[result].link_term->postings_length ? max_targets_per_anchor : all_links_in_file[result].link_term->postings_length;
+	for (current_anchor = 0; current_anchor < targets; current_anchor++)
+		printf("<linkto><file>%d.xml</file><bep>0</bep></linkto>\n", all_links_in_file[result].link_term->postings[current_anchor]);
+	printf("</link>\n");
+	result++;
 	}
 
 puts("</outgoing><incoming><link><anchor><file>654321.xml</file><offset>445</offset><length>462</length></anchor><linkto><bep>1</bep></linkto></link></incoming>");
@@ -437,7 +440,7 @@ for (current = 0; current < links_in_orphan_length; current++)
 */
 void usage(char *exename)
 {
-exit(printf("Usage:%s [-lowercase] [-runname:name] <index> <file_to_link> ...\n", exename));
+exit(printf("Usage:%s [-lowercase] [-runname:name] [-targets:<n>] <index> <file_to_link> ...\n", exename));
 }
 
 /*
@@ -453,6 +456,7 @@ char **term_list, **first, **last, **current;
 ANT_link_term *link_index, *index_term, *last_index_term;
 long terms_in_index, orphan_docid, param, noom, index_argv_param;
 double gamma, numerator, denominator;
+long targets_per_link = 1, anchors_per_run = 250;
 char *runname = "Unknown";
 
 if (argc < 3)
@@ -466,6 +470,18 @@ for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
 		lowercase_only = TRUE;
 	else if (strncmp(argv[index_argv_param], "-runname:", 9) == 0)
 		runname = strchr(argv[index_argv_param], ':') + 1;
+	else if (strncmp(argv[index_argv_param], "-targets:", 8) == 0)
+		{
+		targets_per_link = atoi(strchr(argv[index_argv_param], ':') + 1);
+		if (targets_per_link <= 0)
+			usage(argv[0]);
+		}
+	else if (strncmp(argv[index_argv_param], "-anchors:", 8) == 0)
+		{
+		anchors_per_run = atoi(strchr(argv[index_argv_param], ':') + 1);
+		if (anchors_per_run <= 0)
+			usage(argv[0]);
+		}
 	else
 		usage(argv[0]);		// and exit
 	}
@@ -532,7 +548,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 #endif
 				numerator = (double)last_index_term->postings[noom].doc_link_frequency;
 				gamma = numerator / denominator;
-				push_link(*first, last_index_term->term, last_index_term->postings[0].docid, gamma);
+				push_link(*first, last_index_term->term, last_index_term->postings[0].docid, gamma, last_index_term);
 //				printf("%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);
 				}
 			}
@@ -542,7 +558,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 		deduplicate_links();
 		qsort(all_links_in_file, all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
 
-		print_links(orphan_docid);
+		print_links(orphan_docid, anchors_per_run, targets_per_link);
 
 		delete [] file;
 		delete [] term_list;
