@@ -43,7 +43,7 @@ while (*ch != '\0')
 	}
 
 /*
-	now remove multiple spaces.
+	now remove multiple, head, and tail spaces.
 */
 from = to = file;
 while (isspace(*from))

@@ -23,6 +23,8 @@
 	#define TRUE (!FALSE)
 #endif
 
+#define MODE_NO_4_DIGIT_NUMBERS 1
+
 class ANT_link_posting
 {
 public:
@@ -229,7 +231,6 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 return all_terms;
 }
 
-
 /*
 	PUSH_LINK()
 	-----------
@@ -296,26 +297,64 @@ puts("</inex-submission>");
 	PRINT_LINKS()
 	-------------
 */
-void print_links(long orphan_docid, long links_to_print, long max_targets_per_anchor)
+void print_links(long orphan_docid, long links_to_print, long max_targets_per_anchor, long mode)
 {
-long result, current_anchor, targets;
+long *links_already_printed;
+long current, links_already_printed_length, links_printed;
+long result, current_anchor, forget_it, has_link, anchors_printed;
 char *orphan_name = "Unknown";
+
+links_already_printed = new long [links_to_print * max_targets_per_anchor * 2];
+#ifdef REMOVE_ORPHAN_LINKS
+links_already_printed[0] = orphan_docid;		// fake having already printed the oprhan itself.
+links_already_printed_length = 1;
+#endif
 
 printf("<topic file=\"%d.xml\" name=\"%s\"><outgoing>\n", orphan_docid, orphan_name);
 result = 0;
-links_to_print = all_links_in_file_length < links_to_print ? all_links_in_file_length : links_to_print;
-while (result < links_to_print)
+links_printed = 0;
+while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 	{
-	printf("<link><anchor><file>%d.xml</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
-	targets = max_targets_per_anchor < all_links_in_file[result].link_term->postings_length ? max_targets_per_anchor : all_links_in_file[result].link_term->postings_length;
-	for (current_anchor = 0; current_anchor < targets; current_anchor++)
-		printf("<linkto><file>%d.xml</file><bep>0</bep></linkto>\n", all_links_in_file[result].link_term->postings[current_anchor]);
-	printf("</link>\n");
+	if (mode & MODE_NO_4_DIGIT_NUMBERS)
+		if ((strlen(all_links_in_file[result].link_term->term) == 4) && (atol(all_links_in_file[result].link_term->term) > 999))
+			{
+			result++;		// in the case of a 4 digit number we ignore as we're probably a year
+			continue;
+			}
+
+	has_link = FALSE;
+	anchors_printed = current_anchor = 0;
+	while ((current_anchor < all_links_in_file[result].link_term->postings_length) && (anchors_printed < max_targets_per_anchor))
+		{
+		forget_it = FALSE;
+		for (current = 0; current < links_already_printed_length; current++)
+			if (links_already_printed[current] == all_links_in_file[result].link_term->postings[current_anchor].docid)
+				forget_it = TRUE;
+		if (!forget_it)
+			{
+			links_already_printed[links_already_printed_length] = all_links_in_file[result].link_term->postings[current_anchor].docid;
+			links_already_printed_length++;
+			if (!has_link)
+				printf("<link><anchor><file>%d.xml</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
+			anchors_printed++;
+			printf("<linkto><file>%d.xml</file><bep>0</bep></linkto>\n", all_links_in_file[result].link_term->postings[current_anchor].docid);
+//			printf("%d:%d\n", orphan_docid, all_links_in_file[result].link_term->postings[current_anchor].docid);
+			has_link = TRUE;
+			}
+		current_anchor++;
+		}
+	if (has_link)
+		{
+		printf("</link>\n");
+		links_printed++;
+		}
 	result++;
 	}
 
 puts("</outgoing><incoming><link><anchor><file>654321.xml</file><offset>445</offset><length>462</length></anchor><linkto><bep>1</bep></linkto></link></incoming>");
 puts("</topic>");
+
+delete [] links_already_printed;
 }
 
 /*
@@ -435,12 +474,31 @@ for (current = 0; current < links_in_orphan_length; current++)
 }
 
 /*
+	ISPROPPER_NOUN()
+	----------------
+*/
+long ispropper_noun(char *phrase)
+{
+char *ch;
+
+if (!isupper(*phrase))			// first letter of first word
+	return FALSE;
+
+for (ch = phrase; *ch != '\0'; ch++)
+	if (isspace(*ch))
+		if (!isupper(*(ch + 1)))
+			return FALSE;
+
+return TRUE;
+}
+
+/*
 	USAGE()
 	-------
 */
 void usage(char *exename)
 {
-exit(printf("Usage:%s [-lowercase] [-runname:name] [-targets:<n>] <index> <file_to_link> ...\n", exename));
+exit(printf("Usage:%s [-lowercase] [-noyears] [-runname:name] [-anchors:<n>] [-targets:<n>] [-propernounboost:<n.n>] <index> <file_to_link> ...\n", exename));
 }
 
 /*
@@ -456,8 +514,9 @@ char **term_list, **first, **last, **current;
 ANT_link_term *link_index, *index_term, *last_index_term;
 long terms_in_index, orphan_docid, param, noom, index_argv_param;
 double gamma, numerator, denominator;
-long targets_per_link = 1, anchors_per_run = 250;
+long targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
 char *runname = "Unknown";
+double proper_noun_boost = 0.0;
 
 if (argc < 3)
 	usage(argv[0]);		// and exit
@@ -468,8 +527,12 @@ for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
 	{
 	if (strcmp(argv[index_argv_param], "-lowercase") == 0)
 		lowercase_only = TRUE;
+	else if (strcmp(argv[index_argv_param], "-noyears") == 0)
+		print_mode |= MODE_NO_4_DIGIT_NUMBERS;
 	else if (strncmp(argv[index_argv_param], "-runname:", 9) == 0)
 		runname = strchr(argv[index_argv_param], ':') + 1;
+	else if (strncmp(argv[index_argv_param], "-propernounboost:", 17) == 0)
+		proper_noun_boost = atof(strchr(argv[index_argv_param], ':') + 1);
 	else if (strncmp(argv[index_argv_param], "-targets:", 8) == 0)
 		{
 		targets_per_link = atoi(strchr(argv[index_argv_param], ':') + 1);
@@ -542,12 +605,13 @@ for (param = index_argv_param + 1; param < argc; param++)
 				denominator = (double)last_index_term->document_frequency;
 #ifdef REMOVE_ORPHAN_LINKS
 				denominator--;
-
 				if (last_index_term->postings[noom].docid == orphan_docid)			// not alowed to use links that point to the orphan
 					noom = 1;
 #endif
 				numerator = (double)last_index_term->postings[noom].doc_link_frequency;
 				gamma = numerator / denominator;
+				if (ispropper_noun(buffer))
+					gamma += proper_noun_boost;
 				push_link(*first, last_index_term->term, last_index_term->postings[0].docid, gamma, last_index_term);
 //				printf("%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);
 				}
@@ -558,7 +622,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 		deduplicate_links();
 		qsort(all_links_in_file, all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
 
-		print_links(orphan_docid, anchors_per_run, targets_per_link);
+		print_links(orphan_docid, anchors_per_run, targets_per_link, print_mode);
 
 		delete [] file;
 		delete [] term_list;
