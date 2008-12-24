@@ -338,7 +338,7 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 				printf("<link><anchor><file>%d.xml</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
 			anchors_printed++;
 			printf("<linkto><file>%d.xml</file><bep>0</bep></linkto>\n", all_links_in_file[result].link_term->postings[current_anchor].docid);
-//			printf("%d:%d\n", orphan_docid, all_links_in_file[result].link_term->postings[current_anchor].docid);
+//			printf("%d:%d:%d:%d:%d\n", orphan_docid, all_links_in_file[result].link_term->postings[current_anchor].docid, count_char(all_links_in_file[result].term, ' ') + 1, strlen(all_links_in_file[result].term), (long)(all_links_in_file[result].gamma * 100));
 			has_link = TRUE;
 			}
 		current_anchor++;
@@ -609,6 +609,23 @@ for (param = index_argv_param + 1; param < argc; param++)
 					noom = 1;
 #endif
 				numerator = (double)last_index_term->postings[noom].doc_link_frequency;
+
+#ifdef LYCOS_EXTENSIONS
+				/*
+					Lycos rule for short anchors
+				*/
+				if (strlen(last_index_term->term) < 5 || strlen(last_index_term->term) > 60)
+					denominator = 1000000;
+				/*
+				*/
+				/*
+					Lycos rule for links occuring fewer than 5 times
+				*/
+					if (denominator < 5)
+						denominator = 1000000;				// so make the link unimportant
+				/*
+				*/
+#endif
 				gamma = numerator / denominator;
 				if (ispropper_noun(buffer))
 					gamma += proper_noun_boost;

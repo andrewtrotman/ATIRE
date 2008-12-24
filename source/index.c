@@ -10,6 +10,7 @@
 #include "memory.h"
 #include "memory_index.h"
 #include "memory_index_stats.h"
+#include "time_stats.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -19,73 +20,42 @@
 #endif
 
 /*
-	PRINT_ELAPSED_TIME()
-	--------------------
-*/
-void print_elapsed_time(char *message, long long time_taken)
-{
-if (time_taken > 60)
-	printf("%s%lld:%lld:%lld\n", message, (time_taken / (60 * 60)), (time_taken / 60) % 60, time_taken % 60);
-else if (time_taken > 60)
-	printf("%s%lld:%lld\n", message, time_taken / 60, time_taken % 60);
-else if (time_taken > 1)
-	printf("%s%lld seconds\n", message, time_taken);
-else if (time_taken == 1)
-	printf("%s%lld second\n", message, time_taken);
-else
-	printf("%s<1 second\n", message);
-}
-
-/*
 	MAIN()
 	------
 */
 int main(int argc, char *argv[])
 {
-ANT_memory_index_stats stats;
+ANT_time_stats stats;
 ANT_disk disk;
 ANT_parser parser;
 ANT_string_pair *token;
 unsigned char *file;
 long param, done_work;
 ANT_memory_index *index;
-long long doc;
-long long frequency, program_start_time, program_end_time;
-long long now, input_time, output_time;
+long long doc, now;
 long terms_in_document;
-long first_param = TRUE;
-
-program_start_time = stats.get_clock_tick();
-frequency = stats.get_clock_tick_frequency();
 
 if (argc < 2)
 	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
-input_time = doc = 0;
+doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
 index = new ANT_memory_index;
 for (param = 1; param < argc; param++)
 	{
-	puts("--");
-	puts(argv[param]);
-	if (!first_param)
-		index->stats->text_render();
-	first_param = FALSE;
-
-	now = stats.get_clock_tick();
+	now = stats.start_timer();
 	file = (unsigned char *)disk.read_entire_file(disk.get_first_filename(argv[param]));
-	input_time += stats.get_clock_tick() - now;
+	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
 		{
 		done_work = FALSE;
 		doc++;
 		if (doc % 10000 == 0)
 			{
-			printf("Documents Indexed:%lld Memory used:%lld\n", doc, index->memory->used);
-			program_end_time = stats.get_clock_tick();
-			print_elapsed_time("Total Elapsed Time:", (program_end_time - program_start_time) / frequency);
+			printf("Documents Indexed:%lld Memory used:%lld", doc, index->memory->used);
+			stats.print_elapsed_time();
+			printf("\n");
 			}
-			
 
 		parser.set_document(file);
 		while ((token = parser.get_next_token()) != NULL)
@@ -106,23 +76,19 @@ for (param = 1; param < argc; param++)
 			}
 		index->set_document_length(doc, terms_in_document);
 		delete [] file;
-		now = stats.get_clock_tick();
+		now = stats.start_timer();
 		file = (unsigned char *)disk.read_entire_file(disk.get_next_filename());
-		input_time += stats.get_clock_tick() - now;
+		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 	}
 
-output_time = 0;
-now = stats.get_clock_tick();
+now = stats.start_timer();
 index->serialise("index.aspt");
-output_time = stats.get_clock_tick() - now;
+stats.add_disk_output_time(stats.stop_timer(now));
 delete index;
 
-program_end_time = stats.get_clock_tick();
 printf("\nTIMINGS\n-------\n");
-print_elapsed_time("Total Elapsed Time:", (program_end_time - program_start_time) / frequency);
-print_elapsed_time("Time Reading Files:", input_time / frequency);
-print_elapsed_time("Time Indexing     :", ((program_end_time - program_start_time) - input_time - output_time) / frequency);
-print_elapsed_time("Time Writing Files:", output_time / frequency);
+stats.text_render();
+return 0;
 }
 

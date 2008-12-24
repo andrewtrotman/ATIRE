@@ -13,6 +13,8 @@
 #include "search_engine_btree_node.h"
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
+#include "search_engine_stats.h"
+#include "top_k_sort.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -20,8 +22,6 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
-
-const double DOUBLE_INFINITY = std::numeric_limits<double>::infinity();
 
 /*
 	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
@@ -31,10 +31,11 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
 unsigned char *block;
 long long end, term_header, this_header_block_size, sum;
-long current_length;
+long current_length, pointer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 
+stats = new ANT_search_engine_stats(memory);
 this->memory = memory;
 index = new ANT_file(memory);
 if (index->open("index.aspt", "rb") == 0)
@@ -105,7 +106,12 @@ documents = collection_details.document_frequency;
 
 postings_buffer = (unsigned char *)memory->malloc(documents * 5);	// worst case is that it takes 5 bytes for each integer
 document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
+
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
+accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*accumulator_pointers) * documents);
+for (pointer = 0; pointer < documents; pointer++)
+	accumulator_pointers[pointer] = &accumulator[pointer];
+	
 posting.docid = (long *)memory->malloc(sizeof(*posting.docid) * documents);
 posting.tf = (long *)memory->malloc(sizeof(*posting.tf) * documents);
 
@@ -126,6 +132,25 @@ ANT_search_engine::~ANT_search_engine()
 {
 index->close();
 delete index;
+delete stats;
+}
+
+/*
+	ANT_SEARCH_ENGINE::STATS_TEXT_RENDER()
+	--------------------------------------
+*/
+void ANT_search_engine::stats_text_render(void)
+{
+stats->text_render();
+}
+
+/*
+	ANT_SEARCH_ENGINE::STATS_INITIALISE()
+	-------------------------------------
+*/
+void ANT_search_engine::stats_initialise(void)
+{
+stats->initialise();
 }
 
 /*
@@ -134,16 +159,11 @@ delete index;
 */
 void ANT_search_engine::init_accumulators(void)
 {
-ANT_search_engine_accumulator *current, *end;
-long id;
+long long now;
 
-id = 0;
-end = accumulator + documents;
-for (current = accumulator; current < end; current++)
-	{
-	current->docid = id++;
-	current->rsv = 0.0;
-	}
+now = stats->start_timer();
+memset(accumulator, 0, sizeof(*accumulator) * documents);
+stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 
 /*
@@ -325,7 +345,7 @@ for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid += postings->docid[which];
 	tf = postings->tf[which];
-	accumulator[docid].rsv += idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
+	accumulator[docid].rsv += (float)(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 	}
 }
 
@@ -336,16 +356,25 @@ for (which = 0; which < term_details->document_frequency; which++)
 void ANT_search_engine::process_one_search_term(char *term)
 {
 ANT_search_engine_btree_leaf term_details;
+long long now;
 
+now = stats->start_timer();
 if (get_postings_details(term, &term_details) == NULL)
 	return;
+stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
+now = stats->start_timer();
 if (get_postings(&term_details, postings_buffer) == NULL)
 	return;
+stats->add_posting_read_time(stats->stop_timer(now));
 
+now = stats->start_timer();
 decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid);
 
 #ifdef NEVER
+	/*
+		We don't do this because term frequences are stored uncompressed in one byte
+	*/
 	decompress(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
 #else
 	{
@@ -357,33 +386,51 @@ decompress(postings_buffer, postings_buffer + term_details.docid_length, posting
 		*into++ = *from;
 	}
 #endif
+stats->add_decompress_time(stats->stop_timer(now));
 
+now = stats->start_timer();
 bm25_rank(&term_details, &posting);
+stats->add_rank_time(stats->stop_timer(now));
 }
 
 /*
 	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
 	------------------------------------------
 */
-ANT_search_engine_accumulator *ANT_search_engine::generate_results_list(long *hits)
+ANT_search_engine_accumulator *ANT_search_engine::generate_results_list(long accurate_rank_point, long *hits)
 {
-ANT_search_engine_accumulator *current, *end;
 long found;
+long long now;
 
-qsort(accumulator, documents, sizeof(*accumulator), ANT_search_engine_accumulator::compare);
+ANT_search_engine_accumulator **current, **end;
 
+now = stats->start_timer();
+
+/*
+	Sort the postings into decreasing order, but only guarantee the first accurate_rank_point postings are accurately ordered (top-k sorting)
+*/
+
+//qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
+//top_k_sort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
+ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, documents, accurate_rank_point);
+
+stats->add_sort_time(stats->stop_timer(now));
+
+now = stats->start_timer();
 found = 0;
-end = accumulator + documents;
-for (current = accumulator; current < end; current++)
-	if (current->rsv != 0.0)
+end = accumulator_pointers + documents;
+for (current = accumulator_pointers; current < end; current++)
+	if ((*current)->rsv != 0.0)
 		{
 		found++;
 		if (found <= 10)		// first page
-			printf("%d <%d,%f>\n", current - accumulator + 1, current->docid, current->rsv);
+			printf("%d <%d,%f>\n", found, *current - accumulator, (*current)->rsv);
 		}
 
 printf("\n");
-
 *hits = found;
+
+stats->add_count_relevant_documents(stats->stop_timer(now));
+
 return accumulator;
 }

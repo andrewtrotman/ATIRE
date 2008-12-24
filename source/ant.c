@@ -1,3 +1,7 @@
+/*
+	ANT.C
+	-----
+*/
 #include <stdio.h>
 #include <string.h>
 #include "str.h"
@@ -8,6 +12,7 @@
 #include "mean_average_precision.h"
 #include "disk.h"
 #include "relevant_document.h"
+#include "time_stats.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -36,12 +41,19 @@ return TRUE;
 */
 double perform_query(ANT_search_engine *search_engine, char *query, long topic_id = -1, ANT_mean_average_precision *map = NULL)
 {
+ANT_time_stats stats;
+long long now;
+long did_query;
 char token[1024];
 char *token_start, *token_end;
 long hits;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 
+search_engine->stats_initialise();		// if we are command-line then report query by query stats
+
+did_query = FALSE;
+now = stats.start_timer();
 search_engine->init_accumulators();
 
 token_end = query;
@@ -61,15 +73,26 @@ while (*token_end != '\0')
 	_strlwr(token);
 	
 	search_engine->process_one_search_term(token);
+	did_query = TRUE;
 	}
 
-ranked_list = search_engine->generate_results_list(&hits);
+ranked_list = search_engine->generate_results_list(search_engine->document_count(), &hits); // accurately rank all documents
+//ranked_list = search_engine->generate_results_list(1500, &hits);		// accurately identify the top 1500 documents
+
 if (topic_id == -1)
-	printf("Query '%s' found %d documents\n", query, hits);
+	{
+	printf("Query '%s' found %d documents ", query, hits);
+	stats.print_time("(", stats.stop_timer(now), ")\n");
+	if (did_query)
+		search_engine->stats_text_render();
+	}
 else
 	{
-	printf("Topic:%d Query '%s' found %d documents\n", topic_id, query, hits);
-	average_precision = map->average_precision(topic_id, ranked_list, search_engine->document_count());
+	printf("Topic:%d Query '%s' found %d documents ", topic_id, query, hits);
+	stats.print_time("(", stats.stop_timer(now), ")");
+	if (did_query)
+		search_engine->stats_text_render();
+	average_precision = map->average_precision(topic_id, search_engine);
 	}
 
 return average_precision;
@@ -84,7 +107,6 @@ void command_driven_ant(void)
 ANT_memory memory;
 char query[1024];
 long more;
-
 
 printf("Ant %s\n", ANT_version_string);
 puts("---");

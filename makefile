@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 TOOLDIR = tools
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
 CC = @cl
 
 PARTS = \
@@ -14,6 +14,8 @@ PARTS = \
 	$(OBJDIR)\memory_index_hash_node.obj\
 	$(OBJDIR)\memory.obj \
 	$(OBJDIR)\memory_index.obj \
+	$(OBJDIR)\stats.obj\
+	$(OBJDIR)\time_stats.obj\
 	$(OBJDIR)\memory_index_stats.obj\
 	$(OBJDIR)\ctypes.obj \
 	$(OBJDIR)\hash_table.obj\
@@ -27,9 +29,13 @@ ANT_PARTS = \
 	$(OBJDIR)\search_engine_accumulator.obj \
 	$(OBJDIR)\mean_average_precision.obj \
 	$(OBJDIR)\relevant_document.obj \
+	$(OBJDIR)\stats.obj\
+	$(OBJDIR)\time_stats.obj\
+	$(OBJDIR)\search_engine_stats.obj\
 	$(OBJDIR)\disk.obj \
 	$(OBJDIR)\disk_internals.obj \
 	$(OBJDIR)\btree_iterator.obj \
+	$(OBJDIR)\top_k_sort.obj \
 	$(OBJDIR)\relevant_topic.obj
 	
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
@@ -47,7 +53,8 @@ all : $(BINDIR)\index.exe 				\
 	  $(BINDIR)\remove_head.exe 		\
 	  $(BINDIR)\link_this.exe			\
 	  $(BINDIR)\link_index_merge.exe	\
-	  $(BINDIR)\link_extract_pass2.exe
+	  $(BINDIR)\link_extract_pass2.exe	\
+	  $(BINDIR)\link_length_correlate.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
@@ -69,6 +76,9 @@ $(BINDIR)\link_index.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJ
 
 $(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_index_merge.obj /Fe$@
+
+$(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\link_length_correlate.obj /Fe$@
 
 $(BINDIR)\link_this.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\link_this.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\link_this.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@

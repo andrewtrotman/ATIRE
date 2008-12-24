@@ -10,7 +10,7 @@
 class ANT_memory;
 class ANT_relevant_document;
 class ANT_relevant_topic;
-class ANT_search_engine_accumulator;
+class ANT_search_engine;
 
 class ANT_mean_average_precision
 {
@@ -25,9 +25,7 @@ public:
 	ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long relevance_list_length);
 	~ANT_mean_average_precision() {}
 	
-	double average_precision(long topic, ANT_search_engine_accumulator *results_list, long results_list_length);
+	double average_precision(long topic, ANT_search_engine *search_engine);
 } ;
-
-
 
 #endif __MEAN_AVERAGE_PRECISION_H__

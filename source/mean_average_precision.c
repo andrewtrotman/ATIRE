@@ -9,6 +9,7 @@
 #include "memory.h"
 #include "relevant_topic.h"
 #include "relevant_document.h"
+#include "search_engine.h"
 #include "search_engine_accumulator.h"
 
 /*
@@ -68,21 +69,25 @@ topics[current_topic].number_of_relevant_documents = relevant_documents;
 	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_PRECISION()
 	-----------------------------------------------
 */
-double ANT_mean_average_precision::average_precision(long topic, ANT_search_engine_accumulator *results_list, long results_list_length)
+double ANT_mean_average_precision::average_precision(long topic, ANT_search_engine *search_engine)
 {
+ANT_search_engine_accumulator *accumulators, **results_list;
 ANT_relevant_document key;
 ANT_relevant_topic topic_key, *got;
-long current, found_and_relevant;
+long current, found_and_relevant, results_list_length;
 double precision;
 
 key.topic = topic;
 precision = 0;
 found_and_relevant = 0;
+results_list = search_engine->accumulator_pointers;
+accumulators = search_engine->accumulator;
+results_list_length = search_engine->document_count();
 
 for (current = 0; current < results_list_length; current++)
-	if (results_list[current].rsv != 0)
+	if (results_list[current]->rsv != 0)
 		{
-		key.docid = results_list[current].docid;
+		key.docid = results_list[current] - accumulators;
 		if (bsearch(&key, relevance_list, relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare) != NULL)
 			{
 			found_and_relevant++;

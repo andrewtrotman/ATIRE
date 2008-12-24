@@ -2,7 +2,6 @@
 	MEMORY_INDEX_STATS.C
 	--------------------
 */
-#include <windows.h>
 #include <stdio.h>
 #include "memory.h"
 #include "memory_index.h"
@@ -13,9 +12,8 @@
 	ANT_MEMORY_INDEX_STATS::ANT_MEMORY_INDEX_STATS()
 	------------------------------------------------
 */
-ANT_memory_index_stats::ANT_memory_index_stats(ANT_memory *memory)
+ANT_memory_index_stats::ANT_memory_index_stats(ANT_memory *memory) : ANT_stats(memory)
 {
-this->memory = memory;
 hash_nodes = 0;
 unique_terms = 0;
 documents = 0;
@@ -38,31 +36,6 @@ bytes_used_to_sort_term_list = 0;
 ANT_memory_index_stats::~ANT_memory_index_stats()
 {
 }
-
-/*
-	ANT_MEMORY_INDEX_STATS::GET_CLOCK_TICK()
-	----------------------------------------
-*/
-long long ANT_memory_index_stats::get_clock_tick(void)
-{
-LARGE_INTEGER now;
-
-QueryPerformanceCounter(&now);
-return now.QuadPart;
-}
-
-/*
-	ANT_MEMORY_INDEX_STATS::GET_CLOCK_TICK_FREQUENCY()
-	--------------------------------------------------
-*/
-long long ANT_memory_index_stats::get_clock_tick_frequency(void)
-{
-LARGE_INTEGER frequency;
-
-QueryPerformanceFrequency(&frequency);
-return frequency.QuadPart;
-}
-
 
 /*
 	ANT_MEMORY_INDEX_STATS::TEXT_RENDER()
