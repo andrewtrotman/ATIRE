@@ -1,6 +1,7 @@
 /*
 	LINK_INDEX_MERGE.C
 	------------------
+	Written (w) 2008 by Andrew Trotman, University of Otago
 */
 #include <stdio.h>
 #include <stdlib.h>

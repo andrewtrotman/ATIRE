@@ -1,6 +1,7 @@
 /*
 	LINK_PARTS.H
 	------------
+	Written (w) 2008 by Andrew Trotman, University of Otago
 */
 
 #ifndef __LINK_PARTS_H__

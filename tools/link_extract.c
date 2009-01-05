@@ -1,13 +1,14 @@
 /*
 	LINK_EXTRACT.C
 	--------------
+	Written (w) 2008 by Andrew Trotman, University of Otago
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-#include "../source/disk.h"
+#include "disk.h"
 #include "link_parts.h"
 
 char target[1024];
