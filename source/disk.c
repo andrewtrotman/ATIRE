@@ -12,6 +12,7 @@
 
 #ifdef _MSC_VER
 	#define stat _stat64
+	#define fstat _fstat64
 #endif
 
 /*
@@ -44,14 +45,19 @@ FILE *fp;
 
 if (filename == NULL)
 	return NULL;
-if (stat(filename, &details) != 0)
-	return NULL;
-if (details.st_size == 0)
-	return NULL;
-if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) == NULL)
-	return NULL;
+
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
+
+if (fstat(fileno(fp), &details) != 0)
+	return NULL;
+
+if (details.st_size == 0)
+	return NULL;
+
+if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) == NULL)
+	return NULL;
+
 if (fread(block, (long)details.st_size, 1, fp) != 1)
 	{
 	delete [] block;

@@ -32,6 +32,7 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 unsigned char *block;
 long long end, term_header, this_header_block_size, sum;
 long current_length, pointer;
+long postings_buffer_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 
@@ -42,11 +43,19 @@ if (index->open("index.aspt", "rb") == 0)
 	exit(printf("Cannot open index file:index.aspt\n"));
 
 /*
-	The final sizeof(long long) bytes of the file store the location of the b-tree header block
+	At the end of the file is a "header" that provides various details:
+	long long: the location of the b-tree header block
+	long: the string length of the longest term
+	long: the length of the longest compressed postings list
+	long long: the maximum number of postings in a postings list (the highest DF)
 */
 end = index->file_length();
-index->seek(end - sizeof(long long));
+index->seek(end - sizeof(term_header) - sizeof(string_length_of_longest_term) - sizeof(postings_buffer_length) - sizeof(highest_df));
+
 index->read(&term_header);
+index->read(&string_length_of_longest_term);
+index->read(&postings_buffer_length);
+index->read(&highest_df);
 
 /*
 	Load the b-tree header
@@ -104,7 +113,7 @@ btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size)
 get_postings_details("~length", &collection_details);
 documents = collection_details.document_frequency;
 
-postings_buffer = (unsigned char *)memory->malloc(documents * 5);	// worst case is that it takes 5 bytes for each integer
+postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
 document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
 
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
@@ -112,8 +121,8 @@ accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*
 for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 	
-posting.docid = (long *)memory->malloc(sizeof(*posting.docid) * documents);
-posting.tf = (long *)memory->malloc(sizeof(*posting.tf) * documents);
+posting.docid = (long *)memory->malloc((size_t)(sizeof(*posting.docid) * highest_df));
+posting.tf = (long *)memory->malloc((size_t)(sizeof(*posting.tf) * highest_df));
 
 get_postings(&collection_details, postings_buffer);
 decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths);

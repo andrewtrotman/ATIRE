@@ -169,17 +169,38 @@ return terms;
 	ANT_MEMORY_INDEX::GENERATE_TERM_LIST()
 	--------------------------------------
 */
-long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where)
+long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, long *length_of_longest_term, long long *highest_df)
 {
-long terms = 0;
+long term_length, terms = 0;
 
+/*
+	Recurse right
+*/
 if (root->right != NULL)
-	terms = generate_term_list(root->right, into, where);
+	terms = generate_term_list(root->right, into, where, length_of_longest_term, highest_df);
 
+/*
+	Deal with the current node
+*/
 into[where + terms] = root;
 
+/*
+	Compute the string length of the longest string
+*/
+if ((term_length = root->string.length()) > *length_of_longest_term)
+	*length_of_longest_term = term_length;
+
+/*
+	Compute the highest DF value
+*/
+if (root->document_frequency > *highest_df)
+	*highest_df = root->document_frequency;
+
+/*
+	Recurse left
+*/
 if (root->left != NULL)
-	terms += generate_term_list(root->left, into, where + terms + 1);
+	terms += generate_term_list(root->left, into, where + terms + 1, length_of_longest_term, highest_df);
 
 return terms + 1;
 }
@@ -267,7 +288,9 @@ unsigned char zero = 0;
 long btree_root_worst_case;
 long long file_position, terms_in_root;
 long terms_in_node, unique_terms = 0, max_terms_in_node = 0;
-long hash_val, where, bytes;
+long hash_val, where, bytes, length_of_longest_term = 0;
+long longest_postings_size;
+long long highest_df = 0;
 ANT_file *file;
 ANT_memory_index_hash_node **term_list, **here;
 ANT_btree_head_node *header, *current_header, *last_header;
@@ -297,7 +320,7 @@ term_list = (ANT_memory_index_hash_node **)memory->malloc(bytes);
 where = 0;
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
-		where += generate_term_list(hash_table[hash_val], term_list, where);
+		where += generate_term_list(hash_table[hash_val], term_list, where, &length_of_longest_term, &highest_df);
 term_list[unique_terms] = NULL;
 
 /*
@@ -345,6 +368,19 @@ for (current_header = header; current_header < last_header; current_header++)
 */
 printf("Root pos on disk:%lld\n", file_position);
 file->write((unsigned char *)&file_position, sizeof(file_position));
+/*
+	The string length of the longest term
+*/
+file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));
+/*
+	The maximum length of a compressed posting list
+*/
+longest_postings_size = serialised_docids_size + serialised_tfs_size;
+file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));
+/*
+	and the maximum number of postings in a postings list (that is, the largest document frequencty (DF))
+*/
+file->write((unsigned char *)&highest_df, sizeof(highest_df));
 
 /*
 	Close (and flush) the file

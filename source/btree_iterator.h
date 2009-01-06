@@ -6,10 +6,10 @@
 #ifndef __BTREE_ITERATOR_H__
 #define __BTREE_ITERATOR_H__
 
-#define MAX_TERM_LENGTH 1024
-
 class ANT_search_engine;
 class ANT_search_engine_btree_leaf;
+
+#define MAX_TERM_LENGTH 1024			// this should go and should be (somehow) replaced with search_engine->string_length_of_longest_term
 
 class ANT_btree_iterator
 {

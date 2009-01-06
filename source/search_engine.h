@@ -31,6 +31,8 @@ private:
 	ANT_search_engine_accumulator **accumulator_pointers;
 	ANT_search_engine_posting posting;
 	long long max_header_block_size;
+	long string_length_of_longest_term;
+	long long highest_df;
 
 private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
