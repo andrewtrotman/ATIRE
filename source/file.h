@@ -30,6 +30,7 @@ public:
 	long open(char *filename, char *mode);
 	long close(void);
 	long write(unsigned char *data, long size);
+	long puts(char *string);
 	long read(unsigned char *data, long size);
 	long read(long long *data) { return read((unsigned char *)data, sizeof(long long)); }
 	long read(long *data) { return read((unsigned char *)data, sizeof(long)); }

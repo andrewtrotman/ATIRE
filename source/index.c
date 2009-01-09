@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "disk.h"
+#include "file.h"
 #include "parser.h"
 #include "memory.h"
 #include "memory_index.h"
@@ -34,6 +35,9 @@ long param, done_work;
 ANT_memory_index *index;
 long long doc, now;
 long terms_in_document;
+ANT_memory file_buffer;
+ANT_file id_list(&file_buffer);
+char *filename;
 
 if (argc < 2)
 	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
@@ -41,13 +45,15 @@ doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
 index = new ANT_memory_index;
+id_list.open("doclist.aspt", "rb");
 for (param = 1; param < argc; param++)
 	{
 	now = stats.start_timer();
-	file = (unsigned char *)disk.read_entire_file(disk.get_first_filename(argv[param]));
+	file = (unsigned char *)disk.read_entire_file(filename = disk.get_first_filename(argv[param]));
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
 		{
+		id_list.puts(filename);
 		done_work = FALSE;
 		doc++;
 		if (doc % 10000 == 0)
@@ -77,10 +83,12 @@ for (param = 1; param < argc; param++)
 		index->set_document_length(doc, terms_in_document);
 		delete [] file;
 		now = stats.start_timer();
-		file = (unsigned char *)disk.read_entire_file(disk.get_next_filename());
+		file = (unsigned char *)disk.read_entire_file(filename = disk.get_next_filename());
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 	}
+
+id_list.close();
 
 now = stats.start_timer();
 index->serialise("index.aspt");

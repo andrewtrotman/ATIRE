@@ -36,6 +36,7 @@ buffer = NULL;
 buffer_size = 0;
 buffer_used = 0;
 file_position = 0;
+setvbuff(1024 * 1024);		// use a 1MB buffer by default.
 }
 
 /*
@@ -95,6 +96,20 @@ if (buffer_used > 0)
 	fwrite(buffer, buffer_used, 1, fp);
 	buffer_used = 0;
 	}
+}
+
+/*
+	ANT_FILE::PUTS()
+	----------------
+*/
+long ANT_file::puts(char *string)
+{
+long len;
+
+write((unsigned char *)string, len = strlen(string));
+write((unsigned char *)"\n", 1);
+
+return len + 1;
 }
 
 /*
