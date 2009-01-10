@@ -9,10 +9,11 @@
 	ANT_MEMORY::ANT_MEMORY()
 	------------------------
 */
-ANT_memory::ANT_memory()
+ANT_memory::ANT_memory(long long block_size_for_allocation)
 {
 chunk_end = at = chunk = NULL;
 used = 0;
+this->block_size = block_size_for_allocation;
 }
 
 /*

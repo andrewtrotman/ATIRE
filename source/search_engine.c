@@ -105,6 +105,7 @@ for (current = btree_root + 1; current < end_of_node_list; current++)
 		max_header_block_size = this_header_block_size;
 //	printf("%s : %lld (size:%lld bytes)\n", current->term, current->disk_pos, this_header_block_size);
 	}
+memory->realign();
 btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size);
 
 /*
@@ -114,14 +115,19 @@ get_postings_details("~length", &collection_details);
 documents = collection_details.document_frequency;
 
 postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
+memory->realign();
 document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
 
+memory->realign();
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
+memory->realign();
 accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*accumulator_pointers) * documents);
 for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 	
+memory->realign();
 posting.docid = (long *)memory->malloc((size_t)(sizeof(*posting.docid) * highest_df));
+memory->realign();
 posting.tf = (long *)memory->malloc((size_t)(sizeof(*posting.tf) * highest_df));
 
 get_postings(&collection_details, postings_buffer);

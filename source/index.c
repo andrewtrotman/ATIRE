@@ -35,7 +35,7 @@ long param, done_work;
 ANT_memory_index *index;
 long long doc, now;
 long terms_in_document;
-ANT_memory file_buffer;
+ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
 char *filename;
 
@@ -45,7 +45,7 @@ doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
 index = new ANT_memory_index;
-id_list.open("doclist.aspt", "rb");
+id_list.open("doclist.aspt", "wb");
 for (param = 1; param < argc; param++)
 	{
 	now = stats.start_timer();
