@@ -29,6 +29,21 @@ return (*((new_str = strncpy(new char [len + 1], str, len)) + len) = '\0'), new_
 }
 
 /*
+	STRLWR()
+	--------
+*/
+inline char *strlwr(char *string)
+{
+unsigned char *ch;
+
+for (ch = (unsigned char *)string; *ch != '\0'; ch++)
+	*ch = NCBI_tolower[*ch];
+
+return string;
+}
+
+
+/*
 	STRIP_END_PUNC()
 	----------------
 */
@@ -44,6 +59,24 @@ for (ch = buffer + strlen(buffer) - 1; ch > buffer; ch--)
 
 return buffer;
 }
+
+#ifndef _MSC_VER
+
+/*
+	STRLWR()
+	--------
+*/
+inline char *strlwr(char *string)
+{
+unsigned char *ch;
+
+for (ch = (unsigned char *)string; *ch != '\0'; ch++)
+	*ch = NCBI_tolower[*ch];
+
+return string;
+}
+
+#endif
 
 
 #endif __STR_H__

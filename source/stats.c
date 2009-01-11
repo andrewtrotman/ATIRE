@@ -34,7 +34,7 @@ long long ANT_stats::print_time(char *message, long long time_taken, char *end_m
 char *units = "milliseconds";
 long long hours, minutes, seconds, milliseconds;
 
-milliseconds = time_taken / (get_clock_tick_frequency() / 1000);
+milliseconds = time_taken / (get_clock_tick_frequency() / 1000.0);
 seconds = milliseconds / 1000;
 minutes = seconds / 60;
 hours = minutes / 60;
@@ -84,10 +84,17 @@ return total;
 */
 long long ANT_stats::get_clock_tick(void)
 {
-LARGE_INTEGER now;
-
-QueryPerformanceCounter(&now);
-return now.QuadPart;
+#ifdef __APPLE__
+	uint64_t now;
+	now = mach_absolute_time();
+	return (long long)now;
+#elif defined (_MSC_VER)
+	LARGE_INTEGER now;
+	QueryPerformanceCounter(&now);
+	return now.QuadPart;
+#else
+	#error "Cannot determine OS for timing code"
+#endif
 }
 
 /*
@@ -96,9 +103,14 @@ return now.QuadPart;
 */
 long long ANT_stats::clock_tick_frequency(void)
 {
-LARGE_INTEGER frequency;
-
-QueryPerformanceFrequency(&frequency);
-return frequency.QuadPart;
+#ifdef __APPLE__
+	return AbsoluteToNanoseconds(1);
+#elif define (_MSC_VER)
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+	return frequency.QuadPart;
+#else
+	#error "Cannot determine OS for timing code"
+#endif
 }
 

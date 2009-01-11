@@ -12,7 +12,7 @@
 #include "disk.h"
 #include "disk_internals.h"
 
-#ifdef _MSC_DEV
+#ifdef _MSC_VER
 	#define stat(a,b) _stat(a,b)
 #endif
 
