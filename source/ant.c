@@ -39,7 +39,7 @@ return TRUE;
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_search_engine *search_engine, char *query, long topic_id = -1, ANT_mean_average_precision *map = NULL)
+double perform_query(ANT_search_engine *search_engine, char *query, long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
 {
 ANT_time_stats stats;
 long long now;
@@ -76,8 +76,8 @@ while (*token_end != '\0')
 	did_query = TRUE;
 	}
 
-ranked_list = search_engine->generate_results_list(search_engine->document_count(), &hits); // accurately rank all documents
-//ranked_list = search_engine->generate_results_list(1500, &hits);		// accurately identify the top 1500 documents
+ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
+//ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
 
 if (topic_id == -1)
 	{
@@ -95,6 +95,7 @@ else
 	average_precision = map->average_precision(topic_id, search_engine);
 	}
 
+*matching_documents = hits;
 return average_precision;
 }
 
@@ -104,9 +105,11 @@ return average_precision;
 */
 void command_driven_ant(void)
 {
+ANT_disk disk;
 ANT_memory memory;
 char query[1024];
-long more;
+long last_to_list, hits, more, documents_in_id_list;
+char *document_list_buffer, **document_list, **answer_list;
 
 printf("Ant %s\n", ANT_version_string);
 puts("---");
@@ -114,8 +117,15 @@ puts("Copyright (c) 2008");
 puts("Andrew Trotman, University of Otago");
 puts("andrew@cs.otago.ac.nz");
 
+if ((document_list_buffer = disk.read_entire_file("doclist.aspt")) == NULL)
+	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+document_list = disk.buffer_to_list(document_list_buffer, &documents_in_id_list);
+answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
+
 ANT_search_engine search_engine(&memory);
 printf("Index contains %d documents\n", search_engine.document_count());
+if (search_engine.document_count() != documents_in_id_list)
+	exit(printf("There are %d documents in the index, but %d documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
 
 puts("\nuse:\n\t.quit to quit\n\n");
 
@@ -131,7 +141,13 @@ while (more)
 		if (*query == '.')
 			more = special_command(query);
 		else
-			perform_query(&search_engine, query);
+			{
+			perform_query(&search_engine, query, &hits);
+			last_to_list = hits > 10 ? 10 : hits;
+			search_engine.generate_results_list(document_list, answer_list, last_to_list);
+			for (long result = 0; result < last_to_list; result++)
+				printf("%d:%s\n", result + 1, answer_list[result]);
+			}
 		}
 	}
 puts("Bye");
@@ -185,7 +201,7 @@ void batch_ant(char *topic_file, char *qrel_file)
 {
 ANT_relevant_document *assessments;
 char query[1024];
-long topic_id, line, number_of_assessments;
+long topic_id, line, number_of_assessments, hits;
 ANT_memory memory;
 FILE *fp;
 char *query_text;
@@ -210,7 +226,7 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	if ((query_text = strchr(query, ' ')) == NULL)
 		exit(printf("Line %d: Can't process query as badly formed:'%s'\n", line, query));
 
-	average_precision = perform_query(&search_engine, query_text, topic_id, &map);
+	average_precision = perform_query(&search_engine, query_text, &hits, topic_id, &map);
 	sum_of_average_precisions += average_precision;
 	fprintf(stderr, "Topic:%d Average Precision:%f\n", topic_id, average_precision);
 	line++;

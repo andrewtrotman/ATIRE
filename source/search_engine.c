@@ -409,10 +409,10 @@ stats->add_rank_time(stats->stop_timer(now));
 }
 
 /*
-	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
-	------------------------------------------
+	ANT_SEARCH_ENGINE::SORT_RESULTS_LIST()
+	--------------------------------------
 */
-ANT_search_engine_accumulator *ANT_search_engine::generate_results_list(long accurate_rank_point, long *hits)
+ANT_search_engine_accumulator *ANT_search_engine::sort_results_list(long accurate_rank_point, long *hits)
 {
 long found;
 long long now;
@@ -438,8 +438,8 @@ for (current = accumulator_pointers; current < end; current++)
 	if ((*current)->rsv != 0.0)
 		{
 		found++;
-		if (found <= 10)		// first page
-			printf("%d <%d,%f>\n", found, *current - accumulator, (*current)->rsv);
+//		if (found <= 10)		// first page
+//			printf("%d <%d,%f>\n", found, *current - accumulator, (*current)->rsv);
 		}
 
 printf("\n");
@@ -449,3 +449,28 @@ stats->add_count_relevant_documents(stats->stop_timer(now));
 
 return accumulator;
 }
+
+/*
+	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
+	------------------------------------------
+*/
+char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long top_k)
+{
+long found;
+ANT_search_engine_accumulator **current, **end;
+
+found = 0;
+end = accumulator_pointers + documents;
+for (current = accumulator_pointers; current < end; current++)
+	if ((*current)->rsv != 0.0)
+		{
+		if (found < top_k)		// first page
+			sorted_id_list[found] = document_id_list[*current - accumulator];
+		else
+			break;
+		found++;
+		}
+
+return sorted_id_list;
+}
+

@@ -49,7 +49,7 @@ if (filename == NULL)
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
 
-if (fstat(fileno(fp), &details) != 0)
+if (fstat(_fileno(fp), &details) != 0)
 	return NULL;
 
 if (details.st_size == 0)
@@ -68,6 +68,43 @@ else
 
 fclose(fp);
 return block;
+}
+
+/*
+	ANT_DISK::BUFFER_TO_LIST()
+	--------------------------
+*/
+char **ANT_disk::buffer_to_list(char *buffer, long *lines)
+{
+char *pos, **line_list, **current_line;
+long n_frequency, r_frequency;
+
+n_frequency = r_frequency = 0;
+for (pos = buffer; *pos != '\0'; pos++)
+	if (*pos == '\n')
+		n_frequency++;
+	else if (*pos == '\r')
+		r_frequency++;
+
+*lines = (r_frequency > n_frequency ? r_frequency : n_frequency);
+current_line = line_list = new char * [*lines + 1]; 		// +1 in case the last line has no \n; +1 for a NULL at the end of the list
+
+*current_line++ = pos = buffer;
+while (*pos != '\0')
+	{
+	if (*pos == '\n' || *pos == '\r')
+		{
+		*pos++ = '\0';
+		while (*pos == '\n' || *pos == '\r')
+			pos++;
+		*current_line++ = pos;
+		}
+	else
+		pos++;
+	}
+*current_line = NULL;
+
+return line_list;
 }
 
 /*

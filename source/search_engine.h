@@ -51,7 +51,8 @@ public:
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 	void decompress(unsigned char *start, unsigned char *end, long *into);
 	void process_one_search_term(char *term);
-	ANT_search_engine_accumulator *generate_results_list(long accurrate_rank_point, long *hits);
+	ANT_search_engine_accumulator *sort_results_list(long accurrate_rank_point, long *hits);
+	char **generate_results_list(char **document_id_list, char **sorted_id_list, long top_k);
 	long document_count(void) { return documents; }
 	void stats_initialise(void);
 	void stats_text_render(void);
