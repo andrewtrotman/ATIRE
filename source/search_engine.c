@@ -15,6 +15,7 @@
 #include "search_engine_accumulator.h"
 #include "search_engine_stats.h"
 #include "top_k_sort.h"
+#include "stemmer.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -124,11 +125,16 @@ memory->realign();
 accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*accumulator_pointers) * documents);
 for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
-	
+
+/*
+	Here we allocate space for the decompressed postings.  Although it might appear as though 
+	you only need enough space for the longest postings list, the lists can get longer than that
+	due to stemming.  Space for each document is, therefore, needed.
+*/
 memory->realign();
-posting.docid = (long *)memory->malloc((size_t)(sizeof(*posting.docid) * highest_df));
+posting.docid = (long *)memory->malloc((size_t)(sizeof(*posting.docid) * documents));
 memory->realign();
-posting.tf = (long *)memory->malloc((size_t)(sizeof(*posting.tf) * highest_df));
+posting.tf = (long *)memory->malloc((size_t)(sizeof(*posting.tf) * documents));
 
 get_postings(&collection_details, postings_buffer);
 decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths);
@@ -137,6 +143,9 @@ sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
 	sum += document_lengths[current_length];
 mean_document_length = (double)sum / (double)documents;
+
+memory->realign();
+stem_buffer = (long *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
 }
 
 /*
@@ -326,6 +335,18 @@ while (start < end)
 }
 
 /*
+	ANT_SEARCH_ENGINE::DECOMPRESS_TF()
+	----------------------------------
+*/
+void ANT_search_engine::decompress_tf(unsigned char *start, unsigned char *end, long *into)
+{
+unsigned char *from;
+
+for (from = start; from < end; from++)
+	*into++ = *from;
+}
+
+/*
 	ANT_SEARCH_ENGINE::BM25_RANK()
 	------------------------------
 */
@@ -410,6 +431,93 @@ stats->add_rank_time(stats->stop_timer(now));
 }
 
 /*
+	ANT_SEARCH_ENGINE::STEM_TO_POSTINGS()
+	-------------------------------------
+*/
+void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
+{
+long doc, found;
+
+for (doc = found = 0; doc < documents; doc++)
+	if (stem_buffer[doc] != 0)
+		{
+		posting.docid[found] = doc;
+		posting.tf = stem_buffer[doc];
+		found++;
+		}
+
+term_details->document_frequency = found;
+term_details->collection_frequency = collection_frequency;
+}
+
+/*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
+	----------------------------------------------------
+*/
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmerm *stemmer, char *base_term)
+{
+ANT_search_engine_btree_leaf term_details, stemmed_term_details;
+long long now, collection_frequency;
+long *current_document, *current_tf, *end;
+
+/*
+	TIME THIS (below)
+*/
+memset(stem_buffer, 0, stem_buffer_length_in_bytes);
+collection_frequency = 0;
+/*
+	TIME THIS (above)
+*/
+now = stats->start_timer();
+term = stemmer->first(base_term); term != NULL; term = stemmer->next())
+stats->add_dictionary_lookup_time(stats->stop_timer(now));
+
+while (term != NULL)
+	{
+	now = stats->start_timer();
+	stemmer->get_postings_details(&term_details)
+	stats->add_dictionary_lookup_time(stats->stop_timer(now));
+
+	now = stats->start_timer();
+	if (get_postings(&term_details, postings_buffer) == NULL)
+		return;
+	stats->add_posting_read_time(stats->stop_timer(now));
+
+	now = stats->start_timer();
+	decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid);
+	decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
+	stats->add_decompress_time(stats->stop_timer(now));
+
+/*
+	TIME THIS (below)
+*/
+	collection_frequency += term_details->collection_frequency;
+	end = postings.docid + term_details->document_frequency;
+	for (current_document = posting.docid, current_tf = postings.tf; current < end; current++, current_tf++)
+		stem_buffer[*current] += *current_tf;
+/*
+	TIME THIS (above)
+*/
+
+	now = stats->start_timer();
+	term = stemmer->next()
+	stats->add_dictionary_lookup_time(stats->stop_timer(now));
+	}
+
+/*
+	TIME THIS (below)
+*/
+stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buffer);
+/*
+	TIME THIS (above)
+*/
+
+now = stats->start_timer();
+bm25_rank(&stemmed_term_details, &posting);
+stats->add_rank_time(stats->stop_timer(now));
+}
+
+/*
 	ANT_SEARCH_ENGINE::SORT_RESULTS_LIST()
 	--------------------------------------
 */
@@ -425,7 +533,6 @@ now = stats->start_timer();
 /*
 	Sort the postings into decreasing order, but only guarantee the first accurate_rank_point postings are accurately ordered (top-k sorting)
 */
-
 //qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 //top_k_sort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, documents, accurate_rank_point);
@@ -437,13 +544,8 @@ found = 0;
 end = accumulator_pointers + documents;
 for (current = accumulator_pointers; current < end; current++)
 	if ((*current)->rsv != 0.0)
-		{
 		found++;
-//		if (found <= 10)		// first page
-//			printf("%d <%d,%f>\n", found, *current - accumulator, (*current)->rsv);
-		}
 
-printf("\n");
 *hits = found;
 
 stats->add_count_relevant_documents(stats->stop_timer(now));

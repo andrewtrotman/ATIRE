@@ -33,6 +33,7 @@ private:
 	long long max_header_block_size;
 	long string_length_of_longest_term;
 	long long highest_df;
+	long *stem_buffer, stem_buffer_length_in_bytes;
 
 private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
@@ -50,6 +51,9 @@ public:
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 	void decompress(unsigned char *start, unsigned char *end, long *into);
+	void decompress_tf(unsigned char *start, unsigned char *end, long *into);
+	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
+	void process_one_stemmed_search_term(ANT_stemmerm *stemmer, char *base_term)
 	void process_one_search_term(char *term);
 	ANT_search_engine_accumulator *sort_results_list(long accurrate_rank_point, long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long top_k);

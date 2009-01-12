@@ -2,7 +2,6 @@
 	BTREE_ITERATOR.H
 	----------------
 */
-
 #ifndef __BTREE_ITERATOR_H__
 #define __BTREE_ITERATOR_H__
 
@@ -22,13 +21,11 @@ private:
 
 public:
 	ANT_btree_iterator(ANT_search_engine *search_engine);
-	~ANT_btree_iterator();
+	virtual ~ANT_btree_iterator();
 
-	char *first(char *term);
-	char *next(void);
+	virtual char *first(char *term);
+	virtual char *next(void);
 	ANT_search_engine_btree_leaf *get_postings_details(ANT_search_engine_btree_leaf *term_details);
 } ;
-
-
 
 #endif __BTREE_ITERATOR_H__
