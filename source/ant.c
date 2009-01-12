@@ -13,6 +13,8 @@
 #include "disk.h"
 #include "relevant_document.h"
 #include "time_stats.h"
+#include "stemmer.h"
+#include "stemmer_none.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -46,9 +48,10 @@ long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
-long hits;
+long hits, token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
+ANT_stemmer stemmer(search_engine);
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -66,13 +69,20 @@ while (*token_end != '\0')
 	if (*token_start == '\0')
 		break;
 	token_end = token_start;
-	while (ANT_isalpha(*token_end))
+	while (ANT_isalpha(*token_end) || *token_end == '+')
 		token_end++;
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
+	token_length = token_end - token_start;
 	strlwr(token);
-	
-	search_engine->process_one_search_term(token);
+
+	if ((token_length > 1) && (token[token_length - 1] == '+'))
+		{
+		token[token_length - 1] = '\0';
+		search_engine->process_one_stemmed_search_term(&stemmer, token);
+		}
+	else
+		search_engine->process_one_search_term(token);
 	did_query = TRUE;
 	}
 

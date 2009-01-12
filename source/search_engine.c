@@ -407,22 +407,7 @@ stats->add_posting_read_time(stats->stop_timer(now));
 
 now = stats->start_timer();
 decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid);
-
-#ifdef NEVER
-	/*
-		We don't do this because term frequences are stored uncompressed in one byte
-	*/
-	decompress(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
-#else
-	{
-	unsigned char *from;
-	long *into;
-	into = posting.tf;
-
-	for (from = postings_buffer + term_details.docid_length; from < postings_buffer + term_details.postings_length; from++)
-		*into++ = *from;
-	}
-#endif
+decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
 stats->add_decompress_time(stats->stop_timer(now));
 
 now = stats->start_timer();
@@ -438,15 +423,18 @@ void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *term_deta
 {
 long doc, found;
 long *docid, *tf;
+long last = -1;
 
 docid = posting->docid;
 tf = posting->tf;
 found = 0;
-for (doc = found = 0; doc < documents; doc++, found++)
+for (doc = found = 0; doc < documents; doc++)
 	if (stem_buffer[doc] != 0)
 		{
-		*docid++ = doc;
+		*docid++ = doc - last;
 		*tf++ = stem_buffer[doc];
+		last = doc;
+		found++;
 		}
 
 term_details->document_frequency = found;
@@ -461,7 +449,7 @@ void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, ch
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
-long *current_document, *current_tf, *end;
+long document, *current_document, *current_tf, *end;
 char *term;
 
 /*
@@ -497,8 +485,12 @@ while (term != NULL)
 */
 	collection_frequency += term_details.collection_frequency;
 	end = posting.docid + term_details.document_frequency;
+	document = -1;
 	for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
-		stem_buffer[*current_document] += *current_tf;
+		{
+		document += *current_document;
+		stem_buffer[document] += *current_tf;
+		}
 /*
 	TIME THIS (above)
 */

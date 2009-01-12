@@ -15,12 +15,12 @@ long len;
 
 len = strlen(term);
 strcpy(stem, term);
-if (strcmp(stem + len - 3, "ies"))
+if (strcmp(stem + len - 3, "ies") == 0)
 	{
 	strcpy(stem + len - 3, "y");
 	len -= 3;
 	}
-else if (strcmp(stem + len - 2, "es"))
+else if (strcmp(stem + len - 2, "es") == 0)
 	{
 	*(stem + len - 2) = '\0';
 	len -= 2;

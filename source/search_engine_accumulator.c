@@ -25,7 +25,7 @@ return sign < 0.0 ? 1 : sign > 0.0 ? -1 : 0;
 	ANT_SEARCH_ENGINE_ACCUMULATOR::COMPARE_POINTER()
 	------------------------------------------------
 */
-inline int ANT_search_engine_accumulator::compare_pointer(const void *a, const void *b)
+int ANT_search_engine_accumulator::compare_pointer(const void *a, const void *b)
 {
 double sign;
 
