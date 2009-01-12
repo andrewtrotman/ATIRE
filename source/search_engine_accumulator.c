@@ -3,6 +3,7 @@
 	---------------------------
 	The Implementation of top-k-sort is based on the qsort implementation in the C Runtime Library shipped with Microsoft Visual Studio 2008
 */
+#include <stdlib.h>
 #include "search_engine_accumulator.h"
 
 #define CUTOFF 8 		// drop from qsort to insertion sort when numelements is this value

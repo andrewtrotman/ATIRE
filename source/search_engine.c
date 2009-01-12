@@ -329,7 +329,7 @@ while (start < end)
 		*into = *start++;
 		while (!(*start & 0x80))
 		   *into = (*into << 7) | *start++;
-		*into = (*into << 7) | (*start++ & 0x7F); // Changed
+		*into = (*into << 7) | (*start++ & 0x7F);
         into++;
 		}
 }
@@ -434,16 +434,19 @@ stats->add_rank_time(stats->stop_timer(now));
 	ANT_SEARCH_ENGINE::STEM_TO_POSTINGS()
 	-------------------------------------
 */
-void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
+void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer)
 {
 long doc, found;
+long *docid, *tf;
 
-for (doc = found = 0; doc < documents; doc++)
+docid = posting->docid;
+tf = posting->tf;
+found = 0;
+for (doc = found = 0; doc < documents; doc++, found++)
 	if (stem_buffer[doc] != 0)
 		{
-		posting.docid[found] = doc;
-		posting.tf = stem_buffer[doc];
-		found++;
+		*docid++ = doc;
+		*tf++ = stem_buffer[doc];
 		}
 
 term_details->document_frequency = found;
@@ -454,11 +457,12 @@ term_details->collection_frequency = collection_frequency;
 	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
 	----------------------------------------------------
 */
-void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmerm *stemmer, char *base_term)
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term)
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 long *current_document, *current_tf, *end;
+char *term;
 
 /*
 	TIME THIS (below)
@@ -469,13 +473,13 @@ collection_frequency = 0;
 	TIME THIS (above)
 */
 now = stats->start_timer();
-term = stemmer->first(base_term); term != NULL; term = stemmer->next())
+term = stemmer->first(base_term);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 while (term != NULL)
 	{
 	now = stats->start_timer();
-	stemmer->get_postings_details(&term_details)
+	stemmer->get_postings_details(&term_details);
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 	now = stats->start_timer();
@@ -491,16 +495,16 @@ while (term != NULL)
 /*
 	TIME THIS (below)
 */
-	collection_frequency += term_details->collection_frequency;
-	end = postings.docid + term_details->document_frequency;
-	for (current_document = posting.docid, current_tf = postings.tf; current < end; current++, current_tf++)
-		stem_buffer[*current] += *current_tf;
+	collection_frequency += term_details.collection_frequency;
+	end = posting.docid + term_details.document_frequency;
+	for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
+		stem_buffer[*current_document] += *current_tf;
 /*
 	TIME THIS (above)
 */
 
 	now = stats->start_timer();
-	term = stemmer->next()
+	term = stemmer->next();
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 	}
 

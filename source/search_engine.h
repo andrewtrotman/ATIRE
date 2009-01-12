@@ -13,6 +13,7 @@ class ANT_search_engine_btree_node;
 class ANT_search_engine_btree_leaf;
 class ANT_search_engine_accumulator;
 class ANT_search_engine_stats;
+class ANT_stemmer;
 
 class ANT_search_engine
 {
@@ -53,7 +54,7 @@ public:
 	void decompress(unsigned char *start, unsigned char *end, long *into);
 	void decompress_tf(unsigned char *start, unsigned char *end, long *into);
 	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
-	void process_one_stemmed_search_term(ANT_stemmerm *stemmer, char *base_term)
+	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
 	void process_one_search_term(char *term);
 	ANT_search_engine_accumulator *sort_results_list(long accurrate_rank_point, long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long top_k);

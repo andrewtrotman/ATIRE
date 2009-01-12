@@ -70,7 +70,7 @@ while (*token_end != '\0')
 		token_end++;
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
-	strlwr(token);              // Changed - pick one
+	strlwr(token);
 	
 	search_engine->process_one_search_term(token);
 	did_query = TRUE;

@@ -9,20 +9,29 @@
 	ANT_STEMMER::STEM()
 	-------------------
 */
-char *ANT_stemmer::stem(char *term, char *stem)
+long ANT_stemmer::stem(char *term, char *stem)
 {
 long len;
 
 len = strlen(term);
 strcpy(stem, term);
 if (strcmp(stem + len - 3, "ies"))
+	{
 	strcpy(stem + len - 3, "y");
+	len -= 3;
+	}
 else if (strcmp(stem + len - 2, "es"))
-	*(stem + len - 2) = '\0')
+	{
+	*(stem + len - 2) = '\0';
+	len -= 2;
+	}
 else if (stem[len - 1] == 's')
+	{
 	*(stem + len - 1) = '\0';
+	len--;
+	}
 
-return stem;
+return len;
 }
 
 /*
@@ -51,8 +60,8 @@ return NULL;
 */
 char *ANT_stemmer::first(char *term)
 {
-stem(term, stemmed_search_term);
-return get_next(ANT_btree_iterator::first(stemmed_search_term))
+stemmed_search_term_length = stem(term, stemmed_search_term);
+return get_next(ANT_btree_iterator::first(stemmed_search_term));
 }
 
 /*
@@ -61,5 +70,5 @@ return get_next(ANT_btree_iterator::first(stemmed_search_term))
 */
 char *ANT_stemmer::next(void)
 {
-return get_next(ANT_btree_iterator::next())
+return get_next(ANT_btree_iterator::next());
 }

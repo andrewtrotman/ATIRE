@@ -6,8 +6,6 @@
 #ifndef __SEARCH_ENGINE_ACCUMULATORS_H__
 #define __SEARCH_ENGINE_ACCUMULATORS_H__
 
-#include <stdlib.h>
-
 class ANT_search_engine_accumulator
 {
 private:
@@ -16,8 +14,6 @@ private:
 	static inline int compare_pointer(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b);
 
 public:
-
-//	double rsv;
 	float rsv;
 
 public:

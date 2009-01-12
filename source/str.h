@@ -8,6 +8,10 @@
 #include <string.h>
 #include "ctypes.h"
 
+#ifdef _MSC_VER
+	#define strlwr(a) _strlwr(a)
+#endif
+
 /*
 	STRNEW()
 	--------
@@ -55,7 +59,7 @@ inline static char *strlwr(char *string)
 unsigned char *ch;
 
 for (ch = (unsigned char *)string; *ch != '\0'; ch++)
-	*ch = ANT_tolower(*ch);     // Changed
+	*ch = ANT_tolower(*ch);
 
 return string;
 }

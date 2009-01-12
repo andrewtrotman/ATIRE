@@ -105,9 +105,12 @@ node->add_posting(string, docno);
 */
 void ANT_memory_index::set_document_length(long long docno, long length)
 {
-    ANT_string_pair string = (ANT_string_pair) {{"~length"}, {7}}; // Changed
+ANT_string_pair string("~length", 7);
 long hash_value;
 ANT_memory_index_hash_node *node;
+long long doc;
+
+doc = docno;				// remove compiler warning
 
 hash_value = hash(&string);
 if (hash_table[hash_value] == NULL)
@@ -407,7 +410,7 @@ while (pos < serialised_docids + doc_size)
 	{
 	doc += root->decompress(&pos);
 	tf = *serialised_tfs++;
-	printf("(%ld,%ld),", doc, tf); // Changed
+	printf("(%ld,%ld),", doc, tf);
 	}
 putchar('\n');
 }

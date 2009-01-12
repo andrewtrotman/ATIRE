@@ -5,7 +5,7 @@
 #ifdef _MSC_VER
 	#include <windows.h>
 #else
-#include <string.h>
+	#include <string.h>
 #endif
 #include <new>
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #ifdef _MSC_VER
 	#define stat _stat64
 	#define fstat _fstat64
+	#define fileno _fileno
 #endif
 
 /*
@@ -44,7 +45,7 @@ delete internals;
 char *ANT_disk::read_entire_file(char *filename)
 {
 struct stat details;
-char *block;
+char *block = NULL;
 FILE *fp;
 
 if (filename == NULL)
@@ -53,22 +54,16 @@ if (filename == NULL)
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
 
- if (fstat(fileno(fp), &details) != 0) /* '_fileno' was not declared in this scope */
-	return NULL;
-
-if (details.st_size == 0)
-	return NULL;
-
-if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) == NULL)
-	return NULL;
-
-if (fread(block, (long)details.st_size, 1, fp) != 1)
-	{
-	delete [] block;
-	block = NULL;
-	}
-else
-	block[details.st_size] = '\0';
+if (fstat(fileno(fp), &details) == 0)
+	if (details.st_size != 0)
+		if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)
+			if (fread(block, (long)details.st_size, 1, fp) == 1)
+				block[details.st_size] = '\0';
+			else
+				{
+				delete [] block;
+				block = NULL;
+				}
 
 fclose(fp);
 return block;
@@ -189,5 +184,3 @@ char *ANT_disk::get_next_filename(void)
 	return internals->matching_files.gl_pathv[internals->glob_index++];
 #endif
 }
-
-

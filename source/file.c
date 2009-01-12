@@ -7,8 +7,8 @@
 #include "memory.h"
 
 #ifdef linux
-    #include <sys/stat.h>
-    #define _LARGEFILE_SOURCE
+	#include <sys/stat.h>
+	#define _LARGEFILE_SOURCE
 	#define _LARGEFILE64_SOURCE
 	#define FILE_OFFSET_BITS 64
 	#define ftell ftello

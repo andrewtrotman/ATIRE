@@ -3,8 +3,9 @@
 	------------
 	Based on the qsort implementation in the C Runtime Library shipped with Microsoft Visual Studio 2008
 */
+#include <stdlib.h>
 #include "top_k_sort.h"
-#include "search_engine_accumulator.h"
+//#include "search_engine_accumulator.h"
 
 static void top_k_shortsort (char *lo, char *hi, size_t width, int (*comp)(const void *, const void *));
 

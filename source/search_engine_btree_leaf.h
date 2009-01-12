@@ -8,7 +8,7 @@
 class ANT_search_engine_btree_leaf
 {
 public:
-	long collection_frequency;
+	long long collection_frequency;
 	long document_frequency;
 	long long postings_position_on_disk;
 	long docid_length;

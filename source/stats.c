@@ -3,11 +3,11 @@
 	-------
 */
 #ifdef _MSC_VER
-#include <windows.h>
+	#include <windows.h>
 #elif defined (__APPLE__)
-#include <mach/mach_time.h>
-
+	#include <mach/mach_time.h>
 #endif
+
 #include <stdio.h>
 #include "stats.h"
 
@@ -109,9 +109,8 @@ long long ANT_stats::get_clock_tick(void)
 long long ANT_stats::clock_tick_frequency(void)
 {
 #ifdef __APPLE__
-    static mach_timebase_info_data_t info;
-    if (info.denom == 0) 
-        mach_timebase_info(&info);
+	mach_timebase_info_data_t info;
+	mach_timebase_info(&info);
 	return 1000 * 1000 * info.numer / info.denom; /* returns in nano seconds */
 #elif defined (_MSC_VER)
 	LARGE_INTEGER frequency;

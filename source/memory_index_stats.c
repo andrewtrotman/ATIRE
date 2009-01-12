@@ -47,7 +47,7 @@ long long used, sum;
 
 printf("GLOBAL STATISTICS\n-----------------\n");
 printf("Documents            :%10lld documents\n", documents);
-printf("Unique terms         :%10ld terms\n", unique_terms); // Changed
+printf("Unique terms         :%10ld terms\n", unique_terms);
 printf("Term occurences      :%10lld occurences\n", term_occurences);
 
 printf("\nINTERNAL MEMORY BREAKDOWN\n-------------------------\n");

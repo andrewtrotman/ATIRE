@@ -11,7 +11,7 @@
 ANT_disk_internals::ANT_disk_internals()
 {
 #ifdef _MSC_VER
-file_list = INVALID_HANDLE_VALUE;
+	file_list = INVALID_HANDLE_VALUE;
 #endif
 }
 
