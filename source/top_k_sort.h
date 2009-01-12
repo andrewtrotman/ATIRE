@@ -6,6 +6,8 @@
 #ifndef __TOP_K_SORT_H__
 #define __TOP_K_SORT_H__
 
+#include <stdlib.h>
+
 void top_k_sort(void *base, size_t num, size_t width, int (*comp)(const void *, const void *));
 
 #endif __TOP_K_SORT_H__

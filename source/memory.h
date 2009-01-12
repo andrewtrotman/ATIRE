@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <new.h>
+#include <new>                  // Changed
 
 class ANT_memory
 {

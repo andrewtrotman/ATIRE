@@ -70,7 +70,7 @@ while (*token_end != '\0')
 		token_end++;
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
-	_strlwr(token);
+	strlwr(token);              // Changed - pick one
 	
 	search_engine->process_one_search_term(token);
 	did_query = TRUE;
@@ -81,14 +81,14 @@ ranked_list = search_engine->sort_results_list(search_engine->document_count(), 
 
 if (topic_id == -1)
 	{
-	printf("Query '%s' found %d documents ", query, hits);
+	printf("Query '%s' found %ld documents ", query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")\n");
 	if (did_query)
 		search_engine->stats_text_render();
 	}
 else
 	{
-	printf("Topic:%d Query '%s' found %d documents ", topic_id, query, hits);
+	printf("Topic:%ld Query '%s' found %ld documents ", topic_id, query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
 	if (did_query)
 		search_engine->stats_text_render();
@@ -123,9 +123,9 @@ document_list = disk.buffer_to_list(document_list_buffer, &documents_in_id_list)
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 ANT_search_engine search_engine(&memory);
-printf("Index contains %d documents\n", search_engine.document_count());
+printf("Index contains %ld documents\n", search_engine.document_count());
 if (search_engine.document_count() != documents_in_id_list)
-	exit(printf("There are %d documents in the index, but %d documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
+	exit(printf("There are %ld documents in the index, but %ld documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
 
 puts("\nuse:\n\t.quit to quit\n\n");
 
@@ -146,7 +146,7 @@ while (more)
 			last_to_list = hits > 10 ? 10 : hits;
 			search_engine.generate_results_list(document_list, answer_list, last_to_list);
 			for (long result = 0; result < last_to_list; result++)
-				printf("%d:%s\n", result + 1, answer_list[result]);
+				printf("%ld:%s\n", result + 1, answer_list[result]);
 			}
 		}
 	}
@@ -182,7 +182,7 @@ if ((qrel_fp = fopen(qrel_file, "rb")) == NULL)
 
 while (fgets(text, sizeof(text), qrel_fp) != NULL)
 	{
-	if ((sscanf(text, "%d %d", &current_assessment->topic, &current_assessment->docid)) != 2)
+	if ((sscanf(text, "%ld %ld", &current_assessment->topic, &current_assessment->docid)) != 2)
 		exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", qrel_file, current_assessment - all_assessments));
 	current_assessment++;
 	}
@@ -209,7 +209,7 @@ double average_precision, sum_of_average_precisions, mean_average_precision;
 
 fprintf(stderr, "Ant %s Copyright (c) 2008 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
-fprintf(stderr, "Index contains %d documents\n", search_engine.document_count());
+fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
 
 assessments = get_qrels(&memory, qrel_file, &number_of_assessments);
 ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
@@ -224,17 +224,17 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	strip_end_punc(query);
 	topic_id = atol(query);
 	if ((query_text = strchr(query, ' ')) == NULL)
-		exit(printf("Line %d: Can't process query as badly formed:'%s'\n", line, query));
+		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 
 	average_precision = perform_query(&search_engine, query_text, &hits, topic_id, &map);
 	sum_of_average_precisions += average_precision;
-	fprintf(stderr, "Topic:%d Average Precision:%f\n", topic_id, average_precision);
+	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
 	}
 fclose(fp);
 
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
-printf("Processed %d topics (MAP:%f)\n", line - 1, mean_average_precision);
+printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 }
 
 /*

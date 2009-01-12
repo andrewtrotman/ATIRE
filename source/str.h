@@ -55,7 +55,7 @@ inline static char *strlwr(char *string)
 unsigned char *ch;
 
 for (ch = (unsigned char *)string; *ch != '\0'; ch++)
-	*ch = ANT_tolower[*ch];
+	*ch = ANT_tolower(*ch);     // Changed
 
 return string;
 }

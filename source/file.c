@@ -7,13 +7,16 @@
 #include "memory.h"
 
 #ifdef linux
-	#define _LARGEFILE_SOURCE
+    #include <sys/stat.h>
+    #define _LARGEFILE_SOURCE
 	#define _LARGEFILE64_SOURCE
 	#define FILE_OFFSET_BITS 64
 	#define ftell ftello
 	#define fseek fseeko
 	#define fstat _fstat64
 	#define stat stat64
+#elif defined(__APPLE__)
+	#include <sys/stat.h>
 #elif defined(_MSC_VER)
 	#include <sys/types.h>
 	#include <sys/stat.h>

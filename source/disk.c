@@ -4,6 +4,8 @@
 */
 #ifdef _MSC_VER
 	#include <windows.h>
+#else
+#include <string.h>
 #endif
 #include <new>
 #include <stdio.h>
@@ -51,7 +53,7 @@ if (filename == NULL)
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
 
-if (fstat(_fileno(fp), &details) != 0)
+ if (fstat(fileno(fp), &details) != 0) /* '_fileno' was not declared in this scope */
 	return NULL;
 
 if (details.st_size == 0)

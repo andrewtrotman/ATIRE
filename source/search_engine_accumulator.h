@@ -6,6 +6,8 @@
 #ifndef __SEARCH_ENGINE_ACCUMULATORS_H__
 #define __SEARCH_ENGINE_ACCUMULATORS_H__
 
+#include <stdlib.h>
+
 class ANT_search_engine_accumulator
 {
 private:

@@ -5,7 +5,13 @@
 #ifndef __DISK_INTERNALS_H__
 #define __DISK_INTERNALS_H__
 
+#ifdef _MSC_VER
 #include <windows.h>
+#else
+#include <glob.h>
+#include <sys/syslimits.h>
+#include <stdio.h>
+#endif
 
 class ANT_disk_internals
 {
@@ -17,6 +23,7 @@ public:
 		FILE *file_list;
 		glob_t matching_files;
 		unsigned int glob_index;
+    #define MAX_PATH PATH_MAX
 	#endif
 	char pathname[MAX_PATH];
 	char fully_qualified_filename[MAX_PATH];

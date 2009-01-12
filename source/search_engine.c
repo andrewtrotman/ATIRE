@@ -69,7 +69,7 @@ index->read(block, (long)(end - term_header));
 	The first sizeof(long long) bytes of the header are the number of nodes in the root
 */
 btree_nodes = (long)(get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
-printf("There are %d nodes in the root of the btree\n", btree_nodes - 1);
+printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
 block += sizeof(long long);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 
@@ -320,7 +320,8 @@ while (start < end)
 		*into = *start++;
 		while (!(*start & 0x80))
 		   *into = (*into << 7) | *start++;
-		*into++ = (*into << 7) | (*start++ & 0x7F);
+		*into = (*into << 7) | (*start++ & 0x7F); // Changed
+        into++;
 		}
 }
 
