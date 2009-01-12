@@ -2,8 +2,10 @@
 	DISK.C
 	------
 */
-#include <windows.h>
-#include <new.h>
+#ifdef _MSC_VER
+	#include <windows.h>
+#endif
+#include <new>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -127,8 +129,16 @@ char *ANT_disk::get_first_filename(char *wildcard)
 {
 char *slash, *colon, *backslash, *max;
 
+#ifdef _MSC_VER
 if ((internals->file_list = FindFirstFile(wildcard, &internals->file_data)) == INVALID_HANDLE_VALUE)
 	return NULL;
+#else
+glob(wildcard, 0, NULL, &internals->matching_files);
+internals->glob_index = 0;
+
+if (internals->matching_files.gl_pathc == 0) /* None found */
+	return NULL;
+#endif
 
 strcpy(internals->pathname, wildcard);
 
@@ -146,7 +156,11 @@ if (colon > max)
 
 *(max + 1) = '\0';
 
+#ifdef _MSC_VER
 return construct_full_path(internals->file_data.cFileName);
+#else
+return internals->matching_files.gl_pathv[internals->glob_index++];
+#endif
 }
 
 /*
@@ -155,13 +169,23 @@ return construct_full_path(internals->file_data.cFileName);
 */
 char *ANT_disk::get_next_filename(void)
 {
-if (FindNextFile(internals->file_list, &internals->file_data) == 0)
-	{
-	FindClose(internals->file_list);
-	return NULL;
-	}
+#ifdef _MSC_VER
+	if (FindNextFile(internals->file_list, &internals->file_data) == 0)
+		{
+		FindClose(internals->file_list);
+		return NULL;
+		}
 
-return construct_full_path(internals->file_data.cFileName);
+	return construct_full_path(internals->file_data.cFileName);
+#else
+	if (internals->glob_index == internals->matching_files.gl_pathc)
+		{
+		globfree(&internals->matching_files);
+		return NULL;
+		}
+
+	return internals->matching_files.gl_pathv[internals->glob_index++];
+#endif
 }
 
 

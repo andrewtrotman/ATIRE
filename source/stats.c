@@ -34,7 +34,7 @@ long long ANT_stats::print_time(char *message, long long time_taken, char *end_m
 char *units = "milliseconds";
 long long hours, minutes, seconds, milliseconds;
 
-milliseconds = time_taken / (get_clock_tick_frequency() / 1000.0);
+milliseconds = (long long)(time_taken / (get_clock_tick_frequency() / 1000.0));
 seconds = milliseconds / 1000;
 minutes = seconds / 60;
 hours = minutes / 60;
@@ -105,7 +105,7 @@ long long ANT_stats::clock_tick_frequency(void)
 {
 #ifdef __APPLE__
 	return AbsoluteToNanoseconds(1);
-#elif define (_MSC_VER)
+#elif defined (_MSC_VER)
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	return frequency.QuadPart;

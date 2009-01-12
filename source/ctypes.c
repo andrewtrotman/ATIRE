@@ -8,22 +8,22 @@
 
 unsigned char ANT_ctype[] =
 	{
-	_C,_C,_C,_C,_C,_C,_C,_C,                        /* 0-7 */
-	_C,_C|_S,_C|_S,_C|_S,_C|_S,_C|_S,_C,_C,         /* 8-15 */
-	_C,_C,_C,_C,_C,_C,_C,_C,                        /* 16-23 */
-	_C,_C,_C,_C,_C,_C,_C,_C,                        /* 24-31 */
-	_S|_SP,_P,_P,_P,_P,_P,_P,_P,                    /* 32-39 */
-	_P,_P,_P,_P,_P,_P,_P,_P,                        /* 40-47 */
-	_D,_D,_D,_D,_D,_D,_D,_D,                        /* 48-55 */
-	_D,_D,_P,_P,_P,_P,_P,_P,                        /* 56-63 */
-	_P,_U|_X,_U|_X,_U|_X,_U|_X,_U|_X,_U|_X,_U,      /* 64-71 */
-	_U,_U,_U,_U,_U,_U,_U,_U,                        /* 72-79 */
-	_U,_U,_U,_U,_U,_U,_U,_U,                        /* 80-87 */
-	_U,_U,_U,_P,_P,_P,_P,_P,                        /* 88-95 */
-	_P,_L|_X,_L|_X,_L|_X,_L|_X,_L|_X,_L|_X,_L,      /* 96-103 */
-	_L,_L,_L,_L,_L,_L,_L,_L,                        /* 104-111 */
-	_L,_L,_L,_L,_L,_L,_L,_L,                        /* 112-119 */
-	_L,_L,_L,_P,_P,_P,_P,_C,                        /* 120-127 */
+	_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,                        /* 0-7 */
+	_ANT_C,_ANT_C|_ANT_S,_ANT_C|_ANT_S,_ANT_C|_ANT_S,_ANT_C|_ANT_S,_ANT_C|_ANT_S,_ANT_C,_ANT_C,         /* 8-15 */
+	_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,                        /* 16-23 */
+	_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,_ANT_C,                        /* 24-31 */
+	_ANT_S|_ANT_SP,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,                    /* 32-39 */
+	_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,                        /* 40-47 */
+	_ANT_D,_ANT_D,_ANT_D,_ANT_D,_ANT_D,_ANT_D,_ANT_D,_ANT_D,                        /* 48-55 */
+	_ANT_D,_ANT_D,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,                        /* 56-63 */
+	_ANT_P,_ANT_U|_ANT_X,_ANT_U|_ANT_X,_ANT_U|_ANT_X,_ANT_U|_ANT_X,_ANT_U|_ANT_X,_ANT_U|_ANT_X,_ANT_U,      /* 64-71 */
+	_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,                        /* 72-79 */
+	_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,_ANT_U,                        /* 80-87 */
+	_ANT_U,_ANT_U,_ANT_U,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_P,                        /* 88-95 */
+	_ANT_P,_ANT_L|_ANT_X,_ANT_L|_ANT_X,_ANT_L|_ANT_X,_ANT_L|_ANT_X,_ANT_L|_ANT_X,_ANT_L|_ANT_X,_ANT_L,      /* 96-103 */
+	_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,                        /* 104-111 */
+	_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,_ANT_L,                        /* 112-119 */
+	_ANT_L,_ANT_L,_ANT_L,_ANT_P,_ANT_P,_ANT_P,_ANT_P,_ANT_C,                        /* 120-127 */
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 128-143 */
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 144-159 */
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 160-175 */
