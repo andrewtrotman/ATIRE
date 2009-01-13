@@ -37,6 +37,7 @@ ANT_PARTS = \
     disk_internals.o \
     btree_iterator.o \
     top_k_sort.o \
+    stemmer.o	\
     relevant_topic.o
 
 all : $(BINDIR)/index $(BINDIR)/ant
@@ -48,7 +49,7 @@ $(BINDIR)/index : $(INDEX_PARTS) index.o
 	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/index.o $(INDEX_PARTS:%=$(OBJDIR)/%)
 
 $(BINDIR)/ant : $(ANT_PARTS) ant.o 
-	$(CC) $(CFLAGS) -o $@ $(OBJDIR)/ant.o $(ANT_PARTS:%=$(OBJDIR)/%)
+	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant.o $(ANT_PARTS:%=$(OBJDIR)/%)
 
 .PHONY : clean
 clean :
