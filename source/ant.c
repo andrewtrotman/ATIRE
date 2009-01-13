@@ -15,6 +15,7 @@
 #include "time_stats.h"
 #include "stemmer.h"
 #include "stemmer_none.h"
+#include "stemmer_porter.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -51,7 +52,7 @@ char *token_start, *token_end;
 long hits, token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-ANT_stemmer stemmer(search_engine);
+ANT_stemmer_porter stemmer(search_engine);
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 

@@ -37,6 +37,7 @@ ANT_PARTS = \
 	$(OBJDIR)\btree_iterator.obj \
 	$(OBJDIR)\top_k_sort.obj \
 	$(OBJDIR)\stemmer.obj	\
+	$(OBJDIR)\stemmer_porter.obj	\
 	$(OBJDIR)\relevant_topic.obj
 	
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
