@@ -38,6 +38,7 @@ ANT_PARTS = \
     btree_iterator.o \
     top_k_sort.o \
     stemmer.o	\
+    stemmer_porter.o	\
     relevant_topic.o
 
 all : $(BINDIR)/index $(BINDIR)/ant
