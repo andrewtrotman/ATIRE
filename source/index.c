@@ -34,26 +34,56 @@ unsigned char *file;
 long param, done_work;
 ANT_memory_index *index;
 long long doc, now;
-long terms_in_document;
+long terms_in_document, first_param, trec_docnos;
 ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
-char *filename;
+char *filename, *uid_start, *uid_end;
+char uid_buffer[1024];
 
 if (argc < 2)
-	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
+	exit(printf("Usage:%s [-docno] <filespec> ...\n-docno uses TREC <DOCNO> for document names (default: use filename and each document is in a seperate file).\n", argv[0]));
 doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
 index = new ANT_memory_index;
 id_list.open("doclist.aspt", "wb");
-for (param = 1; param < argc; param++)
+
+first_param = 1;
+trec_docnos = FALSE;
+if (strcmp(argv[1], "-docno") == 0)
+	{
+	first_param++;
+	trec_docnos = TRUE;
+	}
+for (param = first_param; param < argc; param++)
 	{
 	now = stats.start_timer();
 	file = (unsigned char *)disk.read_entire_file(filename = disk.get_first_filename(argv[param]));
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
 		{
-		id_list.puts(filename);
+		if (trec_docnos)
+			{
+			/*
+				Find each and every document ID in the current file and write then to disk
+			*/
+			for (uid_start = strstr((char *)file, "<DOCNO>"); uid_start != NULL; uid_start = strstr(uid_end, "<DOCNO>"))
+				{
+				uid_start += 7;
+				uid_end = strstr(uid_start, "</DOCNO>");
+				if (uid_end - uid_start > sizeof(uid_buffer))
+					{
+					printf("UID longer than UID buffer, truncating at %d characters\n", sizeof(uid_buffer) - 1);
+					uid_end = uid_start + sizeof(uid_buffer) - 1;
+					}
+				strncpy(uid_buffer, uid_start, uid_end - uid_start);
+				uid_buffer[uid_end - uid_start] = '\0';
+				strip_space_inplace(uid_buffer);
+				id_list.puts(uid_buffer);
+				}
+			}
+		else
+			id_list.puts(filename);		// each document is in a seperate file (so filenames are external document ids)
 		done_work = FALSE;
 		doc++;
 		if (doc % 10000 == 0)

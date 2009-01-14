@@ -49,6 +49,27 @@ return buffer;
 }
 
 /*
+	STRIP_SPACE_INPLACE()
+	---------------------
+*/
+inline char *strip_space_inplace(char *source)
+{
+char *end, *start = source;
+
+while (ANT_isspace(*start))
+	start++;
+
+if (start > source)
+	memmove(source, start, strlen(start) + 1);      // copy the '\0'
+
+end = source + strlen(source) - 1;
+while ((end >= source) && (ANT_isspace(*end)))
+	*end-- = '\0';
+
+return source;
+}
+
+/*
 	STRREV()
 	--------
 */
