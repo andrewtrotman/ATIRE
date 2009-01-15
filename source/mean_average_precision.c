@@ -85,7 +85,7 @@ accumulators = search_engine->accumulator;
 results_list_length = search_engine->document_count();
 
 for (current = 0; current < results_list_length; current++)
-	if (results_list[current]->rsv != 0)
+	if (!results_list[current]->is_zero_rsv())
 		{
 		key.docid = results_list[current] - accumulators;
 		if (bsearch(&key, relevance_list, relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare) != NULL)

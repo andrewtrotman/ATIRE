@@ -54,7 +54,8 @@ ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 ANT_stemmer_porter stemmer(search_engine);
 
-search_engine->stats_initialise();		// if we are command-line then report query by query stats
+if (topic_id == -1)
+	search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
 did_query = FALSE;
 now = stats.start_timer();
@@ -101,8 +102,8 @@ else
 	{
 	printf("Topic:%ld Query '%s' found %ld documents ", topic_id, query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
-	if (did_query)
-		search_engine->stats_text_render();
+//	if (did_query)
+//		search_engine->stats_text_render();
 	average_precision = map->average_precision(topic_id, search_engine);
 	}
 
@@ -123,8 +124,7 @@ long last_to_list, hits, more, documents_in_id_list;
 char *document_list_buffer, **document_list, **answer_list;
 
 printf("Ant %s\n", ANT_version_string);
-puts("---");
-puts("Copyright (c) 2008");
+puts("Written (w) 2008, 2009");
 puts("Andrew Trotman, University of Otago");
 puts("andrew@cs.otago.ac.nz");
 
@@ -218,7 +218,7 @@ FILE *fp;
 char *query_text;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 
-fprintf(stderr, "Ant %s Copyright (c) 2008 Andrew Trotman, University of Otago\n", ANT_version_string);
+fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
 
@@ -246,6 +246,8 @@ fclose(fp);
 
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
 printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
+
+search_engine.stats_text_render();
 }
 
 /*

@@ -15,10 +15,10 @@
 */
 int ANT_search_engine_accumulator::compare(const void *a, const void *b)
 {
-double sign;
+ANT_accumulator_t sign;
 
 sign = ((ANT_search_engine_accumulator *)a)->rsv - ((ANT_search_engine_accumulator *)b)->rsv;
-return sign < 0.0 ? 1 : sign > 0.0 ? -1 : 0;
+return sign < 0 ? 1 : sign > 0 ? -1 : 0;
 }
 
 /*
@@ -27,10 +27,10 @@ return sign < 0.0 ? 1 : sign > 0.0 ? -1 : 0;
 */
 int ANT_search_engine_accumulator::compare_pointer(const void *a, const void *b)
 {
-double sign;
+ANT_accumulator_t sign;
 
 sign = (*(ANT_search_engine_accumulator **)a)->rsv - (*(ANT_search_engine_accumulator **)b)->rsv;
-return sign < 0.0 ? 1 : sign > 0.0 ? -1 : 0;
+return sign < 0 ? 1 : sign > 0 ? -1 : 0;
 }
 
 /*
@@ -39,10 +39,10 @@ return sign < 0.0 ? 1 : sign > 0.0 ? -1 : 0;
 */
 inline int ANT_search_engine_accumulator::compare_pointer(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b)
 {
-double diff;
+ANT_accumulator_t diff;
 
 diff = (*a)->rsv - (*b)->rsv;
-return diff < 0.0 ? 1 : diff > 0.0 ? -1 : 0;
+return diff < 0 ? 1 : diff > 0 ? -1 : 0;
 }
 
 /*

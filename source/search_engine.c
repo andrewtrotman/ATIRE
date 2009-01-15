@@ -382,7 +382,7 @@ for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid += postings->docid[which];
 	tf = postings->tf[which];
-	accumulator[docid].rsv += (float)(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+	accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 	}
 }
 
@@ -452,14 +452,11 @@ long long now, collection_frequency;
 long document, *current_document, *current_tf, *end;
 char *term;
 
-/*
-	TIME THIS (below)
-*/
+now = stats->start_timer();
 memset(stem_buffer, 0, stem_buffer_length_in_bytes);
 collection_frequency = 0;
-/*
-	TIME THIS (above)
-*/
+stats->add_stemming_time(stats->stop_timer(now));
+
 now = stats->start_timer();
 term = stemmer->first(base_term);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
@@ -480,9 +477,7 @@ while (term != NULL)
 	decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
 	stats->add_decompress_time(stats->stop_timer(now));
 
-/*
-	TIME THIS (below)
-*/
+	now = stats->start_timer();
 	collection_frequency += term_details.collection_frequency;
 	end = posting.docid + term_details.document_frequency;
 	document = -1;
@@ -491,22 +486,16 @@ while (term != NULL)
 		document += *current_document;
 		stem_buffer[document] += *current_tf;
 		}
-/*
-	TIME THIS (above)
-*/
+	stats->add_stemming_time(stats->stop_timer(now));
 
 	now = stats->start_timer();
 	term = stemmer->next();
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 	}
 
-/*
-	TIME THIS (below)
-*/
+now = stats->start_timer();
 stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buffer);
-/*
-	TIME THIS (above)
-*/
+stats->add_stemming_time(stats->stop_timer(now));
 
 now = stats->start_timer();
 bm25_rank(&stemmed_term_details, &posting);
@@ -539,7 +528,7 @@ now = stats->start_timer();
 found = 0;
 end = accumulator_pointers + documents;
 for (current = accumulator_pointers; current < end; current++)
-	if ((*current)->rsv != 0.0)
+	if (!(*current)->is_zero_rsv())
 		found++;
 
 *hits = found;
@@ -561,7 +550,7 @@ ANT_search_engine_accumulator **current, **end;
 found = 0;
 end = accumulator_pointers + documents;
 for (current = accumulator_pointers; current < end; current++)
-	if ((*current)->rsv != 0.0)
+	if (!(*current)->is_zero_rsv())
 		{
 		if (found < top_k)		// first page
 			sorted_id_list[found] = document_id_list[*current - accumulator];
