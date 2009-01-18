@@ -16,6 +16,7 @@
 #include "stemmer.h"
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
+#include "INEX_assessment.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -25,6 +26,8 @@
 #endif
 
 static char *ANT_version_string = "Version 0.1 alpha";
+
+enum {QREL_INEX, QREL_ANT};
 
 /*
 	SPECIAL_COMMAND()
@@ -112,25 +115,38 @@ return average_precision;
 }
 
 /*
+	READ_DOCID_LIST()
+	-----------------
+*/
+char **read_docid_list(long *documents_in_id_list)
+{
+ANT_disk disk;
+char *document_list_buffer, **document_list;
+
+if ((document_list_buffer = disk.read_entire_file("doclist.aspt")) == NULL)
+	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+document_list = disk.buffer_to_list(document_list_buffer, documents_in_id_list);
+
+return document_list;
+}
+
+/*
 	COMMAND_DRIVEN_ANT()
 	--------------------
 */
 void command_driven_ant(void)
 {
-ANT_disk disk;
 ANT_memory memory;
 char query[1024];
 long last_to_list, hits, more, documents_in_id_list;
-char *document_list_buffer, **document_list, **answer_list;
+char **document_list, **answer_list;
 
 printf("Ant %s\n", ANT_version_string);
 puts("Written (w) 2008, 2009");
 puts("Andrew Trotman, University of Otago");
 puts("andrew@cs.otago.ac.nz");
 
-if ((document_list_buffer = disk.read_entire_file("doclist.aspt")) == NULL)
-	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
-document_list = disk.buffer_to_list(document_list_buffer, &documents_in_id_list);
+document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 ANT_search_engine search_engine(&memory);
@@ -165,11 +181,10 @@ puts("Bye");
 }
 
 /*
-	GET_QRELS()
-	-----------
-	This is highly inefficient, but because it only happens once that's OK.
+	GET_ANT_QRELS()
+	---------------
 */
-ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length)
+ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length)
 {
 ANT_disk file_system;
 ANT_relevant_document *all_assessments, *current_assessment;
@@ -205,24 +220,42 @@ return all_assessments;
 }
 
 /*
+	GET_QRELS()
+	-----------
+	This is highly inefficient, but because it only happens once that's OK.
+*/
+ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length, long qrel_format, char **uid_list, long uid_list_length)
+{
+if (qrel_format == QREL_INEX)
+	{
+	ANT_INEX_assessment qrel_reader(memory, uid_list, uid_list_length);
+	return qrel_reader.read(qrel_file, qrel_list_length);
+	}
+else
+	return get_ant_qrels(memory, qrel_file, qrel_list_length);
+}
+
+/*
+
 	BATCH_ANT()
 	-----------
 */
-void batch_ant(char *topic_file, char *qrel_file)
+void batch_ant(char *topic_file, char *qrel_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
-long topic_id, line, number_of_assessments, hits;
+long topic_id, line, number_of_assessments, hits, documents_in_id_list;
 ANT_memory memory;
 FILE *fp;
-char *query_text;
+char *query_text, **document_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
 
-assessments = get_qrels(&memory, qrel_file, &number_of_assessments);
+document_list = read_docid_list(&documents_in_id_list);
+assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
 ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
 
 if ((fp = fopen(topic_file, "rb")) == NULL)
@@ -269,7 +302,7 @@ int main(int argc, char *argv[])
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	batch_ant(argv[1], argv[2]);
+	batch_ant(argv[1], argv[2], QREL_ANT);
 else
 	usage(argv[0]);
 
