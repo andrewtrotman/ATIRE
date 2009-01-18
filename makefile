@@ -28,6 +28,7 @@ ANT_PARTS = \
 	$(OBJDIR)\search_engine.obj \
 	$(OBJDIR)\search_engine_accumulator.obj \
 	$(OBJDIR)\mean_average_precision.obj \
+	$(OBJDIR)\INEX_assessment.obj \
 	$(OBJDIR)\relevant_document.obj \
 	$(OBJDIR)\stats.obj\
 	$(OBJDIR)\time_stats.obj\
