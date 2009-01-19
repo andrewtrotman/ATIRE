@@ -352,7 +352,7 @@ for (from = start; from < end; from++)
 */
 void ANT_search_engine::bm25_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
 {
-const double k1 = 2.0;
+const double k1 = 1.2;
 const double b = 0.75;
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
@@ -366,7 +366,7 @@ docid = -1;
 	IDF = log -----------
 	            n + 0.5
 
-	It is not clear from the BM25 papers what base should be used, so this implementation uses the natural log of x.  
+	It is not clear from the BM25 papers what log-base should be used, so this implementation uses the natural log of x.  
 */
 idf = log(((double)documents - (double)term_details->document_frequency + 0.5) / ((double)term_details->document_frequency + 0.5));
 
@@ -376,39 +376,16 @@ idf = log(((double)documents - (double)term_details->document_frequency + 0.5) /
 	                                  len(d)
 	      tf(td) + k1 * (1 - b + b * --------)
                                     av_len_d
+
+	In this implementation we ignore k3 and the number of times the term occurs in the query.
 */
 
 for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid += postings->docid[which];
 	tf = postings->tf[which];
-//	if (tf >= 255 || tf <= 0)
-//		printf("TF:%f for DOCID:%d\n", tf, docid);
-	/*
-		ASPT's function (MAP:0.219359)
-		accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
-	*/
 
-	/*
-		CKL's function (MAP:0.226965)
-		(k3 + 1) * terms->get_freq(i) * (k1 + 1) * tf * idf / ((k3 + terms->get_freq(i)) *  (k1 * (b * docno_readbuf->get_num_words(docid) / avg_doclen + (1 - b)) + tf));
-	*/
-
-	const double k1 = 1.2;
-	const double k3 = 7.0;
-	const double b = 0.75;
-	double v;
-
-
-	accumulator[docid].add_rsv
-		(
-		v = (k3 + 1) * 1.0 * (k1 + 1) * tf * idf / ((k3 + 1.0) * (k1 * (b * (double)document_lengths[docid] / (double)mean_document_length + (1 - b)) + tf))
-		);
-
-//	if (docid == 474252 || docid == 5580)
-//		{
-//		printf("DOC:%d TF:%f dl:%f avdl:%f rsv:%f\n", docid, tf, (double)document_lengths[docid], (double)mean_document_length, v);
-//		}
+	accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 	}
 }
 
