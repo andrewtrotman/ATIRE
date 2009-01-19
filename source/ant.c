@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	batch_ant(argv[1], argv[2], QREL_ANT);
+	batch_ant(argv[1], argv[2], QREL_INEX);
 else
 	usage(argv[0]);
 

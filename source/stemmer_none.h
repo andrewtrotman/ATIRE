@@ -6,6 +6,7 @@
 #ifndef __STEMMER_NONE_H__
 #define __STEMMER_NONE_H__
 
+#include <string.h>
 #include "stemmer.h"
 
 class ANT_stemmer_none : public ANT_stemmer
@@ -17,7 +18,7 @@ public:
 	virtual char *first(char *term) { return ANT_btree_iterator::first(term); }
 	virtual char *next(void) { return NULL; }
 
-	virtual char *stem(char *term) { return term; }
+	virtual long stem(char *term, char *dest) {  return strlen(strcpy(dest, term)); }
 } ;
 
 

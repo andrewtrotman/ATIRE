@@ -14,7 +14,12 @@
 */
 int ANT_INEX_assessment::cmp(const void *a, const void *b)
 {
-return *(long **)a - *(long **)b;
+long **one, **two;
+
+one = (long **)a;
+two = (long **)b;
+
+return **one - **two;
 }
 
 /*
@@ -49,15 +54,17 @@ current_docid = numeric_docid_list = (long *)memory->malloc(sizeof(*numeric_doci
 current_sorted_docid = sorted_numeric_docid_list = (long **)memory->malloc(sizeof(*sorted_numeric_docid_list) * documents);
 for (current = docid_list; *current != NULL; current++)
 	{
+	slish = *current;
 	slash = strchr(*current, '/');
 	slosh = strchr(*current, '\\');
-	slish = *current;
-	if ((start = max(slish, slash, slosh)) == NULL)
-		break;
-	*current_docid = atol(start);
-	*current_sorted_docid = current_docid;
-	current_docid++;
-	current_sorted_docid++;
+	start = max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
+	if (*start != '\0')		// avoid blank lines at the end of the file
+		{
+		*current_docid = atol(start + 1);
+		*current_sorted_docid = current_docid;
+		current_docid++;
+		current_sorted_docid++;
+		}
 	}
 qsort(sorted_numeric_docid_list, documents, sizeof(*sorted_numeric_docid_list), cmp);
 }
@@ -109,7 +116,7 @@ for (current = lines; *current != 0; current++)
 		if (found == NULL)
 			printf("DOC:%d is in the assessments, but not in the collection\n", document);
 		else
-			current_assessment->docid = numeric_docid_list - *found;		// the position in the list of documents is the internal docid used for computing precision
+			current_assessment->docid = *found - numeric_docid_list;		// the position in the list of documents is the internal docid used for computing precision
 		current_assessment->topic = topic;
 		current_assessment->rsv = (double)relevant_characters / (double)document_length;
 		current_assessment++;

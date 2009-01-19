@@ -384,6 +384,13 @@ for (which = 0; which < term_details->document_frequency; which++)
 	tf = postings->tf[which];
 	accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 	}
+
+
+
+
+// (k3 + 1) * terms->get_freq(i) * (k1 + 1) * tf * idf / ((k3 + terms->get_freq(i)) *  (k1 * (b * docno_readbuf->get_num_words(docid) / avg_doclen + (1 - b)) + tf));
+
+
 }
 
 /*

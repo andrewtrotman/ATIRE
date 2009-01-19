@@ -56,7 +56,7 @@ if ((fp = fopen(filename, "rb")) == NULL)
 
 if (fstat(fileno(fp), &details) == 0)
 	if (details.st_size != 0)
-		if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)
+		if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
 			if (fread(block, (long)details.st_size, 1, fp) == 1)
 				block[details.st_size] = '\0';
 			else
@@ -85,8 +85,8 @@ for (pos = buffer; *pos != '\0'; pos++)
 	else if (*pos == '\r')
 		r_frequency++;
 
-*lines = (r_frequency > n_frequency ? r_frequency : n_frequency);
-current_line = line_list = new char * [*lines + 1]; 		// +1 in case the last line has no \n; +1 for a NULL at the end of the list
+*lines = r_frequency > n_frequency ? r_frequency : n_frequency;
+current_line = line_list = new (std::nothrow) char * [*lines + 2]; 		// +1 in case the last line has no \n; +1 for a NULL at the end of the list
 
 *current_line++ = pos = buffer;
 while (*pos != '\0')

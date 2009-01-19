@@ -21,7 +21,7 @@ char *title_pos, *first_char, *into;
 long topic;
 
 if (argc != 2)
-	exit(printf("Usage:%s\n", argv[0]));
+	exit(printf("Usage:%s <topic_file (INEX 2008 format)\n", argv[0]));
 
 if ((fp = fopen(argv[1], "rb")) == NULL)
 	exit(printf("Cannot open INEX topic file:%s\n", argv[1]));
