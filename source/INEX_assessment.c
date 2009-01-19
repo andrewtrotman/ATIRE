@@ -60,7 +60,7 @@ for (current = docid_list; *current != NULL; current++)
 	start = max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
 	if (*start != '\0')		// avoid blank lines at the end of the file
 		{
-		*current_docid = atol(start + 1);
+		*current_docid = atol(start + (start == slish ? 0 : 1));
 		*current_sorted_docid = current_docid;
 		current_docid++;
 		current_sorted_docid++;

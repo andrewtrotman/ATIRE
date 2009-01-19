@@ -111,6 +111,7 @@ for (param = first_param; param < argc; param++)
 					}
 			}
 		index->set_document_length(doc, terms_in_document);
+		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();
 		file = (unsigned char *)disk.read_entire_file(filename = disk.get_next_filename());

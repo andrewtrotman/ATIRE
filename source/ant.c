@@ -17,6 +17,7 @@
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
 #include "INEX_assessment.h"
+#include "search_engine_forum.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -247,14 +248,17 @@ char query[1024];
 long topic_id, line, number_of_assessments, hits, documents_in_id_list;
 ANT_memory memory;
 FILE *fp;
-char *query_text, **document_list;
+char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
+ANT_search_engine_forum output("ant.out");
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
 
 document_list = read_docid_list(&documents_in_id_list);
+answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
+
 assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
 ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
 
@@ -263,6 +267,7 @@ if ((fp = fopen(topic_file, "rb")) == NULL)
 
 sum_of_average_precisions = 0.0;
 line = 1;
+output.INEX_init();
 while (fgets(query, sizeof(query), fp) != NULL)
 	{
 	strip_end_punc(query);
@@ -274,9 +279,11 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	sum_of_average_precisions += average_precision;
 	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
+	search_engine.generate_results_list(document_list, answer_list, hits);
+	output.INEX_export(topic_id, answer_list, hits);
 	}
 fclose(fp);
-
+output.INEX_close();
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
 printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 

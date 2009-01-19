@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 TOOLDIR = tools
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
 CC = @cl
 
 PARTS = \
@@ -33,6 +33,7 @@ ANT_PARTS = \
 	$(OBJDIR)\stats.obj\
 	$(OBJDIR)\time_stats.obj\
 	$(OBJDIR)\search_engine_stats.obj\
+	$(OBJDIR)\search_engine_forum.obj\
 	$(OBJDIR)\disk.obj \
 	$(OBJDIR)\disk_internals.obj \
 	$(OBJDIR)\btree_iterator.obj \

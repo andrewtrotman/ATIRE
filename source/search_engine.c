@@ -382,15 +382,34 @@ for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid += postings->docid[which];
 	tf = postings->tf[which];
-	accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+//	if (tf >= 255 || tf <= 0)
+//		printf("TF:%f for DOCID:%d\n", tf, docid);
+	/*
+		ASPT's function (MAP:0.219359)
+		accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+	*/
+
+	/*
+		CKL's function (MAP:0.226965)
+		(k3 + 1) * terms->get_freq(i) * (k1 + 1) * tf * idf / ((k3 + terms->get_freq(i)) *  (k1 * (b * docno_readbuf->get_num_words(docid) / avg_doclen + (1 - b)) + tf));
+	*/
+
+	const double k1 = 1.2;
+	const double k3 = 7.0;
+	const double b = 0.75;
+	double v;
+
+
+	accumulator[docid].add_rsv
+		(
+		v = (k3 + 1) * 1.0 * (k1 + 1) * tf * idf / ((k3 + 1.0) * (k1 * (b * (double)document_lengths[docid] / (double)mean_document_length + (1 - b)) + tf))
+		);
+
+//	if (docid == 474252 || docid == 5580)
+//		{
+//		printf("DOC:%d TF:%f dl:%f avdl:%f rsv:%f\n", docid, tf, (double)document_lengths[docid], (double)mean_document_length, v);
+//		}
 	}
-
-
-
-
-// (k3 + 1) * terms->get_freq(i) * (k1 + 1) * tf * idf / ((k3 + terms->get_freq(i)) *  (k1 * (b * docno_readbuf->get_num_words(docid) / avg_doclen + (1 - b)) + tf));
-
-
 }
 
 /*
