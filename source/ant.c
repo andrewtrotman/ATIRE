@@ -121,13 +121,19 @@ return average_precision;
 */
 char **read_docid_list(long *documents_in_id_list)
 {
+static char **document_list = NULL;
+static long len = 0;
 ANT_disk disk;
-char *document_list_buffer, **document_list;
+char *document_list_buffer;
 
-if ((document_list_buffer = disk.read_entire_file("doclist.aspt")) == NULL)
-	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
-document_list = disk.buffer_to_list(document_list_buffer, documents_in_id_list);
+if (document_list == NULL)		// only read once if this routine is called multiple times (nasty)
+	{
+	if ((document_list_buffer = disk.read_entire_file("doclist.aspt")) == NULL)
+		exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+	document_list = disk.buffer_to_list(document_list_buffer, &len);
+	}
 
+*documents_in_id_list = len;
 return document_list;
 }
 
@@ -187,34 +193,38 @@ puts("Bye");
 */
 ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length)
 {
+static ANT_relevant_document *all_assessments = NULL;
+static long lines = 0;
 ANT_disk file_system;
-ANT_relevant_document *all_assessments, *current_assessment;
+ANT_relevant_document *current_assessment;
 FILE *qrel_fp;
 char *entire_file, *ch;
-long lines;
 char text[80];
 
-if ((entire_file = file_system.read_entire_file(qrel_file)) == NULL)
-	exit(fprintf(stderr, "Cannot read qrel file:%s\n", qrel_file));
-
-lines = 0;
-for (ch = entire_file; *ch != '\0'; ch++)
-	if (*ch == '\n')
-		lines++;
-
-current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(sizeof(*all_assessments) * lines);
-
-if ((qrel_fp = fopen(qrel_file, "rb")) == NULL)
-	exit(fprintf(stderr, "Cannot open topic file:%s\n", qrel_file));
-
-while (fgets(text, sizeof(text), qrel_fp) != NULL)
+if (all_assessments == NULL)		// nasty, but it'll have to do in the mean time.
 	{
-	if ((sscanf(text, "%ld %ld", &current_assessment->topic, &current_assessment->docid)) != 2)
-		exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", qrel_file, current_assessment - all_assessments));
-	current_assessment++;
-	}
+	if ((entire_file = file_system.read_entire_file(qrel_file)) == NULL)
+		exit(fprintf(stderr, "Cannot read qrel file:%s\n", qrel_file));
 
-fclose(qrel_fp);
+	lines = 0;
+	for (ch = entire_file; *ch != '\0'; ch++)
+		if (*ch == '\n')
+			lines++;
+
+	current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(sizeof(*all_assessments) * lines);
+
+	if ((qrel_fp = fopen(qrel_file, "rb")) == NULL)
+		exit(fprintf(stderr, "Cannot open topic file:%s\n", qrel_file));
+
+	while (fgets(text, sizeof(text), qrel_fp) != NULL)
+		{
+		if ((sscanf(text, "%ld %ld", &current_assessment->topic, &current_assessment->docid)) != 2)
+			exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", qrel_file, current_assessment - all_assessments));
+		current_assessment++;
+		}
+
+	fclose(qrel_fp);
+	}
 
 *qrel_list_length = lines;
 return all_assessments;
@@ -241,7 +251,7 @@ else
 	BATCH_ANT()
 	-----------
 */
-void batch_ant(char *topic_file, char *qrel_file, long qrel_format)
+double batch_ant(char *topic_file, char *qrel_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
@@ -288,6 +298,8 @@ mean_average_precision = sum_of_average_precisions / (double) (line - 1);
 printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 
 search_engine.stats_text_render();
+
+return mean_average_precision;
 }
 
 /*
@@ -300,16 +312,50 @@ printf("Usage:\n%s\nor\n", exename);
 printf("%s <topic_file> <qrel_file>\n", exename);
 }
 
+
 /*
 	MAIN()
 	------
 */
 int main(int argc, char *argv[])
 {
+double map;
+
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	batch_ant(argv[1], argv[2], QREL_INEX);
+	map = batch_ant(argv[1], argv[2], QREL_INEX);
+
+#ifdef NEVER
+/*
+	This code can be used for optimising the BM25 parameters.
+	In order to make it work you'll need to change the code for 
+	BM25 to declare and use the externs;
+*/
+else if (argc == 4)
+	{
+	FILE *outfile;
+	extern double BM25_k1;
+	extern double BM25_b;
+
+	outfile = fopen("a.out", "wb");
+	fprintf(outfile, ". ", BM25_b);
+	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
+		fprintf(outfile, "%f ", BM25_b);
+	fprintf(outfile, "\n");
+
+	for (BM25_k1 = 0.1; BM25_k1 < 4.0; BM25_k1+= 0.1)
+		{
+		fprintf(outfile, "%f ", BM25_k1);
+		for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
+			{
+			map = batch_ant(argv[1], argv[2], QREL_INEX);
+			fprintf(outfile, "%f ", map);
+			}
+		fprintf(outfile, "\n");
+		}
+	}
+#endif
 else
 	usage(argv[0]);
 

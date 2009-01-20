@@ -34,6 +34,7 @@
 */
 ANT_file::ANT_file(ANT_memory *memory)
 {
+fp = NULL;
 this->memory = memory;
 buffer = NULL;
 buffer_size = 0;
@@ -48,6 +49,7 @@ setvbuff(1024 * 1024);		// use a 1MB buffer by default.
 */
 ANT_file::~ANT_file()
 {
+close();
 }
 
 /*
@@ -82,9 +84,12 @@ return 1;
 */
 long ANT_file::close(void)
 {
-flush();
-fclose(fp);
-fp = NULL;
+if (fp != NULL)
+	{
+	flush();
+	fclose(fp);
+	fp = NULL;
+	}
 return 1;
 }
 
