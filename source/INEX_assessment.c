@@ -93,7 +93,7 @@ lines = disk.buffer_to_list(file, &lines_in_file);
 relevant_documents = 0;
 for (current = lines; *current != 0; current++)
 	{
-	sscanf(*current, "%d %*s %d %d %d", &topic, &document, &relevant_characters, &document_length);
+	sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
 	if (relevant_characters != 0)
 		relevant_documents++;
 	}
@@ -109,12 +109,12 @@ current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(s
 document_pointer = &document;
 for (current = lines; *current != 0; current++)
 	{
-	sscanf(*current, "%d %*s %d %d %d", &topic, &document, &relevant_characters, &document_length);
+	sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
 	if (relevant_characters != 0)
 		{
 		found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, documents, sizeof(*sorted_numeric_docid_list), cmp);
 		if (found == NULL)
-			printf("DOC:%d is in the assessments, but not in the collection\n", document);
+			printf("DOC:%ld is in the assessments, but not in the collection\n", document);
 		else
 			current_assessment->docid = *found - numeric_docid_list;		// the position in the list of documents is the internal docid used for computing precision
 		current_assessment->topic = topic;

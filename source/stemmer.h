@@ -20,7 +20,7 @@ private:
 
 public:
 	ANT_stemmer(ANT_search_engine *engine) : ANT_btree_iterator(engine) {}
-	virtual ~ANT_stemmer() {}
+	virtual ~ANT_stemmer() {};
 
 	virtual char *first(char *term);
 	virtual char *next(void);

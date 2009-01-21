@@ -3,7 +3,7 @@ OBJDIR = bin
 BINDIR = bin
 
 LDFLAGS = -g
-CFLAGS = -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1  -O2
+CFLAGS = -m32 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1  -O2
 
 CC = g++
 
@@ -29,10 +29,12 @@ ANT_PARTS = \
     search_engine.o \
     search_engine_accumulator.o \
     mean_average_precision.o \
+    INEX_assessment.o \
     relevant_document.o \
     stats.o \
     time_stats.o \
     search_engine_stats.o \
+    search_engine_forum.o \
     disk.o \
     disk_internals.o \
     btree_iterator.o \
