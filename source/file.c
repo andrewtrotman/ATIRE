@@ -13,7 +13,7 @@
 	#define FILE_OFFSET_BITS 64
 	#define ftell ftello
 	#define fseek fseeko
-	#define fstat _fstat64
+	#define fstat fstat64
 	#define stat stat64
 #elif defined(__APPLE__)
 	#include <sys/stat.h>

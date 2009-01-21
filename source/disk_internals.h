@@ -7,13 +7,17 @@
 
 #ifdef _MSC_VER
 	#include <windows.h>
-#else
-	#include <glob.h>
+#elif defined(__APPLE__)
 	#include <sys/syslimits.h>
-	#include <stdio.h>
-
+#elif defined(__linux__)
+	#include <linux/limits.h>
+#endif
+#ifndef _MSC_VER
+	#include <glob.h>
+        #include <stdio.h>
 	#define MAX_PATH PATH_MAX
 #endif
+
 
 class ANT_disk_internals
 {
