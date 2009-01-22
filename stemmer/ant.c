@@ -2,6 +2,8 @@
 	ANT.C
 	-----
 */
+#include <stdlib.h>
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include "str.h"
@@ -299,9 +301,9 @@ search_engine.stats_text_render();
 
     A very temporary solution
 */
+char *str_gen_string = "string";
 char *str_gen() {
-    static char *s = "string";
-    return s;
+    return str_gen_string;
 }
 /*
 
@@ -318,6 +320,8 @@ FILE *fp;
 char *query_text, **document_list;
 char **all_queries = NULL;
 GA *ga;
+
+srand(time(NULL));
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine *search_engine = new ANT_search_engine(&memory);

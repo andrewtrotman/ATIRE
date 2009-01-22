@@ -183,7 +183,7 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
 */
 void GA_individual::generate(char *(*str_gen)()) {
     unsigned int i;
-    count = (unsigned int) rand() % (MAX_INDIVIDUAL_SIZE - 1) + 1;
+    count = (unsigned int) rand() % (MAX_RULES) + 1;
     memset(rules, '\0', count * RULE_SIZE);
 
     for (i = 0; i < count; i++) {
