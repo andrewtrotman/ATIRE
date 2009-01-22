@@ -50,7 +50,8 @@ EXTENSION = \
     ant.o \
     ga.o \
     ga_stemmer.o \
-    ga_individual.o
+    ga_individual.o \
+	ga_function.o
 
 all : $(BINDIR)/index $(BINDIR)/ant
 

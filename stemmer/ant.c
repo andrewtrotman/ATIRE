@@ -20,6 +20,7 @@
 #include "search_engine_forum.h"
 #include "ga.h"
 #include "ga_stemmer.h"
+#include "ga_function.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -293,6 +294,16 @@ search_engine.stats_text_render();
 }
 
 /*
+    STR_GEN()
+    ---------
+
+    A very temporary solution
+*/
+char *str_gen() {
+    static char *s = "string";
+    return s;
+}
+/*
 
 	GA_ANT()
 	--------
@@ -309,12 +320,12 @@ char **all_queries = NULL;
 GA *ga;
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
-ANT_search_engine search_engine(&memory);
-fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
+ANT_search_engine *search_engine = new ANT_search_engine(&memory);
+fprintf(stderr, "Index contains %ld documents\n", search_engine->document_count());
 
 document_list = read_docid_list(&documents_in_id_list);
 assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
-ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
+ANT_mean_average_precision *map = new ANT_mean_average_precision(&memory, assessments, number_of_assessments);
 
 if ((fp = fopen(topic_file, "rb")) == NULL)
 	exit(fprintf(stderr, "Cannot open topic file:%s\n", topic_file));
@@ -322,7 +333,7 @@ line = 1;
 while (fgets(query, sizeof(query), fp) != NULL)
 	{
 	strip_end_punc(query);
-    topic_ids = (long *) realloc(all_queries, line * sizeof(topic_ids[0]));
+    topic_ids = (long *) realloc(topic_ids, line * sizeof(topic_ids[0]));
 	topic_ids[line - 1] = atol(query);
 	if ((query_text = strchr(query, ' ')) == NULL)
 		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
@@ -332,10 +343,13 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	}
 fclose(fp);
 
-// Magic number == number of generations
-ga = new GA(1000, new GA_func(perform_query, &search_engine, line - 1, all_queries, topic_ids, &map));
+// Magic number == size of population
+ga = new GA(200, new GA_function(perform_query, search_engine, line - 1, all_queries, topic_ids, map), str_gen);
+// Magic number 2 == number of generations
+ga->run(400);
+// TODO: output some stats whilst running (to a file, specified on the command line perhaps)
 
-search_engine.stats_text_render();
+search_engine->stats_text_render();
 }
 
 /*
@@ -357,9 +371,10 @@ int main(int argc, char *argv[])
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	batch_ant(argv[1], argv[2], QREL_ANT);
+	ga_ant(argv[1], argv[2], QREL_ANT);
 else
 	usage(argv[0]);
 
 return 0;
 }
+

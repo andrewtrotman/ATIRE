@@ -70,7 +70,7 @@ inline char *GA_individual::rule_to(unsigned int n) {
 */
 char *GA_individual::apply(const char *string) {
     unsigned int i, skipping = 0;
-    int length, buf_m;        /* Attributes of buffer */
+    int length;
     static char buffer[TMP_BUFFER_SIZE];
     
     strncpy(buffer, string, TMP_BUFFER_SIZE);
@@ -143,12 +143,16 @@ void GA_individual::print_raw() {
   assume all space has been allocated and the base size is the same.
   (i.e. char[FIXEDSIZE] within the class)
  */
-void GA_individual::reproduce(GA_individual *p, GA_individual *c) {
-    
+void GA_individual::reproduce(GA_individual *c) {
+    memcpy(c, this, sizeof(GA_individual));
 }
 
-void GA_individual::mutate(GA_individual *p, GA_individual *c) {
-    
+void GA_individual::mutate(GA_individual *c, char *(*str_gen)()) {
+    c->generate(str_gen);
+    if (rand() % 2 == 0) 
+        this->crossover(c,c);
+    else 
+        c->crossover(this,c);
 }
 
 /* 
@@ -157,15 +161,15 @@ void GA_individual::mutate(GA_individual *p, GA_individual *c) {
    TODO: ensure that the INDIVIDUAL_SIZE_MAX limit is never exceeded
    do this when the range for the second point is being decided.
 */
-void GA_individual::crossover(GA_individual *p1, GA_individual *p2,
-                              GA_individual *c) {
-    unsigned int point = random_from(0, p1->rules_size());
+void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
+    unsigned int point = random_from(0, this->rules_size());
     /* Ensure the second point shares the mid-rule position of the first */
     unsigned int point2 = random_from(0, p2->count) * RULE_SIZE
         + (point % RULE_SIZE);
-    
-    memcpy(c->rules, p1->rules, point);
-    memcpy(c->rules + point, p2->rules + point2, p2->rules_size() - point2);
+    if (this != c)
+        memcpy(c->rules, this->rules, point);
+    if (p2 != c)
+        memcpy(c->rules + point, p2->rules + point2, p2->rules_size() - point2);
     c->is_evaluated = FALSE;
     c->count = point + (p2->rules_size() - point2);
 }
@@ -177,7 +181,7 @@ void GA_individual::crossover(GA_individual *p1, GA_individual *p2,
 
    Strings will be used until null-termed or over 6 chars
 */
-GA_individual::GA_individual(char *(*str_gen)()) {
+void GA_individual::generate(char *(*str_gen)()) {
     unsigned int i;
     count = (unsigned int) rand() % (MAX_INDIVIDUAL_SIZE - 1) + 1;
     memset(rules, '\0', count * RULE_SIZE);
@@ -194,16 +198,4 @@ GA_individual::GA_individual(char *(*str_gen)()) {
                 str_gen(),
                 RULE_STRING_MAX);
     }
-}
-
-GA_individual::GA_individual(const char *s, size_t n) {
-    // Rules may contain '\0' inside (The strcpy he don't like it)
-    memcpy(rules, s, n);
-
-    count = n / RULE_SIZE;
-    fitness = 0.0;
-    is_evaluated = FALSE;
-}
-
-GA_individual::~GA_individual() {
 }

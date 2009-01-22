@@ -16,7 +16,6 @@ const int MEASURE_MAX = 5;
 #define TRUE (!FALSE)
 #endif 
 
-
 #include <stdlib.h>
 /* Generates a random number within a given range. */
 extern inline unsigned int random_from(unsigned int lower, unsigned int upper) {
@@ -28,7 +27,6 @@ class GA_individual {
  private:
     char rules[MAX_INDIVIDUAL_SIZE];
     unsigned int count;
-    int is_evaluated;
 
     inline unsigned int rules_size();
     inline char measure(unsigned int n);
@@ -36,20 +34,17 @@ class GA_individual {
     inline char *rule_to(unsigned int n);
 
  public:
+    int is_evaluated;
     double fitness;
+
     char *apply(const char *);
+    double evaluate();
     void print();
     void print_raw();
-    static void reproduce(GA_individual *, 
-                          GA_individual *);
-    static void mutate(GA_individual *, 
-                       GA_individual *);
-    static void crossover(GA_individual *, 
-                          GA_individual *,
-                          GA_individual *);
-    GA_individual(char *(*)());
-    GA_individual(const char *, size_t);
-    ~GA_individual();
+    void reproduce(GA_individual *);
+    void mutate(GA_individual *, char *(*)());
+    void crossover(GA_individual *, GA_individual *);
+    void generate(char *(*)());
 };
 
 #endif /* __GA_INDIVIDUAL_H__ */
