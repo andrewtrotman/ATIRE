@@ -324,7 +324,7 @@ double map;
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	map = batch_ant(argv[1], argv[2], QREL_ANT);
+	map = batch_ant(argv[1], argv[2], QREL_INEX);
 
 #ifdef NEVER
 /*
