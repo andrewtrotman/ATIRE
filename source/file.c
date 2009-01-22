@@ -8,8 +8,12 @@
 
 #ifdef linux
 	#include <sys/stat.h>
+#ifndef _LARGEFILE_SOURCE
 	#define _LARGEFILE_SOURCE
+#endif
+#ifndef _LARGEFILE64_SOURCE
 	#define _LARGEFILE64_SOURCE
+#endif
 	#define FILE_OFFSET_BITS 64
 	#define ftell ftello
 	#define fseek fseeko

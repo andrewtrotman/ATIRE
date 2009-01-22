@@ -3,7 +3,9 @@ OBJDIR = bin
 BINDIR = bin
 
 LDFLAGS = -g
-CFLAGS = -m32 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1  -O2
+CFLAGS = -m32 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O3 \
+       -Wno-endif-labels
+
 
 CC = g++
 

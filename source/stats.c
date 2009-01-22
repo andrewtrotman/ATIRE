@@ -98,7 +98,8 @@ long long ANT_stats::get_clock_tick(void)
 	QueryPerformanceCounter(&now);
 	return now.QuadPart;
 #else
-	#error "Cannot determine OS for timing code"
+	#warning "Cannot determine OS for timing code, timing will not be correct."
+    return 1;
 #endif
 }
 
@@ -117,7 +118,8 @@ long long ANT_stats::clock_tick_frequency(void)
 	QueryPerformanceFrequency(&frequency);
 	return frequency.QuadPart;
 #else
-	#error "Cannot determine OS for timing code"
+	#warning "Cannot determine OS for timing code, timing will not be correct."
+    return 1;
 #endif
 }
 
