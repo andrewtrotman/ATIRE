@@ -99,7 +99,7 @@ long long ANT_stats::get_clock_tick(void)
 	return now.QuadPart;
 #else
 	#warning "Cannot determine OS for timing code, timing will not be correct."
-    return 1;
+	return 1;
 #endif
 }
 
@@ -119,7 +119,7 @@ long long ANT_stats::clock_tick_frequency(void)
 	return frequency.QuadPart;
 #else
 	#warning "Cannot determine OS for timing code, timing will not be correct."
-    return 1;
+	return 1;
 #endif
 }
 

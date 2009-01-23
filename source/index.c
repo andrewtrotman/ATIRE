@@ -71,9 +71,9 @@ for (param = first_param; param < argc; param++)
 				{
 				uid_start += 7;
 				uid_end = strstr(uid_start, "</DOCNO>");
-				if ((unsigned) (uid_end - uid_start) > sizeof(uid_buffer))
+				if (uid_end - uid_start > (ptrdiff_t)sizeof(uid_buffer))
 					{
-					printf("UID longer than UID buffer, truncating at %lud characters\n", sizeof(uid_buffer) - 1);
+					printf("UID longer than UID buffer, truncating at %ld characters\n", (signed long)sizeof(uid_buffer) - 1);
 					uid_end = uid_start + sizeof(uid_buffer) - 1;
 					}
 				strncpy(uid_buffer, uid_start, uid_end - uid_start);

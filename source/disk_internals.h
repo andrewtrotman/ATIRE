@@ -14,7 +14,7 @@
 #endif
 #ifndef _MSC_VER
 	#include <glob.h>
-        #include <stdio.h>
+	#include <stdio.h>
 	#define MAX_PATH PATH_MAX
 #endif
 
