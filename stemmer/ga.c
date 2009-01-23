@@ -7,8 +7,10 @@ inline double GA::get_fitness(GA_individual *individual) {
     if (individual->is_evaluated) 
         return individual->fitness;
     individual->is_evaluated = TRUE;
-    fitness_function->stemmer = individual;
-    return (individual->fitness = fitness_function->call());
+    fitness_function->stemmer->set_stemmer(individual);
+    individual->fitness = fitness_function->call();
+    printf("fitness: %f\n", individual->fitness);
+    return individual->fitness;
 }
 
 /* note that the pointer returned is not to a newly made object */
@@ -62,6 +64,11 @@ GA_individual *GA::get_best() {
 void GA::run(unsigned int generations) {
     unsigned int i;
     for (i = 0; i < generations; i++) {
+        {
+            GA_individual *best = get_best();
+            best->print_raw();
+            printf("Generation: %ud Fitness: %f\n", i, get_fitness(best));
+        }
         this->next_generation();
     }
     {

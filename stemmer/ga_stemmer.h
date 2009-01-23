@@ -2,16 +2,25 @@
 #define __GA_STEMMER_H__
 
 #include "search_engine.h"
+#include "btree_iterator.h"
 #include "stemmer.h"
 #include "ga_individual.h"
+
+const int FIXED_SEARCH_LENGTH = 3;
 
 class GA_stemmer : public ANT_stemmer {
 private:
     GA_individual *individual;
+	virtual char *get_next(char *);
+
 public:
+    void set_stemmer(GA_individual *individual) {this->individual = individual;}
+
+	virtual long stem(char *term, char *destination);
+    virtual char *first(char *);
+
     GA_stemmer(ANT_search_engine *search_engine) : ANT_stemmer(search_engine) {}
     virtual ~GA_stemmer() {}
-	virtual long stem(char *term, char *destination);
 } ;
 
 #endif __GA_STEMMER_H__

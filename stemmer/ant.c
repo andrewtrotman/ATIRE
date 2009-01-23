@@ -23,6 +23,7 @@
 #include "ga.h"
 #include "ga_stemmer.h"
 #include "ga_function.h"
+#include "strgen.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -115,6 +116,58 @@ else
 //		search_engine->stats_text_render();
 	average_precision = map->average_precision(topic_id, search_engine);
 	}
+
+*matching_documents = hits;
+return average_precision;
+}
+
+/*
+	PERFORM_QUERY_W_STEMMER()
+	---------------
+*/
+double perform_query_w_stemmer(ANT_search_engine *search_engine, char *query,
+                               long *matching_documents, ANT_stemmer *stemmer, 
+                               long topic_id = -1, ANT_mean_average_precision *map = NULL)
+{
+ANT_time_stats stats;
+long long now;
+long did_query;
+char token[1024];
+char *token_start, *token_end;
+long hits, token_length;
+ANT_search_engine_accumulator *ranked_list;
+double average_precision = 0.0;
+
+did_query = FALSE;
+now = stats.start_timer();
+search_engine->init_accumulators();
+
+token_end = query;
+
+while (*token_end != '\0')
+	{
+	token_start = token_end;
+	while (!ANT_isalpha(*token_start) && *token_start != '\0')
+		token_start++;
+	if (*token_start == '\0')
+		break;
+	token_end = token_start;
+	while (ANT_isalpha(*token_end) || *token_end == '+')
+		token_end++;
+	strncpy(token, token_start, token_end - token_start);
+	token[token_end - token_start] = '\0';
+	token_length = token_end - token_start;
+	strlwr(token);
+
+    search_engine->process_one_stemmed_search_term(stemmer, token);
+	
+    did_query = TRUE;
+	}
+
+ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
+//ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
+
+average_precision = map->average_precision(topic_id, search_engine);
 
 *matching_documents = hits;
 return average_precision;
@@ -243,10 +296,65 @@ else
 
 /*
 
+	GA_ANT()
+	--------
+*/
+void ga_ant(char *topic_file, char *qrel_file, long qrel_format)
+{
+ANT_relevant_document *assessments;
+char query[1024];
+long line, number_of_assessments, documents_in_id_list, *topic_ids = NULL;
+ANT_memory memory;
+FILE *fp;
+char *query_text, **document_list;
+char **all_queries = NULL;
+GA *ga;
+
+srand(time(NULL));
+
+fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
+ANT_search_engine *search_engine = new ANT_search_engine(&memory);
+fprintf(stderr, "Index contains %ld documents\n", search_engine->document_count());
+init_strgen(search_engine);
+
+document_list = read_docid_list(&documents_in_id_list);
+assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
+ANT_mean_average_precision *map = new ANT_mean_average_precision(&memory, assessments, number_of_assessments);
+
+if ((fp = fopen(topic_file, "rb")) == NULL)
+	exit(fprintf(stderr, "Cannot open topic file:%s\n", topic_file));
+line = 1;
+while (fgets(query, sizeof(query), fp) != NULL)
+	{
+	strip_end_punc(query);
+    topic_ids = (long *) realloc(topic_ids, line * sizeof(topic_ids[0]));
+	topic_ids[line - 1] = atol(query);
+	if ((query_text = strchr(query, ' ')) == NULL)
+		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+    all_queries = (char **) realloc(all_queries, line * sizeof(all_queries[0]));
+    all_queries[line - 1] = strdup(query_text);
+	line++;
+	}
+fclose(fp);
+
+// Magic number == size of population
+ga = new GA(200, 
+            new GA_function(perform_query_w_stemmer, search_engine, line - 1, all_queries, topic_ids, map),
+            strgen);
+// Magic number 2 == number of generations
+ga->run(400);
+// TODO: output some stats whilst running (to a file, specified on the command line perhaps)
+
+search_engine->stats_text_render();
+}
+
+
+/*
+
 	BATCH_ANT()
 	-----------
 */
-void batch_ant(char *topic_file, char *qrel_file, long qrel_format)
+double batch_ant(char *topic_file, char *qrel_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
@@ -284,76 +392,17 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	sum_of_average_precisions += average_precision;
 	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
-     	search_engine.generate_results_list(document_list, answer_list, hits);
+	search_engine.generate_results_list(document_list, answer_list, hits);
 	output.INEX_export(topic_id, answer_list, hits);
 	}
 fclose(fp);
-
+output.INEX_close();
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
 printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 
 search_engine.stats_text_render();
-}
 
-/*
-    STR_GEN()
-    ---------
-
-    A very temporary solution
-*/
-char *str_gen_string = "string";
-char *str_gen() {
-    return str_gen_string;
-}
-/*
-
-	GA_ANT()
-	--------
-*/
-void ga_ant(char *topic_file, char *qrel_file, long qrel_format)
-{
-ANT_relevant_document *assessments;
-char query[1024];
-long line, number_of_assessments, documents_in_id_list, *topic_ids = NULL;
-ANT_memory memory;
-FILE *fp;
-char *query_text, **document_list;
-char **all_queries = NULL;
-GA *ga;
-
-srand(time(NULL));
-
-fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
-ANT_search_engine *search_engine = new ANT_search_engine(&memory);
-fprintf(stderr, "Index contains %ld documents\n", search_engine->document_count());
-
-document_list = read_docid_list(&documents_in_id_list);
-assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
-ANT_mean_average_precision *map = new ANT_mean_average_precision(&memory, assessments, number_of_assessments);
-
-if ((fp = fopen(topic_file, "rb")) == NULL)
-	exit(fprintf(stderr, "Cannot open topic file:%s\n", topic_file));
-line = 1;
-while (fgets(query, sizeof(query), fp) != NULL)
-	{
-	strip_end_punc(query);
-    topic_ids = (long *) realloc(topic_ids, line * sizeof(topic_ids[0]));
-	topic_ids[line - 1] = atol(query);
-	if ((query_text = strchr(query, ' ')) == NULL)
-		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
-    all_queries = (char **) realloc(all_queries, line * sizeof(all_queries[0]));
-    all_queries[line - 1] = strdup(query_text);
-	line++;
-	}
-fclose(fp);
-
-// Magic number == size of population
-ga = new GA(200, new GA_function(perform_query, search_engine, line - 1, all_queries, topic_ids, map), str_gen);
-// Magic number 2 == number of generations
-ga->run(400);
-// TODO: output some stats whilst running (to a file, specified on the command line perhaps)
-
-search_engine->stats_text_render();
+return mean_average_precision;
 }
 
 /*
@@ -376,6 +425,8 @@ if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
 	ga_ant(argv[1], argv[2], QREL_ANT);
+else if (argc == 4)
+	batch_ant(argv[1], argv[2], QREL_ANT); // Used to check baseline performance
 else
 	usage(argv[0]);
 

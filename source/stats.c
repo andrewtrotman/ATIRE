@@ -112,7 +112,7 @@ long long ANT_stats::clock_tick_frequency(void)
 #ifdef __APPLE__
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
-	return 1000 * 1000 * info.numer / info.denom; /* returns in nano seconds */
+	return 1000 * 1000 * 1000 * info.numer / info.denom; /* returns in nano seconds */
 #elif defined (_MSC_VER)
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
@@ -122,4 +122,6 @@ long long ANT_stats::clock_tick_frequency(void)
 	return 1;
 #endif
 }
+
+
 
