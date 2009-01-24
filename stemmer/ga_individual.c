@@ -69,7 +69,7 @@ inline char *GA_individual::rule_to(unsigned int n) {
   Currently returns a pointer to a static array - do not free!
 */
 char *GA_individual::apply(const char *string) {
-    unsigned int i, skipping = 0;
+    unsigned int i, skipping = FALSE;
     int length;
     static char buffer[TMP_BUFFER_SIZE];
     
@@ -80,7 +80,7 @@ char *GA_individual::apply(const char *string) {
     for (i = 0; i < count; i++) {
         if (measure(i) == SEPARATOR) {
             /* Stop skipping at separator */
-            skipping = 0;
+            skipping = FALSE;
         } else if (!skipping) {
             /* Check that rule can be applied */
 
@@ -105,7 +105,7 @@ char *GA_individual::apply(const char *string) {
                   only use strnlen once.
                 */
 
-                skipping = 1;
+                skipping = TRUE;
             }
         }
     }
@@ -164,8 +164,11 @@ void GA_individual::mutate(GA_individual *c, char *(*str_gen)()) {
 void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
     unsigned int point = random_from(0, this->rules_size());
     /* Ensure the second point shares the mid-rule position of the first */
-    unsigned int point2 = random_from(0, p2->count) * RULE_SIZE
+    unsigned int min_point2 = (p2->count + point / RULE_SIZE - MAX_RULES > 0) ? 
+        (p2->count + point / RULE_SIZE - MAX_RULES) : 0;
+    unsigned int point2 = random_from(min_point2, p2->count) * RULE_SIZE
         + (point % RULE_SIZE);
+
     if (this != c)
         memcpy(c->rules, this->rules, point);
     if (p2 != c)
