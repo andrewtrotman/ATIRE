@@ -23,5 +23,6 @@ return NULL;
 
 char *GA_stemmer::first(char *term) {
     stemmed_search_term_length = FIXED_SEARCH_LENGTH;
+    stem(term, stemmed_search_term);
     return get_next(ANT_btree_iterator::first(stemmed_search_term));
 }
