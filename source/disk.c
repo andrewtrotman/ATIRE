@@ -102,6 +102,7 @@ while (*pos != '\0')
 		pos++;
 	}
 *current_line = NULL;
+*lines = current_line - line_list - 1;		// the true number of lines
 
 return line_list;
 }
