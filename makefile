@@ -1,7 +1,7 @@
 SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
-TOOLDIR = tools
+LTWDIR = Link-The-Wiki
 
 CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
 CC = @cl
@@ -45,7 +45,7 @@ ANT_PARTS = \
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
-{$(TOOLDIR)\}.c{$(OBJDIR)\}.obj:
+{$(LTWDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 
