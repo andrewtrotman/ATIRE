@@ -166,10 +166,11 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
     unsigned int point2 = random_from(min_point2, p2->count) * RULE_SIZE
         + (point % RULE_SIZE);
 
+    /* Still need to copy if p2 is also c, as the part from p1 may be small (i.e. p2 needs to shift)
+     * This is also why it is done first. */
+    memmove(c->rules + point, p2->rules + point2, p2->rules_size() - point2);
     if (this != c)
         memcpy(c->rules, this->rules, point);
-    if (p2 != c)
-        memcpy(c->rules + point, p2->rules + point2, p2->rules_size() - point2);
     c->is_evaluated = FALSE;
     c->count = (point + (p2->rules_size() - point2)) / RULE_SIZE;
 }
