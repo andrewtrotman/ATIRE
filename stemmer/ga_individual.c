@@ -157,9 +157,6 @@ void GA_individual::mutate(GA_individual *c, char *(*str_gen)()) {
 
 /* 
    Places a new individual into c based on the parents p1 & p2.
-
-   TODO: ensure that the INDIVIDUAL_SIZE_MAX limit is never exceeded
-   do this when the range for the second point is being decided.
 */
 void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
     unsigned int point = random_from(0, this->rules_size());
@@ -174,7 +171,7 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
     if (p2 != c)
         memcpy(c->rules + point, p2->rules + point2, p2->rules_size() - point2);
     c->is_evaluated = FALSE;
-    c->count = point + (p2->rules_size() - point2);
+    c->count = (point + (p2->rules_size() - point2)) / RULE_SIZE;
 }
 
 /* 
