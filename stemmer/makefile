@@ -5,7 +5,7 @@ BINDIR = ../bin
 
 EXTFLAGS = -I$(SRCDIR)
 LDFLAGS = -g
-CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+CFLAGS = -g -O3 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 	-Wno-endif-labels
 
 CC = g++
@@ -38,11 +38,14 @@ ANT_PARTS = \
     time_stats.o \
     search_engine_stats.o \
     search_engine_forum.o \
+	str.o \
+	stop_word.o \
     disk.o \
     disk_internals.o \
     btree_iterator.o \
     top_k_sort.o \
     stemmer.o	\
+	porter.o \
     stemmer_porter.o	\
     relevant_topic.o
 
