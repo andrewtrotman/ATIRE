@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "../source/str.h"
 #include "../source/disk.h"
 #include "../source/stop_word.h"
@@ -12,6 +13,8 @@
 
 #define MAX_TERMS_PER_QUERY 20
 #define MAX_QUERY_LENGTH 1024
+
+#define BOOTSTRAP_ITERATIONS (1024 * 1024)
 
 static char *SEPERATORS = " []()\"";
 
@@ -41,7 +44,7 @@ long query_length_stats[MAX_TERMS_PER_QUERY];
 	FIND_LINKS()
 	------------
 */
-long find_links(long from)
+long find_links(long from, long quiet)
 {
 long current;
 char **current_term, **term;
@@ -63,7 +66,8 @@ for (current = 0; current < term_list_length; current++)
 	if (simalarity_list[current] != 0)
 		{
 		total_links += simalarity_list[current];
-		fprintf(netfile, "%d %d %d w %d\n", from + 1, current + 1, simalarity_list[current], simalarity_list[current]);
+		if (!quiet)
+			fprintf(netfile, "%d %d %d w %d\n", from + 1, current + 1, simalarity_list[current], simalarity_list[current]);
 		}
 
 delete [] simalarity_list;
@@ -74,13 +78,11 @@ return total_links;
 	GENERATE_RANDOM_QUERY()
 	-----------------------
 */
-ANT_query *generate_random_query(long terms_in_query, long terms_in_dictionary, char **dictionary)
+ANT_query *generate_random_query(ANT_query *query, long terms_in_query, long terms_in_dictionary, char **dictionary)
 {
-ANT_query *query;
 long term, random_term;
 char *word, *into;
 
-query = new ANT_query;
 into = query->term_buffer;
 query->terms_in_query = 0;
 for (term = 0; term < terms_in_query; term++)
@@ -91,6 +93,9 @@ for (term = 0; term < terms_in_query; term++)
 		word = dictionary[random_term];
 		}
 	while (stopper.isstop(word));
+
+//printf("%s ", word);
+
 	strcpy(into, word);
 	stemmer.stem(into, stem_buffer);
 	strcpy(into, stem_buffer);
@@ -100,6 +105,7 @@ for (term = 0; term < terms_in_query; term++)
 	*into++ = '\0';
 	}
 query->terms_in_query = terms_in_query;
+//puts("");
 
 return query;
 }
@@ -107,31 +113,77 @@ return query;
 /*
 	BOOTSTRAP_MAIN()
 	----------------
-	usage: topic_tree.exe <dictionary>
+	usage: topic_tree.exe <dictionary> <statsfile>
 */
 int bootstrap_main(int argc, char *argv[])
 {
 ANT_disk disk;
-char *file, **dictionary;
-long terms_in_dictionary;
+char *file, **dictionary, *stats, **stats_list, **stats_line;
+long terms_in_dictionary, queries, total_links;
+long max_query_length, current_query, current, which;
+long times, stats_length, len;
+long *simalarity_list;
 
-if (argc != 2)
-	exit(printf("Usage:%s <dictionary>\n", argv[0]));
+if (argc != 3)
+	exit(printf("Usage:%s <dictionary> <statsfile>\n", argv[0]));
 
 if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open dictionary:%s\n", argv[1]));
 
+memset(query_length_stats, 0, sizeof(query_length_stats));
 dictionary = disk.buffer_to_list(file, &terms_in_dictionary);
 
-generate_random_query(3, terms_in_dictionary, dictionary);
+if ((stats = disk.read_entire_file(argv[2])) == NULL)
+	exit(printf("Cannot open statsfile:%s\n", argv[2]));
+stats_list = disk.buffer_to_list(stats, &stats_length);
+
+max_query_length = queries = 0;
+for (stats_line = stats_list; *stats_line != NULL; stats_line++)
+	{
+	times = len = 0;
+	sscanf(*stats_line, "%d %d", &len, &times);
+	if (times != 0)
+		{
+		query_length_stats[len] = times;
+		queries += times;
+		max_query_length = len;
+		}
+	}
 
 /*
-	generate_random_query * n, with a profile matching the topic set
-	compute the number of links
-	do it a million times
-	commpute the number of topic to topic links (max must be 2*number of topics)
-	dump the stats and draw the graph
+for (current = 0; current <= max_query_length; current++)
+	if (query_length_stats[current] != 0)
+		printf("len %d, %d times\n", current, query_length_stats[current]);
 */
+
+term_list = new ANT_query[term_list_length = queries];
+simalarity_list = new long [term_list_length];
+memset(simalarity_list, 0, sizeof(*simalarity_list) * term_list_length);
+
+for (times = 0; times < BOOTSTRAP_ITERATIONS; times++)
+	{
+	current_query = 0;
+	for (current = 0; current <= max_query_length; current++)
+		for (which = 0; which < query_length_stats[current]; which++)
+				generate_random_query(&term_list[current_query++], current, terms_in_dictionary, dictionary);
+
+	total_links = 0;
+	for (current = 0; current < queries; current++)
+		total_links += find_links(current, true);
+
+//	if (total_links != 0)
+//		{
+		simalarity_list[total_links / 2]++;		 // because each link is represented in both directions
+//		printf("Total Links:%d\n", total_links);
+//		}
+	}
+
+for (current = 0; current < term_list_length; current++)
+	printf("%d %d\n", current, simalarity_list[current]);
+
+delete [] term_list;
+delete [] simalarity_list;
+
 return 0;
 }
 
@@ -150,7 +202,7 @@ char *netfilename, *statsfilename;
 netfilename = argv[2];
 statsfilename = argv[3];
 if (argc != 4)
-	exit(printf("usage:%s <infile> <netfile> <statsfile>\n", argv[0]));
+	exit(printf("usage:%s <queryfile> <netfile> <statsfile>\n", argv[0]));
 
 if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open topic file\n"));
@@ -197,7 +249,7 @@ for (current = 0; current < lines; current++)
 total_links = 0;
 fprintf(netfile, "*Arcs\n");
 for (current = 0; current < lines; current++)
-	total_links += find_links(current);
+	total_links += find_links(current, false);
 
 fprintf(statsfile, "Len Queries\n");
 for (current = 0; current < MAX_TERMS_PER_QUERY; current++)
@@ -216,8 +268,11 @@ return 0;
 */
 int main(int argc, char *argv[])
 {
+srand((unsigned int)time(0));		// see the random number generator
+
 if (argc == 4)
 	return stats_main(argc, argv);
 else
 	return bootstrap_main(argc, argv);
 }
+
