@@ -76,8 +76,8 @@ return total_links;
 */
 ANT_query *generate_random_query(long terms_in_query, long terms_in_dictionary, char **dictionary)
 {
-ANT_query *query
-long term;
+ANT_query *query;
+long term, random_term;
 char *word, *into;
 
 query = new ANT_query;
@@ -87,12 +87,11 @@ for (term = 0; term < terms_in_query; term++)
 	{
 	do
 		{
-		random_term = (double)rand() / (double)RAND_MAX * terms_in_dictionary;
+		random_term = (long)((double)rand() / (double)RAND_MAX * terms_in_dictionary);
 		word = dictionary[random_term];
 		}
 	while (stopper.isstop(word));
 	strcpy(into, word);
-	query->term = into;
 	stemmer.stem(into, stem_buffer);
 	strcpy(into, stem_buffer);
 	query->term[query->terms_in_query] = into;
@@ -100,7 +99,7 @@ for (term = 0; term < terms_in_query; term++)
 	into += strlen(into);
 	*into++ = '\0';
 	}
-query->term_in_query = terms_in_query;
+query->terms_in_query = terms_in_query;
 
 return query;
 }
@@ -113,8 +112,7 @@ return query;
 int bootstrap_main(int argc, char *argv[])
 {
 ANT_disk disk;
-char *file;
-char **dictionary;
+char *file, **dictionary;
 long terms_in_dictionary;
 
 if (argc != 2)
@@ -122,8 +120,10 @@ if (argc != 2)
 
 if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open dictionary:%s\n", argv[1]));
-dictionary = disk.buffer_to_list(file, &lines);
 
+dictionary = disk.buffer_to_list(file, &terms_in_dictionary);
+
+generate_random_query(3, terms_in_dictionary, dictionary);
 
 /*
 	generate_random_query * n, with a profile matching the topic set
@@ -132,6 +132,7 @@ dictionary = disk.buffer_to_list(file, &lines);
 	commpute the number of topic to topic links (max must be 2*number of topics)
 	dump the stats and draw the graph
 */
+return 0;
 }
 
 /*
@@ -216,7 +217,7 @@ return 0;
 int main(int argc, char *argv[])
 {
 if (argc == 4)
-	stats_main(argc, argv);
+	return stats_main(argc, argv);
 else
-	bootstrap_main(argc, argv);
+	return bootstrap_main(argc, argv);
 }
