@@ -2,6 +2,7 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 LTWDIR = Link-The-Wiki
+TOOLDIR = tools
 
 CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
 CC = @cl
@@ -34,11 +35,14 @@ ANT_PARTS = \
 	$(OBJDIR)\time_stats.obj\
 	$(OBJDIR)\search_engine_stats.obj\
 	$(OBJDIR)\search_engine_forum.obj\
+	$(OBJDIR)\str.obj \
+	$(OBJDIR)\stop_word.obj \
 	$(OBJDIR)\disk.obj \
 	$(OBJDIR)\disk_internals.obj \
 	$(OBJDIR)\btree_iterator.obj \
 	$(OBJDIR)\top_k_sort.obj \
 	$(OBJDIR)\stemmer.obj	\
+	$(OBJDIR)\porter.obj	\
 	$(OBJDIR)\stemmer_porter.obj	\
 	$(OBJDIR)\relevant_topic.obj
 	
@@ -46,6 +50,9 @@ ANT_PARTS = \
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 {$(LTWDIR)\}.c{$(OBJDIR)\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+
+{$(TOOLDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 
@@ -58,7 +65,8 @@ all : $(BINDIR)\index.exe 				\
 	  $(BINDIR)\link_this.exe			\
 	  $(BINDIR)\link_index_merge.exe	\
 	  $(BINDIR)\link_extract_pass2.exe	\
-	  $(BINDIR)\link_length_correlate.exe
+	  $(BINDIR)\link_length_correlate.exe \
+	  $(BINDIR)\topic_tree.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
@@ -89,6 +97,9 @@ $(BINDIR)\link_this.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJD
 
 $(BINDIR)\remove_head.exe : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj $(OBJDIR)\remove_head.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\remove_head.obj $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj /Fe$@
+
+$(BINDIR)\topic_tree.exe : $(ANT_PARTS) $(OBJDIR)\topic_tree.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\topic_tree.obj $(ANT_PARTS) /Fe$@
 
 clean :
 	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb
