@@ -11,12 +11,12 @@
 #include "../source/stop_word.h"
 #include "../source/porter.h"
 
-#define MAX_TERMS_PER_QUERY 20
-#define MAX_QUERY_LENGTH 1024
+#define MAX_TERMS_PER_QUERY 30
+#define MAX_QUERY_LENGTH 2048
 
 #define BOOTSTRAP_ITERATIONS (1024 * 1024)
 
-static char *SEPERATORS = " []()\"";
+static char *SEPERATORS = " []()\"'";
 
 FILE *netfile, *statsfile;
 
@@ -31,14 +31,33 @@ class ANT_query
 {
 public:
 	long terms_in_query;
-	char term_buffer[MAX_QUERY_LENGTH];
-	char *term[MAX_TERMS_PER_QUERY];
+	char term_buffer[MAX_QUERY_LENGTH + 1];
+	char *term[MAX_TERMS_PER_QUERY + 1];
 } *term_list;
 
 long term_list_length;
 
 char stem_buffer[MAX_QUERY_LENGTH];
 long query_length_stats[MAX_TERMS_PER_QUERY];
+
+/*
+	RANDOM32()
+	----------
+*/
+double random32(void)
+{
+unsigned long b1, b2, b3, b4;
+unsigned long bignum;
+
+b1 = rand() & 0xFF;
+b2 = rand() & 0xFF;
+b3 = rand() & 0xFF;
+b4 = rand() & 0xFF;
+
+bignum = (b1) | (b2 << 8) | (b3 << 16) | (b4 << 24);
+
+return (double)bignum / (double)0xFFFFFFFF;
+}
 
 /*
 	FIND_LINKS()
@@ -89,7 +108,7 @@ for (term = 0; term < terms_in_query; term++)
 	{
 	do
 		{
-		random_term = (long)((double)rand() / (double)RAND_MAX * terms_in_dictionary);
+		random_term = (long)(random32() * terms_in_dictionary);
 		word = dictionary[random_term];
 		}
 	while (stopper.isstop(word));
@@ -171,11 +190,7 @@ for (times = 0; times < BOOTSTRAP_ITERATIONS; times++)
 	for (current = 0; current < queries; current++)
 		total_links += find_links(current, true);
 
-//	if (total_links != 0)
-//		{
-		simalarity_list[total_links / 2]++;		 // because each link is represented in both directions
-//		printf("Total Links:%d\n", total_links);
-//		}
+	simalarity_list[total_links / 2]++;		 // because each link is represented in both directions
 	}
 
 for (current = 0; current < term_list_length; current++)
@@ -263,6 +278,93 @@ return 0;
 }
 
 /*
+	GENERATE_RANDOM_QUERY_FROM_TITLE()
+	----------------------------------
+*/
+ANT_query *generate_random_query_from_title(ANT_query *query, long number_of_titles, char **titles)
+{
+long random_title, current_term;
+char *ch, *term;
+
+query->terms_in_query = 0;
+random_title = (long)(random32() * (number_of_titles - 1));
+if (strlen(titles[random_title]) > MAX_QUERY_LENGTH)
+	exit(printf("line %d: Exceeded max title length (of %d chars)\n", random_title, MAX_QUERY_LENGTH));
+strcpy(query->term_buffer, strchr(titles[random_title], ' '));		// from the space because they start with the filename
+
+for (ch = query->term_buffer; *ch != '\0'; ch++)
+	if (!ANT_isalnum(*ch))
+		*ch = ' ';
+
+current_term = 0;
+for (term = strtok(query->term_buffer, SEPERATORS); term != NULL; term = strtok(NULL, SEPERATORS))
+	{
+	if (current_term > MAX_TERMS_PER_QUERY)
+		exit(printf("Line %d: Too many search terms (exceeds %d)\n", random_title, current_term));
+	if (stopper.isstop(term))		// drop stop words
+		continue;
+	strlwr(term);
+	stemmer.stem(term, stem_buffer);
+	strcpy(term, stem_buffer);
+	query->term[current_term] = term;
+	current_term++;
+	}
+query->terms_in_query = current_term;
+query->term[current_term] = NULL;
+
+return query;
+}
+
+/*
+	TITLES_MAIN()
+	-------------
+	usage: topic_tree.exe <doctitlesfile>
+*/
+int titles_main(int argc, char *argv[])
+{
+ANT_disk disk;
+char *file, **titles;
+long number_of_titles, queries, total_links;
+long max_query_length, current_query, current;
+long times, *simalarity_list;
+
+if (argc != 2)
+	exit(printf("Usage:%s <doctitlesfile>\n", argv[0]));
+
+if ((file = disk.read_entire_file(argv[1])) == NULL)
+	exit(printf("Cannot open doc titles file:%s\n", argv[1]));
+
+titles = disk.buffer_to_list(file, &number_of_titles);
+
+max_query_length = queries = 70;
+
+term_list = new ANT_query[term_list_length = queries];
+simalarity_list = new long [term_list_length * term_list_length];
+memset(simalarity_list, 0, sizeof(*simalarity_list) * term_list_length);
+
+for (times = 0; times < BOOTSTRAP_ITERATIONS; times++)
+	{
+	current_query = 0;
+	for (current = 0; current < queries; current++)
+		generate_random_query_from_title(&term_list[current_query++], number_of_titles, titles);
+
+	total_links = 0;
+	for (current = 0; current < queries; current++)
+		total_links += find_links(current, true);
+
+	simalarity_list[total_links / 2]++;		 // because each link is represented in both directions
+	}
+
+for (current = 0; current < term_list_length; current++)
+	printf("%d %d\n", current, simalarity_list[current]);
+
+delete [] term_list;
+delete [] simalarity_list;
+
+return 0;
+}
+
+/*
 	MAIN()
 	------
 */
@@ -272,6 +374,8 @@ srand((unsigned int)time(0));		// see the random number generator
 
 if (argc == 4)
 	return stats_main(argc, argv);
+else if (argc == 2)
+	return titles_main(argc, argv);
 else
 	return bootstrap_main(argc, argv);
 }
