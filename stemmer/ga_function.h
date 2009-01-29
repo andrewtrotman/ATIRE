@@ -4,6 +4,7 @@
 #include "search_engine.h"
 #include "stemmer.h"
 #include "ga_stemmer.h"
+#include "mean_average_precision.h"
 
 class GA_function {
 private:

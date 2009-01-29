@@ -4,7 +4,7 @@
 #include "btree_iterator.h"
 
 char **strings = NULL;
-int string_count = NULL;
+int string_count = 0;
 
 void init_strgen(ANT_search_engine *search_engine) {
     char *term;
@@ -22,5 +22,9 @@ void init_strgen(ANT_search_engine *search_engine) {
 char *strgen() {
     char *str = strings[rand() % string_count];
     int len = strlen(str);
+    if (len > 3) {
+        len -= 3;
+        str += 3;
+    }
     return str + rand() % len;
 }

@@ -5,7 +5,7 @@ const int TMP_BUFFER_SIZE = 255;
 const int RULE_STRING_MAX = 6;
 const int RULE_SIZE = (RULE_STRING_MAX * 2 + 1);
 const int SEPARATOR = -1;
-const int MAX_RULES = 20;
+const int MAX_RULES = 40;
 const int MAX_INDIVIDUAL_SIZE = (RULE_SIZE * MAX_RULES);
 const int MEASURE_MAX = 5;
 
