@@ -30,9 +30,14 @@ GA_individual *GA::tournament_select() {
 }
 
 void GA::next_generation() {
-    unsigned int i, op;
+    unsigned int i = 0, op;
 
-    for (i = 0; i < population_size; i++) {
+    if (elitism == USE_ELITISM) {
+        i = 1;
+        get_best()->reproduce(next_population);
+    }
+
+    for (; i < population_size; i++) {
         op = random_from(0, 100);
         if (op < mutation_rate)
             tournament_select()->mutate(next_population + i, str_gen);
@@ -90,7 +95,7 @@ GA::GA(unsigned int population_size, GA_function *fitness_function, char *(*str_
     }
     next_population = new GA_individual[population_size];
 
-    elitism = NO_ELITISM;
+    elitism = USE_ELITISM;
 
     mutation_rate = DEFAULT_MUTATION_RATE;
     crossover_rate = DEFAULT_CROSSOVER_RATE;
