@@ -130,10 +130,13 @@ void GA_individual::print() {
 void GA_individual::print_raw() {
     unsigned int i;
     for (i = 0; i < this->rules_size(); i++) {
+        if (i % RULE_SIZE == 0) putchar(' ');
         if (rules[i] >= 'a' && rules[i] <= 'z')
             putchar(rules[i]);
-        else 
-            printf("[%d]", (int) rules[i]);
+        else if (rules[i] >= 0 && rules[i] <= 9)
+            putchar(rules[i] + '0');
+        else
+            printf("[%d]", (unsigned) rules[i]);
     }
     putchar('\n');
 }
@@ -161,7 +164,7 @@ void GA_individual::mutate(GA_individual *c, char *(*str_gen)()) {
 void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
     unsigned int point = random_from(0, this->rules_size());
     /* Ensure the second point shares the mid-rule position of the first */
-    unsigned int min_point2 = (p2->count + point / RULE_SIZE - MAX_RULES > 0) ? 
+    unsigned int min_point2 = ((signed)p2->count + (signed)point / RULE_SIZE - MAX_RULES > 0) ? 
         (p2->count + point / RULE_SIZE - MAX_RULES) : 0;
     unsigned int point2 = random_from(min_point2, p2->count) * RULE_SIZE
         + (point % RULE_SIZE);
