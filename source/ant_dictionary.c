@@ -8,6 +8,7 @@
 #include "memory.h"
 #include "search_engine.h"
 #include "btree_iterator.h"
+#include "search_engine_btree_leaf.h"
 
 /*
 	MAIN()
@@ -19,6 +20,7 @@ char *term, *first_term, *last_term;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
 ANT_btree_iterator iterator(&search_engine);
+ANT_search_engine_btree_leaf leaf;
 
 if (argc == 1)
 	first_term = last_term = NULL;
@@ -37,10 +39,11 @@ else
 
 for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 	{
+	iterator.get_postings_details(&leaf);
 	if (last_term != NULL && strcmp(last_term, term) < 0)
 		break;
 	else
-		puts(term);
+		printf("%s %lld %d\n", term, leaf.collection_frequency, leaf.document_frequency);
 	}
 
 return 0;
