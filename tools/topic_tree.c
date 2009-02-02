@@ -30,6 +30,7 @@ ANT_stop_word stopper;
 class ANT_query
 {
 public:
+	long query_id;
 	long terms_in_query;
 	char term_buffer[MAX_QUERY_LENGTH + 1];
 	char *term[MAX_TERMS_PER_QUERY + 1];
@@ -86,7 +87,7 @@ for (current = 0; current < term_list_length; current++)
 		{
 		total_links += simalarity_list[current];
 		if (!quiet)
-			fprintf(netfile, "%d %d %d w %d\n", from + 1, current + 1, simalarity_list[current], simalarity_list[current]);
+			fprintf(netfile, "%d %d %d w %d c Black\n", from + 1, current + 1, simalarity_list[current], simalarity_list[current]);
 		}
 
 delete [] simalarity_list;
@@ -211,7 +212,7 @@ int stats_main(int argc, char *argv[])
 ANT_disk disk;
 char *file, **line_list;
 char *term;
-long lines, current_term, current, total_links;
+long lines, current_term, current, total_links, first_word;
 char *netfilename, *statsfilename;
 
 netfilename = argv[2];
@@ -223,7 +224,7 @@ if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open topic file\n"));
 line_list = disk.buffer_to_list(file, &lines);
 
-netfile = fopen(netfilename, "wb");
+netfile = fopen(netfilename, "wt");
 statsfile = fopen(statsfilename, "wb");
 
 term_list = new ANT_query[lines];
@@ -233,8 +234,16 @@ for (current = 0; current < lines; current++)
 		exit(printf("Line %d: Query too long (exceeds %d chars)\n", current, MAX_QUERY_LENGTH));
 	strcpy(term_list[current].term_buffer, line_list[current]);
 	current_term = 0;
+	first_word = true;
 	for (term = strtok(line_list[current], SEPERATORS); term != NULL; term = strtok(NULL, SEPERATORS))
 		{
+		if (first_word)		// which is the topic ID
+			{
+			first_word = false;
+			if ((term_list[current].query_id = atol(term)) == NULL)
+				exit(printf("Line %d:First word '%s' must be a number as it is the topic id\n", current, term));
+			continue;
+			}
 		if (current_term > MAX_TERMS_PER_QUERY)
 			exit(printf("Line %d: Too many search terms (exceeds %d)\n", current, current_term));
 		if (stopper.isstop(term))		// drop stop words
@@ -257,12 +266,12 @@ memset(query_length_stats, 0, sizeof(query_length_stats));
 fprintf(netfile, "*Vertices %d\n", lines);
 for (current = 0; current < lines; current++)
 	{
-	fprintf(netfile, "%d \"%d\" x_fact %d y_fact %d\n", current + 1, current + 1, term_list[current].terms_in_query, term_list[current].terms_in_query);
+	fprintf(netfile, "%d \"%d\" x_fact %d y_fact %d\n", current + 1, term_list[current].query_id, term_list[current].terms_in_query, term_list[current].terms_in_query);
 	query_length_stats[term_list[current].terms_in_query]++;
 	}
 
 total_links = 0;
-fprintf(netfile, "*Arcs\n");
+fprintf(netfile, "*Edges\n");
 for (current = 0; current < lines; current++)
 	total_links += find_links(current, false);
 
