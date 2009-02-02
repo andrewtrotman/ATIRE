@@ -203,3 +203,23 @@ void GA_individual::generate(char *(*str_gen)()) {
                 RULE_STRING_MAX);
     }
 }
+
+void GA_individual::load(char *filename) {
+    char buffer[1024];
+    int current = 0;
+    char *ptr;
+    FILE *handle = fopen(filename, "r");
+    while (fscanf(handle, "%s", buffer) != EOF) {
+        ptr = buffer;
+        while (*ptr) {
+            if (ptr[0] >= '0' && ptr[0] <= '9') 
+                rules[current] = ptr[0] - '0';
+            else
+                rules[current] = ptr[0];
+            ptr++;
+            current++;
+        }
+    }
+    fclose(handle);
+    count = current / RULE_SIZE;
+}

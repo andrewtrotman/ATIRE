@@ -295,7 +295,6 @@ else
 }
 
 /*
-
 	GA_ANT()
 	--------
 */
@@ -350,11 +349,10 @@ search_engine->stats_text_render();
 
 
 /*
-
 	BATCH_ANT()
 	-----------
 */
-double batch_ant(char *topic_file, char *qrel_file, long qrel_format)
+double batch_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
@@ -368,7 +366,11 @@ ANT_search_engine_forum output("ant.out");
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
-
+GA_stemmer *stemmer = new GA_stemmer(&search_engine);
+GA_individual *ind = new GA_individual();
+ind->load(stemmer_file);
+stemmer->set_stemmer(ind);
+ind->print_raw();
 document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
@@ -377,6 +379,7 @@ ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
 
 if ((fp = fopen(topic_file, "rb")) == NULL)
 	exit(fprintf(stderr, "Cannot open topic file:%s\n", topic_file));
+
 
 sum_of_average_precisions = 0.0;
 line = 1;
@@ -388,7 +391,7 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	if ((query_text = strchr(query, ' ')) == NULL)
 		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 
-	average_precision = perform_query(&search_engine, query_text, &hits, topic_id, &map);
+	average_precision = perform_query_w_stemmer(&search_engine, query_text, &hits, stemmer, topic_id, &map);
 	sum_of_average_precisions += average_precision;
 	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
@@ -426,7 +429,7 @@ if (argc == 1)
 else if (argc == 3)
 	ga_ant(argv[1], argv[2], QREL_ANT);
 else if (argc == 4)
-	batch_ant(argv[1], argv[2], QREL_ANT); // Used to check baseline performance
+	batch_ant(argv[1], argv[2], argv[3], QREL_ANT); // Used to check baseline performance
 else
 	usage(argv[0]);
 

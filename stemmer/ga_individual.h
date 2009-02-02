@@ -45,6 +45,7 @@ class GA_individual {
     void mutate(GA_individual *, char *(*)());
     void crossover(GA_individual *, GA_individual *);
     void generate(char *(*)());
+    void load(char *);
 };
 
 #endif /* __GA_INDIVIDUAL_H__ */

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "ga_stemmer.h"
 
@@ -12,9 +13,10 @@ char *term_to_check;
 for (term_to_check = from; term_to_check != NULL; term_to_check = ANT_btree_iterator::next())
 	{
 	stem(term_to_check, stemmed_index_term);
-	if (strcmp(stemmed_index_term, stemmed_search_term) == 0)
-		return term_to_check;
-
+	if (strcmp(stemmed_index_term, stemmed_search_term) == 0) {
+//		printf("%s\n", term_to_check);
+        return term_to_check;
+    }
 	if (strncmp(term_to_check, stemmed_search_term, stemmed_search_term_length) != 0)
 		return NULL;
 	}
