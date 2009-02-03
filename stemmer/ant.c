@@ -24,6 +24,10 @@
 #include "ga_stemmer.h"
 #include "ga_function.h"
 #include "strgen.h"
+#include "counter.h"
+
+#define NUM_OF_GENERATIONS 200
+#define POPULATION_SIZE 200
 
 #ifndef FALSE
 	#define FALSE 0
@@ -158,12 +162,11 @@ while (*token_end != '\0')
 	token[token_end - token_start] = '\0';
 	token_length = token_end - token_start;
 	strlwr(token);
-
+    DEC_COUNTER;
     search_engine->process_one_stemmed_search_term(stemmer, token);
-	
     did_query = TRUE;
 	}
-
+ PRINT_COUNTER;
 ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
 //ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
 
@@ -336,12 +339,9 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	}
 fclose(fp);
 
-// Magic number == size of population
-ga = new GA(200, 
-            new GA_function(perform_query_w_stemmer, search_engine, line - 1, all_queries, topic_ids, map),
-            strgen);
-// Magic number 2 == number of generations
-ga->run(400);
+ga = new GA(POPULATION_SIZE, 
+            new GA_function(perform_query_w_stemmer, search_engine, line - 1, all_queries, topic_ids, map));
+ga->run(NUM_OF_GENERATIONS);
 // TODO: output some stats whilst running (to a file, specified on the command line perhaps)
 
 search_engine->stats_text_render();

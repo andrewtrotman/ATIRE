@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "strgen.h"
 #include "btree_iterator.h"
+#include "ga_individual.h"
 
 char **strings = NULL;
 int string_count = 0;
@@ -22,9 +23,17 @@ void init_strgen(ANT_search_engine *search_engine) {
 char *strgen() {
     char *str = strings[rand() % string_count];
     int len = strlen(str);
-    if (len > 3) {
-        len -= 3;
-        str += 3;
-    }
-    return str + rand() % len;
+    str += len;
+    if (len > RULE_STRING_MAX)
+        len = RULE_STRING_MAX;
+    return str - (rand() % len + 1);
+}
+
+char *strgen_2() {
+    char *str = strings[rand() % string_count];
+    int len = strlen(str);
+    str += len;
+    if (len > RULE_STRING_MAX)
+        len = RULE_STRING_MAX;
+    return str - rand() % (len + 1);
 }

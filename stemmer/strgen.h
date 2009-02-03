@@ -5,5 +5,6 @@
 
 extern void init_strgen(ANT_search_engine *);
 extern char *strgen();
+extern char *strgen_2();
 
 #endif

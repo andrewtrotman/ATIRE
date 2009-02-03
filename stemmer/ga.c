@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "ga.h"
 #include "ga_individual.h"
+#include "strgen.h"
 
 inline double GA::get_fitness(GA_individual *individual) {
     if (individual->is_evaluated) 
@@ -40,7 +41,7 @@ void GA::next_generation() {
     for (; i < population_size; i++) {
         op = random_from(0, 100);
         if (op < mutation_rate)
-            tournament_select()->mutate(next_population + i, str_gen);
+            tournament_select()->mutate(next_population + i, strgen, strgen_2);
         else if (op < mutation_rate + crossover_rate) 
             tournament_select()->crossover(tournament_select(),
                                          next_population + i);
@@ -83,15 +84,14 @@ void GA::run(unsigned int generations) {
     }
 }
 
-GA::GA(unsigned int population_size, GA_function *fitness_function, char *(*str_gen)()) {
+GA::GA(unsigned int population_size, GA_function *fitness_function) {
     unsigned int i;
     this->population_size = population_size;
     this->fitness_function = fitness_function;
-    this->str_gen = str_gen;
 
     population = new GA_individual[population_size];
     for (i = 0; i < population_size; i++) {
-        population[i].generate(str_gen);
+        population[i].generate(strgen, strgen_2);
     }
     next_population = new GA_individual[population_size];
 

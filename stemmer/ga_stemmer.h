@@ -10,6 +10,7 @@ const int FIXED_SEARCH_LENGTH = 3;
 
 class GA_stemmer : public ANT_stemmer {
 private:
+    char stemmed_prefix[MAX_TERM_LENGTH];
     GA_individual *individual;
 	virtual char *get_next(char *);
 
@@ -18,6 +19,8 @@ public:
 
 	virtual long stem(char *term, char *destination);
     virtual char *first(char *);
+
+    void print();
 
     GA_stemmer(ANT_search_engine *search_engine) : ANT_stemmer(search_engine) {}
     virtual ~GA_stemmer() {}

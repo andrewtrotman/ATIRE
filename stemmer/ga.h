@@ -12,7 +12,6 @@ enum { NO_ELITISM, USE_ELITISM };
 class GA {
  private:
     GA_function *fitness_function;
-    char *(*str_gen)();
 
     GA_individual *population;
     GA_individual *next_population;
@@ -36,7 +35,7 @@ class GA {
     void run(unsigned int);
     void set_generations(unsigned int);
 
-    GA(unsigned int, GA_function *, char *(*)());
+    GA(unsigned int, GA_function *);
     ~GA();
 };
 

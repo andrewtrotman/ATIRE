@@ -150,8 +150,8 @@ void GA_individual::reproduce(GA_individual *c) {
     memcpy(c, this, sizeof(GA_individual));
 }
 
-void GA_individual::mutate(GA_individual *c, char *(*str_gen)()) {
-    c->generate(str_gen);
+void GA_individual::mutate(GA_individual *c, char *(*strgen)(), char *(*strgen_2)()) {
+    c->generate(strgen, strgen_2);
     if (rand() % 2 == 0) 
         this->crossover(c,c);
     else 
@@ -185,7 +185,7 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
 
    Strings will be used until null-termed or over 6 chars
 */
-void GA_individual::generate(char *(*str_gen)()) {
+void GA_individual::generate(char *(*strgen)(), char *(*strgen_2)()) {
     unsigned int i;
     count = (unsigned int) rand() % (MAX_RULES) + 1;
     memset(rules, '\0', count * RULE_SIZE);
@@ -196,10 +196,10 @@ void GA_individual::generate(char *(*str_gen)()) {
             rules[i * RULE_SIZE] = SEPARATOR;
 
         strncpy(rules + (i * RULE_SIZE) + 1,
-                str_gen(),
+                strgen(),
                 RULE_STRING_MAX);
         strncpy(rules + (i * RULE_SIZE) + RULE_STRING_MAX + 1,
-                str_gen(),
+                strgen_2(),
                 RULE_STRING_MAX);
     }
 }

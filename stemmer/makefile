@@ -55,7 +55,8 @@ EXTENSION = \
     ga_stemmer.o \
     ga_individual.o \
 	ga_function.o \
-	strgen.o
+	strgen.o \
+	counter.o
 
 all : $(BINDIR)/index $(BINDIR)/ant
 
