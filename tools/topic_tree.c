@@ -278,9 +278,9 @@ for (current = 0; current < lines; current++)
 fprintf(statsfile, "Len Queries\n");
 for (current = 0; current < MAX_TERMS_PER_QUERY; current++)
 	if (query_length_stats[current] != 0)
-		fprintf(statsfile, "%3d %d\n", current - 1, query_length_stats[current]);
+		fprintf(statsfile, "%3d %d\n", current, query_length_stats[current]);
 
-fprintf(statsfile, "Total Links:%d\n", total_links);
+fprintf(statsfile, "Total Links:%d\n", total_links / 2);
 fclose(netfile);
 fclose(statsfile);
 return 0;
@@ -345,7 +345,7 @@ if ((file = disk.read_entire_file(argv[1])) == NULL)
 
 titles = disk.buffer_to_list(file, &number_of_titles);
 
-max_query_length = queries = 70;
+max_query_length = queries = 135;
 
 term_list = new ANT_query[term_list_length = queries];
 simalarity_list = new long [term_list_length * term_list_length];
