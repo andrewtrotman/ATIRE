@@ -4,7 +4,7 @@ BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
 
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
 CC = @cl
 
 PARTS = \
@@ -68,7 +68,8 @@ all : $(BINDIR)\index.exe 				\
 	  $(BINDIR)\link_length_correlate.exe \
 	  $(BINDIR)\topic_tree_cas.exe		\
 	  $(BINDIR)\term_frequencies.exe	\
-	  $(BINDIR)\topic_tree.exe
+	  $(BINDIR)\topic_tree.exe		\
+	  $(BINDIR)\zipf_graph.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\index.obj $(PARTS) /Fe$@ /link /fixed:no /incremental:no /profile
@@ -108,6 +109,9 @@ $(BINDIR)\topic_tree_cas.exe : $(ANT_PARTS) $(OBJDIR)\topic_tree_cas.obj
 
 $(BINDIR)\term_frequencies.exe : $(ANT_PARTS) $(OBJDIR)\term_frequencies.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\term_frequencies.obj $(ANT_PARTS) /Fe$@
+
+$(BINDIR)\zipf_graph.exe : $(ANT_PARTS) $(OBJDIR)\zipf_graph.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\zipf_graph.obj $(ANT_PARTS) /Fe$@
 
 clean :
 	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb
