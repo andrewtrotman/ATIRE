@@ -368,9 +368,10 @@ ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
 GA_stemmer *stemmer = new GA_stemmer(&search_engine);
 GA_individual *ind = new GA_individual();
-ind->load(stemmer_file);
-stemmer->set_stemmer(ind);
-ind->print_raw();
+if (stemmer_file) {
+    ind->load(stemmer_file);
+    stemmer->set_stemmer(ind);
+}
 document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
@@ -391,7 +392,10 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	if ((query_text = strchr(query, ' ')) == NULL)
 		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 
-	average_precision = perform_query_w_stemmer(&search_engine, query_text, &hits, stemmer, topic_id, &map);
+    if (stemmer_file) 
+        average_precision = perform_query_w_stemmer(&search_engine, query_text, &hits, stemmer, topic_id, &map);
+    else
+        average_precision = perform_query(&search_engine, query_text, &hits, topic_id, &map);
 	sum_of_average_precisions += average_precision;
 	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
@@ -428,8 +432,39 @@ if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
 	ga_ant(argv[1], argv[2], QREL_ANT);
+#ifndef FIT_BM25
 else if (argc == 4)
 	batch_ant(argv[1], argv[2], argv[3], QREL_ANT); // Used to check baseline performance
+#else
+/*
+	This code can be used for optimising the BM25 parameters.
+	In order to make it work you'll need to change the code for 
+	BM25 to declare and use the externs;
+*/
+else if (argc == 4)
+	{
+	FILE *outfile;
+	extern double BM25_k1;
+	extern double BM25_b;
+    double map;
+
+	outfile = fopen(argv[3], "wb");
+	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
+		fprintf(outfile, "%f ", BM25_b);
+	fprintf(outfile, "\n");
+
+	for (BM25_k1 = 0.1; BM25_k1 < 4.0; BM25_k1+= 0.1)
+		{
+		fprintf(outfile, "%f ", BM25_k1);
+		for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
+			{
+            map = batch_ant(argv[1], argv[2], NULL, QREL_ANT);
+			fprintf(outfile, "%f ", map);
+			}
+		fprintf(outfile, "\n");
+		}
+	}
+#endif
 else
 	usage(argv[0]);
 

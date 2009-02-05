@@ -326,11 +326,9 @@ if (argc == 1)
 else if (argc == 3)
 	map = batch_ant(argv[1], argv[2], QREL_INEX);
 
-#ifdef NEVER
+#ifdef FIT_BM25
 /*
 	This code can be used for optimising the BM25 parameters.
-	In order to make it work you'll need to change the code for 
-	BM25 to declare and use the externs;
 */
 else if (argc == 4)
 	{
@@ -338,8 +336,7 @@ else if (argc == 4)
 	extern double BM25_k1;
 	extern double BM25_b;
 
-	outfile = fopen("a.out", "wb");
-	fprintf(outfile, ". ", BM25_b);
+	outfile = fopen(argv[3], "wb"); 
 	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
 		fprintf(outfile, "%f ", BM25_b);
 	fprintf(outfile, "\n");

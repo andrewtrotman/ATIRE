@@ -26,8 +26,9 @@ char *GA_stemmer::get_next(char *from) {
 
 char *GA_stemmer::first(char *term) {
     stemmed_search_term_length = stem(term, stemmed_search_term);
-    //   strncpy(stemmed_prefix, term, FIXED_SEARCH_LENGTH);
-
+    strncpy(stemmed_prefix, term, FIXED_SEARCH_LENGTH);
+    stemmed_prefix[FIXED_SEARCH_LENGTH] = '\0';
+//    return get_next(ANT_btree_iterator::first(stemmed_prefix));
     return get_next(ANT_btree_iterator::first(stemmed_search_term));
 }
 
