@@ -195,14 +195,14 @@ for (current = 0; current < number_of_nodes; current++)
 	if (nodes[current].type == TAG)
 		{
 		long size = 5 + nodes[current].times / 10;
-		printf("%d \"%s\" ellipse x_fact %d y_fact %d lr 0 ic Black lc White\n", nodes[current].node_number + 1, nodes[current].name, size, size);
+		printf("%d \"%s\" ellipse x_fact %d y_fact %d lr 0 ic Black lc White fos %d\n", nodes[current].node_number + 1, nodes[current].name, size, size, (long)(size * 2.6));
 		}
 	else
 		printf("%d \"%s\" ellipse x_fact 4 y_fact 4 lr 0 s 0 ic White\n", nodes[current].node_number + 1, nodes[current].name);
 
-printf("*Arcs\n");
+printf("*Edges\n");
 for (current = 0; current < number_of_links; current++)
-	printf("%d %d %d\n", links[current].from + 1, links[current].to + 1, links[current].times);
+	printf("%d %d %d c Black\n", links[current].from + 1, links[current].to + 1, links[current].times);
 
 return 0;
 }

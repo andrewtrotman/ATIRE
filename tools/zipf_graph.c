@@ -104,7 +104,7 @@ if (argc == 2)
 	{
 	qsort(dictionary, dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp);
 	for (which = 0; which < dictionary_length; which++)
-		if (which % 100 == 0)
+		if (which % 100 == 0 || which <= 100)
 			printf("%ld %ld\n", which, dictionary[which].df);
 	}
 else
