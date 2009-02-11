@@ -6,7 +6,7 @@
 #include "stemmer.h"
 #include "ga_individual.h"
 
-const int FIXED_SEARCH_LENGTH = 3;
+const int FIXED_SEARCH_LENGTH = SACROSANCT_CHARS;
 
 class GA_stemmer : public ANT_stemmer {
 private:

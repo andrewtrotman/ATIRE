@@ -8,6 +8,7 @@ const int SEPARATOR = -1;
 const int MAX_RULES = 40;
 const int MAX_INDIVIDUAL_SIZE = (RULE_SIZE * MAX_RULES);
 const int MEASURE_MAX = 5;
+const int SACROSANCT_CHARS = 3;
 
 #ifndef FALSE
 #define FALSE 0

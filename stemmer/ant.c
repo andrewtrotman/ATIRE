@@ -131,7 +131,8 @@ return average_precision;
 */
 double perform_query_w_stemmer(ANT_search_engine *search_engine, char *query,
                                long *matching_documents, ANT_stemmer *stemmer, 
-                               long topic_id = -1, ANT_mean_average_precision *map = NULL)
+                               long topic_id = -1, double cached_answer = -1,
+                               ANT_mean_average_precision *map = NULL)
 {
 ANT_time_stats stats;
 long long now;
@@ -141,12 +142,16 @@ char *token_start, *token_end;
 long hits, token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-
+int stemmed_terms = 0;
+ANT_stemmer_none default_stemmer(search_engine);
 did_query = FALSE;
 now = stats.start_timer();
 search_engine->init_accumulators();
 
 token_end = query;
+
+ if (stemmer == NULL)
+     stemmer = &default_stemmer;
 
 while (*token_end != '\0')
 	{
@@ -167,6 +172,7 @@ while (*token_end != '\0')
     did_query = TRUE;
 	}
  PRINT_COUNTER;
+
 ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
 //ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
 
@@ -311,6 +317,7 @@ FILE *fp;
 char *query_text, **document_list;
 char **all_queries = NULL;
 GA *ga;
+double *query_cache;
 
 srand(time(NULL));
 
@@ -339,8 +346,16 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	}
 fclose(fp);
 
+
+query_cache = (double *) malloc(sizeof query_cache[0] * (line - 1));
+int i;
+for (i = 0; i < line - 1; i++) {
+    long hits;
+    query_cache[i] = perform_query_w_stemmer(search_engine, all_queries[i], &hits, NULL,topic_ids[i], -1, map);
+}
+
 ga = new GA(POPULATION_SIZE, 
-            new GA_function(perform_query_w_stemmer, search_engine, line - 1, all_queries, topic_ids, map));
+            new GA_function(perform_query_w_stemmer, search_engine, line - 1, all_queries, topic_ids, query_cache, map));
 ga->run(NUM_OF_GENERATIONS);
 // TODO: output some stats whilst running (to a file, specified on the command line perhaps)
 
@@ -393,7 +408,7 @@ while (fgets(query, sizeof(query), fp) != NULL)
 		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 
     if (stemmer_file) 
-        average_precision = perform_query_w_stemmer(&search_engine, query_text, &hits, stemmer, topic_id, &map);
+        average_precision = perform_query_w_stemmer(&search_engine, query_text, &hits, stemmer, topic_id, -1, &map);
     else
         average_precision = perform_query(&search_engine, query_text, &hits, topic_id, &map);
 	sum_of_average_precisions += average_precision;
@@ -408,6 +423,9 @@ mean_average_precision = sum_of_average_precisions / (double) (line - 1);
 printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 
 search_engine.stats_text_render();
+
+delete ind;
+delete stemmer;
 
 return mean_average_precision;
 }
@@ -449,6 +467,7 @@ else if (argc == 4)
     double map;
 
 	outfile = fopen(argv[3], "wb");
+	fprintf(outfile, "%f ", 0.0);
 	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
 		fprintf(outfile, "%f ", BM25_b);
 	fprintf(outfile, "\n");

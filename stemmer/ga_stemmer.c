@@ -18,7 +18,7 @@ char *GA_stemmer::get_next(char *from) {
                 INC_COUNTER;
                 return term_to_check;
             }
-            if (strncmp(term_to_check, stemmed_search_term, stemmed_search_term_length) != 0)
+            if (strncmp(term_to_check, stemmed_search_term, FIXED_SEARCH_LENGTH) != 0)
                 return NULL;
         }
     return NULL;
@@ -28,8 +28,8 @@ char *GA_stemmer::first(char *term) {
     stemmed_search_term_length = stem(term, stemmed_search_term);
     strncpy(stemmed_prefix, term, FIXED_SEARCH_LENGTH);
     stemmed_prefix[FIXED_SEARCH_LENGTH] = '\0';
-//    return get_next(ANT_btree_iterator::first(stemmed_prefix));
-    return get_next(ANT_btree_iterator::first(stemmed_search_term));
+
+    return get_next(ANT_btree_iterator::first(stemmed_prefix));
 }
 
 void GA_stemmer::print() {

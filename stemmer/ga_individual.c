@@ -5,6 +5,13 @@
 #include "strnlen.h"
 #include "ga_individual.h"
 
+inline int strnmatchlen(const char *a, const char *b, int n) {
+    int count = 0;
+    while (*a == *b && *a != '\0' && *b != '\0' && n > 0) {
+        count++; n--; a++; b++;
+    }
+    return count;
+}
 /* 
    Remember that strings in rules may not be null terminated!
    (But they do have a maximum length, so use "%.*s", 6, string)
@@ -85,20 +92,21 @@ char *GA_individual::apply(const char *string) {
             /* Check that rule can be applied */
 
             if (m(buffer, length - 1) >= measure(i) &&
-                strncmp(buffer + length - strnlen(rule_from(i), 
-                                                  RULE_STRING_MAX),
-                        rule_from(i),
-                        RULE_STRING_MAX) == 0) {
-                strncpy(buffer + length - strnlen(rule_from(i), 
-                                                  RULE_STRING_MAX),
-                        rule_to(i),
-                        RULE_STRING_MAX);
+                strncmp(buffer + length - strnlen(rule_from(i), RULE_STRING_MAX),
+                        rule_from(i), RULE_STRING_MAX) == 0) {
 
-                buffer[length 
-                       - strnlen(rule_from(i), RULE_STRING_MAX) 
-                       + strnlen(rule_to(i), RULE_STRING_MAX)] = '\0';
-                length -= strnlen(rule_from(i), RULE_STRING_MAX);
-                length += strnlen(rule_to(i), RULE_STRING_MAX);
+                int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
+                int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
+
+                /* Ensure that the first SACROSANCT_CHARS are respected */ 
+                if (length - from_len + 
+                    strnmatchlen(rule_from(i), rule_to(i), RULE_STRING_MAX) < SACROSANCT_CHARS)
+                    continue;
+
+                strncpy(buffer + length - from_len, rule_to(i), RULE_STRING_MAX);
+
+                buffer[length - from_len + to_len] = '\0';
+                length += to_len - from_len;
 
                 /*
                   TODO: 
