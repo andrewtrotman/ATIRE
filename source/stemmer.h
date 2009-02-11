@@ -25,7 +25,7 @@ public:
 	virtual char *first(char *term);
 	virtual char *next(void);
 
-	virtual long stem(char *term, char *destination);
+	virtual long stem(char *term, char *destination);		// returns the longest stem that could possibly match this stem given the algorithm (2 in the case of Porter).
 } ;
 
 #endif __STEMMER_H__

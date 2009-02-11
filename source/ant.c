@@ -337,6 +337,7 @@ else if (argc == 4)
 	extern double BM25_b;
 
 	outfile = fopen(argv[3], "wb"); 
+	fprintf(outfile, "%f ", 0.0);
 	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
 		fprintf(outfile, "%f ", BM25_b);
 	fprintf(outfile, "\n");

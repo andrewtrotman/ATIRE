@@ -285,7 +285,16 @@ if (*at == 'l' && *(at + 1) == 'l' && length(at + 1) > 1)
 	at++;
 
 strrev(destination, at);
-return strlen(destination);
+/*
+	The Porter algorithms is only guaranteed not to change the first character of the word, but 
+	Porter's web site says that you can trim this to two because that will catch all cases except
+	pathalogically stupid cases such as 'is' and 'as'.  As the length return value is only used
+	by the search engine (because the stem is '\0' terminated), it is OK to return 2 here in order
+	to make the search engine start at the first two characters, but it is not OK to use it for 
+	anything else.
+*/
+//return strlen(destination);
+return 2;
 }
 
 
