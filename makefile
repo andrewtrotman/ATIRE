@@ -69,6 +69,7 @@ all : $(BINDIR)\index.exe 				\
 	  $(BINDIR)\topic_tree_cas.exe		\
 	  $(BINDIR)\term_frequencies.exe	\
 	  $(BINDIR)\topic_tree.exe		\
+	  $(BINDIR)\INEXqrels_to_run.exe		\
 	  $(BINDIR)\zipf_graph.exe
 
 $(BINDIR)\index.exe : $(PARTS) $(OBJDIR)\index.obj
@@ -112,6 +113,9 @@ $(BINDIR)\term_frequencies.exe : $(ANT_PARTS) $(OBJDIR)\term_frequencies.obj
 
 $(BINDIR)\zipf_graph.exe : $(ANT_PARTS) $(OBJDIR)\zipf_graph.obj
 	$(CC) $(CFLAGS) $(OBJDIR)\zipf_graph.obj $(ANT_PARTS) /Fe$@
+
+$(BINDIR)\INEXqrels_to_run.exe : $(ANT_PARTS) $(OBJDIR)\INEXqrels_to_run.obj
+	$(CC) $(CFLAGS) $(OBJDIR)\INEXqrels_to_run.obj $(ANT_PARTS) /Fe$@
 
 clean :
 	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb
