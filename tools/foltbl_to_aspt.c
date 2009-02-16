@@ -21,12 +21,13 @@ friend class ANT_tag_set;
 private:
 	char *name;	
 	long occurrences;
+	bool memory_owner;
 
 private:
-	ANT_tag(void) { name = NULL; }
+	ANT_tag(void) { name = NULL; memory_owner = false; }
 
 public:
-	ANT_tag(char *name);
+	ANT_tag(char *name, long occ = 0);
 	virtual ~ANT_tag();
 	long add(void) { return ++occurrences; }
 	long get_occurrences(void) { return occurrences; }
@@ -38,10 +39,11 @@ public:
 	ANT_TAG::ANT_TAG()
 	------------------
 */
-ANT_tag::ANT_tag(char *name)
+ANT_tag::ANT_tag(char *name, long occ)
 {
 this->name = strnew(name);
-occurrences = 0;
+this->occurrences = occ;
+memory_owner = true;
 }
 
 /*
@@ -50,7 +52,8 @@ occurrences = 0;
 */
 ANT_tag::~ANT_tag()
 {
-delete [] name;
+if (memory_owner)
+	delete [] name;
 }
 
 /*
@@ -80,7 +83,9 @@ public:
 public:
 	ANT_tag_set();
 	~ANT_tag_set();
-	long add(char *name);
+	ANT_tag *push(char *name, long occurrences);		// this appends and does not sort.
+	void sort(void);
+	long add(char *name);							// add and qsort (a very crude insertion sort).
 	void text_render(void);
 } ;
 
@@ -106,12 +111,40 @@ free(tag_list);
 }
 
 /*
+	ANT_TAG_SET::PUSH()
+	-------------------
+*/
+ANT_tag *ANT_tag_set::push(char *name, long occ)
+{
+ANT_tag *another;
+
+another = new ANT_tag(name, occ);
+
+if (tag_list_used >= tag_list_length)
+	tag_list = (ANT_tag **)realloc(tag_list, sizeof(*tag_list) * ((tag_list_length += tag_list_allocation_size) + 1));
+tag_list[tag_list_used] = another;
+tag_list_used++;
+tag_list[tag_list_used] = NULL;
+
+return another;
+}
+
+/*
+	ANT_TAG_SET::SORT()
+	-------------------
+*/
+void ANT_tag_set::sort(void)
+{
+qsort(tag_list, tag_list_used, sizeof(*tag_list), ANT_tag::cmp);
+}
+
+/*
 	ANT_TAG_SET::ADD()
 	------------------
 */
 long ANT_tag_set::add(char *name)
 {
-ANT_tag key, *key_pointer, **got, *another;
+ANT_tag key, *key_pointer, **got;
 
 key.name = name;
 key_pointer = &key;
@@ -119,18 +152,12 @@ key_pointer = &key;
 got = (ANT_tag **)bsearch(&key_pointer, tag_list, tag_list_used, sizeof(*tag_list), ANT_tag::cmp);
 if (got == NULL)
 	{
-	another = new ANT_tag(name);
-	got = &another;
-	if (tag_list_used >= tag_list_length)
-		tag_list = (ANT_tag **)realloc(tag_list, sizeof(*tag_list) * ((tag_list_length += tag_list_allocation_size) + 1));
-	tag_list[tag_list_used] = another;
-	tag_list_used++;
-	tag_list[tag_list_used] = NULL;
-	qsort(tag_list, tag_list_used, sizeof(*tag_list), ANT_tag::cmp);
+	key_pointer = push(name, 0);
+	got = &key_pointer;
+	sort();
 	}
 
 (*got)->add();
-key.name = NULL;
 return (*got)->get_occurrences();
 }
 
