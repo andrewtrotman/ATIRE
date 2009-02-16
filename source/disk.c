@@ -42,9 +42,10 @@ delete internals;
 	ANT_DISK::READ_ENTIRE_FILE()
 	----------------------------
 */
-char *ANT_disk::read_entire_file(char *filename)
+char *ANT_disk::read_entire_file(char *filename, long long *file_length)
 {
 struct stat details;
+long long unused;
 char *block = NULL;
 FILE *fp;
 
@@ -54,8 +55,11 @@ if (filename == NULL)
 if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
 
+if (file_length == NULL)
+	file_length = &unused;
+
 if (fstat(fileno(fp), &details) == 0)
-	if (details.st_size != 0)
+	if ((*file_length = details.st_size) != 0)
 		if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
 			if (fread(block, (long)details.st_size, 1, fp) == 1)
 				block[details.st_size] = '\0';

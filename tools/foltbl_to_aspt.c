@@ -7,6 +7,7 @@
 #include <string.h>
 #include "../source/disk.h"
 #include "../source/str.h"
+#include "../source/ctypes.h"
 
 char buffer[1024 * 1024];
 
@@ -33,6 +34,7 @@ public:
 	long get_occurrences(void) { return occurrences; }
 	static int cmp(const void *a, const void *b);
 	void text_render(void) { printf("%s %d\n", name, occurrences); }
+	void text_render(FILE *outfile) { fwrite(name, strlen(name) + 1, 1, outfile); }
 } ;
 
 /*
@@ -85,8 +87,12 @@ public:
 	~ANT_tag_set();
 	ANT_tag *push(char *name, long occurrences);		// this appends and does not sort.
 	void sort(void);
+	ANT_tag **find(char *name) { return find(name, tag_list_used); }
+	ANT_tag **find(char *name, long fake_length);
 	long add(char *name);							// add and qsort (a very crude insertion sort).
+	void include(ANT_tag_set *me);
 	void text_render(void);
+	void text_render(FILE *outfile);
 } ;
 
 /*
@@ -107,6 +113,10 @@ tag_list_allocation_size = 1024;
 */
 ANT_tag_set::~ANT_tag_set()
 {
+long current;
+
+for (current = 0; current < tag_list_used; current++)
+	delete tag_list[current];
 free(tag_list);
 }
 
@@ -137,6 +147,46 @@ void ANT_tag_set::sort(void)
 {
 qsort(tag_list, tag_list_used, sizeof(*tag_list), ANT_tag::cmp);
 }
+
+/*
+	ANT_TAG_SET::INCLUDE()
+	----------------------
+*/
+void ANT_tag_set::include(ANT_tag_set *with)
+{
+long current;
+long fake_length;
+ANT_tag **into;
+
+fake_length = tag_list_used;
+for (current = 0; current < with->tag_list_used; current++)
+	if ((into = find(with->tag_list[current]->name, fake_length)) == NULL)
+		push(with->tag_list[current]->name, with->tag_list[current]->occurrences);
+	else
+		(*into)->occurrences += with->tag_list[current]->occurrences;
+
+sort();
+}
+
+/*
+	ANT_TAG_SET::FIND()
+	-------------------
+*/
+ANT_tag **ANT_tag_set::find(char *name, long fake_length)
+{
+ANT_tag key, *key_star;
+void *got;
+
+key.name = name;
+key_star = &key;
+got = bsearch(&key_star, tag_list, fake_length, sizeof(*tag_list), ANT_tag::cmp);
+
+if (got == NULL)
+	return NULL;
+
+return (ANT_tag **)got;
+}
+
 
 /*
 	ANT_TAG_SET::ADD()
@@ -171,6 +221,19 @@ ANT_tag **current;
 
 for (current = tag_list; *current != NULL; current++)
 	(*current)->text_render();
+}
+
+/*
+	ANT_TAG_SET::TEXT_RENDER()
+	--------------------------
+*/
+void ANT_tag_set::text_render(FILE *outfile)
+{
+ANT_tag **current;
+
+fwrite(&tag_list_used, sizeof(tag_list_used), 1, outfile);
+for (current = tag_list; *current != NULL; current++)
+	(*current)->text_render(outfile);
 }
 
 /*
@@ -216,9 +279,10 @@ return strcmp(one, two);
 	GENERATE_UNIQUE_PATH_SET()
 	--------------------------
 */
-void generate_unique_path_set(char **path_list, long path_list_length)
+void generate_unique_path_set(ANT_tag_set *paths, char **path_list, long path_list_length)
 {
 char **all, **current, *from, *to, **into, *prev;
+long occurrences;
 
 into = all = new char *[path_list_length + 1];
 for (current = path_list; *current != NULL; current++)
@@ -235,54 +299,102 @@ for (current = path_list; *current != NULL; current++)
 	into++;
 	}
 *into = NULL;
-qsort(all, into-all, sizeof(*all), str_star_cmp);
+qsort(all, into - all, sizeof(*all), str_star_cmp);
 
-prev = "1";
-for (into = all; *into != NULL; into++)
+prev = *all;
+occurrences = 1;
+for (into = all + 1; *into != NULL; into++)
 	{
-	if (strcmp(*into, prev) != 0)
-		puts(*into);
-	prev = *into;
+	if (strcmp(*into, prev) == 0)
+		occurrences++;
+	else
+		{
+		paths->push(prev, occurrences);
+		prev = *into;
+		occurrences = 1;
+		}
 	}
+paths->push(prev, occurrences);
+paths->sort();
 }
 
 /*
 	READ_FILE()
 	-----------
 */
-long read_file(char *filename)
+ANT_tag_set *read_file(char *filename)
 {
-ANT_tag_set tags;
-const char *SEPERATORS = " /\\";
-char *from, *to, *file, *token, **lines, **current;
+ANT_tag_set *paths;
+char *file, **lines;
+long long pos, file_length;
 long length;
 
-file = ANT_disk::read_entire_file(filename);
-lines = ANT_disk::buffer_to_list(file, &length);
+paths = new ANT_tag_set;
 
-generate_unique_path_set(lines, length);
+file = ANT_disk::read_entire_file(filename, &file_length);
+
+for (pos = 0; pos < file_length; pos++)		// yea, right, so the file has '\0' characters in it!
+	if (file[pos] == 0)
+		file[pos] = ' ';
+
+lines = ANT_disk::buffer_to_list(file, &length);
+generate_unique_path_set(paths, lines, length);
+
+delete [] file;
+delete [] lines;
+
+return paths;
+}
+
+/*
+	MAKE_FILE_BINARY()
+	------------------
+*/
+void make_file_binary(char *filename, ANT_tag_set *pathlist, FILE *outfile)
+{
+char *file, **lines, **current;
+long length;
+long long file_length, pos;
+char *path_start, *path_end, *from;
+long rel_file, rel_offset, rel_length, rel_path;
+ANT_tag **got;
+
+file = ANT_disk::read_entire_file(filename, &file_length);
+for (pos = 0; pos < file_length; pos++)		// yea, right, so the file has '\0' characters in it!
+	if (file[pos] == 0)
+		file[pos] = ' ';
+
+lines = ANT_disk::buffer_to_list(file, &length);
 
 for (current = lines; *current != NULL; current++)
 	{
 	if (**current == '\0')
 		continue;
-	if (strlen(*current) > sizeof(buffer) - 1)
-		exit(printf("Line %ld exceeds max line length (%ld chars)\n", current - lines, sizeof(buffer)));
-	if ((from = strchr(*current, ',')) == 0)
-		exit(printf("Line %ld should contain at least one comma\n", current - lines));
-	from++;
-	if ((to = strchr(from, ',')) == 0)
-		exit(printf("Line %ld should contain at least two commas\n", current - lines));
-	strncpy(buffer, from, to - from);
-	buffer[to - from] = '\0';
-//	printf(">%s<\n", buffer);
-	clean_string(buffer);
-	for (token = strtok(buffer, SEPERATORS); token != NULL; token = strtok(NULL, SEPERATORS))
-		tags.add(token);
-	}
-tags.text_render();
+	rel_file = atol(*current);
+	path_start = strchr(*current, ',') + 1;
 
-return 0;
+	path_end = from = strchr(path_start, ',') + 1;
+	rel_offset = atol(from);
+
+	from = strchr(from, ',');
+	rel_length = atol(from);
+
+	*(path_end - 1) = '\0';
+
+	got = pathlist->find(path_start);
+	if (got == NULL)
+		fprintf(stderr, "Path list missing path '%s'\n", path_start);
+	else
+		{
+		rel_path = got - pathlist->tag_list;
+		fwrite(&rel_file, sizeof(rel_file), 1, outfile);
+		fwrite(&rel_path, sizeof(rel_path), 1, outfile);
+		fwrite(&rel_offset, sizeof(rel_offset), 1, outfile);
+		fwrite(&rel_length, sizeof(rel_length), 1, outfile);
+		}
+	}
+
+delete [] file;
 }
 
 /*
@@ -291,9 +403,28 @@ return 0;
 */
 int main(int argc, char *argv[])
 {
+ANT_tag_set all, *current;
+long param;
 
-if (argc != 2)
-	exit(printf("Usage:%s <text_fol_table_file>\n", argv[0]));
+if (argc < 2)
+	exit(printf("Usage:%s <text_fol_table_file> ...\n", argv[0]));
 
-read_file(argv[1]);
+fprintf(stderr, "Process input files\n");
+for (param = 1; param < argc; param++)
+	{
+	fprintf(stderr, "%s\n", argv[param]);
+	current = read_file(argv[param]);
+	all.include(current);
+	delete current;
+	}
+//all.text_render();
+
+FILE *outfile = fopen("outfile", "wb");
+all.text_render(outfile);
+for (param = 1; param < argc; param++)
+	{
+	fprintf(stderr, "%s\n", argv[param]);
+	make_file_binary(argv[param], &all, outfile);
+	}
+fclose(outfile);
 }

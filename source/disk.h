@@ -19,7 +19,7 @@ public:
 	ANT_disk();
 	~ANT_disk();
 
-	static char *read_entire_file(char *filename);
+	static char *read_entire_file(char *filename, long long *len = NULL);
 	static char **buffer_to_list(char *buffer, long *lines);
 	char *get_first_filename(char *wildcard);
 	char *get_next_filename(void);
