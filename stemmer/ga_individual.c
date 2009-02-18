@@ -267,7 +267,7 @@ void GA_individual::generate_c(const char *filename) {
             if (rule_to(i)[0] != '\0')
                 fprintf(file, "            strncpy(buffer + length - %d, \"%.*s\", %d);\n",
                         from_len, RULE_STRING_MAX, rule_to(i), RULE_STRING_MAX);
-            fprintf(file, "            buffer[length - %d] = '\\0';\n", from_len + to_len);
+            fprintf(file, "            buffer[length - %d] = '\\0';\n", from_len - to_len);
             if (to_len != from_len) {
                 if (to_len > from_len) 
                     fprintf(file, "            length += %d;\n", to_len - from_len);
