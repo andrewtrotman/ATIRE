@@ -47,6 +47,7 @@ class GA_individual {
     void crossover(GA_individual *, GA_individual *);
     void generate(char *(*)(), char *(*)());
     void load(char *);
+    void generate_c(const char *);
 };
 
 #endif /* __GA_INDIVIDUAL_H__ */

@@ -90,12 +90,12 @@ char *GA_individual::apply(const char *string) {
             skipping = FALSE;
         } else if (!skipping) {
             /* Check that rule can be applied */
+            int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
 
             if (m(buffer, length - 1) >= measure(i) &&
-                strncmp(buffer + length - strnlen(rule_from(i), RULE_STRING_MAX),
+                strncmp(buffer + length - from_len,
                         rule_from(i), RULE_STRING_MAX) == 0) {
 
-                int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
                 int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
 
                 /* Ensure that the first SACROSANCT_CHARS are respected */ 
@@ -144,7 +144,7 @@ void GA_individual::print_raw() {
         else if (rules[i] >= 0 && rules[i] <= 9)
             putchar(rules[i] + '0');
         else
-            printf("[%d]", (unsigned) rules[i]);
+            putchar('-');
     }
     putchar('\n');
 }
@@ -222,6 +222,8 @@ void GA_individual::load(char *filename) {
         while (*ptr) {
             if (ptr[0] >= '0' && ptr[0] <= '9') 
                 rules[current] = ptr[0] - '0';
+            else if (ptr[0] == '-')
+                rules[current] = (char) -1;
             else
                 rules[current] = ptr[0];
             ptr++;
@@ -230,4 +232,55 @@ void GA_individual::load(char *filename) {
     }
     fclose(handle);
     count = current / RULE_SIZE;
+}
+
+void GA_individual::generate_c(const char *filename) {
+    FILE *file = fopen(filename, "w");
+    int i;
+    fprintf(file, "#include <string.h>\n\n");
+    fprintf(file, "#define TMP_BUFFER_SIZE %d\n", TMP_BUFFER_SIZE);
+    fprintf(file, "#define SACROSANCT_CHARS %d\n\n", SACROSANCT_CHARS);
+    fprintf(file, "inline static int m(const char *s, int j) {\nint n = 0, i = 0;\n");
+    fprintf(file, "while(1) {\nif (i > j) return n;\nif (!consonant_p(s, i)) break;\ni++\n}\n");
+    fprintf(file, "i++;\nwhile(1) {\nwhile(1) {\nif (i > j) return n;\n if (consonant_p(s, i)) break;\n");
+    fprintf(file, "i++;\n}\ni++; n++;\nwhile(1) {\n if (i > j) return n;\n if (!consonant_p(s, i)) break;\n");
+    fprintf(file, "i++;\n}\ni++;}\n}\n");
+    fprintf(file, "char *stem(const char *string) {\n");
+    fprintf(file, "    int length;\n");
+    fprintf(file, "    static char buffer[TMP_BUFFER_SIZE];\n\n");
+    fprintf(file, "    strncpy(buffer, string, TMP_BUFFER_SIZE);\n");
+    fprintf(file, "    buffer[TMP_BUFFER_SIZE - 1] = '\\0';\n\n");
+    fprintf(file, "    length = strlen(buffer);\n\n");
+    fprintf(file, "    do {\n");
+
+    for (i = 0; i < count; i++) {
+        if (measure(i) == SEPARATOR) {
+            fprintf(file, "    } while (0);\n");
+            fprintf(file, "    do {\n");
+        } else {
+            int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
+            int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
+
+            fprintf(file, "        if (m(buffer, length - 1) >= %d && strncmp(buffer + length - %d, \"%.*s\", %d) == 0 && length > %d) {\n",
+                    measure(i), from_len, RULE_STRING_MAX, rule_from(i), RULE_STRING_MAX,
+                    from_len - strnmatchlen(rule_from(i), rule_to(i), RULE_STRING_MAX) + SACROSANCT_CHARS);
+            if (rule_to(i)[0] != '\0')
+                fprintf(file, "            strncpy(buffer + length - %d, \"%.*s\", %d);\n",
+                        from_len, RULE_STRING_MAX, rule_to(i), RULE_STRING_MAX);
+            fprintf(file, "            buffer[length - %d] = '\\0';\n", from_len + to_len);
+            if (to_len != from_len) {
+                if (to_len > from_len) 
+                    fprintf(file, "            length += %d;\n", to_len - from_len);
+                else
+                    fprintf(file, "            length -= %d;\n", from_len - to_len);
+            }
+            fprintf(file, "            break;\n");
+            fprintf(file, "        }\n");
+        }
+    }
+
+    fprintf(file, "    } while (0);\n");
+    fprintf(file, "    return buffer;\n");
+    fprintf(file, "}\n");
+    fclose(file);
 }
