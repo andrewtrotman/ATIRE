@@ -353,17 +353,17 @@ for (from = start; from < end; from++)
 	then you can tune BM25 by doing a grid search.
 */
 #ifdef FIT_BM25
-double BM25_k1;
-double BM25_b;
+	double BM25_k1;
+	double BM25_b;
 #endif 
 void ANT_search_engine::bm25_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
 {
-#ifndef FIT_BM25
-const double k1 = 0.9;
-const double b = 0.2;
+#ifdef FIT_BM25
+	double k1 = BM25_k1;
+	double b = BM25_b;
 #else
-double k1 = BM25_k1;
-double b = BM25_b;
+	const double k1 = 0.9;
+	const double b = 0.2;
 #endif
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;

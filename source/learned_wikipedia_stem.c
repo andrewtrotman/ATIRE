@@ -4,8 +4,9 @@
 	Stemmer learned for the INEX wikipedia collection.  It was learned by Vaughn Wood using 
 	Genetic Programming.
 */
-#include <string.h>
+#pragma warning (disable : 4127)	// this is the Microsoft C/C++ warning "conditional expression is constant" about a while (1)
 
+#include <string.h>
 #include "learned_wikipedia_stem.h"
 
 #define TMP_BUFFER_SIZE 255
