@@ -43,7 +43,7 @@ ANT_PARTS = \
 	$(OBJDIR)\top_k_sort.obj \
 	$(OBJDIR)\stemmer.obj	\
 	$(OBJDIR)\porter.obj	\
-	$(OBJDIR)\stemmer_porter.obj	\
+	$(OBJDIR)\learned_wikipedia_stem.obj	\
 	$(OBJDIR)\relevant_topic.obj
 	
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
