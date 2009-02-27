@@ -8,7 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "disk.h"
+#include "../source/disk.h"
 #include "link_parts.h"
 
 char target[1024];

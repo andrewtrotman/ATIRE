@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "disk.h"
+#include "../source/disk.h"
 #include "link_parts.h"
 
 #define REMOVE_ORPHAN_LINKS 1
