@@ -57,8 +57,8 @@ char *token_start, *token_end;
 long hits, token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-ANT_stemmer_porter stemmer(search_engine);
-//ANT_stemmer_wikipedia stemmer(search_engine);
+//ANT_stemmer_porter stemmer(search_engine);
+ANT_stemmer_wikipedia stemmer(search_engine);
 //ANT_stemmer stemmer(search_engine);
 
 if (topic_id == -1)
@@ -112,6 +112,7 @@ else
 //	if (did_query)
 //		search_engine->stats_text_render();
 	average_precision = map->average_precision(topic_id, search_engine);
+//	average_precision = map->average_generalised_precision(topic_id, search_engine);
 	}
 
 *matching_documents = hits;

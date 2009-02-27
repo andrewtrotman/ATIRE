@@ -26,6 +26,7 @@ public:
 	~ANT_mean_average_precision() {}
 	
 	double average_precision(long topic, ANT_search_engine *search_engine);
+	double average_generalised_precision(long topic, ANT_search_engine *search_engine);
 } ;
 
 #endif __MEAN_AVERAGE_PRECISION_H__
