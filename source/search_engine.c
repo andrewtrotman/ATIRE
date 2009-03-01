@@ -372,6 +372,8 @@ double tf, idf;
 
 docid = -1;
 
+#ifdef NEVER
+// This variant has been removed in favour of the one below because Shlomo showed the version below being better.
 /*
 	          N - n + 0.5
 	IDF = log -----------
@@ -380,6 +382,16 @@ docid = -1;
 	It is not clear from the BM25 papers what log-base should be used, so this implementation uses the natural log of x.  
 */
 idf = log(((double)documents - (double)term_details->document_frequency + 0.5) / ((double)term_details->document_frequency + 0.5));
+#endif
+
+/*
+	          N
+	IDF = log -
+	          n
+
+	This variant of IDF is better than that above on the 70 INEX 2008 Wikipedia topics 
+*/
+idf = log((double)documents / (double)term_details->document_frequency);
 
 /*
 	               tf(td) * (k1 + 1)
