@@ -35,6 +35,8 @@ ANT_PARTS = \
 	$(OBJDIR)\time_stats.obj\
 	$(OBJDIR)\search_engine_stats.obj\
 	$(OBJDIR)\search_engine_forum.obj\
+	$(OBJDIR)\search_engine_forum_INEX.obj\
+	$(OBJDIR)\search_engine_forum_TREC.obj\
 	$(OBJDIR)\str.obj \
 	$(OBJDIR)\stop_word.obj \
 	$(OBJDIR)\disk.obj \
@@ -123,3 +125,8 @@ $(BINDIR)\foltbl_to_aspt.exe : $(ANT_PARTS) $(OBJDIR)\foltbl_to_aspt.obj
 
 clean :
 	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb
+
+depend:
+	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
+
+!include makefile.dependencies
