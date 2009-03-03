@@ -234,6 +234,22 @@ void GA_individual::load(char *filename) {
     count = current / RULE_SIZE;
 }
 
+void GA_individual::sload(char *string) {
+    int current = 0;
+    char *ptr = string;
+    while (*ptr) {
+        if (ptr[0] >= '0' && ptr[0] <= '9') 
+            rules[current] = ptr[0] - '0';
+        else if (ptr[0] == '-')
+            rules[current] = (char) -1;
+        else
+            rules[current] = ptr[0];
+        ptr++;
+        current++;
+    }
+    count = current / RULE_SIZE;
+}
+
 void GA_individual::generate_c(const char *filename) {
     FILE *file = fopen(filename, "w");
     unsigned int i;

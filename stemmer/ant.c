@@ -324,12 +324,15 @@ char **all_queries = NULL;
 GA *ga;
 double *query_cache;
 
+ANT_search_engine search_engine(&memory);
+
+GA_stemmer *stemmer = new GA_stemmer(&search_engine);
+GA_individual *ind = new GA_individual();
 srand(time(NULL));
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
-ANT_search_engine *search_engine = new ANT_search_engine(&memory);
-fprintf(stderr, "Index contains %ld documents\n", search_engine->document_count());
-init_strgen(search_engine);
+fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
+init_strgen(&search_engine);
 
 document_list = read_docid_list(&documents_in_id_list);
 assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
@@ -356,15 +359,30 @@ query_cache = (double *) malloc(sizeof query_cache[0] * (line - 1));
 int i;
 for (i = 0; i < line - 1; i++) {
     long hits;
-    query_cache[i] = perform_query_w_stemmer(search_engine, all_queries[i], &hits, NULL,topic_ids[i], -1, map);
+    query_cache[i] = perform_query_w_stemmer(&search_engine, all_queries[i], &hits, NULL, topic_ids[i], -1, map);
 }
 
-ga = new GA(POPULATION_SIZE, 
-            new GA_function(perform_query_w_stemmer, search_engine, line - 1, all_queries, topic_ids, query_cache, map));
-ga->run(NUM_OF_GENERATIONS);
+if (stemmer_file) {
+    char buffer[4096];
+    FILE *f = fopen(stemmer_file, "r");
+    while (fscanf(f, "%s", buffer) != EOF) {
+        double result = 0.0;
+        ind->sload(buffer);
+        stemmer->set_stemmer(ind);
+        for (i = 0; i < line - 1; i++) {
+            long hits;
+            result += perform_query_w_stemmer(&search_engine, all_queries[i], &hits, stemmer, topic_ids[i], -1, map);
+        }
+        printf("%f\n", result);
+    }
+} else {
+    ga = new GA(POPULATION_SIZE, 
+                new GA_function(perform_query_w_stemmer, &search_engine, line - 1, all_queries, topic_ids, query_cache, map));
+    ga->run(NUM_OF_GENERATIONS);
+}
 // TODO: output some stats whilst running (to a file, specified on the command line perhaps)
 
-search_engine->stats_text_render();
+search_engine.stats_text_render();
 }
 
 
@@ -453,10 +471,10 @@ int main(int argc, char *argv[])
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	ga_ant(argv[1], argv[2], QREL_ANT);
+	ga_ant(argv[1], argv[2], NULL, QREL_ANT);
 #ifndef FIT_BM25
 else if (argc == 4)
-	batch_ant(argv[1], argv[2], argv[3], QREL_ANT); // Used to check baseline performance
+	ga_ant(argv[1], argv[2], argv[3], QREL_ANT); // Used to check baseline performance
 #else
 /*
 	This code can be used for optimising the BM25 parameters.
