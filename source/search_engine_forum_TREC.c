@@ -33,5 +33,5 @@ void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long hits
 long which;
 
 for (which = 0; which < hits; which++)
-	fprintf(file, "%d Q0 %s %d %d %s\n", topic_id, docids[which], which + 1, (hits - which), run_id);
+	fprintf(file, "%ld Q0 %s %ld %ld %s\n", topic_id, docids[which], which + 1, (hits - which), run_id);
 }

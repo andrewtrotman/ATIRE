@@ -38,6 +38,8 @@ ANT_PARTS = \
     time_stats.o \
     search_engine_stats.o \
     search_engine_forum.o \
+	search_engine_forum_INEX.o \
+	search_engine_forum_TREC.o \
 	str.o \
 	stop_word.o \
     disk.o \
@@ -46,7 +48,7 @@ ANT_PARTS = \
     top_k_sort.o \
     stemmer.o	\
 	porter.o \
-    stemmer_porter.o	\
+    learned_wikipedia_stem.o \
     relevant_topic.o
 
 EXTENSION = \

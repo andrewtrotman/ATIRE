@@ -7,6 +7,10 @@
 char **strings = NULL;
 int string_count = 0;
 
+/*
+  WEIGHT ACORDING TO FREQUENCY 
+  
+ */
 void init_strgen(ANT_search_engine *search_engine) {
     char *term;
     int i;

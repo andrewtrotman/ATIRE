@@ -19,12 +19,14 @@
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
 #include "INEX_assessment.h"
-#include "search_engine_forum.h"
 #include "ga.h"
 #include "ga_stemmer.h"
 #include "ga_function.h"
 #include "strgen.h"
 #include "counter.h"
+#include "INEX_assessment.h"
+#include "search_engine_forum_INEX.h"
+#include "search_engine_forum_TREC.h"
 
 #define NUM_OF_GENERATIONS 200
 #define POPULATION_SIZE 200
@@ -376,7 +378,7 @@ ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
-ANT_search_engine_forum output("ant.out");
+ ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
@@ -399,7 +401,6 @@ if ((fp = fopen(topic_file, "rb")) == NULL)
 
 sum_of_average_precisions = 0.0;
 line = 1;
-output.INEX_init();
 while (fgets(query, sizeof(query), fp) != NULL)
 	{
 	strip_end_punc(query);
@@ -415,10 +416,10 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
 	search_engine.generate_results_list(document_list, answer_list, hits);
-	output.INEX_export(topic_id, answer_list, hits);
+	output.write(topic_id, answer_list, hits);
 	}
 fclose(fp);
-output.INEX_close();
+
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
 printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 
