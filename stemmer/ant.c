@@ -308,8 +308,11 @@ else
 /*
 	GA_ANT()
 	--------
+    STEMMER_FILE is optional, and if it is non-null it should be the filename of a file that contains a
+    stemmer per line. If it exists, then the GA will not be run, each stemmer will instead be run on the 
+    queries.
 */
-void ga_ant(char *topic_file, char *qrel_file, long qrel_format)
+void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
