@@ -236,27 +236,79 @@ void GA_individual::load(char *filename) {
 
 void GA_individual::generate_c(const char *filename) {
     FILE *file = fopen(filename, "w");
-    int i;
-    fprintf(file, "#include <string.h>\n\n");
-    fprintf(file, "#define TMP_BUFFER_SIZE %d\n", TMP_BUFFER_SIZE);
-    fprintf(file, "#define SACROSANCT_CHARS %d\n\n", SACROSANCT_CHARS);
-    fprintf(file, "inline static int m(const char *s, int j) {\nint n = 0, i = 0;\n");
-    fprintf(file, "while(1) {\nif (i > j) return n;\nif (!consonant_p(s, i)) break;\ni++\n}\n");
-    fprintf(file, "i++;\nwhile(1) {\nwhile(1) {\nif (i > j) return n;\n if (consonant_p(s, i)) break;\n");
-    fprintf(file, "i++;\n}\ni++; n++;\nwhile(1) {\n if (i > j) return n;\n if (!consonant_p(s, i)) break;\n");
-    fprintf(file, "i++;\n}\ni++;}\n}\n");
-    fprintf(file, "char *stem(const char *string) {\n");
-    fprintf(file, "    int length;\n");
-    fprintf(file, "    static char buffer[TMP_BUFFER_SIZE];\n\n");
-    fprintf(file, "    strncpy(buffer, string, TMP_BUFFER_SIZE);\n");
-    fprintf(file, "    buffer[TMP_BUFFER_SIZE - 1] = '\\0';\n\n");
-    fprintf(file, "    length = strlen(buffer);\n\n");
-    fprintf(file, "    do {\n");
+    unsigned int i;
+    fprintf(file, "\n\
+#include <string.h>\n\
+\n\
+#define TMP_BUFFER_SIZE %d\n\
+#define SACROSANCT_CHARS %d\n\
+\n\
+#ifndef FALSE\n\
+	#define FALSE 0\n\
+#endif\n\
+#ifndef TRUE\n\
+	#define TRUE (!FALSE)\n\
+#endif\n\
+\n\
+inline static int consonant_p(const char *s, int i) {\n\
+    switch (s[i]) {\n\
+    case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;\n\
+    case 'y': return (i == 0) ? TRUE : !consonant_p(s, i-1);\n\
+    default: return TRUE;\n\
+    }\n\
+}\n\
+inline static int m(const char *s, int j) {\n\
+    int n = 0, i = 0;\n\
+    while(1) {\n\
+    	if (i > j)\n\
+    		return n;\n\
+    	if (!consonant_p(s, i))\n\
+	    	break;\n\
+    	i++;\n\
+	}\n\
+    i++;\n\
+    while(1) {\n\
+	    while(1) {\n\
+    		if (i > j)\n\
+    			return n;\n\
+    		if (consonant_p(s, i))\n\
+    			break;\n\
+	    	i++;\n\
+		}\n\
+    	i++;\n\
+	    n++;\n\
+    	while(1) {\n\
+		if (i > j)\n\
+			return n;\n\
+		if (!consonant_p(s, i))\n\
+			break;\n\
+		i++;\n\
+		}\n\
+	i++;\n\
+	}\n\
+}\n\
+\n\
+", TMP_BUFFER_SIZE, SACROSANCT_CHARS);
+
+
+    fprintf(file, "\
+/* Note that buffer should be at least TMP_BUFFER_SIZE */\n\
+char *stem(const char *string, char *buffer) {\n\
+    int length;\n\
+    strncpy(buffer, string, TMP_BUFFER_SIZE);\n\
+    buffer[TMP_BUFFER_SIZE - 1] = '\\0';\n\
+\n\
+    length = strlen(buffer);\n\
+\n\
+    do {\n\
+");
 
     for (i = 0; i < count; i++) {
         if (measure(i) == SEPARATOR) {
-            fprintf(file, "    } while (0);\n");
-            fprintf(file, "    do {\n");
+            fprintf(file, "\
+    } while (0);\n\
+    do {\n\
+");
         } else {
             int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
             int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
@@ -279,8 +331,10 @@ void GA_individual::generate_c(const char *filename) {
         }
     }
 
-    fprintf(file, "    } while (0);\n");
-    fprintf(file, "    return buffer;\n");
-    fprintf(file, "}\n");
+    fprintf(file, "\
+    } while (0);\n\
+    return buffer;\n\
+}\n\
+");
     fclose(file);
 }
