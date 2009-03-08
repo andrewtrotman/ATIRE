@@ -13,7 +13,7 @@ bin/index.obj: source/disk.h source/file.h source/parser.h source/string_pair.h 
 bin/learned_wikipedia_stem.obj: source/learned_wikipedia_stem.h
 bin/mean_average_precision.obj: source/mean_average_precision.h source/memory.h source/relevant_topic.h source/relevant_document.h source/search_engine.h source/search_engine_posting.h source/search_engine_accumulator.h
 bin/memory.obj: source/memory.h
-bin/memory_index.obj: source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/memory_index.h source/memory.h source/file.h source/btree.h source/btree_head_node.h source/hash_table.h
+bin/memory_index.obj: source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/memory_index.h source/memory.h source/file.h source/btree.h source/btree_head_node.h source/hash_table.h source/fundamental_types.h
 bin/memory_index_hash_node.obj: source/string_pair.h source/str.h source/ctypes.h source/memory.h source/memory_index_hash_node.h source/postings_piece.h source/memory_index_stats.h source/stats.h
 bin/memory_index_stats.obj: source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h
 bin/parser.obj: source/parser.h source/string_pair.h source/str.h source/ctypes.h

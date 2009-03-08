@@ -15,6 +15,7 @@
 #include "btree.h"
 #include "btree_head_node.h"
 #include "hash_table.h"
+#include "fundamental_types.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -215,9 +216,9 @@ return terms + 1;
 ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_file *file, ANT_memory_index_hash_node **start)
 {
 unsigned char zero = 0;
-unsigned long long eight_byte;
-unsigned long four_byte, string_pos;
-long terms_in_node, current_node_head_length;
+uint64_t eight_byte;
+uint32_t four_byte, string_pos;
+uint32_t terms_in_node, current_node_head_length;
 ANT_memory_index_hash_node **current, **end;
 
 current = start;
@@ -238,8 +239,8 @@ else
 /*
 	Number of terms in a node
 */
-terms_in_node = current - start;
-file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));	// 4 bytes
+four_byte = terms_in_node = (uint32_t)(current - start);		// the number of terms in the node limited to 4 Billion!
+file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));		// 4 bytes
 
 /*
 	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
@@ -249,22 +250,22 @@ end = current;
 string_pos = (current - start) * (1 * 8 + 5 * 4) + 4;
 for (current = start; current < end; current++)
 	{
-	four_byte = (unsigned long)(*current)->collection_frequency;
+	four_byte = (uint32_t)(*current)->collection_frequency;
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	four_byte = (unsigned long)(*current)->document_frequency;
+	four_byte = (uint32_t)(*current)->document_frequency;
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	eight_byte = (unsigned long long)((*current)->docids_pos_on_disk);
+	eight_byte = (uint64_t)((*current)->docids_pos_on_disk);
 	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
 
-	four_byte = (unsigned long)((*current)->tfs_pos_on_disk - (*current)->docids_pos_on_disk);
+	four_byte = (uint32_t)((*current)->tfs_pos_on_disk - (*current)->docids_pos_on_disk);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	four_byte = (unsigned long)((*current)->end_pos_on_disk - (*current)->docids_pos_on_disk);
+	four_byte = (uint32_t)((*current)->end_pos_on_disk - (*current)->docids_pos_on_disk);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	four_byte = (unsigned long)string_pos;
+	four_byte = (uint32_t)string_pos;
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 	string_pos += (*current)->string.length() + 1 - current_node_head_length;
@@ -287,13 +288,15 @@ return end;
 */
 long ANT_memory_index::serialise(char *filename)
 {
-unsigned char zero = 0;
+uint8_t zero = 0;
 long btree_root_worst_case;
-long long file_position, terms_in_root;
+uint64_t file_position;
+uint64_t terms_in_root, eight_byte;
 long terms_in_node, unique_terms = 0, max_terms_in_node = 0;
-long hash_val, where, bytes, length_of_longest_term = 0;
-long longest_postings_size;
-long long highest_df = 0;
+long hash_val, where, bytes;
+int32_t length_of_longest_term = 0;
+uint32_t longest_postings_size;
+int64_t highest_df = 0;
 ANT_file *file;
 ANT_memory_index_hash_node **term_list, **here;
 ANT_btree_head_node *header, *current_header, *last_header;
@@ -355,35 +358,36 @@ file_position = file->tell();
 /*
 	Write the header to disk N then N * (string, offset) pairs
 */
-file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));
+file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));	// 4 bytes
 
 printf("Terms in root:%lld\n", terms_in_root);
 
 for (current_header = header; current_header < last_header; current_header++)
 	{
 	file->write((unsigned char *)current_header->node->string.string(), current_header->node->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : current_header->node->string.length());
-	file->write(&zero, sizeof(zero));
-	file->write((unsigned char *)&(current_header->disk_pos), sizeof(current_header->disk_pos));
+	file->write(&zero, sizeof(zero));									// 1 byte
+	eight_byte = current_header->disk_pos;
+	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));		// 8 bytes
 	}
 
 /*
 	Write the location of the header to file
 */
 printf("Root pos on disk:%lld\n", file_position);
-file->write((unsigned char *)&file_position, sizeof(file_position));
+file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 bytes
 /*
 	The string length of the longest term
 */
-file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));
+file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));		// 4 bytes
 /*
 	The maximum length of a compressed posting list
 */
 longest_postings_size = serialised_docids_size + serialised_tfs_size;
-file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));
+file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));	// 4 byte
 /*
 	and the maximum number of postings in a postings list (that is, the largest document frequencty (DF))
 */
-file->write((unsigned char *)&highest_df, sizeof(highest_df));
+file->write((unsigned char *)&highest_df, sizeof(highest_df));		// 8 bytes
 
 /*
 	Close (and flush) the file

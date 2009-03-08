@@ -391,7 +391,7 @@ idf = log(((double)documents - (double)term_details->document_frequency + 0.5) /
 
 	This variant of IDF is better than that above on the 70 INEX 2008 Wikipedia topics 
 */
-idf = log((double)documents / (double)term_details->document_frequency);
+idf = log((double)(documents) / (double)term_details->document_frequency);
 
 /*
 	               tf(td) * (k1 + 1)
