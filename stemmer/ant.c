@@ -332,7 +332,6 @@ srand(time(NULL));
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
-init_strgen(&search_engine);
 
 document_list = read_docid_list(&documents_in_id_list);
 assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
@@ -365,7 +364,9 @@ for (i = 0; i < line - 1; i++) {
 if (stemmer_file) {
     char buffer[4096];
     FILE *f = fopen(stemmer_file, "r");
-    while (fscanf(f, "%s", buffer) != EOF) {
+    while (fgets(buffer, 4096, f) != NULL) {
+        if (buffer[0] != ' ')
+            continue;
         double result = 0.0;
         ind->sload(buffer);
         stemmer->set_stemmer(ind);
@@ -373,9 +374,10 @@ if (stemmer_file) {
             long hits;
             result += perform_query_w_stemmer(&search_engine, all_queries[i], &hits, stemmer, topic_ids[i], -1, map);
         }
-        printf("%f\n", result);
+        printf("%f\n", result / (line - 1));
     }
 } else {
+    init_strgen(&search_engine);
     ga = new GA(POPULATION_SIZE, 
                 new GA_function(perform_query_w_stemmer, &search_engine, line - 1, all_queries, topic_ids, query_cache, map));
     ga->run(NUM_OF_GENERATIONS);
@@ -468,46 +470,55 @@ printf("%s <topic_file> <qrel_file>\n", exename);
 */
 int main(int argc, char *argv[])
 {
+int qrel;
 if (argc == 1)
 	command_driven_ant();
-else if (argc == 3)
-	ga_ant(argv[1], argv[2], NULL, QREL_ANT);
+ else {
+     if (argv[1][0] == 'i')
+         qrel = QREL_INEX;
+     else 
+         qrel = QREL_ANT;
+     argc--; argv++;
+
+     if (argc == 3)
+         ga_ant(argv[1], argv[2], NULL, qrel);
 #ifndef FIT_BM25
-else if (argc == 4)
-	ga_ant(argv[1], argv[2], argv[3], QREL_ANT); // Used to check baseline performance
+     else if (argc == 4)
+         ga_ant(argv[1], argv[2], argv[3], qrel);
 #else
 /*
 	This code can be used for optimising the BM25 parameters.
 	In order to make it work you'll need to change the code for 
 	BM25 to declare and use the externs;
 */
-else if (argc == 4)
-	{
-	FILE *outfile;
-	extern double BM25_k1;
-	extern double BM25_b;
-    double map;
+     else if (argc == 4)
+         {
+             FILE *outfile;
+             extern double BM25_k1;
+             extern double BM25_b;
+             double map;
 
-	outfile = fopen(argv[3], "wb");
-	fprintf(outfile, "%f ", 0.0);
-	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
-		fprintf(outfile, "%f ", BM25_b);
-	fprintf(outfile, "\n");
-
-	for (BM25_k1 = 0.1; BM25_k1 < 4.0; BM25_k1+= 0.1)
-		{
-		fprintf(outfile, "%f ", BM25_k1);
-		for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
-			{
-            map = batch_ant(argv[1], argv[2], NULL, QREL_ANT);
-			fprintf(outfile, "%f ", map);
-			}
-		fprintf(outfile, "\n");
-		}
-	}
+             outfile = fopen(argv[3], "wb");
+             fprintf(outfile, "%f ", 0.0);
+             for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
+                 fprintf(outfile, "%f ", BM25_b);
+             fprintf(outfile, "\n");
+             
+             for (BM25_k1 = 0.1; BM25_k1 < 4.0; BM25_k1+= 0.1) {
+                 fprintf(outfile, "%f ", BM25_k1);
+                 for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1) {
+                     map = batch_ant(argv[1], argv[2], NULL, qrel);
+                     fprintf(outfile, "%f ", map);
+                 }
+                 fprintf(outfile, "\n");
+             }
+             fsync(outfile);
+             fclose(outfile);
+         }
 #endif
-else
-	usage(argv[0]);
+     else
+         usage(argv[-1]);
+ }
 
 return 0;
 }

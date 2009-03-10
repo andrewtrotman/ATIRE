@@ -363,7 +363,7 @@ void ANT_search_engine::bm25_rank(ANT_search_engine_btree_leaf *term_details, AN
 	double b = BM25_b;
 #else
 	const double k1 = 0.9;
-	const double b = 0.2;
+	const double b = 0.4;
 #endif
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
