@@ -36,7 +36,6 @@ PARTS = \
 	$(OBJDIR)\file.obj\
 	$(OBJDIR)\file_internals.obj\
 	$(OBJDIR)\memory.obj \
-	$(OBJDIR)\osmalloc.obj \
 	$(OBJDIR)\search_engine.obj \
 	$(OBJDIR)\search_engine_accumulator.obj \
 	$(OBJDIR)\mean_average_precision.obj \
