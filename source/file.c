@@ -5,32 +5,15 @@
 #include <string.h>
 #include "file.h"
 #include "memory.h"
+#include "file_internals.h"
 
 #ifdef linux
 	#include <sys/stat.h>
-#ifndef _LARGEFILE_SOURCE
-	#define _LARGEFILE_SOURCE
-#endif
-#ifndef _LARGEFILE64_SOURCE
-	#define _LARGEFILE64_SOURCE
-#endif
-	#define FILE_OFFSET_BITS 64
-	#define ftell ftello
-	#define fseek fseeko
-	#define fstat fstat64
-	#define stat stat64
 #elif defined(__APPLE__)
 	#include <sys/stat.h>
 #elif defined(_MSC_VER)
-	#include <sys/types.h>
-	#include <sys/stat.h>
-
-	#define fseek _fseeki64
-	#define fileno _fileno
-	#define stat _stat64
-	#define fstat _fstat64
+	#include <windows.h>
 #endif
-
 
 /*
 	ANT_FILE::ANT_FILE()
@@ -38,7 +21,7 @@
 */
 ANT_file::ANT_file(ANT_memory *memory)
 {
-fp = NULL;
+internals = new ANT_file_internals;
 this->memory = memory;
 buffer = NULL;
 buffer_size = 0;
@@ -54,6 +37,7 @@ setvbuff(1024 * 1024);		// use a 1MB buffer by default.
 ANT_file::~ANT_file()
 {
 close();
+delete internals;
 }
 
 /*
@@ -74,10 +58,40 @@ return buffer == NULL ? 0 : 1;
 */
 long ANT_file::open(char *filename, char *mode)
 {
-if ((fp = fopen(filename, mode)) == NULL)
-	return 0;
+#ifdef _MSC_VER
+	DWORD access_mode, creation_mode;
+	char *ch;
+
+	access_mode = creation_mode = 0;
+	for (ch = mode; *ch != NULL; ch++)
+		switch (*ch)
+			{
+			case 'r':
+				access_mode |= GENERIC_READ;
+				creation_mode |= OPEN_EXISTING;
+				break;
+			case 'w':
+				access_mode |= GENERIC_WRITE;
+				creation_mode |= CREATE_ALWAYS;
+				break;
+			case 'a':
+				access_mode |= GENERIC_WRITE;
+				creation_mode = OPEN_ALWAYS;
+				break;
+			case '+':
+				access_mode |= GENERIC_READ | GENERIC_WRITE;
+				break;
+			}
+	if ((internals->fp = CreateFile(filename, access_mode, FILE_SHARE_READ, NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
+		return 0;
+#else
+	if ((internals->fp = fopen(filename, mode)) == NULL)
+		return 0;
+#endif
 
 file_position = 0;
+if (strchr(mode, 'a') != NULL)
+	seek(file_length());
 
 return 1;
 }
@@ -88,11 +102,16 @@ return 1;
 */
 long ANT_file::close(void)
 {
-if (fp != NULL)
+if (internals->fp != NULL)
 	{
 	flush();
-	fclose(fp);
-	fp = NULL;
+	#ifdef _MSC_VER
+		CloseHandle(internals->fp);
+		internals->fp = INVALID_HANDLE_VALUE;
+	#else
+		fclose(internals->fp);
+		internals->fp = NULL;
+	#endif
 	}
 return 1;
 }
@@ -105,7 +124,7 @@ void ANT_file::flush(void)
 {
 if (buffer_used > 0)
 	{
-	fwrite(buffer, buffer_used, 1, fp);
+	internals->write_file_64(internals->fp, buffer, buffer_used);
 	buffer_used = 0;
 	}
 }
@@ -164,8 +183,8 @@ return 1;
 long ANT_file::read(unsigned char *data, long size)
 {
 flush();
-file_position += size;
-return fread(data, size, 1, fp);
+file_position += size;		// this is wherw we'll be at the end of the read
+return internals->read_file_64(internals->fp, data, size);
 }
 
 /*
@@ -183,8 +202,18 @@ return file_position;
 */
 void ANT_file::seek(long long offset_from_start_of_file)
 {
+#ifdef _MSC_VER
+	LARGE_INTEGER offset;
+#endif
+
 flush();
-fseek(fp, offset_from_start_of_file, SEEK_SET);
+
+#ifdef _MSC_VER
+	offset.QuadPart = offset_from_start_of_file;
+	SetFilePointerEx(internals->fp, offset, NULL, FILE_BEGIN);
+#else
+	fseek(internals->fp, offset_from_start_of_file, SEEK_SET);
+#endif
 file_position = offset_from_start_of_file;
 }
 
@@ -194,15 +223,21 @@ file_position = offset_from_start_of_file;
 */
 long long ANT_file::file_length(void)
 {
+#ifdef _MSC_VER
+LARGE_INTEGER ans;
+#else
 struct stat details;
-long ans;
+#endif
 
-if (fp != NULL)
-	{
-	ans = fstat(fileno(fp), &details);
-	return details.st_size;
-	}
+#ifdef _MSC_VER
+	if (internals->fp != INVALID_HANDLE_VALUE)
+		if (GetFileSizeEx(internals->fp, &ans) != 0)
+			return ans.QuadPart;
+#else
+	if (internals->fp != NULL)
+		if (fstat(fileno(internals->fp), &details) == 0)
+			return details.st_size;
+#endif
 
 return 0;
 }
-

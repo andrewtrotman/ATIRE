@@ -3,18 +3,8 @@
 	---------------
 */
 
-class ANT_gp_individual
-{
-public:
-	ANT_gp_individual_node *function;
-	double average_precision;
-
-public:
-	ANT_gp_individual();
-	~ANT_gp_individual();
-
-	double evaluate(void);
-} ;
+#include "gp_individual.h"
+#include "gp_individual_node.h"
 
 /*
 	ANT_GP_INDIVIDUAL::ANT_GP_INDIVIDUAL()
@@ -43,7 +33,7 @@ double ANT_gp_individual::evaluate(void)
 {
 double ans;
 
-ans = function->evaluate();
+ans = function->eval();
 
 return ans;
 }

@@ -5,40 +5,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strstream>
+#include "gp_individual_node.h"
 
 using namespace std;
 
-/*             + - * / l s 0 1 2 3 4 5 6 7 8 9 1  F */
-long *arity = {2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,-1};
-
-class ANT_gp_individual_node
-{
-private:
-	enum  {PLUS, MINUS, TIMES, DIVIDE, LOG, SQRT,
-			CONST0, CONST1, CONST2, CONST3, CONST4, CONST5,
-			CONST6, CONST7, CONST8, CONST9, CONST10,
-			FINAL} ;
-public:
-	ANT_gp_individual_node *parameter1, *parameter2;
-	long opcode;
-	double constant;
-
-private:
-	long new_opcode(void) { opcode = (long)((double)rand() / (double)(RAND_MAX + 1.0) * (double)FINAL); }
-	long get_depth(void);
-	ANT_gp_individual_node *select_child(long *node);
-
-public:
-	ANT_gp_individual_node();
-	virtual ~ANT_gp_individual_node();
-
-	double eval(void);
-	char *text_render(ostrstream &outstream);
-
-	ANT_gp_individual *copy(void);
-	void mutate(long *node);
-} ;
+/*              + - * / L Q 0 1 2 3 4 5 6 7 8 9 1  F */
+static long arity[] = {2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,-1};
+static char *op_names  = "+1*/LQ0123456789XF";
 
 /*
 	ANT_GP_INDIVIDUAL_NODE::ANT_GP_INDIVIDUAL_NODE()
@@ -89,10 +62,19 @@ delete parameter2;
 }
 
 /*
+	ANT_GP_INDIVIDUAL_NODE::NEW_OPCODE()
+	------------------------------------
+*/
+long ANT_gp_individual_node::new_opcode(void) 
+{
+return (long)((double)rand() / (double)(RAND_MAX + 1.0) * (double)FINAL);
+}
+
+/*
 	ANT_GP_INDIVIDUAL::COPY()
 	-------------------------
 */
-ANT_gp_individual *ANT_gp_individual::copy(void)
+ANT_gp_individual_node *ANT_gp_individual_node::copy(void)
 {
 return new ANT_gp_individual_node(this);
 }
@@ -114,34 +96,50 @@ else
 	answer = NULL;
 	(*node)--;
 	if (parameter1 != NULL)
-		answer = parameter1->mutate(node);
+		answer = parameter1->select_child(node);
 	if (answer == NULL && parameter2 != NULL)
-		answer = parameter2->mutate(node);
+		answer = parameter2->select_child(node);
 	}
 return answer;
 }
 
 /*
-	ANT_GP_INDIVIDUAL::MUTATE()
-	---------------------------
+	ANT_GP_INDIVIDUAL_NODE::MUTATE()
+	--------------------------------
 */
-void ANT_gp_individual::mutate(long *node)
+ANT_gp_individual_node *ANT_gp_individual_node::mutate(long *node)
 {
 ANT_gp_individual_node *who;
 long old_arity, new_arity;
 
 who = select_child(node);
 old_arity = arity[who->opcode];
+
+printf("replace:%c (arity:%d) with:", op_names[who->opcode], old_arity);
+
 who->opcode = new_opcode();
 new_arity = arity[who->opcode];
+
+printf("%c (arity:%d)\n", op_names[who->opcode], new_arity);
+
+/*
+	Special case for handling constants
+*/
+if (who->opcode >= CONST0 && who->opcode <= CONST10)
+	who->constant = (double)(who->opcode - CONST0) / 10.0;
+
+/*
+	If arities match then we're done
+*/
+
 if (new_arity == old_arity)
-	return;
+	return this;
 /*
 	Deal with parameter number (arity) mismatch
 */
 if (new_arity < 0)
 	puts("GP mutation went wrong!");
-else (new_arity == 0)
+else if (new_arity == 0)
 	{
 	delete who->parameter1;
 	delete who->parameter2;
@@ -150,24 +148,55 @@ else (new_arity == 0)
 else if (new_arity == 1)
 	{
 	if (who->parameter1 == NULL)
-		who->parameter1 = new ANT_gp_individual;
+		who->parameter1 = new ANT_gp_individual_node;
 	delete who->parameter2;
 	who->parameter2 = NULL;
 	}
 else if (new_arity == 2)
 	{
 	if (who->parameter1 == NULL)
-		who->parameter1 = new ANT_gp_individual;
+		who->parameter1 = new ANT_gp_individual_node;
 	if (who->parameter2 == NULL)
-		who->parameter2 = new ANT_gp_individual;
+		who->parameter2 = new ANT_gp_individual_node;
 	}
+
+return this;
 }
 
 /*
-	ANT_GP_INDIVIDUAL::GET_DEPTH()
-	------------------------------
+	ANT_GP_INDIVIDUAL_NODE::CROSSOVER()
+	-----------------------------------
 */
-long ANT_gp_individual::get_depth(void)
+ANT_gp_individual_node *ANT_gp_individual_node::crossover(long *node, ANT_gp_individual_node *brother, long *node_in_brother)
+{
+ANT_gp_individual_node *my_node, *his_node;
+
+my_node = select_child(node);
+his_node = brother->select_child(node_in_brother);
+
+delete my_node->parameter1;
+delete my_node->parameter2;
+
+my_node->opcode = his_node->opcode;
+my_node->constant = his_node->constant;
+
+my_node->parameter1 = my_node->parameter2 = NULL;
+
+if (his_node->parameter1 != NULL)
+	my_node->parameter1 = his_node->parameter1->copy();
+
+if (his_node->parameter2 != NULL)
+	my_node->parameter2 = his_node->parameter2->copy();
+
+return this;
+}
+
+
+/*
+	ANT_GP_INDIVIDUAL_NODE::GET_DEPTH()
+	-----------------------------------
+*/
+long ANT_gp_individual_node::get_depth(void)
 {
 long left, right;
 
@@ -289,29 +318,5 @@ switch (opcode)
 		break;
 	}
 return "";
-}
-
-
-/*
-	MAIN()
-	------
-*/
-int main(void)
-{
-ANT_gp_individual_node *func;
-long which;
-double ans;
-
-for (which = 0; which < 10; which++)
-	{
-	ostrstream string;
-
-	func = new ANT_gp_individual_node;
-	func->text_render(string);
-	ans = func->eval();
-	string << ends;
-	printf("%f=%s\n", ans, string.str());
-	delete func;
-	}
 }
 

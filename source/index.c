@@ -88,7 +88,7 @@ for (param = first_param; param < argc; param++)
 		doc++;
 		if (doc % 10000 == 0)
 			{
-			printf("Documents Indexed:%lld Memory used:%lld", doc, index->memory->used);
+			printf("Documents Indexed:%lld Memory used:%lld", doc, index->memory->bytes_used());
 			stats.print_elapsed_time();
 			printf("\n");
 			}

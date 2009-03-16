@@ -2,7 +2,6 @@
 	MEMORY.H
 	--------
 */
-
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
@@ -12,15 +11,21 @@
 
 class ANT_memory
 {
-friend int main(int argc, char *argv[]);			// delete this line
 private:
 	char *chunk, *at, *chunk_end;
 	long long used;
 	long long allocated;
-	long long block_size;
+	size_t block_size;
+	long has_large_pages, short_page_size, large_page_size;
+
+protected:
+	void *alloc(size_t *size);
+#ifdef _MSC_VER
+	long set_privilege(char *priv_name, long enable);
+#endif
 
 public:
-	ANT_memory(long long block_size_for_allocation = 1024 * 1024 * 1024);
+	ANT_memory(size_t block_size_for_allocation = 1024 * 1024 * 1024);
 	~ANT_memory();
 
 	void *malloc(size_t bytes);
@@ -36,13 +41,15 @@ public:
 inline void *ANT_memory::malloc(size_t bytes)
 {
 void *ans;
+size_t request;
 
 if (chunk == NULL)
 	{
-	allocated = block_size;
-	at = chunk = new (std::nothrow) char [(size_t)allocated];
+	request = block_size;
+	at = chunk = (char *)alloc(&request);
+	allocated = request;
 	if (chunk == NULL)
-		exit(printf("Out of memory:%lld bytes requested\n", allocated));
+		exit(printf("Out of memory:%lld bytes requested\n", bytes));
 	chunk_end = chunk + allocated;
 	}
 ans = at;

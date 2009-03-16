@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include "disk.h"
 #include "disk_internals.h"
+#include "file_internals.h"
 
 #ifdef _MSC_VER
 	#define stat _stat64
@@ -44,32 +45,58 @@ delete internals;
 */
 char *ANT_disk::read_entire_file(char *filename, long long *file_length)
 {
-struct stat details;
 long long unused;
 char *block = NULL;
-FILE *fp;
+#ifdef _MSC_VER
+	HANDLE fp;
+	LARGE_INTEGER details;
+#else
+	FILE *fp;
+	struct stat details;
+#endif
 
 if (filename == NULL)
-	return NULL;
-
-if ((fp = fopen(filename, "rb")) == NULL)
 	return NULL;
 
 if (file_length == NULL)
 	file_length = &unused;
 
-if (fstat(fileno(fp), &details) == 0)
-	if ((*file_length = details.st_size) != 0)
-		if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
-			if (fread(block, (long)details.st_size, 1, fp) == 1)
-				block[details.st_size] = '\0';
-			else
+#ifdef _MSC_VER
+	fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+	if (fp == INVALID_HANDLE_VALUE)
+		return NULL;
+
+	if (GetFileSizeEx(fp, &details) != 0)
+		if ((*file_length = details.QuadPart) != 0)
+			if ((block = new (std::nothrow) char [(size_t)(details.QuadPart + 1)]) != NULL)		// +1 for the '\0' on the end
 				{
-				delete [] block;
-				block = NULL;
+				if (ANT_file_internals::read_file_64(fp, block, details.QuadPart) != 0)
+					block[details.QuadPart] = '\0';
+				else
+					{
+					delete [] block;
+					block = NULL;
+					}
 				}
 
-fclose(fp);
+	CloseHandle(fp);
+#else
+	if ((fp = fopen(filename, "rb")) == NULL)
+		return NULL;
+
+	if (fstat(fileno(fp), &details) == 0)
+		if ((*file_length = details.st_size) != 0)
+			if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
+				if (fread(block, (long)details.st_size, 1, fp) == 1)
+					block[details.st_size] = '\0';
+				else
+					{
+					delete [] block;
+					block = NULL;
+					}
+	fclose(fp);
+#endif
+
 return block;
 }
 
@@ -132,14 +159,14 @@ char *ANT_disk::get_first_filename(char *wildcard)
 char *slash, *colon, *backslash, *max;
 
 #ifdef _MSC_VER
-if ((internals->file_list = FindFirstFile(wildcard, &internals->file_data)) == INVALID_HANDLE_VALUE)
-	return NULL;
+	if ((internals->file_list = FindFirstFile(wildcard, &internals->file_data)) == INVALID_HANDLE_VALUE)
+		return NULL;
 #else
-glob(wildcard, 0, NULL, &internals->matching_files);
-internals->glob_index = 0;
+	glob(wildcard, 0, NULL, &internals->matching_files);
+	internals->glob_index = 0;
 
-if (internals->matching_files.gl_pathc == 0) /* None found */
-	return NULL;
+	if (internals->matching_files.gl_pathc == 0) /* None found */
+		return NULL;
 #endif
 
 strcpy(internals->pathname, wildcard);
@@ -159,9 +186,9 @@ if (colon > max)
 *(max + 1) = '\0';
 
 #ifdef _MSC_VER
-return construct_full_path(internals->file_data.cFileName);
+	return construct_full_path(internals->file_data.cFileName);
 #else
-return internals->matching_files.gl_pathv[internals->glob_index++];
+	return internals->matching_files.gl_pathv[internals->glob_index++];
 #endif
 }
 

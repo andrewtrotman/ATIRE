@@ -35,7 +35,6 @@ public:
 
 public:
 	ANT_disk_internals();
-	~ANT_disk_internals();
 } ;
 
 #endif __DISK_INTERNALS_H__

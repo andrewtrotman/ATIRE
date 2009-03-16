@@ -2,20 +2,9 @@
 	GP.C
 	----
 */
-
-class ANT_gp
-{
-private:
-	double crossover;
-	double mutation;
-	ANT_gp_individual *population1[POPULATION_SIZE];
-	ANT_gp_individual *population2[POPULATION_SIZE];
-	ANT_gp_individual **current, **next;
-
-public:
-	ANT_gp()
-	virtual ~ANT_gp();
-} ;
+#include <stdio.h>
+#include "gp.h"
+#include "gp_individual.h"
 
 /*
 	ANT_GP::ANT_GP()

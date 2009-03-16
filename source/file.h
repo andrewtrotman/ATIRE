@@ -6,14 +6,13 @@
 #ifndef __FILE_H__
 #define __FILE_H__
 
-#include <stdio.h>
-
 class ANT_memory;
+class ANT_file_internals;
 
 class ANT_file
 {
 private:
-	FILE *fp;
+	ANT_file_internals *internals;
 	long long file_position;
 	unsigned char *buffer;
 	long buffer_size, buffer_used;
