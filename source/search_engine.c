@@ -347,23 +347,23 @@ for (from = start; from < end; from++)
 }
 
 /*
-	ANT_SEARCH_ENGINE::BM25_RANK()
-	------------------------------
-	If you declare FIT_BM25
-	then you can tune BM25 by doing a grid search.
+	ANT_SEARCH_ENGINE::RELEVANCE_RANK()
+	-----------------------------------
+	BM25 relevance ranking by default (this is a virtual function)
+	If you declare FIT_BM25 then you can tune BM25 by doing a grid search.
 */
 #ifdef FIT_BM25
 	double BM25_k1;
 	double BM25_b;
 #endif 
-void ANT_search_engine::bm25_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
+void ANT_search_engine::relevance_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
 {
 #ifdef FIT_BM25
 	double k1 = BM25_k1;
 	double b = BM25_b;
 #else
 	const double k1 = 0.9;
-	const double b = 0.4;
+	const double b = 0.2;
 #endif
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
@@ -437,7 +437,7 @@ decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + ter
 stats->add_decompress_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-bm25_rank(&term_details, &posting);
+relevance_rank(&term_details, &posting);
 stats->add_rank_time(stats->stop_timer(now));
 }
 
@@ -524,7 +524,7 @@ stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buf
 stats->add_stemming_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-bm25_rank(&stemmed_term_details, &posting);
+relevance_rank(&stemmed_term_details, &posting);
 stats->add_rank_time(stats->stop_timer(now));
 }
 

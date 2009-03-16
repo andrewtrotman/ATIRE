@@ -355,9 +355,8 @@ else if (argc == 4)
 			}
 		fprintf(outfile, "\n");
 		}
-    fsync(outfile);
-    fclose(outfile);
 	}
+	fclose(outfile);
 #endif
 else
 	usage(argv[0]);

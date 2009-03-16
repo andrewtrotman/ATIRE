@@ -41,7 +41,8 @@ private:
 	long get_long(unsigned char *from) { return *((long *)from); }
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 
-	void bm25_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
+protected:
+	virtual void relevance_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
 
 public:
 	ANT_search_engine(ANT_memory *memory);
