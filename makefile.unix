@@ -13,6 +13,7 @@ INDEX_PARTS = \
 	disk.o \
 	disk_internals.o \
 	file.o \
+    file_internals.o \
 	parser.o \
 	memory_index_hash_node.o \
 	memory.o \
@@ -27,6 +28,7 @@ INDEX_PARTS = \
 ANT_PARTS = \
 	ctypes.o \
     file.o \
+    file_internals.o \
     memory.o \
     search_engine.o \
     search_engine_accumulator.o \

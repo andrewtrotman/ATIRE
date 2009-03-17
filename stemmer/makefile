@@ -5,7 +5,7 @@ BINDIR = ../bin
 
 EXTFLAGS = -I$(SRCDIR)
 LDFLAGS = -g
-CFLAGS = -g -O3 -Wall -DFIT_BM25 -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+CFLAGS = -g -O3 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 	-Wno-endif-labels
 
 CC = g++
@@ -14,6 +14,7 @@ INDEX_PARTS = \
 	disk.o \
 	disk_internals.o \
 	file.o \
+	file_internals.o \
 	parser.o \
 	memory_index_hash_node.o \
 	memory.o \
@@ -28,6 +29,7 @@ INDEX_PARTS = \
 ANT_PARTS = \
 	ctypes.o \
     file.o \
+	file_internals.o \
     memory.o \
     search_engine.o \
     search_engine_accumulator.o \

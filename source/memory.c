@@ -124,7 +124,7 @@ void *ANT_memory::alloc(size_t *size)
 	*size = bytes;		// number of bytes we allocated
 	return answer;
 #else
-	return malloc(size);
+	return malloc(*size);
 #endif
 }
 

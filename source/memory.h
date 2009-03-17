@@ -49,7 +49,7 @@ if (chunk == NULL)
 	at = chunk = (char *)alloc(&request);
 	allocated = request;
 	if (chunk == NULL)
-		exit(printf("Out of memory:%lld bytes requested\n", bytes));
+		exit(printf("Out of memory:%lld bytes requested\n", (long long)bytes));
 	chunk_end = chunk + allocated;
 	}
 ans = at;

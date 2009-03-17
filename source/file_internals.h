@@ -32,7 +32,7 @@ public:
 	#ifdef _MSC_VER
 		HANDLE fp;
 	#else
-		FILE *fp
+        FILE *fp;
 	#endif
 public:
 	ANT_file_internals();

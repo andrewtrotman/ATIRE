@@ -40,7 +40,7 @@ ANT_file_internals::ANT_file_internals()
 	return 1;
 	}
 #else
-	int ANT_disk_internals::read_file_64(FILE *fp, void *destination, long long bytes_to_read)
+	int ANT_file_internals::read_file_64(FILE *fp, void *destination, long long bytes_to_read)
 	{
 	return fread(destination, bytes_to_read, 1, fp);		// will return 0 (fail) of 1 (success)
 	}
@@ -70,7 +70,7 @@ ANT_file_internals::ANT_file_internals()
 	return 1;
 	}
 #else
-	int ANT_disk_internals::write_file_64(FILE *fp, void *destination, long long bytes_to_write)
+	int ANT_file_internals::write_file_64(FILE *fp, void *destination, long long bytes_to_write)
 	{
 	return fwrite(destination, bytes_to_write, 1, fp);		// will return 0 (fail) of 1 (success)
 	}

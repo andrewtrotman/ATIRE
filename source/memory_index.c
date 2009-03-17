@@ -173,7 +173,7 @@ return terms;
 	ANT_MEMORY_INDEX::GENERATE_TERM_LIST()
 	--------------------------------------
 */
-long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, long *length_of_longest_term, long long *highest_df)
+long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, long long *highest_df)
 {
 long term_length, terms = 0;
 

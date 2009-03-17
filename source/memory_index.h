@@ -7,6 +7,7 @@
 
 #include "memory_index_stats.h"
 #include "memory_index_hash_node.h"
+#include "fundamental_types.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -31,7 +32,7 @@ private:
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
-	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, long *length_of_longest_term, long long *highest_df);
+	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, long long *highest_df);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
 
 public:
