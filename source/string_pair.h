@@ -6,7 +6,6 @@
 #define __STRING_PAIR_H__
 
 #include "str.h"
-#include "maths.h"
 
 class ANT_string_pair
 {
@@ -29,17 +28,17 @@ public:
 
 
 /*
-	INT ANT_STRING_PAIR::STRCMP()
-	-----------------------------
+	ANT_STRING_PAIR::STRCMP()
+	-------------------------
 */
 inline int ANT_string_pair::strcmp(ANT_string_pair *with)
 {
-return string_length == with->string_length ? memcmp(start, with->start, string_length) : sign(string_length - with->string_length);
+return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1;
 }
 
 /*
-	INT ANT_STRING_PAIR::TRUE_STRCMP()
-	----------------------------------
+	ANT_STRING_PAIR::TRUE_STRCMP()
+	------------------------------
 */
 inline int ANT_string_pair::true_strcmp(ANT_string_pair *with)
 {
@@ -51,15 +50,15 @@ else
 	{
 	cmp = ::memcmp(start, with->start, string_length < with->string_length ? string_length : with->string_length);
 	if (cmp == 0)
-		return string_length - with->string_length;
+		return string_length < with->string_length ? -1 : 1;		// cannot be 0 as we already checked for that.
 	else
 		return cmp;
 	}
 }
 
 /*
-	INT ANT_STRING_PAIR::STRNCMP()
-	-------------------------------
+	ANT_STRING_PAIR::STRNCMP()
+	--------------------------
 */
 inline int ANT_string_pair::strncmp(ANT_string_pair *with, long len)
 {
@@ -71,7 +70,7 @@ else
 	{			// at least one string_length must be less than len
 	cmp = ::memcmp(start, with->start, string_length < with->string_length ? string_length : with->string_length);
 	if (cmp == 0)
-		return string_length - with->string_length;
+		return string_length < with->string_length ? -1 : 1;
 	else
 		return cmp;
 	}
