@@ -51,9 +51,4 @@ inline int sign(double a)
 return a < 0 ? -1 : a > 0 ? 1 : 0;
 }
 
-inline int sign(size_t a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
-
 #endif __MATHS_H__
