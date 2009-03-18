@@ -191,7 +191,7 @@ into[where + terms] = root;
 /*
 	Compute the string length of the longest string
 */
-if ((term_length = root->string.length()) > *length_of_longest_term)
+if ((term_length = (long)root->string.length()) > *length_of_longest_term)
 	*length_of_longest_term = term_length;
 
 /*
@@ -245,9 +245,9 @@ file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));		// 4 bytes
 /*
 	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
 */
-current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (*start)->string.length();
+current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (uint32_t)(*start)->string.length();
 end = current;
-string_pos = (current - start) * (1 * 8 + 5 * 4) + 4;
+string_pos = (uint32_t)(current - start) * (1 * 8 + 5 * 4) + 4;
 for (current = start; current < end; current++)
 	{
 	four_byte = (uint32_t)(*current)->collection_frequency;
@@ -268,14 +268,14 @@ for (current = start; current < end; current++)
 	four_byte = (uint32_t)string_pos;
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	string_pos += (*current)->string.length() + 1 - current_node_head_length;
+	string_pos += (uint32_t)(*current)->string.length() + 1 - current_node_head_length;
 	}
 /*
 	Finally the strings ('\0' terminated)
 */
 for (current = start; current < end; current++)
 	{
-	file->write((unsigned char *)((*current)->string.string() + current_node_head_length), (*current)->string.length() - current_node_head_length);
+	file->write((unsigned char *)((*current)->string.string() + current_node_head_length), (uint32_t)((*current)->string.length()) - current_node_head_length);
 	file->write(&zero, 1);
 	}
 

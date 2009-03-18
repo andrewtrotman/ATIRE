@@ -15,7 +15,7 @@ private:
 	ANT_file_internals *internals;
 	long long file_position;
 	unsigned char *buffer;
-	long buffer_size, buffer_used;
+	long long buffer_size, buffer_used;
 	ANT_memory *memory;
 
 private:
@@ -28,8 +28,8 @@ public:
 	long setvbuff(long size);
 	long open(char *filename, char *mode);
 	long close(void);
-	long write(unsigned char *data, long size);
-	long puts(char *string);
+	long write(unsigned char *data, long long size);
+	long long puts(char *string);
 	long read(unsigned char *data, long size);
 	long read(long long *data) { return read((unsigned char *)data, sizeof(long long)); }
 	long read(long *data) { return read((unsigned char *)data, sizeof(long)); }

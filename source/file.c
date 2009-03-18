@@ -133,9 +133,9 @@ if (buffer_used > 0)
 	ANT_FILE::PUTS()
 	----------------
 */
-long ANT_file::puts(char *string)
+long long ANT_file::puts(char *string)
 {
-long len;
+long long len;
 
 write((unsigned char *)string, len = strlen(string));
 write((unsigned char *)"\n", 1);
@@ -147,10 +147,10 @@ return len + 1;
 	ANT_FILE::WRITE()
 	-----------------
 */
-long ANT_file::write(unsigned char *data, long size)
+long ANT_file::write(unsigned char *data, long long size)
 {
 unsigned char *from;
-long block_size;
+long long block_size;
 
 file_position += size;
 if (buffer_used + size < buffer_size)

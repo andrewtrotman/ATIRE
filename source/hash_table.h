@@ -14,10 +14,10 @@ extern unsigned char ANT_hash_table[];
 	ANT_RANDOM_HASH()
 	-----------------
 */
-inline static unsigned int ANT_random_hash(char *string, long length, unsigned int seed)
+inline static unsigned int ANT_random_hash(char *string, size_t length, unsigned int seed)
 {
 unsigned char *ch;
-long pos;
+size_t pos;
 
 ch = (unsigned char *)string;
 
@@ -49,10 +49,10 @@ return (hash1 << 16) + (hash2 << 8) + hash3;
 	according to the ANT source code-layout rules (his comments remain).
 	For the original source see:http://www.azillionmonkeys.com/qed/hash.html
 */
-inline static unsigned long ANT_super_fast_hash(char *data, int len)
+inline static unsigned long ANT_super_fast_hash(char *data, size_t len)
 {
 #define get16bits(d) (*((const unsigned short *) (d)))
-unsigned long hash = len, tmp;
+unsigned long hash = (unsigned long)len, tmp;
 int rem;
 
 if (len <= 0 || data == NULL)
@@ -118,7 +118,8 @@ return ANT_super_fast_hash(string->string(), string->length()) & 0xffffff;
 */
 inline static unsigned long ANT_header_hash_24(ANT_string_pair *string)
 {
-long ans, len;
+long ans;
+size_t len;
 const unsigned char base = 'a' - 1;
 
 ans = (string->string()[0] - base) * 27 * 27 * 27;		// the first char can be a '~' signifying a special term (document lengths etc.)
