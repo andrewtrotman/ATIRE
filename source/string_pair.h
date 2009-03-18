@@ -6,18 +6,19 @@
 #define __STRING_PAIR_H__
 
 #include "str.h"
+#include "maths.h"
 
 class ANT_string_pair
 {
 public:
 	char *start;
-	long string_length;
+	size_t string_length;
 
 public:
 	ANT_string_pair() {}
 	ANT_string_pair(char *source, long len) : start(source), string_length(len) {}
 	char *str(void) { return strnnew(start, string_length); }
-	long length(void) { return string_length; }
+	size_t length(void) { return string_length; }
 	char *string(void) { return start; }
 	char operator[](long pos) { return start[pos]; }
 	char *strcpy(char *dest) { *(strncpy(dest, start, string_length) + string_length + 1) = '\0'; return dest; }
@@ -33,7 +34,7 @@ public:
 */
 inline int ANT_string_pair::strcmp(ANT_string_pair *with)
 {
-return string_length == with->string_length ? memcmp(start, with->start, string_length) : string_length - with->string_length;
+return string_length == with->string_length ? memcmp(start, with->start, string_length) : sign(string_length - with->string_length);
 }
 
 /*

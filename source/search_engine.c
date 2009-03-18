@@ -587,4 +587,3 @@ for (current = accumulator_pointers; current < end; current++)
 
 return sorted_id_list;
 }
-

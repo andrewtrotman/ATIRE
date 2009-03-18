@@ -88,6 +88,7 @@ all : $(PARTS)							\
 	  $(BINDIR)\link_extract_pass2.exe	\
 	  $(BINDIR)\link_length_correlate.exe	\
 	  $(BINDIR)\topic_tree_cas.exe		\
+	  $(BINDIR)\bindiff.exe		\
 	  $(BINDIR)\term_frequencies.exe	\
 	  $(BINDIR)\topic_tree.exe		\
 	  $(BINDIR)\INEXqrels_to_run.exe		\
@@ -99,6 +100,7 @@ all : $(PARTS)							\
 #
 $(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
 $(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
+$(BINDIR)\bindiff.exe : $(OBJDIR)\bindiff.obj
 
 
 

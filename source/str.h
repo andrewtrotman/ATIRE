@@ -79,7 +79,7 @@ inline char *strrev(char *dest, const char *source)
 {
 char *into;
 const char *from;
-long len;
+size_t len;
 
 len = strlen(source);
 for (into = dest + len - 1, from = source; *from != '\0'; from++, into--)
