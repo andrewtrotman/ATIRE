@@ -86,7 +86,7 @@ end_of_node_list = btree_root + btree_nodes;
 for (current++; current < end_of_node_list; current++)
 	{
 	current->term = (char *)block;
-	current->term_length = strlen((char *)block);
+	current->term_length = (long)strlen((char *)block);		// strings of no more than 4GB (to keep the structures small)
 	while (*block != '\0')
 		block++;
 	block++;
@@ -261,7 +261,8 @@ ANT_search_engine_btree_leaf *ANT_search_engine::get_postings_details(char *term
 {
 long long node_position, node_length;
 long low, high, mid, nodes;
-long leaf_size, exact_match, length_of_term, root_node_element;
+long leaf_size, exact_match, root_node_element;
+size_t length_of_term;
 
 if ((node_position = get_btree_leaf_position(term, &node_length, &exact_match, &root_node_element)) == 0)
 	return NULL;		// before the first term in the term list

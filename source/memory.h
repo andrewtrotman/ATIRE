@@ -16,7 +16,8 @@ private:
 	long long used;
 	long long allocated;
 	size_t block_size;
-	long has_large_pages, short_page_size, large_page_size;
+	long has_large_pages;
+	long long short_page_size, large_page_size;
 
 protected:
 	void *alloc(size_t *size);
