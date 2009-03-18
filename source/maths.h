@@ -8,7 +8,7 @@
 #ifdef _MSC_VER
 	#include <crtdefs.h>
 #else
-	
+	#include <stddef.h>
 #endif
 
 
