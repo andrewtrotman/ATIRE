@@ -23,7 +23,7 @@ public:
 	char *strcpy(char *dest) { *(strncpy(dest, start, string_length) + string_length + 1) = '\0'; return dest; }
 	int strcmp(ANT_string_pair *with);
 	int true_strcmp(ANT_string_pair *with);
-	int strncmp(ANT_string_pair *with, long length);
+	int strncmp(ANT_string_pair *with, size_t length);
 };
 
 
@@ -60,7 +60,7 @@ else
 	ANT_STRING_PAIR::STRNCMP()
 	--------------------------
 */
-inline int ANT_string_pair::strncmp(ANT_string_pair *with, long len)
+inline int ANT_string_pair::strncmp(ANT_string_pair *with, size_t len)
 {
 int cmp;
 

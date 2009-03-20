@@ -14,7 +14,7 @@ TOOLDIR = tools
 #
 #	Compiler and flags
 #
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /O2 
 CC = @cl
 
 #

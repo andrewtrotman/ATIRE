@@ -155,7 +155,7 @@ long long block_size;
 file_position += size;
 if (buffer_used + size < buffer_size)
 	{
-	memcpy(buffer + buffer_used, data, size);
+	memcpy(buffer + buffer_used, data, (size_t)size);
 	buffer_used += size;
 	}
 else
@@ -165,7 +165,7 @@ else
 	do
 		{
 		flush();
-		memcpy(buffer, from, block_size);
+		memcpy(buffer, from,(size_t)block_size);
 		buffer_used += block_size;
 		from += block_size;
 		size -= block_size;
