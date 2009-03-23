@@ -46,7 +46,7 @@ protected:
 
 public:
 	ANT_search_engine(ANT_memory *memory);
-	~ANT_search_engine();
+	virtual ~ANT_search_engine();
 
 	void init_accumulators(void);
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);

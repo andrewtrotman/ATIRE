@@ -23,7 +23,6 @@
 #include "ga_stemmer.h"
 #include "ga_function.h"
 #include "strgen.h"
-#include "counter.h"
 #include "INEX_assessment.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
@@ -170,11 +169,9 @@ while (*token_end != '\0')
 	token[token_end - token_start] = '\0';
 	token_length = token_end - token_start;
 	strlwr(token);
-    DEC_COUNTER;
     search_engine->process_one_stemmed_search_term(stemmer, token);
     did_query = TRUE;
 	}
- PRINT_COUNTER;
 
 ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
 //ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
@@ -349,7 +346,7 @@ while (fgets(query, sizeof(query), fp) != NULL)
     topic_ids = (long *) realloc(topic_ids, line * sizeof(topic_ids[0]));
 	topic_ids[line - 1] = atol(query);
 	if ((query_text = strchr(query, ' ')) == NULL)
-		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+		exit(fprintf(stderr, "Line %ld: Can't process query as badly formed:'%s'\n", line, query));
     all_queries = (char **) realloc(all_queries, line * sizeof(all_queries[0]));
     all_queries[line - 1] = strdup(query_text);
 	line++;
@@ -433,7 +430,7 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	strip_end_punc(query);
 	topic_id = atol(query);
 	if ((query_text = strchr(query, ' ')) == NULL)
-		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+		exit(fprintf(stderr, "Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 
     if (stemmer_file) 
         average_precision = perform_query_w_stemmer(&search_engine, query_text, &hits, stemmer, topic_id, -1, &map);
@@ -483,18 +480,23 @@ if (argc == 1)
      else 
          qrel = QREL_ANT;
      argc--; argv++;
-
-     if (argc == 3)
+#ifndef FIT_BM25
+     if (argc == 4) {
+         freopen(argv[4], "w", stderr);
          ga_ant(argv[1], argv[2], NULL, qrel);
-     else if (argc == 5)
+         fclose(stderr);
+     } else if (argc == 5) {
+         freopen(argv[4], "w", stderr);
          ga_ant(argv[1], argv[2], argv[3], qrel);
-#ifdef FIT_BM25
+         fclose(stderr);
+     }
+#else
 /*
 	This code can be used for optimising the BM25 parameters.
 	In order to make it work you'll need to change the code for 
 	BM25 to declare and use the externs;
 */
-     else if (argc == 4)
+     if (argc == 4)
          {
              FILE *outfile;
              extern double BM25_k1;

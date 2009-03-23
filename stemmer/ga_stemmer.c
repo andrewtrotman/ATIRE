@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "ga_stemmer.h"
-#include "counter.h"
 
 size_t GA_stemmer::stem(char *term, char *destination) {
     return strlen(strcpy(destination, individual->apply(term)));
@@ -15,7 +14,6 @@ char *GA_stemmer::get_next(char *from) {
             stem(term_to_check, stemmed_index_term);
             if (strcmp(stemmed_index_term, stemmed_search_term) == 0) {
                 //		printf("%s\n", term_to_check);
-                INC_COUNTER;
                 return term_to_check;
             }
             if (strncmp(term_to_check, stemmed_search_term, FIXED_SEARCH_LENGTH) != 0)
