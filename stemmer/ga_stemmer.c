@@ -3,7 +3,7 @@
 #include "ga_stemmer.h"
 #include "counter.h"
 
-long GA_stemmer::stem(char *term, char *destination) {
+size_t GA_stemmer::stem(char *term, char *destination) {
     return strlen(strcpy(destination, individual->apply(term)));
 }
 

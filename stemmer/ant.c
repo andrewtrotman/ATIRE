@@ -65,7 +65,8 @@ long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
-long hits, token_length;
+long hits;
+size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 GA_stemmer stemmer(search_engine);
@@ -188,7 +189,7 @@ return average_precision;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long *documents_in_id_list)
+char **read_docid_list(size_t *documents_in_id_list)
 {
 ANT_disk disk;
 char *document_list_buffer, **document_list;
@@ -208,10 +209,11 @@ void command_driven_ant(void)
 {
 ANT_memory memory;
 char query[1024];
-long last_to_list, hits, more, documents_in_id_list;
+long last_to_list, hits, more;
+size_t documents_in_id_list;
 char **document_list, **answer_list;
 
-printf("Ant %s\n", ANT_version_string);
+printf("ANT %s\n", ANT_version_string);
 puts("Written (w) 2008, 2009");
 puts("Andrew Trotman, University of Otago");
 puts("andrew@cs.otago.ac.nz");
@@ -254,7 +256,7 @@ puts("Bye");
 	GET_ANT_QRELS()
 	---------------
 */
-ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length)
+ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length)
 {
 ANT_disk file_system;
 ANT_relevant_document *all_assessments, *current_assessment;
@@ -278,7 +280,7 @@ if ((qrel_fp = fopen(qrel_file, "rb")) == NULL)
 
 while (fgets(text, sizeof(text), qrel_fp) != NULL)
 	{
-	if ((sscanf(text, "%ld %ld", &current_assessment->topic, &current_assessment->docid)) != 2)
+	if ((sscanf(text, "%ld %lld", &current_assessment->topic, &current_assessment->docid)) != 2)
 		exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", qrel_file, current_assessment - all_assessments));
 	current_assessment++;
 	}
@@ -294,7 +296,7 @@ return all_assessments;
 	-----------
 	This is highly inefficient, but because it only happens once that's OK.
 */
-ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length, long qrel_format, char **uid_list, long uid_list_length)
+ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length, long qrel_format, char **uid_list, long uid_list_length)
 {
 if (qrel_format == QREL_INEX)
 	{
@@ -316,7 +318,8 @@ void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_for
 {
 ANT_relevant_document *assessments;
 char query[1024];
-long line, number_of_assessments, documents_in_id_list, *topic_ids = NULL;
+long line, *topic_ids = NULL;
+size_t documents_in_id_list, number_of_assessments;
 ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list;
@@ -396,12 +399,13 @@ double batch_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qre
 {
 ANT_relevant_document *assessments;
 char query[1024];
-long topic_id, line, number_of_assessments, hits, documents_in_id_list;
+long topic_id, line, hits;
+size_t documents_in_id_list, number_of_assessments;
 ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
- ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
+ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
@@ -482,10 +486,9 @@ if (argc == 1)
 
      if (argc == 3)
          ga_ant(argv[1], argv[2], NULL, qrel);
-#ifndef FIT_BM25
-     else if (argc == 4)
+     else if (argc == 5)
          ga_ant(argv[1], argv[2], argv[3], qrel);
-#else
+#ifdef FIT_BM25
 /*
 	This code can be used for optimising the BM25 parameters.
 	In order to make it work you'll need to change the code for 

@@ -225,7 +225,7 @@ if (all_assessments == NULL)		// nasty, but it'll have to do in the mean time.
 
 	while (fgets(text, sizeof(text), qrel_fp) != NULL)
 		{
-		if ((sscanf(text, "%ld %ld", &current_assessment->topic, &current_assessment->docid)) != 2)
+		if ((sscanf(text, "%ld %lld", &current_assessment->topic, &current_assessment->docid)) != 2)
 			exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", qrel_file, current_assessment - all_assessments));
 		current_assessment++;
 		}

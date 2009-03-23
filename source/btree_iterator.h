@@ -5,6 +5,10 @@
 #ifndef __BTREE_ITERATOR_H__
 #define __BTREE_ITERATOR_H__
 
+#if defined(__APPLE__) || defined(linux)
+#include <stddef.h>
+#endif
+
 class ANT_search_engine;
 class ANT_search_engine_btree_leaf;
 

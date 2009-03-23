@@ -42,7 +42,7 @@ for (current = 0; current < relevance_list_length; current++)
 		}
 
 /*
-	Allocarte memory for them and copy them in
+	Allocate memory for them and copy them in
 */
 topics = (ANT_relevant_topic *)memory->malloc(sizeof(*topics) * topics_list_length);
 
@@ -99,7 +99,7 @@ topic_key.topic = topic;
 got = (ANT_relevant_topic *)bsearch(&topic_key, topics, topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
 if (got == NULL)
 	{
-	puts("Unexpected: Topic not found in topic list");
+    fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
 	precision = 0;
 	}
 else

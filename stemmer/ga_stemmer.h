@@ -17,7 +17,7 @@ private:
 public:
     void set_stemmer(GA_individual *individual) {this->individual = individual;}
 
-	virtual long stem(char *term, char *destination);
+	virtual size_t stem(char *term, char *destination);
     virtual char *first(char *);
 
     void print();
