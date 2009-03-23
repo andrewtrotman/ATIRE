@@ -70,12 +70,12 @@ return file;
 	STRNNEW()
 	---------
 */
-inline static char *strnnew(char *source, long length)
+inline static char *strnnew(char *source, long long length)
 {
 char *ans;
 
-ans = new char [length + 1];
-strncpy(ans, source, length);
+ans = new char [(size_t)(length + 1)];
+strncpy(ans, source, (size_t)length);
 ans[length] = '\0';
 
 return ans;

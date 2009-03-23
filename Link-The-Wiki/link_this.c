@@ -66,7 +66,7 @@ public:
 
 #define MAX_LINKS_IN_FILE (1024 * 1024)
 ANT_link all_links_in_file[MAX_LINKS_IN_FILE];
-long all_links_in_file_length = 0;
+long long all_links_in_file_length = 0;
 
 ANT_link links_in_orphan[MAX_LINKS_IN_FILE];
 long links_in_orphan_length = 0;
@@ -113,7 +113,7 @@ else if (diff > 0)
 else
 	{
 	if ((cmp = strcmp(one->term, two->term)) == 0)
-		return one->place_in_file - two->place_in_file;
+		return one->place_in_file > two->place_in_file ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
 	else
 		return cmp;
 	}
@@ -137,7 +137,7 @@ if (diff < 0)
 else if (diff > 0)
 	return 1;
 else
-	return one->place_in_file - two->place_in_file;
+	return one->place_in_file > two->place_in_file ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
 }
 
 /*
@@ -183,7 +183,7 @@ ANT_link_posting *one, *two;
 one = (ANT_link_posting *)a;
 two = (ANT_link_posting *)b;
 
-return two->link_frequency - one->link_frequency;
+return two->link_frequency > one->link_frequency ? 1 : two->link_frequency == one->link_frequency ? 0 : -1;
 }
 
 /*
@@ -635,10 +635,10 @@ for (param = index_argv_param + 1; param < argc; param++)
 				}
 			}
 
-		qsort(all_links_in_file, all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::compare);
+		qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::compare);
 
 		deduplicate_links();
-		qsort(all_links_in_file, all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
+		qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
 
 		print_links(orphan_docid, anchors_per_run, targets_per_link, print_mode);
 

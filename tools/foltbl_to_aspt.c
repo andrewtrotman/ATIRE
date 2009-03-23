@@ -386,7 +386,7 @@ for (current = lines; *current != NULL; current++)
 		fprintf(stderr, "Path list missing path '%s'\n", path_start);
 	else
 		{
-		rel_path = got - pathlist->tag_list;
+		rel_path = (long)(got - pathlist->tag_list);
 		fwrite(&rel_file, sizeof(rel_file), 1, outfile);
 		fwrite(&rel_path, sizeof(rel_path), 1, outfile);
 		fwrite(&rel_offset, sizeof(rel_offset), 1, outfile);

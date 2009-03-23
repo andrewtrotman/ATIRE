@@ -27,10 +27,10 @@ return strcpy(new char[strlen(str) + 1], str);
 	STRNNEW()
 	---------
 */
-inline char *strnnew(const char *str, size_t len)
+inline char *strnnew(const char *str, long long len)
 {
 char *new_str;
-return (*((new_str = strncpy(new char [len + 1], str, len)) + len) = '\0'), new_str;
+return (*((new_str = strncpy(new char [(size_t)(len + 1)], str, (size_t)len)) + len) = '\0'), new_str;
 }
 
 /*
