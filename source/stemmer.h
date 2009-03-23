@@ -13,7 +13,7 @@ class ANT_stemmer : public ANT_btree_iterator
 protected:
 	char stemmed_search_term[MAX_TERM_LENGTH];
 	char stemmed_index_term[MAX_TERM_LENGTH];
-	long stemmed_search_term_length;
+	size_t stemmed_search_term_length;
 
 private:
 	virtual char *get_next(char *);
@@ -25,7 +25,7 @@ public:
 	virtual char *first(char *term);
 	virtual char *next(void);
 
-	virtual long stem(char *term, char *destination);		// returns the longest stem that could possibly match this stem given the algorithm (2 in the case of Porter).
+	virtual size_t stem(char *term, char *destination);		// returns the longest stem that could possibly match this stem given the algorithm (2 in the case of Porter).
 } ;
 
 #endif __STEMMER_H__

@@ -67,12 +67,11 @@ return 0;
 
 	parameter "destination" must not overlap parameter "what"
 */
-long ANT_porter::stem(char *what, char *destination)
+size_t ANT_porter::stem(char *what, char *destination)
 {
-long len, kill_dups = 0;
+long kill_dups = 0;
 char *reverse, *at;
 
-len = strlen(what);
 at = reverse = workspace;
 strrev(at, what);
 

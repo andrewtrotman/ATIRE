@@ -16,7 +16,7 @@
 	ANT_MEAN_AVERAGE_PRECISION::ANT_MEAN_AVERAGE_PRECISION()
 	--------------------------------------------------------
 */
-ANT_mean_average_precision::ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long relevance_list_length)
+ANT_mean_average_precision::ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long long relevance_list_length)
 {
 long current, last_topic, current_topic, relevant_documents;
 

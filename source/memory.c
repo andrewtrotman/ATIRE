@@ -28,7 +28,7 @@ ANT_memory::ANT_memory(size_t block_size_for_allocation)
 
 //	printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
 #else
-	short_page_size = large_page_size = 4096;		// use 4K blocks by default
+	short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium small page size)
 #endif
 
 chunk_end = at = chunk = NULL;

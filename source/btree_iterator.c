@@ -23,7 +23,7 @@
 ANT_btree_iterator::ANT_btree_iterator(ANT_search_engine *search_engine)
 {
 this->search_engine = search_engine;
-btree_leaf_buffer = new unsigned char [(long)search_engine->max_header_block_size];
+btree_leaf_buffer = new unsigned char [(size_t)search_engine->max_header_block_size];
 }
 
 /*
@@ -42,7 +42,8 @@ delete [] btree_leaf_buffer;
 char *ANT_btree_iterator::first(char *term)
 {
 long long node_length, node_position;
-long exact_match, length_of_term, terms_in_leaf;
+long exact_match, terms_in_leaf;
+size_t length_of_term;
 long low, high, mid, leaf_size;
 long before_first_term = FALSE;
 
@@ -63,7 +64,7 @@ keyword_head_length = strlen(search_engine->btree_root[node].term);
 strcpy(keyword, search_engine->btree_root[node].term);
 
 search_engine->index->seek(node_position);
-search_engine->index->read(btree_leaf_buffer, (long)node_length);
+search_engine->index->read(btree_leaf_buffer, node_length);
 
 if (before_first_term)	// then we are before the first term so use the first term in the node
 	leaf = 0;
@@ -73,7 +74,7 @@ else
 	if (length_of_term < B_TREE_PREFIX_SIZE)
 		if (!exact_match)
 			{
-			leaf = (long)search_engine->get_long(btree_leaf_buffer);		// we have a short string (less then the length of the head node) and did not find it as a node
+			leaf = search_engine->get_long(btree_leaf_buffer);		// we have a short string (less then the length of the head node) and did not find it as a node
 			return next();
 			}
 		else
@@ -81,14 +82,14 @@ else
 	else
 		if (strncmp(search_engine->btree_root[node].term, term, B_TREE_PREFIX_SIZE) != 0)
 			{
-			leaf = (long)search_engine->get_long(btree_leaf_buffer);		// there is no node in the list that starts with the head of the string.
+			leaf = search_engine->get_long(btree_leaf_buffer);		// there is no node in the list that starts with the head of the string.
 			return next();
 			}
 		else
 			term += B_TREE_PREFIX_SIZE;
 
 	low = 0;
-	high = terms_in_leaf = (long)search_engine->get_long(btree_leaf_buffer);
+	high = terms_in_leaf = search_engine->get_long(btree_leaf_buffer);
 	leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
 
 	while (low < high)
@@ -119,7 +120,7 @@ long leaf_size;
 
 leaf++;
 
-if (leaf >= (long)search_engine->get_long(btree_leaf_buffer))
+if (leaf >= search_engine->get_long(btree_leaf_buffer))
 	{
 	node++;
 	if (search_engine->btree_root[node].term == NULL)		// then we are at the end of the term list
@@ -133,7 +134,7 @@ if (leaf >= (long)search_engine->get_long(btree_leaf_buffer))
 	strcpy(keyword, search_engine->btree_root[node].term);
 
 	search_engine->index->seek(node_position);
-	search_engine->index->read(btree_leaf_buffer, (long)node_length);
+	search_engine->index->read(btree_leaf_buffer, node_length);
 	}
 
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)

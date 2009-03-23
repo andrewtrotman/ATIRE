@@ -9,9 +9,9 @@
 	ANT_STEMMER::STEM()
 	-------------------
 */
-long ANT_stemmer::stem(char *term, char *stem)
+size_t ANT_stemmer::stem(char *term, char *stem)
 {
-long len;
+size_t len;
 
 len = strlen(term);
 strcpy(stem, term);

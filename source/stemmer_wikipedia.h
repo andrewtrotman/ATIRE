@@ -14,7 +14,7 @@ class ANT_stemmer_wikipedia : public ANT_stemmer, public ANT_learned_wikipedia_s
 {
 public:
 	ANT_stemmer_wikipedia(ANT_search_engine *search_engine) : ANT_stemmer(search_engine), ANT_learned_wikipedia_stem() {}
-	virtual long stem(char *term, char *destination) { return ANT_learned_wikipedia_stem::stem(term, destination); }
+	virtual size_t stem(char *term, char *destination) { return ANT_learned_wikipedia_stem::stem(term, destination); }
 } ;
 
 #endif __STEMMER_WIKIPEDIA_H__

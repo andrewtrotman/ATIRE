@@ -23,7 +23,7 @@
 	CONSONANT_P()
 	-------------
 */
-inline static int consonant_p(const char *s, int i) {
+inline static int consonant_p(const char *s, size_t i) {
     switch (s[i]) {
     case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;
     case 'y': return (i == 0) ? TRUE : !consonant_p(s, i-1);
@@ -35,9 +35,10 @@ inline static int consonant_p(const char *s, int i) {
 	M()
 	---
 */
-inline static int m(const char *s, int j)
+inline static size_t m(const char *s, size_t j)
 {
-int n = 0, i = 0;
+size_t n = 0, i = 0;
+
 while(1)
 	{
 	if (i > j) 
@@ -75,8 +76,8 @@ while(1)
 	ANT_LEARNED_WIKIPEDIA_STEM::STEM()
 	----------------------------------
 */
-long ANT_learned_wikipedia_stem::stem (const char *string, char *buffer){
-    int length;
+size_t ANT_learned_wikipedia_stem::stem (const char *string, char *buffer){
+    size_t length;
 
     strncpy(buffer, string, TMP_BUFFER_SIZE);
     buffer[TMP_BUFFER_SIZE - 1] = '\0';

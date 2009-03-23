@@ -104,7 +104,7 @@ return block;
 	ANT_DISK::BUFFER_TO_LIST()
 	--------------------------
 */
-char **ANT_disk::buffer_to_list(char *buffer, long *lines)
+char **ANT_disk::buffer_to_list(char *buffer, size_t *lines)
 {
 char *pos, **line_list, **current_line;
 long n_frequency, r_frequency;

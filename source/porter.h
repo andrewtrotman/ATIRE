@@ -24,7 +24,7 @@ private:
 public:
 	ANT_porter() {}
 	virtual ~ANT_porter() {}
-	virtual long stem(char *term, char *destination);
+	virtual size_t stem(char *term, char *destination);
 } ;
 
 #endif __PORTER_H__

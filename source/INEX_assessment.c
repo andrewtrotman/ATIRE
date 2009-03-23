@@ -43,7 +43,7 @@ return thus_far;
 	ANT_INEX_ASSESSMENT::ANT_INEX_ASSESSMENT()
 	------------------------------------------
 */
-ANT_INEX_assessment::ANT_INEX_assessment(ANT_memory *mem, char **docid_list, long documents)
+ANT_INEX_assessment::ANT_INEX_assessment(ANT_memory *mem, char **docid_list, size_t documents)
 {
 char **current, *slish, *slosh, *slash, *start;
 long *current_docid, **current_sorted_docid;
@@ -73,11 +73,12 @@ qsort(sorted_numeric_docid_list, documents, sizeof(*sorted_numeric_docid_list), 
 	ANT_INEX_ASSESSMENT::READ()
 	---------------------------
 */
-ANT_relevant_document *ANT_INEX_assessment::read(char *filename, long *reldocs)
+ANT_relevant_document *ANT_INEX_assessment::read(char *filename, size_t *reldocs)
 {
 ANT_disk disk;
 char *file, **lines, **current;
-long topic, document, document_length, relevant_characters, relevant_documents, *document_pointer, **found, lines_in_file;
+long topic, document, document_length, relevant_characters, relevant_documents, *document_pointer, **found;
+size_t lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
 
 /*

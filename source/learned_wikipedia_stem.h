@@ -12,7 +12,7 @@ public:
 	ANT_learned_wikipedia_stem() {}
 	virtual ~ANT_learned_wikipedia_stem() {}
 
-	virtual long stem(const char *term, char *destination);
+	virtual size_t stem(const char *term, char *destination);
 } ;
 
 #endif __LEARNED_WIKIPEDIA_STEM_H__

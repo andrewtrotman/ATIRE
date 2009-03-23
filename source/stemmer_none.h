@@ -18,7 +18,7 @@ public:
 	virtual char *first(char *term) { return ANT_btree_iterator::first(term); }
 	virtual char *next(void) { return NULL; }
 
-	virtual long stem(char *term, char *dest) {  return strlen(strcpy(dest, term)); }
+	virtual size_t stem(char *term, char *dest) {  return strlen(strcpy(dest, term)); }
 } ;
 
 

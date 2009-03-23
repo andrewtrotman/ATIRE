@@ -180,7 +180,7 @@ return 1;
 	ANT_FILE::READ()
 	----------------
 */
-long ANT_file::read(unsigned char *data, long size)
+long ANT_file::read(unsigned char *data, size_t size)
 {
 flush();
 file_position += size;		// this is wherw we'll be at the end of the read

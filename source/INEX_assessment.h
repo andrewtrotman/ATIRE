@@ -15,15 +15,15 @@ private:
 	long *numeric_docid_list;
 	long **sorted_numeric_docid_list;
 	ANT_memory *memory;
-	long documents;
+	size_t documents;
 
 private:
 	char *max(char *a, char *b, char *c);
 	static int cmp(const void *a, const void *b);
 
 public:
-	ANT_INEX_assessment(ANT_memory *mem, char **docid_list, long documents);
-	ANT_relevant_document *read(char *filename, long *reldocs);
+	ANT_INEX_assessment(ANT_memory *mem, char **docid_list, size_t documents);
+	ANT_relevant_document *read(char *filename, size_t *reldocs);
 } ;
 
 

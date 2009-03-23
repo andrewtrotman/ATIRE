@@ -10,7 +10,7 @@ class ANT_relevant_document
 {
 public:
 	long topic;
-	long docid;
+	long long docid;
 	long relevant_characters;
 	long document_length;
 

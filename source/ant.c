@@ -55,7 +55,8 @@ long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
-long hits, token_length;
+long hits;
+size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 //ANT_stemmer_porter stemmer(search_engine);
@@ -124,10 +125,10 @@ return average_precision;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long *documents_in_id_list)
+char **read_docid_list(size_t *documents_in_id_list)
 {
 static char **document_list = NULL;
-static long len = 0;
+static size_t len = 0;
 ANT_disk disk;
 char *document_list_buffer;
 
@@ -150,10 +151,11 @@ void command_driven_ant(void)
 {
 ANT_memory memory;
 char query[1024];
-long last_to_list, hits, more, documents_in_id_list;
+long last_to_list, hits, more;
+size_t documents_in_id_list;
 char **document_list, **answer_list;
 
-printf("Ant %s\n", ANT_version_string);
+printf("ANT %s\n", ANT_version_string);
 puts("Written (w) 2008, 2009");
 puts("Andrew Trotman, University of Otago");
 puts("andrew@cs.otago.ac.nz");
@@ -196,7 +198,7 @@ puts("Bye");
 	GET_ANT_QRELS()
 	---------------
 */
-ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length)
+ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length)
 {
 static ANT_relevant_document *all_assessments = NULL;
 static long lines = 0;
@@ -240,7 +242,7 @@ return all_assessments;
 	-----------
 	This is highly inefficient, but because it only happens once that's OK.
 */
-ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long *qrel_list_length, long qrel_format, char **uid_list, long uid_list_length)
+ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length, long qrel_format, char **uid_list, size_t uid_list_length)
 {
 if (qrel_format == QREL_INEX)
 	{
@@ -260,14 +262,16 @@ double batch_ant(char *topic_file, char *qrel_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
-long topic_id, line, number_of_assessments, hits, documents_in_id_list;
+long topic_id, line, hits;
+size_t number_of_assessments;
+size_t documents_in_id_list;
 ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
 
-fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
+fprintf(stderr, "ANT %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
 

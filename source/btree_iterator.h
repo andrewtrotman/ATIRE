@@ -15,7 +15,7 @@ class ANT_btree_iterator
 private:
 	unsigned char *btree_leaf_buffer;
 	char keyword[MAX_TERM_LENGTH];
-	long keyword_head_length;
+	size_t keyword_head_length;
 	ANT_search_engine *search_engine;
 	long node, leaf;
 

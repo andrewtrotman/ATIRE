@@ -17,12 +17,12 @@ class ANT_mean_average_precision
 private:
 	ANT_memory *memory;
 	ANT_relevant_document *relevance_list;
-	long relevance_list_length;
+	long long relevance_list_length;
 	ANT_relevant_topic *topics;
-	long topics_list_length;
+	long long topics_list_length;
 
 public:
-	ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long relevance_list_length);
+	ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long long relevance_list_length);
 	~ANT_mean_average_precision() {}
 	
 	double average_precision(long topic, ANT_search_engine *search_engine);
