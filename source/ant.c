@@ -48,14 +48,14 @@ return TRUE;
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_search_engine *search_engine, char *query, long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
+double perform_query(ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
 {
 ANT_time_stats stats;
 long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
-long hits;
+long long hits;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
@@ -125,10 +125,10 @@ return average_precision;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(size_t *documents_in_id_list)
+char **read_docid_list(long long *documents_in_id_list)
 {
 static char **document_list = NULL;
-static size_t len = 0;
+static long long len = 0;
 ANT_disk disk;
 char *document_list_buffer;
 
@@ -151,8 +151,8 @@ void command_driven_ant(void)
 {
 ANT_memory memory;
 char query[1024];
-long last_to_list, hits, more;
-size_t documents_in_id_list;
+long more;
+long long last_to_list, hits, documents_in_id_list;
 char **document_list, **answer_list;
 
 printf("ANT %s\n", ANT_version_string);
@@ -187,7 +187,7 @@ while (more)
 			last_to_list = hits > 10 ? 10 : hits;
 			search_engine.generate_results_list(document_list, answer_list, last_to_list);
 			for (long result = 0; result < last_to_list; result++)
-				printf("%ld:%s\n", result + 1, answer_list[result]);
+				printf("%lld:%s\n", result + 1, answer_list[result]);
 			}
 		}
 	}
@@ -198,7 +198,7 @@ puts("Bye");
 	GET_ANT_QRELS()
 	---------------
 */
-ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length)
+ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long long *qrel_list_length)
 {
 static ANT_relevant_document *all_assessments = NULL;
 static long lines = 0;
@@ -242,7 +242,7 @@ return all_assessments;
 	-----------
 	This is highly inefficient, but because it only happens once that's OK.
 */
-ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length, long qrel_format, char **uid_list, size_t uid_list_length)
+ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long long *qrel_list_length, long qrel_format, char **uid_list, long long uid_list_length)
 {
 if (qrel_format == QREL_INEX)
 	{
@@ -262,9 +262,8 @@ double batch_ant(char *topic_file, char *qrel_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
-long topic_id, line, hits;
-size_t number_of_assessments;
-size_t documents_in_id_list;
+long topic_id, line;
+long long hits, number_of_assessments, documents_in_id_list;
 ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list, **answer_list;

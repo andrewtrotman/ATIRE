@@ -43,7 +43,7 @@ return thus_far;
 	ANT_INEX_ASSESSMENT::ANT_INEX_ASSESSMENT()
 	------------------------------------------
 */
-ANT_INEX_assessment::ANT_INEX_assessment(ANT_memory *mem, char **docid_list, size_t documents)
+ANT_INEX_assessment::ANT_INEX_assessment(ANT_memory *mem, char **docid_list, long long documents)
 {
 char **current, *slish, *slosh, *slash, *start;
 long *current_docid, **current_sorted_docid;
@@ -66,20 +66,21 @@ for (current = docid_list; *current != NULL; current++)
 		current_sorted_docid++;
 		}
 	}
-qsort(sorted_numeric_docid_list, documents, sizeof(*sorted_numeric_docid_list), cmp);
+qsort(sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
 }
 
 /*
 	ANT_INEX_ASSESSMENT::READ()
 	---------------------------
 */
-ANT_relevant_document *ANT_INEX_assessment::read(char *filename, size_t *reldocs)
+ANT_relevant_document *ANT_INEX_assessment::read(char *filename, long long *reldocs)
 {
 ANT_disk disk;
 char *file, **lines, **current;
 long topic, document, document_length, relevant_characters, relevant_documents, *document_pointer, **found;
-size_t lines_in_file;
+long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
+long params;
 
 /*
 	load the assessment file into memory
@@ -94,8 +95,8 @@ lines = disk.buffer_to_list(file, &lines_in_file);
 relevant_documents = 0;
 for (current = lines; *current != 0; current++)
 	{
-	sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
-	if (relevant_characters != 0)
+	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
+	if ((params == 4) && (relevant_characters != 0))
 		relevant_documents++;
 	}
 
@@ -110,10 +111,10 @@ current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(s
 document_pointer = &document;
 for (current = lines; *current != 0; current++)
 	{
-	sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
-	if (relevant_characters != 0)
+	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
+	if ((params == 4) && (relevant_characters != 0))
 		{
-		found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, documents, sizeof(*sorted_numeric_docid_list), cmp);
+		found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
 		if (found == NULL)
 			printf("DOC:%ld is in the assessments, but not in the collection\n", document);
 		else

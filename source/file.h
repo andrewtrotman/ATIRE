@@ -30,7 +30,7 @@ public:
 	long close(void);
 	long write(unsigned char *data, long long size);
 	long long puts(char *string);
-	long read(unsigned char *data, size_t size);
+	long read(unsigned char *data, long long size);
 	long read(long long *data) { return read((unsigned char *)data, sizeof(long long)); }
 	long read(long *data) { return read((unsigned char *)data, sizeof(long)); }
 	long long tell(void);

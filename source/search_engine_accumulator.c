@@ -49,7 +49,7 @@ return diff < 0 ? 1 : diff > 0 ? -1 : 0;
 	ANT_SEARCH_ENGINE_ACCUMULATOR::TOP_K_SORT()
 	-------------------------------------------
 */
-void ANT_search_engine_accumulator::top_k_sort(ANT_search_engine_accumulator **base, size_t num, long top_k)
+void ANT_search_engine_accumulator::top_k_sort(ANT_search_engine_accumulator **base, long long num, long long top_k)
 {
 ANT_search_engine_accumulator **lo, **hi;              /* ends of sub-array currently sorting */
 ANT_search_engine_accumulator **mid;                  /* points to middle of subarray */

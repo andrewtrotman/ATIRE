@@ -24,7 +24,8 @@ private:
 	ANT_memory *memory;
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
-	long btree_nodes, documents;
+	long btree_nodes;
+	long long documents;
 	long *document_lengths;
 	double mean_document_length;
 	unsigned char *btree_leaf_buffer, *postings_buffer;
@@ -34,7 +35,8 @@ private:
 	long long max_header_block_size;
 	long string_length_of_longest_term;
 	long long highest_df;
-	long *stem_buffer, stem_buffer_length_in_bytes;
+	long *stem_buffer;
+	long long stem_buffer_length_in_bytes;
 
 private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
@@ -57,9 +59,9 @@ public:
 	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
 	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
 	void process_one_search_term(char *term);
-	ANT_search_engine_accumulator *sort_results_list(long accurrate_rank_point, long *hits);
-	char **generate_results_list(char **document_id_list, char **sorted_id_list, long top_k);
-	long document_count(void) { return documents; }
+	ANT_search_engine_accumulator *sort_results_list(long long accurrate_rank_point, long long *hits);
+	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
+	long long document_count(void) { return documents; }
 	void stats_initialise(void);
 	void stats_text_render(void);
 };

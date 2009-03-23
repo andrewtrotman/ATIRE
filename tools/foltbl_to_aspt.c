@@ -279,12 +279,12 @@ return strcmp(one, two);
 	GENERATE_UNIQUE_PATH_SET()
 	--------------------------
 */
-void generate_unique_path_set(ANT_tag_set *paths, char **path_list, long path_list_length)
+void generate_unique_path_set(ANT_tag_set *paths, char **path_list, long long path_list_length)
 {
 char **all, **current, *from, *to, **into, *prev;
 long occurrences;
 
-into = all = new char *[path_list_length + 1];
+into = all = new char *[(size_t)(path_list_length + 1)];
 for (current = path_list; *current != NULL; current++)
 	{
 	if (**current == '\0')
@@ -327,7 +327,7 @@ ANT_tag_set *read_file(char *filename)
 ANT_tag_set *paths;
 char *file, **lines;
 long long pos, file_length;
-long length;
+long long length;
 
 paths = new ANT_tag_set;
 
@@ -353,7 +353,7 @@ return paths;
 void make_file_binary(char *filename, ANT_tag_set *pathlist, FILE *outfile)
 {
 char *file, **lines, **current;
-long length;
+long long length;
 long long file_length, pos;
 char *path_start, *path_end, *from;
 long rel_file, rel_offset, rel_length, rel_path;

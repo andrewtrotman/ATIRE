@@ -18,7 +18,8 @@
 */
 ANT_mean_average_precision::ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long long relevance_list_length)
 {
-long current, last_topic, current_topic, relevant_documents;
+long long current;
+long last_topic, current_topic, relevant_documents;
 
 /*
 	Take a copy of the relevance_list and sort it on topic then docid.
@@ -26,8 +27,8 @@ long current, last_topic, current_topic, relevant_documents;
 this->memory = memory;
 this->relevance_list = (ANT_relevant_document *)memory->malloc(sizeof(*relevance_list) * relevance_list_length);
 this->relevance_list_length = relevance_list_length;
-memcpy(this->relevance_list, relevance_list, sizeof(*relevance_list) *  relevance_list_length);
-qsort(this->relevance_list, relevance_list_length, sizeof(*this->relevance_list), ANT_relevant_document::compare);
+memcpy(this->relevance_list, relevance_list, (size_t)(sizeof(*relevance_list) * relevance_list_length));
+qsort(this->relevance_list, (size_t)relevance_list_length, sizeof(*this->relevance_list), ANT_relevant_document::compare);
 
 /*
 	Find out how many topics there are in the list
@@ -74,7 +75,7 @@ double ANT_mean_average_precision::average_precision(long topic, ANT_search_engi
 ANT_search_engine_accumulator *accumulators, **results_list;
 ANT_relevant_document key;
 ANT_relevant_topic topic_key, *got;
-long current, found_and_relevant, results_list_length;
+long long current, found_and_relevant, results_list_length;
 double precision;
 
 key.topic = topic;
@@ -88,7 +89,7 @@ for (current = 0; current < results_list_length; current++)
 	if (!results_list[current]->is_zero_rsv())
 		{
 		key.docid = results_list[current] - accumulators;
-		if (bsearch(&key, relevance_list, relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare) != NULL)
+		if (bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare) != NULL)
 			{
 			found_and_relevant++;
 			precision += (double)found_and_relevant / (double)(current + 1);
@@ -96,7 +97,7 @@ for (current = 0; current < results_list_length; current++)
 		}
 
 topic_key.topic = topic;
-got = (ANT_relevant_topic *)bsearch(&topic_key, topics, topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
+got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
 if (got == NULL)
 	{
     fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
@@ -118,7 +119,7 @@ double ANT_mean_average_precision::average_generalised_precision(long topic, ANT
 ANT_search_engine_accumulator *accumulators, **results_list;
 ANT_relevant_document key, *relevance_data;
 ANT_relevant_topic topic_key, *got;
-long current, results_list_length;
+long long current, results_list_length;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
 
@@ -133,7 +134,7 @@ for (current = 0; current < results_list_length; current++)
 	if (!results_list[current]->is_zero_rsv())
 		{
 		key.docid = results_list[current] - accumulators;
-		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 			{
 			doc_precision = (double)relevance_data->relevant_characters / (double)relevance_data->document_length;
 			doc_recall = 1.0;		// we retrieve the whole document so recall is 1.
@@ -144,7 +145,7 @@ for (current = 0; current < results_list_length; current++)
 		}
 
 topic_key.topic = topic;
-got = (ANT_relevant_topic *)bsearch(&topic_key, topics, topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
+got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
 if (got == NULL)
 	{
 	puts("Unexpected: Topic not found in topic list");

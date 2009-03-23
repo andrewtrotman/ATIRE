@@ -54,18 +54,18 @@ return diff;
 	READ_FILE()
 	-----------
 */
-ANT_dictionary *read_file(char *filename, long *length)
+ANT_dictionary *read_file(char *filename, long long *length)
 {
 ANT_disk disk;
 char *file, **line_list, **current, *pos;
-long lines;
+long long lines;
 ANT_dictionary *term_list, *term;
 
 if ((file = disk.read_entire_file(filename)) == NULL)
 	exit(printf("Cannot read input file:%s\n", filename));
 
 line_list = disk.buffer_to_list(file, &lines);
-term = term_list = new ANT_dictionary[lines];
+term = term_list = new ANT_dictionary[(size_t)lines];
 lines = 0;
 
 for (current = line_list; *current != NULL; current++)
@@ -92,9 +92,7 @@ int main(int argc, char *argv[])
 {
 ANT_disk disk;
 ANT_dictionary *dictionary, *terms, *hit;
-long dictionary_length, terms_length;
-long which;
-
+long long dictionary_length, which, terms_length;
 
 if (argc != 2 && argc != 3)
 	exit(printf("Usage:%s <dictionary_file> [<termlist_file>]\n", argv[0]));
@@ -102,7 +100,7 @@ if (argc != 2 && argc != 3)
 dictionary = read_file(argv[1], &dictionary_length);
 if (argc == 2)
 	{
-	qsort(dictionary, dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp);
+	qsort(dictionary, (size_t)dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp);
 	for (which = 0; which < dictionary_length; which++)
 		if (which % 100 == 0 || which <= 100)
 			printf("%ld %ld\n", which, dictionary[which].df);
@@ -110,14 +108,14 @@ if (argc == 2)
 else
 	{
 	terms = read_file(argv[2], &terms_length);
-	qsort(dictionary, dictionary_length, sizeof(*dictionary), ANT_dictionary::find);		// alphabetical order first
+	qsort(dictionary, (size_t)dictionary_length, sizeof(*dictionary), ANT_dictionary::find);		// alphabetical order first
 	for (which = 0; which < terms_length; which++)
-		if ((hit = (ANT_dictionary *)bsearch(terms + which, dictionary, dictionary_length, sizeof(*dictionary), ANT_dictionary::find)) != NULL)
+		if ((hit = (ANT_dictionary *)bsearch(terms + which, dictionary, (size_t)dictionary_length, sizeof(*dictionary), ANT_dictionary::find)) != NULL)
 			memcpy(terms + which, hit, sizeof(*hit));
 
-	qsort(dictionary, dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp);		// term frequency order
+	qsort(dictionary, (size_t)dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp);		// term frequency order
 	for (which = 0; which < terms_length; which++)
-		if ((hit = (ANT_dictionary *)bsearch(terms + which, dictionary, dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp)) != NULL)
+		if ((hit = (ANT_dictionary *)bsearch(terms + which, dictionary, (size_t)dictionary_length, sizeof(*dictionary), ANT_dictionary::cmp)) != NULL)
 			printf("%d %d\n", hit - dictionary, hit->df);
 	}
 

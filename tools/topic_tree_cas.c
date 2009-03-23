@@ -165,7 +165,8 @@ int main(int argc, char *argv[])
 ANT_disk disk;
 char *file, **lines, *token;
 long current;
-long current_line, queries, node, previous_node;
+long current_line, node, previous_node;
+long long queries;
 
 if (argc != 2)
 	exit(printf("usage:%s <cas_query_file>\n", argv[0]));

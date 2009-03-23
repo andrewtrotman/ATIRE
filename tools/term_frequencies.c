@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
 {
 ANT_disk disk;
 char *file, **lines, **current;
-long number_of_terms, power, times, df;
+long long number_of_terms;
+long power, times, df;
 
 if (argc != 2)
 	exit(printf("Usage:%s <infile>\n"));

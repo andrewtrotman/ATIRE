@@ -15,21 +15,21 @@ private:
 	char *chunk, *at, *chunk_end;
 	long long used;
 	long long allocated;
-	size_t block_size;
+	long long block_size;
 	long has_large_pages;
 	size_t short_page_size, large_page_size;
 
 protected:
-	void *alloc(size_t *size);
+	void *alloc(long long *size);
 #ifdef _MSC_VER
 	long set_privilege(char *priv_name, long enable);
 #endif
 
 public:
-	ANT_memory(size_t block_size_for_allocation = 1024 * 1024 * 1024);
+	ANT_memory(long long block_size_for_allocation = 1024 * 1024 * 1024);
 	~ANT_memory();
 
-	void *malloc(size_t bytes);
+	void *malloc(long long bytes);
 	long long bytes_allocated(void) { return allocated; }
 	long long bytes_used(void) { return used; }
 	void realign(void) { allocated += (allocated % sizeof(long long) == 0) ? 0 : sizeof(long long) - allocated % sizeof(long long); }		//
@@ -39,10 +39,10 @@ public:
 	ANT_MEMORY::MALLOC()
 	--------------------
 */
-inline void *ANT_memory::malloc(size_t bytes)
+inline void *ANT_memory::malloc(long long bytes)
 {
 void *ans;
-size_t request;
+long long request;
 
 if (chunk == NULL)
 	{

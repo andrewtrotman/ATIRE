@@ -98,7 +98,7 @@ return total_links;
 	GENERATE_RANDOM_QUERY()
 	-----------------------
 */
-ANT_query *generate_random_query(ANT_query *query, long terms_in_query, long terms_in_dictionary, char **dictionary)
+ANT_query *generate_random_query(ANT_query *query, long terms_in_query, long long terms_in_dictionary, char **dictionary)
 {
 long term, random_term;
 char *word, *into;
@@ -139,9 +139,11 @@ int bootstrap_main(int argc, char *argv[])
 {
 ANT_disk disk;
 char *file, **dictionary, *stats, **stats_list, **stats_line;
-long terms_in_dictionary, queries, total_links;
+long long terms_in_dictionary;
+long queries, total_links;
 long max_query_length, current_query, current, which;
-long times, stats_length, len;
+long times, len;
+long long stats_length;
 long *simalarity_list;
 
 if (argc != 3)
@@ -185,7 +187,7 @@ for (times = 0; times < BOOTSTRAP_ITERATIONS; times++)
 	current_query = 0;
 	for (current = 0; current <= max_query_length; current++)
 		for (which = 0; which < query_length_stats[current]; which++)
-				generate_random_query(&term_list[current_query++], current, terms_in_dictionary, dictionary);
+			generate_random_query(&term_list[current_query++], current, terms_in_dictionary, dictionary);
 
 	total_links = 0;
 	for (current = 0; current < queries; current++)
@@ -212,7 +214,8 @@ int stats_main(int argc, char *argv[])
 ANT_disk disk;
 char *file, **line_list;
 char *term;
-long lines, current_term, current, total_links, first_word;
+long long lines;
+long current_term, current, total_links, first_word;
 char *netfilename, *statsfilename;
 
 netfilename = argv[2];
@@ -227,7 +230,7 @@ line_list = disk.buffer_to_list(file, &lines);
 netfile = fopen(netfilename, "wt");
 statsfile = fopen(statsfilename, "wb");
 
-term_list = new ANT_query[lines];
+term_list = new ANT_query[(size_t)lines];
 for (current = 0; current < lines; current++)
 	{
 	if (strlen(line_list[current]) >= MAX_QUERY_LENGTH)
@@ -290,7 +293,7 @@ return 0;
 	GENERATE_RANDOM_QUERY_FROM_TITLE()
 	----------------------------------
 */
-ANT_query *generate_random_query_from_title(ANT_query *query, long number_of_titles, char **titles)
+ANT_query *generate_random_query_from_title(ANT_query *query, long long number_of_titles, char **titles)
 {
 long random_title, current_term;
 char *ch, *term;
@@ -333,7 +336,8 @@ int titles_main(int argc, char *argv[])
 {
 ANT_disk disk;
 char *file, **titles;
-long number_of_titles, queries, total_links;
+long long number_of_titles;
+long queries, total_links;
 long max_query_length, current_query, current;
 long times, *simalarity_list;
 

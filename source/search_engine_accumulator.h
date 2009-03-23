@@ -33,7 +33,7 @@ public:
 
 	static int compare(const void *a, const void *b);
 	static int compare_pointer(const void *a, const void *b);
-	static void top_k_sort(ANT_search_engine_accumulator **base, size_t num, long top_k);
+	static void top_k_sort(ANT_search_engine_accumulator **base, long long num, long long top_k);
 } ;
 
 #endif __SEARCH_ENGINE_ACCUMULATOR_H__

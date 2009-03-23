@@ -28,9 +28,9 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 	ANT_SEARCH_ENGINE_FORUM_TREC::WRITE()
 	-------------------------------------
 */
-void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long hits)
+void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits)
 {
-long which;
+long long which;
 
 for (which = 0; which < hits; which++)
 	fprintf(file, "%ld Q0 %s %ld %ld %s\n", topic_id, docids[which], which + 1, (hits - which), run_id);

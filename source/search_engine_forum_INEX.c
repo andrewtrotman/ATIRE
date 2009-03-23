@@ -29,9 +29,9 @@ fprintf(file, "</inex-submission>");
 	ANT_SEARCH_ENGINE_FORUM_INEX::WRITE()
 	-------------------------------------
 */
-void ANT_search_engine_forum_INEX::write(long topic_id, char **docids, long hits)
+void ANT_search_engine_forum_INEX::write(long topic_id, char **docids, long long hits)
 {
-long which;
+long long which;
 fprintf(file, "<topic topic-id=\"%ld\">\n", topic_id);
 
 for (which = 0; which < hits; which++)

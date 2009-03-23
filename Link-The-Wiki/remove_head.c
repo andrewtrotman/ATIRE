@@ -18,7 +18,7 @@ char *text, *pos;
 FILE *fp;
 
 if (argc != 3)
-	exit(printf("Usage:%s <infile><outfile>\n"));
+	exit(printf("Usage:%s <infile><outfile>\n", argv[0]));
 text = disk.read_entire_file(argv[1]);
 pos = strchr(text, '\n') + 1;
 pos = strchr(pos, '\n') + 1;

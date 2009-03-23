@@ -104,7 +104,7 @@ return block;
 	ANT_DISK::BUFFER_TO_LIST()
 	--------------------------
 */
-char **ANT_disk::buffer_to_list(char *buffer, size_t *lines)
+char **ANT_disk::buffer_to_list(char *buffer, long long *lines)
 {
 char *pos, **line_list, **current_line;
 long n_frequency, r_frequency;
@@ -117,7 +117,10 @@ for (pos = buffer; *pos != '\0'; pos++)
 		r_frequency++;
 
 *lines = r_frequency > n_frequency ? r_frequency : n_frequency;
-current_line = line_list = new (std::nothrow) char * [*lines + 2]; 		// +1 in case the last line has no \n; +1 for a NULL at the end of the list
+current_line = line_list = new (std::nothrow) char * [(size_t)(*lines + 2)]; 		// +1 in case the last line has no \n; +1 for a NULL at the end of the list
+
+if (line_list == NULL)		// out of memory!
+	return NULL;
 
 *current_line++ = pos = buffer;
 while (*pos != '\0')

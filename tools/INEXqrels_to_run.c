@@ -140,7 +140,8 @@ into->passage_list[into->passage_list_length] = NULL;
 ANT_INEX_assessment **read_assessments(char *filename, long *length)
 {
 char *file, **lines, **current;
-long number_of_lines, qid, document, relevant, doc_length;
+long long number_of_lines;
+long qid, document, relevant, doc_length;
 ANT_INEX_assessment *another, **assessment_list;
 long assessment_list_length, assessment_list_used, assessment_list_chunk_size;
 

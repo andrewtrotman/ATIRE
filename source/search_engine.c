@@ -32,7 +32,7 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
 unsigned char *block;
 long long end, term_header, this_header_block_size, sum;
-long current_length, pointer;
+size_t current_length, pointer;
 long postings_buffer_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
@@ -186,7 +186,7 @@ void ANT_search_engine::init_accumulators(void)
 long long now;
 
 now = stats->start_timer();
-memset(accumulator, 0, sizeof(*accumulator) * documents);
+memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 
@@ -480,7 +480,7 @@ long document, *current_document, *current_tf, *end;
 char *term;
 
 now = stats->start_timer();
-memset(stem_buffer, 0, stem_buffer_length_in_bytes);
+memset(stem_buffer, 0, (size_t)stem_buffer_length_in_bytes);
 collection_frequency = 0;
 stats->add_stemming_time(stats->stop_timer(now));
 
@@ -533,7 +533,7 @@ stats->add_rank_time(stats->stop_timer(now));
 	ANT_SEARCH_ENGINE::SORT_RESULTS_LIST()
 	--------------------------------------
 */
-ANT_search_engine_accumulator *ANT_search_engine::sort_results_list(long accurate_rank_point, long *hits)
+ANT_search_engine_accumulator *ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits)
 {
 long found;
 long long now;
@@ -569,9 +569,9 @@ return accumulator;
 	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
 	------------------------------------------
 */
-char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long top_k)
+char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k)
 {
-long found;
+long long found;
 ANT_search_engine_accumulator **current, **end;
 
 found = 0;

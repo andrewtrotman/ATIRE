@@ -13,7 +13,7 @@
 	ANT_MEMORY::ANT_MEMORY()
 	------------------------
 */
-ANT_memory::ANT_memory(size_t block_size_for_allocation)
+ANT_memory::ANT_memory(long long block_size_for_allocation)
 {
 #ifdef _MSC_VER
 	OSVERSIONINFO os_info;
@@ -91,10 +91,10 @@ ANT_memory::~ANT_memory()
 	to check whether or not you have permission to allocate large pages see:
 	Control Panel->Administrative Tools->Local Security Settings->->User Rights Assignment->Lock pages in memory
 */
-void *ANT_memory::alloc(size_t *size)
+void *ANT_memory::alloc(long long *size)
 {
 #ifdef _MSC_VER
-	size_t bytes = 0;
+	long long bytes = 0;
 	void *answer = NULL;
 	/*
 		First try using large page memory blocks
@@ -103,7 +103,7 @@ void *ANT_memory::alloc(size_t *size)
 		if (set_privilege(SE_LOCK_MEMORY_NAME, TRUE))		// try and get permission from the OS to allocate large pages
 			{
 			bytes = large_page_size * ((*size + large_page_size - 1) / large_page_size);
-			answer = VirtualAlloc(NULL, bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
+			answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			set_privilege(SE_LOCK_MEMORY_NAME, FALSE);		// drop back to the initial security level
 			}
 	/*
@@ -112,9 +112,9 @@ void *ANT_memory::alloc(size_t *size)
 	if (answer == NULL)
 		{
 		bytes = short_page_size * ((*size + short_page_size - 1) / short_page_size);
-		answer = VirtualAlloc(NULL, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+		answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		if (answer != NULL)
-			VirtualLock(answer, bytes);		// lock the pages in memory so that it can't page to disk
+			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
 		else
 			bytes = 0;		// couldn't allocate any memory.
 		}
@@ -124,7 +124,7 @@ void *ANT_memory::alloc(size_t *size)
 	*size = bytes;		// number of bytes we allocated
 	return answer;
 #else
-	return ::malloc(*size);
+	return ::malloc((size_t)*size);
 #endif
 }
 
