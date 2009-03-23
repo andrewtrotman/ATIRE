@@ -10,21 +10,20 @@
 	#include <windows.h>
 #else
 	#include <stdio.h>
-#endif
-
-#ifdef linux
-    #ifndef _LARGEFILE_SOURCE
-		#define _LARGEFILE_SOURCE
+	#ifdef linux
+	    #ifndef _LARGEFILE_SOURCE
+			#define _LARGEFILE_SOURCE
+		#endif
+		#ifndef _LARGEFILE64_SOURCE
+			#define _LARGEFILE64_SOURCE
+		#endif
+		#include <sys/stat.h> /* because defines will cause function def to break */
+		#define FILE_OFFSET_BITS 64
+		#define ftell ftello
+		#define fseek fseeko
+		#define fstat fstat64
+		#define stat stat64
 	#endif
-	#ifndef _LARGEFILE64_SOURCE
-		#define _LARGEFILE64_SOURCE
-	#endif
-	#include <sys/stat.h> /* because defines will cause function def to fuck up */
-	#define FILE_OFFSET_BITS 64
-	#define ftell ftello
-	#define fseek fseeko
-	#define fstat fstat64
-	#define stat stat64
 #endif
 
 class ANT_file_internals
