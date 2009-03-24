@@ -102,14 +102,14 @@ ranked_list = search_engine->sort_results_list(search_engine->document_count(), 
 
 if (topic_id == -1)
 	{
-	printf("Query '%s' found %ld documents ", query, hits);
+	printf("Query '%s' found %lld documents ", query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")\n");
 	if (did_query)
 		search_engine->stats_text_render();
 	}
 else
 	{
-	printf("Topic:%ld Query '%s' found %ld documents ", topic_id, query, hits);
+	printf("Topic:%ld Query '%s' found %lld documents ", topic_id, query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
 //	if (did_query)
 //		search_engine->stats_text_render();
@@ -164,9 +164,9 @@ document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 ANT_search_engine search_engine(&memory);
-printf("Index contains %ld documents\n", search_engine.document_count());
+printf("Index contains %lld documents\n", search_engine.document_count());
 if (search_engine.document_count() != documents_in_id_list)
-	exit(printf("There are %ld documents in the index, but %ld documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
+	exit(printf("There are %lld documents in the index, but %lld documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
 
 puts("\nuse:\n\t.quit to quit\n\n");
 
@@ -187,7 +187,7 @@ while (more)
 			last_to_list = hits > 10 ? 10 : hits;
 			search_engine.generate_results_list(document_list, answer_list, last_to_list);
 			for (long result = 0; result < last_to_list; result++)
-				printf("%lld:%s\n", result + 1, answer_list[result]);
+				printf("%ld:%s\n", result + 1, answer_list[result]);
 			}
 		}
 	}
@@ -272,7 +272,7 @@ ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInCo
 
 fprintf(stderr, "ANT %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
-fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
+fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 
 document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
