@@ -1,6 +1,7 @@
 #ifndef __GA_STEMMER_H__
 #define __GA_STEMMER_H__
 
+#include <stdio.h>
 #include "search_engine.h"
 #include "btree_iterator.h"
 #include "stemmer.h"
@@ -20,7 +21,7 @@ public:
 	virtual size_t stem(char *term, char *destination);
     virtual char *first(char *);
 
-    void print();
+    void print(FILE *);
 
     GA_stemmer(ANT_search_engine *search_engine) : ANT_stemmer(search_engine) {}
     virtual ~GA_stemmer() {}

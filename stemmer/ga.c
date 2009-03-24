@@ -72,15 +72,15 @@ void GA::run(unsigned int generations) {
     for (i = 0; i < generations; i++) {
         {
             GA_individual *best = get_best();
-            best->print_raw();
-            printf("Generation: %u Fitness: %f\n", i, get_fitness(best));
+            best->print_raw(stderr);
+            fprintf(stderr, "Generation: %u Fitness: %f\n", i, get_fitness(best));
         }
         this->next_generation();
     }
     {
         GA_individual *best = get_best();
-        best->print_raw();
-        printf("Fitness: %f\n", get_fitness(best));
+        best->print_raw(stderr);
+        fprintf(stderr, "Fitness: %f\n", get_fitness(best));
     }
 }
 

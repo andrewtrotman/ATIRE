@@ -39,7 +39,7 @@ for (which = 0; which < hits; which++)
 	fprintf(file, "<result>\n");
 	fprintf(file, "<file>%s</file>\n", docids[which]);
 	fprintf(file, "<path>/article[1]</path>\n");
-	fprintf(file, "<rank>%ld</rank>", which);
+	fprintf(file, "<rank>%lld</rank>", which);
 	fprintf(file, "</result>\n");
 	}
 

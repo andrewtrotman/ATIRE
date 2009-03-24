@@ -1,6 +1,8 @@
 #ifndef __GA_INDIVIDUAL_H__
 #define __GA_INDIVIDUAL_H__
 
+#include <stdio.h>
+
 const int TMP_BUFFER_SIZE = 255;
 const int RULE_STRING_MAX = 4;
 const int RULE_SIZE = (RULE_STRING_MAX * 2 + 1);
@@ -41,7 +43,7 @@ class GA_individual {
     char *apply(const char *);
     double evaluate();
     void print();
-    void print_raw();
+    void print_raw(FILE *);
     void reproduce(GA_individual *);
     void mutate(GA_individual *, char *(*)(), char *(*)());
     void crossover(GA_individual *, GA_individual *);

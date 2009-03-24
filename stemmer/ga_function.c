@@ -8,8 +8,7 @@ double GA_function::call() {
     for (i = 0; i < query_count; i++) {
         sum_of_average_precisions += function(search_engine, all_queries[i], &hits, stemmer, topic_ids[i], cached_results[i], map);
     }
-    if (sum_of_average_precisions == 0.0)
-        stemmer->print();
+
     return sum_of_average_precisions / (double) (query_count);
 }
 

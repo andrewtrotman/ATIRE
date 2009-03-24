@@ -64,7 +64,7 @@ long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
-long hits;
+long long hits;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
@@ -109,14 +109,14 @@ ranked_list = search_engine->sort_results_list(search_engine->document_count(), 
 
 if (topic_id == -1)
 	{
-	printf("Query '%s' found %ld documents ", query, hits);
+	printf("Query '%s' found %lld documents ", query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")\n");
 	if (did_query)
 		search_engine->stats_text_render();
 	}
 else
 	{
-	printf("Topic:%ld Query '%s' found %ld documents ", topic_id, query, hits);
+	printf("Topic:%ld Query '%s' found %lld documents ", topic_id, query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
 //	if (did_query)
 //		search_engine->stats_text_render();
@@ -141,7 +141,8 @@ long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
-long hits, token_length;
+long long hits;
+long token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 int stemmed_terms = 0;
@@ -186,7 +187,7 @@ return average_precision;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(size_t *documents_in_id_list)
+char **read_docid_list(long long *documents_in_id_list)
 {
 ANT_disk disk;
 char *document_list_buffer, **document_list;
@@ -207,7 +208,7 @@ void command_driven_ant(void)
 ANT_memory memory;
 char query[1024];
 long last_to_list, hits, more;
-size_t documents_in_id_list;
+long long documents_in_id_list;
 char **document_list, **answer_list;
 
 printf("ANT %s\n", ANT_version_string);
@@ -253,7 +254,7 @@ puts("Bye");
 	GET_ANT_QRELS()
 	---------------
 */
-ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length)
+ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long long *qrel_list_length)
 {
 ANT_disk file_system;
 ANT_relevant_document *all_assessments, *current_assessment;
@@ -293,7 +294,7 @@ return all_assessments;
 	-----------
 	This is highly inefficient, but because it only happens once that's OK.
 */
-ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, size_t *qrel_list_length, long qrel_format, char **uid_list, long uid_list_length)
+ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long long *qrel_list_length, long qrel_format, char **uid_list, long uid_list_length)
 {
 if (qrel_format == QREL_INEX)
 	{
@@ -316,7 +317,7 @@ void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_for
 ANT_relevant_document *assessments;
 char query[1024];
 long line, *topic_ids = NULL;
-size_t documents_in_id_list, number_of_assessments;
+long long documents_in_id_list, number_of_assessments;
 ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list;
@@ -362,6 +363,7 @@ for (i = 0; i < line - 1; i++) {
 }
 
 if (stemmer_file) {
+    int count = 0;
     char buffer[4096];
     FILE *f = fopen(stemmer_file, "r");
     while (fgets(buffer, 4096, f) != NULL) {
@@ -370,11 +372,12 @@ if (stemmer_file) {
         double result = 0.0;
         ind->sload(buffer);
         stemmer->set_stemmer(ind);
+        stemmer->print(stderr);
         for (i = 0; i < line - 1; i++) {
             long hits;
             result += perform_query_w_stemmer(&search_engine, all_queries[i], &hits, stemmer, topic_ids[i], -1, map);
         }
-        printf("%f\n", result / (line - 1));
+        fprintf(stderr, "%d %f\n", count++, result / (line - 1));
     }
 } else {
     init_strgen(&search_engine);
@@ -397,7 +400,7 @@ double batch_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qre
 ANT_relevant_document *assessments;
 char query[1024];
 long topic_id, line, hits;
-size_t documents_in_id_list, number_of_assessments;
+long long documents_in_id_list, number_of_assessments;
 ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list, **answer_list;

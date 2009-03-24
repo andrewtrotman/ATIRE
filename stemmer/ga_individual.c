@@ -135,18 +135,18 @@ void GA_individual::print() {
     }
 }
 
-void GA_individual::print_raw() {
+void GA_individual::print_raw(FILE *fd) {
     unsigned int i;
     for (i = 0; i < this->rules_size(); i++) {
-        if (i % RULE_SIZE == 0) putchar(' ');
+        if (i % RULE_SIZE == 0) fputc(' ', fd);
         if (rules[i] >= 'a' && rules[i] <= 'z')
-            putchar(rules[i]);
+            fputc(rules[i], fd);
         else if (rules[i] >= 0 && rules[i] <= 9)
-            putchar(rules[i] + '0');
+            fputc(rules[i] + '0', fd);
         else
-            putchar('-');
+            fputc('-', fd);
     }
-    putchar('\n');
+    fputc('\n', fd);
 }
 
 /*
@@ -213,7 +213,7 @@ void GA_individual::generate(char *(*strgen)(), char *(*strgen_2)()) {
 }
 
 void GA_individual::load(char *filename) {
-    char buffer[1024];
+    char buffer[4096];
     int current = 0;
     char *ptr;
     FILE *handle = fopen(filename, "r");
@@ -242,6 +242,8 @@ void GA_individual::sload(char *string) {
             rules[current] = ptr[0] - '0';
         else if (ptr[0] == '-')
             rules[current] = (char) -1;
+        else if (ptr[0] == ' ' || ptr[0] == '\n')
+            current--;
         else
             rules[current] = ptr[0];
         ptr++;

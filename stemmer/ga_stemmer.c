@@ -30,6 +30,6 @@ char *GA_stemmer::first(char *term) {
     return get_next(ANT_btree_iterator::first(stemmed_prefix));
 }
 
-void GA_stemmer::print() {
-    individual->print_raw();
+void GA_stemmer::print(FILE *fd) {
+    individual->print_raw(fd);
 }
