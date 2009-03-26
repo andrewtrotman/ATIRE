@@ -220,9 +220,9 @@ document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 ANT_search_engine search_engine(&memory);
-printf("Index contains %ld documents\n", search_engine.document_count());
+printf("Index contains %lld documents\n", search_engine.document_count());
 if (search_engine.document_count() != documents_in_id_list)
-	exit(printf("There are %ld documents in the index, but %ld documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
+	exit(printf("There are %lld documents in the index, but %lld documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
 
 puts("\nuse:\n\t.quit to quit\n\n");
 
@@ -332,7 +332,7 @@ GA_individual *ind = new GA_individual();
 srand(time(NULL));
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
-fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
+fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 
 document_list = read_docid_list(&documents_in_id_list);
 assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
@@ -409,7 +409,7 @@ ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInCo
 
 fprintf(stderr, "Ant %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
-fprintf(stderr, "Index contains %ld documents\n", search_engine.document_count());
+fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 GA_stemmer *stemmer = new GA_stemmer(&search_engine);
 GA_individual *ind = new GA_individual();
 if (stemmer_file) {
@@ -485,7 +485,7 @@ if (argc == 1)
      argc--; argv++;
 #ifndef FIT_BM25
      if (argc == 4) {
-         freopen(argv[4], "w", stderr);
+         freopen(argv[3], "w", stderr);
          ga_ant(argv[1], argv[2], NULL, qrel);
          fclose(stderr);
      } else if (argc == 5) {
