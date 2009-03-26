@@ -16,7 +16,7 @@
 #include "stemmer.h"
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
-//#include "stemmer_lovins.h"
+#include "stemmer_lovins.h"
 #include "stemmer_wikipedia.h"
 #include "INEX_assessment.h"
 #include "search_engine_forum_INEX.h"
@@ -64,6 +64,7 @@ double average_precision = 0.0;
 ANT_stemmer_wikipedia stemmer(search_engine);
 //ANT_stemmer_lovins stemmer(search_engine);
 //ANT_stemmer stemmer(search_engine);
+//ANT_stemmer_none stemmer(search_engine);
 
 if (topic_id == -1)
 	search_engine->stats_initialise();		// if we are command-line then report query by query stats
