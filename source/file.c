@@ -183,7 +183,7 @@ return 1;
 long ANT_file::read(unsigned char *data, long long size)
 {
 flush();
-file_position += size;		// this is wherw we'll be at the end of the read
+file_position += size;		// this is where we'll be at the end of the read
 return internals->read_file_64(internals->fp, data, size);
 }
 

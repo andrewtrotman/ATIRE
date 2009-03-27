@@ -173,7 +173,7 @@ return terms;
 	ANT_MEMORY_INDEX::GENERATE_TERM_LIST()
 	--------------------------------------
 */
-long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, long long *highest_df)
+long ANT_memory_index::generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df)
 {
 long term_length, terms = 0;
 
@@ -360,7 +360,7 @@ file_position = file->tell();
 */
 file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));	// 4 bytes
 
-printf("Terms in root:%lld\n", terms_in_root);
+printf("Terms in root:%llu\n", (unsigned long long) terms_in_root);
 
 for (current_header = header; current_header < last_header; current_header++)
 	{
@@ -373,7 +373,7 @@ for (current_header = header; current_header < last_header; current_header++)
 /*
 	Write the location of the header to file
 */
-printf("Root pos on disk:%lld\n", file_position);
+printf("Root pos on disk:%llu\n", (unsigned long long) file_position);
 file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 bytes
 /*
 	The string length of the longest term
