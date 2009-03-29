@@ -12,10 +12,10 @@ LTWDIR = Link-The-Wiki
 TOOLDIR = tools
 
 #
-#	Compiler and flags
+#	Compiler and flags (the top line is debug, the bottom is release)
 #
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /Ox /fp:fast /GL
+#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /Ox /fp:fast /GL
 CC = @cl
 
 #
@@ -57,6 +57,7 @@ PARTS = \
 	$(OBJDIR)\stemmer.obj	\
 	$(OBJDIR)\porter.obj	\
 	$(OBJDIR)\lovins.obj	\
+	$(OBJDIR)\paice_husk.obj	\
 	$(OBJDIR)\learned_wikipedia_stem.obj	\
 	$(OBJDIR)\relevant_topic.obj
 

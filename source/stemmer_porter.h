@@ -5,8 +5,6 @@
 #ifndef __STEMMER_PORTER_H__
 #define __STEMMER_PORTER_H__
 
-#include <stdio.h>
-#include "ctypes.h"
 #include "stemmer.h"
 #include "porter.h"
 

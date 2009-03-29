@@ -18,5 +18,3 @@ ANT_disk_internals::ANT_disk_internals()
 #endif
 }
 
-ANT_disk_internals::~ANT_disk_internals() {
-}
