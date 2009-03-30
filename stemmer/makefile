@@ -11,25 +11,25 @@ CFLAGS = -g -O3 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 CC = g++
 
 INDEX_PARTS = \
-	disk.o \
-	disk_internals.o \
-	file.o \
-	file_internals.o \
-	parser.o \
-	memory_index_hash_node.o \
-	memory.o \
-	memory_index.o \
-	stats.o \
-	time_stats.o \
-	memory_index_stats.o \
-	ctypes.o \
-	hash_table.o \
-	postings_piece.o
+    disk.o \
+    disk_internals.o \
+    file.o \
+    file_internals.o \
+    parser.o \
+    memory_index_hash_node.o \
+    memory.o \
+    memory_index.o \
+    stats.o \
+    time_stats.o \
+    memory_index_stats.o \
+    ctypes.o \
+    hash_table.o \
+    postings_piece.o
 
 ANT_PARTS = \
-	ctypes.o \
+    ctypes.o \
     file.o \
-	file_internals.o \
+    file_internals.o \
     memory.o \
     search_engine.o \
     search_engine_accumulator.o \
@@ -40,16 +40,18 @@ ANT_PARTS = \
     time_stats.o \
     search_engine_stats.o \
     search_engine_forum.o \
-	search_engine_forum_INEX.o \
-	search_engine_forum_TREC.o \
-	str.o \
-	stop_word.o \
+    search_engine_forum_INEX.o \
+    search_engine_forum_TREC.o \
+    str.o \
+    stop_word.o \
     disk.o \
     disk_internals.o \
     btree_iterator.o \
     top_k_sort.o \
     stemmer.o	\
-	porter.o \
+    porter.o \
+    paice_husk.o \
+    lovins.o \
     learned_wikipedia_stem.o \
     relevant_topic.o
 
