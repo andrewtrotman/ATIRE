@@ -17,7 +17,7 @@ private:
 
 private:
 	int isallowable(unsigned char val) { return ANT_isalpha(val) || val == '>' || val == '/'; }
-	int isheadchar(unsigned char val) { return ANT_isalpha(val) || val == '<' || val == '\0'; }
+	int isheadchar(unsigned char val) { return ANT_isalnum(val) || val == '<' || val == '\0'; }
 
 public:
 	ANT_parser();

@@ -80,12 +80,12 @@ token_end = query;
 while (*token_end != '\0')
 	{
 	token_start = token_end;
-	while (!ANT_isalpha(*token_start) && *token_start != '\0')
+	while (!ANT_isalnum(*token_start) && *token_start != '\0')
 		token_start++;
 	if (*token_start == '\0')
 		break;
 	token_end = token_start;
-	while (ANT_isalpha(*token_end) || *token_end == '+')
+	while (ANT_isalnum(*token_end) || *token_end == '+')
 		token_end++;
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
@@ -335,7 +335,7 @@ double map;
 if (argc == 1)
 	command_driven_ant();
 else if (argc == 3)
-	map = batch_ant(argv[1], argv[2], QREL_INEX);
+	map = batch_ant(argv[1], argv[2], QREL_ANT);
 
 #ifdef FIT_BM25
 /*

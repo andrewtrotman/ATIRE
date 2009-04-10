@@ -41,9 +41,7 @@ unsigned char *start;
 while (!isheadchar(*current))
 	current++;
 
-if (*current == '\0')
-	return NULL;
-else if (ANT_isalpha(*current))
+if (ANT_isalpha(*current))				// alphabetic strings
 	{
 	*current = ANT_tolower(*current);
 	start = current++;
@@ -53,7 +51,15 @@ else if (ANT_isalpha(*current))
 		current++;
 		}
 	}
-else
+else if (ANT_isdigit(*current))				// numbers
+	{
+	start = current++;
+	while (ANT_isdigit(*current))
+		current++;
+	}
+else if (*current == '\0')						// end of string
+	return NULL;
+else											// everything else (that starts with a '<'
 	{
 	start = current++;
 	while (isallowable(*current))

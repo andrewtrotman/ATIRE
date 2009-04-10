@@ -96,7 +96,7 @@ for (param = first_param; param < argc; param++)
 		parser.set_document(file);
 		while ((token = parser.get_next_token()) != NULL)
 			{
-			if (ANT_isalpha(*token->start))
+			if (ANT_isalnum(*token->start))
 				{
 				terms_in_document++;
 				index->add_term(token, doc);

@@ -337,7 +337,7 @@ qsort(term_list, unique_terms, sizeof(*term_list), ANT_memory_index_hash_node::t
 /*
 	Write the term list and generate the header list
 */
-btree_root_worst_case = (long)pow((double)27, (double)B_TREE_PREFIX_SIZE) + 1; // +1 for "special" terms such as document lengths
+btree_root_worst_case = (long)pow((double)ANT_ALPHABET_SIZE, (double)B_TREE_PREFIX_SIZE) + 1; // +1 for "special" terms such as document lengths
 current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree_head_node) * btree_root_worst_case);
 here = term_list;
 while (*here != NULL)

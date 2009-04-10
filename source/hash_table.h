@@ -2,13 +2,15 @@
 	HASH_TABLE.H
 	------------
 */
-
 #ifndef __HASH_TABLE_H__
 #define __HASH_TABLE_H__
 
 #include "string_pair.h"
 
 extern unsigned char ANT_hash_table[];
+extern unsigned char ANT_header_hash_encode[];
+
+#define ANT_ALPHABET_SIZE 37			/* allowable characters in a token:abcdefghijklmnopqrstuvwxyz0123456789~ */
 
 /*
 	ANT_RANDOM_HASH()
@@ -118,9 +120,14 @@ return ANT_super_fast_hash(string->string(), string->length()) & 0xffffff;
 */
 inline static unsigned long ANT_header_hash_24(ANT_string_pair *string)
 {
+#ifdef NEVER
+/*
+	this is the old version for alpha strings only.  It uses the first 4 characters as a base 27 number (range 0..531441)
+	as this uses only 5 nybbles, the last nybble encodes the length of the string (range 0..16).
+*/
 long ans;
 size_t len;
-const unsigned char base = 'a' - 1;
+const unsigned char base = 'a' - 1;			// this looks like a bug, it appears to assume ~ is before 'a' in ASCII
 
 ans = (string->string()[0] - base) * 27 * 27 * 27;		// the first char can be a '~' signifying a special term (document lengths etc.)
 
@@ -134,8 +141,28 @@ if (len > 3)
 ans += (string->length() & 0x0F) << 20;	// top 4 bits are the length
 
 return ans;
-}
+#else
+/*
+	This code assumes a 37 character alphabet (a..z,0..9,(~/_)) and treats the string as a base 37 integer.
+	and encodes the length in the top 3 bits
+*/
+unsigned long ans;
+size_t len;
 
+ans = (ANT_header_hash_encode[string->string()[0]]) * 37 * 37 * 37;		// a..z,0..9,_,~ (where ~ and _ encode to 36)
+
+if ((len = string->length()) > 1)
+	ans += (ANT_header_hash_encode[string->string()[1]]) * 37 * 37;
+if (len > 2)
+	ans += (ANT_header_hash_encode[string->string()[2]]) * 37;
+if (len > 3)
+	ans += (ANT_header_hash_encode[string->string()[3]]);
+
+ans += (string->length() & 0x07) << 21;	// top 3 bits are the length
+
+return ans;
+#endif
+}
 
 /*
 	ANT_HASH_24()
