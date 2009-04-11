@@ -18,7 +18,6 @@ bin/memory.obj: source/memory.h
 bin/memory_index.obj: source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/memory_index.h source/fundamental_types.h source/memory.h source/file.h source/btree.h source/btree_head_node.h source/hash_table.h
 bin/memory_index_hash_node.obj: source/string_pair.h source/str.h source/ctypes.h source/memory.h source/memory_index_hash_node.h source/postings_piece.h source/memory_index_stats.h source/stats.h
 bin/memory_index_stats.obj: source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/fundamental_types.h
-bin/osmalloc.obj: source/osmalloc.h
 bin/paice_husk.obj: source/paice_husk.h
 bin/parser.obj: source/parser.h source/string_pair.h source/str.h source/ctypes.h
 bin/porter.obj: source/str.h source/ctypes.h source/porter.h source/btree_iterator.h

@@ -9,6 +9,20 @@
 #include <stdlib.h>
 #include "memory.h"
 
+#if _WIN32_WINNT < 0x0600			// prior to Vista
+	/*
+		If you compile under XP then GetLargePageMinimum() doesn't exist; it is first seen in
+		Server 2003 and Vista.  So, if you have a version of the compiler from the XP era then
+		we need to fake this method because you might compile under XP and run under Vista (or
+		later) which would cause the run-time check to succeed so a function stub is needed.
+		The solution is to require Microsoft C/C++ version 15.00 or later, but some existing
+		ANT users don't have that.
+
+		The hack is to set the large page size to the small page size (4096 bytes) in the case 
+		of compiled under XP but run under Vista.
+	*/
+	#define GetLargePageMinimum() (4096)
+#endif
 /*
 	ANT_MEMORY::ANT_MEMORY()
 	------------------------
@@ -26,7 +40,7 @@ ANT_memory::ANT_memory(long long block_size_for_allocation)
 	GetSystemInfo(&hardware_info);
 	short_page_size = hardware_info.dwPageSize;
 
-//	printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
+//printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
 #else
 	short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium small page size)
 #endif
