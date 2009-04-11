@@ -21,6 +21,7 @@ private:
 
 protected:
 	void *alloc(long long *size);
+	void *get_chained_block(long long bytes);
 #ifdef _MSC_VER
 	long set_privilege(char *priv_name, long enable);
 #endif
@@ -42,21 +43,13 @@ public:
 inline void *ANT_memory::malloc(long long bytes)
 {
 void *ans;
-long long request;
 
-if (chunk == NULL)
-	{
-	request = block_size;
-	at = chunk = (char *)alloc(&request);
-	allocated = request;
-	if (chunk == NULL)
-		exit(printf("Out of memory:%lld bytes requested\n", (long long)bytes));
-	chunk_end = chunk + allocated;
-	}
+if (chunk == NULL || at + bytes > chunk_end)
+	if (get_chained_block(bytes) == NULL)
+		exit(printf("ANT:Out of memory:%lld bytes requested %lld bytes used %lld bytes allocated\n", (long long)bytes, used, allocated));
+
 ans = at;
 at += bytes;
-if (at > chunk_end)
-	exit(printf("Out of memory:%lld bytes requested %lld bytes used\n", (long long)bytes, used));
 used += bytes;
 
 return ans;

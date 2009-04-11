@@ -14,7 +14,7 @@ TOOLDIR = tools
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /Gy
+#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
 CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /Ox /fp:fast /GL /Gy
 CC = @cl
 
@@ -108,8 +108,9 @@ all : $(PARTS)		\
       $(ANT_TARGETS)	\
       $(OTHER_TARGETS)
 
-$(ANT_TARGETS) : $(PARTS)
+$(ANT_TARGETS) : $(PARTS) 
 $(OTHER_TARGETS) : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj
+$(PARTS) : makefile
 
 #
 #	Some dependencies need to be explicit (is this an nmake bug)?

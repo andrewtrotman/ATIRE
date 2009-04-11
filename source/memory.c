@@ -23,6 +23,7 @@
 	*/
 	#define GetLargePageMinimum() (4096)
 #endif
+
 /*
 	ANT_MEMORY::ANT_MEMORY()
 	------------------------
@@ -47,6 +48,7 @@ ANT_memory::ANT_memory(long long block_size_for_allocation)
 
 chunk_end = at = chunk = NULL;
 used = 0;
+allocated = 0;
 this->block_size = block_size_for_allocation;
 }
 
@@ -56,13 +58,18 @@ this->block_size = block_size_for_allocation;
 */
 ANT_memory::~ANT_memory()
 {
-#ifdef _MSC_VER
-	if (chunk != NULL)
-		VirtualFree(chunk, 0, MEM_RELEASE);
-#else
-	if (chunk != NULL)
-		free(chunk);
-#endif
+char *killer;
+
+while (chunk != NULL)
+	{
+	killer = chunk;
+	chunk = *(char **)chunk;
+	#ifdef _MSC_VER
+		VirtualFree(killer, 0, MEM_RELEASE);
+	#else
+		free(killer);
+	#endif
+	}
 }
 
 #ifdef _MSC_VER
@@ -108,8 +115,9 @@ ANT_memory::~ANT_memory()
 void *ANT_memory::alloc(long long *size)
 {
 #ifdef _MSC_VER
-	long long bytes = 0;
 	void *answer = NULL;
+	long long bytes = 0;
+
 	/*
 		First try using large page memory blocks
 	*/
@@ -140,5 +148,33 @@ void *ANT_memory::alloc(long long *size)
 #else
 	return ::malloc((size_t)*size);
 #endif
+}
+
+/*
+	ANT_MEMORY::GET_CHAINED_BLOCK()
+	-------------------------------
+	The bytes parameter is passed to this routine simply so that we can be sure to
+	allocate at least that number of bytes.
+*/
+void *ANT_memory::get_chained_block(long long bytes)
+{
+char **chain;
+long long request;
+
+if (bytes > block_size)
+	block_size = bytes;			// extend the largest allocate block size
+
+request = block_size + sizeof(*chain);
+if ((chain = (char **)alloc(&request)) == NULL)
+	return NULL;
+
+*chain = chunk;
+chunk = (char *)chain;
+at = chunk + sizeof(*chain);
+chunk_end = chunk + request;		// request is the amount it allocated (which might be more than we asked for)
+
+allocated += request;
+
+return chunk;
 }
 
