@@ -5,7 +5,14 @@
 #ifndef __BITSTREAM_H__
 #define __BITSTREAM_H__
 
-#include <stdlib.h>
+#include "fundamental_types.h"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
 
 /*
 	class ANT_BITSTREAM
@@ -14,32 +21,30 @@
 class ANT_bitstream
 {
 protected:
-	long total_bits;
+	unsigned long long total_bits;
 
-	unsigned long *stream;
-	long stream_length, stream_pos;
+	uint32_t *stream;
+	unsigned long stream_length, stream_pos;
 
 	long bit_pos;
-	unsigned long buffer;
+	uint32_t buffer;
 
-	long decomp_bit_pos;
+	long failed;
 
 protected:
 	inline void push_buffer(void);
 
 public:
 	ANT_bitstream();
-	virtual ~ANT_bitstream();
 
 	inline void push_zero(void);
 	inline void push_one(void);
-	inline void push_bits(unsigned long bits, long length);
-	long eof(void);
+	inline void push_bits(uint32_t bits, long length);		// push up-to 32 bits
+	unsigned long eof(void);								// clean up and return the length in bytes
+	void rewind(unsigned char *destination = 0, unsigned long destination_length = 0);		// destination_length is in units of bytes
 
 	inline long get_bit(void);
-	inline unsigned long get_bits(long bits);
-
-	void text_render(void);
+	inline uint32_t get_bits(long bits);					// get up-to 32 bits
 } ;
 
 /*
@@ -53,7 +58,6 @@ if (++bit_pos >= 32)
 
 total_bits++;
 }
-
 
 /*
 	ANT_BITSTREAM::PUSH_ONE()
@@ -73,7 +77,7 @@ total_bits++;
 	ANT_BITSTREAM::PUSH_BITS()
 	--------------------------
 */
-inline void ANT_bitstream::push_bits(unsigned long bits, long length)
+inline void ANT_bitstream::push_bits(uint32_t bits, long length)
 {
 while (length-- > 0)
 	if (bits & (1 << length))
@@ -90,8 +94,8 @@ inline void ANT_bitstream::push_buffer(void)
 {
 if (stream_pos >= stream_length)
 	{
-	stream_length = stream_length * 2 + 1;
-	stream = (unsigned long *)realloc(stream, sizeof(*stream) * (stream_length));
+	failed = TRUE;
+	return;
 	}
 stream[stream_pos] = buffer;
 stream_pos++;
@@ -105,17 +109,21 @@ bit_pos = 0;
 */
 inline long ANT_bitstream::get_bit(void)
 {
-decomp_bit_pos++;
-return (stream[decomp_bit_pos >> 5] >> (decomp_bit_pos & 31)) & 0x01;
+long ans;
+
+ans = (stream[bit_pos >> 5] >> (bit_pos & 31)) & 0x01;
+bit_pos++;
+
+return ans;
 }
 
 /*
 	ANT_BITSTREAM::GET_BITS()
 	-------------------------
 */
-inline unsigned long ANT_bitstream::get_bits(long bits)
+inline uint32_t ANT_bitstream::get_bits(long bits)
 {
-unsigned long ans = 0;
+uint32_t ans = 0;
 
 while (bits-- > 0)
 	ans = (ans << 1) | get_bit();

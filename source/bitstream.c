@@ -11,39 +11,33 @@
 */
 ANT_bitstream::ANT_bitstream()
 {
-stream = NULL;
-stream_pos = stream_length = 0;
-bit_pos = 0;
-buffer = 0;
-decomp_bit_pos = -1;
-total_bits = 0;
+rewind();
 }
 
 /*
-	ANT_BITSTREAM::~ANT_BITSTREAM()
-	-------------------------------
+	ANT_BITSTREAM::REWIND()
+	-----------------------
+	it is assumed to be OK to convert destination into a uint32_t and assign to it
 */
-ANT_bitstream::~ANT_bitstream()
+void ANT_bitstream::rewind(unsigned char *destination, unsigned long destination_length)
 {
-free(stream);
+stream = (uint32_t *)destination;
+stream_length = destination_length / sizeof(uint32_t);		// convert into chunk sizes
+
+failed = FALSE;
+stream_pos = 0;
+bit_pos = 0;
+buffer = 0;
+total_bits = 0;
 }
 
 /*
 	ANT_BITSTREAM::EOF()
 	--------------------
 */
-long ANT_bitstream::eof(void)
+unsigned long ANT_bitstream::eof(void)
 {
 push_buffer();
-return total_bits;
-}
-
-/*
-	ANT_BITSTREAM::TEXT_RENDER()
-	----------------------------
-*/
-void ANT_bitstream::text_render(void)
-{
-printf("Space: %d bytes %d bits", total_bits / 8, total_bits);
+return failed ? 0 : (unsigned long)((total_bits + 7) / 8);			// return the number of bytes used or 0 on error
 }
 

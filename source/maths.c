@@ -1,10 +1,6 @@
-/*
-	LOG2.C
-	------
-*/
-#include "log2.h"
+#include "maths.h"
 
-unsigned long ANT_log2_byte[] =
+unsigned long ANT_floor_log2_byte[] =
 {
 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -24,21 +20,3 @@ unsigned long ANT_log2_byte[] =
 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
 };
 
-/*
-	ANT_LOG2()
-	----------
-*/
-unsigned long ANT_log2(unsigned long x)
-{
-unsigned long sum, mult = 0;
-
-do
-	{
-	sum = ANT_log2_byte[x & 0xFF] + mult;
-	mult += 8;
-	x >>= 8;
-	}
-while (x != 0);
-
-return sum;
-}

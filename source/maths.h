@@ -2,7 +2,6 @@
 	MATHS.H
 	-------
 */
-
 #ifndef __MATHS_H__
 #define __MATHS_H__
 #ifdef _MSC_VER
@@ -11,44 +10,38 @@
 	#include <stddef.h>
 #endif
 
-
 /*
-	SIGN()
+	ANT_SIGN()
 	------
 */
-inline int sign(char a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
+inline int ANT_sign(char a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
+inline int ANT_sign(short a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
+inline int ANT_sign(int a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
+inline int ANT_sign(long a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
+inline int ANT_sign(long long a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
+inline int ANT_sign(float a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
+inline int ANT_sign(double a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
 
-inline int sign(short a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
 
-inline int sign(int a)
+/*
+	ANT_FLOOR_LOG2()
+	----------------
+*/
+inline unsigned long ANT_floor_log2(unsigned long x)
 {
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
+extern unsigned long ANT_floor_log2_byte[];
+unsigned long sum, mult = 0;
 
-inline int sign(long a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
+do
+	{
+	sum = ANT_floor_log2_byte[x & 0xFF] + mult;
+	mult += 8;
+	x >>= 8;
+	}
+while (x != 0);
 
-inline int sign(long long a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
-
-inline int sign(float a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
-}
-
-inline int sign(double a)
-{
-return a < 0 ? -1 : a > 0 ? 1 : 0;
+return sum;
 }
 
 #endif __MATHS_H__
+

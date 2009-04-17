@@ -7,15 +7,15 @@
 #include <string.h>
 #include <time.h>
 
-#include "compress_golomb.h"
 #include "compress_elias_gamma.h"
-#include "compress_elias_delta.h"
 
 #define ITERATIONS 10
 #define TEST_LENGTH (1024*1024)
 
-unsigned long random_buffer[TEST_LENGTH];
-unsigned long decode_buffer[TEST_LENGTH];
+uint32_t random_buffer[TEST_LENGTH];
+unsigned char buffer[TEST_LENGTH * sizeof(long)];
+unsigned char second_buffer[TEST_LENGTH * sizeof(long)];
+uint32_t decode_buffer[TEST_LENGTH];
 
 /*
 	GOLOMB_FACTOR()
@@ -42,6 +42,7 @@ int main(void)
 {
 unsigned long *into;
 long iteration, which;
+long bytes;
 
 srand((unsigned int)time(NULL));
 
@@ -51,15 +52,13 @@ for (iteration = 0; iteration < ITERATIONS; iteration++)
 	for (which = 0; which < TEST_LENGTH; which++)
 		 *into++ = rand();
 
-	ANT_compress_golomb compressor(golomb_factor(random_buffer, TEST_LENGTH));
-//	ANT_compress_elias_delta compressor;
+	ANT_compress_elias_gamma compressor(TEST_LENGTH * 2);
 
-	into = random_buffer;
-	for (which = 0; which < TEST_LENGTH; which++)
-		compressor.encode(*into++);
-	compressor.eof();
-
-	compressor.decode(decode_buffer, TEST_LENGTH);
+	bytes = compressor.compress(buffer, sizeof(buffer), random_buffer, TEST_LENGTH);
+	printf("Compressed from %lld to %lld bytes ", (long long)sizeof(random_buffer), (long long)bytes);
+	memset(second_buffer, 0, sizeof(second_buffer));
+	memcpy(second_buffer, buffer, bytes);
+	compressor.decompress(decode_buffer, second_buffer, TEST_LENGTH);
 
 	if (memcmp(random_buffer, decode_buffer, TEST_LENGTH * sizeof(*random_buffer)) == 0)
 		printf("Iteration:%d (of %d) Success\n", iteration + 1, ITERATIONS);
