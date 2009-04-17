@@ -36,6 +36,7 @@ PARTS = \
 	$(OBJDIR)\ctypes.obj \
 	$(OBJDIR)\file.obj\
 	$(OBJDIR)\file_internals.obj\
+	$(OBJDIR)\maths.obj \
 	$(OBJDIR)\memory.obj \
 	$(OBJDIR)\search_engine.obj \
 	$(OBJDIR)\search_engine_accumulator.obj \
