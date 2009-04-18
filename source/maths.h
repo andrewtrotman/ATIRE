@@ -27,7 +27,7 @@ inline int ANT_sign(double a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
 	ANT_FLOOR_LOG2()
 	----------------
 */
-inline unsigned long ANT_floor_log2(unsigned long x)
+inline unsigned long ANT_floor_log2(unsigned long long x)
 {
 extern unsigned long ANT_floor_log2_byte[];
 unsigned long sum, mult = 0;

@@ -21,10 +21,10 @@
 class ANT_bitstream
 {
 protected:
-	unsigned long long total_bits;
+	long long total_bits;
 
 	uint32_t *stream;
-	unsigned long stream_length, stream_pos;
+	long long stream_length, stream_pos;
 
 	long bit_pos;
 	uint32_t buffer;
@@ -38,13 +38,14 @@ public:
 	ANT_bitstream();
 
 	inline void push_zero(void);
+	inline void push_zeros(long long length);
 	inline void push_one(void);
-	inline void push_bits(uint32_t bits, long length);		// push up-to 32 bits
-	unsigned long eof(void);								// clean up and return the length in bytes
-	void rewind(unsigned char *destination = 0, unsigned long destination_length = 0);		// destination_length is in units of bytes
+	inline void push_bits(unsigned long long bits, long length);		// push up-to 64 bits
+	long long eof(void);								// clean up and return the length in bytes
+	void rewind(unsigned char *destination = 0, long long destination_length = 0);		// destination_length is in units of bytes
 
 	inline long get_bit(void);
-	inline uint32_t get_bits(long bits);					// get up-to 32 bits
+	inline unsigned long long get_bits(long bits);					// get up-to 64 bits
 } ;
 
 /*
@@ -77,13 +78,23 @@ total_bits++;
 	ANT_BITSTREAM::PUSH_BITS()
 	--------------------------
 */
-inline void ANT_bitstream::push_bits(uint32_t bits, long length)
+inline void ANT_bitstream::push_bits(unsigned long long bits, long length)
 {
 while (length-- > 0)
-	if (bits & (1 << length))
+	if (bits & ((unsigned long long)1 << length))
 		push_one();
 	else
 		push_zero();
+}
+
+/*
+	VOID ANT_BITSTREAM::PUSH_ZEROS()
+	--------------------------------
+*/
+inline void ANT_bitstream::push_zeros(long long length)
+{
+while (length-- > 0)
+	push_zero();
 }
 
 /*
@@ -121,9 +132,9 @@ return ans;
 	ANT_BITSTREAM::GET_BITS()
 	-------------------------
 */
-inline uint32_t ANT_bitstream::get_bits(long bits)
+inline unsigned long long ANT_bitstream::get_bits(long bits)
 {
-uint32_t ans = 0;
+uint64_t ans = 0;
 
 while (bits-- > 0)
 	ans = (ans << 1) | get_bit();

@@ -1,5 +1,7 @@
 ALL = bitstream.obj \
  compress_elias_gamma.obj \
+ compress_elias_delta.obj \
+ compress_golomb.obj \
  test_compression.obj \
  maths.obj
 
