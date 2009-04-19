@@ -1,4 +1,3 @@
-
 /*
 	COMPRESS_SIMPLE9.H
 	------------------
@@ -6,45 +5,34 @@
 #ifndef __COMPRESS_SIMPLE9_H__
 #define __COMPRESS_SIMPLE9_H__
 
-long CompressSim9(long a[], long size, long n[]);
-void InitSim9(void);
-
-typedef struct {
-	long noDig;
-	long noBit;
-	long shft;
-}Lookup;
-
-extern Lookup tbl[9];
+#include "compress.h"
 
 /*
-	DECOMPRESSSIM9()
-	----------------
-	this function decompresses the n[] array to get back differences in p[]	
+	class ANT_COMPRESS_SIMPLE9
+	--------------------------
 */
-inline void DecompressSim9(long *n, long compressedLength, long *into)
+class ANT_compress_simple9 : ANT_compress
 {
-	long j=0,temp1,row1, shift;
-	long noOfDigits1,noOfBits1;
-
-	for(j=0;j<compressedLength;j++)  //outer loop: loops thru' all the compressed elements of n[]
-	{
-		temp1 = *n++;
-		row1 = (unsigned)temp1 >> 28;  //row no. is got by eliminating the last 28 bits
-		temp1 &= 0x0fffffff;
-
-		noOfBits1 = tbl[row1].noBit;   //gets info. from the look-up table
-		shift = tbl[row1].shft;
-		noOfDigits1 = tbl[row1].noDig;
-		
-		for(; noOfDigits1 > 0; noOfDigits1--) //extracts "noOfDigits" digits from 1 compressed word n[j]
+protected:
+	class ANT_compress_simple9_lookup
 		{
-			*into++ = temp1 & shift;      //puts the digit in p[i]
-			temp1 >>= noOfBits1;    //shifting appropriately
-		}
-	}
-}
+		public:
+			long long numbers;
+			long bits;
+			long mask;
+		} ;
+protected:
+	static ANT_compress_simple9_lookup simple9_table[];
 
+protected:
+	long ANT_compress_simple9::DoesHighestFit(ANT_compressable_integer d[], long pos, long noOfDigits, long noOfBits, long size);
 
+public:
+	ANT_compress_simple9(long long max_list_length) : ANT_compress(max_list_length) {}
+	virtual ~ANT_compress_simple9() {}
+
+	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);
+	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
+} ;
 
 #endif __COMPRESS_SIMPLE9_H__

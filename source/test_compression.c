@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "compress_simple9.h"
 #include "compress_golomb.h"
 
 #define ITERATIONS 10
@@ -26,15 +27,16 @@ int main(void)
 ANT_compressable_integer *into;
 long iteration, which;
 long long bytes;
-ANT_compress_golomb compressor(TEST_LENGTH), decompressor(TEST_LENGTH);
+ANT_compress_simple9 compressor(TEST_LENGTH), decompressor(TEST_LENGTH);
 
 srand((unsigned int)time(NULL));
+srand(0);
 
 for (iteration = 0; iteration < ITERATIONS; iteration++)
 	{
 	into = random_buffer;
 	for (which = 0; which < TEST_LENGTH; which++)
-		 *into++ = rand();
+		 *into++ = (rand() + 1) & 0xffff;
 
 	bytes = compressor.compress(buffer, sizeof(buffer), random_buffer, TEST_LENGTH);
 	printf("Compressed from %lld to %lld bytes ", (long long)sizeof(random_buffer), bytes);
@@ -45,7 +47,14 @@ for (iteration = 0; iteration < ITERATIONS; iteration++)
 	if (memcmp(random_buffer, decode_buffer, TEST_LENGTH * sizeof(*random_buffer)) == 0)
 		printf("Iteration:%d (of %d) Success\n", iteration + 1, ITERATIONS);
 	else
+		{
 		printf("Iteration:%d (of %d) Failure!\n", iteration + 1, ITERATIONS);
+		for (which = 0; which < TEST_LENGTH; which++)
+			if (random_buffer[which] == second_buffer[which])
+				printf("<Y>");
+			else
+				printf("<%d->%d>", random_buffer[which], second_buffer[which]);
+		}
 	}
 
 return 0;

@@ -43,5 +43,25 @@ while (x != 0);
 return sum;
 }
 
+/*
+	ANT_CEILING_LOG2()
+	------------------
+*/
+inline unsigned long ANT_ceiling_log2(unsigned long long x)
+{
+extern unsigned long ANT_ceiling_log2_byte[];
+unsigned long sum, mult = 0;
+
+do
+	{
+	sum = ANT_ceiling_log2_byte[x & 0xFF] + mult;
+	mult += 8;
+	x >>= 8;
+	}
+while (x != 0);
+
+return sum;
+}
+
 #endif __MATHS_H__
 
