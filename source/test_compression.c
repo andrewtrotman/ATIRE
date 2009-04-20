@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "compress_simple9.h"
+#include "compress_relative10.h"
 #include "compress_golomb.h"
 
 #define ITERATIONS 10
@@ -27,7 +28,7 @@ int main(void)
 ANT_compressable_integer *into;
 long iteration, which;
 long long bytes;
-ANT_compress_simple9 compressor(TEST_LENGTH), decompressor(TEST_LENGTH);
+ANT_compress_relative10 compressor(TEST_LENGTH), decompressor(TEST_LENGTH);
 
 srand((unsigned int)time(NULL));
 srand(0);

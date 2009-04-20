@@ -3,6 +3,7 @@ ALL = bitstream.obj \
  compress_elias_delta.obj \
  compress_golomb.obj \
  compress_simple9.obj \
+ compress_relative10.obj \
  test_compression.obj \
  maths.obj
 

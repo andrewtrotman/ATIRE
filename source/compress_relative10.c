@@ -10,6 +10,15 @@
 */
 
 #include "compress_relative10.h"
+#include "maths.h"
+
+typedef struct {
+	long noDig;
+	long noBit;
+	long shft;
+	long transferArray[10];
+	long aspt_pos[4];
+} Lookup_ten;
 
 Lookup_ten tbl_ten[10] = {    //look-up table to map the no. of digits into 
 		{30, 1, 0x1, 		0, 1, 2, 9, 9, 9, 9, 9, 9, 3,       0, 1, 2, 9},
@@ -22,18 +31,6 @@ Lookup_ten tbl_ten[10] = {    //look-up table to map the no. of digits into
 		{3, 10, 0x3FF,      9, 9, 9, 9, 9, 9, 0, 1, 2, 3,		6, 7, 8, 9},
 		{2, 15, 0x7FFF,     9, 9, 9, 9, 9, 9, 0, 1, 2, 3,		6, 7, 8, 9},
 		{1, 30, 0x3FFFFFFF, 9, 9, 9, 9, 9, 9, 0, 1, 2, 3,		6, 7, 8, 9}
-	};
-
-Lookup_nine tbl_nine[9] = {    //look-up table to map the no. of digits into 
-		{28, 1, 0x1},                           //no. of bits used for compression
-		{14, 2, 0x3},
-		{9,  3, 0x7},
-		{7,  4, 0xF},
-		{5,  5, 0x1F},
-		{4,  7, 0x7F},
-		{3,  9, 0x1FF},
-		{2, 14, 0x3FFF},
-		{1, 28, 0xFFFFFFF}
 	};
 
 //This function checks whether the highest no. in the 
@@ -56,68 +53,143 @@ static bool DoesHighestFit(long d[], long pos, long noOfDigits, long noOfBits, l
 		return false;
 }
 
-//this function compresses the d[] array	
-long CompressRel10(long a[], long size, long n[])
+/*
+	ANT_COMPRESS_RELATIVE10::COMPRESS()
+	-----------------------------------
+*/
+long long ANT_compress_relative10::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers)
 {
-	long j,pos=0,start,temp,k, *d;
-	long r,m=0,i,row,noOfDigits,noOfBits;
+long *a = (long *)source;
+long size = source_integers;
+long *n = (long *)destination;
 
-	d = a;
+long j,pos=0,start,temp,k, *d;
+long r,m=0,i,row,noOfDigits,noOfBits;
 
-	for(i=0;i<9;i++)  //inner loop: for flagging the table row
+d = a;
+
+/*
+	Encode the first word using Simple 9
+*/
+long term, needed, needed_for_this_integer, bits_per_integer;
+ANT_compressable_integer *from = (ANT_compressable_integer *)a;
+needed = 0;
+for (term = 0; term < 28 && pos + term < source_integers; term++)
 	{
-		if(DoesHighestFit(d, 0,tbl_nine[i].noDig,tbl_nine[i].noBit,size))  //returns true or false
-		{
-			row = i;  
-			noOfDigits = tbl_nine[i].noDig;
-			noOfBits = tbl_nine[i].noBit;
-			pos = noOfDigits;  //updates the position
-			break;
-		}
+	needed_for_this_integer = bits_to_use[ANT_ceiling_log2(source[pos + term])];
+	if (needed_for_this_integer > 28 || needed_for_this_integer < 1)
+		return 0;					// we fail because there is an integer greater then 2^28 (or 0) and so we cannot pack it
+	if (needed_for_this_integer > needed)
+		needed = needed_for_this_integer;
+	if (needed * term >= 28)				// then we'll overflow so break out
+		break;
 	}
 
-	n[0] = row;  //new byte of n[] 
-	n[0] = n[0] << 28;   //puts the row no. to the first 4 bits.
+row = table_row[term - 1];
+pos = simple9_table[row].numbers;
+bits_per_integer = simple9_table[row].bits;
 
-	for (k=0;k<pos && k < size;k++)  //puts the next noOfDigits of d[] into 1 word n[j]
-	{
-		temp = d[k] << (m*noOfBits);  //left shift the bits to the correct position in n[j]
-		m++;    //1 digit is filled, filling done in reverse order.
-		n[0] |= temp;  //bitwise OR operator
-	}        
+n[0] = row << 28;   //puts the row no. to the first 4 bits.
+for (term = 0; from < source + pos; term++)
+	n[0] |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
 
-	for(j=1;pos<size;j++)  //outer loop: loops thru' all the elements in d[]
+/*
+	And the remainder in Relative 10
+*/
+for(j = 1; pos < size; j++)  //outer loop: loops thru' all the elements in d[]
 	{
-		n[j] = 0;
-		for(i=0;i<10;i++)  //inner loop: for flagging the table row
+	n[j] = 0;
+	for (i = 0; i < 10; i++)  //inner loop: for flagging the table row
 		{
-			if(tbl_ten[row].transferArray[i] == 9)   //invalid rows
-				continue;
-	
-			if(DoesHighestFit(d,pos,tbl_ten[i].noDig,tbl_ten[i].noBit, size))  //returns true or false
+		if (tbl_ten[row].transferArray[i] == 9)   //invalid rows
+			continue;
+
+		if (DoesHighestFit(d, pos, tbl_ten[i].noDig, tbl_ten[i].noBit, size))  //returns true or false
 			{
-				start = pos; //marks the starting position, row, noOfDigits, noOfBits required for each
-				r = tbl_ten[row].transferArray[i];   //row selector
-				row = i;       //update the row no.
-				noOfDigits = tbl_ten[i].noDig;
-				noOfBits = tbl_ten[i].noBit;
-				pos = pos + noOfDigits;  //updates the position
-				break;
+			start = pos; //marks the starting position, row, noOfDigits, noOfBits required for each
+			r = tbl_ten[row].transferArray[i];   //row selector
+			row = i;       //update the row no.
+			noOfDigits = tbl_ten[i].noDig;
+			noOfBits = tbl_ten[i].noBit;
+			pos = pos + noOfDigits;  //updates the position
+			break;
 			}
 		}
 
-		n[j] = r;  //new byte of n[] 
-		n[j] = n[j] << 30;   //puts the row no. to the first 2 bits.
+	n[j] = r << 30;   //puts the row no. to the first 2 bits.
+	m = 0;
 
-		m=0;
-
-		for (k = start;k < pos && k < size;k++)  //puts the next noOfDigits of d[] into 1 word n[j]
+	for (k = start; k < pos && k < size; k++)  //puts the next noOfDigits of d[] into 1 word n[j]
 		{
-			temp = d[k] << (m*noOfBits);  //left shift the bits to the correct position in n[j]
-			m++;    //1 digit is filled, filling done in reverse order.
-			n[j] |= temp;  //bitwise OR operator
+		temp = d[k] << (m*noOfBits);  //left shift the bits to the correct position in n[j]
+		m++;    //1 digit is filled, filling done in reverse order.
+		n[j] |= temp;  //bitwise OR operator
 		}
 	}
-	return j;  //stores the length of n[]
+return j * 4;  //stores the length of n[]
+}
+
+/*
+	ANT_COMPRESS_RELATIVE10::DECOMPRESS()
+	-------------------------------------
+*/
+void ANT_compress_relative10::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
+{
+long long numbers;
+long mask, bits;
+uint32_t *compressed_sequence = (uint32_t *)source;
+uint32_t value, row;
+ANT_compressable_integer *end = destination + destination_integers;
+
+/*
+	The first word is encoded in Simple-9
+*/
+value = *compressed_sequence++;
+row = value >> 28;  		// row no. is got by eliminating the last 28 bits
+value &= 0x0fffffff;
+
+bits = simple9_table[row].bits;
+mask = simple9_table[row].mask;
+numbers = simple9_table[row].numbers;
+
+if (numbers > destination_integers)
+	numbers = destination_integers;
+
+while (numbers-- > 0)
+	{
+	*destination++ = value & mask;
+	value >>= bits;
+	}
+
+/*
+	The remainder is in relative-10
+*/
+while (1)
+	{
+	value = *compressed_sequence++;
+	row = tbl_ten[row].aspt_pos[value >> 30];
+	value &= 0x3fffffff;		// top 2 bits are the relative selector, botton 30 are the integer
+
+	bits = tbl_ten[row].noBit;
+	mask = tbl_ten[row].shft;
+	numbers = tbl_ten[row].noDig;
+
+	if (destination + numbers < end)
+		while (numbers-- > 0)
+			{
+			*destination++ = value & mask;
+			value >>= bits;
+			}
+	else
+		{
+		numbers = end - destination;
+		while (numbers-- > 0)
+			{
+			*destination++ = value & mask;
+			value >>= bits;
+			}
+		break;
+		}
+	}
 }
 

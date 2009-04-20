@@ -7,7 +7,7 @@
 	This code was originally written by Vikram Subramanya while working on:
 	A. Trotman, V. Subramanya (2007), Sigma encoded inverted files, Proceedings of CIKM 2007, pp 983-986
 
-	Converted for use in ANT by Andrew Trotman (2009)
+	Re-written and converted for use in ANT by Andrew Trotman (2009)
 */
 #include <stdio.h>
 #include "compress_simple9.h"
@@ -22,8 +22,9 @@
 #endif
 
 /*
-	ANT_compress_simple9::simple9_table
-	-----------------------------------
+	ANT_compress_simple9::simple9_table[]
+	-------------------------------------
+	This is the simple-9 selector table (top 4 bits)
 */
 ANT_compress_simple9::ANT_compress_simple9_lookup ANT_compress_simple9::simple9_table[] =
 	{
@@ -37,95 +38,19 @@ ANT_compress_simple9::ANT_compress_simple9_lookup ANT_compress_simple9::simple9_
 	{14, 2, 0x3},
 	{28, 1, 0x1}
 	};
-
-long bits_to_use [] =
-{
-0,		// 0
-1,		// 1
-2,		// 2
-3,		// 3
-4,		// 4
-5,		// 5
-7,		// 6
-7,		// 7
-9,		// 8
-9,		// 9
-14,	// 10
-14,	// 11
-14,	// 12
-14,	// 13
-14,	// 14
-28,	// 15
-28,	// 16
-28,	// 17
-28,	// 18
-28,	// 19
-28,	// 20
-28,	// 21
-28,	// 22
-28,	// 23
-28,	// 24
-28,	// 25
-28,	// 26
-28,	// 27
-28,	// 28
-28		// 29
-} ;
-
-long table_row[] =
-{
-0,		// 1 integer
-1,		// 2 integers
-2,		// 3
-3,		// 4
-4,		// 5
-5,		// 6
-5,		// 7
-6,		// 8
-6,		// 9
-7,		// 10
-7,		// 11
-7,		// 12
-7,		// 13
-7,		// 14
-8,		// 15
-8,		// 16
-8,		// 17
-8,		// 18
-8,		// 19
-8,		// 20
-8,		// 21
-8,		// 22
-8,		// 23
-8,		// 24
-8,		// 25
-8,		// 26
-8,		// 27
-8,		// 28
-8		// 29
-} ;
+/*
+	ANT_compress_simple9::bits_to_use[]
+	-----------------------------------
+	This is the number of bits that simple-9 will be used to store an integer of the given the number of bits in length
+*/
+long ANT_compress_simple9::bits_to_use[] = {0, 1, 2, 3, 4, 5, 7, 7, 9, 9, 14, 14, 14, 14, 14, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28};
 
 /*
-	DOESHIGHESTFIT()
-	----------------
-	This function checks whether the highest no. in the 
-	range d[pos] to d[pos + noOfDigits] can fit in "noOfBits" bits
+	ANT_compress_simple9::table_row[]
+	---------------------------------
+	This is the row of the table to use given the number of integers we can pack into the word
 */
-long ANT_compress_simple9::DoesHighestFit(ANT_compressable_integer d[], long pos, long noOfDigits, long noOfBits, long size)
-{
-long i = 0, highest;
-
-highest = d[pos];
-
-for (i = pos + 1; i < (pos + noOfDigits) && i < size ; i++)
-	if (highest < d[i])
-		highest = d[i];   //stores the highest no. in "highest"
-
-if (highest < (((unsigned long)1) << noOfBits))  //checks if "highest" fits in noOfBits
-	return TRUE;
-else 
-	return FALSE;
-}
+long ANT_compress_simple9::table_row[] = {0, 1, 2, 3, 4, 5, 5, 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
 
 /*
 	ANT_COMPRESS_SIMPLE9::COMPRESS()
@@ -133,56 +58,54 @@ else
 */
 long long ANT_compress_simple9::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers)
 {
-long needed_for_this_integer, needed;
-unsigned long *into = (unsigned long *)destination;
-long m = 0, j = 0, pos = 0, start = 0, temp = 0, k = 0;
-long noOfDigits = 0, noOfBits = 0, row = 0, i = 0;
+ANT_compressable_integer *from;
+long long words_in_compressed_string, pos;
+long row, bits_per_integer, needed_for_this_integer, needed, term;
+uint32_t *into, *end;
 
-for (j = 0; pos < source_integers; j++)  //outer loop: loops thru' all the elements in source[]
+into = (uint32_t *)destination;
+end = (uint32_t *)(destination + destination_length);
+from = source;
+pos = 0;
+for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++)  //outer loop: loops thru' all the elements in source[]
 	{
 	needed = 0;
-	for (i = 0; i < 28 && pos + i < source_integers; i++)
+	for (term = 0; term < 28 && pos + term < source_integers; term++)
 		{
-		needed_for_this_integer = bits_to_use[ANT_ceiling_log2(source[pos + i])];
+		needed_for_this_integer = bits_to_use[ANT_ceiling_log2(source[pos + term])];
 		if (needed_for_this_integer > 28 || needed_for_this_integer < 1)
 			return 0;					// we fail because there is an integer greater then 2^28 (or 0) and so we cannot pack it
 		if (needed_for_this_integer > needed)
 			needed = needed_for_this_integer;
-		if (needed * i >= 28)				// then we'll overflow so break out
+		if (needed * term >= 28)				// then we'll overflow so break out
 			break;
 		}
-	start = pos;
-	row = table_row[i - 1];
-	noOfDigits = simple9_table[row].numbers;
-	noOfBits = simple9_table[row].bits;
-	pos = pos + noOfDigits;  //updates the position
+
+	row = table_row[term - 1];
+	pos += simple9_table[row].numbers;
+	bits_per_integer = simple9_table[row].bits;
 
 	*into = row << 28;   //puts the row no. to the first 4 bits.
-	m = 0;
-	for (k = start; k < pos && k < source_integers; k++)  //puts the next noOfDigits of source[] into 1 word n[j]
-		*into |= ((unsigned long)source[k]) << (m++ * noOfBits);  //left shift the bits to the correct position in n[j]
+	for (term = 0; from < source + pos; term++)
+		*into |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
 	into++;
+	if (into >= end)
+		return 0;
 	}
-return j * 4;  //stores the length of n[]
+return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
 }
 
-/*
-	DECOMPRESSSIM9()
-	----------------
-	this function decompresses the n[] array to get back differences in p[]	
-*/
-//inline void DecompressSim9(long *n, long compressedLength, long *into)
 /*
 	ANT_COMPRESS_SIMPLE9::DECOMPRESS()
 	----------------------------------
 */
 void ANT_compress_simple9::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
 {
-long long decompressed_integers = 0;
 long long numbers;
 long mask, bits;
 uint32_t *compressed_sequence = (uint32_t *)source;
 uint32_t value, row;
+ANT_compressable_integer *end = destination + destination_integers;
 
 while (1)		// we break out of this loop in the case of overflow of the destination buffer
 	{
@@ -197,9 +120,8 @@ while (1)		// we break out of this loop in the case of overflow of the destinati
 	bits = simple9_table[row].bits;
 	mask = simple9_table[row].mask;
 	numbers = simple9_table[row].numbers;
-	decompressed_integers += numbers;
 
-	if (decompressed_integers < destination_integers)
+	if (destination + numbers < end)
 		while (numbers-- > 0)		// Extract "numbers" number of integers from the word
 			{
 			*destination++ = value & mask;		// mask the current integer
@@ -207,7 +129,7 @@ while (1)		// we break out of this loop in the case of overflow of the destinati
 			}
 	else
 		{
-		numbers -= decompressed_integers - destination_integers;
+		numbers = end - destination;
 		while (numbers-- > 0)		// Extract "numbers" number of integers from the word
 			{
 			*destination++ = value & mask;		// mask the current integer

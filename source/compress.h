@@ -9,6 +9,7 @@
 #include "fundamental_types.h"
 
 typedef uint32_t ANT_compressable_integer;
+
 /*
 	class ANT_COMPRESS
 	------------------

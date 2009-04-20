@@ -23,9 +23,8 @@ protected:
 		} ;
 protected:
 	static ANT_compress_simple9_lookup simple9_table[];
-
-protected:
-	long ANT_compress_simple9::DoesHighestFit(ANT_compressable_integer d[], long pos, long noOfDigits, long noOfBits, long size);
+	static long bits_to_use[];
+	static long ANT_compress_simple9::table_row[];
 
 public:
 	ANT_compress_simple9(long long max_list_length) : ANT_compress(max_list_length) {}
