@@ -311,8 +311,9 @@ inline static int m(const char *s, int j) {\n\
 
     fprintf(file, "\
 /* Note that buffer should be at least TMP_BUFFER_SIZE */\n\
-char *stem(const char *string, char *buffer) {\n\
-    int length;\n\
+int stem(const char *string, char *buffer) {\n\
+    size_t length;\n\
+\n\
     strncpy(buffer, string, TMP_BUFFER_SIZE);\n\
     buffer[TMP_BUFFER_SIZE - 1] = '\\0';\n\
 \n\
@@ -351,7 +352,7 @@ char *stem(const char *string, char *buffer) {\n\
 
     fprintf(file, "\
     } while (0);\n\
-    return buffer;\n\
+    return SACROSANCT_CHARS;\n\
 }\n\
 ");
     fclose(file);

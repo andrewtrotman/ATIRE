@@ -1,17 +1,14 @@
 #include <string.h>
 #include <stdlib.h>
-#include "strgen.h"
+#include "vocab.h"
 #include "btree_iterator.h"
 #include "ga_individual.h"
 
-char **strings = NULL;
-int string_count = 0;
-
 /*
-  WEIGHT ACORDING TO FREQUENCY 
+  TODO: WEIGHT ACORDING TO FREQUENCY 
   
  */
-void init_strgen(ANT_search_engine *search_engine) {
+vocab::vocab(ANT_search_engine *search_engine) {
     char *term;
     int i;
     ANT_btree_iterator iterator(search_engine);
@@ -24,7 +21,10 @@ void init_strgen(ANT_search_engine *search_engine) {
         strings[i] = strdup(term);
 }
 
-char *strgen() {
+void vocab::weight_strings() {
+}
+
+char *vocab::strgen() {
     char *str = strings[rand() % string_count];
     int len = strlen(str);
     str += len;
@@ -33,7 +33,7 @@ char *strgen() {
     return str - (rand() % len + 1);
 }
 
-char *strgen_2() {
+char *vocab::strgen_2() {
     char *str = strings[rand() % string_count];
     int len = strlen(str);
     str += len;

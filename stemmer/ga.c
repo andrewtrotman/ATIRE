@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "ga.h"
 #include "ga_individual.h"
-#include "strgen.h"
+#include "vocab.h"
 
 inline double GA::get_fitness(GA_individual *individual) {
     if (individual->is_evaluated) 
@@ -74,7 +74,7 @@ void GA::run(unsigned int generations) {
             GA_individual *best = get_best();
             best->print_raw(stderr);
             fprintf(stderr, "Generation: %u Fitness: %f\n", i, get_fitness(best));
-            fflush(stderr); 
+            fflush(NULL); 
         }
         this->next_generation();
     }

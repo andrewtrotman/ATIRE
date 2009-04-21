@@ -61,7 +61,7 @@ EXTENSION = \
     ga_stemmer.o \
     ga_individual.o \
 	ga_function.o \
-	strgen.o 
+	vocab.o 
 
 all : $(BINDIR)/index $(BINDIR)/ant
 

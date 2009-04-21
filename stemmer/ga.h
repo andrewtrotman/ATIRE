@@ -9,6 +9,8 @@ const unsigned int DEFAULT_MUTATION_RATE = 10; // out of 100
 const unsigned int DEFAULT_CROSSOVER_RATE = 70; // out of 100
 enum { NO_ELITISM, USE_ELITISM };
 
+class vocab;
+
 class GA {
  private:
     GA_function *fitness_function;
