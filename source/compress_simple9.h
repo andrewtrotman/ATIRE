@@ -15,16 +15,16 @@ class ANT_compress_simple9 : ANT_compress
 {
 protected:
 	class ANT_compress_simple9_lookup
-		{
-		public:
-			long long numbers;
-			long bits;
-			long mask;
-		} ;
+	{
+	public:
+		long long numbers;
+		long bits;
+		long mask;
+	} ;
 protected:
 	static ANT_compress_simple9_lookup simple9_table[];
 	static long bits_to_use[];
-	static long ANT_compress_simple9::table_row[];
+	static long table_row[];
 
 public:
 	ANT_compress_simple9(long long max_list_length) : ANT_compress(max_list_length) {}

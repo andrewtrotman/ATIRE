@@ -1,57 +1,70 @@
 /*
 	COMPRESS_RELATIVE10.C
 	---------------------
-*/
-/* 
-	Coded by Vikram S under the guidance of Andrew Trotman, University of Otago, New Zealand.
+	Anh and Moffat's Relative-9 Compression scheme from:
+	V. Anh, A. Moffat (2005), Inverted Index Compression Using Word-Alligned Binary Codes, Information Retrieval, 8(1):151-166
 
-  Implementation of the Relative-10 compression algorithm described in the Information Retrieval paper
-  "Inverted Index Compression Using Word-Alligned Binary Codes" by Anh and Moffat in 2004.
+	This code was originally written by Vikram Subramanya while working on:
+	A. Trotman, V. Subramanya (2007), Sigma encoded inverted files, Proceedings of CIKM 2007, pp 983-986
+
+	Substantially re-written and converted for use in ANT by Andrew Trotman (2009)
 */
 
 #include "compress_relative10.h"
 #include "maths.h"
 
-typedef struct {
-	long noDig;
-	long noBit;
-	long shft;
-	long transferArray[10];
-	long aspt_pos[4];
-} Lookup_ten;
-
-Lookup_ten tbl_ten[10] = {    //look-up table to map the no. of digits into 
-		{30, 1, 0x1, 		0, 1, 2, 9, 9, 9, 9, 9, 9, 3,       0, 1, 2, 9},
-		{15, 2, 0x3,        0, 1, 2, 9, 9, 9, 9, 9, 9, 3,		0, 1, 2, 9},
-		{10, 3, 0x7,        9, 0, 1, 2, 9, 9, 9, 9, 9, 3,		1, 2, 3, 9},
-		{7,  4, 0xF,        9, 9, 0, 1, 2, 9, 9, 9, 9, 3,		2, 3, 4, 9},
-		{6,  5, 0x1F,       9, 9, 9, 0, 1, 2, 9, 9, 9, 3,		3, 4, 5, 9},
-		{5,  6, 0x3F,       9, 9, 9, 9, 0, 1, 2, 9, 9, 3,		4, 5, 6, 9},
-		{4,  7, 0x7F,       9, 9, 9, 9, 9, 0, 1, 2, 9, 3,		5, 6, 7, 9},
-		{3, 10, 0x3FF,      9, 9, 9, 9, 9, 9, 0, 1, 2, 3,		6, 7, 8, 9},
-		{2, 15, 0x7FFF,     9, 9, 9, 9, 9, 9, 0, 1, 2, 3,		6, 7, 8, 9},
-		{1, 30, 0x3FFFFFFF, 9, 9, 9, 9, 9, 9, 0, 1, 2, 3,		6, 7, 8, 9}
-	};
-
-//This function checks whether the highest no. in the 
-//range d[pos] to d[pos + noOfDigits] can fit in "noOfBits" bits
-static bool DoesHighestFit(long d[], long pos, long noOfDigits, long noOfBits, long size )
+/*
+	ANT_compress_relative10::relative10_table[]
+	-------------------------------------------
+	This is the Relative-10 selector table.  The first 3 columns are obvious.
+	The last 4 columns are the 2-bit selector - that is, given the previous
+	row and a 2 bit selector, it is the new row to use.
+	The last 9 columns are points into the last 4 columns used to generate the
+	2-bit selectors during compression.
+*/
+ANT_compress_relative10::ANT_compress_relative10_lookup ANT_compress_relative10::relative10_table[10] = 
 {
-	long i,highest;
-	highest = d[pos];
+/*0*/	{1, 30, 0x3FFFFFFF, 3, 2, 1, 0, 3, 3, 3, 3, 3, 3,		3, 2, 1, 0},
+/*1*/	{2, 15, 0x7FFF,     3, 2, 1, 0, 3, 3, 3, 3, 3, 3,		3, 2, 1, 0},
+/*2*/	{3, 10, 0x3FF,      3, 2, 1, 0, 3, 3, 3, 3, 3, 3,		3, 2, 1, 0},
+/*3*/	{4,  7, 0x7F,       3, 3, 2, 1, 0, 3, 3, 3, 3, 3,		4, 3, 2, 0},
+/*4*/	{5,  6, 0x3F,       3, 3, 3, 2, 1, 0, 3, 3, 3, 3,		5, 4, 3, 0},
+/*5*/	{6,  5, 0x1F,       3, 3, 3, 3, 2, 1, 0, 3, 3, 3,		6, 5, 4, 0},
+/*6*/	{7,  4, 0xF,        3, 3, 3, 3, 3, 2, 1, 0, 3, 3,		7, 6, 5, 0},
+/*7*/	{10, 3, 0x7,        3, 3, 3, 3, 3, 3, 2, 1, 0, 3,		8, 7, 6, 0},
+/*8*/	{15, 2, 0x3,        3, 3, 3, 3, 3, 3, 3, 2, 1, 0,		9, 8, 7, 0},
+/*9*/	{30, 1, 0x1, 		3, 3, 3, 3, 3, 3, 3, 2, 1, 0,       9, 8, 7, 0}
+};
 
-	for(i=pos+1; i<(pos + noOfDigits) && i<size ; i++)
-	{
-		if(highest<d[i])
-			highest = d[i];   //stores the highest no. in "highest"
-	}
+/*
+	ANT_compress_relative10::bits_to_use10[]
+	----------------------------------------
+	This is the number of bits that simple-9 will be used to store an integer of the given the number of bits in length
+*/
+long ANT_compress_relative10::bits_to_use10[] = 
+{
+ 0,  1,  2,  3,  4,  5,  6,  7,
+10, 10, 10, 15, 15, 15, 15, 15,
+30, 30, 30, 30, 30, 30, 30, 30,
+30, 30, 30, 30, 30, 30, 30, 64,
+64, 64, 64, 64, 64, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64
+};
 
-	if((unsigned long)highest< ((unsigned long)1<<noOfBits))  //checks if "highest" fits in noOfBits
-		return true;
-
-	else 
-		return false;
-}
+/*
+	ANT_compress_relative10::table_row10[]
+	--------------------------------------
+	This is the row of the table to use given the number of integers we can pack into the word
+*/
+long ANT_compress_relative10::table_row10[] = 
+{
+0, 1, 2, 3, 4, 5, 6, 7, 7, 
+7, 8, 8, 8, 8, 8, 8, 8, 8, 
+8, 8, 8, 8, 8, 8, 8, 8, 8, 
+8, 8, 9, 9, 9
+};
 
 /*
 	ANT_COMPRESS_RELATIVE10::COMPRESS()
@@ -59,20 +72,22 @@ static bool DoesHighestFit(long d[], long pos, long noOfDigits, long noOfBits, l
 */
 long long ANT_compress_relative10::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers)
 {
-long *a = (long *)source;
-long size = source_integers;
-long *n = (long *)destination;
+ANT_compressable_integer *from = source;
+long long words_in_compressed_string, pos;
+long row, bits_per_integer, needed_for_this_integer, needed, term, r;
+uint32_t *into, *end;
 
-long j,pos=0,start,temp,k, *d;
-long r,m=0,i,row,noOfDigits,noOfBits;
-
-d = a;
+/*
+	Init
+*/
+into = (uint32_t *)destination;
+end = (uint32_t *)(destination + destination_length);
+from = source;
+pos = 0;
 
 /*
 	Encode the first word using Simple 9
 */
-long term, needed, needed_for_this_integer, bits_per_integer;
-ANT_compressable_integer *from = (ANT_compressable_integer *)a;
 needed = 0;
 for (term = 0; term < 28 && pos + term < source_integers; term++)
 	{
@@ -89,44 +104,42 @@ row = table_row[term - 1];
 pos = simple9_table[row].numbers;
 bits_per_integer = simple9_table[row].bits;
 
-n[0] = row << 28;   //puts the row no. to the first 4 bits.
+*into = row << 28;   //puts the row no. to the first 4 bits.
 for (term = 0; from < source + pos; term++)
-	n[0] |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
+	*into |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
+into++;
 
 /*
 	And the remainder in Relative 10
 */
-for(j = 1; pos < size; j++)  //outer loop: loops thru' all the elements in d[]
+for (words_in_compressed_string = 1; pos < source_integers; words_in_compressed_string++)  //outer loop: loops thru' all the elements in source[]
 	{
-	n[j] = 0;
-	for (i = 0; i < 10; i++)  //inner loop: for flagging the table row
+	if (into >= end)
+		return 0;
+	needed = 0;
+	for (term = 0; term < 30 && pos + term < source_integers; term++)
 		{
-		if (tbl_ten[row].transferArray[i] == 9)   //invalid rows
-			continue;
-
-		if (DoesHighestFit(d, pos, tbl_ten[i].noDig, tbl_ten[i].noBit, size))  //returns true or false
-			{
-			start = pos; //marks the starting position, row, noOfDigits, noOfBits required for each
-			r = tbl_ten[row].transferArray[i];   //row selector
-			row = i;       //update the row no.
-			noOfDigits = tbl_ten[i].noDig;
-			noOfBits = tbl_ten[i].noBit;
-			pos = pos + noOfDigits;  //updates the position
+		needed_for_this_integer = bits_to_use10[ANT_ceiling_log2(source[pos + term])];
+		if (needed_for_this_integer > 30 || needed_for_this_integer < 1)
+			return 0;					// we fail because there is an integer greater then 2^30 (or 0) and so we cannot pack it
+		if (needed_for_this_integer > needed)
+			needed = needed_for_this_integer;
+		if (needed * term >= 30)				// then we'll overflow so break out
 			break;
-			}
 		}
 
-	n[j] = r << 30;   //puts the row no. to the first 2 bits.
-	m = 0;
+	r = relative10_table[row].transfer_array[table_row10[term - 1]];
+	row = relative10_table[row].relative_row[r];
 
-	for (k = start; k < pos && k < size; k++)  //puts the next noOfDigits of d[] into 1 word n[j]
-		{
-		temp = d[k] << (m*noOfBits);  //left shift the bits to the correct position in n[j]
-		m++;    //1 digit is filled, filling done in reverse order.
-		n[j] |= temp;  //bitwise OR operator
-		}
+	pos += relative10_table[row].numbers;
+	bits_per_integer = relative10_table[row].bits;
+
+	*into = r << 30;   //puts the row no. to the first 4 bits.
+	for (term = 0; from < source + pos; term++)
+		*into |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
+	into++;
 	}
-return j * 4;  //stores the length of n[]
+return words_in_compressed_string * sizeof(*into);
 }
 
 /*
@@ -145,7 +158,7 @@ ANT_compressable_integer *end = destination + destination_integers;
 	The first word is encoded in Simple-9
 */
 value = *compressed_sequence++;
-row = value >> 28;  		// row no. is got by eliminating the last 28 bits
+row = value >> 28;
 value &= 0x0fffffff;
 
 bits = simple9_table[row].bits;
@@ -161,18 +174,22 @@ while (numbers-- > 0)
 	value >>= bits;
 	}
 
+if (numbers == destination_integers)
+	return;			// we're done as it all fits in the first word!
+
 /*
 	The remainder is in relative-10
 */
 while (1)
 	{
 	value = *compressed_sequence++;
-	row = tbl_ten[row].aspt_pos[value >> 30];
-	value &= 0x3fffffff;		// top 2 bits are the relative selector, botton 30 are the integer
+	row = relative10_table[row].relative_row[value >> 30];
 
-	bits = tbl_ten[row].noBit;
-	mask = tbl_ten[row].shft;
-	numbers = tbl_ten[row].noDig;
+	value &= 0x3fffffff;		// top 2 bits are the relative selector, botton 30 are the encoded integer
+
+	bits = relative10_table[row].bits;
+	mask = relative10_table[row].mask;
+	numbers = relative10_table[row].numbers;
 
 	if (destination + numbers < end)
 		while (numbers-- > 0)
@@ -192,4 +209,3 @@ while (1)
 		}
 	}
 }
-

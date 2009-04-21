@@ -13,6 +13,21 @@
 */
 class ANT_compress_relative10 : ANT_compress_simple9
 {
+protected:
+	class ANT_compress_relative10_lookup
+	{
+	public:
+		long long numbers;
+		long bits;
+		long mask;
+		long transfer_array[10];
+		long relative_row[4];
+	} ;
+protected:
+	static ANT_compress_relative10_lookup relative10_table[];
+	static long bits_to_use10[];
+	static long table_row10[];
+
 public:
 	ANT_compress_relative10(long long max) : ANT_compress_simple9(max) {}
 	virtual ~ANT_compress_relative10() {}

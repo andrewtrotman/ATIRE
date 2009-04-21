@@ -51,10 +51,11 @@ for (iteration = 0; iteration < ITERATIONS; iteration++)
 		{
 		printf("Iteration:%d (of %d) Failure!\n", iteration + 1, ITERATIONS);
 		for (which = 0; which < TEST_LENGTH; which++)
-			if (random_buffer[which] == second_buffer[which])
+			if (random_buffer[which] == decode_buffer[which])
 				printf("<Y>");
 			else
-				printf("<%d->%d>", random_buffer[which], second_buffer[which]);
+				printf("<%d->%d>", random_buffer[which], decode_buffer[which]);
+		puts("");
 		}
 	}
 

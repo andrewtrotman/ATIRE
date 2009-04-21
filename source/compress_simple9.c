@@ -7,7 +7,7 @@
 	This code was originally written by Vikram Subramanya while working on:
 	A. Trotman, V. Subramanya (2007), Sigma encoded inverted files, Proceedings of CIKM 2007, pp 983-986
 
-	Re-written and converted for use in ANT by Andrew Trotman (2009)
+	Substantially re-written and converted for use in ANT by Andrew Trotman (2009)
 */
 #include <stdio.h>
 #include "compress_simple9.h"
@@ -38,19 +38,36 @@ ANT_compress_simple9::ANT_compress_simple9_lookup ANT_compress_simple9::simple9_
 	{14, 2, 0x3},
 	{28, 1, 0x1}
 	};
+
 /*
 	ANT_compress_simple9::bits_to_use[]
 	-----------------------------------
 	This is the number of bits that simple-9 will be used to store an integer of the given the number of bits in length
 */
-long ANT_compress_simple9::bits_to_use[] = {0, 1, 2, 3, 4, 5, 7, 7, 9, 9, 14, 14, 14, 14, 14, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28};
+long ANT_compress_simple9::bits_to_use[] = 
+{
+ 0,  1,  2,  3,  4,  5,  7,  7, 
+ 9,  9, 14, 14, 14, 14, 14, 28, 
+28, 28, 28, 28, 28, 28, 28, 28, 
+28, 28, 28, 28, 28, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64,
+64, 64, 64, 64, 64, 64, 64, 64
+};
 
 /*
 	ANT_compress_simple9::table_row[]
 	---------------------------------
 	This is the row of the table to use given the number of integers we can pack into the word
 */
-long ANT_compress_simple9::table_row[] = {0, 1, 2, 3, 4, 5, 5, 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+long ANT_compress_simple9::table_row[] = 
+{
+0, 1, 2, 3, 4, 5, 5, 6, 
+6, 7, 7, 7, 7, 7, 8, 8, 
+8, 8, 8, 8, 8, 8, 8, 8, 
+8, 8, 8, 8, 8
+};
 
 /*
 	ANT_COMPRESS_SIMPLE9::COMPRESS()
