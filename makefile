@@ -21,7 +21,7 @@ CC = @cl
 #
 #	Libraries
 #
-WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib
+WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib
 
 #
 #	Objects
