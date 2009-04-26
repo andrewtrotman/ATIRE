@@ -53,6 +53,7 @@ PARTS = \
 	$(OBJDIR)\stop_word.obj \
 	$(OBJDIR)\disk.obj \
 	$(OBJDIR)\disk_internals.obj \
+	$(OBJDIR)\directory_recursive_iterator.obj \
 	$(OBJDIR)\btree_iterator.obj \
 	$(OBJDIR)\top_k_sort.obj \
 	$(OBJDIR)\stemmer.obj	\

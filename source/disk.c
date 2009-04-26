@@ -4,7 +4,6 @@
 */
 #ifdef _MSC_VER
 	#include <windows.h>
-	#include <shlwapi.h>
 #else
 	#include <string.h>
 #endif
@@ -18,12 +17,6 @@
 #include "disk_directory.h"
 #include "file_internals.h"
 
-#ifdef _MSC_VER
-	#define getcwd _getcwd
-#endif
-
-#define HANDLE_STACK_SIZE (_MAX_PATH / 2)		/* because every second char must be a '\' */   
-
 /*
 	ANT_DISK::ANT_DISK()
 	--------------------
@@ -31,9 +24,6 @@
 ANT_disk::ANT_disk()
 {
 internals = new ANT_disk_internals;
-handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
-wildcard = new char [MAX_PATH_LENGTH];
-recursive_file_list = handle_stack;
 }
 
 /*
@@ -43,8 +33,6 @@ recursive_file_list = handle_stack;
 ANT_disk::~ANT_disk()
 {
 delete internals;
-delete [] handle_stack;
-delete wildcard;
 }
 
 /*
@@ -227,121 +215,3 @@ char *ANT_disk::get_next_filename(void)
 	return internals->matching_files.gl_pathv[internals->glob_index++];
 #endif
 }
-
-/*
-	ANT_DISK:;PUSH_DIRECTORY()
-	--------------------------
-*/
-long ANT_disk::push_directory(void)
-{
-if (recursive_file_list < handle_stack + HANDLE_STACK_SIZE)
-	{
-	recursive_file_list++;
-	return TRUE;
-	}
-return FALSE;
-}
-
-/*
-	ANT_DISK::POP_DIRECTORY()
-	-------------------------
-*/
-long ANT_disk::pop_directory(void)
-{
-if (recursive_file_list > handle_stack)
-	{
-	recursive_file_list--;
-	return TRUE;
-	}
-return FALSE;
-}
-
-/*
-	ANT_DISK::RECURSIVE_GET_NEXT_MATCH_WILDCARD()
-	---------------------------------------------
-*/
-char *ANT_disk::recursive_get_next_match_wildcard(long at_end)
-{
-char *dir, *file;
-long match = FALSE;
-
-while (!match)
-	{
-	if (at_end == 0)
-		{
-		FindClose(recursive_file_list->handle);
-		if (pop_directory())
-			return recursive_get_next_filename();
-		else
-			return NULL;
-		}
-	else if (internals->recursive_file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-		{
-		if (!(strcmp(internals->recursive_file_data.cFileName, ".") == 0 || strcmp(internals->recursive_file_data.cFileName, "..") == 0))
-			{
-			dir = recursive_file_list->path;
-			push_directory();
-			if ((file = recursive_get_first_filename(dir, internals->recursive_file_data.cFileName)) != NULL)
-				return file;
-			}
-		}
-	else 
-		if ((match = PathMatchSpec(internals->recursive_file_data.cFileName, wildcard)) != 0)
-			break;
-
-	at_end = FindNextFile(recursive_file_list->handle, &internals->recursive_file_data);
-	}
-
-return internals->recursive_file_data.cFileName;
-}
-
-/*
-	ANT_DISK::RECURSIVE_GET_FIRST_FILENAME()
-	----------------------------------------
-*/
-char *ANT_disk::recursive_get_first_filename(char *root_directory, char *local_directory)
-{
-char path[MAX_PATH_LENGTH];
-
-if (*local_directory != '\0' && *root_directory != '\0')
-	sprintf(recursive_file_list->path, "%s\\%s", root_directory, local_directory);
-else if (*local_directory == '\0')
-	strcpy(recursive_file_list->path, root_directory);
-else if (*root_directory == '\0')
-	strcpy(recursive_file_list->path, local_directory);
-else
-	strcpy(recursive_file_list->path, ".");
-
-sprintf(path, "%s\\*.*", recursive_file_list->path);
-
-recursive_file_list->handle = FindFirstFile(path, &internals->recursive_file_data);
-
-if (recursive_file_list->handle == INVALID_HANDLE_VALUE)
-	return NULL;
-else
-	return recursive_get_next_match_wildcard(1);
-}
-
-/*
-	ANT_DISK::RECURSIVE_GET_FIRST_FILENAME()
-	----------------------------------------
-*/
-char *ANT_disk::recursive_get_first_filename(char *wildcard)
-{
-char buffer[MAX_PATH_LENGTH];
-
-recursive_file_list = handle_stack;
-strcpy(this->wildcard, wildcard);
-
-return recursive_get_first_filename(getcwd(buffer, sizeof(buffer)), "");
-}
-
-/*
-	ANT_DISK::RECURSIVE_GET_NEXT_FILENAME()
-	---------------------------------------
-*/
-char *ANT_disk::recursive_get_next_filename(void)
-{
-return recursive_get_next_match_wildcard(FindNextFile(recursive_file_list->handle, &internals->recursive_file_data));
-}
-

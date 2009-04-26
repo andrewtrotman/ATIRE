@@ -25,7 +25,6 @@ public:
 #ifdef _MSC_VER
 	HANDLE file_list;
 	WIN32_FIND_DATA file_data;
-	WIN32_FIND_DATA recursive_file_data;
 #else
 	FILE *file_list;
 	glob_t matching_files;

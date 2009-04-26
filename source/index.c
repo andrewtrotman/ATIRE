@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "disk.h"
+#include "directory_recursive_iterator.h"
 #include "file.h"
 #include "parser.h"
 #include "memory.h"
