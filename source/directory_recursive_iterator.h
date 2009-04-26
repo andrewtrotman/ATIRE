@@ -5,18 +5,24 @@
 #ifndef __DIRECTORY_RECURSIVE_ITERATOR_H__
 #define __DIRECTORY_RECURSIVE_ITERATOR_H__
 
+#include <stdlib.h>
 #include "directory_iterator.h"
+
+#ifndef MAX_PATH
+	#define MAX_PATH _MAX_PATH
+#endif
 
 /*
 	class ANT_DIRECTORY_RECURSIVE_ITERATOR
 	--------------------------------------
 */
-class ANT_directory_recursive_iterator : protected ANT_directory_iterator
+class ANT_directory_recursive_iterator : public ANT_directory_iterator
 {
 private:
 	ANT_disk_directory *handle_stack;
 	ANT_disk_directory *file_list;
 	char *wildcard;
+	char path_buffer[MAX_PATH];
 
 private:
 	/*

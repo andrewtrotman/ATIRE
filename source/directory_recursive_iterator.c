@@ -8,7 +8,7 @@
 #include "disk_directory.h"
 #include "directory_recursive_iterator.h"
 
-#define HANDLE_STACK_SIZE (_MAX_PATH / 2)		/* because every second char must be a '\' */   
+#define HANDLE_STACK_SIZE (MAX_PATH / 2)		/* because every second char must be a '\' */   
 
 /*
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::ANT_DIRECTORY_RECURSIVE_ITERATOR()
@@ -74,7 +74,10 @@ while (!match)
 		{
 		FindClose(file_list->handle);
 		if (pop_directory())
-			return next();
+			{
+			return next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data));
+//			return next();
+			}
 		else
 			return NULL;
 		}
@@ -131,13 +134,17 @@ else
 */
 char *ANT_directory_recursive_iterator::first(char *wildcard)
 {
-char buffer[MAX_PATH];
+char *got;
 
 file_list = handle_stack;
 strcpy(this->wildcard, wildcard);
 
-GetCurrentDirectory(sizeof(buffer), buffer);
-return first(buffer, "");
+GetCurrentDirectory(sizeof(path_buffer), path_buffer);
+if ((got = first(path_buffer, "")) == NULL)
+	return NULL;
+
+sprintf(path_buffer, "%s//%s", file_list->path, got);
+return path_buffer;
 }
 
 /*
@@ -146,6 +153,12 @@ return first(buffer, "");
 */
 char *ANT_directory_recursive_iterator::next(void)
 {
-return next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data));
+char *got;
+
+if ((got = next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data))) == NULL)
+	return NULL;
+
+sprintf(path_buffer, "%s\\%s", file_list->path, got);
+return path_buffer;
 }
 

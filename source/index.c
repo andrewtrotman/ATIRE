@@ -27,21 +27,21 @@
 int main(int argc, char *argv[])
 {
 ANT_time_stats stats;
-ANT_disk disk;
+ANT_disk *disk;
 ANT_parser parser;
 ANT_string_pair *token;
 unsigned char *file;
 long param, done_work;
 ANT_memory_index *index;
 long long doc, now;
-long terms_in_document, first_param, trec_docnos;
+long terms_in_document, first_param, trec_docnos, recursive = FALSE;
 ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
 char *filename, *uid_start, *uid_end;
 char uid_buffer[1024];
 
 if (argc < 2)
-	exit(printf("Usage:%s [-docno] <filespec> ...\n-docno uses TREC <DOCNO> for document names (default: use filename and each document is in a seperate file).\n", argv[0]));
+	exit(printf("Usage:%s [-docno (-trec)] [-r] <filespec> ...\n-docno uses TREC <DOCNO> for document names (default: use filename and each document is in a seperate file).\n", argv[0]));
 doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
@@ -50,15 +50,35 @@ id_list.open("doclist.aspt", "wb");
 
 first_param = 1;
 trec_docnos = FALSE;
-if (strcmp(argv[1], "-docno") == 0)
+
+for (param = 0; param < argc; param++)
 	{
-	first_param++;
-	trec_docnos = TRUE;
+	if (strcmp(argv[param], "-docno") == 0)
+		{
+		first_param++;
+		trec_docnos = TRUE;
+		}
+	else if (strcmp(argv[param], "-trec") == 0)
+		{
+		first_param++;
+		trec_docnos = TRUE;
+		}
+	else if (strcmp(argv[param], "-r") == 0)
+		{
+		first_param++;
+		recursive = TRUE;
+		}
 	}
+
+if (recursive)
+	disk = new ANT_directory_recursive_iterator;
+else
+	disk = new ANT_directory_iterator;
+
 for (param = first_param; param < argc; param++)
 	{
 	now = stats.start_timer();
-	file = (unsigned char *)disk.read_entire_file(filename = disk.get_first_filename(argv[param]));
+	file = (unsigned char *)disk->read_entire_file(filename = disk->first(argv[param]));
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
 		{
@@ -114,7 +134,7 @@ for (param = first_param; param < argc; param++)
 		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();
-		file = (unsigned char *)disk.read_entire_file(filename = disk.get_next_filename());
+		file = (unsigned char *)disk->read_entire_file(filename = disk->next());
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 	}
@@ -125,9 +145,11 @@ now = stats.start_timer();
 index->serialise("index.aspt");
 stats.add_disk_output_time(stats.stop_timer(now));
 delete index;
+delete disk;
 
 printf("\nTIMINGS\n-------\n");
 stats.text_render();
+
 return 0;
 }
 

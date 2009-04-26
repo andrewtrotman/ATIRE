@@ -72,6 +72,7 @@ ANT_TARGETS = \
 	$(BINDIR)\ant_dictionary.exe
 
 OTHER_TARGETS = \
+	$(BINDIR)\filelist.exe 		\
 	$(BINDIR)\remove_head.exe 		\
 	$(BINDIR)\link_extract.exe 		\
 	$(BINDIR)\link_index.exe 			\
@@ -120,6 +121,7 @@ $(PARTS) : makefile
 $(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
 $(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
 $(BINDIR)\bindiff.exe : $(OBJDIR)\bindiff.obj
+$(BINDIR)\filelist.exe : $(OBJDIR)\filelist.obj
 
 #
 #	Management

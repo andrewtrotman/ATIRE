@@ -31,6 +31,9 @@ public:
 	static char **buffer_to_list(char *buffer, long long *lines);
 	char *get_first_filename(char *wildcard);
 	char *get_next_filename(void);
+
+	virtual char *first(char *wildcard) { return get_first_filename(wildcard); }
+	virtual char *next(void) { return get_next_filename(); }
 } ;
 
 #endif __DISK_H__

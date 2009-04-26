@@ -11,7 +11,7 @@
 	class ANT_DIRECTORY_ITERATOR
 	----------------------------
 */
-class ANT_directory_iterator : protected ANT_disk
+class ANT_directory_iterator : public ANT_disk
 {
 public:
 	ANT_directory_iterator() {};
