@@ -4,6 +4,7 @@ ALL = bitstream.obj \
  compress_golomb.obj \
  compress_simple9.obj \
  compress_relative10.obj \
+ compress_carryover12.obj \
  test_compression.obj \
  maths.obj
 

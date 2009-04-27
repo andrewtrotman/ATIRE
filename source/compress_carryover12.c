@@ -27,6 +27,11 @@
 
 #include "compress_carryover12.h"
 
+#define ALLOW_ZERO				1
+
+#define MAX_ELEM_PER_WORD		64
+#define TRANS_TABLE_STARTER	33
+
 
 /* ========================================================
  Coding variables:
@@ -41,14 +46,14 @@
    ========================================================
 */ 
 
-unsigned char *__pc30, *__pc32;	/* point to transition table, 30 and 32 data bits */
-unsigned char *__pcbase;    /* point to current transition table */
+static unsigned char *__pc30, *__pc32;	/* point to transition table, 30 and 32 data bits */
+static unsigned char *__pcbase;    /* point to current transition table */
 /*
 	big is transition table for the cases when number of bits
 	needed to code the maximal value exceeds 16.
 	_small are used otherwise.
 */
-unsigned char trans_B1_30_big[]={
+static unsigned char trans_B1_30_big[]={
 	0,0,0,0, 1,2,3,28, 1,2,3,28, 2,3,4,28, 3,4,5,28, 4,5,6,28,
 	5,6,7,28, 6,7,8,28, 6,7,10,28, 8,10,15,28, 9,10,14,28,
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 10,15,16,28, 10,14,15,28,
@@ -56,7 +61,7 @@ unsigned char trans_B1_30_big[]={
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	6,10,16,28, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 4,9,15,28};
 
-unsigned char trans_B1_32_big[]={
+static unsigned char trans_B1_32_big[]={
 	0,0,0,0, 1,2,3,28, 1,2,3,28, 2,3,4,28, 3,4,5,28, 4,5,6,28,
 	5,6,7,28, 6,7,8,28, 7,9,10,28, 7,10,15,28, 8,10,15,28,
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 7,10,15,28, 10,15,16,28,
@@ -64,7 +69,7 @@ unsigned char trans_B1_32_big[]={
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	6,10,16,28, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 4,10,16,28};
 
-unsigned char trans_B1_30_small[]={
+static unsigned char trans_B1_30_small[]={
 	0,0,0,0, 1,2,3,16, 1,2,3,16, 2,3,4,16, 3,4,5,16, 4,5,6,16,
 	5,6,7,16, 6,7,8,16, 6,7,10,16, 7,8,10,16, 9,10,14,16, 0,0,0,0,
 	0,0,0,0, 0,0,0,0, 8,10,15,16, 10,14,15,16,  7,10,15,16, 0,0,0,0,
@@ -72,7 +77,7 @@ unsigned char trans_B1_30_small[]={
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 3,7,10,16};
 
-unsigned char trans_B1_32_small[] = {
+static unsigned char trans_B1_32_small[] = {
 	0,0,0,0, 1,2,3,16, 1,2,3,16, 2,3,4,16, 3,4,5,16, 4,5,6,16,
 	5,6,7,16, 6,7,8,16, 7,9,10,16, 7,10,15,16, 8,10,15,16, 0,0,0,0,
 	0,0,0,0, 0,0,0,0, 7,10,15,16, 8,10,15,16, 10,14,15,16, 0,0,0,0,
@@ -80,8 +85,23 @@ unsigned char trans_B1_32_small[] = {
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	0,0,0,0, 3,7,10,16};
  
-unsigned char CLOG2TAB[] = {
-	0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
+static unsigned char CLOG2TAB[] = {
+	0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 
+   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 
+   6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
+   6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 
+   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
 
 #define GET_TRANS_TABLE(avail) avail < 2? (avail = 30, __pc30) : (avail -= 2, __pc32)
 
@@ -90,7 +110,7 @@ unsigned char CLOG2TAB[] = {
 	------
 	__mask[i] is 2^i-1
 */
-unsigned __mask[33]= {
+static unsigned __mask[33]= {
   0x00U, 0x01U, 0x03U, 0x07U, 0x0FU,
   0x1FU, 0x3FU, 0x7FU, 0xFFU,
   0x01FFU, 0x03FFU, 0x07FFU, 0x0FFFU,
@@ -108,7 +128,7 @@ unsigned __mask[33]= {
 	do																		\
 		{																	\
 		unsigned word;														\
-		word = __values[--__pvalue];											\
+		word = __values[--__pvalue];										\
 		for (--__pvalue; __pvalue >= 0; __pvalue--)							\
 			{																\
 			word <<= __bits[__pvalue];										\
@@ -272,3 +292,103 @@ if (__pvalue)
 return destination - original_destination;
 }
 
+/*
+	MACROS FOR WORD DECODING
+	========================
+*/
+#define GET_NEW_WORD														\
+	__wval= *__wpos++
+  
+#define WORD_DECODE(x,b)													\
+	do 																		\
+		{																	\
+		if (__wremaining < (b))												\
+			{  																\
+			GET_NEW_WORD;													\
+			__wremaining = 32;												\
+			}																\
+		(x) = (__wval & __mask[b]) + 1;										\
+		__wval >>= (b);														\
+		__wremaining -= (b);												\
+		} 																	\
+	while (0)
+
+#define CARRY_BLOCK_DECODE_START											\
+do  																		\
+	{																		\
+	int tmp;																\
+	WORD_DECODE(tmp, 1);													\
+	__pc30 = tmp == 1 ? trans_B1_30_small : trans_B1_30_big;				\
+	__pc32 = tmp == 1 ? trans_B1_32_small : trans_B1_32_big;				\
+	__pcbase = __pc30;														\
+	CARRY_DECODE_GET_SELECTOR												\
+	} 																		\
+while (0)
+
+#define CARRY_DECODE_GET_SELECTOR											\
+	if (__wremaining >= 2)													\
+		{																	\
+		__pcbase = __pc32;													\
+		__wbits = __pcbase[(__wbits << 2) + (__wval & 3)];					\
+		__wval >>= 2;														\
+		__wremaining -= 2;													\
+		if (__wremaining < __wbits)											\
+			{																\
+			GET_NEW_WORD;													\
+			__wremaining = 32;												\
+			}																\
+		}																	\
+	else																	\
+		{																	\
+		__pcbase = __pc30;													\
+		GET_NEW_WORD;														\
+		__wbits = __pcbase[(__wbits << 2) + (__wval & 3)];					\
+		__wval >>= 2;														\
+		__wremaining = 30; 													\
+		}
+
+#ifdef ALLOW_ZERO
+	#define CARRY_DECODE(x)													\
+		do 																	\
+			{																\
+			if (__wremaining < __wbits)										\
+			CARRY_DECODE_GET_SELECTOR										\
+			x = (__wval & __mask[__wbits]);									\
+			__wval >>= __wbits;												\
+			__wremaining -= __wbits;										\
+			}																\
+		while(0)
+#else
+	#define CARRY_DECODE(x)													\
+		do 																	\
+			{																\
+			if (__wremaining < __wbits)										\
+			CARRY_DECODE_GET_SELECTOR										\
+			x = (__wval & __mask[__wbits]) + 1;								\
+			__wval >>= __wbits;												\
+			__wremaining -= __wbits;										\
+			}																\
+		while(0)
+#endif
+
+/*
+	CARRY_DECODE_BUFFER()
+	---------------------
+	__wpos is the compressed string
+	destination is the destination
+	n is the number of unsigneds in __wpos
+*/
+inline int carry_decode_buffer(unsigned *destination, unsigned *__wpos, unsigned n)
+{
+unsigned i;
+unsigned curr = 0;
+int __wbits = TRANS_TABLE_STARTER;
+int __wremaining = -1;
+unsigned __wval = 0;
+
+CARRY_BLOCK_DECODE_START;
+for (i = 0; i < n; i++)
+	CARRY_DECODE(*destination++);
+
+return 1;
+}
