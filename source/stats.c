@@ -47,22 +47,21 @@ hours = minutes / 60;
 printf("%s", message);
 
 if (hours > 0)
-	{
 	printf("%lld:", hours);
-	units = "";
-	}
 
 if (hours > 0 || minutes > 0)
-	{
 	printf("%02lld:", minutes % 60);
-	units = "minutes";
-	}
 
 if (hours > 0 || minutes > 0 || seconds > 0)
-	{
 	printf("%02lld.", seconds % 60);
+
+
+if (hours > 0)
+	units = "hours";
+else if (minutes > 0)
+	units = "minutes";
+else if (seconds > 0)
 	units = "seconds";
-	}
 
 printf("%03lld %s%s\n", milliseconds % 1000, units, end_message);
 

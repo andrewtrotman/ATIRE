@@ -40,6 +40,7 @@ ANT_file id_list(&file_buffer);
 char *filename, *uid_start, *uid_end;
 char uid_buffer[1024];
 
+printf("ANT indexer (%dbit)\n", sizeof(char *) == 4 ? 32 : sizeof(char *) == 8 ? 64 : 0);
 if (argc < 2)
 	exit(printf("Usage:%s [-docno (-trec)] [-r] <filespec> ...\n-docno uses TREC <DOCNO> for document names (default: use filename and each document is in a seperate file).\n", argv[0]));
 doc = 0;

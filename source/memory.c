@@ -136,7 +136,14 @@ void *ANT_memory::alloc(long long *size)
 		bytes = short_page_size * ((*size + short_page_size - 1) / short_page_size);
 		answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		if (answer != NULL)
-			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
+			{
+			/*
+				This code is commented out at the moment because when I ran this over the
+				INEX Wikipedia 2009 collection it caused a VISTA hang!  It looks like you
+				can't lock more than 4GB of memory - but this is a guess.
+			*/
+//			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
+			}
 		else
 			bytes = 0;		// couldn't allocate any memory.
 		}
