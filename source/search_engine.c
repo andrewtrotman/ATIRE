@@ -535,12 +535,23 @@ stats->add_rank_time(stats->stop_timer(now));
 ANT_search_engine_accumulator *ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits)
 {
 long found;
-long long now;
+long long now, pointer;
 
 ANT_search_engine_accumulator **current, **end;
 
 now = stats->start_timer();
 
+
+/*
+	On first observations it appears as though this array does not need to be
+	re-initialised because the accumulator_pointers array already has a pointer
+	to each accumulator, but they are left in a random order from the previous
+	sort - which is good news (right?). Actaully, all the zeros are left at the
+	end which leads to a pathological case in quick-sort taking tens of seconds
+	on the INEX Wikipedia 2009 collection
+*/
+for (pointer = 0; pointer < documents; pointer++)
+	accumulator_pointers[pointer] = &accumulator[pointer];
 /*
 	Sort the postings into decreasing order, but only guarantee the first accurate_rank_point postings are accurately ordered (top-k sorting)
 */
