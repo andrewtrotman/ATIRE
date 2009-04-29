@@ -116,7 +116,7 @@ else
 		{
 		do
 			loguy++;
-		while (loguy <= hi && compare_pointer(loguy, mid) <= 0);
+		while (loguy <= hi && compare_pointer(loguy, mid) <= 0);			// ASPT: This looks like a bug, <= should (surely) by <
 
 		do
 			higuy--;
