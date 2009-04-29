@@ -1,6 +1,6 @@
 /*
 	ANT.C
-	-----
+
 */
 #include <stdlib.h>
 #include <time.h>
@@ -22,7 +22,6 @@
 #include "ga.h"
 #include "ga_stemmer.h"
 #include "ga_function.h"
-#include "strgen.h"
 #include "INEX_assessment.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
@@ -380,12 +379,10 @@ if (stemmer_file) {
         fprintf(stderr, "%d %f\n", count++, result / (line - 1));
     }
 } else {
-    init_strgen(&search_engine);
     ga = new GA(POPULATION_SIZE, 
-                new GA_function(perform_query_w_stemmer, &search_engine, line - 1, all_queries, topic_ids, query_cache, map));
+                new GA_function(perform_query_w_stemmer, &search_engine, line - 1, all_queries, topic_ids, query_cache, map), &search_engine);
     ga->run(NUM_OF_GENERATIONS);
 }
-// TODO: output some stats whilst running (to a file, specified on the command line perhaps)
 
 search_engine.stats_text_render();
 }

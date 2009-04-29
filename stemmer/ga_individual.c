@@ -4,178 +4,192 @@
 #include <float.h>
 #include "strnlen.h"
 #include "ga_individual.h"
+#include "vocab.h"
+
+const char *banned[] = {"s"};
 
 inline int strnmatchlen(const char *a, const char *b, int n) {
-    int count = 0;
-    while (*a == *b && *a != '\0' && *b != '\0' && n > 0) {
-        count++; n--; a++; b++;
-    }
-    return count;
+int count = 0;
+while (*a == *b && *a != '\0' && *b != '\0' && n > 0) {
+    count++; n--; a++; b++;
+}
+return count;
 }
 /* 
-   Remember that strings in rules may not be null terminated!
-   (But they do have a maximum length, so use "%.*s", 6, string)
+Remember that strings in rules may not be null terminated!
+(But they do have a maximum length, so use "%.*s", 6, string)
 */
 
 inline static int consonant_p(const char *s, int i) {
-    switch (s[i]) {
-    case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;
-    case 'y': return (i == 0) ? TRUE : !consonant_p(s, i-1);
-    default: return TRUE;
-    }
+switch (s[i]) {
+case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;
+case 'y': return (i == 0) ? TRUE : !consonant_p(s, i-1);
+default: return TRUE;
+}
 }
 
 /*
-  Returns the measure of a string, 
-  j being the start of the suffix to remove 
+Returns the measure of a string, 
+j being the start of the suffix to remove 
 */
 inline static int m(const char *s, int j) {
-    int n = 0;
-    int i = 0;
-    while(TRUE) {
+int n = 0;
+int i = 0;
+while(TRUE) {
+    if (i > j) return n;
+    if (!consonant_p(s, i)) break; 
+    i++;
+}
+i++;
+while(TRUE) {
+    while(TRUE) { 
         if (i > j) return n;
-        if (!consonant_p(s, i)) break; 
+        if (consonant_p(s, i)) break;
         i++;
     }
     i++;
+    n++;
     while(TRUE) {
-        while(TRUE) { 
-            if (i > j) return n;
-            if (consonant_p(s, i)) break;
-            i++;
-        }
-        i++;
-        n++;
-        while(TRUE) {
-            if (i > j) return n;
-            if (!consonant_p(s, i)) break;
-            i++;
-        }
+        if (i > j) return n;
+        if (!consonant_p(s, i)) break;
         i++;
     }
+    i++;
+}
 }
 
 inline unsigned int GA_individual::rules_size() {
-    return count * RULE_SIZE;
+return count * RULE_SIZE;
 }
 
 inline char GA_individual::measure(unsigned int n) {
-    return rules[n * RULE_SIZE];
+return rules[n * RULE_SIZE];
 }
 
 inline char *GA_individual::rule_from(unsigned int n) {
-    return rules + (n * RULE_SIZE) + 1;
+return rules + (n * RULE_SIZE) + 1;
 }
 
 inline char *GA_individual::rule_to(unsigned int n) {
-    return rules + (n * RULE_SIZE) + RULE_STRING_MAX + 1;
+return rules + (n * RULE_SIZE) + RULE_STRING_MAX + 1;
 }
 
+/* is a word on the banned list? */
+inline int GA_individual::is_banned(char *s) {
+unsigned int i;
+for (i = 0; i < (sizeof banned / sizeof banned[0]); i++) {
+    if (!strcmp(s, banned[0]))
+        return TRUE;
+}
+return FALSE;
+}
 
 /*
-  Currently returns a pointer to a static array - do not free!
+Currently returns a pointer to a static array - do not free!
 */
 char *GA_individual::apply(const char *string) {
-    unsigned int i, skipping = FALSE;
-    int length;
-    static char buffer[TMP_BUFFER_SIZE];
-    
-    strncpy(buffer, string, TMP_BUFFER_SIZE);
-    buffer[TMP_BUFFER_SIZE - 1] = '\0';
-    length = strlen(buffer);
+unsigned int i, skipping = FALSE;
+int length;
+static char buffer[TMP_BUFFER_SIZE];
 
-    for (i = 0; i < count; i++) {
-        if (measure(i) == SEPARATOR) {
-            /* Stop skipping at separator */
-            skipping = FALSE;
-        } else if (!skipping) {
-            /* Check that rule can be applied */
-            int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
+strncpy(buffer, string, TMP_BUFFER_SIZE);
+buffer[TMP_BUFFER_SIZE - 1] = '\0';
+length = strlen(buffer);
 
-            if (m(buffer, length - 1) >= measure(i) &&
-                strncmp(buffer + length - from_len,
-                        rule_from(i), RULE_STRING_MAX) == 0) {
+for (i = 0; i < count; i++) {
+    if (measure(i) == SEPARATOR) {
+        /* Stop skipping at separator */
+        skipping = FALSE;
+    } else if (!skipping) {
+        /* Check that rule can be applied */
+        int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
 
-                int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
+        if (m(buffer, length - 1) >= measure(i) &&
+            strncmp(buffer + length - from_len,
+                    rule_from(i), RULE_STRING_MAX) == 0) {
 
-                /* Ensure that the first SACROSANCT_CHARS are respected */ 
-                if (length - from_len + 
-                    strnmatchlen(rule_from(i), rule_to(i), RULE_STRING_MAX) < SACROSANCT_CHARS)
-                    continue;
+            int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
 
-                strncpy(buffer + length - from_len, rule_to(i), RULE_STRING_MAX);
+            /* Ensure that the first SACROSANCT_CHARS are respected */ 
+            if (length - from_len + 
+                strnmatchlen(rule_from(i), rule_to(i), RULE_STRING_MAX) < SACROSANCT_CHARS)
+                continue;
 
-                buffer[length - from_len + to_len] = '\0';
-                length += to_len - from_len;
+            strncpy(buffer + length - from_len, rule_to(i), RULE_STRING_MAX);
 
-                /*
-                  TODO: 
-                  only use strnlen once.
-                */
+            buffer[length - from_len + to_len] = '\0';
+            length += to_len - from_len;
 
-                skipping = TRUE;
-            }
+            skipping = TRUE;
         }
     }
+}
 
-    return buffer;
+return buffer;
 }
 
 void GA_individual::print() {
-    unsigned int i;
-    for (i = 0; i < count; i++) {
-        if (this->measure(i) == SEPARATOR) {
-            printf("=SEP=\n");
-        } else {
-            printf("if (M >= %d) substitute '%.*s' for '%.*s'\n",
-                   this->measure(i), 
-                   RULE_STRING_MAX, this->rule_from(i),
-                   RULE_STRING_MAX, this->rule_to(i));
-        }
+unsigned int i;
+for (i = 0; i < count; i++) {
+    if (this->measure(i) == SEPARATOR) {
+        printf("=SEP=\n");
+    } else {
+        printf("if (M >= %d) substitute '%.*s' for '%.*s'\n",
+               this->measure(i), 
+               RULE_STRING_MAX, this->rule_from(i),
+               RULE_STRING_MAX, this->rule_to(i));
     }
+}
 }
 
 void GA_individual::print_raw(FILE *fd) {
-    unsigned int i;
-    for (i = 0; i < this->rules_size(); i++) {
-        if (i % RULE_SIZE == 0) fputc(' ', fd);
-        if (rules[i] >= 'a' && rules[i] <= 'z')
-            fputc(rules[i], fd);
-        else if (rules[i] >= 0 && rules[i] <= 9)
-            fputc(rules[i] + '0', fd);
-        else
-            fputc('-', fd);
-    }
-    fputc('\n', fd);
+unsigned int i;
+for (i = 0; i < this->rules_size(); i++) {
+    if (i % RULE_SIZE == 0) fputc(' ', fd);
+    if (rules[i] >= 'a' && rules[i] <= 'z')
+        fputc(rules[i], fd);
+    else if (rules[i] >= 0 && rules[i] <= 9)
+        fputc(rules[i] + '0', fd);
+    else
+        fputc('-', fd);
+}
+fputc('\n', fd);
 }
 
 /*
-  The three following operations: REPRODUCE() MUTATE() and CROSSOVER()
-  assume all space has been allocated and the base size is the same.
-  (i.e. char[FIXEDSIZE] within the class)
- */
+The three following operations: REPRODUCE() MUTATE() and CROSSOVER()
+assume all space has been allocated and the base size is the same.
+(i.e. char[FIXEDSIZE] within the class)
+*/
 void GA_individual::reproduce(GA_individual *c) {
-    memcpy(c, this, sizeof(GA_individual));
+memcpy(c, this, sizeof(GA_individual));
 }
 
-void GA_individual::mutate(GA_individual *c, char *(*strgen)(), char *(*strgen_2)()) {
-    c->generate(strgen, strgen_2);
-    if (rand() % 2 == 0) 
-        this->crossover(c,c);
-    else 
-        c->crossover(this,c);
+void GA_individual::mutate(GA_individual *c, Vocab *v) {
+c->generate(v);
+if (rand() % 2 == 0) 
+    this->crossover(c,c);
+else 
+    c->crossover(this,c);
 }
 
 /* 
-   Places a new individual into c based on the parents p1 & p2.
+Places a new individual into c based on the parents p1 & p2.
+Crossover is limited to being between parts of rules (i.e. not mid-string)
 */
 void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
-    unsigned int point = random_from(0, this->rules_size());
+/* position inside the rules to crossover at */
+unsigned int mid_point = random_from(0, 2);
+if (mid_point == 2)
+    mid_point = 1 + RULE_STRING_MAX;
+
+/* which rule are we crossing over at*/
+    unsigned int point = random_from(0, this->rules_size() / RULE_SIZE) + mid_point;
     /* Ensure the second point shares the mid-rule position of the first */
     unsigned int min_point2 = ((signed)p2->count + (signed)point / RULE_SIZE - MAX_RULES > 0) ? 
         (p2->count + point / RULE_SIZE - MAX_RULES) : 0;
     unsigned int point2 = random_from(min_point2, p2->count) * RULE_SIZE
-        + (point % RULE_SIZE);
+        + mid_point;
 
     /* Still need to copy if p2 is also c, as the part from p1 may be small (i.e. p2 needs to shift)
      * This is also why it is done first. */
@@ -193,7 +207,7 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
 
    Strings will be used until null-termed or over 6 chars
 */
-void GA_individual::generate(char *(*strgen)(), char *(*strgen_2)()) {
+void GA_individual::generate(Vocab *v) {
     unsigned int i;
     count = (unsigned int) rand() % (MAX_RULES) + 1;
     memset(rules, '\0', count * RULE_SIZE);
@@ -203,11 +217,23 @@ void GA_individual::generate(char *(*strgen)(), char *(*strgen_2)()) {
         if (rules[i * RULE_SIZE] == MEASURE_MAX)
             rules[i * RULE_SIZE] = SEPARATOR;
 
-        strncpy(rules + (i * RULE_SIZE) + 1,
-                strgen(),
-                RULE_STRING_MAX);
+
+	/* 
+	   Checking both strings in the representation against the banned
+	   list ensures that there are no rules that perform the stem by 
+	   adding an ending. 
+	*/
+	char *s;
+	while ((s = v->strgen()) && !is_banned(s)) 
+	  ;
+	strncpy(rules + (i * RULE_SIZE) + 1,
+		s,
+		RULE_STRING_MAX);
+
+	while ((s = v->strgen_2()) && !is_banned(s)) 
+	  ;
         strncpy(rules + (i * RULE_SIZE) + RULE_STRING_MAX + 1,
-                strgen_2(),
+                s,
                 RULE_STRING_MAX);
     }
 }

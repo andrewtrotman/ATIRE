@@ -79,4 +79,4 @@ $(BINDIR)/ant : $(ANT_PARTS) $(EXTENSION)
 
 .PHONY : clean
 clean :
-	-rm $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant
+

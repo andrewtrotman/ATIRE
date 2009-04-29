@@ -41,7 +41,7 @@ void GA::next_generation() {
     for (; i < population_size; i++) {
         op = random_from(0, 100);
         if (op < mutation_rate)
-            tournament_select()->mutate(next_population + i, strgen, strgen_2);
+            tournament_select()->mutate(next_population + i, vocab);
         else if (op < mutation_rate + crossover_rate) 
             tournament_select()->crossover(tournament_select(),
                                          next_population + i);
@@ -85,14 +85,16 @@ void GA::run(unsigned int generations) {
     }
 }
 
-GA::GA(unsigned int population_size, GA_function *fitness_function) {
+GA::GA(unsigned int population_size, GA_function *fitness_function,
+       ANT_search_engine *search_engine) {
+    this->vocab = new Vocab(search_engine);
     unsigned int i;
     this->population_size = population_size;
     this->fitness_function = fitness_function;
 
     population = new GA_individual[population_size];
     for (i = 0; i < population_size; i++) {
-        population[i].generate(strgen, strgen_2);
+        population[i].generate(vocab);
     }
     next_population = new GA_individual[population_size];
 

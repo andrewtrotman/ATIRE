@@ -6,6 +6,9 @@
 	#include <windows.h>
 #elif defined (__APPLE__)
 	#include <mach/mach_time.h>
+#elif defined(__linux__)
+    #include <sys/time.h>
+    #include <values.h>
 #endif
 
 #include <stdio.h>
@@ -96,6 +99,10 @@ long long ANT_stats::get_clock_tick(void)
 	LARGE_INTEGER now;
 	QueryPerformanceCounter(&now);
 	return now.QuadPart;
+#elif defined(__linux__)
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	return ((long long)now.tv_sec) * 1000 * 1000 + now.tv_usec;
 #else
 	#warning "Cannot determine OS for timing code, timing will not be correct."
 	return 1;
@@ -116,6 +123,8 @@ long long ANT_stats::clock_tick_frequency(void)
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	return frequency.QuadPart;
+#elif defined (__linux__)
+	return 1000 * 1000; /* struct coded in microseconds*/
 #else
 	#warning "Cannot determine OS for timing code, timing will not be correct."
 	return 1;

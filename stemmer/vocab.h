@@ -3,16 +3,18 @@
 
 class ANT_search_engine;
 
-class vocab {
+class Vocab {
 public:
-    vocab(ANT_search_engine *);
+    Vocab(ANT_search_engine *);
 
     char *strgen();             // For strings without spaces
     char *strgen_2();           // For strings with empty string
 
+    void weight_strings();
+
 private:
-    char **strings = NULL;
-    int string_count = 0;
+    char **strings;
+    int string_count;
 };
 
 #endif

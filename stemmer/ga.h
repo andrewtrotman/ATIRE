@@ -9,10 +9,11 @@ const unsigned int DEFAULT_MUTATION_RATE = 10; // out of 100
 const unsigned int DEFAULT_CROSSOVER_RATE = 70; // out of 100
 enum { NO_ELITISM, USE_ELITISM };
 
-class vocab;
+class Vocab;
 
 class GA {
  private:
+    Vocab *vocab;
     GA_function *fitness_function;
 
     GA_individual *population;
@@ -37,7 +38,7 @@ class GA {
     void run(unsigned int);
     void set_generations(unsigned int);
 
-    GA(unsigned int, GA_function *);
+    GA(unsigned int, GA_function *, ANT_search_engine *);
     ~GA();
 };
 
