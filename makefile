@@ -14,8 +14,8 @@ TOOLDIR = tools
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /Ox /fp:fast /GL /Gy
+#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1 /Ox /fp:fast /GL /Gy
 CC = @cl
 
 #

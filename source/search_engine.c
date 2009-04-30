@@ -534,43 +534,56 @@ stats->add_rank_time(stats->stop_timer(now));
 */
 ANT_search_engine_accumulator *ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits)
 {
-long found;
-long long now, pointer;
-
-ANT_search_engine_accumulator **current, **end;
-
-now = stats->start_timer();
-
+long long now;
+ANT_search_engine_accumulator **current, **back_current, *current_accumulator, *end_accumulator;
 
 /*
 	On first observations it appears as though this array does not need to be
 	re-initialised because the accumulator_pointers array already has a pointer
 	to each accumulator, but they are left in a random order from the previous
-	sort - which is good news (right?). Actaully, all the zeros are left at the
+	sort - which is good news (right?). Actually, all the zeros are left at the
 	end which leads to a pathological case in quick-sort taking tens of seconds
-	on the INEX Wikipedia 2009 collection
+	on the INEX Wikipedia 2009 collection.
+
+	An effective optimisation is to bucket sort into two buckets at the beginning,
+	one bucket is the zeros and the other bucket is the non-zeros.  This is essentially
+	the first particion of the quick-sort before the call to quick sort.  The advantage
+	is that we know in advance what the correct partition value is and that the secone
+	partition (of all zeros) is now already sorted.  We also get (for free) the number
+	of documents we found.
 */
-for (pointer = 0; pointer < documents; pointer++)
-	accumulator_pointers[pointer] = &accumulator[pointer];
+now = stats->start_timer();
+
+current = accumulator_pointers;
+back_current = accumulator_pointers + documents - 1;
+end_accumulator = accumulator + documents;
+for (current_accumulator = accumulator; current_accumulator < end_accumulator; current_accumulator++)
+	if (current_accumulator->is_zero_rsv())
+		*back_current-- = current_accumulator;
+	else
+		*current++ = current_accumulator;
+
+/*
+	If the number of found documents is less than the accurate_rank_point then there
+	is no point sorting past the number of found documents
+*/
+if ((*hits = current - accumulator_pointers) < accurate_rank_point)
+	accurate_rank_point = *hits;
+
+stats->add_count_relevant_documents(stats->stop_timer(now));
+
 /*
 	Sort the postings into decreasing order, but only guarantee the first accurate_rank_point postings are accurately ordered (top-k sorting)
 */
+now = stats->start_timer();
+
 //qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 //top_k_sort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
+//ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, documents, documents);
 ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, documents, accurate_rank_point);
 
 stats->add_sort_time(stats->stop_timer(now));
 
-now = stats->start_timer();
-found = 0;
-end = accumulator_pointers + documents;
-for (current = accumulator_pointers; current < end; current++)
-	if (!(*current)->is_zero_rsv())
-		found++;
-
-*hits = found;
-
-stats->add_count_relevant_documents(stats->stop_timer(now));
 
 return accumulator;
 }

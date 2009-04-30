@@ -273,7 +273,7 @@ ANT_memory memory;
 FILE *fp;
 char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
-ANT_search_engine_forum_INEX output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
+ANT_search_engine_forum_TREC output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
 
 fprintf(stderr, "ANT %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
