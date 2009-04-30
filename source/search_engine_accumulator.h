@@ -34,6 +34,12 @@ public:
 	static int compare(const void *a, const void *b);
 	static int compare_pointer(const void *a, const void *b);
 	static void top_k_sort(ANT_search_engine_accumulator **base, long long num, long long top_k);
+
+	static inline int compare_pointer(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator *b);
+	static inline long long bentley_mcilroy_min(long long a, long long b);
+	static inline ANT_search_engine_accumulator **bentley_mcilroy_med3(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b, ANT_search_engine_accumulator **c);
+	static inline void bentley_mcilroy_swapfunc(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b, long long n);
+	static void bentley_mcilroy_qsort(ANT_search_engine_accumulator **a, long long n, long long top_k);
 } ;
 
 #endif __SEARCH_ENGINE_ACCUMULATOR_H__
