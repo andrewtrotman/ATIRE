@@ -5,7 +5,6 @@
 */
 #include <stdlib.h>
 #include "top_k_sort.h"
-//#include "search_engine_accumulator.h"
 
 static void top_k_shortsort (char *lo, char *hi, size_t width, int (*comp)(const void *, const void *));
 

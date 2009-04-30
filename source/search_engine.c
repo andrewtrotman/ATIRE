@@ -567,12 +567,7 @@ for (current_accumulator = accumulator; current_accumulator < end_accumulator; c
 	If the number of found documents is less than the accurate_rank_point then there
 	is no point sorting past the number of found documents
 */
-#ifdef NEVER
-if ((*hits = current - accumulator_pointers) < accurate_rank_point)
-	accurate_rank_point = *hits;
-#else
-accurate_rank_point = *hits = current - accumulator_pointers;
-#endif
+*hits = current - accumulator_pointers;
 stats->add_count_relevant_documents(stats->stop_timer(now));
 
 /*
@@ -582,10 +577,7 @@ now = stats->start_timer();
 
 //qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 //top_k_sort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
-//ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, documents, documents);
-//ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, documents, accurate_rank_point);
-//ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, accurate_rank_point, accurate_rank_point);
-ANT_search_engine_accumulator::bentley_mcilroy_qsort(accumulator_pointers, accurate_rank_point, accurate_rank_point);
+ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, *hits, accurate_rank_point);
 
 stats->add_sort_time(stats->stop_timer(now));
 
