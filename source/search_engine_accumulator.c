@@ -98,7 +98,7 @@ void ANT_search_engine_accumulator::top_k_sort(ANT_search_engine_accumulator **a
 {
 ANT_search_engine_accumulator **pa, **pb, **pc, **pd, **pl, **pm, **pn;
 ANT_search_engine_accumulator v, *pv;
-long long s;
+long long s, s2;
 int r;
 
 if (n < 7)
@@ -169,6 +169,6 @@ if (s > 1)
 	top_k_sort(a, s, top_k);
 
 if (s < top_k)
-	if ((s = pd - pc) > 1)
-		top_k_sort(pn - s, s, top_k);
+	if ((s2 = pd - pc) > 1)
+		top_k_sort(pn - s2, s2, top_k - s);
 }
