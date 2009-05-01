@@ -8,10 +8,10 @@ ALL = bitstream.obj \
  test_compression.obj \
  maths.obj
 
-CFLAGS = /W3 /Zi /TP
+CFLAGS = /W4 /Zi /TP
 
 test_compression.exe : $(ALL)
-	$(CC) /W3 /Zi $(ALL) /Fetest_compression.exe
+	$(CC) /W4 /Zi $(ALL) /Fetest_compression.exe
 
 
 clean :

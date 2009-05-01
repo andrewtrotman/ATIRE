@@ -124,7 +124,7 @@ uint32_t *compressed_sequence = (uint32_t *)source;
 uint32_t value, row;
 ANT_compressable_integer *end = destination + destination_integers;
 
-while (1)		// we break out of this loop in the case of overflow of the destination buffer
+for (;;)		// we break out of this (empty) loop in the case of overflow of the destination buffer
 	{
 	value = *compressed_sequence++;
 	row = value >> 28;						// row number stored in high 4 bits

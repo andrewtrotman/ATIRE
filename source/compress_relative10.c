@@ -180,7 +180,7 @@ if (numbers == destination_integers)
 /*
 	The remainder is in relative-10
 */
-while (1)
+for (;;)		/* empty loop */
 	{
 	value = *compressed_sequence++;
 	row = relative10_table[row].relative_row[value >> 30];

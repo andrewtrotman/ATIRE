@@ -25,9 +25,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "compress_carryover12.h"
+#pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the same of the C macros
 
-#define ALLOW_ZERO				1
+#include "compress_carryover12.h"
 
 #define MAX_ELEM_PER_WORD		64
 #define TRANS_TABLE_STARTER	33
@@ -127,15 +127,17 @@ static unsigned __mask[33]= {
 #define WORD_ENCODE_WRITE													\
 	do																		\
 		{																	\
-		unsigned word;														\
+		uint32_t word;														\
 		word = __values[--__pvalue];										\
 		for (--__pvalue; __pvalue >= 0; __pvalue--)							\
 			{																\
 			word <<= __bits[__pvalue];										\
 			word |= __values[__pvalue];										\
 			}																\
-		*((unsigned *)destination) = word;									\
+		*((uint32_t *)destination) = word;									\
 		destination += sizeof(word);										\
+		if (destination >= destination_end)									\
+			return 0;	 /* overflow */										\
 		__wremaining = 32;													\
 		__pvalue = 0;														\
 		}																	\
@@ -146,13 +148,13 @@ static unsigned __mask[33]= {
 		{																	\
 		if (__wremaining < (b))												\
 			WORD_ENCODE_WRITE;												\
-		__values[__pvalue] = (x) - 1;										\
+		__values[__pvalue] = ((uint32_t)x) - 1;								\
 		__bits[__pvalue++] = (b);											\
 		__wremaining -= (b);												\
 		} 																	\
 	while (0)
 
-#define CARRY_BLOCK_ENCODE_START(n,max_bits)								\
+#define CARRY_BLOCK_ENCODE_START(n, max_bits)								\
 	do 																		\
 		{																	\
 		__pc30 = max_bits <= 16 ? trans_B1_30_small : trans_B1_30_big;		\
@@ -166,67 +168,56 @@ static unsigned __mask[33]= {
 	QCEILLOG_2()
 	------------
 */
-inline int qceillog_2(int x)
+static inline long qceillog_2(ANT_compressable_integer x)
 {
-int _B_x  = x - 1;
+ANT_compressable_integer _B_x  = x - 1;
 
-return _B_x >> 16 ? (_B_x >> 24 ? 24 + CLOG2TAB[_B_x >> 24] : 16 | CLOG2TAB[_B_x >> 16]) : (_B_x >> 8 ? 8 + CLOG2TAB[_B_x >> 8] : CLOG2TAB[_B_x]);
+return _B_x >> 16 ? 
+	(_B_x >> 24 ? 24 + CLOG2TAB[_B_x >> 24] : 16 | CLOG2TAB[_B_x >> 16]) : 
+	(_B_x >> 8 ? 8 + CLOG2TAB[_B_x >> 8] : CLOG2TAB[_B_x]);
 }
 
 /*
 	CALC_MIN_BITS()
 	---------------
-	bits[i] = bits needed to code gaps[i]
-	return max(bits[i])
+	Calculate the number of bits needed to store the largest integer in the list
 */
-int calc_min_bits(unsigned *gaps, unsigned char *bits, int n)
+static inline long calc_min_bits(ANT_compressable_integer *gaps, long long n)
 {
-int i;
-int max=0;
+long long i;
+long bits, max = 0;
 
 for (i = 0; i < n; i++)
-	{ 
-#ifdef ALLOW_ZERO
-	bits[i] = qceillog_2(gaps[i] + 1);
-#else
-	bits[i] = qceillog_2(gaps[i]);
-#endif
-	if (max<bits[i])
-		max = bits[i];
-	if (bits[i] > 28)
-		exit(fprintf(stderr, "Error: At gap %d exceeds 2^28.\n", i));
-	}
-if (max > 28)
-	exit(fprintf(stderr, "Error: At least one gap exceeds 2^28. It cannot be coded by this method. Terminated.\n"));
+	if (max < (bits = qceillog_2(gaps[i])))
+		max = bits;
 
-return max;
+return max > 28 ? -1 : max;
 }
 
 /*
 	ELEMS_CODED()
 	-------------
 	given codeleng of "len" bits, and "avail" bits available for coding,
-	bits[] - sequence of sizes   
 	Return number_of_elems_coded (possible) if "avail" bits can be used to
 	code the number of elems  with the remaining < "len"
 	Returns 0 (impossible) otherwise
 */
-int elems_coded(int avail, int len, unsigned char *bits, int start, int end)
+long long elems_coded(long avail, long len, ANT_compressable_integer *gaps, long long start, long long end)
 {
-int i, real_end, max;
+long long i, real_end, max;
 
 if (len)
 	{
 	max = avail/len;
 	real_end = start + max - 1 <= end ? start + max: end + 1; 
-	for (i = start; i < real_end && bits[i] <= len; i++);
+	for (i = start; i < real_end && qceillog_2(gaps[i]) <= len; i++);
 	if (i < real_end)
 		return 0;
 	return real_end - start;
 	}
 else
 	{
-	for (i = start; i < start + MAX_ELEM_PER_WORD && i <= end && bits[i] <= len; i++);			// empty loop
+	for (i = start; i < start + MAX_ELEM_PER_WORD && i <= end && qceillog_2(gaps[i]) <= len; i++);			// empty loop
 	if (i - start < 2)
 		return 0;
 	return i - start;
@@ -234,25 +225,33 @@ else
 }
 
 /*
-	CARRY_ENCODE_BUFFER()
-	---------------------
+	ANT_COMPRESS_CARRYOVER12::COMPRESS()
+	------------------------------------
 	Parameters
-	a - the d-gaps (or otherwise) buffer to encode
+	a - (source)
 	n - length of a (in integers)
 	destination - where the compressed sequence is put
-	bits - an array of bytes of length n (used as scratch space)
+	destination_length - length of destination (in bytes)
 
 	returns length of destination (length in bytes)
 */
-int carry_encode_buffer(unsigned *a, unsigned n, unsigned char *bits, unsigned char *destination)
+long long ANT_compress_carryover12::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *a, long long n)
 {
-unsigned max_bits, i, __values[32], __bits[32];
-int elems, j, __wremaining = 32, __pvalue = 0, size, avail;
-unsigned char *table, *base, *original_destination = destination;
+unsigned long max_bits;
+uint32_t __values[32];			// can't compress integers larger than 2^28 so they will all fit in a uint32_t
+unsigned long __bits[32];
+long long i;
+long j, __wremaining = 32, __pvalue = 0, size, avail;
+long long elems = 0;
+unsigned char *table, *base, *destination_end, *original_destination = destination;
+
+destination_end = destination + destination_length;
 
 size = TRANS_TABLE_STARTER;
 
-max_bits = calc_min_bits(a,bits,n);
+if ((max_bits = calc_min_bits(a, n)) <= 0)
+	return 0;
+
 CARRY_BLOCK_ENCODE_START(n, max_bits);
 
 for (i = 0; i < n; )
@@ -271,19 +270,14 @@ for (i = 0; i < n; )
 			j = -1;
 			continue;
 			}
-		if (elems = elems_coded(avail, size, bits, i, n - 1))
+		if ((elems = elems_coded(avail, size, a, i, n - 1)) != 0)
 			break;
 		}
 
 	/* 2. Coding: Code elements using row "base" & column "j" */
 	WORD_ENCODE(j + 1, 2);             /* encoding column */
 	for ( ; elems ; elems--, i++)   /* encoding d-gaps */
-#ifdef ALLOW_ZERO
-		WORD_ENCODE(a[i] + 1, size);
-#else
 		WORD_ENCODE(a[i], size);
-#endif
-
 	}
 
 if (__pvalue)
@@ -316,7 +310,7 @@ return destination - original_destination;
 #define CARRY_BLOCK_DECODE_START											\
 do  																		\
 	{																		\
-	int tmp;																\
+	long tmp;																\
 	WORD_DECODE(tmp, 1);													\
 	__pc30 = tmp == 1 ? trans_B1_30_small : trans_B1_30_big;				\
 	__pc32 = tmp == 1 ? trans_B1_32_small : trans_B1_32_big;				\
@@ -347,48 +341,32 @@ while (0)
 		__wremaining = 30; 													\
 		}
 
-#ifdef ALLOW_ZERO
-	#define CARRY_DECODE(x)													\
-		do 																	\
-			{																\
-			if (__wremaining < __wbits)										\
+#define CARRY_DECODE(x)													\
+	do 																		\
+		{																	\
+		if (__wremaining < __wbits)											\
 			CARRY_DECODE_GET_SELECTOR										\
-			x = (__wval & __mask[__wbits]);									\
-			__wval >>= __wbits;												\
-			__wremaining -= __wbits;										\
-			}																\
-		while(0)
-#else
-	#define CARRY_DECODE(x)													\
-		do 																	\
-			{																\
-			if (__wremaining < __wbits)										\
-			CARRY_DECODE_GET_SELECTOR										\
-			x = (__wval & __mask[__wbits]) + 1;								\
-			__wval >>= __wbits;												\
-			__wremaining -= __wbits;										\
-			}																\
-		while(0)
-#endif
+		x = (__wval & __mask[__wbits]) + 1;									\
+		__wval >>= __wbits;													\
+		__wremaining -= __wbits;											\
+		}																	\
+	while(0)
 
 /*
-	CARRY_DECODE_BUFFER()
-	---------------------
+	ANT_COMPRESS_CARRYOVER12::DECOMPRESS()
+	--------------------------------------
 	__wpos is the compressed string
 	destination is the destination
-	n is the number of unsigneds in __wpos
+	n is the number of integers in __wpos
 */
-inline int carry_decode_buffer(unsigned *destination, unsigned *__wpos, unsigned n)
+void ANT_compress_carryover12::decompress(ANT_compressable_integer *destination, unsigned char *compressed, long long n)
 {
-unsigned i;
-unsigned curr = 0;
-int __wbits = TRANS_TABLE_STARTER;
-int __wremaining = -1;
-unsigned __wval = 0;
+long long i;
+long __wbits = TRANS_TABLE_STARTER;
+long __wremaining = -1;
+unsigned long *__wpos = (unsigned long *)compressed, __wval = 0;
 
 CARRY_BLOCK_DECODE_START;
 for (i = 0; i < n; i++)
 	CARRY_DECODE(*destination++);
-
-return 1;
 }

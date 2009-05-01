@@ -5,8 +5,17 @@
 #ifndef __COMPRESS_CARRYOVER12_H__
 #define __COMPRESS_CARRYOVER12_H__
 
-extern int carry_encode_buffer(unsigned *a, unsigned n, unsigned char *bits /* tmp buffer pass in and of a's length */ , unsigned char *destination);
-extern int carry_decode_buffer(unsigned *destination, unsigned *source, unsigned length);
+#include "compress.h"
+
+class ANT_compress_carryover12 : ANT_compress
+{
+public:
+	ANT_compress_carryover12(long long max_list_length) : ANT_compress(max_list_length) {}
+	virtual ~ANT_compress_carryover12() {}
+
+	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);
+	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
+} ;
 
 
 #endif __COMPRESS_CARRYOVER12_H__
