@@ -61,7 +61,16 @@ PARTS = \
 	$(OBJDIR)\lovins.obj	\
 	$(OBJDIR)\paice_husk.obj	\
 	$(OBJDIR)\learned_wikipedia_stem.obj	\
-	$(OBJDIR)\relevant_topic.obj
+	$(OBJDIR)\relevant_topic.obj	\
+	$(OBJDIR)\bitstream.obj		\
+	$(OBJDIR)\compress_elias_gamma.obj		\
+	$(OBJDIR)\compress_elias_delta.obj		\
+	$(OBJDIR)\compress_golomb.obj		\
+	$(OBJDIR)\compress_simple9.obj		\
+	$(OBJDIR)\compress_relative10.obj		\
+	$(OBJDIR)\compress_carryover12.obj		\
+	$(OBJDIR)\compress_variable_byte.obj	\
+	$(OBJDIR)\compression_factory.obj
 
 #
 #	Targets
@@ -102,7 +111,7 @@ OTHER_TARGETS = \
 
 {$(OBJDIR)\}.obj{$(BINDIR)\}.exe:
 	@echo Building $@...
-	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) /Fe$@ /link /fixed:no
+	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) /Fe$@ 
 
 #
 #	List of objects to build

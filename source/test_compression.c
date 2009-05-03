@@ -10,9 +10,11 @@
 #include "compress_relative10.h"
 #include "compress_carryover12.h"
 #include "compress_golomb.h"
+#include "compress_variable_byte.h"
+#include "compression_factory.h"
 
 #define ITERATIONS 10
-#define TEST_LENGTH (1024*1024)
+#define TEST_LENGTH (1024 * 1024)
 
 ANT_compressable_integer random_buffer[TEST_LENGTH];
 unsigned char buffer[TEST_LENGTH * sizeof(long)];
@@ -28,7 +30,7 @@ int main(void)
 ANT_compressable_integer *into;
 long iteration, which;
 long long bytes;
-ANT_compress_carryover12 compressor(TEST_LENGTH), decompressor(TEST_LENGTH);
+ANT_compression_factory compressor, decompressor;
 
 srand((unsigned int)time(NULL));
 srand(0);

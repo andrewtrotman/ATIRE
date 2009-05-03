@@ -11,7 +11,7 @@
 	class ANT_COMPRESS_SIMPLE9
 	--------------------------
 */
-class ANT_compress_simple9 : ANT_compress
+class ANT_compress_simple9 : public ANT_compress
 {
 protected:
 	class ANT_compress_simple9_lookup
@@ -27,7 +27,7 @@ protected:
 	static long table_row[];
 
 public:
-	ANT_compress_simple9(long long max_list_length) : ANT_compress(max_list_length) {}
+	ANT_compress_simple9() {}
 	virtual ~ANT_compress_simple9() {}
 
 	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);

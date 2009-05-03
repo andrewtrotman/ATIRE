@@ -16,11 +16,8 @@ typedef uint64_t ANT_compressable_integer;
 */
 class ANT_compress
 {
-protected:
-	long long length_of_longest_possible_list;
-
 public:
-	ANT_compress(long long max_list_length) { length_of_longest_possible_list = max_list_length; }
+	ANT_compress() {}
 	virtual ~ANT_compress() {}
 
 	/*

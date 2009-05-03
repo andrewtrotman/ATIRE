@@ -26,7 +26,7 @@ protected:
 	inline unsigned long long decode(void);
 
 public:
-	ANT_compress_golomb(long long max_list_length) : ANT_compress_elias_delta(max_list_length) {}
+	ANT_compress_golomb() {}
 	virtual ~ANT_compress_golomb() {}
 
 	long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);

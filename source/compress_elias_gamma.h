@@ -24,7 +24,7 @@ protected:
 	long long eof(void) { return bitstream.eof(); }
 
 public:
-	ANT_compress_elias_gamma(long long max_list_length) : ANT_compress(max_list_length) {};
+	ANT_compress_elias_gamma() {}
 	virtual ~ANT_compress_elias_gamma() {};
 
 	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);

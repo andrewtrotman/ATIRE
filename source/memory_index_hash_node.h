@@ -33,8 +33,8 @@ public:
 	long long docids_pos_on_disk, tfs_pos_on_disk, end_pos_on_disk;
 
 private:
-	long compress_bytes_needed(long long val);
-	void compress_into(unsigned char *dest, long long docno);
+	inline long compress_bytes_needed(long long val);
+	inline void compress_into(unsigned char *dest, long long docno);
 	ANT_postings_piece *new_postings_piece(long length_in_bytes);
 
 public:

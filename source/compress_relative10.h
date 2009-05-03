@@ -11,7 +11,7 @@
 	class ANT_COMPRESS_RELATIVE10
 	-----------------------------
 */
-class ANT_compress_relative10 : ANT_compress_simple9
+class ANT_compress_relative10 : public ANT_compress_simple9
 {
 protected:
 	class ANT_compress_relative10_lookup
@@ -29,7 +29,7 @@ protected:
 	static long table_row10[];
 
 public:
-	ANT_compress_relative10(long long max) : ANT_compress_simple9(max) {}
+	ANT_compress_relative10() {}
 	virtual ~ANT_compress_relative10() {}
 
 	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);

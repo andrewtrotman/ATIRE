@@ -7,10 +7,14 @@
 
 #include "compress.h"
 
-class ANT_compress_carryover12 : ANT_compress
+/*
+	class ANT_COMPRESS_CARRYOVER12
+	------------------------------
+*/
+class ANT_compress_carryover12 : public ANT_compress
 {
 public:
-	ANT_compress_carryover12(long long max_list_length) : ANT_compress(max_list_length) {}
+	ANT_compress_carryover12() {}
 	virtual ~ANT_compress_carryover12() {}
 
 	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);

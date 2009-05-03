@@ -8,6 +8,7 @@
 #include "memory_index_hash_node.h"
 #include "memory_index_stats.h"
 #include "postings_piece.h"
+#include "compress_variable_byte.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -75,16 +76,7 @@ return memory->malloc(count);
 */
 inline long ANT_memory_index_hash_node::compress_bytes_needed(long long docno)
 {
-if (docno & ((long long)127 << 28))
-	return 5;
-else if (docno & ((long long)127 << 21))
-	return 4;
-else if (docno & ((long long)127 << 14))
-	return 3;
-else if (docno & ((long long)127 << 7))
-	return 2;
-else
-	return 1;
+return ANT_compress_variable_byte::compress_bytes_needed(docno);
 }
 
 /*
@@ -93,27 +85,7 @@ else
 */
 inline void ANT_memory_index_hash_node::compress_into(unsigned char *dest, long long docno)
 {
-if (docno & ((long long)127 << 28))
-	goto five;
-else if (docno & ((long long)127 << 21))
-	goto four;
-else if (docno & ((long long)127 << 14))
-	goto three;
-else if (docno & ((long long)127 << 7))
-	goto two;
-else
-	goto one;
-
-five:
-	*dest++ = (docno >> 28) & 0x7F;
-four:
-	*dest++ = (docno >> 21) & 0x7F;
-three:
-	*dest++ = (docno >> 14) & 0x7F;
-two:
-	*dest++ = (docno >> 7) & 0x7F;
-one:
-	*dest++ = (docno & 0x7F) | 0x80;
+ANT_compress_variable_byte::compress_into(dest, docno);
 }
 
 /*
