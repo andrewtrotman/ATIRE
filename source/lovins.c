@@ -703,7 +703,7 @@ do				/* Search for the first character     */
 
 	if (p_first != NULL)	/* Search for the rest */
 		{
-		e_offset = stem_end - suffix_start;
+		e_offset = (int)(stem_end - suffix_start);
 		if ((p_list = p_first->ptr[e_offset]) != NULL)
 			{
 			for (;;)		/* no need to compare the first char  */
@@ -721,7 +721,7 @@ do				/* Search for the first character     */
 						break;
 				else
 					{
-					s_len = suffix_start - word;
+					s_len = (int)(suffix_start - word);
 					if (!p_list->cond || (*p_list->cond) (s_len, suffix_start - 1))
 						{
 						*suffix_start = EOS;
@@ -751,7 +751,7 @@ size_t lovins_stem(char *term, char *destination)
 int length;
 char *stem_end;
 
-length = strlen(strcpy(destination, term));
+length = (int)strlen(strcpy(destination, term));
 if (length > 2)		// This constraint comes from the original code and if you remove it then it crashes!
 	{
 	stem_end = remove_ending(destination, length);

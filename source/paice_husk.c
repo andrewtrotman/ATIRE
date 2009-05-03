@@ -106,7 +106,7 @@ if (!strcmp(r->text, "dummy")) /* If it's just a dummy list header.. */
 if (!isintact && r->intact) /* If it should be intact,but isn't.. */
 	return notapply; /* ..then rule fails */
 
-x = strlen(word) - r->deltotal; /* Find where suffix should start */
+x = (int)(strlen(word) - r->deltotal); /* Find where suffix should start */
 
 if (!strcmp(word + x, r->keystr)) /* If ending matches key string.. */
 	{
@@ -388,7 +388,7 @@ int ANT_paice_husk::acceptable(char *s)
 int x;
 
 /* If longer than 3 chars then don't worry */
-if((x = strlen(s)) > 3)
+if((x = (int)strlen(s)) > 3)
 	return 1;
 
 /* If first is a vowel,then second must be a consonant */
@@ -397,7 +397,7 @@ if(isvowel(*s))
 
 /* If first is a consonant,then second or third must be */
 /* a vowel and length must be >3 */
-return isvowel((*(s + 1)) || isvowel(*(s + 2))) && (x  > 3);
+return isvowel((*(s + 1)) || isvowel(*(s + 2))) && (x > 3);
 }
 
 /*
