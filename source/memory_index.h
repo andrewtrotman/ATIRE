@@ -13,6 +13,7 @@ class ANT_memory_index_hash_node;
 class ANT_memory;
 class ANT_string_pair;
 class ANT_file;
+class ANT_compression_factory;
 
 #define HASH_TABLE_SIZE (0x1000000)
 
@@ -25,6 +26,7 @@ private:
 	unsigned char *serialised_docids, *serialised_tfs;
 	long serialised_docids_size, serialised_tfs_size;
 	ANT_memory_index_stats *stats;
+	ANT_compression_factory *factory;
 
 private:
 	long hash(ANT_string_pair *string);

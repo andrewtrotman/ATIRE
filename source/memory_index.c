@@ -16,6 +16,7 @@
 #include "btree_head_node.h"
 #include "hash_table.h"
 #include "fundamental_types.h"
+#include "compression_factory.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -32,6 +33,7 @@ serialised_docids_size = 1;
 serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
+factory = new ANT_compression_factory;
 }
 
 /*
@@ -43,6 +45,7 @@ ANT_memory_index::~ANT_memory_index()
 stats->text_render();
 delete memory;
 delete stats;
+delete factory;
 }
 
 /*
@@ -153,6 +156,23 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 		serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 		}
 	}
+
+#ifdef NEVER
+
+/*
+	At this point we know the number of documents in the collection so we can allocate the
+	source and destination buffers once and be sure it all fits.
+
+	FIX THIS CODE 
+*/
+source_buffer = new ANT_compressable_integer[root->document_frequency];
+destination_buffer = new unsigned char [destination_length = (sizeof(ANT_compressable_integer) * root->document_frequency)];
+factory->compress(destination_buffer, destination_length, source_buffer, root->document_frequency);
+
+delete [] source_buffer;
+delete [] destination_buffer[];
+
+#endif
 
 /*
 	text_render(root, serialised_docids, doc_size, serialised_tfs, tf_size);
