@@ -23,9 +23,9 @@ void ANT_time_stats::text_render(void)
 long long now;
 
 now = get_clock_tick() - creation_time;
-print_time("Disk input time   :", disk_input_time);
-print_time("Disk ouput time   :", disk_output_time);
-print_time("CPU time          :", now - disk_input_time - disk_output_time);
+print_time("Disk input time      :", disk_input_time);
+print_time("Disk ouput time      :", disk_output_time);
+print_time("CPU time             :", now - disk_input_time - disk_output_time);
 print_elapsed_time();
 }
 

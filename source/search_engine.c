@@ -136,7 +136,7 @@ memory->realign();
 posting.tf = (long *)memory->malloc((size_t)(sizeof(*posting.tf) * documents));
 
 get_postings(&collection_details, postings_buffer);
-decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths);
+decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths, &collection_details);
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
@@ -319,19 +319,23 @@ return destination;
 	ANT_SEARCH_ENGINE::DECOMPRESS()
 	-------------------------------
 */
-void ANT_search_engine::decompress(unsigned char *start, unsigned char *end, long *into)
+void ANT_search_engine::decompress(unsigned char *start, unsigned char *end, long *into, ANT_search_engine_btree_leaf *leaf)
 {
-while (start < end)
-	if (*start & 0x80)
-		*into++ = *start++ & 0x7F;
-	else
-		{
-		*into = *start++;
-		while (!(*start & 0x80))
-		   *into = (*into << 7) | *start++;
-		*into = (*into << 7) | (*start++ & 0x7F);
-        into++;
-		}
+#ifdef ANT_COMPRESS_EXPERIMENT
+	factory.decompress((uint32_t *)into, start, leaf->document_frequency);
+#else
+	while (start < end)
+		if (*start & 0x80)
+			*into++ = *start++ & 0x7F;
+		else
+			{
+			*into = *start++;
+			while (!(*start & 0x80))
+			   *into = (*into << 7) | *start++;
+			*into = (*into << 7) | (*start++ & 0x7F);
+	        into++;
+			}
+#endif
 }
 
 /*
@@ -432,7 +436,7 @@ if (get_postings(&term_details, postings_buffer) == NULL)
 stats->add_posting_read_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid);
+decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid, &term_details);
 decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
 stats->add_decompress_time(stats->stop_timer(now));
 
@@ -499,7 +503,7 @@ while (term != NULL)
 	stats->add_posting_read_time(stats->stop_timer(now));
 
 	now = stats->start_timer();
-	decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid);
+	decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid, &term_details);
 	decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
 	stats->add_decompress_time(stats->stop_timer(now));
 

@@ -8,6 +8,7 @@
 #include "memory_index_stats.h"
 #include "memory_index_hash_node.h"
 #include "fundamental_types.h"
+#include "compress_variable_byte.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -24,9 +25,23 @@ private:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
-	long serialised_docids_size, serialised_tfs_size;
+	long long serialised_docids_size, serialised_tfs_size;
+	long long largest_docno;
 	ANT_memory_index_stats *stats;
+
+	/*
+		This code is experimental.  We are trying to work out what form of compression is best,
+		of whether a hybrid method is best.  The compression factory will find the best method
+		but in order to do this we need so decompress and recompress the blocks that the indexer
+		has created.
+	*/
+#ifdef ANT_COMPRESS_EXPERIMENT
+	ANT_compress_variable_byte variable_byte;
 	ANT_compression_factory *factory;
+	ANT_compressable_integer *decompressed_postings_list;
+	unsigned char *compressed_postings_list;
+	long long compressed_postings_list_length;
+#endif
 
 private:
 	long hash(ANT_string_pair *string);

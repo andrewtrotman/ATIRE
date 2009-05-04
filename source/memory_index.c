@@ -33,7 +33,11 @@ serialised_docids_size = 1;
 serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
-factory = new ANT_compression_factory;
+largest_docno = 0;
+
+#ifdef ANT_COMPRESS_EXPERIMENT
+	factory = new ANT_compression_factory;
+#endif
 }
 
 /*
@@ -45,7 +49,11 @@ ANT_memory_index::~ANT_memory_index()
 stats->text_render();
 delete memory;
 delete stats;
-delete factory;
+
+#ifdef ANT_COMPRESS_EXPERIMENT
+	factory->text_render();
+	delete factory;
+#endif
 }
 
 /*
@@ -112,9 +120,8 @@ void ANT_memory_index::set_document_length(long long docno, long length)
 ANT_string_pair string("~length", 7);
 long hash_value;
 ANT_memory_index_hash_node *node;
-long long doc;
 
-doc = docno;				// remove compiler warning
+largest_docno = docno;				// remove compiler warning
 
 hash_value = hash(&string);
 if (hash_table[hash_value] == NULL)
@@ -135,7 +142,7 @@ node->add_posting(&string, length);
 long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
 long terms = 1;
-long doc_size, tf_size, total;
+long long doc_size, tf_size, total;
 
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
@@ -157,28 +164,18 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 		}
 	}
 
-#ifdef NEVER
+#ifdef ANT_COMPRESS_EXPERIMENT
+	long long len;
 
-/*
-	At this point we know the number of documents in the collection so we can allocate the
-	source and destination buffers once and be sure it all fits.
+	variable_byte.decompress(decompressed_postings_list, serialised_docids, root->document_frequency);
+	len = factory->compress(compressed_postings_list, compressed_postings_list_length, decompressed_postings_list, root->document_frequency);
 
-	FIX THIS CODE 
-*/
-source_buffer = new ANT_compressable_integer[root->document_frequency];
-destination_buffer = new unsigned char [destination_length = (sizeof(ANT_compressable_integer) * root->document_frequency)];
-factory->compress(destination_buffer, destination_length, source_buffer, root->document_frequency);
-
-delete [] source_buffer;
-delete [] destination_buffer[];
-
+	root->docids_pos_on_disk = file->tell();
+	file->write(compressed_postings_list, len);
+#else
+	root->docids_pos_on_disk = file->tell();
+	file->write(serialised_docids, doc_size);
 #endif
-
-/*
-	text_render(root, serialised_docids, doc_size, serialised_tfs, tf_size);
-*/
-root->docids_pos_on_disk = file->tell();
-file->write(serialised_docids, doc_size);
 root->tfs_pos_on_disk = file->tell();
 file->write(serialised_tfs, tf_size);
 root->end_pos_on_disk = file->tell();
@@ -326,6 +323,12 @@ file->open(filename, "w+b");
 file->setvbuff(DISK_BUFFER_SIZE);
 stats->disk_buffer = DISK_BUFFER_SIZE;
 
+#ifdef ANT_COMPRESS_EXPERIMENT
+	compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
+	decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
+	compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
+#endif
+
 /*
 	Write the postings
 */
@@ -402,7 +405,7 @@ file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_t
 /*
 	The maximum length of a compressed posting list
 */
-longest_postings_size = serialised_docids_size + serialised_tfs_size;
+longest_postings_size = (uint32_t)(serialised_docids_size + serialised_tfs_size);
 file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));	// 4 byte
 /*
 	and the maximum number of postings in a postings list (that is, the largest document frequencty (DF))

@@ -6,6 +6,7 @@
 #define __SEARCH_ENGINE_H__
 
 #include "search_engine_posting.h"
+#include "compression_factory.h"
 
 class ANT_memory;
 class ANT_file;
@@ -54,7 +55,12 @@ public:
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
-	void decompress(unsigned char *start, unsigned char *end, long *into);
+
+#ifdef ANT_COMPRESS_EXPERIMENT
+	ANT_compression_factory factory;
+#endif
+
+	void decompress(unsigned char *start, unsigned char *end, long *into, ANT_search_engine_btree_leaf *leaf);
 	void decompress_tf(unsigned char *start, unsigned char *end, long *into);
 	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
 	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);

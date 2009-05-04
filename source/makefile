@@ -6,6 +6,7 @@ ALL = bitstream.obj \
  compress_relative10.obj \
  compress_carryover12.obj \
  compress_variable_byte.obj \
+ compress_none.obj \
  compression_factory.obj \
  test_compression.obj \
  maths.obj

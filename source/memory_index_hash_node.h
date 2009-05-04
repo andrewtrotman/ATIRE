@@ -42,7 +42,7 @@ public:
 	~ANT_memory_index_hash_node();
 	void *operator new(size_t count, ANT_memory *memory);
 	void add_posting(ANT_string_pair *keyword, long long docno);
-	long serialise_postings(unsigned char *doc_into, long *doc_size, unsigned char *tf_into, long *tf_size);
+	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
 
 	long decompress(unsigned char **from);
 	static int term_compare(const void *a, const void *b);

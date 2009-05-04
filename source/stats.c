@@ -80,7 +80,7 @@ long long ANT_stats::print_elapsed_time(void)
 long long total;
 
 total = get_clock_tick() - creation_time;
-print_time("Total Elapsed Time:", total);
+print_time("Total Elapsed Time   :", total);
 
 return total;
 }

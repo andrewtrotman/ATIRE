@@ -13,11 +13,13 @@
 #include "compress_variable_byte.h"
 #include "compression_factory.h"
 
-#define ITERATIONS 10
-#define TEST_LENGTH (1024 * 1024)
+#define ITERATIONS 1
+#define TEST_LENGTH 2
 
-ANT_compressable_integer random_buffer[TEST_LENGTH];
-unsigned char buffer[TEST_LENGTH * sizeof(long)];
+ANT_compressable_integer random_buffer[TEST_LENGTH] = 
+{51691, 18754};
+//{88, 184, 39, 140, 168, 24, 101, 21, 279, 148, 304, 93, 122, 7, 26, 95, 48, 21};
+unsigned char buffer[TEST_LENGTH * sizeof(long) * 4];		// * 4 so that it is easily big enough
 unsigned char second_buffer[TEST_LENGTH * sizeof(long)];
 ANT_compressable_integer decode_buffer[TEST_LENGTH];
 
@@ -30,7 +32,7 @@ int main(void)
 ANT_compressable_integer *into;
 long iteration, which;
 long long bytes;
-ANT_compression_factory compressor, decompressor;
+ANT_compress_simple9 compressor, decompressor;
 
 srand((unsigned int)time(NULL));
 srand(0);
@@ -38,9 +40,10 @@ srand(0);
 for (iteration = 0; iteration < ITERATIONS; iteration++)
 	{
 	into = random_buffer;
+/*
 	for (which = 0; which < TEST_LENGTH; which++)
 		 *into++ = (rand() + 1) & 0xffffff;
-
+*/
 	bytes = compressor.compress(buffer, sizeof(buffer), random_buffer, TEST_LENGTH);
 	printf("Compressed from %lld to %lld bytes ", (long long)sizeof(random_buffer), bytes);
 	memset(second_buffer, 0, sizeof(second_buffer));

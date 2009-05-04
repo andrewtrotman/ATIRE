@@ -63,10 +63,17 @@ long ANT_compress_simple9::bits_to_use[] =
 */
 long ANT_compress_simple9::table_row[] = 
 {
+0, 1, 2, 3, 4, 4, 5, 5, 
+6, 6, 6, 6, 6, 7, 7, 7, 
+7, 7, 7, 7, 7, 7, 7, 7, 
+7, 7, 7, 8, 8
+/*old (broken) */
+/*
 0, 1, 2, 3, 4, 5, 5, 6, 
 6, 7, 7, 7, 7, 7, 8, 8, 
 8, 8, 8, 8, 8, 8, 8, 8, 
 8, 8, 8, 8, 8
+*/
 };
 
 /*
@@ -89,18 +96,22 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	needed = 0;
 	for (term = 0; term < 28 && pos + term < source_integers; term++)
 		{
+//printf("(D:%ld B:%ld S:%ld)\n", (long)source[pos + term], (long)ANT_ceiling_log2(source[pos + term]), bits_to_use[ANT_ceiling_log2(source[pos + term])]);
 		needed_for_this_integer = bits_to_use[ANT_ceiling_log2(source[pos + term])];
 		if (needed_for_this_integer > 28 || needed_for_this_integer < 1)
 			return 0;					// we fail because there is an integer greater then 2^28 (or 0) and so we cannot pack it
 		if (needed_for_this_integer > needed)
 			needed = needed_for_this_integer;
-		if (needed * term >= 28)				// then we'll overflow so break out
+		if (needed * (term + 1) > 28)				// then we'll overflow so break out
 			break;
 		}
-
 	row = table_row[term - 1];
 	pos += simple9_table[row].numbers;
 	bits_per_integer = simple9_table[row].bits;
+
+//if (simple9_table[row].numbers != term)
+//	printf("MM ");
+//printf("(N:%ld T:%ld Bpi:%ld n:%ld)\n", (long)needed, (long)term, (long)bits_per_integer, (long)simple9_table[row].numbers);
 
 	*into = row << 28;   //puts the row no. to the first 4 bits.
 	for (term = 0; from < source + pos; term++)
@@ -135,6 +146,7 @@ for (;;)		// we break out of this (empty) loop in the case of overflow of the de
 		avoid the dereference each decode.
 	*/
 	bits = simple9_table[row].bits;
+//printf("[B:%ld]", bits);
 	mask = simple9_table[row].mask;
 	numbers = simple9_table[row].numbers;
 

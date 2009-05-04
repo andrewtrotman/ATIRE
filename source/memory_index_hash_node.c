@@ -166,10 +166,10 @@ else
 	ANT_MEMORY_INDEX_HASH_NODE::SERIALISE_POSTINGS()
 	------------------------------------------------
 */
-long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, long *doc_size, unsigned char *tf_into, long *tf_size)
+long long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size)
 {
 ANT_postings_piece *where;
-long err, size, doc_bytes, tf_bytes, more;
+long long err, size, doc_bytes, tf_bytes, more;
 
 err = FALSE;
 doc_bytes = 0;
@@ -183,7 +183,7 @@ for (where = docid_list_head; where != NULL; where = where->next)
 			memcpy(doc_into + doc_bytes, where->data, docid_node_used);			// final block many not be full
 		else
 			{
-			memcpy(doc_into + doc_bytes, where->data, size);
+			memcpy(doc_into + doc_bytes, where->data, (size_t)size);
 			size = (long)(postings_growth_factor * size);
 			}
 		}
@@ -203,7 +203,7 @@ for (where = tf_list_head; where != NULL; where = where->next)
 			memcpy(tf_into + tf_bytes, where->data, tf_node_used);
 		else
 			{
-			memcpy(tf_into + tf_bytes, where->data, size);
+			memcpy(tf_into + tf_bytes, where->data, (size_t)size);
 			size = (long)(postings_growth_factor * size);
 			}
 		}

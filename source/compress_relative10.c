@@ -60,10 +60,17 @@ long ANT_compress_relative10::bits_to_use10[] =
 */
 long ANT_compress_relative10::table_row10[] = 
 {
+0, 1, 2, 3, 4, 5, 6, 6, 6, 
+7, 7, 7, 7, 7, 8, 8, 8, 8, 
+8, 8, 8, 8, 8, 8, 8, 8, 8, 
+8, 8, 9, 9, 9
+/* old broken */
+/*
 0, 1, 2, 3, 4, 5, 6, 7, 7, 
 7, 8, 8, 8, 8, 8, 8, 8, 8, 
 8, 8, 8, 8, 8, 8, 8, 8, 8, 
 8, 8, 9, 9, 9
+*/
 };
 
 /*
@@ -96,7 +103,7 @@ for (term = 0; term < 28 && pos + term < source_integers; term++)
 		return 0;					// we fail because there is an integer greater then 2^28 (or 0) and so we cannot pack it
 	if (needed_for_this_integer > needed)
 		needed = needed_for_this_integer;
-	if (needed * term >= 28)				// then we'll overflow so break out
+	if (needed * (term + 1) > 28)				// then we'll overflow so break out
 		break;
 	}
 
@@ -124,7 +131,7 @@ for (words_in_compressed_string = 1; pos < source_integers; words_in_compressed_
 			return 0;					// we fail because there is an integer greater then 2^30 (or 0) and so we cannot pack it
 		if (needed_for_this_integer > needed)
 			needed = needed_for_this_integer;
-		if (needed * term >= 30)				// then we'll overflow so break out
+		if (needed * (term + 1) > 30)				// then we'll overflow so break out
 			break;
 		}
 

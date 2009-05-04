@@ -34,14 +34,14 @@ static ANT_compress_golomb golomb;
 */
 ANT_compress *ANT_compression_factory::technique[] = 
 {
-&none,
-&variable_byte,
-&simple9,
-&relative10,
-&carryover12,
-&elias_delta,
-&elias_gamma,
-&golomb
+&none,				/* type 0 */
+&variable_byte,	/* type 1 */
+&simple9,			/* type 2 */
+&relative10,		/* type 3 */
+&carryover12,		/* type 4 */
+&elias_delta,		/* type 5 */
+&elias_gamma,		/* type 6 */
+&golomb			/* type 7 */
 } ;
 
 /*
@@ -75,7 +75,15 @@ min_size = LLONG_MAX;
 for (which = 0; which < number_of_techniques; which++)
 	{
 	size = technique[which]->compress(destination, destination_length, source, source_integers);
-	if (size != 0 && size < min_size)
+
+#ifdef ANT_COMPRESS_EXPERIMENT
+	static ANT_compressable_integer d2[200000];
+	technique[which]->decompress(d2, destination, source_integers);
+	if (memcmp(source, d2, source_integers * sizeof(ANT_compressable_integer)))
+		printf("%s: Raw and decompressed strings do not match (list length:%lld)\n", technique_name[which], source_integers);
+#endif
+
+	if (size != 0 && size < min_size)		// if equal we prefer the first in the list
 		{
 		min_size = size;
 		preferred = which;
@@ -107,13 +115,21 @@ technique[*source]->decompress(destination, source + 1, destination_integers);
 void ANT_compression_factory::text_render(void)
 {
 long which;
+long long terms;
 
-puts("COMPRESSION FACTORY USAGE\n");
-puts("-------------------------\n");
+puts("\nCOMPRESSION FACTORY USAGE");
+puts("-------------------------");
+
+terms = histogram[-1];
 if (histogram[-1] != 0)
-		printf("FAILED TO COMPRESS:%ld\n", histogram[-1]);
+	printf("FAILED TO COMPRESS:%ld\n", histogram[-1]);
 for (which = 0; which < number_of_techniques; which++)
 	if (histogram[which] != 0)
-		printf("%s:%ld\n", technique_name[which], histogram[which]);
+		{
+		printf("%-*.*s :%10lld terms\n", 20, 20, technique_name[which], histogram[which]);
+		terms += histogram[which];
+		}
+
+printf("Factory calls        :%10lld terms\n", terms);
 }
 
