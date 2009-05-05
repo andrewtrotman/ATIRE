@@ -78,16 +78,18 @@ for (which = 0; which < number_of_techniques; which++)
 	size = scheme[which].scheme->compress(destination, destination_length, source, source_integers);
 	scheme[which].would_take += size;
 
-#ifdef ANT_COMPRESS_EXPERIMENT
-	static ANT_compressable_integer d2[200000];
+#ifdef ANT_COMPRESS_EXPERIMENT	
+
+	ANT_compressable_integer *d2;
+	d2 = new ANT_compressable_integer[(size_t)(source_integers + 1)];
+	d2[source_integers] = 0xCCCCCCCC;
 	scheme[which].scheme->decompress(d2, destination, source_integers);
-	if (memcmp(source, d2, source_integers * sizeof(ANT_compressable_integer)))
-		{
+	if (memcmp(source, d2, (size_t)(source_integers * sizeof(ANT_compressable_integer))))
 		printf("%s: Raw and decompressed strings do not match (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
-		for (long pos = 0; pos < source_integers; pos++)
-			if (source[pos] != d2[pos])
-				exit(printf("[@%d:%d->%d]", pos, source[pos], d2[pos]));
-		}
+	if (d2[source_integers] != 0xCCCCCCCC)
+		printf("%s: Decompression overrun\n", scheme[which].name);
+	delete [] d2;
+
 #endif
 
 	if (size != 0 && size < min_size)		// if equal we prefer the first in the list
