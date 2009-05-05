@@ -3,6 +3,7 @@
 	---------------------
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include "compression_factory.h"
 #include "compression_factory_scheme.h"
@@ -28,57 +29,24 @@ static ANT_compress_elias_delta elias_delta;
 static ANT_compress_elias_gamma elias_gamma;
 static ANT_compress_golomb golomb;
 
-ANT_compression_factory_scheme scheme[] =
+/*
+	ANT_compression_factory::scheme[]
+	---------------------------------
+	The known compression schemes that can be used
+*/
+ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {
-{&none, "No-Compression", 0},
-{&variable_byte, "Variable-Byte", 0},
-{&simple9, "Simple-9", 0},
-{&relative10, "Relative-10", 0},
-{&carryover12, "Carryover-12", 0},
-{&elias_delta, "Elias-Delta", 0},
-{&elias_gamma, "Elias-Gamma", 0},
-{&golomb, "Golomb", 0}
+{&none, "No-Compression"},
+{&variable_byte, "Variable-Byte"},
+{&simple9, "Simple-9"},
+{&relative10, "Relative-10"},
+{&carryover12, "Carryover-12"},
+{&elias_delta, "Elias-Delta"},
+{&elias_gamma, "Elias-Gamma"},
+{&golomb, "Golomb"}
 };
 
-#ifdef NEVER
-/*
-	ANT_compression_factory::techniques[]
-	-------------------------------------
-	List of all known (to ANT) compression schemes
-*/
-ANT_compress *ANT_compression_factory::technique[] = 
-{
-&none,				/* type 0 */
-&variable_byte,	/* type 1 */
-&simple9,			/* type 2 */
-&relative10,		/* type 3 */
-&carryover12,		/* type 4 */
-&elias_delta,		/* type 5 */
-&elias_gamma,		/* type 6 */
-&golomb			/* type 7 */
-} ;
-
-/*
-	ANT_compression_factory::names[]
-*/
-char *ANT_compression_factory::technique_name[] =
-{
-"No-Compression",
-"Variable-Byte",
-"Simple-9",
-"Relative-10",
-"Carryover-12",
-"Elias-Delta",
-"Elias-Gamma",
-"Golomb"
-} ;
-
-long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::technique) / sizeof(*ANT_compression_factory::technique);
-
-#endif
-
-long ANT_compression_factory::number_of_techniques = sizeof(scheme) / sizeof(*scheme);
-
+long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::scheme) / sizeof(*ANT_compression_factory::scheme);
 
 /*
 	ANT_COMPRESSION_FACTORY::ANT_COMPRESSION_FACTORY()
@@ -88,8 +56,9 @@ ANT_compression_factory::ANT_compression_factory()
 {
 long which;
 
+failures = integers_compressed = 0;
 for (which = 0; which < number_of_techniques; which++)
-	scheme[which].uses = scheme[which].times = scheme[which].bytes = 0;
+	scheme[which].uses = scheme[which].would_take = scheme[which].did_take = 0;
 }
 
 /*
@@ -102,16 +71,23 @@ long which, preferred = -1;
 long long min_size, size;
 
 min_size = LLONG_MAX;
+integers_compressed += source_integers;
 
 for (which = 0; which < number_of_techniques; which++)
 	{
 	size = scheme[which].scheme->compress(destination, destination_length, source, source_integers);
+	scheme[which].would_take += size;
 
 #ifdef ANT_COMPRESS_EXPERIMENT
 	static ANT_compressable_integer d2[200000];
 	scheme[which].scheme->decompress(d2, destination, source_integers);
 	if (memcmp(source, d2, source_integers * sizeof(ANT_compressable_integer)))
-		printf("%s: Raw and decompressed strings do not match (list length:%lld)\n", scheme[which].name, source_integers);
+		{
+		printf("%s: Raw and decompressed strings do not match (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
+		for (long pos = 0; pos < source_integers; pos++)
+			if (source[pos] != d2[pos])
+				exit(printf("[@%d:%d->%d]", pos, source[pos], d2[pos]));
+		}
 #endif
 
 	if (size != 0 && size < min_size)		// if equal we prefer the first in the list
@@ -121,17 +97,14 @@ for (which = 0; which < number_of_techniques; which++)
 		}
 	}
 
-
 if (preferred < 0)
 	{
-	/*
-		failed to compress into the given space
-		note that we do not keep track of the fact that we failed.
-	*/
+	failures++;
 	return 0;
 	}
 
 scheme[preferred].uses++;
+scheme[preferred].did_take += min_size;
 
 *destination = (unsigned char)preferred;
 return scheme[preferred].scheme->compress(destination + 1, destination_length - 1, source, source_integers) + 1;
@@ -153,19 +126,35 @@ scheme[*source].scheme->decompress(destination, source + 1, destination_integers
 void ANT_compression_factory::text_render(void)
 {
 long which;
-long long terms;
+long long terms, bytes, best_other;
 
 puts("\nCOMPRESSION FACTORY USAGE");
 puts("-------------------------");
 
-terms = 0;
+terms = bytes = 0;
 for (which = 0; which < number_of_techniques; which++)
 	if (scheme[which].uses != 0)
 		{
-		printf("%-*.*s :%10lld terms\n", 20, 20, scheme[which].name, scheme[which].uses);
+		printf("%-*.*s :%10lld terms into %10lld bytes\n", 20, 20, scheme[which].name, scheme[which].uses, scheme[which].did_take);
 		terms += scheme[which].uses;
+		bytes += scheme[which].did_take;
 		}
 
 printf("Factory calls        :%10lld terms\n", terms);
+printf("        into         :%10lld bytes\n", bytes);
+printf("        total space  :%10lld bytes\n", bytes + terms);		// add terms because it takes one byte to store which scheme was used
+
+best_other = LLONG_MAX;
+puts("\nCOMPRESSION COMPARISON");
+puts("----------------------");
+for (which = 0; which < number_of_techniques; which++)
+	{
+	printf("Only %-*.*s :%10lld bytes (%2.2f bits per integer)\n", 15, 15, scheme[which].name, scheme[which].would_take, (double)(scheme[which].would_take * 8) / (double)integers_compressed);
+	if (scheme[which].would_take < best_other)
+		best_other = scheme[which].would_take;
+	}
+printf("Mixed                :%10lld bytes (%2.2f bits per integer)\n", bytes + terms, (double)((bytes + terms) * 8) / (double)integers_compressed);
+printf("Mixed cf best other  :%10lld bytes saved\n", best_other - (bytes + terms));
+printf("Mixed cf best other  :%2.2f%% saved\n", (double)(best_other - (bytes + terms)) / (double)best_other);
 }
 

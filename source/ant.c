@@ -22,6 +22,7 @@
 #include "INEX_assessment.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
+#include "version.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -29,8 +30,6 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
-
-static char *ANT_version_string = "Version 0.1 alpha";
 
 enum {QREL_INEX, QREL_ANT};
 
@@ -160,11 +159,7 @@ long more;
 long long last_to_list, hits, documents_in_id_list;
 char **document_list, **answer_list;
 
-printf("ANT %s\n", ANT_version_string);
-puts("Written (w) 2008, 2009");
-puts("Andrew Trotman, University of Otago");
-puts("andrew@cs.otago.ac.nz");
-
+puts(ANT_version_string);
 document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
@@ -275,7 +270,7 @@ char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_search_engine_forum_TREC output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
 
-fprintf(stderr, "ANT %s Written (w) 2008, 2009 Andrew Trotman, University of Otago\n", ANT_version_string);
+fprintf(stderr, "%s\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 

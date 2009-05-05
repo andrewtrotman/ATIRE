@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "compress.h"
+#include "compression_factory_scheme.h"
 
 /*
 	class ANT_COMPRESSION_FACTORY
@@ -16,6 +17,9 @@ class ANT_compression_factory : ANT_compress
 {
 private:
 	static long number_of_techniques;
+	static ANT_compression_factory_scheme scheme[];
+	long long failures;
+	long long integers_compressed;
 	
 public:
 	ANT_compression_factory();

@@ -74,7 +74,8 @@ PARTS = \
 	$(OBJDIR)\compress_carryover12.obj			\
 	$(OBJDIR)\compress_variable_byte.obj		\
 	$(OBJDIR)\compress_none.obj					\
-	$(OBJDIR)\compression_factory.obj
+	$(OBJDIR)\compression_factory.obj		\
+	$(OBJDIR)\version.obj
 
 #
 #	Targets

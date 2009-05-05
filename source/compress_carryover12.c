@@ -249,7 +249,7 @@ destination_end = destination + destination_length;
 
 size = TRANS_TABLE_STARTER;
 
-if ((max_bits = calc_min_bits(a, n)) <= 0)
+if ((max_bits = calc_min_bits(a, n)) < 0)
 	return 0;
 
 CARRY_BLOCK_ENCODE_START(n, max_bits);
