@@ -74,10 +74,7 @@ while (!match)
 		{
 		FindClose(file_list->handle);
 		if (pop_directory())
-			{
 			return next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data));
-//			return next();
-			}
 		else
 			return NULL;
 		}

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include "compression_factory.h"
+#include "compression_factory_scheme.h"
 #include "compress_relative10.h"
 #include "compress_carryover12.h"
 #include "compress_golomb.h"
@@ -27,6 +28,19 @@ static ANT_compress_elias_delta elias_delta;
 static ANT_compress_elias_gamma elias_gamma;
 static ANT_compress_golomb golomb;
 
+ANT_compression_factory_scheme scheme[] =
+{
+{&none, "No-Compression", 0},
+{&variable_byte, "Variable-Byte", 0},
+{&simple9, "Simple-9", 0},
+{&relative10, "Relative-10", 0},
+{&carryover12, "Carryover-12", 0},
+{&elias_delta, "Elias-Delta", 0},
+{&elias_gamma, "Elias-Gamma", 0},
+{&golomb, "Golomb", 0}
+};
+
+#ifdef NEVER
 /*
 	ANT_compression_factory::techniques[]
 	-------------------------------------
@@ -61,6 +75,23 @@ char *ANT_compression_factory::technique_name[] =
 
 long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::technique) / sizeof(*ANT_compression_factory::technique);
 
+#endif
+
+long ANT_compression_factory::number_of_techniques = sizeof(scheme) / sizeof(*scheme);
+
+
+/*
+	ANT_COMPRESSION_FACTORY::ANT_COMPRESSION_FACTORY()
+	--------------------------------------------------
+*/
+ANT_compression_factory::ANT_compression_factory()
+{
+long which;
+
+for (which = 0; which < number_of_techniques; which++)
+	scheme[which].uses = scheme[which].times = scheme[which].bytes = 0;
+}
+
 /*
 	ANT_COMPRESSION_FACTORY::COMPRESS()
 	-----------------------------------
@@ -74,13 +105,13 @@ min_size = LLONG_MAX;
 
 for (which = 0; which < number_of_techniques; which++)
 	{
-	size = technique[which]->compress(destination, destination_length, source, source_integers);
+	size = scheme[which].scheme->compress(destination, destination_length, source, source_integers);
 
 #ifdef ANT_COMPRESS_EXPERIMENT
 	static ANT_compressable_integer d2[200000];
-	technique[which]->decompress(d2, destination, source_integers);
+	scheme[which].scheme->decompress(d2, destination, source_integers);
 	if (memcmp(source, d2, source_integers * sizeof(ANT_compressable_integer)))
-		printf("%s: Raw and decompressed strings do not match (list length:%lld)\n", technique_name[which], source_integers);
+		printf("%s: Raw and decompressed strings do not match (list length:%lld)\n", scheme[which].name, source_integers);
 #endif
 
 	if (size != 0 && size < min_size)		// if equal we prefer the first in the list
@@ -90,13 +121,20 @@ for (which = 0; which < number_of_techniques; which++)
 		}
 	}
 
-histogram[preferred]++;		// OK, this is a hack, histogram[-1] is the "cannot compress" count.
 
 if (preferred < 0)
-	return 0;			// fail, all compression schemes make the string longer!
+	{
+	/*
+		failed to compress into the given space
+		note that we do not keep track of the fact that we failed.
+	*/
+	return 0;
+	}
+
+scheme[preferred].uses++;
 
 *destination = (unsigned char)preferred;
-return technique[preferred]->compress(destination + 1, destination_length - 1, source, source_integers) + 1;
+return scheme[preferred].scheme->compress(destination + 1, destination_length - 1, source, source_integers) + 1;
 }
 
 /*
@@ -105,7 +143,7 @@ return technique[preferred]->compress(destination + 1, destination_length - 1, s
 */
 void ANT_compression_factory::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
 {
-technique[*source]->decompress(destination, source + 1, destination_integers);
+scheme[*source].scheme->decompress(destination, source + 1, destination_integers);
 }
 
 /*
@@ -120,14 +158,12 @@ long long terms;
 puts("\nCOMPRESSION FACTORY USAGE");
 puts("-------------------------");
 
-terms = histogram[-1];
-if (histogram[-1] != 0)
-	printf("FAILED TO COMPRESS:%ld\n", histogram[-1]);
+terms = 0;
 for (which = 0; which < number_of_techniques; which++)
-	if (histogram[which] != 0)
+	if (scheme[which].uses != 0)
 		{
-		printf("%-*.*s :%10lld terms\n", 20, 20, technique_name[which], histogram[which]);
-		terms += histogram[which];
+		printf("%-*.*s :%10lld terms\n", 20, 20, scheme[which].name, scheme[which].uses);
+		terms += scheme[which].uses;
 		}
 
 printf("Factory calls        :%10lld terms\n", terms);
