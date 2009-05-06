@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "compress_sigma.h"
 #include "compress_carryover12.h"
@@ -64,7 +65,7 @@ return *(long *)a - *(long *)b;
 	ANT_COMPRESS_SIGMA::REORDER()
 	-----------------------------
 */
-ANT_compress_sigma_frequency *ANT_compress_sigma::reorder(ANT_compress_sigma_frequency *map, ANT_compress_sigma_frequency *end, long uniques, long threshold, ANT_compressable_integer *uniques_over_threshold)
+ANT_compress_sigma_frequency *ANT_compress_sigma::reorder(ANT_compress_sigma_frequency *map, ANT_compress_sigma_frequency *end, long uniques, unsigned long threshold, ANT_compressable_integer *uniques_over_threshold)
 {
 ANT_compress_sigma_frequency *current;
 ANT_compress_sigma_frequency *preorder, *gap;
@@ -99,38 +100,51 @@ for (pow = 0; to < *uniques_over_threshold; pow++)
 return preorder;
 }
 
-
 /*
 	ANT_COMPRESS_SIGMA::COMPRESS()
 	------------------------------
 */
-long long ANT_compress_sigma::compress(unsigned char *target, long long destination_length, ANT_compressable_integer *a, long long size)
+long long ANT_compress_sigma::compress(unsigned char *target, long long destination_length, ANT_compressable_integer *source, long long size)
 {
 ANT_compress_carryover12 carryover12;
-ANT_compress_sigma_frequency *map, *current, *end, *from, *equal_freq;
-ANT_compressable_integer *source;
 ANT_compressable_integer *destination, *gap, *list;
-long long last;
 ANT_compress_sigma_frequency *preorder;
-long uniques, freq, index = 0;
+long index = 0;
 long raw_size, final_size;
 ANT_compressable_integer uniques_over_threshold;
 
+/**/
+ANT_compress_sigma_frequency *map, *end, *from, *equal_freq, *current;
+ANT_compressable_integer *integer, last, uniques, freq;
+/**/
+
+/*
+	Allocate space needed to compute the frequencies
+*/
 map = new ANT_compress_sigma_frequency[(size_t)size];
 end = map + size;
 
-source = a;
+/*
+	copy the source array
+*/
+integer = source;
 for (current = map; current < end; current++)
 	{
-	current->gap = *source;
-	current->index_pos = source - a;
+	current->gap = *integer;
+	current->index_pos = integer - source;
 	current->freq = 0;
-	source++;
+	integer++;
 	}
 
+/*
+	sort it.
+*/
 qsort(map, (size_t)size, sizeof(*map), map_cmp);
 
-last = -1;
+/*
+	Compute the frequences of each unique value in the source array
+*/
+last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler will work this out
 uniques = 0;
 from = map;
 freq = 1;
@@ -150,8 +164,15 @@ for (current = map; current < end; current++)
 for (equal_freq = from; equal_freq < current; equal_freq++)
 	equal_freq->freq = freq;
 
-qsort(map, (size_t)size, sizeof(*map), map_freq_cmp);		// order by frequencies
-preorder = reorder(map, end, uniques, threshold, &uniques_over_threshold);			// now sort into increasing order by 2^n
+/*
+	Sort the unique values by frequency
+*/
+qsort(map, (size_t)size, sizeof(*map), map_freq_cmp);
+
+/*
+	Now sort into increasing order within whole powers of 2
+*/
+preorder = reorder(map, end, uniques, threshold, &uniques_over_threshold);
 
 raw_size = uniques_over_threshold + 1 + size;
 destination = new ANT_compressable_integer[raw_size];

@@ -17,7 +17,7 @@ class ANT_compress_sigma_frequency
 public:
 	ANT_compressable_integer gap;
 	size_t index_pos;
-	long long freq;
+	ANT_compressable_integer freq;
 } ;
 
 
