@@ -160,6 +160,6 @@ for (which = 0; which < number_of_techniques; which++)
 	}
 printf("Mixed                :%10lld bytes (%2.2f bits per integer)\n", bytes + terms, (double)((bytes + terms) * 8) / (double)integers_compressed);
 printf("Mixed cf best other  :%10lld bytes saved\n", best_other - (bytes + terms));
-printf("Mixed cf best other  :%2.2f%% saved\n", (double)(best_other - (bytes + terms)) / (double)best_other);
+printf("Mixed cf best other  :%2.2f%% saved\n", 100.0 * ((double)(best_other - (bytes + terms)) / (double)best_other));
 }
 

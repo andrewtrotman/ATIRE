@@ -63,5 +63,17 @@ while (x != 0);
 return sum;
 }
 
+/*
+	ANT_POW2_ZERO()
+	---------------
+	return 2^power (except that 2^0=0)
+*/
+inline unsigned long ANT_pow2_zero(long power)
+{
+extern unsigned long ANT_powers_of_two_zero[];
+
+return ANT_powers_of_two_zero[power];
+}
+
 #endif __MATHS_H__
 

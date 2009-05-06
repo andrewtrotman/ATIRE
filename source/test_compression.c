@@ -14,8 +14,8 @@
 #include "compression_factory.h"
 #include "compress_sigma.h"
 
-#define ITERATIONS 1
-#define TEST_LENGTH (10)
+#define ITERATIONS 10
+#define TEST_LENGTH (1024)
 
 ANT_compressable_integer random_buffer[TEST_LENGTH];
 unsigned char buffer[TEST_LENGTH * sizeof(long) * 4];		// * 4 so that it is easily big enough

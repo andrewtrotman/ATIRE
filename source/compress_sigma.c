@@ -9,29 +9,22 @@
 #include "compress_sigma.h"
 #include "compress_carryover12.h"
 #include "compress_carryover12_internals.h"
+#include "fundamental_types.h"
+#include "maths.h"
+#include "compress_sigma_frequency.h"
 
-typedef struct
-{
-	ANT_compressable_integer gap;
-	size_t index_pos;
-	long long freq;
-} FreqOrdinal;
 
-static unsigned long powers_of_two[] = { 
-         0,          2,        4,         8,        16,        32,         64,        128,
-       256,        512,     1024,      2048,      4096,      8192,      16384,      32768,
-     65536,     131072,   262144,    524288,   1048576,   2097152,    4194304,    8388608,
-  16777216,   33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648};
+#pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the same of the C macros
 
 /*
-	MAP_CMP()
-	---------
+	ANT_COMPRESS_SIGMA::MAP_CMP()
+	-----------------------------
 */
-static int map_cmp(const void *a, const void *b)
+int ANT_compress_sigma::map_cmp(const void *a, const void *b)
 {
-FreqOrdinal *first, *second;
-first = (FreqOrdinal *)a;
-second = (FreqOrdinal *)b;
+ANT_compress_sigma_frequency *first, *second;
+first = (ANT_compress_sigma_frequency *)a;
+second = (ANT_compress_sigma_frequency *)b;
 
 if (first->gap == second->gap)
 	return first->index_pos > second->index_pos ? 1 : -1;
@@ -40,14 +33,14 @@ else
 }
 
 /*
-	MAP_FREQ_CMP()
-	--------------
+	ANT_COMPRESS_SIGMA::MAP_FREQ_CMP()
+	----------------------------------
 */
-static int map_freq_cmp(const void *a, const void *b)
+int ANT_compress_sigma::map_freq_cmp(const void *a, const void *b)
 {
-FreqOrdinal *first, *second;
-first = (FreqOrdinal *)a;
-second = (FreqOrdinal *)b;
+ANT_compress_sigma_frequency *first, *second;
+first = (ANT_compress_sigma_frequency *)a;
+second = (ANT_compress_sigma_frequency *)b;
 
 if (second->freq != first->freq)
 	return second->freq > first->freq ? 1 : -1;
@@ -62,26 +55,22 @@ return first->index_pos > second->index_pos ? 1 : -1;
 	ASPT_LONG_CMP()
 	---------------
 */
-static int aspt_long_cmp(const void *a, const void *b)
+int ANT_compress_sigma::long_cmp(const void *a, const void *b)
 {
-long *first, *second;
-first = (long *)a;
-second = (long *)b;
-
-return *first - *second;
+return *(long *)a - *(long *)b;
 }
 
 /*
-	REORDER()
-	---------
+	ANT_COMPRESS_SIGMA::REORDER()
+	-----------------------------
 */
-static FreqOrdinal *reorder(FreqOrdinal *map, FreqOrdinal *end, long uniques, long threshold, long *uniques_over_threshold)
+ANT_compress_sigma_frequency *ANT_compress_sigma::reorder(ANT_compress_sigma_frequency *map, ANT_compress_sigma_frequency *end, long uniques, long threshold, ANT_compressable_integer *uniques_over_threshold)
 {
-FreqOrdinal *current;
-FreqOrdinal *preorder, *gap;
-long last, pow, from, to;
+ANT_compress_sigma_frequency *current;
+ANT_compress_sigma_frequency *preorder, *gap;
+ANT_compressable_integer last, pow, from, to;
 
-gap = preorder = new FreqOrdinal[uniques];
+gap = preorder = new ANT_compress_sigma_frequency[uniques];
 *uniques_over_threshold = last = 0;
 for (current = map; current < end; current++)
 	{
@@ -100,18 +89,12 @@ for (current = map; current < end; current++)
 from = to = 0;
 for (pow = 0; to < *uniques_over_threshold; pow++)
 	{
-	from = powers_of_two[pow];
-	to = powers_of_two[pow + 1];
+	from = ANT_pow2_zero(pow);
+	to = ANT_pow2_zero(pow + 1);
 	if (to > *uniques_over_threshold)
 		to = *uniques_over_threshold;
-	qsort(preorder + from, to - from, sizeof(*preorder), aspt_long_cmp);
+	qsort(preorder + from, to - from, sizeof(*preorder), long_cmp);
 	}
-/*
-printf("\nInorder->\n");
-for (long pos = 0; pos < uniques; pos++)
-	printf("%d:%d\n", pos, preorder[pos]);
-printf("<-Inorder\n");
-*/
 
 return preorder;
 }
@@ -124,15 +107,16 @@ return preorder;
 long long ANT_compress_sigma::compress(unsigned char *target, long long destination_length, ANT_compressable_integer *a, long long size)
 {
 ANT_compress_carryover12 carryover12;
-long threshold = 1;									// FIX THIS
-FreqOrdinal *map, *current, *end, *from, *equal_freq;
+ANT_compress_sigma_frequency *map, *current, *end, *from, *equal_freq;
 ANT_compressable_integer *source;
 ANT_compressable_integer *destination, *gap, *list;
-FreqOrdinal *preorder;
-long uniques, last, freq, index = 0;
-long raw_size, final_size, uniques_over_threshold;
+long long last;
+ANT_compress_sigma_frequency *preorder;
+long uniques, freq, index = 0;
+long raw_size, final_size;
+ANT_compressable_integer uniques_over_threshold;
 
-map = new FreqOrdinal[size];
+map = new ANT_compress_sigma_frequency[(size_t)size];
 end = map + size;
 
 source = a;
@@ -144,7 +128,7 @@ for (current = map; current < end; current++)
 	source++;
 	}
 
-qsort(map, size, sizeof(*map), map_cmp);
+qsort(map, (size_t)size, sizeof(*map), map_cmp);
 
 last = -1;
 uniques = 0;
@@ -166,7 +150,7 @@ for (current = map; current < end; current++)
 for (equal_freq = from; equal_freq < current; equal_freq++)
 	equal_freq->freq = freq;
 
-qsort(map, size, sizeof(*map), map_freq_cmp);		// order by frequencies
+qsort(map, (size_t)size, sizeof(*map), map_freq_cmp);		// order by frequencies
 preorder = reorder(map, end, uniques, threshold, &uniques_over_threshold);			// now sort into increasing order by 2^n
 
 raw_size = uniques_over_threshold + 1 + size;
@@ -206,8 +190,8 @@ long pow, p_from, to, diff;
 p_from = to = 1;
 for (pow = 0; to < uniques_over_threshold; pow++)
 	{
-	p_from = powers_of_two[pow];
-	to = powers_of_two[pow + 1];
+	p_from = ANT_pow2_zero(pow);
+	to = ANT_pow2_zero(pow + 1);
 	if (to > uniques_over_threshold)
 		to = uniques_over_threshold;
 	last = preorder[p_from].gap;
@@ -245,16 +229,12 @@ return final_size;			// number of longs allocated
 */
 void ANT_compress_sigma::decompress(ANT_compressable_integer *uncompressed, unsigned char *source, long long n)
 {
-long *__wpos = (long *)source;
-long last, uniques, got;
-long from, to, diff;
-unsigned long *pow;
-int __wbits = TRANS_TABLE_STARTER;
-int __wremaining = -1;
+uint32_t *__wpos = (uint32_t *)source;
+long pow;
+long __wbits = TRANS_TABLE_STARTER;
+long __wremaining = -1;
 unsigned __wval = 0;
-ANT_compressable_integer *temp, *dictionary, *into, *end;
-
-temp = new ANT_compressable_integer [n * 3 + 100];			// fix this
+ANT_compressable_integer *into, *end, uniques, from, to, diff, last, got;
 
 CARRY_BLOCK_DECODE_START;
 /*
@@ -262,26 +242,32 @@ CARRY_BLOCK_DECODE_START;
 */
 CARRY_DECODE(uniques);
 
-dictionary = temp;			// this is where we're gonna put the dictionary
+if (uniques > dictionary_length)
+	{
+	delete [] dictionary;
+	dictionary = new ANT_compressable_integer[dictionary_length = uniques];
+	}
 
 /*
 	Decode the dictionary
 */
 from = to = 0;
 last = 0;
-for (pow = powers_of_two; to < uniques; /* nothing */)
+pow = 0;
+into = dictionary;
+while (to < uniques)
 	{
-	from = *pow++;
-	to = *pow;
+	from = ANT_pow2_zero(pow++);
+	to = ANT_pow2_zero(pow);
 	if (to > uniques)
 		to = uniques;
 
-	CARRY_DECODE(*dictionary++ = last);
+	CARRY_DECODE(*into++ = last);
 
 	for (diff = from + 1; diff < to; diff++)
 		{
 		CARRY_DECODE(got);
-		last = *dictionary++ = got + last + 1;
+		last = *into++ = got + last + 1;
 		}
 	}
 
@@ -296,9 +282,7 @@ do
 	if (got > uniques)
 		*into++ = got - uniques;
 	else
-		*into++ = temp[got];
+		*into++ = dictionary[got];
 	}
 while (into < end);
-
-delete [] temp;			// fix this
 }
