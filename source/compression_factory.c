@@ -11,6 +11,7 @@
 #include "compress_carryover12.h"
 #include "compress_golomb.h"
 #include "compress_variable_byte.h"
+#include "compress_sigma.h"
 #include "compress_none.h"
 
 /*
@@ -28,6 +29,7 @@ static ANT_compress_carryover12 carryover12;
 static ANT_compress_elias_delta elias_delta;
 static ANT_compress_elias_gamma elias_gamma;
 static ANT_compress_golomb golomb;
+static ANT_compress_sigma sigma;
 
 /*
 	ANT_compression_factory::scheme[]
@@ -41,6 +43,7 @@ ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {&simple9, "Simple-9"},
 {&relative10, "Relative-10"},
 {&carryover12, "Carryover-12"},
+{&sigma, "Sigma"},
 {&elias_delta, "Elias-Delta"},
 {&elias_gamma, "Elias-Gamma"},
 {&golomb, "Golomb"}

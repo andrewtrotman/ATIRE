@@ -7,6 +7,8 @@
 
 #include "compress.h"
 
+#define ALLOW_ZERO 1
+
 /*
 	class ANT_COMPRESS_CARRYOVER12
 	------------------------------

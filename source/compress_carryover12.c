@@ -28,9 +28,10 @@
 #pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the same of the C macros
 
 #include "compress_carryover12.h"
+#include "compress_carryover12_internals.h"
+
 
 #define MAX_ELEM_PER_WORD		64
-#define TRANS_TABLE_STARTER	33
 
 
 /* ========================================================
@@ -46,14 +47,14 @@
    ========================================================
 */ 
 
-static unsigned char *__pc30, *__pc32;	/* point to transition table, 30 and 32 data bits */
-static unsigned char *__pcbase;    /* point to current transition table */
+unsigned char *__pc30, *__pc32;	/* point to transition table, 30 and 32 data bits */
+unsigned char *__pcbase;    /* point to current transition table */
 /*
 	big is transition table for the cases when number of bits
 	needed to code the maximal value exceeds 16.
 	_small are used otherwise.
 */
-static unsigned char trans_B1_30_big[]={
+unsigned char trans_B1_30_big[]={
 	0,0,0,0, 1,2,3,28, 1,2,3,28, 2,3,4,28, 3,4,5,28, 4,5,6,28,
 	5,6,7,28, 6,7,8,28, 6,7,10,28, 8,10,15,28, 9,10,14,28,
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 10,15,16,28, 10,14,15,28,
@@ -61,7 +62,7 @@ static unsigned char trans_B1_30_big[]={
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	6,10,16,28, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 4,9,15,28};
 
-static unsigned char trans_B1_32_big[]={
+unsigned char trans_B1_32_big[]={
 	0,0,0,0, 1,2,3,28, 1,2,3,28, 2,3,4,28, 3,4,5,28, 4,5,6,28,
 	5,6,7,28, 6,7,8,28, 7,9,10,28, 7,10,15,28, 8,10,15,28,
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 7,10,15,28, 10,15,16,28,
@@ -69,7 +70,7 @@ static unsigned char trans_B1_32_big[]={
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	6,10,16,28, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 4,10,16,28};
 
-static unsigned char trans_B1_30_small[]={
+unsigned char trans_B1_30_small[]={
 	0,0,0,0, 1,2,3,16, 1,2,3,16, 2,3,4,16, 3,4,5,16, 4,5,6,16,
 	5,6,7,16, 6,7,8,16, 6,7,10,16, 7,8,10,16, 9,10,14,16, 0,0,0,0,
 	0,0,0,0, 0,0,0,0, 8,10,15,16, 10,14,15,16,  7,10,15,16, 0,0,0,0,
@@ -77,7 +78,7 @@ static unsigned char trans_B1_30_small[]={
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 	0,0,0,0, 0,0,0,0, 0,0,0,0, 3,7,10,16};
 
-static unsigned char trans_B1_32_small[] = {
+unsigned char trans_B1_32_small[] = {
 	0,0,0,0, 1,2,3,16, 1,2,3,16, 2,3,4,16, 3,4,5,16, 4,5,6,16,
 	5,6,7,16, 6,7,8,16, 7,9,10,16, 7,10,15,16, 8,10,15,16, 0,0,0,0,
 	0,0,0,0, 0,0,0,0, 7,10,15,16, 8,10,15,16, 10,14,15,16, 0,0,0,0,
@@ -110,7 +111,7 @@ static unsigned char CLOG2TAB[] = {
 	------
 	__mask[i] is 2^i-1
 */
-static unsigned __mask[33]= {
+unsigned __mask[33]= {
   0x00U, 0x01U, 0x03U, 0x07U, 0x0FU,
   0x1FU, 0x3FU, 0x7FU, 0xFFU,
   0x01FFU, 0x03FFU, 0x07FFU, 0x0FFFU,
@@ -188,7 +189,11 @@ long long i;
 long bits, max = 0;
 
 for (i = 0; i < n; i++)
+#ifdef ALLOW_ZERO
+	if (max < (bits = qceillog_2(gaps[i] + 1)))
+#else
 	if (max < (bits = qceillog_2(gaps[i])))
+#endif
 		max = bits;
 
 return max > 28 ? -1 : max;
@@ -210,14 +215,23 @@ if (len)
 	{
 	max = avail/len;
 	real_end = start + max - 1 <= end ? start + max: end + 1; 
+#ifdef ALLOW_ZERO
+	for (i = start; i < real_end && qceillog_2(gaps[i] + 1) <= len; i++);
+#else
 	for (i = start; i < real_end && qceillog_2(gaps[i]) <= len; i++);
+#endif
 	if (i < real_end)
 		return 0;
 	return real_end - start;
 	}
 else
 	{
+#ifdef ALLOW_ZERO
+	for (i = start; i < start + MAX_ELEM_PER_WORD && i <= end && qceillog_2(gaps[i] + 1) <= len; i++);			// empty loop
+#else
 	for (i = start; i < start + MAX_ELEM_PER_WORD && i <= end && qceillog_2(gaps[i]) <= len; i++);			// empty loop
+#endif
+
 	if (i - start < 2)
 		return 0;
 	return i - start;
@@ -277,7 +291,11 @@ for (i = 0; i < n; )
 	/* 2. Coding: Code elements using row "base" & column "j" */
 	WORD_ENCODE(j + 1, 2);             /* encoding column */
 	for ( ; elems ; elems--, i++)   /* encoding d-gaps */
+#ifdef ALLOW_ZERO
+		WORD_ENCODE(a[i] + 1, size);
+#else
 		WORD_ENCODE(a[i], size);
+#endif
 	}
 
 if (__pvalue)
@@ -290,67 +308,6 @@ return destination - original_destination;
 	MACROS FOR WORD DECODING
 	========================
 */
-#define GET_NEW_WORD														\
-	__wval= *__wpos++
-  
-#define WORD_DECODE(x,b)													\
-	do 																		\
-		{																	\
-		if (__wremaining < (b))												\
-			{  																\
-			GET_NEW_WORD;													\
-			__wremaining = 32;												\
-			}																\
-		(x) = (__wval & __mask[b]) + 1;										\
-		__wval >>= (b);														\
-		__wremaining -= (b);												\
-		} 																	\
-	while (0)
-
-#define CARRY_BLOCK_DECODE_START											\
-do  																		\
-	{																		\
-	long tmp;																\
-	WORD_DECODE(tmp, 1);													\
-	__pc30 = tmp == 1 ? trans_B1_30_small : trans_B1_30_big;				\
-	__pc32 = tmp == 1 ? trans_B1_32_small : trans_B1_32_big;				\
-	__pcbase = __pc30;														\
-	CARRY_DECODE_GET_SELECTOR												\
-	} 																		\
-while (0)
-
-#define CARRY_DECODE_GET_SELECTOR											\
-	if (__wremaining >= 2)													\
-		{																	\
-		__pcbase = __pc32;													\
-		__wbits = __pcbase[(__wbits << 2) + (__wval & 3)];					\
-		__wval >>= 2;														\
-		__wremaining -= 2;													\
-		if (__wremaining < __wbits)											\
-			{																\
-			GET_NEW_WORD;													\
-			__wremaining = 32;												\
-			}																\
-		}																	\
-	else																	\
-		{																	\
-		__pcbase = __pc30;													\
-		GET_NEW_WORD;														\
-		__wbits = __pcbase[(__wbits << 2) + (__wval & 3)];					\
-		__wval >>= 2;														\
-		__wremaining = 30; 													\
-		}
-
-#define CARRY_DECODE(x)													\
-	do 																		\
-		{																	\
-		if (__wremaining < __wbits)											\
-			CARRY_DECODE_GET_SELECTOR										\
-		x = (__wval & __mask[__wbits]) + 1;									\
-		__wval >>= __wbits;													\
-		__wremaining -= __wbits;											\
-		}																	\
-	while(0)
 
 /*
 	ANT_COMPRESS_CARRYOVER12::DECOMPRESS()
