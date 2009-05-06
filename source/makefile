@@ -8,6 +8,7 @@ ALL = bitstream.obj \
  compress_variable_byte.obj \
  compress_none.obj \
  compression_factory.obj \
+ compress_sigma.obj \
  test_compression.obj \
  maths.obj
 

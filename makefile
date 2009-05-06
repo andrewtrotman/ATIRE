@@ -11,8 +11,8 @@ BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
 
-# MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DANT_COMPRESS_EXPERIMENT=1
-MINUS_D = -DHASHER=1 -DHEADER_HASHER=1
+MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DANT_COMPRESS_EXPERIMENT=1
+# MINUS_D = -DHASHER=1 -DHEADER_HASHER=1
 
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
@@ -74,7 +74,8 @@ PARTS = \
 	$(OBJDIR)\compress_carryover12.obj			\
 	$(OBJDIR)\compress_variable_byte.obj		\
 	$(OBJDIR)\compress_none.obj					\
-	$(OBJDIR)\compression_factory.obj		\
+	$(OBJDIR)\compress_sigma.obj				\
+	$(OBJDIR)\compression_factory.obj			\
 	$(OBJDIR)\version.obj
 
 #
