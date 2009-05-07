@@ -7,6 +7,7 @@
 #define __COMPRESS_SIGMA_H__
 
 #include "compress.h"
+#include "compress_carryover12.h"
 
 class  ANT_compress_sigma_frequency;
 
@@ -20,6 +21,7 @@ protected:
 	unsigned long threshold;
 	ANT_compressable_integer *dictionary;
 	long long dictionary_length;
+	ANT_compress_carryover12 carryover12;
 
 protected:
 	static int map_cmp(const void *a, const void *b);
@@ -29,7 +31,7 @@ protected:
 	ANT_compress_sigma_frequency *reorder(ANT_compress_sigma_frequency *map, ANT_compress_sigma_frequency *end, long uniques, unsigned long threshold, ANT_compressable_integer *uniques_over_threshold);
 
 public:
-	ANT_compress_sigma() { threshold = 1; dictionary_length = 0; dictionary = NULL; }
+	ANT_compress_sigma() { threshold = 1; dictionary_length = -1; dictionary = NULL; }
 	virtual ~ANT_compress_sigma() { delete [] dictionary; }
 
 	virtual long long compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers);

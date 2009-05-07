@@ -67,8 +67,7 @@ return *(long *)a - *(long *)b;
 */
 ANT_compress_sigma_frequency *ANT_compress_sigma::reorder(ANT_compress_sigma_frequency *map, ANT_compress_sigma_frequency *end, long uniques, unsigned long threshold, ANT_compressable_integer *uniques_over_threshold)
 {
-ANT_compress_sigma_frequency *current;
-ANT_compress_sigma_frequency *preorder, *gap;
+ANT_compress_sigma_frequency *current, *preorder, *gap;
 ANT_compressable_integer last, pow, from, to;
 
 gap = preorder = new ANT_compress_sigma_frequency[uniques];
@@ -106,7 +105,6 @@ return preorder;
 */
 long long ANT_compress_sigma::compress(unsigned char *target, long long destination_length, ANT_compressable_integer *source, long long size)
 {
-ANT_compress_carryover12 carryover12;
 ANT_compressable_integer *destination, *gap, *list;
 ANT_compress_sigma_frequency *preorder;
 long index = 0;

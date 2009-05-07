@@ -46,7 +46,7 @@ ANT_compress_simple9::ANT_compress_simple9_lookup ANT_compress_simple9::simple9_
 */
 long ANT_compress_simple9::bits_to_use[] = 
 {
- 0,  1,  2,  3,  4,  5,  7,  7, 
+ 1,  1,  2,  3,  4,  5,  7,  7, 
  9,  9, 14, 14, 14, 14, 14, 28, 
 28, 28, 28, 28, 28, 28, 28, 28, 
 28, 28, 28, 28, 28, 64, 64, 64,

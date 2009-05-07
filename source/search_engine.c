@@ -328,7 +328,8 @@ return destination;
 */
 void ANT_search_engine::decompress(unsigned char *start, ANT_search_engine_btree_leaf *leaf)
 {
-ANT_compressable_integer *current, sum, term_frequency, *docid, *tf, *end;
+ANT_compressable_integer *current, term_frequency, *docid, *tf, *end;
+long sum;
 
 /*
 	Decompress using one of the factory methods
@@ -458,9 +459,8 @@ stats->add_rank_time(stats->stop_timer(now));
 */
 void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer)
 {
-#ifdef NEVER							/// THIS NEEDS A FIX
-long doc, found;
-long *docid, *tf;
+ANT_compressable_integer doc, found;
+ANT_compressable_integer *docid, *tf;
 long last = -1;
 
 docid = posting->docid;
@@ -477,7 +477,6 @@ for (doc = found = 0; doc < documents; doc++)
 
 term_details->document_frequency = found;
 term_details->collection_frequency = collection_frequency;
-#endif
 }
 
 /*
@@ -488,7 +487,8 @@ void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, ch
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
-ANT_compressable_integer document, *current_document, *current_tf, *end;
+ANT_compressable_integer *current_document, *current_tf, *end;
+long document;
 char *term;
 
 now = stats->start_timer();

@@ -43,7 +43,7 @@ ANT_compress_relative10::ANT_compress_relative10_lookup ANT_compress_relative10:
 */
 long ANT_compress_relative10::bits_to_use10[] = 
 {
- 0,  1,  2,  3,  4,  5,  6,  7,
+ 1,  1,  2,  3,  4,  5,  6,  7,
 10, 10, 10, 15, 15, 15, 15, 15,
 30, 30, 30, 30, 30, 30, 30, 30,
 30, 30, 30, 30, 30, 30, 30, 64,

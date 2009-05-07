@@ -38,8 +38,8 @@ static ANT_compress_sigma sigma;
 */
 ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {
+{&variable_byte, "Variable-Byte"}
 //{&none, "No-Compression"},
-{&variable_byte, "Variable-Byte"},
 //{&simple9, "Simple-9"},
 //{&relative10, "Relative-10"},
 //{&carryover12, "Carryover-12"},
@@ -85,15 +85,25 @@ for (which = 0; which < number_of_techniques; which++)
 	/*
 		This piece of code decompressed each posting during indexing to validate that compression was successful
 	*/
-	ANT_compressable_integer *d2;
-	d2 = new ANT_compressable_integer[(size_t)(source_integers + 1)];
-	d2[source_integers] = 0xCCCCCCCC;
-	scheme[which].scheme->decompress(d2, destination, source_integers);
-	if (memcmp(source, d2, (size_t)(source_integers * sizeof(ANT_compressable_integer))))
-		printf("%s: Raw and decompressed strings do not match (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
-	if (d2[source_integers] != 0xCCCCCCCC)
-		printf("%s: Decompression overrun\n", scheme[which].name);
-	delete [] d2;
+	if (size == 0)
+			printf("%s: Compression Failure\n", scheme[which].name);
+	else
+		{
+		ANT_compressable_integer *d2;
+		d2 = new ANT_compressable_integer[(size_t)(source_integers + 1)];
+		d2[source_integers] = 0xCCCCCCCC;
+		scheme[which].scheme->decompress(d2, destination, source_integers);
+		if (memcmp(source, d2, (size_t)(source_integers * sizeof(ANT_compressable_integer))))
+			{
+			printf("%s: Raw and decompressed strings do not match (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
+			for (long err = 0; err < (source_integers > 10 ? 10 : source_integers); err++)
+				printf("[%lld->%lld]", (long long)source[err], (long long)d2[err]);
+			printf("\n\n");
+			}
+		if (d2[source_integers] != 0xCCCCCCCC)
+			printf("%s: Decompression overrun\n", scheme[which].name);
+		delete [] d2;
+		}
 #endif
 
 	if (size != 0 && size < min_size)		// if equal we prefer the first in the list
@@ -111,6 +121,7 @@ if (preferred < 0)
 
 scheme[preferred].uses++;
 scheme[preferred].did_take += min_size;
+scheme[preferred].did_compress += source_integers;
 
 *destination = (unsigned char)preferred;
 return scheme[preferred].scheme->compress(destination + 1, destination_length - 1, source, source_integers) + 1;
@@ -141,11 +152,12 @@ terms = bytes = 0;
 for (which = 0; which < number_of_techniques; which++)
 	if (scheme[which].uses != 0)
 		{
-		printf("%-*.*s :%10lld terms into %10lld bytes\n", 20, 20, scheme[which].name, scheme[which].uses, scheme[which].did_take);
+		printf("%-*.*s :%10lld terms into %10lld bytes (%2.2f bits per integer)\n", 20, 20, scheme[which].name, scheme[which].uses, scheme[which].did_take, (double)(scheme[which].did_take * 8) / (double)scheme[which].did_compress);
 		terms += scheme[which].uses;
 		bytes += scheme[which].did_take;
 		}
-
+if (failures != 0)
+	printf("*failures*           :%10lld calls\n", failures);
 printf("Factory calls        :%10lld terms\n", terms);
 printf("        into         :%10lld bytes\n", bytes);
 printf("        total space  :%10lld bytes\n", bytes + terms);		// add terms because it takes one byte to store which scheme was used
