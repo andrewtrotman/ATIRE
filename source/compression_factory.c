@@ -38,15 +38,15 @@ static ANT_compress_sigma sigma;
 */
 ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {
-{&none, "No-Compression"},
+//{&none, "No-Compression"},
 {&variable_byte, "Variable-Byte"},
-{&simple9, "Simple-9"},
-{&relative10, "Relative-10"},
-{&carryover12, "Carryover-12"},
-{&sigma, "Sigma"},
-{&elias_delta, "Elias-Delta"},
-{&elias_gamma, "Elias-Gamma"},
-{&golomb, "Golomb"}
+//{&simple9, "Simple-9"},
+//{&relative10, "Relative-10"},
+//{&carryover12, "Carryover-12"},
+//{&sigma, "Sigma"},
+//{&elias_delta, "Elias-Delta"},
+//{&elias_gamma, "Elias-Gamma"},
+//{&golomb, "Golomb"}
 };
 
 long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::scheme) / sizeof(*ANT_compression_factory::scheme);
@@ -81,8 +81,10 @@ for (which = 0; which < number_of_techniques; which++)
 	size = scheme[which].scheme->compress(destination, destination_length, source, source_integers);
 	scheme[which].would_take += size;
 
-#ifdef ANT_COMPRESS_EXPERIMENT	
-
+#ifdef NEVER
+	/*
+		This piece of code decompressed each posting during indexing to validate that compression was successful
+	*/
 	ANT_compressable_integer *d2;
 	d2 = new ANT_compressable_integer[(size_t)(source_integers + 1)];
 	d2[source_integers] = 0xCCCCCCCC;
@@ -92,7 +94,6 @@ for (which = 0; which < number_of_techniques; which++)
 	if (d2[source_integers] != 0xCCCCCCCC)
 		printf("%s: Decompression overrun\n", scheme[which].name);
 	delete [] d2;
-
 #endif
 
 	if (size != 0 && size < min_size)		// if equal we prefer the first in the list

@@ -30,7 +30,7 @@ public:
 	long long collection_frequency, document_frequency;
 	ANT_memory *memory;
 	ANT_memory_index_stats *stats;
-	long long docids_pos_on_disk, tfs_pos_on_disk, end_pos_on_disk;
+	long long docids_pos_on_disk, end_pos_on_disk, impacted_length;
 
 private:
 	inline long compress_bytes_needed(long long val);

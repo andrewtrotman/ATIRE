@@ -16,6 +16,10 @@ class ANT_search_engine_accumulator;
 class ANT_search_engine_stats;
 class ANT_stemmer;
 
+/*
+	class ANT_SEARCH_ENGINE
+	-----------------------
+*/
 class ANT_search_engine
 {
 friend class ANT_btree_iterator;
@@ -37,7 +41,9 @@ private:
 	long string_length_of_longest_term;
 	long long highest_df;
 	long *stem_buffer;
+	ANT_compressable_integer *decompress_buffer;
 	long long stem_buffer_length_in_bytes;
+	ANT_compression_factory factory;
 
 private:
 	long long get_long_long(unsigned char *from) { return *((long long *)from); }
@@ -56,12 +62,7 @@ public:
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 
-#ifdef ANT_COMPRESS_EXPERIMENT
-	ANT_compression_factory factory;
-#endif
-
-	void decompress(unsigned char *start, unsigned char *end, long *into, ANT_search_engine_btree_leaf *leaf);
-	void decompress_tf(unsigned char *start, unsigned char *end, long *into);
+	void decompress(unsigned char *start, ANT_search_engine_btree_leaf *leaf);
 	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
 	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
 	void process_one_search_term(char *term);

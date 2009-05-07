@@ -29,19 +29,11 @@ private:
 	long long largest_docno;
 	ANT_memory_index_stats *stats;
 
-	/*
-		This code is experimental.  We are trying to work out what form of compression is best,
-		of whether a hybrid method is best.  The compression factory will find the best method
-		but in order to do this we need so decompress and recompress the blocks that the indexer
-		has created.
-	*/
-#ifdef ANT_COMPRESS_EXPERIMENT
 	ANT_compress_variable_byte variable_byte;
 	ANT_compression_factory *factory;
-	ANT_compressable_integer *decompressed_postings_list;
+	ANT_compressable_integer *decompressed_postings_list, *impacted_postings;
 	unsigned char *compressed_postings_list;
 	long long compressed_postings_list_length;
-#endif
 
 private:
 	long hash(ANT_string_pair *string);
@@ -51,6 +43,7 @@ private:
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
+	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 
 public:
 	ANT_memory_index();

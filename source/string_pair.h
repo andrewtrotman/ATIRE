@@ -5,6 +5,7 @@
 #ifndef __STRING_PAIR_H__
 #define __STRING_PAIR_H__
 
+#include <stdio.h>
 #include "str.h"
 
 class ANT_string_pair
@@ -24,6 +25,7 @@ public:
 	int strcmp(ANT_string_pair *with) { return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1; }
 	int true_strcmp(ANT_string_pair *with);
 	int strncmp(ANT_string_pair *with, size_t length);
+	void text_render(void) { printf("%*.*s", string_length, string_length, start); }
 };
 
 /*

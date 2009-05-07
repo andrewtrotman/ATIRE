@@ -116,6 +116,10 @@ documents = collection_details.document_frequency;
 
 postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
 memory->realign();
+
+decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + highest_df));		// 512 because of the tf and 0 at each end of each impact ordered list
+memory->realign();
+
 document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
 
 memory->realign();
@@ -131,16 +135,19 @@ for (pointer = 0; pointer < documents; pointer++)
 	due to stemming.  Space for each document is, therefore, needed.
 */
 memory->realign();
-posting.docid = (long *)memory->malloc((size_t)(sizeof(*posting.docid) * documents));
+posting.docid = (ANT_compressable_integer *)memory->malloc((size_t)(sizeof(*posting.docid) * documents));
 memory->realign();
-posting.tf = (long *)memory->malloc((size_t)(sizeof(*posting.tf) * documents));
+posting.tf = (ANT_compressable_integer *)memory->malloc((size_t)(sizeof(*posting.tf) * documents));
 
+/*
+	decompress the document length vector
+*/
 get_postings(&collection_details, postings_buffer);
-decompress(postings_buffer, postings_buffer + collection_details.docid_length, document_lengths, &collection_details);
+factory.decompress(posting.docid, postings_buffer, collection_details.document_frequency);
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
-	sum += document_lengths[current_length];
+	sum += document_lengths[current_length] = posting.docid[current_length];
 mean_document_length = (double)sum / (double)documents;
 
 memory->realign();
@@ -246,7 +253,7 @@ base = leaf + leaf_size * term_in_leaf + sizeof(long);		// sizeof(long) is for t
 term_details->collection_frequency = get_long(base);
 term_details->document_frequency = get_long(base + 4);
 term_details->postings_position_on_disk = get_long_long(base + 8);
-term_details->docid_length = get_long(base + 16);
+term_details->impacted_length = get_long(base + 16);
 term_details->postings_length = get_long(base + 20);
 
 return term_details;
@@ -319,35 +326,36 @@ return destination;
 	ANT_SEARCH_ENGINE::DECOMPRESS()
 	-------------------------------
 */
-void ANT_search_engine::decompress(unsigned char *start, unsigned char *end, long *into, ANT_search_engine_btree_leaf *leaf)
+void ANT_search_engine::decompress(unsigned char *start, ANT_search_engine_btree_leaf *leaf)
 {
-#ifdef ANT_COMPRESS_EXPERIMENT
-	factory.decompress((uint32_t *)into, start, leaf->document_frequency);
-#else
-	while (start < end)
-		if (*start & 0x80)
-			*into++ = *start++ & 0x7F;
-		else
-			{
-			*into = *start++;
-			while (!(*start & 0x80))
-			   *into = (*into << 7) | *start++;
-			*into = (*into << 7) | (*start++ & 0x7F);
-	        into++;
-			}
-#endif
-}
+ANT_compressable_integer *current, sum, term_frequency, *docid, *tf, *end;
 
 /*
-	ANT_SEARCH_ENGINE::DECOMPRESS_TF()
-	----------------------------------
+	Decompress using one of the factory methods
 */
-void ANT_search_engine::decompress_tf(unsigned char *start, unsigned char *end, long *into)
-{
-unsigned char *from;
+factory.decompress(decompress_buffer, start, leaf->document_frequency);
 
-for (from = start; from < end; from++)
-	*into++ = *from;
+/*
+	Convert from impact order into two arrays, one for docids, the other for tf values;
+*/
+docid = posting.docid;
+tf = posting.tf;
+end = decompress_buffer + leaf->impacted_length;
+current = decompress_buffer;
+while (current < end)
+	{
+	term_frequency = *current;
+	current++;
+	sum = -1;
+	while (*current != 0)
+		{
+		sum += *current;			// because we are difference encoded
+		*docid++ = sum;
+		*tf++ = term_frequency;
+		current++;
+		}
+	current++;		// skip over the zero
+	}
 }
 
 /*
@@ -409,7 +417,7 @@ idf = log((double)(documents) / (double)term_details->document_frequency);
 
 for (which = 0; which < term_details->document_frequency; which++)
 	{
-	docid += postings->docid[which];
+	docid = postings->docid[which];
 	tf = postings->tf[which];
 
 	accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
@@ -436,8 +444,7 @@ if (get_postings(&term_details, postings_buffer) == NULL)
 stats->add_posting_read_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid, &term_details);
-decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
+decompress(postings_buffer, &term_details);
 stats->add_decompress_time(stats->stop_timer(now));
 
 now = stats->start_timer();
@@ -451,6 +458,7 @@ stats->add_rank_time(stats->stop_timer(now));
 */
 void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer)
 {
+#ifdef NEVER							/// THIS NEEDS A FIX
 long doc, found;
 long *docid, *tf;
 long last = -1;
@@ -469,6 +477,7 @@ for (doc = found = 0; doc < documents; doc++)
 
 term_details->document_frequency = found;
 term_details->collection_frequency = collection_frequency;
+#endif
 }
 
 /*
@@ -479,7 +488,7 @@ void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, ch
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
-long document, *current_document, *current_tf, *end;
+ANT_compressable_integer document, *current_document, *current_tf, *end;
 char *term;
 
 now = stats->start_timer();
@@ -503,8 +512,7 @@ while (term != NULL)
 	stats->add_posting_read_time(stats->stop_timer(now));
 
 	now = stats->start_timer();
-	decompress(postings_buffer, postings_buffer + term_details.docid_length, posting.docid, &term_details);
-	decompress_tf(postings_buffer + term_details.docid_length, postings_buffer + term_details.postings_length, posting.tf);
+	decompress(postings_buffer, &term_details);
 	stats->add_decompress_time(stats->stop_timer(now));
 
 	now = stats->start_timer();

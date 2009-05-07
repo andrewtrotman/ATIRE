@@ -49,7 +49,7 @@ stats->bytes_allocated_for_tfs += postings_initial_length;
 
 collection_frequency = document_frequency = current_docno = 0;
 docids_pos_on_disk = 0;
-tfs_pos_on_disk = 0;
+impacted_length = 0;
 end_pos_on_disk = 0;
 }
 

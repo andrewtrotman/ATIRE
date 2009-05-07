@@ -34,10 +34,7 @@ serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 largest_docno = 0;
-
-#ifdef ANT_COMPRESS_EXPERIMENT
-	factory = new ANT_compression_factory;
-#endif
+factory = new ANT_compression_factory;
 }
 
 /*
@@ -49,11 +46,8 @@ ANT_memory_index::~ANT_memory_index()
 stats->text_render();
 delete memory;
 delete stats;
-
-#ifdef ANT_COMPRESS_EXPERIMENT
-	factory->text_render();
-	delete factory;
-#endif
+factory->text_render();
+delete factory;
 }
 
 /*
@@ -136,13 +130,82 @@ node->add_posting(&string, length);
 }
 
 /*
+	ANT_MEMORY_INDEX::IMPACT_ORDER()
+	--------------------------------
+*/
+long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency)
+{
+ANT_compressable_integer sum, bucket_size[0x100], bucket_prev_docid[0x100];
+ANT_compressable_integer *pointer[0x100], *current_docid, doc;
+unsigned char *current, *end;
+long bucket, buckets_used;
+
+/*
+	Set all the buckets to empty;
+*/
+memset(bucket_size, 0, sizeof(bucket_size));
+
+/*
+	Set the previous document ID to zero for each bucket (for difference encoding)
+*/
+memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
+
+/*
+	Compute the size of the buckets
+*/
+end = term_frequency + document_frequency;
+for (current = term_frequency; current < end; current++)
+	bucket_size[*current]++;
+
+/*
+	Compute the location of the pointers for each bucket
+*/
+buckets_used = sum = 0;
+for (bucket = 0xFF; bucket >= 0; bucket--)
+	{
+	pointer[bucket] = destination + sum + 2 * buckets_used;
+	sum += bucket_size[bucket];
+	if (bucket_size[bucket] != 0)
+		{
+		*pointer[bucket]++ = bucket;
+		buckets_used++;
+		}
+	}
+
+/*
+	Now generate the impact ordering
+*/
+current_docid = docid;
+doc = 0;
+for (current = term_frequency; current < end; current++)
+	{
+	doc += *current_docid;							// because the original list is difference encoded
+	*pointer[*current]++ = doc - bucket_prev_docid[*current];		// because this list is also difference encoded
+	bucket_prev_docid[*current] = doc;
+	current_docid++;
+	}
+
+/*
+	Finally terminate each impact list with a 0
+*/
+for (bucket = 0; bucket < 0x100; bucket++)
+	if (bucket_size[bucket] != 0)
+		*pointer[bucket] = 0;
+
+/*
+	Return the length of the impact ordered list
+*/
+return sum + 2 * buckets_used;
+}
+
+/*
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */
 long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
 long terms = 1;
-long long doc_size, tf_size, total;
+long long doc_size, tf_size, total, len, impacted_postings_length;
 
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
@@ -163,21 +226,23 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 		serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 		}
 	}
-
-#ifdef ANT_COMPRESS_EXPERIMENT
-	long long len;
-
+if (root->string[0] == '~')			// these are "special" strings in the index (e.g. document lengths)
+	{
+	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
+	impacted_postings_length = root->document_frequency;
+	}
+else
+	{
 	variable_byte.decompress(decompressed_postings_list, serialised_docids, root->document_frequency);
-	len = factory->compress(compressed_postings_list, compressed_postings_list_length, decompressed_postings_list, root->document_frequency);
+	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
+	}
 
-	root->docids_pos_on_disk = file->tell();
-	file->write(compressed_postings_list, len);
-#else
-	root->docids_pos_on_disk = file->tell();
-	file->write(serialised_docids, doc_size);
-#endif
-root->tfs_pos_on_disk = file->tell();
-file->write(serialised_tfs, tf_size);
+len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+
+root->docids_pos_on_disk = file->tell();
+file->write(compressed_postings_list, len);
+
+root->impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 root->end_pos_on_disk = file->tell();
 
 if (root->left != NULL)
@@ -276,7 +341,7 @@ for (current = start; current < end; current++)
 	eight_byte = (uint64_t)((*current)->docids_pos_on_disk);
 	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
 
-	four_byte = (uint32_t)((*current)->tfs_pos_on_disk - (*current)->docids_pos_on_disk);
+	four_byte = (uint32_t)((*current)->impacted_length);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 	four_byte = (uint32_t)((*current)->end_pos_on_disk - (*current)->docids_pos_on_disk);
@@ -323,11 +388,10 @@ file->open(filename, "w+b");
 file->setvbuff(DISK_BUFFER_SIZE);
 stats->disk_buffer = DISK_BUFFER_SIZE;
 
-#ifdef ANT_COMPRESS_EXPERIMENT
-	compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
-	decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
-	compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
-#endif
+compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
+decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
+compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
+impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + 512);		// 512 because the TF and the 0 at the end of each of 255 lists
 
 /*
 	Write the postings

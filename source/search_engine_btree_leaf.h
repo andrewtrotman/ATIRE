@@ -11,7 +11,7 @@ public:
 	long long collection_frequency;
 	long document_frequency;
 	long long postings_position_on_disk;
-	long docid_length;
+	long impacted_length;
 	long postings_length;
 } ;
 
