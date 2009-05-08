@@ -21,6 +21,7 @@ public:
 	long long would_take;		// the number of bytes it would take if only this scheme were used
 	long long did_take;			// the number of bytes this scheme did take (for just the this->uses cases)
 	long long did_compress;		// the number of integers that were compressed using this scheme
+	long long failures;			// the number of times this scheme resulted in a list longer than the raw list
 } ;
 
 

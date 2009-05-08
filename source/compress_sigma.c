@@ -1,6 +1,8 @@
 /*
 	COMPRESS_SIGMA.C
 	----------------
+	This code is the original Sigma code ported to ANT.  For details see:
+	A. Trotman, V. Subramanya, Sigma encoded inverted files, CIKM 2007, pp 983-986
 */
 #include <string.h>
 #include <stdio.h>
@@ -14,8 +16,7 @@
 #include "maths.h"
 #include "compress_sigma_frequency.h"
 
-
-#pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the same of the C macros
+#pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the some of the C macros in Carryover-12
 
 /*
 	ANT_COMPRESS_SIGMA::MAP_CMP()
@@ -58,7 +59,12 @@ return first->index_pos > second->index_pos ? 1 : -1;
 */
 int ANT_compress_sigma::long_cmp(const void *a, const void *b)
 {
-return *(long *)a - *(long *)b;
+ANT_compressable_integer one, two;
+
+one = *(ANT_compressable_integer *)a;
+two = *(ANT_compressable_integer *)b;
+
+return a > b ? 1 : (a == b ? 0 : -1);
 }
 
 /*
@@ -71,7 +77,8 @@ ANT_compress_sigma_frequency *current, *preorder, *gap;
 ANT_compressable_integer last, pow, from, to;
 
 gap = preorder = new ANT_compress_sigma_frequency[uniques];
-*uniques_over_threshold = last = 0;
+*uniques_over_threshold = 0;
+last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler should work this out
 for (current = map; current < end; current++)
 	{
 	if (current->gap != last)
@@ -110,11 +117,9 @@ ANT_compress_sigma_frequency *preorder;
 long index = 0;
 long raw_size, final_size;
 ANT_compressable_integer uniques_over_threshold;
-
-/**/
 ANT_compress_sigma_frequency *map, *end, *from, *equal_freq, *current;
-ANT_compressable_integer *integer, last, uniques, freq;
-/**/
+ANT_compressable_integer *integer, last, uniques, freq, temp, diff;
+long pow, p_from, to;
 
 /*
 	Allocate space needed to compute the frequencies
@@ -142,7 +147,7 @@ qsort(map, (size_t)size, sizeof(*map), map_cmp);
 /*
 	Compute the frequences of each unique value in the source array
 */
-last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler will work this out
+last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler should work this out
 uniques = 0;
 from = map;
 freq = 1;
@@ -172,42 +177,41 @@ qsort(map, (size_t)size, sizeof(*map), map_freq_cmp);
 */
 preorder = reorder(map, end, uniques, threshold, &uniques_over_threshold);
 
+/*
+	Now run through and do the sigma encoding
+*/
 raw_size = uniques_over_threshold + 1 + size;
 destination = new ANT_compressable_integer[raw_size];
-gap = destination + 1;										// Vikram's e
-list = destination + uniques_over_threshold + 1;			// Vikram's f
+gap = destination + 1;
+list = destination + uniques_over_threshold + 1;
 
-last = 0;
-for (current = map; current < end; current++)
+last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler should work this out
+for (current = map; current < end; current++)					// for each term in the list
 	{
 	if (current->gap != last)
 		{
-		for (index = 0; index < uniques; index++)
-			if (preorder[index].gap == current->gap)
+		for (index = 0; index < uniques; index++)				// for each number in the (frequency sorted) dictionary
+			if (preorder[index].gap == current->gap)			// found it
 				{
-				if (preorder[index].freq <= threshold)
+				if (preorder[index].freq <= threshold)			// frequency is less than threshold so use the raw value (+base)
 					index = current->gap + uniques_over_threshold;
-				break;
+				break;											// else use the dictionary position
 				}
 		last = current->gap;
 		}
-	list[current->index_pos] = index;
+	list[current->index_pos] = index;							// now store the result
 	}
 
 for (index = 0; index < uniques_over_threshold; index++)
 	(destination + 1)[index] = preorder[index].gap;
 
 *destination = uniques_over_threshold;
-/*
-printf("\nIn--->\n"); {
-for (long pos = 0; pos < (raw_size < 10 ? raw_size : 10); pos++)
-	printf("%d:%d\n", pos, destination[pos]);
-} printf("<---In\n");
-*/
 
-long pow, p_from, to, diff;
+/*
+	Difference encode each set of numbers in the range [(2^n), (2^(n+1)-1)]
+*/
 p_from = to = 1;
-for (pow = 0; to < uniques_over_threshold; pow++)
+for (pow = 0; to < uniques_over_threshold; pow++)		// for each power of 2
 	{
 	p_from = ANT_pow2_zero(pow);
 	to = ANT_pow2_zero(pow + 1);
@@ -215,32 +219,34 @@ for (pow = 0; to < uniques_over_threshold; pow++)
 		to = uniques_over_threshold;
 	last = preorder[p_from].gap;
 	(destination + 1)[p_from] = last;
-	for (diff = p_from + 1; diff < to; diff++)
+	for (diff = p_from + 1; diff < to; diff++)			// difference encode
 		{
-		long tmp;
-		tmp = (destination + 1)[diff];
+		temp = (destination + 1)[diff];
 		(destination + 1)[diff] -= last + 1;
-		last = tmp;
+		last = temp;
 		}
 	}
 
-//*destination = uniques_over_threshold;
-/*
-printf("\nIn--->\n"); {
-for (long pos = 0; pos < (raw_size < 10 ? raw_size : 10); pos++)
-	printf("%d:%d\n", pos, destination[pos]);
-} printf("<---In\n");
-*/
+#ifdef NEVER
+	{
+	printf("\nSIGMA--->\n");
+	for (long pos = 0; pos < (raw_size < 10 ? raw_size : 10); pos++)
+		printf("%d:%d\n", pos, destination[pos]);
+	printf("<---SIGMA\n");
+	}
+#endif
 
+/*
+	Finally, compress using something that is good at compressing small numbers
+*/
 final_size = carryover12.compress(target, destination_length, destination, raw_size);
 
 delete [] map;
 delete [] destination;
 delete [] preorder;
 
-return final_size;			// number of longs allocated
+return final_size;		// the space sigma uses is the space that (in this case) carryover-12 takes
 }
-
 
 /*
 	ANT_COMPRESS_SIGMA::DECOMPRESS()
@@ -298,10 +304,11 @@ end = into + n;
 do
 	{
 	CARRY_DECODE(got);
-	if (got > uniques)
+	if (got >= uniques)
 		*into++ = got - uniques;
 	else
 		*into++ = dictionary[got];
 	}
 while (into < end);
 }
+

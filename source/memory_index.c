@@ -234,16 +234,45 @@ if (root->string[0] == '~')			// these are "special" strings in the index (e.g. 
 else
 	{
 	variable_byte.decompress(decompressed_postings_list, serialised_docids, root->document_frequency);
+#ifdef SPECIAL_COMPRESSION
+	if (root->document_frequency > 2)
+		impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
+#else
 	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
+#endif
 	}
 
-len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+#ifdef SPECIAL_COMPRESSION
+	if (root->document_frequency <= 2)
+		{
+		root->docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
+		if (root->document_frequency == 2)
+			{
+			root->impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
+			root->end_pos_on_disk = serialised_tfs[1] + root->docids_pos_on_disk;		// because root->docids_pos_on_disk is subtracted later
+			}
+		else
+			root->impacted_length = root->end_pos_on_disk = 0;
+		}
+	else
+		{
+		len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
-root->docids_pos_on_disk = file->tell();
-file->write(compressed_postings_list, len);
+		root->docids_pos_on_disk = file->tell();
+		file->write(compressed_postings_list, len);
 
-root->impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-root->end_pos_on_disk = file->tell();
+		root->impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+		root->end_pos_on_disk = file->tell();
+		}
+#else
+	len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+
+	root->docids_pos_on_disk = file->tell();
+	file->write(compressed_postings_list, len);
+
+	root->impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+	root->end_pos_on_disk = file->tell();
+#endif
 
 if (root->left != NULL)
 	terms += serialise_all_nodes(file, root->left);

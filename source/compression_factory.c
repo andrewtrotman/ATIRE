@@ -38,14 +38,15 @@ static ANT_compress_sigma sigma;
 */
 ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {
+{&none, "No-Compression"},						// do not move this line - it is hard coded for being at poistion 0.
 {&variable_byte, "Variable-Byte"},
 {&simple9, "Simple-9"},
 {&relative10, "Relative-10"},
 {&carryover12, "Carryover-12"}
-//{&sigma, "Sigma"},
+//{&sigma, "Sigma"}
 //{&elias_delta, "Elias-Delta"},
 //{&elias_gamma, "Elias-Gamma"},
-//{&golomb, "Golomb"}
+//{&golomb, "Golomb"},
 //{&none, "No-Compression"},
 };
 
@@ -61,7 +62,7 @@ long which;
 
 failures = integers_compressed = 0;
 for (which = 0; which < number_of_techniques; which++)
-	scheme[which].uses = scheme[which].would_take = scheme[which].did_take = 0;
+	scheme[which].uses = scheme[which].would_take = scheme[which].did_take = scheme[which].failures = 0;
 }
 
 /*
@@ -76,27 +77,29 @@ long long min_size, size;
 min_size = LLONG_MAX;
 integers_compressed += source_integers;
 
-for (which = 0; which < number_of_techniques; which++)
+for (which = 1; which < number_of_techniques; which++)
 	{
 	size = scheme[which].scheme->compress(destination, destination_length, source, source_integers);
 	scheme[which].would_take += size;
+	if (size == 0)				// failure
+		scheme[which].failures++;
 
 #ifdef NEVER
 	/*
 		This piece of code decompressed each posting during indexing to validate that compression was successful
 	*/
 	if (size == 0)
-			printf("%s: Compression Failure\n", scheme[which].name);
+		printf("%s: Compression Failure\n", scheme[which].name);
 	else
 		{
 		ANT_compressable_integer *d2;
 		d2 = new ANT_compressable_integer[(size_t)(source_integers + 1)];
-		d2[source_integers] = 0xCCCCCCCC;
+		d2[source_integers] = 0xCCCCCCCC;		// terminate the list so that we can check for overflow at the end
 		scheme[which].scheme->decompress(d2, destination, source_integers);
 		if (memcmp(source, d2, (size_t)(source_integers * sizeof(ANT_compressable_integer))))
 			{
 			printf("%s: Raw and decompressed strings do not match (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
-			for (long err = 0; err < (source_integers > 10 ? 10 : source_integers); err++)
+			for (long err = 0; err < (source_integers < 10 ? source_integers : 10); err++)
 				printf("[%lld->%lld]", (long long)source[err], (long long)d2[err]);
 			printf("\n\n");
 			}
@@ -165,9 +168,12 @@ printf("        total space  :%10lld bytes\n", bytes + terms);		// add terms bec
 best_other = LLONG_MAX;
 puts("\nCOMPRESSION COMPARISON");
 puts("----------------------");
-for (which = 0; which < number_of_techniques; which++)
+for (which = 1; which < number_of_techniques; which++)
 	{
-	printf("Only %-*.*s :%10lld bytes (%2.2f bits per integer)\n", 15, 15, scheme[which].name, scheme[which].would_take, (double)(scheme[which].would_take * 8) / (double)integers_compressed);
+	printf("Only %-*.*s :%10lld bytes (%2.2f bits per integer)", 15, 15, scheme[which].name, scheme[which].would_take, (double)(scheme[which].would_take * 8) / (double)integers_compressed);
+	if (scheme[which].failures != 0)
+		printf(" Failed %10lld times", scheme[which].failures);
+	printf("\n");
 	if (scheme[which].would_take < best_other)
 		best_other = scheme[which].would_take;
 	}

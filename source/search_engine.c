@@ -316,8 +316,29 @@ else
 */
 unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
 {
-index->seek(term_details->postings_position_on_disk);
-index->read(destination, term_details->postings_length);
+#ifdef SPECIAL_COMPRESSION
+	ANT_compressable_integer *into;
+	if (term_details->document_frequency <= 2)
+		{
+		*destination = 0;		// no compression
+		into = (ANT_compressable_integer *)(destination + 1);
+		*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
+		*into++ = term_details->postings_position_on_disk >> 32;
+		*into++ = 0;
+		*into++ = term_details->postings_length;
+		*into++ = term_details->impacted_length;
+		*into++ = 0;
+		term_details->impacted_length = 7;	
+		}
+	else
+		{
+		index->seek(term_details->postings_position_on_disk);
+		index->read(destination, term_details->postings_length);
+		}
+#else
+	index->seek(term_details->postings_position_on_disk);
+	index->read(destination, term_details->postings_length);
+#endif
 
 return destination;
 }
@@ -334,7 +355,8 @@ long sum;
 /*
 	Decompress using one of the factory methods
 */
-factory.decompress(decompress_buffer, start, leaf->document_frequency);
+//factory.decompress(decompress_buffer, start, leaf->document_frequency);
+factory.decompress(decompress_buffer, start, leaf->impacted_length);
 
 /*
 	Convert from impact order into two arrays, one for docids, the other for tf values;
