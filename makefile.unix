@@ -12,6 +12,7 @@ CC = g++
 INDEX_PARTS = \
     disk.o \
     disk_internals.o \
+	directory_recursive_iterator.o \
     file.o \
     file_internals.o \
     parser.o \
@@ -23,7 +24,17 @@ INDEX_PARTS = \
     memory_index_stats.o \
     ctypes.o \
     hash_table.o \
-    postings_piece.o
+    postings_piece.o \
+	bitstream.o \
+	commress_elias_gamma.o \
+	compress_elias_delta.o \
+	compress_golomb.o \
+	compress_simple9.o \
+	compress_relative10.o \
+	compress_carryover12.o \
+	compress_variable_byte.o \
+	compress_none.o \
+	compression_factory.o
 
 ANT_PARTS = \
     ctypes.o \

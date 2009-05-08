@@ -38,6 +38,11 @@ class trie_node {
             this->child[word[pos-1] - 'a']->add(word, pos - 1, depth + 1);
         }
 
+		void print() {
+			this->print(' ', 0);
+		}
+
+ private:
         void print(char me, int depth) {
             int i;
             for (i = 0; i < depth; i++)
@@ -71,6 +76,10 @@ Vocab::Vocab(ANT_search_engine *search_engine) {
 }
 
 void Vocab::weight_strings() {
+}
+
+void Vocab::print() {
+	trie->print();
 }
 
 /* Does not allocate a string, do not free */
