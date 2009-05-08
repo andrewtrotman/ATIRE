@@ -469,7 +469,11 @@ found = 0;
 for (doc = found = 0; doc < documents; doc++)
 	if (stem_buffer[doc] != 0)
 		{
+#ifdef NEVER
 		*docid++ = doc - last;
+#else
+		*docid++ = doc;
+#endif
 		*tf++ = stem_buffer[doc];
 		last = doc;
 		found++;
@@ -521,7 +525,11 @@ while (term != NULL)
 	document = -1;
 	for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
 		{
+#ifdef NEVER
 		document += *current_document;
+#else
+		document = *current_document;
+#endif
 		stem_buffer[document] += *current_tf;
 		}
 	stats->add_stemming_time(stats->stop_timer(now));
