@@ -38,15 +38,15 @@ static ANT_compress_sigma sigma;
 */
 ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {
-{&variable_byte, "Variable-Byte"}
-//{&none, "No-Compression"},
-//{&simple9, "Simple-9"},
-//{&relative10, "Relative-10"},
-//{&carryover12, "Carryover-12"},
+{&variable_byte, "Variable-Byte"},
+{&simple9, "Simple-9"},
+{&relative10, "Relative-10"},
+{&carryover12, "Carryover-12"}
 //{&sigma, "Sigma"},
 //{&elias_delta, "Elias-Delta"},
 //{&elias_gamma, "Elias-Gamma"},
 //{&golomb, "Golomb"}
+//{&none, "No-Compression"},
 };
 
 long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::scheme) / sizeof(*ANT_compression_factory::scheme);
