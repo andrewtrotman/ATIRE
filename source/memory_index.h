@@ -9,12 +9,12 @@
 #include "memory_index_hash_node.h"
 #include "fundamental_types.h"
 #include "compress_variable_byte.h"
+#include "compression_factory.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
 class ANT_string_pair;
 class ANT_file;
-class ANT_compression_factory;
 
 #define HASH_TABLE_SIZE (0x1000000)
 
@@ -52,6 +52,8 @@ public:
 	void add_term(ANT_string_pair *string, long long docno);
 	long serialise(char *filename);
 	void set_document_length(long long docid, long length);
+	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
+	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 } ;
 
 

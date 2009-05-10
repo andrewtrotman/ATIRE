@@ -3,6 +3,7 @@
 	-------
 */
 #ifdef _MSC_VER
+	#include <stdio.h>
 	#include <windows.h>
 #elif defined (__APPLE__)
 	#include <mach/mach_time.h>
@@ -86,8 +87,8 @@ return total;
 }
 
 /*
-	LONG ANT_STATS::GET_CLOCK_TICK()
-	--------------------------------
+	ANT_STATS::GET_CLOCK_TICK()
+	---------------------------
 */
 long long ANT_stats::get_clock_tick(void)
 {
@@ -110,8 +111,8 @@ long long ANT_stats::get_clock_tick(void)
 }
 
 /*
-	LONG ANT_STATS::CLOCK_TICK_FREQUENCY()
-	--------------------------------------
+	ANT_STATS::CLOCK_TICK_FREQUENCY()
+	---------------------------------
 */
 long long ANT_stats::clock_tick_frequency(void)
 {

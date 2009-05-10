@@ -10,6 +10,7 @@
 #include "parser.h"
 #include "memory.h"
 #include "memory_index.h"
+#include "indexer_param_block.h"
 #include "memory_index_stats.h"
 #include "time_stats.h"
 #include "version.h"
@@ -27,6 +28,7 @@
 */
 int main(int argc, char *argv[])
 {
+ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
 ANT_disk *disk;
 ANT_parser parser;
@@ -35,56 +37,42 @@ unsigned char *file;
 long param, done_work;
 ANT_memory_index *index;
 long long doc, now;
-long terms_in_document, first_param, trec_docnos, recursive = FALSE;
+long terms_in_document, first_param;
 ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
 char *filename, *uid_start, *uid_end;
 char uid_buffer[1024];
+long long files_that_match;
 
-puts(ANT_version_string);
 if (argc < 2)
-	exit(printf("Usage:%s [-docno (-trec)] [-r] <filespec> ...\n-docno uses TREC <DOCNO> for document names (default: use filename and each document is in a seperate file).\n", argv[0]));
+	param_block.help();
 doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
 index = new ANT_memory_index;
 id_list.open("doclist.aspt", "wb");
 
-first_param = 1;
-trec_docnos = FALSE;
+first_param = param_block.parse();
+puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
-for (param = 0; param < argc; param++)
-	{
-	if (strcmp(argv[param], "-docno") == 0)
-		{
-		first_param++;
-		trec_docnos = TRUE;
-		}
-	else if (strcmp(argv[param], "-trec") == 0)
-		{
-		first_param++;
-		trec_docnos = TRUE;
-		}
-	else if (strcmp(argv[param], "-r") == 0)
-		{
-		first_param++;
-		recursive = TRUE;
-		}
-	}
-
-if (recursive)
+if (param_block.recursive)
 	disk = new ANT_directory_recursive_iterator;
 else
 	disk = new ANT_directory_iterator;
 
+index->set_compression_scheme(param_block.compression_scheme);
+index->set_compression_validation(param_block.compression_validation);
+
 for (param = first_param; param < argc; param++)
 	{
+	files_that_match = 0;
 	now = stats.start_timer();
 	file = (unsigned char *)disk->read_entire_file(filename = disk->first(argv[param]));
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
 		{
-		if (trec_docnos)
+		files_that_match++;
+		if (param_block.trec_docnos)
 			{
 			/*
 				Find each and every document ID in the current file and write then to disk
@@ -139,6 +127,8 @@ for (param = first_param; param < argc; param++)
 		file = (unsigned char *)disk->read_entire_file(filename = disk->next());
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
+	if (files_that_match == 0)
+		printf("Warning: '%s' does not match any files\n", argv[first_param]);
 	}
 
 id_list.close();

@@ -237,6 +237,8 @@ else
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency > 2)
 		impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
+	else
+		impacted_postings_length = 0;
 #else
 	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
 #endif
