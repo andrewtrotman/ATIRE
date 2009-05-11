@@ -76,12 +76,15 @@ return time_taken;
 	ANT_STATS::PRINT_ELAPSED_TIME()
 	-------------------------------
 */
-long long ANT_stats::print_elapsed_time(void)
+long long ANT_stats::print_elapsed_time(long spaced_out)
 {
 long long total;
 
 total = get_clock_tick() - creation_time;
-print_time("Total Elapsed Time   :", total);
+if (spaced_out)
+	print_time("Total Elapsed Time   :", total);
+else
+	print_time("", total);
 
 return total;
 }

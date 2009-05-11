@@ -11,6 +11,9 @@
 */
 class ANT_indexer_param_block
 {
+public:
+	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
+
 private:
 	int argc;
 	char **argv;
@@ -20,12 +23,17 @@ public:
 	long recursive;						// search for files to index in this directory and directories below (-r)
 	unsigned long compression_scheme;	// bitstring of which compression schemes to use
 	long compression_validation;		// decompress all compressed strings and measure the decompression performance
+	long statistics;					// bit pattern of which stats to print at the end of indexing
+	long logo;							// display (or suppress) the banner on startup
+	long long reporting_frequency;		// the number of documents to index before reporting the memory usage stats
 
 protected:
 	void compression(char *schemes);
+	void stats(char *stat_list);
 
 public:
 	ANT_indexer_param_block(int argc, char *argv[]);
+	void usage(void);
 	void help(void);
 	long parse(void);
 } ;

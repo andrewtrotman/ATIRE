@@ -20,7 +20,9 @@ class ANT_file;
 
 class ANT_memory_index
 {
-friend int main(int argc, char *argv[]);			// delete this line
+public:
+	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
+
 private:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
@@ -54,6 +56,8 @@ public:
 	void set_document_length(long long docid, long length);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
+	void text_render(long what);
+	long long get_memory_usage(void);
 } ;
 
 

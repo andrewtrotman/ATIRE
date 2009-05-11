@@ -1,9 +1,15 @@
-
 /*
 	TIME_STATS.C
 	------------
 */
 #include "time_stats.h"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
 
 /*
 	ANT_TIME_STATS::ADD_DISK_INPUT_TIME()
@@ -26,6 +32,6 @@ now = get_clock_tick() - creation_time;
 print_time("Disk input time      :", disk_input_time);
 print_time("Disk ouput time      :", disk_output_time);
 print_time("CPU time             :", now - disk_input_time - disk_output_time);
-print_elapsed_time();
+print_elapsed_time(TRUE);
 }
 

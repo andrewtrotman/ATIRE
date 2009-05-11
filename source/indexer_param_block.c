@@ -2,8 +2,10 @@
 	INDEXER_PARAM_BLOCK.C
 	---------------------
 */
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "indexer_param_block.h"
 #include "compression_factory.h"
 #include "version.h"
@@ -26,6 +28,20 @@ this->argv = argv;
 trec_docnos = recursive = FALSE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
+statistics = 0;
+logo = TRUE;
+reporting_frequency = LLONG_MAX;
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK::USAGE()
+	--------------------------------
+*/
+void ANT_indexer_param_block::usage(void)
+{
+printf("Usage:%s [option...] filename <... filename>\n", argv[0]);
+printf("     : -? for help\n");
+exit(0);
 }
 
 /*
@@ -39,40 +55,50 @@ puts("");
 
 puts("GENERAL");
 puts("-------");
-puts("-? -h -H  Display this help message");
+puts("-? -h -H        Display this help message");
+puts("-nologo         Suppress banner");
 puts("");
 
 puts("FILE HANDLING");
 puts("-------------");
-puts("-r        Recursive search for files in this and directories below this");
-puts("");
-
-puts("INDEXING");
-puts("--------");
-puts("-c[bBceEgnrsv] Compress postings using one of:");
-puts("   b try all bitwise schemes and choose the best  (same as -ceEg)");
-puts("   B try all Bytewise schemes and choose the best (same as -ccrsSv)");
-puts("   c Carryover-12  (bytewise)");
-puts("   e Elias Delta   (bitwise)");
-puts("   E Elias Gamma   (bitwise)");
-puts("   g Golomb        (bitwise)");
-puts("   n None          (-)");
-puts("   r Relative-10   (bytewise)");
-puts("   s Simple-9      (bytewise)");
-puts("   S Sigma         (bytewise)");
-puts("   v Variable Byte (bytewise) [default]");
+puts("-r              Recursive search for files in this and directories below this");
 puts("");
 
 puts("TREC / INEX SPECIFIC");
 puts("--------------------");
-puts("-docno  <DOC>...</DOC> seperates documents (identified by <DOCNO>docid</DOCNO>)");
-puts("        default is each doc in seperate file and docid is filename");
-puts("-trec   see -docno");
+puts("-docno          <DOC>...</DOC> seperates documents (identified by <DOCNO>docid</DOCNO>)");
+puts("                default is each doc in seperate file and docid is filename");
+puts("-trec           see -docno");
 puts("");
 
-puts("OTHER");
-puts("-----");
-puts("-vc     Validate compression (and report decompression rate)");
+puts("COMPRESSION");
+puts("-----------");
+puts("-c[abBceEgnrsv] Compress postings using one of:");
+puts("   a            try all schemes and choose the best  (same as -cceEgnrsv)");
+puts("   b            try all bitwise schemes and choose the best  (same as -ceEg)");
+puts("   B            try all Bytewise schemes and choose the best (same as -ccrsSv)");
+puts("   c            Carryover-12  (bytewise)");
+puts("   e            Elias Delta   (bitwise)");
+puts("   E            Elias Gamma   (bitwise)");
+puts("   g            Golomb        (bitwise)");
+puts("   n            None          (-)");
+puts("   r            Relative-10   (bytewise)");
+puts("   s            Simple-9      (bytewise)");
+puts("   S            Sigma         (bytewise)");
+puts("   v            Variable Byte (bytewise) [default]");
+puts("-vc             Validate compression (and report decompression rates)");
+puts("");
+
+puts("REPORTING");
+puts("---------");
+puts("-N<n>           Report time and memory every <n> documents [default -N0]");
+puts("-s[-acmst]      Report statistics");
+puts("   -            No statistics [default]");
+puts("   a            All statistics");
+puts("   c            Compression ratios");
+puts("   m            Memory usage");
+puts("   s            Summary statistics");
+puts("   t            Timings");
 puts("");
 
 exit(0);
@@ -89,6 +115,7 @@ char *scheme;
 for (scheme = scheme_list; *scheme != '\0'; scheme++)
 	switch (*scheme)
 		{
+		case 'a': compression("ceEgnrsv"); break;
 		case 'b': compression("eEg"); break;
 		case 'B': compression("crsSv"); break;
 		case 'c': compression_scheme |= ANT_compression_factory::CARRYOVER_12; break;
@@ -101,6 +128,27 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 		case 'S': compression_scheme |= ANT_compression_factory::SIGMA; break;
 		case 'v': compression_scheme |= ANT_compression_factory::VARIABLE_BYTE; break;
 		default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
+		}
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK::STATS()
+	--------------------------------
+*/
+void ANT_indexer_param_block::stats(char *stat_list)
+{
+char *stat;
+
+for (stat = stat_list; *stat != '\0'; stat++)
+	switch (*stat)
+		{
+		case '-': statistics = 0;
+		case 'a': stats("ccmst");
+		case 'c': statistics |= STAT_COMPRESSION; break;
+		case 'm': statistics |= STAT_MEMORY; break;
+		case 's': statistics |= STAT_SUMMARY; break;
+		case 't': statistics |= STAT_TIME; break;
+		default : exit(printf("Unknown statistic: '%c'\n", *stat)); break;
 		}
 }
 
@@ -130,6 +178,12 @@ for (param = 1; param < argc; param++)
 			help();
 		else if (strcmp(command, "H") == 0)
 			help();
+		else if (*command == 'N')
+			{
+			reporting_frequency = atol(command + 1);
+			if (reporting_frequency == 0)
+				reporting_frequency = LLONG_MAX;
+			}
 		else if (*command == 'c')
 			{
 			compression_scheme = 0;
@@ -137,8 +191,15 @@ for (param = 1; param < argc; param++)
 			}
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;
+		else if (*command == 's')
+			{
+			statistics = 0;
+			stats(command + 1);
+			}
+		else if (strcmp(command, "nologo") == 0)
+			logo = FALSE;
 		else
-			help();
+			usage();
 		}
 	else
 		break;
@@ -146,4 +207,3 @@ for (param = 1; param < argc; param++)
 
 return param;		// first parameter that isn't a command line switch
 }
-

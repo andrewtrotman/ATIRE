@@ -23,6 +23,16 @@
 #endif
 
 /*
+	REPORT()
+	--------
+*/
+void report(long long doc, ANT_memory_index *index, ANT_time_stats *stats)
+{
+printf("%lld Documents in %lld bytes in ", doc, index->get_memory_usage());
+stats->print_elapsed_time();
+}
+
+/*
 	MAIN()
 	------
 */
@@ -45,7 +55,7 @@ char uid_buffer[1024];
 long long files_that_match;
 
 if (argc < 2)
-	param_block.help();
+	param_block.usage();
 doc = 0;
 terms_in_document = 0;
 done_work = FALSE;
@@ -53,7 +63,9 @@ index = new ANT_memory_index;
 id_list.open("doclist.aspt", "wb");
 
 first_param = param_block.parse();
-puts(ANT_version_string);				// print the version string is we parsed the parameters OK
+
+if (param_block.logo)
+	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
 if (param_block.recursive)
 	disk = new ANT_directory_recursive_iterator;
@@ -96,12 +108,8 @@ for (param = first_param; param < argc; param++)
 			id_list.puts(filename);		// each document is in a seperate file (so filenames are external document ids)
 		done_work = FALSE;
 		doc++;
-		if (doc % 10000 == 0)
-			{
-			printf("Documents Indexed:%lld Memory used:%lld ", doc, index->memory->bytes_used());
-			stats.print_elapsed_time();
-			printf("\n");
-			}
+		if (doc % param_block.reporting_frequency == 0)
+			report(doc, index, &stats);
 
 		parser.set_document(file);
 		while ((token = parser.get_next_token()) != NULL)
@@ -117,6 +125,8 @@ for (param = first_param; param < argc; param++)
 					{
 					index->set_document_length(doc, terms_in_document);
 					doc++;
+					if (doc % param_block.reporting_frequency == 0)
+						report(doc, index, &stats);
 					terms_in_document = 0;
 					}
 			}
@@ -136,11 +146,15 @@ id_list.close();
 now = stats.start_timer();
 index->serialise("index.aspt");
 stats.add_disk_output_time(stats.stop_timer(now));
+index->text_render(param_block.statistics);
 delete index;
 delete disk;
 
-printf("\nTIMINGS\n-------\n");
-stats.text_render();
+if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
+	{
+	printf("\nTIMINGS\n-------\n");
+	stats.text_render();
+	}
 
 return 0;
 }

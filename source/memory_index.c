@@ -43,11 +43,32 @@ factory = new ANT_compression_factory;
 */
 ANT_memory_index::~ANT_memory_index()
 {
-stats->text_render();
 delete memory;
 delete stats;
-factory->text_render();
 delete factory;
+}
+
+/*
+	ANT_MEMORY_INDEX::TEXT_RENDER()
+	-------------------------------
+*/
+void ANT_memory_index::text_render(long which_stats)
+{
+if (which_stats & STAT_SUMMARY)
+	stats->text_render(ANT_memory_index_stats::STAT_SUMMARY);
+if (which_stats & STAT_MEMORY)
+	stats->text_render(ANT_memory_index_stats::STAT_MEMORY);
+if (which_stats & STAT_COMPRESSION)
+	factory->text_render();
+}
+
+/*
+	ANT_MEMORY_INDEX::GET_MEMORY_USAGE()
+	------------------------------------
+*/
+long long ANT_memory_index::get_memory_usage(void)
+{
+return memory->bytes_used();
 }
 
 /*
@@ -478,7 +499,7 @@ file_position = file->tell();
 */
 file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));	// 4 bytes
 
-printf("Terms in root:%llu\n", (unsigned long long) terms_in_root);
+//printf("Terms in root:%llu\n", (unsigned long long) terms_in_root);
 
 for (current_header = header; current_header < last_header; current_header++)
 	{
@@ -491,7 +512,7 @@ for (current_header = header; current_header < last_header; current_header++)
 /*
 	Write the location of the header to file
 */
-printf("Root pos on disk:%llu\n", (unsigned long long) file_position);
+//printf("Root pos on disk:%llu\n", (unsigned long long) file_position);
 file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 bytes
 /*
 	The string length of the longest term

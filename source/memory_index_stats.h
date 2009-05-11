@@ -11,6 +11,9 @@
 class ANT_memory_index_stats : public ANT_stats
 {
 public:
+	enum {STAT_MEMORY = 1, STAT_SUMMARY = 2} ;
+
+public:
 	long hash_nodes;
 	long unique_terms;
 	long long documents;
@@ -28,7 +31,7 @@ public:
 	ANT_memory_index_stats(ANT_memory *memory = NULL);
 	virtual ~ANT_memory_index_stats();
 
-	virtual void text_render(void);
+	virtual void text_render(long which_stats);
 } ;
 
 #endif __MEMORY_INDEX_STATS_H__

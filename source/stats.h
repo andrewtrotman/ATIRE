@@ -19,7 +19,7 @@ public:
 	ANT_stats(ANT_memory *memory = 0);
 	virtual ~ANT_stats();
 
-	long long print_elapsed_time(void);
+	long long print_elapsed_time(long spaced_out = 0);
 	long long print_time(char *message, long long time_taken, char *end_message = "");
 
 	long long get_clock_tick_frequency(void) { return tick_frequency; }
