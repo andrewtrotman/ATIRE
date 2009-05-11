@@ -45,6 +45,6 @@ public:
 	ANT_paice_husk_rule stem(char *s);
 } ;
 
-extern char *ANT_paice_husk_rule_set[];
+extern const char *ANT_paice_husk_rule_set[];
 
 #endif __PAICE_HUSK_H__

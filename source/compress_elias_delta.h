@@ -11,11 +11,23 @@
 	class ANT_COMPRESS_ELIAS_DELTA
 	------------------------------
 */
-class ANT_compress_elias_delta : public ANT_compress_elias_gamma
+class ANT_compress_elias_delta : protected ANT_compress_elias_gamma
 {
 protected:
-	inline void encode(unsigned long long val);
-	inline unsigned long long decode(void);
+	inline void encode(unsigned long long val)
+        {
+        long exp = ANT_floor_log2(++val);
+
+        ANT_compress_elias_gamma::encode(exp + 1);
+        bitstream.push_bits(val, exp);
+        }
+
+	inline unsigned long long decode(void)
+        {
+        long exp = (long)ANT_compress_elias_gamma::decode() - 1;
+
+        return ((((unsigned long long)1) << exp) | bitstream.get_bits(exp)) - 1;
+        }
 
 public:
 	ANT_compress_elias_delta() {}

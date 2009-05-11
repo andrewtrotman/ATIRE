@@ -110,8 +110,8 @@ static int CC (int stem_length, char *end) { return (*end == 'l'); }
 class Recode_Rules
 {
 public:
-	char *old_end;		/* old ending */
-	char *new_end;		/* new ending */
+	const char *old_end;		/* old ending */
+	const char *new_end;		/* new ending */
 	char old_offset;	/* length of the old ending - 1 */
 	int (*cond)(char);		/* condition rule */
 	char end_group;		/* signal the end of the group */
@@ -266,7 +266,7 @@ if (p_last != NULL)		/* Check for the rest of suffix list */
 class Ending_List
 {
 public:
-	char *ending;				/* old ending                */
+	const char *ending;				/* old ending                */
 	int (*cond) (int, char *);				/* conditional rule          */
 	signed char left_offset;	/* used to find the siblings */
 	signed char right_offset;	/* in balanced binary tree   */

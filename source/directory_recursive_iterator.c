@@ -18,7 +18,7 @@
 #define FALSE (0)
 #endif
 #ifndef TRUE
-#define TRUE (! FALSE)
+#define TRUE (!FALSE)
 #endif
 
 #ifndef _MSC_VER

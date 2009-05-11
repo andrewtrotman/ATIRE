@@ -261,7 +261,7 @@ return temp;
 void ANT_paice_husk::readrules(ANT_paice_husk_rule ttable[26])
 {
 char copy[maxlinelength];
-char **line;
+const char **line;
 int n = 0;
 ANT_paice_husk_rule temp;
 
@@ -405,7 +405,7 @@ return isvowel((*(s + 1)) || isvowel(*(s + 2))) && (x > 3);
 	-----------------------
 	The Paice-Husk rule set embedded from the rules file that came with this code
 */
-char *ANT_paice_husk_rule_set[] =
+const char *ANT_paice_husk_rule_set[] =
 {
 "ia,?,intact\t;-ia > -- if intact \n",
 "a,?,intact\t;-a > -- if intact\n",
