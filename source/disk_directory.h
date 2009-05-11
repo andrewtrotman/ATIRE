@@ -23,7 +23,8 @@ public:
 #ifdef _MSC_VER
 	HANDLE handle;
 #else
-	FILE *fp;
+    glob_t matching_files;
+    unsigned int glob_index;
 #endif
 	char path[MAX_PATH_LENGTH];
 } ;

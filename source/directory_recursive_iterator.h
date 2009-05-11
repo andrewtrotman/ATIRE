@@ -8,6 +8,16 @@
 #include <stdlib.h>
 #include "directory_iterator.h"
 
+#ifdef __APPLE__
+	#include <sys/syslimits.h>
+#elif defined(__linux__)
+	#include <linux/limits.h>
+#endif
+
+#ifndef _MSC_VER
+#define MAX_PATH PATH_MAX
+#endif
+
 #ifndef MAX_PATH
 	#define MAX_PATH _MAX_PATH
 #endif

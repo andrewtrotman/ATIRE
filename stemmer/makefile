@@ -10,37 +10,18 @@ CFLAGS = -g -O3 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 
 CC = g++
 
-INDEX_PARTS = \
-    disk.o \
-    disk_internals.o \
-	directory_recursive_iterator.o \
-    file.o \
-    file_internals.o \
+
+OBJECTS = \
     parser.o \
     memory_index_hash_node.o \
-    memory.o \
     memory_index.o \
-    stats.o \
-    time_stats.o \
     memory_index_stats.o \
-    ctypes.o \
     hash_table.o \
     postings_piece.o \
-	bitstream.o \
-	commress_elias_gamma.o \
-	compress_elias_delta.o \
-	compress_golomb.o \
-	compress_simple9.o \
-	compress_relative10.o \
-	compress_carryover12.o \
-	compress_variable_byte.o \
-	compress_none.o \
-	compression_factory.o
-
-ANT_PARTS = \
     ctypes.o \
     file.o \
     file_internals.o \
+    maths.o \
     memory.o \
     search_engine.o \
     search_engine_accumulator.o \
@@ -57,14 +38,28 @@ ANT_PARTS = \
     stop_word.o \
     disk.o \
     disk_internals.o \
+	directory_recursive_iterator.o \
     btree_iterator.o \
     top_k_sort.o \
     stemmer.o	\
     porter.o \
-    paice_husk.o \
     lovins.o \
+    paice_husk.o \
     learned_wikipedia_stem.o \
-    relevant_topic.o
+    relevant_topic.o \
+	bitstream.o \
+	compress_elias_gamma.o \
+	compress_elias_delta.o \
+	compress_golomb.o \
+	compress_simple9.o \
+	compress_relative10.o \
+	compress_carryover12.o \
+	compress_variable_byte.o \
+	compress_none.o \
+	compress_sigma.o \
+	compression_factory.o \
+	indexer_param_block.o \
+    version.o
 
 EXTENSION = \
     ant.o \
@@ -82,11 +77,11 @@ all : $(BINDIR)/index $(BINDIR)/ant
 $(EXTENSION) : 
 	$(CC) $(CFLAGS) $(EXTFLAGS) -c $*.c -o $(OBJDIR)/$@
 
-$(BINDIR)/index : $(INDEX_PARTS) index.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/index.o $(INDEX_PARTS:%=$(OBJDIR)/%)
+$(BINDIR)/index : $(OBJECTS) index.o
+	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
 
-$(BINDIR)/ant : $(ANT_PARTS) $(EXTENSION) 
-	$(CC) $(LDFLAGS) -o $@ $(ANT_PARTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%)
+$(BINDIR)/ant : $(OBJECTS) $(EXTENSION) 
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%)
 
 .PHONY : clean
 clean :
