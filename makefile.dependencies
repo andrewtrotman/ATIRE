@@ -1,20 +1,21 @@
 # DO NOT DELETE
 
 bin/INEX_assessment.obj: source/INEX_assessment.h source/relevant_document.h source/memory.h source/disk.h
-bin/ant.obj: source/str.h source/ctypes.h source/memory.h source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/search_engine_btree_leaf.h source/mean_average_precision.h source/disk.h source/relevant_document.h source/time_stats.h source/stats.h source/stemmer.h source/btree_iterator.h source/stemmer_none.h source/stemmer_porter.h source/porter.h source/stemmer_lovins.h source/lovins.h source/stemmer_paice_husk.h source/paice_husk.h source/stemmer_wikipedia.h source/learned_wikipedia_stem.h source/INEX_assessment.h source/search_engine_forum_INEX.h source/search_engine_forum.h source/search_engine_forum_TREC.h source/version.h
+bin/ant.obj: source/str.h source/ctypes.h source/memory.h source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/search_engine_btree_leaf.h source/mean_average_precision.h source/disk.h source/relevant_document.h source/time_stats.h source/stats.h source/stemmer.h source/btree_iterator.h source/stemmer_factory.h source/INEX_assessment.h source/search_engine_forum_INEX.h source/search_engine_forum.h source/search_engine_forum_TREC.h source/ant_param_block.h
 bin/ant_dictionary.obj: source/memory.h source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/btree_iterator.h source/search_engine_btree_leaf.h
+bin/ant_param_block.obj: source/ant_param_block.h source/version.h
 bin/bitstream.obj: source/bitstream.h source/fundamental_types.h
 bin/btree_iterator.obj: source/file.h source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/search_engine_btree_node.h source/btree.h source/btree_iterator.h
 bin/compress_carryover12.obj: source/compress_carryover12.h source/compress.h source/fundamental_types.h source/compress_carryover12_internals.h
-bin/compress_elias_delta.obj: source/compress_elias_delta.h source/compress_elias_gamma.h source/compress.h source/fundamental_types.h source/bitstream.h source/maths.h
+bin/compress_elias_delta.obj: source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/compress.h source/fundamental_types.h source/bitstream.h
 bin/compress_elias_gamma.obj: source/maths.h source/compress_elias_gamma.h source/compress.h source/fundamental_types.h source/bitstream.h
-bin/compress_golomb.obj: source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/compress.h source/fundamental_types.h source/bitstream.h source/maths.h
+bin/compress_golomb.obj: source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/compress.h source/fundamental_types.h source/bitstream.h
 bin/compress_none.obj: source/compress_none.h source/compress.h source/fundamental_types.h
 bin/compress_relative10.obj: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/maths.h
 bin/compress_sigma.obj: source/compress_sigma.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_carryover12_internals.h source/maths.h source/compress_sigma_frequency.h
 bin/compress_simple9.obj: source/compress_simple9.h source/compress.h source/fundamental_types.h source/maths.h
 bin/compress_variable_byte.obj: source/compress_variable_byte.h source/compress.h source/fundamental_types.h
-bin/compression_factory.obj: source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compress_relative10.h source/compress_simple9.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/bitstream.h source/compress_variable_byte.h source/compress_sigma.h source/compress_none.h
+bin/compression_factory.obj: source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compress_relative10.h source/compress_simple9.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compress_sigma.h source/compress_none.h source/stats.h
 bin/ctypes.obj: source/ctypes.h
 bin/directory_recursive_iterator.obj: source/disk_internals.h source/disk_directory.h source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h
 bin/disk.obj: source/disk.h source/disk_internals.h source/disk_directory.h source/file_internals.h
@@ -22,15 +23,16 @@ bin/disk_internals.obj: source/disk_internals.h
 bin/file.obj: source/file.h source/memory.h source/file_internals.h
 bin/file_internals.obj: source/file_internals.h
 bin/hash_table.obj: source/hash_table.h source/string_pair.h source/str.h source/ctypes.h
-bin/index.obj: source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h source/file.h source/parser.h source/string_pair.h source/str.h source/ctypes.h source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/postings_piece.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/time_stats.h source/version.h
+bin/index.obj: source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h source/file.h source/parser.h source/string_pair.h source/str.h source/ctypes.h source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/postings_piece.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/compression_factory.h source/compression_factory_scheme.h source/indexer_param_block.h source/time_stats.h source/version.h
+bin/indexer_param_block.obj: source/indexer_param_block.h source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/version.h
 bin/learned_wikipedia_stem.obj: source/learned_wikipedia_stem.h
 bin/lovins.obj: source/lovins.h
 bin/maths.obj: source/maths.h
 bin/mean_average_precision.obj: source/mean_average_precision.h source/memory.h source/relevant_topic.h source/relevant_document.h source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/search_engine_accumulator.h
 bin/memory.obj: source/memory.h
-bin/memory_index.obj: source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/memory_index.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/memory.h source/file.h source/btree.h source/btree_head_node.h source/hash_table.h source/compression_factory.h source/compression_factory_scheme.h
+bin/memory_index.obj: source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/memory_index.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/compression_factory.h source/compression_factory_scheme.h source/memory.h source/file.h source/btree.h source/btree_head_node.h source/hash_table.h
 bin/memory_index_hash_node.obj: source/string_pair.h source/str.h source/ctypes.h source/memory.h source/memory_index_hash_node.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/compress_variable_byte.h source/compress.h source/fundamental_types.h
-bin/memory_index_stats.obj: source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h
+bin/memory_index_stats.obj: source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/compression_factory.h source/compression_factory_scheme.h
 bin/paice_husk.obj: source/paice_husk.h
 bin/parser.obj: source/parser.h source/string_pair.h source/str.h source/ctypes.h
 bin/porter.obj: source/str.h source/ctypes.h source/porter.h source/btree_iterator.h
@@ -45,9 +47,10 @@ bin/search_engine_forum_TREC.obj: source/search_engine_forum_TREC.h source/searc
 bin/search_engine_stats.obj: source/search_engine_stats.h source/time_stats.h source/stats.h
 bin/stats.obj: source/stats.h
 bin/stemmer.obj: source/stemmer.h source/btree_iterator.h
+bin/stemmer_factory.obj: source/stemmer_none.h source/stemmer.h source/btree_iterator.h source/stemmer_porter.h source/porter.h source/ctypes.h source/stemmer_lovins.h source/lovins.h source/stemmer_paice_husk.h source/paice_husk.h source/stemmer_otago.h source/learned_wikipedia_stem.h source/stemmer_factory.h
 bin/stop_word.obj: source/str.h source/ctypes.h source/stop_word.h
 bin/str.obj: source/str.h source/ctypes.h
-bin/test_compression.obj: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/bitstream.h source/compress_variable_byte.h source/compression_factory.h source/compression_factory_scheme.h source/compress_sigma.h
+bin/test_compression.obj: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compression_factory.h source/compression_factory_scheme.h source/compress_sigma.h
 bin/time_stats.obj: source/time_stats.h source/stats.h
 bin/top_k_sort.obj: source/top_k_sort.h
 bin/INEXqrels_to_run.obj: source/disk.h

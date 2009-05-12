@@ -10,6 +10,10 @@
 #include "stemmer.h"
 #include "lovins.h"
 
+/*
+	class ANT_STEMMER_LOVINS 
+	------------------------
+*/
 class ANT_stemmer_lovins : public ANT_stemmer
 {
 public:

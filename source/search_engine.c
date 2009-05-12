@@ -606,8 +606,7 @@ for (current_accumulator = accumulator; current_accumulator < end_accumulator; c
 		*current++ = current_accumulator;
 
 /*
-	If the number of found documents is less than the accurate_rank_point then there
-	is no point sorting past the number of found documents
+	Return the number of relevant documents.
 */
 *hits = current - accumulator_pointers;
 stats->add_count_relevant_documents(stats->stop_timer(now));

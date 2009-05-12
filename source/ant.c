@@ -14,14 +14,11 @@
 #include "relevant_document.h"
 #include "time_stats.h"
 #include "stemmer.h"
-#include "stemmer_none.h"
-#include "stemmer_porter.h"
-#include "stemmer_lovins.h"
-#include "stemmer_paice_husk.h"
-#include "stemmer_wikipedia.h"
+#include "stemmer_factory.h"
 #include "INEX_assessment.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
+#include "ant_param_block.h"
 #include "version.h"
 
 #ifndef FALSE
@@ -49,7 +46,7 @@ return TRUE;
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
 {
 ANT_time_stats stats;
 long long now;
@@ -60,12 +57,10 @@ long long hits;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-//ANT_stemmer_porter stemmer(search_engine);
-ANT_stemmer_wikipedia stemmer(search_engine);
-//ANT_stemmer_paice_husk stemmer(search_engine);
-//ANT_stemmer_lovins stemmer(search_engine);
-//ANT_stemmer stemmer(search_engine);
-//ANT_stemmer_none stemmer(search_engine);
+ANT_stemmer *stemmer = NULL;
+
+if (params->stemmer != 0)
+	stemmer = ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
 
 if (topic_id == -1)
 	search_engine->stats_initialise();		// if we are command-line then report query by query stats
@@ -91,17 +86,16 @@ while (*token_end != '\0')
 	token_length = token_end - token_start;
 	strlwr(token);
 
-	if ((token_length > 1) && (token[token_length - 1] == '+'))
-		{
-		token[token_length - 1] = '\0';
-		search_engine->process_one_stemmed_search_term(&stemmer, token);
-		}
-	else
+	if (stemmer == NULL)
 		search_engine->process_one_search_term(token);
+	else
+		search_engine->process_one_stemmed_search_term(stemmer, token);
+
 	did_query = TRUE;
 	}
 
-ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
+ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // accurately rank all documents
+//ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
 //ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
 
 if (topic_id == -1)
@@ -151,7 +145,7 @@ return document_list;
 	COMMAND_DRIVEN_ANT()
 	--------------------
 */
-void command_driven_ant(void)
+void command_driven_ant(ANT_ANT_param_block *params)
 {
 ANT_memory memory;
 char query[1024];
@@ -159,7 +153,6 @@ long more;
 long long last_to_list, hits, documents_in_id_list;
 char **document_list, **answer_list;
 
-puts(ANT_version_string);
 document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
@@ -183,7 +176,7 @@ while (more)
 			more = special_command(query);
 		else
 			{
-			perform_query(&search_engine, query, &hits);
+			perform_query(params, &search_engine, query, &hits);
 			last_to_list = hits > 10 ? 10 : hits;
 			search_engine.generate_results_list(document_list, answer_list, last_to_list);
 			for (long result = 0; result < last_to_list; result++)
@@ -258,7 +251,7 @@ else
 	BATCH_ANT()
 	-----------
 */
-double batch_ant(char *topic_file, char *qrel_file, long qrel_format)
+double batch_ant(ANT_ANT_param_block *params, char *topic_file, char *qrel_file, long qrel_format)
 {
 ANT_relevant_document *assessments;
 char query[1024];
@@ -270,7 +263,6 @@ char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_search_engine_forum_TREC output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
 
-fprintf(stderr, "%s\n", ANT_version_string);
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 
@@ -292,7 +284,7 @@ while (fgets(query, sizeof(query), fp) != NULL)
 	if ((query_text = strchr(query, ' ')) == NULL)
 		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 
-	average_precision = perform_query(&search_engine, query_text, &hits, topic_id, &map);
+	average_precision = perform_query(params, &search_engine, query_text, &hits, topic_id, &map);
 	sum_of_average_precisions += average_precision;
 	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
@@ -315,7 +307,7 @@ return mean_average_precision;
 void usage(char *exename)
 {
 printf("Usage:\n%s\nor\n", exename);
-printf("%s <topic_file> <qrel_file>\n", exename);
+printf("%s [options...] <topic_file> <qrel_file>\n", exename);
 }
 
 
@@ -325,12 +317,17 @@ printf("%s <topic_file> <qrel_file>\n", exename);
 */
 int main(int argc, char *argv[])
 {
-double map;
+long last_param;
+ANT_ANT_param_block params(argc, argv);
 
-if (argc == 1)
-	command_driven_ant();
-else if (argc == 3)
-	map = batch_ant(argv[1], argv[2], QREL_INEX);
+last_param = params.parse();
+if (params.logo)
+	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
+
+if (argc - last_param == 0)
+	command_driven_ant(&params);
+else if (argc - last_param == 2)
+	batch_ant(&params, argv[last_param], argv[last_param + 1], QREL_ANT);
 
 #ifdef FIT_BM25
 /*
@@ -338,6 +335,7 @@ else if (argc == 3)
 */
 else if (argc == 4)
 	{
+	double map;
 	FILE *outfile;
 	extern double BM25_k1;
 	extern double BM25_b;

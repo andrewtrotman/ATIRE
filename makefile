@@ -17,8 +17,8 @@ MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D)
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
+CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D)
+#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
 CC = @cl
 
 #
@@ -62,6 +62,7 @@ PARTS = \
 	$(OBJDIR)\stemmer.obj						\
 	$(OBJDIR)\porter.obj						\
 	$(OBJDIR)\lovins.obj						\
+	$(OBJDIR)\stemmer_factory.obj				\
 	$(OBJDIR)\paice_husk.obj					\
 	$(OBJDIR)\learned_wikipedia_stem.obj		\
 	$(OBJDIR)\relevant_topic.obj				\
@@ -77,6 +78,7 @@ PARTS = \
 	$(OBJDIR)\compress_sigma.obj				\
 	$(OBJDIR)\compression_factory.obj			\
 	$(OBJDIR)\indexer_param_block.obj			\
+	$(OBJDIR)\ant_param_block.obj				\
 	$(OBJDIR)\version.obj
 
 #
