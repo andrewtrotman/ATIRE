@@ -11,7 +11,7 @@
 	class ANT_COMPRESS_ELIAS_DELTA
 	------------------------------
 */
-class ANT_compress_elias_delta : protected ANT_compress_elias_gamma
+class ANT_compress_elias_delta : public ANT_compress_elias_gamma
 {
 protected:
 	inline void encode(unsigned long long val)
