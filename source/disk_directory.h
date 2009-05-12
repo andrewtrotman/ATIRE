@@ -9,10 +9,11 @@
 #include <stdlib.h>
 
 #ifdef _MSC_VER
-#define MAX_PATH_LENGTH _MAX_PATH
+	#define MAX_PATH_LENGTH _MAX_PATH
 #else
-#define MAX_PATH_LENGTH MAX_PATH
+	#define MAX_PATH_LENGTH MAX_PATH
 #endif
+
 /*
 	class ANT_DISK_DIRECTORY
 	------------------------
@@ -23,8 +24,8 @@ public:
 #ifdef _MSC_VER
 	HANDLE handle;
 #else
-    glob_t matching_files;
-    unsigned int glob_index;
+	glob_t matching_files;
+	unsigned int glob_index;
 #endif
 	char path[MAX_PATH_LENGTH];
 } ;
