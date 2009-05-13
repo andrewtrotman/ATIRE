@@ -57,7 +57,9 @@ OBJECTS = \
 	compress_sigma.o \
 	compression_factory.o \
 	indexer_param_block.o \
-    version.o
+    version.o \
+    ant_param_block.o \
+    stemmer_factory.o
 
 all : $(BINDIR)/index $(BINDIR)/ant
 
