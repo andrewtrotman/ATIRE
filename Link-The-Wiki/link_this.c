@@ -24,6 +24,10 @@
 	#define TRUE (!FALSE)
 #endif
 
+#ifndef _MSC_VER
+#define _strdup strdup
+#endif
+
 #define MODE_NO_4_DIGIT_NUMBERS 1
 
 class ANT_link_posting

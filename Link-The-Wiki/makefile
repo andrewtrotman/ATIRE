@@ -5,7 +5,7 @@
 CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi -DHASHER=1 -DHEADER_HASHER=1  /O2 
 CC = cl
 
-all : link_extract.exe link_extract_pass2.exe link_index.exe link_index_merge.exe link_this.exe
+all : link_extract.exe link_extract_pass2.exe link_index.exe link_index_merge.exe link_this.exe title_extract.exe
 
 .c.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
@@ -27,6 +27,9 @@ link_index_merge.exe : link_index_merge.obj
 
 link_this.exe : disk.obj disk_internals.obj link_this.obj
 	$(CC) $(CFLAGS) link_this.obj disk.obj disk_internals.obj /Fe$@
+
+title_extract.exe : disk.obj disk_internals.obj title_extract.obj
+	$(CC) $(CFLAGS) title_extract.obj disk.obj disk_internals.obj /Fe$@
 
 clean :
 	del *.obj *.exe *.ilk *.pdb *.suo *.pdb
