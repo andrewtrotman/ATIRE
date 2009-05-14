@@ -15,7 +15,7 @@
 #include "time_stats.h"
 #include "stemmer.h"
 #include "stemmer_factory.h"
-#include "INEX_assessment.h"
+#include "assessment_INEX.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
@@ -57,10 +57,12 @@ long long hits;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-ANT_stemmer *stemmer = NULL;
+ANT_stemmer *stemmer;
 
-if (params->stemmer != 0)
-	stemmer = ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
+/*
+	if we're stemming then create the stemmer object
+*/
+stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
 
 if (topic_id == -1)
 	search_engine->stats_initialise();		// if we are command-line then report query by query stats
@@ -86,6 +88,9 @@ while (*token_end != '\0')
 	token_length = token_end - token_start;
 	strlwr(token);
 
+	/*
+		process the next search term - either stemmed or not.
+	*/
 	if (stemmer == NULL)
 		search_engine->process_one_search_term(token);
 	else
@@ -94,9 +99,10 @@ while (*token_end != '\0')
 	did_query = TRUE;
 	}
 
-ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // accurately rank all documents
-//ranked_list = search_engine->sort_results_list(search_engine->document_count(), &hits); // accurately rank all documents
-//ranked_list = search_engine->sort_results_list(1500, &hits);		// accurately identify the top 1500 documents
+/*
+	Rank the results list
+*/
+ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // rank
 
 if (topic_id == -1)
 	{
@@ -111,11 +117,28 @@ else
 	stats.print_time("(", stats.stop_timer(now), ")");
 //	if (did_query)
 //		search_engine->stats_text_render();
-	average_precision = map->average_precision(topic_id, search_engine);
-//	average_precision = map->average_generalised_precision(topic_id, search_engine);
+	/*
+		Compute the precision
+	*/
+	if (params->metric == ANT_ANT_param_block::MAP)
+		average_precision = map->average_precision(topic_id, search_engine);
+	else
+		average_precision = map->average_generalised_precision(topic_id, search_engine);
 	}
 
+/*
+	Return the number of document that matched the user's query
+*/
 *matching_documents = hits;
+
+/*
+	Clean up
+*/
+delete stemmer;
+
+/*
+	Return the precision
+*/
 return average_precision;
 }
 
@@ -239,7 +262,7 @@ ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long long 
 {
 if (qrel_format == QREL_INEX)
 	{
-	ANT_INEX_assessment qrel_reader(memory, uid_list, uid_list_length);
+	ANT_assessment_INEX qrel_reader(memory, uid_list, uid_list_length);
 	return qrel_reader.read(qrel_file, qrel_list_length);
 	}
 else

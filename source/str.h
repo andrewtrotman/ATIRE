@@ -110,6 +110,22 @@ while (from < to)
 return what;
 }
 
+/*
+	STRCOUNTCHR()
+	-------------
+*/
+inline int strcountchr(const char *token, char ch)
+{
+int out = 0;
+
+while ((token = strchr(token, ch)) != NULL)
+	{
+	out++;
+	token++;
+	}
+
+return out;
+}
 
 
 #ifndef _MSC_VER

@@ -27,7 +27,7 @@ public:
 	ANT_disk();
 	virtual ~ANT_disk();
 
-	static char *read_entire_file(char *filename, long long *len = NULL);
+	static char *read_entire_file(char *filename, long long *len = 0);
 	static char **buffer_to_list(char *buffer, long long *lines);
 	char *get_first_filename(char *wildcard);
 	char *get_next_filename(void);

@@ -17,8 +17,8 @@ MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D)
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
+#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D)
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
 CC = @cl
 
 #
@@ -44,7 +44,10 @@ PARTS = \
 	$(OBJDIR)\search_engine.obj 				\
 	$(OBJDIR)\search_engine_accumulator.obj 	\
 	$(OBJDIR)\mean_average_precision.obj 		\
-	$(OBJDIR)\INEX_assessment.obj 				\
+	$(OBJDIR)\assessment.obj					\
+	$(OBJDIR)\assessment_ANT.obj				\
+	$(OBJDIR)\assessment_INEX.obj				\
+	$(OBJDIR)\assessment_factory.obj			\
 	$(OBJDIR)\relevant_document.obj 			\
 	$(OBJDIR)\stats.obj							\
 	$(OBJDIR)\time_stats.obj					\
@@ -140,6 +143,8 @@ $(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
 $(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
 $(BINDIR)\bindiff.exe : $(OBJDIR)\bindiff.obj
 $(BINDIR)\filelist.exe : $(OBJDIR)\filelist.obj
+$(BINDIR)\index.exe : $(OBJDIR)\index.obj
+$(BINDIR)\ant.exe : $(OBJDIR)\ant.obj
 
 #
 #	Management
@@ -153,4 +158,4 @@ depend:
 #
 #	And include the dependencie generated using makedepend from cygwin and "make depend"
 #
-!include makefile.dependencies
+#!include makefile.dependencies

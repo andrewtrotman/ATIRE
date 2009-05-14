@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include "str.h"
 #include "ant_param_block.h"
 #include "version.h"
 #include "stemmer_factory.h"
@@ -29,6 +30,17 @@ this->argv = argv;
 logo = TRUE;
 stemmer = 0;
 sort_top_k = LLONG_MAX;
+metric = MAP;
+assessments_filename = NULL;
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::ANT_ANT_PARAM_BLOCK()
+	------------------------------------------
+*/
+ANT_ANT_param_block::~ANT_ANT_param_block()
+{
+delete [] assessments_filename; 
 }
 
 /*
@@ -69,9 +81,41 @@ puts("");
 
 puts("OPTIMISATIONS");
 puts("-------------");
-puts("-k<n>           accumulator sorting only accurate to the top <n>");
+puts("-k<n>           Results list accurate to the top <n> (0=all) [default=0]");
 puts("");
+
+puts("METRICS AND ASSESSMENTS");
+puts("-----------------------");
+puts("-m[metric]      Score the result set using");
+puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
+puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
+puts(" -a<filenane>   Topic assessments are in <filename>");
+puts("");
+
 exit(0);
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::ASSESSMENTS()
+	----------------------------------
+*/
+void ANT_ANT_param_block::assessments(char  *filename)
+{
+assessments_filename = strnew(filename);
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::SET_METRIC()
+	---------------------------------
+*/
+void ANT_ANT_param_block::set_metric(char *which)
+{
+if (strcmp(which, "MAP") == 0)
+	metric = MAP;
+else if (strcmp(which, "MAgP") == 0)
+	metric = MAgP;
+else
+	exit(printf("Unknown metric:'%s'\n", which));
 }
 
 /*
@@ -125,6 +169,10 @@ for (param = 1; param < argc; param++)
 			if (sort_top_k == 0)
 				sort_top_k = LLONG_MAX;
 			}
+		else if (*command == 'm')
+			set_metric(command + 1);
+		else if (*command == 'a')
+			assessments(command + 1);
 		else
 			usage();
 		}

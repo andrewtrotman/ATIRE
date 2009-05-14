@@ -1,81 +1,19 @@
 /*
-	INEX_ASSESSMENT.C
+	ASSESSMENT_INEX.C
 	-----------------
 */
 #include <string.h>
-#include "INEX_assessment.h"
+#include "assessment_INEX.h"
 #include "relevant_document.h"
 #include "memory.h"
 #include "disk.h"
 
 /*
-	ANT_INEX_ASSESSMENT::CMP()
-	--------------------------
-*/
-int ANT_INEX_assessment::cmp(const void *a, const void *b)
-{
-long **one, **two;
-
-one = (long **)a;
-two = (long **)b;
-
-return **one - **two;
-}
-
-/*
-	ANT_INEX_ASSESSMENT::MAX()
-	--------------------------
-*/
-inline char *ANT_INEX_assessment::max(char *a, char *b, char *c)
-{
-char *thus_far;
-
-thus_far = a;
-if (b > thus_far)
-	thus_far = b;
-if (c > thus_far)
-	thus_far = c;
-
-return thus_far;
-}
-
-/*
-	ANT_INEX_ASSESSMENT::ANT_INEX_ASSESSMENT()
-	------------------------------------------
-*/
-ANT_INEX_assessment::ANT_INEX_assessment(ANT_memory *mem, char **docid_list, long long documents)
-{
-char **current, *slish, *slosh, *slash, *start;
-long *current_docid, **current_sorted_docid;
-
-memory = mem;
-this->documents = documents;
-current_docid = numeric_docid_list = (long *)memory->malloc(sizeof(*numeric_docid_list) * documents);
-current_sorted_docid = sorted_numeric_docid_list = (long **)memory->malloc(sizeof(*sorted_numeric_docid_list) * documents);
-for (current = docid_list; *current != NULL; current++)
-	{
-	slish = *current;
-	slash = strchr(*current, '/');
-	slosh = strchr(*current, '\\');
-	start = max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
-	if (*start != '\0')		// avoid blank lines at the end of the file
-		{
-		*current_docid = atol(start + (start == slish ? 0 : 1));
-		*current_sorted_docid = current_docid;
-		current_docid++;
-		current_sorted_docid++;
-		}
-	}
-qsort(sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
-}
-
-/*
-	ANT_INEX_ASSESSMENT::READ()
+	ANT_ASSESSMENT_INEX::READ()
 	---------------------------
 */
-ANT_relevant_document *ANT_INEX_assessment::read(char *filename, long long *reldocs)
+ANT_relevant_document *ANT_assessment_INEX::read(char *filename, long long *reldocs)
 {
-ANT_disk disk;
 char *file, **lines, **current;
 long topic, document, document_length, relevant_characters, relevant_documents, *document_pointer, **found;
 long long lines_in_file;
@@ -85,9 +23,9 @@ long params;
 /*
 	load the assessment file into memory
 */
-if ((file = disk.read_entire_file(filename)) == NULL)
+if ((file = ANT_disk::read_entire_file(filename)) == NULL)
 	return NULL;
-lines = disk.buffer_to_list(file, &lines_in_file);
+lines = ANT_disk::buffer_to_list(file, &lines_in_file);
 
 /*
 	count the number of relevant documents
