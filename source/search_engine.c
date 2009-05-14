@@ -16,6 +16,7 @@
 #include "search_engine_stats.h"
 #include "top_k_sort.h"
 #include "stemmer.h"
+#include "compress_variable_byte.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -35,6 +36,7 @@ long long end, term_header, this_header_block_size, sum, current_length, pointer
 long postings_buffer_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
+ANT_compress_variable_byte variable_byte;
 
 stats = new ANT_search_engine_stats(memory);
 this->memory = memory;
@@ -143,7 +145,7 @@ posting.tf = (ANT_compressable_integer *)memory->malloc((size_t)(sizeof(*posting
 	decompress the document length vector
 */
 get_postings(&collection_details, postings_buffer);
-factory.decompress(posting.docid, postings_buffer, collection_details.document_frequency);
+variable_byte.decompress(posting.docid, postings_buffer, collection_details.document_frequency);
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
