@@ -17,6 +17,9 @@ private:
 	ANT_assessment *factory;
 
 public:
+	ANT_assessment_factory(ANT_memory *mem, char **docid_list, long long documents) : ANT_assessment(mem, docid_list, documents) { factory = NULL; }
+	virtual ~ANT_assessment_factory();
+
 	virtual ANT_relevant_document *read(char *filename, long long *reldocs);
 } ;
 

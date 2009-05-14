@@ -56,16 +56,20 @@ long long files_that_match;
 
 if (argc < 2)
 	param_block.usage();
-doc = 0;
-terms_in_document = 0;
-done_work = FALSE;
-index = new ANT_memory_index;
-id_list.open("doclist.aspt", "wb");
 
 first_param = param_block.parse();
 
 if (param_block.logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
+
+if (first_param >= argc)
+	exit(0);				// no files to index so terminate
+
+doc = 0;
+terms_in_document = 0;
+done_work = FALSE;
+index = new ANT_memory_index;
+id_list.open("doclist.aspt", "wb");
 
 if (param_block.recursive)
 	disk = new ANT_directory_recursive_iterator;

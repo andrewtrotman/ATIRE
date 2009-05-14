@@ -67,6 +67,7 @@ puts("GENERAL");
 puts("-------");
 puts("-? -h -H        Display this help message");
 puts("-nologo         Suppress banner");
+puts("");
 
 puts("TERM EXPANSION");
 puts("--------------");
@@ -89,7 +90,8 @@ puts("-----------------------");
 puts("-m[metric]      Score the result set using");
 puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
 puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
-puts(" -a<filenane>   Topic assessments are in <filename>");
+puts("-a<filenane>    Topic assessments are in <filename>");
+puts("-q<filename>    Queries are in file <filename>");
 puts("");
 
 exit(0);

@@ -15,7 +15,7 @@
 #include "time_stats.h"
 #include "stemmer.h"
 #include "stemmer_factory.h"
-#include "assessment_INEX.h"
+#include "assessment_factory.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
@@ -211,70 +211,11 @@ puts("Bye");
 }
 
 /*
-	GET_ANT_QRELS()
-	---------------
-*/
-ANT_relevant_document *get_ant_qrels(ANT_memory *memory, char *qrel_file, long long *qrel_list_length)
-{
-static ANT_relevant_document *all_assessments = NULL;
-static long lines = 0;
-ANT_disk file_system;
-ANT_relevant_document *current_assessment;
-FILE *qrel_fp;
-char *entire_file, *ch;
-char text[80];
-
-if (all_assessments == NULL)		// nasty, but it'll have to do in the mean time.
-	{
-	if ((entire_file = file_system.read_entire_file(qrel_file)) == NULL)
-		exit(fprintf(stderr, "Cannot read qrel file:%s\n", qrel_file));
-
-	lines = 0;
-	for (ch = entire_file; *ch != '\0'; ch++)
-		if (*ch == '\n')
-			lines++;
-
-	current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(sizeof(*all_assessments) * lines);
-
-	if ((qrel_fp = fopen(qrel_file, "rb")) == NULL)
-		exit(fprintf(stderr, "Cannot open topic file:%s\n", qrel_file));
-
-	while (fgets(text, sizeof(text), qrel_fp) != NULL)
-		{
-		if ((sscanf(text, "%ld %lld", &current_assessment->topic, &current_assessment->docid)) != 2)
-			exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", qrel_file, current_assessment - all_assessments));
-		current_assessment++;
-		}
-
-	fclose(qrel_fp);
-	}
-
-*qrel_list_length = lines;
-return all_assessments;
-}
-
-/*
-	GET_QRELS()
-	-----------
-	This is highly inefficient, but because it only happens once that's OK.
-*/
-ANT_relevant_document *get_qrels(ANT_memory *memory, char *qrel_file, long long *qrel_list_length, long qrel_format, char **uid_list, long long uid_list_length)
-{
-if (qrel_format == QREL_INEX)
-	{
-	ANT_assessment_INEX qrel_reader(memory, uid_list, uid_list_length);
-	return qrel_reader.read(qrel_file, qrel_list_length);
-	}
-else
-	return get_ant_qrels(memory, qrel_file, qrel_list_length);
-}
-
-/*
 
 	BATCH_ANT()
 	-----------
 */
-double batch_ant(ANT_ANT_param_block *params, char *topic_file, char *qrel_file, long qrel_format)
+double batch_ant(ANT_ANT_param_block *params, char *topic_file, char *qrel_file)
 {
 ANT_relevant_document *assessments;
 char query[1024];
@@ -285,6 +226,7 @@ FILE *fp;
 char *query_text, **document_list, **answer_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_search_engine_forum_TREC output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
+ANT_assessment_factory *factory;
 
 ANT_search_engine search_engine(&memory);
 fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
@@ -292,7 +234,9 @@ fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count(
 document_list = read_docid_list(&documents_in_id_list);
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
-assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
+factory = new ANT_assessment_factory(&memory, document_list, documents_in_id_list);
+assessments = factory->read(qrel_file, &number_of_assessments);
+
 ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
 
 if ((fp = fopen(topic_file, "rb")) == NULL)
@@ -320,6 +264,8 @@ printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
 
 search_engine.stats_text_render();
 
+delete factory;
+
 return mean_average_precision;
 }
 
@@ -344,13 +290,14 @@ long last_param;
 ANT_ANT_param_block params(argc, argv);
 
 last_param = params.parse();
+
 if (params.logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
 if (argc - last_param == 0)
 	command_driven_ant(&params);
 else if (argc - last_param == 2)
-	batch_ant(&params, argv[last_param], argv[last_param + 1], QREL_ANT);
+	batch_ant(&params, argv[last_param], argv[last_param + 1]);
 
 #ifdef FIT_BM25
 /*
@@ -374,7 +321,7 @@ else if (argc == 4)
 		fprintf(outfile, "%f ", BM25_k1);
 		for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
 			{
-			map = batch_ant(argv[1], argv[2], QREL_INEX);
+			map = batch_ant(argv[1], argv[2]);
 			fprintf(outfile, "%f ", map);
 			}
 		fprintf(outfile, "\n");

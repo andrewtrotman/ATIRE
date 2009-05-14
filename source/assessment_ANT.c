@@ -26,6 +26,8 @@ all_assessments = current_assessment = (ANT_relevant_document *)memory->malloc(s
 
 for (current = lines; *current != NULL; current++)
 	{
+	if (**current == '\0')
+		continue;			// blank line
 	if ((sscanf(*current, "%ld %lld", &current_assessment->topic, &current_assessment->docid)) != 2)
 		exit(printf("%s line %d:Cannot extract '<queryid> <docid>'", filename, current_assessment - all_assessments));
 	current_assessment->document_length = current_assessment->relevant_characters = 1024;		// fake the length and proportion of the document that are relevant

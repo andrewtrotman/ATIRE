@@ -9,6 +9,15 @@
 #include "assessment_INEX.h"
 
 /*
+	ANT_ASSESSMENT_FACTORY::~ANT_ASSESSMENT_FACTORY()
+	-------------------------------------------------
+*/
+ANT_assessment_factory::~ANT_assessment_factory()
+{
+delete factory;
+}
+
+/*
 	ANT_ASSESSMENT_FACTORY::READ()
 	------------------------------
 */
