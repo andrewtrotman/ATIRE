@@ -4,7 +4,7 @@ bin/ant.obj: source/str.h source/ctypes.h source/memory.h source/search_engine.h
 bin/ant_dictionary.obj: source/memory.h source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/btree_iterator.h source/search_engine_btree_leaf.h
 bin/ant_param_block.obj: source/str.h source/ctypes.h source/ant_param_block.h source/version.h source/stemmer_factory.h
 bin/assessment.obj: source/str.h source/ctypes.h source/memory.h source/assessment.h
-bin/assessment_ANT.obj: source/disk.h source/assessment_ant.h source/assessment.h source/memory.h source/relevant_document.h
+bin/assessment_ANT.obj: source/disk.h source/assessment_ANT.h source/assessment.h source/memory.h source/relevant_document.h
 bin/assessment_INEX.obj: source/assessment_INEX.h source/assessment.h source/relevant_document.h source/memory.h source/disk.h
 bin/assessment_factory.obj: source/str.h source/ctypes.h source/assessment_factory.h source/assessment.h source/assessment_ANT.h source/assessment_INEX.h
 bin/bitstream.obj: source/bitstream.h source/fundamental_types.h
@@ -42,7 +42,7 @@ bin/porter.obj: source/str.h source/ctypes.h source/porter.h source/btree_iterat
 bin/postings_piece.obj: source/postings_piece.h source/memory.h
 bin/relevant_document.obj: source/relevant_document.h
 bin/relevant_topic.obj: source/relevant_topic.h
-bin/search_engine.obj: source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/file.h source/memory.h source/search_engine_btree_node.h source/btree.h source/search_engine_btree_leaf.h source/search_engine_accumulator.h source/search_engine_stats.h source/time_stats.h source/stats.h source/top_k_sort.h source/stemmer.h source/btree_iterator.h
+bin/search_engine.obj: source/search_engine.h source/search_engine_posting.h source/compress.h source/fundamental_types.h source/compression_factory.h source/compression_factory_scheme.h source/file.h source/memory.h source/search_engine_btree_node.h source/btree.h source/search_engine_btree_leaf.h source/search_engine_accumulator.h source/search_engine_stats.h source/time_stats.h source/stats.h source/top_k_sort.h source/stemmer.h source/btree_iterator.h source/compress_variable_byte.h
 bin/search_engine_accumulator.obj: source/search_engine_accumulator.h
 bin/search_engine_forum.obj: source/search_engine_forum.h
 bin/search_engine_forum_INEX.obj: source/search_engine_forum_INEX.h source/search_engine_forum.h

@@ -32,6 +32,11 @@ stemmer = 0;
 sort_top_k = LLONG_MAX;
 metric = MAP;
 assessments_filename = NULL;
+queries_filename = NULL;
+output_forum = NONE;
+run_name = participant_id = "unknown";
+output_filename = "ant.out";
+results_list_length = 1500;			// the INEX results list length
 }
 
 /*
@@ -40,7 +45,6 @@ assessments_filename = NULL;
 */
 ANT_ANT_param_block::~ANT_ANT_param_block()
 {
-delete [] assessments_filename; 
 }
 
 /*
@@ -90,20 +94,37 @@ puts("-----------------------");
 puts("-m[metric]      Score the result set using");
 puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
 puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
-puts("-a<filenane>    Topic assessments are in <filename>");
-puts("-q<filename>    Queries are in file <filename>");
+puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
+puts("-q<filename>    Queries are in file <filename> (format: ANT)");
 puts("");
+
+puts("TREC / INEX SPECIFIC");
+puts("--------------------");
+puts("-e[-it]         Export a run file for use in an Evaluation Forum");
+puts("  -             Don't generate a run file [default]");
+puts("  i             INEX run format");
+puts("  t             TREC run format");
+puts("-o<filename>    Output filename for the run [default=ant.out]");
+puts("-i<id>          Forum participant id is <id> [default=unknown]");
+puts("-n<name>        Run is named <name> [default=unknown]");
+puts("-l<n>           Length of the results list [default=1500]");
 
 exit(0);
 }
 
 /*
-	ANT_ANT_PARAM_BLOCK::ASSESSMENTS()
-	----------------------------------
+	ANT_ANT_PARAM_BLOCK::EXPORT_FORMAT()
+	------------------------------------
 */
-void ANT_ANT_param_block::assessments(char  *filename)
+void ANT_ANT_param_block::export_format(char *forum)
 {
-assessments_filename = strnew(filename);
+switch (*forum)
+	{
+	case '-' : output_forum = NONE;   break;
+	case 'i' : output_forum = INEX;   break;
+	case 't' : output_forum = TREC;   break;
+	default : exit(printf("Unknown export format: '%c'\n", *forum)); break;
+	}
 }
 
 /*
@@ -174,7 +195,19 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'm')
 			set_metric(command + 1);
 		else if (*command == 'a')
-			assessments(command + 1);
+			assessments_filename = command + 1;
+		else if (*command == 'q')
+			queries_filename = command + 1;
+		else if (*command == 'e')
+			export_format(command + 1);
+		else if (*command == 'i')
+			participant_id = command + 1;
+		else if (*command == 'n')
+			run_name = command + 1;
+		else if (*command == 'o')
+			output_filename = command + 1;
+		else if (*command == 'l')
+			results_list_length = atol(command + 1);
 		else
 			usage();
 		}

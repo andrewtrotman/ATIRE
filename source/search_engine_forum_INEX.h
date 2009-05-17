@@ -7,7 +7,7 @@
 
 #include "search_engine_forum.h"
 
-class ANT_search_engine_forum_INEX : ANT_search_engine_forum
+class ANT_search_engine_forum_INEX : public ANT_search_engine_forum
 {
 public:
 	ANT_search_engine_forum_INEX(char *filename, char *participant_id, char *run_id, char *task);

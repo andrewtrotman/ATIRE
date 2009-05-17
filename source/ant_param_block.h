@@ -12,6 +12,7 @@ class ANT_ANT_param_block
 {
 public:
 	enum { MAP, MAgP } ;
+	enum { NONE, INEX, TREC } ;
 
 private:
 	int argc;
@@ -23,10 +24,16 @@ public:
 	long long sort_top_k;		// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long metric;				// which metric to use (MAP, MAgP, etc)
 	char *assessments_filename;	// name of the file containing the assessments for the given queries
+	char *queries_filename;		// name of a file containing one query per line (first token of each line is the query ID)
+	long output_forum;			// export the list of results in INEX or TREC format
+	char *output_filename;		// name of the run file
+	char *participant_id;		// participant id (used in the export file)
+	char *run_name;				// name of the run (used in the export file)
+	long results_list_length;	// length of the results list as exported
 
 private:
+	void export_format(char *forum);
 	void term_expansion(char *which);
-	void assessments(char *filename);
 	void set_metric(char *which);
 
 public:

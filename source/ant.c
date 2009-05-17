@@ -28,19 +28,31 @@
 	#define TRUE (!FALSE)
 #endif
 
-enum {QREL_INEX, QREL_ANT};
-
+const char *PROMPT = "]";
 /*
-	SPECIAL_COMMAND()
-	-----------------
+	class ANT_ANT_FILE_ITERATOR
+	---------------------------
 */
-long special_command(char *command)
+class ANT_ANT_file_iterator
 {
-if (strcmp(command, ".quit") == 0)
-	return FALSE;
+private:
+	FILE *fp;
+	char query[1024];
 
-return TRUE;
-}
+public:
+	ANT_ANT_file_iterator(char *filename) 
+		{
+		if (filename == NULL)
+			fp = stdin;
+		else
+			fp = fopen(filename, "rb");
+		if (fp == NULL)
+			exit(printf("Cannot open topic file:'%s'\n", filename));
+		}
+	~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
+	char *first(void) { return fgets(query, sizeof(query), fp); }
+	char *next(void) { return fgets(query, sizeof(query), fp); }
+} ;
 
 /*
 	PERFORM_QUERY()
@@ -143,142 +155,71 @@ return average_precision;
 }
 
 /*
-	READ_DOCID_LIST()
-	-----------------
+	ANT()
+	-----
 */
-char **read_docid_list(long long *documents_in_id_list)
+double ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list, char *topic_filename)
 {
-static char **document_list = NULL;
-static long long len = 0;
-ANT_disk disk;
-char *document_list_buffer;
-
-if (document_list == NULL)		// only read once if this routine is called multiple times (nasty)
-	{
-	if ((document_list_buffer = disk.read_entire_file("doclist.aspt")) == NULL)
-		exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
-	document_list = disk.buffer_to_list(document_list_buffer, &len);
-	}
-
-*documents_in_id_list = len;
-return document_list;
-}
-
-/*
-	COMMAND_DRIVEN_ANT()
-	--------------------
-*/
-void command_driven_ant(ANT_ANT_param_block *params)
-{
-ANT_memory memory;
-char query[1024];
-long more;
-long long last_to_list, hits, documents_in_id_list;
-char **document_list, **answer_list;
-
-document_list = read_docid_list(&documents_in_id_list);
-answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
-
-ANT_search_engine search_engine(&memory);
-printf("Index contains %lld documents\n", search_engine.document_count());
-if (search_engine.document_count() != documents_in_id_list)
-	exit(printf("There are %lld documents in the index, but %lld documents in the ID list (exiting)\n", search_engine.document_count(), documents_in_id_list));
-
-puts("\nuse:\n\t.quit to quit\n\n");
-
-more = TRUE;
-while (more)
-	{
-	printf("]");
-	if (fgets(query, sizeof(query), stdin) == NULL)
-		more = FALSE;
-	else
-		{
-		strip_end_punc(query);
-		if (*query == '.')
-			more = special_command(query);
-		else
-			{
-			perform_query(params, &search_engine, query, &hits);
-			last_to_list = hits > 10 ? 10 : hits;
-			search_engine.generate_results_list(document_list, answer_list, last_to_list);
-			for (long result = 0; result < last_to_list; result++)
-				printf("%ld:%s\n", result + 1, answer_list[result]);
-			}
-		}
-	}
-puts("Bye");
-}
-
-/*
-
-	BATCH_ANT()
-	-----------
-*/
-double batch_ant(ANT_ANT_param_block *params, char *topic_file, char *qrel_file)
-{
-ANT_relevant_document *assessments;
-char query[1024];
+char *query;
 long topic_id, line;
-long long hits, number_of_assessments, documents_in_id_list;
-ANT_memory memory;
-FILE *fp;
-char *query_text, **document_list, **answer_list;
+long long hits;
 double average_precision, sum_of_average_precisions, mean_average_precision;
-ANT_search_engine_forum_TREC output("ant.out", "4", "ANTWholeDoc", "RelevantInContext");
-ANT_assessment_factory *factory;
+ANT_ANT_file_iterator input(topic_filename);
+ANT_search_engine_forum *output = NULL;
+long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
 
-ANT_search_engine search_engine(&memory);
-fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
-
-document_list = read_docid_list(&documents_in_id_list);
-answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
-
-factory = new ANT_assessment_factory(&memory, document_list, documents_in_id_list);
-assessments = factory->read(qrel_file, &number_of_assessments);
-
-ANT_mean_average_precision map(&memory, assessments, number_of_assessments);
-
-if ((fp = fopen(topic_file, "rb")) == NULL)
-	exit(fprintf(stderr, "Cannot open topic file:%s\n", topic_file));
+if (params->output_forum == ANT_ANT_param_block::TREC)
+	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == ANT_ANT_param_block::INEX)
+	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 
 sum_of_average_precisions = 0.0;
 line = 1;
-while (fgets(query, sizeof(query), fp) != NULL)
+printf(PROMPT);
+for (query = input.first(); query != NULL; query = input.next())
 	{
 	strip_end_punc(query);
-	topic_id = atol(query);
-	if ((query_text = strchr(query, ' ')) == NULL)
-		exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+	if (strcmp(query, ".quit") == 0)
+		break;
+	if (!have_assessments)
+		topic_id = -1;
+	else
+		{
+		topic_id = atol(query);
+		if ((query = strchr(query, ' ')) == NULL)
+			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+		}
 
-	average_precision = perform_query(params, &search_engine, query_text, &hits, topic_id, &map);
+	average_precision = perform_query(params, search_engine, query, &hits, topic_id, map);
 	sum_of_average_precisions += average_precision;
-	fprintf(stderr, "Topic:%ld Average Precision:%f\n", topic_id, average_precision);
+	printf("Topic:%ld Average Precision:%f\n", topic_id, average_precision);
 	line++;
-	search_engine.generate_results_list(document_list, answer_list, hits);
-	output.write(topic_id, answer_list, hits > 1500 ? 1500 : hits);			// top 1500 results only
+	search_engine->generate_results_list(document_list, answer_list, hits);
+	if (output != NULL)
+		output->write(topic_id, answer_list, hits > params->results_list_length ? params->results_list_length : hits);
+	printf(PROMPT);
 	}
-fclose(fp);
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
-printf("Processed %ld topics (MAP:%f)\n", line - 1, mean_average_precision);
+printf("\nProcessed %ld topics (MAP:%f)\n\n", line - 1, mean_average_precision);
 
-search_engine.stats_text_render();
-
-delete factory;
+search_engine->stats_text_render();
 
 return mean_average_precision;
 }
 
 /*
-	USAGE()
-	-------
+	READ_DOCID_LIST()
+	-----------------
 */
-void usage(char *exename)
+char **read_docid_list(long long *documents_in_id_list)
 {
-printf("Usage:\n%s\nor\n", exename);
-printf("%s [options...] <topic_file> <qrel_file>\n", exename);
-}
+char *document_list_buffer;			// this is leaked!!!!
 
+if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
+	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+
+return ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
+}
 
 /*
 	MAIN()
@@ -286,24 +227,41 @@ printf("%s [options...] <topic_file> <qrel_file>\n", exename);
 */
 int main(int argc, char *argv[])
 {
+ANT_search_engine *search_engine;
+ANT_mean_average_precision *map = NULL;
+ANT_memory memory;
 long last_param;
 ANT_ANT_param_block params(argc, argv);
+char **document_list, **answer_list;
+ANT_relevant_document *assessments = NULL;
+long long documents_in_id_list, number_of_assessments;
 
 last_param = params.parse();
 
 if (params.logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
-if (argc - last_param == 0)
-	command_driven_ant(&params);
-else if (argc - last_param == 2)
-	batch_ant(&params, argv[last_param], argv[last_param + 1]);
+document_list = read_docid_list(&documents_in_id_list);
+
+if (params.assessments_filename != NULL)
+	{
+	ANT_assessment_factory factory(&memory, document_list, documents_in_id_list);
+	assessments = factory.read(params.assessments_filename, &number_of_assessments);
+	map = new ANT_mean_average_precision(&memory, assessments, number_of_assessments);
+	}
+
+answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
+
+search_engine = new ANT_search_engine(&memory);
+printf("Index contains %lld documents\n", search_engine->document_count());
+
+ant(search_engine, map, &params, document_list, answer_list, params.queries_filename);
 
 #ifdef FIT_BM25
 /*
 	This code can be used for optimising the BM25 parameters.
 */
-else if (argc == 4)
+if (argc == 4)
 	{
 	double map;
 	FILE *outfile;
@@ -329,9 +287,8 @@ else if (argc == 4)
 	}
 	fclose(outfile);
 #endif
-else
-	usage(argv[0]);
 
+delete map;
 return 0;
 }
 

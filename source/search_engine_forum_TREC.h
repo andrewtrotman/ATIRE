@@ -1,8 +1,11 @@
 #include "search_engine_forum.h"
 
 #define MAX_RUN_NAME_LENGTH 1024
-
-class ANT_search_engine_forum_TREC : ANT_search_engine_forum
+/*
+	class ANT_SEARCH_ENGINE_FORUM_TREC
+	----------------------------------
+*/
+class ANT_search_engine_forum_TREC : public ANT_search_engine_forum
 {
 private:
 	char run_id[MAX_RUN_NAME_LENGTH];
