@@ -121,6 +121,7 @@ void *ANT_memory::alloc(long long *size)
 	/*
 		First try using large page memory blocks
 	*/
+#ifdef LARGE_MEMORY_PAGES
 	if (has_large_pages)
 		if (set_privilege(SE_LOCK_MEMORY_NAME, TRUE))		// try and get permission from the OS to allocate large pages
 			{
@@ -128,6 +129,7 @@ void *ANT_memory::alloc(long long *size)
 			answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			set_privilege(SE_LOCK_MEMORY_NAME, FALSE);		// drop back to the initial security level
 			}
+#endif
 	/*
 		If we don't have large pages or large pages fail then fall back to small pages
 	*/
