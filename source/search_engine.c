@@ -62,7 +62,7 @@ index->read(&highest_df);
 /*
 	Load the b-tree header
 */
-printf("Btree header is %lld bytes on disk\n", end - term_header);
+//printf("Btree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
 block = (unsigned char *)memory->malloc((long)(end - term_header));
 index->read(block, (long)(end - term_header));
@@ -71,7 +71,7 @@ index->read(block, (long)(end - term_header));
 	The first sizeof(long long) bytes of the header are the number of nodes in the root
 */
 btree_nodes = (long)(get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
-printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
+//printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
 block += sizeof(long long);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 

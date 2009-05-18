@@ -12,7 +12,8 @@ class ANT_ANT_param_block
 {
 public:
 	enum { MAP, MAgP } ;
-	enum { NONE, INEX, TREC } ;
+	enum { /* NONE = 0, */ INEX = 1, TREC = 2 } ;
+	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };		// bitstring
 
 private:
 	int argc;
@@ -30,11 +31,13 @@ public:
 	char *participant_id;		// participant id (used in the export file)
 	char *run_name;				// name of the run (used in the export file)
 	long results_list_length;	// length of the results list as exported
+	long stats;					// which stats to display
 
 private:
 	void export_format(char *forum);
 	void term_expansion(char *which);
 	void set_metric(char *which);
+	void set_stats(char *which);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);

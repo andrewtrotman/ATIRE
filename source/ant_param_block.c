@@ -36,7 +36,8 @@ queries_filename = NULL;
 output_forum = NONE;
 run_name = participant_id = "unknown";
 output_filename = "ant.out";
-results_list_length = 1500;			// the INEX results list length
+results_list_length = -1;
+stats = SHORT;
 }
 
 /*
@@ -107,10 +108,45 @@ puts("  t             TREC run format");
 puts("-o<filename>    Output filename for the run [default=ant.out]");
 puts("-i<id>          Forum participant id is <id> [default=unknown]");
 puts("-n<name>        Run is named <name> [default=unknown]");
-puts("-l<n>           Length of the results list [default=1500]");
+puts("-l<n>           Length of the results list [default=1500 for batch, default=10 for interactive)]");
+puts("");
+
+puts("REPORTING");
+puts("---------");
+puts("-s[-aqQs]       Report statistics");
+puts("   -            No statistics");
+puts("   a            All statistics (same as -sqQs)");
+puts("   q            Query by query statistics");
+puts("   Q            Sum of query by query statistics for this run");
+puts("   s            Short reporting (hits, average precision, etc) [default]");
+puts("");
+
 
 exit(0);
 }
+
+/*
+	ANT_ANT_PARAM_BLOCK::SET_STATS()
+	--------------------------------
+*/
+void ANT_ANT_param_block::set_stats(char *which)
+{
+do
+	{
+	switch (*which)
+		{
+		case '-' : stats = NONE;					break;
+		case 'a' : stats |= QUERY | SUM | SHORT;	break;
+		case 'q' : stats |= QUERY;					break;
+		case 'Q' : stats |= SUM;    				break;
+		case 's' : stats |= SHORT;    				break;
+		default : exit(printf("Unknown stat: '%c'\n", *which)); break;
+		}
+	which++;
+	}
+while (*which != '\0');
+}
+
 
 /*
 	ANT_ANT_PARAM_BLOCK::EXPORT_FORMAT()
@@ -118,13 +154,18 @@ exit(0);
 */
 void ANT_ANT_param_block::export_format(char *forum)
 {
-switch (*forum)
+do
 	{
-	case '-' : output_forum = NONE;   break;
-	case 'i' : output_forum = INEX;   break;
-	case 't' : output_forum = TREC;   break;
-	default : exit(printf("Unknown export format: '%c'\n", *forum)); break;
+	switch (*forum)
+		{
+		case '-' : output_forum = NONE;   break;
+		case 'i' : output_forum = INEX;   break;
+		case 't' : output_forum = TREC;   break;
+		default : exit(printf("Unknown export format: '%c'\n", *forum)); break;
+		}
+	forum++;
 	}
+while (*forum != '\0');
 }
 
 /*
@@ -148,7 +189,7 @@ else
 void ANT_ANT_param_block::term_expansion(char *which)
 {
 if (*(which + 1) != '\0')
-	exit(printf("Multiple term expansion algorithm may be specified\n", *which));
+	exit(printf("Only one term expansion algorith is permitted\n", *which));
 
 switch (*which)
 	{
@@ -208,12 +249,25 @@ for (param = 1; param < argc; param++)
 			output_filename = command + 1;
 		else if (*command == 'l')
 			results_list_length = atol(command + 1);
+		else if (*command == 's')
+			set_stats(command + 1);
 		else
 			usage();
 		}
 	else
 		break;
 	}
+
+/*
+	If we're in batch mode (a query file has been specified) then the default 
+	length of the list of results is 1500.  If we're in interactive mode (no
+	query file specified) then the default length is 10.
+*/
+if (results_list_length == -1)
+	if (queries_filename == NULL)
+		results_list_length = 10;
+	else
+		results_list_length = 1500;
 
 return param;		// first parameter that isn't a command line switch
 }

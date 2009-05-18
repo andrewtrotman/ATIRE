@@ -51,6 +51,7 @@ exit(0);
 void ANT_indexer_param_block::help(void)
 {
 puts(ANT_version_string);
+printf("Usage:%s [option...] filename <... filename>\n", argv[0]);
 puts("");
 
 puts("GENERAL");

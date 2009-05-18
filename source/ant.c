@@ -116,27 +116,28 @@ while (*token_end != '\0')
 */
 ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // rank
 
-if (topic_id == -1)
+/*
+	Reporting
+*/
+if (params->stats & ANT_ANT_param_block::SHORT)
 	{
+	if (topic_id >= 0)
+		printf("Topic:%ld ", topic_id);
 	printf("Query '%s' found %lld documents ", query, hits);
-	stats.print_time("(", stats.stop_timer(now), ")\n");
-	if (did_query)
-		search_engine->stats_text_render();
-	}
-else
-	{
-	printf("Topic:%ld Query '%s' found %lld documents ", topic_id, query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
-//	if (did_query)
-//		search_engine->stats_text_render();
-	/*
-		Compute the precision
-	*/
+	}
+
+if (did_query && params->stats & ANT_ANT_param_block::QUERY)
+	search_engine->stats_text_render();
+
+/*
+	Compute average previsions
+*/
+if (map != NULL)
 	if (params->metric == ANT_ANT_param_block::MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
 	else
 		average_precision = map->average_generalised_precision(topic_id, search_engine);
-	}
 
 /*
 	Return the number of document that matched the user's query
@@ -155,16 +156,26 @@ return average_precision;
 }
 
 /*
+	PROMPT()
+	--------
+*/
+void prompt(ANT_ANT_param_block *params)
+{
+if (params->queries_filename == NULL)
+	printf(PROMPT);
+}
+
+/*
 	ANT()
 	-----
 */
-double ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list, char *topic_filename)
+double ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list)
 {
 char *query;
 long topic_id, line;
-long long hits;
+long long hits, result, last_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
-ANT_ANT_file_iterator input(topic_filename);
+ANT_ANT_file_iterator input(params->queries_filename);
 ANT_search_engine_forum *output = NULL;
 long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
 
@@ -174,10 +185,14 @@ else if (params->output_forum == ANT_ANT_param_block::INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 
 sum_of_average_precisions = 0.0;
-line = 1;
-printf(PROMPT);
+line = 0;
+prompt(params);
 for (query = input.first(); query != NULL; query = input.next())
 	{
+	line++;
+	/*
+		Parsing to get the topic number
+	*/
 	strip_end_punc(query);
 	if (strcmp(query, ".quit") == 0)
 		break;
@@ -190,20 +205,54 @@ for (query = input.first(); query != NULL; query = input.next())
 			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 		}
 
+	/*
+		Do the query and compute average precision
+	*/
 	average_precision = perform_query(params, search_engine, query, &hits, topic_id, map);
 	sum_of_average_precisions += average_precision;
-	printf("Topic:%ld Average Precision:%f\n", topic_id, average_precision);
-	line++;
+
+	/*
+		Report the average precision for the query
+	*/
+	if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
+		printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+
+	/*
+		Convert from a results list into a list of documents
+	*/
 	search_engine->generate_results_list(document_list, answer_list, hits);
-	if (output != NULL)
-		output->write(topic_id, answer_list, hits > params->results_list_length ? params->results_list_length : hits);
-	printf(PROMPT);
+
+	/*
+		Display the list of results (either to the user or to a run file)
+	*/
+	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
+	if (output == NULL)
+		for (result = 0; result < last_to_list; result++)
+			printf("%lld:%s\n", result + 1, answer_list[result]);
+	else
+		output->write(topic_id, answer_list, last_to_list);
+	prompt(params);
 	}
+/*
+	Compute Mean Average Precision
+*/
 mean_average_precision = sum_of_average_precisions / (double) (line - 1);
-printf("\nProcessed %ld topics (MAP:%f)\n\n", line - 1, mean_average_precision);
 
-search_engine->stats_text_render();
+/*
+	Report MAP
+*/
+if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
+	printf("\nProcessed %ld topics (MAP:%f)\n\n", line - 1, mean_average_precision);
 
+/*
+	Report the summary of the stats
+*/
+if (params->stats & ANT_ANT_param_block::SUM)
+	search_engine->stats_text_render();
+
+/*
+	And finally report MAP
+*/
 return mean_average_precision;
 }
 
@@ -253,9 +302,9 @@ if (params.assessments_filename != NULL)
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 search_engine = new ANT_search_engine(&memory);
-printf("Index contains %lld documents\n", search_engine->document_count());
+//printf("Index contains %lld documents\n", search_engine->document_count());
 
-ant(search_engine, map, &params, document_list, answer_list, params.queries_filename);
+ant(search_engine, map, &params, document_list, answer_list);
 
 #ifdef FIT_BM25
 /*
