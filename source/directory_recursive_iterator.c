@@ -215,7 +215,7 @@ else if (*root_directory == '\0')
 else
 	strcpy(file_list->path, ".");
 
-sprintf(path, "%s/*.*", file_list->path);
+sprintf(path, "%s/*.*", file_list->path); /* This is the search problem*/
 
 #ifdef _MSC_VER
 	file_list->handle = FindFirstFile(path, &internals->file_data);
@@ -244,13 +244,16 @@ strcpy(this->wildcard, wildcard);
 
 #ifdef _MSC_VER
 	GetCurrentDirectory(sizeof(path_buffer), path_buffer);
+    if ((got = first(path_buffer, "")) == NULL)
+        return NULL;
+    sprintf(path_buffer, "%s/%s", file_list->path, got);
 #else
 	getcwd(path_buffer, sizeof(path_buffer));
+    if ((got = first(path_buffer, "")) == NULL)
+        return NULL;
+    sprintf(path_buffer, "%s", got);
 #endif
-if ((got = first(path_buffer, "")) == NULL)
-	return NULL;
 
-sprintf(path_buffer, "%s/%s", file_list->path, got);
 return path_buffer;
 }
 
@@ -265,14 +268,15 @@ char *got;
 #ifdef _MSC_VER
 	if ((got = next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data))) == NULL)
 		return NULL;
+    sprintf(path_buffer, "%s/%s", file_list->path, got);
 #else
 	if (internals->glob_index == internals->matching_files.gl_pathc)
 		return NULL;
 	else
 	    got = next_match_wildcard(1);
+    sprintf(path_buffer, "%s", got);
 #endif
 
-sprintf(path_buffer, "%s/%s", file_list->path, got);
 return path_buffer;
 }
 
