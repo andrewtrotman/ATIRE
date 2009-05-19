@@ -2,7 +2,7 @@
 #define _VOCAB_H_
 
 class ANT_search_engine;
-class trie;
+class trie_node;
 
 class Vocab {
 public:
@@ -15,7 +15,7 @@ public:
     void weight_strings();
 
 private:
-	trie *trie;
+	trie_node *trie;
     char **strings;
     int string_count;
 };

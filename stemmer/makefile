@@ -26,7 +26,10 @@ OBJECTS = \
     search_engine.o \
     search_engine_accumulator.o \
     mean_average_precision.o \
-    INEX_assessment.o \
+    assessment.o \
+    assessment_ANT.o \
+    assessment_INEX.o \
+    assessment_factory.o \
     relevant_document.o \
     stats.o \
     time_stats.o \
@@ -44,6 +47,7 @@ OBJECTS = \
     stemmer.o	\
     porter.o \
     lovins.o \
+    stemmer_factory.o \
     paice_husk.o \
     learned_wikipedia_stem.o \
     relevant_topic.o \
@@ -59,6 +63,7 @@ OBJECTS = \
 	compress_sigma.o \
 	compression_factory.o \
 	indexer_param_block.o \
+    ant_param_block.o \
     version.o
 
 EXTENSION = \
