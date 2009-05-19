@@ -118,13 +118,8 @@ for (param = first_param; param < argc; param++)
 		parser.set_document(file);
 		while ((token = parser.get_next_token()) != NULL)
 			{
-			if (ANT_isalnum(*token->start))
+			if (param_block.trec_docnos && token->length() == 3 && strncmp(token->start, "DOC", 3) == 0)
 				{
-				terms_in_document++;
-				index->add_term(token, doc);
-				done_work = TRUE;
-				}
-			else if (token->length() == 5 && strncmp(token->start, "<DOC>", 5) == 0)
 				if (done_work)
 					{
 					index->set_document_length(doc, terms_in_document);
@@ -133,6 +128,13 @@ for (param = first_param; param < argc; param++)
 						report(doc, index, &stats);
 					terms_in_document = 0;
 					}
+				}
+			else if (ANT_isalnum(*token->start))
+				{
+				terms_in_document++;
+				index->add_term(token, doc);
+				done_work = TRUE;
+				}
 			}
 		index->set_document_length(doc, terms_in_document);
 		terms_in_document = 0;

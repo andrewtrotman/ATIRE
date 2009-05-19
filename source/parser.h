@@ -16,7 +16,8 @@ private:
 	ANT_string_pair current_token;
 
 private:
-	int isallowable(unsigned char val) { return ANT_isalpha(val) || val == '>' || val == '/'; }
+	int isXMLnamestartchar(unsigned char val) { return ANT_isalpha(val) || val == ':' || val == '_'; }		// see http://www.w3.org/TR/REC-xml/#NT-NameStartChar
+	int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
 	int isheadchar(unsigned char val) { return ANT_isalnum(val) || val == '<' || val == '\0'; }
 
 public:

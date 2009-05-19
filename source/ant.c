@@ -97,7 +97,7 @@ while (*token_end != '\0')
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
 	token_length = token_end - token_start;
-	strlwr(token);
+//	strlwr(token);
 
 	/*
 		process the next search term - either stemmed or not.
