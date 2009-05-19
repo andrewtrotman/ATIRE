@@ -24,6 +24,23 @@ stemming_time = dictionary_time = count_relevant_time = sort_time = accumulator_
 }
 
 /*
+	ANT_SEARCH_ENGINE_STATS::ADD()
+	------------------------------
+*/
+void ANT_search_engine_stats::add(ANT_search_engine_stats *which)
+{
+ANT_time_stats::add(which);
+this->decompress_time += which->decompress_time;
+this->posting_read_time += which->posting_read_time;
+this->rank_time += which->rank_time;
+this->accumulator_init_time += which->accumulator_init_time;
+this->sort_time += which->sort_time;
+this->count_relevant_time += which->count_relevant_time;
+this->dictionary_time += which->dictionary_time;
+this->stemming_time += which->stemming_time;
+}
+
+/*
 	ANT_SEARCH_ENGINE_STATS::TEXT_RENDER()
 	--------------------------------------
 */

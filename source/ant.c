@@ -76,8 +76,7 @@ ANT_stemmer *stemmer;
 */
 stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
 
-if (topic_id == -1)
-	search_engine->stats_initialise();		// if we are command-line then report query by query stats
+search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
 did_query = FALSE;
 now = stats.start_timer();
@@ -149,6 +148,10 @@ if (map != NULL)
 */
 delete stemmer;
 
+/*
+	Add the time it took to search to the global stats for the search engine
+*/
+search_engine->stats_add();
 /*
 	Return the precision
 */
@@ -248,7 +251,7 @@ if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
 	Report the summary of the stats
 */
 if (params->stats & ANT_ANT_param_block::SUM)
-	search_engine->stats_text_render();
+	search_engine->stats_all_text_render();
 
 /*
 	And finally report MAP

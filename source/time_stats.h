@@ -20,6 +20,8 @@ public:
 	virtual ~ANT_time_stats() {}
 	virtual void text_render(void);
 
+	void add(ANT_time_stats *which);
+
 	void add_disk_input_time(long long time) { disk_input_time += time; }
 	void add_disk_output_time(long long time) { disk_output_time += time; }
 	void add_cpu_time(long long time) { cpu_time += time; }

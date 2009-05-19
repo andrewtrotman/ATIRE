@@ -7,6 +7,10 @@
 
 #include "time_stats.h"
 
+/*
+	class ANT_SEARCH_ENGINE_STATS
+	-----------------------------
+*/
 class ANT_search_engine_stats : public ANT_time_stats
 {
 public:
@@ -25,6 +29,7 @@ public:
 	virtual void text_render(void);
 
 	void initialise(void);
+	void add(ANT_search_engine_stats *what);
 
 	void add_posting_read_time(long long time) { posting_read_time += time; }
 	void add_decompress_time(long long time) { decompress_time += time; }

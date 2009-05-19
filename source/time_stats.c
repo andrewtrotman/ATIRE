@@ -21,6 +21,17 @@ disk_input_time = disk_output_time = cpu_time = 0;
 }
 
 /*
+	ANT_TIME_STATS::ADD()
+	---------------------
+*/
+void ANT_time_stats::add(ANT_time_stats *which)
+{
+this->disk_input_time += which->disk_input_time;
+this->disk_output_time += which->disk_output_time;
+this->cpu_time += which->cpu_time;
+}
+
+/*
 	ANT_TIME_STATS::TEXT_RENDER()
 	-----------------------------
 */

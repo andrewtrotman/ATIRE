@@ -39,6 +39,7 @@ ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
 
 stats = new ANT_search_engine_stats(memory);
+stats_for_all_queries = new ANT_search_engine_stats(memory);
 this->memory = memory;
 index = new ANT_file(memory);
 if (index->open("index.aspt", "rb") == 0)
@@ -165,6 +166,7 @@ ANT_search_engine::~ANT_search_engine()
 index->close();
 delete index;
 delete stats;
+delete stats_for_all_queries;
 }
 
 /*
@@ -177,12 +179,30 @@ stats->text_render();
 }
 
 /*
+	ANT_SEARCH_ENGINE::STATS_ALL_TEXT_RENDER()
+	------------------------------------------
+*/
+void ANT_search_engine::stats_all_text_render(void)
+{
+stats_for_all_queries->text_render();
+}
+
+/*
 	ANT_SEARCH_ENGINE::STATS_INITIALISE()
 	-------------------------------------
 */
 void ANT_search_engine::stats_initialise(void)
 {
 stats->initialise();
+}
+
+/*
+	ANT_SEARCH_ENGINE::STATS_ADD()
+	------------------------------
+*/
+void ANT_search_engine::stats_add(void)
+{
+stats_for_all_queries->add(stats);
 }
 
 /*
@@ -549,11 +569,7 @@ while (term != NULL)
 	document = -1;
 	for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
 		{
-#ifdef NEVER
-		document += *current_document;
-#else
 		document = *current_document;
-#endif
 		stem_buffer[document] += *current_tf;
 		}
 	stats->add_stemming_time(stats->stop_timer(now));

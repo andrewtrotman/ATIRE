@@ -26,6 +26,7 @@ friend class ANT_btree_iterator;
 friend class ANT_mean_average_precision;
 private:
 	ANT_search_engine_stats *stats;
+	ANT_search_engine_stats *stats_for_all_queries;
 	ANT_memory *memory;
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
@@ -71,6 +72,8 @@ public:
 	long long document_count(void) { return documents; }
 	void stats_initialise(void);
 	void stats_text_render(void);
+	void stats_all_text_render(void);
+	void stats_add(void);
 };
 
 #endif __SEARCH_ENGINE_H__
