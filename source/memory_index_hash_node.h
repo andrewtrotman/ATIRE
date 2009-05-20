@@ -2,7 +2,6 @@
 	MEMORY_INDEX_HASH_NODE.H
 	------------------------
 */
-
 #ifndef __MEMORY_INDEX_HASH_NODE_H__
 #define __MEMORY_INDEX_HASH_NODE_H__
 
@@ -14,6 +13,10 @@ class ANT_memory;
 class ANT_postings_piece;
 class ANT_memory_index_stats;
 
+/*
+	class ANT_MEMORY_INDEX_HASH_NODE
+	--------------------------------
+*/
 class ANT_memory_index_hash_node
 {
 private:

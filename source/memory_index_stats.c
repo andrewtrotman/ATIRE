@@ -27,6 +27,7 @@ strings = 0;
 bytes_in_string_pool = 0;
 disk_buffer = 0;
 bytes_used_to_sort_term_list = 0;
+bytes_for_decompression_recompression = 0;
 }
 
 /*
@@ -85,6 +86,7 @@ if (type & STAT_MEMORY)
 	printf("Total strings        :%10lld strings\n", strings);
 	printf("Space for strings    :%10lld bytes\n", bytes_in_string_pool);
 	printf("Disk buffering       :%10ld bytes\n", disk_buffer);
+	printf("Recompression Buffers:%10lld bytes\n", bytes_for_decompression_recompression);
 
 	if (memory != NULL)
 		{
@@ -105,6 +107,8 @@ if (type & STAT_MEMORY)
 		printf("Term List (uniq sort):%10lld bytes\n", used = bytes_used_to_sort_term_list);
 		sum += used;
 		printf("Disk Output Buffer   :%10lld bytes\n", used = disk_buffer);
+		sum += used;
+		printf("Recompression Buffers:%10lld bytes\n", used = bytes_for_decompression_recompression);
 		sum += used;
 		printf("Unaccounted for      :%10lld bytes\n", memory->bytes_used() - sum);
 		}

@@ -26,6 +26,7 @@ public:
 	long long posting_fragments;
 	long long strings;
 	long long bytes_in_string_pool;
+	long long bytes_for_decompression_recompression;
 	long disk_buffer;
 public:
 	ANT_memory_index_stats(ANT_memory *memory = NULL);

@@ -344,21 +344,14 @@ return terms + 1;
 }
 
 /*
-	ANT_MEMORY_INDEX::WRITE_NODE()
-	------------------------------
+	ANT_MEMORY_INDEX::FIND_END_OF_NODE()
+	------------------------------------
 */
-ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_file *file, ANT_memory_index_hash_node **start)
+ANT_memory_index_hash_node **ANT_memory_index::find_end_of_node(ANT_memory_index_hash_node **start)
 {
-unsigned char zero = 0;
-uint64_t eight_byte;
-uint32_t four_byte, string_pos;
-uint32_t terms_in_node, current_node_head_length;
-ANT_memory_index_hash_node **current, **end;
+ANT_memory_index_hash_node **current;
 
 current = start;
-/*
-	Find the end of the node
-*/
 if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
 	current++;
 else
@@ -370,18 +363,37 @@ else
 			break;
 		current++;
 		}
+return current;
+}
+
 /*
-	Number of terms in a node
+	ANT_MEMORY_INDEX::WRITE_NODE()
+	------------------------------
 */
-four_byte = terms_in_node = (uint32_t)(current - start);		// the number of terms in the node limited to 4 Billion!
+ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_file *file, ANT_memory_index_hash_node **start)
+{
+unsigned char zero = 0;
+uint64_t eight_byte;
+uint32_t four_byte, string_pos;
+uint32_t terms_in_node, current_node_head_length;
+ANT_memory_index_hash_node **current, **end;
+
+/*
+	Find the end of the node
+*/
+end = find_end_of_node(start);
+
+/*
+	Compute the number of terms in a node
+*/
+four_byte = terms_in_node = (uint32_t)(end - start);		// the number of terms in the node limited to 4 Billion!
 file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));		// 4 bytes
 
 /*
 	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
 */
 current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (uint32_t)(*start)->string.length();
-end = current;
-string_pos = (uint32_t)(current - start) * (1 * 8 + 5 * 4) + 4;
+string_pos = (uint32_t)(end - start) * (1 * 8 + 5 * 4) + 4;
 for (current = start; current < end; current++)
 	{
 	four_byte = (uint32_t)(*current)->collection_frequency;
@@ -404,6 +416,7 @@ for (current = start; current < end; current++)
 
 	string_pos += (uint32_t)(*current)->string.length() + 1 - current_node_head_length;
 	}
+
 /*
 	Finally the strings ('\0' terminated)
 */
@@ -423,14 +436,11 @@ return end;
 long ANT_memory_index::serialise(char *filename)
 {
 uint8_t zero = 0;
-long btree_root_worst_case;
-uint64_t file_position;
-uint64_t terms_in_root, eight_byte;
-long terms_in_node, unique_terms = 0, max_terms_in_node = 0;
-long hash_val, where, bytes;
 int32_t length_of_longest_term = 0;
 uint32_t longest_postings_size;
 int64_t highest_df = 0;
+uint64_t file_position, terms_in_root, eight_byte;
+long terms_in_node, unique_terms = 0, max_terms_in_node = 0, hash_val, where, bytes, btree_root_size;
 ANT_file *file;
 ANT_memory_index_hash_node **term_list, **here;
 ANT_btree_head_node *header, *current_header, *last_header;
@@ -444,6 +454,7 @@ compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * lar
 decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
 compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
 impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + 512);		// 512 because the TF and the 0 at the end of each of 255 lists
+stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 
 /*
 	Write the postings
@@ -474,10 +485,16 @@ term_list[unique_terms] = NULL;
 qsort(term_list, unique_terms, sizeof(*term_list), ANT_memory_index_hash_node::term_compare);
 
 /*
+	Work out how many nodes there are in the root of the b-tree
+*/
+btree_root_size = 0;
+for (here = term_list; *here != NULL; here = find_end_of_node(here))
+	btree_root_size++;
+
+/*
 	Write the term list and generate the header list
 */
-btree_root_worst_case = (long)pow((double)ANT_ALPHABET_SIZE, (double)B_TREE_PREFIX_SIZE) + 1; // +1 for "special" terms such as document lengths
-current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree_head_node) * btree_root_worst_case);
+current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree_head_node) * btree_root_size);
 here = term_list;
 while (*here != NULL)
 	{
@@ -514,15 +531,18 @@ for (current_header = header; current_header < last_header; current_header++)
 */
 //printf("Root pos on disk:%llu\n", (unsigned long long) file_position);
 file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 bytes
+
 /*
 	The string length of the longest term
 */
 file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));		// 4 bytes
+
 /*
 	The maximum length of a compressed posting list
 */
 longest_postings_size = (uint32_t)(serialised_docids_size + serialised_tfs_size);
 file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));	// 4 byte
+
 /*
 	and the maximum number of postings in a postings list (that is, the largest document frequencty (DF))
 */

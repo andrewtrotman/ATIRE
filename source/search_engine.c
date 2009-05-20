@@ -61,9 +61,9 @@ index->read(&postings_buffer_length);
 index->read(&highest_df);
 
 /*
-	Load the b-tree header
+	Load the B-tree header
 */
-//printf("Btree header is %lld bytes on disk\n", end - term_header);
+//printf("B-tree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
 block = (unsigned char *)memory->malloc((long)(end - term_header));
 index->read(block, (long)(end - term_header));
@@ -97,6 +97,7 @@ for (current++; current < end_of_node_list; current++)
 	}
 current->term = NULL;
 current->disk_pos = term_header;
+
 /*
 	Compute the size of the largest block and then allocate memory so that it will fit (and use that throughout the execution of this program)
 */
