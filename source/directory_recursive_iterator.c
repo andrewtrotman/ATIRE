@@ -244,14 +244,14 @@ strcpy(this->wildcard, wildcard);
 
 #ifdef _MSC_VER
 	GetCurrentDirectory(sizeof(path_buffer), path_buffer);
-    if ((got = first(path_buffer, "")) == NULL)
-        return NULL;
-    sprintf(path_buffer, "%s/%s", file_list->path, got);
+	if ((got = first(path_buffer, "")) == NULL)
+		return NULL;
+	sprintf(path_buffer, "%s/%s", file_list->path, got);
 #else
 	getcwd(path_buffer, sizeof(path_buffer));
-    if ((got = first(path_buffer, "")) == NULL)
-        return NULL;
-    sprintf(path_buffer, "%s", got);
+	if ((got = first(path_buffer, "")) == NULL)
+		return NULL;
+	sprintf(path_buffer, "%s", got);
 #endif
 
 return path_buffer;
@@ -268,13 +268,13 @@ char *got;
 #ifdef _MSC_VER
 	if ((got = next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data))) == NULL)
 		return NULL;
-    sprintf(path_buffer, "%s/%s", file_list->path, got);
+	sprintf(path_buffer, "%s/%s", file_list->path, got);
 #else
 	if (internals->glob_index == internals->matching_files.gl_pathc)
 		return NULL;
 	else
-	    got = next_match_wildcard(1);
-    sprintf(path_buffer, "%s", got);
+		got = next_match_wildcard(1);
+	sprintf(path_buffer, "%s", got);
 #endif
 
 return path_buffer;
