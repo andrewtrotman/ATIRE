@@ -85,7 +85,10 @@ $(EXTENSION) :
 $(BINDIR)/index : $(OBJECTS) index.o
 	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
 
-$(BINDIR)/ant : $(OBJECTS) $(EXTENSION) 
+$(BINDIR)/ant : $(OBJECTS) ant.o
+	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%) 
+
+$(BINDIR)/ga_ant : $(OBJECTS) $(EXTENSION) 
 	$(CC) $(LDFLAGS) -o $@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%)
 
 .PHONY : clean

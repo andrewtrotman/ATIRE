@@ -7,6 +7,7 @@
 #else
 	#include <unistd.h>
 	#include <string.h>
+    #include <fnmatch.h>
 #endif
 #include <stdio.h>
 #include "disk_internals.h"
@@ -25,56 +26,18 @@
 	/*
 		PATHMATCHSPEC()
 		---------------
-		came from:XXYYZZ
 	*/
 	static long PathMatchSpec(const char *str, const char *pattern)
 	{
-	enum { Exact, QMark, Star } ;
-	const char *s = str, *p = pattern, *q = 0;
-	long state = 0;
-	long match = TRUE;
+		char *fn = (char *)str;
+		char *tmp = fn;
 
-	while (match && *p)
-		{
-		if (*p == '*')
-			{
-			state = Star;
-			q = p + 1;
-			} 
-		else if (*p == '?')
-			state = QMark;
-		else 
-			state = Exact;
-
-		if (*s == 0)
-			break;
-		switch (state)
-			{
-			case Exact:
-				match = (*s == *p);
-				s++;
-				p++;
-				break;
-			case QMark:
-				match = TRUE;
-				s++;
-				p++;
-				break;
-			case Star:
-				match = TRUE;
-				s++;
-				if (*s == *q)
-					p++;
-				break;
-			}
+		while (*tmp != '\0') {
+			if (*tmp == '/') fn = tmp + 1;
+			tmp++;
 		}
-
-	if (state == Star) 
-		return (*s == *q);
-	else if (state == QMark) 
-		return (*s == *p);
-	else 
-		return match && (*s == *p);
+		
+		return fnmatch(pattern, fn, FNM_FILE_NAME) == 0; /* 0 = success */
 	} 
 #endif
 
@@ -163,13 +126,13 @@ while (!match)
 				break;
 		at_end = FindNextFile(file_list->handle, &internals->file_data);
 	#else
-		if (at_end == 0)
+		if (at_end == 0 || file_list->matching_files.gl_pathv[file_list->glob_index] == NULL)
 			{
 			globfree(&file_list->matching_files);
 			if (pop_directory())
 				{
 				file_list->glob_index++;
-				return next_match_wildcard(file_list->matching_files.gl_pathc == file_list->glob_index);
+				return next_match_wildcard(1);
 				}
 			else
 				return NULL;
@@ -178,23 +141,25 @@ while (!match)
 			{
 			if (true)
 				{
+				/* tmp is here as push_directory() will trash current file_list*/
+				char *tmp=file_list->matching_files.gl_pathv[file_list->glob_index];
 				dir = file_list->path;
 				push_directory();
-				if ((file = first(dir, file_list->matching_files.gl_pathv[file_list->glob_index])) != NULL)
+				if ((file = first(dir, tmp)) != NULL)
 					return file;
 				}
 			}
 		else 
 			if ((match = PathMatchSpec(file_list->matching_files.gl_pathv[file_list->glob_index], wildcard)) != 0)
 				break;
-		at_end = !(file_list->glob_index == file_list->matching_files.gl_pathc);
+		at_end = !(file_list->glob_index++ == file_list->matching_files.gl_pathc);
 	#endif
 	}
 
 #ifdef _MSC_VER
 	return internals->file_data.cFileName;
 #else
-	return file_list->matching_files.gl_pathv[file_list->glob_index];
+	return file_list->matching_files.gl_pathv[file_list->glob_index++];
 #endif
 }
 
@@ -207,7 +172,11 @@ char *ANT_directory_recursive_iterator::first(char *root_directory, char *local_
 char path[MAX_PATH];
 
 if (*local_directory != '\0' && *root_directory != '\0')
+#ifdef _MSC_VER
 	sprintf(file_list->path, "%s/%s", root_directory, local_directory);
+#else
+	sprintf(file_list->path, "%s", local_directory);
+#endif
 else if (*local_directory == '\0')
 	strcpy(file_list->path, root_directory);
 else if (*root_directory == '\0')
@@ -215,13 +184,15 @@ else if (*root_directory == '\0')
 else
 	strcpy(file_list->path, ".");
 
-sprintf(path, "%s/*.*", file_list->path); /* This is the search problem*/
+
 
 #ifdef _MSC_VER
+	sprintf(path, "%s/*.*", file_list->path); 
 	file_list->handle = FindFirstFile(path, &internals->file_data);
 	if (file_list->handle == INVALID_HANDLE_VALUE)
 		return NULL;
 #else
+	sprintf(path, "%s*", file_list->path); 
 	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
 	file_list->glob_index = 0;
 
@@ -249,9 +220,10 @@ strcpy(this->wildcard, wildcard);
 	sprintf(path_buffer, "%s/%s", file_list->path, got);
 #else
 	getcwd(path_buffer, sizeof(path_buffer));
-	if ((got = first(path_buffer, "")) == NULL)
-		return NULL;
-	sprintf(path_buffer, "%s", got);
+	sprintf(path_buffer, "%s/", path_buffer); /* As we will later use this to mark dirs */
+    if ((got = first(path_buffer, "")) == NULL)
+        return NULL;
+    sprintf(path_buffer, "%s", got);
 #endif
 
 return path_buffer;
@@ -270,11 +242,9 @@ char *got;
 		return NULL;
 	sprintf(path_buffer, "%s/%s", file_list->path, got);
 #else
-	if (internals->glob_index == internals->matching_files.gl_pathc)
+	if ((got = next_match_wildcard(1)) == NULL)
 		return NULL;
-	else
-		got = next_match_wildcard(1);
-	sprintf(path_buffer, "%s", got);
+    sprintf(path_buffer, "%s", got);
 #endif
 
 return path_buffer;

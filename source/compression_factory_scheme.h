@@ -17,7 +17,7 @@ class ANT_compression_factory_scheme
 public:
 	unsigned long scheme_id;	// the external name of the scheme as a bit pattern.  Done so the user can select which schemes to use
 	ANT_compress *scheme;		// ANT_compress object
-	char *name;					// the name of the scheme
+	const char *name;					// the name of the scheme
 	long long uses;				// the number of times this compression scheme was chosen as the "best" scheme
 	long long would_take;		// the number of bytes it would take if only this scheme were used
 	long long did_take;			// the number of bytes this scheme did take (for just the this->uses cases)
