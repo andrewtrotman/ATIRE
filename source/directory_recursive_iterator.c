@@ -7,7 +7,7 @@
 #else
 	#include <unistd.h>
 	#include <string.h>
-    #include <fnmatch.h>
+	#include <fnmatch.h>
 #endif
 #include <stdio.h>
 #include "disk_internals.h"
@@ -221,9 +221,9 @@ strcpy(this->wildcard, wildcard);
 #else
 	getcwd(path_buffer, sizeof(path_buffer));
 	sprintf(path_buffer, "%s/", path_buffer); /* As we will later use this to mark dirs */
-    if ((got = first(path_buffer, "")) == NULL)
-        return NULL;
-    sprintf(path_buffer, "%s", got);
+	if ((got = first(path_buffer, "")) == NULL)
+		return NULL;
+	sprintf(path_buffer, "%s", got);
 #endif
 
 return path_buffer;
@@ -244,7 +244,7 @@ char *got;
 #else
 	if ((got = next_match_wildcard(1)) == NULL)
 		return NULL;
-    sprintf(path_buffer, "%s", got);
+	sprintf(path_buffer, "%s", got);
 #endif
 
 return path_buffer;

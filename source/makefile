@@ -13,6 +13,10 @@ ALL = bitstream.obj \
  maths.obj
 
 CFLAGS = /W4 /Zi /TP
+all : nexi.exe
+
+nexi.exe : nexi.c ctypes.c string_pair.h parser.c
+	$(CC) /W4 -D _CRT_SECURE_NO_WARNINGS /Zi /TP nexi.c ctypes.c parser.c
 
 test_compression.exe : $(ALL)
 	$(CC) /W4 /Zi $(ALL) /Fetest_compression.exe /link /fixed:no
