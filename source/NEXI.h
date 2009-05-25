@@ -21,12 +21,12 @@ private:
 private:
 	long ispart(char *from, long length, char next);
 	ANT_string_pair *get_next_token(void);
-	ANT_string_pair *read_path(void);
+	void read_path(ANT_string_pair *path);
 	void parse_error(char *message);
 	long about(void);
 	void read_operator(void);
 	long numbers(void);
-	long read_CO(char *path);
+	long read_CO(ANT_string_pair *path);
 	long read_CAS(void);
 
 public:

@@ -30,11 +30,20 @@ else if (length == 1)
 		return FALSE;
 	else if (*from == ')')
 		return FALSE;
+	else if (ANT_parser::isXMLnamestartchar(*from))
+		{
+		if (ANT_parser::isXMLnamechar(next))
+			return TRUE;
+		else
+			return FALSE;
+		}
 	else if (*from == '/')
+		{
 		if (next == '/')
 			return TRUE;
 		else
 			return FALSE;
+		}
 	else
 		return FALSE;
 else
@@ -63,8 +72,10 @@ ANT_string_pair *ANT_NEXI::get_next_token(void)
 long length;
 
 length = 0;
-while (ispart(at, length, *at + 1))
-	length++;
+
+if (*at != '\0')
+	while (*(at + length) != '\0' && ispart(at, length, *(at + length)))
+		length++;
 
 token.start = at;
 token.string_length = length;
@@ -76,12 +87,11 @@ return &token;
 	ANT_NEXI::READ_PATH()
 	---------------------
 */
-ANT_string_pair *ANT_NEXI::read_path(void)
+void ANT_NEXI::read_path(ANT_string_pair *path)
 {
-char *start;
 long more;
 
-start = token.start;
+path->start = token.start;
 more = TRUE;
 do
 	{
@@ -98,10 +108,7 @@ while (more);
 /*
 	Convert the whole path into a single 
 */
-token.string_length = token.start - start + token.string_length;
-token.start = start;
-
-return &token;
+path->string_length = token.start - path->start;
 }
 
 /*
@@ -120,16 +127,18 @@ successful_parse = FALSE;
 */
 long ANT_NEXI::about(void)
 {
+ANT_string_pair path;
+
 get_next_token();
 if (token[0] != '(')
 	parse_error("Expected '('");
-read_path();
-get_next_token();
+get_next_token();						// prime the read_path method with the first token in the path
+read_path(&path);
 if (token[0] != ',')
 	parse_error("Expected ','");
-read_CO("");								// this should be the path from the about clause
-if (token[0] != ']')
-	parse_error("Expected ']'");
+read_CO(&path);
+if (token[0] != ')')
+	parse_error("Expected ')'");
 
 return 0;
 }
@@ -152,9 +161,9 @@ long ANT_NEXI::numbers(void)
 {
 ANT_string_pair path;
 
-path = *read_path();
+read_path(&path);
 read_operator();
-read_CO("");								// this should be the path from the clause
+read_CO(&path);
 
 return 0;
 }
@@ -163,7 +172,7 @@ return 0;
 	ANT_NEXI::READ_CO()
 	-------------------
 */
-long ANT_NEXI::read_CO(char *path)
+long ANT_NEXI::read_CO(ANT_string_pair *path)
 {
 ANT_string_pair start;
 
@@ -183,7 +192,7 @@ long ANT_NEXI::read_CAS(void)
 ANT_string_pair path;
 long parsing_result = FALSE;
 
-path = *read_path();
+read_path(&path);
 if (token[0] == '[')
 	{
 	get_next_token();
@@ -194,7 +203,7 @@ if (token[0] == '[')
 		else if (token[0] == '.')
 			numbers();
 		else
-			parse_error("Expected 'about' clause");
+			parse_error("Expected 'about()' clause or numeric expression");
 		get_next_token();
 		}
 	while (token.strcmp("or") == 0 || token.strcmp("and") == 0);
@@ -212,6 +221,8 @@ return parsing_result;
 void ANT_NEXI::parse(char *expression)
 {
 successful_parse = TRUE;
+at = string = expression;
+
 get_next_token();
 
 if (token.strcmp("//") == 0)		// we're a CAS query
@@ -233,7 +244,7 @@ for(;;)
 	{
 	printf("]");
 	gets(buffer);
-	if (strcmp(buffer, ".quit"))
+	if (strcmp(buffer, ".quit") == 0)
 		break;
 	nexi_parser.parse(buffer);
 	puts("");
