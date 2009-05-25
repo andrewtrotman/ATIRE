@@ -1,6 +1,6 @@
 /*
-	ANT.C
-	-----
+	GA_ANT.C
+	--------
 */
 #include <stdio.h>
 #include <string.h>
@@ -308,7 +308,8 @@ answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list
 search_engine = new ANT_search_engine(&memory);
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
-ant(search_engine, map, &params, document_list, answer_list);
+//ga_ant(search_engine, map, &params, document_list, answer_list);
+ trie_test(search_engine);
 
 #ifdef FIT_BM25
 /*

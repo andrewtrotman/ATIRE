@@ -67,14 +67,14 @@ OBJECTS = \
     version.o
 
 EXTENSION = \
-    ant.o \
+	ga_ant.o \
     ga.o \
     ga_stemmer.o \
     ga_individual.o \
 	ga_function.o \
 	vocab.o 
 
-all : $(BINDIR)/index $(BINDIR)/ant
+all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant
 
 %.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $(SRCDIR)/$*.c -o $(OBJDIR)/$*.o
