@@ -26,9 +26,9 @@
 	REPORT()
 	--------
 */
-void report(long long doc, ANT_memory_index *index, ANT_time_stats *stats)
+void report(long long doc, ANT_memory_index *index, ANT_time_stats *stats, long long bytes_indexed)
 {
-printf("%lld Documents in %lld bytes in ", doc, index->get_memory_usage());
+printf("%lld Documents (%lld bytes) in %lld bytes of memory in ", doc, bytes_indexed, index->get_memory_usage());
 stats->print_elapsed_time();
 }
 
@@ -53,6 +53,7 @@ ANT_file id_list(&file_buffer);
 char *filename, *uid_start, *uid_end;
 char uid_buffer[1024];
 long long files_that_match;
+long long bytes_indexed, current_file_length;
 
 if (argc < 2)
 	param_block.usage();
@@ -79,11 +80,13 @@ else
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 
+current_file_length = bytes_indexed = 0;
 for (param = first_param; param < argc; param++)
 	{
 	files_that_match = 0;
 	now = stats.start_timer();
-	file = (unsigned char *)disk->read_entire_file(filename = disk->first(argv[param]));
+	file = (unsigned char *)disk->read_entire_file(filename = disk->first(argv[param]), &current_file_length);
+	bytes_indexed += current_file_length;
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
 		{
@@ -113,7 +116,7 @@ for (param = first_param; param < argc; param++)
 		done_work = FALSE;
 		doc++;
 		if (doc % param_block.reporting_frequency == 0)
-			report(doc, index, &stats);
+			report(doc, index, &stats, bytes_indexed);
 
 		parser.set_document(file);
 		while ((token = parser.get_next_token()) != NULL)
@@ -125,7 +128,7 @@ for (param = first_param; param < argc; param++)
 					index->set_document_length(doc, terms_in_document);
 					doc++;
 					if (doc % param_block.reporting_frequency == 0)
-						report(doc, index, &stats);
+						report(doc, index, &stats, 0);
 					terms_in_document = 0;
 					}
 				}
@@ -140,7 +143,8 @@ for (param = first_param; param < argc; param++)
 		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();
-		file = (unsigned char *)disk->read_entire_file(filename = disk->next());
+		file = (unsigned char *)disk->read_entire_file(filename = disk->next(), &current_file_length);
+		bytes_indexed += current_file_length;
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 	if (files_that_match == 0)
