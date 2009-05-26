@@ -26,7 +26,7 @@ private:
 	long about(void);
 	void read_operator(void);
 	long numbers(void);
-	long read_CO(ANT_string_pair *path);
+	void read_CO(ANT_string_pair *path, ANT_string_pair *terms);
 	long read_CAS(void);
 
 public:

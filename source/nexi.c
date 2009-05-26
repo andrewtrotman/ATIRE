@@ -30,25 +30,35 @@ else if (length == 1)
 		return FALSE;
 	else if (*from == ')')
 		return FALSE;
-	else if (ANT_parser::isXMLnamestartchar(*from))
-		{
-		if (ANT_parser::isXMLnamechar(next))
+	else if (*from == '-')
+		if (ANT_isdigit(next))
 			return TRUE;
 		else
 			return FALSE;
-		}
+	else if (ANT_parser::isXMLnamestartchar(*from))
+		if (ANT_parser::isXMLnamechar(next))
+			return TRUE;
+		else if (next == '-')		// hyphenated words
+			return TRUE;
+		else if (next == '\'')			// apostrophies (don't tell me)
+			return TRUE;
+		else
+			return FALSE;
 	else if (*from == '/')
-		{
 		if (next == '/')
 			return TRUE;
 		else
 			return FALSE;
-		}
 	else
 		return FALSE;
 else
 	{
-	if (ANT_parser::isXMLnamestartchar(*from))
+	if (*from == '-')
+		if (ANT_isdigit(next))
+			return TRUE;
+		else
+			return FALSE;
+	else if (ANT_parser::isXMLnamestartchar(*from))
 		if (ANT_parser::isXMLnamechar(next))
 			return TRUE;
 		else
@@ -96,9 +106,11 @@ more = TRUE;
 do
 	{
 	get_next_token();
-	if (strchr("(|)", token[0]))
+	if (ANT_parser::isXMLnamestartchar(token[0]))
 		continue;
-	else if (ANT_parser::isXMLnamestartchar(token[0]))
+	else if (token.strcmp("//") == 0)
+		continue;
+	else if (strchr("(|)", token[0]))
 		continue;
 	else
 		more = FALSE;
@@ -127,7 +139,7 @@ successful_parse = FALSE;
 */
 long ANT_NEXI::about(void)
 {
-ANT_string_pair path;
+ANT_string_pair path, terms;
 
 get_next_token();
 if (token[0] != '(')
@@ -136,7 +148,7 @@ get_next_token();						// prime the read_path method with the first token in the
 read_path(&path);
 if (token[0] != ',')
 	parse_error("Expected ','");
-read_CO(&path);
+read_CO(&path, &terms);
 if (token[0] != ')')
 	parse_error("Expected ')'");
 
@@ -159,11 +171,11 @@ while (strchr("<>=", token[0]) != NULL)
 */
 long ANT_NEXI::numbers(void)
 {
-ANT_string_pair path;
+ANT_string_pair path, terms;
 
 read_path(&path);
 read_operator();
-read_CO(&path);
+read_CO(&path, &terms);
 
 return 0;
 }
@@ -172,15 +184,62 @@ return 0;
 	ANT_NEXI::READ_CO()
 	-------------------
 */
-long ANT_NEXI::read_CO(ANT_string_pair *path)
+void ANT_NEXI::read_CO(ANT_string_pair *path, ANT_string_pair *terms)
 {
-ANT_string_pair start;
+ANT_string_pair current;
+long weight, first_time = TRUE, more = TRUE;
 
-start = *get_next_token();
-while (ANT_isalnum(token[0]))
-	get_next_token();
+do
+	{
+	weight = 0;
+	current = *get_next_token();
+	if (first_time)
+		{
+		*terms = token;
+		first_time = FALSE;
+		}
 
-return 0;
+	if (token.string_length == 1)
+		{
+		if (token[0] == ' ')				// space
+			continue;						// toss the token
+		else if (token[0] == '"')
+			{
+			/*
+				This is a phrase
+			*/
+			do
+				get_next_token();
+			while (token[0] != '\0' && token[0] != '"');
+			current.string_length = token.start - current.start;
+			}
+		else if (token[0] == '+')		// positive selected terms
+			{
+			weight = +1;
+			current = *get_next_token();
+			}
+		else if (token[0] == '-')		// negatively selected terms
+			{
+			weight = -1;
+			current = *get_next_token();
+			}
+		else if (!ANT_isalnum(token[0]))
+			more = FALSE;
+		}
+	else if (!ANT_isalnum(token[0]) && token[0] != '-')		// negative numbers
+		more = FALSE;
+//
+	if (more)
+		printf("TERM:%*.*s:%d:\n",  current.string_length, current.string_length, current.start, weight);
+//
+	}
+while (more);
+
+terms->string_length = token.start - terms->start;
+
+if (path != NULL)
+	printf("TAG:%*.*s:", path->string_length, path->string_length, path->start);
+printf("TERM:%*.*s:\n",  terms->string_length, terms->string_length, terms->start);
 }
 
 /*
@@ -220,6 +279,8 @@ return parsing_result;
 */
 void ANT_NEXI::parse(char *expression)
 {
+ANT_string_pair terms;
+
 successful_parse = TRUE;
 at = string = expression;
 
@@ -228,7 +289,7 @@ get_next_token();
 if (token.strcmp("//") == 0)		// we're a CAS query
 	read_CAS();
 else
-	read_CO(NULL);
+	read_CO(NULL, &terms);
 }
 
 /*
