@@ -6,6 +6,33 @@
 
 const int MAX_TRIE_DEPTH = 4;
 const int ALPHABET_SIZE = 26;
+const int ARBITRARY_NUMBER = 300;
+
+class trie_stats {
+ private:
+	int freq[MAX_TRIE_DEPTH][ARBITRARY_NUMBER];
+
+ public:
+	trie_stats() {
+		int i, j;
+		for (i = 0; i < MAX_TRIE_DEPTH; i++) 
+			for (j = 0; j < ARBITRARY_NUMBER; j++) 
+				freq[i][j] = 0;
+	}
+	inline void add(int depth, int cum_freq) {
+		if (cum_freq >= ARBITRARY_NUMBER)
+			cum_freq = ARBITRARY_NUMBER - 1;
+		freq[depth][cum_freq]++;
+	}
+	void print() {
+		int i,j;
+		for (i = 0; i < MAX_TRIE_DEPTH; i++) {
+			printf("-- DEPTH %d --\n", i);
+			for (j = 0; j < ARBITRARY_NUMBER; j++)
+				printf("%d : %d\n", j, freq[i][j]);
+		}
+	}
+};
 
 /* 
  * I store a trie, starting from the endings of words.
@@ -29,7 +56,11 @@ class trie_node {
         }
 
 		void print() {
-			this->internal_print(' ', 0);
+			trie_stats *stats = new trie_stats();
+			internal_stats(stats, 0);
+			stats->print();
+			//	this->internal_print(' ', 0);
+			delete stats;
 		}
 
  private:
@@ -49,12 +80,20 @@ class trie_node {
             int i;
             for (i = 0; i < depth; i++)
                 putchar(' ');
-            printf("'%c' * %d\n", me, this->cum_freq);
+            printf("'%c' * %d\n", me, cum_freq);
             for (i = 0; i < ALPHABET_SIZE; i++) {
-                if (this->child[i])
-                    this->child[i]->internal_print(i + 'a', depth + 1);
+                if (child[i])
+                    child[i]->internal_print(i + 'a', depth + 1);
             }
         }
+
+        void internal_stats(trie_stats *stats, int depth) {
+			int i;
+			stats->add(depth, cum_freq);
+			for (i = 0; i < ALPHABET_SIZE; i++) 
+				if (child[i])
+                    child[i]->internal_stats(stats, depth + 1);
+		}
 };
 
 /*

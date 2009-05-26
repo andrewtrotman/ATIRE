@@ -1,4 +1,4 @@
-#ifndef __ANT_H__
+#ifndef __GA_ANT_H__
 
 /* 
  * This header stores as much of my extensions for ant.c as possible.
@@ -18,8 +18,6 @@
 #define NUM_OF_GENERATIONS 200
 #define POPULATION_SIZE 200
 
-
-
 /*
 	PERFORM_QUERY_W_STEMMER()
 	---------------
@@ -35,7 +33,6 @@ double perform_query_w_stemmer(ANT_ANT_param_block *params, ANT_search_engine *s
 	size_t token_length;
 	ANT_search_engine_accumulator *ranked_list;
 	double average_precision = 0.0;
-
 
 	search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -103,11 +100,6 @@ double perform_query_w_stemmer(ANT_ANT_param_block *params, ANT_search_engine *s
 	  Return the number of document that matched the user's query
 	*/
 	*matching_documents = hits;
-
-	/*
-	  Clean up
-	*/
-	delete stemmer;
 
 	/*
 	  Add the time it took to search to the global stats for the search engine
@@ -218,4 +210,4 @@ void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_for
 			trie_test();
 */
 
-#endif /* __ANT_H__ */
+#endif /* __GA_ANT_H__ */
