@@ -12,7 +12,7 @@ public:
     char *strgen_2();           // For strings with empty string
 
 	void print();
-    void weight_strings();
+    void trim(int level);
 
 private:
 	trie_node *trie;

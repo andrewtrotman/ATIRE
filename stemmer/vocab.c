@@ -19,6 +19,7 @@ class trie_stats {
 			for (j = 0; j < ARBITRARY_NUMBER; j++) 
 				freq[i][j] = 0;
 	}
+
 	inline void add(int depth, int cum_freq) {
 		if (cum_freq >= ARBITRARY_NUMBER)
 			cum_freq = ARBITRARY_NUMBER - 1;
@@ -51,16 +52,26 @@ class trie_node {
             this->cum_freq = 0;
         } 
 
+		~trie_node() {
+			int i;
+			for (i = 0; i < ALPHABET_SIZE; i++)
+				if (child[i])
+					delete child[i];
+		}
+
         void add(char *word) {
 			this->internal_add(word, strlen(word), 0);
         }
 
 		void print() {
-			trie_stats *stats = new trie_stats();
-			internal_stats(stats, 0);
-			stats->print();
+			trie_stats stats;
+			internal_stats(&stats, 0);
+			stats.print();
 			//	this->internal_print(' ', 0);
-			delete stats;
+		}
+
+		void trim(int level) {
+			internal_trim(level);
 		}
 
  private:
@@ -69,7 +80,7 @@ class trie_node {
             
             if (pos == 0)
                 return;
-            if (depth >= MAX_TRIE_DEPTH)
+            if (depth > MAX_TRIE_DEPTH)
                 return;
             if (this->child[word[pos-1] - 'a'] == NULL)
                 this->child[word[pos-1] - 'a'] = new trie_node();
@@ -93,6 +104,24 @@ class trie_node {
 			for (i = 0; i < ALPHABET_SIZE; i++) 
 				if (child[i])
                     child[i]->internal_stats(stats, depth + 1);
+		}
+
+		int internal_trim(int level) {
+			int tmp, i, total = 0;
+
+			for (i = 0; i < ALPHABET_SIZE; i++) {
+				if (child[i]) {
+					tmp = child[i]->internal_trim(level);
+					if (level > tmp) {
+						cum_freq -= tmp;
+						delete child[i];
+						child[i] = NULL;
+					} else {
+						total += tmp;
+					}
+				}
+			}
+			return total;
 		}
 };
 
@@ -145,7 +174,13 @@ Vocab::Vocab(ANT_search_engine *search_engine) {
 #endif
 }
 
-void Vocab::weight_strings() {
+/* 
+   TRIM()
+   
+   removes all words in the trie that do not occur at least level times.
+ */
+void Vocab::trim(int level) {
+	trie->trim(level);
 }
 
 void Vocab::print() {

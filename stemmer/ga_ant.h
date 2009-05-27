@@ -122,7 +122,9 @@ void trie_test(ANT_search_engine *search_engine) {
 	//	fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 	Vocab *trie = new Vocab(search_engine);
 	trie->print();
-	free(trie);
+	trie->trim(4);
+	trie->print();
+	delete trie;
 }
 
 /*
@@ -196,7 +198,6 @@ void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_for
 		ga->run(NUM_OF_GENERATIONS);
 	}
 
-	search_engine.stats_text_render();
 }
 
 /*
