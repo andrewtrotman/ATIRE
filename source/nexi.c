@@ -44,6 +44,11 @@ else if (length == 1)
 			return TRUE;
 		else
 			return FALSE;
+	else if (ANT_isdigit(*from))
+		if (ANT_isdigit(next))
+			return TRUE;
+		else
+			return FALSE;
 	else if (*from == '/')
 		if (next == '/')
 			return TRUE;
@@ -84,8 +89,13 @@ long length;
 length = 0;
 
 if (*at != '\0')
-	while (*(at + length) != '\0' && ispart(at, length, *(at + length)))
-		length++;
+	{
+	while (ANT_isspace(*at) && *at != '\0')
+		at++;
+	if (*at != '\0')
+		while (*(at + length) != '\0' && ispart(at, length, *(at + length)))
+			length++;
+	}
 
 token.start = at;
 token.string_length = length;
@@ -110,7 +120,9 @@ do
 		continue;
 	else if (token.strcmp("//") == 0)
 		continue;
-	else if (strchr("(|)", token[0]))
+	else if (token[0] == 0)
+		more = FALSE;
+	else if (strchr("(|)*@", token[0]))
 		continue;
 	else
 		more = FALSE;
@@ -148,6 +160,7 @@ get_next_token();						// prime the read_path method with the first token in the
 read_path(&path);
 if (token[0] != ',')
 	parse_error("Expected ','");
+get_next_token();			// prime read_CO
 read_CO(&path, &terms);
 if (token[0] != ')')
 	parse_error("Expected ')'");
@@ -162,7 +175,10 @@ return 0;
 void ANT_NEXI::read_operator(void)
 {
 while (strchr("<>=", token[0]) != NULL)
-	get_next_token();
+	if (token[0] == '\0')
+		break;
+	else
+		get_next_token();
 }
 
 /*
@@ -171,13 +187,76 @@ while (strchr("<>=", token[0]) != NULL)
 */
 long ANT_NEXI::numbers(void)
 {
-ANT_string_pair path, terms;
+ANT_string_pair path, term;
 
 read_path(&path);
 read_operator();
-read_CO(&path, &terms);
+term = token;
+//read_CO(&path, &terms);
+
+printf("0TAG0:%*.*s:", path.string_length, path.string_length, path.start);
+printf("0TERM0:%*.*s:\n",  term.string_length, term.string_length, term.start);
 
 return 0;
+}
+
+/*
+	ANT_NEXI::READ_TERM()
+	---------------------
+*/
+long ANT_NEXI::read_term(ANT_string_pair *term)
+{
+*term = *get_next_token();
+if (ANT_parser::isXMLnamestartchar(token[0]))
+	return TRUE;
+if (ANT_isalnum(token[0]))
+	return TRUE;
+if (token[0] == '-' && token.string_length > 1)
+	return TRUE;
+if (token[0] == '"')
+	return read_phrase(term);
+
+return FALSE;
+}
+
+/*
+	ANT_NEXI::READ_PHRASELESS_TERM()
+	--------------------------------
+*/
+long ANT_NEXI::read_phraseless_term(ANT_string_pair *term)
+{
+*term = *get_next_token();
+if (ANT_parser::isXMLnamestartchar(token[0]))
+	return TRUE;
+if (ANT_isalnum(token[0]))
+	return TRUE;
+if (token[0] == '-' && token.string_length > 1)
+	return TRUE;
+return FALSE;
+}
+
+/*
+	ANT_NEXI::READ_PHRASE()
+	-----------------------
+*/
+long ANT_NEXI::read_phrase(ANT_string_pair *string)
+{
+ANT_string_pair current;
+long more;
+
+string->start = token.start;
+do
+	more = read_phraseless_term(&current);
+while (more);
+
+if (token[0] != '"')
+	{
+	parse_error("non-term found in phrase");
+	return FALSE;
+	}
+
+string->string_length = token.start - string->start + token.string_length;
+return TRUE;
 }
 
 /*
@@ -187,51 +266,38 @@ return 0;
 void ANT_NEXI::read_CO(ANT_string_pair *path, ANT_string_pair *terms)
 {
 ANT_string_pair current;
-long weight, first_time = TRUE, more = TRUE;
+long weight, more = TRUE;
 
+current = *terms = token;
 do
 	{
 	weight = 0;
-	current = *get_next_token();
-	if (first_time)
-		{
-		*terms = token;
-		first_time = FALSE;
-		}
-
 	if (token.string_length == 1)
 		{
-		if (token[0] == ' ')				// space
-			continue;						// toss the token
-		else if (token[0] == '"')
-			{
-			/*
-				This is a phrase
-			*/
-			do
-				get_next_token();
-			while (token[0] != '\0' && token[0] != '"');
-			current.string_length = token.start - current.start;
-			}
+		if (token[0] == '"')
+			read_phrase(&current);
 		else if (token[0] == '+')		// positive selected terms
 			{
 			weight = +1;
-			current = *get_next_token();
+			if (!read_term(&current))
+				parse_error("term expected");
 			}
 		else if (token[0] == '-')		// negatively selected terms
 			{
 			weight = -1;
-			current = *get_next_token();
+			if (!read_term(&current))
+				parse_error("term expected");
 			}
 		else if (!ANT_isalnum(token[0]))
 			more = FALSE;
 		}
 	else if (!ANT_isalnum(token[0]) && token[0] != '-')		// negative numbers
 		more = FALSE;
-//
 	if (more)
+		{
 		printf("TERM:%*.*s:%d:\n",  current.string_length, current.string_length, current.start, weight);
-//
+		current = *get_next_token();
+		}
 	}
 while (more);
 
@@ -251,24 +317,31 @@ long ANT_NEXI::read_CAS(void)
 ANT_string_pair path;
 long parsing_result = FALSE;
 
-read_path(&path);
-if (token[0] == '[')
+do
 	{
-	get_next_token();
-	do
+	read_path(&path);
+	if (token[0] == '[')
 		{
-		if (token.strcmp("about") == 0)
-			about();
-		else if (token[0] == '.')
-			numbers();
-		else
-			parse_error("Expected 'about()' clause or numeric expression");
-		get_next_token();
+		do
+			{
+			get_next_token();
+
+			if (token.strcmp("about") == 0)
+				about();
+			else if (token[0] == '.')
+				numbers();
+			else
+				parse_error("Expected 'about()' clause or numeric expression");
+			get_next_token();
+			}
+		while (token.strcmp("or") == 0 || token.strcmp("and") == 0 || token.strcmp("OR") == 0 || token.strcmp("AND") == 0);
+		if (token[0] != ']')
+			parse_error("Expected ']'");
 		}
-	while (token.strcmp("or") == 0 || token.strcmp("and") == 0);
+	else if (token[0] != '\0')
+		parse_error("Expected '['");
 	}
-else
-	parse_error("Expected '['");
+while (token[0] != '\0');
 
 return parsing_result;
 }

@@ -24,6 +24,9 @@ private:
 	void read_path(ANT_string_pair *path);
 	void parse_error(char *message);
 	long about(void);
+	long read_phrase(ANT_string_pair *string);
+	long read_phraseless_term(ANT_string_pair *term);
+	long read_term(ANT_string_pair *term);
 	void read_operator(void);
 	long numbers(void);
 	void read_CO(ANT_string_pair *path, ANT_string_pair *terms);
