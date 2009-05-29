@@ -106,9 +106,11 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 //	printf("MM ");
 //printf("(N:%ld T:%ld Bpi:%ld n:%ld)\n", (long)needed, (long)term, (long)bits_per_integer, (long)simple9_table[row].numbers);
 
-	*into = row << 28;   //puts the row no. to the first 4 bits.
+	*into = 0;
 	for (term = 0; from < source + pos; term++)
 		*into |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
+	*into = (*into << 4) | row;		// put the selector in the bottom 4 bits
+
 	into++;
 	if (into >= end)
 		return 0;
@@ -122,42 +124,90 @@ return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
 */
 void ANT_compress_simple9::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
 {
-long long numbers;
 long mask, bits;
 uint32_t *compressed_sequence = (uint32_t *)source;
 uint32_t value, row;
 ANT_compressable_integer *end = destination + destination_integers;
 
-for (;;)		// we break out of this (empty) loop in the case of overflow of the destination buffer
+while (destination < end)
 	{
 	value = *compressed_sequence++;
-	row = value >> 28;						// row number stored in high 4 bits
-	value &= 0x0fffffff;
+	row = value & 0x0F;
+	value >>= 4;
 
 	/*
 		Load the details from the lookup table so as to
 		avoid the dereference each decode.
 	*/
 	bits = simple9_table[row].bits;
-//printf("[B:%ld]", bits);
 	mask = simple9_table[row].mask;
-	numbers = simple9_table[row].numbers;
 
-	if (destination + numbers < end)
-		while (numbers-- > 0)		// Extract "numbers" number of integers from the word
-			{
-			*destination++ = value & mask;		// mask the current integer
-			value >>= bits;						// shift to the next integer
-			}
-	else
+	switch (mask)			// unwind the loop
 		{
-		numbers = end - destination;
-		while (numbers-- > 0)		// Extract "numbers" number of integers from the word
-			{
+		case 0x01:			// 28 integers
 			*destination++ = value & mask;		// mask the current integer
 			value >>= bits;						// shift to the next integer
-			}
-		break;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x03:		// 14 integers
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x07:		// 9 integers
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x0F:		// 7 integers
+			*destination++ = value & mask;
+			value >>= bits;
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x01F:		// 5 integers
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x7F:		// 4 integers
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x1FF:		// 3 integers
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0x3FFF:	// 2 integers
+			*destination++ = value & mask;
+			value >>= bits;
+		case 0xFFFFFFF:	// 1 integer
+			*destination++ = value;
 		}
 	}
 }

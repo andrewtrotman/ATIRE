@@ -9,6 +9,9 @@
 #include "compress.h"
 #include "compression_factory_scheme.h"
 
+
+#define ANT_COMPRESSION_FACTORY_END_PADDING 128	// extra padding at the end because some schemes (Simple-9) don't know when to stop
+
 /*
 	class ANT_COMPRESSION_FACTORY
 	-----------------------------

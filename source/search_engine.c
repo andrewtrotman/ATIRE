@@ -121,7 +121,13 @@ documents = collection_details.document_frequency;
 postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
 memory->realign();
 
-decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + highest_df));		// 512 because of the tf and 0 at each end of each impact ordered list
+/*
+	Allocate space for decompression.
+	NOTES:
+		Add 512 because of the tf and 0 at each end of each impact ordered list.
+		Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
+*/
+decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + highest_df + ANT_COMPRESSION_FACTORY_END_PADDING));
 memory->realign();
 
 document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
@@ -378,7 +384,6 @@ long sum;
 /*
 	Decompress using one of the factory methods
 */
-//factory.decompress(decompress_buffer, start, leaf->document_frequency);
 factory.decompress(decompress_buffer, start, leaf->impacted_length);
 
 /*

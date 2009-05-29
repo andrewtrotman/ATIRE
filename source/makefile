@@ -9,11 +9,12 @@ ALL = bitstream.obj \
  compress_none.obj \
  compression_factory.obj \
  compress_sigma.obj \
+ stats.obj \
  test_compression.obj \
  maths.obj
 
 CFLAGS = /W4 /Zi /TP
-all : nexi.exe
+all : nexi.exe test_compression.exe
 
 nexi.exe : nexi.c ctypes.c string_pair.h parser.c
 	$(CC) /W4 -D _CRT_SECURE_NO_WARNINGS /Zi /TP nexi.c ctypes.c parser.c

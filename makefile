@@ -11,6 +11,8 @@ BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
 
+FIXED = /link /fixed:no
+
 MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #MINUS_D = -DHASHER=1 -DHEADER_HASHER=1
 
@@ -123,7 +125,7 @@ OTHER_TARGETS = \
 
 {$(OBJDIR)\}.obj{$(BINDIR)\}.exe:
 	@echo Building $@...
-	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) /Fe$@ 
+	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) /Fe$@  $(FIXED)
 
 #
 #	List of objects to build

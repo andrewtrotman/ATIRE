@@ -135,7 +135,7 @@ for (which = 0; which < number_of_techniques; which++)
 				if (validation_buffer_length < source_integers)
 					{
 					delete [] validation_buffer;		// efficiency isn't an issue (or else we wouldn't be validating)
-					validation_buffer = new ANT_compressable_integer[(size_t)((validation_buffer_length = source_integers) + 1)];
+					validation_buffer = new ANT_compressable_integer[(size_t)((validation_buffer_length = source_integers) + ANT_COMPRESSION_FACTORY_END_PADDING)];
 					}
 				validation_buffer[source_integers] = 0xCCCCCCCC;		// terminate the list so that we can check for overflow at the end
 

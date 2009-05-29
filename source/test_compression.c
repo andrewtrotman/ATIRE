@@ -14,8 +14,8 @@
 #include "compression_factory.h"
 #include "compress_sigma.h"
 
-#define ITERATIONS 1
-#define TEST_LENGTH 3		
+#define ITERATIONS 5
+#define TEST_LENGTH 30
 
 ANT_compressable_integer random_buffer[TEST_LENGTH] = 
 /*
@@ -39,7 +39,7 @@ int main(void)
 ANT_compressable_integer *into;
 long iteration, which;
 long long bytes;
-ANT_compress_sigma compressor, decompressor;
+ANT_compress_simple9 compressor, decompressor;
 
 srand((unsigned int)time(NULL));
 srand(0);
@@ -48,8 +48,8 @@ for (iteration = 0; iteration < ITERATIONS; iteration++)
 	{
 	into = random_buffer;
 
-//	for (which = 0; which < TEST_LENGTH; which++)
-//		 *into++ = (rand() + 1) & 0xffffff;
+	for (which = 0; which < TEST_LENGTH; which++)
+		 *into++ = (rand() + 1) & 0xffffff;
 
 	bytes = compressor.compress(buffer, sizeof(buffer), random_buffer, TEST_LENGTH);
 	printf("Compressed from %lld to %lld bytes ", (long long)sizeof(random_buffer), bytes);
