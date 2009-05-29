@@ -12,6 +12,7 @@ public:
     char *strgen_2();           // For strings with empty string
 
 	void print();
+	void print_stats();
     void trim(int level);
 
 private:

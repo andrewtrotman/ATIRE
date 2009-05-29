@@ -121,8 +121,8 @@ void trie_test(ANT_search_engine *search_engine) {
 	//  No more document_count() ?!
 	//	fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
 	Vocab *trie = new Vocab(search_engine);
-	trie->print();
-	trie->trim(4);
+	trie->print_stats();
+	//	trie->trim(200);
 	trie->print();
 	delete trie;
 }

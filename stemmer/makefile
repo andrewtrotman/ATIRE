@@ -5,8 +5,8 @@ BINDIR = ../bin
 
 EXTFLAGS = -I$(SRCDIR)
 LDFLAGS = -g
-CFLAGS = -g -O3 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-	-Wno-endif-labels
+CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+	-Wno-endif-labels -Wno-missing-braces
 
 CC = g++
 
@@ -87,6 +87,9 @@ $(BINDIR)/index : $(OBJECTS) index.o
 
 $(BINDIR)/ant : $(OBJECTS) ant.o
 	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%) 
+
+$(BINDIR)/ant_dict : $(OBJECTS) ant_dictionary.o
+	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant_dictionary.o $(OBJECTS:%=$(OBJDIR)/%) 
 
 $(BINDIR)/ga_ant : $(OBJECTS) $(EXTENSION) 
 	$(CC) $(LDFLAGS) -o $@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%)

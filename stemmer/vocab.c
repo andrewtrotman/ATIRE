@@ -4,7 +4,7 @@
 #include "btree_iterator.h"
 #include "ga_individual.h"
 
-const int MAX_TRIE_DEPTH = 4;
+const int MAX_TRIE_DEPTH = 7; 	/* Trie holds MAX_TRIE_DEPTH chars */
 const int ALPHABET_SIZE = 26;
 const int ARBITRARY_NUMBER = 300;
 
@@ -23,6 +23,10 @@ class trie_stats {
 	inline void add(int depth, int cum_freq) {
 		if (cum_freq >= ARBITRARY_NUMBER)
 			cum_freq = ARBITRARY_NUMBER - 1;
+		if (depth >= MAX_TRIE_DEPTH) {
+			fprintf(stderr, "Trie stats are doing things they shouldn't; depth = %d\n", depth);
+			return;
+		}
 		freq[depth][cum_freq]++;
 	}
 	void print() {
@@ -60,16 +64,23 @@ class trie_node {
 		}
 
         void add(char *word) {
-			this->internal_add(word, strlen(word), 0);
+			internal_add(word, strlen(word), 0);
         }
 
 		void print() {
-			trie_stats stats;
-			internal_stats(&stats, 0);
-			stats.print();
-			//	this->internal_print(' ', 0);
+			char buffer[MAX_TRIE_DEPTH + 1];
+			buffer[MAX_TRIE_DEPTH] = '\0';
+			internal_print(buffer + MAX_TRIE_DEPTH, 0);
 		}
 
+		void print_stats() {
+			trie_stats *stats = new trie_stats();
+			internal_stats(stats, 0);
+			stats->print();
+			delete stats;
+		}
+
+		/* Removes leaves from the trie with frequency under a certain amount */
 		void trim(int level) {
 			internal_trim(level);
 		}
@@ -80,48 +91,45 @@ class trie_node {
             
             if (pos == 0)
                 return;
-            if (depth > MAX_TRIE_DEPTH)
+            if (depth >= MAX_TRIE_DEPTH)
                 return;
             if (this->child[word[pos-1] - 'a'] == NULL)
                 this->child[word[pos-1] - 'a'] = new trie_node();
             this->child[word[pos-1] - 'a']->internal_add(word, pos - 1, depth + 1);
         }
 
-        void internal_print(char me, int depth) {
+        void internal_print(char *me, int depth) {
             int i;
-            for (i = 0; i < depth; i++)
-                putchar(' ');
-            printf("'%c' * %d\n", me, cum_freq);
+			if (depth > MAX_TRIE_DEPTH)
+				return;
+            printf("%d * '%s'\n", cum_freq, me);
             for (i = 0; i < ALPHABET_SIZE; i++) {
-                if (child[i])
-                    child[i]->internal_print(i + 'a', depth + 1);
+                if (child[i]) {
+					me[-1] = i + 'a';
+                    child[i]->internal_print(me - 1, depth + 1);
+				}
             }
         }
 
         void internal_stats(trie_stats *stats, int depth) {
 			int i;
-			stats->add(depth, cum_freq);
+			if (depth > 0)
+				stats->add(depth - 1, cum_freq);
 			for (i = 0; i < ALPHABET_SIZE; i++) 
 				if (child[i])
                     child[i]->internal_stats(stats, depth + 1);
 		}
 
 		int internal_trim(int level) {
-			int tmp, i, total = 0;
+			int i;
 
 			for (i = 0; i < ALPHABET_SIZE; i++) {
-				if (child[i]) {
-					tmp = child[i]->internal_trim(level);
-					if (level > tmp) {
-						cum_freq -= tmp;
-						delete child[i];
-						child[i] = NULL;
-					} else {
-						total += tmp;
-					}
+				if (child[i] && level >= child[i]->internal_trim(level)) {
+					delete child[i];
+					child[i] = NULL;
 				}
 			}
-			return total;
+			return cum_freq;
 		}
 };
 
@@ -186,6 +194,13 @@ void Vocab::trim(int level) {
 void Vocab::print() {
 	if (trie)
 		trie->print();
+	else
+		printf("Vocab is empty\n");
+}
+
+void Vocab::print_stats() {
+	if (trie)
+		trie->print_stats();
 	else
 		printf("Vocab is empty\n");
 }
