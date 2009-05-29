@@ -52,6 +52,7 @@ private:
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 
 protected:
+	virtual void relevance_rank_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering);
 	virtual void relevance_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
 
 public:

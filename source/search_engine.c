@@ -349,6 +349,9 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 	ANT_compressable_integer *into;
 	if (term_details->document_frequency <= 2)
 		{
+		/*
+			We're about to generate the impact-ordering here and so we interlace TF, DOC-ID and 0s
+		*/
 		*destination = 0;		// no compression
 		into = (ANT_compressable_integer *)(destination + 1);
 		*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
@@ -410,6 +413,39 @@ while (current < end)
 }
 
 /*
+	ANT_SEARCH_ENGINE::RELEVANCE_RANK_K()
+	-------------------------------------
+	BM25
+*/
+void ANT_search_engine::relevance_rank_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering)
+{
+const double k1 = 0.9;
+const double b = 0.4;
+
+const double k1_plus_1 = k1 + 1.0;
+const double one_minus_b = 1.0 - b;
+long docid;
+double top_row, tf, idf;
+ANT_compressable_integer *current, *end = impact_ordering + term_details->impacted_length;
+
+idf = log((double)(documents) / (double)term_details->document_frequency);
+
+current = impact_ordering;
+while (current < end)
+	{
+	tf = *current++;
+	top_row = tf * k1_plus_1;
+	docid = -1;
+	while (*current != 0)
+		{
+		docid += *current++;
+		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+		}
+	current++;		// skip over the zero
+	}
+}
+
+/*
 	ANT_SEARCH_ENGINE::RELEVANCE_RANK()
 	-----------------------------------
 	BM25 relevance ranking by default (this is a virtual function)
@@ -465,7 +501,6 @@ idf = log((double)(documents) / (double)term_details->document_frequency);
 
 	In this implementation we ignore k3 and the number of times the term occurs in the query.
 */
-
 for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid = postings->docid[which];
@@ -495,11 +530,19 @@ if (get_postings(&term_details, postings_buffer) == NULL)
 stats->add_posting_read_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-decompress(postings_buffer, &term_details);
+#ifdef ANT_TOP_K
+	factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+#else
+	decompress(postings_buffer, &term_details);
+#endif
 stats->add_decompress_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-relevance_rank(&term_details, &posting);
+#ifdef ANT_TOP_K
+	relevance_rank_k(&term_details, decompress_buffer);
+#else
+	relevance_rank(&term_details, &posting);
+#endif
 stats->add_rank_time(stats->stop_timer(now));
 }
 
@@ -519,11 +562,7 @@ found = 0;
 for (doc = found = 0; doc < documents; doc++)
 	if (stem_buffer[doc] != 0)
 		{
-#ifdef NEVER
-		*docid++ = doc - last;
-#else
 		*docid++ = doc;
-#endif
 		*tf++ = stem_buffer[doc];
 		last = doc;
 		found++;
