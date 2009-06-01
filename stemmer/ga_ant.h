@@ -119,9 +119,9 @@ double perform_query_w_stemmer(ANT_ANT_param_block *params, ANT_search_engine *s
 */
 void trie_test(ANT_search_engine *search_engine) {
 	//  No more document_count() ?!
-	//	fprintf(stderr, "Index contains %lld documents\n", search_engine.document_count());
+
 	Vocab *trie = new Vocab(search_engine);
-	trie->print_stats();
+	//	trie->print_stats();
 	//	trie->trim(200);
 	trie->print();
 	delete trie;

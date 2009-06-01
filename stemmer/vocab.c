@@ -1,10 +1,13 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "vocab.h"
 #include "btree_iterator.h"
 #include "ga_individual.h"
+#include "search_engine.h"
+#include "search_engine_btree_leaf.h"
 
-const int MAX_TRIE_DEPTH = 7; 	/* Trie holds MAX_TRIE_DEPTH chars */
+const int MAX_TRIE_DEPTH = 10; 	/* Trie holds MAX_TRIE_DEPTH chars */
 const int ALPHABET_SIZE = 26;
 const int ARBITRARY_NUMBER = 300;
 
@@ -47,13 +50,15 @@ class trie_stats {
 class trie_node {
     public:
         trie_node *child[ALPHABET_SIZE];
-        int cum_freq;
+        long cum_suffix_freq;
+		long long cum_term_freq;
         
         trie_node() {
             int i;
             for (i = 0; i < ALPHABET_SIZE; i++)
                 this->child[i] = NULL;
-            this->cum_freq = 0;
+            this->cum_suffix_freq = 0;
+            this->cum_term_freq = 0;
         } 
 
 		~trie_node() {
@@ -63,8 +68,8 @@ class trie_node {
 					delete child[i];
 		}
 
-        void add(char *word) {
-			internal_add(word, strlen(word), 0);
+        void add(char *word, long long cum_term_freq = 0) {
+			internal_add(word, strlen(word), 0, cum_term_freq);
         }
 
 		void print() {
@@ -86,23 +91,28 @@ class trie_node {
 		}
 
  private:
-        void internal_add(char *word, int pos, int depth) {
-            this->cum_freq++; 
+		/* Having one as a default for cum_term_freq allows fix_trie */
+        void internal_add(char *word, int pos, int depth, long long cum_term_freq = 1) {
+            this->cum_suffix_freq++; 
             
-            if (pos == 0)
+            if (pos == 0) {
+				this->cum_term_freq += cum_term_freq;
                 return;
-            if (depth >= MAX_TRIE_DEPTH)
+			}
+            if (depth >= MAX_TRIE_DEPTH) {
+				this->cum_term_freq += cum_term_freq; // Also add if it's too long for the trie
                 return;
+			}
             if (this->child[word[pos-1] - 'a'] == NULL)
                 this->child[word[pos-1] - 'a'] = new trie_node();
-            this->child[word[pos-1] - 'a']->internal_add(word, pos - 1, depth + 1);
+            this->child[word[pos-1] - 'a']->internal_add(word, pos - 1, depth + 1, cum_term_freq);
         }
 
         void internal_print(char *me, int depth) {
             int i;
 			if (depth > MAX_TRIE_DEPTH)
 				return;
-            printf("%d * '%s'\n", cum_freq, me);
+            printf("%ld %lld '%s'\n", cum_suffix_freq, cum_term_freq, me);
             for (i = 0; i < ALPHABET_SIZE; i++) {
                 if (child[i]) {
 					me[-1] = i + 'a';
@@ -114,7 +124,7 @@ class trie_node {
         void internal_stats(trie_stats *stats, int depth) {
 			int i;
 			if (depth > 0)
-				stats->add(depth - 1, cum_freq);
+				stats->add(depth - 1, cum_suffix_freq);
 			for (i = 0; i < ALPHABET_SIZE; i++) 
 				if (child[i])
                     child[i]->internal_stats(stats, depth + 1);
@@ -129,7 +139,7 @@ class trie_node {
 					child[i] = NULL;
 				}
 			}
-			return cum_freq;
+			return cum_suffix_freq;
 		}
 };
 
@@ -177,8 +187,13 @@ Vocab::Vocab(ANT_search_engine *search_engine) {
 #else
 	trie = new trie_node();
     for (iterator.first(NULL); (term = iterator.next()) != NULL;)
-		if (!contains_non_alpha(term))
-			trie->add(term);
+		if (!contains_non_alpha(term)) {
+			ANT_search_engine_btree_leaf td;
+			search_engine->get_postings_details(term, &td);
+			trie->add(term, td.collection_frequency);
+			// td.document_frequency;  ??
+			// td.collection_frequency; ?? WHICH ONE?
+		}
 #endif
 }
 
