@@ -96,11 +96,11 @@ int main(int argc, char *argv[]) {
 	
 	/*
 	 Input format:
-	 <hashed username> <HTTP method> <URL> <HTTP status> <bytes received> <timestamp (DD/Mon/YYYY:HH:MM:SS)>
+	 <hashed username> <HTTP method> <URL> <HTTP status> <bytes received> <timestamp (DD/Mon/YYYY:HH:MM:SS)> <original log filename>
 	 Output format:
 	 <hashed username> <URL> <Article ID> <timestamp (DD/Mon/YYYY:HH:MM:SS)>
 	 */
-	while (fscanf(infile, "%1024s %*s %1024s %*d %*d %1024s\n",
+	while (fscanf(infile, "%1024s %*s %1024s %*d %*d %1024s %*s\n",
 				  user_hash, url, time) != EOF) {
 		// Extract the article title. Ignore requests for non-articles.
 		if (regexec(&url_regex, url, (sizeof matches / sizeof matches[0]), matches, 0) != REG_NOMATCH) {

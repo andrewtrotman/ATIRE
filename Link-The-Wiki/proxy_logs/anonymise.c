@@ -30,39 +30,46 @@ void SHA1Input(SHA1Context*, const unsigned char*, unsigned);
 #define MAX_STR_LEN 1024
 
 int main(int argc, char *argv[]) {
-	FILE *infile = stdin, *outfile = stdout;
 	SHA1Context sha;
 	
 	char user[MAX_STR_LEN+1], time[MAX_STR_LEN+1], method[MAX_STR_LEN+1],
 	     url[MAX_STR_LEN+1], protocol[MAX_STR_LEN+1];
-
-	char last_user[MAX_STR_LEN+1];
-	last_user[0] = '\0';
 	
 	int status, bytes;
+	int param;
 	
-	/*
-	 Input format:
-	   <IP address> - <username> [<timestamp (DD/Mon/YYYY:HH:MM:SS)> <timezone>]
-	   "<HTTP method> <URL> <HTTP version>" <HTTP status> <bytes received> <TCP status>
-	 Output format:
-	   <hashed username> <HTTP method> <URL> <HTTP status> <bytes received> <timestamp (DD/Mon/YYYY:HH:MM:SS)>
-	 */
-	while (fscanf(infile, "%*s - %1024s [%1024s %*s \"%1024s %1024s %*s %d %d %*s\n",
-				  user, time, method, url, &status, &bytes) != EOF) {
+	for (param = 1; param < argc; param++) {
 		
-		// If the log gives the username as "-", this usually means the request failed, so we'll ignore it.
-		// Also, we're only interested in requests for Wikipedia pages.
-		if (strcmp(user, "-") != 0 && strcasestr(url, "wikipedia") != NULL) {
+		FILE *infile = fopen(argv[param], "r");
 		
-			// If the username isn't the same as the last one we looked at, print its SHA1 hash.
-			// Otherwise, print "-" instead.
-			if (strcmp(last_user, user) != 0) {
-				strcpy(last_user, user);
-				
+		if (infile == NULL) {
+			fprintf(stderr, "%s: fopen(\"%s\", \"r\"): ", argv[0], argv[param]);
+			perror(NULL);
+			continue;
+		}
+	
+		FILE *outfile = stdout;
+		
+		fprintf(stderr, "Processing %s...\n", argv[param]);
+		
+		/*
+		 Input format:
+		   <IP address> - <username> [<timestamp (DD/Mon/YYYY:HH:MM:SS)> <timezone>]
+		   "<HTTP method> <URL> <HTTP version>" <HTTP status> <bytes received> <TCP status>
+		 Output format:
+		   <hashed username> <HTTP method> <URL> <HTTP status> <bytes received> <timestamp (DD/Mon/YYYY:HH:MM:SS)> <original log filename>
+		 */
+		while (fscanf(infile, "%*s - %1024s [%1024s %*s \"%1024s %1024s %*s %d %d %*s\n",
+					  user, time, method, url, &status, &bytes) != EOF) {
+			
+			// If the log gives the username as "-", this usually means the request failed, so we'll ignore it.
+			// Also, we're only interested in requests for Wikipedia pages.
+			if (strcmp(user, "-") != 0 && strcasestr(url, "wikipedia") != NULL) {
+			
+				// Calculate and print the SHA1 hash of the username.
 				SHA1Reset(&sha);
 				SHA1Input(&sha, (unsigned char*)user, strlen(user));
-				
+					
 				if (!SHA1Result(&sha)) {
 					fprintf(outfile, "sha_error");
 				}else{
@@ -71,13 +78,12 @@ int main(int argc, char *argv[]) {
 							sha.Message_Digest[2], sha.Message_Digest[3],
 							sha.Message_Digest[4]);
 				}
-			}else{
-				fprintf(outfile, "-");
+				
+				fprintf(outfile, " %s %s %d %d %s %s\n", method, url, status, bytes, time, argv[param]);
+				
 			}
-			
-			fprintf(outfile, " %s %s %d %d %s\n", method, url, status, bytes, time);
-			
 		}
+		
 	}
 	
 	fprintf(stderr, "Done.\n");
