@@ -65,6 +65,7 @@ public:
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 
 	void decompress(unsigned char *start, ANT_search_engine_btree_leaf *leaf);
+	void stem_to_postings_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, long long collection_frequency, long *stem_buffer);
 	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
 	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
 	void process_one_search_term(char *term);
