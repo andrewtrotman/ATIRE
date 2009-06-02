@@ -1,6 +1,7 @@
 /*
 	ANT.C
 	-----
+	call GetSystemTimes() at the end and compare.
 */
 #include <stdio.h>
 #include <string.h>
