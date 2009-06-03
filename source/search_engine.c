@@ -598,11 +598,10 @@ for (bucket = 0xFF; bucket >= 0; bucket--)
 /*
 	Now generate the impact ordering
 */
-doc = 0;
 for (current = stem_buffer; current < end; current++)
 	if (*current != 0)
 		{
-		doc = current - stem_buffer;
+		doc = current - stem_buffer + 1;
 		*pointer[*current]++ = doc - bucket_prev_docid[*current];		// because this list is difference encoded
 		bucket_prev_docid[*current] = doc;
 		}
@@ -616,6 +615,7 @@ for (bucket = 0; bucket < 0x100; bucket++)
 
 term_details->document_frequency = document_frequency;
 term_details->collection_frequency = collection_frequency;
+term_details->impacted_length = sum + 2 * buckets_used;
 }
 
 /*
