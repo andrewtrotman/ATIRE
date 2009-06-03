@@ -360,7 +360,7 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		*into++ = term_details->postings_length;
 		*into++ = term_details->impacted_length;
 		*into++ = 0;
-		term_details->impacted_length = term_details->document_frequency == 1 ? 4 : 7;
+		term_details->impacted_length = term_details->document_frequency == 1 ? 3 : 6;
 		}
 	else
 		{
@@ -758,7 +758,7 @@ now = stats->start_timer();
 #else
 	stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buffer);
 #endif
-stats->add_stemming_time(stats->stop_timer(now));
+stats->add_stemming_reencode_time(stats->stop_timer(now));
 
 /*
 	Finally do the relevance ranking as if it was a single search term

@@ -20,7 +20,7 @@ initialise();
 */
 void ANT_search_engine_stats::initialise(void)
 {
-stemming_time = dictionary_time = count_relevant_time = sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
+stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
 }
 
 /*
@@ -38,6 +38,7 @@ this->sort_time += which->sort_time;
 this->count_relevant_time += which->count_relevant_time;
 this->dictionary_time += which->dictionary_time;
 this->stemming_time += which->stemming_time;
+this->stemming_reencode_time += which->stemming_reencode_time;
 }
 
 /*
@@ -52,7 +53,10 @@ print_time("Accumulator Init Time :", accumulator_init_time);
 print_time("Dictionary Read Time  :", dictionary_time);
 print_time("Posting Disk Read Time:", posting_read_time);
 if (stemming_time != 0)
+	{
 	print_time("Stem Computation Time :", stemming_time);
+	print_time("Stem to Postings Time :", stemming_reencode_time);
+	}
 print_time("Decompress Time       :", decompress_time);
 print_time("Rank Time             :", rank_time);
 print_time("Sort Time             :", sort_time);
@@ -67,6 +71,7 @@ sum += rank_time;
 sum += sort_time;
 sum += count_relevant_time;
 sum += stemming_time;
+sum += stemming_reencode_time;
 
 print_time("Total Time to Search  :", sum);
 

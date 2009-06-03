@@ -21,7 +21,8 @@ public:
 	long long sort_time;
 	long long count_relevant_time;
 	long long dictionary_time;
-	long long stemming_time;
+	long long stemming_time;				// time taken to do stemming (except re-convert into a postings list)
+	long long stemming_reencode_time;		// time taken to convert from the stemming tf array into a postings list
 
 public:
 	ANT_search_engine_stats(ANT_memory *memory) ;
@@ -39,6 +40,7 @@ public:
 	void add_count_relevant_documents(long long time) { count_relevant_time += time; }
 	void add_dictionary_lookup_time(long long time) { dictionary_time += time; }
 	void add_stemming_time(long long time) { stemming_time += time; }
+	void add_stemming_reencode_time(long long time) { stemming_reencode_time += time; }
 } ;
 
 #endif __SEARCH_ENGINE_STATS_H__
