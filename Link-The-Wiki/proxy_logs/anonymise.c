@@ -23,21 +23,32 @@ void SHA1Input(SHA1Context*, const unsigned char*, unsigned);
 
 // End headers for SHA1 algorithm.
 
-
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define MAX_STR_LEN 1024
 
 int main(int argc, char *argv[]) {
 	SHA1Context sha;
 	
-	char user[MAX_STR_LEN+1], time[MAX_STR_LEN+1], method[MAX_STR_LEN+1],
+	char user[MAX_STR_LEN+1], timestamp[MAX_STR_LEN+1], method[MAX_STR_LEN+1],
 	     url[MAX_STR_LEN+1], protocol[MAX_STR_LEN+1];
 	
 	int status, bytes;
 	int param;
-	
+        int ch;
+
+        // Generate a long random string to concatenate to each username before hashing it.
+        // This means that we can't find which log entries belong to a known username.
+        srand(time(NULL));
+        char rand_str[MAX_STR_LEN+1];
+        for (ch = 0; ch<MAX_STR_LEN; ch++) {
+           rand_str[ch] = 'a' + (rand()%26);
+        }
+        rand_str[MAX_STR_LEN] = '\0';
+
 	for (param = 1; param < argc; param++) {
 		
 		FILE *infile = fopen(argv[param], "r");
@@ -60,7 +71,7 @@ int main(int argc, char *argv[]) {
 		   <hashed username> <HTTP method> <URL> <HTTP status> <bytes received> <timestamp (DD/Mon/YYYY:HH:MM:SS)> <original log filename>
 		 */
 		while (fscanf(infile, "%*s - %1024s [%1024s %*s \"%1024s %1024s %*s %d %d %*s\n",
-					  user, time, method, url, &status, &bytes) != EOF) {
+					  user, timestamp, method, url, &status, &bytes) != EOF) {
 			
 			// If the log gives the username as "-", this usually means the request failed, so we'll ignore it.
 			// Also, we're only interested in requests for Wikipedia pages.
@@ -69,7 +80,8 @@ int main(int argc, char *argv[]) {
 				// Calculate and print the SHA1 hash of the username.
 				SHA1Reset(&sha);
 				SHA1Input(&sha, (unsigned char*)user, strlen(user));
-					
+                                SHA1Input(&sha, (unsigned char*)rand_str, MAX_STR_LEN);
+
 				if (!SHA1Result(&sha)) {
 					fprintf(outfile, "sha_error");
 				}else{
@@ -79,7 +91,7 @@ int main(int argc, char *argv[]) {
 							sha.Message_Digest[4]);
 				}
 				
-				fprintf(outfile, " %s %s %d %d %s %s\n", method, url, status, bytes, time, argv[param]);
+				fprintf(outfile, " %s %s %d %d %s %s\n", method, url, status, bytes, timestamp, argv[param]);
 				
 			}
 		}

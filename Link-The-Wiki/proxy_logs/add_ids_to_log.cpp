@@ -44,10 +44,6 @@ int main(int argc, char *argv[]) {
 	char **lines = disk.buffer_to_list(file, &num_lines_ll);
 	num_lines = (int)num_lines_ll;
 	
-	printf("%d\n", num_lines);
-	
-	//num_lines = 100;
-
 	article_info *articles = (article_info*)malloc(sizeof *articles * (int)num_lines);
 
 	int count = 0;
