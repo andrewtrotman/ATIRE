@@ -38,3 +38,12 @@ The current contents of the directory are:
       If a URL doesn't match the regular expression, it is ignored, as
       it is assumed to be a request for something other than a
       Wikipedia article.
+
+    - add_links_to_log.cpp: takes a list of links (not necessarily
+      sorted) in the format "source_id:target_id:anchor_text", and a
+      log file (in the format given by the add_ids_to_log program) and
+      tries to work out which links were clicked to produce the
+      requests in the log. This currently works by loading the whole
+      list of links into memory, which means that it has trouble with
+      the 2009 Wikipedia collection, whose link-list alone takes up
+      about 2GB.
