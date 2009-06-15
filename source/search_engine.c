@@ -31,6 +31,7 @@
 */
 ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
+int32_t four_byte;
 unsigned char *block;
 long long end, term_header, this_header_block_size, sum, current_length, pointer;
 long postings_buffer_length;
@@ -56,8 +57,10 @@ end = index->file_length();
 index->seek(end - sizeof(term_header) - sizeof(string_length_of_longest_term) - sizeof(postings_buffer_length) - sizeof(highest_df));
 
 index->read(&term_header);
-index->read(&string_length_of_longest_term);
-index->read(&postings_buffer_length);
+index->read(&four_byte);
+string_length_of_longest_term = four_byte;
+index->read(&four_byte);
+postings_buffer_length = four_byte;
 index->read(&highest_df);
 
 /*
