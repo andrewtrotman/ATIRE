@@ -40,7 +40,7 @@ private:
 	ANT_search_engine_posting posting;
 	long long max_header_block_size;
 	long string_length_of_longest_term;
-	long long highest_df;
+	int64_t highest_df;
 	long *stem_buffer;
 	ANT_compressable_integer *decompress_buffer;
 	long long stem_buffer_length_in_bytes;

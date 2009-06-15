@@ -33,7 +33,7 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
 int32_t four_byte;
 unsigned char *block;
-long long end, term_header, this_header_block_size, sum, current_length, pointer;
+int64_t end, term_header, this_header_block_size, sum, current_length, pointer;
 long postings_buffer_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
