@@ -37,11 +37,8 @@ public:
 	long write(unsigned char *data, long long size);
 	long long puts(char *string);
 	long read(unsigned char *data, long long size);
-	long read(long long *data) { return read((unsigned char *)data, sizeof(long long)); }
-	long read(long *data) { return read((unsigned char *)data, sizeof(long)); }
-#ifndef _MSC_VER
+	long read(int64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(int32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
-#endif
 	long long tell(void);
 	void seek(long long offset_from_start_of_file);
 	long long file_length(void);
