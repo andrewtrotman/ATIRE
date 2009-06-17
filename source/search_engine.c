@@ -287,7 +287,7 @@ long leaf_size;
 unsigned char *base;
 
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
-base = leaf + leaf_size * term_in_leaf + sizeof(long);		// sizeof(long) is for the number of terms in the node
+base = leaf + leaf_size * term_in_leaf + sizeof(int32_t);		// sizeof(long) is for the number of terms in the node
 term_details->collection_frequency = get_long(base);
 term_details->document_frequency = get_long(base + 4);
 term_details->postings_position_on_disk = get_long_long(base + 8);
