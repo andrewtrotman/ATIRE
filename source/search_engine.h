@@ -47,8 +47,8 @@ private:
 	ANT_compression_factory factory;
 
 private:
-	long long get_long_long(unsigned char *from) { return *((long long *)from); }
-	long get_long(unsigned char *from) { return *((long *)from); }
+	long long get_long_long(unsigned char *from) { return *((int64_t *)from); }
+	long get_long(unsigned char *from) { return *((int32_t *)from); }
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 
 protected:
