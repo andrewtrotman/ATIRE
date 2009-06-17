@@ -32,8 +32,9 @@
 ANT_search_engine::ANT_search_engine(ANT_memory *memory)
 {
 int32_t four_byte;
+int64_t eight_byte;
 unsigned char *block;
-int64_t end, term_header, this_header_block_size, sum, current_length, pointer;
+long long end, term_header, this_header_block_size, sum, current_length, pointer;
 long postings_buffer_length;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
@@ -54,14 +55,19 @@ if (index->open("index.aspt", "rb") == 0)
 	long long: the maximum number of postings in a postings list (the highest DF)
 */
 end = index->file_length();
-index->seek(end - sizeof(term_header) - sizeof(string_length_of_longest_term) - sizeof(postings_buffer_length) - sizeof(highest_df));
+index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte));
 
-index->read(&term_header);
+index->read(&eight_byte);
+term_header = eight_byte;
+
 index->read(&four_byte);
 string_length_of_longest_term = four_byte;
+
 index->read(&four_byte);
 postings_buffer_length = four_byte;
-index->read(&highest_df);
+
+index->read(&eight_byte);
+highest_df = eight_byte;
 
 /*
 	Load the B-tree header
