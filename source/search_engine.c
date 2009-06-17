@@ -78,11 +78,11 @@ block = (unsigned char *)memory->malloc((long)(end - term_header));
 index->read(block, (long)(end - term_header));
 
 /*
-	The first sizeof(long long) bytes of the header are the number of nodes in the root
+	The first sizeof(int64_t) bytes of the header are the number of nodes in the root
 */
 btree_nodes = (long)(get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
 //printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
-block += sizeof(long long);
+block += sizeof(int64_t);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 
 /*
@@ -287,7 +287,7 @@ long leaf_size;
 unsigned char *base;
 
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
-base = leaf + leaf_size * term_in_leaf + sizeof(int32_t);		// sizeof(long) is for the number of terms in the node
+base = leaf + leaf_size * term_in_leaf + sizeof(int32_t);		// sizeof(int32_t) is for the number of terms in the node
 term_details->collection_frequency = get_long(base);
 term_details->document_frequency = get_long(base + 4);
 term_details->postings_position_on_disk = get_long_long(base + 8);
