@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([ANT], [0.0.3], [BUG-REPORT-ADDRESS])
+AC_INIT([ANT], [0.3], [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([source/ant_param_block.c])
 #AC_CONFIG_HEADERS([config.h])
 
