@@ -42,12 +42,14 @@ bool ANT_encoding_utf8::is_valid_char(unsigned char* c)
 	if ((0 <= *c && *c <= 0x7F))
 		return ANT_isalpha(*c);
 
-	int bytes = test_utf8char(c);
+	bytes = test_utf8char(c);
 	if (bytes > 0) {
 		unsigned int codepoint = to_codepoint(c);
 
-		if (is_chinese_codepoint(c))
+		if (is_chinese_codepoint(c)) {
+			current_lang = CHINESE;
 			return true;
+		}
 	}
 	return false;
 }

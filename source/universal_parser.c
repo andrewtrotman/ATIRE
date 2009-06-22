@@ -25,10 +25,10 @@ ANT_string_pair *ANT_universal_parser::get_next_token(void)
 {
 unsigned char *start;
 
-while (!isheadchar(*current))
+while (!isheadchar(current))
 	current++;
 
-if (ANT_isalpha(*current))				// alphabetic strings
+if (enc->is_valid_char(current))				// alphabetic strings
 	{
 	*current = ANT_tolower(*current);
 	start = current++;
