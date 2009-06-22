@@ -10,7 +10,7 @@
 
 class ANT_parser
 {
-private:
+protected:
 	unsigned char *document;
 	unsigned char *current;
 	ANT_string_pair current_token;
@@ -26,7 +26,7 @@ public:
 	static int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
 
 	void set_document(unsigned char *document);
-	ANT_string_pair *get_next_token(void);
+	virtual ANT_string_pair *get_next_token(void);
 } ;
 
 #endif __PARSER_H__
