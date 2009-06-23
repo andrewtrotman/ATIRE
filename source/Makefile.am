@@ -10,7 +10,10 @@ CC = g++
 #BINDIR = 
 
 library_sources =  \
+	encoding.c \
+	encoding_factory.c \
 	parser.c \
+	universal_parser.c \
     memory_index_hash_node.c \
     memory_index.c \
     memory_index_stats.c \

@@ -27,8 +27,12 @@ public:
 	long logo;							// display (or suppress) the banner on startup
 	long long reporting_frequency;		// the number of documents to index before reporting the memory usage stats
 
+	long segmentation;
+	unsigned long encoding_scheme;
+
 protected:
 	void compression(char *schemes);
+	void encoding(char *schemes);
 	void stats(char *stat_list);
 
 public:

@@ -6,19 +6,18 @@
  */
 
 #include "universal_parser.h"
-#include "encoding_factory.h"
 
-ANT_universal_parser::ANT_universal_parser(ANT_encoding::encoding what_encoding
+ANT_universal_parser::ANT_universal_parser(ANT_encoding_factory::encoding what_encoding
 											, bool by_char_or_word) :
-		ANT_parse::ANT_parse(), tokentype(by_char_or_word);
+		ANT_parser::ANT_parser(), tokentype(by_char_or_word)
 {
-	enc = encoding_factory::gen_encoding_scheme(what_encoding);
+	enc = ANT_encoding_factory::gen_encoding_scheme(what_encoding);
 }
 
 ANT_universal_parser::ANT_universal_parser() :
-		ANT_parse::ANT_parse(), tokentype(true);
+		ANT_parser::ANT_parser(), tokentype(true)
 {
-	enc = encoding_factory::gen_encoding_scheme(encoding_factory::ASCII);
+	enc = ANT_encoding_factory::gen_encoding_scheme(ANT_encoding_factory::ASCII);
 }
 
 ANT_universal_parser::~ANT_universal_parser()
@@ -37,9 +36,9 @@ void ANT_universal_parser::store_token(unsigned char *start)
 //		if (enc->lang() == ANT_encoding::CHINESE) {
 //
 //		}
-		while (enc->is_valid_char(*current))
+		while (enc->is_valid_char(current))
 			{
-			*current = enc->tolower(*current);
+			enc->tolower(current);
 			move2nextchar();
 			}
 	}
@@ -57,10 +56,10 @@ while (!isheadchar(current))
 
 if (enc->is_valid_char(current))				// alphabetic strings for all languages
 	{
-	enc->tolower(*current);
+	enc->tolower(current);
 	start = current;
 	move2nextchar();
-	store_token();
+	store_token(start);
 	}
 else if (ANT_isdigit(*current))				// numbers
 	{
@@ -80,7 +79,7 @@ else											// everything else (that starts with a '<')
 		{
 		while (isXMLnamechar(*current))
 			{
-			enc->tohigher(*current);
+			enc->toupper(current);
 			current++;
 			}
 		current_token.start = (char *)start;

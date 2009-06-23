@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include "indexer_param_block.h"
 #include "compression_factory.h"
+#include "encoding_factory.h"
 #include "version.h"
 
 #ifndef FALSE
@@ -25,7 +26,7 @@ ANT_indexer_param_block::ANT_indexer_param_block(int argc, char *argv[])
 {
 this->argc = argc;
 this->argv = argv;
-trec_docnos = recursive = FALSE;
+trec_docnos = recursive = segmentation = FALSE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
 statistics = 0;
@@ -90,6 +91,17 @@ puts("   v            Variable Byte (bytewise) [default]");
 puts("-vc             Validate compression (and report decompression rates)");
 puts("");
 
+puts("ENCODING");
+puts("-----------");
+puts("-e[u] decode the input text using one of encodings:");
+puts("   u            UTF8 encoding");
+puts("");
+
+puts("SEGMENTATION(EAST-ASIAN LANGUAGES ONLY)");
+puts("-----------");
+puts("-S	          segment the text into meaningful words");
+puts("");
+
 puts("REPORTING");
 puts("---------");
 puts("-N<n>           Report time and memory every <n> documents [default -N0]");
@@ -129,6 +141,22 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 		case 'S': compression_scheme |= ANT_compression_factory::SIGMA; break;
 		case 'v': compression_scheme |= ANT_compression_factory::VARIABLE_BYTE; break;
 		default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
+		}
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK::COMPRESSION()
+	--------------------------------------
+*/
+void ANT_indexer_param_block::encoding(char *scheme_list)
+{
+char *scheme;
+
+for (scheme = scheme_list; *scheme != '\0'; scheme++)
+	switch (*scheme)
+		{
+		case 'u': encoding_scheme = ANT_encoding_factory::UTF8; break;
+		default : exit(printf("Unknown encoding scheme: '%c'\n", *scheme)); break;
 		}
 }
 
@@ -173,6 +201,8 @@ for (param = 1; param < argc; param++)
 			trec_docnos = TRUE;
 		else if (strcmp(command, "r") == 0)
 			recursive = TRUE;
+		else if (strcmp(command, "S") == 0)
+			segmentation = TRUE;
 		else if (strcmp(command, "?") == 0)
 			help();
 		else if (strcmp(command, "h") == 0)
@@ -189,6 +219,11 @@ for (param = 1; param < argc; param++)
 			{
 			compression_scheme = 0;
 			compression(command + 1);
+			}
+		else if (*command == 'e')
+			{
+			encoding_scheme = 0;
+			encoding(command + 1);
 			}
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;

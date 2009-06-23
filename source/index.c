@@ -8,6 +8,7 @@
 #include "directory_recursive_iterator.h"
 #include "file.h"
 #include "parser.h"
+#include "universal_parser.h"
 #include "memory.h"
 #include "memory_index.h"
 #include "indexer_param_block.h"
@@ -41,7 +42,7 @@ int main(int argc, char *argv[])
 ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
 ANT_disk *disk;
-ANT_parser parser;
+ANT_parser* parser;
 ANT_string_pair *token;
 unsigned char *file;
 long param, done_work;
@@ -79,6 +80,16 @@ else
 
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
+
+if (param_block.encoding_scheme == ANT_encoding_factory::UTF8)
+	{
+	if (param_block.segmentation)
+		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, true);
+	else
+		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, false);
+	}
+else
+	parser = new ANT_parser();
 
 current_file_length = bytes_indexed = 0;
 for (param = first_param; param < argc; param++)
@@ -118,8 +129,8 @@ for (param = first_param; param < argc; param++)
 		if (doc % param_block.reporting_frequency == 0)
 			report(doc, index, &stats, bytes_indexed);
 
-		parser.set_document(file);
-		while ((token = parser.get_next_token()) != NULL)
+		parser->set_document(file);
+		while ((token = parser->get_next_token()) != NULL)
 			{
 			if (param_block.trec_docnos && token->length() == 3 && strncmp(token->start, "DOC", 3) == 0)
 				{
@@ -159,6 +170,7 @@ stats.add_disk_output_time(stats.stop_timer(now));
 index->text_render(param_block.statistics);
 delete index;
 delete disk;
+delete parser;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{
