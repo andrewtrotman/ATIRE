@@ -10,7 +10,10 @@ CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O3 \
 CC = g++
 
 OBJECTS = \
-    parser.o \
+	encoding.c \
+	encoding_factory.c \
+	parser.c \
+	universal_parser.c \
     memory_index_hash_node.o \
     memory_index.o \
     memory_index_stats.o \

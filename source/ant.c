@@ -20,6 +20,7 @@
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
+#include "encoding.h"
 #include "version.h"
 
 #ifndef FALSE
@@ -41,7 +42,7 @@ private:
 	char query[1024];
 
 public:
-	ANT_ANT_file_iterator(char *filename) 
+	ANT_ANT_file_iterator(char *filename)
 		{
 		if (filename == NULL)
 			fp = stdin;
@@ -72,6 +73,11 @@ ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 ANT_stemmer *stemmer;
 
+/**
+ * make the utf8 as the default input encoding
+ */
+ANT_encoding_utf8 utf8_enc;
+
 /*
 	if we're stemming then create the stemmer object
 */
@@ -88,13 +94,21 @@ token_end = query;
 while (*token_end != '\0')
 	{
 	token_start = token_end;
-	while (!ANT_isalnum(*token_start) && *token_start != '\0')
+	/*while (!ANT_isalnum(*token_start) && *token_start != '\0')
+		token_start++;*/
+	while (!utf8_enc.is_valid_char((unsigned char*)token_start) && *token_start != '\0')
 		token_start++;
 	if (*token_start == '\0')
 		break;
 	token_end = token_start;
-	while (ANT_isalnum(*token_end) || *token_end == '+')
-		token_end++;
+	/*while (ANT_isalnum(*token_end) || *token_end == '+')
+		token_end++;*/
+	while (utf8_enc.is_valid_char((unsigned char*)token_end) || *token_end == '+') {
+		if (*token_end == '+')
+			token_end++;
+		else
+			token_end += utf8_enc.howmanybytes();
+	}
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
 	token_length = token_end - token_start;
@@ -134,10 +148,12 @@ if (did_query && params->stats & ANT_ANT_param_block::QUERY)
 	Compute average previsions
 */
 if (map != NULL)
+	{
 	if (params->metric == ANT_ANT_param_block::MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
 	else
 		average_precision = map->average_generalised_precision(topic_id, search_engine);
+	}
 
 /*
 	Return the number of document that matched the user's query
@@ -321,7 +337,7 @@ if (argc == 4)
 	extern double BM25_k1;
 	extern double BM25_b;
 
-	outfile = fopen(argv[3], "wb"); 
+	outfile = fopen(argv[3], "wb");
 	fprintf(outfile, "%f ", 0.0);
 	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
 		fprintf(outfile, "%f ", BM25_b);

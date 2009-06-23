@@ -33,6 +33,10 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib
 #
 PARTS = \
 	$(OBJDIR)\parser.obj 						\
+	$(OBJDIR)\encoding.obj 						\
+	$(OBJDIR)\encoding_factory.obj 				\
+	$(OBJDIR)\parser.obj 						\
+	$(OBJDIR)\universal_parser.obj 				\	
 	$(OBJDIR)\memory_index_hash_node.obj		\
 	$(OBJDIR)\memory_index.obj 					\
 	$(OBJDIR)\memory_index_stats.obj			\

@@ -149,7 +149,7 @@ for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 
 /*
-	Here we allocate space for the decompressed postings.  Although it might appear as though 
+	Here we allocate space for the decompressed postings.  Although it might appear as though
 	you only need enough space for the longest postings list, the lists can get longer than that
 	due to stemming.  Space for each document is, therefore, needed.
 */
@@ -463,7 +463,7 @@ while (current < end)
 #ifdef FIT_BM25
 	double BM25_k1;
 	double BM25_b;
-#endif 
+#endif
 void ANT_search_engine::relevance_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
 {
 #ifdef FIT_BM25
@@ -487,7 +487,7 @@ docid = -1;
 	IDF = log -----------
 	            n + 0.5
 
-	It is not clear from the BM25 papers what log-base should be used, so this implementation uses the natural log of x.  
+	It is not clear from the BM25 papers what log-base should be used, so this implementation uses the natural log of x.
 */
 idf = log(((double)documents - (double)term_details->document_frequency + 0.5) / ((double)term_details->document_frequency + 0.5));
 #endif
@@ -497,7 +497,7 @@ idf = log(((double)documents - (double)term_details->document_frequency + 0.5) /
 	IDF = log -
 	          n
 
-	This variant of IDF is better than that above on the 70 INEX 2008 Wikipedia topics 
+	This variant of IDF is better than that above on the 70 INEX 2008 Wikipedia topics
 */
 idf = log((double)(documents) / (double)term_details->document_frequency);
 
