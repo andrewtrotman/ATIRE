@@ -89,14 +89,17 @@ else											// everything else (that starts with a '<')
 			current++;
 			}
 		}
-	else 
+	else
 		{
 		if (*current == '/')					// </tag>	(XML Close tag)
 			while (*current != '>')
 				current++;
 		else if (*current == '?')					// <? ... ?> (XML Processing Instructions)
+			{
+			current++; // current has to move to next character before we do the comparison again
 			while (*current != '?' && *(current + 1) != '>')
 				current++;
+			}
 		else if (*current == '!')				// <! ... > (
 			{
 			if (*(current + 1) == '-' && *(current + 2) == '-')		// <!-- /// --> (XML Comment)

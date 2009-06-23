@@ -39,8 +39,10 @@ int ANT_encoding_utf8::test_utf8char(unsigned char* c)
 
 bool ANT_encoding_utf8::is_valid_char(unsigned char* c)
 {
-	if ((0 <= *c && *c <= 0x7F))
+	if ((0 <= *c && *c <= 0x7F)) {
+		current_lang = ENGLISH;
 		return ANT_isalpha(*c);
+	}
 
 	bytes = test_utf8char(c);
 	if (bytes > 0) {

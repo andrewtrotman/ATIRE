@@ -150,9 +150,11 @@ bin_PROGRAMS = ant index
 
 ant_SOURCES = ant.c
 ant_LDADD = -L${OBJDIR} -lant
+ant_DEPENDENCIES = libant.la
 
 index_SOURCES = index.c
 index_LDADD = -L${OBJDIR} -lant
+index_DEPENDENCIES = libant.la
 
 
 

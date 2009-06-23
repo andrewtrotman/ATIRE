@@ -10,7 +10,7 @@
 
 class ANT_encoding {
 public:
-	enum language { ENGLISH, CHINESE }; // supported languages
+	enum language { UNKNOWN, ENGLISH, CHINESE }; // supported languages
 
 protected:
 	language 	current_lang;
@@ -20,6 +20,13 @@ public:
 	ANT_encoding() : current_lang(ENGLISH), bytes(0) {}
 	virtual ~ANT_encoding() {}
 	virtual bool is_valid_char(unsigned char* c) = 0;
+	virtual void tolower(unsigned char* c) = 0;
+	virtual void tohigher(unsigned char* c) = 0;
+
+	size_t bytes() { return bytes; }
+	language lang() { return current_lang; }
+
+	bool is_english() { return current_lang == ENGLISH; }
 };
 
 
@@ -36,7 +43,7 @@ public:
 
 inline bool ANT_encoding_ascii::is_valid_char(unsigned char* c) { return ANT_isalpha(*c); }
 inline void ANT_encoding_ascii::tolower(unsigned char* c) { if ((*c) >= 'A' && (*c) <= 'Z') *c = ANT_tolower(*c); }
-inline void ANT_encoding_ascii::tohigher(unsigned char* c) { if ((*c) >= 'a' && (*c) <= 'z') *c = ANT_tohigher(c); }
+inline void ANT_encoding_ascii::tohigher(unsigned char* c) { if ((*c) >= 'a' && (*c) <= 'z') *c = ANT_tohigher(*c); }
 
 
 class ANT_encoding_utf8 : public ANT_encoding_ascii {

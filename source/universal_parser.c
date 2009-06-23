@@ -8,17 +8,44 @@
 #include "universal_parser.h"
 #include "encoding_factory.h"
 
-ANT_universal_parser::ANT_universal_parser(ANT_encoding::encoding what_encoding) :
-		ANT_parse::ANT_parse()
+ANT_universal_parser::ANT_universal_parser(ANT_encoding::encoding what_encoding
+											, bool by_char_or_word) :
+		ANT_parse::ANT_parse(), tokentype(by_char_or_word);
 {
 	enc = encoding_factory::gen_encoding_scheme(what_encoding);
 }
 
+ANT_universal_parser::ANT_universal_parser() :
+		ANT_parse::ANT_parse(), tokentype(true);
+{
+	enc = encoding_factory::gen_encoding_scheme(encoding_factory::ASCII);
+}
 
 ANT_universal_parser::~ANT_universal_parser()
 {
 	if (enc != NULL)
 		delete enc;
+}
+
+void ANT_universal_parser::store_token(unsigned char *start)
+{
+	if (tokentype || enc->is_english()) {
+
+		/** TODO Chinese segmentation
+		 *
+		 */
+//		if (enc->lang() == ANT_encoding::CHINESE) {
+//
+//		}
+		while (enc->is_valid_char(*current))
+			{
+			*current = enc->tolower(*current);
+			move2nextchar();
+			}
+	}
+
+	current_token.start = (char *)start;
+	current_token.string_length = current - start;
 }
 
 ANT_string_pair *ANT_universal_parser::get_next_token(void)
@@ -28,18 +55,12 @@ unsigned char *start;
 while (!isheadchar(current))
 	current++;
 
-if (enc->is_valid_char(current))				// alphabetic strings
+if (enc->is_valid_char(current))				// alphabetic strings for all languages
 	{
-	*current = ANT_tolower(*current);
-	start = current++;
-	while (ANT_isalpha(*current))
-		{
-		*current = ANT_tolower(*current);
-		current++;
-		}
-
-	current_token.start = (char *)start;
-	current_token.string_length = current - start;
+	enc->tolower(*current);
+	start = current;
+	move2nextchar();
+	store_token();
 	}
 else if (ANT_isdigit(*current))				// numbers
 	{
@@ -59,7 +80,7 @@ else											// everything else (that starts with a '<')
 		{
 		while (isXMLnamechar(*current))
 			{
-			*current = ANT_toupper(*current);
+			enc->tohigher(*current);
 			current++;
 			}
 		current_token.start = (char *)start;
@@ -82,8 +103,11 @@ else											// everything else (that starts with a '<')
 			while (*current != '>')
 				current++;
 		else if (*current == '?')					// <? ... ?> (XML Processing Instructions)
+			{
+			current++; // current has to move to next character before we do the comparison again
 			while (*current != '?' && *(current + 1) != '>')
 				current++;
+			}
 		else if (*current == '!')				// <! ... > (
 			{
 			if (*(current + 1) == '-' && *(current + 2) == '-')		// <!-- /// --> (XML Comment)
@@ -98,3 +122,6 @@ else											// everything else (that starts with a '<')
 	}
 
 return &current_token;
+}
+
+
