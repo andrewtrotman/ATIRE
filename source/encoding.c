@@ -40,9 +40,14 @@ int ANT_encoding_utf8::test_utf8char(unsigned char* c)
 bool ANT_encoding_utf8::is_valid_char(unsigned char* c)
 {
 	if ((0 <= *c && *c <= 0x7F)) {
-		current_lang = ENGLISH;
+		bool alpha = ANT_isalpha(*c);
+
+		if (alpha)
+			current_lang = ENGLISH;
+		else
+			current_lang = ASCIICHAR;
 		bytes = 1;
-		return ANT_isalpha(*c);
+		return current_lang == ENGLISH;
 	}
 
 	bytes = test_utf8char(c);
@@ -54,6 +59,7 @@ bool ANT_encoding_utf8::is_valid_char(unsigned char* c)
 			return true;
 		}
 	}
+	current_lang = UNKNOWN;
 	return false;
 }
 

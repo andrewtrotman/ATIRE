@@ -13,7 +13,7 @@
 
 class ANT_encoding {
 public:
-	enum language { UNKNOWN, ENGLISH, CHINESE }; // supported languages
+	enum language { UNKNOWN, ASCIICHAR, ENGLISH, CHINESE }; // supported languages
 
 protected:
 	language 	current_lang;

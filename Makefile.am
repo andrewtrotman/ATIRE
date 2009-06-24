@@ -5,8 +5,13 @@ SRCDIR = source
 
 AM_LDFLAGS = @LIBS@
 
-AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-       -Wno-endif-labels -Wno-missing-braces
+# using HEADER HASH FUNCTION
+#AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+#       -Wno-endif-labels -Wno-missing-braces
+       
+# using RANDOM HASH FUNCTION       
+AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DRANDOM_HASHER=1 \
+       -Wno-endif-labels -Wno-missing-braces       
 
 CC = g++
 

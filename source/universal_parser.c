@@ -9,13 +9,13 @@
 
 ANT_universal_parser::ANT_universal_parser(ANT_encoding_factory::encoding what_encoding
 											, bool by_char_or_word) :
-		ANT_parser::ANT_parser(), tokentype(by_char_or_word)
+		ANT_parser::ANT_parser(), tokentype(by_char_or_word), lang(lang = ANT_encoding::UNKNOWN)
 {
 	enc = ANT_encoding_factory::gen_encoding_scheme(what_encoding);
 }
 
 ANT_universal_parser::ANT_universal_parser() :
-		ANT_parser::ANT_parser(), tokentype(true)
+		ANT_parser::ANT_parser(), tokentype(true), lang(lang = ANT_encoding::UNKNOWN)
 {
 	enc = ANT_encoding_factory::gen_encoding_scheme(ANT_encoding_factory::ASCII);
 }
@@ -36,8 +36,9 @@ void ANT_universal_parser::store_token(unsigned char *start)
 //		if (enc->lang() == ANT_encoding::CHINESE) {
 //
 //		}
-		while (enc->is_valid_char(current))
+		while (enc->is_valid_char(current) && lang == enc->lang())
 			{
+			lang = enc->lang();
 			enc->tolower(current);
 			move2nextchar();
 			}
@@ -51,17 +52,20 @@ ANT_string_pair *ANT_universal_parser::get_next_token(void)
 {
 unsigned char *start;
 
-while (!isheadchar(current))
+int ret = NOTHEADCHAR;
+while ((ret = isheadchar(current)) == NOTHEADCHAR)
 	current++;
 
-if (enc->is_valid_char(current))				// alphabetic strings for all languages
+lang = enc->lang();
+
+if (ret == ALPHACHAR)				// alphabetic-like strings for all languages
 	{
 	enc->tolower(current);
 	start = current;
 	move2nextchar();
 	store_token(start);
 	}
-else if (ANT_isdigit(*current))				// numbers
+else if (ret == NUMBER)				// numbers
 	{
 	start = current++;
 	while (ANT_isdigit(*current))
@@ -70,7 +74,7 @@ else if (ANT_isdigit(*current))				// numbers
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (*current == '\0')						// end of string
+else if (ret == END)						// end of string
 	return NULL;
 else											// everything else (that starts with a '<')
 	{
