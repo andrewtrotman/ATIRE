@@ -10,10 +10,10 @@ CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O3 \
 CC = g++
 
 OBJECTS = \
-	encoding.c \
-	encoding_factory.c \
-	parser.c \
-	universal_parser.c \
+    encoding.o \
+    encoding_factory.o \
+    parser.o \
+    universal_parser.o \
     memory_index_hash_node.o \
     memory_index.o \
     memory_index_stats.o \
@@ -42,7 +42,7 @@ OBJECTS = \
     stop_word.o \
     disk.o \
     disk_internals.o \
-	directory_recursive_iterator.o \
+    directory_recursive_iterator.o \
     btree_iterator.o \
     top_k_sort.o \
     stemmer.o	\
@@ -52,18 +52,18 @@ OBJECTS = \
     paice_husk.o \
     learned_wikipedia_stem.o \
     relevant_topic.o \
-	bitstream.o \
-	compress_elias_gamma.o \
-	compress_elias_delta.o \
-	compress_golomb.o \
-	compress_simple9.o \
-	compress_relative10.o \
-	compress_carryover12.o \
-	compress_variable_byte.o \
-	compress_none.o \
-	compress_sigma.o \
-	compression_factory.o \
-	indexer_param_block.o \
+    bitstream.o \
+    compress_elias_gamma.o \
+    compress_elias_delta.o \
+    compress_golomb.o \
+    compress_simple9.o \
+    compress_relative10.o \
+    compress_carryover12.o \
+    compress_variable_byte.o \
+    compress_none.o \
+    compress_sigma.o \
+    compression_factory.o \
+    indexer_param_block.o \
     ant_param_block.o \
     version.o
 
