@@ -126,14 +126,14 @@ unsigned long ans;
 size_t len;
 const long base = 37;
 
-ans = (ANT_header_hash_encode[string->string()[0]]) * base * base * base;
+ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
 
 if ((len = string->length()) > 1)
-	ans += (ANT_header_hash_encode[string->string()[1]]) * base * base;
+	ans += (ANT_header_hash_encode[(*string)[1]]) * base * base;
 if (len > 2)
-	ans += (ANT_header_hash_encode[string->string()[2]]) * base;
+	ans += (ANT_header_hash_encode[(*string)[2]]) * base;
 if (len > 3)
-	ans += (ANT_header_hash_encode[string->string()[3]]);
+	ans += (ANT_header_hash_encode[(*string)[3]]);
 
 ans += (string->length() & 0x07) << 21;	// top 3 bits are the length
 

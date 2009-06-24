@@ -19,8 +19,8 @@ MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 -DANT_TOP_K=1
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D)
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
+CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D)
+#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
 CC = @cl
 
 #
@@ -32,11 +32,10 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib
 #	Objects
 #
 PARTS = \
-	$(OBJDIR)\parser.obj 						\
 	$(OBJDIR)\encoding.obj 						\
 	$(OBJDIR)\encoding_factory.obj 				\
 	$(OBJDIR)\parser.obj 						\
-	$(OBJDIR)\universal_parser.obj 				\	
+	$(OBJDIR)\universal_parser.obj 				\
 	$(OBJDIR)\memory_index_hash_node.obj		\
 	$(OBJDIR)\memory_index.obj 					\
 	$(OBJDIR)\memory_index_stats.obj			\
@@ -88,7 +87,8 @@ PARTS = \
 	$(OBJDIR)\compression_factory.obj			\
 	$(OBJDIR)\indexer_param_block.obj			\
 	$(OBJDIR)\ant_param_block.obj				\
-	$(OBJDIR)\version.obj
+	$(OBJDIR)\version.obj					
+#	$(OBJDIR)\ranking_function_bm25.obj			
 
 #
 #	Targets

@@ -96,9 +96,7 @@ while (*token_end != '\0')
 	token_start = token_end;
 	/*while (!ANT_isalnum(*token_start) && *token_start != '\0')
 		token_start++;*/
-	while (!(utf8_enc.is_valid_char((unsigned char*)token_start)
-			|| ANT_isdigit(*token_start) )
-			&& *token_start != '\0')
+	while (!(utf8_enc.is_valid_char((unsigned char*)token_start) || ANT_isdigit(*token_start))	&& *token_start != '\0')
 		token_start++;
 	if (*token_start == '\0')
 		break;
@@ -106,9 +104,7 @@ while (*token_end != '\0')
 	/*while (ANT_isalnum(*token_end) || *token_end == '+')
 		token_end++;*/
 	int bytes = 0;
-	while (utf8_enc.is_valid_char((unsigned char*)token_end)
-			|| ANT_isdigit(*token_start)
-			|| *token_end == '+')
+	while (utf8_enc.is_valid_char((unsigned char*)token_end) || ANT_isdigit(*token_end) || *token_end == '+')
 		{
 		bytes = utf8_enc.howmanybytes();
 		if (bytes > 0)

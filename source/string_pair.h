@@ -22,7 +22,7 @@ public:
 	ANT_string_pair() {}
 	ANT_string_pair(char *source, long len) : start(source), string_length(len) {}
 
-	char operator[](long pos) { return start[pos]; }
+	unsigned char operator[](long pos) { return (unsigned char)start[pos]; }
 
 	size_t length(void) { return string_length; }
 	char *string(void) { return start; }

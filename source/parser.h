@@ -8,6 +8,9 @@
 #include "string_pair.h"
 #include "ctypes.h"
 
+/*
+	class ANT_PARSER
+*/
 class ANT_parser
 {
 protected:

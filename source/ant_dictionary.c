@@ -9,6 +9,10 @@
 #include "search_engine.h"
 #include "btree_iterator.h"
 #include "search_engine_btree_leaf.h"
+#ifdef _MSC_VER
+	#include <windows.h>
+	wchar_t wide[10 * 1024];	// buffer for storing wide character strings before printing them
+#endif
 
 /*
 	MAIN()
@@ -43,7 +47,20 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 	if (last_term != NULL && strcmp(last_term, term) < 0)
 		break;
 	else
-		printf("%s %lld %d\n", term, leaf.collection_frequency, leaf.document_frequency);
+		{
+#ifdef _MSC_VER
+		/*
+			Convert into a wide string and print that as Windows printf() doesn't do UTF-8
+		*/
+		if (MultiByteToWideChar(CP_UTF8, 0, term, -1, wide, sizeof(wide)) == 0)
+			printf("FAIL ");
+		else
+			wprintf(L"%s ", wide);
+#else
+		printf("%s ", term);
+#endif
+		printf("%lld %d\n", leaf.collection_frequency, leaf.document_frequency);
+		}
 	}
 
 return 0;
