@@ -159,6 +159,11 @@ index_SOURCES = index.c
 index_LDADD = -L${OBJDIR} -lant
 index_DEPENDENCIES = libant.la
 
+noinst_PROGRAMS = ant_dictionary
 
+ant_dictionary_SOURCES = ant_dictionary.c \
+						btree_iterator.c \
+						memory.c \
+						search_engine.c 
 
 

@@ -44,7 +44,7 @@ AC_CHECK_FUNCS([getcwd gettimeofday memmove memset sqrt strchr strcspn strdup st
 #                 Makefile
 #                 source/Makefile
 #                 stemmer/Makefile])
-AC_CONFIG_FILES([Makefile
-				source/Makefile
+AC_CONFIG_FILES([
+				Makefile
 				])
 AC_OUTPUT
