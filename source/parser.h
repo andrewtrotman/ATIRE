@@ -28,7 +28,7 @@ public:
 	static int isXMLnamestartchar(unsigned char val) { return ANT_isalpha(val) || val == ':' || val == '_'; }		// see http://www.w3.org/TR/REC-xml/#NT-NameStartChar
 	static int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
 
-	void set_document(unsigned char *document);
+	virtual void set_document(unsigned char *document);
 	virtual ANT_string_pair *get_next_token(void);
 } ;
 

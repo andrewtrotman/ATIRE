@@ -11,7 +11,7 @@
 	ANT_UNIVERSAL_PARSER::ANT_UNIVERSAL_PARSER()
 	--------------------------------------------
 */
-ANT_universal_parser::ANT_universal_parser(ANT_encoding_factory::encoding what_encoding, bool by_char_or_word) : ANT_parser(), tokentype(by_char_or_word), lang(lang = ANT_encoding::UNKNOWN)
+ANT_universal_parser::ANT_universal_parser(ANT_encoding_factory::encoding what_encoding, bool by_char_or_word) : ANT_parser(), tokentype(by_char_or_word), current_lang(ANT_encoding::UNKNOWN)
 {
 enc = ANT_encoding_factory::gen_encoding_scheme(what_encoding);
 }
@@ -20,7 +20,7 @@ enc = ANT_encoding_factory::gen_encoding_scheme(what_encoding);
 	ANT_UNIVERSAL_PARSER::ANT_UNIVERSAL_PARSER()
 	--------------------------------------------
 */
-ANT_universal_parser::ANT_universal_parser() :	ANT_parser(), tokentype(true), lang(lang = ANT_encoding::UNKNOWN)
+ANT_universal_parser::ANT_universal_parser() :	ANT_parser(), tokentype(true), current_lang(ANT_encoding::UNKNOWN)
 {
 enc = ANT_encoding_factory::gen_encoding_scheme(ANT_encoding_factory::ASCII);
 }
@@ -40,7 +40,8 @@ delete enc;
 */
 void ANT_universal_parser::store_token(unsigned char *start)
 {
-if (tokentype || enc->is_english())
+ANT_encoding::language 		previous_lang = current_lang;
+if (tokentype || current_lang == ANT_encoding::ENGLISH)
 	{
 /*
 	TODO Chinese segmentation
@@ -48,16 +49,29 @@ if (tokentype || enc->is_english())
 //		if (enc->lang() == ANT_encoding::CHINESE) {
 //
 //		}
-	while (enc->is_valid_char(current) && lang == enc->lang())
+	while (is_current_valid_char() && current_lang == previous_lang)
 		{
-		lang = enc->lang();
+		previous_lang = current_lang;
 		enc->tolower(current);
 		move2nextchar();
 		}
 	}
 
+if (previous_lang == current_lang) // if the end of the token is not caused by the different language, we need to reset the variables
+	initialise();
+
 current_token.start = (char *)start;
 current_token.string_length = current - start;
+}
+
+/*
+	ANT_UNIVERSAL_PARSER::SET_DOCUMENT()
+	--------------------------
+*/
+void ANT_universal_parser::set_document(unsigned char *document)
+{
+initialise();
+this->document = current = document;
 }
 
 /*
@@ -67,21 +81,22 @@ current_token.string_length = current - start;
 ANT_string_pair *ANT_universal_parser::get_next_token(void)
 {
 unsigned char *start;
-int ret = NOTHEADCHAR;
 
-while ((ret = isheadchar(current)) == NOTHEADCHAR)
-	current++;
+// avoid the cost in double checking for current utf8 valid char where there are many mixes of characters for different languages,
+// e.g. linux[.], where [.] is a UTF-8 character in a language other than English
+if (current_char_idc != ALPHACHAR)
+	while ((current_char_idc = isheadchar(current)) == NOTHEADCHAR)
+		current++;
 
-lang = enc->lang();
-
-if (ret == ALPHACHAR)				// alphabetic-like strings for all languages
+if (current_char_idc == ALPHACHAR)				// alphabetic-like strings for all languages
 	{
+	current_lang = enc->lang();
 	enc->tolower(current);
 	start = current;
 	move2nextchar();
 	store_token(start);
 	}
-else if (ret == NUMBER)				// numbers
+else if (current_char_idc == NUMBER)				// numbers
 	{
 	start = current++;
 	while (ANT_isdigit(*current))
@@ -90,7 +105,7 @@ else if (ret == NUMBER)				// numbers
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (ret == END)						// end of string
+else if (current_char_idc == END)						// end of string
 	return NULL;
 else											// everything else (that starts with a '<')
 	{

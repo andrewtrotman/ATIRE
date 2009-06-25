@@ -15,7 +15,7 @@ class ANT_char {
 private:
 	ANT_encoding::language lang;
 	ANT_encoding* enc;
-	char* start;
+	char *start;
 	size_t bytes;
 
 public:

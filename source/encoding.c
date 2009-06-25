@@ -11,7 +11,7 @@
 	ANT_ENCODING_UTF8::TEST_UTF8CHAR()
 	----------------------------------
 */
-int ANT_encoding_utf8::test_utf8char(unsigned char* c)
+int ANT_encoding_utf8::test_utf8char(unsigned char *c)
 {
 int num_of_bytes = 0;
 unsigned char code = *c;
@@ -44,7 +44,7 @@ return num_of_bytes;
 	ANT_ENCODING_UTF8::IS_VALID_CHAR()
 	----------------------------------
 */
-long ANT_encoding_utf8::is_valid_char(unsigned char* c)
+long ANT_encoding_utf8::is_valid_char(unsigned char *c)
 {
 if (0 <= *c && *c <= 0x7F)
 	{
@@ -72,7 +72,7 @@ return false;
 	ANT_ENCODING_UTF8::TO_CODEPOINT()
 	---------------------------------
 */
-unsigned int ANT_encoding_utf8::to_codepoint(unsigned char* utf8_char)
+unsigned int ANT_encoding_utf8::to_codepoint(unsigned char *utf8_char)
 {
 const unsigned int br_c = 6;  // maximun bytes of utf8 encoding
 const unsigned int min_c = 128;
