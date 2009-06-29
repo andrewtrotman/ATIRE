@@ -6,6 +6,8 @@
 */
 
 #include "encoding_factory.h"
+#include "encoding_ascii.h"
+#include "encoding_utf8.h"
 
 /*
 	ANT_ENCODING_FACTORY::GEN_ENCODING_SCHEME()

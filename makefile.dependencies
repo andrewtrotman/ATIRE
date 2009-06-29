@@ -23,7 +23,7 @@ bin/ctypes.obj: source/ctypes.h
 bin/directory_recursive_iterator.obj: source/disk_internals.h source/disk_directory.h source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h
 bin/disk.obj: source/disk.h source/disk_internals.h source/disk_directory.h source/file_internals.h
 bin/disk_internals.obj: source/disk_internals.h
-bin/encoding.obj: source/encoding.h source/ctypes.h
+bin/encoding_utf8.obj: source/encoding.h source/ctypes.h
 bin/encoding_factory.obj: source/encoding_factory.h source/encoding.h source/ctypes.h
 bin/file.obj: source/file.h source/fundamental_types.h source/memory.h source/file_internals.h
 bin/file_internals.obj: source/file_internals.h

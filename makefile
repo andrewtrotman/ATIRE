@@ -32,7 +32,7 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib
 #	Objects
 #
 PARTS = \
-	$(OBJDIR)\encoding.obj 						\
+	$(OBJDIR)\encoding_utf8.obj 						\
 	$(OBJDIR)\encoding_factory.obj 				\
 	$(OBJDIR)\parser.obj 						\
 	$(OBJDIR)\universal_parser.obj 				\

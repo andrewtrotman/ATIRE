@@ -1,11 +1,11 @@
 /*
-	ENCODING.C
-	----------
+	ENCODING_UTF8.C
+	---------------
 	Created on: Jun 20, 2009
 	Author: monfee
 */
 
-#include "encoding.h"
+#include "encoding_utf8.h"
 
 /*
 	ANT_ENCODING_UTF8::TEST_UTF8CHAR()

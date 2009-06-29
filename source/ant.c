@@ -20,7 +20,7 @@
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
-#include "encoding.h"
+#include "encoding_utf8.h"
 #include "version.h"
 
 #ifndef FALSE

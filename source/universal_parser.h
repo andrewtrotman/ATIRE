@@ -9,6 +9,7 @@
 #define __UNIVERSAL_PARSER_H__
 
 #include "parser.h"
+#include "encoding.h"
 #include "encoding_factory.h"
 
 /*

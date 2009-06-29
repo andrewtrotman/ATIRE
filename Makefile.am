@@ -19,7 +19,7 @@ CC = g++
 #BINDIR = 
 
 library_sources =  \
-	$(SRCDIR)/encoding.c \
+	$(SRCDIR)/encoding_utf8.c \
 	$(SRCDIR)/encoding_factory.c \
 	$(SRCDIR)/parser.c \
 	$(SRCDIR)/universal_parser.c \

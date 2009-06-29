@@ -7,7 +7,7 @@
 #ifndef __ENCODING_FACTORY_H__
 #define __ENCODING_FACTORY_H__
 
-#include "encoding.h"
+class ANT_encoding;
 
 /*
 	class ANT_ENCODING_FACTORY
