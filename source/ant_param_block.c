@@ -38,6 +38,7 @@ run_name = participant_id = "unknown";
 output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT;
+segmentation = FALSE;
 }
 
 /*
@@ -109,6 +110,11 @@ puts("-o<filename>    Output filename for the run [default=ant.out]");
 puts("-i<id>          Forum participant id is <id> [default=unknown]");
 puts("-n<name>        Run is named <name> [default=unknown]");
 puts("-l<n>           Length of the results list [default=1500 for batch, default=10 for interactive)]");
+puts("");
+
+puts("SEGMENTATION(EAST-ASIAN LANGUAGES ONLY)");
+puts("-----------");
+puts("-S	          segment the query into meaningful words");
 puts("");
 
 puts("REPORTING");
@@ -251,6 +257,8 @@ for (param = 1; param < argc; param++)
 			results_list_length = atol(command + 1);
 		else if (*command == 's')
 			set_stats(command + 1);
+		else if (strcmp(command, "S") == 0)
+			segmentation = TRUE;
 		else
 			usage();
 		}
@@ -259,7 +267,7 @@ for (param = 1; param < argc; param++)
 	}
 
 /*
-	If we're in batch mode (a query file has been specified) then the default 
+	If we're in batch mode (a query file has been specified) then the default
 	length of the list of results is 1500.  If we're in interactive mode (no
 	query file specified) then the default length is 10.
 */

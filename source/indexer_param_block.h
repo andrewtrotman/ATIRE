@@ -27,8 +27,8 @@ public:
 	long logo;							// display (or suppress) the banner on startup
 	long long reporting_frequency;		// the number of documents to index before reporting the memory usage stats
 
-	long segmentation;
-	unsigned long encoding_scheme;
+	long segmentation;					// need segmentation or not for east-asian languages, e.g. Chinese
+	unsigned long encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 
 protected:
 	void compression(char *schemes);

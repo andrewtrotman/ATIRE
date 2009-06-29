@@ -33,6 +33,8 @@ public:
 	long results_list_length;	// length of the results list as exported
 	long stats;					// which stats to display
 
+	long segmentation;			// query segmentation need or not for east-asian languages, e.g. Chinese
+
 private:
 	void export_format(char *forum);
 	void term_expansion(char *which);

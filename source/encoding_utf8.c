@@ -46,7 +46,7 @@ return num_of_bytes;
 */
 long ANT_encoding_utf8::is_valid_char(unsigned char *c)
 {
-if (0 <= *c && *c <= 0x7F)
+if (0 <= *c && *c <= 0x7F) // ASCII characters
 	{
 	if (ANT_isalpha(*c))
 		current_lang = ENGLISH;
@@ -74,10 +74,11 @@ return false;
 */
 unsigned int ANT_encoding_utf8::to_codepoint(unsigned char *utf8_char)
 {
-const unsigned int br_c = 6;  // maximun bytes of utf8 encoding
+// Identifier with _c suffix mean that it is a constant variable
+const unsigned int max_bytes_c = 6;  // Maximum bytes of utf8 encoding for purpose of shifting into codepoint
 const unsigned int min_c = 128;
 const unsigned int max_c = 1;
-const unsigned int max_rest = 63;
+const unsigned int max_rest_c = 63; // for verification of validity of UTF8 byte
 unsigned int low_max = max_c;
 unsigned int high_min = min_c;
 int code = 0;
@@ -104,12 +105,12 @@ if (bytes <= 6 && bytes > 0)
 		for (i = 1; i < bytes; i++)
 			{
 			unsigned char b = utf8_char[i];
-			if (b < min_c || b > (min_c + max_rest))
+			if (b < min_c || b > (min_c + max_rest_c))
 				{
 				code = -2;
 				break;
 				}
-			code = code << br_c;
+			code = code << max_bytes_c;
 			code += (b - min_c);
 			}
 

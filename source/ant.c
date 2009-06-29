@@ -111,6 +111,12 @@ while (*token_end != '\0')
 			{
 			token_end += bytes;
 			bytes = 0;
+			if (!params->segmentation)
+				break;
+			/**
+			 * TODO Chinese segmentation on query
+			 */
+			//else
 			}
 		else
 			token_end++;
