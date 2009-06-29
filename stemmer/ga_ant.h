@@ -18,98 +18,8 @@
 #define NUM_OF_GENERATIONS 200
 #define POPULATION_SIZE 200
 
-/*
-	PERFORM_QUERY_W_STEMMER()
-	---------------
-	Taken almost verbatim from PERFORM_QUERY()
-*/
-double perform_query_w_stemmer(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL, ANT_stemmer *stemmer = NULL) {
-	ANT_time_stats stats;
-	long long now;
-	long did_query;
-	char token[1024];
-	char *token_start, *token_end;
-	long long hits;
-	size_t token_length;
-	ANT_search_engine_accumulator *ranked_list;
-	double average_precision = 0.0;
-
-	search_engine->stats_initialise();		// if we are command-line then report query by query stats
-
-	did_query = FALSE;
-	now = stats.start_timer();
-	search_engine->init_accumulators();
-
-	token_end = query;
-
-	while (*token_end != '\0')
-		{
-			token_start = token_end;
-			while (!ANT_isalnum(*token_start) && *token_start != '\0')
-				token_start++;
-			if (*token_start == '\0')
-				break;
-			token_end = token_start;
-			while (ANT_isalnum(*token_end) || *token_end == '+')
-				token_end++;
-			strncpy(token, token_start, token_end - token_start);
-			token[token_end - token_start] = '\0';
-			token_length = token_end - token_start;
-			//	strlwr(token);
-
-			/*
-			  process the next search term - either stemmed or not.
-			*/
-			if (stemmer == NULL)
-				search_engine->process_one_search_term(token);
-			else
-				search_engine->process_one_stemmed_search_term(stemmer, token);
-
-			did_query = TRUE;
-		}
-
-	/*
-	  Rank the results list
-	*/
-	ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // rank
-
-	/*
-	  Reporting
-	*/
-	if (params->stats & ANT_ANT_param_block::SHORT)
-		{
-			if (topic_id >= 0)
-				printf("Topic:%ld ", topic_id);
-			printf("Query '%s' found %lld documents ", query, hits);
-			stats.print_time("(", stats.stop_timer(now), ")");
-		}
-
-	if (did_query && params->stats & ANT_ANT_param_block::QUERY)
-		search_engine->stats_text_render();
-
-	/*
-	  Compute average previsions
-	*/
-	if (map != NULL)
-		if (params->metric == ANT_ANT_param_block::MAP)
-			average_precision = map->average_precision(topic_id, search_engine);
-		else
-			average_precision = map->average_generalised_precision(topic_id, search_engine);
-
-	/*
-	  Return the number of document that matched the user's query
-	*/
-	*matching_documents = hits;
-
-	/*
-	  Add the time it took to search to the global stats for the search engine
-	*/
-	search_engine->stats_add();
-	/*
-	  Return the precision
-	*/
-	return average_precision;
-}
+double perform_query(ANT_ANT_param_block *, ANT_search_engine *, char *, long long *, long, ANT_mean_average_precision *, ANT_stemmer *);
+char **get_queries(long *query_count, ANT_ANT_param_block *params);
 
 /*
   TRIE_TEST()
@@ -136,45 +46,47 @@ void trie_test(ANT_search_engine *search_engine) {
     stemmer per line. If it exists, then the GA will not be run, each stemmer will instead be run on the 
     queries.
 */
-void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_format) {
-	ANT_relevant_document *assessments;
-	char query[1024];
-	long line, *topic_ids = NULL;
-	long long documents_in_id_list, number_of_assessments;
-	ANT_memory memory;
-	FILE *fp;
-	char *query_text, **document_list;
-	char **all_queries = NULL;
+/*
+  TODO: make more like ANT(...)
+  TODO: be able to specify a stemmer.
+*/
+void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list, char *stemmer_file) {
+    char *query;
+	char **queries;
+    long query_count, i;
+	long *topic_ids;
+    ANT_search_engine_forum *output = NULL;
+    long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
+
 	GA *ga;
-	double *query_cache;
-
-	ANT_search_engine search_engine(&memory);
-
-	GA_stemmer *stemmer = new GA_stemmer(&search_engine);
+	GA_stemmer *stemmer = new GA_stemmer(search_engine);
 	GA_individual *ind = new GA_individual();
 	srand(time(NULL));
 
-	//	document_list = read_docid_list(&documents_in_id_list);
-	//	assessments = get_qrels(&memory, qrel_file, &number_of_assessments, qrel_format, document_list, documents_in_id_list);
-	ANT_mean_average_precision *map = new ANT_mean_average_precision(&memory, assessments, number_of_assessments);
+    // Still here in case we need output from a single stemmer
+    if (params->output_forum == ANT_ANT_param_block::TREC)
+        output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+    else if (params->output_forum == ANT_ANT_param_block::INEX)
+        output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 
-	if ((fp = fopen(topic_file, "rb")) == NULL)
-		exit(fprintf(stderr, "Cannot open topic file:%s\n", topic_file));
-	line = 1;
-	while (fgets(query, sizeof(query), fp) != NULL) {
-		strip_end_punc(query);
-		topic_ids = (long *) realloc(topic_ids, line * sizeof(topic_ids[0]));
-		topic_ids[line - 1] = atol(query);
-		if ((query_text = strchr(query, ' ')) == NULL)
-			exit(fprintf(stderr, "Line %ld: Can't process query as badly formed:'%s'\n", line, query));
-		all_queries = (char **) realloc(all_queries, line * sizeof(all_queries[0]));
-		all_queries[line - 1] = strdup(query_text);
-		line++;
-	}
-	fclose(fp);
+    /*
+      Store queries and their topic ids - For the GA, we need these for each run.
+     */
+    queries = get_queries(&query_count, params);
+    topic_ids = (long *) malloc(sizeof *topic_ids * query_count);
+    for (i = 0; i < query_count; i++) {
+        strip_end_punc(queries[i]);
+        if (!have_assessments)
+            exit(printf("No assessments given.\n"));
+        else
+            {
+                topic_ids[i] = atol(queries[i]);
+                if ((query = strchr(queries[i], ' ')) == NULL)
+                    exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", i, queries[i]));
+            }
+    }
 
 	if (stemmer_file) {
-		int i;
 		int count = 0;
 		char buffer[4096];
 		FILE *f = fopen(stemmer_file, "r");
@@ -185,19 +97,17 @@ void ga_ant(char *topic_file, char *qrel_file, char *stemmer_file, long qrel_for
 			ind->sload(buffer);
 			stemmer->set_stemmer(ind);
 			stemmer->print(stderr);
-			for (i = 0; i < line - 1; i++) {
-				long hits;
-				// TODO: Gives error about param list
-				//result += perform_query_w_stemmer(&search_engine, all_queries[i], &hits, stemmer, topic_ids[i], -1, map);
+			for (i = 0; i < query_count; i++) {
+				long long hits;
+				result += perform_query(params, search_engine, queries[i], &hits, topic_ids[i], map, stemmer);
 			}
-			fprintf(stderr, "%d %f\n", count++, result / (line - 1));
+			fprintf(stderr, "%d %f\n", count++, result / (double)query_count);
 		}
 	} else {
-		//		ga = new GA(POPULATION_SIZE, 
-		//p		new GA_function(perform_query_w_stemmer, &search_engine, line - 1, all_queries, topic_ids, query_cache, map), &search_engine);
+        ga = new GA(POPULATION_SIZE, 
+                    new GA_function(perform_query, params, search_engine, query_count, queries, topic_ids, map, stemmer), search_engine);
 		ga->run(NUM_OF_GENERATIONS);
 	}
-
 }
 
 /*

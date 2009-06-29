@@ -59,7 +59,7 @@ public:
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL, ANT_stemmer *stemmer = NULL)
 {
 ANT_time_stats stats;
 long long now;
@@ -70,12 +70,12 @@ long long hits;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-ANT_stemmer *stemmer;
 
 /*
 	if we're stemming then create the stemmer object
 */
-stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
+if (!stemmer)
+    stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -88,7 +88,7 @@ token_end = query;
 while (*token_end != '\0')
 	{
 	token_start = token_end;
-	while (!ANT_isalnum(*token_start) && *token_start != '\0')
+ 	while (!ANT_isalnum(*token_start) && *token_start != '\0')
 		token_start++;
 	if (*token_start == '\0')
 		break;
@@ -288,11 +288,16 @@ ANT_ANT_param_block params(argc, argv);
 char **document_list, **answer_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
+#ifndef VOCAB_TOOL
+char *stemmer_file = argv[1];
+argc++;
+#endif
+
 
 last_param = params.parse();
 
 if (params.logo)
-	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
+	puts(ANT_version_string);				// print the version string if we parsed the parameters OK
 
 document_list = read_docid_list(&documents_in_id_list);
 
@@ -309,7 +314,7 @@ search_engine = new ANT_search_engine(&memory);
 #ifdef VOCAB_TOOL
 trie_test(search_engine);
 #else
-ga_ant(search_engine, map, &params, document_list, answer_list);
+ ga_ant(search_engine, map, &params, document_list, answer_list, stemmer_file);
 #endif
 
 #ifdef FIT_BM25
@@ -345,4 +350,25 @@ if (argc == 4)
 
 delete map;
 return 0;
+}
+
+
+/* 
+*** MY ADDITION ***
+
+   GET_QUERIES()
+   fill an array with queries from params->queries_filename
+*/
+char **get_queries(long *query_count, ANT_ANT_param_block *params) {
+    ANT_ANT_file_iterator input(params->queries_filename);
+	char **queries;
+    char *query;
+    int i;
+    *query_count = 0;
+    for (query = input.first(); query != NULL; query = input.next()) 
+        *query_count++;
+    queries = (char **)malloc(sizeof *queries * *query_count);
+    for (query = input.first(), i = 0; query != NULL; query = input.next(), i++) 
+        queries[i] = strdup(query);
+    return queries;
 }

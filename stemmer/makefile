@@ -12,7 +12,10 @@ CC = g++
 
 
 OBJECTS = \
+    encoding_utf8.o \
+    encoding_factory.o \
     parser.o \
+    universal_parser.o \
     memory_index_hash_node.o \
     memory_index.o \
     memory_index_stats.o \
@@ -72,8 +75,8 @@ EXTENSION = \
     ga_individual.o \
 	ga_function.o \
 	vocab.o 
-
-all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool
+	
+all : index ant ga_ant vocab_tool
 
 %.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $(SRCDIR)/$*.c -o $(OBJDIR)/$*.o
@@ -81,23 +84,25 @@ all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool
 $(EXTENSION) : 
 	$(CC) $(CFLAGS) $(EXTFLAGS) -c $*.c -o $(OBJDIR)/$@
 
-$(BINDIR)/index : $(OBJECTS) index.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
+index : $(OBJECTS) index.o
+	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
 
-$(BINDIR)/ant : $(OBJECTS) ant.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%) 
+ant : $(OBJECTS) ant.o
+	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%) 
 
-$(BINDIR)/ant_dict : $(OBJECTS) ant_dictionary.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant_dictionary.o $(OBJECTS:%=$(OBJDIR)/%) 
+ant_dict : $(OBJECTS) ant_dictionary.o
+	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/ant_dictionary.o $(OBJECTS:%=$(OBJDIR)/%) 
 
-$(BINDIR)/ga_ant : $(OBJECTS) $(EXTENSION) $(OBJDIR)/ga_ant.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/ga_ant.o
+ga_ant.o : $(EXTDIR)/ga_ant.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -c $(EXTDIR)/ga_ant.c -o $(OBJDIR)/$@
+ga_ant : $(OBJECTS) $(EXTENSION) ga_ant.o
+	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/ga_ant.o
 
-$(OBJDIR)/vocab_tool.o : $(EXTDIR)/ga_ant.c
-	$(CC) $(EXTFLAGS) $(CFLAGS) -DVOCAB_TOOL -c $(EXTDIR)/ga_ant.c -o $@
-$(BINDIR)/vocab_tool : $(OBJECTS) $(EXTENSION) $(OBJDIR)/vocab_tool.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/vocab_tool.o
+vocab_tool.o : $(EXTDIR)/ga_ant.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DVOCAB_TOOL -c $(EXTDIR)/ga_ant.c -o $(OBJDIR)/$@
+vocab_tool : $(OBJECTS) $(EXTENSION) vocab_tool.o
+	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/vocab_tool.o
 
 .PHONY : clean
 clean :
-
+	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(OBJDIR)/vocab_tool.o
