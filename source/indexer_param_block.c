@@ -9,6 +9,7 @@
 #include "indexer_param_block.h"
 #include "compression_factory.h"
 #include "encoding_factory.h"
+#include "readability_factory.h"
 #include "version.h"
 
 #ifndef FALSE
@@ -29,6 +30,7 @@ this->argv = argv;
 trec_docnos = recursive = segmentation = FALSE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
+readability_measure = ANT_readability_factory::NONE;
 statistics = 0;
 logo = TRUE;
 reporting_frequency = LLONG_MAX;
@@ -102,6 +104,13 @@ puts("-----------");
 puts("-S	          segment the text into meaningful words");
 puts("");
 
+puts("READABILITY");
+puts("-----------");
+puts("-R[nd]          Calculate a readability measure using one of:");
+puts("   n            none [default]");
+puts("   d            Dale-Chall");
+puts("");
+
 puts("REPORTING");
 puts("---------");
 puts("-N<n>           Report time and memory every <n> documents [default -N0]");
@@ -145,8 +154,8 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 }
 
 /*
-	ANT_INDEXER_PARAM_BLOCK::COMPRESSION()
-	--------------------------------------
+	ANT_INDEXER_PARAM_BLOCK::ENCODING()
+	-----------------------------------
 */
 void ANT_indexer_param_block::encoding(char *scheme_list)
 {
@@ -157,6 +166,23 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 		{
 		case 'u': encoding_scheme = ANT_encoding_factory::UTF8; break;
 		default : exit(printf("Unknown encoding scheme: '%c'\n", *scheme)); break;
+		}
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK::READABILITY()
+	--------------------------------------
+*/
+void ANT_indexer_param_block::readability(char *measures)
+{
+char *measure;
+
+for (measure = measures; *measure != '\0'; measure++)
+	switch (*measure)
+		{
+		case 'n': readability_measure = 0; break;
+		case 'd': readability_measure |= ANT_readability_factory::DALE_CHALL; break;
+		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}
 }
 

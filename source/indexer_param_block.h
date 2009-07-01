@@ -30,9 +30,12 @@ public:
 	long segmentation;					// need segmentation or not for east-asian languages, e.g. Chinese
 	unsigned long encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 
+	unsigned long readability_measure; 	// readability measure to calculate
+
 protected:
 	void compression(char *schemes);
 	void encoding(char *schemes);
+	void readability(char *measures);
 	void stats(char *stat_list);
 
 public:
