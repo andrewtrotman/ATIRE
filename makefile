@@ -32,7 +32,7 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib
 #	Objects
 #
 PARTS = \
-	$(OBJDIR)\encoding_utf8.obj 						\
+	$(OBJDIR)\encoding_utf8.obj 				\
 	$(OBJDIR)\encoding_factory.obj 				\
 	$(OBJDIR)\parser.obj 						\
 	$(OBJDIR)\universal_parser.obj 				\
@@ -85,6 +85,7 @@ PARTS = \
 	$(OBJDIR)\compress_none.obj					\
 	$(OBJDIR)\compress_sigma.obj				\
 	$(OBJDIR)\compression_factory.obj			\
+	$(OBJDIR)\readability_none.obj				\
 	$(OBJDIR)\readability_factory.obj			\
 	$(OBJDIR)\indexer_param_block.obj			\
 	$(OBJDIR)\ant_param_block.obj				\

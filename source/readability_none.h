@@ -14,10 +14,10 @@
 class ANT_readability_none : public ANT_readability
 {
 public:
-	ANT_readability_none() {}
-	virtual ~ANT_readability_none() {}
+	ANT_readability_none() {};
+	virtual ~ANT_readability_none() {};
 
 	virtual long score();
-}
+} ;
 
 #endif __READABILITY_NONE_H__
