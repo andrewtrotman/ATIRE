@@ -180,8 +180,8 @@ char *measure;
 for (measure = measures; *measure != '\0'; measure++)
 	switch (*measure)
 		{
-		case 'n': readability_measure = 0; break;
-		case 'd': readability_measure |= ANT_readability_factory::DALE_CHALL; break;
+		case 'n': readability_measure = ANT_readability_factory::NONE; break;
+		case 'd': readability_measure = ANT_readability_factory::DALE_CHALL; break;
 		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}
 }

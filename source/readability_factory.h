@@ -19,6 +19,7 @@ public:
 	} ;
 	
 	ANT_readability_factory();
+	ANT_readability_factory(unsigned long measure);
 	virtual ~ANT_readability_factory();
 
 private:
