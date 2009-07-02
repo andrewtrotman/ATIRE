@@ -64,6 +64,7 @@ OBJECTS = \
     compress_sigma.o \
     compression_factory.o \
     readability_none.o \
+    readability_dale_chall.o \
     readability_factory.o \
     indexer_param_block.o \
     ant_param_block.o \

@@ -86,6 +86,7 @@ PARTS = \
 	$(OBJDIR)\compress_sigma.obj				\
 	$(OBJDIR)\compression_factory.obj			\
 	$(OBJDIR)\readability_none.obj				\
+	$(OBJDIR)\readability_dale_chall.obj		\
 	$(OBJDIR)\readability_factory.obj			\
 	$(OBJDIR)\indexer_param_block.obj			\
 	$(OBJDIR)\ant_param_block.obj				\
