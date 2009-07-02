@@ -1,5 +1,10 @@
-#ifndef WORD_H_
-#define WORD_H_
+/*
+	 WORD.H
+	 ------
+ */
+
+#ifndef __WORD_H__
+#define __WORD_H__
 
 #include <string>
 #include <vector>
@@ -8,7 +13,7 @@
 #include <map>
 #include <cassert>
 
-#include <utils/icstring.hpp>
+#include "icstring.hpp"
 
 namespace SEGMENTATION {
 
@@ -188,4 +193,4 @@ namespace SEGMENTATION {
 	};
 
 }
-#endif /*WORD_H_*/
+#endif /*__WORD_H__*/

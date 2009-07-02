@@ -1,14 +1,16 @@
+/*
+	 WORD.c
+	 ------
+ */
+
 #include "word.h"
 #include <climits>
 #include <cassert>
 #include <algorithm>
-#include <stpl/characters/stpl_unicode.h>
 #include <iostream>
-#include <qconf.h>
 #include <limits>
+#include <encoding_utf8.h>
 
-using namespace SEGMENTATION;
-using namespace stpl;
 using namespace std;
 
 Word::Word(string_type chars, int size) : chars_(chars), size_(size) {
