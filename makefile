@@ -36,6 +36,7 @@ PARTS = \
 	$(OBJDIR)\encoding_factory.obj 				\
 	$(OBJDIR)\parser.obj 						\
 	$(OBJDIR)\universal_parser.obj 				\
+	$(OBJDIR)\parser_readability.obj			\
 	$(OBJDIR)\memory_index_hash_node.obj		\
 	$(OBJDIR)\memory_index.obj 					\
 	$(OBJDIR)\memory_index_stats.obj			\

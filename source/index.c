@@ -9,6 +9,7 @@
 #include "file.h"
 #include "parser.h"
 #include "universal_parser.h"
+#include "parser_readability.h"
 #include "readability_factory.h"
 #include "memory.h"
 #include "memory_index.h"
@@ -90,8 +91,10 @@ if (param_block.encoding_scheme == ANT_encoding_factory::UTF8)
 	else
 		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, false);
 	}
-else
+else if (param_block.readability_measure == ANT_readability_factory::NONE)
 	parser = new ANT_parser();
+else
+	parser = new ANT_parser_readability();
 
 readability_factory = new ANT_readability_factory();
 readability_factory->set_measure(param_block.readability_measure);
@@ -169,7 +172,6 @@ for (param = first_param; param < argc; param++)
 	}
 
 id_list.close();
-
 now = stats.start_timer();
 index->serialise("index.aspt");
 stats.add_disk_output_time(stats.stop_timer(now));

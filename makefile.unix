@@ -14,6 +14,7 @@ OBJECTS = \
     encoding_factory.o \
     parser.o \
     universal_parser.o \
+    parser_readability.o \
     memory_index_hash_node.o \
     memory_index.o \
     memory_index_stats.o \

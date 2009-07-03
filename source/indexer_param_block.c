@@ -31,6 +31,7 @@ trec_docnos = recursive = segmentation = FALSE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
 readability_measure = ANT_readability_factory::NONE;
+encoding_scheme = ANT_encoding_factory::ASCII;
 statistics = 0;
 logo = TRUE;
 reporting_frequency = LLONG_MAX;
@@ -94,14 +95,15 @@ puts("-vc             Validate compression (and report decompression rates)");
 puts("");
 
 puts("ENCODING");
-puts("-----------");
-puts("-e[u] decode the input text using one of encodings:");
+puts("--------");
+puts("-e[au] decode the input text using one of encodings:");
+puts("   a            ASCII encoding [default]");
 puts("   u            UTF8 encoding");
 puts("");
 
 puts("SEGMENTATION(EAST-ASIAN LANGUAGES ONLY)");
 puts("-----------");
-puts("-S	          segment the text into meaningful words");
+puts("-S              segment the text into meaningful words");
 puts("");
 
 puts("READABILITY");
@@ -165,6 +167,7 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 	switch (*scheme)
 		{
 		case 'u': encoding_scheme = ANT_encoding_factory::UTF8; break;
+		case 'a': encoding_scheme = ANT_encoding_factory::ASCII; break;
 		default : exit(printf("Unknown encoding scheme: '%c'\n", *scheme)); break;
 		}
 }
@@ -253,7 +256,7 @@ for (param = 1; param < argc; param++)
 			}
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;
-		else if (*command = 'R')
+		else if (*command == 'R')
 			{
 			readability_measure = 0;
 			readability(command + 1);
