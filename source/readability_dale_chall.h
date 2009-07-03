@@ -15,8 +15,7 @@
 class ANT_readability_dale_chall : public ANT_readability
 {
 public:
-	ANT_readability_dale_chall() {};
-	ANT_readability_dale_chall(ANT_parser *);
+	ANT_readability_dale_chall();
 	virtual ~ANT_readability_dale_chall() {};
 	
 	ANT_string_pair *get_next_token();

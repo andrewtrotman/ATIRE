@@ -9,6 +9,7 @@
 #include "file.h"
 #include "parser.h"
 #include "universal_parser.h"
+#include "readability_factory.h"
 #include "memory.h"
 #include "memory_index.h"
 #include "indexer_param_block.h"
@@ -43,6 +44,7 @@ ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
 ANT_disk *disk;
 ANT_parser* parser;
+ANT_readability_factory *readability_factory;
 ANT_string_pair *token;
 unsigned char *file;
 long param, done_work;
@@ -91,6 +93,10 @@ if (param_block.encoding_scheme == ANT_encoding_factory::UTF8)
 else
 	parser = new ANT_parser();
 
+readability_factory = new ANT_readability_factory();
+readability_factory->set_measure(param_block.readability_measure);
+readability_factory->set_parser(parser);
+
 current_file_length = bytes_indexed = 0;
 for (param = first_param; param < argc; param++)
 	{
@@ -129,8 +135,8 @@ for (param = first_param; param < argc; param++)
 		if (doc % param_block.reporting_frequency == 0)
 			report(doc, index, &stats, bytes_indexed);
 
-		parser->set_document(file);
-		while ((token = parser->get_next_token()) != NULL)
+		readability_factory->set_document(file);
+		while ((token = readability_factory->get_next_token()) != NULL)
 			{
 			if (param_block.trec_docnos && token->length() == 3 && strncmp(token->start, "DOC", 3) == 0)
 				{
@@ -171,6 +177,7 @@ index->text_render(param_block.statistics);
 delete index;
 delete disk;
 delete parser;
+delete readability_factory;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{

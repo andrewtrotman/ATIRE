@@ -253,6 +253,11 @@ for (param = 1; param < argc; param++)
 			}
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;
+		else if (*command = 'R')
+			{
+			readability_measure = 0;
+			readability(command + 1);
+			}
 		else if (*command == 's')
 			{
 			statistics = 0;

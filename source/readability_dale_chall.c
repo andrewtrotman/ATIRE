@@ -8,7 +8,7 @@
 	ANT_READABILITY_DALE_CHALL::ANT_READABILITY_DALE_CHALL()
 	--------------------------------------------------------
 */
-ANT_readability_dale_chall::ANT_readability_dale_chall(ANT_parser *parser) : ANT_readability(parser)
+ANT_readability_dale_chall::ANT_readability_dale_chall()
 {
 	this->number_of_words = this->number_of_sentences = 0;
 	// TODO: Reset words in document stuff

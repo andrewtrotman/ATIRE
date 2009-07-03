@@ -17,11 +17,13 @@ class ANT_readability
 {
 public:
 	ANT_readability() {};
-	ANT_readability(ANT_parser *) { this->parser = parser; };
 	virtual ~ANT_readability() {};
-
-	virtual ANT_string_pair *get_next_token() {};
-	virtual void set_document(unsigned char *) {};
+	
+	virtual ANT_string_pair *get_next_token() = 0;
+	virtual void set_document(unsigned char *) = 0;
+	virtual long score() = 0;
+	
+	void set_parser(ANT_parser *parser) { this->parser = parser; }
 
 protected:
 	ANT_parser *parser;
