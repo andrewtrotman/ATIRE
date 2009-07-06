@@ -30,7 +30,7 @@ measure->set_document(document);
 */
 long ANT_readability_factory::score()
 {
-return this->measure->score();
+return measure->score();
 }
 
 /*
@@ -41,15 +41,9 @@ void ANT_readability_factory::set_measure(unsigned long m)
 {
 switch (m)
 	{
-	case NONE: 
-		this->measure = new ANT_readability_none(); 
-		break;
-	case DALE_CHALL: 
-		this->measure = new ANT_readability_dale_chall(); 
-		break;
-	default: 
-		this->measure = new ANT_readability_none(); 
-		break; // shouldn't happen
+	case NONE: measure = new ANT_readability_none(); break;
+	case DALE_CHALL: measure = new ANT_readability_dale_chall(); break;
+	default: measure = new ANT_readability_none(); break; // shouldn't happen
 	}
 }
 
@@ -59,6 +53,14 @@ switch (m)
 */
 void ANT_readability_factory::set_parser(ANT_parser *parser)
 {
-this->measure->set_parser(parser);
-this->parser = parser;
+measure->set_parser(parser);
+}
+
+/*
+	READABILITY_FACTORY::ADD_NODE()
+	-------------------------------
+*/
+void ANT_readability_factory::add_node(ANT_memory_index_hash_node *node)
+{
+measure->add_node(node);
 }

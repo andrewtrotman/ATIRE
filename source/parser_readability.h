@@ -10,7 +10,7 @@
 /*
 	class PARSER_READABILITY
 	------------------------
-	Overrides the get_next_token method, to include punctuation and exclude tag names. 
+	Overrides the get_next_token method, to include end of sentence punctuation.
 	Responsibility of the caller to covert to indexable tokens.
 */
 class ANT_parser_readability : public ANT_parser
@@ -19,6 +19,9 @@ public:
 	ANT_parser_readability() : ANT_parser() {};
 	virtual ~ANT_parser_readability() {};
 	ANT_string_pair *get_next_token(void);
+
+protected:
+	static int issentenceend(unsigned char val) { return val == '.' || val == '?' || val == '!'; }
 } ;
 
 #endif __PARSER_READABILITY_H__

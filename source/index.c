@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
 ANT_disk *disk;
-ANT_parser* parser;
-ANT_readability_factory *readability_factory;
+ANT_parser *parser;
+ANT_readability_factory *readability;
 ANT_string_pair *token;
 unsigned char *file;
 long param, done_work;
@@ -96,9 +96,9 @@ else if (param_block.readability_measure == ANT_readability_factory::NONE)
 else
 	parser = new ANT_parser_readability();
 
-readability_factory = new ANT_readability_factory();
-readability_factory->set_measure(param_block.readability_measure);
-readability_factory->set_parser(parser);
+readability = new ANT_readability_factory();
+readability->set_measure(param_block.readability_measure);
+readability->set_parser(parser);
 
 current_file_length = bytes_indexed = 0;
 for (param = first_param; param < argc; param++)
@@ -138,8 +138,8 @@ for (param = first_param; param < argc; param++)
 		if (doc % param_block.reporting_frequency == 0)
 			report(doc, index, &stats, bytes_indexed);
 
-		readability_factory->set_document(file);
-		while ((token = readability_factory->get_next_token()) != NULL)
+		readability->set_document(file);
+		while ((token = readability->get_next_token()) != NULL)
 			{
 			if (param_block.trec_docnos && token->length() == 3 && strncmp(token->start, "DOC", 3) == 0)
 				{
@@ -155,11 +155,12 @@ for (param = first_param; param < argc; param++)
 			else /*if (ANT_isalnum(*token->start))*/ // keep all tokens returned from the parser which defines what should be indexed, not here
 				{
 				terms_in_document++;
-				index->add_term(token, doc);
+				readability->add_node(index->add_term(token, doc));
 				done_work = TRUE;
 				}
 			}
 		index->set_document_length(doc, terms_in_document);
+		readability->score();
 		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();
@@ -168,7 +169,7 @@ for (param = first_param; param < argc; param++)
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 	if (files_that_match == 0)
-		printf("Warning: '%s' does not match any files\n", argv[first_param]);
+		printf("Warning: '%s' does not match any files\n", argv[param]);
 	}
 
 id_list.close();
@@ -179,7 +180,7 @@ index->text_render(param_block.statistics);
 delete index;
 delete disk;
 delete parser;
-delete readability_factory;
+delete readability;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{

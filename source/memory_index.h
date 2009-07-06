@@ -52,7 +52,7 @@ public:
 	ANT_memory_index();
 	~ANT_memory_index();
 
-	void add_term(ANT_string_pair *string, long long docno);
+	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
 	long serialise(char *filename);
 	void set_document_length(long long docid, long length);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
