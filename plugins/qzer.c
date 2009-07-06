@@ -1,8 +1,8 @@
 #include "qzer.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 #include "freq_loader.h"
 #include "doc_freq.h"
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "convert.h"
 #include "qfreq.h"
 
@@ -25,15 +25,15 @@ void QZer::init() {
 
 	FreqLoader loader(freq_);
 
-	loader.load(AppConf::instance().wd());
+	loader.load(UNISEQ_settings::instance().wd());
 	freq_.cal_sum_n_avg();
 	k_ = loader.count();*/
 }
 
 void QZer::start() {
 	//Freq freq;
-	if (AppConf::instance().phrase().length() > 0) {
-		doit(AppConf::instance().phrase());
+	if (UNISEQ_settings::instance().phrase().length() > 0) {
+		doit(UNISEQ_settings::instance().phrase());
 	}
 	else {
 		cout << endl << "Starting segmentation" << endl;
@@ -77,7 +77,7 @@ void QZer::do_others(Seger& seger) {
 	//seger.apply_rules();
 	seger.seg();
 
-	if (AppConf::instance().verbose())
+	if (UNISEQ_settings::instance().verbose())
 		seger.show_all();
 
 	seger.add_to_list(cwlist_);
@@ -91,8 +91,8 @@ void QZer::show() {
 }
 
 void QZer::save() {
-	if (AppConf::instance().save_good()) {
+	if (UNISEQ_settings::instance().save_good()) {
 		FreqLoader saver(freq_);
-		saver.save(AppConf::instance().good());
+		saver.save(UNISEQ_settings::instance().good());
 	}
 }

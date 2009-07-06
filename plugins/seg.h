@@ -9,7 +9,7 @@
 #define SEG_H_
 
 #include <string>
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "freq.h"
 #include "clist.h"
 

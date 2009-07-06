@@ -7,30 +7,32 @@ AM_LDFLAGS = @LIBS@
 CC = g++
 
 libuniseq_sources = \
-		word.c	
-		
-A	=	clist.c	\
+		uniseg_settings.c \
+		word.c	\
+		clist.c	\
 		cwords.c	\
-		dic_builder.c	\
+		freq.c	\
+		freq_file.c	\
+		freq_loader.c	\
+		index_file.c	
+A	=	\			
+		qfreq.c	\
+		qzer.c	\
+		seg.c	\
 		dic.c	\
-		doc_base.c	\
+		doc_base.c		
 		doc.c	\
 		doc_freq.c	\
 		doc_reader.c	\
 		doc_seg.c	\
 		fdoc.c	\
 		file.c	\
-		freq.c	\
-		freq_file.c	\
-		freq_loader.c	\
-		index_file.c	\
 		mdoc.c	\
 		qconf.c	\
 		qdoc.c	\
-		qfreq.c	\
-		qzer.c	\
-		seg.c	\
 		udoc.c	
+		
+B =    dic_builder.c	
 		
 libuniseg_headers = \
 		address.h	\

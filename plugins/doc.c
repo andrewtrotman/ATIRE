@@ -6,7 +6,7 @@
  */
 
 #include "doc.h"
-#include "qconf.h"
+#include "uniseg_settings.h"
 
 Doc::Doc(std::string name, stpl::Language lang, string_type& stream) :
 	name_(name), lang_(lang), stream_(stream), parser_ptr_(NULL) {
@@ -115,7 +115,7 @@ void Doc::next(entity_iterator& begin, entity_iterator& end) {
 	entity_iterator stop = pos_;
 
 	while (pos_ != doc().iter_end()) {
-		if ((*pos_)->lang() != lang /*QConf::instance()->lang()*/)
+		if ((*pos_)->lang() != lang /*UNISEQ_settings::instance().lang()*/)
 			break;
 
 		if (do_skip_acronym())

@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "doc.h"
 #include "doc_freq.h"
 

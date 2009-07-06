@@ -1,7 +1,7 @@
 #include "freq_loader.h"
 #include "freq_file.h"
 #include "convert.h"
-#include "qconf.h"
+#include "uniseg_settings.h"
 
 #include <iostream>
 
@@ -11,7 +11,7 @@ void FreqLoader::load(std::string path, int n) {
 	k_ = 1;
 	//	int num = 0;
 	cout << "Loading files from " << path << endl;
-	QConf::instance()->do_load(true);
+	UNISEQ_settings::instance().load = true;
 
 	while (k_ <= n) {
 
@@ -49,14 +49,14 @@ void FreqLoader::save(std::string path) {
 		}
 
 		FreqFile freq_file(stringify(k), freq_);
-		//freq_file.path(AppConf::instance().wd());
+		//freq_file.path(UNISEQ_settings::instance().wd());
 		freq_file.path(path);
 		freq_file.wlen(k);
 		freq_file.write(freq_.array_k(k));
 
 		if (k > 1) {
 			IndexFile idx_file(stringify(k));
-			//idx_file.path(AppConf::instance().wd());
+			//idx_file.path(UNISEQ_settings::instance().wd());
 			idx_file.path(path);
 			idx_file.wlen(k);
 			idx_file.alloc(freq_.array_k(k));

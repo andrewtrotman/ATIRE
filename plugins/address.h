@@ -12,11 +12,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include "uniseg_types.h"
 
 class Address {
 public:
-	typedef	Freq::string_type					string_type;
-	typedef Freq::string_array					string_array;
 	typedef unsigned int						uint;
 	typedef std::vector<uint>					uint_array;
 	enum { INVALID_BOUND = 0xffffffff };

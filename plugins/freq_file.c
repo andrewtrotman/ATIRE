@@ -5,15 +5,13 @@
  *      Author: monfee
  */
 
-#include "qconf.h"
+#include "uniseg_settings.h"
 #include "freq_file.h"
+#include "utilities.h"
 
 #include <string.h>
-#include <stpl/characters/stpl_unicode.h>
-
 #include <iostream>
 
-using namespace stpl;
 using namespace std;
 
 /*
@@ -40,7 +38,7 @@ void FreqFile::init() {
 }
 
 unsigned int FreqFile::cal(File::array_type& arr) {
-	//if (arr[0]->address() == SEGMENTATION::INVALID)
+	//if (arr[0]->address() == INVALID)
 	//	freq_.alloc(k);
 	//File::word_ptr_type last_word = freq_n_[k - 1][freq_n_[k - 1].size() - 1];
 	/*
@@ -129,8 +127,7 @@ void FreqFile::read() {
 			}
 			string_array ca;
 			/// save them in the array
-			string_type a_char =
-				UNICODE::Utf8<string_type, char*>::first_utf8_char((char*)&buf);
+			string_type a_char = get_first_utf8char((unsigned char*)&buf);
 			ca.push_back(a_char);
 
 			freq_.add(ca, value); //->address(count/RECORD_LENGTH);
@@ -203,8 +200,7 @@ void FreqFile::read_with_index() {
 					}
 
 					/// save them in the array
-					string_type a_char(
-						UNICODE::Utf8<string_type, char*>::first_utf8_char((char*)&buf));
+					string_type a_char(get_first_utf8char((unsigned char*)&buf));
 					string_array aca(ca);
 					aca.push_back(a_char);
 					assert(value > 0);
@@ -229,8 +225,7 @@ void FreqFile::read_with_index() {
 					}
 
 					/// save them in the array
-					string_type a_char =
-						UNICODE::Utf8<string_type, char*>::first_utf8_char((char*)&buf);
+					string_type a_char = get_first_utf8char((unsigned char*)&buf);
 					string_array aca = ca;
 					aca.insert(aca.begin(), a_char);
 					assert(value > 0);

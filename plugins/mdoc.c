@@ -6,7 +6,7 @@
  */
 
 #include "mdoc.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 #include <limits>
 #include <cmath>
 
@@ -34,7 +34,7 @@ void MDoc::init() {
 void MDoc::seg_sentence(entity_iterator& begin, entity_iterator& end) {
 	create_pairs(begin, end);
 	cal_assc_strength();
-	if (AppConf::instance().verbose())
+	if (UNISEQ_settings::instance().verbose())
 		show_assc_strength();
 	//pairs_.sort(MPair::cmp);
 	pair<int, int> unseged = get_first_unfil(0);

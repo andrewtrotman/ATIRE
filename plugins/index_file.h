@@ -15,10 +15,6 @@
 class IndexFile : public File {
 
 public:
-	typedef Freq::string_type						string_type;
-	typedef Freq::string_array						string_array;
-
-public:
 	static const int UINT_SIZE = sizeof(unsigned int);
 	static const int ADDRESSES_NUMBER = 3;
 	static const int ADDRESSES_LENGTH = ADDRESSES_NUMBER * UINT_SIZE;

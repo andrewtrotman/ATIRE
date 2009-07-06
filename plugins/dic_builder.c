@@ -7,7 +7,7 @@
 
 #include "dic_builder.h"
 #include "doc.h"
-#include "qconf.h"
+#include "uniseg_settings.h"
 #include "convert.h"
 #include <fstream>
 
@@ -24,7 +24,7 @@ void DicBuilder::add(string_type word, stpl::Language lang) {
 void DicBuilder::build(string_type& text, stpl::Language lang) {
 
 	typedef Doc::entity_iterator	iterator;
-	Doc doc(QConf::instance()->lang(), text);
+	Doc doc(UNISEQ_settings::instance().lang(), text);
 
 	doc.parse();
 	doc.reset();
@@ -40,7 +40,7 @@ void DicBuilder::build(string_type& text, stpl::Language lang) {
 			iterator next = begin;
 
 			string_type str = (*begin)->to_string();
-			if (QConf::instance()->lang() == stpl::ENGLISH) {
+			if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 				tolower(str);
 			}
 			word.append( str );

@@ -17,7 +17,7 @@
 #include "doc.h"
 #include "freq.h"
 #include "doc_freq.h"
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "range.h"
 #include "file.h"
 

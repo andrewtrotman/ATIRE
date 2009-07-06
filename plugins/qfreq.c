@@ -6,7 +6,7 @@
  */
 
 #include "qfreq.h"
-#include "qconf.h"
+#include "uniseg_settings.h"
 #include "freq_loader.h"
 
 #include <iostream>
@@ -34,7 +34,7 @@ void QFreq::load_freq(int n, bool force) {
 
 	FreqLoader loader(freq_);
 
-	loader.load(QConf::instance()->wd(), n);
+	loader.load(UNISEQ_settings::instance().wd(), n);
 	freq_.cal_sum_n_avg();
 	k_ = loader.count();
 }

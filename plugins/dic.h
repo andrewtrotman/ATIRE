@@ -9,7 +9,7 @@
 #define DIC_H_
 
 #include <stpl/characters/stpl_character.h>
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include <map>
 
 class Dic {

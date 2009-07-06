@@ -8,7 +8,7 @@
 #ifndef DIC_BUILDER_H_
 #define DIC_BUILDER_H_
 
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "dic.h"
 
 class DicBuilder {

@@ -11,21 +11,16 @@
 #include <map>
 #include <string>
 #include <cassert>
-#include <utils/icstring.hpp>
+#include <icstring.hpp>
 
 #include "word.h"
+#include "uniseg_types.h"
 
 class Freq {
 public:
-	typedef SEGMENTATION::Word::string_type			string_type;
-	typedef SEGMENTATION::Word::word_type			word_type;
-	typedef SEGMENTATION::Word::word_ptr_type		word_ptr_type;
 	//typedef std::map<string_type, word_ptr_type, ignorcase_string_compare>
 	typedef std::map<string_type, word_ptr_type>
 													freq_type;
-	typedef SEGMENTATION::Word::array_type			array_type;
-	typedef SEGMENTATION::Word::array_array_type	array_array_type;
-	typedef SEGMENTATION::Word::string_array		string_array;
 
 private:
 	/// for more than one character (2, 3, 4, 5 ...)

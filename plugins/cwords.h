@@ -2,7 +2,7 @@
 #define CWORDS_H_
 
 #include <list>
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "freq.h"
 
 class CWords {

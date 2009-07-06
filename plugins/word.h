@@ -26,7 +26,7 @@ public:
 public:
 	typedef std::string	 							string_type;
 	typedef Word									word_type;
-	typedef word_type*								word_ptr_type;
+	typedef word_type								*word_ptr_type;
 	typedef std::vector<word_ptr_type>				array_type;
 	typedef std::vector<array_type >				array_array_type;
 	typedef std::vector<string_type>				string_array;
@@ -38,13 +38,13 @@ private:
 	int 											address_;
 	int 											size_; /// number of characters
 
-	array_type 										arr_; /// the Word* array mapping to each parent character(s)
-	array_type										children_; /// the Word* array linked to children character(s)
+	array_type 										arr_; /// the Word *array mapping to each parent character(s)
+	array_type										children_; /// the Word *array linked to children character(s)
 	std::map<std::string, Word*> 					rcchar_;  /// the right single characters of all its children
-	Word* 											lparent_;
-	Word* 											rparent_;
-	Word* 											lchar_;
-	Word* 											rchar_;
+	Word 											*lparent_;
+	Word 											*rparent_;
+	Word 											*lchar_;
+	Word 											*rchar_;
 
 	Side 											side_; // the lefe or right indicator of parent with the highest frequency
 
@@ -70,7 +70,7 @@ public:
 
 	Word& operator ++ ();
 	Word operator ++ (int);
-	bool operator < (Word* w2);
+	bool operator < (Word *w2);
 	bool operator() (int);
 
 	const unsigned int freq() const { return freq_; }
@@ -99,49 +99,49 @@ public:
 	void subchars(string_type& substr, int idx, int len);
 
 	array_type subarray(int idx, int len);
-	Word* subword(int idx, int len);
+	Word *subword(int idx, int len);
 
 	void increase() { freq_++; }
-	void link(Word* w) { children_.push_back(w); }
-	void add(Word* w) { arr_.push_back(w); }
+	void link(Word *w) { children_.push_back(w); }
+	void add(Word *w) { arr_.push_back(w); }
 	const std::vector<Word*>& array() const { return arr_; }
 	void array(std::vector<Word*> arr);
 
-	//Word* word(int idx);
+	//Word *word(int idx);
 	unsigned int highest_freq();
 	static bool cmp_freq(Word *w1, Word *w2);
 	static bool cmp_just_freq(Word *w1, Word *w2);
 
-	const Word* lparent() const { return lparent_; }
-	Word* lparent() { return lparent_; }
-	void lparent(Word* lparent) {
+	const Word *lparent() const { return lparent_; }
+	Word *lparent() { return lparent_; }
+	void lparent(Word *lparent) {
 		lparent_ = lparent;
 		if (lparent_ != NULL && lparent_ != this) {
 			lparent_->link(this);
 		}
 	}
-	const Word* rparent() const { return rparent_; }
-	Word* rparent() { return rparent_; }
-	void rparent(Word* rparent) {
+	const Word *rparent() const { return rparent_; }
+	Word *rparent() { return rparent_; }
+	void rparent(Word *rparent) {
 		rparent_ = rparent;
 		if (rparent_ != NULL && rparent != this)
 			rparent_->link(this);
 	}
-	const Word* lchar() const { return lchar_; }
-	void lchar(Word* lchar) {
+	const Word *lchar() const { return lchar_; }
+	void lchar(Word *lchar) {
 		assert(lchar->size() == 1);
 		lchar_ = lchar;
 	}
 
-	const Word* rchar() const { return rchar_; }
-	void rchar(Word* rchar) {
+	const Word *rchar() const { return rchar_; }
+	void rchar(Word *rchar) {
 		//assert(this->lparent_ != NULL);
 		rchar_ = rchar;
 		if (this->lparent_ != NULL)
 			lparent_->add_rcchar(rchar_, this);
 	}
 
-	void add_rcchar(Word* rchar, Word* child) {
+	void add_rcchar(Word *rchar, Word *child) {
 		assert(rchar->size() == 1);
 		rcchar_.insert(make_pair(rchar->chars(), child));
 	}
@@ -150,13 +150,13 @@ public:
 	 * find a direct right child
 	 * @param a_char the most right char of the word
 	 */
-	Word* find_rchild(string_type a_char);
+	Word *find_rchild(string_type a_char);
 
 	void children_do(void (*function_ptr)(Word*));
 
 	std::pair<Word*, Word*> family();
-	const Word* parent() const;
-	const Word* parent2() const; /// return the parent with less frequency
+	const Word *parent() const;
+	const Word *parent2() const; /// return the parent with less frequency
 	bool has_parent();
 
 	unsigned int children_freq();
@@ -191,5 +191,9 @@ public:
 private:
 	double cal_a(int start);
 };
+
+inline const Word::Side Word::side() const {
+	return side_;
+}
 
 #endif /*__WORD_H__*/

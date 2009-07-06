@@ -12,7 +12,8 @@
 #include <cassert>
 #include <limits>
 
-#include "app_conf.h"
+#include "uniseg_settings.h"
+#include "uniseg_types.h"
 
 using namespace std;
 
@@ -81,7 +82,7 @@ void CList::cal(Freq* freq) {
 void CList::show() {
 	// for debug
 	// showing the the combinations
-	int n = 50;/*AppConf::instance().top();
+	int n = 50;/*UNISEQ_settings::instance().top();
 	if (n < 0)
 		n = list_.size();*/
 
@@ -141,7 +142,7 @@ void CList::remove_two_consecutive_single_chars() {
 	 *
 	 * but for the ancient Chinese, that could be possible
 	 */
-	if (AppConf::instance().lang() == stpl::ENGLISH) {
+	if (UNISEQ_settings::instance().lang == uniseg_encoding::ENGLISH) {
 		cwords_list::iterator it = list_.begin();
 		for (; it != list_.end();) {
 			bool to_remove = false;
@@ -210,7 +211,7 @@ cwords_list_iterator CList::delete_node(cwords_list_iterator it) {
  *******************************************************************************************/
 void CList::apply_rules() {
 
-	if (QConf::instance()->do_optimize()) {
+	if (UNISEQ_settings::instance().optimize) {
 		int orig_size = size();
 		/**
 		 * Rule #1
@@ -225,7 +226,7 @@ void CList::apply_rules() {
 		 */
 		remove_two_consecutive_single_chars();
 
-		if (QConf::instance()->do_debug())
+		if (UNISEQ_settings::instance().debug)
 			cout << "Removed " << orig_size - size() << " bad segmentations from list" << endl;
 	}
 

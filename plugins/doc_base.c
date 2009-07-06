@@ -6,7 +6,7 @@
  */
 
 #include "doc_base.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 
 #include <iostream>
 
@@ -25,10 +25,10 @@ DocBase::~DocBase() {
 }
 
 void DocBase::init() {
-	if (AppConf::instance().do_save()) {
+	if (UNISEQ_settings::instance().do_save()) {
 		this->EXT_NAME = "txt";
 		name(doc_->name());
-		path(AppConf::instance().opath() + string(AppConf::instance().separator()));
+		path(UNISEQ_settings::instance().opath() + string(UNISEQ_settings::instance().separator()));
 		wopen();
 	}
 

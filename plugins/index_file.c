@@ -9,13 +9,10 @@
 #include "word.h"
 #include "address.h"
 
-#include <stpl/characters/stpl_unicode.h>
 #include <cassert>
 #include <iostream>
 
-using namespace SEGMENTATION;
 using namespace std;
-using namespace stpl;
 
 IndexFile::~IndexFile() {
 
@@ -43,11 +40,11 @@ void IndexFile::alloc(File::array_type& arr) {
 	cout << "ffs: " << ffs << endl;
 	assert( ffs == (wlen_ - 1));
 	//string_type pre_parent = word_ptr->family().first->chars();
-	Side side = word_ptr->side(); //SEGMENTATION::LEFT;
-	assert(side != SEGMENTATION::UNKNOWN);
-	if (side == SEGMENTATION::LEFT)
+	Word::Side side = word_ptr->side(); //LEFT;
+	assert(side != Word::UNKNOWN);
+	if (side == Word::LEFT)
 		bound[0] = 0;
-	else if (side == SEGMENTATION::RIGHT)
+	else if (side == Word::RIGHT)
 		bound[1] = 0;
 
 	bound[2] = 0;
@@ -58,7 +55,7 @@ void IndexFile::alloc(File::array_type& arr) {
 		//word_ptr = arr[i];
 		//string_type p_str = arr[i]->family().first->chars();
 
-		assert(arr[i]->side() != SEGMENTATION::UNKNOWN);
+		assert(arr[i]->side() != Word::UNKNOWN);
 
 		if (word_ptr->family().first->chars() != arr[i]->family().first->chars()) {
 			bound[2] = i - 1;
@@ -68,14 +65,14 @@ void IndexFile::alloc(File::array_type& arr) {
 			bound = forcopy;
 
 			word_ptr = arr[i];
-			//assert(side != SEGMENTATION::LEFT);
+			//assert(side != Word::LEFT);
 			assert(change < 2);
 			side = word_ptr->side();//arr[i]->side();
 
 			bound[2] = i;
-			if (side == SEGMENTATION::LEFT)
+			if (side == Word::LEFT)
 				bound[0] = i;
-			else if (side == SEGMENTATION::RIGHT)
+			else if (side == Word::RIGHT)
 				bound[1] = i;
 			//bound[0] = i;
 
@@ -85,7 +82,7 @@ void IndexFile::alloc(File::array_type& arr) {
 			if (side != arr[i]->side()) {
 				bound[1] = i - 1;
 				//bound[1] = i - 1;
-				side = SEGMENTATION::RIGHT;
+				side = Word::RIGHT;
 				change++;
 			}
 		}
@@ -147,7 +144,7 @@ void IndexFile::read() {
 			}
 			/// save them in the array
 			string_type a_char =
-				UNICODE::Utf8<string_type, char*>::first_utf8_char((char*)&buf);
+				get_first_utf8char((unsigned char*)&buf);
 			ca.push_back(a_char);
 		}
 

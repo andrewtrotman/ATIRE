@@ -9,7 +9,10 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
-#include <encoding_utf8.h>
+#include <math.h>
+
+#include "uniseg_settings.h"
+#include "uniseg_types.h"
 
 using namespace std;
 
@@ -81,8 +84,8 @@ bool Word::cmp_freq(Word *w1, Word *w2) {
 		assert(w2->size() == 1);
 		if (h1 == h2)
 			{
-			return ANT_encoding_utf8::to_codepoint(w1->chars().c_str())
-				< ANT_encoding_utf8::to_codepoint(w2->chars().c_str());
+			return uniseg_encoding_utf8::to_codepoint((unsigned char *)w1->chars().c_str())
+				< uniseg_encoding_utf8::to_codepoint((unsigned char *)w2->chars().c_str());
 			}
 		return h1 > h2;
 	}
@@ -218,12 +221,6 @@ int Word::counter(Side side) {
 	else if (side == RIGHT)
 		return rcounter();
 	return 0;
-}
-
-const Side Word::side() const {
-	//if (side_ == UNKNOWN)
-	//	highest_freq();
-	return side_;
 }
 
 Word::string_type Word::array_to_string(array_type& wa) {
@@ -405,7 +402,7 @@ void Word::cal_a() {
 //				left_a_ += mi;
 //			}
 //		}
-		if (QConf::instance()->do_debug())
+		if (UNISEQ_settings::instance().debug)
 						cout << endl << "calculating overall association score for " << this->chars() << endl;
 		left_a_ = cal_a(size_/2);
 		if ((size_ % 2) == 1)
@@ -417,11 +414,11 @@ void Word::cal_a() {
 double Word::cal_a(int start) {
 	double a = 0.0;
 
-	if (QConf::instance()->mean() == 5
-				&& QConf::instance()->whichmi() == 2)
+	if (UNISEQ_settings::instance().mean == 5
+				&& UNISEQ_settings::instance().mi == 2)
 		a = std::numeric_limits<double>::max();
-	else if (QConf::instance()->mean() == 5
-			&& QConf::instance()->whichmi() == 3)
+	else if (UNISEQ_settings::instance().mean == 5
+			&& UNISEQ_settings::instance().mi == 3)
 		a = std::numeric_limits<double>::min();
 
 	int count = 0;
@@ -443,7 +440,7 @@ double Word::cal_a(int start) {
 			double sign = (mi > 0) ? 1.0 : -1.0;
 			double tmp = sign * mi * mi;
 
-			if (QConf::instance()->do_debug())
+			if (UNISEQ_settings::instance().debug)
 				cout << "calculating association score for log "
 					<< ww->chars() << "(" << ww->p() << ") over "
 					<< lw->chars() << "(" << lw->p() << ") "
@@ -456,8 +453,8 @@ double Word::cal_a(int start) {
 			if (mi < 0)
 				assert(sign == -1.0);
 
-			if (QConf::instance()->mean() == 5) {
-				switch (QConf::instance()->whichmi()) {
+			if (UNISEQ_settings::instance().mean == 5) {
+				switch (UNISEQ_settings::instance().mi) {
 					case 1: // sum
 					case 4: // mean, average
 						a += tmp;
@@ -482,8 +479,8 @@ double Word::cal_a(int start) {
 		}
 	}
 
-	if (QConf::instance()->mean() == 5
-			&& QConf::instance()->whichmi() == 4)
+	if (UNISEQ_settings::instance().mean == 5
+			&& UNISEQ_settings::instance().mi == 4)
 		a /= count;
 
 	return a;

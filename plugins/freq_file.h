@@ -12,11 +12,6 @@
 #include "freq.h"
 
 class FreqFile : public File {
-	typedef Freq::string_type						string_type;
-	typedef Freq::word_type 						word_type;
-	typedef Freq::word_ptr_type						word_ptr_type;
-	typedef Freq::array_type						array_type;
-	typedef Freq::string_array						string_array;
 
 public:
 	static const int UNICODE_CHAR_LENGTH = IndexFile::UNICODE_CHAR_LENGTH;

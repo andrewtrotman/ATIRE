@@ -6,7 +6,7 @@
  */
 
 #include "qdoc.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 #include "convert.h"
 #include "qzer.h"
 #include "qfreq.h"
@@ -39,7 +39,7 @@ void QDoc::init() {
 
 		while (begin <= end) {
 			string_type str = (*begin)->to_string();
-			if (AppConf::instance().lang() == stpl::ENGLISH) {
+			if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 				tolower(str);
 			}
 			//sents_[sents_.size() - 1].append(str);
@@ -50,10 +50,10 @@ void QDoc::init() {
 
 	}
 
-	if (AppConf::instance().do_save()) {
+	if (UNISEQ_settings::instance().do_save()) {
 		this->EXT_NAME = "txt";
 		name(doc_->name());
-		path(AppConf::instance().opath() + string(AppConf::instance().separator()));
+		path(UNISEQ_settings::instance().opath() + string(UNISEQ_settings::instance().separator()));
 		wopen();
 	}
 }
@@ -78,16 +78,16 @@ void QDoc::qzerit() {
 
 				if (/*(str.length() > 0
 						&& (!QFreq::instance().freq().find(str))
-						&& (QFreq::instance().freq().array_size() >= QConf::instance()->max())
+						&& (QFreq::instance().freq().array_size() >= UNISEQ_settings::instance().max())
 						)
-					|| */count >= QConf::instance()->max()) {
+					|| */count >= UNISEQ_settings::instance().max()) {
 					break;
 				}
 
 				last = begin;
 
 				a_char = (*begin)->to_string();
-				if (AppConf::instance().lang() == stpl::ENGLISH) {
+				if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 					tolower(a_char);
 				}
 				//sents_[sents_.size() - 1].append(a_char);
@@ -99,7 +99,7 @@ void QDoc::qzerit() {
 			//str.insert(0, last_word);
 
 			QZer qzer;
-			if (QConf::instance()->verbose())
+			if (UNISEQ_settings::instance().verbose())
 				cout << "Now segmenting:" << str << endl;
 
 //			if (str == "楊椗光")
@@ -128,13 +128,13 @@ void QDoc::qzerit() {
 			/**
 			 * if the segment size is greater than three, then check whether it can be further broken down
 			 */
-			if (AppConf::instance().repeat()) {
+			if (UNISEQ_settings::instance().repeat()) {
 				array_type::iterator it = qzer.list().begin();
 				for (; it != qzer.list().end();) {
 					if ((*it)->size() >= 3) {
 						QZer ano_qzer;
 
-						if (QConf::instance()->verbose())
+						if (UNISEQ_settings::instance().verbose())
 							cout << "Checking segment:" << (*it)->chars() << endl;
 
 						ano_qzer.doit((*it)->chars());
@@ -149,32 +149,32 @@ void QDoc::qzerit() {
 									|| last_w->size() == 1){
 
 								// if stop words found, then further break down, no then no
-								if (!(AppConf::instance().stopwords().find(first_w->chars())
-										|| AppConf::instance().stopwords().find(last_w->chars())))
+								if (!(UNISEQ_settings::instance().stopwords().find(first_w->chars())
+										|| UNISEQ_settings::instance().stopwords().find(last_w->chars())))
 									break_flag = false;
 							}
 
 							if (break_flag) {
-								if (QConf::instance()->do_debug()) cout << "Removing " << (*it)->chars() << endl;
+								if (UNISEQ_settings::instance().do_debug()) cout << "Removing " << (*it)->chars() << endl;
 								it = qzer.list().erase(it);
 
 								array_type::iterator insert_pos = it;
 
-								if (QConf::instance()->do_debug()) cout << "Now the current is " << ((insert_pos != qzer.list().end())? (*insert_pos)->chars() : "THE END" )<< endl;
+								if (UNISEQ_settings::instance().do_debug()) cout << "Now the current is " << ((insert_pos != qzer.list().end())? (*insert_pos)->chars() : "THE END" )<< endl;
 
 								for (array_type::iterator iner_it = ano_qzer.list().begin();
 										iner_it != ano_qzer.list().end();
 										iner_it++) {
-									if (QConf::instance()->do_debug()) cout << "Insert before " << ((insert_pos != qzer.list().end())? (*insert_pos)->chars() : "THE END" ) << endl;
+									if (UNISEQ_settings::instance().do_debug()) cout << "Insert before " << ((insert_pos != qzer.list().end())? (*insert_pos)->chars() : "THE END" ) << endl;
 									insert_pos = qzer.list().insert(insert_pos, (*iner_it));
 									insert_pos++;
 								}
 								it = insert_pos;
-								if (QConf::instance()->do_debug()) cout << "Confirm the current is " << ((insert_pos != qzer.list().end())? (*insert_pos)->chars() : "THE END" ) << endl;
+								if (UNISEQ_settings::instance().do_debug()) cout << "Confirm the current is " << ((insert_pos != qzer.list().end())? (*insert_pos)->chars() : "THE END" ) << endl;
 
 								if (it == qzer.list().end()) {
 									if (qzer.list().size() > 1 && last < end) {
-										if (QConf::instance()->do_debug()) cout << "popping back " << qzer.list().back()->chars() << endl;
+										if (UNISEQ_settings::instance().do_debug()) cout << "popping back " << qzer.list().back()->chars() << endl;
 										begin -= qzer.list().back()->size();
 										qzer.list().pop_back();
 										break;
@@ -190,10 +190,10 @@ void QDoc::qzerit() {
 
 			qzer.show();
 			collect(qzer.list());
-			if (AppConf::instance().do_save())
+			if (UNISEQ_settings::instance().do_save())
 				save(qzer.list());
 
-			if (QConf::instance()->verbose())
+			if (UNISEQ_settings::instance().verbose())
 				cout << "Finished segmentation of " << str << endl;
 
 		} while (begin <= end);

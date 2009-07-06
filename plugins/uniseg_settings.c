@@ -8,7 +8,7 @@
 
 #include "uniseg_settings.h"
 
-LIB_uniseg_settings::LIB_uniseg_settings()
+UNISEQ_settings::UNISEQ_settings()
 {
 #ifdef DEBUG
 	debug = true;
@@ -23,8 +23,7 @@ to_skip = 1;
 skip_high = 0;
 skip_low = 0;
 
-lang = stpl::UNKNOWN;
-format = XML;
+lang = uniseg_encoding::UNKNOWN;
 
 reward = false;
 mean = 1;
@@ -33,10 +32,37 @@ mi = 0;
 max = 5;
 
 #ifdef _MSC_VER
-	sep_[0] = '\';
+	sep[0] = '\\';
 #else
-	sep_[0] = '/';
+	sep[0] = '/';
+#endif
 
-sep_[1] = '\0';
+sep[1] = '\0';
 }
 
+UNISEQ_settings& UNISEQ_settings::instance() {
+	static UNISEQ_settings inst;
+	return inst;
+}
+
+bool UNISEQ_settings::skipit(int size, int freq) {
+	if (skip.size() <= 0)
+		return false;
+
+	std::vector<int>::iterator ret = std::find(skip.begin(), skip.end(), size);
+	if (ret != skip.end()) {
+		if (skip_low == 0 && skip_high != 0) {
+			if (freq > skip_high)
+				return true;
+		}
+		else if (skip_high == 0 && skip_low != 0) {
+			if (freq < skip_low)
+				return true;
+		}
+		else {
+			if (freq > skip_low && freq < skip_high)
+				return true;
+		}
+	}
+	return false;
+}

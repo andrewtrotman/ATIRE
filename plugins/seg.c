@@ -8,7 +8,7 @@
 #include "seg.h"
 #include "doc_freq.h"
 #include "clist.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 #include "qfreq.h"
 
 #include <cassert>
@@ -110,7 +110,7 @@ void Seger::build() {
 
 	// remove those nodes without end
 	// clist_.remove_no_end();
-	if (AppConf::instance().verbose()) {
+	if (UNISEQ_settings::instance().verbose()) {
 		TIMINGS_DECL();
 		TIMINGS_START();
 
@@ -163,8 +163,8 @@ void Seger::do_some_calculations() {
 void Seger::seg() {
 	clist_.cal(&freq_);
 
-	if (QConf::instance()->mean() == 4
-			|| QConf::instance()->mean() == 5)
+	if (UNISEQ_settings::instance().mean() == 4
+			|| UNISEQ_settings::instance().mean() == 5)
 		clist_.sort(false);
 	else
 		clist_.sort(true);

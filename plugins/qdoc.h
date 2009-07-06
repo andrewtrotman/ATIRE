@@ -12,7 +12,7 @@
 #include <set>
 
 #include "file.h"
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "doc.h"
 #include "freq.h"
 

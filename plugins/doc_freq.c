@@ -1,5 +1,5 @@
 #include "doc_freq.h"
-#include "qconf.h"
+#include "uniseg_settings.h"
 #include "doc.h"
 #include "convert.h"
 
@@ -19,7 +19,7 @@ void FreqCounter::count(int max, int min) {
 
 	//c_parser.parse();
 
-	Doc a_doc(QConf::instance()->lang(), stream_);
+	Doc a_doc(UNISEQ_settings::instance().lang(), stream_);
 	a_doc.parse();
 	if (a_doc.doc().count() <= 0)
 		return;
@@ -53,7 +53,7 @@ void FreqCounter::count(Doc& a_doc, int max, int min) {
 
 /*	/// find the first valid character
 	do {
-		if ((*it)->lang() == QConf::instance()->lang()) {
+		if ((*it)->lang() == UNISEQ_settings::instance().lang()) {
 			begin = it;
 			it++;
 			break;
@@ -62,7 +62,7 @@ void FreqCounter::count(Doc& a_doc, int max, int min) {
 	} while (it != a_doc.doc().iter_end());
 
 	for (; it != a_doc.doc().iter_end(); it++) {
-		if ((*it)->lang() != QConf::instance()->lang()) continue;
+		if ((*it)->lang() != UNISEQ_settings::instance().lang()) continue;
 
 		// boundary arrives, like punctuation, symbols, characters in other languages
 		if (it != a_doc.doc().iter_begin() && (*it)->begin() != (*prev)->end()) {
@@ -119,7 +119,7 @@ void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, 
 			Freq::string_array ca;
 			for (; start != to; start++) {
 				string_type str = (*start)->to_string();
-				if (QConf::instance()->lang() == stpl::ENGLISH) {
+				if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 					// for debug
 					//cout << "before transform: " << str << endl;
 					tolower(str);
@@ -151,12 +151,12 @@ void FreqCounter::assign_array() {
 	wa_.clear();
 	//assert(wa_.size() == 0);
 	freq_->to_array(wa_);
-	std::sort(wa_.begin(), wa_.end(), SEGMENTATION::Word::cmp_just_freq);
+	std::sort(wa_.begin(), wa_.end(), Word::cmp_just_freq);
 	remove_array_r();
 
 	/// we need to do the sort again, because after remove the redundancy
 	/// the frequency changes
-	std::sort(wa_.begin(), wa_.end(), SEGMENTATION::Word::cmp_just_freq);
+	std::sort(wa_.begin(), wa_.end(), Word::cmp_just_freq);
 }
 
 void FreqCounter::remove_array_r() {

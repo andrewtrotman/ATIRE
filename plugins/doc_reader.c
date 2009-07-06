@@ -9,15 +9,15 @@
 using namespace stpl;
 using namespace std;
 
-DocumentReader* DocumentReader::create(QConf::Format format) {
+DocumentReader* DocumentReader::create(UNISEQ_settings::Format format) {
 	switch (format) {
-	case QConf::TEXT:
+	case UNISEQ_settings::TEXT:
 		return reinterpret_cast<DocumentReader*>(new TextReader);
 
-	case QConf::XML:
+	case UNISEQ_settings::XML:
 		return reinterpret_cast<DocumentReader*>(new XmlReader);
 
-	case QConf::TREC:
+	case UNISEQ_settings::TREC:
 		return reinterpret_cast<DocumentReader*>(new TrecReader);
 
 	default:
@@ -49,7 +49,7 @@ void XmlReader::read(const char* filename, string_type& stream) {
 
 	//parser.root()->all_text(counter.stream());
 	parser.root()->all_text(stream, nm, false, true);
-	if (QConf::instance()->do_debug()) {
+	if (UNISEQ_settings::instance().do_debug()) {
 		cout << __FILE__ << ":" << __LINE__ << endl;
 		cout << "stream: " << stream << endl;
 	}

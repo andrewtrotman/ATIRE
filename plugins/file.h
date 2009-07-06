@@ -14,9 +14,9 @@
 
 class File {
 public:
-	typedef SEGMENTATION::Word::array_type			array_type;
-	typedef SEGMENTATION::Word::word_type			word_type;
-	typedef SEGMENTATION::Word::word_ptr_type		word_ptr_type;
+	typedef Word::array_type			array_type;
+	typedef Word::word_type			word_type;
+	typedef Word::word_ptr_type		word_ptr_type;
 
 public:
 	std::string EXT_NAME;

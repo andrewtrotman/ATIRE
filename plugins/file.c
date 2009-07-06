@@ -6,7 +6,7 @@
  */
 
 #include "file.h"
-#include "qconf.h"
+#include "uniseg_settings.h"
 #include <iostream>
 #include <string>
 #include <utils/fs.h>
@@ -30,7 +30,7 @@ File::~File() {
 
 void File::setup() {
 	//name_.append(EXT_NAME);
-	//string path = string(QConf::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
+	//string path = string(UNISEQ_settings::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
 	//cout << "path: " << path << endl;
 	//path.push_back(FILESYSTEM::File<std::string>::SEPARATOR);
 	filename_ = name_ + EXT_NAME;

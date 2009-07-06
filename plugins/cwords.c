@@ -1,12 +1,14 @@
 #include "cwords.h"
-#include "qconf.h"
-#include "qfreq.h"
 
 #include <algorithm>
 #include <iostream>
 #include <cassert>
 #include <cmath>
 #include <limits>
+
+#include "uniseg_settings.h"
+#include "uniseg_settings.h"
+#include "qfreq.h"
 
 using namespace std;
 
@@ -79,7 +81,7 @@ void CWords::adjust_pos(const_word_ptr w_ptr) {
 
 double CWords::cal(Freq* freq) {
 	score_ = 0;
-	switch(QConf::instance()->mean()) {
+	switch(UNISEQ_settings::instance().mean) {
 		case 1:
 			cal_harmonic_mean(freq);
 			break;
@@ -96,7 +98,7 @@ double CWords::cal(Freq* freq) {
 			cal_reverse_mi2(freq);
 			break;
 		case 6:
-			cal_mi(freq, QConf::instance()->whichmi());
+			cal_mi(freq, UNISEQ_settings::instance().mi);
 			break;
 		default:
 			break;
@@ -278,7 +280,7 @@ void CWords::cal_reverse_mi2(Freq* freq) {
 		assert(lr_w != NULL);
 		assert(lr_w->p() != 0.0);
 
-		if (QConf::instance()->whichmi() <= 0) {
+		if (UNISEQ_settings::instance().mi <= 0) {
 				double mi = log(lr_w->p()/(lw->p()*rw->p()));
 				double sign = (mi > 0) ? 1.0 : -1.0;
 
@@ -354,7 +356,7 @@ void CWords::cal_mi(Freq* freq, int switcher) {
 }
 
 void CWords::add_reward_or_penalty(Freq* freq){
-	if (QConf::instance()->reward())
+	if (UNISEQ_settings::instance().reward)
 		get_reward_or_penalty(freq);
 }
 /***
@@ -367,7 +369,7 @@ void CWords::get_reward_or_penalty(Freq* freq) {
 	int k = QFreq::instance().freq().array_size();
 	double n = static_cast<double>(cwords_.size());
 
-	switch (QConf::instance()->mean()) {
+	switch (UNISEQ_settings::instance().mean) {
 	case 1:
 	case 3:
 	{
@@ -376,9 +378,9 @@ void CWords::get_reward_or_penalty(Freq* freq) {
 		double cons_v = 0.0;
 		double cons_p = 1.16;
 
-		if (QConf::instance()->lang() == stpl::ENGLISH)
+		if (UNISEQ_settings::instance().lang == uniseg_encoding::ENGLISH)
 			cons_v = sqrt(2 * n);
-		else if (QConf::instance()->lang() == stpl::CHINESE)
+		else if (UNISEQ_settings::instance().lang == uniseg_encoding::CHINESE)
 			cons_v = 9.0;
 
 		if (n > 0)
@@ -406,7 +408,7 @@ void CWords::get_reward_or_penalty(Freq* freq) {
 			int prefer_n = (len_ + 1)/2; //len_ > 3 ? (len_ + 1)/2 : 1;
 
 			if (ipr > 2/*&& prefer_n != n*/) {
-				if (QConf::instance()->do_debug())
+				if (UNISEQ_settings::instance().debug)
 					cout << "Discriminate " << to_string() << endl;
 				/*ipr = len_/num_w + 1;
 				if (ipr > len_)

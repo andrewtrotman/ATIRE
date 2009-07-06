@@ -3,7 +3,7 @@
 
 #include "freq.h"
 #include <vector>
-#include "qtypes.h"
+#include "uniseg_types.h"
 #include "seg.h"
 
 class QZer {

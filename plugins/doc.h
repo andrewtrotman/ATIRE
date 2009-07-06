@@ -16,7 +16,7 @@
 
 class Doc {
 public:
-	typedef SEGMENTATION::Word::string_type							string_type;
+	typedef Word::string_type							string_type;
 	typedef stpl::UNICODE::UniChar<stpl::CHINESE + stpl::NUMBER + stpl::PUNCTUATION, string_type>		chinese_char;
 	typedef stpl::UNICODE::UniChar<stpl::ENGLISH + stpl::NUMBER + stpl::PUNCTUATION, string_type>		english_char;
 	typedef stpl::UNICODE::UniChar<stpl::UNKNOWN, string_type>		uni_char;

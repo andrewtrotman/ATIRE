@@ -6,7 +6,7 @@
  */
 
 #include "fdoc.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 #include <limits>
 
 FDoc::FDoc(Doc* doc) : MDoc::MDoc(doc){
@@ -20,7 +20,7 @@ FDoc::~FDoc() {
 void FDoc::extract_bigram(int start, int end){
 	MPair* pair = pairs_[start];
 	double a = pair->score();
-	double threhold = AppConf::instance().threshold();
+	double threhold = UNISEQ_settings::instance().threshold();
 
 	if (a > threhold) {
 		MPair* next = NULL;

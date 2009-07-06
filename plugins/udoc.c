@@ -8,7 +8,7 @@
 
 #include "udoc.h"
 #include "qfreq.h"
-#include "app_conf.h"
+#include "uniseg_settings.h"
 #include "convert.h"
 
 using namespace std;
@@ -42,7 +42,7 @@ void UDoc::init() {
 
 		while (begin <= end) {
 			string_type str = (*begin)->to_string();
-			if (AppConf::instance().lang() == stpl::ENGLISH) {
+			if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 				tolower(str);
 			}
 			//sents_[sents_.size() - 1].append(str);
@@ -53,10 +53,10 @@ void UDoc::init() {
 		cout << sent << endl;
 	}*/
 
-	if (AppConf::instance().do_save()) {
+	if (UNISEQ_settings::instance().do_save()) {
 		this->EXT_NAME = "txt";
 		name(doc_->name());
-		path(AppConf::instance().opath() + string(AppConf::instance().separator()));
+		path(UNISEQ_settings::instance().opath() + string(UNISEQ_settings::instance().separator()));
 		wopen();
 	}
 }
@@ -165,7 +165,7 @@ void UDoc::seg(){
 
 		/// show for temporary
 		show();
-		if (AppConf::instance().do_save())
+		if (UNISEQ_settings::instance().do_save())
 			save();
 		collect();
 	}
@@ -328,7 +328,7 @@ void UDoc::resolve_conflict() {
 
 				// sub_len must be greater than 0,
 				// otherwise the whole current node is a part of the next word
-				if (sub_len > 0 && found_w_ptr->freq() > AppConf::instance().to_skip()) {
+				if (sub_len > 0 && found_w_ptr->freq() > UNISEQ_settings::instance().to_skip()) {
 					iter->second = found_w_ptr;
 					frange_ptr->right(frange_ptr->right() - ol_n);
 				} else {
@@ -358,7 +358,7 @@ void UDoc::find_missing(const entity_iterator begin, const entity_iterator end) 
 			do {
 				len++;
 				string_type a_char = (*(begin + i))->to_string();
-				if (AppConf::instance().lang() == stpl::ENGLISH) {
+				if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 					tolower(a_char);
 				}
 				substr.append(a_char);
@@ -396,7 +396,7 @@ int UDoc::find(word_ptr_type w_ptr
 			entity_iterator cur = next + i;
 
 			string_type str = (*cur)->to_string();
-			if (AppConf::instance().lang() == stpl::ENGLISH) {
+			if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
 				tolower(str);
 			}
 			if (ca[i]->chars() != str)

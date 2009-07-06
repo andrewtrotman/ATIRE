@@ -1,12 +1,12 @@
 #ifndef DOC_READER_H_
 #define DOC_READER_H_
 
-#include "qconf.h"
-#include "qtypes.h"
+#include "uniseg_settings.h"
+#include "uniseg_types.h"
 
 class DocumentReader {
 public:
-	static DocumentReader* create(QConf::Format);
+	static DocumentReader* create(UNISEQ_settings::Format);
 	virtual void read(const char* filename, string_type& stream) = 0;
 };
 

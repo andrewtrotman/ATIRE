@@ -1,4 +1,4 @@
-#include "qconf.h"
+#include "uniseg_settings.h"
 
 #include <cstdlib>
 #include <utils/fs.h>
@@ -7,18 +7,18 @@
 
 using namespace std;
 
-const char QConf::DEFAULT_HOME[] = {"."};
-const char QConf::DEFAULT_HOME_V_NAME[] = {"QLINK_HOME"};
-const char QConf::DEFAULT_VAR[] = {"var"};
-const char QConf::DEFAULT_INDEX[] = {"index"};
-const char QConf::DEFAULT_ZH[] = {"zh"};
-const char QConf::DEFAULT_EN[] = {"en"};
+const char UNISEQ_settings::DEFAULT_HOME[] = {"."};
+const char UNISEQ_settings::DEFAULT_HOME_V_NAME[] = {"QLINK_HOME"};
+const char UNISEQ_settings::DEFAULT_VAR[] = {"var"};
+const char UNISEQ_settings::DEFAULT_INDEX[] = {"index"};
+const char UNISEQ_settings::DEFAULT_ZH[] = {"zh"};
+const char UNISEQ_settings::DEFAULT_EN[] = {"en"};
 
-const char QConf::GOOD[] = {"good"};
+const char UNISEQ_settings::GOOD[] = {"good"};
 
-QConf* QConf::qconf_ptr_ = NULL;
+QConf* UNISEQ_settings::qconf_ptr_ = NULL;
 
-QConf::QConf() {
+UNISEQ_settings::QConf() {
 	load_ = false;
 	verbose_ = false;
 
@@ -44,11 +44,11 @@ QConf::QConf() {
 	setup_home();
 }
 
-QConf::~QConf() {
+UNISEQ_settings::~QConf() {
 
 }
 
-QConf* QConf::instance() {
+QConf* UNISEQ_settings::instance() {
 	if (!qconf_ptr_) {
 		/**
 		 * TODO throw an exception here
@@ -63,7 +63,7 @@ QConf* QConf::instance() {
 	*/
 }
 
-void QConf::usage() {
+void UNISEQ_settings::usage() {
 	if(opt_.hasOptions())
 		opt_.printUsage();
 	else
@@ -71,7 +71,7 @@ void QConf::usage() {
 	exit(0);
 }
 
-void QConf::options() {
+void UNISEQ_settings::options() {
     opt_.setFlag(  "help", 'h' );   /* a flag (takes no argument), supporting long and short form */
     opt_.setFlag(  "verbose", 'v' );
     opt_.setFlag(  "debug" );
@@ -92,7 +92,7 @@ void QConf::options() {
 	opt_.setFlag(  "reward" );
 }
 
-void QConf::process(int argc, char** argv) {
+void UNISEQ_settings::process(int argc, char** argv) {
 	opt_.processCommandArgs( argc, argv );
 
 	app_name_ = argv[0];
@@ -105,7 +105,7 @@ void QConf::process(int argc, char** argv) {
 	setup_wd();
 }
 
-void QConf::process_lang() {
+void UNISEQ_settings::process_lang() {
 	if( opt_.getValue( "lang" ) != NULL ) {
 	   	std::string lang(opt_.getValue( "lang" ));
 	   	//cout << "lang: " << lang << endl;
@@ -124,7 +124,7 @@ void QConf::process_lang() {
 	}
 }
 
-void QConf::process_format() {
+void UNISEQ_settings::process_format() {
 	if( opt_.getValue( "format" ) != NULL || opt_.getValue( 'f' ) != NULL  ) {
 		std::string format(opt_.getValue( "format" ));
 		if (format == "xml")
@@ -139,7 +139,7 @@ void QConf::process_format() {
 	}
 }
 
-void QConf::process_skipping() {
+void UNISEQ_settings::process_skipping() {
 
 	if( opt_.getValue( 'k' ) != NULL  || opt_.getValue( "skip" ) != NULL  )
 		chars_to_array(static_cast<const char*>(opt_.getValue( "skip" )), skip_);
@@ -154,7 +154,7 @@ void QConf::process_skipping() {
 	    skip_low_ =  atoi(opt_.getValue( "skip-low" ));
 }
 
-void QConf::process_others() {
+void UNISEQ_settings::process_others() {
     if( opt_.getFlag( "help" ) || opt_.getFlag( 'h' ) ) {
         usage();
         exit(0);
@@ -211,13 +211,13 @@ void QConf::process_others() {
 	}
 }
 
-void QConf::process_ras() {
+void UNISEQ_settings::process_ras() {
 	if (ras_.size() == 0)
 		for( int i = 0 ; i < opt_.getArgc() ; i++ )
 			ras_.push_back(opt_.getArgv( i ));
 }
 
-void QConf::ras_to_files(std::vector<std::string>& files, bool recursive) {
+void UNISEQ_settings::ras_to_files(std::vector<std::string>& files, bool recursive) {
 
 	process_ras();
 
@@ -240,7 +240,7 @@ void QConf::ras_to_files(std::vector<std::string>& files, bool recursive) {
 	}
 }
 
-void QConf::setup_wd() {
+void UNISEQ_settings::setup_wd() {
 	wd_ = string(home_);
 	char ch[2];
 	ch[0] = FILESYSTEM::File<>::SEPARATOR;
@@ -268,7 +268,7 @@ void QConf::setup_wd() {
  *  directory or path for holding "good" (seged) freq
  *
  */
-std::string QConf::good() {
+std::string UNISEQ_settings::good() {
 	string good(wd_);
 	//good.push_back(FILESYSTEM::File<>::SEPARATOR);
 	good.append(sep_);
@@ -278,17 +278,17 @@ std::string QConf::good() {
 	return good;
 }
 
-void QConf::setup_home() {
+void UNISEQ_settings::setup_home() {
 	home_ = getenv(DEFAULT_HOME_V_NAME);
 	if (!home_)
 		home_ = DEFAULT_HOME;
 }
 
-void QConf::skip_level(const char* level) {
+void UNISEQ_settings::skip_level(const char* level) {
 	chars_to_array(level, skip_);
 }
 
-bool QConf::is_skip(int size, int freq) {
+bool UNISEQ_settings::is_skip(int size, int freq) {
 	if (skip_.size() <= 0)
 		return false;
 

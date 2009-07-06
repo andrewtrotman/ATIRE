@@ -9,7 +9,7 @@
 #define MDOC_H_
 
 #include "doc_base.h"
-#include "qtypes.h"
+#include "uniseg_types.h"
 
 #include <string>
 

@@ -9,11 +9,12 @@
 #ifndef __UNISEQ_SETTINGS_H__
 #define __UNISEQ_SETTINGS_H__
 
-class LIB_uniseg_settings
+#include "uniseg_types.h"
+
+class UNISEQ_settings
 {
 public:
 	static const int MAX_CHARS = 100;
-	enum Format {XML, TEXT, TREC};
 
 public:
 	bool 					load;
@@ -27,8 +28,7 @@ public:
 
 	int 					max;
 
-	stpl::Language 			lang;
-	Format 					format;
+	uniseg_encoding::language 	lang;
 
 	std::string 			wd;
 	char  					sep[2];
@@ -37,9 +37,14 @@ public:
 	int 					mean;
 	int 					mi;
 	bool 					reward;
+	bool					optimize;
 
 public:
-	LIB_uniseg_settings();
-	~LIB_uniseg_settings() {}
+	UNISEQ_settings();
+	~UNISEQ_settings() {}
+
+	static UNISEQ_settings& instance();
+
+	bool skipit(int size, int freq);
 };
 #endif /* __UNISEQ_SETTINGS_H__ */
