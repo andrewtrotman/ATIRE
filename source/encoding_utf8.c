@@ -11,9 +11,9 @@
 	ANT_ENCODING_UTF8::TEST_UTF8CHAR()
 	----------------------------------
 */
-int ANT_encoding_utf8::test_utf8char(unsigned char *c)
+size_t ANT_encoding_utf8::test_utf8char(unsigned char *c)
 {
-int num_of_bytes = 0;
+size_t num_of_bytes = 0;
 unsigned char code = *c;
 
 if (code >= 0xFC && code <=0xFD)
@@ -44,7 +44,7 @@ return num_of_bytes;
 	ANT_ENCODING_UTF8::IS_VALID_CHAR()
 	----------------------------------
 */
-long ANT_encoding_utf8::is_valid_char(unsigned char *c)
+bool ANT_encoding_utf8::is_valid_char(unsigned char *c)
 {
 if (0 <= *c && *c <= 0x7F) // ASCII characters
 	{
@@ -58,7 +58,7 @@ if (0 <= *c && *c <= 0x7F) // ASCII characters
 
 bytes = test_utf8char(c);
 if (bytes > 0)
-	if (is_chinese_codepoint(to_codepoint(c)))
+	if (is_chinese_codepoint(to_codepoint(c, bytes)))
 		{
 		current_lang = CHINESE;
 		return true;
@@ -72,7 +72,16 @@ return false;
 	ANT_ENCODING_UTF8::TO_CODEPOINT()
 	---------------------------------
 */
-unsigned int ANT_encoding_utf8::to_codepoint(unsigned char *utf8_char)
+unsigned long ANT_encoding_utf8::to_codepoint(unsigned char *utf8_char)
+{
+return to_codepoint(utf8_char, test_utf8char(utf8_char);
+}
+
+/*
+	ANT_ENCODING_UTF8::TO_CODEPOINT()
+	---------------------------------
+*/
+unsigned long ANT_encoding_utf8::to_codepoint(unsigned char *utf8_char, size_t num_of_bytes)
 {
 // Identifier with _c suffix mean that it is a constant variable
 const unsigned int max_bytes_c = 6;  // Maximum bytes of utf8 encoding for purpose of shifting into codepoint
@@ -84,30 +93,30 @@ unsigned int high_min = min_c;
 int code = 0;
 
 //int length = utf8_char.end() - utf8_char.begin();
-if (bytes <= 6 && bytes > 0)
+if (num_of_bytes <= 6 && num_of_bytes > 0)
 	{
 	unsigned char b1 = utf8_char[0];
 
-	if (bytes == 1)
+	if (num_of_bytes == 1)
 		return b1;
 
 	// deciding the first byte valid or not
 	unsigned int i;
-	for (i = 0; i < (bytes - 1); i++)
+	for (i = 0; i < (num_of_bytes - 1); i++)
 		high_min = (high_min >> 1) + min_c;
 
-	for (i = 0; i < (7 - (bytes + 1)); i++)
+	for (i = 0; i < (7 - (num_of_bytes + 1)); i++)
 		low_max = (low_max << 1) + max_c;
 
 	if (b1 <= (high_min + low_max) && b1 >= high_min)
 		{
 		code = b1 - high_min;
-		for (i = 1; i < bytes; i++)
+		for (i = 1; i < num_of_bytes; i++)
 			{
 			unsigned char b = utf8_char[i];
 			if (b < min_c || b > (min_c + max_rest_c))
 				{
-				code = -2;
+				code = 0;
 				break;
 				}
 			code = code << max_bytes_c;
@@ -116,6 +125,5 @@ if (bytes <= 6 && bytes > 0)
 
 		}
 	}
-// TODO if code = -1, throw a exception say this is not a valid utf8 char
 return code;
 }

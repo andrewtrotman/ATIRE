@@ -27,7 +27,7 @@ public:
 	ANT_encoding() : current_lang(ENGLISH), bytes(0) {}
 	virtual ~ANT_encoding() {}
 
-	virtual long is_valid_char(unsigned char *c) = 0;
+	virtual bool is_valid_char(unsigned char *c) = 0;
 	virtual void tolower(unsigned char *c) = 0;
 	virtual void toupper(unsigned char *c) = 0;
 

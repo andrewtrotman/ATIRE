@@ -1,5 +1,5 @@
 #AUTOMAKE_OPTIONS = foreign
-SUBDIRS = plugins
+#SUBDIRS = plugins
 
 SRCDIR = source
 

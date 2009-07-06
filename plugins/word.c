@@ -72,15 +72,18 @@ bool Word::cmp_just_freq(Word *w1, Word *w2) {
 
 bool Word::cmp_freq(Word *w1, Word *w2) {
 	int h1, h2;
-	if (!w1->has_parent() || !w2->has_parent()) {
+	if (!w1->has_parent() || !w2->has_parent())
+	{
 		h1 = w1->freq();
 		h2 = w2->freq();
 
 		assert(w1->size() == 1);
 		assert(w2->size() == 1);
 		if (h1 == h2)
-			return UNICODE::Utf8<string_type>::code(w1->chars())
-				< UNICODE::Utf8<string_type>::code(w2->chars());
+			{
+			return ANT_encoding_utf8::to_codepoint(w1->chars().c_str())
+				< ANT_encoding_utf8::to_codepoint(w2->chars().c_str());
+			}
 		return h1 > h2;
 	}
 
@@ -363,16 +366,17 @@ void Word::cal_p(double base) {
 
 	assert(base_ != 0.0);
 	p_ = static_cast<double>(freq())/base_;*/
-	if (QConf::instance()->do_debug())
+#ifdef DEBUG
 		cout << "Calculating probabilty of "
 			<< chars() << " with "
 			<< freq() << " over "
 			<< base << endl;
+#endif
 
 	assert(base != 0.0);
 
 	//if (p == 0.0)
-		p_ = static_cast<double>(freq())/base;
+	p_ = static_cast<double>(freq())/base;
 
 }
 
