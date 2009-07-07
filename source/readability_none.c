@@ -32,9 +32,9 @@ return 0;
 }
 
 /*
-	ANT_READABILITY_NONE::ADD_NODE()
-	--------------------------------
+	ANT_READABILITY_NONE::ADD_TOKEN()
+	---------------------------------
 */
-void ANT_readability_none::add_node(ANT_memory_index_hash_node *token)
+void ANT_readability_none::add_token(ANT_string_pair *token)
 {
 }

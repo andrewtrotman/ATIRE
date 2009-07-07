@@ -25,7 +25,7 @@ public:
 	ANT_string_pair *get_next_token();
 	void set_document(unsigned char *);
 	long score();
-	void add_node(ANT_memory_index_hash_node *);
+	void add_token(ANT_string_pair *);
 
 	void set_measure(unsigned long);
 	void set_parser(ANT_parser *);

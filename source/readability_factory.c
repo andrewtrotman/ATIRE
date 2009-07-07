@@ -57,10 +57,10 @@ measure->set_parser(parser);
 }
 
 /*
-	READABILITY_FACTORY::ADD_NODE()
+	READABILITY_FACTORY::ADD_TOKEN()
 	-------------------------------
 */
-void ANT_readability_factory::add_node(ANT_memory_index_hash_node *node)
+void ANT_readability_factory::add_token(ANT_string_pair *token)
 {
-measure->add_node(node);
+measure->add_token(token);
 }

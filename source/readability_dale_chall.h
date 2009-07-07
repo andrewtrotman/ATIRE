@@ -21,15 +21,16 @@ public:
 	ANT_string_pair *get_next_token();
 	void set_document(unsigned char *);
 	long score();
-	void add_node(ANT_memory_index_hash_node *);
+	void add_token(ANT_string_pair *) {};
+	void add_token(char *);
 
 private:
 	unsigned long number_of_sentences;
 	unsigned long number_of_words;
 	unsigned long number_of_unfamiliar_words;
 	unsigned long size; // maximum size of list of words encountered
-	ANT_memory_index_hash_node **words_encountered;
-	
+	char **words_encountered;
+
 	static const unsigned long initial_size = 50;
 };
 

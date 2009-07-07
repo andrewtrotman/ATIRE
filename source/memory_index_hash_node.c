@@ -92,7 +92,7 @@ ANT_compress_variable_byte::compress_into(dest, docno);
 	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
 	-----------------------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index_hash_node::add_posting(ANT_string_pair *keyword, long long docno)
+void ANT_memory_index_hash_node::add_posting(ANT_string_pair *keyword, long long docno)
 {
 unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
 long needed, remain;
@@ -160,7 +160,6 @@ else
 	stats->term_occurences++;
 	tf_node_used++;
 	}
-return this;
 }
 
 /*

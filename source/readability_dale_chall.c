@@ -15,7 +15,7 @@ ANT_readability_dale_chall::ANT_readability_dale_chall()
 {
 number_of_words = number_of_sentences = number_of_unfamiliar_words = 0;
 size = initial_size;
-words_encountered = new ANT_memory_index_hash_node *[initial_size];
+words_encountered = new char*[initial_size];
 }
 
 /*
@@ -34,11 +34,19 @@ delete [] words_encountered;
 ANT_string_pair *ANT_readability_dale_chall::get_next_token()
 {
 ANT_string_pair *token = parser->get_next_token();
-//char *stoken = token->str();
-//
-//number_of_sentences += strcountchr(stoken, '.') + strcountchr(stoken, '?') + strcountchr(stoken, '!');
-//
-// Getting a segfault with the above and can't track the cause down
+char *stoken;
+
+if (token == '\0') return token;
+
+stoken = token->str();
+
+number_of_sentences += strcountchr(stoken, '.') + strcountchr(stoken, '?') + strcountchr(stoken, '!');
+
+add_token(stoken);
+
+//printf("%p --> \"", token);
+//token->text_render();
+//printf("\"\t%ld\t%p\n", number_of_sentences, &stoken);
 
 return token;
 }
@@ -49,21 +57,23 @@ return token;
 */
 long ANT_readability_dale_chall::score()
 {
-ANT_string_pair *token;
+char *token;
 unsigned long start_of_lowercase = 0;
 
-//printf("\nNumber of sentences: %ld\n", number_of_sentences);
+//printf("\n");
+//printf("Number of sentences: %ld\n", number_of_sentences);
+//printf("Number of words: %ld\n", number_of_words);
 
 // sort the list of terms encountered
-qsort(words_encountered, number_of_words, sizeof(*words_encountered), ANT_memory_index_hash_node::term_compare);
+//qsort(words_encountered, number_of_words, sizeof(*words_encountered), scmp);
 
 // find the first word that starts with lower case
-token = &words_encountered[start_of_lowercase]->string;
-while (ANT_isupper(token->start[0]))
-	{
-	start_of_lowercase++;
-	token = &words_encountered[start_of_lowercase]->string;
-	}
+//token = words_encountered[start_of_lowercase];
+//while (ANT_isupper(token[0]))
+//	{
+//	start_of_lowercase++;
+//	token = words_encountered[start_of_lowercase];
+//	}
 
 // for each uppercase word, see if it appears as a lowercase word
 // if it does then check the lowercase version for familiarity
@@ -75,15 +85,14 @@ while (ANT_isupper(token->start[0]))
 // and count the number of times that it appears
 //for (unsigned int i = 0; i < number_of_words; i++)
 //	{
-//	token = &words_encountered[i]->string;
+//	token = words_encountered[i];
 //	if (i == start_of_lowercase)
 //		printf("--------------------\n");
-//	printf("%p --> ", token);
-//	token->text_render();
-//	printf("\n");
+//	printf("%p --> \"%s\"\n", &token, token);
 //	}
 
 // (0.049 * (nw / ns)) + (15.79 * (nu / nw)) + 3.6365
+
 return 0;
 }
 
@@ -98,27 +107,27 @@ number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
 
 // Reset the list of words for this document
 delete [] words_encountered;
-words_encountered = new ANT_memory_index_hash_node *[initial_size];
+words_encountered = new char *[initial_size];
 }
 
 /*
-	ANT_READABILITY_DALE_CHALL::ADD_NODE()
-	--------------------------------------
+	ANT_READABILITY_DALE_CHALL::ADD_TOKEN()
+	----------------------------------------
 */
-void ANT_readability_dale_chall::add_node(ANT_memory_index_hash_node *node)
+void ANT_readability_dale_chall::add_token(char *token)
 {
 if (number_of_words == size)
 	{
 	/*
 		Expand the size of the list of hash nodes, to twice the size it currently it
 	*/
-	ANT_memory_index_hash_node **new_words = new ANT_memory_index_hash_node *[size * 2];
-	memcpy(new_words, words_encountered, sizeof(ANT_memory_index_hash_node *) * size);
+	char **new_words = new char*[size * 2];
+	memcpy(new_words, words_encountered, sizeof(char *) * size);
 	size *= 2;
 	delete [] words_encountered;
 	words_encountered = new_words;
 	}
 
 // add this hash node/word to the list of encountered ones
-words_encountered[number_of_words++] = node;
+words_encountered[number_of_words++] = token;
 }

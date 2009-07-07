@@ -8,7 +8,6 @@
 
 #include "parser.h"
 #include "string_pair.h"
-#include "memory_index_hash_node.h"
 
 /* 
 	class ANT_READABILITY
@@ -23,7 +22,7 @@ public:
 	virtual ANT_string_pair *get_next_token() = 0;
 	virtual void set_document(unsigned char *) = 0;
 	virtual long score() = 0;
-	virtual void add_node(ANT_memory_index_hash_node *) = 0;
+	virtual void add_token(ANT_string_pair *) = 0;
 	
 	void set_parser(ANT_parser *parser) { this->parser = parser; }
 
