@@ -7,10 +7,6 @@
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
 
-const int MAX_TRIE_DEPTH = 10; 	/* Trie holds MAX_TRIE_DEPTH chars */
-const int ALPHABET_SIZE = 26;
-const int ARBITRARY_NUMBER = 300;
-
 class trie_stats {
  private:
 	int freq[MAX_TRIE_DEPTH][ARBITRARY_NUMBER];
@@ -27,7 +23,7 @@ class trie_stats {
 		if (cum_freq >= ARBITRARY_NUMBER)
 			cum_freq = ARBITRARY_NUMBER - 1;
 		if (depth >= MAX_TRIE_DEPTH) {
-			fprintf(stderr, "Trie stats are doing things they shouldn't; depth = %d\n", depth);
+			fprintf(stderr, "'trie_stats' has gone beyond MAX_TRIE_DEPTH. depth = %d\n", depth);
 			return;
 		}
 		freq[depth][cum_freq]++;
@@ -191,8 +187,6 @@ Vocab::Vocab(ANT_search_engine *search_engine) {
 			ANT_search_engine_btree_leaf td;
 			search_engine->get_postings_details(term, &td);
 			trie->add(term, td.collection_frequency);
-			// td.document_frequency;  ??
-			// td.collection_frequency; ?? WHICH ONE?
 		}
 #endif
 }
@@ -220,22 +214,59 @@ void Vocab::print_stats() {
 		printf("Vocab is empty\n");
 }
 
+void Vocab::roulette_wheel_string_builder(int length) {
+    trie_node *node = trie;
+    long pos;
+    
+    str_ptr = buffer + MAX_TRIE_DEPTH;
+    *str_ptr = '\0';
+
+    while (length > 0) {
+        trie_node **next = node->child;
+        trie_node **end = node->child + ALPHABET_SIZE;
+        pos = (long)(rand()) % node->cum_suffix_freq;
+        str_ptr--;
+        while (*next == NULL || pos > (*next)->cum_suffix_freq) {
+            if (*next)
+                pos -= (*next)->cum_suffix_freq;
+            next++;
+            if (next >= end) 
+                return;
+        }
+        *str_ptr = 'a' + (char) (next - node->child); 
+        node = *next;
+        length--;
+    }
+}
+
 /* Does not allocate a string, do not free */
 char *Vocab::strgen() {
+#ifdef USE_STR_LIST
     char *str = strings[rand() % string_count];
     int len = strlen(str);
     str += len;
     if (len > RULE_STRING_MAX)
         len = RULE_STRING_MAX;
     return str - (rand() % len + 1);
+#else
+    int len = rand() % RULE_STRING_MAX + 1;
+    roulette_wheel_string_builder(len);
+    return str_ptr;
+#endif
 }
 
 /* Does not allocate a string, do not free */
 char *Vocab::strgen_2() {
+#ifdef USE_STR_LIST
     char *str = strings[rand() % string_count];
     int len = strlen(str);
     str += len;
     if (len > RULE_STRING_MAX)
         len = RULE_STRING_MAX;
     return str - rand() % (len + 1);
+#else
+    int len = rand() % (RULE_STRING_MAX + 1);
+    roulette_wheel_string_builder(len);
+    return str_ptr;
+#endif
 }

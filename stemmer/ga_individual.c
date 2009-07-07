@@ -217,24 +217,17 @@ void GA_individual::generate(Vocab *v) {
         if (rules[i * RULE_SIZE] == MEASURE_MAX)
             rules[i * RULE_SIZE] = SEPARATOR;
 
-
 	/* 
 	   Checking both strings in the representation against the banned
 	   list ensures that there are no rules that perform the stem by 
 	   adding an ending. 
 	*/
 	char *s;
-	while ((s = v->strgen()) && !is_banned(s)) 
-	  ;
-	strncpy(rules + (i * RULE_SIZE) + 1,
-		s,
-		RULE_STRING_MAX);
+	while ((s = v->strgen()) && !is_banned(s)) {}
+	strncpy(rules + (i * RULE_SIZE) + 1, s, RULE_STRING_MAX);
 
-	while ((s = v->strgen_2()) && !is_banned(s)) 
-	  ;
-        strncpy(rules + (i * RULE_SIZE) + RULE_STRING_MAX + 1,
-                s,
-                RULE_STRING_MAX);
+	while ((s = v->strgen_2()) && !is_banned(s)) {}
+    strncpy(rules + (i * RULE_SIZE) + RULE_STRING_MAX + 1, s, RULE_STRING_MAX);
     }
 }
 
@@ -372,12 +365,12 @@ int stem(const char *string, char *buffer) {\n\
                     fprintf(file, "            length -= %d;\n", from_len - to_len);
             }
             fprintf(file, "            break;\n");
-            fprintf(file, "        }\n");
+            fprintf(file, "        } else ");
         }
     }
 
     fprintf(file, "\
-    } while (0);\n\
+    {}\n                                         \
     return SACROSANCT_CHARS;\n\
 }\n\
 ");

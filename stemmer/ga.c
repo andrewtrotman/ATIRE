@@ -87,8 +87,11 @@ void GA::run(unsigned int generations) {
 
 GA::GA(unsigned int population_size, GA_function *fitness_function,
        ANT_search_engine *search_engine) {
-    this->vocab = new Vocab(search_engine);
     unsigned int i;
+
+    this->vocab = new Vocab(search_engine);
+    this->vocab->trim(2);       // Remove unique sufficies.
+
     this->population_size = population_size;
     this->fitness_function = fitness_function;
 

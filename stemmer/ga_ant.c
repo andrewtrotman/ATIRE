@@ -289,8 +289,11 @@ char **document_list, **answer_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
 #ifndef VOCAB_TOOL
-char *stemmer_file = argv[1];
-argc++;
+char *stemmer_file = NULL;
+if (argv[1][0] == '-' && argv[1][0] == 's') {
+     stemmer_file = argv[1] + 2;
+     argc++;
+ }
 #endif
 
 

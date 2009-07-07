@@ -16,6 +16,7 @@ OBJECTS = \
     encoding_factory.o \
     parser.o \
     universal_parser.o \
+    parser_readability.o \
     memory_index_hash_node.o \
     memory_index.o \
     memory_index_stats.o \
@@ -65,6 +66,9 @@ OBJECTS = \
 	compress_none.o \
 	compress_sigma.o \
 	compression_factory.o \
+    readability_none.o \
+    readability_dale_chall.o \
+    readability_factory.o \
 	indexer_param_block.o \
     ant_param_block.o \
     version.o
@@ -75,7 +79,7 @@ EXTENSION = \
     ga_individual.o \
 	ga_function.o \
 	vocab.o 
-	
+
 all : index ant ga_ant vocab_tool
 
 %.o : $(SRCDIR)/%.c
