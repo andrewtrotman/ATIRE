@@ -34,11 +34,11 @@ void GA::next_generation() {
     unsigned int i = 0, op;
 
     if (elitism == USE_ELITISM) {
-        i = 1;
         get_best()->reproduce(next_population);
+        i = 1;
     }
 
-    for (; i < population_size; i++) {
+    for (i = i; i < population_size; i++) {
         op = random_from(0, 100);
         if (op < mutation_rate)
             tournament_select()->mutate(next_population + i, vocab);

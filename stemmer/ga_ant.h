@@ -73,6 +73,7 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
       Store queries and their topic ids - For the GA, we need these for each run.
      */
     queries = get_queries(&query_count, params);
+
     topic_ids = (long *) malloc(sizeof *topic_ids * query_count);
     for (i = 0; i < query_count; i++) {
         strip_end_punc(queries[i]);
@@ -109,16 +110,5 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 		ga->run(NUM_OF_GENERATIONS);
 	}
 }
-
-/*
-				freopen(argv[4], "w", stderr);
-				ga_ant(argv[2], argv[3], NULL, qrel);
-				fclose(stderr);
-			} else if (argc == 6) {
-				freopen(argv[5], "w", stderr);
-				ga_ant(argv[2], argv[3], argv[4], qrel);
-				fclose(stderr);
-			trie_test();
-*/
 
 #endif /* __GA_ANT_H__ */

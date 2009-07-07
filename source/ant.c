@@ -52,7 +52,10 @@ public:
 			exit(printf("Cannot open topic file:'%s'\n", filename));
 		}
 	~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
-	char *first(void) { return fgets(query, sizeof(query), fp); }
+	char *first(void) { 
+        fseek(fp, 0, SEEK_SET);
+        return fgets(query, sizeof(query), fp); 
+    }
 	char *next(void) { return fgets(query, sizeof(query), fp); }
 } ;
 

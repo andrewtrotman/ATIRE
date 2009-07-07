@@ -51,7 +51,10 @@ public:
 			exit(printf("Cannot open topic file:'%s'\n", filename));
 		}
 	~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
-	char *first(void) { return fgets(query, sizeof(query), fp); }
+	char *first(void) {
+        fseek(fp, 0, SEEK_SET);
+        return fgets(query, sizeof(query), fp); 
+    }
 	char *next(void) { return fgets(query, sizeof(query), fp); }
 } ;
 
@@ -369,7 +372,7 @@ char **get_queries(long *query_count, ANT_ANT_param_block *params) {
     int i;
     *query_count = 0;
     for (query = input.first(); query != NULL; query = input.next()) 
-        *query_count++;
+        (*query_count)++;
     queries = (char **)malloc(sizeof *queries * *query_count);
     for (query = input.first(), i = 0; query != NULL; query = input.next(), i++) 
         queries[i] = strdup(query);
