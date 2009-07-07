@@ -8,31 +8,13 @@
 #include <map>
 #include <string>
 #include <vector>
-//#include <utils/icstring.hpp>
 
-#include <stpl/characters/stpl_unicode.h>
-#include <stpl/characters/stpl_chinese.h>
-//#include <stpl/misc/stpl_unidoc.h>
-
-#include "word.h"
 #include "freq.h"
-#include "doc.h"
+#include "uniseg_types.h"
 
 /**
  */
 class FreqCounter {
-
-public:
-	typedef Freq::string_type						string_type;
-	typedef Freq::word_type 						word_type;
-	typedef Freq::word_ptr_type						word_ptr_type;
-	typedef Freq::freq_type						 	freq_type;
-	typedef Freq::array_type						array_type;
-	typedef Freq::array_array_type					array_array_type;
-
-	//typedef stpl::UNICODE::DefaultChineseParser::document_type::entity_iterator	entity_iterator;
-	typedef Doc::entity_iterator					entity_iterator;
-
 
 private:
 	string_type stream_;
@@ -54,7 +36,6 @@ public:
 
 	void count(int max, int min = 1);
 	void count() { count(stream_.length(), 1); }
-	void count(Doc& doc, int max, int min);
 	string_type& stream() { return stream_; }
 	void stream(string_type& str) { stream_ = str; }
 

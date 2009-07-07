@@ -11,7 +11,7 @@
 
 #include "uniseg_types.h"
 
-class UNISEQ_settings
+class UNISEG_settings
 {
 public:
 	static const int MAX_CHARS = 100;
@@ -40,10 +40,10 @@ public:
 	bool					optimize;
 
 public:
-	UNISEQ_settings();
-	~UNISEQ_settings() {}
+	UNISEG_settings();
+	~UNISEG_settings() {}
 
-	static UNISEQ_settings& instance();
+	static UNISEG_settings& instance();
 
 	bool skipit(int size, int freq);
 };

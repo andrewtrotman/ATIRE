@@ -31,4 +31,6 @@ inline std::string get_first_utf8char(unsigned char* c) {
 	return a_char;
 }
 
+#include <string>
+typedef std::string::iterator						entity_iterator;
 #endif

@@ -16,15 +16,15 @@ using namespace std;
 DicBuilder::DicBuilder(Dic* dic) : dic_(dic) {
 	count_ = 0;
 }
-void DicBuilder::add(string_type word, stpl::Language lang) {
+void DicBuilder::add(string_type word, uniseg_encoding::language lang) {
 	dic_->add(word, lang);
 	count_++;
 }
 
-void DicBuilder::build(string_type& text, stpl::Language lang) {
+void DicBuilder::build(string_type& text, uniseg_encoding::language lang) {
 
 	typedef Doc::entity_iterator	iterator;
-	Doc doc(UNISEQ_settings::instance().lang(), text);
+	Doc doc(UNISEG_settings::instance().lang(), text);
 
 	doc.parse();
 	doc.reset();
@@ -40,7 +40,7 @@ void DicBuilder::build(string_type& text, stpl::Language lang) {
 			iterator next = begin;
 
 			string_type str = (*begin)->to_string();
-			if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
+			if (UNISEG_settings::instance().lang() == stpl::ENGLISH) {
 				tolower(str);
 			}
 			word.append( str );

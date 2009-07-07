@@ -10,16 +10,13 @@
 
 #include <string>
 #include <fstream>
-#include "word.h"
+#include <vector>
 
 class File {
-public:
-	typedef Word::array_type			array_type;
-	typedef Word::word_type			word_type;
-	typedef Word::word_ptr_type		word_ptr_type;
 
 public:
 	std::string EXT_NAME;
+	static const char SEPARATOR;
 
 protected:
 	std::fstream 			iofs_;
@@ -43,6 +40,8 @@ public:
 
 	void path(std::string path) { path_ = path; filename_ = path_ + name_ + "." + EXT_NAME; }
 	const std::string& path() const { return path_; }
+
+	static int list(std::string dir, std::vector<std::string> &files, bool recursive = false);
 
 protected:
 	bool ropen();

@@ -37,7 +37,7 @@ void FreqFile::init() {
 	File::setup();
 }
 
-unsigned int FreqFile::cal(File::array_type& arr) {
+unsigned int FreqFile::cal(array_type& arr) {
 	//if (arr[0]->address() == INVALID)
 	//	freq_.alloc(k);
 	//File::word_ptr_type last_word = freq_n_[k - 1][freq_n_[k - 1].size() - 1];
@@ -54,7 +54,7 @@ unsigned int FreqFile::cal(File::array_type& arr) {
 	return (UNICODE_CHAR_LENGTH + sizeof(int)) * arr.size();
 }
 
-void FreqFile::write(File::array_type& arr) {
+void FreqFile::write(array_type& arr) {
 
 	if (arr.size() <= 0)
 		return;

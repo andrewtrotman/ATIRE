@@ -8,7 +8,7 @@
 
 #include "uniseg_settings.h"
 
-UNISEQ_settings::UNISEQ_settings()
+UNISEG_settings::UNISEG_settings()
 {
 #ifdef DEBUG
 	debug = true;
@@ -40,12 +40,12 @@ max = 5;
 sep[1] = '\0';
 }
 
-UNISEQ_settings& UNISEQ_settings::instance() {
-	static UNISEQ_settings inst;
+UNISEG_settings& UNISEG_settings::instance() {
+	static UNISEG_settings inst;
 	return inst;
 }
 
-bool UNISEQ_settings::skipit(int size, int freq) {
+bool UNISEG_settings::skipit(int size, int freq) {
 	if (skip.size() <= 0)
 		return false;
 

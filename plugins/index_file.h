@@ -11,6 +11,7 @@
 #include "file.h"
 #include "freq.h"
 #include "address.h"
+#include "uniseg_types.h"
 
 class IndexFile : public File {
 
@@ -35,8 +36,8 @@ public:
 
 	void write();
 	void read();
-	unsigned int cal(File::array_type& arr);
-	void alloc(File::array_type& arr);
+	unsigned int cal(array_type& arr);
+	void alloc(array_type& arr);
 
 	int wlen() { return wlen_; }
 	void wlen(int len) { wlen_ = len; }

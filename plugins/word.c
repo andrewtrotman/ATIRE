@@ -402,7 +402,7 @@ void Word::cal_a() {
 //				left_a_ += mi;
 //			}
 //		}
-		if (UNISEQ_settings::instance().debug)
+		if (UNISEG_settings::instance().debug)
 						cout << endl << "calculating overall association score for " << this->chars() << endl;
 		left_a_ = cal_a(size_/2);
 		if ((size_ % 2) == 1)
@@ -414,11 +414,11 @@ void Word::cal_a() {
 double Word::cal_a(int start) {
 	double a = 0.0;
 
-	if (UNISEQ_settings::instance().mean == 5
-				&& UNISEQ_settings::instance().mi == 2)
+	if (UNISEG_settings::instance().mean == 5
+				&& UNISEG_settings::instance().mi == 2)
 		a = std::numeric_limits<double>::max();
-	else if (UNISEQ_settings::instance().mean == 5
-			&& UNISEQ_settings::instance().mi == 3)
+	else if (UNISEG_settings::instance().mean == 5
+			&& UNISEG_settings::instance().mi == 3)
 		a = std::numeric_limits<double>::min();
 
 	int count = 0;
@@ -440,7 +440,7 @@ double Word::cal_a(int start) {
 			double sign = (mi > 0) ? 1.0 : -1.0;
 			double tmp = sign * mi * mi;
 
-			if (UNISEQ_settings::instance().debug)
+			if (UNISEG_settings::instance().debug)
 				cout << "calculating association score for log "
 					<< ww->chars() << "(" << ww->p() << ") over "
 					<< lw->chars() << "(" << lw->p() << ") "
@@ -453,8 +453,8 @@ double Word::cal_a(int start) {
 			if (mi < 0)
 				assert(sign == -1.0);
 
-			if (UNISEQ_settings::instance().mean == 5) {
-				switch (UNISEQ_settings::instance().mi) {
+			if (UNISEG_settings::instance().mean == 5) {
+				switch (UNISEG_settings::instance().mi) {
 					case 1: // sum
 					case 4: // mean, average
 						a += tmp;
@@ -479,8 +479,8 @@ double Word::cal_a(int start) {
 		}
 	}
 
-	if (UNISEQ_settings::instance().mean == 5
-			&& UNISEQ_settings::instance().mi == 4)
+	if (UNISEG_settings::instance().mean == 5
+			&& UNISEG_settings::instance().mi == 4)
 		a /= count;
 
 	return a;

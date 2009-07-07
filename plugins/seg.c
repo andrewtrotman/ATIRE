@@ -1,15 +1,16 @@
 /*
- * seg.cpp
+ * SEG.CPP
+ * -------
  *
  *  Created on: Nov 29, 2008
  *      Author: monfee
  */
 
 #include "seg.h"
-#include "doc_freq.h"
 #include "clist.h"
 #include "uniseg_settings.h"
 #include "qfreq.h"
+#include "freq_counter.h"
 
 #include <cassert>
 
@@ -110,7 +111,7 @@ void Seger::build() {
 
 	// remove those nodes without end
 	// clist_.remove_no_end();
-	if (UNISEQ_settings::instance().verbose()) {
+	if (UNISEG_settings::instance().verbose) {
 		TIMINGS_DECL();
 		TIMINGS_START();
 
@@ -163,8 +164,8 @@ void Seger::do_some_calculations() {
 void Seger::seg() {
 	clist_.cal(&freq_);
 
-	if (UNISEQ_settings::instance().mean() == 4
-			|| UNISEQ_settings::instance().mean() == 5)
+	if (UNISEG_settings::instance().mean == 4
+			|| UNISEG_settings::instance().mean == 5)
 		clist_.sort(false);
 	else
 		clist_.sort(true);
@@ -231,76 +232,5 @@ void Seger::mark_the_seged() {
 		const unsigned int freq = tw_ptr_->freq();
 		freq_.set_seged(allfreq_, freq);
 	}
-
-	/*
-	word_ptr_type w_ptr = a_w_ptr->lparent();
-	while (w_ptr != NULL) {
-		if (w_ptr->freq() == freq) {
-			// for debug
-			//cout << "setting " << w_ptr->chars() << " for no need being seged again" << endl;
-			w_ptr->seged(true);
-		}
-		else
-			break;
-
-		w_ptr = w_ptr->lparent();
-	}
-
-	w_ptr = a_w_ptr->rparent();
-	while (w_ptr != NULL) {
-		if (w_ptr->freq() == freq) {
-			// for debug
-			//cout << "setting " << w_ptr->chars() << " for no need being seged again" << endl;
-			w_ptr->seged(true);
-		}
-		else
-			break;
-
-		w_ptr = w_ptr->rparent();
-	}
-	*/
 }
-
-void Seger::s1(Freq::array_type wa) {
-	/*
-	int len = wa[i]->chars().size();
-	int n = len - 1;
-	int freq = wa[i]->freq();
-	int tmp_freq = freq;
-	bool stop = false;
-	vector<Freq::string_type> known_words;
-
-	word_ptr_type p_ptr = (word_ptr_type)wa[i]->lparent();
-	word_ptr_type l_ptr = p_ptr;
-	while (p_ptr != NULL || n > 0) {
-		if (p_ptr->freq() != freq) {
-			const_word_ptr tmp_ptr =
-				freq_.find(wa[i]->subchars(n, len - n));
-
-			if (tmp_ptr->freq() > freq) {
-				stop = true;
-				Freq::string_type tmp_str = tmp_ptr->chars()
-					+ Freq::string_type("(") + stringify(tmp_ptr->freq()) + Freq::string_type(")");
-				known_words.insert(known_words.begin(), tmp_str);
-				freq = p_ptr->freq();
-				l_ptr = p_ptr;
-			}
-		}if (tw_ptr_ != NULL)
-
-		p_ptr = (word_ptr_type)p_ptr->lparent();
-		n--;
-		//cout << n << endl;
-	}
-
-	Freq::string_type tmp_str = l_ptr->chars()
-		+ Freq::string_type("(") + stringify(l_ptr->freq()) + Freq::string_type(")");
-	if (l_ptr != NULL)
-		known_words.insert(known_words.begin(), tmp_str);
-
-	std::copy(known_words.begin(), known_words.end(),
-			ostream_iterator<Freq::string_type>(cout, " "));
-	cout << endl << endl;
-		 */
-}
-
 

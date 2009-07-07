@@ -12,25 +12,24 @@ libuniseq_sources = \
 		clist.c	\
 		cwords.c	\
 		freq.c	\
+		freq_counter.c \
 		freq_file.c	\
 		freq_loader.c	\
-		index_file.c	
-A	=	\			
+		index_file.c	\
+		file.c	\		
 		qfreq.c	\
-		qzer.c	\
-		seg.c	\
-		dic.c	\
-		doc_base.c		
-		doc.c	\
+		seg.c	\	
+		dic.c	
+
+		
+A	=	\		
+		qzer.c	\	
+		doc_base.c	\	
 		doc_freq.c	\
 		doc_reader.c	\
-		doc_seg.c	\
-		fdoc.c	\
-		file.c	\
-		mdoc.c	\
 		qconf.c	\
-		qdoc.c	\
-		udoc.c	
+		qdoc.c			udoc.c	
+
 		
 B =    dic_builder.c	
 		

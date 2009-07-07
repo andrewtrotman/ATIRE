@@ -20,11 +20,11 @@ public:
 	DicBuilder(Dic* dic);
 	~DicBuilder() {}
 
-	void build(string_type& text, stpl::Language lang);
-	//void save(string_type filename, stpl::Language lang);
-	//void load(string_type filename, stpl::Language lang);
+	void build(string_type& text, uniseg_encoding::language lang);
+	//void save(string_type filename, uniseg_encoding::language lang);
+	//void load(string_type filename, uniseg_encoding::language lang);
 
-	void add(string_type filename, stpl::Language lang);
+	void add(string_type filename, uniseg_encoding::language lang);
 	Dic* dic() { return dic_; }
 	void set_dic(Dic* dic) { dic_ = dic; }
 

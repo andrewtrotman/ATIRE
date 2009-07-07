@@ -12,7 +12,7 @@
 using namespace std;
 using namespace stpl;
 
-void Dic::add(string_type word, stpl::Language lang) {
+void Dic::add(string_type word, uniseg_encoding::language lang) {
 	if (word.length() > 0 && !find(word)) {
 		list_.insert(std::make_pair(word, lang));
 		update_stat(UNICODE::Utf8<string_type>::length(word), 1);
@@ -23,7 +23,7 @@ bool Dic::find(string_type word) {
 	return list_.find(word) != list_.end();
 }
 
-void Dic::save(string_type filename, stpl::Language lang) {
+void Dic::save(string_type filename, uniseg_encoding::language lang) {
 	std::ofstream 			ofs;
 	ostream* os;
 
@@ -44,7 +44,7 @@ void Dic::save(string_type filename, stpl::Language lang) {
     	ofs.close();
 }
 
-void Dic::load(string_type filename, stpl::Language lang) {
+void Dic::load(string_type filename, uniseg_encoding::language lang) {
 	  string line;
 	  ifstream dicfile(filename.c_str());
 	  if (dicfile.is_open()) {

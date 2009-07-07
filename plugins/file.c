@@ -9,9 +9,21 @@
 #include "uniseg_settings.h"
 #include <iostream>
 #include <string>
-#include <utils/fs.h>
+
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
+
+#ifdef unix
+	const char File::SEPARATOR = '/';
+#elif defined(_WIN32) || defined(_MSC_VER) || defined(_WIN64)
+	const char File::SEPARATOR = '\\';
+#else
+	const char File::SEPARATOR = '/';
+#endif
 
 File::File(std::string name, unsigned int size) :
 	name_(name), size_(size){
@@ -30,7 +42,7 @@ File::~File() {
 
 void File::setup() {
 	//name_.append(EXT_NAME);
-	//string path = string(UNISEQ_settings::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
+	//string path = string(UNISEG_settings::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
 	//cout << "path: " << path << endl;
 	//path.push_back(FILESYSTEM::File<std::string>::SEPARATOR);
 	filename_ = name_ + EXT_NAME;
@@ -66,9 +78,45 @@ void File::initialize(unsigned int size) {
 	}
 }
 
-bool File::exist() {
-	FILESYSTEM::File<std::string> file(filename_);
-	return file.exist();
+int File::list(std::string dir, std::vector<std::string> &files, bool recursive)
+{
+    DIR *dp;
+    struct dirent *dirp;
+    if(/*exist() || */(dp  = opendir(dir.c_str())) == NULL) {
+    	// TODO throw a error exception
+       // cout << "Error(" << errno << ") opening " << dir << endl;
+    	return -1;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+    	std::string temp_str(dirp->d_name);
+    	if (temp_str == "." || temp_str == "..")
+    		continue;
+
+    	// TODO
+    	std::string in_dir = dir;
+    	in_dir.push_back(SEPARATOR);
+    	in_dir.append(dirp->d_name);
+    	if( dirp->d_type == DT_DIR && recursive) {
+    		chdir(in_dir.c_str());
+    	    list(in_dir, files, recursive);
+    	    chdir( ".." );
+    	} else
+    		files.push_back(in_dir);
+    }
+    closedir(dp);
+    return files.size();
 }
+
+bool File::exist() {
+	bool success = true;
+	struct stat my_stat;
+
+	if( stat( name_.c_str(), &my_stat ) == -1 )
+		success = false;
+
+	return success;
+}
+
 
 

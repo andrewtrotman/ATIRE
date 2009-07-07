@@ -27,9 +27,9 @@ class NeedSkip {    // function object that returns true for the call
     }
 };
 
-Freq::Freq() : sum_n_(UNISEQ_settings::MAX_CHARS, 0), avg_n_(UNISEQ_settings::MAX_CHARS, 0), k_(0) {
+Freq::Freq() : sum_n_(UNISEG_settings::MAX_CHARS, 0), avg_n_(UNISEG_settings::MAX_CHARS, 0), k_(0) {
 	freq_n_.push_back(freq_1_);  // freq_n_[0]
-	for (int i = 0; i < UNISEQ_settings::MAX_CHARS; i++) {
+	for (int i = 0; i < UNISEG_settings::MAX_CHARS; i++) {
 		//array_type freq_n;
 		freq_n_.push_back(array_type());
 	}
@@ -72,7 +72,7 @@ word_ptr_type Freq::add(string_array& ca,  unsigned int freq) {
 	word_ptr_type word_ptr = find(chars);
 
 	/*
-	if (UNISEQ_settings::instance().load && size <= UNISEQ_settings::instance().min) {
+	if (UNISEG_settings::instance().load && size <= UNISEG_settings::instance().min) {
 		/// for debug
 		if (word_ptr) {
 			cout << "array size: " << freq_n_.size() << endl;
@@ -92,12 +92,12 @@ word_ptr_type Freq::add(string_array& ca,  unsigned int freq) {
 		//cout << "adding new word : " << chars << endl;
 		bool skip = false;
 
-		if (UNISEQ_settings::instance().load) {
+		if (UNISEG_settings::instance().load) {
 			if (freq > 0 && size > 1) {
-				if (freq <= UNISEQ_settings::instance().to_skip)
+				if (freq <= UNISEG_settings::instance().to_skip)
 					skip = true;
 
-				if(!skip && UNISEQ_settings::instance().skipit(size, freq))
+				if(!skip && UNISEG_settings::instance().skipit(size, freq))
 					skip = true;
 			}
 		} // loading
@@ -255,19 +255,19 @@ void Freq::remove_low(int k) {
 
 	/* Not a good idea to remove those low frequency word in the following way
 	for (int i = (freq_n_[k].size() - 1); i >= 0; i++) {
-		if (freq_n_[k][i]->freq() <= UNISEQ_settings::instance().to_skip())
+		if (freq_n_[k][i]->freq() <= UNISEG_settings::instance().to_skip())
 			freq_n_[k].erase(freq_n_[k].begin() + i);
 		else
 			break;
 	}
 	*/
 	array_type::iterator pos = std::remove_if(
-			freq_n_[k].begin(), freq_n_[k].end(), NeedSkip(UNISEQ_settings::instance().to_skip));
+			freq_n_[k].begin(), freq_n_[k].end(), NeedSkip(UNISEG_settings::instance().to_skip));
 	freq_n_[k].erase(pos, freq_n_[k].end());
 }
 
 bool Freq::need_skip(word_ptr_type w_ptr) {
-	//return w_ptr->freq() <= UNISEQ_settings::instance().to_skip;
+	//return w_ptr->freq() <= UNISEG_settings::instance().to_skip;
 	return w_ptr->freq() < 2;
 }
 
@@ -284,7 +284,7 @@ void Freq::array_to_array(array_type& wa, string_array& ca) {
 
 void Freq::cal_sum() {
 	int k = 0;
-	while (k < UNISEQ_settings::MAX_CHARS) {
+	while (k < UNISEG_settings::MAX_CHARS) {
 		int freq = 0;
 		for (int i = 0; i < (int)freq_n_[k].size(); i++) {
 			freq += freq_n_[k][i]->freq();
@@ -296,7 +296,7 @@ void Freq::cal_sum() {
 
 void Freq::cal_avg() {
 	int k = 0;
-	while (k < UNISEQ_settings::MAX_CHARS) {
+	while (k < UNISEG_settings::MAX_CHARS) {
 		if (freq_n_[k].size() > 0)
 			avg_n_[k] = static_cast<float>(sum_n_[k])/freq_n_[k].size();
 		k++;
@@ -305,7 +305,7 @@ void Freq::cal_avg() {
 	//for debug
 	k = 0;
 	cout << "average freq of each size of words" << endl;
-	while (k < UNISEQ_settings::MAX_CHARS) {
+	while (k < UNISEG_settings::MAX_CHARS) {
 		if (freq_n_[k].size() > 0)
 			cout << k << ": " << avg_n_[k] << " (with sum "
 				<< sum_n_[k] << " on size " << freq_n_[k].size() << ")"
@@ -330,7 +330,7 @@ void Freq::assign_freq(Freq& freq) {
 //				tmp_wp = freq.add(sa, iter->second->freq());
 //		}
 
-		if (UNISEQ_settings::instance().debug)
+		if (UNISEG_settings::instance().debug)
 			cout << "Assigning " << iter->second->chars()
 			<< " with frequency " << freqc << ""
 			<< endl;
@@ -387,7 +387,7 @@ void Freq::add_freq(Freq& freq, int threshold) {
 					assert(tmp_wp != NULL);
 					//tmp_wp->cal_p(this->sum_k(1));
 
-					if (UNISEQ_settings::instance().debug)
+					if (UNISEG_settings::instance().debug)
 						cout << "Found new string pattern for the 1 of N+1: " << tmp_wp->chars()
 						<< "(" << tmp_wp->freq() << ")"
 						<< endl;
@@ -434,7 +434,7 @@ void Freq::cal_word_a() {
 }
 
 void Freq::show_p() {
-	if (UNISEQ_settings::instance().debug) {
+	if (UNISEG_settings::instance().debug) {
 		freq_type::const_iterator iter;
 		for (iter=freq_.begin(); iter != freq_.end(); ++iter)
 			cout << iter->second->chars() << ": " << iter->second->p()
@@ -443,7 +443,7 @@ void Freq::show_p() {
 	}
 
 	cout << endl << "The association scores:" << endl;
-	if (UNISEQ_settings::instance().debug) {
+	if (UNISEG_settings::instance().debug) {
 		freq_type::const_iterator iter;
 		for (iter=freq_.begin(); iter != freq_.end(); ++iter)
 			cout << iter->second->chars() << ": " << iter->second->a()

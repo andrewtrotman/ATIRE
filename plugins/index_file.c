@@ -24,11 +24,11 @@ void IndexFile::init() {
 	File::setup();
 }
 
-unsigned int IndexFile::cal(File::array_type& arr) {
+unsigned int IndexFile::cal(array_type& arr) {
 	return 0;
 }
 
-void IndexFile::alloc(File::array_type& arr) {
+void IndexFile::alloc(array_type& arr) {
 	if (arr.size() < 1)
 		return;
 

@@ -35,10 +35,6 @@ public:
 	void add_to_list(array_type& cwlist);
 	void mark_the_seged();
 
-	/**
-	 * simple segmentation algorightm #1
-	 */
-	void s1(Freq::array_type);
 
 private:
 	void make(CList& clist, string_type& str);

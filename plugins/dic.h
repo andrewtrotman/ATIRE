@@ -14,14 +14,14 @@
 
 class Dic {
 public:
-	typedef std::map<string_type, stpl::Language>	word_map;
+	typedef std::map<string_type, uniseg_encoding::language>	word_map;
 	typedef std::map<int, int>						stat_map;
 
 private:
 	word_map										list_;
 	stat_map										stat_;
 
-	//stpl::Language									lang_;
+	//uniseg_encoding::language									lang_;
 
 public:
 	Dic() {}
@@ -30,12 +30,12 @@ public:
 	const word_map& list() const { return list_; }
 	const stat_map& stat() const { return stat_; }
 
-	void add(string_type, stpl::Language);
+	void add(string_type, uniseg_encoding::language);
 
 	bool find(string_type word);
-	//stpl::Language lang() { return lang_; }
-	void save(string_type filename, stpl::Language lang);
-	void load(string_type filename, stpl::Language lang);
+	//uniseg_encoding::language lang() { return lang_; }
+	void save(string_type filename, uniseg_encoding::language lang);
+	void load(string_type filename, uniseg_encoding::language lang);
 
 	int size() { return list_.size(); }
 

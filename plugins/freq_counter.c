@@ -1,86 +1,19 @@
-#include "doc_freq.h"
+#include "freq_counter.h"
 #include "uniseg_settings.h"
-#include "doc.h"
 #include "convert.h"
 
 #include <cassert>
 #include <algorithm>
 
-//using namespace stpl;
 using namespace std;
-//using namespace UNICODE;
 
-void FreqCounter::count(int max, int min) {
-	//cout << "Text content: " << endl;
-	//cout << "\"" << stream_ << "\"" << endl << endl;
-
-	//stpl::UNICODE::DefaultChineseParser c_parser(stream_.begin(), stream_.end());
-	//stpl::UNICODE::DefaultChineseParser::document_type& doc = c_parser.doc();
-
-	//c_parser.parse();
-
-	Doc a_doc(UNISEQ_settings::instance().lang(), stream_);
-	a_doc.parse();
-	if (a_doc.doc().count() <= 0)
-		return;
-
-	count(a_doc, max, min);
+void FreqCounter::count(int max, int min)
+{
+add_word(stream_.begin(), stream_.end(), max, min);
 }
 
-void FreqCounter::count(Doc& a_doc, int max, int min) {
-
-	/*entity_iterator prev = a_doc.doc().iter_begin();
-	entity_iterator it = a_doc.doc().iter_begin();
-	entity_iterator begin = a_doc.doc().iter_begin();*/
-
-	a_doc.reset();
-	while (a_doc.more()) {
-		entity_iterator begin;
-		entity_iterator end;
-
-		a_doc.next(begin, end);
-		int cmax = end - begin + 1;
-		if ( max < cmax)
-			cmax = max;
-
-		add_word(begin, end, cmax, min);
-	}
-
-}
-
-/// below is old style way to do the text frequency counting
-/// now all the correct characters are extracted
-
-/*	/// find the first valid character
-	do {
-		if ((*it)->lang() == UNISEQ_settings::instance().lang()) {
-			begin = it;
-			it++;
-			break;
-		}
-		it++;
-	} while (it != a_doc.doc().iter_end());
-
-	for (; it != a_doc.doc().iter_end(); it++) {
-		if ((*it)->lang() != UNISEQ_settings::instance().lang()) continue;
-
-		// boundary arrives, like punctuation, symbols, characters in other languages
-		if (it != a_doc.doc().iter_begin() && (*it)->begin() != (*prev)->end()) {
-			//cout << endl;
-			add_word(begin, prev, max, min);
-			begin = it;
-		}
-
-		//cout << (*it)->to_string() << endl;
-		prev = it;
-	}
-
-	// last setence
-	if (begin != prev)
-		add_word(begin, prev, max, min);
-}*/
-
-void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, int min) {
+void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, int min)
+{
 	int len = end - begin + 1;
 	entity_iterator from;
 	entity_iterator to;
@@ -116,10 +49,11 @@ void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, 
 			to = from + i;
 
 			entity_iterator start = from;
-			Freq::string_array ca;
+			string_array ca;
 			for (; start != to; start++) {
-				string_type str = (*start)->to_string();
-				if (UNISEQ_settings::instance().lang() == stpl::ENGLISH) {
+				// TODO
+				string_type str(""); // ((*start)->to_string();
+				if (UNISEG_settings::instance().lang == uniseg_encoding::ENGLISH) {
 					// for debug
 					//cout << "before transform: " << str << endl;
 					tolower(str);

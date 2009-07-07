@@ -30,10 +30,10 @@ public:
 		File::File(name, size), freq_(freq), idxf_(name) { init(); }
 	virtual ~FreqFile();
 
-	void write(File::array_type& arr);
+	void write(array_type& arr);
 	void read();
 	void read_with_index();
-	unsigned int cal(File::array_type& arr);
+	unsigned int cal(array_type& arr);
 
 	int wlen() { return wlen_; }
 	void wlen(int len) { wlen_ = len; idxf_.wlen(len); }
