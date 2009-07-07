@@ -63,11 +63,10 @@ public:
 double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
 {
 ANT_time_stats stats;
-long long now;
-long did_query;
+long long now, hits;
+long did_query, first_case;
 char token[1024];
-char *token_start, *token_end;
-long long hits;
+char *token_start, *token_end, *current;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
@@ -128,7 +127,18 @@ while (*token_end != '\0')
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';
 	token_length = token_end - token_start;
-//	strlwr(token);
+
+	/*
+		Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms
+		but as the vocab is in lower case it is necessary to check then convert.
+	*/
+	first_case = ANT_islower(*token);
+	for (current = token; *current != '\0'; current++)
+		if (ANT_islower(*current) != first_case)
+			{
+			strlwr(token);
+			break;
+			}
 
 	/*
 		process the next search term - either stemmed or not.

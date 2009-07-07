@@ -74,7 +74,7 @@ return false;
 */
 unsigned long ANT_encoding_utf8::to_codepoint(unsigned char *utf8_char)
 {
-return to_codepoint(utf8_char, test_utf8char(utf8_char);
+return to_codepoint(utf8_char, test_utf8char(utf8_char));
 }
 
 /*
