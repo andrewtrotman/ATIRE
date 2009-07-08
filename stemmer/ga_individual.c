@@ -165,6 +165,7 @@ void GA_individual::reproduce(GA_individual *c) {
 memcpy(c, this, sizeof(GA_individual));
 }
 
+/* TODO: This is not mutation */
 void GA_individual::mutate(GA_individual *c, Vocab *v) {
 c->generate(v);
 if (rand() % 2 == 0) 

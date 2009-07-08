@@ -24,6 +24,12 @@ class ANT_search_engine
 {
 friend class ANT_btree_iterator;
 friend class ANT_mean_average_precision;
+protected:
+	long long documents;
+	unsigned char *btree_leaf_buffer, *postings_buffer;
+	ANT_search_engine_posting posting;
+	long *stem_buffer;
+
 private:
 	ANT_search_engine_stats *stats;
 	ANT_search_engine_stats *stats_for_all_queries;
@@ -31,17 +37,13 @@ private:
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
 	long btree_nodes;
-	long long documents;
 	long *document_lengths;
 	double mean_document_length;
-	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
-	ANT_search_engine_posting posting;
 	long long max_header_block_size;
 	long string_length_of_longest_term;
 	long long highest_df;
-	long *stem_buffer;
 	ANT_compressable_integer *decompress_buffer;
 	long long stem_buffer_length_in_bytes;
 	ANT_compression_factory factory;

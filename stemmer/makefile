@@ -78,7 +78,8 @@ EXTENSION = \
     ga_stemmer.o \
     ga_individual.o \
 	ga_function.o \
-	vocab.o 
+	vocab.o \
+	thesaurus_engine.o
 
 all : index ant ga_ant vocab_tool
 

@@ -5,8 +5,8 @@
  * The only change to ant.c that should be needed it to add '#include "ga_ant.h"'
  * and to change calls to ant() as calls to ga_ant()
  *
- * I know doing this in a header file is ugly, but I want to be able to use definitions
- * from ant.c 
+ * I know doing this in a header file is ugly, but I want to be able to use a
+ * slightly modified copy of ant.c 
  */
 #include <time.h>
 #include <stdlib.h>
@@ -28,8 +28,6 @@ char **get_queries(long *query_count, ANT_ANT_param_block *params);
   prints out the trie
 */
 void trie_test(ANT_search_engine *search_engine) {
-	//  No more document_count() ?!
-
 	Vocab *trie = new Vocab(search_engine);
 	//	trie->print_stats();
 	//	trie->trim(200);
@@ -40,15 +38,11 @@ void trie_test(ANT_search_engine *search_engine) {
 /*
 	GA_ANT()
 	--------
-	We should take cli args from ANT_ANT_PARAM_BLOCk
+	We should take cli args from ANT_ANT_PARAM_BLOCK
 
     STEMMER_FILE is optional, and if it is non-null it should be the filename of a file that contains a
     stemmer per line. If it exists, then the GA will not be run, each stemmer will instead be run on the 
     queries.
-*/
-/*
-  TODO: make more like ANT(...)
-  TODO: be able to specify a stemmer.
 */
 void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list, char *stemmer_file) {
     char *query;
