@@ -17,13 +17,9 @@ while (!isheadchar(*current))
 
 if (ANT_isalpha(*current) || issentenceend(*current))				// alphabetic strings
 	{
-	//*current = ANT_tolower(*current);
 	start = current++;
 	while (ANT_isalpha(*current) || issentenceend(*current))
-		{
-		//*current = ANT_tolower(*current);
 		current++;
-		}
 
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
@@ -45,12 +41,7 @@ else											// everything else (that starts with a '<')
 	if (isXMLnamestartchar(*current))
 		{
 		while (isXMLnamechar(*current))
-			{
-			//*current = ANT_toupper(*current);
 			current++;
-			}
-		current_token.start = (char *)start;
-		current_token.string_length = current - start;
 
 		while (*current != '>')
 			{
@@ -62,6 +53,7 @@ else											// everything else (that starts with a '<')
 					current++;
 			current++;
 			}
+		return get_next_token(); // Don't care about tags
 		}
 	else
 		{
@@ -87,6 +79,5 @@ else											// everything else (that starts with a '<')
 		}
 	}
 
-//printf("Parser yielding: %*.*s\n", current_token.length(), current_token.length(), current_token.start);
 return &current_token;
 }

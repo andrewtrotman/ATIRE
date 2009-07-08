@@ -108,7 +108,7 @@ return root;
 	ANT_MEMORY_INDEX::ADD_TERM()
 	----------------------------
 */
-void ANT_memory_index::add_term(ANT_string_pair *string, long long docno)
+ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string, long long docno)
 {
 long hash_value;
 ANT_memory_index_hash_node *node;
@@ -123,7 +123,7 @@ if (hash_table[hash_value] == NULL)
 	}
 else
 	node = find_add_node(hash_table[hash_value], string);
-node->add_posting(string, docno);
+return node->add_posting(string, docno);
 }
 
 /*

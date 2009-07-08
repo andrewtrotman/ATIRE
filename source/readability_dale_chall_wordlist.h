@@ -6,6 +6,7 @@
 #ifndef __READABILITY_DALE_CHALL_WORDLIST_H__
 #define __READABILITY_DALE_CHALL_WORDLIST_H__
 
+
 /*
 	ANT_readability_dale_chall_wordlist
 	-----------------------------------
@@ -11799,5 +11800,7 @@ char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"zoo",
     (char *)"zoos"
 };
+
+unsigned long ANT_readability_dale_chall_wordlist_length = sizeof(ANT_readability_dale_chall_wordlist) / sizeof(*ANT_readability_dale_chall_wordlist);
 
 #endif __READABILITY_DALE_CHALL_WORDLIST_H__

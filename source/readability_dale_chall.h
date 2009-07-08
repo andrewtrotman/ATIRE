@@ -21,16 +21,24 @@ public:
 	ANT_string_pair *get_next_token();
 	void set_document(unsigned char *);
 	long score();
-	void add_token(ANT_string_pair *) {};
-	void add_token(char *);
+	void add_node(ANT_memory_index_hash_node *);
 
 private:
+	struct word
+	{
+	ANT_memory_index_hash_node *node;
+	unsigned char istitle;
+	};
+	
+static int word_cmp(const void *a, const void *b);
+
 	unsigned long number_of_sentences;
 	unsigned long number_of_words;
 	unsigned long number_of_unfamiliar_words;
 	unsigned long size; // maximum size of list of words encountered
-	char **words_encountered;
-
+	word *words_encountered;
+	unsigned char last_was_title; // whether the last word we passed on was title
+	
 	static const unsigned long initial_size = 50;
 };
 
