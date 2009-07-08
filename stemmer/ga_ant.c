@@ -21,6 +21,10 @@
 #include "ant_param_block.h"
 #include "version.h"
 #include "ga_ant.h"
+#include "thesaurus_engine.h"
+
+// For instrumenting
+#include "stemmer_none.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -283,7 +287,8 @@ return ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 */
 int main(int argc, char *argv[])
 {
-ANT_search_engine *search_engine;
+//ANT_search_engine *search_engine;
+thesaurus_engine *search_engine;
 ANT_mean_average_precision *map = NULL;
 ANT_memory memory;
 long last_param;
@@ -293,7 +298,7 @@ ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
 #ifndef VOCAB_TOOL
 char *stemmer_file = NULL;
-if (argv[1][0] == '-' && argv[1][0] == 's') {
+if (argc > 1 && argv[1][0] == '-' && argv[1][0] == 's') {
      stemmer_file = argv[1] + 2;
      argc++;
  }
@@ -316,7 +321,9 @@ if (params.assessments_filename != NULL)
 
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
-search_engine = new ANT_search_engine(&memory);
+search_engine = new thesaurus_engine(&memory);
+//search_engine->stemming_exceptions((ANT_stemmer*)new ANT_stemmer_none(search_engine), 0.8);
+
 #ifdef VOCAB_TOOL
 trie_test(search_engine);
 #else

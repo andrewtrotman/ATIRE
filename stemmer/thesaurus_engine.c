@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "ctypes.h"
 #include "stemmer.h"
 #include "btree_iterator.h"
 #include "search_engine.h"
@@ -72,8 +73,8 @@ double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long b
 
     for (doc = 0; doc < documents; doc++) {
         similarity += 
-            (buffer_a[doc] / (double)buffer_a_total) *
-            (buffer_b[doc] / (double)buffer_b_total);
+            (buffer_a[doc] / (double) 100 / buffer_a_total) *
+            (buffer_b[doc] / (double) 100 / buffer_b_total);
     }
     return similarity;
 }
@@ -110,10 +111,12 @@ void thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshol
     char *term;
     char *stem;
 
-    for (term = all_terms.first(NULL); term != NULL; term = all_terms.next()) {
+    // .first("a") skips all the numbers and tags
+    // alternately check that the first char is alpha via ANT_isalpha(term[0]);
+    for (term = all_terms.first("a"); term != NULL; term = all_terms.next()) {
         for (stem = stemmer->first(term); stem != NULL; stem = stemmer->next()) {
             // TODO: for efficiency skip if stem == term
-            if ((similarity = term_similarity(term, stem)) > 0.5)
+            if ((similarity = term_similarity(term, stem))) // > 0.5)
                 printf("%s is ~= %s by a factor of %f\n", term, stem, similarity);
         }
     }
