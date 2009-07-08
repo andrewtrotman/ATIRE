@@ -7,15 +7,13 @@
 
 #include "dic.h"
 #include <fstream>
-#include <stpl/characters/stpl_unicode.h>
 
 using namespace std;
-using namespace stpl;
 
 void Dic::add(string_type word, uniseg_encoding::language lang) {
 	if (word.length() > 0 && !find(word)) {
 		list_.insert(std::make_pair(word, lang));
-		update_stat(UNICODE::Utf8<string_type>::length(word), 1);
+		update_stat(get_utf8_string_length(word), 1);
 	}
 }
 
@@ -80,7 +78,7 @@ void Dic::show() {
 		word_map::const_iterator iner_it = list_.begin();
 		for (; iner_it != list_.end(); iner_it++) {
 			string_type word = iner_it->first;
-			if (UNICODE::Utf8<string_type>::length(word) == it->first)
+			if (get_utf8_string_length(word) == it->first)
 				cout << iner_it->first << endl;
 		}
 	}

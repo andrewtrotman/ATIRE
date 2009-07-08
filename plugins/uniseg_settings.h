@@ -39,6 +39,8 @@ public:
 	bool 					reward;
 	bool					optimize;
 
+	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
+
 public:
 	UNISEG_settings();
 	~UNISEG_settings() {}

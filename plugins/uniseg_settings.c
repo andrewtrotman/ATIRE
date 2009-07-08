@@ -38,14 +38,18 @@ max = 5;
 #endif
 
 sep[1] = '\0';
+
+encoding_scheme = uniseg_encoding_factory::UTF8;
 }
 
-UNISEG_settings& UNISEG_settings::instance() {
+UNISEG_settings& UNISEG_settings::instance()
+{
 	static UNISEG_settings inst;
 	return inst;
 }
 
-bool UNISEG_settings::skipit(int size, int freq) {
+bool UNISEG_settings::skipit(int size, int freq)
+{
 	if (skip.size() <= 0)
 		return false;
 

@@ -50,7 +50,7 @@ public:
 	void overall(Freq& freq);
 
 private:
-	void add_word(entity_iterator begin, entity_iterator end, int max, int min);
+	void add_word(const char *begin, const char *end, int max, int min);
 };
 
 #endif /*DOC_FREQ_H_*/

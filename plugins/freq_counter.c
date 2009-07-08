@@ -9,14 +9,18 @@ using namespace std;
 
 void FreqCounter::count(int max, int min)
 {
-add_word(stream_.begin(), stream_.end(), max, min);
+const char *start = (char *)stream_.c_str();
+const char *end = start + stream_.length();
+
+add_word(start, end, max, min);
 }
 
-void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, int min)
+void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 {
 	int len = end - begin + 1;
-	entity_iterator from;
-	entity_iterator to;
+	char *from;
+	char *to;
+	uniseg_encoding *enc = uniseg_encoding_factory::gen_encoding_scheme((uniseg_encoding_factory::encoding)UNISEG_settings::instance().encoding_scheme);
 
 	if (len < min)
 		return;
@@ -45,21 +49,23 @@ void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, 
 		//	cout << "Stop here , I need to see what you got" << endl;
 
 		for (int j = 0; j < (len - i) + 1; j++) {
-			from = begin + j;
+			from = (char *)begin + j;
 			to = from + i;
 
-			entity_iterator start = from;
+			char *start = from;
 			string_array ca;
-			for (; start != to; start++) {
+			for (; start != to;) {
 				// TODO
-				string_type str(""); // ((*start)->to_string();
-				if (UNISEG_settings::instance().lang == uniseg_encoding::ENGLISH) {
+				enc->test_char((unsigned char *)start);
+				string_type str(start, enc->howmanybytes()); // ((*start)->to_string();
+				if (enc->lang() == uniseg_encoding::ENGLISH) {
 					// for debug
 					//cout << "before transform: " << str << endl;
 					tolower(str);
 					//cout << "after transform: " << str << endl;
 				}
 				ca.push_back(str);
+				start += enc->howmanybytes();
 				//ca.push_back((*start)->to_string());
 			}
 
@@ -67,6 +73,7 @@ void FreqCounter::add_word(entity_iterator begin, entity_iterator end, int max, 
 			//cout << string_type((*from)->begin(), (*to)->end()) << endl;
 		}
 	}
+	delete enc;
 }
 
 void FreqCounter::show_array() {

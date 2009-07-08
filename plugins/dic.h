@@ -8,7 +8,6 @@
 #ifndef DIC_H_
 #define DIC_H_
 
-#include <stpl/characters/stpl_character.h>
 #include "uniseg_types.h"
 #include <map>
 

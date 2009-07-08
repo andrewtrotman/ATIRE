@@ -23,13 +23,25 @@ using namespace std;
 Seger::Seger(Freq& allfreq, word_ptr_type tw_ptr) :
 	allfreq_(allfreq), tw_ptr_(tw_ptr), stream_(tw_ptr_->chars()) {}
 
-Seger::Seger(Freq&	allfreq, const string_type& stream) : allfreq_(allfreq), stream_(stream) {
+Seger::Seger(Freq&	allfreq, const string_type stream) : allfreq_(allfreq), stream_(stream) {
 	tw_ptr_ = allfreq_.find(stream);
 }
+
+Seger::Seger(Freq&	allfreq, const char* stream, size_t length) : allfreq_(allfreq), stream_(stream, length) {
+
+}
+
+
 Seger::~Seger() {}
 
 void Seger::start() {
+	build();
+	//apply_rules();
+	seg();
 
+
+	//add_to_list(cwlist_);
+	//mark_the_seged();
 }
 
 void Seger::output() {
