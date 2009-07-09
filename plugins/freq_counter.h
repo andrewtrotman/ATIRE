@@ -35,7 +35,7 @@ public:
 	~FreqCounter() {}
 
 	void count(int max, int min = 1);
-	void count() { count(stream_.length(), 1); }
+	void count() { count(get_utf8_string_length(stream_), 1); }
 	string_type& stream() { return stream_; }
 	void stream(string_type& str) { stream_ = str; }
 

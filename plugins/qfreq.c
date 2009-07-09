@@ -35,7 +35,12 @@ void QFreq::load_freq(int n, bool force) {
 
 	FreqLoader loader(freq_);
 
-	loader.load(UNISEG_settings::instance().wd, n);
+	if (UNISEG_settings::instance().freqs_path.length() <= 0) {
+		cerr << "cann't find the frequency table path " << endl;
+		exit(-1);
+	}
+
+	loader.load(UNISEG_settings::instance().freqs_path, n);
 	freq_.cal_sum_n_avg();
 	k_ = loader.count();
 

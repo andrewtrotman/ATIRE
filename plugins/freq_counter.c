@@ -3,6 +3,7 @@
 #include "convert.h"
 
 #include <cassert>
+#include <list>
 #include <algorithm>
 
 using namespace std;
@@ -18,8 +19,10 @@ add_word(start, end, max, min);
 void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 {
 	int len = end - begin + 1;
-	char *from;
-	char *to;
+	//char *from = NULL;
+	//char *to = NULL;
+	char *start = NULL;
+	int count = 0;
 	uniseg_encoding *enc = uniseg_encoding_factory::gen_encoding_scheme((uniseg_encoding_factory::encoding)UNISEG_settings::instance().encoding_scheme);
 
 	if (len < min)
@@ -41,21 +44,29 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 
 	// i - the number of characters depends on min
 	// may from 1, 2, 3, 4, ... till less than max
+	typedef list<string_type>	string_list;
+
 	for (int i = min; i >= 0 && i <= max; i++) {
 	//cout << "I got " << string_type((*begin)->begin(), (*end)->end()) << endl;
 	//int i = max;
 		//array_type	ca;
 		//if ( i == max)
 		//	cout << "Stop here , I need to see what you got" << endl;
+		start = (char *)begin;
+		//string_array last_ca;
+		string_list cl; // chars list
+		//for (int j = 0; j < (len - i) + 1; j++) {
+		while (start < end) {
+			//to = from + i;
 
-		for (int j = 0; j < (len - i) + 1; j++) {
-			from = (char *)begin + j;
-			to = from + i;
+			//char *start = from;
+			//string_array ca;
+			//if (last_ca.size() > 0 && (last_ca.size() - 1) > 0)
+			//	std::copy(last_ca.begin()++, last_ca.end(), ca.begin());
+			if (cl.size() > 0)
+				cl.pop_front();
 
-			char *start = from;
-			string_array ca;
-			for (; start != to;) {
-				// TODO
+			while ( start < end ) {
 				enc->test_char((unsigned char *)start);
 				string_type str(start, enc->howmanybytes()); // ((*start)->to_string();
 				if (enc->lang() == uniseg_encoding::ENGLISH) {
@@ -64,11 +75,17 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 					tolower(str);
 					//cout << "after transform: " << str << endl;
 				}
-				ca.push_back(str);
+				cl.push_back(str);
 				start += enc->howmanybytes();
+
+				if (cl.size() == i) {
+					break;
+				}
 				//ca.push_back((*start)->to_string());
 			}
 
+			string_array ca(cl.size());
+			std::copy(cl.begin(), cl.end(), ca.begin());
 			freq_->add(ca);
 			//cout << string_type((*from)->begin(), (*to)->end()) << endl;
 		}

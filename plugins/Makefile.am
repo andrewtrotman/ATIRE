@@ -6,7 +6,15 @@ AM_LDFLAGS = @LIBS@
 
 CC = g++
 
+ant_src_dir = $(srcdir)/../source/
+
+extra_sources = \
+		$(ant_src_dir)/ctypes.c \
+		$(ant_src_dir)/encoding_utf8.c \
+		$(ant_src_dir)/encoding_factory.c
+
 libuniseq_sources = \
+		$(extra_sources) \
 		uniseg_settings.c \
 		word.c \
 		clist.c	\
@@ -20,18 +28,6 @@ libuniseq_sources = \
 		qfreq.c	\
 		seg.c \
 		dic.c
-
-		
-A	= \
-		qzer.c \
-		doc_base.c \
-		doc_freq.c \
-		doc_reader.c \
-		qconf.c	\
-		qdoc.c udoc.c	
-
-		
-B =    dic_builder.c	
 		
 libuniseg_headers = \
 		address.h	\
@@ -70,11 +66,13 @@ lib_LTLIBRARIES = libuniseg.la
 libuniseg_ladir = .
 libuniseg_la_SOURCES = $(libuniseq_sources)
 libuniseg_la_HEADERS = $(libuniseq_headers)
-libuniseg_la_LDFLAGS = -shared
+#libuniseg_la_LDFLAGS = -shared
 
 noinst_PROGRAMS = test/uniseg
 
 test_uniseg_SOURCES = test/uniseg.c
+test_uniseg_LDADD = -L. -luniseg
+test_uniseg_LDFLAGS = -static
 test_uniseg_DEPENDENCIES = libuniseg.la
 test_uniseg_CFLAGS =
 

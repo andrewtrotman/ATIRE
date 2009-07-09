@@ -112,7 +112,7 @@ bool File::exist() {
 	bool success = true;
 	struct stat my_stat;
 
-	if( stat( name_.c_str(), &my_stat ) == -1 )
+	if( stat( filename_.c_str(), &my_stat ) == -1 )
 		success = false;
 
 	return success;

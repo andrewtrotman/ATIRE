@@ -15,6 +15,12 @@ class UNISEG_settings
 {
 public:
 	static const int MAX_CHARS = 100;
+	static const char DEFAULT_FRQS_V_NAME[];
+	static const char DEFAULT_DICS_V_NAME[];
+	static const char DEFAULT_VAR[];
+	static const char DEFAULT_INDEX[];
+	static const char DEFAULT_ZH[];
+	static const char DEFAULT_EN[];
 
 public:
 	bool 					load;
@@ -30,7 +36,8 @@ public:
 
 	uniseg_encoding::language 	lang;
 
-	std::string 			wd;
+	std::string 			freqs_path; // string pattern frequency table path
+	std::string 			dics_path;  // dictionary path
 	char  					sep[2];
 
 
@@ -40,6 +47,11 @@ public:
 	bool					optimize;
 
 	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
+
+private:
+	void init();
+	void init_fields();
+	void init_others();
 
 public:
 	UNISEG_settings();

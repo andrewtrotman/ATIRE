@@ -35,8 +35,17 @@ Seger::Seger(const char* stream, size_t length) : stream_(stream, length) {
 Seger::~Seger() {}
 
 void Seger::init() {
+	assert (stream_.length() > 0);
+	//assert(tw_ptr_->chars().length() > 0);
+	FreqCounter counter(stream_, &freq_);
+	counter.count();
+
 	allfreq_ = &(QFreq::instance().freq());
 	tw_ptr_ = allfreq_->find(stream_);
+
+	assign_freq();
+	do_some_calculations();
+	//justify(0);
 }
 
 void Seger::start() {
@@ -54,14 +63,6 @@ void Seger::output() {
 }
 
 void Seger::build() {
-	assert (stream_.length() > 0);
-	//assert(tw_ptr_->chars().length() > 0);
-	FreqCounter counter(stream_, &freq_);
-	counter.count();
-	assign_freq();
-	do_some_calculations();
-	//justify(0);
-
 	bool stop = false;
 	word_ptr_type local_tw_ptr = freq_.find(stream_);
 	word_ptr_type w_ptr = local_tw_ptr;
