@@ -39,6 +39,16 @@ unsigned long i;
 if (token == NULL)
 	return token;
 
+/*
+	If we've been given a tag, remove the starting < and pass it on
+*/
+if (*token->start == '<')
+	{
+	token->start++;
+	token->string_length--;
+	return token;
+	}
+
 last_was_title = ANT_isupper(*token->start);
 
 while (ANT_parser_readability::issentenceend(token->start[token->length()-1]))
@@ -77,12 +87,6 @@ unsigned long wordlist_position = 0;
 unsigned int i = 0;
 int comparison_prev, comparison_curr;
 
-//printf("\n");
-//printf("Number of sentences: %ld\n", number_of_sentences);
-//printf("Number of words: %ld\n", number_of_words);
-//printf("Number of words in wordlist: %ld\n", ANT_readability_dale_chall_wordlist_length);
-//printf("\n");
-
 // sort the list of terms encountered
 qsort(words_encountered, number_of_words, sizeof(*words_encountered), ANT_readability_dale_chall::word_cmp);
 
@@ -118,20 +122,14 @@ for (i = 1; i < number_of_words; i++)
 		while (wordlist_position < ANT_readability_dale_chall_wordlist_length && 
 		(comparison_prev = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0 && // want the wordlist to come after previous (string > wordlist)
 		(comparison_curr = curr->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0) // and before current (string < wordlist)
-			{
 			wordlist_position++;
-			}
+
+		// found a familiar word
+		// skip over the word in the wordlist
 		if (comparison_prev == 0)
-			{
-			// found a familiar word
-			// skip over the word in the wordlist
 			wordlist_position++;
-			}
 		else
-			{
-			// found an unfamiliar word
 			number_of_unfamiliar_words += istitle ? 1 : term_frequency;
-			}
 		
 		// reset things for the new word
 		prev = curr;
@@ -143,14 +141,10 @@ for (i = 1; i < number_of_words; i++)
 	Finally, deal with the last term in the list, it won't be dealt with until now even if it's repeated.
 */
 while (wordlist_position < ANT_readability_dale_chall_wordlist_length && (comparison_prev = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
-	{
 	wordlist_position++;
-	}
+
 if (comparison_prev != 0)
-	{
-	// found an unfamiliar word
 	number_of_unfamiliar_words += istitle ? 1 : term_frequency;
-	}
 
 // avoid division by zero errors
 if (number_of_words == 0)
@@ -158,9 +152,6 @@ if (number_of_words == 0)
 if (number_of_sentences == 0)
 	number_of_sentences = 1;
 
-//printf("\n");
-//printf("Score = (0.049 * %ld / %ld) + (15.79 * %ld / %ld) + 3.6365\n", number_of_words, number_of_sentences, number_of_unfamiliar_words, number_of_words);
-//printf("Score = %.4f\n", (0.049 * number_of_words / number_of_sentences) + (15.79 * number_of_unfamiliar_words / number_of_words) + 3.6365);
 return (long)(1000 * ((0.049 * number_of_words / number_of_sentences) + (15.79 * number_of_unfamiliar_words / number_of_words) + 3.6365));
 }
 
@@ -171,9 +162,6 @@ return (long)(1000 * ((0.049 * number_of_words / number_of_sentences) + (15.79 *
 void ANT_readability_dale_chall::set_document(unsigned char *document)
 {
 parser->set_document(document);
-number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
-// don't reset the wordlist - might need expanding again, cheaper to just reuse
-// the same space from the beginning
 }
 
 /*
@@ -182,11 +170,18 @@ number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
 */
 void ANT_readability_dale_chall::add_node(ANT_memory_index_hash_node *node)
 {
+/*
+	If we've been given a tag to deal with, then just ignore it.
+*/
+if (ANT_isupper(node->string[0]))
+	return;
+
+/*
+	If we've run out of room then expand the size of the list of hash nodes to 
+	twice the size it currently is
+*/
 if (number_of_words == size)
 	{
-	/*
-		Expand the size of the list of hash nodes, to twice the size it currently it
-	*/
 	word *new_words = new word[size * 2];
 	memcpy(new_words, words_encountered, sizeof(word) * size);
 	size *= 2;
@@ -208,4 +203,7 @@ void ANT_readability_dale_chall::index(long long docno, ANT_memory_index *index)
 {
 ANT_string_pair measure_name("~dalechall", 10);
 index->set_document_readability(docno, score(), &measure_name);
+
+// If we're adding to the index, we've finished with this document
+number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
 }

@@ -41,11 +41,14 @@ else if (*current == '\0')						// end of string
 	return NULL;
 else											// everything else (that starts with a '<')
 	{
-	start = ++current;
+	start = current++; // keep the < so readability can know it's a tag
 	if (isXMLnamestartchar(*current))
 		{
 		while (isXMLnamechar(*current))
+			{
+			*current = ANT_toupper(*current);
 			current++;
+			}
 
 		while (*current != '>')
 			{
@@ -57,7 +60,8 @@ else											// everything else (that starts with a '<')
 					current++;
 			current++;
 			}
-		return get_next_token(); // Don't care about tags
+		current_token.start = (char *)start;
+		current_token.string_length = current - start;
 		}
 	else
 		{
