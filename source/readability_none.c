@@ -38,3 +38,11 @@ return 0;
 void ANT_readability_none::add_node(ANT_memory_index_hash_node *node)
 {
 }
+
+/*
+	ANT_READABILITY_NONE::INDEX()
+	-----------------------------
+*/
+void ANT_readability_none::index(long long docno, ANT_memory_index *index)
+{
+}

@@ -15,21 +15,25 @@ unsigned char *start;
 while (!isheadchar(*current))
 	current++;
 
-if (ANT_isalpha(*current) || issentenceend(*current))				// alphabetic strings
+if (ANT_isalpha(*current))
 	{
 	start = current++;
-	while (ANT_isalpha(*current) || issentenceend(*current))
+	while (ANT_isalpha(*current))
 		current++;
-
+	while (issentenceend(*current))
+		current++;
+	
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (ANT_isdigit(*current) || issentenceend(*current))				// numbers
+else if (ANT_isdigit(*current))
 	{
 	start = current++;
-	while (ANT_isdigit(*current) || issentenceend(*current))
+	while (ANT_isdigit(*current))
 		current++;
-
+	while (issentenceend(*current))
+		current++;
+	
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}

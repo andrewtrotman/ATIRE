@@ -64,3 +64,12 @@ void ANT_readability_factory::add_node(ANT_memory_index_hash_node *node)
 {
 measure->add_node(node);
 }
+
+/*
+	READABILITY_FACTORY::INDEX()
+	----------------------------
+*/
+void ANT_readability_factory::index(long long docno, ANT_memory_index *index)
+{
+measure->index(docno, index);
+}

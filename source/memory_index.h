@@ -55,6 +55,7 @@ public:
 	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
 	long serialise(char *filename);
 	void set_document_length(long long docid, long length);
+	void set_document_readability(long long docid, long length, ANT_string_pair *measure_name);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 	void text_render(long what);

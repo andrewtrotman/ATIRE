@@ -151,6 +151,29 @@ node->add_posting(&string, length);
 }
 
 /*
+	ANT_MEMORY_INDEX::SET_DOCUMENT_READABILITY()
+	--------------------------------------------
+*/
+void ANT_memory_index::set_document_readability(long long docno, long score, ANT_string_pair *measure_name)
+{
+long hash_value;
+ANT_memory_index_hash_node *node;
+
+largest_docno = docno;
+
+hash_value = hash(measure_name);
+if (hash_table[hash_value] == NULL)
+	{
+	stats->hash_nodes++;
+	node = hash_table[hash_value] = new_memory_index_hash_node(measure_name);
+	}
+else
+	node = find_add_node(hash_table[hash_value], measure_name);
+node->current_docno = 0;
+node->add_posting(measure_name, score);
+}
+
+/*
 	ANT_MEMORY_INDEX::IMPACT_ORDER()
 	--------------------------------
 */

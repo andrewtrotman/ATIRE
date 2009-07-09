@@ -34,24 +34,21 @@ delete [] words_encountered;
 ANT_string_pair *ANT_readability_dale_chall::get_next_token()
 {
 ANT_string_pair *token = parser->get_next_token();
+unsigned long i;
 
 if (token == NULL)
 	return token;
 
 last_was_title = ANT_isupper(*token->start);
 
-for (unsigned long i = 0; i < token->length(); i++)
+while (ANT_parser_readability::issentenceend(token->start[token->length()-1]))
 	{
-	if (token->start[i] == '.' || token->start[i] == '?' || token->start[i] == '!')
-		number_of_sentences++;
-	token->start[i] = ANT_tolower(token->start[i]);
+	number_of_sentences++;
+	token->string_length--;
 	}
 
-// TODO: Remove punctuation
-
-//printf("Yielding \"");
-//token->text_render();
-//printf("\" which was%s title\n", last_was_title ? "" : "n\'t");
+for (i = 0; i < token->length(); i++)
+	token->start[i] = ANT_tolower(token->start[i]);
 
 return token;
 }
@@ -127,18 +124,12 @@ for (i = 1; i < number_of_words; i++)
 		if (comparison_prev == 0)
 			{
 			// found a familiar word
-			//printf("Familiar: \"");
-			//prev->node->string.text_render();
-			//printf("\"\n");
 			// skip over the word in the wordlist
 			wordlist_position++;
 			}
 		else
 			{
 			// found an unfamiliar word
-			//printf("Unfamiliar: \"");
-			//prev->node->string.text_render();
-			//printf("\" (%s, %d)\n", istitle ? "title" : "normal", term_frequency);
 			number_of_unfamiliar_words += istitle ? 1 : term_frequency;
 			}
 		
@@ -161,12 +152,16 @@ if (comparison_prev != 0)
 	number_of_unfamiliar_words += istitle ? 1 : term_frequency;
 	}
 
-// (0.049 * (nw / ns)) + (15.79 * (nu / nw)) + 3.6365
+// avoid division by zero errors
+if (number_of_words == 0)
+	number_of_words = 1;
+if (number_of_sentences == 0)
+	number_of_sentences = 1;
 
 //printf("\n");
-//printf("Score = (0.049 * (%ld / %ld)) + (15.79 * (%ld / %ld)) + 3.6365\n", number_of_words, number_of_sentences, number_of_unfamiliar_words, number_of_words);
-//printf("Score = %.4f\n", (0.049 * (number_of_words / number_of_sentences)) + (15.79 * (number_of_unfamiliar_words / number_of_words)) + 3.6365);
-return 0;
+//printf("Score = (0.049 * %ld / %ld) + (15.79 * %ld / %ld) + 3.6365\n", number_of_words, number_of_sentences, number_of_unfamiliar_words, number_of_words);
+//printf("Score = %.4f\n", (0.049 * number_of_words / number_of_sentences) + (15.79 * number_of_unfamiliar_words / number_of_words) + 3.6365);
+return (long)(1000 * ((0.049 * number_of_words / number_of_sentences) + (15.79 * number_of_unfamiliar_words / number_of_words) + 3.6365));
 }
 
 /*
@@ -177,10 +172,8 @@ void ANT_readability_dale_chall::set_document(unsigned char *document)
 {
 parser->set_document(document);
 number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
-
-// Reset the list of words for this document
-delete [] words_encountered;
-words_encountered = new word[initial_size];
+// don't reset the wordlist - might need expanding again, cheaper to just reuse
+// the same space from the beginning
 }
 
 /*
@@ -189,10 +182,6 @@ words_encountered = new word[initial_size];
 */
 void ANT_readability_dale_chall::add_node(ANT_memory_index_hash_node *node)
 {
-//printf("Adding ");
-//node->string.text_render();
-//printf(" (%lld)\n", node->document_frequency);
-
 if (number_of_words == size)
 	{
 	/*
@@ -209,4 +198,14 @@ if (number_of_words == size)
 words_encountered[number_of_words].node = node;
 words_encountered[number_of_words].istitle = last_was_title;
 number_of_words++;
+}
+
+/*
+	ANT_READABILITY_DALE_CHALL::INDEX()
+	-----------------------------------
+*/
+void ANT_readability_dale_chall::index(long long docno, ANT_memory_index *index)
+{
+ANT_string_pair measure_name("~dalechall", 10);
+index->set_document_readability(docno, score(), &measure_name);
 }

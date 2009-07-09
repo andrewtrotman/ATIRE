@@ -20,8 +20,7 @@ public:
 	virtual ~ANT_parser_readability() {};
 	ANT_string_pair *get_next_token(void);
 
-protected:
-	static int issentenceend(unsigned char val) { return val == '.' || val == '?' || val == '!'; }
+	static int issentenceend(unsigned char val) { return val == '.' || val == '!' || val == '?'; }
 } ;
 
 #endif __PARSER_READABILITY_H__

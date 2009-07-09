@@ -8,6 +8,7 @@
 
 #include "parser.h"
 #include "string_pair.h"
+#include "memory_index.h"
 #include "memory_index_hash_node.h"
 
 /* 
@@ -24,6 +25,7 @@ public:
 	virtual void set_document(unsigned char *) = 0;
 	virtual long score() = 0;
 	virtual void add_node(ANT_memory_index_hash_node *) = 0;
+	virtual void index(long long, ANT_memory_index *) = 0;
 	
 	void set_parser(ANT_parser *parser) { this->parser = parser; }
 

@@ -7,6 +7,7 @@
 #define __READABILITY_DALE_CHALL_H__
 
 #include "readability.h"
+#include "parser_readability.h"
 
 /*
 	class ANT_READABILITY_DALE_CHALL
@@ -19,9 +20,10 @@ public:
 	virtual ~ANT_readability_dale_chall();
 	
 	ANT_string_pair *get_next_token();
-	void set_document(unsigned char *);
 	long score();
+	void set_document(unsigned char *);
 	void add_node(ANT_memory_index_hash_node *);
+	void index(long long, ANT_memory_index *);
 
 private:
 	struct word
@@ -30,8 +32,8 @@ private:
 	unsigned char istitle;
 	};
 	
-static int word_cmp(const void *a, const void *b);
-
+	static int word_cmp(const void *a, const void *b);
+	
 	unsigned long number_of_sentences;
 	unsigned long number_of_words;
 	unsigned long number_of_unfamiliar_words;

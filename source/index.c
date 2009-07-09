@@ -96,7 +96,7 @@ else if (param_block.readability_measure == ANT_readability_factory::NONE)
 else
 	parser = new ANT_parser_readability();
 
-readability = new ANT_readability_factory();
+readability = new ANT_readability_factory;
 readability->set_measure(param_block.readability_measure);
 readability->set_parser(parser);
 
@@ -146,6 +146,7 @@ for (param = first_param; param < argc; param++)
 				if (done_work)
 					{
 					index->set_document_length(doc, terms_in_document);
+					readability->index(doc, index);
 					doc++;
 					if (doc % param_block.reporting_frequency == 0)
 						report(doc, index, &stats, 0);
@@ -160,7 +161,7 @@ for (param = first_param; param < argc; param++)
 				}
 			}
 		index->set_document_length(doc, terms_in_document);
-		readability->score();
+		readability->index(doc, index);
 		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();
