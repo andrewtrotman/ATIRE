@@ -16,6 +16,7 @@ using namespace std;
 
 QFreq::QFreq() {
 	k_ = -1;
+	loaded_ = false;
 }
 
 QFreq::~QFreq() {
@@ -37,6 +38,8 @@ void QFreq::load_freq(int n, bool force) {
 	loader.load(UNISEG_settings::instance().wd, n);
 	freq_.cal_sum_n_avg();
 	k_ = loader.count();
+
+	loaded_ = true;
 }
 
 QFreq& QFreq::instance() {

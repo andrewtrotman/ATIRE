@@ -20,19 +20,24 @@
 
 using namespace std;
 
-Seger::Seger(Freq& allfreq, word_ptr_type tw_ptr) :
-	allfreq_(allfreq), tw_ptr_(tw_ptr), stream_(tw_ptr_->chars()) {}
+Seger::Seger(word_ptr_type tw_ptr) :
+	tw_ptr_(tw_ptr), stream_(tw_ptr_->chars()) {}
 
-Seger::Seger(Freq&	allfreq, const string_type stream) : allfreq_(allfreq), stream_(stream) {
-	tw_ptr_ = allfreq_.find(stream);
+Seger::Seger(const string_type stream) : stream_(stream) {
+	init();
 }
 
-Seger::Seger(Freq&	allfreq, const char* stream, size_t length) : allfreq_(allfreq), stream_(stream, length) {
-
+Seger::Seger(const char* stream, size_t length) : stream_(stream, length) {
+	init();
 }
 
 
 Seger::~Seger() {}
+
+void Seger::init() {
+	allfreq_ = &(QFreq::instance().freq());
+	tw_ptr_ = allfreq_->find(stream_);
+}
 
 void Seger::start() {
 	build();
@@ -155,7 +160,7 @@ void Seger::make(CList& clist, string_type& str) {
 }
 
 void Seger::assign_freq() {
-	freq_.assign_freq(allfreq_);
+	freq_.assign_freq(*allfreq_);
 }
 
 void Seger::justify(unsigned int min) {
@@ -204,7 +209,7 @@ void Seger::add_to_list(array_type& cwlist) {
 
 			for (int i = 0; i < temp.size(); i++) {
 				str.append(temp[i]->chars());
-				word_ptr_type w_ptr = allfreq_.find(temp[i]->chars());
+				word_ptr_type w_ptr = allfreq_->find(temp[i]->chars());
 
 				if (!w_ptr)
 					continue;
@@ -213,7 +218,7 @@ void Seger::add_to_list(array_type& cwlist) {
 				cwlist.push_back(w_ptr);
 
 				if (i > 0 && i < (temp.size() -1)) {
-					word_ptr_type iner_w_ptr = allfreq_.find(str);
+					word_ptr_type iner_w_ptr = allfreq_->find(str);
 					// for debug
 					//cout << "setting " << str << " for being a word or seged" << endl;
 					//assert(iner_w_ptr != NULL);
@@ -242,7 +247,7 @@ void Seger::mark_the_seged() {
 	/// to set some other words for being seged as well
 	if (tw_ptr_ != NULL) {
 		const unsigned int freq = tw_ptr_->freq();
-		freq_.set_seged(allfreq_, freq);
+		freq_.set_seged(*allfreq_, freq);
 	}
 }
 

@@ -7,11 +7,12 @@
 
 class FreqLoader {
 private:
-	Freq& freq_;
-	int k_;
+	Freq& 		freq_;
+	int 		k_;
+
 
 public:
-	FreqLoader(Freq& freq) : freq_(freq) {}
+	FreqLoader(Freq& freq) : freq_(freq) {  }
 	~FreqLoader() {}
 
 	void load(std::string path, int n = INT_MAX);

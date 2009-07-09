@@ -8,27 +8,27 @@ CC = g++
 
 libuniseq_sources = \
 		uniseg_settings.c \
-		word.c	\
+		word.c \
 		clist.c	\
-		cwords.c	\
-		freq.c	\
+		cwords.c \
+		freq.c \
 		freq_counter.c \
 		freq_file.c	\
-		freq_loader.c	\
-		index_file.c	\
-		file.c	\		
+		freq_loader.c \
+		index_file.c \
+		file.c \
 		qfreq.c	\
-		seg.c	\	
-		dic.c	
+		seg.c \
+		dic.c
 
 		
-A	=	\		
-		qzer.c	\	
-		doc_base.c	\	
-		doc_freq.c	\
-		doc_reader.c	\
+A	= \
+		qzer.c \
+		doc_base.c \
+		doc_freq.c \
+		doc_reader.c \
 		qconf.c	\
-		qdoc.c			udoc.c	
+		qdoc.c udoc.c	
 
 		
 B =    dic_builder.c	
@@ -71,3 +71,12 @@ libuniseg_ladir = .
 libuniseg_la_SOURCES = $(libuniseq_sources)
 libuniseg_la_HEADERS = $(libuniseq_headers)
 libuniseg_la_LDFLAGS = -shared
+
+noinst_PROGRAMS = test/uniseg
+
+test_uniseg_SOURCES = test/uniseg.c
+test_uniseg_DEPENDENCIES = libuniseg.la
+test_uniseg_CFLAGS =
+
+TESTS = test/uniseg
+
