@@ -1,4 +1,6 @@
+#include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include "ctypes.h"
 #include "stemmer.h"
 #include "btree_iterator.h"
@@ -20,16 +22,16 @@ long long thesaurus_engine::fill_buffer_with_postings(char *term, long *buffer) 
 	ANT_compressable_integer *current_tf;
 #endif
 
+    memset(buffer, 0, sizeof (*buffer) * documents);
+
     // Get position 
-    if (get_postings_details(term, &term_details) == NULL) {
-        memset(buffer, 0, sizeof buffer[0] * documents);
+    if (get_postings_details(term, &term_details) == NULL) 
         return 0;
-    }
+
     // Get from disk
-	if (get_postings(&term_details, postings_buffer) == NULL) {
-        memset(buffer, 0, sizeof buffer[0] * documents);
+	if (get_postings(&term_details, postings_buffer) == NULL) 
 		return 0;
-    }
+
     // Decompress
 #ifdef ANT_TOP_K
 	factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
@@ -42,7 +44,7 @@ long long thesaurus_engine::fill_buffer_with_postings(char *term, long *buffer) 
 		while (*current_document != 0)
 			{
 			document += *current_document++;
-			buffer[document] = term_frequency;
+            buffer[document] = term_frequency;
 			}
 		current_document++;
 		}
@@ -65,6 +67,7 @@ long long thesaurus_engine::fill_buffer_with_postings(char *term, long *buffer) 
 */
 double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long buffer_b_total) {
     long long doc;
+    long long buffer_a_length = 0, buffer_b_length = 0;
     double similarity = 0;
 
     if (buffer_a_total == 0 ||
@@ -72,10 +75,14 @@ double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long b
         return 0.0;
 
     for (doc = 0; doc < documents; doc++) {
-        similarity += 
-            (buffer_a[doc] / (double) 100 / buffer_a_total) *
-            (buffer_b[doc] / (double) 100 / buffer_b_total);
+        similarity += buffer_a[doc] * buffer_b[doc];
+        buffer_a_length += buffer_a[doc] * buffer_a[doc];
+        buffer_b_length += buffer_b[doc] * buffer_b[doc];
     }
+
+    similarity /= sqrt((double)buffer_a_length);
+    similarity /= sqrt((double)buffer_b_length);
+
     return similarity;
 }
 
@@ -115,9 +122,13 @@ void thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshol
     // alternately check that the first char is alpha via ANT_isalpha(term[0]);
     for (term = all_terms.first("a"); term != NULL; term = all_terms.next()) {
         for (stem = stemmer->first(term); stem != NULL; stem = stemmer->next()) {
-            // TODO: for efficiency skip if stem == term
-            if ((similarity = term_similarity(term, stem))) // > 0.5)
+            if (strcmp(term, stem) == 0) continue;
+
+            similarity = term_similarity(term, stem);
+            if (similarity > threshold)
                 printf("%s is ~= %s by a factor of %f\n", term, stem, similarity);
+            else
+                printf("%s is !~= %s by a factor of %f\n", term, stem, similarity);
         }
     }
 }
