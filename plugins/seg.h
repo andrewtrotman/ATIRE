@@ -18,9 +18,12 @@ class Seger {
 private:
 	CList				clist_;
 	Freq				freq_;    // the frequency records for the input text
-	Freq*				allfreq_;
+	Freq				*allfreq_;
 	word_ptr_type 		tw_ptr_;
 	string_type 		stream_;  // for the incoming document which will be segmented
+
+	array_type			words_list_;   // top ranking candidate words aka segmented words
+	char 				**output_;  // same content with words_, but for the easy access of other programs
 
 public:
 	Seger(word_ptr_type tw_ptr);
@@ -29,7 +32,8 @@ public:
 	~Seger();
 
 	void start();
-	void output();
+	char **output();
+	void free_output();
 
 	void build();
 	void show_all();

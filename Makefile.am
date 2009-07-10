@@ -23,6 +23,7 @@ library_sources =  \
 	$(SRCDIR)/encoding_utf8.c \
 	$(SRCDIR)/encoding_factory.c \
 	$(SRCDIR)/parser.c \
+	$(SRCDIR)/parser_readability.c \
 	$(SRCDIR)/universal_parser.c \
     $(SRCDIR)/memory_index_hash_node.c \
     $(SRCDIR)/memory_index.c \
@@ -75,6 +76,12 @@ library_sources =  \
 	$(SRCDIR)/compression_factory.c \
 	$(SRCDIR)/indexer_param_block.c \
 	$(SRCDIR)/ant_param_block.c \
+	$(SRCDIR)/readability_factory.c \
+	$(SRCDIR)/readability_none.c \
+	$(SRCDIR)/readability_dale_chall.c \
+	$(SRCDIR)/plugin.c \
+	$(SRCDIR)/plugin_segmentation.c \
+	$(SRCDIR)/plugin_manager.c \
 	$(SRCDIR)/version.c
 				
 library_headers = \
@@ -123,6 +130,8 @@ library_headers = \
 	$(SRCDIR)/NEXI.h	\
 	$(SRCDIR)/paice_husk.h	\
 	$(SRCDIR)/parser.h	\
+	$(SRCDIR)/parser_readability.h	\
+	$(SRCDIR)/universal_parser.h \
 	$(SRCDIR)/porter.h	\
 	$(SRCDIR)/postings_piece.h	\
 	$(SRCDIR)/relevant_document.h	\
@@ -149,6 +158,12 @@ library_headers = \
 	$(SRCDIR)/string_pair.h	\
 	$(SRCDIR)/time_stats.h	\
 	$(SRCDIR)/top_k_sort.h	\
+	$(SRCDIR)/readability_factory.h \
+	$(SRCDIR)/readability_none.h \
+	$(SRCDIR)/readability_dale_chall.h \
+	$(SRCDIR)/plugin.h \
+	$(SRCDIR)/plugin_segmentation.h \	
+	$(SRCDIR)/plugin_manager.h \
 	$(SRCDIR)/version.h
 				
 noinst_LTLIBRARIES = libant.la

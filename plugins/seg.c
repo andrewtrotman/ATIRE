@@ -21,48 +21,86 @@
 using namespace std;
 
 Seger::Seger(word_ptr_type tw_ptr) :
-	tw_ptr_(tw_ptr), stream_(tw_ptr_->chars()) {}
-
-Seger::Seger(const string_type stream) : stream_(stream) {
+	tw_ptr_(tw_ptr), stream_(tw_ptr_->chars())
+{
 	init();
 }
 
-Seger::Seger(const char* stream, size_t length) : stream_(stream, length) {
+Seger::Seger(const string_type stream) : stream_(stream)
+{
+	tw_ptr_ = NULL;
+	init();
+}
+
+Seger::Seger(const char* stream, size_t length) : stream_(stream, length)
+{
+	tw_ptr_ = NULL;
 	init();
 }
 
 
-Seger::~Seger() {}
+Seger::~Seger()
+{
+	free_output();
+}
 
-void Seger::init() {
+void Seger::init()
+{
+	output_ = NULL;
+
 	assert (stream_.length() > 0);
 	//assert(tw_ptr_->chars().length() > 0);
 	FreqCounter counter(stream_, &freq_);
 	counter.count();
 
 	allfreq_ = &(QFreq::instance().freq());
-	tw_ptr_ = allfreq_->find(stream_);
+
+	if (!tw_ptr_)
+		tw_ptr_ = allfreq_->find(stream_);
 
 	assign_freq();
 	do_some_calculations();
 	//justify(0);
 }
 
-void Seger::start() {
+void Seger::start()
+{
 	build();
 	//apply_rules();
 	seg();
 
 
-	//add_to_list(cwlist_);
+	add_to_list(words_list_);
 	//mark_the_seged();
 }
 
-void Seger::output() {
+char** Seger::output()
+{
+	if (!output_ && words_list_.size() > 0) {
+		output_ = new char*[words_list_.size() + 1];
+		output_[words_list_.size()] = '\0';
 
+		for (int i = 0; i < words_list_.size(); i++) {
+			output_[i] = new char[words_list_[i]->chars().length() + 1];
+			strcpy(output_[i], words_list_[i]->chars().c_str());
+		}
+	}
+	return output_;
 }
 
-void Seger::build() {
+void Seger::free_output()
+{
+//	int i = 0;
+//	while (output_[i]) {
+//		delete output_[i];
+//		i++;
+//	}
+	delete [] output_;
+	output_ = NULL;
+}
+
+void Seger::build()
+{
 	bool stop = false;
 	word_ptr_type local_tw_ptr = freq_.find(stream_);
 	word_ptr_type w_ptr = local_tw_ptr;
