@@ -122,7 +122,8 @@ void thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshol
     // alternately check that the first char is alpha via ANT_isalpha(term[0]);
     for (term = all_terms.first("a"); term != NULL; term = all_terms.next()) {
         for (stem = stemmer->first(term); stem != NULL; stem = stemmer->next()) {
-            if (strcmp(term, stem) == 0) continue;
+            /* Prevent doing everything twice (turn the resultant matrix into a triangle) */
+            if (strcmp(term, stem) == 0) break;
 
             similarity = term_similarity(term, stem);
             if (similarity > threshold)
