@@ -82,18 +82,22 @@ long ANT_readability_dale_chall::score()
 {
 word *prev, *curr;
 unsigned long istitle = 0;
-unsigned int term_frequency;
+unsigned int term_frequency = 0;
 unsigned long wordlist_position = 0;
 unsigned int i = 0;
-int comparison_prev, comparison_curr;
+int comparison_prev = 0, comparison_curr = 0;
 
 // sort the list of terms encountered
 qsort(words_encountered, number_of_words, sizeof(*words_encountered), ANT_readability_dale_chall::word_cmp);
 
-prev = &words_encountered[0];
+// skip over any numbers, or words beginning uppercase (should be none)
+while (!ANT_islower(words_encountered[i].node->string[0]))
+	i++;
+
+prev = &words_encountered[i++];
 istitle += prev->istitle;
 
-for (i = 1; i < number_of_words; i++)
+for (; i < number_of_words; i++)
 	{
 	curr = &words_encountered[i];
 
