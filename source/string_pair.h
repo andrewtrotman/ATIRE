@@ -72,7 +72,7 @@ cmp = ::strncmp(start, with, string_length);
 if (cmp == 0)
 	{
 	len = strlen(with);
-	return len == string_length ? 0 : len > string_length ? 1 : -1;
+	return len == string_length ? 0 : len > string_length ? -1 : 1;
 	}
 else
 	return cmp;

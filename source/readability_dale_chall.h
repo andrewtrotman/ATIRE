@@ -37,11 +37,11 @@ private:
 	unsigned long number_of_sentences;
 	unsigned long number_of_words;
 	unsigned long number_of_unfamiliar_words;
-	unsigned long size; // maximum size of list of words encountered
+	//unsigned long size; // maximum size of list of words encountered
 	word *words_encountered;
 	unsigned char last_was_title; // whether the last word we passed on was title
-	
-	static const unsigned long initial_size = 50;
+	// largest document in wiki is 65003
+	unsigned long size;
 };
 
 #endif __READABILITY_DALE_CHALL_H__

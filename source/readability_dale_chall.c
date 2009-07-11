@@ -14,8 +14,8 @@
 ANT_readability_dale_chall::ANT_readability_dale_chall()
 {
 number_of_words = number_of_sentences = number_of_unfamiliar_words = 0;
-size = initial_size;
-words_encountered = new word[initial_size];
+size = 65005; // biggest doc in wiki is 65003
+words_encountered = new word[size];
 }
 
 /*
@@ -51,7 +51,7 @@ if (*token->start == '<')
 
 last_was_title = ANT_isupper(*token->start);
 
-while (ANT_parser_readability::issentenceend(token->start[token->length()-1]))
+while (ANT_parser_readability::issentenceend(token->start[token->length() - 1]))
 	{
 	number_of_sentences++;
 	token->string_length--;
@@ -81,23 +81,19 @@ int ANT_readability_dale_chall::word_cmp(const void *a, const void *b)
 long ANT_readability_dale_chall::score()
 {
 word *prev, *curr;
-unsigned long istitle = 0;
-unsigned int term_frequency = 0;
-unsigned long wordlist_position = 0;
 unsigned int i = 0;
-int comparison_prev = 0, comparison_curr = 0;
+unsigned long istitle = 0;
+unsigned long wordlist_position = 0;
+unsigned long term_frequency = 0;
+int comparison = 0;
 
 // sort the list of terms encountered
 qsort(words_encountered, number_of_words, sizeof(*words_encountered), ANT_readability_dale_chall::word_cmp);
 
-// skip over any numbers, or words beginning uppercase (should be none)
-while (!ANT_islower(words_encountered[i].node->string[0]))
-	i++;
-
-prev = &words_encountered[i++];
+prev = &words_encountered[0];
 istitle += prev->istitle;
 
-for (; i < number_of_words; i++)
+for (i = 1; i < number_of_words; i++)
 	{
 	curr = &words_encountered[i];
 
@@ -117,23 +113,32 @@ for (; i < number_of_words; i++)
 	*/
 	else
 		{
-		term_frequency = prev->node->tf_list_tail->data[prev->node->tf_node_used - 1];
-		
+
 		/*
 			Compare the term to those in the familiar wordlist.
 			If it's not in there, then nu += istitle ? 1 : term_frequency
+
+			While we have words in the wordlist, play "catch up" 
+			to the term we're looking at.
 		*/
 		while (wordlist_position < ANT_readability_dale_chall_wordlist_length && 
-		(comparison_prev = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0 && // want the wordlist to come after previous (string > wordlist)
-		(comparison_curr = curr->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0) // and before current (string < wordlist)
+			(comparison = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
+			{
 			wordlist_position++;
+			}
 
-		// found a familiar word
-		// skip over the word in the wordlist
-		if (comparison_prev == 0)
+		if (comparison == 0) // found a familiar word
+			{
+			// skip over the word in the wordlist
 			wordlist_position++;
+			}
 		else
-			number_of_unfamiliar_words += istitle ? 1 : term_frequency;
+			{
+			term_frequency = prev->node->tf_list_tail->data[prev->node->tf_node_used - 1];
+			// if it's only occured as title-case then it's a name
+			// cheap/fugly approximaion
+			number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
+			}
 		
 		// reset things for the new word
 		prev = curr;
@@ -144,11 +149,15 @@ for (; i < number_of_words; i++)
 /*
 	Finally, deal with the last term in the list, it won't be dealt with until now even if it's repeated.
 */
-while (wordlist_position < ANT_readability_dale_chall_wordlist_length && (comparison_prev = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
+while (wordlist_position < ANT_readability_dale_chall_wordlist_length && 
+	(comparison = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
 	wordlist_position++;
 
-if (comparison_prev != 0)
-	number_of_unfamiliar_words += istitle ? 1 : term_frequency;
+if (comparison != 0)
+	{
+	term_frequency = prev->node->tf_list_tail->data[prev->node->tf_node_used - 1];
+	number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
+	}
 
 // avoid division by zero errors
 if (number_of_words == 0)
@@ -180,12 +189,17 @@ void ANT_readability_dale_chall::add_node(ANT_memory_index_hash_node *node)
 if (ANT_isupper(node->string[0]))
 	return;
 
+// ignore numbers as well
+if (ANT_isdigit(node->string[0]))
+	return;
+
 /*
 	If we've run out of room then expand the size of the list of hash nodes to 
 	twice the size it currently is
 */
 if (number_of_words == size)
 	{
+	// shouldn't happen now!
 	word *new_words = new word[size * 2];
 	memcpy(new_words, words_encountered, sizeof(word) * size);
 	size *= 2;
