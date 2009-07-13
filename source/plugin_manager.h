@@ -11,25 +11,24 @@
 
 #include "plugin.h"
 
-class ANT_plugin_segmentation;
-
 class ANT_plugin_manager
 {
 public:
-	static int		plugin_ids[];  // registered plugin ids
-	ANT_plugin		**plugins;
-	int				num_of_plugins;
+	static char 			PLUGIN_DIRECTORY_NAME[];
+
+	static int				plugin_ids[];  // registered plugin ids
+	static int				num_of_plugins;
+	static char				plugin_names[][]; // plugin dynamic library names
 
 public:
 	ANT_plugin_manager();
 	~ANT_plugin_manager();
 
 	static ANT_plugin_manager& instance();
-	void plug(ANT_plugin::plugin_type);
+//	void plug(ANT_plugin::plugin_type);
 	void load();
 
-	// the reason with using a plugin function is that we don't have unified interfaces for achieving particular tasks
-	ANT_plugin_segmentation *get_segmentation_plugin();
+	char **do_segmentation(char *c);
 };
 
 inline ANT_plugin_manager& instance()

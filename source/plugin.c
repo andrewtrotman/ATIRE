@@ -8,7 +8,12 @@
 
 #include "plugin.h"
 
-void ANT_plugin::load()
+ANT_plugin::ANT_plugin()
 {
-
 }
+
+
+ANT_plugin::~ANT_plugin()
+{
+}
+

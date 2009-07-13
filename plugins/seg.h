@@ -29,6 +29,7 @@ public:
 	Seger(word_ptr_type tw_ptr);
 	Seger(const string_type stream);
 	Seger(const char* stream, size_t length);
+	Seger();
 	~Seger();
 
 	void start();
@@ -42,6 +43,7 @@ public:
 	void mark_the_seged();
 
 	string_type& stream() { return stream_; }
+	void input(char *);
 
 private:
 	void init();

@@ -20,20 +20,28 @@
 
 using namespace std;
 
+Seger::Seger()
+{
+	allfreq_ = NULL;
+}
+
 Seger::Seger(word_ptr_type tw_ptr) :
 	tw_ptr_(tw_ptr), stream_(tw_ptr_->chars())
 {
+	allfreq_ = NULL;
 	init();
 }
 
 Seger::Seger(const string_type stream) : stream_(stream)
 {
+	allfreq_ = NULL;
 	tw_ptr_ = NULL;
 	init();
 }
 
 Seger::Seger(const char* stream, size_t length) : stream_(stream, length)
 {
+	allfreq_ = NULL;
 	tw_ptr_ = NULL;
 	init();
 }
@@ -46,13 +54,15 @@ Seger::~Seger()
 
 void Seger::init()
 {
-	output_ = NULL;
+	if (!output_)
+		free_output();
 
 	assert (stream_.length() > 0);
 	//assert(tw_ptr_->chars().length() > 0);
 	FreqCounter counter(stream_, &freq_);
 	counter.count();
 
+	if (!allfreq_)
 	allfreq_ = &(QFreq::instance().freq());
 
 	if (!tw_ptr_)
@@ -61,6 +71,12 @@ void Seger::init()
 	assign_freq();
 	do_some_calculations();
 	//justify(0);
+}
+
+void Seger::input(char *input)
+{
+	stream_ = input;
+	init();
 }
 
 void Seger::start()

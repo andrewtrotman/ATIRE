@@ -80,7 +80,6 @@ library_sources =  \
 	$(SRCDIR)/readability_none.c \
 	$(SRCDIR)/readability_dale_chall.c \
 	$(SRCDIR)/plugin.c \
-	$(SRCDIR)/plugin_segmentation.c \
 	$(SRCDIR)/plugin_manager.c \
 	$(SRCDIR)/version.c
 				
@@ -161,8 +160,7 @@ library_headers = \
 	$(SRCDIR)/readability_factory.h \
 	$(SRCDIR)/readability_none.h \
 	$(SRCDIR)/readability_dale_chall.h \
-	$(SRCDIR)/plugin.h \
-	$(SRCDIR)/plugin_segmentation.h \	
+	$(SRCDIR)/plugin.h \	
 	$(SRCDIR)/plugin_manager.h \
 	$(SRCDIR)/version.h
 				

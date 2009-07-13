@@ -15,6 +15,7 @@ extra_sources = \
 
 libuniseq_sources = \
 		$(extra_sources) \
+		uniseg_plugin.c \
 		uniseg_settings.c \
 		word.c \
 		clist.c	\
@@ -59,6 +60,7 @@ libuniseg_headers = \
 		timings.h	\
 		udoc.h	\
 		utilities.h	\
+		uniseg_plugin.h \
 		word.h			
 
 lib_LTLIBRARIES = libuniseg.la
