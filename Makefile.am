@@ -79,7 +79,6 @@ library_sources =  \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_none.c \
 	$(SRCDIR)/readability_dale_chall.c \
-	$(SRCDIR)/plugin.c \
 	$(SRCDIR)/plugin_manager.c \
 	$(SRCDIR)/version.c
 				
@@ -183,10 +182,9 @@ index_SOURCES = $(SRCDIR)/index.c
 index_LDADD = -L${OBJDIR} -lant
 index_DEPENDENCIES = libant.la
 
-noinst_PROGRAMS = ant_dictionary
+noinst_PROGRAMS = ant_dictionary ant_plugins
 
 ant_dictionary_SOURCES = $(SRCDIR)/ant_dictionary.c 
-						index_LDADD = -L${OBJDIR} -lant
 ant_dictionary_LDADD = -L${OBJDIR} -lant
 ant_dictionary_DEPENDENCIES = libant.la
 # ############################################################################
@@ -195,6 +193,11 @@ ant_dictionary_DEPENDENCIES = libant.la
 #  object `XXXX.$(OBJEXT)' created both with libtool and without
 # ant_dictionary_CFLAGS = $(AM_CFLAGS)
 						 
-
+ant_plugins_SOURCES = $(SRCDIR)/ant_plugins.c \
+					$(SRCDIR)/plugin_manager.c
+ant_plugins_CFLAGS = $(AM_CFLAGS)
+ant_plugins_LDADD = -ldl
+ant_plugins_LDFLAGS = -rdynamic
+ant_plugins_DEPENDENCIES = 
 
 

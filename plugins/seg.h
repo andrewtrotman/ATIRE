@@ -32,6 +32,7 @@ public:
 	Seger();
 	~Seger();
 
+	void load_frqs();
 	void start();
 	char **output();
 	void free_output();

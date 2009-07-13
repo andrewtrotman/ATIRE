@@ -79,6 +79,11 @@ void Seger::input(char *input)
 	init();
 }
 
+void Seger::load_frqs()
+{
+	QFreq::instance().load_freq();
+}
+
 void Seger::start()
 {
 	build();

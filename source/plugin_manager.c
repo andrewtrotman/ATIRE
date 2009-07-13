@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "plugin_manager.h"
 
@@ -21,23 +22,24 @@ int ANT_plugin_manager::num_of_plugins = sizeof(ANT_plugin_manager::plugin_ids)/
 
 
 #ifdef _MSC_VER
-	char ANT_plugin_manager::plugin_names[][] = { { "uniseg.dll" } {} };
+	char *ANT_plugin_manager::plugin_names[] = { "uniseg.dll" };
 #else
-	char ANT_plugin_manager::plugin_names[][] = { { "libuniseg.so"} {} };
+	char *ANT_plugin_manager::plugin_names[] = { "libuniseg.so" };
 #endif
 
 
 /* global plugins */
-ANT_plugin_maker *plugin_factory = NULL;
+ANT_plugin_maker **plugin_factory = NULL;
 
 ANT_plugin_manager::ANT_plugin_manager()
 {
 if (!plugin_factory)
 	{
-	plugin_factory = new ANT_plugin_maker[num_of_plugins];
+	plugin_factory = new ANT_plugin_maker *[num_of_plugins];
 
 	for (int i = 0; i < num_of_plugins; i++)
 		{
+		plugin_factory[i] = new ANT_plugin_maker;
 		plugin_factory[i]->plugin = NULL;
 		plugin_factory[i]->dlib = NULL;
 		}
@@ -47,10 +49,12 @@ if (!plugin_factory)
 ANT_plugin_manager::~ANT_plugin_manager()
 {
 for (int i = 0; i < num_of_plugins; i++)
+	{
 	if (plugin_factory[i]->plugin)
 		delete plugin_factory[i]->plugin;
 	if (plugin_factory[i]->dlib)
-		dlclose(dlib);
+		dlclose(plugin_factory[i]->dlib);
+	}
 
 delete [] plugin_factory;
 }
@@ -67,18 +71,31 @@ for (int i = 0; i < num_of_plugins; i++)
 	#else
 		char sep[] = { "/" };
 	#endif
-	char *name_with_plugin_path = new char[strlen(PLUGIN_DIRECTORY_NAME) + strlen(sep) + strlen(name)];
+	int len = strlen(PLUGIN_DIRECTORY_NAME) + strlen(sep) + strlen(name) + 1;
+	char *name_with_plugin_path = new char[len];
 	strcpy(name_with_plugin_path, PLUGIN_DIRECTORY_NAME);
 	strcat(name_with_plugin_path, sep);
 	strcat(name_with_plugin_path, name);
-	dlib = dlopen(name_with_plugin_path, RTLD_NOW);
-	if (dlib == NULL )
-		printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
-	delete name_with_plugin_path;
+	name_with_plugin_path[len] = '\0';
+	struct stat plugin_stat;
+	if (stat( name_with_plugin_path, &plugin_stat ) != -1)
+		{
+		plugin_factory[plugin_ids[i]]->dlib = dlopen(name_with_plugin_path, RTLD_NOW);
+		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
+			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
+		else
+			printf("found plugin(%s)\n", name_with_plugin_path);
+		plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
+		}
+	else
+		printf("no plugin found for : %s\n", name_with_plugin_path);
+	delete [] name_with_plugin_path;
 	}
 }
 
 char **ANT_plugin_manager::do_segmentation(char *c)
 {
-return plugins[ANT_plugin::SEGMENTATION]->do_segmentation(c);
+if (plugin_factory[ANT_plugin::SEGMENTATION]->plugin)
+	return plugin_factory[ANT_plugin::SEGMENTATION]->plugin->do_segmentation(c);
+return NULL;
 }

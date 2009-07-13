@@ -10,8 +10,10 @@
 
 UNISEG_plugin::UNISEG_plugin() : uniseg_plugin_interface()
 {
-	name = SEGMENTATION_PLUGIN_NAME;
 	output = 0;
+
+	// load the string frequency table
+	seger.load_frqs();
 }
 
 UNISEG_plugin::~UNISEG_plugin()
@@ -20,9 +22,6 @@ UNISEG_plugin::~UNISEG_plugin()
 
 char **UNISEG_plugin::do_segmentation(char *c)
 {
-	if (!dlib)
-		return 0;
-
 	seger.input(c);
 	seger.start();
 
@@ -40,7 +39,7 @@ extern "C"
 	public:
 	   proxy() {
 		  // register the maker with the factory
-		   plugins[uniseg_plugin_interface::SEGMENTATION] = maker;
+		   plugin_factory[uniseg_plugin_interface::SEGMENTATION]->maker = maker;
 	   }
 	};
 	// our one instance of the proxy

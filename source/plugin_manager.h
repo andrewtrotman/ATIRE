@@ -18,7 +18,7 @@ public:
 
 	static int				plugin_ids[];  // registered plugin ids
 	static int				num_of_plugins;
-	static char				plugin_names[][]; // plugin dynamic library names
+	static char				*plugin_names[]; // plugin dynamic library name array, e.g segmentation module on linux named libuniseg.so, on Windows named uniseg.dll
 
 public:
 	ANT_plugin_manager();
@@ -31,7 +31,7 @@ public:
 	char **do_segmentation(char *c);
 };
 
-inline ANT_plugin_manager& instance()
+inline ANT_plugin_manager& ANT_plugin_manager::instance()
 {
 static ANT_plugin_manager inst;
 return inst;
