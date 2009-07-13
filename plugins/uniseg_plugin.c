@@ -20,12 +20,11 @@ UNISEG_plugin::~UNISEG_plugin()
 {
 }
 
-char **UNISEG_plugin::do_segmentation(char *c)
+int UNISEG_plugin::do_segmentation(unsigned char *c, unsigned char **out)
 {
 	seger.input(c);
 	seger.start();
-
-	output = seger.output();
+	return seger.output(out);
 }
 
 extern "C"

@@ -31,7 +31,7 @@ void UNISEG_settings::init_fields()
 	#ifdef DEBUG
 		debug = true;
 	#else
-		debug = false;
+		debug = true; //false;
 	#endif
 
 	verbose = true;

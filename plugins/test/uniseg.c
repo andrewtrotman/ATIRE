@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 		Seger	seger(argv[1]);
 		seger.start();
 
-		char** result = seger.output();
+		unsigned char** result = seger.output();
 		int i = 0;
 		while (result[i]) {
 			cout << result[i] << " ";

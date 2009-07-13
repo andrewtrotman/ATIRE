@@ -23,7 +23,7 @@ private:
 	string_type 		stream_;  // for the incoming document which will be segmented
 
 	array_type			words_list_;   // top ranking candidate words aka segmented words
-	char 				**output_;  // same content with words_, but for the easy access of other programs
+	unsigned char 		**output_;  // same content with words_, but for the easy access of other programs
 
 public:
 	Seger(word_ptr_type tw_ptr);
@@ -34,7 +34,8 @@ public:
 
 	void load_frqs();
 	void start();
-	char **output();
+	unsigned char **output();
+	int output(unsigned char **out);
 	void free_output();
 
 	void build();
@@ -44,7 +45,7 @@ public:
 	void mark_the_seged();
 
 	string_type& stream() { return stream_; }
-	void input(char *);
+	void input(unsigned char *);
 
 private:
 	void init();

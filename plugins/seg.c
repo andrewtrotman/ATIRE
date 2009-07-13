@@ -73,9 +73,9 @@ void Seger::init()
 	//justify(0);
 }
 
-void Seger::input(char *input)
+void Seger::input(unsigned char *input)
 {
-	stream_ = input;
+	stream_ = string_type((char *)input);
 	init();
 }
 
@@ -95,18 +95,46 @@ void Seger::start()
 	//mark_the_seged();
 }
 
-char** Seger::output()
+unsigned char** Seger::output()
 {
 	if (!output_ && words_list_.size() > 0) {
-		output_ = new char*[words_list_.size() + 1];
-		output_[words_list_.size()] = '\0';
+		output_ = new unsigned char *[words_list_.size() + 1];
+		output_[words_list_.size()] = NULL;
 
 		for (int i = 0; i < words_list_.size(); i++) {
-			output_[i] = new char[words_list_[i]->chars().length() + 1];
-			strcpy(output_[i], words_list_[i]->chars().c_str());
+			//cout << words_list_[i]->chars() << endl;
+			int len = words_list_[i]->chars().length();
+			output_[i] = new unsigned char[len];
+			for (int k = 0; k < len; k++)
+				output_[i][k] = words_list_[i]->chars()[k];
+			//strncpy((char *)output_[i], words_list_[i]->chars().c_str(), len);
+			cout << output_[i] << endl;
+			//output_[i][len] = '\0';
 		}
 	}
 	return output_;
+}
+
+int Seger::output(unsigned char** out)
+{
+	if (!out && words_list_.size() > 0) {
+		out = new unsigned char *[words_list_.size() + 1];
+		out[words_list_.size()] = NULL;
+
+		for (int i = 0; i < words_list_.size(); i++) {
+			//cout << words_list_[i]->chars() << endl;
+			int len = words_list_[i]->chars().length();
+			out[i] = new unsigned char[len + 1];
+			for (int k = 0; k < len; k++)
+				out[i][k] = words_list_[i]->chars()[k];
+			unsigned char *word = out[i];
+			word[len] = '\0';
+			//strncpy((char *)out[i], words_list_[i]->chars().c_str(), len);
+			cout << word << endl;
+			//out[i][len] = '\0';
+		}
+	}
+	return words_list_.size();
 }
 
 void Seger::free_output()
@@ -276,6 +304,8 @@ void Seger::add_to_list(array_type& cwlist) {
 
 				w_ptr->is_word(true);
 				cwlist.push_back(w_ptr);
+				if(UNISEG_settings::instance().debug)
+					cout << w_ptr->chars() << endl;
 
 				if (i > 0 && i < (temp.size() -1)) {
 					word_ptr_type iner_w_ptr = allfreq_->find(str);

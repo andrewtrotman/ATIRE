@@ -15,13 +15,13 @@ class UNISEG_plugin : public uniseg_plugin_interface
 {
 private:
 	Seger	seger;
-	char	**output;
+	unsigned char	**output;
 
 public:
 	UNISEG_plugin();
 	~UNISEG_plugin();
 
-	char **do_segmentation(char *c);
+	int do_segmentation(unsigned char *c, unsigned char **out);
 };
 
 #endif /* __UNISEG_PLUGIN_H__ */

@@ -27,11 +27,13 @@ while(1)
 	string input;
 	cout << "> ";
 	cin >> input;
-	char **output = ANT_plugin_manager::instance().do_segmentation((char *)input.c_str());
+	unsigned char **output = NULL;
+	unsigned char *word = NULL;
+	int count = ANT_plugin_manager::instance().do_segmentation((unsigned char *)input.c_str(), output);
 	int i = 0;
-	while (output[i])
+	while (i < count && (word = output[i]))
 		{
-		cout << output[i] << " ";
+		cout << word << endl;
 		i++;
 		}
 	cout << endl;

@@ -28,7 +28,7 @@ public:
 //	void plug(ANT_plugin::plugin_type);
 	void load();
 
-	char **do_segmentation(char *c);
+	int do_segmentation(unsigned char *c, unsigned char **out);
 };
 
 inline ANT_plugin_manager& ANT_plugin_manager::instance()
