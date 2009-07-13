@@ -172,7 +172,7 @@ if (argc != 2)
 	exit(printf("usage:%s <cas_query_file>\n", argv[0]));
 
 file = disk.read_entire_file(argv[1]);
-strlwr(file);
+strlower(file);
 lines = disk.buffer_to_list(file, &queries);
 
 for (current_line = 0; current_line < queries; current_line++)

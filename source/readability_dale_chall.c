@@ -57,7 +57,7 @@ while (ANT_parser_readability::issentenceend(token->start[token->length() - 1]))
 	token->string_length--;
 	}
 
-return token->strlwr();
+return token->strlower();
 }
 
 /*

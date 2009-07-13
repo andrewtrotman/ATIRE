@@ -139,7 +139,7 @@ while (*token_end != '\0')
 	for (current = token; *current != '\0'; current++)
 		if (ANT_islower(*current) != first_case)
 			{
-			strlwr(token);
+			strlower(token);
 			break;
 			}
 

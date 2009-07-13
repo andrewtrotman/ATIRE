@@ -36,7 +36,7 @@ public:
 	int true_strcmp(ANT_string_pair *with);
 	int true_strncmp(ANT_string_pair *with, size_t length);
 
-	ANT_string_pair *strlwr(void);
+	ANT_string_pair *strlower(void);
 
 	void text_render(void) { printf("%*.*s", (int)string_length, (int)string_length, start); }
 };
@@ -101,10 +101,10 @@ else
 }
 
 /*
-	ANT_STRING_PAIR::STRLWR()
-	-------------------------
+	ANT_STRING_PAIR::STRLOWER()
+	---------------------------
 */
-inline ANT_string_pair *ANT_string_pair::strlwr(void)
+inline ANT_string_pair *ANT_string_pair::strlower(void)
 {
 size_t current;
 

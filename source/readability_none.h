@@ -20,7 +20,9 @@ public:
 	ANT_string_pair *get_next_token();
 	void set_document(unsigned char *document);
 	long score(void) { return 0; };
+#pragma warning (suppress : 4100)
 	void add_node(ANT_memory_index_hash_node *node) {};
+#pragma warning (suppress : 4100)
 	void index(ANT_memory_index *index) {};
 
 	void set_parser(ANT_parser *parser);

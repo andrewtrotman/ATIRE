@@ -251,7 +251,7 @@ for (current = 0; current < lines; current++)
 			exit(printf("Line %d: Too many search terms (exceeds %d)\n", current, current_term));
 		if (stopper.isstop(term))		// drop stop words
 			continue;
-		strlwr(term);
+		strlower(term);
 		stemmer.stem(term, stem_buffer);
 		strcpy(term, stem_buffer);
 		term_list[current].term[current_term] = term;
@@ -315,7 +315,7 @@ for (term = strtok(query->term_buffer, SEPERATORS); term != NULL; term = strtok(
 		exit(printf("Line %d: Too many search terms (exceeds %d)\n", random_title, current_term));
 	if (stopper.isstop(term))		// drop stop words
 		continue;
-	strlwr(term);
+	strlower(term);
 	stemmer.stem(term, stem_buffer);
 	strcpy(term, stem_buffer);
 	query->term[current_term] = term;

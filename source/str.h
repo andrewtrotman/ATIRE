@@ -9,7 +9,7 @@
 #include "ctypes.h"
 
 #ifdef _MSC_VER
-	inline char *strlwr(char *a) { return _strlwr(a); }
+	inline char *strlower(char *a) { return _strlwr(a); }
 #endif
 
 extern "C" int char_star_star_strcmp(const void *one, const void *two);
@@ -131,10 +131,10 @@ return out;
 #ifndef _MSC_VER
 
 /*
-	STRLWR()
-	--------
+	STRLOWER()
+	----------
 */
-inline char *strlwr(char *string)
+inline char *strlower(char *string)
 {
 unsigned char *ch;
 
