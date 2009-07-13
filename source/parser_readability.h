@@ -18,6 +18,7 @@ class ANT_parser_readability : public ANT_parser
 public:
 	ANT_parser_readability() : ANT_parser() {};
 	virtual ~ANT_parser_readability() {};
+
 	ANT_string_pair *get_next_token(void);
 
 	static int issentenceend(unsigned char val) { return val == '.' || val == '!' || val == '?'; }

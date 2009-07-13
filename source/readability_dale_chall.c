@@ -16,6 +16,7 @@ ANT_readability_dale_chall::ANT_readability_dale_chall()
 number_of_words = number_of_sentences = number_of_unfamiliar_words = 0;
 size = 65005; // biggest doc in wiki is 65003
 words_encountered = new word[size];
+measure_name = new ANT_string_pair("~dalechall");
 }
 
 /*
@@ -31,10 +32,9 @@ delete [] words_encountered;
 	ANT_READABILITY_DALE_CHALL::GET_NEXT_TOKEN()
 	--------------------------------------------
 */
-ANT_string_pair *ANT_readability_dale_chall::get_next_token()
+ANT_string_pair *ANT_readability_dale_chall::get_next_token(void)
 {
 ANT_string_pair *token = parser->get_next_token();
-unsigned long i;
 
 if (token == NULL)
 	return token;
@@ -57,10 +57,7 @@ while (ANT_parser_readability::issentenceend(token->start[token->length() - 1]))
 	token->string_length--;
 	}
 
-for (i = 0; i < token->length(); i++)
-	token->start[i] = ANT_tolower(token->start[i]);
-
-return token;
+return token->strlwr();
 }
 
 /*
@@ -69,29 +66,36 @@ return token;
 */
 int ANT_readability_dale_chall::word_cmp(const void *a, const void *b)
 {
-	word *x = (word *)a;
-	word *y = (word *)b;
-	return x->node->string.true_strcmp(&y->node->string);
+word *x = (word *)a;
+word *y = (word *)b;
+
+return x->node->string.true_strcmp(&y->node->string);
 }
 
 /*
 	ANT_READABILITY_DALE_CHALL::SCORE()
 	-----------------------------------
 */
-long ANT_readability_dale_chall::score()
+long ANT_readability_dale_chall::score(void)
 {
 word *prev, *curr;
-unsigned int i = 0;
-unsigned long istitle = 0;
+unsigned int i;
+unsigned long istitle;
 unsigned long wordlist_position = 0;
-unsigned long term_frequency = 0;
-int comparison = 0;
+unsigned long term_frequency;
+int comparison = 1;			// non-zero
+
+/*
+	Blank (empty) document therefore no score.
+*/
+if (number_of_words == 0)
+	return 0;
 
 // sort the list of terms encountered
 qsort(words_encountered, number_of_words, sizeof(*words_encountered), ANT_readability_dale_chall::word_cmp);
 
 prev = &words_encountered[0];
-istitle += prev->istitle;
+istitle = prev->istitle;
 
 for (i = 1; i < number_of_words; i++)
 	{
@@ -122,7 +126,7 @@ for (i = 1; i < number_of_words; i++)
 			to the term we're looking at.
 		*/
 		while (wordlist_position < ANT_readability_dale_chall_wordlist_length && 
-			(comparison = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
+			(comparison = prev->node->string.true_strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
 			{
 			wordlist_position++;
 			}
@@ -150,7 +154,7 @@ for (i = 1; i < number_of_words; i++)
 	Finally, deal with the last term in the list, it won't be dealt with until now even if it's repeated.
 */
 while (wordlist_position < ANT_readability_dale_chall_wordlist_length && 
-	(comparison = prev->node->string.strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
+	(comparison = prev->node->string.true_strcmp(ANT_readability_dale_chall_wordlist[wordlist_position])) > 0)
 	wordlist_position++;
 
 if (comparison != 0)
@@ -201,7 +205,7 @@ if (number_of_words == size)
 	{
 	// shouldn't happen now!
 	word *new_words = new word[size * 2];
-	memcpy(new_words, words_encountered, sizeof(word) * size);
+	memcpy(new_words, words_encountered, sizeof(*words_encountered) * size);
 	size *= 2;
 	delete [] words_encountered;
 	words_encountered = new_words;
@@ -217,10 +221,9 @@ number_of_words++;
 	ANT_READABILITY_DALE_CHALL::INDEX()
 	-----------------------------------
 */
-void ANT_readability_dale_chall::index(long long docno, ANT_memory_index *index)
+void ANT_readability_dale_chall::index(ANT_memory_index *index)
 {
-ANT_string_pair measure_name("~dalechall", 10);
-index->set_document_readability(docno, score(), &measure_name);
+index->set_document_detail(measure_name, score());
 
 // If we're adding to the index, we've finished with this document
 number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;

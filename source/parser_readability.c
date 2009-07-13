@@ -50,6 +50,9 @@ else											// everything else (that starts with a '<')
 			current++;
 			}
 
+		current_token.start = (char *)start;
+		current_token.string_length = current - start;
+
 		while (*current != '>')
 			{
 			if (*current == '"')
@@ -60,8 +63,6 @@ else											// everything else (that starts with a '<')
 					current++;
 			current++;
 			}
-		current_token.start = (char *)start;
-		current_token.string_length = current - start;
 		}
 	else
 		{

@@ -21,11 +21,11 @@ public:
 	ANT_readability() {};
 	virtual ~ANT_readability() {};
 	
-	virtual ANT_string_pair *get_next_token() = 0;
-	virtual void set_document(unsigned char *) = 0;
-	virtual long score() = 0;
-	virtual void add_node(ANT_memory_index_hash_node *) = 0;
-	virtual void index(long long, ANT_memory_index *) = 0;
+	virtual ANT_string_pair *get_next_token(void) = 0;
+	virtual void set_document(unsigned char *document) = 0;
+	virtual long score(void) = 0;
+	virtual void add_node(ANT_memory_index_hash_node *node) = 0;
+	virtual void index(ANT_memory_index *index) = 0;
 	
 	void set_parser(ANT_parser *parser) { this->parser = parser; }
 

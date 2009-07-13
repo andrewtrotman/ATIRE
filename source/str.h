@@ -9,7 +9,7 @@
 #include "ctypes.h"
 
 #ifdef _MSC_VER
-	#define strlwr(a) _strlwr(a)
+	inline char *strlwr(char *a) { return _strlwr(a); }
 #endif
 
 extern "C" int char_star_star_strcmp(const void *one, const void *two);

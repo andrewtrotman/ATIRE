@@ -145,8 +145,8 @@ for (param = first_param; param < argc; param++)
 				{
 				if (done_work)
 					{
-					index->set_document_length(doc, terms_in_document);
-					readability->index(doc, index);
+					index->set_document_length(terms_in_document);
+					readability->index(index);
 					doc++;
 					if (doc % param_block.reporting_frequency == 0)
 						report(doc, index, &stats, 0);
@@ -160,8 +160,8 @@ for (param = first_param; param < argc; param++)
 				done_work = TRUE;
 				}
 			}
-		index->set_document_length(doc, terms_in_document);
-		readability->index(doc, index);
+		index->set_document_length(terms_in_document);
+		readability->index(index);
 		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();

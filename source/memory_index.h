@@ -24,6 +24,7 @@ public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
 
 private:
+	ANT_string_pair *squiggle_length;
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
@@ -54,8 +55,8 @@ public:
 
 	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
 	long serialise(char *filename);
-	void set_document_length(long long docid, long length);
-	void set_document_readability(long long docid, long length, ANT_string_pair *measure_name);
+	void set_document_length(long length) { set_document_detail(squiggle_length, length); } 
+	void set_document_detail(ANT_string_pair *measure_name, long length);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 	void text_render(long what);

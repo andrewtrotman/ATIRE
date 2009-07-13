@@ -9,39 +9,44 @@
 #include "readability.h"
 #include "parser_readability.h"
 
+class ANT_string_pair;
+
 /*
 	class ANT_READABILITY_DALE_CHALL
 	--------------------------------
 */
 class ANT_readability_dale_chall : public ANT_readability
 {
-public:
-	ANT_readability_dale_chall();
-	virtual ~ANT_readability_dale_chall();
-	
-	ANT_string_pair *get_next_token();
-	long score();
-	void set_document(unsigned char *);
-	void add_node(ANT_memory_index_hash_node *);
-	void index(long long, ANT_memory_index *);
-
 private:
 	struct word
 	{
 	ANT_memory_index_hash_node *node;
-	unsigned char istitle;
+	unsigned long istitle;
 	};
-	
-	static int word_cmp(const void *a, const void *b);
-	
+
+private:
+	ANT_string_pair *measure_name;
 	unsigned long number_of_sentences;
 	unsigned long number_of_words;
 	unsigned long number_of_unfamiliar_words;
 	//unsigned long size; // maximum size of list of words encountered
 	word *words_encountered;
-	unsigned char last_was_title; // whether the last word we passed on was title
+	unsigned long last_was_title; // whether the last word we passed on was title
 	// largest document in wiki is 65003
 	unsigned long size;
-};
+
+private:
+	static int word_cmp(const void *a, const void *b);
+
+public:
+	ANT_readability_dale_chall();
+	virtual ~ANT_readability_dale_chall();
+	
+	ANT_string_pair *get_next_token(void);
+	long score(void);
+	void set_document(unsigned char *document);
+	void add_node(ANT_memory_index_hash_node *node);
+	void index(ANT_memory_index *index);
+} ;
 
 #endif __READABILITY_DALE_CHALL_H__

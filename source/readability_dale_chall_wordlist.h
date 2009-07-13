@@ -12,7 +12,7 @@
 	-----------------------------------
 	List of words that are considered familiar by Dale-Chall
 */
-char *ANT_readability_dale_chall_wordlist[] = {
+static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"a",
     (char *)"able",
     (char *)"abler",

@@ -37,13 +37,19 @@ return measure->score();
 	READABILITY_FACTORY::SET_MEASURE()
 	----------------------------------
 */
-void ANT_readability_factory::set_measure(unsigned long m)
+void ANT_readability_factory::set_measure(unsigned long what_measure)
 {
-switch (m)
+switch (what_measure)
 	{
-	case NONE: measure = new ANT_readability_none(); break;
-	case DALE_CHALL: measure = new ANT_readability_dale_chall(); break;
-	default: measure = new ANT_readability_none(); break; // shouldn't happen
+	case NONE: 
+		measure = new ANT_readability_none();
+		break;
+	case DALE_CHALL: 
+		measure = new ANT_readability_dale_chall(); 
+		break;
+	default: 
+		measure = new ANT_readability_none(); 
+		break; // shouldn't happen
 	}
 }
 
@@ -69,7 +75,7 @@ measure->add_node(node);
 	READABILITY_FACTORY::INDEX()
 	----------------------------
 */
-void ANT_readability_factory::index(long long docno, ANT_memory_index *index)
+void ANT_readability_factory::index(ANT_memory_index *index)
 {
-measure->index(docno, index);
+measure->index(index);
 }

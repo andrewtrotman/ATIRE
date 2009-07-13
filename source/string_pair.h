@@ -20,6 +20,7 @@ public:
 
 public:
 	ANT_string_pair() {}
+	ANT_string_pair(char *name) { start = name; string_length = ::strlen(name); }
 	ANT_string_pair(char *source, long len) : start(source), string_length(len) {}
 
 	unsigned char operator[](long pos) { return (unsigned char)start[pos]; }
@@ -28,13 +29,14 @@ public:
 	char *string(void) { return start; }
 
 	char *str(void) { return strnnew(start, string_length); }
-
 	char *strcpy(char *dest) { *(strncpy(dest, start, string_length) + string_length + 1) = '\0'; return dest; }
-
 	int strcmp(ANT_string_pair *with) { return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1; }
-	int strcmp(char *string);
+
+	int true_strcmp(char *string);
 	int true_strcmp(ANT_string_pair *with);
-	int strncmp(ANT_string_pair *with, size_t length);
+	int true_strncmp(ANT_string_pair *with, size_t length);
+
+	ANT_string_pair *strlwr(void);
 
 	void text_render(void) { printf("%*.*s", (int)string_length, (int)string_length, start); }
 };
@@ -60,10 +62,10 @@ else
 }
 
 /*
-	INT ANT_STRING_PAIR::STRCMP()
-	-----------------------------
+	ANT_STRING_PAIR::TRUE_STRCMP()
+	------------------------------
 */
-inline int ANT_string_pair::strcmp(char *with)
+inline int ANT_string_pair::true_strcmp(char *with)
 {
 int cmp;
 size_t len;
@@ -79,10 +81,10 @@ else
 }
 
 /*
-	ANT_STRING_PAIR::STRNCMP()
-	--------------------------
+	ANT_STRING_PAIR::TRUE_STRNCMP()
+	-------------------------------
 */
-inline int ANT_string_pair::strncmp(ANT_string_pair *with, size_t len)
+inline int ANT_string_pair::true_strncmp(ANT_string_pair *with, size_t len)
 {
 int cmp;
 
@@ -92,10 +94,25 @@ else
 	{			// at least one string_length must be less than len
 	cmp = ::memcmp(start, with->start, string_length < with->string_length ? string_length : with->string_length);
 	if (cmp == 0)
-		return string_length < with->string_length ? -1 : 1;
+		return with->string_length > string_length  ? -1 : 1;
 	else
 		return cmp;
 	}
 }
+
+/*
+	ANT_STRING_PAIR::STRLWR()
+	-------------------------
+*/
+inline ANT_string_pair *ANT_string_pair::strlwr(void)
+{
+size_t current;
+
+for (current = 0; current < string_length; current++)
+	start[current] = ANT_tolower(start[current]);
+
+return this;
+}
+
 
 #endif __STRING_PAIR_H__

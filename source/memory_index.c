@@ -26,6 +26,7 @@
 */
 ANT_memory_index::ANT_memory_index()
 {
+squiggle_length = new ANT_string_pair("~length");
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
 stats = new ANT_memory_index_stats(memory);
@@ -127,39 +128,13 @@ return node->add_posting(string, docno);
 }
 
 /*
-	ANT_MEMORY_INDEX::SET_DOCUMENT_LENGTH()
+	ANT_MEMORY_INDEX::SET_DOCUMENT_DETAIL()
 	---------------------------------------
 */
-void ANT_memory_index::set_document_length(long long docno, long length)
-{
-ANT_string_pair string("~length", 7);
-long hash_value;
-ANT_memory_index_hash_node *node;
-
-largest_docno = docno;				// remove compiler warning
-
-hash_value = hash(&string);
-if (hash_table[hash_value] == NULL)
-	{
-	stats->hash_nodes++;
-	node = hash_table[hash_value] = new_memory_index_hash_node(&string);
-	}
-else
-	node = find_add_node(hash_table[hash_value], &string);
-node->current_docno = 0;
-node->add_posting(&string, length);
-}
-
-/*
-	ANT_MEMORY_INDEX::SET_DOCUMENT_READABILITY()
-	--------------------------------------------
-*/
-void ANT_memory_index::set_document_readability(long long docno, long score, ANT_string_pair *measure_name)
+void ANT_memory_index::set_document_detail(ANT_string_pair *measure_name, long score)
 {
 long hash_value;
 ANT_memory_index_hash_node *node;
-
-largest_docno = docno;
 
 hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
@@ -382,7 +357,7 @@ else
 		{
 		if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
 			break;
-		if ((*current)->string.strncmp(&(*start)->string, B_TREE_PREFIX_SIZE) != 0)
+		if ((*current)->string.true_strncmp(&(*start)->string, B_TREE_PREFIX_SIZE) != 0)
 			break;
 		current++;
 		}
