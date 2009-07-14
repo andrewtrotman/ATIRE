@@ -66,22 +66,60 @@ long long thesaurus_engine::fill_buffer_with_postings(char *term, long *buffer) 
   Calculates how similar the two buffers are.
 */
 double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long buffer_b_total) {
-    long long doc;
-    long long buffer_a_length = 0, buffer_b_length = 0;
+    long long doc, tmp_a = 0, tmp_b = 0;
+    long long doc_count_a = 0, doc_count_b = 0;
+    double length_a = 0, length_b = 0;
     double similarity = 0;
+    double tf_a, tf_b, idf_a, idf_b;
 
     if (buffer_a_total == 0 ||
         buffer_b_total == 0)
         return 0.0;
 
     for (doc = 0; doc < documents; doc++) {
-        similarity += buffer_a[doc] * buffer_b[doc];
-        buffer_a_length += buffer_a[doc] * buffer_a[doc];
-        buffer_b_length += buffer_b[doc] * buffer_b[doc];
+        /* 
+                        A . B 
+           cos theta = -------
+                       |A| |B|
+
+           where A and B are tf.idf scores.
+           we can open up the expressions and multiply by 
+           
+           idf_a * idf_b  OR idf_a ^ 2 OR idf_b ^ 2
+
+           at the end.
+
+
+           TF*IDF;
+           TF = term_count / |document|
+                    ( |collection| )
+           IDF = log( ------------ )
+                    ( doc_count    )
+
+         */
+        if (buffer_a[doc]) doc_count_a++;
+        if (buffer_b[doc]) doc_count_b++;
+        if (buffer_a[doc] > 0 && buffer_b[doc] == 0) tmp_a++;
+        if (buffer_b[doc] > 0 && buffer_a[doc] == 0) tmp_b++;
+
+        tf_a = (double) buffer_a[doc] / (double) document_lengths[doc];
+        tf_b = (double) buffer_b[doc] / (double) document_lengths[doc];
+
+        similarity += tf_a * tf_b;
+
+        length_a += tf_a * tf_a;
+        length_b += tf_b * tf_b;
     }
 
-    similarity /= sqrt((double)buffer_a_length);
-    similarity /= sqrt((double)buffer_b_length);
+    idf_a = log((double) documents / (double) doc_count_a);
+    idf_b = log((double) documents / (double) doc_count_b);
+
+    similarity *= idf_a * idf_b;
+    //    if (tmp_a > 0 && tmp_b > 0)
+    //    printf("%lld %lld %lld\n", tmp_a, tmp_b, doc_count_a - tmp_a);
+
+    similarity /= sqrt((double)length_a * idf_a * idf_a);
+    similarity /= sqrt((double)length_b * idf_b * idf_b);
 
     return similarity;
 }
