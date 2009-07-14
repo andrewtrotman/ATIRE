@@ -28,10 +28,10 @@ void UNISEG_settings::init()
 
 void UNISEG_settings::init_fields()
 {
-	#ifdef DEBUG
+	#if defined(DEBUG) || defined(_DEBUG)
 		debug = true;
 	#else
-		debug = true; //false;
+		debug = false; //false;
 	#endif
 
 	verbose = true;

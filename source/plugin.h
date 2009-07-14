@@ -19,10 +19,14 @@ public:
 	enum plugin_id { SEGMENTATION  = 0 };
 
 public:
-	virtual int do_segmentation(unsigned char *c, unsigned char **out);
+	virtual const char *do_segmentation(unsigned char *c);
+	virtual const char *get_input();
+	virtual const char *get_output();
 };
 
-inline int ANT_plugin::do_segmentation(unsigned char *c, unsigned char **out) { return 0; }
+inline const char *ANT_plugin::do_segmentation(unsigned char *c) { return 0; }
+inline const char *ANT_plugin::get_input() { return NULL; }
+inline const char *ANT_plugin::get_output() { return NULL; }
 
 typedef ANT_plugin *maker_t();
 

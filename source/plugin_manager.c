@@ -93,9 +93,14 @@ for (int i = 0; i < num_of_plugins; i++)
 	}
 }
 
-int ANT_plugin_manager::do_segmentation(unsigned char *c, unsigned char **out)
+const char *ANT_plugin_manager::do_segmentation(unsigned char *c)
 {
 if (plugin_factory[ANT_plugin::SEGMENTATION]->plugin)
-	return plugin_factory[ANT_plugin::SEGMENTATION]->plugin->do_segmentation(c, out);
+	return plugin_factory[ANT_plugin::SEGMENTATION]->plugin->do_segmentation(c);
 return 0;
+}
+
+ANT_plugin *ANT_plugin_manager::segmentation_plugin()
+{
+return plugin_factory[ANT_plugin::SEGMENTATION]->plugin;
 }

@@ -25,10 +25,10 @@ public:
 	~ANT_plugin_manager();
 
 	static ANT_plugin_manager& instance();
-//	void plug(ANT_plugin::plugin_type);
 	void load();
 
-	int do_segmentation(unsigned char *c, unsigned char **out);
+	const char *do_segmentation(unsigned char *c);
+	ANT_plugin *segmentation_plugin();
 };
 
 inline ANT_plugin_manager& ANT_plugin_manager::instance()

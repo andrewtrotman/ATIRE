@@ -21,9 +21,10 @@ private:
 	Freq				*allfreq_;
 	word_ptr_type 		tw_ptr_;
 	string_type 		stream_;  // for the incoming document which will be segmented
+	string_type			stream_out_;  // store the segmented text, words are seperated by spaces
 
 	array_type			words_list_;   // top ranking candidate words aka segmented words
-	unsigned char 		**output_;  // same content with words_, but for the easy access of other programs
+	//unsigned char 		**output_;  // same content with words_, but for the easy access of other programs
 
 public:
 	Seger(word_ptr_type tw_ptr);
@@ -34,9 +35,10 @@ public:
 
 	void load_frqs();
 	void start();
-	unsigned char **output();
-	int output(unsigned char **out);
-	void free_output();
+	//unsigned char **output();
+	//int output(unsigned char **out);
+	//void free_output();
+	const char *output();
 
 	void build();
 	void show_all();
@@ -45,6 +47,7 @@ public:
 	void mark_the_seged();
 
 	string_type& stream() { return stream_; }
+	string_type& stream_out() { return stream_out_; }
 	void input(unsigned char *);
 
 private:

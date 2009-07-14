@@ -16,13 +16,19 @@ int main(int argc, char **argv)
 		Seger	seger(argv[1]);
 		seger.start();
 
-		unsigned char** result = seger.output();
-		int i = 0;
-		while (result[i]) {
-			cout << result[i] << " ";
-			i++;
-		}
-		cout << endl;
+		const char* output = seger.output();
+		char *next = (char *)output;
+		while (*next != '\0')
+			{
+			string word;
+			while (*next != ' ')
+				{
+				word.push_back(*next);
+				next++;
+				}
+			next++;
+			cout << word << endl;
+			}
 	}
 	return 0;
 }

@@ -27,16 +27,20 @@ while(1)
 	string input;
 	cout << "> ";
 	cin >> input;
-	unsigned char **output = NULL;
-	unsigned char *word = NULL;
-	int count = ANT_plugin_manager::instance().do_segmentation((unsigned char *)input.c_str(), output);
-	int i = 0;
-	while (i < count && (word = output[i]))
+	const char *output = NULL;
+	output = ANT_plugin_manager::instance().do_segmentation((unsigned char *)input.c_str());
+	char *next = (char *)output;
+	while (*next != '\0')
 		{
+		string word;
+		while (*next != ' ')
+			{
+			word.push_back(*next);
+			next++;
+			}
+		next++;
 		cout << word << endl;
-		i++;
 		}
-	cout << endl;
 	}
 
 return 0;

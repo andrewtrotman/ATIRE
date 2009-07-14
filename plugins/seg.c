@@ -49,13 +49,13 @@ Seger::Seger(const char* stream, size_t length) : stream_(stream, length)
 
 Seger::~Seger()
 {
-	free_output();
+	//free_output();
 }
 
 void Seger::init()
 {
-	if (!output_)
-		free_output();
+	//if (!output_)
+	//	free_output();
 
 	assert (stream_.length() > 0);
 	//assert(tw_ptr_->chars().length() > 0);
@@ -95,58 +95,67 @@ void Seger::start()
 	//mark_the_seged();
 }
 
-unsigned char** Seger::output()
+const char *Seger::output()
 {
-	if (!output_ && words_list_.size() > 0) {
-		output_ = new unsigned char *[words_list_.size() + 1];
-		output_[words_list_.size()] = NULL;
-
-		for (int i = 0; i < words_list_.size(); i++) {
-			//cout << words_list_[i]->chars() << endl;
-			int len = words_list_[i]->chars().length();
-			output_[i] = new unsigned char[len];
-			for (int k = 0; k < len; k++)
-				output_[i][k] = words_list_[i]->chars()[k];
-			//strncpy((char *)output_[i], words_list_[i]->chars().c_str(), len);
-			cout << output_[i] << endl;
-			//output_[i][len] = '\0';
-		}
+	if (stream_out_.size() == 0) {
+		for (int i = 0; i < words_list_.size(); i++)
+			stream_out_.append(words_list_[i]->chars() + " ");
 	}
-	return output_;
+	return stream_out_.c_str();
 }
 
-int Seger::output(unsigned char** out)
-{
-	if (!out && words_list_.size() > 0) {
-		out = new unsigned char *[words_list_.size() + 1];
-		out[words_list_.size()] = NULL;
-
-		for (int i = 0; i < words_list_.size(); i++) {
-			//cout << words_list_[i]->chars() << endl;
-			int len = words_list_[i]->chars().length();
-			out[i] = new unsigned char[len + 1];
-			for (int k = 0; k < len; k++)
-				out[i][k] = words_list_[i]->chars()[k];
-			unsigned char *word = out[i];
-			word[len] = '\0';
-			//strncpy((char *)out[i], words_list_[i]->chars().c_str(), len);
-			cout << word << endl;
-			//out[i][len] = '\0';
-		}
-	}
-	return words_list_.size();
-}
-
-void Seger::free_output()
-{
+//unsigned char** Seger::output()
+//{
+//	if (!output_ && words_list_.size() > 0) {
+//		output_ = new unsigned char *[words_list_.size() + 1];
+//		output_[words_list_.size()] = NULL;
+//
+//		for (int i = 0; i < words_list_.size(); i++) {
+//			//cout << words_list_[i]->chars() << endl;
+//			int len = words_list_[i]->chars().length();
+//			output_[i] = new unsigned char[len];
+//			for (int k = 0; k < len; k++)
+//				output_[i][k] = words_list_[i]->chars()[k];
+//			//strncpy((char *)output_[i], words_list_[i]->chars().c_str(), len);
+//			cout << output_[i] << endl;
+//			//output_[i][len] = '\0';
+//		}
+//	}
+//	return output_;
+//}
+//
+//int Seger::output(unsigned char** out)
+//{
+//	if (!out && words_list_.size() > 0) {
+//		out = new unsigned char *[words_list_.size() + 1];
+//		out[words_list_.size()] = NULL;
+//
+//		for (int i = 0; i < words_list_.size(); i++) {
+//			//cout << words_list_[i]->chars() << endl;
+//			int len = words_list_[i]->chars().length();
+//			out[i] = new unsigned char[len + 1];
+//			for (int k = 0; k < len; k++)
+//				out[i][k] = words_list_[i]->chars()[k];
+//			unsigned char *word = out[i];
+//			word[len] = '\0';
+//			//strncpy((char *)out[i], words_list_[i]->chars().c_str(), len);
+//			cout << word << endl;
+//			//out[i][len] = '\0';
+//		}
+//	}
+//	return words_list_.size();
+//}
+//
+//void Seger::free_output()
+//{
 //	int i = 0;
 //	while (output_[i]) {
 //		delete output_[i];
 //		i++;
 //	}
-	delete [] output_;
-	output_ = NULL;
-}
+//	delete [] output_;
+//	output_ = NULL;
+//}
 
 void Seger::build()
 {
@@ -304,8 +313,6 @@ void Seger::add_to_list(array_type& cwlist) {
 
 				w_ptr->is_word(true);
 				cwlist.push_back(w_ptr);
-				if(UNISEG_settings::instance().debug)
-					cout << w_ptr->chars() << endl;
 
 				if (i > 0 && i < (temp.size() -1)) {
 					word_ptr_type iner_w_ptr = allfreq_->find(str);
