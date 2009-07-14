@@ -39,6 +39,7 @@ output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT;
 segmentation = FALSE;
+readability = FALSE;
 }
 
 /*
@@ -115,6 +116,11 @@ puts("");
 puts("SEGMENTATION(EAST-ASIAN LANGUAGES ONLY)");
 puts("-----------");
 puts("-S	          segment the query into meaningful words");
+puts("");
+
+puts("READABILITY");
+puts("-----------");
+puts("-R              Use the readability search engine");
 puts("");
 
 puts("REPORTING");
@@ -259,6 +265,8 @@ for (param = 1; param < argc; param++)
 			set_stats(command + 1);
 		else if (strcmp(command, "S") == 0)
 			segmentation = TRUE;
+		else if (*command == 'R')
+			readability = TRUE;
 		else
 			usage();
 		}

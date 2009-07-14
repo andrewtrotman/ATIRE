@@ -164,8 +164,6 @@ if (comparison != 0)
 	}
 
 // avoid division by zero errors
-if (number_of_words == 0)
-	number_of_words = 1;
 if (number_of_sentences == 0)
 	number_of_sentences = 1;
 

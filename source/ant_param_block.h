@@ -34,6 +34,7 @@ public:
 	long stats;					// which stats to display
 
 	long segmentation;			// query segmentation need or not for east-asian languages, e.g. Chinese
+	long readability;			// whether to use the readability search engine
 
 private:
 	void export_format(char *forum);

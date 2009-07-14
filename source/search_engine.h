@@ -29,6 +29,9 @@ protected:
 	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_search_engine_posting posting;
 	long *stem_buffer;
+	long *document_lengths;
+	double mean_document_length;
+	ANT_search_engine_accumulator *accumulator;
 
 private:
 	ANT_search_engine_stats *stats;
@@ -37,9 +40,6 @@ private:
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
 	long btree_nodes;
-	long *document_lengths;
-	double mean_document_length;
-	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long max_header_block_size;
 	long string_length_of_longest_term;

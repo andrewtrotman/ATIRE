@@ -25,6 +25,7 @@ protected:
 
 protected:
 	ANT_assessment() {}
+	virtual ~ANT_assessment() {}
 	void copy(ANT_assessment *what_to_copy);
 
 	char *max(char *a, char *b, char *c);

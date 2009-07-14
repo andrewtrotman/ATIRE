@@ -9,6 +9,7 @@
 #include "memory.h"
 #include "ctypes.h"
 #include "search_engine.h"
+#include "search_engine_readability.h"
 #include "search_engine_btree_leaf.h"
 #include "mean_average_precision.h"
 #include "disk.h"
@@ -350,7 +351,10 @@ if (params.assessments_filename != NULL)
 
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
-search_engine = new ANT_search_engine(&memory);
+if (params.readability)
+	search_engine = new ANT_search_engine_readability(&memory);
+else
+	search_engine = new ANT_search_engine(&memory);
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
 ant(search_engine, map, &params, document_list, answer_list);

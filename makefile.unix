@@ -4,7 +4,7 @@ BINDIR = bin
 
 LDFLAGS = -g
 CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O3 \
-       -Wno-endif-labels -Wno-missing-braces
+       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas
 
 
 CC = g++
@@ -67,6 +67,7 @@ OBJECTS = \
     readability_none.o \
     readability_dale_chall.o \
     readability_factory.o \
+    search_engine_readability.o \
     indexer_param_block.o \
     ant_param_block.o \
     version.o
