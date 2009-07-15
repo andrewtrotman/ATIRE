@@ -181,8 +181,10 @@ if (map != NULL)
 	{
 	if (params->metric == ANT_ANT_param_block::MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
-	else
+	else if (params->metric == ANT_ANT_param_block::MAgP)
 		average_precision = map->average_generalised_precision(topic_id, search_engine);
+	else if (params->metric == ANT_ANT_param_block::RANKEFF)
+		average_precision = map->rank_effectiveness(topic_id, search_engine);
 	}
 
 /*
@@ -222,7 +224,7 @@ if (params->queries_filename == NULL)
 double ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list)
 {
 char *query;
-long topic_id, line;
+long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_ANT_file_iterator input(params->queries_filename);
@@ -235,17 +237,20 @@ else if (params->output_forum == ANT_ANT_param_block::INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 
 sum_of_average_precisions = 0.0;
-line = 0;
+number_of_queries = line = 0;
 prompt(params);
 for (query = input.first(); query != NULL; query = input.next())
 	{
-	line++;
 	/*
 		Parsing to get the topic number
 	*/
-	strip_end_punc(query);
+	strip_space_inplace(query);
 	if (strcmp(query, ".quit") == 0)
 		break;
+	if (*query == '\0')
+		continue;			// ignore blank lines
+
+	line++;
 	if (!have_assessments)
 		topic_id = -1;
 	else
@@ -258,6 +263,7 @@ for (query = input.first(); query != NULL; query = input.next())
 	/*
 		Do the query and compute average precision
 	*/
+	number_of_queries++;
 	average_precision = perform_query(params, search_engine, query, &hits, topic_id, map);
 	sum_of_average_precisions += average_precision;
 
@@ -286,13 +292,13 @@ for (query = input.first(); query != NULL; query = input.next())
 /*
 	Compute Mean Average Precision
 */
-mean_average_precision = sum_of_average_precisions / (double) (line - 1);
+mean_average_precision = sum_of_average_precisions / (double)number_of_queries;
 
 /*
 	Report MAP
 */
 if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
-	printf("\nProcessed %ld topics (MAP:%f)\n\n", line - 1, mean_average_precision);
+	printf("\nProcessed %ld topics (MAP:%f)\n\n", number_of_queries, mean_average_precision);
 
 /*
 	Report the summary of the stats

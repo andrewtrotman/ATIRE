@@ -11,7 +11,7 @@
 class ANT_ANT_param_block
 {
 public:
-	enum { MAP, MAgP } ;
+	enum { MAP, MAgP, RANKEFF } ;
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2 } ;
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };		// bitstring
 

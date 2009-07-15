@@ -97,6 +97,7 @@ puts("-----------------------");
 puts("-m[metric]      Score the result set using");
 puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
 puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
+puts("  RankEff       Mean Rank Effectiveness (acount for unassessed documents)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
 puts("");
@@ -190,6 +191,8 @@ if (strcmp(which, "MAP") == 0)
 	metric = MAP;
 else if (strcmp(which, "MAgP") == 0)
 	metric = MAgP;
+else if (strcmp(which, "RankEff") == 0)
+	metric = RANKEFF;
 else
 	exit(printf("Unknown metric:'%s'\n", which));
 }
