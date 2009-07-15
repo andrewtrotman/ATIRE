@@ -96,19 +96,19 @@ puts("");
 
 puts("ENCODING");
 puts("--------");
-puts("-e[au] decode the input text using one of encodings:");
+puts("-e[au]          The input text is encoded using one of:");
 puts("   a            ASCII encoding [default]");
 puts("   u            UTF8 encoding");
 puts("");
 
-puts("SEGMENTATION(EAST-ASIAN LANGUAGES ONLY)");
-puts("-----------");
-puts("-S              segment the text into meaningful words");
+puts("SEGMENTATION");
+puts("------------");
+puts("-S              East-Asian language word segmentation");
 puts("");
 
 puts("READABILITY");
 puts("-----------");
-puts("-R[nd]          Calculate a readability measure using one of:");
+puts("-R[nd]          Calculate readability using one of:");
 puts("   n            none [default]");
 puts("   d            Dale-Chall");
 puts("");

@@ -155,7 +155,8 @@ for (param = first_param; param < argc; param++)
 				}
 			else /*if (ANT_isalnum(*token->start))*/ // keep all tokens returned from the parser which defines what should be indexed, not here
 				{
-				terms_in_document++;
+				if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
+					terms_in_document++;
 				readability->add_node(index->add_term(token, doc));
 				done_work = TRUE;
 				}

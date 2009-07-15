@@ -1,11 +1,13 @@
 /*
 	INEXTOPICS_TO_ANTQUERY.C
 	------------------------
+	Convert an INEX 2008 / 2009 topic file into an ANT query file
 */
 #include "/ant/source/str.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 char buffer[1024 * 1024];
 char title[1024 * 1024];
@@ -17,13 +19,22 @@ char title[1024 * 1024];
 int main(int argc, char *argv[])
 {
 FILE *fp;
-char *title_pos, *first_char, *into;
+char *title_pos, *first_char, *into, *filename, *pos;
 long topic;
+bool clean = false;
 
-if (argc != 2)
-	exit(printf("Usage:%s <topic_file (INEX 2008 format)\n", argv[0]));
+if (argc != 2 && argc != 3)
+	exit(printf("Usage:%s [-clean] <topic_file (INEX 2008/2009 format)>\n", argv[0]));
 
-if ((fp = fopen(argv[1], "rb")) == NULL)
+if (argc == 2)
+	filename = argv[1];
+else
+	{
+	clean = true;
+	filename = argv[2];
+	}
+
+if ((fp = fopen(filename, "rb")) == NULL)
 	exit(printf("Cannot open INEX topic file:%s\n", argv[1]));
 
 into = title;
@@ -64,6 +75,14 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 					}
 				}
 			}
+		if (clean)
+			for (pos = title; *pos != '\0'; pos++)
+				{
+				if (isupper(*pos))
+					*pos = tolower(*pos);
+				if (!isalnum(*pos))
+					*pos = ' ';
+				}
 		printf("%d %s\n", topic, title);
 		}
 	}

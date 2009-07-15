@@ -106,7 +106,8 @@ puts("TREC / INEX SPECIFIC");
 puts("--------------------");
 puts("-e[-it]         Export a run file for use in an Evaluation Forum");
 puts("  -             Don't generate a run file [default]");
-puts("  i             INEX run format");
+puts("  I             INEX 2008 (XML) run format");
+puts("  i             INEX 2009 (TREC++) run format");
 puts("  t             TREC run format");
 puts("-o<filename>    Output filename for the run [default=ant.out]");
 puts("-i<id>          Forum participant id is <id> [default=unknown]");
@@ -114,9 +115,9 @@ puts("-n<name>        Run is named <name> [default=unknown]");
 puts("-l<n>           Length of the results list [default=1500 for batch, default=10 for interactive)]");
 puts("");
 
-puts("SEGMENTATION(EAST-ASIAN LANGUAGES ONLY)");
-puts("-----------");
-puts("-S	          segment the query into meaningful words");
+puts("SEGMENTATION");
+puts("------------");
+puts("-S	           East-Asian language word segmentation");
 puts("");
 
 puts("READABILITY");
@@ -172,7 +173,8 @@ do
 	switch (*forum)
 		{
 		case '-' : output_forum = NONE;   break;
-		case 'i' : output_forum = INEX;   break;
+		case 'I' : output_forum = INEX;   break;
+		case 'i' : output_forum = TREC;   break;		// in 2009 INEX moved to the TREC format with extra stuff on the end of each line
 		case 't' : output_forum = TREC;   break;
 		default : exit(printf("Unknown export format: '%c'\n", *forum)); break;
 		}

@@ -241,6 +241,7 @@ number_of_queries = line = 0;
 prompt(params);
 for (query = input.first(); query != NULL; query = input.next())
 	{
+	line++;
 	/*
 		Parsing to get the topic number
 	*/
@@ -250,15 +251,15 @@ for (query = input.first(); query != NULL; query = input.next())
 	if (*query == '\0')
 		continue;			// ignore blank lines
 
-	line++;
-	if (!have_assessments)
-		topic_id = -1;
-	else
+	if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE)
 		{
 		topic_id = atol(query);
 		if ((query = strchr(query, ' ')) == NULL)
 			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 		}
+	else
+		topic_id = -1;
+
 
 	/*
 		Do the query and compute average precision
@@ -313,17 +314,56 @@ return mean_average_precision;
 }
 
 /*
+	MAX()
+	-----
+*/
+char *max(char *a, char *b, char *c)
+{
+char *thus_far;
+
+thus_far = a;
+if (b > thus_far)
+	thus_far = b;
+if (c > thus_far)
+	thus_far = c;
+
+return thus_far;
+}
+
+/*
 	READ_DOCID_LIST()
 	-----------------
 */
 char **read_docid_list(long long *documents_in_id_list)
 {
 char *document_list_buffer;			// this is leaked!!!!
+char **id_list, **current;
+char *slish, *slash, *slosh, *start, *dot;
 
 if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
 	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
 
-return ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
+id_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
+
+#ifdef NEVER
+/*
+	This code converts filenames into DOCIDs
+*/
+for (current = id_list; *current != NULL; current++)
+	{
+	slish = *current;
+	slash = strrchr(*current, '/');
+	slosh = strrchr(*current, '\\');
+	start = max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
+	if (*start != '\0')		// avoid blank lines at the end of the file
+		{
+		dot = strchr(start, '.');
+		*dot = '\0';
+		*current = start == *current ? *current : start + 1;		// +1 to skip over the '/'
+		}
+	}
+#endif
+return id_list;
 }
 
 /*
