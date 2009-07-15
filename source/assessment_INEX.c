@@ -60,7 +60,12 @@ document_pointer = &document;
 for (current = lines; *current != 0; current++)
 	{
 	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
+#ifdef NEVER
 	if ((params == 4) && (relevant_characters != 0))
+
+#else
+	if (params == 4)
+#endif
 		{
 		found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
 		if (found == NULL)
