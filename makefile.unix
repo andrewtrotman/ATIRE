@@ -2,7 +2,23 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-LDFLAGS = -g
+PLATFORM    = linux
+
+LDFLAGS = -g -ldl
+
+#############################################################################
+#
+# Different platform could have different loader to load the dynamic library
+# If there is such a difference, use the conditional statement as below to 
+# specify it.
+# e.g. on Linux, -ldl(libdl.so or libdl.a) is the library for dynamic library
+# loading
+#
+#############################################################################
+ifeq ($(PLATFORM), linux)
+LDFLAGS = -g -ldl
+endif
+
 CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O3 \
        -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas
 

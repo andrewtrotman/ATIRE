@@ -64,9 +64,13 @@ for (int i = 0; i < num_of_plugins; i++)
 	{
 	if (plugin_factory[i]->plugin)
 		delete plugin_factory[i]->plugin;
-//	if (plugin_factory[i]->dlib)
-//		dlclose(plugin_factory[i]->dlib);
-	}
+
+#ifdef _MSC_VER
+	// close the dll here
+#else
+	if (plugin_factory[i]->dlib)
+		dlclose(plugin_factory[i]->dlib);
+#endif
 
 delete [] plugin_factory;
 }
@@ -102,13 +106,12 @@ for (int i = 0; i < num_of_plugins; i++)
 		 */
 
 #else
-/*		plugin_factory[plugin_ids[i]]->dlib = dlopen(name_with_plugin_path, RTLD_NOW);
+		plugin_factory[plugin_ids[i]]->dlib = dlopen(name_with_plugin_path, RTLD_NOW);
 		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
 			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
 		else
 			printf("found plugin(%s)\n", name_with_plugin_path);
 		plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
-*/
 #endif
 		}
 	else
