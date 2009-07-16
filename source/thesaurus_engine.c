@@ -192,7 +192,7 @@ void thesaurus_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, cha
     term = stemmer->first(base_term);
 
     while (term != NULL) {
-        if (strcmp(base_term, term) == 0 || term_similarity(base_term, term) > 0.0) {
+        if (strcmp(base_term, term) == 0 || term_similarity(base_term, term) > threshold) {
             stemmer->get_postings_details(&term_details);
 
             if (get_postings(&term_details, postings_buffer) == NULL)

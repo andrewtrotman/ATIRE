@@ -259,10 +259,16 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'm')
 			set_metric(command + 1);
-		else if (*command == 'a')
-			assessments_filename = command + 1;
+		else if (*command == 'a') 
+            if (*(command + 1) == '\0' && param < argc - 1) 
+                assessments_filename = argv[++param];
+            else
+                assessments_filename = command + 1;
 		else if (*command == 'q')
-			queries_filename = command + 1;
+            if (*(command + 1) == '\0' && param < argc - 1) 
+                queries_filename = argv[++param];
+            else
+                queries_filename = command + 1;
 		else if (*command == 'e')
 			export_format(command + 1);
 		else if (*command == 'i')
@@ -280,10 +286,10 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'R')
 			readability = TRUE;
 		else if (strstr(command, "-termsim") == command) 
-                        {
-                        thesaurus = TRUE;
-                        thesaurus_threshold = atof(command + 8);
-                        }
+            {
+            thesaurus = TRUE;
+            thesaurus_threshold = strtod(command + 8, NULL);
+            }
 		else
 			usage();
 		}

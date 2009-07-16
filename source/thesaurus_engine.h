@@ -17,11 +17,13 @@ private:
     double buffer_similarity(long long buffer_a_total, long long buffer_b_total);
     long *buffer_a;
     long *buffer_b;
+    double threshold;
 
 public:
-    thesaurus_engine(ANT_memory *memory) : ANT_search_engine(memory) {
+    thesaurus_engine(ANT_memory *memory, double threshold) : ANT_search_engine(memory) {
         buffer_a = (long *)memory->malloc(sizeof (*buffer_a) * documents);
         buffer_b = (long *)memory->malloc(sizeof (*buffer_b) * documents);
+        this->threshold = threshold;
     }
     double term_similarity(char *term1, char *term2);
     void stemming_exceptions(ANT_stemmer *, double);

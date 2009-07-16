@@ -401,7 +401,7 @@ answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list
 if (params.readability)
 	search_engine = new ANT_search_engine_readability(&memory);
 else if (params.thesaurus)
-	search_engine = new thesaurus_engine(&memory);
+	search_engine = new thesaurus_engine(&memory, params.thesaurus_threshold);
 else
 	search_engine = new ANT_search_engine(&memory);
 //printf("Index contains %lld documents\n", search_engine->document_count());

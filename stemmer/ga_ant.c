@@ -284,8 +284,8 @@ return ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 */
 int main(int argc, char *argv[])
 {
-//ANT_search_engine *search_engine;
-thesaurus_engine *search_engine;
+ANT_search_engine *search_engine;
+//thesaurus_engine *search_engine;
 ANT_mean_average_precision *map = NULL;
 ANT_memory memory;
 long last_param;
@@ -318,8 +318,9 @@ if (params.assessments_filename != NULL)
 
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
-search_engine = new thesaurus_engine(&memory);
-search_engine->stemming_exceptions(ANT_stemmer_factory::get_stemmer(ANT_stemmer_factory::PORTER, search_engine), 0.8);
+search_engine = new ANT_search_engine(&memory);
+//search_engine = new thesaurus_engine(&memory, 0.0);
+//search_engine->stemming_exceptions(ANT_stemmer_factory::get_stemmer(ANT_stemmer_factory::PORTER, search_engine), 0.8);
 
 #ifdef VOCAB_TOOL
 trie_test(search_engine);
