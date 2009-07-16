@@ -71,7 +71,7 @@ for (int i = 0; i < num_of_plugins; i++)
 	if (plugin_factory[i]->dlib)
 		dlclose(plugin_factory[i]->dlib);
 #endif
-
+	}
 delete [] plugin_factory;
 }
 

@@ -14,6 +14,8 @@ LDFLAGS = -g -ldl
 # e.g. on Linux, -ldl(libdl.so or libdl.a) is the library for dynamic library
 # loading
 #
+# alternatively, use autotools to avoid such statements
+#
 #############################################################################
 ifeq ($(PLATFORM), linux)
 LDFLAGS = -g -ldl
