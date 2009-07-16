@@ -319,7 +319,7 @@ if (params.assessments_filename != NULL)
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 search_engine = new thesaurus_engine(&memory);
-//search_engine->stemming_exceptions(ANT_stemmer_factory::get_stemmer(ANT_stemmer_factory::PORTER, search_engine), 0.8);
+search_engine->stemming_exceptions(ANT_stemmer_factory::get_stemmer(ANT_stemmer_factory::PORTER, search_engine), 0.8);
 
 #ifdef VOCAB_TOOL
 trie_test(search_engine);

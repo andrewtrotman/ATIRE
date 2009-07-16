@@ -171,3 +171,74 @@ void thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshol
         }
     }
 }
+
+/*
+	PROCESS_ONE_STEMMED_SEARCH_TERM()
+*/
+void thesaurus_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term) {
+    ANT_search_engine_btree_leaf term_details, stemmed_term_details;
+    long long now, collection_frequency;
+    ANT_compressable_integer *current_document, *end;
+    long document;
+    char *term;
+#ifdef ANT_TOP_K
+	ANT_compressable_integer term_frequency;
+#else
+	ANT_compressable_integer *current_tf;
+#endif
+    memset(stem_buffer, 0, (size_t)stem_buffer_length_in_bytes);
+    collection_frequency = 0;
+
+    term = stemmer->first(base_term);
+
+    while (term != NULL) {
+        if (strcmp(base_term, term) == 0 || term_similarity(base_term, term) > 0.0) {
+            stemmer->get_postings_details(&term_details);
+
+            if (get_postings(&term_details, postings_buffer) == NULL)
+                return;
+
+#ifdef ANT_TOP_K
+            factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+#else
+            decompress(postings_buffer, &term_details);
+#endif
+
+            collection_frequency += term_details.collection_frequency;
+
+#ifdef ANT_TOP_K
+            current_document = decompress_buffer;
+            end = decompress_buffer + term_details.impacted_length;
+            while (current_document < end) {
+                term_frequency = *current_document++;
+                document = -1;
+                while (*current_document != 0) {
+                    document += *current_document++;
+                    stem_buffer[document] += term_frequency;
+                }
+                current_document++;
+            }
+#else
+            end = posting.docid + term_details.document_frequency;
+            document = -1;
+            for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++) {
+                document = *current_document;
+                stem_buffer[document] += *current_tf;
+            }
+#endif
+        }
+        term = stemmer->next();
+    }
+
+#ifdef ANT_TOP_K
+	stem_to_postings_k(&stemmed_term_details, decompress_buffer, collection_frequency, stem_buffer);
+#else
+	stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buffer);
+#endif
+
+#ifdef ANT_TOP_K
+	relevance_rank_k(&stemmed_term_details, decompress_buffer);
+#else
+	relevance_rank(&stemmed_term_details, &posting);
+#endif
+}

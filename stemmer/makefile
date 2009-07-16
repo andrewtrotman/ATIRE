@@ -6,7 +6,7 @@ BINDIR = ../bin
 EXTFLAGS = -I$(SRCDIR)
 LDFLAGS = -g
 CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-	-Wno-endif-labels -Wno-missing-braces
+	-Wno-endif-labels -Wno-missing-braces -I$(EXTDIR) -I$(SRCDIR)
 
 CC = g++
 
@@ -70,8 +70,10 @@ OBJECTS = \
     readability_dale_chall.o \
     readability_factory.o \
 	search_engine_readability.o \
+    plugin_manager.o \
 	indexer_param_block.o \
     ant_param_block.o \
+	thesaurus_engine.o \
     version.o
 
 EXTENSION = \
@@ -79,8 +81,7 @@ EXTENSION = \
     ga_stemmer.o \
     ga_individual.o \
 	ga_function.o \
-	vocab.o \
-	thesaurus_engine.o
+	vocab.o 
 
 all : index ant ga_ant vocab_tool
 
@@ -93,7 +94,7 @@ $(EXTENSION) :
 index : $(OBJECTS) index.o
 	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
 
-ant : $(OBJECTS) ant.o
+ant : $(OBJECTS) ant.o 
 	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%) 
 
 ant_dict : $(OBJECTS) ant_dictionary.o

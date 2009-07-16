@@ -25,6 +25,7 @@ public:
     }
     double term_similarity(char *term1, char *term2);
     void stemming_exceptions(ANT_stemmer *, double);
+    void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
 };
 
 #endif

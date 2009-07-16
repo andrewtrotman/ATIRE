@@ -32,6 +32,7 @@ protected:
 	long *document_lengths;
 	double mean_document_length;
 	ANT_search_engine_accumulator *accumulator;
+	long long stem_buffer_length_in_bytes;
 
 private:
 	ANT_search_engine_stats *stats;
@@ -45,7 +46,6 @@ private:
 	long string_length_of_longest_term;
 	long long highest_df;
 	ANT_compressable_integer *decompress_buffer;
-	long long stem_buffer_length_in_bytes;
 	ANT_compression_factory factory;
 
 private:
@@ -56,6 +56,7 @@ private:
 protected:
 	virtual void relevance_rank_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering);
 	virtual void relevance_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
+
 
 public:
 	ANT_search_engine(ANT_memory *memory);
@@ -69,7 +70,7 @@ public:
 	void decompress(unsigned char *start, ANT_search_engine_btree_leaf *leaf);
 	void stem_to_postings_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, long long collection_frequency, long *stem_buffer);
 	void stem_to_postings(ANT_search_engine_btree_leaf *stemmed_term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer);
-	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
+	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
 	void process_one_search_term(char *term);
 	ANT_search_engine_accumulator *sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);

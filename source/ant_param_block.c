@@ -40,6 +40,8 @@ results_list_length = -1;
 stats = SHORT;
 segmentation = FALSE;
 readability = FALSE;
+thesaurus = FALSE;
+thesaurus_threshold = 0.0;
 }
 
 /*
@@ -85,6 +87,11 @@ puts("  l             Lovins stemming");
 puts("  o             Otago stemming");
 puts("  p             Porter stemming");
 puts("  s             S-Striping stemming");
+puts("");
+
+puts("STEMMING SIMILARITY THRESHOLD");
+puts("-----------");
+puts("--termsim<n>    Prevent stemming if term similarity is <= n [default=0.0]");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -206,7 +213,7 @@ else
 void ANT_ANT_param_block::term_expansion(char *which)
 {
 if (*(which + 1) != '\0')
-	exit(printf("Only one term expansion algorith is permitted\n", *which));
+	exit(printf("Only one term expansion algorithm is permitted: '%c'\n", *which));
 
 switch (*which)
 	{
@@ -236,7 +243,7 @@ for (param = 1; param < argc; param++)
 		command = argv[param] + 1;
 		if (strcmp(command, "?") == 0)
 			help();
-		else if (strcmp(command, "h") == 0)
+                else if (strcmp(command, "h") == 0)
 			help();
 		else if (strcmp(command, "H") == 0)
 			help();
@@ -272,6 +279,11 @@ for (param = 1; param < argc; param++)
 			segmentation = TRUE;
 		else if (*command == 'R')
 			readability = TRUE;
+		else if (strstr(command, "-termsim") == command) 
+                        {
+                        thesaurus = TRUE;
+                        thesaurus_threshold = atof(command + 8);
+                        }
 		else
 			usage();
 		}

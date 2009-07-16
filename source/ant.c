@@ -23,6 +23,7 @@
 #include "ant_param_block.h"
 #include "encoding_utf8.h"
 #include "version.h"
+#include "thesaurus_engine.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -399,6 +400,8 @@ answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list
 
 if (params.readability)
 	search_engine = new ANT_search_engine_readability(&memory);
+else if (params.thesaurus)
+	search_engine = new thesaurus_engine(&memory);
 else
 	search_engine = new ANT_search_engine(&memory);
 //printf("Index contains %lld documents\n", search_engine->document_count());

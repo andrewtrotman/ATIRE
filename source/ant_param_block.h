@@ -35,6 +35,8 @@ public:
 
 	long segmentation;			// query segmentation need or not for east-asian languages, e.g. Chinese
 	long readability;			// whether to use the readability search engine
+	long thesaurus;			// 'correct' stemming with the thesaurus?
+	double thesaurus_threshold;			// threshold for rejecting stems with the thesaurus (default = 0.0)
 
 private:
 	void export_format(char *forum);
