@@ -18,6 +18,7 @@ class ANT_search_engine_readability : public ANT_search_engine
 {
 private:
 	long *document_readability;
+	long hardest_document;
 
 protected:
 	void relevance_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);

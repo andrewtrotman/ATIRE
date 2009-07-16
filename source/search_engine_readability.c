@@ -28,8 +28,14 @@ get_postings_details("~dalechall", &collection_details);
 get_postings(&collection_details, postings_buffer);
 variable_byte.decompress(posting.docid, postings_buffer, collection_details.document_frequency);
 
+hardest_document = 0;
+
 for (current_readability = 0; current_readability < collection_details.document_frequency; current_readability++)
+	{
 	document_readability[current_readability] = posting.docid[current_readability];
+	if (document_readability[current_readability] > hardest_document)
+		hardest_document = document_readability[current_readability];
+	}
 
 memory->realign();
 }
@@ -60,6 +66,7 @@ for (which = 0; which < term_details->document_frequency; which++)
 	/*
 		use some combination of bm25 and readability score
 	*/
-	accumulator[docid].add_rsv((0.5 * bm25) + (0.1 * document_readability[docid] / 1000));
+	accumulator[docid].add_rsv((0.5 * bm25) + (0.5 * (20000 - document_readability[docid]) / 1000));
+//	accumulator[docid].add_rsv(hardest_document - document_readability[docid]);
 	}
 }
