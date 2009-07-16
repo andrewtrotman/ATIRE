@@ -24,16 +24,6 @@ class ANT_search_engine
 {
 friend class ANT_btree_iterator;
 friend class ANT_mean_average_precision;
-protected:
-	long long documents;
-	unsigned char *btree_leaf_buffer, *postings_buffer;
-	ANT_search_engine_posting posting;
-	long *stem_buffer;
-	long *document_lengths;
-	double mean_document_length;
-	ANT_search_engine_accumulator *accumulator;
-	long long stem_buffer_length_in_bytes;
-
 private:
 	ANT_search_engine_stats *stats;
 	ANT_search_engine_stats *stats_for_all_queries;
@@ -45,8 +35,19 @@ private:
 	long long max_header_block_size;
 	long string_length_of_longest_term;
 	long long highest_df;
+
+protected:
 	ANT_compressable_integer *decompress_buffer;
 	ANT_compression_factory factory;
+	long long documents;
+	unsigned char *btree_leaf_buffer, *postings_buffer;
+	ANT_search_engine_posting posting;
+	long *stem_buffer;
+	long *document_lengths;
+	double mean_document_length;
+	ANT_search_engine_accumulator *accumulator;
+	long long stem_buffer_length_in_bytes;
+
 
 private:
 	long long get_long_long(unsigned char *from) { return *((int64_t *)from); }

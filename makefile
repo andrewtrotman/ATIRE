@@ -93,7 +93,7 @@ PARTS = \
 	$(OBJDIR)\plugin_manager.obj				\
 	$(OBJDIR)\indexer_param_block.obj			\
 	$(OBJDIR)\ant_param_block.obj				\
-	$(OBJDIR)\thesaurus.obj                     \
+	$(OBJDIR)\thesaurus_engine.obj                     \
 	$(OBJDIR)\version.obj					
 #	$(OBJDIR)\ranking_function_bm25.obj			
 
