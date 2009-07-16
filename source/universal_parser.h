@@ -25,12 +25,20 @@ private:
 	bool 						tokentype;  // true, parse the word as a single token; false, parse the single character as a token
 	ANT_encoding::language 		current_lang;
 	int 						current_char_idc; // current char indicator
+	int							**boundary_array; // used in segmentation to indicate where the boundary is, including the one at the end
+	int							boundary_count; // the number of segmented words
+	int							boundary_consumed; // indicating where we are
+	unsigned char				*current_boundary;
 
 private:
-	void initialise();
+	void init();
+	void lang_initialise();
+	void segmentation_initialise();
 	bool is_current_valid_char();
-	void store_token(unsigned char *start);
+	void store_token(unsigned char *start, int length);
+	void get_more(unsigned char *start);
 	inline void move2nextchar() { current += enc->howmanybytes(); }
+	bool check_segmentation_plugin_availability();
 
 protected:
 	int isheadchar(unsigned char *val);
@@ -44,12 +52,38 @@ public:
 	ANT_string_pair *get_next_token(void);
 } ;
 
-inline void ANT_universal_parser::initialise()
+/*
+	ANT_UNIVERSAL_PARSER::LANG_INITIALISE()
+	----------------------------------
+*/
+inline void ANT_universal_parser::lang_initialise()
 {
 current_lang = ANT_encoding::UNKNOWN;
 current_char_idc = UNKNOWNCHAR;
 }
 
+/*
+	ANT_UNIVERSAL_PARSER::SEGMENTATION_INITIALISE()
+	----------------------------------
+*/
+inline void ANT_universal_parser::segmentation_initialise()
+{
+current_boundary = NULL;
+boundary_consumed = 0;
+if (boundary_array)
+	{
+	for (int i = 0; i < boundary_count; i++)
+		delete boundary_array[i];
+	delete [] boundary_array;
+	boundary_array = NULL;
+	}
+boundary_count = 0;
+}
+
+/*
+	ANT_UNIVERSAL_PARSER::IS_CURRENT_VALID_CHAR()
+	---------------------------------------------
+*/
 inline bool ANT_universal_parser::is_current_valid_char()
 {
 if (enc->is_valid_char(current))
@@ -62,6 +96,10 @@ else
 return 	(current_char_idc == ALPHACHAR);
 }
 
+/*
+	ANT_UNIVERSAL_PARSER::ISHEADERCHAR()
+	------------------------------------
+*/
 inline int ANT_universal_parser::isheadchar(unsigned char *val)
 {
 if (enc->is_valid_char(val)) return ALPHACHAR;

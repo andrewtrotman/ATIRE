@@ -49,6 +49,7 @@ library_sources =  \
     $(SRCDIR)/search_engine_forum.c \
     $(SRCDIR)/search_engine_forum_INEX.c \
     $(SRCDIR)/search_engine_forum_TREC.c \
+    $(SRCDIR)/search_engine_readability.c \
     $(SRCDIR)/str.c \
     $(SRCDIR)/stop_word.c \
     $(SRCDIR)/disk.c \
@@ -175,11 +176,13 @@ libant_la_HEADERS = $(library_headers)
 bin_PROGRAMS = ant index
 
 ant_SOURCES = $(SRCDIR)/ant.c
-ant_LDADD = -L${OBJDIR} -lant
+ant_LDADD = -L${OBJDIR} -lant -ldl
+ant_LDFLAGS = -rdynamic
 ant_DEPENDENCIES = libant.la
 
 index_SOURCES = $(SRCDIR)/index.c
-index_LDADD = -L${OBJDIR} -lant
+index_LDADD = -L${OBJDIR} -lant -ldl
+index_LDFLAGS = -rdynamic
 index_DEPENDENCIES = libant.la
 
 noinst_PROGRAMS = ant_dictionary ant_plugins

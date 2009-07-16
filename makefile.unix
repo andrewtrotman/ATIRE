@@ -68,6 +68,7 @@ OBJECTS = \
     readability_dale_chall.o \
     readability_factory.o \
     search_engine_readability.o \
+    plugin_manager.o \
     indexer_param_block.o \
     ant_param_block.o \
     version.o

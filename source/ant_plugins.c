@@ -27,9 +27,8 @@ while(1)
 	string input;
 	cout << "> ";
 	cin >> input;
-	const char *output = NULL;
-	output = ANT_plugin_manager::instance().do_segmentation((unsigned char *)input.c_str());
-	char *next = (char *)output;
+	const unsigned char *output = ANT_plugin_manager::instance().do_segmentation((unsigned char *)input.c_str(), input.length());
+	unsigned char *next = (unsigned char *)output;
 	while (*next != '\0')
 		{
 		string word;

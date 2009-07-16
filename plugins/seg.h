@@ -17,7 +17,7 @@
 class Seger {
 private:
 	CList				clist_;
-	Freq				freq_;    // the frequency records for the input text
+	Freq				*freq_;    // the frequency records for the input text
 	Freq				*allfreq_;
 	word_ptr_type 		tw_ptr_;
 	string_type 		stream_;  // for the incoming document which will be segmented
@@ -38,20 +38,26 @@ public:
 	//unsigned char **output();
 	//int output(unsigned char **out);
 	//void free_output();
-	const char *output();
+	const unsigned char *output();
 
 	void build();
 	void show_all();
 	void seg();
+
+	void free();
+
 	void add_to_list(array_type& cwlist);
 	void mark_the_seged();
 
 	string_type& stream() { return stream_; }
 	string_type& stream_out() { return stream_out_; }
-	void input(unsigned char *);
+	void input(unsigned char *, int length);
+
+	int get_count() { return words_list_.size(); }
 
 private:
 	void init();
+	void init_members();
 	void make(CList& clist, string_type& str);
 	void assign_freq();
 	void justify(unsigned int min = 2);

@@ -11,6 +11,10 @@
 
 #include "plugin.h"
 
+/*
+	class ANT_PLUGIN_MANAGER
+	------------------------
+*/
 class ANT_plugin_manager
 {
 public:
@@ -27,14 +31,38 @@ public:
 	static ANT_plugin_manager& instance();
 	void load();
 
-	const char *do_segmentation(unsigned char *c);
+	const unsigned char *do_segmentation(unsigned char *c, int length);
 	ANT_plugin *segmentation_plugin();
+	inline bool is_segmentation_plugin_available();
 };
 
+/*
+	ANT_PLUGIN_MANAGER::INSTANCE()
+	------------------------------
+*/
 inline ANT_plugin_manager& ANT_plugin_manager::instance()
 {
 static ANT_plugin_manager inst;
 return inst;
+}
+
+
+/*
+	ANT_PLUGIN_MANAGER::SEGMENTATION_PLUGIN()
+	-----------------------------------------
+*/
+inline ANT_plugin *ANT_plugin_manager::segmentation_plugin()
+{
+return plugin_factory[ANT_plugin::SEGMENTATION]->plugin;
+}
+
+/*
+	ANT_PLUGIN_MANAGER::IS_SEGMENTATION_PLUGIN_AVAILABLE()
+	------------------------------------------------------
+*/
+inline bool ANT_plugin_manager::is_segmentation_plugin_available()
+{
+return segmentation_plugin() != NULL;
 }
 
 #endif /* __PLUGIN_MANAGER_H__ */

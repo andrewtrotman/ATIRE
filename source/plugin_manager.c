@@ -6,7 +6,11 @@
  *      Author: monfee
  */
 
-#include <dlfcn.h>
+#ifdef _MSC_VER
+	#include <windows.h>
+#else
+	#include <dlfcn.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +35,10 @@ int ANT_plugin_manager::num_of_plugins = sizeof(ANT_plugin_manager::plugin_ids)/
 /* global plugins */
 ANT_plugin_maker **plugin_factory = NULL;
 
+/*
+	ANT_PLUGIN_MANAGER::ANT_PLUGIN_MANAGER()
+	----------------------------------------
+*/
 ANT_plugin_manager::ANT_plugin_manager()
 {
 if (!plugin_factory)
@@ -46,6 +54,10 @@ if (!plugin_factory)
 	}
 }
 
+/*
+	ANT_PLUGIN_MANAGER::~ANT_PLUGIN_MANAGER()
+	-----------------------------------------
+*/
 ANT_plugin_manager::~ANT_plugin_manager()
 {
 for (int i = 0; i < num_of_plugins; i++)
@@ -59,6 +71,10 @@ for (int i = 0; i < num_of_plugins; i++)
 delete [] plugin_factory;
 }
 
+/*
+	ANT_PLUGIN_MANAGER::LOAD()
+	--------------------------
+*/
 void ANT_plugin_manager::load()
 {
 char *name = 0;
@@ -80,12 +96,19 @@ for (int i = 0; i < num_of_plugins; i++)
 	struct stat plugin_stat;
 	if (stat( name_with_plugin_path, &plugin_stat ) != -1)
 		{
+#ifdef _MSC_VER
+		/*
+		 * please help with implementation of loading dynamic library on Windows
+		 */
+
+#else
 		plugin_factory[plugin_ids[i]]->dlib = dlopen(name_with_plugin_path, RTLD_NOW);
 		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
 			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
 		else
 			printf("found plugin(%s)\n", name_with_plugin_path);
 		plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
+#endif
 		}
 	else
 		printf("no plugin found for : %s\n", name_with_plugin_path);
@@ -93,14 +116,13 @@ for (int i = 0; i < num_of_plugins; i++)
 	}
 }
 
-const char *ANT_plugin_manager::do_segmentation(unsigned char *c)
+/*
+	ANT_PLUGIN_MANAGER::DO_SEGMENTATION()
+	-------------------------------------
+*/
+const unsigned char *ANT_plugin_manager::do_segmentation(unsigned char *c, int length)
 {
 if (plugin_factory[ANT_plugin::SEGMENTATION]->plugin)
-	return plugin_factory[ANT_plugin::SEGMENTATION]->plugin->do_segmentation(c);
+	return plugin_factory[ANT_plugin::SEGMENTATION]->plugin->do_segmentation(c, length);
 return 0;
-}
-
-ANT_plugin *ANT_plugin_manager::segmentation_plugin()
-{
-return plugin_factory[ANT_plugin::SEGMENTATION]->plugin;
 }

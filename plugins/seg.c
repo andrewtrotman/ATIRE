@@ -22,48 +22,66 @@ using namespace std;
 
 Seger::Seger()
 {
-	allfreq_ = NULL;
+	init_members();
 }
 
-Seger::Seger(word_ptr_type tw_ptr) :
-	tw_ptr_(tw_ptr), stream_(tw_ptr_->chars())
+Seger::Seger(word_ptr_type tw_ptr) : stream_(tw_ptr_->chars())
 {
-	allfreq_ = NULL;
+	init_members();
+	tw_ptr_ = tw_ptr;
 	init();
 }
 
 Seger::Seger(const string_type stream) : stream_(stream)
 {
-	allfreq_ = NULL;
-	tw_ptr_ = NULL;
+	init_members();
 	init();
 }
 
 Seger::Seger(const char* stream, size_t length) : stream_(stream, length)
 {
-	allfreq_ = NULL;
-	tw_ptr_ = NULL;
+	init_members();
 	init();
 }
-
 
 Seger::~Seger()
 {
 	//free_output();
+	free();
+}
+
+void Seger::free()
+{
+	if (words_list_.size() > 0)
+		words_list_.clear();
+
+	if (freq_) {
+		delete freq_;
+		freq_ = NULL;
+
+		tw_ptr_ = NULL;
+	}
+}
+
+void Seger::init_members()
+{
+	freq_ = NULL;
+	allfreq_ = NULL;
+	tw_ptr_ = NULL;
 }
 
 void Seger::init()
 {
-	//if (!output_)
-	//	free_output();
+	free();
 
-	assert (stream_.length() > 0);
+	assert(stream_.length() > 0);
 	//assert(tw_ptr_->chars().length() > 0);
-	FreqCounter counter(stream_, &freq_);
+	freq_ = new Freq;
+	FreqCounter counter(stream_, freq_);
 	counter.count();
 
 	if (!allfreq_)
-	allfreq_ = &(QFreq::instance().freq());
+		allfreq_ = &(QFreq::instance().freq());
 
 	if (!tw_ptr_)
 		tw_ptr_ = allfreq_->find(stream_);
@@ -73,7 +91,7 @@ void Seger::init()
 	//justify(0);
 }
 
-void Seger::input(unsigned char *input)
+void Seger::input(unsigned char *input, int length)
 {
 	stream_ = string_type((char *)input);
 	init();
@@ -95,13 +113,13 @@ void Seger::start()
 	//mark_the_seged();
 }
 
-const char *Seger::output()
+const unsigned char *Seger::output()
 {
 	if (stream_out_.size() == 0) {
 		for (int i = 0; i < words_list_.size(); i++)
 			stream_out_.append(words_list_[i]->chars() + " ");
 	}
-	return stream_out_.c_str();
+	return (unsigned char *)stream_out_.c_str();
 }
 
 //unsigned char** Seger::output()
@@ -160,7 +178,7 @@ const char *Seger::output()
 void Seger::build()
 {
 	bool stop = false;
-	word_ptr_type local_tw_ptr = freq_.find(stream_);
+	word_ptr_type local_tw_ptr = freq_->find(stream_);
 	word_ptr_type w_ptr = local_tw_ptr;
 	//word_ptr_type r_ptr = (word_ptr_type)local_tw_ptr->rparent();
 	assert (w_ptr != NULL);
@@ -240,7 +258,7 @@ void Seger::build()
 }
 
 void Seger::make(CList& clist, string_type& str) {
-	word_ptr_type w_ptr = freq_.find(str);
+	word_ptr_type w_ptr = freq_->find(str);
 
 	//cwords_list::reverse_iterator it = clist_.list().rbegin();
 	//cout << "clist size: " << clist.list().size() << endl;
@@ -257,26 +275,26 @@ void Seger::make(CList& clist, string_type& str) {
 }
 
 void Seger::assign_freq() {
-	freq_.assign_freq(*allfreq_);
+	freq_->assign_freq(*allfreq_);
 }
 
 void Seger::justify(unsigned int min) {
-	freq_.justify(min);
+	freq_->justify(min);
 }
 
 void Seger::do_some_calculations() {
-	freq_.cal_word_p(QFreq::instance().freq().sum_k(1));
+	freq_->cal_word_p(QFreq::instance().freq().sum_k(1));
 
-	freq_.cal_word_a();
+	freq_->cal_word_a();
 
-	freq_.show_p();
+	freq_->show_p();
 }
 /**
  * the freq here is different with the freq_, the local freq_ is used to
  * stored the possible combinations of segmentations
  */
 void Seger::seg() {
-	clist_.cal(&freq_);
+	clist_.cal(freq_);
 
 	if (UNISEG_settings::instance().mean == 4
 			|| UNISEG_settings::instance().mean == 5)
@@ -344,7 +362,7 @@ void Seger::mark_the_seged() {
 	/// to set some other words for being seged as well
 	if (tw_ptr_ != NULL) {
 		const unsigned int freq = tw_ptr_->freq();
-		freq_.set_seged(*allfreq_, freq);
+		freq_->set_seged(*allfreq_, freq);
 	}
 }
 

@@ -7,34 +7,42 @@
 
 #include "uniseg_plugin.h"
 #include "seg.h"
+#include <iostream>
+
+using namespace std;
 
 UNISEG_plugin::UNISEG_plugin() : uniseg_plugin_interface()
 {
 	output = 0;
 
 	// load the string frequency table
+	cout << "##################### initializing UNISEG segmentation module ######################" << endl;
 	seger.load_frqs();
+	cout << "############################# finished initialization ##############################" << endl;
 }
 
 UNISEG_plugin::~UNISEG_plugin()
 {
 }
 
-const char *UNISEG_plugin::do_segmentation(unsigned char *c)
+const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length)
 {
-	seger.input(c);
+	if (!c || strlen((char *)c) == 0 || length == 0)
+		return NULL;
+
+	seger.input(c, length);
 	seger.start();
 	return seger.output();
 }
 
-const char* UNISEG_plugin::get_input()
+const unsigned char *UNISEG_plugin::get_input()
 {
-return seger.stream().c_str();
+return (unsigned char *)seger.stream().c_str();
 }
 
-const char* UNISEG_plugin::get_output()
+const unsigned char *UNISEG_plugin::get_output()
 {
-return seger.stream_out().c_str();
+return (unsigned char *)seger.stream_out().c_str();
 }
 
 extern "C"

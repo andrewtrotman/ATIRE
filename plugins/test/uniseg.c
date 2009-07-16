@@ -16,8 +16,8 @@ int main(int argc, char **argv)
 		Seger	seger(argv[1]);
 		seger.start();
 
-		const char* output = seger.output();
-		char *next = (char *)output;
+		const unsigned char* output = seger.output();
+		unsigned char *next = (unsigned char *)output;
 		while (*next != '\0')
 			{
 			string word;

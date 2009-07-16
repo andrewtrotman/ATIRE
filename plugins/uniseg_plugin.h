@@ -21,9 +21,10 @@ public:
 	UNISEG_plugin();
 	~UNISEG_plugin();
 
-	const char *do_segmentation(unsigned char *c);
-	const char* get_input();
-	const char* get_output();
+	const unsigned char *do_segmentation(unsigned char *c, int length);
+	const unsigned char* get_input();
+	const unsigned char* get_output();
+	int get_count();
 };
 
 #endif /* __UNISEG_PLUGIN_H__ */

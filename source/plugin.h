@@ -19,17 +19,42 @@ public:
 	enum plugin_id { SEGMENTATION  = 0 };
 
 public:
-	virtual const char *do_segmentation(unsigned char *c);
-	virtual const char *get_input();
-	virtual const char *get_output();
+	virtual const unsigned char *do_segmentation(unsigned char *c, int length);
+	virtual const unsigned char *get_input();
+	virtual const unsigned char *get_output();
+	virtual int get_count();
 };
 
-inline const char *ANT_plugin::do_segmentation(unsigned char *c) { return 0; }
-inline const char *ANT_plugin::get_input() { return NULL; }
-inline const char *ANT_plugin::get_output() { return NULL; }
+/*
+	ANT_PLUGIN::DO_SEGMENTATION()
+	-----------------------------
+*/
+inline const unsigned char *ANT_plugin::do_segmentation(unsigned char *c, int length) { return 0; }
+
+/*
+	ANT_PLUGIN::GET_INPUT()
+	-----------------------
+*/
+inline const unsigned char *ANT_plugin::get_input() { return NULL; }
+
+/*
+	ANT_PLUGIN::GET_OUTPUT()
+	------------------------
+*/
+inline const unsigned char *ANT_plugin::get_output() { return NULL; }
+
+/*
+	ANT_PLUGIN::GET_COUNT()
+	-----------------------
+*/
+inline int ANT_plugin::get_count() { return 0; }
 
 typedef ANT_plugin *maker_t();
 
+/*
+	struct ANT_PLUGIN_MAKER
+	-----------------------
+*/
 struct ANT_plugin_maker
 {
 	ANT_plugin		*plugin;

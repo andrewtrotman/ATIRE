@@ -90,6 +90,7 @@ PARTS = \
 	$(OBJDIR)\readability_dale_chall.obj		\
 	$(OBJDIR)\readability_factory.obj			\
 	$(OBJDIR)\search_engine_readability.obj		\
+	$(OBJDIR)\plugin_manager.obj				\
 	$(OBJDIR)\indexer_param_block.obj			\
 	$(OBJDIR)\ant_param_block.obj				\
 	$(OBJDIR)\version.obj					
