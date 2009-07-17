@@ -76,6 +76,7 @@ puts("GENERAL");
 puts("-------");
 puts("-? -h -H        Display this help message");
 puts("-nologo         Suppress banner");
+puts("-people         Display credits");
 puts("");
 
 puts("TERM EXPANSION");
@@ -124,7 +125,7 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S	           East-Asian language word segmentation");
+puts("-S              East-Asian language word segmentation");
 puts("");
 
 puts("READABILITY");
@@ -290,6 +291,11 @@ for (param = 1; param < argc; param++)
             thesaurus = TRUE;
             thesaurus_threshold = strtod(command + 8, NULL);
             }
+		else if (strcmp(command, "people") == 0)
+			{
+			ANT_credits();
+			exit(0);
+			}
 		else
 			usage();
 		}

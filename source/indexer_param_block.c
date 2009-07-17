@@ -62,6 +62,7 @@ puts("GENERAL");
 puts("-------");
 puts("-? -h -H        Display this help message");
 puts("-nologo         Suppress banner");
+puts("-people         Display credits");
 puts("");
 
 puts("FILE HANDLING");
@@ -268,6 +269,11 @@ for (param = 1; param < argc; param++)
 			}
 		else if (strcmp(command, "nologo") == 0)
 			logo = FALSE;
+		else if (strcmp(command, "people") == 0)
+			{
+			ANT_credits();
+			exit(0);
+			}
 		else
 			usage();
 		}

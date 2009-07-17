@@ -346,7 +346,7 @@ if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
 
 id_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 
-#ifdef NEVER
+//#ifdef NEVER
 /*
 	This code converts filenames into DOCIDs
 */
@@ -363,7 +363,7 @@ for (current = id_list; *current != NULL; current++)
 		*current = start == *current ? *current : start + 1;		// +1 to skip over the '/'
 		}
 	}
-#endif
+//#endif
 return id_list;
 }
 

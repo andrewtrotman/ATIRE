@@ -386,6 +386,12 @@ return islower(s) && !isvowel(s);
 int ANT_paice_husk::acceptable(char *s)
 {
 int x;
+char *ch;
+
+/* must be a sequence of alphabetic characters (ie, not a number) */
+for (ch = s; *ch != '\0'; ch++)
+	if (!islower(*ch))
+		return 0;
 
 /* If longer than 3 chars then don't worry */
 if((x = (int)strlen(s)) > 3)
