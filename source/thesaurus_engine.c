@@ -75,7 +75,7 @@ return term_details.collection_frequency;
 	-------------------------------------
   Calculates how similar the two buffers are.
 */
-double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long buffer_b_total) 
+double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long buffer_b_total)
 {
 long long doc, tmp_a = 0, tmp_b = 0;
 long long doc_count_a = 0, doc_count_b = 0;
@@ -103,9 +103,8 @@ for (doc = 0; doc < documents; doc++)
 
 	TF*IDF;
 	TF = term_count / |document|
-	        ( |collection| )
-	IDF = log( ------------ )
-	        ( doc_count    )
+             
+	IDF = log(|collection| / doc_count)
 
 	*/
 	if (buffer_a[doc])
@@ -130,8 +129,6 @@ idf_a = log((double) documents / (double) doc_count_a);
 idf_b = log((double) documents / (double) doc_count_b);
 
 similarity *= idf_a * idf_b;
-//    if (tmp_a > 0 && tmp_b > 0)
-//    printf("%lld %lld %lld\n", tmp_a, tmp_b, doc_count_a - tmp_a);
 
 similarity /= sqrt((double)length_a * idf_a * idf_a);
 similarity /= sqrt((double)length_b * idf_b * idf_b);
@@ -171,7 +168,7 @@ return buffer_similarity(row_total1, row_total2);
 */
 void thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshold)
 {
-ANT_btree_iterator all_terms(this); // first(NULL) works
+ANT_btree_iterator all_terms(this); 
 double similarity;
 char *term;
 char *stem;
@@ -186,10 +183,10 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
 			break;
 
 		similarity = term_similarity(term, stem);
-		if (similarity > threshold)
-			printf("%s is ~= %s by a factor of %f\n", term, stem, similarity);
+		if (similarity != 0.0)
+			printf("%s -- %s [label=%f]\n", term, stem, similarity);
 		else
-			printf("%s is !~= %s by a factor of %f\n", term, stem, similarity);
+			printf("%s; %s;\n", term, stem); // ensure the nodes show up
 		}
 }
 
