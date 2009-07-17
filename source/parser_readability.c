@@ -12,10 +12,19 @@ ANT_string_pair *ANT_parser_readability::get_next_token(void)
 {
 unsigned char *start;
 
-while (!isheadchar(*current))
+while (!isheadchar(*current) && !issentenceend(*current))
 	current++;
 
-if (ANT_isalpha(*current))
+if (issentenceend(*current))
+	{
+	start = current++;
+	while (issentenceend(*current))
+		current++;
+	
+	current_token.start = (char *)start;
+	current_token.string_length = current - start;
+	}
+else if (ANT_isalpha(*current))
 	{
 	start = current++;
 	while (ANT_isalpha(*current))

@@ -46,27 +46,26 @@ memory->realign();
 */
 void ANT_search_engine_readability::relevance_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
 {
-const double k1 = 0.9;
-const double b = 0.4;
-const double k1_plus_1 = k1 + 1.0;
-const double one_minus_b = 1.0 - b;
-long docid, which;
-double tf, idf, bm25;
-docid = -1;
+//const double k1 = 0.9;
+//const double b = 0.4;
+//const double k1_plus_1 = k1 + 1.0;
+//const double one_minus_b = 1.0 - b;
+long docid = -1, which;
+//double tf, idf, bm25;
 
-idf = log((double)(documents) / (double)term_details->document_frequency);
+//idf = log((double)(documents) / (double)term_details->document_frequency);
 
 for (which = 0; which < term_details->document_frequency; which++)
 	{
 	docid = postings->docid[which];
-	tf = postings->tf[which];
-	
-	bm25 = idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
-	
-	/*
-		use some combination of bm25 and readability score
-	*/
-	accumulator[docid].add_rsv((0.5 * bm25) + (0.5 * (20000 - document_readability[docid]) / 1000));
-//	accumulator[docid].add_rsv(hardest_document - document_readability[docid]);
+//	tf = postings->tf[which];
+//	
+//	bm25 = idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
+//	
+//	/*
+//		use some combination of bm25 and readability score
+//	*/
+//	accumulator[docid].add_rsv(bm25 + ((50000 - document_readability[docid]) / 1000.0));
+	accumulator[docid].add_rsv((hardest_document - document_readability[docid]) / 1000.0);
 	}
 }

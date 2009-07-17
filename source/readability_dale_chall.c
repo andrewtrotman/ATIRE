@@ -40,6 +40,15 @@ if (token == NULL)
 	return token;
 
 /*
+	If we've been given just sentence endings, add them, then get next token
+*/
+if (ANT_parser_readability::issentenceend(*token->start))
+	{
+	number_of_sentences += token->length();
+	return get_next_token();
+	}
+
+/*
 	If we've been given a tag, remove the starting < and pass it on
 */
 if (*token->start == '<')
@@ -51,6 +60,9 @@ if (*token->start == '<')
 
 last_was_title = ANT_isupper(*token->start);
 
+/*
+	Remove the sentence endings from the end of the token
+*/
 while (ANT_parser_readability::issentenceend(token->start[token->length() - 1]))
 	{
 	number_of_sentences++;
@@ -120,7 +132,6 @@ for (i = 1; i < number_of_words; i++)
 
 		/*
 			Compare the term to those in the familiar wordlist.
-			If it's not in there, then nu += istitle ? 1 : term_frequency
 
 			While we have words in the wordlist, play "catch up" 
 			to the term we're looking at.
@@ -186,13 +197,9 @@ parser->set_document(document);
 void ANT_readability_dale_chall::add_node(ANT_memory_index_hash_node *node)
 {
 /*
-	If we've been given a tag to deal with, then just ignore it.
+	If we've been given a tag or number to deal with, then just ignore it.
 */
-if (ANT_isupper(node->string[0]))
-	return;
-
-// ignore numbers as well
-if (ANT_isdigit(node->string[0]))
+if (ANT_isupper(node->string[0]) || ANT_isdigit(node->string[0]))
 	return;
 
 /*
@@ -201,7 +208,7 @@ if (ANT_isdigit(node->string[0]))
 */
 if (number_of_words == size)
 	{
-	// shouldn't happen now!
+	// expand
 	word *new_words = new word[size * 2];
 	memcpy(new_words, words_encountered, sizeof(*words_encountered) * size);
 	size *= 2;
