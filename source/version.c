@@ -37,6 +37,12 @@ puts("-----------------------");
 puts("Andrew Trotman");
 puts("");
 
+puts("MANAGEMENT");
+puts("----------");
+puts("Andrew Trotman");
+puts("Shlomo Geva");
+puts("");
+
 puts("HASHING ALGORITHMS");
 puts("------------------");
 puts("Random Hash             : Andrew Trotman");
