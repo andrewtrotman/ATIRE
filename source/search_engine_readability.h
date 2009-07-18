@@ -16,12 +16,11 @@ class ANT_search_engine_btree_leaf;
 */
 class ANT_search_engine_readability : public ANT_search_engine
 {
+friend class ANT_ranking_function_readability;
+
 private:
 	long *document_readability;
 	long hardest_document;
-
-protected:
-	void relevance_rank(ANT_search_engine_btree_leaf *leaf, ANT_search_engine_posting *postings);
 
 public:
 	ANT_search_engine_readability(ANT_memory *memory);

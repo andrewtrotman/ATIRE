@@ -26,46 +26,16 @@ document_readability = (long *)memory->malloc(documents * sizeof(*document_reada
 */
 get_postings_details("~dalechall", &collection_details);
 get_postings(&collection_details, postings_buffer);
-variable_byte.decompress(posting.docid, postings_buffer, collection_details.document_frequency);
+variable_byte.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
 hardest_document = 0;
 
 for (current_readability = 0; current_readability < collection_details.document_frequency; current_readability++)
 	{
-	document_readability[current_readability] = posting.docid[current_readability];
+	document_readability[current_readability] = decompress_buffer[current_readability];
 	if (document_readability[current_readability] > hardest_document)
 		hardest_document = document_readability[current_readability];
 	}
 
 memory->realign();
-}
-
-/*
-	ANT_SEARCH_ENGINE_READABILITY::RELEVANCE_RANK()
-	-----------------------------------------------
-*/
-void ANT_search_engine_readability::relevance_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
-{
-//const double k1 = 0.9;
-//const double b = 0.4;
-//const double k1_plus_1 = k1 + 1.0;
-//const double one_minus_b = 1.0 - b;
-long docid = -1, which;
-//double tf, idf, bm25;
-
-//idf = log((double)(documents) / (double)term_details->document_frequency);
-
-for (which = 0; which < term_details->document_frequency; which++)
-	{
-	docid = postings->docid[which];
-//	tf = postings->tf[which];
-//	
-//	bm25 = idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
-//	
-//	/*
-//		use some combination of bm25 and readability score
-//	*/
-//	accumulator[docid].add_rsv(bm25 + ((50000 - document_readability[docid]) / 1000.0));
-	accumulator[docid].add_rsv((hardest_document - document_readability[docid]) / 1000.0);
-	}
 }

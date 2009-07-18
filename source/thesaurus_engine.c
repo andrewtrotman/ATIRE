@@ -11,24 +11,21 @@
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
 #include "thesaurus_engine.h"
+#include "ranking_function.h"
 
 /*
-	LONG THESAURUS_ENGINE::FILL_BUFFER_WITH_POSTINGS()
-	--------------------------------------------------
-  I want to compare TF values, so I need this to fill a long * buffer with 
-  values for terms.
+	ANT_THESAURUS_ENGINE::FILL_BUFFER_WITH_POSTINGS()
+	-------------------------------------------------
+	I want to compare TF values, so I need this to fill a long * buffer with 
+	values for terms.
 */
-long long thesaurus_engine::fill_buffer_with_postings(char *term, long *buffer)
+long long ANT_thesaurus_engine::fill_buffer_with_postings(char *term, long *buffer)
 {
 ANT_search_engine_btree_leaf term_details;
 ANT_compressable_integer *current_document, *end;
 long document;
 
-#ifdef ANT_TOP_K
-	ANT_compressable_integer term_frequency;
-#else
-	ANT_compressable_integer *current_tf;
-#endif
+ANT_compressable_integer term_frequency;
 
 memset(buffer, 0, (size_t)(sizeof (*buffer) * documents));
 
@@ -40,42 +37,31 @@ if (get_postings_details(term, &term_details) == NULL)
 if (get_postings(&term_details, postings_buffer) == NULL) 
 	return 0;
 
-    // Decompress
-#ifdef ANT_TOP_K
-	factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-	current_document = decompress_buffer;
-	end = decompress_buffer + term_details.impacted_length;
-	while (current_document < end)
-		{
-		term_frequency = *current_document++;
-		document = -1;
-		while (*current_document != 0)
-			{
-			document += *current_document++;
-			buffer[document] = term_frequency;
-			}
-		current_document++;
-	}
-#else
-	decompress(postings_buffer, &term_details);
-	end = posting.docid + term_details.document_frequency;
+ // Decompress
+factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+current_document = decompress_buffer;
+end = decompress_buffer + term_details.impacted_length;
+while (current_document < end)
+	{
+	term_frequency = *current_document++;
 	document = -1;
-	for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
+	while (*current_document != 0)
 		{
-		document = *current_document;
-		buffer[document] = *current_tf;
+		document += *current_document++;
+		buffer[document] = term_frequency;
 		}
-#endif
+	current_document++;
+	}
 
 return term_details.collection_frequency;
 }
 
 /*
-	THESAURUS_ENGINE::BUFFER_SIMILARITY()
-	-------------------------------------
+	ANT_THESAURUS_ENGINE::BUFFER_SIMILARITY()
+	-----------------------------------------
   Calculates how similar the two buffers are.
 */
-double thesaurus_engine::buffer_similarity(long long buffer_a_total, long long buffer_b_total)
+double ANT_thesaurus_engine::buffer_similarity(long long buffer_a_total, long long buffer_b_total) 
 {
 long long doc, tmp_a = 0, tmp_b = 0;
 long long doc_count_a = 0, doc_count_b = 0;
@@ -137,8 +123,8 @@ return similarity;
 }
 
 /* 
-	THESAURUS_ENGINE::TERM_SIMILARITY()
-	-----------------------------------
+	ANT_THESAURUS_ENGINE::TERM_SIMILARITY()
+	---------------------------------------
 
    This is in effect a matrix multiplication, between the index and its 
    transpose. Each postings list must be normalised, and the multiplication
@@ -149,9 +135,8 @@ return similarity;
    term B [     1      0 ] /\  doc b [    1       0 ]  == term B [    0       1 ]
 
    (obviously we do this in another way for efficiency)
-
 */
-double thesaurus_engine::term_similarity(char *term1, char *term2)
+double ANT_thesaurus_engine::term_similarity(char *term1, char *term2)
 {
 long long row_total1, row_total2;
 
@@ -162,11 +147,11 @@ return buffer_similarity(row_total1, row_total2);
 }
 
 /*
-	THESAURUS_ENGINE::STEMMING_EXCEPTIONS()
-	---------------------------------------
+	ANT_THESAURUS_ENGINE::STEMMING_EXCEPTIONS()
+	-------------------------------------------
    Stemming exceptions - print these out for now, we can do something with them later.
 */
-void thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshold)
+void ANT_thesaurus_engine::stemming_exceptions(ANT_stemmer *stemmer, double threshold)
 {
 ANT_btree_iterator all_terms(this); 
 double similarity;
@@ -191,22 +176,18 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
 }
 
 /*
-	THESAURUS_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
-	---------------------------------------------------
+	ANT_THESAURUS_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
+	-------------------------------------------------------
 */
-void thesaurus_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term)
+void ANT_thesaurus_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function)
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 ANT_compressable_integer *current_document, *end;
 long document;
 char *term;
+ANT_compressable_integer term_frequency;
 
-#ifdef ANT_TOP_K
-	ANT_compressable_integer term_frequency;
-#else
-	ANT_compressable_integer *current_tf;
-#endif
 memset(stem_buffer, 0, (size_t)stem_buffer_length_in_bytes);
 collection_frequency = 0;
 
@@ -221,50 +202,27 @@ while (term != NULL)
 		if (get_postings(&term_details, postings_buffer) == NULL)
 			return;
 
-		#ifdef ANT_TOP_K
-			factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-		#else
-			decompress(postings_buffer, &term_details);
-		#endif
+		factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
 
 		collection_frequency += term_details.collection_frequency;
 
-		#ifdef ANT_TOP_K
-			current_document = decompress_buffer;
-			end = decompress_buffer + term_details.impacted_length;
-			while (current_document < end)
-				{
-				term_frequency = *current_document++;
-				document = -1;
-				while (*current_document != 0)
-					{
-					document += *current_document++;
-					stem_buffer[document] += term_frequency;
-					}
-				current_document++;
-				}
-		#else
-			end = posting.docid + term_details.document_frequency;
+		current_document = decompress_buffer;
+		end = decompress_buffer + term_details.impacted_length;
+		while (current_document < end)
+			{
+			term_frequency = *current_document++;
 			document = -1;
-			for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
+			while (*current_document != 0)
 				{
-				document = *current_document;
-				stem_buffer[document] += *current_tf;
+				document += *current_document++;
+				stem_buffer[document] += term_frequency;
 				}
-		#endif
+			current_document++;
+			}
 		}
 	term = stemmer->next();
-}
+	}
 
-#ifdef ANT_TOP_K
-	stem_to_postings_k(&stemmed_term_details, decompress_buffer, collection_frequency, stem_buffer);
-#else
-	stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buffer);
-#endif
-
-#ifdef ANT_TOP_K
-	relevance_rank_k(&stemmed_term_details, decompress_buffer);
-#else
-	relevance_rank(&stemmed_term_details, &posting);
-#endif
+stemmed_term_details.collection_frequency = collection_frequency;
+ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer);
 }

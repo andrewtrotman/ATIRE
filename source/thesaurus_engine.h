@@ -16,10 +16,10 @@
 class ANT_stemmer;
 
 /*
-	class THESAURUS_ENGINE
-	----------------------
+	class ANT_THESAURUS_ENGINE
+	--------------------------
 */
-class thesaurus_engine : public ANT_search_engine
+class ANT_thesaurus_engine : public ANT_search_engine
 {
 private:
 	long *buffer_a;
@@ -31,7 +31,7 @@ private:
 	double buffer_similarity(long long buffer_a_total, long long buffer_b_total);
 
 public:
-	thesaurus_engine(ANT_memory *memory, double threshold) : ANT_search_engine(memory)
+	ANT_thesaurus_engine(ANT_memory *memory, double threshold) : ANT_search_engine(memory)
 		{
 		buffer_a = (long *)memory->malloc(sizeof (*buffer_a) * documents);
 		buffer_b = (long *)memory->malloc(sizeof (*buffer_b) * documents);
@@ -39,8 +39,8 @@ public:
 		}
 
 	double term_similarity(char *term1, char *term2);
-	void stemming_exceptions(ANT_stemmer *, double);
-	void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term);
+	void stemming_exceptions(ANT_stemmer *stemmer, double threshold);
+	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function);
 };
 
 
