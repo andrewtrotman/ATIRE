@@ -217,7 +217,7 @@ else
 			else if (*current == '!')				// <! ... > (
 				{
 				if (*(current + 1) == '-' && *(current + 2) == '-')		// <!-- /// --> (XML Comment)
-					while (*current != '-' && *(current + 1) != '-' && *(current + 2) != '>')
+					while (!((*current == '-') && (*(current + 1) == '-') && (*(current + 2) == '>')))
 						current++;
 				else								// nasty XML stuff like <![CDATA[<greeting>Hello, world!</greeting>]]>
 					while (*current != '>')
