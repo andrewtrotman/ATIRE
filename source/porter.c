@@ -73,7 +73,7 @@ long kill_dups = 0;
 char *reverse, *at;
 
 at = reverse = workspace;
-strrev(at, what);
+strnrev(at, what, sizeof(workspace) - 1);		// -1 for the '\0' on the end
 
 /*
 	Step 1a.

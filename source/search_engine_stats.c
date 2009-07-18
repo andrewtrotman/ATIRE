@@ -71,7 +71,7 @@ sum += rank_time;
 sum += sort_time;
 sum += count_relevant_time;
 sum += stemming_time;
-sum += stemming_reencode_time;
+//sum += stemming_reencode_time;		/* Don't add the re-encode time as it is already part of the rank_time */
 
 print_time("Total Time to Search  :", sum);
 

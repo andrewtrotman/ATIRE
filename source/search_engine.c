@@ -15,6 +15,7 @@
 #include "search_engine_accumulator.h"
 #include "search_engine_stats.h"
 #include "top_k_sort.h"
+#include "ranking_function_bm25.h"
 #include "stemmer.h"
 #include "compress_variable_byte.h"
 
@@ -136,7 +137,7 @@ memory->realign();
 		Add 512 because of the tf and 0 at each end of each impact ordered list.
 		Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
 */
-decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + highest_df + ANT_COMPRESSION_FACTORY_END_PADDING));
+decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
 memory->realign();
 
 document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
@@ -149,24 +150,14 @@ for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 
 /*
-	Here we allocate space for the decompressed postings.  Although it might appear as though
-	you only need enough space for the longest postings list, the lists can get longer than that
-	due to stemming.  Space for each document is, therefore, needed.
-*/
-memory->realign();
-posting.docid = (ANT_compressable_integer *)memory->malloc((size_t)(sizeof(*posting.docid) * documents));
-memory->realign();
-posting.tf = (ANT_compressable_integer *)memory->malloc((size_t)(sizeof(*posting.tf) * documents));
-
-/*
 	decompress the document length vector
 */
 get_postings(&collection_details, postings_buffer);
-variable_byte.decompress(posting.docid, postings_buffer, collection_details.document_frequency);
+variable_byte.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
-	sum += document_lengths[current_length] = posting.docid[current_length];
+	sum += document_lengths[current_length] = decompress_buffer[current_length];
 mean_document_length = (double)sum / (double)documents;
 
 memory->realign();
@@ -385,145 +376,10 @@ return destination;
 }
 
 /*
-	ANT_SEARCH_ENGINE::DECOMPRESS()
-	-------------------------------
-*/
-void ANT_search_engine::decompress(unsigned char *start, ANT_search_engine_btree_leaf *leaf)
-{
-ANT_compressable_integer *current, term_frequency, *docid, *tf, *end;
-long sum;
-
-/*
-	Decompress using one of the factory methods
-*/
-factory.decompress(decompress_buffer, start, leaf->impacted_length);
-
-/*
-	Convert from impact order into two arrays, one for docids, the other for tf values;
-*/
-docid = posting.docid;
-tf = posting.tf;
-end = decompress_buffer + leaf->impacted_length;
-current = decompress_buffer;
-while (current < end)
-	{
-	term_frequency = *current;
-	current++;
-	sum = -1;
-	while (*current != 0)
-		{
-		sum += *current;			// because we are difference encoded
-		*docid++ = sum;
-		*tf++ = term_frequency;
-		current++;
-		}
-	current++;		// skip over the zero
-	}
-}
-
-/*
-	ANT_SEARCH_ENGINE::RELEVANCE_RANK_K()
-	-------------------------------------
-	BM25
-*/
-void ANT_search_engine::relevance_rank_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering)
-{
-const double k1 = 0.9;
-const double b = 0.4;
-
-const double k1_plus_1 = k1 + 1.0;
-const double one_minus_b = 1.0 - b;
-long docid;
-double top_row, tf, idf;
-ANT_compressable_integer *current, *end = impact_ordering + term_details->impacted_length;
-
-idf = log((double)(documents) / (double)term_details->document_frequency);
-
-current = impact_ordering;
-while (current < end)
-	{
-	tf = *current++;
-	top_row = tf * k1_plus_1;
-	docid = -1;
-	while (*current != 0)
-		{
-		docid += *current++;
-		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
-		}
-	current++;		// skip over the zero
-	}
-}
-
-/*
-	ANT_SEARCH_ENGINE::RELEVANCE_RANK()
-	-----------------------------------
-	BM25 relevance ranking by default (this is a virtual function)
-	If you declare FIT_BM25 then you can tune BM25 by doing a grid search.
-*/
-#ifdef FIT_BM25
-	double BM25_k1;
-	double BM25_b;
-#endif
-void ANT_search_engine::relevance_rank(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting *postings)
-{
-#ifdef FIT_BM25
-	double k1 = BM25_k1;
-	double b = BM25_b;
-#else
-	const double k1 = 0.9;
-	const double b = 0.4;
-#endif
-const double k1_plus_1 = k1 + 1.0;
-const double one_minus_b = 1.0 - b;
-long docid, which;
-double tf, idf;
-
-docid = -1;
-
-#ifdef NEVER
-// This variant has been removed in favour of the one below because Shlomo showed the version below being better.
-/*
-	          N - n + 0.5
-	IDF = log -----------
-	            n + 0.5
-
-	It is not clear from the BM25 papers what log-base should be used, so this implementation uses the natural log of x.
-*/
-idf = log(((double)documents - (double)term_details->document_frequency + 0.5) / ((double)term_details->document_frequency + 0.5));
-#endif
-
-/*
-	          N
-	IDF = log -
-	          n
-
-	This variant of IDF is better than that above on the 70 INEX 2008 Wikipedia topics
-*/
-idf = log((double)(documents) / (double)term_details->document_frequency);
-
-/*
-	               tf(td) * (k1 + 1)
-	rsv = ----------------------------------- * IDF
-	                                  len(d)
-	      tf(td) + k1 * (1 - b + b * --------)
-                                    av_len_d
-
-	In this implementation we ignore k3 and the number of times the term occurs in the query.
-*/
-for (which = 0; which < term_details->document_frequency; which++)
-	{
-	docid = postings->docid[which];
-	tf = postings->tf[which];
-
-	accumulator[docid].add_rsv(idf * ((tf * k1_plus_1) / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
-	}
-}
-
-/*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_search_term(char *term)
+void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function)
 {
 ANT_search_engine_btree_leaf term_details;
 long long now;
@@ -539,136 +395,29 @@ if (get_postings(&term_details, postings_buffer) == NULL)
 stats->add_posting_read_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-#ifdef ANT_TOP_K
-	factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-#else
-	decompress(postings_buffer, &term_details);
-#endif
+
+factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
 stats->add_decompress_time(stats->stop_timer(now));
 
 now = stats->start_timer();
-#ifdef ANT_TOP_K
-	relevance_rank_k(&term_details, decompress_buffer);
-#else
-	relevance_rank(&term_details, &posting);
-#endif
+
+ranking_function->relevance_rank_top_k(accumulator, &term_details, decompress_buffer);
+
 stats->add_rank_time(stats->stop_timer(now));
-}
-
-/*
-	ANT_SEARCH_ENGINE::STEM_TO_POSTINGS_K()
-	---------------------------------------
-*/
-void ANT_search_engine::stem_to_postings_k(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, long long collection_frequency, long *stem_buffer)
-{
-ANT_compressable_integer sum, bucket_size[0x100], bucket_prev_docid[0x100];
-ANT_compressable_integer *pointer[0x100], doc, document_frequency;
-long *current, *end, bucket, buckets_used;
-
-/*
-	Set all the buckets to empty;
-*/
-memset(bucket_size, 0, sizeof(bucket_size));
-
-/*
-	Set the previous document ID to zero for each bucket (for difference encoding)
-*/
-memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
-
-/*
-	Compute the size of the buckets - and as we are stemming we also have to cap Term Frequency at 255.
-*/
-end = stem_buffer + documents;
-document_frequency = 0;
-for (current = stem_buffer; current < end; current++)
-	if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
-		{
-		if (*current >= 0x100)
-			*current = 0xFF;			// cap term frequency at 255
-		bucket_size[*current]++;
-		document_frequency++;						// count the document frequency
-		}
-
-/*
-	Compute the location of the pointers for each bucket
-*/
-buckets_used = sum = 0;
-for (bucket = 0xFF; bucket >= 0; bucket--)
-	{
-	pointer[bucket] = destination + sum + 2 * buckets_used;
-	sum += bucket_size[bucket];
-	if (bucket_size[bucket] != 0)
-		{
-		*pointer[bucket]++ = bucket;
-		buckets_used++;
-		}
-	}
-
-/*
-	Now generate the impact ordering
-*/
-for (current = stem_buffer; current < end; current++)
-	if (*current != 0)
-		{
-		doc = current - stem_buffer + 1;
-		*pointer[*current]++ = doc - bucket_prev_docid[*current];		// because this list is difference encoded
-		bucket_prev_docid[*current] = doc;
-		}
-
-/*
-	Finally terminate each impact list with a 0
-*/
-for (bucket = 0; bucket < 0x100; bucket++)
-	if (bucket_size[bucket] != 0)
-		*pointer[bucket] = 0;
-
-term_details->document_frequency = document_frequency;
-term_details->collection_frequency = collection_frequency;
-term_details->impacted_length = sum + 2 * buckets_used;
-}
-
-/*
-	ANT_SEARCH_ENGINE::STEM_TO_POSTINGS()
-	-------------------------------------
-*/
-void ANT_search_engine::stem_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_search_engine_posting  *posting, long long collection_frequency, long *stem_buffer)
-{
-ANT_compressable_integer doc, found;
-ANT_compressable_integer *docid, *tf;
-long last = -1;
-
-docid = posting->docid;
-tf = posting->tf;
-found = 0;
-for (doc = found = 0; doc < documents; doc++)
-	if (stem_buffer[doc] != 0)
-		{
-		*docid++ = doc;
-		*tf++ = stem_buffer[doc];
-		last = doc;
-		found++;
-		}
-
-term_details->document_frequency = found;
-term_details->collection_frequency = collection_frequency;
 }
 
 /*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
 	----------------------------------------------------
 */
-void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term)
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function)
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 ANT_compressable_integer *current_document, *end;
 long document;
 char *term;
-#ifdef ANT_TOP_K
-	ANT_compressable_integer term_frequency;
-#else
-	ANT_compressable_integer *current_tf;
-#endif
+ANT_compressable_integer term_frequency;
 /*
 	The way we stem is to load the terms that match the stem one at a time and to
 	accumulate the term frequences into the stem_buffer accumulator list.  This then
@@ -712,11 +461,7 @@ while (term != NULL)
 		Decompress the postings
 	*/
 	now = stats->start_timer();
-#ifdef ANT_TOP_K
 	factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-#else
-	decompress(postings_buffer, &term_details);
-#endif
 	stats->add_decompress_time(stats->stop_timer(now));
 
 	/*
@@ -725,7 +470,6 @@ while (term != NULL)
 	now = stats->start_timer();
 	collection_frequency += term_details.collection_frequency;
 
-#ifdef ANT_TOP_K
 	current_document = decompress_buffer;
 	end = decompress_buffer + term_details.impacted_length;
 	while (current_document < end)
@@ -739,15 +483,6 @@ while (term != NULL)
 			}
 		current_document++;
 		}
-#else
-	end = posting.docid + term_details.document_frequency;
-	document = -1;
-	for (current_document = posting.docid, current_tf = posting.tf; current_document < end; current_document++, current_tf++)
-		{
-		document = *current_document;
-		stem_buffer[document] += *current_tf;
-		}
-#endif
 	stats->add_stemming_time(stats->stop_timer(now));
 
 	/*
@@ -759,25 +494,11 @@ while (term != NULL)
 	}
 
 /*
-	Convert the stem_buffer (term frequency accumulator) into a regular postings list
-*/
-now = stats->start_timer();
-#ifdef ANT_TOP_K
-	stem_to_postings_k(&stemmed_term_details, decompress_buffer, collection_frequency, stem_buffer);
-#else
-	stem_to_postings(&stemmed_term_details, &posting, collection_frequency, stem_buffer);
-#endif
-stats->add_stemming_reencode_time(stats->stop_timer(now));
-
-/*
 	Finally do the relevance ranking as if it was a single search term
 */
 now = stats->start_timer();
-#ifdef ANT_TOP_K
-	relevance_rank_k(&stemmed_term_details, decompress_buffer);
-#else
-	relevance_rank(&stemmed_term_details, &posting);
-#endif
+stemmed_term_details.collection_frequency = collection_frequency;
+ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer);
 stats->add_rank_time(stats->stop_timer(now));
 }
 

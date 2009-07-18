@@ -111,6 +111,29 @@ return what;
 }
 
 /*
+	STRNREV()
+	---------
+	if the string exceeds max_length in length then only reverse the first max_len characters
+*/
+inline char *strnrev(char *dest, const char *source, size_t max_length)
+{
+char *into;
+const char *from;
+size_t len;
+
+len = strlen(source);
+if (len > max_length)
+	len = max_length;
+	
+for (into = dest + len - 1, from = source; *from != '\0'; from++, into--)
+	*into = *from;
+dest[len] = '\0';
+
+return dest;
+}
+
+
+/*
 	STRCOUNTCHR()
 	-------------
 */

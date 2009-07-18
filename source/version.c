@@ -55,6 +55,12 @@ puts("ANT Hash                : Andrew Trotman");
 #endif
 puts("");
 
+puts("SORTING ALGORITHMS");
+puts("------------------");
+puts("qsort                   : Microsoft (from the Visual C/C++ runtime library)");
+puts("qsort (alternate)       : J.L. Bentley, M.D. McIlroy");
+puts("");
+
 puts("FILE MANIPULATION");
 puts("-----------------");
 puts("Windows                 : Andrew Trotman");

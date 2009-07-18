@@ -34,17 +34,7 @@ relevant_documents = 0;
 for (current = lines; *current != 0; current++)
 	{
 	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
-#ifdef NEVER
-	/*
-		OLD - only keep positive assessments
-	*/
-	if ((params == 4) && (relevant_characters != 0))
-#else
-	/*
-		NEW - keep all assessments because we are now aware of assessed negative documents
-	*/
 	if (params == 4)
-#endif
 		relevant_documents++;
 	}
 

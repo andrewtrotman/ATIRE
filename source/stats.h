@@ -30,6 +30,8 @@ public:
 	static long long start_timer(void) { return get_clock_tick(); }
 	static long long stop_timer(long long timer) { return get_clock_tick() - timer; }
 
+	static void print_operating_system_process_time(void);
+
 	virtual void text_render(void) {}
 } ;
 

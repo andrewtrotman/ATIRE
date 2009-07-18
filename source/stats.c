@@ -135,5 +135,38 @@ long long ANT_stats::clock_tick_frequency(void)
 #endif
 }
 
+#ifdef _MSC_VER
+
+	/*
+		PRINT_FILETIME()
+		----------------
+	*/
+	static void print_filetime(FILETIME *system)
+	{
+	SYSTEMTIME readable;
+	FileTimeToSystemTime(system, &readable);
+	printf("%02d:%02d:%02d.%03d", readable.wHour, readable.wMinute, readable.wSecond, readable.wMilliseconds);
+	}
+
+#endif
 
 
+/*
+	ANT_STATS::PRINT_OPERATING_SYSTEM_PROCESS_TIME()
+	------------------------------------------------
+*/
+void ANT_stats::print_operating_system_process_time(void)
+{
+#ifdef _MSC_VER
+	FILETIME start, end, kernel, user;
+
+	if (GetProcessTimes(GetCurrentProcess(), &start, &end, &kernel, &user) != 0)
+		{
+		printf("Windows reports");
+		printf(" Kernel:");
+		print_filetime(&kernel);
+		printf(" User:");
+		print_filetime(&user);
+		}
+#endif
+}

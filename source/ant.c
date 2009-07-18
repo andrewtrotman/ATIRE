@@ -1,7 +1,6 @@
 /*
 	ANT.C
 	-----
-	call GetSystemTimes() at the end and compare.
 */
 #include <stdio.h>
 #include <string.h>
@@ -24,6 +23,8 @@
 #include "encoding_utf8.h"
 #include "version.h"
 #include "thesaurus_engine.h"
+#include "ranking_function_bm25.h"
+#include "ranking_function_readability.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -65,7 +66,7 @@ public:
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL)
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map)
 {
 ANT_time_stats stats;
 long long now, hits;
@@ -148,10 +149,10 @@ while (*token_end != '\0')
 	/*
 		process the next search term - either stemmed or not.
 	*/
-	if (stemmer == NULL)
-		search_engine->process_one_search_term(token);
+	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers of tag names
+		search_engine->process_one_search_term(token, ranking_function);
 	else
-		search_engine->process_one_stemmed_search_term(stemmer, token);
+		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
 
 	did_query = TRUE;
 	}
@@ -222,7 +223,7 @@ if (params->queries_filename == NULL)
 	ANT()
 	-----
 */
-double ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list)
+double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list)
 {
 char *query;
 long topic_id, line, number_of_queries;
@@ -266,7 +267,7 @@ for (query = input.first(); query != NULL; query = input.next())
 		Do the query and compute average precision
 	*/
 	number_of_queries++;
-	average_precision = perform_query(params, search_engine, query, &hits, topic_id, map);
+	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map);
 	sum_of_average_precisions += average_precision;
 
 	/*
@@ -358,8 +359,8 @@ for (current = id_list; *current != NULL; current++)
 	start = max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
 	if (*start != '\0')		// avoid blank lines at the end of the file
 		{
-		dot = strchr(start, '.');
-		*dot = '\0';
+		if ((dot = strchr(start, '.')) != NULL)
+			*dot = '\0';
 		*current = start == *current ? *current : start + 1;		// +1 to skip over the '/'
 		}
 	}
@@ -374,6 +375,7 @@ return id_list;
 int main(int argc, char *argv[])
 {
 ANT_search_engine *search_engine;
+ANT_search_engine_readability *readable_search_engine;
 ANT_mean_average_precision *map = NULL;
 ANT_memory memory;
 long last_param;
@@ -381,6 +383,7 @@ ANT_ANT_param_block params(argc, argv);
 char **document_list, **answer_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
+ANT_ranking_function *ranking_function;
 
 last_param = params.parse();
 
@@ -399,14 +402,22 @@ if (params.assessments_filename != NULL)
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
 if (params.readability)
-	search_engine = new ANT_search_engine_readability(&memory);
-else if (params.thesaurus)
-	search_engine = new thesaurus_engine(&memory, params.thesaurus_threshold);
+	{
+	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory);
+	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
+	}
 else
-	search_engine = new ANT_search_engine(&memory);
+	{
+	if (params.thesaurus)
+		search_engine = new ANT_thesaurus_engine(&memory, params.thesaurus_threshold);
+	else
+		search_engine = new ANT_search_engine(&memory);
+	ranking_function = new ANT_ranking_function_BM25(search_engine);
+	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
-ant(search_engine, map, &params, document_list, answer_list);
+
+ant(search_engine, ranking_function, map, &params, document_list, answer_list);
 
 #ifdef FIT_BM25
 /*
@@ -440,6 +451,8 @@ if (argc == 4)
 #endif
 
 delete map;
+
+ANT_stats::print_operating_system_process_time();
 return 0;
 }
 
