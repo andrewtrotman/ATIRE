@@ -23,6 +23,7 @@
 #include "encoding_utf8.h"
 #include "version.h"
 #include "thesaurus_engine.h"
+#include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
 #include "ranking_function_readability.h"
 
@@ -85,8 +86,8 @@ ANT_encoding_utf8 utf8_enc;
 /*
 	if we're stemming then create the stemmer object
 */
-if (!stemmer)
-    stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
+if (stemmer == NULL)
+	stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -383,7 +384,7 @@ ANT_ANT_param_block params(argc, argv);
 char **document_list, **answer_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
-ANT_ranking_function *ranking_function;
+ANT_ranking_function *ranking_function = NULL;
 
 last_param = params.parse();
 
@@ -401,7 +402,7 @@ if (params.assessments_filename != NULL)
 
 answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list);
 
-if (params.readability)
+if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	{
 	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory);
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
@@ -412,7 +413,11 @@ else
 		search_engine = new ANT_thesaurus_engine(&memory, params.thesaurus_threshold);
 	else
 		search_engine = new ANT_search_engine(&memory);
-	ranking_function = new ANT_ranking_function_BM25(search_engine);
+
+	if (params.ranking_function == ANT_ANT_param_block::BM25)
+		ranking_function = new ANT_ranking_function_BM25(search_engine);
+	else if (params.ranking_function == ANT_ANT_param_block::IMPACT)
+		ranking_function = new ANT_ranking_function_impact(search_engine);
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 

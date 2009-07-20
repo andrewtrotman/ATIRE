@@ -96,6 +96,7 @@ PARTS = \
 	$(OBJDIR)\thesaurus_engine.obj              \
 	$(OBJDIR)\version.obj						\
 	$(OBJDIR)\ranking_function.obj				\
+	$(OBJDIR)\ranking_function_impact.obj	\
 	$(OBJDIR)\ranking_function_readability.obj	\
 	$(OBJDIR)\ranking_function_bm25.obj			
 

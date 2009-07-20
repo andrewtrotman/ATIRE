@@ -39,9 +39,9 @@ output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT;
 segmentation = FALSE;
-readability = FALSE;
 thesaurus = FALSE;
 thesaurus_threshold = 0.0;
+ranking_function = BM25;
 }
 
 /*
@@ -128,9 +128,12 @@ puts("------------");
 puts("-S              East-Asian language word segmentation");
 puts("");
 
-puts("READABILITY");
-puts("-----------");
-puts("-R              Use the readability search engine");
+puts("RANKING");
+puts("-------");
+puts("-R[function]    Use the readability search engine");
+puts("   BM25         Use BM25 [default]");
+puts("   impact       Use sum of impact scores");
+puts("   readable     Use the readability search engine (BM25 with Dale-Chall)");
 puts("");
 
 puts("REPORTING");
@@ -141,8 +144,6 @@ puts("   a            All statistics (same as -sqQs)");
 puts("   q            Query by query statistics");
 puts("   Q            Sum of query by query statistics for this run");
 puts("   s            Short reporting (hits, average precision, etc) [default]");
-puts("");
-
 
 exit(0);
 }
@@ -229,6 +230,22 @@ switch (*which)
 }
 
 /*
+	ANT_ANT_PARAM_BLOCK::SET_RANKER()
+	---------------------------------
+*/
+void ANT_ANT_param_block::set_ranker(char *which)
+{
+if (strcmp(which, "BM25") == 0)
+	ranking_function = BM25;
+else if (strcmp(which, "impact") == 0)
+	ranking_function = IMPACT;
+else if (strcmp(which, "readable") == 0)
+	ranking_function = READABLE;
+else
+	exit(printf("Unknown Ranking Function:'%s'\n", which));
+}
+
+/*
 	ANT_ANT_PARAM_BLOCK::PARSE()
 	----------------------------
 */
@@ -285,7 +302,7 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "S") == 0)
 			segmentation = TRUE;
 		else if (*command == 'R')
-			readability = TRUE;
+			set_ranker(command + 1);
 		else if (strstr(command, "-termsim") == command) 
             {
             thesaurus = TRUE;

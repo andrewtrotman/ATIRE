@@ -3,6 +3,7 @@
 	---------------------------
 */
 #include <math.h>
+#include <stdlib.h>
 #include "search_engine_readability.h"
 #include "memory.h"
 #include "search_engine_btree_leaf.h"
@@ -24,7 +25,9 @@ document_readability = (long *)memory->malloc(documents * sizeof(*document_reada
 /*
 	read and decompress the readability vector
 */
-get_postings_details("~dalechall", &collection_details);
+if (get_postings_details("~dalechall", &collection_details) == NULL)
+	exit(puts("This index is not annotated with readability data - terminating"));
+
 get_postings(&collection_details, postings_buffer);
 variable_byte.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
