@@ -81,7 +81,11 @@ library_sources =  \
 	$(SRCDIR)/readability_none.c \
 	$(SRCDIR)/readability_dale_chall.c \
 	$(SRCDIR)/plugin_manager.c \
-	$(SRCDIR)/version.c
+	$(SRCDIR)/thesaurus_engine.c \
+	$(SRCDIR)/version.c \
+	$(SRCDIR)/ranking_function.c	\
+	$(SRCDIR)/ranking_function_readability.c	\
+	$(SRCDIR)/ranking_function_bm25.c	
 				
 library_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -160,9 +164,13 @@ library_headers = \
 	$(SRCDIR)/readability_factory.h \
 	$(SRCDIR)/readability_none.h \
 	$(SRCDIR)/readability_dale_chall.h \
-	$(SRCDIR)/plugin.h \	
+	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h \
-	$(SRCDIR)/version.h
+	$(SRCDIR)/thesaurus_engine.h \
+	$(SRCDIR)/version.h \
+	$(SRCDIR)/ranking_function.h	\
+	$(SRCDIR)/ranking_function_readability.h	\
+	$(SRCDIR)/ranking_function_bm25.h	
 				
 noinst_LTLIBRARIES = libant.la
 
