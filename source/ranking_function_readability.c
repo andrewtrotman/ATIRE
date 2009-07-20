@@ -18,6 +18,7 @@ ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_en
 this->k1 = k1;
 this->b = b;
 this->document_readability = engine->document_readability;
+this->hardest_document = engine->hardest_document;
 }
 
 /*
@@ -43,10 +44,10 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		bm25 = (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+		//bm25 = (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 
-		accumulator[docid].add_rsv((0.5 * bm25) + (0.5 * (20000.0 - document_readability[docid]) / 1000.0));
-	//	accumulator[docid].add_rsv(hardest_document - document_readability[docid]);
+		//accumulator[docid].add_rsv((0.5 * bm25) + (0.5 * (20000.0 - document_readability[docid]) / 1000.0));
+		accumulator[docid].add_rsv((hardest_document - document_readability[docid]) / 1000.0);
 		}
 	current++;		// skip over the zero
 	}

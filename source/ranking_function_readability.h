@@ -19,6 +19,7 @@ private:
 	double k1;
 	double b;
 	long *document_readability;
+	long hardest_document;
 
 public:
 	ANT_ranking_function_readability(ANT_search_engine_readability *engine, double k1 = 0.9, double b = 0.4);
