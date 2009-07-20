@@ -14,11 +14,12 @@
 #include "ga_stemmer.h"
 #include "ga_function.h"
 #include "vocab.h"
+#include "ranking_function_bm25.h"
 
 #define NUM_OF_GENERATIONS 200
 #define POPULATION_SIZE 200
 
-double perform_query(ANT_ANT_param_block *, ANT_search_engine *, char *, long long *, long, ANT_mean_average_precision *, ANT_stemmer *);
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer);
 char **get_queries(long *query_count, ANT_ANT_param_block *params);
 
 /*
@@ -51,6 +52,7 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 	long *topic_ids;
     ANT_search_engine_forum *output = NULL;
     long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
+    ANT_ranking_function *ranking_function = new ANT_ranking_function_BM25(search_engine);
 
 	GA *ga;
 	GA_stemmer *stemmer = new GA_stemmer(search_engine);
@@ -94,13 +96,13 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 			stemmer->print(stderr);
 			for (i = 0; i < query_count; i++) {
 				long long hits;
-				result += perform_query(params, search_engine, queries[i], &hits, topic_ids[i], map, stemmer);
+				result += perform_query(params, search_engine, ranking_function, queries[i], &hits, topic_ids[i], map, stemmer);
 			}
 			fprintf(stderr, "%d %f\n", count++, result / (double)query_count);
 		}
 	} else {
         ga = new GA(POPULATION_SIZE, 
-                    new GA_function(perform_query, params, search_engine, query_count, queries, topic_ids, map, stemmer), search_engine);
+                    new GA_function(perform_query, params, search_engine, ranking_function, query_count, queries, topic_ids, map, stemmer), search_engine);
 		ga->run(NUM_OF_GENERATIONS);
 	}
 }

@@ -22,6 +22,9 @@
 #include "version.h"
 #include "ga_ant.h"
 #include "thesaurus_engine.h"
+#include "ranking_function.h"
+#include "ranking_function_bm25.h"
+
 
 #ifndef FALSE
 	#define FALSE 0
@@ -63,7 +66,7 @@ public:
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, char *query, long long *matching_documents, long topic_id = -1, ANT_mean_average_precision *map = NULL, ANT_stemmer *stemmer = NULL)
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
 {
 ANT_time_stats stats;
 long long now;
@@ -108,9 +111,9 @@ while (*token_end != '\0')
 		process the next search term - either stemmed or not.
 	*/
 	if (stemmer == NULL)
-		search_engine->process_one_search_term(token);
+		search_engine->process_one_search_term(token, ranking_function);
 	else
-		search_engine->process_one_stemmed_search_term(stemmer, token);
+		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
 
 	did_query = TRUE;
 	}
@@ -151,7 +154,7 @@ if (map != NULL)
 /*
 	Clean up
 */
-delete stemmer;
+//delete stemmer;
 
 /*
 	Add the time it took to search to the global stats for the search engine
@@ -177,6 +180,7 @@ if (params->queries_filename == NULL)
 	ANT()
 	-----
 */
+#ifdef C_PLUS_PLUS_HAS_NESTABLE_COMMENTS
 double ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list)
 {
 char *query;
@@ -264,6 +268,7 @@ if (params->stats & ANT_ANT_param_block::SUM)
 return mean_average_precision;
 }
 
+#endif 
 /*
 	READ_DOCID_LIST()
 	-----------------
@@ -293,6 +298,7 @@ ANT_ANT_param_block params(argc, argv);
 char **document_list, **answer_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
+
 #ifndef VOCAB_TOOL
 char *stemmer_file = NULL;
 if (argc > 1 && argv[1][0] == '-' && argv[1][0] == 's') {
@@ -325,7 +331,7 @@ search_engine = new ANT_search_engine(&memory);
 #ifdef VOCAB_TOOL
 trie_test(search_engine);
 #else
- ga_ant(search_engine, map, &params, document_list, answer_list, stemmer_file);
+ga_ant(search_engine, map, &params, document_list, answer_list, stemmer_file);
 #endif
 
 #ifdef FIT_BM25

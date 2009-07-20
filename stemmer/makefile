@@ -74,7 +74,10 @@ OBJECTS = \
 	indexer_param_block.o \
     ant_param_block.o \
 	thesaurus_engine.o \
-    version.o
+    version.o \
+    ranking_function.o \
+    ranking_function_readability.o \
+    ranking_function_bm25.o
 
 EXTENSION = \
     ga.o \

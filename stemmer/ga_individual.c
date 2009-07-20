@@ -76,56 +76,56 @@ return rules + (n * RULE_SIZE) + RULE_STRING_MAX + 1;
 
 /* is a word on the banned list? */
 inline int GA_individual::is_banned(char *s) {
-unsigned int i;
-for (i = 0; i < (sizeof banned / sizeof banned[0]); i++) {
-    if (!strcmp(s, banned[0]))
-        return TRUE;
-}
-return FALSE;
+    unsigned int i;
+    for (i = 0; i < (sizeof banned / sizeof banned[0]); i++) {
+        if (strcmp(s, banned[i]) == 0)
+            return TRUE;
+    }
+    return FALSE;
 }
 
 /*
 Currently returns a pointer to a static array - do not free!
 */
 char *GA_individual::apply(const char *string) {
-unsigned int i, skipping = FALSE;
-int length;
-static char buffer[TMP_BUFFER_SIZE];
+    unsigned int i, skipping = FALSE;
+    int length;
+    static char buffer[TMP_BUFFER_SIZE];
 
-strncpy(buffer, string, TMP_BUFFER_SIZE);
-buffer[TMP_BUFFER_SIZE - 1] = '\0';
-length = strlen(buffer);
+    strncpy(buffer, string, TMP_BUFFER_SIZE);
+    buffer[TMP_BUFFER_SIZE - 1] = '\0';
+    length = strlen(buffer);
 
-for (i = 0; i < count; i++) {
-    if (measure(i) == SEPARATOR) {
-        /* Stop skipping at separator */
-        skipping = FALSE;
-    } else if (!skipping) {
-        /* Check that rule can be applied */
-        int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
+    for (i = 0; i < count; i++) {
+        if (measure(i) == SEPARATOR) {
+            /* Stop skipping at separator */
+            skipping = FALSE;
+        } else if (!skipping) {
+            /* Check that rule can be applied */
+            int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
 
-        if (m(buffer, length - 1) >= measure(i) &&
-            strncmp(buffer + length - from_len,
-                    rule_from(i), RULE_STRING_MAX) == 0) {
+            if (m(buffer, length - 1) >= measure(i) &&
+                strncmp(buffer + length - from_len,
+                        rule_from(i), RULE_STRING_MAX) == 0) {
 
-            int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
+                int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
 
-            /* Ensure that the first SACROSANCT_CHARS are respected */ 
-            if (length - from_len + 
-                strnmatchlen(rule_from(i), rule_to(i), RULE_STRING_MAX) < SACROSANCT_CHARS)
-                continue;
+                /* Ensure that the first SACROSANCT_CHARS are respected */ 
+                if (length - from_len + 
+                    strnmatchlen(rule_from(i), rule_to(i), RULE_STRING_MAX) < SACROSANCT_CHARS)
+                    continue;
 
-            strncpy(buffer + length - from_len, rule_to(i), RULE_STRING_MAX);
+                strncpy(buffer + length - from_len, rule_to(i), RULE_STRING_MAX);
 
-            buffer[length - from_len + to_len] = '\0';
-            length += to_len - from_len;
+                buffer[length - from_len + to_len] = '\0';
+                length += to_len - from_len;
 
-            skipping = TRUE;
+                skipping = TRUE;
+            }
         }
     }
-}
 
-return buffer;
+    return buffer;
 }
 
 void GA_individual::print() {
@@ -162,16 +162,37 @@ assume all space has been allocated and the base size is the same.
 (i.e. char[FIXEDSIZE] within the class)
 */
 void GA_individual::reproduce(GA_individual *c) {
-memcpy(c, this, sizeof(GA_individual));
+    memcpy(c, this, sizeof(GA_individual));
 }
 
-/* TODO: This is not mutation */
+/* c is the child, this is the parent */
 void GA_individual::mutate(GA_individual *c, Vocab *v) {
-c->generate(v);
-if (rand() % 2 == 0) 
-    this->crossover(c,c);
-else 
-    c->crossover(this,c);
+    char *s;
+    unsigned int position = rand() % count;
+
+    memcpy(c, this, sizeof(GA_individual));
+
+    switch (rand() % 3) {
+    case 0:
+        c->rules[position * RULE_SIZE] = (char) (rand() % (MEASURE_MAX + 1));
+        if (c->rules[position * RULE_SIZE] == MEASURE_MAX)
+            c->rules[position * RULE_SIZE] = SEPARATOR;
+        break;
+
+    case 1:
+        char *s;
+        while ((s = v->strgen()) && is_banned(s)) {}
+        strncpy(rules + (position * RULE_SIZE) + 1, s, RULE_STRING_MAX);
+        break;
+
+    case 2:
+        while ((s = v->strgen_2()) && is_banned(s)) {}
+        strncpy(rules + (position * RULE_SIZE) + RULE_STRING_MAX + 1, s, RULE_STRING_MAX);
+        break;
+
+    default:
+        fprintf(stderr, "Error in GA_individual::mutate\n");
+    }
 }
 
 /* 
@@ -179,12 +200,12 @@ Places a new individual into c based on the parents p1 & p2.
 Crossover is limited to being between parts of rules (i.e. not mid-string)
 */
 void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
-/* position inside the rules to crossover at */
-unsigned int mid_point = random_from(0, 2);
-if (mid_point == 2)
-    mid_point = 1 + RULE_STRING_MAX;
+    /* position inside the rules to crossover at */
+    unsigned int mid_point = random_from(0, 2);
+    if (mid_point == 2)
+        mid_point = 1 + RULE_STRING_MAX;
 
-/* which rule are we crossing over at*/
+    /* which rule are we crossing over at*/
     unsigned int point = random_from(0, this->rules_size() / RULE_SIZE) + mid_point;
     /* Ensure the second point shares the mid-rule position of the first */
     unsigned int min_point2 = ((signed)p2->count + (signed)point / RULE_SIZE - MAX_RULES > 0) ? 
@@ -218,17 +239,17 @@ void GA_individual::generate(Vocab *v) {
         if (rules[i * RULE_SIZE] == MEASURE_MAX)
             rules[i * RULE_SIZE] = SEPARATOR;
 
-	/* 
-	   Checking both strings in the representation against the banned
-	   list ensures that there are no rules that perform the stem by 
-	   adding an ending. 
-	*/
-	char *s;
-	while ((s = v->strgen()) && !is_banned(s)) {}
-	strncpy(rules + (i * RULE_SIZE) + 1, s, RULE_STRING_MAX);
+        /* 
+           Checking both strings in the representation against the banned
+           list ensures that there are no rules that perform the stem by 
+           adding an ending. 
+        */
+        char *s;
+        while ((s = v->strgen()) && is_banned(s)) {}
+        strncpy(rules + (i * RULE_SIZE) + 1, s, RULE_STRING_MAX);
 
-	while ((s = v->strgen_2()) && !is_banned(s)) {}
-    strncpy(rules + (i * RULE_SIZE) + RULE_STRING_MAX + 1, s, RULE_STRING_MAX);
+        while ((s = v->strgen_2()) && is_banned(s)) {}
+        strncpy(rules + (i * RULE_SIZE) + RULE_STRING_MAX + 1, s, RULE_STRING_MAX);
     }
 }
 

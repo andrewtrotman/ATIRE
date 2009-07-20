@@ -66,7 +66,7 @@ public:
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map)
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
 {
 ANT_time_stats stats;
 long long now, hits;
@@ -76,7 +76,6 @@ char *token_start, *token_end, *current;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-ANT_stemmer *stemmer;
 
 /**
  * make the utf8 as the default input encoding
@@ -86,7 +85,8 @@ ANT_encoding_utf8 utf8_enc;
 /*
 	if we're stemming then create the stemmer object
 */
-stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
+if (!stemmer)
+    stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
