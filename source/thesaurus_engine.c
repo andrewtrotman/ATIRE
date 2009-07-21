@@ -224,5 +224,5 @@ while (term != NULL)
 	}
 
 stemmed_term_details.collection_frequency = collection_frequency;
-ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer);
+ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
 }

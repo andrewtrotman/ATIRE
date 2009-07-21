@@ -24,6 +24,7 @@ public:
 	long logo;							// display the ANT banner logo or not
 	long stemmer;						// which stemmer to use (or 0 for don't stem)
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
+	long long trim_postings_k;			// trim the postigs lists at no fewer than k
 	long metric;						// which metric to use (MAP, MAgP, etc)
 	char *assessments_filename;			// name of the file containing the assessments for the given queries
 	char *queries_filename;				// name of a file containing one query per line (first token of each line is the query ID)

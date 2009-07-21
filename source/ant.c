@@ -421,7 +421,7 @@ else
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
-
+search_engine->set_trim_postings_k(params.trim_postings_k);
 ant(search_engine, ranking_function, map, &params, document_list, answer_list);
 
 #ifdef FIT_BM25

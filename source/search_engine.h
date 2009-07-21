@@ -47,6 +47,7 @@ protected:
 	double mean_document_length;
 	ANT_search_engine_accumulator *accumulator;
 	long long stem_buffer_length_in_bytes;
+	long long trim_postings_k;
 
 private:
 	long long get_long_long(unsigned char *from) { return *((int64_t *)from); }
@@ -74,6 +75,7 @@ public:
 	void stats_text_render(void);
 	void stats_all_text_render(void);
 	void stats_add(void);
+	void set_trim_postings_k(long long what) { trim_postings_k = what; }
 };
 
 #endif __SEARCH_ENGINE_H__

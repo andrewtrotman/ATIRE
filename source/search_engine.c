@@ -41,6 +41,7 @@ ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
 
+trim_postings_k = LLONG_MAX;
 stats = new ANT_search_engine_stats(memory);
 stats_for_all_queries = new ANT_search_engine_stats(memory);
 this->memory = memory;
@@ -401,7 +402,7 @@ stats->add_decompress_time(stats->stop_timer(now));
 
 now = stats->start_timer();
 
-ranking_function->relevance_rank_top_k(accumulator, &term_details, decompress_buffer);
+ranking_function->relevance_rank_top_k(accumulator, &term_details, decompress_buffer, trim_postings_k);
 
 stats->add_rank_time(stats->stop_timer(now));
 }
@@ -498,7 +499,7 @@ while (term != NULL)
 */
 now = stats->start_timer();
 stemmed_term_details.collection_frequency = collection_frequency;
-ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer);
+ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
 stats->add_rank_time(stats->stop_timer(now));
 }
 

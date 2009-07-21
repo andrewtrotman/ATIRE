@@ -25,19 +25,21 @@ this->hardest_document = engine->hardest_document;
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
-void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering)
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 const double k1_plus_1 = k1 + 1.0;
-const double one_minus_b = 1.0 - b;
+//const double one_minus_b = 1.0 - b;
+//double bm25;
 long docid;
-double top_row, tf, idf, bm25;
+double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
 idf = log((double)(documents) / (double)term_details->document_frequency);
 current = impact_ordering;
-end = impact_ordering + term_details->impacted_length;
+end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);		// allow early termination
 while (current < end)
 	{
+	end += 2;		// account for the impact_order and the terminator
 	tf = *current++;
 	top_row = tf * k1_plus_1;
 	docid = -1;

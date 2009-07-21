@@ -37,7 +37,7 @@ public:
 	/*
 		You must override this function if you're going to add a ranking function
 	*/
-	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering) = 0;
+	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) = 0;
 	
 	/*
 		If you also override this function then you can rank directly from the tf array,
@@ -45,8 +45,12 @@ public:
 		so you'll have to compute that using compute_term_details() requires a scan of the tf array.  Also note
 		that the number of floating point computations you'll need to do could be sufficiently large that it takes
 		less time to convert into a postings list and call relevance_rank_top_k (which is the default behaviour).
+
+		Of new note is that the trim_point gets automaticly chained on to relevance_rank_top_k() and so once the
+		postings list is generated from the tf array it is then (correctly) trimmed thus further reducing the
+		computational cost of the search.
 	*/
-	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array);
+	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point);
 } ;
 
 #endif __ANT_RANKING_FUNCTION_H__

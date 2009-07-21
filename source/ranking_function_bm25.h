@@ -21,8 +21,8 @@ public:
 	ANT_ranking_function_BM25(ANT_search_engine *engine, double k1 = 0.9, double b = 0.4) : ANT_ranking_function(engine) { this->k1 = k1; this->b = b; }
 	virtual ~ANT_ranking_function_BM25() {}
 
-	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering);
-	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array);
+	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point);
+	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point);
 } ;
 
 #endif __RANKING_FUNCTION_BM25_H__

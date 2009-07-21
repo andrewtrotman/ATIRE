@@ -12,7 +12,7 @@
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering)
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 const double k1 = this->k1;
 const double b = this->b;
@@ -40,10 +40,24 @@ idf = log((double)(documents) / (double)term_details->document_frequency);
 
 	In this implementation we ignore k3 and the number of times the term occurs in the query.
 */
+/*
+	Alright, so, we have the trim_point at this point.  The trim point is an optimising factor.  It is the
+	number of postings we should process before early-terminating.  As the postings are stored in impact
+	order (typically from highest to lowest term frequency), the first posting is most probably the most
+	relevant document and so on.  Oh, but as there will be multiple postings with the same impact score
+	and we don't know which is "best", the early termination actually only happens at the end of processing
+	one complete impact value's postings list.
+
+	So how do we compute where to end?  The impacted list is of length:document frequencies plus the impacts 
+	plus the terminators.  So we can compute the ending point from document frequency if we add to that pointer
+	for each impact and each zero.  Now that we can compare document frequency, we can compare to the trim_point
+	measured in postings and early terminate after we have processed that "batch" of postings.
+*/
 current = impact_ordering;
-end = impact_ordering + term_details->impacted_length;
+end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
 while (current < end)
 	{
+	end += 2;		// account for the impact_order and the terminator
 	tf = *current++;
 	top_row = tf * k1_plus_1;
 	docid = -1;
@@ -61,7 +75,7 @@ while (current < end)
 	----------------------------------------------
 	This is the variant that gets called for stemming
 */
-void ANT_ranking_function_BM25::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array)
+void ANT_ranking_function_BM25::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point)
 {
 const double k1 = this->k1;
 const double b = this->b;
@@ -85,4 +99,5 @@ for (current = tf_array; current < end; current++)
 
 		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 		}
+#pragma warning (suppress : 4100)		// disable the unreferenced formal parameter warning referring to trim_point
 }

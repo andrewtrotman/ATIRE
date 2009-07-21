@@ -98,14 +98,14 @@ term_details->impacted_length = sum + 2 * buckets_used;
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
 	-----------------------------------------
 */
-void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array)
+void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point)
 {
 long long now;
 now = stats->start_timer();
 tf_to_postings(term_details, decompress_buffer, tf_array);
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
-relevance_rank_top_k(accumulator, term_details, decompress_buffer);
+relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);
 }
 
 /*

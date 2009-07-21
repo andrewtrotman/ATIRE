@@ -42,6 +42,7 @@ segmentation = FALSE;
 thesaurus = FALSE;
 thesaurus_threshold = 0.0;
 ranking_function = BM25;
+trim_postings_k = LLONG_MAX;
 }
 
 /*
@@ -98,6 +99,7 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-k<n>           Results list accurate to the top <n> (0=all) [default=0]");
+puts("-K<n>           Process no fewer than <n> postings (0=all) [default=0]");
 puts("");
 
 puts("METRICS AND ASSESSMENTS");
@@ -274,6 +276,12 @@ for (param = 1; param < argc; param++)
 			sort_top_k = atol(command + 1);
 			if (sort_top_k == 0)
 				sort_top_k = LLONG_MAX;
+			}
+		else if (*command == 'K')
+			{
+			trim_postings_k = atol(command + 1);
+			if (trim_postings_k == 0)
+				trim_postings_k = LLONG_MAX;
 			}
 		else if (*command == 'm')
 			set_metric(command + 1);
