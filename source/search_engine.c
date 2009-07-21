@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <limits>
+#include <limits.h>
 #include "search_engine.h"
 #include "file.h"
 #include "memory.h"
