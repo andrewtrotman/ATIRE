@@ -85,7 +85,8 @@ library_sources =  \
 	$(SRCDIR)/version.c \
 	$(SRCDIR)/ranking_function.c	\
 	$(SRCDIR)/ranking_function_readability.c	\
-	$(SRCDIR)/ranking_function_bm25.c	
+	$(SRCDIR)/ranking_function_bm25.c	\
+	$(SRCDIR)/ranking_function_impact.c
 				
 library_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -170,7 +171,8 @@ library_headers = \
 	$(SRCDIR)/version.h \
 	$(SRCDIR)/ranking_function.h	\
 	$(SRCDIR)/ranking_function_readability.h	\
-	$(SRCDIR)/ranking_function_bm25.h	
+	$(SRCDIR)/ranking_function_bm25.h \
+	$(SRCDIR)/ranking_function_impact.h
 				
 noinst_LTLIBRARIES = libant.la
 

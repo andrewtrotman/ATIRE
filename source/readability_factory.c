@@ -7,6 +7,24 @@
 #include "readability_dale_chall.h"
 
 /*
+	READABILITY_FACTORY::READABILITY_FACTORY()
+	-------------------------------------
+*/
+ANT_readability_factory::ANT_readability_factory()
+{
+measure = 0;
+}
+
+/*
+	READABILITY_FACTORY::~READABILITY_FACTORY()
+	-------------------------------------
+*/
+ANT_readability_factory::~ANT_readability_factory()
+{
+if (measure) delete measure;
+}
+
+/*
 	READABILITY_FACTORY::GET_NEXT_TOKEN()
 	-------------------------------------
 */
@@ -41,14 +59,14 @@ void ANT_readability_factory::set_measure(unsigned long what_measure)
 {
 switch (what_measure)
 	{
-	case NONE: 
+	case NONE:
 		measure = new ANT_readability_none();
 		break;
-	case DALE_CHALL: 
-		measure = new ANT_readability_dale_chall(); 
+	case DALE_CHALL:
+		measure = new ANT_readability_dale_chall();
 		break;
-	default: 
-		measure = new ANT_readability_none(); 
+	default:
+		measure = new ANT_readability_none();
 		break; // shouldn't happen
 	}
 }

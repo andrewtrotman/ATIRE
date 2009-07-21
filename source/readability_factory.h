@@ -21,9 +21,9 @@ public:
 		NONE       = 1,
 		DALE_CHALL = 2
 	};
-	
-	ANT_readability_factory() {};
-	virtual ~ANT_readability_factory() {};
+
+	ANT_readability_factory();
+	virtual ~ANT_readability_factory();
 
 	ANT_string_pair *get_next_token(void);
 	void set_document(unsigned char *document);
