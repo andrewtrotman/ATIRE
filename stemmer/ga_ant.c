@@ -126,6 +126,7 @@ ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // ra
 /*
 	Reporting
 */
+/*
 if (params->stats & ANT_ANT_param_block::SHORT)
 	{
 	if (topic_id >= 0)
@@ -136,7 +137,7 @@ if (params->stats & ANT_ANT_param_block::SHORT)
 
 if (did_query && params->stats & ANT_ANT_param_block::QUERY)
 	search_engine->stats_text_render();
-
+*/
 /*
 	Compute average previsions
 */
