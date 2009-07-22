@@ -14,7 +14,7 @@ public:
 	enum { MAP, MAgP, RANKEFF } ;						// metrics
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2 } ;		// evaluation forum
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };	// statistics to print (bitstring)
-	enum { BM25, IMPACT, READABLE };					// ranking function
+	enum { BM25, IMPACT, READABLE, LMD, LMJM};			// ranking function
 
 private:
 	int argc;
@@ -36,6 +36,9 @@ public:
 	long stats;							// which stats to display
 	long ranking_function;				// what ranking function should we use?
 
+	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
+	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
+
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long thesaurus;						// 'correct' stemming with the thesaurus?
 	double thesaurus_threshold;			// threshold for rejecting stems with the thesaurus (default = 0.0)
@@ -46,6 +49,7 @@ private:
 	void set_metric(char *which);
 	void set_stats(char *which);
 	void set_ranker(char *which);
+	void get_one_param(char *from, double *into);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);

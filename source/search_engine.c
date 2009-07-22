@@ -160,6 +160,7 @@ sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
 	sum += document_lengths[current_length] = decompress_buffer[current_length];
 mean_document_length = (double)sum / (double)documents;
+collection_length_in_terms = sum;
 
 memory->realign();
 stem_buffer = (long *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));

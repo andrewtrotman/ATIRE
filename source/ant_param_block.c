@@ -43,6 +43,7 @@ thesaurus = FALSE;
 thesaurus_threshold = 0.0;
 ranking_function = BM25;
 trim_postings_k = LLONG_MAX;
+lmd_u = 500.0;
 }
 
 /*
@@ -133,9 +134,11 @@ puts("");
 puts("RANKING");
 puts("-------");
 puts("-R[function]    Use the readability search engine");
-puts("   BM25         Use BM25 [default]");
-puts("   impact       Use sum of impact scores");
-puts("   readable     Use the readability search engine (BM25 with Dale-Chall)");
+puts("   BM25         BM25 [default]");
+puts("   impact       Sum of impact scores");
+puts("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500]");
+puts("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1]");
+puts("   readable     The readability search engine (BM25 with Dale-Chall)");
 puts("");
 
 puts("REPORTING");
@@ -232,6 +235,23 @@ switch (*which)
 }
 
 /*
+	ANT_ANT_PARAM_BLOCK::GET_ONE_PARAM()
+	------------------------------------
+*/
+void ANT_ANT_param_block::get_one_param(char *from, double *into)
+{
+while (*from != '\0')
+	{
+	if (isdigit(*from) || *from == '-' || *from == '.')
+		{
+		*into = atof(from);
+		printf("u=%f\n", *into);
+		break;
+		}
+	from++;
+	}
+}
+/*
 	ANT_ANT_PARAM_BLOCK::SET_RANKER()
 	---------------------------------
 */
@@ -243,6 +263,16 @@ else if (strcmp(which, "impact") == 0)
 	ranking_function = IMPACT;
 else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;
+else if (strncmp(which, "lmd", 3) == 0)
+	{
+	ranking_function = LMD;
+	get_one_param(which + 3, &lmd_u);
+	}
+else if (strncmp(which, "lmjm", 3) == 0)
+	{
+	ranking_function = LMJM;
+	get_one_param(which + 3, &lmjm_l);
+	}
 else
 	exit(printf("Unknown Ranking Function:'%s'\n", which));
 }

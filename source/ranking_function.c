@@ -18,6 +18,7 @@ documents = engine->document_count();
 document_lengths = engine->get_document_lengths(&mean_document_length);
 decompress_buffer = engine->get_decompress_buffer();
 stats = engine->get_stats();
+collection_length_in_terms = engine->get_collection_length();
 }
 
 /*
