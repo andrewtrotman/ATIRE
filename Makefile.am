@@ -2,7 +2,9 @@
 #SUBDIRS = plugins
 
 SRCDIR = source
-
+LTWDIR = Link-The-Wiki
+TOOLDIR = tools
+LIBDIR = .
 
 AM_LDFLAGS = @LIBS@
 
@@ -80,13 +82,13 @@ library_sources =  \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_none.c \
 	$(SRCDIR)/readability_dale_chall.c \
-	$(SRCDIR)/plugin_manager.c \
 	$(SRCDIR)/thesaurus_engine.c \
 	$(SRCDIR)/version.c \
 	$(SRCDIR)/ranking_function.c	\
 	$(SRCDIR)/ranking_function_readability.c	\
 	$(SRCDIR)/ranking_function_bm25.c	\
-	$(SRCDIR)/ranking_function_impact.c
+	$(SRCDIR)/ranking_function_impact.c \
+	$(SRCDIR)/plugin_manager.c 	
 				
 library_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -165,52 +167,138 @@ library_headers = \
 	$(SRCDIR)/readability_factory.h \
 	$(SRCDIR)/readability_none.h \
 	$(SRCDIR)/readability_dale_chall.h \
-	$(SRCDIR)/plugin.h \
-	$(SRCDIR)/plugin_manager.h \
 	$(SRCDIR)/thesaurus_engine.h \
 	$(SRCDIR)/version.h \
 	$(SRCDIR)/ranking_function.h	\
 	$(SRCDIR)/ranking_function_readability.h	\
 	$(SRCDIR)/ranking_function_bm25.h \
-	$(SRCDIR)/ranking_function_impact.h
-				
-noinst_LTLIBRARIES = libant.la
+	$(SRCDIR)/ranking_function_impact.h \
+	$(SRCDIR)/plugin.h \
+	$(SRCDIR)/plugin_manager.h
+	
+lib_LTLIBRARIES = libant.la
 
 libant_ladir = $(LIBDIR)
 libant_la_SOURCES = $(library_sources)
 libant_la_HEADERS = $(library_headers)
 
-
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-bin_PROGRAMS = ant index
+bin_PROGRAMS = ant index ant_dictionary
 
 ant_SOURCES = $(SRCDIR)/ant.c
-ant_LDADD = -L${OBJDIR} -lant -ldl
+ant_LDADD = -L${LIBDIR} -lant -ldl
 ant_LDFLAGS = -rdynamic
 ant_DEPENDENCIES = libant.la
 
 index_SOURCES = $(SRCDIR)/index.c
-index_LDADD = -L${OBJDIR} -lant -ldl
+index_LDADD = -L${LIBDIR} -lant -ldl
 index_LDFLAGS = -rdynamic
 index_DEPENDENCIES = libant.la
-
-noinst_PROGRAMS = ant_dictionary ant_plugins
 
 ant_dictionary_SOURCES = $(SRCDIR)/ant_dictionary.c 
 ant_dictionary_LDADD = -L${OBJDIR} -lant
 ant_dictionary_DEPENDENCIES = libant.la
-# ############################################################################
+##############################################################################
 #  use this if it is really necessary to have same source files with libant.la
 #  otherwise, it will cause automake problem:
 #  object `XXXX.$(OBJEXT)' created both with libtool and without
 # ant_dictionary_CFLAGS = $(AM_CFLAGS)
+##############################################################################
+
+ANT_LIBS = -L. -lant -ldl
+						 
+noinst_PROGRAMS =  ant_plugins filelist remove_head link_extract link_index \
+			link_this link_index_merge link_extract_pass2 link_length_correlate \
+			topic_tree_cas bindiff term_frequencies topic_tree INEXqrels_to_run \
+			foltbl_to_aspt zipf_graph
 						 
 ant_plugins_SOURCES = $(SRCDIR)/ant_plugins.c \
 					$(SRCDIR)/plugin_manager.c
 ant_plugins_CFLAGS = $(AM_CFLAGS)
-ant_plugins_LDADD = -ldl
+ant_plugins_LDADD = ${ANT_LIBS}
 ant_plugins_LDFLAGS = -rdynamic
 ant_plugins_DEPENDENCIES = 
+	
 
+#################################################################################
+#                               TOOLS
+#################################################################################
+filelist_SOURCES = $(TOOLDIR)/filelist.c
+filelist_LDFLAGS = -rdynamic
+filelist_LDADD = ${ANT_LIBS}
+filelist_DEPENDENCIES = libant.la
 
+topic_tree_cas_SOURCES = $(TOOLDIR)/topic_tree_cas.c
+topic_tree_cas_LDFLAGS = -rdynamic
+topic_tree_cas_LDADD = ${ANT_LIBS}
+topic_tree_cas_DEPENDENCIES = libant.la
+
+bindiff_SOURCES = $(TOOLDIR)/bindiff.c
+bindiff_LDFLAGS = -rdynamic
+bindiff_LDADD = ${ANT_LIBS}
+bindiff_DEPENDENCIES = libant.la
+
+term_frequencies_SOURCES = $(TOOLDIR)/term_frequencies.c
+term_frequencies_LDFLAGS = -rdynamic
+term_frequencies_LDADD = ${ANT_LIBS}
+term_frequencies_DEPENDENCIES = libant.la
+
+topic_tree_SOURCES = $(TOOLDIR)/topic_tree.c
+topic_tree_LDFLAGS = -rdynamic
+topic_tree_LDADD = ${ANT_LIBS}
+topic_tree_DEPENDENCIES = libant.la
+
+INEXqrels_to_run_SOURCES = $(TOOLDIR)/INEXqrels_to_run.c
+INEXqrels_to_run_LDFLAGS = -rdynamic
+INEXqrels_to_run_LDADD = ${ANT_LIBS}
+INEXqrels_to_run_DEPENDENCIES = libant.la
+
+foltbl_to_aspt_SOURCES = $(TOOLDIR)/foltbl_to_aspt.c
+foltbl_to_aspt_LDFLAGS = -rdynamic
+foltbl_to_aspt_LDADD = ${ANT_LIBS}
+foltbl_to_aspt_DEPENDENCIES = libant.la
+
+zipf_graph_SOURCES = $(TOOLDIR)/zipf_graph.c
+zipf_graph_LDFLAGS = -rdynamic
+zipf_graph_LDADD = ${ANT_LIBS}
+zipf_graph_DEPENDENCIES = libant.la
+
+#################################################################################
+#                               LINK-THE-WIKI
+#################################################################################
+
+link_extract_SOURCES = $(LTWDIR)/link_extract.c
+link_extract_LDFLAGS = -rdynamic
+link_extract_LDADD = ${ANT_LIBS}
+link_extract_DEPENDENCIES = libant.la
+
+link_index_SOURCES = $(LTWDIR)/link_index.c
+link_index_LDFLAGS = -rdynamic
+link_index_LDADD = ${ANT_LIBS}
+link_index_DEPENDENCIES = libant.la
+
+link_this_SOURCES = $(LTWDIR)/link_this.c
+link_this_LDFLAGS = -rdynamic
+link_this_LDADD = ${ANT_LIBS}
+link_this_DEPENDENCIES = libant.la
+
+link_index_merge_SOURCES = $(LTWDIR)/link_index_merge.c
+link_index_merge_LDFLAGS = -rdynamic
+link_index_merge_LDADD = ${ANT_LIBS}
+link_index_merge_DEPENDENCIES = libant.la
+
+link_extract_pass2_SOURCES = $(LTWDIR)/link_extract_pass2.c
+link_extract_pass2_LDFLAGS = -rdynamic
+link_extract_pass2_LDADD = ${ANT_LIBS}
+link_extract_pass2_DEPENDENCIES = libant.la
+
+link_length_correlate_SOURCES = $(LTWDIR)/link_length_correlate.c
+link_length_correlate_LDFLAGS = -rdynamic
+link_length_correlate_LDADD = ${ANT_LIBS}
+link_length_correlate_DEPENDENCIES = libant.la
+
+remove_head_SOURCES = $(LTWDIR)/remove_head.c
+remove_head_LDFLAGS = -rdynamic
+remove_head_LDADD = ${ANT_LIBS}
+remove_head_DEPENDENCIES = libant.la

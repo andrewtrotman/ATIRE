@@ -95,7 +95,17 @@ if ((fp = fopen(argv[2], "rb")) == NULL)
 current_topic = current_target = 0;
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	{
+#ifdef _MSC_VER
 	_strlwr(buffer);
+#else
+	char *tmp = buffer;
+	while (*tmp != '\0')
+		{
+		if (*tmp >= 'A' && *tmp <= 'Z')
+			*tmp = 'a' + *tmp - 'A';
+		tmp++;
+		}
+#endif
 	if (strstr(buffer, "<ltw_topic") != 0)
 		current_topic = atol(strstr(buffer, "id=\"") + 4);
 	else if (strstr(buffer, "<outlink") != 0)
