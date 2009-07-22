@@ -137,6 +137,7 @@ puts("");
 puts("RANKING");
 puts("-------");
 puts("-R[function]    Use the readability search engine");
+puts("   be           Bose-Einstein");
 puts("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] [default]");
 puts("   impact       Sum of impact scores");
 puts("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500]");
@@ -297,20 +298,19 @@ if (strncmp(which, "BM25", 4) == 0)
 	{
 	ranking_function = BM25;
 	get_two_parameters(which + 4, &bm25_k1, &bm25_b);
-//	printf("k1=%f b=%f\n", bm25_k1, bm25_b);
 	}
 else if (strncmp(which, "lmd", 3) == 0)
 	{
 	ranking_function = LMD;
 	get_one_parameter(which + 3, &lmd_u);
-//	printf("u=%f\n", lmd_u);
 	}
 else if (strncmp(which, "lmjm", 4) == 0)
 	{
 	ranking_function = LMJM;
 	get_one_parameter(which + 4, &lmjm_l);
-//	printf("l=%f\n", lmjm_l);
 	}
+else if (strcmp(which, "be") == 0)
+	ranking_function = BOSE_EINSTEIN;
 else if (strcmp(which, "impact") == 0)
 	ranking_function = IMPACT;
 else if (strcmp(which, "readable") == 0)

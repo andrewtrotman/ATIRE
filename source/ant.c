@@ -27,6 +27,7 @@
 #include "ranking_function_bm25.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
+#include "ranking_function_bose_einstein.h"
 #include "ranking_function_readability.h"
 
 #ifndef FALSE
@@ -424,42 +425,13 @@ else
 		ranking_function = new ANT_ranking_function_lmd(search_engine, params.lmd_u);
 	else if (params.ranking_function == ANT_ANT_param_block::LMJM)
 		ranking_function = new ANT_ranking_function_lmjm(search_engine, params.lmjm_l);
+	else if (params.ranking_function == ANT_ANT_param_block::BOSE_EINSTEIN)
+		ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
 search_engine->set_trim_postings_k(params.trim_postings_k);
 ant(search_engine, ranking_function, map, &params, document_list, answer_list);
-
-#ifdef FIT_BM25
-/*
-	This code can be used for optimising the BM25 parameters.
-*/
-if (argc == 4)
-	{
-	double map;
-	FILE *outfile;
-	extern double BM25_k1;
-	extern double BM25_b;
-
-	outfile = fopen(argv[3], "wb");
-	fprintf(outfile, "%f ", 0.0);
-	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
-		fprintf(outfile, "%f ", BM25_b);
-	fprintf(outfile, "\n");
-
-	for (BM25_k1 = 0.1; BM25_k1 < 4.0; BM25_k1+= 0.1)
-		{
-		fprintf(outfile, "%f ", BM25_k1);
-		for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
-			{
-			map = batch_ant(argv[1], argv[2]);
-			fprintf(outfile, "%f ", map);
-			}
-		fprintf(outfile, "\n");
-		}
-	}
-	fclose(outfile);
-#endif
 
 delete map;
 
