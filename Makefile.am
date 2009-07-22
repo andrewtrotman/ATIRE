@@ -88,6 +88,7 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_readability.c	\
 	$(SRCDIR)/ranking_function_bm25.c	\
 	$(SRCDIR)/ranking_function_impact.c \
+	$(SRCDIR)/ranking_function_lmd.c \	
 	$(SRCDIR)/plugin_manager.c 	
 				
 library_headers = \
@@ -173,6 +174,7 @@ library_headers = \
 	$(SRCDIR)/ranking_function_readability.h	\
 	$(SRCDIR)/ranking_function_bm25.h \
 	$(SRCDIR)/ranking_function_impact.h \
+	$(SRCDIR)/ranking_function_lmd.h \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	
@@ -182,22 +184,24 @@ libant_ladir = $(LIBDIR)
 libant_la_SOURCES = $(library_sources)
 libant_la_HEADERS = $(library_headers)
 
+ANT_LIBS = -L. -lant -ldl
+
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
 bin_PROGRAMS = ant index ant_dictionary
 
 ant_SOURCES = $(SRCDIR)/ant.c
-ant_LDADD = -L${LIBDIR} -lant -ldl
+ant_LDADD = ${ANT_LIBS}
 ant_LDFLAGS = -rdynamic
 ant_DEPENDENCIES = libant.la
 
 index_SOURCES = $(SRCDIR)/index.c
-index_LDADD = -L${LIBDIR} -lant -ldl
+index_LDADD = ${ANT_LIBS}
 index_LDFLAGS = -rdynamic
 index_DEPENDENCIES = libant.la
 
 ant_dictionary_SOURCES = $(SRCDIR)/ant_dictionary.c 
-ant_dictionary_LDADD = -L${OBJDIR} -lant
+ant_dictionary_LDADD = ${ANT_LIBS}
 ant_dictionary_DEPENDENCIES = libant.la
 ##############################################################################
 #  use this if it is really necessary to have same source files with libant.la
@@ -205,8 +209,6 @@ ant_dictionary_DEPENDENCIES = libant.la
 #  object `XXXX.$(OBJEXT)' created both with libtool and without
 # ant_dictionary_CFLAGS = $(AM_CFLAGS)
 ##############################################################################
-
-ANT_LIBS = -L. -lant -ldl
 						 
 noinst_PROGRAMS =  ant_plugins filelist remove_head link_extract link_index \
 			link_this link_index_merge link_extract_pass2 link_length_correlate \
