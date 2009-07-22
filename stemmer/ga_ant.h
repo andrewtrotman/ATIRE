@@ -17,7 +17,7 @@
 #include "ranking_function_bm25.h"
 
 #define NUM_OF_GENERATIONS 200
-#define POPULATION_SIZE 200
+#define POPULATION_SIZE 100
 
 double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer);
 char **get_queries(long *query_count, ANT_ANT_param_block *params);

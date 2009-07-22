@@ -167,7 +167,7 @@ void GA_individual::reproduce(GA_individual *c) {
 
 /* c is the child, this is the parent */
 void GA_individual::mutate(GA_individual *c, Vocab *v) {
-    char *s;
+    char *s; (void) s;
     unsigned int position = rand() % count;
 
     memcpy(c, this, sizeof(GA_individual));
@@ -182,12 +182,12 @@ void GA_individual::mutate(GA_individual *c, Vocab *v) {
     case 1:
         char *s;
         while ((s = v->strgen()) && is_banned(s)) {}
-        strncpy(rules + (position * RULE_SIZE) + 1, s, RULE_STRING_MAX);
+        strncpy(c->rules + (position * RULE_SIZE) + 1, s, RULE_STRING_MAX);
         break;
 
     case 2:
         while ((s = v->strgen_2()) && is_banned(s)) {}
-        strncpy(rules + (position * RULE_SIZE) + RULE_STRING_MAX + 1, s, RULE_STRING_MAX);
+        strncpy(c->rules + (position * RULE_SIZE) + RULE_STRING_MAX + 1, s, RULE_STRING_MAX);
         break;
 
     default:
@@ -196,30 +196,52 @@ void GA_individual::mutate(GA_individual *c, Vocab *v) {
 }
 
 /* 
-Places a new individual into c based on the parents p1 & p2.
-Crossover is limited to being between parts of rules (i.e. not mid-string)
+   Places a new individual into c based on the parents p1 & p2.
+   Crossover is limited to being between parts of rules (i.e. not mid-string)
 */
 void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
-    /* position inside the rules to crossover at */
-    unsigned int mid_point = random_from(0, 2);
-    if (mid_point == 2)
-        mid_point = 1 + RULE_STRING_MAX;
-
     /* which rule are we crossing over at*/
-    unsigned int point = random_from(0, this->rules_size() / RULE_SIZE) + mid_point;
-    /* Ensure the second point shares the mid-rule position of the first */
-    unsigned int min_point2 = ((signed)p2->count + (signed)point / RULE_SIZE - MAX_RULES > 0) ? 
-        (p2->count + point / RULE_SIZE - MAX_RULES) : 0;
-    unsigned int point2 = random_from(min_point2, p2->count) * RULE_SIZE
-        + mid_point;
+    unsigned int point = random_from(0, this->count);
+
+    /* Prevent growth beyond the MAX_RULES */
+    unsigned int min_point2 = ((signed)p2->count + (signed)point - MAX_RULES > 0) ? 
+        (p2->count + point - MAX_RULES) : 0;
+
+    unsigned int point2 = random_from(min_point2, p2->count);
+
+    switch (random_from (0, 2)) {
+    case 0: // MEASURE
+        point = point * RULE_SIZE;
+        point2 = point2 * RULE_SIZE;
+        break;
+    case 1: // RULE_FROM
+        point = rule_from(point) - rules;
+        point2 = p2->rule_from(point2) - p2->rules;
+        break;
+    case 2: // RULE_TO
+        point = rule_to(point) - rules;
+        point2 = p2->rule_to(point2) - p2->rules;
+        break;
+    default:
+        fprintf(stderr, "ERROR IN CROSSOVER\n");
+    }
 
     /* Still need to copy if p2 is also c, as the part from p1 may be small (i.e. p2 needs to shift)
      * This is also why it is done first. */
     memmove(c->rules + point, p2->rules + point2, p2->rules_size() - point2);
+
     if (this != c)
         memcpy(c->rules, this->rules, point);
+
     c->is_evaluated = FALSE;
     c->count = (point + (p2->rules_size() - point2)) / RULE_SIZE;
+
+    if (c->sanity_check() == 0) {
+        printf("Crossover error, point:%u\n min_point2:%u point2:%u\n", point, min_point2, point2);
+        print_raw(stdout);
+        p2->print_raw(stdout);
+        c->print_raw(stdout);
+    }
 }
 
 /* 
@@ -227,11 +249,12 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
    No allocation or deallocation (or modification) is done on the strings
    ONLY POINTERS ARE NEEDED.
 
-   Strings will be used until null-termed or over 6 chars
+   Strings will be used until null-termed or over they exceed RULE_STRING_MAX chars
 */
 void GA_individual::generate(Vocab *v) {
     unsigned int i;
-    count = (unsigned int) rand() % (MAX_RULES) + 1;
+
+    count = (unsigned int) rand() % (GEN_MAX_RULES - GEN_MIN_RULES) + GEN_MIN_RULES;
     memset(rules, '\0', count * RULE_SIZE);
 
     for (i = 0; i < count; i++) {
@@ -360,14 +383,12 @@ int stem(const char *string, char *buffer) {\n\
 \n\
     length = strlen(buffer);\n\
 \n\
-    do {\n\
 ");
 
     for (i = 0; i < count; i++) {
         if (measure(i) == SEPARATOR) {
             fprintf(file, "\
-    } while (0);\n\
-    do {\n\
+    }\n\
 ");
         } else {
             int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
@@ -397,4 +418,31 @@ int stem(const char *string, char *buffer) {\n\
 }\n\
 ");
     fclose(file);
+}
+
+/*
+  Returns 1 if an individual is correctly formed.
+*/
+int GA_individual::sanity_check() {
+    unsigned int i, j;
+
+    if (count > (unsigned) MAX_INDIVIDUAL_SIZE)
+        return 0;
+    for (i = 0; i < count; i++) {
+        if (measure(i) > MEASURE_MAX && 
+            measure(i) != SEPARATOR)
+            return 0;
+        for (j = 0; j < (unsigned) RULE_STRING_MAX; j++) {
+            if (*(rule_to(i) + j) < 'a' ||
+                *(rule_to(i) + j) > 'z')
+                if (*(rule_to(i) + j) != '\0')
+                    return 0;
+            if (*(rule_from(i) + j) < 'a' ||
+                *(rule_from(i) + j) > 'z')
+                if (*(rule_to(i) + j) != '\0')
+                    return 0;
+        }
+    }
+
+    return 1;
 }

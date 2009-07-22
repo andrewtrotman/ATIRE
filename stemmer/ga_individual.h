@@ -9,6 +9,8 @@ const int RULE_STRING_MAX = 4;
 const int RULE_SIZE = (RULE_STRING_MAX * 2 + 1);
 const int SEPARATOR = -1;
 const int MAX_RULES = 60;
+const int GEN_MIN_RULES = 5;    // Minimum size when generating.
+const int GEN_MAX_RULES = 30;   // Maximum size when generating.
 const int MAX_INDIVIDUAL_SIZE = (RULE_SIZE * MAX_RULES);
 const int MEASURE_MAX = 5;
 const int SACROSANCT_CHARS = 3;
@@ -32,13 +34,15 @@ extern inline unsigned int random_from(unsigned int lower, unsigned int upper) {
 class GA_individual {
  private:
     char rules[MAX_INDIVIDUAL_SIZE];
-    unsigned int count;
+    unsigned int count;         // Number of rules.
 
     inline unsigned int rules_size();
     inline char measure(unsigned int n);
     inline char *rule_from(unsigned int n);
     inline char *rule_to(unsigned int n);
     inline int is_banned(char *s);
+    
+    int sanity_check();
 
  public:
 
