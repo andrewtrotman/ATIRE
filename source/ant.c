@@ -417,13 +417,13 @@ else
 		search_engine = new ANT_search_engine(&memory);
 
 	if (params.ranking_function == ANT_ANT_param_block::BM25)
-		ranking_function = new ANT_ranking_function_BM25(search_engine);
+		ranking_function = new ANT_ranking_function_BM25(search_engine, params.bm25_k1, params.bm25_b);
 	else if (params.ranking_function == ANT_ANT_param_block::IMPACT)
 		ranking_function = new ANT_ranking_function_impact(search_engine);
 	else if (params.ranking_function == ANT_ANT_param_block::LMD)
 		ranking_function = new ANT_ranking_function_lmd(search_engine, params.lmd_u);
 	else if (params.ranking_function == ANT_ANT_param_block::LMJM)
-		ranking_function = new ANT_ranking_function_lmd(search_engine, params.lmjm_l);
+		ranking_function = new ANT_ranking_function_lmjm(search_engine, params.lmjm_l);
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 

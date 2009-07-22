@@ -38,6 +38,7 @@ public:
 
 	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
 	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
+	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long thesaurus;						// 'correct' stemming with the thesaurus?
@@ -49,7 +50,8 @@ private:
 	void set_metric(char *which);
 	void set_stats(char *which);
 	void set_ranker(char *which);
-	void get_one_param(char *from, double *into);
+	void get_two_parameters(char *from, double *first, double *second);
+	void get_one_parameter(char *from, double *into);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);
