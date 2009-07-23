@@ -78,6 +78,9 @@ OBJECTS = \
     ranking_function.o \
     ranking_function_impact.o \
     ranking_function_readability.o \
+    ranking_function_lmd.o \
+    ranking_function_lmjm.o \
+    ranking_function_bose_einstein.o \
     ranking_function_bm25.o
 
 EXTENSION = \

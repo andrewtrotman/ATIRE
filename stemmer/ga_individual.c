@@ -439,7 +439,7 @@ int GA_individual::sanity_check() {
                     return 0;
             if (*(rule_from(i) + j) < 'a' ||
                 *(rule_from(i) + j) > 'z')
-                if (*(rule_to(i) + j) != '\0')
+                if (*(rule_from(i) + j) != '\0')
                     return 0;
         }
     }
