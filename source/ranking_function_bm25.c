@@ -9,15 +9,46 @@
 #include "search_engine_accumulator.h"
 
 /*
+	ANT_RANKING_FUNCTION_BM25::ANT_RANKING_FUNCTION_BM25()
+	------------------------------------------------------
+*/
+ANT_ranking_function_BM25::ANT_ranking_function_BM25(ANT_search_engine *engine, double k1, double b) : ANT_ranking_function(engine)
+{
+const double one_minus_b = 1.0 - b;
+long current;
+
+this->k1 = k1;
+this->b = b;
+
+/*
+	Precompute the length normalisation prior probability part of BM25
+*/
+document_prior_probability = new float [(size_t)documents_as_integer];
+for (current = 0; current < documents_as_integer; current++)
+	document_prior_probability[current] =  (float)(k1 * (one_minus_b + b * (document_lengths[current] / mean_document_length)));
+}
+
+/*
+	ANT_RANKING_FUNCTION_BM25::~ANT_RANKING_FUNCTION_BM25()
+	-------------------------------------------------------
+*/
+ANT_ranking_function_BM25::~ANT_ranking_function_BM25()
+{
+delete [] document_prior_probability;
+}
+
+/*
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
 void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
+#ifdef ANT_BM25_SLOW
+	const double b = this->b;
+	const double one_minus_b = 1.0 - b;
+#endif
 const double k1 = this->k1;
-const double b = this->b;
 const double k1_plus_1 = k1 + 1.0;
-const double one_minus_b = 1.0 - b;
 long docid;
 double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
@@ -29,7 +60,7 @@ ANT_compressable_integer *current, *end;
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
-idf = log((double)(documents) / (double)term_details->document_frequency);
+idf = log((double)documents / (double)term_details->document_frequency);
 
 /*
 	               tf(td) * (k1 + 1)
@@ -64,40 +95,21 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
+#ifdef ANT_BM25_SLOW
+		/*
+			This version uses the document lengths from the search_engine object
+			which takes more time.  The fast version is preferred as it is a lot laster
+		*/
 		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+#else
+		/*
+			This version uses the document prior probabilities computed in the constructor
+			which takes more memory
+		*/
+		accumulator[docid].add_rsv(idf * (top_row / (tf + document_prior_probability[docid])));
+#endif
 		}
 	current++;		// skip over the zero
 	}
 }
 
-/*
-	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TF()
-	----------------------------------------------
-	This is the variant that gets called for stemming
-*/
-void ANT_ranking_function_BM25::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point)
-{
-const double k1 = this->k1;
-const double b = this->b;
-const double k1_plus_1 = k1 + 1.0;
-const double one_minus_b = 1.0 - b;
-double tf, idf, top_row;
-long *current, *end;
-long docid;
-
-compute_term_details(term_details, tf_array);	// get document_frequency;
-
-idf = log((double)(documents) / (double)term_details->document_frequency);
-
-end = tf_array + documents;
-for (current = tf_array; current < end; current++)
-	if (*current != 0)
-		{
-		tf = *current >= 0x100 ? 0xFF : *current;
-		docid = current - tf_array;
-		top_row = tf * k1_plus_1;
-
-		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
-		}
-#pragma warning (suppress : 4100)		// disable the unreferenced formal parameter warning referring to trim_point
-}

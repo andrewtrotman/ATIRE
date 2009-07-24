@@ -14,8 +14,7 @@
 */
 void ANT_ranking_function_impact::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
-double tf;
-long docid;
+long docid, tf;
 ANT_compressable_integer *current, *end;
 
 current = impact_ordering;

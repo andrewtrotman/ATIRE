@@ -14,11 +14,16 @@
 */
 ANT_ranking_function::ANT_ranking_function(ANT_search_engine *engine)
 {
-documents = engine->document_count();
+documents_as_integer = engine->document_count();
+documents = (double)documents_as_integer;
+
+collection_length_in_terms_as_integer = engine->get_collection_length();
+collection_length_in_terms = (double)collection_length_in_terms_as_integer;
+
 document_lengths = engine->get_document_lengths(&mean_document_length);
 decompress_buffer = engine->get_decompress_buffer();
+
 stats = engine->get_stats();
-collection_length_in_terms = engine->get_collection_length();
 }
 
 /*
@@ -47,7 +52,7 @@ memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
 /*
 	Compute the size of the buckets - and as we are stemming we also have to cap Term Frequency at 255.
 */
-end = stem_buffer + documents;
+end = stem_buffer + documents_as_integer;
 document_frequency = 0;
 for (current = stem_buffer; current < end; current++)
 	if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
@@ -122,7 +127,7 @@ long long now;
 	Compute document frequency which is needed for many ranking functions (but not all)
 */
 now = stats->start_timer();
-end = tf_array + documents;
+end = tf_array + documents_as_integer;
 document_frequency = 0;
 
 for (current = tf_array; current < end; current++)

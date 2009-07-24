@@ -20,8 +20,10 @@ class ANT_ranking_function
 {
 protected:
 	ANT_search_engine *engine;
-	long long documents;
-	long long collection_length_in_terms;
+	double documents;
+	long long documents_as_integer;
+	double collection_length_in_terms;
+	long long collection_length_in_terms_as_integer;
 	double mean_document_length;
 	long *document_lengths;
 	ANT_compressable_integer *decompress_buffer;

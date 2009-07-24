@@ -36,7 +36,7 @@ int32_t four_byte;
 int64_t eight_byte;
 unsigned char *block;
 long long end, term_header, this_header_block_size, sum, current_length, pointer;
-long postings_buffer_length;
+long postings_buffer_length, decompressed_integer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
@@ -158,7 +158,11 @@ variable_byte.decompress(decompress_buffer, postings_buffer, collection_details.
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
-	sum += document_lengths[current_length] = decompress_buffer[current_length];
+	{
+	decompressed_integer = decompress_buffer[current_length];
+	sum += decompressed_integer;
+	document_lengths[current_length] = decompressed_integer;
+	}
 mean_document_length = (double)sum / (double)documents;
 collection_length_in_terms = sum;
 

@@ -29,6 +29,7 @@ private:
 
 public:
 	void add_rsv(double score) { rsv += (ANT_accumulator_t)(100 * score); }
+	void add_rsv(long score) { rsv += (ANT_accumulator_t)score; }
 	long is_zero_rsv(void) { return rsv == 0; }
 
 	static int compare(const void *a, const void *b);
