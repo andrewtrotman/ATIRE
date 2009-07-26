@@ -23,6 +23,7 @@ public:
 	long long dictionary_time;
 	long long stemming_time;				// time taken to do stemming (except re-convert into a postings list)
 	long long stemming_reencode_time;		// time taken to convert from the stemming tf array into a postings list
+	long long queries;						// total number of times stats have been added to this one.
 
 public:
 	ANT_search_engine_stats(ANT_memory *memory) ;

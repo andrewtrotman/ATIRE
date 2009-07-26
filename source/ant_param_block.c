@@ -163,6 +163,7 @@ exit(0);
 */
 void ANT_ANT_param_block::set_stats(char *which)
 {
+stats = 0;
 do
 	{
 	switch (*which)

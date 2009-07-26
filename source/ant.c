@@ -224,12 +224,48 @@ if (params->queries_filename == NULL)
 }
 
 /*
+	GET_DOCUMENT_AND_PARSE()
+	------------------------
+*/
+char *get_document_and_parse(char *filename, ANT_time_stats *stats)
+{
+static char filename_buffer[1024];
+char *start, *end, *file;
+long long now;
+
+if (filename[1] == ':')							// windows c:\blah
+	filename += 2;
+
+now = stats->start_timer();
+file = ANT_disk::read_entire_file(filename);
+stats->add_disk_input_time(stats->stop_timer(now));
+
+if (file == NULL)
+	return NULL;
+
+now = stats->start_timer();
+start = strstr(file, "<title>");
+if (start != NULL)
+	if ((end = strstr(start += 7, "</title>")) != NULL)
+		{
+		strncpy(filename_buffer, start, end - start);
+		filename_buffer[end - start] = '\0';
+		}
+delete [] file;
+
+stats->add_cpu_time(stats->stop_timer(now));
+
+return *filename_buffer == '\0' ? NULL : filename_buffer;
+}
+
+/*
 	ANT()
 	-----
 */
-double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list)
+double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list)
 {
-char *query;
+ANT_time_stats post_processing_stats;
+char *query, *name;
 long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
@@ -257,7 +293,7 @@ for (query = input.first(); query != NULL; query = input.next())
 	if (*query == '\0')
 		continue;			// ignore blank lines
 
-	if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE)
+	if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
 		{
 		topic_id = atol(query);
 		if ((query = strchr(query, ' ')) == NULL)
@@ -283,7 +319,10 @@ for (query = input.first(); query != NULL; query = input.next())
 	/*
 		Convert from a results list into a list of documents
 	*/
-	search_engine->generate_results_list(document_list, answer_list, hits);
+	if (output == NULL)
+		search_engine->generate_results_list(filename_list, answer_list, hits);
+	else
+		search_engine->generate_results_list(document_list, answer_list, hits);
 
 	/*
 		Display the list of results (either to the user or to a run file)
@@ -291,11 +330,16 @@ for (query = input.first(); query != NULL; query = input.next())
 	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
 	if (output == NULL)
 		for (result = 0; result < last_to_list; result++)
-			printf("%lld:%s\n", result + 1, answer_list[result]);
+			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
+				printf("%lld:%s\n", result + 1, answer_list[result]);
+			else
+				printf("%lld:%s\n", result + 1, name);
 	else
 		output->write(topic_id, answer_list, last_to_list);
+
 	prompt(params);
 	}
+
 /*
 	Compute Mean Average Precision
 */
@@ -311,7 +355,11 @@ if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
 	Report the summary of the stats
 */
 if (params->stats & ANT_ANT_param_block::SUM)
+	{
 	search_engine->stats_all_text_render();
+	post_processing_stats.print_time("Post Processing I/O  :", post_processing_stats.disk_input_time);
+	post_processing_stats.print_time("Post Processing CPU  :", post_processing_stats.cpu_time);
+	}
 
 /*
 	And finally report MAP
@@ -340,14 +388,17 @@ return thus_far;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long long *documents_in_id_list)
+char **read_docid_list(long long *documents_in_id_list, char ***filename_list)
 {
-char *document_list_buffer;			// this is leaked!!!!
+char *document_list_buffer, *filename_list_buffer;			// these is leaked!!!!
 char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
 if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
 	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+
+filename_list_buffer = strnew(document_list_buffer);
+*filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);
 
 id_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 
@@ -378,13 +429,14 @@ return id_list;
 */
 int main(int argc, char *argv[])
 {
+ANT_stats stats;
 ANT_search_engine *search_engine;
 ANT_search_engine_readability *readable_search_engine;
 ANT_mean_average_precision *map = NULL;
 ANT_memory memory;
 long last_param;
 ANT_ANT_param_block params(argc, argv);
-char **document_list, **answer_list;
+char **document_list, **answer_list, **filename_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
 ANT_ranking_function *ranking_function = NULL;
@@ -394,7 +446,7 @@ last_param = params.parse();
 if (params.logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
-document_list = read_docid_list(&documents_in_id_list);
+document_list = read_docid_list(&documents_in_id_list, &filename_list);
 
 if (params.assessments_filename != NULL)
 	{
@@ -431,12 +483,12 @@ else
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
 search_engine->set_trim_postings_k(params.trim_postings_k);
-ant(search_engine, ranking_function, map, &params, document_list, answer_list);
+ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list);
 
 delete map;
 
+printf("Total elapsed time including startup and shutdown ");
+stats.print_elapsed_time();
 ANT_stats::print_operating_system_process_time();
 return 0;
 }
-
-

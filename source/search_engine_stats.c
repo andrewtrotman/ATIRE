@@ -21,6 +21,7 @@ initialise();
 void ANT_search_engine_stats::initialise(void)
 {
 stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
+queries = 0;
 }
 
 /*
@@ -39,6 +40,7 @@ this->count_relevant_time += which->count_relevant_time;
 this->dictionary_time += which->dictionary_time;
 this->stemming_time += which->stemming_time;
 this->stemming_reencode_time += which->stemming_reencode_time;
+this->queries++;
 }
 
 /*
@@ -74,6 +76,11 @@ sum += stemming_time;
 //sum += stemming_reencode_time;		/* Don't add the re-encode time as it is already part of the rank_time */
 
 print_time("Total Time to Search  :", sum);
+if (queries > 1)
+	{
+	printf("Total Queries         :%lld\n", queries);
+	print_time("Mean Time to Search   :", sum / queries);
+	}
 
 min = posting_read_time;
 min = min < decompress_time ? min : decompress_time;
