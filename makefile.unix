@@ -99,16 +99,18 @@ OBJECTS = \
     ranking_function_bose_einstein.o \
     ranking_function_bm25.o
 
+OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
+
 all : $(BINDIR)/index $(BINDIR)/ant
 
-%.o : $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $(SRCDIR)/$*.c -o $(OBJDIR)/$*.o
+$(OBJDIR)/%.o : $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
-$(BINDIR)/index : $(OBJECTS) index.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
+$(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
+	$(CC) $(LDFLAGS) -o $@ $^
 
-$(BINDIR)/ant : $(OBJECTS) ant.o 
-	$(CC) $(LDFLAGS) -o $@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%)
+$(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
+	$(CC) $(LDFLAGS) -o $@ $^
 
 .PHONY : clean
 clean :

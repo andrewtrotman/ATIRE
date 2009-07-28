@@ -1,12 +1,13 @@
-EXTDIR = .
 SRCDIR = ../source
 OBJDIR = ../bin
 BINDIR = ../bin
+EXTSRCDIR = .
+EXTOBJDIR = ./obj
 
 EXTFLAGS = -I$(SRCDIR)
 LDFLAGS = -g
 CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-	-Wno-endif-labels -Wno-missing-braces -I$(EXTDIR) -I$(SRCDIR)
+	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR)
 
 CC = g++
 
@@ -90,33 +91,38 @@ EXTENSION = \
 	ga_function.o \
 	vocab.o 
 
-all : index ant ga_ant vocab_tool
+OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
+EXTENSION_W_DIR = $(EXTENSION:%=$(EXTOBJDIR)/%)
 
-%.o : $(SRCDIR)/%.c
+all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool
+
+$(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $(SRCDIR)/$*.c -o $(OBJDIR)/$*.o
 
-$(EXTENSION) : 
-	$(CC) $(CFLAGS) $(EXTFLAGS) -c $*.c -o $(OBJDIR)/$@
+$(EXTOBJDIR)/%.o : $(EXTSRCDIR)/%.c
+	$(CC) $(CFLAGS) $(EXTFLAGS) -c $*.c -o $@
 
-index : $(OBJECTS) index.o
-	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/index.o $(OBJECTS:%=$(OBJDIR)/%)
+$(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
+	$(CC) $(LDFLAGS) -o $@ $^
 
-ant : $(OBJECTS) ant.o 
-	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/ant.o $(OBJECTS:%=$(OBJDIR)/%) 
+$(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
+	$(CC) $(LDFLAGS) -o $@ $^
 
-ant_dict : $(OBJECTS) ant_dictionary.o
-	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJDIR)/ant_dictionary.o $(OBJECTS:%=$(OBJDIR)/%) 
+$(BINDIR)/ant_dict : $(OBJECTS_W_DIR) $(OBJDIR)/ant_dictionary.o
+	$(CC) $(LDFLAGS) -o $@ $^
 
-ga_ant.o : $(EXTDIR)/ga_ant.c
-	$(CC) $(EXTFLAGS) $(CFLAGS) -c $(EXTDIR)/ga_ant.c -o $(OBJDIR)/$@
-ga_ant : $(OBJECTS) $(EXTENSION) ga_ant.o
-	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/ga_ant.o
+$(BINDIR)/ga_ant : $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o
+	$(CC) $(LDFLAGS) -o $@ $^
 
-vocab_tool.o : $(EXTDIR)/ga_ant.c
-	$(CC) $(EXTFLAGS) $(CFLAGS) -DVOCAB_TOOL -c $(EXTDIR)/ga_ant.c -o $(OBJDIR)/$@
-vocab_tool : $(OBJECTS) $(EXTENSION) vocab_tool.o
-	$(CC) $(LDFLAGS) -o $(BINDIR)/$@ $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/vocab_tool.o
+$(EXTOBJDIR)/vocab_tool.o : $(EXTSRCDIR)/ga_ant.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DVOCAB_TOOL -c $^ -o $@
+$(BINDIR)/vocab_tool : $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/vocab_tool.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+.PHONY : depend
+depend : 
+	makedepend -f makefile.dep -- $(CFLAGS) $(EXTFLAGS) $(EXTENSION:%.o=$(EXTSRCDIR)/%.c) $(OBJECTS:%.o=$(SRCDIR)/%.c)
 
 .PHONY : clean
 clean :
-	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS:%=$(OBJDIR)/%) $(EXTENSION:%=$(OBJDIR)/%) $(OBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(OBJDIR)/vocab_tool.o
+	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o
