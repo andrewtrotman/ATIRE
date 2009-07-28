@@ -237,7 +237,7 @@ double ANT_thesaurus_engine::prob_word_in_query(char **query_terms, int query_te
 {
 double prob = 0, mean;
 long *doc_lengths;
-int i, j;
+int i;
 
 /*
   P(w|Q) = sigma   P(w|D) * P(D|Q)
@@ -337,8 +337,9 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
 p_q_d_buffer = (double *)malloc(sizeof *p_q_d_buffer * documents);
 double mean;
 long *doc_lengths = get_document_lengths(&mean);
+(void) mean;                   // At -O3 gcc will optimise away mean, giving segfault above.
 for (i = 0; i < documents; i++) 
-    p_q_d_buffer[j] = 1;
+    p_q_d_buffer[i] = 1;
 
 for (i = 0; i < query_term_count; i++) 
     {
