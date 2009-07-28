@@ -233,9 +233,9 @@ ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buf
 	------------------------------------------
     Assumes buffer_b is filled with sum of tfs of query terms
 */
-double ANT_thesaurus_engine::prob_word_in_query(char **query_terms, int query_term_count, char *word, double p_coll_w, long long documents_returned, double *p_coll_qs, long **q_buffers) 
+double ANT_thesaurus_engine::prob_word_in_query(char **query_terms, int query_term_count, char *word, double p_coll_w, long long documents_returned, double *p_q_d_buffer, double lambda)
 {
-double prob = 0, mean, lambda = 0.6;
+double prob = 0, mean;
 long *doc_lengths;
 int i, j;
 
@@ -264,20 +264,15 @@ for (i = 0; i < documents; i++)
           P(D|Q) ~= P(Q|D) P(D) via Bayes. P(Q) is assumed(ish) to be 1.
          */
         double p_d = 1 / (double) documents_returned; // No chance of 0.
+
         /*
           P(Q|D) =    PI    P(q|D)
                    (q in Q)
 
           P(q|D) is much like P(w|D)
          */ 
-        double p_q_d = 1;
-        for (j = 0; j < query_term_count; j++) {
-            double pml_small_q_d = (double)q_buffers[j][i] / (double) doc_lengths[i];
-            double p_small_q_d = lambda * pml_small_q_d + (1 - lambda) * p_coll_qs[j];
-            p_q_d *= p_small_q_d;
-        }
 
-        double p_d_q = p_q_d * p_d;
+        double p_d_q = p_q_d_buffer[i] * p_d;
         
         prob += p_w_d * p_d_q;
         }
@@ -292,7 +287,7 @@ return prob;
     Currently uses the Kullback-Leibler divergence between the query and the collection.
     (Jensen-Shannon is another possibility.)
 */
-double ANT_thesaurus_engine::clarity_score(char *query) 
+double ANT_thesaurus_engine::clarity_score(char *query, double lambda) 
 {
 ANT_btree_iterator all_terms(this);
 ANT_search_engine_btree_leaf details;
@@ -300,8 +295,8 @@ char **query_terms;
 char *start, *end, *term;
 long long total_collection_frequency = 0, documents_returned = 0;
 int i, j, query_term_count = 0;
-double *p_coll_qs, score = 0.0;
-long **q_buffers;
+double score = 0.0;
+double *p_q_d_buffer;
 
 /*
   Get the query terms.
@@ -332,24 +327,32 @@ for (i = 0; i < query_term_count; i++)
     query_terms[i] = strndup(start, end - start); /* Allocates memory */
     }
 
-/* fill all the query buffers - to avoid doing this for all w in vocab */
-q_buffers = (long **)malloc(sizeof **q_buffers * query_term_count);
-for (i = 0; i < query_term_count; i++) 
-    {
-    q_buffers[i] = (long *)malloc(sizeof *q_buffers * documents);
-    fill_buffer_with_postings(query_terms[i], q_buffers[i]);
-    }
-
- /* Get the total collection frequency - total occurances of all terms: TODO - doc lengths */
+/* Get the total collection frequency - total occurances of all terms */
 for (term = all_terms.first("a"); term != NULL; term = all_terms.next()) 
     total_collection_frequency += get_postings_details(term, &details)->collection_frequency;
 
-p_coll_qs = (double *) malloc(sizeof *p_coll_qs * query_term_count);
+/* 
+   Precalc the P(q|D) for all D
+*/
+p_q_d_buffer = (double *)malloc(sizeof *p_q_d_buffer * documents);
+double mean;
+long *doc_lengths = get_document_lengths(&mean);
+for (i = 0; i < documents; i++) 
+    p_q_d_buffer[j] = 1;
+
 for (i = 0; i < query_term_count; i++) 
     {
-    p_coll_qs[i] =
+    fill_buffer_with_postings(query_terms[i], buffer_a);
+    double p_coll_q =
         (double) get_postings_details(query_terms[i], &details)->collection_frequency /
         (double) total_collection_frequency;
+
+    for (j = 0; j < documents; j++) 
+        {
+        double pml_small_q_d = (double)buffer_a[j] / (double) doc_lengths[j];
+        double p_small_q_d = lambda * pml_small_q_d + (1 - lambda) * p_coll_q;
+        p_q_d_buffer[j] *= p_small_q_d;
+        }
     }
 
 /* 
@@ -382,7 +385,7 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
     double p_coll_w = 
         (double) get_postings_details(term, &details)->collection_frequency /
         (double) total_collection_frequency;
-    double p_w_q = prob_word_in_query(query_terms, query_term_count, term, p_coll_w, documents_returned, p_coll_qs, q_buffers);
+    double p_w_q = prob_word_in_query(query_terms, query_term_count, term, p_coll_w, documents_returned, p_q_d_buffer, lambda);
     
     score += p_w_q * log(p_w_q / p_coll_w) / log(2);
     }
@@ -391,10 +394,8 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
 for (i = 0; i < query_term_count; i++)
     {
     free(query_terms[i]);
-    free(q_buffers[i]);
     }
 free(query_terms);
-free(q_buffers);
-free(p_coll_qs);
+free(p_q_d_buffer);
 return score;
 }

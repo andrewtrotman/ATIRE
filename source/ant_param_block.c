@@ -95,10 +95,10 @@ puts("  p             Porter stemming");
 puts("  s             S-Striping stemming");
 puts("");
 
-puts("STEMMING SIMILARITY THRESHOLD");
+puts("TERM SIMILARITY");
 puts("-----------");
 puts("--termsim<n>    Prevent stemming if term similarity is <= n [default=0.0]");
-puts("--clarity       Give clarity scores before each query");
+puts("--clarity       Give clarity scores for each query, requires --termsim (SLOW)");
 puts("");
 
 puts("OPTIMISATIONS");
