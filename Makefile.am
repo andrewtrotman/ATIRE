@@ -88,7 +88,9 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_readability.c	\
 	$(SRCDIR)/ranking_function_bm25.c	\
 	$(SRCDIR)/ranking_function_impact.c \
-	$(SRCDIR)/ranking_function_lmd.c \	
+	$(SRCDIR)/ranking_function_lmd.c \
+	$(SRCDIR)/ranking_function_bose_einstein.c \
+	$(SRCDIR)/ranking_function_lmjm.c \
 	$(SRCDIR)/plugin_manager.c 	
 				
 library_headers = \
@@ -175,6 +177,7 @@ library_headers = \
 	$(SRCDIR)/ranking_function_bm25.h \
 	$(SRCDIR)/ranking_function_impact.h \
 	$(SRCDIR)/ranking_function_lmd.h \
+	$(SRCDIR)/ranking_function_bose_einstein.h \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	
@@ -272,6 +275,7 @@ zipf_graph_DEPENDENCIES = libant.la
 
 link_extract_SOURCES = $(LTWDIR)/link_extract.c
 link_extract_LDFLAGS = -rdynamic
+#link_extract_LDFLAGS = -static
 link_extract_LDADD = ${ANT_LIBS}
 link_extract_DEPENDENCIES = libant.la
 
