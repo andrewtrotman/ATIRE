@@ -98,6 +98,7 @@ puts("");
 puts("STEMMING SIMILARITY THRESHOLD");
 puts("-----------");
 puts("--termsim<n>    Prevent stemming if term similarity is <= n [default=0.0]");
+puts("--clarity       Give clarity scores before each query");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -389,6 +390,8 @@ for (param = 1; param < argc; param++)
             thesaurus = TRUE;
             thesaurus_threshold = strtod(command + 8, NULL);
             }
+		else if (strstr(command, "-clarity") == command) 
+            clarity = TRUE;
 		else if (strcmp(command, "people") == 0)
 			{
 			ANT_credits();

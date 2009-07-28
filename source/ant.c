@@ -303,6 +303,10 @@ for (query = input.first(); query != NULL; query = input.next())
 		topic_id = -1;
 
 
+	if (params->thesaurus && params->clarity)
+        printf("Clarity: %u\n", ((ANT_thesaurus_engine *)search_engine)->clarity_score(query));
+
+
 	/*
 		Do the query and compute average precision
 	*/

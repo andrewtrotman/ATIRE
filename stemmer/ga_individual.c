@@ -9,11 +9,11 @@
 const char *banned[] = {"s"};
 
 inline int strnmatchlen(const char *a, const char *b, int n) {
-int count = 0;
-while (*a == *b && *a != '\0' && *b != '\0' && n > 0) {
-    count++; n--; a++; b++;
-}
-return count;
+    int count = 0;
+    while (*a == *b && *a != '\0' && *b != '\0' && n > 0) {
+        count++; n--; a++; b++;
+    }
+    return count;
 }
 /* 
 Remember that strings in rules may not be null terminated!
@@ -21,57 +21,57 @@ Remember that strings in rules may not be null terminated!
 */
 
 inline static int consonant_p(const char *s, int i) {
-switch (s[i]) {
-case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;
-case 'y': return (i == 0) ? TRUE : !consonant_p(s, i-1);
-default: return TRUE;
-}
-}
+    switch (s[i]) {
+    case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;
+    case 'y': return (i == 0) ? TRUE : !consonant_p(s, i-1);
+    default: return TRUE;
+    }
+ }
 
 /*
 Returns the measure of a string, 
 j being the start of the suffix to remove 
 */
 inline static int m(const char *s, int j) {
-int n = 0;
-int i = 0;
-while(TRUE) {
-    if (i > j) return n;
-    if (!consonant_p(s, i)) break; 
-    i++;
-}
-i++;
-while(TRUE) {
-    while(TRUE) { 
-        if (i > j) return n;
-        if (consonant_p(s, i)) break;
-        i++;
-    }
-    i++;
-    n++;
+    int n = 0;
+    int i = 0;
     while(TRUE) {
         if (i > j) return n;
-        if (!consonant_p(s, i)) break;
+        if (!consonant_p(s, i)) break; 
         i++;
     }
     i++;
-}
+    while(TRUE) {
+        while(TRUE) { 
+            if (i > j) return n;
+            if (consonant_p(s, i)) break;
+            i++;
+        }
+        i++;
+        n++;
+        while(TRUE) {
+            if (i > j) return n;
+            if (!consonant_p(s, i)) break;
+            i++;
+        }
+        i++;
+    }
 }
 
 inline unsigned int GA_individual::rules_size() {
-return count * RULE_SIZE;
+    return count * RULE_SIZE;
 }
 
 inline char GA_individual::measure(unsigned int n) {
-return rules[n * RULE_SIZE];
+    return rules[n * RULE_SIZE];
 }
 
 inline char *GA_individual::rule_from(unsigned int n) {
-return rules + (n * RULE_SIZE) + 1;
+    return rules + (n * RULE_SIZE) + 1;
 }
 
 inline char *GA_individual::rule_to(unsigned int n) {
-return rules + (n * RULE_SIZE) + RULE_STRING_MAX + 1;
+    return rules + (n * RULE_SIZE) + RULE_STRING_MAX + 1;
 }
 
 /* is a word on the banned list? */
@@ -124,7 +124,7 @@ char *GA_individual::apply(const char *string) {
             }
         }
     }
-
+    
     return buffer;
 }
 

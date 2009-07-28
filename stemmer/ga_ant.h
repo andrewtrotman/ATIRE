@@ -45,7 +45,7 @@ void trie_test(ANT_search_engine *search_engine) {
     stemmer per line. If it exists, then the GA will not be run, each stemmer will instead be run on the 
     queries.
 */
-void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **document_list, char **answer_list, char *stemmer_file) {
+void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list, char *stemmer_file) {
     char *query;
 	char **queries;
     long query_count, i;
@@ -72,13 +72,13 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 
     topic_ids = (long *) malloc(sizeof *topic_ids * query_count);
     for (i = 0; i < query_count; i++) {
-        strip_end_punc(queries[i]);
+        strip_space_inplace(query);
         if (!have_assessments)
             exit(printf("No assessments given.\n"));
         else
             {
                 topic_ids[i] = atol(queries[i]);
-                if ((query = strchr(queries[i], ' ')) == NULL)
+                if ((queries[i] = strchr(queries[i], ' ')) == NULL)
                     exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", i, queries[i]));
             }
     }

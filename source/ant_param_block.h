@@ -42,6 +42,7 @@ public:
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long thesaurus;						// 'correct' stemming with the thesaurus?
+	long clarity;  						// Output clarity score for each query
 	double thesaurus_threshold;			// threshold for rejecting stems with the thesaurus (default = 0.0)
 
 private:

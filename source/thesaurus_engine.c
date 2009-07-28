@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include "str.h"
 #include "ctypes.h"
 #include "stemmer.h"
 #include "btree_iterator.h"
@@ -182,7 +183,7 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
 void ANT_thesaurus_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function)
 {
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
-long long now, collection_frequency;
+long long collection_frequency;
 ANT_compressable_integer *current_document, *end;
 long document;
 char *term;
@@ -225,4 +226,175 @@ while (term != NULL)
 
 stemmed_term_details.collection_frequency = collection_frequency;
 ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
+}
+
+/*
+	ANT_THESAURUS_ENGINE::PROB_WORD_IN_QUERY()
+	------------------------------------------
+    Assumes buffer_b is filled with sum of tfs of query terms
+*/
+double ANT_thesaurus_engine::prob_word_in_query(char **query_terms, int query_term_count, char *word, double p_coll_w, long long documents_returned, double *p_coll_qs, long **q_buffers) 
+{
+double prob, mean, lambda = 0.6;
+long *doc_lengths;
+int i, j;
+
+/*
+  P(w|Q) = sigma   P(w|D) * P(D|Q)
+          (D in R)
+
+  where R is the set of documents containing at least one of the query terms.
+*/
+doc_lengths = get_document_lengths(&mean);
+fill_buffer_with_postings(word, buffer_a);
+
+for (i = 0; i < documents; i++)
+    {
+    if (buffer_b[i])
+        {
+        /*
+          P(w|D) = lambda Pml(w|D) + (1 - lambda) Pcoll(w)
+          
+          Pml = relative frequency
+        */
+        double pml_w_d = (double)buffer_a[i] / (double) doc_lengths[i];
+        double p_w_d = lambda * pml_w_d + (1 - lambda) * p_coll_w;
+
+        /*
+          P(D|Q) ~= P(Q|D) P(D) via Bayes. P(Q) is assumed(ish) to be 1.
+         */
+        double p_d = 1 / (double) documents_returned; // No chance of 0.
+        /*
+          P(Q|D) =    PI    P(q|D)
+                   (q in Q)
+
+          P(q|D) is much like P(w|D)
+         */ 
+        double p_q_d = 1;
+        for (j = 0; j < query_term_count; j++) {
+            double pml_small_q_d = (double)q_buffers[j][i] / (double) doc_lengths[i];
+            double p_small_q_d = lambda * pml_small_q_d + (1 - lambda) * p_coll_qs[j];
+            p_q_d *= p_small_q_d;
+        }
+
+        double p_d_q = p_q_d * p_d;
+        
+        prob += p_w_d * p_d_q;
+        }
+    }
+
+return prob;
+}
+
+/*
+	ANT_THESAURUS_ENGINE::CLARITY_SCORE()
+	-------------------------------------
+    Currently uses the Kullback-Leibler divergence between the query and the collection.
+    (Jensen-Shannon is another possibility.)
+*/
+double ANT_thesaurus_engine::clarity_score(char *query) 
+{
+ANT_btree_iterator all_terms(this);
+ANT_search_engine_btree_leaf details;
+char **query_terms;
+char *start, *end, *term;
+long long total_collection_frequency = 0, documents_returned = 0;
+int i, j, query_term_count = 0;
+double *p_coll_qs, score = 0.0;
+long **q_buffers;
+
+/*
+  Get the query terms.
+*/
+end = query;
+while (*end != '\0') 
+    {
+    start = end;
+    while (!ANT_isalpha(*start))
+        start++;
+    end = start + 1;
+    while (ANT_isalpha(*end))
+        end++;
+    query_term_count++;
+    }
+
+query_terms = (char **)malloc(sizeof *query_terms * query_term_count);
+
+end = query;
+for (i = 0; i < query_term_count; i++) 
+    {
+    start = end;
+    while (!ANT_isalpha(*start)) 
+        start++;
+    end = start + 1;
+    while (ANT_isalpha(*end))
+        end++;
+    query_terms[i] = strndup(start, end - start); /* Allocates memory */
+    }
+
+/* fill all the query buffers - to avoid doing this for all w in vocab */
+q_buffers = (long **)malloc(sizeof **q_buffers * query_term_count);
+for (i = 0; i < query_term_count; i++) 
+    {
+    q_buffers[i] = (long *)malloc(sizeof *q_buffers * documents);
+    fill_buffer_with_postings(query_terms[i], q_buffers[i]);
+    }
+
+ /* Get the total collection frequency - total occurances of all terms: TODO - doc lengths */
+for (term = all_terms.first("a"); term != NULL; term = all_terms.next()) 
+    total_collection_frequency += get_postings_details(term, &details)->collection_frequency;
+
+p_coll_qs = (double *) malloc(sizeof *p_coll_qs * query_term_count);
+for (i = 0; i < query_term_count; i++) 
+    {
+    p_coll_qs[i] =
+        (double) get_postings_details(query_terms[i], &details)->collection_frequency /
+        (double) total_collection_frequency;
+    }
+
+/* 
+   We also need buffer_b to have the term totals.
+   So we can figure out which docs contain at least one term.
+*/
+memset(buffer_b, 0, documents * sizeof *buffer_a);
+for (i = 0; i < query_term_count; i++)
+    {
+    fill_buffer_with_postings(query_terms[i], buffer_a);
+    for (j = 0; j < documents; j++) 
+        buffer_b[j] += buffer_a[j];
+    }
+for (i = 0; i < documents; i++) 
+    if (buffer_b[i])
+        documents_returned++;
+
+/* 
+   Actual calculation 
+                                               P(w|Q)
+   Clarity Score =    Sigma      P(w|Q) log_2 ---------
+                   (w in Vocab)                Pcoll(w)
+   
+   Q - query
+   Pcoll - Relative frequency in the whole collection
+*/
+
+for (term = all_terms.first("a"); term != NULL; term = all_terms.next()) 
+    {
+    double p_coll_w = 
+        (double) get_postings_details(term, &details)->collection_frequency /
+        (double) total_collection_frequency;
+    double p_w_q = prob_word_in_query(query_terms, query_term_count, term, p_coll_w, documents_returned, p_coll_qs, q_buffers);
+    
+    score += p_w_q * log(p_w_q / p_coll_w) / log(2);
+    }
+
+/* Clean up */
+for (i = 0; i < query_term_count; i++)
+    {
+    free(query_terms[i]);
+    free(q_buffers[i]);
+    }
+free(query_terms);
+free(q_buffers);
+free(p_coll_qs);
+return score;
 }

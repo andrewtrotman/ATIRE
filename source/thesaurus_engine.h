@@ -29,6 +29,7 @@ private:
 private:
 	long long fill_buffer_with_postings(char *term, long *buffer);
 	double buffer_similarity(long long buffer_a_total, long long buffer_b_total);
+    double prob_word_in_query(char **query_terms, int query_term_count, char *word, double p_coll_w, long long documents_returned, double *p_coll_qs, long **q_buffers); 
 
 public:
 	ANT_thesaurus_engine(ANT_memory *memory, double threshold) : ANT_search_engine(memory)
@@ -41,6 +42,7 @@ public:
 	double term_similarity(char *term1, char *term2);
 	void stemming_exceptions(ANT_stemmer *stemmer, double threshold);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function);
+    double clarity_score(char *query);
 };
 
 

@@ -8,6 +8,10 @@
 #include <string.h>
 #include "ctypes.h"
 
+#ifdef __APPLE__
+#include <stdlib.h>
+#endif
+
 #ifdef _MSC_VER
 	inline char *strlower(char *a) { return _strlwr(a); }
 #endif
@@ -169,5 +173,33 @@ return string;
 
 #endif
 
+#ifdef __APPLE__
+/*
+	STRNLEN()
+	---------
+*/
+inline size_t strnlen(char *s, size_t n) 
+{
+size_t l = 0;
+while (l < n && s[l])
+    l++;
+return l;
+}
+
+/*
+	STRNDUP()
+	---------
+*/
+inline char *strndup(char *string, size_t size)
+{
+size_t actual = strnlen(string, size);
+char *result = (char *) malloc(sizeof *result * (actual + 1));
+
+strncpy(result, string, actual);
+result[actual + 1] = '\0';
+
+return result;
+}
+#endif
 
 #endif __STR_H__

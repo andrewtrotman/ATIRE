@@ -126,7 +126,7 @@ ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // ra
 /*
 	Reporting
 */
-/*
+
 if (params->stats & ANT_ANT_param_block::SHORT)
 	{
 	if (topic_id >= 0)
@@ -137,15 +137,19 @@ if (params->stats & ANT_ANT_param_block::SHORT)
 
 if (did_query && params->stats & ANT_ANT_param_block::QUERY)
 	search_engine->stats_text_render();
-*/
+
 /*
 	Compute average previsions
 */
 if (map != NULL)
+    {
 	if (params->metric == ANT_ANT_param_block::MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
-	else
+	else if (params->metric == ANT_ANT_param_block::MAgP)
 		average_precision = map->average_generalised_precision(topic_id, search_engine);
+	else if (params->metric == ANT_ANT_param_block::RANKEFF)
+		average_precision = map->rank_effectiveness(topic_id, search_engine);
+    }
 
 /*
 	Return the number of document that matched the user's query
@@ -206,9 +210,12 @@ for (query = input.first(); query != NULL; query = input.next())
 	/*
 		Parsing to get the topic number
 	*/
-	strip_end_punc(query);
+	strip_space_inplace(query);
 	if (strcmp(query, ".quit") == 0)
 		break;
+	if (*query == '\0')
+		continue;			// ignore blank lines
+
 	if (!have_assessments)
 		topic_id = -1;
 	else
@@ -274,12 +281,15 @@ return mean_average_precision;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long long *documents_in_id_list)
+char **read_docid_list(long long *documents_in_id_list, char ***filename_list)
 {
-char *document_list_buffer;			// this is leaked!!!!
+char *document_list_buffer, *filename_list_buffer;
 
 if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
 	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+
+filename_list_buffer = strnew(document_list_buffer);
+*filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);
 
 return ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 }
@@ -295,26 +305,27 @@ ANT_search_engine *search_engine;
 ANT_mean_average_precision *map = NULL;
 ANT_memory memory;
 long last_param;
-ANT_ANT_param_block params(argc, argv);
-char **document_list, **answer_list;
+ char **document_list, **answer_list, **filename_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
 
 #ifndef VOCAB_TOOL
 char *stemmer_file = NULL;
-if (argc > 1 && argv[1][0] == '-' && argv[1][0] == 's') {
+if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 's') {
      stemmer_file = argv[1] + 2;
-     argc++;
+     argc--;
+     argv++;
  }
 #endif
 
+ANT_ANT_param_block params(argc, argv);
 
 last_param = params.parse();
 
 if (params.logo)
 	puts(ANT_version_string);				// print the version string if we parsed the parameters OK
 
-document_list = read_docid_list(&documents_in_id_list);
+ document_list = read_docid_list(&documents_in_id_list, &filename_list);
 
 if (params.assessments_filename != NULL)
 	{
@@ -332,38 +343,7 @@ search_engine = new ANT_search_engine(&memory);
 #ifdef VOCAB_TOOL
 trie_test(search_engine);
 #else
-ga_ant(search_engine, map, &params, document_list, answer_list, stemmer_file);
-#endif
-
-#ifdef FIT_BM25
-/*
-	This code can be used for optimising the BM25 parameters.
-*/
-if (argc == 4)
-	{
-	double map;
-	FILE *outfile;
-	extern double BM25_k1;
-	extern double BM25_b;
-
-	outfile = fopen(argv[3], "wb"); 
-	fprintf(outfile, "%f ", 0.0);
-	for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
-		fprintf(outfile, "%f ", BM25_b);
-	fprintf(outfile, "\n");
-
-	for (BM25_k1 = 0.1; BM25_k1 < 4.0; BM25_k1+= 0.1)
-		{
-		fprintf(outfile, "%f ", BM25_k1);
-		for (BM25_b = 0.1; BM25_b < 1.0; BM25_b += 0.1)
-			{
-				map = batch_ant(argv[1], argv[2]); 
-			fprintf(outfile, "%f ", map);
-			}
-		fprintf(outfile, "\n");
-		}
-	}
-	fclose(outfile);
+ga_ant(search_engine, map, &params, document_list, filename_list, answer_list, stemmer_file);
 #endif
 
 delete map;
@@ -383,10 +363,18 @@ char **get_queries(long *query_count, ANT_ANT_param_block *params) {
     char *query;
     int i;
     *query_count = 0;
-    for (query = input.first(); query != NULL; query = input.next()) 
-        (*query_count)++;
+    for (query = input.first(); query != NULL; query = input.next()) {
+        strip_space_inplace(query);
+        if (query != '\0')
+            (*query_count)++;
+    }
     queries = (char **)malloc(sizeof *queries * *query_count);
-    for (query = input.first(), i = 0; query != NULL; query = input.next(), i++) 
+    for (query = input.first(), i = 0; query != NULL; query = input.next(), i++) {
+        strip_space_inplace(query);
+        if (query == '\0')
+            continue;
+
         queries[i] = strdup(query);
+    }
     return queries;
 }
