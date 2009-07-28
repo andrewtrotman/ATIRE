@@ -235,7 +235,7 @@ ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buf
 */
 double ANT_thesaurus_engine::prob_word_in_query(char **query_terms, int query_term_count, char *word, double p_coll_w, long long documents_returned, double *p_coll_qs, long **q_buffers) 
 {
-double prob, mean, lambda = 0.6;
+double prob = 0, mean, lambda = 0.6;
 long *doc_lengths;
 int i, j;
 
