@@ -174,32 +174,19 @@ return string;
 #endif
 
 #ifdef __APPLE__
+
 /*
 	STRNLEN()
 	---------
 */
-inline size_t strnlen(char *s, size_t n) 
+inline size_t strnlen(char *string, size_t max) 
 {
-size_t l = 0;
-while (l < n && s[l])
-    l++;
-return l;
+size_t length = 0;
+while (length < max && string[length] != '\0')
+	length++;
+return length;
 }
 
-/*
-	STRNDUP()
-	---------
-*/
-inline char *strndup(char *string, size_t size)
-{
-size_t actual = strnlen(string, size);
-char *result = (char *) malloc(sizeof *result * (actual + 1));
-
-strncpy(result, string, actual);
-result[actual + 1] = '\0';
-
-return result;
-}
 #endif
 
 #endif __STR_H__

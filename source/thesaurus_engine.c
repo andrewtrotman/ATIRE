@@ -324,7 +324,7 @@ for (i = 0; i < query_term_count; i++)
     end = start + 1;
     while (ANT_isalpha(*end))
         end++;
-    query_terms[i] = strndup(start, end - start); /* Allocates memory */
+    query_terms[i] = strnnew(start, end - start); /* Allocates memory */
     }
 
 /* Get the total collection frequency - total occurances of all terms */
@@ -388,14 +388,13 @@ for (term = all_terms.first("a"); term != NULL; term = all_terms.next())
         (double) total_collection_frequency;
     double p_w_q = prob_word_in_query(query_terms, query_term_count, term, p_coll_w, documents_returned, p_q_d_buffer, lambda);
     
-    score += p_w_q * log(p_w_q / p_coll_w) / log(2);
+    score += p_w_q * log(p_w_q / p_coll_w) / log(2.0);
     }
 
 /* Clean up */
 for (i = 0; i < query_term_count; i++)
-    {
-    free(query_terms[i]);
-    }
+    delete [] query_terms[i];
+
 free(query_terms);
 free(p_q_d_buffer);
 return score;
