@@ -32,12 +32,12 @@ public:
 	virtual ~ANT_readability_factory() {}
 	
 	ANT_string_pair *get_next_token(void);
-	void set_document(unsigned char *document);
 	void handle_node(ANT_memory_index_hash_node *node);
 	void index(ANT_memory_index *index);
 	
-	void set_measure(unsigned long value);
-	void set_parser(ANT_parser *parser);
+	inline void set_document(unsigned char *document);
+	inline void set_measure(unsigned long value);
+	inline void set_parser(ANT_parser *parser);
 };
 
 #endif __READABILITY_FACTORY_H__

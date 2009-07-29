@@ -22,7 +22,6 @@ public:
 	ANT_readability() {};
 	virtual ~ANT_readability() {};
 	
-	virtual void set_document(unsigned char *document) {};
 	virtual void index(ANT_memory_index *index) = 0;
 
 protected:

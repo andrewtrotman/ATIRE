@@ -4,7 +4,7 @@
 */
 #include "readability_factory.h"
 #include "readability_factory_measure.h"
-//#include "readability_none.h"
+#include "readability_none.h"
 #include "readability_dale_chall.h"
 
 /*
@@ -13,7 +13,7 @@
 	Declaration of an object of each of the known readability types.
 	Pointers to these will be used below as objects to calculate readability.
 */
-//static ANT_readability_none none;
+static ANT_readability_none none;
 static ANT_readability_dale_chall dale_chall;
 
 /*
@@ -23,7 +23,7 @@ static ANT_readability_dale_chall dale_chall;
 */
 ANT_readability_factory_measure ANT_readability_factory::measure[] =
 {
-//{NONE, &none},
+{NONE, &none},
 {DALE_CHALL, &dale_chall}
 };
 
@@ -38,6 +38,9 @@ ANT_string_pair *ANT_readability_factory::get_next_token()
 long which;
 ANT_string_pair *token = parser->get_next_token();
 
+/*
+	Each measure we're using should now handle the token
+*/
 for (which = 0; which < number_of_measures; which++)
 	if ((measure[which].measure_id & measures_to_use) != 0)
 		measure[which].measure->handle_token(token);
