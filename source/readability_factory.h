@@ -35,9 +35,9 @@ public:
 	void handle_node(ANT_memory_index_hash_node *node);
 	void index(ANT_memory_index *index);
 	
-	inline void set_document(unsigned char *document);
-	inline void set_measure(unsigned long value);
-	inline void set_parser(ANT_parser *parser);
+	void set_document(unsigned char *document);
+	void set_measure(unsigned long value);
+	void set_parser(ANT_parser *parser);
 };
 
 #endif __READABILITY_FACTORY_H__
