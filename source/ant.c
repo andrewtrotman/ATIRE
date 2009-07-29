@@ -28,6 +28,7 @@
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
+#include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
 
 #ifndef FALSE
@@ -483,6 +484,8 @@ else
 		ranking_function = new ANT_ranking_function_lmjm(search_engine, params.lmjm_l);
 	else if (params.ranking_function == ANT_ANT_param_block::BOSE_EINSTEIN)
 		ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
+	else if (params.ranking_function == ANT_ANT_param_block::DIVERGENCE)
+		ranking_function = new ANT_ranking_function_divergence(search_engine);
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 

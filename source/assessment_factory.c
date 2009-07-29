@@ -2,6 +2,7 @@
 	ASSESSMENT_FACTORY.C
 	--------------------
 */
+#include <stdlib.h>
 #include <stdio.h>
 #include "str.h"
 #include "assessment_factory.h"
@@ -39,8 +40,8 @@ if (separators == 1)
 	factory = new ANT_assessment_ANT();
 else if (separators >= 4)
 	factory = new ANT_assessment_INEX();
-else 
-    exit(fprintf(stderr, "Unrecognised assessment format.\n"));
+else
+	exit(fprintf(stderr, "Unrecognised assessment format.\n"));
 
 factory->copy(this);
 

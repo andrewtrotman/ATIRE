@@ -11,7 +11,9 @@
 /*
 	ANT_RANKING_FUNCTION_BOSE_EINSTEIN::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------------
-	Language Models with Dirichlet smoothing
+	Ranking function GL2 from:
+	G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on 
+	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
 */
 void ANT_ranking_function_bose_einstein::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
@@ -26,6 +28,14 @@ ANT_compressable_integer *current, *end;
 
 	where
 		tf'(td) = tf(td) * log(1 + av_len_d / len(d))
+
+
+	This implementation has:
+		Inf =according to the Geometric estimation of the Bose Einstein Model of Randomness
+		First Normalisation according to Laplace's Law of Succession
+		Second (length) normalisation according to H2
+	and is therefore GL2
+		
 */
 current = impact_ordering;
 end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);

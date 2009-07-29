@@ -140,6 +140,7 @@ puts("-------");
 puts("-R[function]    Rank the result set using");
 puts("   be           Bose-Einstein");
 puts("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] [default]");
+puts("   divergence   Divergence from randomness using I(ne)B2");
 puts("   impact       Sum of impact scores");
 puts("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500]");
 puts("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1]");
@@ -313,6 +314,8 @@ else if (strncmp(which, "lmjm", 4) == 0)
 	}
 else if (strcmp(which, "be") == 0)
 	ranking_function = BOSE_EINSTEIN;
+else if (strcmp(which, "divergence") == 0)
+	ranking_function = DIVERGENCE;
 else if (strcmp(which, "impact") == 0)
 	ranking_function = IMPACT;
 else if (strcmp(which, "readable") == 0)

@@ -99,6 +99,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_lmd.obj	\
 	$(OBJDIR)\ranking_function_lmjm.obj	\
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
+	$(OBJDIR)\ranking_function_divergence.obj	\
 	$(OBJDIR)\ranking_function_bm25.obj			
 
 #

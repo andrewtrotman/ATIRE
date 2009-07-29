@@ -10,6 +10,8 @@
 	#include <stddef.h>
 #endif
 
+#include <math.h>
+
 /*
 	ANT_SIGN()
 	------
@@ -61,6 +63,26 @@ do
 while (x != 0);
 
 return sum;
+}
+
+/*
+	ANT_LOG_TO_BASE()
+	-----------------
+*/
+inline double ANT_log_to_base(double base, double value)
+{
+return log(value) / log(base);
+}
+
+/*
+	ANT_LOG2()
+	----------
+*/
+inline double ANT_log2(double value)
+{
+static double log2 = log(2.0);
+
+return log(value) / log2;
 }
 
 /*

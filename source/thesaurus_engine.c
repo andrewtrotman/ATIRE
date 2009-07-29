@@ -29,7 +29,7 @@ long long ANT_thesaurus_engine::fill_buffer_with_postings(char *term, long *buff
 ANT_search_engine_btree_leaf term_details;
 ANT_compressable_integer *current_document, *end;
 long document;
-long long tf_length_squared;
+long long tf_length_squared = 0;
 ANT_compressable_integer term_frequency;
 
 memset(buffer, 0, (size_t)(sizeof (*buffer) * documents));
@@ -49,13 +49,13 @@ end = decompress_buffer + term_details.impacted_length;
 while (current_document < end)
 	{
 	term_frequency = *current_document++;
-    tf_length_squared = term_frequency * term_frequency;
+	tf_length_squared = term_frequency * term_frequency;
 	document = -1;
 	while (*current_document != 0)
 		{
 		document += *current_document++;
 		buffer[document] = term_frequency;
-        tf_length_squared += term_frequency * term_frequency;
+		tf_length_squared += term_frequency * term_frequency;
 		}
 	current_document++;
 	}

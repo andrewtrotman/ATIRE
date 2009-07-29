@@ -14,7 +14,7 @@ public:
 	enum { MAP, MAgP, RANKEFF } ;									// metrics
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2 } ;					// evaluation forum
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };				// statistics to print (bitstring)
-	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN};		// ranking function
+	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN, DIVERGENCE};		// ranking function
 
 private:
 	int argc;

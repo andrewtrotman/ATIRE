@@ -17,7 +17,7 @@ public:
 		using floating point arrithmatic.  The effect on precision is in the 5th decimal place (negligable) and so can be ignored.
 		For higher accuracy at an execution cost set ANT_accumulator_t to a double (or float).
 	*/
-	typedef short ANT_accumulator_t;			// short or double
+	typedef double ANT_accumulator_t;			// short or double
 
 private:
 	ANT_accumulator_t rsv;
