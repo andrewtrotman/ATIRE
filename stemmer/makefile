@@ -67,7 +67,6 @@ OBJECTS = \
 	compress_none.o \
 	compress_sigma.o \
 	compression_factory.o \
-    readability_none.o \
     readability_dale_chall.o \
     readability_factory.o \
 	search_engine_readability.o \

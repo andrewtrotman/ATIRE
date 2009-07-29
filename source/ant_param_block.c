@@ -98,7 +98,7 @@ puts("");
 puts("TERM SIMILARITY");
 puts("-----------");
 puts("--termsim<n>    Prevent stemming if term similarity is <= n [default=0.0]");
-puts("--clarity       Give clarity scores for each query, requires --termsim (SLOW)");
+puts("--clarity       Give clarity scores for each query, requires --termsim");
 puts("");
 
 puts("OPTIMISATIONS");

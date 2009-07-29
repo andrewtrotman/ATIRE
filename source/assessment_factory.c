@@ -24,21 +24,23 @@ delete factory;
 ANT_relevant_document *ANT_assessment_factory::read(char *filename, long long *reldocs)
 {
 FILE *fp;
-long seperators = 0;
+long separators = 0;
 char buffer[1024];		// look at the first 1KB of the file
 
 if ((fp = fopen(filename, "r")) == NULL)
 	return NULL;
 
 while (fgets(buffer, sizeof(buffer), fp) != 0)
-	if ((seperators = strcountchr(buffer, ' ')) != 0)
+	if ((separators = strcountchr(buffer, ' ')) != 0)
 		break;
 fclose(fp);
 
-if (seperators == 1)
+if (separators == 1)
 	factory = new ANT_assessment_ANT();
-else if (seperators >= 4)
+else if (separators >= 4)
 	factory = new ANT_assessment_INEX();
+else 
+    exit(fprintf(stderr, "Unrecognised assessment format.\n"));
 
 factory->copy(this);
 

@@ -304,7 +304,7 @@ for (query = input.first(); query != NULL; query = input.next())
 
 
 	if (params->thesaurus && params->clarity)
-        printf("Clarity: %u\n", ((ANT_thesaurus_engine *)search_engine)->clarity_score(query));
+        printf("Clarity: %lf\n", ((ANT_thesaurus_engine *)search_engine)->clarity_score(query, ranking_function));
 
 
 	/*

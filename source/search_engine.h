@@ -32,7 +32,6 @@ private:
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
 	long btree_nodes;
-	ANT_search_engine_accumulator **accumulator_pointers;
 	long long max_header_block_size;
 	long string_length_of_longest_term;
 	long long highest_df;
@@ -46,6 +45,7 @@ protected:
 	long *document_lengths;
 	double mean_document_length;
 	ANT_search_engine_accumulator *accumulator;
+	ANT_search_engine_accumulator **accumulator_pointers;
 	long long stem_buffer_length_in_bytes;
 	long long trim_postings_k;
 	long long collection_length_in_terms;

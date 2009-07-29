@@ -12,6 +12,7 @@
 
 #include "search_engine.h"
 #include "memory.h"
+#include "search_engine_accumulator.h"
 
 class ANT_stemmer;
 
@@ -28,8 +29,8 @@ private:
 
 private:
 	long long fill_buffer_with_postings(char *term, long *buffer);
-	double buffer_similarity(long long buffer_a_total, long long buffer_b_total);
-    double prob_word_in_query(char **query_terms, int query_term_count, char *word, double p_coll_w, long long documents_returned, double *p_q_d_buffer, double lambda); 
+	double buffer_similarity(char *a, long long buffer_a_total, char *b, long long buffer_b_total);
+    double prob_word_in_query(char *query_term, ANT_search_engine_accumulator::ANT_accumulator_t *full_query_results, ANT_ranking_function *ranking_function);
 
 public:
 	ANT_thesaurus_engine(ANT_memory *memory, double threshold) : ANT_search_engine(memory)
@@ -42,7 +43,7 @@ public:
 	double term_similarity(char *term1, char *term2);
 	void stemming_exceptions(ANT_stemmer *stemmer, double threshold);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function);
-    double clarity_score(char *query, double lambda = 0.6);
+    double clarity_score(char *query, ANT_ranking_function *ranking_function);
 };
 
 
