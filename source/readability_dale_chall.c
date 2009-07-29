@@ -14,7 +14,10 @@
 ANT_readability_dale_chall::ANT_readability_dale_chall()
 {
 number_of_words = number_of_sentences = number_of_unfamiliar_words = 0;
-size = 65005; // biggest doc in wiki is 65003
+/*
+	Biggest document in wiki07/08 is 65003 - dirty to avoid expanding
+*/
+size = 65005; 
 words_encountered = new word[size];
 measure_name = new ANT_string_pair("~dalechall");
 }
@@ -29,15 +32,15 @@ delete [] words_encountered;
 }
 
 /*
-	ANT_READABILITY_DALE_CHALL::GET_NEXT_TOKEN()
-	--------------------------------------------
+	ANT_READABILITY_DALE_CHALL::HANDLE_TOKEN()
+	------------------------------------------
 */
-ANT_string_pair *ANT_readability_dale_chall::get_next_token(void)
+void ANT_readability_dale_chall::handle_token(ANT_string_pair *token)
 {
-ANT_string_pair *token = parser->get_next_token();
+char *str;
 
 if (token == NULL)
-	return token;
+	return;
 
 /*
 	If we've been given just sentence endings, add them, then get next token
@@ -45,31 +48,22 @@ if (token == NULL)
 if (ANT_parser_readability::issentenceend(*token->start))
 	{
 	number_of_sentences += token->length();
-	return get_next_token();
+	return;
 	}
 
 /*
 	If we've been given a tag, remove the starting < and pass it on
 */
 if (*token->start == '<')
-	{
-	token->start++;
-	token->string_length--;
-	return token;
-	}
+	return;
 
 last_was_title = ANT_isupper(*token->start);
 
-/*
-	Remove the sentence endings from the end of the token
-*/
-while (ANT_parser_readability::issentenceend(token->start[token->length() - 1]))
-	{
-	number_of_sentences++;
-	token->string_length--;
-	}
-
-return token->strlower();
+str = token->str();
+number_of_sentences += strcountchr(str, '.');
+number_of_sentences += strcountchr(str, '!');
+number_of_sentences += strcountchr(str, '?');
+delete str;
 }
 
 /*
@@ -103,7 +97,9 @@ int comparison = 1;			// non-zero
 if (number_of_words == 0)
 	return 0;
 
-// sort the list of terms encountered
+/* 
+	sort the list of terms encountered
+*/
 qsort(words_encountered, number_of_words, sizeof(*words_encountered), ANT_readability_dale_chall::word_cmp);
 
 prev = &words_encountered[0];
@@ -142,20 +138,26 @@ for (i = 1; i < number_of_words; i++)
 			wordlist_position++;
 			}
 
-		if (comparison == 0) // found a familiar word
+		if (comparison == 0) 
 			{
-			// skip over the word in the wordlist
+			/*
+				found a familiar word so skip over it in the wordlist
+			*/
 			wordlist_position++;
 			}
 		else
 			{
 			term_frequency = prev->node->tf_list_tail->data[prev->node->tf_node_used - 1];
-			// if it's only occured as title-case then it's a name
-			// cheap/fugly approximaion
+			/*
+				if it's only occured as title-case then it's a name
+				cheap/fugly approximaion
+			*/
 			number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
 			}
 		
-		// reset things for the new word
+		/*
+			reset things for the next word
+		*/
 		prev = curr;
 		istitle = prev->istitle;
 		}
@@ -174,7 +176,9 @@ if (comparison != 0)
 	number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
 	}
 
-// avoid division by zero errors
+/*
+	avoid division by zero errors
+*/
 if (number_of_sentences == 0)
 	number_of_sentences = 1;
 
@@ -182,19 +186,10 @@ return (long)(1000 * ((0.049 * number_of_words / number_of_sentences) + (15.79 *
 }
 
 /*
-	ANT_READABILITY_DALE_CHALL::SET_DOCUMENT()
-	------------------------------------------
+	ANT_READABILITY_DALE_CHALL::HANDLE_NODE()
+	-----------------------------------------
 */
-void ANT_readability_dale_chall::set_document(unsigned char *document)
-{
-parser->set_document(document);
-}
-
-/*
-	ANT_READABILITY_DALE_CHALL::ADD_NODE()
-	--------------------------------------
-*/
-void ANT_readability_dale_chall::add_node(ANT_memory_index_hash_node *node)
+void ANT_readability_dale_chall::handle_node(ANT_memory_index_hash_node *node)
 {
 /*
 	If we've been given a tag or number to deal with, then just ignore it.
@@ -203,12 +198,20 @@ if (ANT_isupper(node->string[0]) || ANT_isdigit(node->string[0]))
 	return;
 
 /*
+	If it's on the suffix list then ignore it.
+
+	Couldn't get bsearch to work - it was comparing node->string with garbage.
+*/
+for (unsigned long i = 0; i < ANT_readability_dale_chall_suffixlist_length; i++)
+	if (node->string.true_strcmp(ANT_readability_dale_chall_suffixlist[i]) == 0)
+		return;
+
+/*
 	If we've run out of room then expand the size of the list of hash nodes to 
 	twice the size it currently is
 */
 if (number_of_words == size)
 	{
-	// expand
 	word *new_words = new word[size * 2];
 	memcpy(new_words, words_encountered, sizeof(*words_encountered) * size);
 	size *= 2;
@@ -216,7 +219,9 @@ if (number_of_words == size)
 	words_encountered = new_words;
 	}
 
-// add this hash node/word to the list of encountered ones
+/*
+	Add the word to our list of words
+*/
 words_encountered[number_of_words].node = node;
 words_encountered[number_of_words].istitle = last_was_title;
 number_of_words++;
@@ -230,6 +235,5 @@ void ANT_readability_dale_chall::index(ANT_memory_index *index)
 {
 index->set_document_detail(measure_name, score());
 
-// If we're adding to the index, we've finished with this document
 number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
 }

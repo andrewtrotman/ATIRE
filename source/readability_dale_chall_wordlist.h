@@ -6,7 +6,6 @@
 #ifndef __READABILITY_DALE_CHALL_WORDLIST_H__
 #define __READABILITY_DALE_CHALL_WORDLIST_H__
 
-
 /*
 	ANT_readability_dale_chall_wordlist
 	-----------------------------------
@@ -293,7 +292,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"arear",
     (char *)"areas",
     (char *)"ared",
-    (char *)"aren't",
     (char *)"ares",
     (char *)"arest",
     (char *)"arise",
@@ -1461,7 +1459,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"camping",
     (char *)"camps",
     (char *)"can",
-    (char *)"can't",
     (char *)"canal",
     (char *)"canaled",
     (char *)"canaler",
@@ -2236,7 +2233,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"coughs",
     (char *)"could",
     (char *)"couldest",
-    (char *)"couldn't",
     (char *)"count",
     (char *)"counted",
     (char *)"counter",
@@ -2703,7 +2699,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"dictionary",
     (char *)"did",
     (char *)"didest",
-    (char *)"didn't",
     (char *)"die",
     (char *)"died",
     (char *)"dieing",
@@ -2842,7 +2837,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"dodging",
     (char *)"doer",
     (char *)"does",
-    (char *)"doesn't",
     (char *)"doest",
     (char *)"dog",
     (char *)"doges",
@@ -2862,8 +2856,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"dolls",
     (char *)"dolly",
     (char *)"dollying",
-    (char *)"don't",
-    (char *)"don'ts",
     (char *)"done",
     (char *)"donkey",
     (char *)"donkeys",
@@ -4487,7 +4479,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"haded",
     (char *)"hades",
     (char *)"hading",
-    (char *)"hadn't",
     (char *)"hail",
     (char *)"hailed",
     (char *)"hailer",
@@ -4592,7 +4583,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"harvesting",
     (char *)"harvests",
     (char *)"has",
-    (char *)"hasn't",
     (char *)"hat",
     (char *)"hatch",
     (char *)"hatched",
@@ -4617,7 +4607,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"hauling",
     (char *)"hauls",
     (char *)"have",
-    (char *)"haven't",
     (char *)"haver",
     (char *)"haves",
     (char *)"having",
@@ -4633,7 +4622,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"haying",
     (char *)"hays",
     (char *)"he",
-    (char *)"he'll",
     (char *)"head",
     (char *)"headache",
     (char *)"headaches",
@@ -5043,10 +5031,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"hymning",
     (char *)"hymns",
     (char *)"i",
-    (char *)"i'd",
-    (char *)"i'll",
-    (char *)"i'm",
-    (char *)"i've",
     (char *)"ice",
     (char *)"ice-cream",
     (char *)"iceberg",
@@ -5162,10 +5146,7 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"islander",
     (char *)"islanding",
     (char *)"islands",
-    (char *)"isn't",
     (char *)"it",
-    (char *)"it'll",
-    (char *)"it's",
     (char *)"itd",
     (char *)"iter",
     (char *)"its",
@@ -6472,7 +6453,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"musted",
     (char *)"muster",
     (char *)"musting",
-    (char *)"mustn't",
     (char *)"musts",
     (char *)"my",
     (char *)"myself",
@@ -6554,7 +6534,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"needler",
     (char *)"needles",
     (char *)"needling",
-    (char *)"needn't",
     (char *)"needs",
     (char *)"negro",
     (char *)"negroes",
@@ -6729,7 +6708,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"nutted",
     (char *)"nutter",
     (char *)"nutting",
-    (char *)"o'clock",
     (char *)"oak",
     (char *)"oaks",
     (char *)"oar",
@@ -8808,8 +8786,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"shaves",
     (char *)"shaving",
     (char *)"she",
-    (char *)"she'd",
-    (char *)"she'll",
     (char *)"shed",
     (char *)"sheep",
     (char *)"sheet",
@@ -8902,7 +8878,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"shouldering",
     (char *)"shoulders",
     (char *)"shouldest",
-    (char *)"shouldn't",
     (char *)"shout",
     (char *)"shouted",
     (char *)"shouter",
@@ -10405,7 +10380,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"thanksgiving",
     (char *)"thanksgivings",
     (char *)"that",
-    (char *)"that's",
     (char *)"thatd",
     (char *)"thats",
     (char *)"the",
@@ -10422,7 +10396,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"then",
     (char *)"thens",
     (char *)"there",
-    (char *)"there's",
     (char *)"thered",
     (char *)"theres",
     (char *)"thermometer",
@@ -10430,10 +10403,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"these",
     (char *)"theses",
     (char *)"they",
-    (char *)"they'd",
-    (char *)"they'll",
-    (char *)"they're",
-    (char *)"they've",
     (char *)"theyd",
     (char *)"thick",
     (char *)"thicker",
@@ -11268,7 +11237,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"washing",
     (char *)"washroom",
     (char *)"washrooms",
-    (char *)"wasn't",
     (char *)"wasp",
     (char *)"wasps",
     (char *)"waste",
@@ -11313,8 +11281,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"waying",
     (char *)"ways",
     (char *)"we",
-    (char *)"we'll",
-    (char *)"we're",
     (char *)"weak",
     (char *)"weaken",
     (char *)"weakened",
@@ -11400,7 +11366,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"went",
     (char *)"wer",
     (char *)"were",
-    (char *)"weren't",
     (char *)"wering",
     (char *)"west",
     (char *)"wester",
@@ -11435,7 +11400,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"when",
     (char *)"whens",
     (char *)"where",
-    (char *)"where's",
     (char *)"whered",
     (char *)"wheres",
     (char *)"which",
@@ -11481,7 +11445,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"whitest",
     (char *)"whiting",
     (char *)"who",
-    (char *)"who's",
     (char *)"whod",
     (char *)"whole",
     (char *)"wholes",
@@ -11613,7 +11576,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"womans",
     (char *)"women",
     (char *)"won",
-    (char *)"won't",
     (char *)"wonder",
     (char *)"wondered",
     (char *)"wonderer",
@@ -11690,7 +11652,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"would",
     (char *)"wouldest",
     (char *)"woulding",
-    (char *)"wouldn't",
     (char *)"wound",
     (char *)"wounded",
     (char *)"wounder",
@@ -11769,8 +11730,6 @@ static char *ANT_readability_dale_chall_wordlist[] = {
     (char *)"yolks",
     (char *)"yonder",
     (char *)"you",
-    (char *)"you'd",
-    (char *)"you'll",
     (char *)"youd",
     (char *)"young",
     (char *)"younger",
@@ -11802,5 +11761,24 @@ static char *ANT_readability_dale_chall_wordlist[] = {
 };
 
 unsigned long ANT_readability_dale_chall_wordlist_length = sizeof(ANT_readability_dale_chall_wordlist) / sizeof(*ANT_readability_dale_chall_wordlist);
+
+/*
+	ANT_readability_dale_chall_suffixlist
+	-------------------------------------
+	The contractions that appear in the wordlist, can't occur as original words
+	in ANT, so don't count them as words in sentence or unfamiliar.
+*/
+static char *ANT_readability_dale_chall_suffixlist[] = {
+    (char *)"d",
+    (char *)"ll",
+    (char *)"m",
+    (char *)"o", // o'clock - not suffix, but contraction, clock is in wordlist
+    (char *)"re",
+    (char *)"s",
+    (char *)"t",
+    (char *)"ve"
+};
+
+unsigned long ANT_readability_dale_chall_suffixlist_length = sizeof(ANT_readability_dale_chall_suffixlist) / sizeof(*ANT_readability_dale_chall_suffixlist);
 
 #endif __READABILITY_DALE_CHALL_WORDLIST_H__

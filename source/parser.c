@@ -67,7 +67,7 @@ else if (*current == '\0')						// end of string
 	return NULL;
 else											// everything else (that starts with a '<')
 	{
-	start = ++current;
+	start = current++;
 	if (isXMLnamestartchar(*current))
 		{
 		while (isXMLnamechar(*current))

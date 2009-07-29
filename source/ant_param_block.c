@@ -137,7 +137,7 @@ puts("");
 
 puts("RANKING");
 puts("-------");
-puts("-R[function]    Use the readability search engine");
+puts("-R[function]    Rank the result set using");
 puts("   be           Bose-Einstein");
 puts("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] [default]");
 puts("   impact       Sum of impact scores");

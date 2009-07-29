@@ -157,7 +157,7 @@ for (param = first_param; param < argc; param++)
 				{
 				if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
 					terms_in_document++;
-				readability->add_node(index->add_term(token, doc));
+				readability->handle_node(index->add_term(token, doc));
 				done_work = TRUE;
 				}
 			}
