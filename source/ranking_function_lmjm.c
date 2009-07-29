@@ -22,7 +22,7 @@ ANT_compressable_integer *current, *end;
 
 /*
                  1 - lambda   tf(dt)   len(c)
-   rsv = log(1 + ---------- * ------ * ------
+   rsv = log(1 + ---------- * ------ * ------)
                    lambda     len(d)    cf(t)
 */
 current = impact_ordering;
