@@ -49,7 +49,6 @@ end = decompress_buffer + term_details.impacted_length;
 while (current_document < end)
 	{
 	term_frequency = *current_document++;
-	tf_length_squared = term_frequency * term_frequency;
 	document = -1;
 	while (*current_document != 0)
 		{
@@ -68,55 +67,72 @@ return tf_length_squared;
 	-----------------------------------------
   Calculates how similar the two buffers are.
 */
-double ANT_thesaurus_engine::buffer_similarity(char *a, long long buffer_a_total, char *b, long long buffer_b_total) 
+double ANT_thesaurus_engine::buffer_similarity(char *a, char *b) 
 {
-ANT_search_engine_btree_leaf details;
-long long doc;
-double length_a = 0, length_b = 0;
-double similarity = 0;
-double tf_a, tf_b, idf_a, idf_b;
+ANT_search_engine_btree_leaf term_details;
+ANT_compressable_integer *current_document, *end;
+double length_b = 0, similarity = 0;
+double idf_a, idf_b;
+long document;
+ANT_compressable_integer term_frequency;
 
-if (buffer_a_total == 0 || buffer_b_total == 0)
-	return 0.0;
+if (buffer_a_length_squared == 0)
+    return 0.0;
 
-for (doc = 0; doc < documents; doc++)
-	{
-	/* 
-	            A . B 
-	cos theta = -------
-	           |A| |B|
+// Get position 
+if (get_postings_details(b, &term_details) == NULL) 
+	return 0;
 
-	where A and B are tf.idf scores.
-	we can open up the expressions and multiply by 
+// Get from disk
+if (get_postings(&term_details, postings_buffer) == NULL) 
+	return 0;
 
-	idf_a * idf_b  OR idf_a ^ 2 OR idf_b ^ 2
+ // Decompress
+factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+current_document = decompress_buffer;
+end = decompress_buffer + term_details.impacted_length;
 
-	at the end.
+/* 
+             A . B 
+cos theta = -------
+	        |A| |B|
+
+where A and B are tf.idf scores.
+we can open up the expressions and multiply by 
+
+idf_a * idf_b  OR idf_a ^ 2 OR idf_b ^ 2
+
+at the end.
 
 
-	TF*IDF;
-	TF = term_count / |document|
+TF*IDF;
+TF = term_count / |document|
              
-	IDF = log(|collection| / doc_count)
+IDF = log(|collection| / doc_count)
 
-	*/
-	tf_a = (double) buffer_a[doc] / (double) document_lengths[doc];
-	tf_b = (double) buffer_b[doc] / (double) document_lengths[doc];
+*/
 
-	similarity += tf_a * tf_b;
-
-    // This portion required for all docs with tf scores.
-	length_a += tf_a * tf_a;
-	length_b += tf_b * tf_b;
+while (current_document < end)
+	{
+	term_frequency = *current_document++;
+	document = -1;
+	while (*current_document != 0)
+		{
+		document += *current_document++;
+		length_b += term_frequency * term_frequency;
+        if (buffer_a[document]) 
+            similarity += ((double) buffer_a[document] / (double) document_lengths[document])
+                * ((double) term_frequency / (double) document_lengths[document]);
+		}
+	current_document++;
 	}
 
-
-idf_a = log((double) documents / (double) get_postings_details(a, &details)->document_frequency);
-idf_b = log((double) documents / (double) get_postings_details(b, &details)->document_frequency);
+idf_a = log((double) documents / (double) get_postings_details(a, &term_details)->document_frequency);
+idf_b = log((double) documents / (double) get_postings_details(b, &term_details)->document_frequency);
 
 similarity *= idf_a * idf_b;
 
-similarity /= sqrt((double)length_a * idf_a * idf_a);
+similarity /= sqrt((double)buffer_a_length_squared * idf_a * idf_a);
 similarity /= sqrt((double)length_b * idf_b * idf_b);
 
 return similarity;
@@ -138,12 +154,15 @@ return similarity;
 */
 double ANT_thesaurus_engine::term_similarity(char *term1, char *term2)
 {
-long long row_total1, row_total2;
+if (buffer_a_term == NULL || strcmp(term1, buffer_a_term) != 0)
+    {
+    if (buffer_a_term != NULL)
+        delete [] buffer_a_term;
+    buffer_a_term = strnew(term1);
+    buffer_a_length_squared = fill_buffer_with_postings(term1, buffer_a);
+    }
 
-row_total1 = fill_buffer_with_postings(term1, buffer_a);
-row_total2 = fill_buffer_with_postings(term2, buffer_b);
-
-return buffer_similarity(term1, row_total1, term2, row_total2);
+return buffer_similarity(term1, term2);
 }
 
 /*
@@ -228,6 +247,7 @@ stemmed_term_details.collection_frequency = collection_frequency;
 ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
 }
 
+
 /*
 	ANT_THESAURUS_ENGINE::PROB_WORD_IN_QUERY()
 	------------------------------------------
@@ -276,7 +296,6 @@ char **query_terms;
 char *start, *end;
 long i, query_term_count = 0;
 double score = 0.0;
-ANT_search_engine_accumulator *ranked_list;
 ANT_search_engine_accumulator::ANT_accumulator_t *cached_results;
 
 /*
