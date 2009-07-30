@@ -81,6 +81,7 @@ OBJECTS = \
     ranking_function_lmd.o \
     ranking_function_lmjm.o \
     ranking_function_bose_einstein.o \
+	ranking_function_divergence.o \
     ranking_function_bm25.o
 
 EXTENSION = \
@@ -125,3 +126,4 @@ depend :
 .PHONY : clean
 clean :
 	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o
+
