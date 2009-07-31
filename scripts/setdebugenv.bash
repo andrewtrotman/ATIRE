@@ -1,4 +1,4 @@
 #!/bin/bash
 
-export CFLAGS="-g"
-export CXXFLAGS="-g"
+export CFLAGS="-g -DDEBUG"
+export CXXFLAGS="-g -DDEBUG"

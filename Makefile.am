@@ -80,7 +80,6 @@ library_sources =  \
 	$(SRCDIR)/indexer_param_block.c \
 	$(SRCDIR)/ant_param_block.c \
 	$(SRCDIR)/readability_factory.c \
-	$(SRCDIR)/readability_none.c \
 	$(SRCDIR)/readability_dale_chall.c \
 	$(SRCDIR)/thesaurus_engine.c \
 	$(SRCDIR)/version.c \
@@ -91,6 +90,7 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_lmd.c \
 	$(SRCDIR)/ranking_function_bose_einstein.c \
 	$(SRCDIR)/ranking_function_lmjm.c \
+	$(SRCDIR)/ranking_function_divergence.c \
 	$(SRCDIR)/plugin_manager.c 	
 				
 library_headers = \
@@ -168,7 +168,6 @@ library_headers = \
 	$(SRCDIR)/time_stats.h	\
 	$(SRCDIR)/top_k_sort.h	\
 	$(SRCDIR)/readability_factory.h \
-	$(SRCDIR)/readability_none.h \
 	$(SRCDIR)/readability_dale_chall.h \
 	$(SRCDIR)/thesaurus_engine.h \
 	$(SRCDIR)/version.h \
@@ -178,6 +177,7 @@ library_headers = \
 	$(SRCDIR)/ranking_function_impact.h \
 	$(SRCDIR)/ranking_function_lmd.h \
 	$(SRCDIR)/ranking_function_bose_einstein.h \
+	$(SRCDIR)/ranking_function_divergence.h \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	
