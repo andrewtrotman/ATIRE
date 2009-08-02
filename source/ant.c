@@ -39,6 +39,7 @@
 #endif
 
 const char *PROMPT = "]";
+
 /*
 	class ANT_ANT_FILE_ITERATOR
 	---------------------------
@@ -338,7 +339,7 @@ for (query = input.first(); query != NULL; query = input.next())
 			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
 				printf("%lld:%s\n", result + 1, answer_list[result]);
 			else
-				printf("%lld:%s\n", result + 1, name);
+				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
 	else
 		output->write(topic_id, answer_list, last_to_list);
 
