@@ -448,11 +448,13 @@ stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 while (term != NULL)
 	{
+
 	/*
 		get the location of the postings on disk
 	*/
 	now = stats->start_timer();
-	stemmer->get_postings_details(&term_details);
+    //	stemmer->get_postings_details(&term_details); // WTF?
+    get_postings_details(term, &term_details);
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 	/*
@@ -586,3 +588,32 @@ for (current = accumulator_pointers; current < end; current++)
 
 return sorted_id_list;
 }
+
+/*
+	ANT_SEARCH_ENGINE::DECOMPRESS_POSTINGS()
+	----------------------------------------
+*/
+ANT_compressable_integer *ANT_search_engine::decompress_postings(char *term)
+{
+ANT_search_engine_btree_leaf term_details;
+long long now;
+
+// Get position 
+now = stats->start_timer();
+if (get_postings_details(term, &term_details) == NULL)
+	return NULL;
+stats->add_dictionary_lookup_time(stats->stop_timer(now));
+
+// Get from disk
+now = stats->start_timer();
+if (get_postings(&term_details, postings_buffer) == NULL)
+	return NULL;
+stats->add_posting_read_time(stats->stop_timer(now));
+
+// Decompress
+now = stats->start_timer();
+factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+stats->add_decompress_time(stats->stop_timer(now));
+
+return decompress_buffer;
+} 

@@ -29,6 +29,8 @@ this->argc = argc;
 this->argv = argv;
 logo = TRUE;
 stemmer = 0;
+stemmer_similarity = FALSE;
+stemmer_similarity_threshold = 0.0;
 sort_top_k = LLONG_MAX;
 metric = MAP;
 assessments_filename = NULL;
@@ -39,14 +41,13 @@ output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT;
 segmentation = FALSE;
-thesaurus = FALSE;
-thesaurus_threshold = 0.0;
 ranking_function = BM25;
 trim_postings_k = LLONG_MAX;
 lmd_u = 500.0;
 lmjm_l = 0.5;
 bm25_k1 = 0.9;
 bm25_b = 0.4;
+clarity = FALSE;
 }
 
 /*
@@ -86,19 +87,19 @@ puts("");
 
 puts("TERM EXPANSION");
 puts("--------------");
-puts("-t[-hlops]      Term expansion, one of:");
-puts("  -             None [default]");
-puts("  h             Paice Husk stemming");
-puts("  l             Lovins stemming");
-puts("  o             Otago stemming");
-puts("  p             Porter stemming");
-puts("  s             S-Striping stemming");
+puts("-t[-hlops][+<th>]      Term expansion, one of:");
+puts("  -                    None [default]");
+puts("  h                    Paice Husk stemming");
+puts("  l                    Lovins stemming");
+puts("  o                    Otago stemming");
+puts("  p                    Porter stemming");
+puts("  s                    S-Striping stemming");
+puts("   +<th>               Term similarity threshold applied to stemming. [default=0]");
 puts("");
 
-puts("TERM SIMILARITY");
-puts("-----------");
-puts("--termsim<n>    Prevent stemming if term similarity is <= n [default=0.0]");
-puts("--clarity       Give clarity scores for each query, requires --termsim");
+puts("QPP");
+puts("---");
+puts("--clarity       Give clarity scores for each query");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -226,7 +227,7 @@ else
 */
 void ANT_ANT_param_block::term_expansion(char *which)
 {
-if (*(which + 1) != '\0')
+if (*(which + 1) != '\0' && *(which + 1) != '+')
 	exit(printf("Only one term expansion algorithm is permitted: '%c'\n", *which));
 
 switch (*which)
@@ -239,6 +240,11 @@ switch (*which)
 	case 's' : stemmer = ANT_stemmer_factory::S_STRIPPER; break;
 	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
 	}
+if (*(which + 1) == '+')
+    {
+    stemmer_similarity = TRUE;
+    stemmer_similarity_threshold = strtod(which + 2, NULL);
+    }
 }
 
 /*
@@ -388,11 +394,6 @@ for (param = 1; param < argc; param++)
 			segmentation = TRUE;
 		else if (*command == 'R')
 			set_ranker(command + 1);
-		else if (strstr(command, "-termsim") == command) 
-            {
-            thesaurus = TRUE;
-            thesaurus_threshold = strtod(command + 8, NULL);
-            }
 		else if (strstr(command, "-clarity") == command) 
             clarity = TRUE;
 		else if (strcmp(command, "people") == 0)

@@ -78,6 +78,8 @@ public:
 	void stats_add(void);
 	void set_trim_postings_k(long long what) { trim_postings_k = what; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
+
+    ANT_compressable_integer *decompress_postings(char *term); 
 };
 
 #endif __SEARCH_ENGINE_H__

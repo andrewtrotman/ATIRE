@@ -23,6 +23,9 @@ private:
 public:
 	long logo;							// display the ANT banner logo or not
 	long stemmer;						// which stemmer to use (or 0 for don't stem)
+	long stemmer_similarity;						// 'correct' stemming with the thesaurus?
+	double stemmer_similarity_threshold;			// threshold for rejecting stems with the thesaurus (default = 0.0)
+
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long long trim_postings_k;			// trim the postigs lists at no fewer than k
 	long metric;						// which metric to use (MAP, MAgP, etc)
@@ -41,9 +44,8 @@ public:
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
-	long thesaurus;						// 'correct' stemming with the thesaurus?
+
 	long clarity;  						// Output clarity score for each query
-	double thesaurus_threshold;			// threshold for rejecting stems with the thesaurus (default = 0.0)
 
 private:
 	void export_format(char *forum);

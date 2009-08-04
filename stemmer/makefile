@@ -49,6 +49,7 @@ OBJECTS = \
 	directory_recursive_iterator.o \
     btree_iterator.o \
     top_k_sort.o \
+    stemmer_term_similarity.o	\
     stemmer.o	\
     porter.o \
     lovins.o \

@@ -88,12 +88,6 @@ double average_precision = 0.0;
  */
 ANT_encoding_utf8 utf8_enc;
 
-/*
-	if we're stemming then create the stemmer object
-*/
-if (stemmer == NULL)
-	stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
-
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
 did_query = FALSE;
@@ -201,11 +195,6 @@ if (map != NULL)
 *matching_documents = hits;
 
 /*
-	Clean up
-*/
-delete stemmer;
-
-/*
 	Add the time it took to search to the global stats for the search engine
 */
 search_engine->stats_add();
@@ -276,6 +265,7 @@ double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_ANT_file_iterator input(params->queries_filename);
 ANT_search_engine_forum *output = NULL;
 long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
+ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, params->stemmer_similarity, params->stemmer_similarity_threshold, search_engine);
 
 if (params->output_forum == ANT_ANT_param_block::TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
@@ -307,7 +297,7 @@ for (query = input.first(); query != NULL; query = input.next())
 		topic_id = -1;
 
 
-	if (params->thesaurus && params->clarity)
+	if (params->clarity)
         printf("Clarity: %lf\n", ((ANT_thesaurus_engine *)search_engine)->clarity_score(query, ranking_function));
 
 
@@ -315,7 +305,8 @@ for (query = input.first(); query != NULL; query = input.next())
 		Do the query and compute average precision
 	*/
 	number_of_queries++;
-	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map);
+
+	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer);
 	sum_of_average_precisions += average_precision;
 
 	/*
@@ -472,8 +463,8 @@ if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	}
 else
 	{
-	if (params.thesaurus)
-		search_engine = new ANT_thesaurus_engine(&memory, params.thesaurus_threshold);
+	if (params.clarity)
+		search_engine = new ANT_thesaurus_engine(&memory);
 	else
 		search_engine = new ANT_search_engine(&memory);
 

@@ -8,23 +8,29 @@
 #include "stemmer_paice_husk.h"
 #include "stemmer_otago.h"
 #include "stemmer_factory.h"
+#include "stemmer_term_similarity.h"
 
 /*
 	ANT_STEMMER_FACTORY::GET_STEMMER()
 	----------------------------------
 */
-ANT_stemmer *ANT_stemmer_factory::get_stemmer(long which_stemmer, ANT_search_engine *engine)
+ANT_stemmer *ANT_stemmer_factory::get_stemmer(long which_stemmer, long use_similarity, double threshold, ANT_search_engine *engine)
 {
+ANT_stemmer *stemmer = NULL;
 switch (which_stemmer)
 	{
-	case NONE: 			return new ANT_stemmer_none(engine);		break;
-	case S_STRIPPER: 	return new ANT_stemmer(engine);				break;
-	case PORTER: 		return new ANT_stemmer_porter(engine);		break;
-	case LOVINS:		return new ANT_stemmer_lovins(engine);		break;
-	case PAICE_HUSK:	return new ANT_stemmer_paice_husk(engine);	break;
-	case OTAGO:			return new ANT_stemmer_otago(engine);		break;
-	default:
-		return NULL;
+	case NONE: 			stemmer = new ANT_stemmer_none(engine);		break;
+	case S_STRIPPER: 	stemmer = new ANT_stemmer(engine);				break;
+	case PORTER: 		stemmer = new ANT_stemmer_porter(engine);		break;
+	case LOVINS:		stemmer = new ANT_stemmer_lovins(engine);		break;
+	case PAICE_HUSK:	stemmer = new ANT_stemmer_paice_husk(engine);	break;
+	case OTAGO:			stemmer = new ANT_stemmer_otago(engine);		break;
+	default:            break;
 	}
+
+if (use_similarity)
+    stemmer = new ANT_stemmer_term_similarity(engine, stemmer, threshold);
+
+return stemmer;
 }
 

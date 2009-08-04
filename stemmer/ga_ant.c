@@ -81,9 +81,10 @@ double average_precision = 0.0;
 /*
 	if we're stemming then create the stemmer object
 */
+/*
 if (!stemmer)
     stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine);
-
+*/
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
 did_query = FALSE;
