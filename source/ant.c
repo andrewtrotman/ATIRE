@@ -233,7 +233,7 @@ char *get_document_and_parse(char *filename, ANT_time_stats *stats)
 {
 static char filename_buffer[1024];
 char *start, *end, *file;
-long long now;
+long long now, length;
 
 if (filename[1] == ':')							// windows c:\blah
 	filename += 2;
@@ -250,9 +250,11 @@ start = strstr(file, "<title>");
 if (start != NULL)
 	if ((end = strstr(start += 7, "</title>")) != NULL)
 		{
-		strncpy(filename_buffer, start, end - start);
-		filename_buffer[end - start] = '\0';
+		length = end - start < 1022 ? end - start : 1022;
+		strncpy(filename_buffer, start, length);
+		filename_buffer[length] = '\0';
 		}
+
 delete [] file;
 
 stats->add_cpu_time(stats->stop_timer(now));
