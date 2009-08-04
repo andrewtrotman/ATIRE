@@ -65,6 +65,7 @@ OBJECTS = \
     btree_iterator.o \
     top_k_sort.o \
     stemmer.o	\
+    stemmer_term_similarity.o	\
     porter.o \
     lovins.o \
     stemmer_factory.o \

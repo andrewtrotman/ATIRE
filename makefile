@@ -68,6 +68,7 @@ PARTS = \
 	$(OBJDIR)\btree_iterator.obj 				\
 	$(OBJDIR)\top_k_sort.obj 					\
 	$(OBJDIR)\stemmer.obj						\
+	$(OBJDIR)\stemmer_term_similarity.obj						\
 	$(OBJDIR)\porter.obj						\
 	$(OBJDIR)\lovins.obj						\
 	$(OBJDIR)\stemmer_factory.obj				\
