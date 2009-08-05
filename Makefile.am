@@ -63,6 +63,7 @@ library_sources =  \
     $(SRCDIR)/porter.c \
     $(SRCDIR)/lovins.c \
     $(SRCDIR)/stemmer_factory.c \
+    $(SRCDIR)/stemmer_term_similarity.c \
     $(SRCDIR)/paice_husk.c \
     $(SRCDIR)/learned_wikipedia_stem.c \
     $(SRCDIR)/relevant_topic.c \
@@ -162,6 +163,7 @@ library_headers = \
 	$(SRCDIR)/stemmer_otago.h	\
 	$(SRCDIR)/stemmer_paice_husk.h	\
 	$(SRCDIR)/stemmer_porter.h	\
+	$(SRCDIR)/stemmer_term_similarity.h \
 	$(SRCDIR)/stop_word.h	\
 	$(SRCDIR)/str.h	\
 	$(SRCDIR)/string_pair.h	\
@@ -295,7 +297,8 @@ link_index_merge_LDADD = ${ANT_LIBS}
 link_index_merge_DEPENDENCIES = libant.la
 
 link_extract_pass2_SOURCES = $(LTWDIR)/link_extract_pass2.c
-link_extract_pass2_LDFLAGS = -rdynamic
+#link_extract_pass2_LDFLAGS = -rdynamic
+link_extract_pass2_LDFLAGS = -static
 link_extract_pass2_LDADD = ${ANT_LIBS}
 link_extract_pass2_DEPENDENCIES = libant.la
 
