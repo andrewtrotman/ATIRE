@@ -79,7 +79,7 @@ public:
 	void set_trim_postings_k(long long what) { trim_postings_k = what; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
-    ANT_compressable_integer *decompress_postings(char *term); 
+	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
 };
 
 #endif __SEARCH_ENGINE_H__

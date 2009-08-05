@@ -448,7 +448,6 @@ stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 while (term != NULL)
 	{
-
 	/*
 		get the location of the postings on disk
 	*/
@@ -590,29 +589,37 @@ return sorted_id_list;
 }
 
 /*
-	ANT_SEARCH_ENGINE::DECOMPRESS_POSTINGS()
-	----------------------------------------
+	ANT_SEARCH_ENGINE::GET_DECOMPRESSED_POSTINGS()
+	----------------------------------------------
 */
-ANT_compressable_integer *ANT_search_engine::decompress_postings(char *term)
+ANT_compressable_integer *ANT_search_engine::get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details)
 {
-ANT_search_engine_btree_leaf term_details;
+ANT_search_engine_btree_leaf *got_position;
+unsigned char *got_postings;
 long long now;
 
-// Get position 
+/*
+	Find the term in the term vocab
+*/
 now = stats->start_timer();
-if (get_postings_details(term, &term_details) == NULL)
-	return NULL;
+got_position = get_postings_details(term, term_details);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
-
-// Get from disk
-now = stats->start_timer();
-if (get_postings(&term_details, postings_buffer) == NULL)
+if (got_position == NULL)
 	return NULL;
-stats->add_posting_read_time(stats->stop_timer(now));
-
-// Decompress
+/*
+	Load the postings from disk
+*/
 now = stats->start_timer();
-factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+got_postings = get_postings(term_details, postings_buffer);
+stats->add_posting_read_time(stats->stop_timer(now));
+if (got_postings == NULL)
+	return NULL;
+
+/*
+	And now decompress
+*/
+now = stats->start_timer();
+factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
 stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;

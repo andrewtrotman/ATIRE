@@ -19,7 +19,7 @@ ANT_stemmer *ANT_stemmer_factory::get_stemmer(long which_stemmer, long use_simil
 ANT_stemmer *stemmer = NULL;
 switch (which_stemmer)
 	{
-	case NONE: 			stemmer = new ANT_stemmer_none(engine);		break;
+	case NONE: 			stemmer = new ANT_stemmer_none(engine);			break;
 	case S_STRIPPER: 	stemmer = new ANT_stemmer(engine);				break;
 	case PORTER: 		stemmer = new ANT_stemmer_porter(engine);		break;
 	case LOVINS:		stemmer = new ANT_stemmer_lovins(engine);		break;
@@ -29,7 +29,7 @@ switch (which_stemmer)
 	}
 
 if (use_similarity)
-    stemmer = new ANT_stemmer_term_similarity(engine, stemmer, threshold);
+	stemmer = new ANT_stemmer_term_similarity(engine, stemmer, threshold);
 
 return stemmer;
 }
