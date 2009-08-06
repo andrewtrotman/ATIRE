@@ -18,8 +18,8 @@ MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D)
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
+#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D)
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy
 CC = @cl
 
 #
@@ -92,7 +92,6 @@ PARTS = \
 	$(OBJDIR)\plugin_manager.obj				\
 	$(OBJDIR)\indexer_param_block.obj			\
 	$(OBJDIR)\ant_param_block.obj				\
-	$(OBJDIR)\thesaurus_engine.obj              \
 	$(OBJDIR)\version.obj						\
 	$(OBJDIR)\ranking_function.obj				\
 	$(OBJDIR)\ranking_function_impact.obj	\
