@@ -6,6 +6,7 @@
 #define __SEARCH_ENGINE_H__
 
 #include "compression_factory.h"
+#include "ranking_function.h"
 
 class ANT_memory;
 class ANT_file;
@@ -41,7 +42,7 @@ protected:
 	ANT_compression_factory factory;
 	long long documents;
 	unsigned char *btree_leaf_buffer, *postings_buffer;
-	long *stem_buffer;
+	ANT_weighted_tf *stem_buffer;
 	long *document_lengths;
 	double mean_document_length;
 	ANT_search_engine_accumulator *accumulator;

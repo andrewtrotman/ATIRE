@@ -15,6 +15,7 @@ public:
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2 } ;					// evaluation forum
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };				// statistics to print (bitstring)
 	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN, DIVERGENCE};		// ranking function
+    enum { THRESHOLD = 1, WEIGHTED = 2 }; // Use FALSE as 0
 
 private:
 	int argc;
@@ -23,8 +24,8 @@ private:
 public:
 	long logo;							// display the ANT banner logo or not
 	long stemmer;						// which stemmer to use (or 0 for don't stem)
-	long stemmer_similarity;						// 'correct' stemming with the thesaurus?
-	double stemmer_similarity_threshold;			// threshold for rejecting stems with the thesaurus (default = 0.0)
+	long stemmer_similarity;			// 'correct' stemming with the thesaurus?
+	double stemmer_similarity_threshold;	// threshold for rejecting stems with the thesaurus (default = 0.0)
 
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long long trim_postings_k;			// trim the postigs lists at no fewer than k
@@ -44,8 +45,6 @@ public:
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
-
-	long clarity;  						// Output clarity score for each query
 
 private:
 	void export_format(char *forum);

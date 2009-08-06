@@ -18,7 +18,7 @@ public:
 	enum { NONE, S_STRIPPER, PORTER, LOVINS, PAICE_HUSK, OTAGO };
 
 public:
-	static ANT_stemmer *get_stemmer(long which_stemmer, long use_similarity, double threshold, ANT_search_engine *engine);
+	static ANT_stemmer *get_stemmer(long which_stemmer, ANT_search_engine *engine, long use_similarity = 0, double threshold = 0.0);
 } ;
 
 #endif __STEMMER_FACTORY_H__

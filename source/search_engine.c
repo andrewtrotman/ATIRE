@@ -167,7 +167,7 @@ mean_document_length = (double)sum / (double)documents;
 collection_length_in_terms = sum;
 
 memory->realign();
-stem_buffer = (long *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
+stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
 }
 
 /*
@@ -452,15 +452,14 @@ while (term != NULL)
 		get the location of the postings on disk
 	*/
 	now = stats->start_timer();
-    //	stemmer->get_postings_details(&term_details); // WTF?
-    get_postings_details(term, &term_details);
+	stemmer->get_postings_details(&term_details); 
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 	/*
 		load the postings from disk
 	*/
 	now = stats->start_timer();
-	if (get_postings(&term_details, postings_buffer) == NULL)
+    if (get_postings(&term_details, postings_buffer) == NULL)
 		return;
 	stats->add_posting_read_time(stats->stop_timer(now));
 

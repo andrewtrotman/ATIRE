@@ -7,7 +7,7 @@ EXTOBJDIR = ./obj
 EXTFLAGS = -I$(SRCDIR)
 LDFLAGS = -g
 CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR)
+	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR) -DUSE_FLOATED_TF
 
 CC = g++
 
@@ -74,11 +74,11 @@ OBJECTS = \
     plugin_manager.o \
 	indexer_param_block.o \
     ant_param_block.o \
-	thesaurus_engine.o \
     version.o \
     ranking_function.o \
     ranking_function_impact.o \
     ranking_function_readability.o \
+    ranking_function_similarity.o \
     ranking_function_lmd.o \
     ranking_function_lmjm.o \
     ranking_function_bose_einstein.o \

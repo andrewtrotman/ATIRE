@@ -32,12 +32,13 @@ stats = engine->get_stats();
 	convert from an array of tf values into an ANT postings list that can then be used
 	in a top-k ranking function
 */
-void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, long *stem_buffer)
+void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer)
 {
 ANT_compressable_integer bucket_prev_docid[0x100];
 long bucket_size[0x100];
 ANT_compressable_integer sum, *pointer[0x100];
-long doc, document_frequency, bucket, buckets_used, *current, *end;
+long doc, document_frequency, bucket, buckets_used;
+ANT_weighted_tf *current, *end;
 
 /*
 	Set all the buckets to empty;
@@ -59,7 +60,7 @@ for (current = stem_buffer; current < end; current++)
 		{	
 		if (*current >= 0x100)
 			*current = 0xFF;			// cap term frequency at 255
-		bucket_size[*current]++;
+		bucket_size[(long) *current]++;
 		document_frequency++;						// count the document frequency
 		}
 
@@ -85,8 +86,8 @@ for (current = stem_buffer; current < end; current++)
 	if (*current != 0)
 		{
 		doc = current - stem_buffer + 1;
-		*pointer[*current]++ = doc - bucket_prev_docid[*current];		// because this list is difference encoded
-		bucket_prev_docid[*current] = doc;
+		*pointer[(long)*current]++ = doc - bucket_prev_docid[(long)*current];		// because this list is difference encoded
+		bucket_prev_docid[(long)*current] = doc;
 		}
 
 /*
@@ -104,7 +105,7 @@ term_details->impacted_length = sum + 2 * buckets_used;
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
 	-----------------------------------------
 */
-void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point)
+void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point)
 {
 long long now;
 now = stats->start_timer();
@@ -118,9 +119,10 @@ relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);
 	ANT_RANKING_FUNCTION::COMPUTE_TERM_DETAILS()
 	--------------------------------------------
 */
-void ANT_ranking_function::compute_term_details(ANT_search_engine_btree_leaf *term_details, long *tf_array)
+void ANT_ranking_function::compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array)
 {
-long document_frequency, *current, *end;
+long document_frequency;
+ANT_weighted_tf *current, *end;
 long long now;
 
 /*
@@ -131,7 +133,7 @@ end = tf_array + documents_as_integer;
 document_frequency = 0;
 
 for (current = tf_array; current < end; current++)
-	if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
+    if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
 		document_frequency++;
 
 term_details->document_frequency = document_frequency;

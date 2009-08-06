@@ -21,7 +21,6 @@
 #include "ant_param_block.h"
 #include "version.h"
 #include "ga_ant.h"
-#include "thesaurus_engine.h"
 #include "ranking_function.h"
 #include "ranking_function_bm25.h"
 

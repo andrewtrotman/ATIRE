@@ -12,6 +12,12 @@ class ANT_search_engine_accumulator;
 class ANT_search_engine_btree_leaf;
 class ANT_search_engine_stats;
 
+#ifdef USE_FLOATED_TF
+typedef double ANT_weighted_tf;
+#else
+typedef long ANT_weighted_tf;
+#endif
+
 /*
 	class ANT_RANKING_FUNCTION
 	--------------------------
@@ -30,8 +36,8 @@ protected:
 	ANT_search_engine_stats *stats;
 
 protected:
-	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, long *stem_buffer);
-	void compute_term_details(ANT_search_engine_btree_leaf *term_details, long *tf_array);
+	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer);
+	void compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array);
 
 public:
 	ANT_ranking_function(ANT_search_engine *engine);
@@ -53,7 +59,7 @@ public:
 		postings list is generated from the tf array it is then (correctly) trimmed thus further reducing the
 		computational cost of the search.
 	*/
-	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, long *tf_array, long long trim_point);
+	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point);
 } ;
 
 #endif __ANT_RANKING_FUNCTION_H__

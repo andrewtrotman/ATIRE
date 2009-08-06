@@ -29,7 +29,7 @@ public:
 
 	virtual char *first(char *term);
 	virtual char *next(void);
-	ANT_search_engine_btree_leaf *get_postings_details(ANT_search_engine_btree_leaf *term_details);
+	virtual ANT_search_engine_btree_leaf *get_postings_details(ANT_search_engine_btree_leaf *term_details);
 } ;
 
 #endif __BTREE_ITERATOR_H__

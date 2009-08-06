@@ -47,7 +47,6 @@ lmd_u = 500.0;
 lmjm_l = 0.5;
 bm25_k1 = 0.9;
 bm25_b = 0.4;
-clarity = FALSE;
 }
 
 /*
@@ -87,19 +86,15 @@ puts("");
 
 puts("TERM EXPANSION");
 puts("--------------");
-puts("-t[-hlops][+<th>]      Term expansion, one of:");
+puts("-t[-hlops][+-<th>]      Term expansion, one of:");
 puts("  -                    None [default]");
 puts("  h                    Paice Husk stemming");
 puts("  l                    Lovins stemming");
 puts("  o                    Otago stemming");
 puts("  p                    Porter stemming");
 puts("  s                    S-Striping stemming");
-puts("   +<th>               Term similarity threshold applied to stemming. [default=0]");
-puts("");
-
-puts("QPP");
-puts("---");
-puts("--clarity       Give clarity scores for each query");
+puts("   +<th>               Stemmed terms tfs weighted by term similarity. [default=1]");
+puts("   -<th>               Stemmed terms cutoff with term similarity. [default=0]");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -227,7 +222,7 @@ else
 */
 void ANT_ANT_param_block::term_expansion(char *which)
 {
-if (*(which + 1) != '\0' && *(which + 1) != '+')
+if (*(which + 1) != '\0' && *(which + 1) != '+' && *(which + 1) != '-')
 	exit(printf("Only one term expansion algorithm is permitted: '%c'\n", *which));
 
 switch (*which)
@@ -242,7 +237,15 @@ switch (*which)
 	}
 if (*(which + 1) == '+')
     {
-    stemmer_similarity = TRUE;
+    stemmer_similarity = WEIGHTED;
+    if (*(which + 2) != '\0')
+        stemmer_similarity_threshold = strtod(which + 2, NULL);
+    else 
+        stemmer_similarity_threshold = 1.0;
+    }
+else if (*(which + 1) == '-')
+    {
+    stemmer_similarity = THRESHOLD;
     stemmer_similarity_threshold = strtod(which + 2, NULL);
     }
 }
@@ -394,8 +397,6 @@ for (param = 1; param < argc; param++)
 			segmentation = TRUE;
 		else if (*command == 'R')
 			set_ranker(command + 1);
-		else if (strstr(command, "-clarity") == command) 
-            clarity = TRUE;
 		else if (strcmp(command, "people") == 0)
 			{
 			ANT_credits();

@@ -93,6 +93,7 @@ OBJECTS = \
     version.o \
     ranking_function.o \
 	ranking_function_impact.o \
+    ranking_function_similarity.o \
     ranking_function_readability.o \
     ranking_function_lmd.o \
     ranking_function_lmjm.o \

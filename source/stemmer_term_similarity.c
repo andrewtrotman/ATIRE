@@ -36,6 +36,17 @@ delete [] buffer;
 }
 
 /*
+	ANT_STEMMER_TERM_SIMILARITY::GET_POSTING_DETAILS()
+	--------------------------------------------------
+    Necessary, in order to get the right value, as this wraps up the real object, which has
+    access to this.
+*/
+ANT_search_engine_btree_leaf *ANT_stemmer_term_similarity::get_postings_details(ANT_search_engine_btree_leaf *term_details) 
+{
+return base_stemmer->get_postings_details(term_details);
+}
+
+/*
 	ANT_STEMMER_TERM_SIMILARITY::FILL_BUFFER_WITH_POSTINGS()
 	--------------------------------------------------------
 	I want to compare TF values, so I need this to fill a long * buffer with 
@@ -160,7 +171,7 @@ double ANT_stemmer_term_similarity::term_similarity(char *term1, char *term2)
 {
 long df;
 
-if (term == NULL || strcmp(term1, term) != 0)
+if (strcmp(term1, term) != 0)
 	{
 	strncpy(term, term1, MAX_TERM_LENGTH);
 	buffer_length_squared = fill_buffer_with_postings(term1, buffer, &df);
