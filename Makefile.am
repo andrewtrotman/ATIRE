@@ -276,8 +276,8 @@ zipf_graph_DEPENDENCIES = libant.la
 #################################################################################
 
 link_extract_SOURCES = $(LTWDIR)/link_extract.c
-link_extract_LDFLAGS = -rdynamic
-#link_extract_LDFLAGS = -static
+#link_extract_LDFLAGS = -rdynamic
+link_extract_LDFLAGS = -static
 link_extract_LDADD = ${ANT_LIBS}
 link_extract_DEPENDENCIES = libant.la
 

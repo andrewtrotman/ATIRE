@@ -9,6 +9,7 @@
 #include <ctype.h>
 
 #include "../source/disk.h"
+#include "../source/directory_recursive_iterator.h"
 #include "link_parts.h"
 
 char target[1024];
@@ -41,9 +42,11 @@ return source;
 */
 int main(int argc, char *argv[])
 {
-ANT_disk disk;
+//ANT_disk disk;
+ANT_directory_recursive_iterator disk;  // make the recursive pattern matching as for default files reading
 char *file, *start, *end, *from, *ch;
 char *target_start, *target_end, *target_dot;
+char *slash;
 long param, file_number, current_docid;
 
 if (argc < 2)
@@ -52,35 +55,46 @@ if (argc < 2)
 file_number = 1;
 for (param = 1; param < argc; param++)
 	{
-	file = disk.read_entire_file(disk.get_first_filename(argv[param]));
+	//file = disk.read_entire_file(disk.get_first_filename(argv[param]));
+	file = disk.read_entire_file(disk.first(argv[param]));
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
 		from = file;
 		while (from != NULL)
 			{
-			if ((start = strstr(from, "<collectionlink")) != NULL)
-				if ((end = strstr(start, "</collectionlink>")) != NULL)
+			if (((start = strstr(from, "<collectionlink")) != NULL) || ((start = strstr(from, "<link")) != NULL))
+				if (((end = strstr(start, "</collectionlink>")) != NULL) || ((end = strstr(start, "</link>")) != NULL))
 					{
 					start = strstr(start, "xlink:href=");
-					target_start = strchr(start, '"') + 1;
-					target_dot = strchr(start, '.');
-					target_end = strchr(target_start, '"');
-					if (target_dot < target_end && target_dot != NULL)
-						target_end = target_dot;
-					strncpy(target, target_start, target_end - target_start);
-					target[target_end - target_start] = '\0';
+					if (start != NULL && start < end)
+						{
+						target_start = strchr(start, '"') + 1;
 
-					start = strchr(start, '>') + 1;
-					strncpy(anchor_text, start, end - start);
-					anchor_text[end - start] = '\0';
-					strip_space_inline(anchor_text);
-					for (ch = anchor_text; *ch != '\0'; ch++)
-						if (isspace(*ch))
-							*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
-					printf("%d:%s:%s\n", current_docid, target, anchor_text);
+						/* skip / or \ */
+						while ((slash = strpbrk(target_start, "\\/")) && slash < end)
+							target_start = slash + 1;
 
-					start = end;		// for the next time around the loop
+						target_dot = strchr(target_start, '.');
+						target_end = strchr(target_start, '"');
+						if (target_dot != NULL && target_dot < target_end)
+							target_end = target_dot;
+						strncpy(target, target_start, target_end - target_start);
+						target[target_end - target_start] = '\0';
+
+						start = strchr(start, '>') + 1;
+						strncpy(anchor_text, start, end - start);
+						anchor_text[end - start] = '\0';
+						strip_space_inline(anchor_text);
+						for (ch = anchor_text; *ch != '\0'; ch++)
+							if (isspace(*ch))
+								*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
+						if (*target >= '0' && *target <= '9') // make sure this is a valid link
+							printf("%d:%s:%s\n", current_docid, target, anchor_text);
+						}
+
+					if (start != NULL && start < end)
+						start = end;		// for the next time around the loop
 					}
 			from = start;
 			}
@@ -90,7 +104,8 @@ for (param = 1; param < argc; param++)
 		file_number++;
 
 		delete [] file;
-		file = disk.read_entire_file(disk.get_next_filename());
+		//file = disk.read_entire_file(disk.get_next_filename());
+		file = disk.read_entire_file(disk.next());
 		}
 	}
 

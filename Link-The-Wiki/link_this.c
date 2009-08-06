@@ -30,6 +30,12 @@
 
 #define MODE_NO_4_DIGIT_NUMBERS 1
 
+#ifdef INEX_ARCHIVE
+	#define COLLECTION_LINK_TAG_NAME "collectionlink"
+#else
+	#define COLLECTION_LINK_TAG_NAME "link"
+#endif
+
 class ANT_link_posting
 {
 public:
@@ -422,14 +428,14 @@ long id;
 
 links_in_orphan_length = 0;
 file = _strdup(original_file);
-pos = strstr(file, "<collectionlink");
+pos = strstr(file, "<"COLLECTION_LINK_TAG_NAME);
 while (pos != NULL)
 	{
 	pos = strstr(pos, "xlink:href=");
 	pos = strchr(pos, '"');
 	id = atol(pos + 1);
 	pos = strchr(pos, '>');
-	end = strstr(pos, "</collectionlink");
+	end = strstr(pos, "</"COLLECTION_LINK_TAG_NAME);
 
 	copy = strnnew(pos + 1, end - pos - 1);
 	string_clean(copy, lowercase_only);
@@ -441,7 +447,7 @@ while (pos != NULL)
 	links_in_orphan_length++;
 	if (links_in_orphan_length >= MAX_LINKS_IN_FILE)
 		exit(printf("Too many links present in orphan a priori\n"));
-	pos = strstr(pos, "<collectionlink");
+	pos = strstr(pos, "<"COLLECTION_LINK_TAG_NAME);
 	}
 delete [] file;
 

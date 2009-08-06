@@ -9,6 +9,9 @@
 
 #include <ctype.h>
 
+#define INEX_ARCHIVE_ARTICLE_ID_SIGNITURE "name id="
+#define ARTICLE_ID_SIGNITURE "id"
+
 /*
 	STRING_CLEAN()
 	--------------
@@ -89,9 +92,11 @@ inline static long get_doc_id(char *file)
 {
 char *pos;
 
-pos = strstr(file, "<name id=");
+pos = strstr(file, "<"INEX_ARCHIVE_ARTICLE_ID_SIGNITURE);
 if (pos == NULL)
-	exit(printf("Cannot find DOC id <name id=...> in file\n"));
+	pos = strstr(file, "<"ARTICLE_ID_SIGNITURE);
+if (pos == NULL)
+	exit(printf("Cannot find DOC id <name id=...> or <id> in file\n"));
 while (!isdigit(*pos))
 	pos++;
 
