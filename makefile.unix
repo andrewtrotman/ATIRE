@@ -89,7 +89,6 @@ OBJECTS = \
     plugin_manager.o \
     indexer_param_block.o \
     ant_param_block.o \
-	thesaurus_engine.o \
     version.o \
     ranking_function.o \
 	ranking_function_impact.o \
