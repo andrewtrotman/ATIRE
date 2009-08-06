@@ -91,13 +91,13 @@ for (param = first_param; param < argc; param++)
 					if (start != NULL && start < end)
 						{
 						target_start = strchr(start, '"') + 1;
+						target_end = strchr(target_start, '"');
 
 						/* skip / or \ */
-						while ((slash = strpbrk(target_start, "\\/")) && slash < end)
+						while ((slash = strpbrk(target_start, "\\/")) && slash < target_end)
 							target_start = slash + 1;
 
 						target_dot = strchr(target_start, '.');
-						target_end = strchr(target_start, '"');
 						if (target_dot != NULL && target_dot < target_end)
 							target_end = target_dot;
 						strncpy(target, target_start, target_end - target_start);
@@ -111,9 +111,7 @@ for (param = first_param; param < argc; param++)
 							if (isspace(*ch))
 								*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
 
-						// case sensitive or not
-						if (lowercase_only)
-							to_lower(anchor_text);
+						string_clean(anchor_text, lowercase_only);
 
 						if (*target >= '0' && *target <= '9') // make sure this is a valid link
 							printf("%d:%s:%s\n", current_docid, target, anchor_text);
