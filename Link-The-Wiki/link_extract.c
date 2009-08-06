@@ -12,6 +12,13 @@
 #include "../source/directory_recursive_iterator.h"
 #include "link_parts.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 char target[1024];
 char anchor_text[1024 * 1024];
 
@@ -48,12 +55,26 @@ char *file, *start, *end, *from, *ch;
 char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid;
+long lowercase_only, first_param;
 
 if (argc < 2)
-	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
+	exit(printf("Usage:%s [-lowercase] <filespec> ...\n", argv[0]));
+
+first_param = 1;
+lowercase_only = FALSE;
+if (*argv[1] == '-')
+	{
+	if (strcmp(argv[1], "-lowercase") == 0)
+		{
+		lowercase_only = TRUE;
+		first_param = 2;
+		}
+	else
+		exit(printf("Unknown parameter:%s\n", argv[1]));
+	}
 
 file_number = 1;
-for (param = 1; param < argc; param++)
+for (param = first_param; param < argc; param++)
 	{
 	//file = disk.read_entire_file(disk.get_first_filename(argv[param]));
 	file = disk.read_entire_file(disk.first(argv[param]));
@@ -89,6 +110,11 @@ for (param = 1; param < argc; param++)
 						for (ch = anchor_text; *ch != '\0'; ch++)
 							if (isspace(*ch))
 								*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
+
+						// case sensitive or not
+						if (lowercase_only)
+							to_lower(anchor_text);
+
 						if (*target >= '0' && *target <= '9') // make sure this is a valid link
 							printf("%d:%s:%s\n", current_docid, target, anchor_text);
 						}

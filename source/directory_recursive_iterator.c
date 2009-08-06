@@ -192,7 +192,10 @@ else
 	if (file_list->handle == INVALID_HANDLE_VALUE)
 		return NULL;
 #else
-	sprintf(path, "%s*", file_list->path);
+	/**
+	 * we already have the wildcard in first function, so use the wildcard and path for the file(s)
+	 */
+	sprintf(path, "%s%s", file_list->path, this->wildcard);
 	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
 	file_list->glob_index = 0;
 
@@ -231,6 +234,7 @@ strcpy(this->wildcard, wildcard);
 	long last_slash_idx = strlen(wildcard) - 1;
 	char *last_char = wildcard + last_slash_idx; // searching backward
 	char *slash = last_char;
+	long path_len = 0;
 	while (slash != wildcard)
 		{
 		if(*slash == '/')
@@ -255,7 +259,9 @@ strcpy(this->wildcard, wildcard);
 			strncpy(this->wildcard, wildcard_start, wildcard_len);
 			this->wildcard[wildcard_len] = '\0';
 			}
-		strncpy(path_buffer, wildcard, last_slash_idx + 1);
+		path_len = last_slash_idx + 1;
+		strncpy(path_buffer, wildcard, path_len);
+		path_buffer[path_len] = '\0';
 		}
 	if ((got = first(path_buffer, "")) == NULL)
 		return NULL;

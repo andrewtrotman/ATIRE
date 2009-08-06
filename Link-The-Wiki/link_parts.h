@@ -103,5 +103,15 @@ while (!isdigit(*pos))
 return atol(pos);
 }
 
+
+inline char *to_lower(char *source)
+{
+int i = 0;
+for (; i < strlen(source); i++)
+	if (source[i] >= 'A' && source[i] <= 'Z')
+		source[i] = source[i] - 'A' + 'a';
+return source;
+}
+
 #endif __LINK_PARTS_H__
 
