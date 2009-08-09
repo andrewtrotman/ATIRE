@@ -50,6 +50,8 @@ OBJECTS = \
     btree_iterator.o \
     top_k_sort.o \
     stemmer_term_similarity.o	\
+    stemmer_term_similarity_threshold.o	\
+    stemmer_term_similarity_weighted.o	\
     stemmer.o	\
     porter.o \
     lovins.o \
@@ -128,3 +130,4 @@ depend :
 clean :
 	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o
 
+include makefile.dep

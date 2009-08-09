@@ -66,6 +66,8 @@ OBJECTS = \
     top_k_sort.o \
     stemmer.o	\
     stemmer_term_similarity.o	\
+    stemmer_term_similarity_threshold.o	\
+    stemmer_term_similarity_weighted.o	\
     porter.o \
     lovins.o \
     stemmer_factory.o \

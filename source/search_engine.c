@@ -421,9 +421,10 @@ void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, ch
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 ANT_compressable_integer *current_document, *end;
-long document;
+long document, weight_terms;
 char *term;
 ANT_compressable_integer term_frequency;
+double tf_weight;
 /*
 	The way we stem is to load the terms that match the stem one at a time and to
 	accumulate the term frequences into the stem_buffer accumulator list.  This then
@@ -478,17 +479,29 @@ while (term != NULL)
 
 	current_document = decompress_buffer;
 	end = decompress_buffer + term_details.impacted_length;
-	while (current_document < end)
-		{
-		term_frequency = *current_document++;
-		document = -1;
-		while (*current_document != 0)
-			{
-			document += *current_document++;
-			stem_buffer[document] += term_frequency;
-			}
-		current_document++;
-		}
+    weight_terms = stemmer->weight_terms(&tf_weight, term);
+    while (current_document < end)
+        {
+        term_frequency = *current_document++;
+        document = -1;
+        while (*current_document != 0)
+            {
+            document += *current_document++;
+	/*
+		Only weight TFs if we're using floats, this makes no sense for integer tfs. 
+	*/
+#ifdef USE_FLOATED_TF 
+	if (weight_terms)
+		stem_buffer[document] += term_frequency * tf_weight;
+	else
+		stem_buffer[document] += term_frequency;
+#else
+		stem_buffer[document] += term_frequency;
+#endif
+            }
+        current_document++;
+        }
+
 	stats->add_stemming_time(stats->stop_timer(now));
 
 	/*

@@ -146,4 +146,6 @@ for (current = tf_array; current < end; current++)
 
 		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 		}
+
+relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);
 }

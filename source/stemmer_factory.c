@@ -8,13 +8,14 @@
 #include "stemmer_paice_husk.h"
 #include "stemmer_otago.h"
 #include "stemmer_factory.h"
-#include "stemmer_term_similarity.h"
+#include "stemmer_term_similarity_weighted.h"
+#include "stemmer_term_similarity_threshold.h"
 
 /*
 	ANT_STEMMER_FACTORY::GET_STEMMER()
 	----------------------------------
 */
-ANT_stemmer *ANT_stemmer_factory::get_stemmer(long which_stemmer, ANT_search_engine *engine, long use_similarity, double threshold)
+ANT_stemmer *ANT_stemmer_factory::get_stemmer(long which_stemmer, ANT_search_engine *engine, long use_wrapper, double value)
 {
 ANT_stemmer *stemmer = NULL;
 switch (which_stemmer)
@@ -28,8 +29,13 @@ switch (which_stemmer)
 	default:            break;
 	}
 
-if (use_similarity)
-	stemmer = new ANT_stemmer_term_similarity(engine, stemmer, threshold);
+switch (use_wrapper)
+	{
+	case NONE:			break;
+	case THRESHOLD_SIMILARITY: 	stemmer = new ANT_stemmer_term_similarity_threshold(engine, stemmer, value);		break;
+	case WEIGHTED_SIMILARITY: 	stemmer = new ANT_stemmer_term_similarity_weighted(engine, stemmer, value); 		break;
+	default:            break;
+	}
 
 return stemmer;
 }

@@ -7,6 +7,7 @@
 #define __STEMMER_H__
 
 #include "btree_iterator.h"
+#include "ranking_function.h"
 
 class ANT_stemmer : public ANT_btree_iterator
 {
@@ -26,6 +27,8 @@ public:
 	virtual char *next(void);
 
 	virtual size_t stem(char *term, char *destination);		// returns the longest stem that could possibly match this stem given the algorithm (2 in the case of Porter).
+
+    virtual long weight_terms(ANT_weighted_tf *term_weight, char *term);
 } ;
 
 #endif __STEMMER_H__

@@ -69,6 +69,8 @@ PARTS = \
 	$(OBJDIR)\top_k_sort.obj 					\
 	$(OBJDIR)\stemmer.obj						\
 	$(OBJDIR)\stemmer_term_similarity.obj						\
+	$(OBJDIR)\stemmer_term_similarity_threshold.obj	\
+	$(OBJDIR)\stemmer_term_similarity_weighted.obj	\
 	$(OBJDIR)\porter.obj						\
 	$(OBJDIR)\lovins.obj						\
 	$(OBJDIR)\stemmer_factory.obj				\

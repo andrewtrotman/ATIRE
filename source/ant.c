@@ -265,7 +265,7 @@ double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_ANT_file_iterator input(params->queries_filename);
 ANT_search_engine_forum *output = NULL;
 long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
-ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine, params->stemmer_similarity == ANT_ANT_param_block::THRESHOLD, params->stemmer_similarity_threshold);
+ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine, params->stemmer_similarity, params->stemmer_similarity_threshold);
 
 if (params->output_forum == ANT_ANT_param_block::TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
@@ -459,9 +459,10 @@ if (params.ranking_function == ANT_ANT_param_block::READABLE)
 else
 	{
 	search_engine = new ANT_search_engine(&memory);
-	if (params.stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
+    /*    	if (params.stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
 		ranking_function = new ANT_ranking_function_similarity(search_engine, params.bm25_k1, params.bm25_b); 
-    else if (params.ranking_function == ANT_ANT_param_block::BM25)
+        else*/
+    if (params.ranking_function == ANT_ANT_param_block::BM25)
 		ranking_function = new ANT_ranking_function_BM25(search_engine, params.bm25_k1, params.bm25_b);
 	else if (params.ranking_function == ANT_ANT_param_block::IMPACT)
 		ranking_function = new ANT_ranking_function_impact(search_engine);
@@ -470,7 +471,7 @@ else
 	else if (params.ranking_function == ANT_ANT_param_block::LMJM)
 		ranking_function = new ANT_ranking_function_lmjm(search_engine, params.lmjm_l);
 	else if (params.ranking_function == ANT_ANT_param_block::BOSE_EINSTEIN)
-		ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
+        ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
 	else if (params.ranking_function == ANT_ANT_param_block::DIVERGENCE)
 		ranking_function = new ANT_ranking_function_divergence(search_engine);
 	}

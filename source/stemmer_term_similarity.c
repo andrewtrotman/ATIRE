@@ -17,12 +17,11 @@
 	ANT_STEMMER_TERM_SIMILARITY::ANT_STEMMER_TERM_SIMILARITY()
 	----------------------------------------------------------
 */
-ANT_stemmer_term_similarity::ANT_stemmer_term_similarity(ANT_search_engine *search_engine, ANT_stemmer *stemmer, double threshold) : ANT_stemmer(search_engine)
+ANT_stemmer_term_similarity::ANT_stemmer_term_similarity(ANT_search_engine *search_engine, ANT_stemmer *stemmer) : ANT_stemmer(search_engine)
 {
 this->buffer = new long [search_engine->document_count()];
 this->search_engine = search_engine;
 this->base_stemmer = stemmer;
-this->threshold = threshold;
 }
 
 /*
@@ -181,39 +180,22 @@ return buffer_similarity(term2);
 }
 
 /*
-	ANT_STEMMER_TERM_SIMILARITY::NEXT()
-	-----------------------------------
+	ANT_STEMMER_TERM_SIMILARITY_THRESHOLD::NEXT()
+	---------------------------------------------
 */
 char *ANT_stemmer_term_similarity::next()
 {
-char *next = base_stemmer->next();
-
-if (next == NULL)
-	return next;
-while (next != NULL &&  (strcmp(term, next) != 0) && buffer_similarity(next) < threshold)   
-	next = base_stemmer->next();
-
-return next;
+return base_stemmer->next();
 }
 
 /*
 	ANT_STEMMER_TERM_SIMILARITY::FIRST()
-	------------------------------------
+	----------------------------------------------
 */
 char *ANT_stemmer_term_similarity::first(char *term)
 {
-char *first = base_stemmer->first(term);
-
-if (first == NULL)
-	return NULL;
-
 strncpy(this->term, term, MAX_TERM_LENGTH);
 buffer_length_squared = fill_buffer_with_postings(term, buffer, &document_frequency);
-if (strcmp(this->term, first) == 0)
-	return first;
 
-while (first != NULL && buffer_similarity(first) < threshold)
-	first = base_stemmer->next();
-
-return first;
+return base_stemmer->first(term);
 }

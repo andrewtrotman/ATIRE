@@ -237,7 +237,7 @@ switch (*which)
 	}
 if (*(which + 1) == '+')
     {
-    stemmer_similarity = WEIGHTED;
+    stemmer_similarity = ANT_stemmer_factory::WEIGHTED_SIMILARITY;
     if (*(which + 2) != '\0')
         stemmer_similarity_threshold = strtod(which + 2, NULL);
     else 
@@ -245,7 +245,7 @@ if (*(which + 1) == '+')
     }
 else if (*(which + 1) == '-')
     {
-    stemmer_similarity = THRESHOLD;
+    stemmer_similarity = ANT_stemmer_factory::THRESHOLD_SIMILARITY;
     stemmer_similarity_threshold = strtod(which + 2, NULL);
     }
 }

@@ -72,3 +72,14 @@ char *ANT_stemmer::next(void)
 {
 return get_next(ANT_btree_iterator::next());
 }
+
+/*
+	ANT_STEMMER::WEIGHT_TERMS()
+	---------------------------
+    Returns a boolean - should we weight tfs for stemmed terms?
+    If true (false by default) then you should set weight to how they should be affected.
+*/
+long ANT_stemmer::weight_terms(ANT_weighted_tf *term_weight, char *term) {
+*term_weight = 1;
+return 0;
+}
