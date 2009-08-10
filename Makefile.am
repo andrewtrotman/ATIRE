@@ -64,6 +64,8 @@ library_sources =  \
     $(SRCDIR)/lovins.c \
     $(SRCDIR)/stemmer_factory.c \
     $(SRCDIR)/stemmer_term_similarity.c \
+    $(SRCDIR)/stemmer_term_similarity_threshold.c \
+    $(SRCDIR)/stemmer_term_similarity_weighted.c \
     $(SRCDIR)/paice_husk.c \
     $(SRCDIR)/learned_wikipedia_stem.c \
     $(SRCDIR)/relevant_topic.c \
@@ -82,7 +84,6 @@ library_sources =  \
 	$(SRCDIR)/ant_param_block.c \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_dale_chall.c \
-	$(SRCDIR)/thesaurus_engine.c \
 	$(SRCDIR)/version.c \
 	$(SRCDIR)/ranking_function.c	\
 	$(SRCDIR)/ranking_function_readability.c	\
@@ -164,6 +165,8 @@ library_headers = \
 	$(SRCDIR)/stemmer_paice_husk.h	\
 	$(SRCDIR)/stemmer_porter.h	\
 	$(SRCDIR)/stemmer_term_similarity.h \
+	$(SRCDIR)/stemmer_term_similarity_threshold.h \
+	$(SRCDIR)/stemmer_term_similarity_weighted.h \
 	$(SRCDIR)/stop_word.h	\
 	$(SRCDIR)/str.h	\
 	$(SRCDIR)/string_pair.h	\
@@ -171,7 +174,6 @@ library_headers = \
 	$(SRCDIR)/top_k_sort.h	\
 	$(SRCDIR)/readability_factory.h \
 	$(SRCDIR)/readability_dale_chall.h \
-	$(SRCDIR)/thesaurus_engine.h \
 	$(SRCDIR)/version.h \
 	$(SRCDIR)/ranking_function.h	\
 	$(SRCDIR)/ranking_function_readability.h	\

@@ -424,7 +424,7 @@ ANT_compressable_integer *current_document, *end;
 long document, weight_terms;
 char *term;
 ANT_compressable_integer term_frequency;
-double tf_weight;
+ANT_weighted_tf tf_weight;
 /*
 	The way we stem is to load the terms that match the stem one at a time and to
 	accumulate the term frequences into the stem_buffer accumulator list.  This then

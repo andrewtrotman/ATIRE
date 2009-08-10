@@ -292,7 +292,11 @@ all_links_in_file_length = to - all_links_in_file;
 */
 void print_header(char *runname)
 {
-printf("<inex-submission participant-id=\"4\" run-id=\"%s\" task=\"LinkTheWiki\" format=\"FOL\"><details><machine><cpu>Pentium 4</cpu><speed>2992 MHz</speed><cores>2</cores><hyperthreads>1</hyperthreads><memory>1GB</memory></machine><time>TBC</time></details><description>This is the description</description><collections><collection>wikipedia</collection></collections>", runname);
+#ifdef INEX_ARCHIVE
+	printf("<inex-submission participant-id=\"4\" run-id=\"%s\" task=\"LinkTheWiki\" format=\"FOL\"><details><machine><cpu>Pentium 4</cpu><speed>2992 MHz</speed><cores>2</cores><hyperthreads>1</hyperthreads><memory>1GB</memory></machine><time>TBC</time></details><description>This is the description</description><collections><collection>wikipedia</collection></collections>", runname);
+#else
+	printf("<inexltw-submission participant-id=\"4\" run-id=\"%s\" task=\"LTW_F2F\" format=\"FOL\"><details><machine><cpu>Pentium 4</cpu><speed>2992 MHz</speed><cores>2</cores><hyperthreads>1</hyperthreads><memory>1GB</memory></machine><time>TBC</time></details><description>This is the description</description><collections><collection>wikipedia</collection></collections>", runname);
+#endif
 }
 
 /*
@@ -301,7 +305,11 @@ printf("<inex-submission participant-id=\"4\" run-id=\"%s\" task=\"LinkTheWiki\"
 */
 void print_footer(void)
 {
-puts("</inex-submission>");
+#ifdef INEX_ARCHIVE
+	puts("</inex-submission>");
+#else
+	puts("</inexltw-submission>");
+#endif
 }
 
 /*
