@@ -1,10 +1,12 @@
 /*
 	NEXI.C
 	------
+	FIX:  get_NEXI_term should not call new
 */
-#include "nexi.h"
+#include "NEXI.h"
 #include "ctypes.h"
 #include "parser.h"
+#include "NEXI_term.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -12,6 +14,55 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+/*
+	ANT_NEXI::GET_NEXI_TERM()
+	-------------------------
+*/
+ANT_NEXI_term *ANT_NEXI::get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *tag, ANT_string_pair *term, long weight)
+{
+ANT_NEXI_term *answer;
+
+answer = new ANT_NEXI_term;
+answer->next = answer->parent_path = NULL;
+answer->sign = weight;
+if (tag == NULL)
+	{
+	answer->path.start = NULL;
+	answer->path.string_length = 0;
+	}
+else
+	answer->path = *tag;
+
+if (term == NULL)
+	{
+	answer->term.start = NULL;
+	answer->term.string_length = 0;
+	}
+else
+	answer->term = *term;
+
+if (parent != NULL)
+	parent->next = answer;
+
+return answer;
+}
+
+/*
+	ANT_NEXI::DUPLICATE_PATH_CHAIN()
+	--------------------------------
+*/
+ANT_NEXI_term *ANT_NEXI::duplicate_path_chain(ANT_NEXI_term *start, ANT_NEXI_term **end_of_chain)
+{
+ANT_NEXI_term sentinal, *current, *head, *tail;
+
+head = tail = &sentinal;
+for (current = start; current != NULL; current = current->next)
+	tail = get_NEXI_term(tail,  &current->path, &current->term, current->sign);
+
+*end_of_chain = tail;
+return sentinal.next;
+}
 
 /*
 	ANT_NEXI::ISPART()
@@ -118,7 +169,7 @@ do
 	get_next_token();
 	if (ANT_parser::isXMLnamestartchar(token[0]))
 		continue;
-	else if (token.strcmp("//") == 0)
+	else if (token.true_strcmp("//") == 0)
 		continue;
 	else if (token[0] == 0)
 		more = FALSE;
@@ -149,8 +200,9 @@ successful_parse = FALSE;
 	ANT_NEXI::ABOUT()
 	-----------------
 */
-long ANT_NEXI::about(void)
+ANT_NEXI_term *ANT_NEXI::about(void)
 {
+ANT_NEXI_term *answer;
 ANT_string_pair path, terms;
 
 get_next_token();
@@ -161,11 +213,11 @@ read_path(&path);
 if (token[0] != ',')
 	parse_error("Expected ','");
 get_next_token();			// prime read_CO
-read_CO(&path, &terms);
+answer = read_CO(&path, &terms);
 if (token[0] != ')')
 	parse_error("Expected ')'");
 
-return 0;
+return answer;
 }
 
 /*
@@ -185,19 +237,18 @@ while (strchr("<>=", token[0]) != NULL)
 	ANT_NEXI::NUMBERS()
 	-------------------
 */
-long ANT_NEXI::numbers(void)
+ANT_NEXI_term *ANT_NEXI::numbers(void)
 {
 ANT_string_pair path, term;
+ANT_NEXI_term *answer;
 
 read_path(&path);
-read_operator();
+read_operator();		// at this point we should do something with the operator
 term = token;
-//read_CO(&path, &terms);
 
-printf("0TAG0:%*.*s:", path.string_length, path.string_length, path.start);
-printf("0TERM0:%*.*s:\n",  term.string_length, term.string_length, term.start);
+answer = get_NEXI_term(NULL, &path, &term, 0);
 
-return 0;
+return answer;
 }
 
 /*
@@ -263,11 +314,14 @@ return TRUE;
 	ANT_NEXI::READ_CO()
 	-------------------
 */
-void ANT_NEXI::read_CO(ANT_string_pair *path, ANT_string_pair *terms)
+ANT_NEXI_term *ANT_NEXI::read_CO(ANT_string_pair *path, ANT_string_pair *terms)
 {
 ANT_string_pair current;
 long weight, more = TRUE;
+ANT_NEXI_term root, *node;
 
+root.next = NULL;
+node = &root;		// root acts as a sentinal
 current = *terms = token;
 do
 	{
@@ -295,74 +349,102 @@ do
 		more = FALSE;
 	if (more)
 		{
-		printf("TERM:%*.*s:%d:\n",  current.string_length, current.string_length, current.start, weight);
+		node = get_NEXI_term(node, path, &current, weight);
 		current = *get_next_token();
 		}
 	}
 while (more);
 
 terms->string_length = token.start - terms->start;
-
-if (path != NULL)
-	printf("TAG:%*.*s:", path->string_length, path->string_length, path->start);
-printf("TERM:%*.*s:\n",  terms->string_length, terms->string_length, terms->start);
+return root.next;
 }
 
 /*
 	ANT_NEXI::READ_CAS()
 	--------------------
 */
-long ANT_NEXI::read_CAS(void)
+ANT_NEXI_term *ANT_NEXI::read_CAS(void)
 {
 ANT_string_pair path;
-long parsing_result = FALSE;
+ANT_NEXI_term *got, sentinal, *current, *parent_path, *end_of_path_chain;
 
+current = &sentinal;
+end_of_path_chain = sentinal.next = parent_path = NULL;
 do
 	{
 	read_path(&path);
+	if (path.string_length < 3 || strncmp(path.start, "//", 2) != 0)
+		parse_error("Path must start with a //");
+	if (parent_path != NULL)
+		{
+		parent_path = duplicate_path_chain(parent_path, &end_of_path_chain);
+		get_NEXI_term(end_of_path_chain, &path, NULL, 0);
+		}
+	else
+		parent_path = get_NEXI_term(end_of_path_chain, &path, NULL, 0);
+
 	if (token[0] == '[')
 		{
 		do
 			{
 			get_next_token();
 
-			if (token.strcmp("about") == 0)
-				about();
+			got = NULL;
+			if (token.true_strcmp("about") == 0)
+				got = about();
 			else if (token[0] == '.')
-				numbers();
+				got = numbers();
 			else
 				parse_error("Expected 'about()' clause or numeric expression");
+
+			if (got != NULL)
+				{
+				current->next = got;
+				while (current->next != NULL)
+					{
+					current = current->next;
+					current->parent_path = parent_path;
+					}
+				}
+			
 			get_next_token();
 			}
-		while (token.strcmp("or") == 0 || token.strcmp("and") == 0 || token.strcmp("OR") == 0 || token.strcmp("AND") == 0);
+		while (token.true_strcmp("or") == 0 || token.true_strcmp("and") == 0 || token.true_strcmp("OR") == 0 || token.true_strcmp("AND") == 0);
 		if (token[0] != ']')
 			parse_error("Expected ']'");
+		get_next_token();		// primed for next iteration of target-element loop
 		}
 	else if (token[0] != '\0')
 		parse_error("Expected '['");
 	}
 while (token[0] != '\0');
 
-return parsing_result;
+return sentinal.next;
 }
 
 /*
 	ANT_NEXI::PARSE()
 	-----------------
 */
-void ANT_NEXI::parse(char *expression)
+ANT_NEXI_term *ANT_NEXI::parse(char *expression)
 {
 ANT_string_pair terms;
+ANT_NEXI_term *answer;
 
 successful_parse = TRUE;
 at = string = expression;
 
 get_next_token();
 
-if (token.strcmp("//") == 0)		// we're a CAS query
-	read_CAS();
+if (token.true_strcmp("//") == 0)		// we're a CAS query
+	answer = read_CAS();
 else
-	read_CO(NULL, &terms);
+	answer = read_CO(NULL, &terms);
+
+if (token[0] != '\0')
+	parse_error("Unexpected end of query");
+
+return answer;
 }
 
 /*
@@ -371,6 +453,7 @@ else
 */
 int main(void)
 {
+ANT_NEXI_term *parsing;
 ANT_NEXI nexi_parser;
 char buffer[1024];
 
@@ -380,7 +463,14 @@ for(;;)
 	gets(buffer);
 	if (strcmp(buffer, ".quit") == 0)
 		break;
-	nexi_parser.parse(buffer);
+	parsing = nexi_parser.parse(buffer);
+	if (parsing != NULL)
+		{
+		if (nexi_parser.get_success_state())
+			parsing->text_render();
+		else
+			puts("Failed to parse");
+		}
 	puts("");
 	}
 

@@ -2,22 +2,41 @@
 	NEXI_TERM.C
 	-----------
 */
-#ifndef __NEXI_TERM_C__
-#define __NEXI_TERM_C__
-
 #include <stdio.h>
+#include "NEXI_term.h"
+#include "string_pair.h"
 
 /*
-	class ANT_NEXI_TERM
-	-------------------
-	This requires some explinatio
+	ANT_NEXI_TERM::TEXT_RENDER()
+	----------------------------
 */
-class ANT_NEXI_term
+void ANT_NEXI_term::text_render(void)
 {
-public:
-	ANT_string_pair path;
-	ANT_string_pair term;
-	static void text_render(void) { printf("TAG:"); path->text_render(); printf("TERM:"); term->text_render(); printf("\n"); }
-} ;
+ANT_NEXI_term *parent;
 
-#endif __NEXI_TERM_C__
+if (path.start != NULL)
+	{
+	printf("TAG:");
+	parent = parent_path;
+	while (parent != NULL)
+		{
+		parent->path.text_render();
+		parent = parent->next;
+		}
+	path.text_render();
+	printf(" ");
+	}
+
+printf("TERM:");
+
+if (sign > 0)
+	printf("+");
+else if (sign < 0)
+	printf("-");
+
+term.text_render();
+printf("\n");
+
+if (next != NULL) 
+	next->text_render();
+}
