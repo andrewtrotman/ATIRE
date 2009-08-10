@@ -65,7 +65,11 @@ while (chunk != NULL)
 	killer = chunk;
 	chunk = *(char **)chunk;
 	#ifdef _MSC_VER
-		VirtualFree(killer, 0, MEM_RELEASE);
+		#ifdef PURIFY
+			free(killer);
+		#else
+			VirtualFree(killer, 0, MEM_RELEASE);
+		#endif
 	#else
 		free(killer);
 	#endif
@@ -115,45 +119,49 @@ while (chunk != NULL)
 void *ANT_memory::alloc(long long *size)
 {
 #ifdef _MSC_VER
-	void *answer = NULL;
-	long long bytes = 0;
+	#ifdef PURIFY
+		return ::malloc((size_t)*size);
+	#else
+		void *answer = NULL;
+		long long bytes = 0;
 
-	/*
-		First try using large page memory blocks
-	*/
-#ifdef LARGE_MEMORY_PAGES
-	if (has_large_pages)
-		if (set_privilege(SE_LOCK_MEMORY_NAME, TRUE))		// try and get permission from the OS to allocate large pages
+		/*
+			First try using large page memory blocks
+		*/
+		#ifdef LARGE_MEMORY_PAGES
+			if (has_large_pages)
+				if (set_privilege(SE_LOCK_MEMORY_NAME, TRUE))		// try and get permission from the OS to allocate large pages
+					{
+					bytes = large_page_size * ((*size + large_page_size - 1) / large_page_size);
+					answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
+					set_privilege(SE_LOCK_MEMORY_NAME, FALSE);		// drop back to the initial security level
+					}
+		#endif
+		/*
+			If we don't have large pages or large pages fail then fall back to small pages
+		*/
+		if (answer == NULL)
 			{
-			bytes = large_page_size * ((*size + large_page_size - 1) / large_page_size);
-			answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
-			set_privilege(SE_LOCK_MEMORY_NAME, FALSE);		// drop back to the initial security level
+			bytes = short_page_size * ((*size + short_page_size - 1) / short_page_size);
+			answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+			if (answer != NULL)
+				{
+				/*
+					This code is commented out at the moment because when I ran this over the
+					INEX Wikipedia 2009 collection it caused a VISTA hang!  It looks like you
+					can't lock more than 4GB of memory - but this is a guess.
+				*/
+	//			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
+				}
+			else
+				bytes = 0;		// couldn't allocate any memory.
 			}
-#endif
-	/*
-		If we don't have large pages or large pages fail then fall back to small pages
-	*/
-	if (answer == NULL)
-		{
-		bytes = short_page_size * ((*size + short_page_size - 1) / short_page_size);
-		answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-		if (answer != NULL)
-			{
-			/*
-				This code is commented out at the moment because when I ran this over the
-				INEX Wikipedia 2009 collection it caused a VISTA hang!  It looks like you
-				can't lock more than 4GB of memory - but this is a guess.
-			*/
-//			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
-			}
-		else
-			bytes = 0;		// couldn't allocate any memory.
-		}
-	/*
-		If we still can't allocate memory then we're run out (ans so return NULL)
-	*/
-	*size = bytes;		// number of bytes we allocated
-	return answer;
+		/*
+			If we still can't allocate memory then we're run out (ans so return NULL)
+		*/
+		*size = bytes;		// number of bytes we allocated
+		return answer;
+	#endif
 #else
 	return ::malloc((size_t)*size);
 #endif
@@ -170,10 +178,14 @@ void *ANT_memory::get_chained_block(long long bytes)
 char **chain;
 long long request;
 
-if (bytes > block_size)
-	block_size = bytes;			// extend the largest allocate block size
+#ifdef PURIFY
+	request = bytes + sizeof(*chain);
+#else
+	if (bytes > block_size)
+		block_size = bytes;			// extend the largest allocate block size
 
-request = block_size + sizeof(*chain);
+	request = block_size + sizeof(*chain);
+#endif
 if ((chain = (char **)alloc(&request)) == NULL)
 	return NULL;
 
@@ -186,4 +198,3 @@ allocated += request;
 
 return chunk;
 }
-

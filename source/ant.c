@@ -382,9 +382,9 @@ return thus_far;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long long *documents_in_id_list, char ***filename_list)
+char **read_docid_list(long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
 {
-char *document_list_buffer, *filename_list_buffer;			// these is leaked!!!!
+char *document_list_buffer, *filename_list_buffer;			// these are leaked!
 char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
@@ -396,7 +396,6 @@ filename_list_buffer = strnew(document_list_buffer);
 
 id_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 
-//#ifdef NEVER
 /*
 	This code converts filenames into DOCIDs
 */
@@ -413,7 +412,15 @@ for (current = id_list; *current != NULL; current++)
 		*current = start == *current ? *current : start + 1;		// +1 to skip over the '/'
 		}
 	}
-//#endif
+/*
+	The caller must delete these two on termination
+*/
+*mem1 = document_list_buffer;
+*mem2 = filename_list_buffer;
+
+/*
+	Now return the list
+*/
 return id_list;
 }
 
@@ -434,13 +441,14 @@ char **document_list, **answer_list, **filename_list;
 ANT_relevant_document *assessments = NULL;
 long long documents_in_id_list, number_of_assessments;
 ANT_ranking_function *ranking_function = NULL;
+char *mem1, *mem2;
 
 last_param = params.parse();
 
 if (params.logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
-document_list = read_docid_list(&documents_in_id_list, &filename_list);
+document_list = read_docid_list(&documents_in_id_list, &filename_list, &mem1, &mem2);
 
 if (params.assessments_filename != NULL)
 	{
@@ -481,6 +489,12 @@ search_engine->set_trim_postings_k(params.trim_postings_k);
 ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list);
 
 delete map;
+delete ranking_function;
+delete search_engine;
+delete [] document_list;
+delete [] filename_list;
+delete [] mem1;
+delete [] mem2;
 
 printf("Total elapsed time including startup and shutdown ");
 stats.print_elapsed_time();
