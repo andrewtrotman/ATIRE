@@ -19,8 +19,14 @@
 	#define DEBUGNESS ""
 #endif
 
+#ifdef PURIFY
+	#define PURIFYNESS " PURIFY"
+#else
+	#define PURIFYNESS ""
+#endif
+
 long ANT_version = 0x0003;		// version number in BCD
-char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS ")\nWritten (w) 2008, 2009 Andrew Trotman, University of Otago";
+char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008, 2009 Andrew Trotman, University of Otago";
 
 
 /*

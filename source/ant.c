@@ -384,7 +384,7 @@ return thus_far;
 */
 char **read_docid_list(long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
 {
-char *document_list_buffer, *filename_list_buffer;			// these are leaked!
+char *document_list_buffer, *filename_list_buffer;
 char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
