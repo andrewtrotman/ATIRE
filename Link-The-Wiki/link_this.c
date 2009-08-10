@@ -32,8 +32,10 @@
 
 #ifdef INEX_ARCHIVE
 	#define COLLECTION_LINK_TAG_NAME "collectionlink"
+	#define TOPIC_SIGNITURE "<topic file=\"%d.xml\" name=\"%s\"><outgoing>\n"
 #else
 	#define COLLECTION_LINK_TAG_NAME "link"
+	#define TOPIC_SIGNITURE "<topic file=\"%d\" name=\"%s\"><outgoing>\n"
 #endif
 
 class ANT_link_posting
@@ -204,14 +206,18 @@ ANT_link_term *read_index(char *filename, long *terms_in_collection)
 {
 FILE *fp;
 ANT_link_term *all_terms, *term;
-long unique_terms, postings, current;
+/**
+ * there is something wrong with the long type for sscanf in reading the number of terms on 64-bit Linux
+ */
+int unique_terms, postings, current;
 char *term_end, *from;
+char tmp[6];
 
 if ((fp = fopen(filename, "rb")) == NULL)
 	exit(printf("Cannot index file:%s\n", filename));
 
 fgets(buffer, sizeof(buffer), fp);
-sscanf(buffer, "%d", &unique_terms);
+sscanf(buffer, "%d %s", &unique_terms, tmp);
 term = all_terms = new ANT_link_term [unique_terms];
 
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
@@ -318,18 +324,20 @@ void print_footer(void)
 */
 void print_links(long orphan_docid, long links_to_print, long max_targets_per_anchor, long mode)
 {
-long *links_already_printed;
+//long *links_already_printed;
 long current, links_already_printed_length, links_printed;
 long result, current_anchor, forget_it, has_link, anchors_printed;
 char *orphan_name = "Unknown";
+long array_size = links_to_print * max_targets_per_anchor * 2;
 
-links_already_printed = new long [links_to_print * max_targets_per_anchor * 2];
+long links_already_printed[array_size]; // = new long [array_size];
+
 #ifdef REMOVE_ORPHAN_LINKS
 links_already_printed[0] = orphan_docid;		// fake having already printed the oprhan itself.
 links_already_printed_length = 1;
 #endif
 
-printf("<topic file=\"%d.xml\" name=\"%s\"><outgoing>\n", orphan_docid, orphan_name);
+printf(TOPIC_SIGNITURE, orphan_docid, orphan_name);
 result = 0;
 links_printed = 0;
 while ((result < all_links_in_file_length) && (links_printed < links_to_print))
@@ -346,7 +354,7 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 	while ((current_anchor < all_links_in_file[result].link_term->postings_length) && (anchors_printed < max_targets_per_anchor))
 		{
 		forget_it = FALSE;
-		for (current = 0; current < links_already_printed_length; current++)
+		for (current = 0; (current < links_already_printed_length) && (current < array_size); current++)
 			if (links_already_printed[current] == all_links_in_file[result].link_term->postings[current_anchor].docid)
 				forget_it = TRUE;
 		if (!forget_it)
@@ -354,11 +362,18 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 			links_already_printed[links_already_printed_length] = all_links_in_file[result].link_term->postings[current_anchor].docid;
 			links_already_printed_length++;
 			if (!has_link)
+#ifdef INEX_ARCHIVE
 				printf("<link><anchor><file>%d.xml</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
-			anchors_printed++;
 			printf("<linkto><file>%d.xml</file><bep>0</bep></linkto>\n", all_links_in_file[result].link_term->postings[current_anchor].docid);
+#else
+				//printf("<link><anchor><file>%d</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
+			printf("<linkto>%d</linkto>\n", all_links_in_file[result].link_term->postings[current_anchor].docid);
+#endif
+			anchors_printed++;
+			if (anchors_printed >= max_targets_per_anchor)
+				break;
 //			printf("%d:%d:%d:%d:%d\n", orphan_docid, all_links_in_file[result].link_term->postings[current_anchor].docid, count_char(all_links_in_file[result].term, ' ') + 1, strlen(all_links_in_file[result].term), (long)(all_links_in_file[result].gamma * 100));
-			has_link = TRUE;
+			//has_link = TRUE;
 			}
 		current_anchor++;
 		}
@@ -370,10 +385,14 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 	result++;
 	}
 
+#ifdef INEX_ARCHIVE
 puts("</outgoing><incoming><link><anchor><file>654321.xml</file><offset>445</offset><length>462</length></anchor><linkto><bep>1</bep></linkto></link></incoming>");
+#else
+puts("</outgoing>");
+#endif
 puts("</topic>");
 
-delete [] links_already_printed;
+//delete [] links_already_printed;
 }
 
 /*
@@ -431,7 +450,7 @@ else
 */
 void generate_collection_link_set(char *original_file)
 {
-char *file, *pos, *end, *copy;
+char *file, *pos, *end, *copy, *slash, *target_end;
 long id;
 
 links_in_orphan_length = 0;
@@ -439,23 +458,32 @@ file = _strdup(original_file);
 pos = strstr(file, "<"COLLECTION_LINK_TAG_NAME);
 while (pos != NULL)
 	{
-	pos = strstr(pos, "xlink:href=");
-	pos = strchr(pos, '"');
-	id = atol(pos + 1);
-	pos = strchr(pos, '>');
 	end = strstr(pos, "</"COLLECTION_LINK_TAG_NAME);
+	pos = strstr(pos, "xlink:href=");
+	if (pos != NULL && pos < end)
+		{
+		pos = strchr(pos, '"');
+		pos++;
+		target_end = strchr(pos, '"');
 
-	copy = strnnew(pos + 1, end - pos - 1);
-	string_clean(copy, lowercase_only);
+		while ((slash = strpbrk(pos, "\\/")) && slash < target_end)
+			pos = slash + 1;
 
-	links_in_orphan[links_in_orphan_length].term = copy;
-	links_in_orphan[links_in_orphan_length].gamma = 0;	
-	links_in_orphan[links_in_orphan_length].target_document = id;
+		id = atol(pos);
+		pos = strchr(pos, '>');
 
-	links_in_orphan_length++;
-	if (links_in_orphan_length >= MAX_LINKS_IN_FILE)
-		exit(printf("Too many links present in orphan a priori\n"));
-	pos = strstr(pos, "<"COLLECTION_LINK_TAG_NAME);
+		copy = strnnew(pos + 1, end - pos - 1);
+		string_clean(copy, lowercase_only);
+
+		links_in_orphan[links_in_orphan_length].term = copy;
+		links_in_orphan[links_in_orphan_length].gamma = 0;
+		links_in_orphan[links_in_orphan_length].target_document = id;
+
+		links_in_orphan_length++;
+		if (links_in_orphan_length >= MAX_LINKS_IN_FILE)
+			exit(printf("Too many links present in orphan a priori\n"));
+		}
+	pos = strstr(end, "<"COLLECTION_LINK_TAG_NAME);
 	}
 delete [] file;
 

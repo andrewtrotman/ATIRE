@@ -289,7 +289,8 @@ link_index_LDADD = ${ANT_LIBS}
 link_index_DEPENDENCIES = libant.la
 
 link_this_SOURCES = $(LTWDIR)/link_this.c
-link_this_LDFLAGS = -rdynamic
+#link_this_LDFLAGS = -rdynamic
+link_this_LDFLAGS = -static
 link_this_LDADD = ${ANT_LIBS}
 link_this_DEPENDENCIES = libant.la
 
