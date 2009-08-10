@@ -3,6 +3,7 @@
 	----------------------------------
 */
 #include <string.h>
+#include <math.h>
 #include "stemmer.h"
 #include "stemmer_term_similarity.h"
 #include "stemmer_term_similarity_weighted.h"
@@ -26,8 +27,8 @@ this->weight = weight;
 long ANT_stemmer_term_similarity_weighted::weight_terms(ANT_weighted_tf *term_weight, char *term)
 {
 if (strcmp(this->term, term) == 0)
-    *term_weight = 1.0;
+    *term_weight = (ANT_weighted_tf) 1.0;
 else
-    *term_weight = buffer_similarity(term);
+    *term_weight = (ANT_weighted_tf) pow(buffer_similarity(term), weight);
 return 1;
 }

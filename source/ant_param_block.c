@@ -93,7 +93,9 @@ puts("  l                    Lovins stemming");
 puts("  o                    Otago stemming");
 puts("  p                    Porter stemming");
 puts("  s                    S-Striping stemming");
+#ifdef USE_FLOATED_TF
 puts("   +<th>               Stemmed terms tfs weighted by term similarity. [default=1]");
+#endif
 puts("   -<th>               Stemmed terms cutoff with term similarity. [default=0]");
 puts("");
 
@@ -236,6 +238,7 @@ switch (*which)
 	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
 	}
 if (*(which + 1) == '+')
+#ifdef USE_FLOATED_TF
     {
     stemmer_similarity = ANT_stemmer_factory::WEIGHTED_SIMILARITY;
     if (*(which + 2) != '\0')
@@ -243,6 +246,9 @@ if (*(which + 1) == '+')
     else 
         stemmer_similarity_threshold = 1.0;
     }
+#else
+	exit(printf("Not compilied with floating point tf, option unsupported.\n"));
+#endif
 else if (*(which + 1) == '-')
     {
     stemmer_similarity = ANT_stemmer_factory::THRESHOLD_SIMILARITY;
