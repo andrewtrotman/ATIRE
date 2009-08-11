@@ -11,6 +11,7 @@
 
 #define INEX_ARCHIVE_ARTICLE_ID_SIGNITURE "name id="
 #define ARTICLE_ID_SIGNITURE "id"
+#define ARTICLE_NAME_SIGNITURE "title"
 
 /*
 	STRING_CLEAN()
@@ -103,7 +104,32 @@ while (!isdigit(*pos))
 return atol(pos);
 }
 
+/*
+	 GET_DOC_NAME()
+	 --------------
+ */
+inline char *get_doc_name(char *file, char *to)
+{
+	char *pos, *start, *end;
+	long len = 0;
 
+	pos = strstr(file, "<"ARTICLE_NAME_SIGNITURE);
+	if (pos == NULL)
+		exit(printf("Cannot find DOC title <title> in file\n"));
+
+	start = strchr(pos, '>');
+	start++;
+	end = strstr(file, "</"ARTICLE_NAME_SIGNITURE);
+	len = end - start;
+	strncpy(to, start, len);
+	to[len] = '\0';
+
+	return to;
+}
+/*
+	 TO_LOWER()
+	 ----------
+ */
 inline char *to_lower(char *source)
 {
 int i = 0;

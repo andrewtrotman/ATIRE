@@ -322,15 +322,17 @@ void print_footer(void)
 	PRINT_LINKS()
 	-------------
 */
-void print_links(long orphan_docid, long links_to_print, long max_targets_per_anchor, long mode)
+void print_links(long orphan_docid, char *orphan_name, long links_to_print, long max_targets_per_anchor, long mode)
 {
-//long *links_already_printed;
+long *links_already_printed;
 long current, links_already_printed_length, links_printed;
 long result, current_anchor, forget_it, has_link, anchors_printed;
-char *orphan_name = "Unknown";
+//char *orphan_name = "Unknown";
 long array_size = links_to_print * max_targets_per_anchor * 2;
+long stop_sign = 0;
 
-long links_already_printed[array_size]; // = new long [array_size];
+long links_already_printed_array[array_size]; // = new long [array_size];
+links_already_printed = links_already_printed_array;
 
 #ifdef REMOVE_ORPHAN_LINKS
 links_already_printed[0] = orphan_docid;		// fake having already printed the oprhan itself.
@@ -351,6 +353,7 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 
 	has_link = FALSE;
 	anchors_printed = current_anchor = 0;
+#ifdef INEX_ARCHIVE
 	while ((current_anchor < all_links_in_file[result].link_term->postings_length) && (anchors_printed < max_targets_per_anchor))
 		{
 		forget_it = FALSE;
@@ -362,16 +365,14 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 			links_already_printed[links_already_printed_length] = all_links_in_file[result].link_term->postings[current_anchor].docid;
 			links_already_printed_length++;
 			if (!has_link)
-#ifdef INEX_ARCHIVE
 				printf("<link><anchor><file>%d.xml</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
 			printf("<linkto><file>%d.xml</file><bep>0</bep></linkto>\n", all_links_in_file[result].link_term->postings[current_anchor].docid);
-#else
-				//printf("<link><anchor><file>%d</file><offset>0</offset><length>0</length></anchor>\n", orphan_docid);
-			printf("<linkto>%d</linkto>\n", all_links_in_file[result].link_term->postings[current_anchor].docid);
-#endif
 			anchors_printed++;
-			if (anchors_printed >= max_targets_per_anchor)
+			if (/*anchors_printed >= max_targets_per_anchor || */links_already_printed_length >= array_size)
+				{
+				stop_sign = 1;
 				break;
+				}
 //			printf("%d:%d:%d:%d:%d\n", orphan_docid, all_links_in_file[result].link_term->postings[current_anchor].docid, count_char(all_links_in_file[result].term, ' ') + 1, strlen(all_links_in_file[result].term), (long)(all_links_in_file[result].gamma * 100));
 			//has_link = TRUE;
 			}
@@ -382,13 +383,43 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 		printf("</link>\n");
 		links_printed++;
 		}
+#else
+	printf("<linkto>");
+	while ((current_anchor < all_links_in_file[result].link_term->postings_length) && (anchors_printed < max_targets_per_anchor))
+		{
+		forget_it = FALSE;
+		for (current = 0; (current < links_already_printed_length) && (current < array_size); current++)
+			if (links_already_printed[current] == all_links_in_file[result].link_term->postings[current_anchor].docid)
+				forget_it = TRUE;
+		if (!forget_it)
+			{
+			links_already_printed[links_already_printed_length] = all_links_in_file[result].link_term->postings[current_anchor].docid;
+			if (links_already_printed_length > 1)
+				printf(", ");
+			printf("%d", all_links_in_file[result].link_term->postings[current_anchor].docid);
+			anchors_printed++;
+			links_already_printed_length++;
+			if (/*anchors_printed >= max_targets_per_anchor || */links_already_printed_length >= array_size)
+				{
+				stop_sign = 1;
+				break;
+				}
+			}
+		current_anchor++;
+		}
+	printf("<linkto>\n");
+
+#endif
 	result++;
-	}
+
+	if (stop_sign)
+		break;
+	} // while
 
 #ifdef INEX_ARCHIVE
-puts("</outgoing><incoming><link><anchor><file>654321.xml</file><offset>445</offset><length>462</length></anchor><linkto><bep>1</bep></linkto></link></incoming>");
+		puts("</outgoing><incoming><link><anchor><file>654321.xml</file><offset>445</offset><length>462</length></anchor><linkto><bep>1</bep></linkto></link></incoming>");
 #else
-puts("</outgoing>");
+		puts("</outgoing>");
 #endif
 puts("</topic>");
 
@@ -563,7 +594,9 @@ long terms_in_index, orphan_docid, param, noom, index_argv_param;
 double gamma, numerator, denominator;
 long targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
 char *runname = "Unknown";
+char orphan_name[2048];
 double proper_noun_boost = 0.0;
+long num_of_processed_topic = 0;
 
 if (argc < 3)
 	usage(argv[0]);		// and exit
@@ -605,6 +638,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 		{
 		all_links_in_file_length = 0;
 		orphan_docid = get_doc_id(file);
+		get_doc_name(file, orphan_name);
 #ifdef REMOVE_ORPHAN_LINKS
 		generate_collection_link_set(file);
 		add_or_subtract_orphan_links(SUBTRACT_ORPHAN_LINKS, link_index, terms_in_index);
@@ -686,14 +720,16 @@ for (param = index_argv_param + 1; param < argc; param++)
 		deduplicate_links();
 		qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
 
-		print_links(orphan_docid, anchors_per_run, targets_per_link, print_mode);
+		print_links(orphan_docid, orphan_name, anchors_per_run, targets_per_link, print_mode);
 
 		delete [] file;
 		delete [] term_list;
 #ifdef REMOVE_ORPHAN_LINKS
 		add_or_subtract_orphan_links(ADD_ORPHAN_LINKS, link_index, terms_in_index);
 #endif
+		num_of_processed_topic++;
 		}
+fprintf(stderr, "Total %d topics processed\n", num_of_processed_topic);
 print_footer();
 
 return 0;
