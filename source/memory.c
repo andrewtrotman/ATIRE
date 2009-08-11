@@ -7,6 +7,7 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "memory.h"
 
 #if _WIN32_WINNT < 0x0600			// prior to Vista
@@ -43,7 +44,9 @@ ANT_memory::ANT_memory(long long block_size_for_allocation)
 
 //printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
 #else
-	short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium small page size)
+	if ((short_page_size = large_page_size = sysconf(_SC_PAGESIZE)) <= 0 ) {
+		short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium small page size)
+	}
 #endif
 
 chunk_end = at = chunk = NULL;
