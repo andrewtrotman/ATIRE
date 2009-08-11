@@ -342,6 +342,7 @@ links_already_printed_length = 1;
 printf(TOPIC_SIGNITURE, orphan_docid, orphan_name);
 result = 0;
 links_printed = 0;
+#ifdef INEX_ARCHIVE
 while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 	{
 	if (mode & MODE_NO_4_DIGIT_NUMBERS)
@@ -353,7 +354,6 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 
 	has_link = FALSE;
 	anchors_printed = current_anchor = 0;
-#ifdef INEX_ARCHIVE
 	while ((current_anchor < all_links_in_file[result].link_term->postings_length) && (anchors_printed < max_targets_per_anchor))
 		{
 		forget_it = FALSE;
@@ -383,8 +383,30 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 		printf("</link>\n");
 		links_printed++;
 		}
+	result++;
+
+	if (stop_sign)
+		break;
+	} // while
 #else
-	printf("<linkto>");
+printf("<linkto>");
+while ((result < all_links_in_file_length) && (links_printed < links_to_print))
+	{
+	if (strlen(all_links_in_file[result].link_term->term) == 0)
+		{
+		result++;		// in the case of empty term
+		continue;
+		}
+
+	if (mode & MODE_NO_4_DIGIT_NUMBERS)
+		if ((strlen(all_links_in_file[result].link_term->term) == 4) && (atol(all_links_in_file[result].link_term->term) > 999))
+			{
+			result++;		// in the case of a 4 digit number we ignore as we're probably a year
+			continue;
+			}
+
+	has_link = FALSE;
+	anchors_printed = current_anchor = 0;
 	while ((current_anchor < all_links_in_file[result].link_term->postings_length) && (anchors_printed < max_targets_per_anchor))
 		{
 		forget_it = FALSE;
@@ -407,14 +429,14 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 			}
 		current_anchor++;
 		}
-	printf("<linkto>\n");
-
-#endif
 	result++;
 
 	if (stop_sign)
 		break;
 	} // while
+printf("</linkto>\n");
+#endif
+
 
 #ifdef INEX_ARCHIVE
 		puts("</outgoing><incoming><link><anchor><file>654321.xml</file><offset>445</offset><length>462</length></anchor><linkto><bep>1</bep></linkto></link></incoming>");
