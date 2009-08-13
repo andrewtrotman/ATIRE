@@ -29,7 +29,7 @@ public:
 	char *string(void) { return start; }
 
 	char *str(void) { return strnnew(start, string_length); }
-	char *strcpy(char *dest) { *(strncpy(dest, start, string_length) + string_length + 1) = '\0'; return dest; }
+	char *strcpy(char *dest) { *(strncpy(dest, start, string_length) + string_length /*+ 1*/) = '\0'; return dest; }
 	int strcmp(ANT_string_pair *with) { return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1; }
 
 	int true_strcmp(char *string);

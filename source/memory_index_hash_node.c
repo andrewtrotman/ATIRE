@@ -30,9 +30,9 @@ this->stats = stats;
 left = right = NULL;
 this->memory = memory;
 
-string.start = (char *)memory->malloc(original_string->length());
+string.start = (char *)memory->malloc(original_string->length() + 1);		// +1 because it adds a '\0';
 stats->strings++;
-stats->bytes_in_string_pool += original_string->length();
+stats->bytes_in_string_pool += original_string->length() + 1;
 
 original_string->strcpy(string.start);
 string.string_length = original_string->length();

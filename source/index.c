@@ -100,12 +100,16 @@ readability = new ANT_readability_factory;
 readability->set_measure(param_block.readability_measure);
 readability->set_parser(parser);
 
+/*
+	The first parameter that is not a command line switch is the start of the list of files to index
+*/
 current_file_length = bytes_indexed = 0;
 for (param = first_param; param < argc; param++)
 	{
 	files_that_match = 0;
 	now = stats.start_timer();
 	file = (unsigned char *)disk->read_entire_file(filename = disk->first(argv[param]), &current_file_length);
+
 	bytes_indexed += current_file_length;
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
@@ -114,7 +118,8 @@ for (param = first_param; param < argc; param++)
 		if (param_block.trec_docnos)
 			{
 			/*
-				Find each and every document ID in the current file and write then to disk
+				This is some hacky nastyness for extracting DOCNO from the TREC documents so that we can give the
+				unique ID of the file when we search.
 			*/
 			for (uid_start = strstr((char *)file, "<DOCNO>"); uid_start != NULL; uid_start = strstr(uid_end, "<DOCNO>"))
 				{
@@ -143,8 +148,15 @@ for (param = first_param; param < argc; param++)
 			{
 			if (param_block.trec_docnos && token->length() == 3 && strncmp(token->start, "DOC", 3) == 0)
 				{
+				/*
+					Multiple documents per file in the TREC data and each is delineated with <DOC>
+				*/
 				if (done_work)
 					{
+					/*
+						Finish-up the previous document bu setting its length and it readability score
+						and then reinitialising ready for parsing the next document.
+					*/
 					index->set_document_length(doc, terms_in_document);
 					readability->index(index);
 					doc++;

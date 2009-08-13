@@ -4,10 +4,11 @@
 */
 #ifdef _MSC_VER
 	#include <windows.h>
+#else
+	#include <unistd.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include "memory.h"
 
 #if _WIN32_WINNT < 0x0600			// prior to Vista
@@ -41,13 +42,11 @@ ANT_memory::ANT_memory(long long block_size_for_allocation)
 	large_page_size = has_large_pages ? GetLargePageMinimum() : 0;
 	GetSystemInfo(&hardware_info);
 	short_page_size = hardware_info.dwPageSize;
-
-//printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
 #else
-	if ((short_page_size = large_page_size = sysconf(_SC_PAGESIZE)) <= 0 ) {
+	if ((short_page_size = large_page_size = sysconf(_SC_PAGESIZE)) <= 0)
 		short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium small page size)
-	}
 #endif
+//printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
 
 chunk_end = at = chunk = NULL;
 used = 0;
@@ -69,7 +68,7 @@ while (chunk != NULL)
 	chunk = *(char **)chunk;
 	#ifdef _MSC_VER
 		#ifdef PURIFY
-			free(killer);
+			::free(killer);
 		#else
 			VirtualFree(killer, 0, MEM_RELEASE);
 		#endif

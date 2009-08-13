@@ -47,6 +47,7 @@ ANT_memory_index::~ANT_memory_index()
 delete memory;
 delete stats;
 delete factory;
+delete [] squiggle_length;
 }
 
 /*

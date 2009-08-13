@@ -53,7 +53,7 @@ if (token == NULL)
 
 /*
 	If it starts with a sentence end, then it's only sentence ends, so we
-	need to retun a new token entirely
+	need to return a new token entirely
 */
 if (ANT_parser_readability::issentenceend(*token->start))
 	return get_next_token();

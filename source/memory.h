@@ -9,6 +9,22 @@
 #include <stdlib.h>
 #include <new>
 
+/*
+#if defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
+	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
+#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4) || defined(__APPLE__) 
+	const long long ANT_memory_block_size_for_allocation = 64 * 1024 * 1024;
+#else
+	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
+#endif
+*/
+const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
+
+
+/*
+	class ANT_MEMORY
+	----------------
+*/
 class ANT_memory
 {
 private:
@@ -26,8 +42,9 @@ protected:
 	long set_privilege(char *priv_name, long enable);
 #endif
 
+
 public:
-	ANT_memory(long long block_size_for_allocation = 1024 * 1024 * 1024);
+	ANT_memory(long long block_size_for_allocation = ANT_memory_block_size_for_allocation);
 	~ANT_memory();
 
 	void *malloc(long long bytes);
