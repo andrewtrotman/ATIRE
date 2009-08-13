@@ -5,9 +5,9 @@
 
 #include <stdio.h>
 
-#if defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
+#if defined(_WIN64) || (__WORDSIZE == 64) || (defined(__APPLE__) && (_LP64 == 1))
 	#define BITNESS "64"
-#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4) || defined(__APPLE__) 
+#elif defined(_WIN32) || (__WORDSIZE == 32) || defined(__APPLE__) 
 	#define BITNESS "32"
 #else
 	#define BITNESS "Unknown"
