@@ -18,6 +18,8 @@ AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 
 CC = g++
 
+AM_CFLAGS = -std=c++0x -pedantic 
+
 #OBJDIR = 
 #BINDIR = 
 

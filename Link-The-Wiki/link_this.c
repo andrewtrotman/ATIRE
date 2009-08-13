@@ -331,8 +331,7 @@ long result, current_anchor, forget_it, has_link, anchors_printed;
 long array_size = links_to_print * max_targets_per_anchor * 2;
 long stop_sign = 0;
 
-long links_already_printed_array[array_size]; // = new long [array_size];
-links_already_printed = links_already_printed_array;
+links_already_printed = new long [array_size];
 
 #ifdef REMOVE_ORPHAN_LINKS
 links_already_printed[0] = orphan_docid;		// fake having already printed the oprhan itself.
