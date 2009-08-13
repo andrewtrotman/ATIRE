@@ -2,32 +2,33 @@
 	READABILITY_FACTORY.C
 	---------------------
 */
+#include "readability.h"
 #include "readability_factory.h"
-#include "readability_factory_measure.h"
 #include "readability_none.h"
 #include "readability_dale_chall.h"
 
 /*
-	static
-	------
-	Declaration of an object of each of the known readability types.
-	Pointers to these will be used below as objects to calculate readability.
+	ANT_READABILITY_FACTORY::ANT_READABILITY_FACTORY()
+	--------------------------------------------------
 */
-static ANT_readability_none none;
-static ANT_readability_dale_chall dale_chall;
+ANT_readability_factory::ANT_readability_factory() 
+{
+measures_to_use = 0;
+number_of_measures = 2;
+
+measure = new ANT_readability*[number_of_measures];
+measure[0] = new ANT_readability_none;
+measure[1] = new ANT_readability_dale_chall;
+}
 
 /*
-	ANT_readability_factory::measure[]
-	----------------------------------
-	The known readability measures that can be used
+	ANT_READABILITY_FACTORY::~ANT_READABILITY_FACTORY()
+	---------------------------------------------------
 */
-ANT_readability_factory_measure ANT_readability_factory::measure[] =
+ANT_readability_factory::~ANT_readability_factory()
 {
-{NONE, &none},
-{DALE_CHALL, &dale_chall}
-};
-
-long ANT_readability_factory::number_of_measures = sizeof(ANT_readability_factory::measure) / sizeof(*ANT_readability_factory::measure);
+delete [] measure;
+}
 
 /*
 	READABILITY_FACTORY::GET_NEXT_TOKEN()
@@ -38,12 +39,15 @@ ANT_string_pair *ANT_readability_factory::get_next_token()
 long which;
 ANT_string_pair *token = parser->get_next_token();
 
+if (measures_to_use == 0)
+	return token;
+
 /*
 	Each measure we're using should now handle the token
 */
 for (which = 0; which < number_of_measures; which++)
-	if ((measure[which].measure_id & measures_to_use) != 0)
-		measure[which].measure->handle_token(token);
+	if ((which & measures_to_use) != 0)
+		measure[which]->handle_token(token);
 
 /*
 	After we've handled all the tokens, clean it up and pass it on
@@ -115,9 +119,12 @@ void ANT_readability_factory::handle_node(ANT_memory_index_hash_node *node)
 {
 long which;
 
+if (measures_to_use == 0)
+	return;
+
 for (which = 0; which < number_of_measures; which++)
-	if ((measure[which].measure_id & measures_to_use) != 0)
-		measure[which].measure->handle_node(node);
+	if ((which & measures_to_use) != 0)
+		measure[which]->handle_node(node);
 }
 
 /*
@@ -128,7 +135,10 @@ void ANT_readability_factory::index(ANT_memory_index *index)
 {
 long which;
 
+if (measures_to_use == 0)
+	return;
+
 for (which = 0; which < number_of_measures; which++)
-	if ((measure[which].measure_id & measures_to_use) != 0)
-		measure[which].measure->index(index);
+	if ((which & measures_to_use) != 0)
+		measure[which]->index(index);
 }

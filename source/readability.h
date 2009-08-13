@@ -22,7 +22,7 @@ public:
 	ANT_readability() {};
 	virtual ~ANT_readability() {};
 	
-	virtual void index(ANT_memory_index *index) = 0;
+	virtual void index(ANT_memory_index *index) {};
 
 protected:
 	ANT_string_pair *measure_name;

@@ -181,7 +181,7 @@ else
 		return NULL;
 	else											// everything else (that starts with a '<')
 		{
-		start = current++;
+		start = ++current;
 		if (isXMLnamestartchar(*current))
 			{
 			while (isXMLnamechar(*current))
