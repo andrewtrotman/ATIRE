@@ -97,7 +97,7 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_divergence.c \
 	$(SRCDIR)/plugin_manager.c 	
 				
-library_headers = \
+library_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
 	$(SRCDIR)/assessment_ANT.h	\
 	$(SRCDIR)/assessment_factory.h	\
@@ -187,11 +187,16 @@ library_headers = \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	
+library_headers = $(SRCDIR)/ant_api.h $(SRCDIR)/ant_params.h	
+	
+includedir = $(prefix)/include
+include_HEADERS = $(library_headers)
+	
 lib_LTLIBRARIES = libant.la
 
 libant_ladir = $(LIBDIR)
 libant_la_SOURCES = $(library_sources)
-libant_la_HEADERS = $(library_headers)
+libant_la_HEADERS = $(library_headers) $(library_noinst_headers)
 
 ANT_LIBS = -L. -lant -ldl
 
@@ -199,7 +204,7 @@ ANT_LIBS = -L. -lant -ldl
 # the previous manual Makefile
 bin_PROGRAMS = ant index ant_dictionary
 
-ant_SOURCES = $(SRCDIR)/ant.c
+ant_SOURCES = $(SRCDIR)/ant_ant.c
 ant_LDADD = ${ANT_LIBS}
 ant_LDFLAGS = -rdynamic
 ant_DEPENDENCIES = libant.la
