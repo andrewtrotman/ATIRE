@@ -10,11 +10,11 @@ AM_LDFLAGS = @LIBS@
 
 # using HEADER HASH FUNCTION
 AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-       -Wno-endif-labels -Wno-missing-braces
+       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
        
 # using RANDOM HASH FUNCTION       
 #AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DRANDOM_HASHER=1 \
-#       -Wno-endif-labels -Wno-missing-braces       
+#       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings     
 
 CC = g++
 
@@ -95,7 +95,8 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_bose_einstein.c \
 	$(SRCDIR)/ranking_function_lmjm.c \
 	$(SRCDIR)/ranking_function_divergence.c \
-	$(SRCDIR)/plugin_manager.c 	
+	$(SRCDIR)/plugin_manager.c 	\
+	$(SRCDIR)/ant_api.c
 				
 library_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
