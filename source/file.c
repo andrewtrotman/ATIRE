@@ -13,6 +13,10 @@
 	#include <sys/stat.h>
 #elif defined(_MSC_VER)
 	#include <windows.h>
+#else
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <unistd.h>
 #endif
 
 /*
