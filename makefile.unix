@@ -21,7 +21,10 @@ ifeq ($(PLATFORM), linux)
 LDFLAGS = -g -ldl
 endif
 
-CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O3 \
+#CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+#       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
+
+CFLAGS = -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O2 \
        -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 CFLAGS += $(COMPRESSION)
 
