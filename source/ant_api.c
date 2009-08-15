@@ -49,6 +49,7 @@
 struct ANT_ant_handle
 {
 ANT_stats stats;
+ANT_time_stats *post_processing_stats;
 ANT_ANT_params params;
 ANT_search_engine *search_engine;
 ANT_search_engine_readability *readable_search_engine;
@@ -60,7 +61,7 @@ long long documents_in_id_list, number_of_assessments;
 ANT_ranking_function *ranking_function;
 char *mem1, *mem2;
 
-double average_precision, sum_of_average_precisions, mean_average_precision;
+double average_precision, sum_of_average_precisions, number_of_queries;
 };
 
 /*
@@ -104,8 +105,17 @@ params->bm25_b = 0.4;
 }
 
 /*
+	ANT_POST_PROCESSING_STATS_INIT()
+	---------------
+*/
+void ant_post_processing_stats_init(ANT *ant)
+{
+((ANT_ant_handle *)ant)->post_processing_stats = new ANT_time_stats;
+}
+
+/*
 	ANT_EASY_INIT()
-	----------
+	---------------
 */
 ANT *ant_easy_init()
 {
@@ -116,7 +126,8 @@ data->assessments = NULL;
 data->ranking_function = NULL;
 data->average_precision = 0.0;
 data->sum_of_average_precisions = 0.0;
-data->mean_average_precision = 0.0;
+data->number_of_queries = 0;
+data->post_processing_stats = NULL;
 
 ant_params_init((ANT *)data);
 
@@ -416,30 +427,23 @@ return *filename_buffer == '\0' ? NULL : filename_buffer;
 	ANT()
 	-----
 */
-double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved)
+double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, long topic_id)
 {
-ANT_time_stats post_processing_stats;
 char /**query, */*name;
-long topic_id, line, number_of_queries;
+//long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
 double average_precision = 0.0;
 
 //ANT_ANT_file_iterator input(params->queries_filename);
-ANT_search_engine_forum *output = NULL;
-long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
+//long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
 ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine, params->stemmer_similarity, params->stemmer_similarity_threshold);
 
-if (params->output_forum == TREC)
-	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
-else if (params->output_forum == INEX)
-	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
-
 //sum_of_average_precisions = 0.0;
-number_of_queries = line = 0;
+//number_of_queries = line = 0;
 //prompt(params);
 //for (query = input.first(); query != NULL; query = input.next())
-	{
-	line++;
+	//{
+	//line++;
 	/*
 		Parsing to get the topic number
 	*/
@@ -449,19 +453,19 @@ number_of_queries = line = 0;
 //	if (*query == '\0')
 //		continue;			// ignore blank lines
 
-	if (have_assessments || params->output_forum != NONE || params->queries_filename != NULL)
-		{
-		topic_id = atol(query);
-		if ((query = strchr(query, ' ')) == NULL)
-			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
-		}
-	else
-		topic_id = -1;
+//	if (have_assessments || params->output_forum != NONE || params->queries_filename != NULL)
+//		{
+//		topic_id = atol(query);
+//		if ((query = strchr(query, ' ')) == NULL)
+//			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+//		}
+//	else
+//		topic_id = -1;
 
 	/*
 		Do the query and compute average precision
 	*/
-	number_of_queries++;
+	//number_of_queries++;
 
 	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer);
 	//sum_of_average_precisions += average_precision;
@@ -472,29 +476,8 @@ number_of_queries = line = 0;
 	if (map != NULL && params->stats & SHORT)
 		printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
 
-	/*
-		Convert from a results list into a list of documents
-	*/
-	if (output == NULL)
-		search_engine->generate_results_list(filename_list, answer_list, hits);
-	else
-		search_engine->generate_results_list(document_list, answer_list, hits);
-
-	/*
-		Display the list of results (either to the user or to a run file)
-	*/
-	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
-	if (output == NULL)
-		for (result = 0; result < last_to_list; result++)
-			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
-				printf("%lld:%s\n", result + 1, answer_list[result]);
-			else
-				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
-	else
-		output->write(topic_id, answer_list, last_to_list);
-
 	//prompt(params);
-	}
+	//}
 
 *num_of_retrieved = hits;
 return average_precision;
@@ -504,16 +487,72 @@ return average_precision;
 	ANT_SEARCH()
 	-----------
 */
-long long ant_search(ANT *ant, char *query, char **docids)
+long long ant_search(ANT *ant, char *query, long topic_id)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+struct ANT_ANT_params *params = ant_params(ant);
 
-long long num_of_retrieved = 0;
+long long hits = 0, result;
+long long last_to_list = 0;
+char *name;
 
-data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, &num_of_retrieved);
-data->number_of_assessments++;
-docids = data->answer_list;
-return num_of_retrieved;
+data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, &hits, topic_id);
+data->number_of_queries++;
+
+ANT_search_engine_forum *output = NULL;
+if (params->output_forum == TREC)
+	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == INEX)
+	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+
+/*
+	Convert from a results list into a list of documents
+*/
+if (output == NULL)
+    data->search_engine->generate_results_list(data->filename_list, data->answer_list, hits);
+else
+    data->search_engine->generate_results_list(data->document_list, data->answer_list, hits);
+
+
+/*
+	Display the list of results (either to the user or to a run file)
+*/
+last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
+if (output == NULL)
+	for (result = 0; result < last_to_list; result++)
+		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
+			printf("%lld:%s\n", result + 1, data->answer_list[result]);
+		else
+			printf("%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
+else
+	output->write(topic_id, data->answer_list, last_to_list);
+
+return hits;
+}
+
+/*
+	ANT_CAL_MAP()
+	-------------
+*/
+double ant_cal_map(ANT *ant)
+{
+struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+struct ANT_ANT_params *params = ant_params(ant);
+/*
+	Compute Mean Average Precision
+*/
+double mean_average_precision = data->sum_of_average_precisions / (double)data->number_of_queries;
+
+/*
+	Report MAP
+*/
+if (data->map != NULL && params->stats & SHORT)
+	printf("\nProcessed %ld topics (MAP:%f)\n\n", data->number_of_queries, mean_average_precision);
+
+/*
+	And finally report MAP
+*/
+return mean_average_precision;
 }
 
 /*
@@ -523,6 +562,17 @@ return num_of_retrieved;
 void ant_stat(ANT *ant)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+struct ANT_ANT_params *params = ant_params(ant);
+
+/*
+	Report the summary of the stats
+*/
+if (data->post_processing_stats != NULL && params->stats & SUM)
+    {
+    data->search_engine->stats_all_text_render();
+    data->post_processing_stats->print_time("Post Processing I/O  :", data->post_processing_stats->disk_input_time);
+    data->post_processing_stats->print_time("Post Processing CPU  :", data->post_processing_stats->cpu_time);
+    }
 
 printf("Total elapsed time including startup and shutdown ");
 data->stats.print_elapsed_time();
@@ -536,6 +586,9 @@ ANT_stats::print_operating_system_process_time();
 void ant_free(ANT *ant)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+
+if (data->post_processing_stats != NULL)
+    delete data->post_processing_stats;
 
 delete data->map;
 delete data->ranking_function;

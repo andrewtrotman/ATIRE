@@ -14,24 +14,21 @@ extern "C" {
 
 typedef void ANT;
 
-/*
- * ANT_ANT_HANDLE
- */
-//struct ANT_ant_handle;
-
 ANT *ant_easy_init();
 
 void ant_setup(ANT *ant);
 
-ANT_ANT_params *ant_params(ANT *);
+ANT_ANT_params *ant_params(ANT *ant);
 
-void ant_params_setup(ANT *ant);
+void ant_post_processing_stats_init(ANT *ant);
 
-long long ant_search(ANT *ant, char *query, char **docids);
+long long ant_search(ANT *ant, char *query, long topic_id = -1);
+
+double ant_cal_map(ANT *ant);
 
 void ant_stat(ANT *ant);
 
-void ant_free(ANT *);
+void ant_free(ANT *ant);
 
 #ifdef  __cplusplus
 }

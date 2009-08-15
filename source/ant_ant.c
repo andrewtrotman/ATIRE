@@ -10,34 +10,12 @@
 */
 #include <stdio.h>
 #include <string.h>
-#include "str.h"
-#include "memory.h"
-#include "ctypes.h"
-#include "search_engine.h"
-#include "search_engine_readability.h"
-#include "search_engine_btree_leaf.h"
-#include "mean_average_precision.h"
-#include "disk.h"
-#include "relevant_document.h"
-#include "time_stats.h"
-#include "stemmer.h"
-#include "stemmer_factory.h"
-#include "assessment_factory.h"
-#include "search_engine_forum_INEX.h"
-#include "search_engine_forum_TREC.h"
-#include "ant_param_block.h"
-#include "encoding_utf8.h"
-#include "version.h"
-#include "ranking_function_impact.h"
-#include "ranking_function_bm25.h"
-#include "ranking_function_similarity.h"
-#include "ranking_function_lmd.h"
-#include "ranking_function_lmjm.h"
-#include "ranking_function_bose_einstein.h"
-#include "ranking_function_divergence.h"
-#include "ranking_function_readability.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "ant_api.h"
+#include "ant_param_block.h"
+#include "str.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -87,48 +65,92 @@ if (params->queries_filename == NULL)
 }
 
 /*
+	PARAM_BLOCK_TO_PARAMS()
+	-----------------------
+*/
+void param_block_to_params(ANT_ANT_param_block *block, ANT_ANT_params *params)
+{
+params->logo = block->logo;
+params->stemmer = block->stemmer;
+params->stemmer_similarity = block->stemmer_similarity;
+params->stemmer_similarity_threshold = block->stemmer_similarity_threshold;
+params->sort_top_k = block->sort_top_k;
+params->metric = block->metric;
+params->assessments_filename = block->assessments_filename;
+params->queries_filename = block->queries_filename;
+params->output_forum = block->output_forum;
+params->run_name = block->run_name;
+params->output_filename = block->output_filename;
+params->results_list_length = block->results_list_length;
+params->stats = block->stats;
+params->segmentation = block->segmentation;
+params->ranking_function = block->ranking_function;
+params->trim_postings_k = block->trim_postings_k;
+params->lmd_u = block->lmd_u;
+params->lmjm_l = block->lmjm_l;
+params->bm25_k1 = block->bm25_k1;
+params->bm25_b = block->bm25_b;
+}
+
+/*
 	MAIN()
 	------
 */
 int main(int argc, char *argv[])
 {
-ANT_ANT_param_block params(argc, argv);
+ANT_ANT_param_block param_block(argc, argv);
 long last_param;
+char *query;
+long topic_id, line;
 
-last_param = params.parse();
+last_param = param_block.parse();
 
 /**
  * TODO implement the query loop here
  */
+ANT_ANT_file_iterator input(param_block.queries_filename);
 
 //ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list);
+ANT *ant = ant_easy_init();
+ANT_ANT_params *params = ant_params(ant);
+param_block_to_params(&param_block, params);
 
-/*
-	Compute Mean Average Precision
-*/
-//mean_average_precision = sum_of_average_precisions / (double)number_of_queries;
+long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
 
-/*
-	Report MAP
-*/
-//if (map != NULL && params->stats & SHORT)
-//	printf("\nProcessed %ld topics (MAP:%f)\n\n", number_of_queries, mean_average_precision);
+ant_setup(ant);
 
-/*
-	Report the summary of the stats
-*/
-//if (params->stats & SUM)
-//	{
-//	search_engine->stats_all_text_render();
-//	post_processing_stats.print_time("Post Processing I/O  :", post_processing_stats.disk_input_time);
-//	post_processing_stats.print_time("Post Processing CPU  :", post_processing_stats.cpu_time);
-//	}
+ant_post_processing_stats_init(ant);
 
-/*
-	And finally report MAP
-*/
-//return mean_average_precision;
+line = 0;
+prompt(&param_block);
+for (query = input.first(); query != NULL; query = input.next())
+    {
+    line++;
+    /*
+	    Parsing to get the topic number
+    */
+    strip_space_inplace(query);
+    if (strcmp(query, ".quit") == 0)
+	    break;
+    if (*query == '\0')
+	    continue;			// ignore blank lines
 
+    if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
+	    {
+	    topic_id = atol(query);
+	    if ((query = strchr(query, ' ')) == NULL)
+		    exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+	    }
+    else
+	    topic_id = -1;
 
+    ant_search(ant, query, topic_id);
+
+    prompt(&param_block);
+    }
+
+ant_cal_map(ant);
+ant_stat(ant);
+ant_free(ant);
 return 0;
 }
