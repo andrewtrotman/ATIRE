@@ -4,7 +4,7 @@
 SRCDIR = source
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
-LIBDIR = .
+#LIBDIR = .
 
 AM_LDFLAGS = @LIBS@
 
@@ -188,22 +188,29 @@ library_noinst_headers = \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	
-library_headers = $(SRCDIR)/ant_api.h $(SRCDIR)/ant_params.h	
+library_headers = \
+	$(SRCDIR)/ant_api.h \
+	$(SRCDIR)/ant_params.h	
 	
-includedir = $(prefix)/include
-include_HEADERS = $(library_headers)
+#includedir = $(prefix)/include
+#include_HEADERS = $(library_headers)
 	
 lib_LTLIBRARIES = libant.la
 
-libant_ladir = $(LIBDIR)
+libant_ladir = $(prefix)/lib
 libant_la_SOURCES = $(library_sources)
-libant_la_HEADERS = $(library_headers) $(library_noinst_headers)
+libant_la_HEADERS = $(library_headers)
+# $(library_noinst_headers)
 
 ANT_LIBS = -L. -lant -ldl
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-bin_PROGRAMS = ant index ant_dictionary
+noinst_PROGRAMS = ant index ant_dictionary \
+			ant_plugins filelist remove_head link_extract link_index \
+			link_this link_index_merge link_extract_pass2 link_length_correlate \
+			topic_tree_cas bindiff term_frequencies topic_tree INEXqrels_to_run \
+			foltbl_to_aspt zipf_graph
 
 ant_SOURCES = $(SRCDIR)/ant_ant.c
 ant_LDADD = ${ANT_LIBS}
@@ -224,11 +231,6 @@ ant_dictionary_DEPENDENCIES = libant.la
 #  object `XXXX.$(OBJEXT)' created both with libtool and without
 # ant_dictionary_CFLAGS = $(AM_CFLAGS)
 ##############################################################################
-						 
-noinst_PROGRAMS =  ant_plugins filelist remove_head link_extract link_index \
-			link_this link_index_merge link_extract_pass2 link_length_correlate \
-			topic_tree_cas bindiff term_frequencies topic_tree INEXqrels_to_run \
-			foltbl_to_aspt zipf_graph
 						 
 ant_plugins_SOURCES = $(SRCDIR)/ant_plugins.c \
 					$(SRCDIR)/plugin_manager.c
