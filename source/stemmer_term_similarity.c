@@ -19,7 +19,7 @@
 */
 ANT_stemmer_term_similarity::ANT_stemmer_term_similarity(ANT_search_engine *search_engine, ANT_stemmer *stemmer) : ANT_stemmer(search_engine)
 {
-this->buffer = new long [search_engine->document_count()];
+this->buffer = new long [(size_t)(search_engine->document_count())];
 this->search_engine = search_engine;
 this->base_stemmer = stemmer;
 }

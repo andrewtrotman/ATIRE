@@ -29,6 +29,7 @@ public:
 	ANT_PLUGIN::DO_SEGMENTATION()
 	-----------------------------
 */
+#pragma warning (suppress: 4100)
 inline const unsigned char *ANT_plugin::do_segmentation(unsigned char *c, int length) { return 0; }
 
 /*

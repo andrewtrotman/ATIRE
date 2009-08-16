@@ -21,15 +21,7 @@ public:
 	ANT_encoding_ascii() : ANT_encoding() {}
 	virtual ~ANT_encoding_ascii() {}
 
-	virtual bool is_valid_char(unsigned char *c); // for English, a valid char will be an alphabet character
-
-	virtual void tolower(unsigned char *c);
-	virtual void toupper(unsigned char *c);
+	virtual long is_valid_char(unsigned char *c) { return ANT_isalpha(*c); } // for English, a valid char will be an alphabet character
 };
-
-inline bool ANT_encoding_ascii::is_valid_char(unsigned char *c) { return ANT_isalpha(*c); }
-inline void ANT_encoding_ascii::tolower(unsigned char *c) { if ((*c) >= 'A' && (*c) <= 'Z') *c = ANT_tolower(*c); }
-inline void ANT_encoding_ascii::toupper(unsigned char *c) { if ((*c) >= 'a' && (*c) <= 'z') *c = ANT_toupper(*c); }
-
 
 #endif __ENCODING_ASCII_H__

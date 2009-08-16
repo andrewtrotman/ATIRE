@@ -1,3 +1,6 @@
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /Zi 
+CC = cl
+
 ALL = bitstream.obj \
  compress_elias_gamma.obj \
  compress_elias_delta.obj \
@@ -10,18 +13,22 @@ ALL = bitstream.obj \
  compression_factory.obj \
  compress_sigma.obj \
  stats.obj \
- test_compression.obj \
- maths.obj
+ maths.obj \
+ ctypes.obj \
+ parser.obj \
+ nexi_term.obj \
+ encoding_utf8.obj
 
-CFLAGS = /W4 /Zi /TP
 all : nexi.exe test_compression.exe
 
-nexi.exe : nexi.c ctypes.c string_pair.h parser.c nexi_term.c
-	$(CC) /W4 -D _CRT_SECURE_NO_WARNINGS /Zi /TP nexi.c ctypes.c parser.c nexi_term.c
+nexi.exe : $(ALL)
+	$(CC) /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(ALL) /Tp nexi.c /Fenexi.exe
 
 test_compression.exe : $(ALL)
-	$(CC) /W4 /Zi $(ALL) /Fetest_compression.exe /link /fixed:no
+	$(CC) /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(ALL) /Tp test_compression.c /Fetest_compression.exe /link /fixed:no
 
+.c.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 clean :
-	del $(ALL) test_compression.exe
+	del $(ALL) test_compression.exe nexi.exe

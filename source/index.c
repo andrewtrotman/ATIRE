@@ -87,9 +87,9 @@ index->set_compression_validation(param_block.compression_validation);
 if (param_block.encoding_scheme == ANT_encoding_factory::UTF8)
 	{
 	if (param_block.segmentation)
-		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, true);
+		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, TRUE);
 	else
-		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, false);
+		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, FALSE);
 	}
 else if (param_block.readability_measure == ANT_readability_factory::NONE)
 	parser = new ANT_parser();

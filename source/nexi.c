@@ -68,7 +68,7 @@ return sentinal.next;
 	ANT_NEXI::ISPART()
 	------------------
 */
-long ANT_NEXI::ispart(char *from, long length, char next)
+long ANT_NEXI::ispart(unsigned char *from, long length, unsigned char *next)
 {
 if (length == 0)
 	return TRUE;				/* all tokens must be at least one char in length */
@@ -82,26 +82,26 @@ else if (length == 1)
 	else if (*from == ')')
 		return FALSE;
 	else if (*from == '-')
-		if (ANT_isdigit(next))
+		if (ANT_isdigit(*next))
 			return TRUE;
 		else
 			return FALSE;
 	else if (ANT_parser::isXMLnamestartchar(*from))
-		if (ANT_parser::isXMLnamechar(next))
+		if (ANT_parser::isXMLnamechar(*next))
 			return TRUE;
-		else if (next == '-')		// hyphenated words
+		else if (*next == '-')		// hyphenated words
 			return TRUE;
-		else if (next == '\'')			// apostrophies (don't tell me)
+		else if (*next == '\'')			// apostrophies (don't tell me)
 			return TRUE;
 		else
 			return FALSE;
 	else if (ANT_isdigit(*from))
-		if (ANT_isdigit(next))
+		if (ANT_isdigit(*next))
 			return TRUE;
 		else
 			return FALSE;
 	else if (*from == '/')
-		if (next == '/')
+		if (*next == '/')
 			return TRUE;
 		else
 			return FALSE;
@@ -110,17 +110,17 @@ else if (length == 1)
 else
 	{
 	if (*from == '-')
-		if (ANT_isdigit(next))
+		if (ANT_isdigit(*next))
 			return TRUE;
 		else
 			return FALSE;
 	else if (ANT_parser::isXMLnamestartchar(*from))
-		if (ANT_parser::isXMLnamechar(next))
+		if (ANT_parser::isXMLnamechar(*next))
 			return TRUE;
 		else
 			return FALSE;
 	else if (ANT_isalnum(*from))
-		if (ANT_isalnum(next))
+		if (ANT_isalnum(*next))
 			return TRUE;
 		else
 			return FALSE;
@@ -136,19 +136,27 @@ else
 ANT_string_pair *ANT_NEXI::get_next_token(void)
 {
 long length;
+long bytes;
 
 length = 0;
 
 if (*at != '\0')
 	{
-	while (ANT_isspace(*at) && *at != '\0')
-		at++;
+	/*
+		Using the multi-language parser, skip over all characters that are not alphabetic or numberic.
+	*/
+	while (!(character_decoder.is_valid_char(at) || ANT_isdigit(*at)) && *at != '\0')
+		{
+		bytes = character_decoder.howmanybytes();
+		at += bytes;
+		}
+
 	if (*at != '\0')
-		while (*(at + length) != '\0' && ispart(at, length, *(at + length)))
+		while (*(at + length) != '\0' && ispart(at, length, (at + length)))
 			length++;
 	}
 
-token.start = at;
+token.start = (char *)at;
 token.string_length = length;
 at += length;
 return &token;
@@ -432,7 +440,7 @@ ANT_string_pair terms;
 ANT_NEXI_term *answer;
 
 successful_parse = TRUE;
-at = string = expression;
+at = string = (unsigned char *)expression;
 
 get_next_token();
 

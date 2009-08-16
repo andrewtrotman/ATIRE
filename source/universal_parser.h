@@ -22,7 +22,7 @@ private:
 	enum {UNKNOWNCHAR = 0, ALPHACHAR = 1, NUMBER, LARROW, END, NOTHEADCHAR};
 
 	ANT_encoding 				*enc;
-	bool 						tokentype;  // true, parse the word as a single token; false, parse the single character as a token
+	long 						tokentype;  // true, parse the word as a single token; false, parse the single character as a token
 	ANT_encoding::language 		current_lang;
 	int 						current_char_idc; // current char indicator
 	int							**boundary_array; // used in segmentation to indicate where the boundary is, including the one at the end
@@ -34,17 +34,17 @@ private:
 	void init();
 	void lang_initialise();
 	void segmentation_initialise();
-	bool is_current_valid_char();
+	long is_current_valid_char();
 	void store_token(unsigned char *start, int length);
 	void get_more(unsigned char *start);
 	inline void move2nextchar() { current += enc->howmanybytes(); }
-	bool check_segmentation_plugin_availability();
+	long check_segmentation_plugin_availability();
 
 protected:
 	int isheadchar(unsigned char *val);
 
 public:
-	ANT_universal_parser(ANT_encoding_factory::encoding what_encoding, bool tokentype/*by_char_or_word*/ = true);
+	ANT_universal_parser(ANT_encoding_factory::encoding what_encoding, long tokentype/*by_char_or_word*/ = true);
 	ANT_universal_parser();
 	virtual ~ANT_universal_parser();
 
@@ -84,7 +84,7 @@ boundary_count = 0;
 	ANT_UNIVERSAL_PARSER::IS_CURRENT_VALID_CHAR()
 	---------------------------------------------
 */
-inline bool ANT_universal_parser::is_current_valid_char()
+inline long ANT_universal_parser::is_current_valid_char()
 {
 if (enc->is_valid_char(current))
 	{
@@ -93,7 +93,7 @@ if (enc->is_valid_char(current))
 	}
 else
 	current_char_idc = UNKNOWNCHAR;
-return 	(current_char_idc == ALPHACHAR);
+return (current_char_idc == ALPHACHAR);
 }
 
 /*

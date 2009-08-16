@@ -239,8 +239,8 @@ start = strstr(file, "<title>");
 if (start != NULL)
 	if ((end = strstr(start += 7, "</title>")) != NULL)
 		{
-		length = end - start < 1022 ? end - start : 1022;
-		strncpy(filename_buffer, start, length);
+		length = end - start < (sizeof(filename_buffer) - 2) ? end - start : sizeof(filename_buffer) - 2;
+		strncpy(filename_buffer, start, (size_t)length);
 		filename_buffer[length] = '\0';
 		}
 

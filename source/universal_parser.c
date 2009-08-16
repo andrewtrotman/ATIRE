@@ -8,11 +8,18 @@
 #include "universal_parser.h"
 #include "plugin_manager.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+
+#ifndef TRUE
+	#define TRUE 0
+#endif
 /*
 	ANT_UNIVERSAL_PARSER::ANT_UNIVERSAL_PARSER()
 	--------------------------------------------
 */
-ANT_universal_parser::ANT_universal_parser(ANT_encoding_factory::encoding what_encoding, bool by_char_or_word) : ANT_parser(), tokentype(by_char_or_word), current_lang(ANT_encoding::UNKNOWN), boundary_array(NULL)
+ANT_universal_parser::ANT_universal_parser(ANT_encoding_factory::encoding what_encoding, long by_char_or_word) : ANT_parser(), tokentype(by_char_or_word), current_lang(ANT_encoding::UNKNOWN), boundary_array(NULL)
 {
 init();
 enc = ANT_encoding_factory::gen_encoding_scheme(what_encoding);
@@ -22,7 +29,7 @@ enc = ANT_encoding_factory::gen_encoding_scheme(what_encoding);
 	ANT_UNIVERSAL_PARSER::ANT_UNIVERSAL_PARSER()
 	--------------------------------------------
 */
-ANT_universal_parser::ANT_universal_parser() :	ANT_parser(), tokentype(true), current_lang(ANT_encoding::UNKNOWN), boundary_array(NULL)
+ANT_universal_parser::ANT_universal_parser() :	ANT_parser(), tokentype(TRUE), current_lang(ANT_encoding::UNKNOWN), boundary_array(NULL)
 {
 init();
 enc = ANT_encoding_factory::gen_encoding_scheme(ANT_encoding_factory::ASCII);
@@ -40,7 +47,7 @@ segmentation_initialise();
 
 /*
 	ANT_UNIVERSAL_PARSER::INIT()
-	--------------------------------------------
+	----------------------------
 */
 void ANT_universal_parser::init()
 {
@@ -52,7 +59,7 @@ if (tokentype)
 	ANT_UNIVERSAL_PARSER::CHECK_SEGMENTATION_PLUGIN_AVAILABILITY()
 	--------------------------------------------------------------
 */
-inline bool ANT_universal_parser::check_segmentation_plugin_availability()
+inline long ANT_universal_parser::check_segmentation_plugin_availability()
 {
 return ANT_plugin_manager::instance().is_segmentation_plugin_available();
 }
@@ -81,11 +88,11 @@ this->document = current = document;
 
 /*
 	ANT_UNIVERSAL_PARSER::GET_MORE()
-	--------------------------------------
+	--------------------------------
 */
 void ANT_universal_parser::get_more(unsigned char *start)
 {
-ANT_encoding::language 		previous_lang = current_lang;
+ANT_encoding::language previous_lang = current_lang;
 
 current_token.start = (char *)start;
 
@@ -94,7 +101,7 @@ if (tokentype || current_lang == ANT_encoding::ENGLISH)
 	while (is_current_valid_char() && current_lang == previous_lang)
 		{
 		previous_lang = current_lang;
-		enc->tolower(current);
+		*current = ANT_tolower(*current);
 		move2nextchar();
 		}
 	/*
@@ -163,7 +170,7 @@ else
 	if (current_char_idc == ALPHACHAR)				// alphabetic-like strings for all languages
 		{
 		current_lang = enc->lang();
-		enc->tolower(current);
+		*current = ANT_tolower(*current);
 		start = current;
 		move2nextchar();
 		get_more(start);
@@ -186,7 +193,7 @@ else
 			{
 			while (isXMLnamechar(*current))
 				{
-				enc->toupper(current);
+				*current = ANT_toupper(*current);
 				current++;
 				}
 			current_token.start = (char *)start;

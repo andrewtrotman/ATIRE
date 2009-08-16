@@ -7,65 +7,76 @@
 
 #include "encoding_utf8.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	ANT_ENCODING_UTF8::TEST_UTF8CHAR()
 	----------------------------------
+	return number of bytes occupied by the character to test if the input character is a valid 
+	utf8 character? Could be anything including symbols and punctuation
 */
 size_t ANT_encoding_utf8::test_utf8char(unsigned char *c)
 {
-size_t num_of_bytes = 0;
+size_t number_of_bytes = 0;
 unsigned char code = *c;
+size_t byte;
 
-if (code >= 0xFC && code <=0xFD)
-	num_of_bytes = 6;
-else if (code >= 0xF8 && code <= 0xFB)
-	num_of_bytes = 5;
-else if (code >= 0xF0 && code <= 0xF4)
-	num_of_bytes = 4;
+if (code >= 0xC0 && code <= 0xDF)
+	number_of_bytes = 2;
 else if (code >= 0xE0 && code <= 0xEF)
-	num_of_bytes = 3;
-else if (code >= 0xC0 && code <= 0xDF)
-	num_of_bytes = 2;
+	number_of_bytes = 3;
+else if (code >= 0xF0 && code <= 0xF4)
+	number_of_bytes = 4;
+else if (code >= 0xF8 && code <= 0xFB)
+	number_of_bytes = 5;
+else if (code >= 0xFC && code <=0xFD)
+	number_of_bytes = 6;
 
-for (int i = 0; i < num_of_bytes - 1; i++)
+for (byte = 0; byte < number_of_bytes - 1; byte++)
 	{
 	c++;
 	code = *c;
 	if (code < 0x80 || code > 0xBF)
 		{
-		num_of_bytes = 0;
+		number_of_bytes = 0;
 		break;
 		}
 	}
-return num_of_bytes;
+return number_of_bytes;
 }
 
 /*
 	ANT_ENCODING_UTF8::IS_VALID_CHAR()
 	----------------------------------
 */
-bool ANT_encoding_utf8::is_valid_char(unsigned char *c)
+long ANT_encoding_utf8::is_valid_char(unsigned char *character)
 {
-if (0 <= *c && *c <= 0x7F) // ASCII characters
+if ((*character & 0x80) == 0) // ASCII characters
 	{
-	if (ANT_isalpha(*c))
+	if (ANT_isalpha(*character))
 		current_lang = ENGLISH;
 	else
 		current_lang = ASCIICHAR;
 	bytes = 1;
+
 	return current_lang == ENGLISH;
 	}
 
-bytes = test_utf8char(c);
+bytes = test_utf8char(character);
 if (bytes > 0)
-	if (is_chinese_codepoint(to_codepoint(c, bytes)))
+	if (is_chinese_codepoint(to_codepoint(character, bytes)))
 		{
 		current_lang = CHINESE;
-		return true;
+		return TRUE;
 		}
 current_lang = UNKNOWN;
 
-return false;
+return FALSE;
 }
 
 /*

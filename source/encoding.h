@@ -27,17 +27,13 @@ public:
 	ANT_encoding() : current_lang(ENGLISH), bytes(0) {}
 	virtual ~ANT_encoding() {}
 
-	virtual bool is_valid_char(unsigned char *c) = 0;
-	virtual void tolower(unsigned char *c) = 0;
-	virtual void toupper(unsigned char *c) = 0;
-	virtual void test_char(unsigned char *c); // trying to find out the language of the character, and how many bytes it occupies
+	virtual long is_valid_char(unsigned char *c) = 0;
+	virtual void test_char(unsigned char *c) { is_valid_char(c); } // trying to find out the language of the character, and how many bytes it occupies
 
 	size_t howmanybytes() { return bytes; }
 	language lang() { return current_lang; }
 
-	bool is_english() { return current_lang == ENGLISH; }
+	long is_english() { return current_lang == ENGLISH; }
 };
-
-inline void ANT_encoding::test_char(unsigned char *c) { is_valid_char(c); }
 
 #endif __ENCODING_H__
