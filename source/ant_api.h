@@ -22,7 +22,7 @@ ANT_ANT_params *ant_params(ANT *ant);
 
 void ant_post_processing_stats_init(ANT *ant);
 
-long long ant_search(ANT *ant, char *query, long topic_id = -1);
+char **ant_search(ANT *ant, long long *hits, char *query, long topic_id = -1);
 
 double ant_cal_map(ANT *ant);
 

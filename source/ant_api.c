@@ -487,16 +487,16 @@ return average_precision;
 	ANT_SEARCH()
 	-----------
 */
-long long ant_search(ANT *ant, char *query, long topic_id)
+char **ant_search(ANT *ant, long long *hits, char *query, long topic_id)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
 
-long long hits = 0, result;
+long long result;
 long long last_to_list = 0;
 char *name;
 
-data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, &hits, topic_id);
+data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, hits, topic_id);
 data->number_of_queries++;
 
 ANT_search_engine_forum *output = NULL;
@@ -509,15 +509,15 @@ else if (params->output_forum == INEX)
 	Convert from a results list into a list of documents
 */
 if (output == NULL)
-    data->search_engine->generate_results_list(data->filename_list, data->answer_list, hits);
+    data->search_engine->generate_results_list(data->filename_list, data->answer_list, *hits);
 else
-    data->search_engine->generate_results_list(data->document_list, data->answer_list, hits);
+    data->search_engine->generate_results_list(data->document_list, data->answer_list, *hits);
 
 
 /*
 	Display the list of results (either to the user or to a run file)
 */
-last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
+last_to_list = (*hits) > params->results_list_length ? params->results_list_length : (*hits);
 if (output == NULL)
 	for (result = 0; result < last_to_list; result++)
 		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
@@ -527,7 +527,7 @@ if (output == NULL)
 else
 	output->write(topic_id, data->answer_list, last_to_list);
 
-return hits;
+return data->answer_list;
 }
 
 /*

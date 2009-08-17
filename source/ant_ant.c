@@ -1,13 +1,8 @@
 /*
- * ANT_ANT.C
- * ---------
- *
+     ANT_ANT.C
+     ---------
  */
 
-/*
-	ANT.C
-	-----
-*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -102,12 +97,10 @@ ANT_ANT_param_block param_block(argc, argv);
 long last_param;
 char *query;
 long topic_id, line;
+long long hits;
 
 last_param = param_block.parse();
 
-/**
- * TODO implement the query loop here
- */
 ANT_ANT_file_iterator input(param_block.queries_filename);
 
 //ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list);
@@ -144,7 +137,7 @@ for (query = input.first(); query != NULL; query = input.next())
     else
 	    topic_id = -1;
 
-    ant_search(ant, query, topic_id);
+    ant_search(ant, &hits, query, topic_id);
 
     prompt(&param_block);
     }
