@@ -8,18 +8,11 @@
 #include <stdlib.h>
 #include "directory_iterator.h"
 
-#ifdef __APPLE__
-	#include <sys/syslimits.h>
-#elif defined(__linux__)
-	#include <linux/limits.h>
-#endif
-
-#ifndef _MSC_VER
-#define MAX_PATH PATH_MAX
-#endif
-
-#ifndef MAX_PATH
-	#define MAX_PATH _MAX_PATH
+#ifdef _MSC_VER
+	#include <windows.h>
+	#define PATH_MAX MAX_PATH
+#else
+	#include <limits.h>
 #endif
 
 /*
@@ -32,7 +25,7 @@ private:
 	ANT_disk_directory *handle_stack;
 	ANT_disk_directory *file_list;
 	char *wildcard;
-	char path_buffer[MAX_PATH];
+	char path_buffer[PATH_MAX];
 
 private:
 	/*

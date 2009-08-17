@@ -14,7 +14,7 @@
 #include "disk_directory.h"
 #include "directory_recursive_iterator.h"
 
-#define HANDLE_STACK_SIZE (MAX_PATH / 2)		/* because every second char must be a '\' */
+#define HANDLE_STACK_SIZE (PATH_MAX / 2)		/* because every second char must be a '\' */
 #ifndef FALSE
 	#define FALSE (0)
 #endif
@@ -37,7 +37,7 @@
 			tmp++;
 		}
 
-		return fnmatch(pattern, fn, FNM_FILE_NAME) == 0; /* 0 = success */
+		return fnmatch(pattern, fn, FNM_PATHNAME) == 0; /* 0 = success */
 	}
 #endif
 
@@ -49,7 +49,7 @@
 ANT_directory_recursive_iterator::ANT_directory_recursive_iterator()
 {
 handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
-wildcard = new char [MAX_PATH];
+wildcard = new char [PATH_MAX];
 file_list = handle_stack;
 }
 
@@ -169,7 +169,7 @@ while (!match)
 */
 char *ANT_directory_recursive_iterator::first(char *root_directory, char *local_directory)
 {
-char path[MAX_PATH];
+char path[PATH_MAX];
 
 if (*local_directory != '\0' && *root_directory != '\0')
 #ifdef _MSC_VER

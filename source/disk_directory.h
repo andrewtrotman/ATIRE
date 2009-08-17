@@ -7,12 +7,7 @@
 #define __DISK_DIRECTORY_H__
 
 #include <stdlib.h>
-
-#ifdef _MSC_VER
-	#define MAX_PATH_LENGTH _MAX_PATH
-#else
-	#define MAX_PATH_LENGTH MAX_PATH
-#endif
+#include <limits.h>
 
 /*
 	class ANT_DISK_DIRECTORY
@@ -27,7 +22,7 @@ public:
 	glob_t matching_files;
 	unsigned int glob_index;
 #endif
-	char path[MAX_PATH_LENGTH];
+	char path[PATH_MAX];
 } ;
 
 

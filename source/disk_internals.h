@@ -7,15 +7,11 @@
 
 #ifdef _MSC_VER
 	#include <windows.h>
-#elif defined(__APPLE__)
-	#include <sys/syslimits.h>
-#elif defined(__linux__)
-	#include <linux/limits.h>
-#endif
-#ifndef _MSC_VER
+	#define PATH_MAX MAX_PATH
+#else
+	#include <limits.h>
 	#include <glob.h>
 	#include <stdio.h>
-	#define MAX_PATH PATH_MAX
 #endif
 
 
@@ -30,8 +26,8 @@ public:
 	glob_t matching_files;
 	unsigned int glob_index;
 #endif
-	char pathname[MAX_PATH];
-	char fully_qualified_filename[MAX_PATH];
+	char pathname[PATH_MAX];
+	char fully_qualified_filename[PATH_MAX];
 
 public:
 	ANT_disk_internals();
