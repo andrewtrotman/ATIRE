@@ -7,7 +7,7 @@
 	#include <windows.h>
 #elif defined (__APPLE__)
 	#include <mach/mach_time.h>
-#elif
+#else
     #include <sys/time.h>
 #endif
 
@@ -102,7 +102,7 @@ long long ANT_stats::get_clock_tick(void)
 	LARGE_INTEGER now;
 	QueryPerformanceCounter(&now);
 	return now.QuadPart;
-#elif
+#else
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	return ((long long)now.tv_sec) * 1000 * 1000 + now.tv_usec;
@@ -123,7 +123,7 @@ long long ANT_stats::clock_tick_frequency(void)
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	return frequency.QuadPart;
-#elif
+#else
 	return 1000 * 1000; /* struct coded in microseconds*/
 #endif
 }
