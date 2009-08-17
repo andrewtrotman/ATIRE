@@ -192,14 +192,14 @@ library_headers = \
 	$(SRCDIR)/ant_api.h \
 	$(SRCDIR)/ant_params.h	
 	
-#includedir = $(prefix)/include
-#include_HEADERS = $(library_headers)
+includedir = $(prefix)/include
+include_HEADERS = $(library_headers)
 	
 lib_LTLIBRARIES = libant.la
 
 libant_ladir = $(prefix)/lib
 libant_la_SOURCES = $(library_sources)
-libant_la_HEADERS = $(library_headers)
+# libant_la_HEADERS = $(library_headers)
 # $(library_noinst_headers)
 
 ANT_LIBS = -L. -lant -ldl
