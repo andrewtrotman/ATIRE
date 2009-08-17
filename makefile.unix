@@ -2,115 +2,97 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
-PLATFORM    = linux
-
 LDFLAGS = -g -ldl
-
-#############################################################################
-#
-# Different platform could have different loader to load the dynamic library
-# If there is such a difference, use the conditional statement as below to 
-# specify it.
-# e.g. on Linux, -ldl(libdl.so or libdl.a) is the library for dynamic library
-# loading
-#
-# alternatively, use autotools to avoid such statements
-#
-#############################################################################
-ifeq ($(PLATFORM), linux)
-LDFLAGS = -g -ldl
-endif
 
 #CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-#       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
+#         -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
-CFLAGS = -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 -O2 \
-       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
-CFLAGS += $(COMPRESSION)
+CFLAGS = -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 \
+         -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
 
 CC = g++
 
 OBJECTS = \
-    encoding_utf8.o \
-    encoding_factory.o \
-    parser.o \
-    universal_parser.o \
-    parser_readability.o \
-    memory_index_hash_node.o \
-    memory_index.o \
-    memory_index_stats.o \
-    hash_table.o \
-    postings_piece.o \
-    ctypes.o \
-    file.o \
-    file_internals.o \
-    maths.o \
-    memory.o \
-    search_engine.o \
-    search_engine_accumulator.o \
-    mean_average_precision.o \
-    assessment.o \
-    assessment_ANT.o \
-    assessment_INEX.o \
-    assessment_factory.o \
-    relevant_document.o \
-    stats.o \
-    time_stats.o \
-    search_engine_stats.o \
-    search_engine_forum.o \
-    search_engine_forum_INEX.o \
-    search_engine_forum_TREC.o \
-    str.o \
-    stop_word.o \
-    disk.o \
-    disk_internals.o \
-    directory_recursive_iterator.o \
-    btree_iterator.o \
-    top_k_sort.o \
-    stemmer.o	\
-    stemmer_term_similarity.o	\
-    stemmer_term_similarity_threshold.o	\
-    stemmer_term_similarity_weighted.o	\
-    porter.o \
-    lovins.o \
-    stemmer_factory.o \
-    paice_husk.o \
-    learned_wikipedia_stem.o \
-    relevant_topic.o \
-    bitstream.o \
-    compress_elias_gamma.o \
-    compress_elias_delta.o \
-    compress_golomb.o \
-    compress_simple9.o \
-    compress_relative10.o \
-    compress_carryover12.o \
-    compress_variable_byte.o \
-    compress_none.o \
-    compress_sigma.o \
-    compression_factory.o \
-    readability_dale_chall.o \
-    readability_factory.o \
-    search_engine_readability.o \
-    plugin_manager.o \
-    indexer_param_block.o \
-    ant_param_block.o \
-    version.o \
-    ranking_function.o \
+	encoding_utf8.o \
+	encoding_factory.o \
+	parser.o \
+	universal_parser.o \
+	parser_readability.o \
+	memory_index_hash_node.o \
+	memory_index.o \
+	memory_index_stats.o \
+	hash_table.o \
+	postings_piece.o \
+	ctypes.o \
+	file.o \
+	file_internals.o \
+	maths.o \
+	memory.o \
+	search_engine.o \
+	search_engine_accumulator.o \
+	mean_average_precision.o \
+	assessment.o \
+	assessment_ANT.o \
+	assessment_INEX.o \
+	assessment_factory.o \
+	relevant_document.o \
+	stats.o \
+	time_stats.o \
+	search_engine_stats.o \
+	search_engine_forum.o \
+	search_engine_forum_INEX.o \
+	search_engine_forum_TREC.o \
+	str.o \
+	stop_word.o \
+	disk.o \
+	disk_internals.o \
+	directory_recursive_iterator.o \
+	btree_iterator.o \
+	top_k_sort.o \
+	stemmer.o \
+	stemmer_term_similarity.o \
+	stemmer_term_similarity_threshold.o \
+	stemmer_term_similarity_weighted.o \
+	porter.o \
+	lovins.o \
+	stemmer_factory.o \
+	paice_husk.o \
+	learned_wikipedia_stem.o \
+	relevant_topic.o \
+	bitstream.o \
+	compress_elias_gamma.o \
+	compress_elias_delta.o \
+	compress_golomb.o \
+	compress_simple9.o \
+	compress_relative10.o \
+	compress_carryover12.o \
+	compress_variable_byte.o \
+	compress_none.o \
+	compress_sigma.o \
+	compression_factory.o \
+	readability_dale_chall.o \
+	readability_factory.o \
+	search_engine_readability.o \
+	plugin_manager.o \
+	indexer_param_block.o \
+	ant_param_block.o \
+	version.o \
+	ranking_function.o \
 	ranking_function_impact.o \
-    ranking_function_similarity.o \
-    ranking_function_readability.o \
-    ranking_function_lmd.o \
-    ranking_function_lmjm.o \
-    ranking_function_bose_einstein.o \
+	ranking_function_similarity.o \
+	ranking_function_readability.o \
+	ranking_function_lmd.o \
+	ranking_function_lmjm.o \
+	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
-    ranking_function_bm25.o
+	ranking_function_bm25.o
 
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
 
 all : $(BINDIR)/index $(BINDIR)/ant
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -121,3 +103,8 @@ $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o
 .PHONY : clean
 clean :
 	\rm $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant
+
+depend :
+	makedepend -f- -Y -w1024 -pbin/ source/*.c -- $(CFLAGS) | sed -e "s/bin\/source/bin/" >| makefile.dependencies.unix
+
+include makefile.dependencies.unix
