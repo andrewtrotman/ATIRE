@@ -168,6 +168,8 @@ collection_length_in_terms = sum;
 
 memory->realign();
 stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
+
+stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
 }
 
 /*
@@ -387,29 +389,35 @@ return destination;
 */
 void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function)
 {
+void *verify;
 ANT_search_engine_btree_leaf term_details;
 long long now;
+long long bytes_already_read;
+
+bytes_already_read = index->get_bytes_read();
 
 now = stats->start_timer();
-if (get_postings_details(term, &term_details) == NULL)
-	return;
+verify = get_postings_details(term, &term_details);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
-now = stats->start_timer();
-if (get_postings(&term_details, postings_buffer) == NULL)
-	return;
-stats->add_posting_read_time(stats->stop_timer(now));
+if (verify != NULL)
+	{
+	now = stats->start_timer();
+	verify = get_postings(&term_details, postings_buffer);
+	stats->add_posting_read_time(stats->stop_timer(now));
+	if (verify != NULL)
+		{
+		now = stats->start_timer();
+		factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+		stats->add_decompress_time(stats->stop_timer(now));
 
-now = stats->start_timer();
+		now = stats->start_timer();
+		ranking_function->relevance_rank_top_k(accumulator, &term_details, decompress_buffer, trim_postings_k);
+		stats->add_rank_time(stats->stop_timer(now));
+		}
+	}
 
-factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-stats->add_decompress_time(stats->stop_timer(now));
-
-now = stats->start_timer();
-
-ranking_function->relevance_rank_top_k(accumulator, &term_details, decompress_buffer, trim_postings_k);
-
-stats->add_rank_time(stats->stop_timer(now));
+stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 }
 
 /*
@@ -418,6 +426,8 @@ stats->add_rank_time(stats->stop_timer(now));
 */
 void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function)
 {
+void *verify;
+long long bytes_already_read;
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 ANT_compressable_integer *current_document, *end;
@@ -431,6 +441,8 @@ ANT_weighted_tf tf_weight;
 	gets converted into a postings list and processed (ranked) as if a single search
 	term within the search engine.
 */
+verify = NULL;
+bytes_already_read = index->get_bytes_read();
 
 /*
 	Initialise the term_frequency accumulators to all zero.
@@ -460,9 +472,10 @@ while (term != NULL)
 		load the postings from disk
 	*/
 	now = stats->start_timer();
-    if (get_postings(&term_details, postings_buffer) == NULL)
-		return;
+	verify = get_postings(&term_details, postings_buffer);
 	stats->add_posting_read_time(stats->stop_timer(now));
+	if (verify == NULL)
+		break;
 
 	/*
 		Decompress the postings
@@ -479,28 +492,28 @@ while (term != NULL)
 
 	current_document = decompress_buffer;
 	end = decompress_buffer + term_details.impacted_length;
-    weight_terms = stemmer->weight_terms(&tf_weight, term);
-    while (current_document < end)
-        {
-        term_frequency = *current_document++;
-        document = -1;
-        while (*current_document != 0)
-            {
-            document += *current_document++;
-	/*
-		Only weight TFs if we're using floats, this makes no sense for integer tfs. 
-	*/
-#ifdef USE_FLOATED_TF 
-	if (weight_terms)
-		stem_buffer[document] += term_frequency * tf_weight;
-	else
-		stem_buffer[document] += term_frequency;
-#else
-		stem_buffer[document] += term_frequency;
-#endif
-            }
-        current_document++;
-        }
+	weight_terms = stemmer->weight_terms(&tf_weight, term);
+	while (current_document < end)
+		{
+		term_frequency = *current_document++;
+		document = -1;
+		while (*current_document != 0)
+			{
+			document += *current_document++;
+			/*
+				Only weight TFs if we're using floats, this makes no sense for integer tfs. 
+			*/
+			#ifdef USE_FLOATED_TF 
+				if (weight_terms)
+					stem_buffer[document] += term_frequency * tf_weight;
+				else
+					stem_buffer[document] += term_frequency;
+			#else
+				stem_buffer[document] += term_frequency;
+			#endif
+			}
+		current_document++;
+		}
 
 	stats->add_stemming_time(stats->stop_timer(now));
 
@@ -513,12 +526,18 @@ while (term != NULL)
 	}
 
 /*
-	Finally do the relevance ranking as if it was a single search term
+	Finally, if we had no problem loading the search terms then 
+	do the relevance ranking as if it was a single search term
 */
-now = stats->start_timer();
-stemmed_term_details.collection_frequency = collection_frequency;
-ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
-stats->add_rank_time(stats->stop_timer(now));
+if (verify != NULL)
+	{
+	now = stats->start_timer();
+	stemmed_term_details.collection_frequency = collection_frequency;
+	ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
+	stats->add_rank_time(stats->stop_timer(now));
+	}
+
+stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 }
 
 /*
@@ -606,25 +625,24 @@ return sorted_id_list;
 */
 ANT_compressable_integer *ANT_search_engine::get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details)
 {
-ANT_search_engine_btree_leaf *got_position;
-unsigned char *got_postings;
+void *verify;
 long long now;
 
 /*
 	Find the term in the term vocab
 */
 now = stats->start_timer();
-got_position = get_postings_details(term, term_details);
+verify = get_postings_details(term, term_details);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
-if (got_position == NULL)
+if (verify == NULL)
 	return NULL;
 /*
 	Load the postings from disk
 */
 now = stats->start_timer();
-got_postings = get_postings(term_details, postings_buffer);
+verify = get_postings(term_details, postings_buffer);
 stats->add_posting_read_time(stats->stop_timer(now));
-if (got_postings == NULL)
+if (verify == NULL)
 	return NULL;
 
 /*

@@ -32,6 +32,7 @@ buffer_size = 0;
 buffer_used = 0;
 file_position = 0;
 setvbuff(1024 * 1024);		// use a 1MB buffer by default.
+bytes_written = bytes_read = 0;
 }
 
 /*
@@ -159,11 +160,18 @@ long long block_size;
 file_position += size;
 if (buffer_used + size < buffer_size)
 	{
+	/*
+		The data fits in the internal buffers
+	*/
 	memcpy(buffer + buffer_used, data, (size_t)size);
 	buffer_used += size;
 	}
 else
 	{
+	/*
+		The data does not fit in the internal buffers so it is
+		necessary to flush the buffers and then do the write
+	*/
 	from = data;
 	block_size = size <= buffer_size ? size : buffer_size;
 	do
@@ -177,6 +185,11 @@ else
 	while (size > 0);
 	}
 
+/*
+	Keep track of the total number of bytes we've been asked to write to the file
+*/
+bytes_written += size;
+
 return 1;
 }
 
@@ -186,8 +199,23 @@ return 1;
 */
 long ANT_file::read(unsigned char *data, long long size)
 {
+/*
+	Keep track of the number of bytes we've been asked to write
+*/
+bytes_read += size;
+
+/*
+	Flush the write cache
+*/
 flush();
+/*
+	Take note of the new file position (at the end of the read)
+*/
 file_position += size;		// this is where we'll be at the end of the read
+
+/*
+	And now perform the read
+*/
 return internals->read_file_64(internals->fp, data, size);
 }
 
@@ -210,14 +238,24 @@ void ANT_file::seek(long long offset_from_start_of_file)
 	LARGE_INTEGER offset;
 #endif
 
+/*
+	Empty the write buffer
+*/
 flush();
 
+/*
+	Now do the seek
+*/
 #ifdef _MSC_VER
 	offset.QuadPart = offset_from_start_of_file;
 	SetFilePointerEx(internals->fp, offset, NULL, FILE_BEGIN);
 #else
 	fseek(internals->fp, offset_from_start_of_file, SEEK_SET);
 #endif
+
+/*
+	Store the file file position
+*/
 file_position = offset_from_start_of_file;
 }
 
@@ -228,9 +266,9 @@ file_position = offset_from_start_of_file;
 long long ANT_file::file_length(void)
 {
 #ifdef _MSC_VER
-LARGE_INTEGER ans;
+	LARGE_INTEGER ans;
 #else
-struct stat details;
+	struct stat details;
 #endif
 
 #ifdef _MSC_VER

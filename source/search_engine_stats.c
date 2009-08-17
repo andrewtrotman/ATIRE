@@ -20,7 +20,9 @@ initialise();
 */
 void ANT_search_engine_stats::initialise(void)
 {
-stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
+stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = 0;
+sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
+disk_bytes_read_on_init = disk_bytes_read_on_search = 0;
 queries = 0;
 }
 
@@ -41,6 +43,8 @@ this->dictionary_time += which->dictionary_time;
 this->stemming_time += which->stemming_time;
 this->stemming_reencode_time += which->stemming_reencode_time;
 this->queries++;
+this->disk_bytes_read_on_init += which->disk_bytes_read_on_init;
+this->disk_bytes_read_on_search += which->disk_bytes_read_on_search;
 }
 
 /*
@@ -51,6 +55,9 @@ void ANT_search_engine_stats::text_render(void)
 {
 long long min, sum;
 
+if (disk_bytes_read_on_init != 0)
+	printf("Disk Bytes Read Init  :%lld bytes\n", disk_bytes_read_on_init);
+printf("Disk Bytes Read Search:%lld bytes\n", disk_bytes_read_on_search);
 print_time("Accumulator Init Time :", accumulator_init_time);
 print_time("Dictionary Read Time  :", dictionary_time);
 print_time("Posting Disk Read Time:", posting_read_time);

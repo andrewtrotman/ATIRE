@@ -23,6 +23,7 @@ private:
 	unsigned char *buffer;
 	long long buffer_size, buffer_used;
 	ANT_memory *memory;
+	long long bytes_written, bytes_read;
 
 private:
 	void flush(void);
@@ -42,8 +43,8 @@ public:
 	long long tell(void);
 	void seek(long long offset_from_start_of_file);
 	long long file_length(void);
+	long long get_bytes_read(void) { return bytes_read; }
+	long long get_bytes_written(void) { return bytes_read; }
 } ;
-
-
 
 #endif __FILE_H__

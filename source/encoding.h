@@ -30,10 +30,8 @@ public:
 	virtual long is_valid_char(unsigned char *c) = 0;
 	virtual void test_char(unsigned char *c) { is_valid_char(c); } // trying to find out the language of the character, and how many bytes it occupies
 
-	size_t howmanybytes() { return bytes; }
-	language lang() { return current_lang; }
-
-	long is_english() { return current_lang == ENGLISH; }
+	size_t howmanybytes(void) { return bytes; }
+	language lang(void) { return current_lang; }
 };
 
 #endif __ENCODING_H__

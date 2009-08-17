@@ -65,6 +65,11 @@ else if (ANT_isdigit(*current))				// numbers
 	}
 else if (*current == '\0')						// end of string
 	return NULL;
+#ifdef ONE_PARSER
+	else if ((*current & 0x80) && ischinese(current))
+		{
+		}
+#endif
 else											// everything else (that starts with a '<')
 	{
 	start = ++current;
