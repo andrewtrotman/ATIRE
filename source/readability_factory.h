@@ -16,8 +16,9 @@ class ANT_readability_factory : public ANT_readability
 {
 public:
 	enum {
-		NONE       = 0,
-		DALE_CHALL = 1
+		NONE          = 0,
+		DALE_CHALL    = 1,
+		FLESH_KINCAID = 2
 	};
 
 private:

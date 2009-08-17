@@ -14,11 +14,12 @@
 ANT_readability_factory::ANT_readability_factory() 
 {
 measures_to_use = 0;
-number_of_measures = 2;
+number_of_measures = 3;
 
 measure = new ANT_readability*[number_of_measures];
 measure[0] = new ANT_readability_none;
 measure[1] = new ANT_readability_dale_chall;
+measure[2] = NULL;//new ANT_readability;
 }
 
 /*
