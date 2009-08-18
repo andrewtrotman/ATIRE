@@ -4,6 +4,9 @@
 */
 #ifndef __ANT_PARAMS_H__
 #define __ANT_PARAMS_H__
+
+#include <stdio.h>
+
 /*
 	struct ANT_ANT_PARAMS
 	-------------------------
@@ -39,6 +42,7 @@ struct ANT_ANT_params
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
+	FILE *output;					// the output of ant, stdout is default value
 } ;
 
 #endif __ANT_PARAMS_H__

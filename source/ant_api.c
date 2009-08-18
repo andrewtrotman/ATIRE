@@ -102,6 +102,7 @@ params->lmd_u = 500.0;
 params->lmjm_l = 0.5;
 params->bm25_k1 = 0.9;
 params->bm25_b = 0.4;
+params->output = stdout;
 }
 
 /*
@@ -163,7 +164,7 @@ char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
 if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
-	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+	exit(fprintf(stderr, "Cannot open document ID list file 'doclist.aspt'\n"));
 
 filename_list_buffer = strnew(document_list_buffer);
 *filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);
@@ -350,8 +351,8 @@ ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // ra
 if (params->stats & SHORT)
 	{
 	if (topic_id >= 0)
-		printf("Topic:%ld ", topic_id);
-	printf("Query '%s' found %lld documents ", query, hits);
+		fprintf(params->output, "Topic:%ld ", topic_id);
+	fprintf(params->output, "Query '%s' found %lld documents ", query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
 	}
 
@@ -474,7 +475,7 @@ ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_st
 		Report the average precision for the query
 	*/
 	if (map != NULL && params->stats & SHORT)
-		printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+		fprintf(params->output, "Topic:%ld Average Precision:%f\n", topic_id , average_precision);
 
 	//prompt(params);
 	//}
@@ -521,9 +522,9 @@ last_to_list = (*hits) > params->results_list_length ? params->results_list_leng
 if (output == NULL)
 	for (result = 0; result < last_to_list; result++)
 		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
-			printf("%lld:%s\n", result + 1, data->answer_list[result]);
+			fprintf(params->output, "%lld:%s\n", result + 1, data->answer_list[result]);
 		else
-			printf("%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
+			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
 else
 	output->write(topic_id, data->answer_list, last_to_list);
 
@@ -547,7 +548,7 @@ double mean_average_precision = data->sum_of_average_precisions / (double)data->
 	Report MAP
 */
 if (data->map != NULL && params->stats & SHORT)
-	printf("\nProcessed %ld topics (MAP:%f)\n\n", data->number_of_queries, mean_average_precision);
+	fprintf(stderr, "\nProcessed %ld topics (MAP:%f)\n\n", data->number_of_queries, mean_average_precision);
 
 /*
 	And finally report MAP
@@ -574,7 +575,7 @@ if (data->post_processing_stats != NULL && params->stats & SUM)
     data->post_processing_stats->print_time("Post Processing CPU  :", data->post_processing_stats->cpu_time);
     }
 
-printf("Total elapsed time including startup and shutdown ");
+fprintf(params->output, "Total elapsed time including startup and shutdown ");
 data->stats.print_elapsed_time();
 ANT_stats::print_operating_system_process_time();
 }

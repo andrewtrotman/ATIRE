@@ -197,7 +197,7 @@ include_HEADERS = $(library_headers)
 	
 lib_LTLIBRARIES = libant.la
 
-libant_ladir = $(prefix)/lib
+# libant_ladir = $(prefix)/lib
 libant_la_SOURCES = $(library_sources)
 # libant_la_HEADERS = $(library_headers)
 # $(library_noinst_headers)
