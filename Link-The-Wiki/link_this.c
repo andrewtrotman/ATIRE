@@ -444,7 +444,7 @@ printf("</linkto>\n");
 #endif
 puts("</topic>");
 
-//delete [] links_already_printed;
+delete [] links_already_printed;
 }
 
 /*
