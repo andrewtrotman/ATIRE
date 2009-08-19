@@ -111,6 +111,9 @@ $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
+$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(OBJDIR)/ant_api.o $(OBJDIR)/qpp.o 
+	$(CC) $(LDFLAGS) -o $@ $^
+
 $(BINDIR)/ant_dict : $(OBJECTS_W_DIR) $(OBJDIR)/ant_dictionary.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
@@ -124,7 +127,7 @@ $(BINDIR)/vocab_tool : $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/vocab_to
 
 .PHONY : depend
 depend : 
-	makedepend -f makefile.dep -- $(CFLAGS) $(EXTFLAGS) $(EXTENSION:%.o=$(EXTSRCDIR)/%.c) $(OBJECTS:%.o=$(SRCDIR)/%.c)
+	$(CC) -MM -MF makefile.dep $(CFLAGS) $(EXTFLAGS) $(EXTENSION:%.o=$(EXTSRCDIR)/%.c) $(OBJECTS:%.o=$(SRCDIR)/%.c)
 
 .PHONY : clean
 clean :

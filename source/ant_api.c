@@ -61,7 +61,8 @@ long long documents_in_id_list, number_of_assessments;
 ANT_ranking_function *ranking_function;
 char *mem1, *mem2;
 
-double average_precision, sum_of_average_precisions, number_of_queries;
+double average_precision, sum_of_average_precisions;
+long number_of_queries;
 };
 
 /*
@@ -529,6 +530,25 @@ else
 	output->write(topic_id, data->answer_list, last_to_list);
 
 return data->answer_list;
+}
+
+/*
+	ANT_GET_TERM_DETAILS()
+	----------------------
+    Struct becomes caller's responsibility to free, no refunds or warranties.
+*/
+struct term_details_s *ant_get_term_details(ANT *ant, char *term) 
+{
+    struct term_details_s *term_details = (struct term_details_s *)malloc(sizeof *term_details);
+    ANT_search_engine *search_engine = ((ANT_ant_handle *)ant)->search_engine;
+    ANT_search_engine_btree_leaf internal_details;
+    search_engine->get_postings_details(term, &internal_details);
+
+    term_details->documents_in_collection = search_engine->document_count();
+    term_details->collection_frequency = internal_details.collection_frequency;
+    term_details->document_frequency = internal_details.document_frequency;
+
+    return term_details;
 }
 
 /*
