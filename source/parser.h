@@ -19,6 +19,7 @@ protected:
 	ANT_string_pair current_token;
 #ifdef ONE_PARSER
 	unsigned char *segmentation;
+	long should_segment;
 #endif
 
 protected:
@@ -32,7 +33,7 @@ public:
 	static int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
 
 #ifdef ONE_PARSER
-	virtual void segment(void);
+	virtual void segment(unsigned char *start, long length);
 	static int ischinese(unsigned char *here);
 	static unsigned long utf8_to_wide(unsigned char *here);
 	static long utf8_bytes(unsigned char *here);

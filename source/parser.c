@@ -5,6 +5,13 @@
 #include "parser.h"
 #include "plugin_manager.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	ANT_PARSER::ANT_PARSER()
 	------------------------
@@ -15,6 +22,7 @@ set_document(NULL);
 
 #ifdef ONE_PARSER
 	segmentation = NULL;
+	should_segment = FALSE;
 #endif
 }
 
@@ -40,9 +48,9 @@ this->document = current = document;
 		ANT_PARSER::SEGMENT()
 		---------------------
 	*/
-	void ANT_parser::segment(void)
+	void ANT_parser::segment(unsigned char *start, long length)
 	{
-	segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation((unsigned char *)current_token.start, current_token.string_length);
+	segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(start, length);
 	}
 #endif
 
@@ -87,9 +95,31 @@ unsigned char *start, *here;
 		}
 
 #endif
-while (!isheadchar(*current))
-	current++;
+#ifdef ONE_PARSER
+	/*
+		We skip over non-indexable characters before the start of the first token
+	*/
+	for (;;)
+		{
+		if (isheadchar(*current))
+			break;
+		if (*current & 0x80)
+			{
+			if (ischinese(current))
+				break;
+			current += utf8_bytes(current);
+			}
+		else
+			current++;
+		}
 
+#else
+	while (!isheadchar(*current))
+		current++;
+#endif
+/*
+	Now we look at the first character as it defines how parse the next token
+*/
 if (ANT_isalpha(*current))				// alphabetic strings (in the ASCII CodePage)
 	{
 	*current = ANT_tolower(*current);
@@ -120,16 +150,24 @@ else if (*current == '\0')						// end of string
 		if (ischinese(current))		// Chinese CodePage
 			{
 			start = current;
-			while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
-				current += utf8_bytes(current);
-			/*
-				At this point we have the start and end of a sequence of chinese characters
-				which then needs to be segmented.
-			*/
-			current_token.start = (char *)start;
-			current_token.string_length = current - start;
-			segment();
+			current += utf8_bytes(current);		// move on to the next character
+
+			if (should_segment)
+				{
+				while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
+					current += utf8_bytes(current);
+				segment(start, current - start);
+				return get_next_token();
+				}
+			else
+				{
+				current_token.start = (char *)start;
+				current_token.string_length = current - start;
+				}
 			}
+		/*
+			There is no else clause because if the high bit is set we already know it must be Chinese
+		*/
 		}
 #endif
 else											// everything else (that starts with a '<')
