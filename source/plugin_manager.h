@@ -17,6 +17,10 @@
 */
 class ANT_plugin_manager
 {
+
+private:
+	static bool				loaded;
+
 public:
 	static char 			PLUGIN_DIRECTORY_NAME[];
 
@@ -29,11 +33,12 @@ public:
 	~ANT_plugin_manager();
 
 	static ANT_plugin_manager& instance();
-	void load();
 
 	const unsigned char *do_segmentation(unsigned char *c, int length);
 	ANT_plugin *segmentation_plugin();
 	inline bool is_segmentation_plugin_available();
+
+	void load();
 };
 
 /*
@@ -43,6 +48,10 @@ public:
 inline ANT_plugin_manager& ANT_plugin_manager::instance()
 {
 static ANT_plugin_manager inst;
+
+if (!loaded)
+    inst.load();
+
 return inst;
 }
 

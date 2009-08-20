@@ -34,6 +34,8 @@ int ANT_plugin_manager::num_of_plugins = sizeof(ANT_plugin_manager::plugin_ids)/
 
 /* global plugins */
 ANT_plugin_maker **plugin_factory = NULL;
+bool ANT_plugin_manager::loaded = false;
+
 
 /*
 	ANT_PLUGIN_MANAGER::ANT_PLUGIN_MANAGER()
@@ -81,6 +83,9 @@ delete [] plugin_factory;
 */
 void ANT_plugin_manager::load()
 {
+if (loaded)
+    return;
+
 char *name = 0;
 
 for (int i = 0; i < num_of_plugins; i++)
@@ -118,6 +123,8 @@ for (int i = 0; i < num_of_plugins; i++)
 		printf("no plugin found for : %s\n", name_with_plugin_path);
 	delete [] name_with_plugin_path;
 	}
+
+loaded = true;
 }
 
 /*

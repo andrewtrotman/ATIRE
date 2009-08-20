@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <string>
+#include <stdlib.h>
 #include "plugin_manager.h"
 
 using namespace std;
@@ -21,6 +22,9 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 ANT_plugin_manager::instance().load();
+
+if (!ANT_plugin_manager::instance().is_segmentation_plugin_available())
+    exit(-1);
 
 while(1)
 	{

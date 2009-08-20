@@ -45,6 +45,9 @@ const unsigned char *UNISEG_plugin::get_output()
 return (unsigned char *)seger.stream_out().c_str();
 }
 
+int UNISEG_plugin::get_count() { return seger.get_count(); }
+
+
 extern "C"
 {
 	uniseg_plugin_interface *maker() {

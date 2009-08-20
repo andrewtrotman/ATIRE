@@ -59,7 +59,7 @@ unsigned char *start, *here;
 		{
 		/*
 			The segmenter has returned a space seperated list of tokens and we now have to work through them.
-			My reading of Darren's Chinese Segmentation code is that each term is followed by a space and
+			My reading of Eric's Chinese Segmentation code is that each term is followed by a space and
 			the final space is followed by a '\0'.  That is, the last term has a space after it.
 		*/
 		here = segmentation;
