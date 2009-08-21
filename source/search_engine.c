@@ -154,7 +154,7 @@ for (pointer = 0; pointer < documents; pointer++)
 	decompress the document length vector
 */
 get_postings(&collection_details, postings_buffer);
-variable_byte.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
+factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
