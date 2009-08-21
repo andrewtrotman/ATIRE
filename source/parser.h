@@ -26,7 +26,11 @@ protected:
 	static int isheadchar(unsigned char val) { return ANT_isalnum(val) || val == '<' || val == '\0'; }
 
 public:
+#ifdef ONE_PARSER
+	ANT_parser::ANT_parser(long should_segment = 0 /* FALSE */);
+#else
 	ANT_parser();
+#endif
 	virtual ~ANT_parser();
 
 	static int isXMLnamestartchar(unsigned char val) { return ANT_isalpha(val) || val == ':' || val == '_'; }		// see http://www.w3.org/TR/REC-xml/#NT-NameStartChar

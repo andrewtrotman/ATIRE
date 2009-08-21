@@ -92,7 +92,7 @@ if (param_block.encoding_scheme == ANT_encoding_factory::UTF8)
 		parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, FALSE);
 	}
 else if (param_block.readability_measure == ANT_readability_factory::NONE)
-	parser = new ANT_parser();
+	parser = new ANT_parser(param_block.segmentation);
 else
 	parser = new ANT_parser_readability();
 

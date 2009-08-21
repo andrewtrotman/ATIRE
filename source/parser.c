@@ -16,13 +16,21 @@
 	ANT_PARSER::ANT_PARSER()
 	------------------------
 */
-ANT_parser::ANT_parser()
+#ifdef ONE_PARSER
+	ANT_parser::ANT_parser(long should_segment)
+#else
+	ANT_parser::ANT_parser()
+#endif
 {
 set_document(NULL);
 
 #ifdef ONE_PARSER
 	segmentation = NULL;
-	should_segment = TRUE;
+	if (should_segment && ANT_plugin_manager::instance().is_segmentation_plugin_available())
+		this->should_segment = TRUE;
+	else
+		this->should_segment = FALSE;
+
 #endif
 }
 
