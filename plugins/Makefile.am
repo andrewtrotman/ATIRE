@@ -63,11 +63,13 @@ libuniseg_headers = \
 		uniseg_plugin.h \
 		word.h			
 
+noinst_HEADERS = $(libuniseq_headers)
+
 lib_LTLIBRARIES = libuniseg.la
 
-libuniseg_ladir = .
+#libuniseg_ladir = .
 libuniseg_la_SOURCES = $(libuniseq_sources)
-libuniseg_la_HEADERS = $(libuniseq_headers)
+#libuniseg_la_HEADERS = $(libuniseq_headers)
 #libuniseg_la_LDFLAGS = -shared
 
 noinst_PROGRAMS = test/uniseg

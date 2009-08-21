@@ -115,12 +115,31 @@ for (int i = 0; i < num_of_plugins; i++)
 		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
 			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
 		else
+			{
 			printf("found plugin(%s)\n", name_with_plugin_path);
-		plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
+			plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
+			}
 #endif
 		}
 	else
-		printf("no plugin found for : %s\n", name_with_plugin_path);
+		{
+#ifdef _MSC_VER
+		/*
+		 * please help with implementation of loading dynamic library on Windows
+		 */
+
+#else
+		plugin_factory[plugin_ids[i]]->dlib = dlopen(name, RTLD_NOW);
+		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
+			printf("opening plugin(%s) failed: %s\n", name, dlerror());
+		else
+			{
+			printf("found plugin(%s)\n", name);
+			plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
+			}
+#endif
+		//printf("no plugin found for : %s\n", name_with_plugin_path);
+		}
 	delete [] name_with_plugin_path;
 	}
 

@@ -22,7 +22,7 @@ set_document(NULL);
 
 #ifdef ONE_PARSER
 	segmentation = NULL;
-	should_segment = FALSE;
+	should_segment = TRUE;
 #endif
 }
 

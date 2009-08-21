@@ -7,6 +7,7 @@
 
 #include "uniseg_plugin.h"
 #include "seg.h"
+
 #include <iostream>
 
 using namespace std;
@@ -48,8 +49,9 @@ return (unsigned char *)seger.stream_out().c_str();
 int UNISEG_plugin::get_count() { return seger.get_count(); }
 
 
-extern "C"
-{
+#ifdef  __cplusplus
+extern "C" {
+#endif
 	uniseg_plugin_interface *maker() {
 	   return new UNISEG_plugin;
 	}
@@ -58,10 +60,13 @@ extern "C"
 	{
 	public:
 	   proxy() {
+		   std::cout << "Registering UNISEG to the plugin factory..." << std::endl;
 		  // register the maker with the factory
 		   plugin_factory[uniseg_plugin_interface::SEGMENTATION]->maker = maker;
 	   }
 	};
 	// our one instance of the proxy
 	proxy p;
+#ifdef  __cplusplus
 }
+#endif

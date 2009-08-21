@@ -64,6 +64,14 @@ struct ANT_plugin_maker
 	void			*dlib; // dynamic library handle loaded by name
 };
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 extern ANT_plugin_maker **plugin_factory;
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif __PLUGIN_H__

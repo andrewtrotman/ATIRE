@@ -219,8 +219,8 @@ ant_DEPENDENCIES = libant.la
 
 index_SOURCES = $(SRCDIR)/index.c
 index_LDADD = ${ANT_LIBS}
-#index_LDFLAGS = -rdynamic
-index_LDFLAGS = -static
+index_LDFLAGS = -rdynamic
+#index_LDFLAGS = -static
 index_DEPENDENCIES = libant.la
 
 ant_dictionary_SOURCES = $(SRCDIR)/ant_dictionary.c 
