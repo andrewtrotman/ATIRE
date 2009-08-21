@@ -62,7 +62,7 @@ extern "C" {
 	   proxy() {
 		   std::cout << "Registering UNISEG to the plugin factory..." << std::endl;
 		  // register the maker with the factory
-		   plugin_factory[uniseg_plugin_interface::SEGMENTATION]->maker = maker;
+		   plugin_factory[uniseg_plugin_interface::SEGMENTATION].maker = maker;
 	   }
 	};
 	// our one instance of the proxy

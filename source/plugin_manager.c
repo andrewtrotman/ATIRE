@@ -33,7 +33,7 @@ int ANT_plugin_manager::num_of_plugins = sizeof(ANT_plugin_manager::plugin_ids)/
 
 
 /* global plugins */
-ANT_plugin_maker **plugin_factory = NULL;
+ANT_plugin_maker *plugin_factory = NULL;
 bool ANT_plugin_manager::loaded = false;
 
 
@@ -45,13 +45,12 @@ ANT_plugin_manager::ANT_plugin_manager()
 {
 if (!plugin_factory)
 	{
-	plugin_factory = new ANT_plugin_maker *[num_of_plugins];
+	plugin_factory = new ANT_plugin_maker [num_of_plugins];
 
 	for (int i = 0; i < num_of_plugins; i++)
 		{
-		plugin_factory[i] = new ANT_plugin_maker;
-		plugin_factory[i]->plugin = NULL;
-		plugin_factory[i]->dlib = NULL;
+		plugin_factory[i].plugin = NULL;
+		plugin_factory[i].dlib = NULL;
 		}
 	}
 }
@@ -64,14 +63,14 @@ ANT_plugin_manager::~ANT_plugin_manager()
 {
 for (int i = 0; i < num_of_plugins; i++)
 	{
-	if (plugin_factory[i]->plugin)
-		delete plugin_factory[i]->plugin;
+	if (plugin_factory[i].plugin)
+		delete plugin_factory[i].plugin;
 
 #ifdef _MSC_VER
 	// close the dll here
 #else
-	if (plugin_factory[i]->dlib)
-		dlclose(plugin_factory[i]->dlib);
+	if (plugin_factory[i].dlib)
+		dlclose(plugin_factory[i].dlib);
 #endif
 	}
 delete [] plugin_factory;
@@ -111,35 +110,18 @@ for (int i = 0; i < num_of_plugins; i++)
 		 */
 
 #else
-		plugin_factory[plugin_ids[i]]->dlib = dlopen(name_with_plugin_path, RTLD_NOW);
-		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
+		plugin_factory[plugin_ids[i]].dlib = dlopen(name_with_plugin_path, RTLD_NOW);
+		if (plugin_factory[plugin_ids[i]].dlib == NULL )
 			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
 		else
 			{
 			printf("found plugin(%s)\n", name_with_plugin_path);
-			plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
+			plugin_factory[plugin_ids[i]].plugin = plugin_factory[plugin_ids[i]].maker();
 			}
 #endif
 		}
 	else
-		{
-#ifdef _MSC_VER
-		/*
-		 * please help with implementation of loading dynamic library on Windows
-		 */
-
-#else
-		plugin_factory[plugin_ids[i]]->dlib = dlopen(name, RTLD_NOW);
-		if (plugin_factory[plugin_ids[i]]->dlib == NULL )
-			printf("opening plugin(%s) failed: %s\n", name, dlerror());
-		else
-			{
-			printf("found plugin(%s)\n", name);
-			plugin_factory[plugin_ids[i]]->plugin = plugin_factory[plugin_ids[i]]->maker();
-			}
-#endif
-		//printf("no plugin found for : %s\n", name_with_plugin_path);
-		}
+		fprintf(stderr, "no plugin found for : %s\n", name_with_plugin_path);
 	delete [] name_with_plugin_path;
 	}
 
@@ -152,7 +134,7 @@ loaded = true;
 */
 const unsigned char *ANT_plugin_manager::do_segmentation(unsigned char *c, int length)
 {
-if (plugin_factory[ANT_plugin::SEGMENTATION]->plugin)
-	return plugin_factory[ANT_plugin::SEGMENTATION]->plugin->do_segmentation(c, length);
+if (plugin_factory[ANT_plugin::SEGMENTATION].plugin)
+	return plugin_factory[ANT_plugin::SEGMENTATION].plugin->do_segmentation(c, length);
 return 0;
 }

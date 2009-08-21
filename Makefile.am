@@ -9,7 +9,7 @@ TOOLDIR = tools
 AM_LDFLAGS = @LIBS@
 
 # using HEADER HASH FUNCTION
-AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
        -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
        
 # using RANDOM HASH FUNCTION       
@@ -219,8 +219,8 @@ ant_DEPENDENCIES = libant.la
 
 index_SOURCES = $(SRCDIR)/index.c
 index_LDADD = ${ANT_LIBS}
-index_LDFLAGS = -rdynamic
-#index_LDFLAGS = -static
+#index_LDFLAGS = -rdynamic
+index_LDFLAGS = -static -export-dynamic
 index_DEPENDENCIES = libant.la
 
 ant_dictionary_SOURCES = $(SRCDIR)/ant_dictionary.c 

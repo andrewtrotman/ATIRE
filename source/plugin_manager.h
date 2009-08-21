@@ -62,7 +62,7 @@ return inst;
 */
 inline ANT_plugin *ANT_plugin_manager::segmentation_plugin()
 {
-return plugin_factory[ANT_plugin::SEGMENTATION]->plugin;
+return plugin_factory[ANT_plugin::SEGMENTATION].plugin;
 }
 
 /*

@@ -27,7 +27,7 @@ protected:
 
 public:
 #ifdef ONE_PARSER
-	ANT_parser::ANT_parser(long should_segment = 0 /* FALSE */);
+	ANT_parser(long should_segment = 0 /* FALSE */);
 #else
 	ANT_parser();
 #endif
