@@ -8,7 +8,6 @@
 #include "memory.h"
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
-#include "compress_variable_byte.h"
 
 /*
 	ANT_SEARCH_ENGINE_READABILITY::ANT_SEARCH_ENGINE_READABILITY()
@@ -18,9 +17,9 @@ ANT_search_engine_readability::ANT_search_engine_readability(ANT_memory *memory)
 {
 long long current_readability;
 ANT_search_engine_btree_leaf collection_details;
-ANT_compress_variable_byte variable_byte;
 
 document_readability = (long *)memory->malloc(documents * sizeof(*document_readability));
+memory->realign();
 
 /*
 	read and decompress the readability vector
@@ -29,7 +28,7 @@ if (get_postings_details("~dalechall", &collection_details) == NULL)
 	exit(puts("This index is not annotated with readability data - terminating"));
 
 get_postings(&collection_details, postings_buffer);
-variable_byte.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
+factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
 hardest_document = 0;
 
@@ -39,6 +38,4 @@ for (current_readability = 0; current_readability < collection_details.document_
 	if (document_readability[current_readability] > hardest_document)
 		hardest_document = document_readability[current_readability];
 	}
-
-memory->realign();
 }

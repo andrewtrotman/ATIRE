@@ -187,7 +187,7 @@ for (measure = measures; *measure != '\0'; measure++)
 		{
 		case 'n': readability_measure = ANT_readability_factory::NONE; break;
 		case 'd': readability_measure |= ANT_readability_factory::DALE_CHALL; break;
-		case 'f': readability_measure |= ANT_readability_factory::FLESH_KINCAID; break;
+		case 'f': readability_measure |= ANT_readability_factory::FLESCH_KINCAID; break;
 		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}
 }

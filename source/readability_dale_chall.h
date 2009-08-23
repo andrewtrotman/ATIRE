@@ -26,9 +26,9 @@ private:
 
 private:
 	ANT_string_pair *measure_name;
-	unsigned long number_of_sentences;
-	unsigned long number_of_words;
-	unsigned long number_of_unfamiliar_words;
+	size_t number_of_sentences;
+	size_t number_of_words;
+	size_t number_of_unfamiliar_words;
 	word *words_encountered;
 	unsigned long last_was_title; // whether the last word we passed on was title
 	unsigned long size;

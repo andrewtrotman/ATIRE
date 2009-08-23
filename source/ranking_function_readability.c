@@ -13,7 +13,7 @@
 	ANT_RANKING_FUNCTION_READABILITY::ANT_RANKING_FUNCTION_READABILITY()
 	--------------------------------------------------------------------
 */
-ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_engine_readability *engine, double cutoff, double mix, double k1, double b) : ANT_ranking_function(engine)
+ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_engine_readability *engine, double mix, double cutoff, double k1, double b) : ANT_ranking_function(engine)
 {
 this->cutoff = cutoff ? cutoff : engine->hardest_document / 1000.0;
 this->mix = mix;
@@ -48,13 +48,16 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		bm25 = (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+		bm25 = idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
 		//readability = (document_readability[docid] / 1000.0)  - (15.79 * tf / document_lengths[docid]);
-		readability = document_readability[docid] / 1000.0;
-		readability = cutoff - readability;
+		if (accumulator[docid].is_zero_rsv())
+			{
+			readability = cutoff - (document_readability[docid] / 1000.0);
+			accumulator[docid].add_rsv((1 - mix) * readability);
+			}
 		
 		//accumulator[docid].add_rsv(readability);
-		accumulator[docid].add_rsv((mix * bm25) + ((1.0 - mix) * readability));
+		accumulator[docid].add_rsv(mix * bm25);
 		}
 	current++;		// skip over the zero
 	}
