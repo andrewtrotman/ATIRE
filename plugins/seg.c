@@ -61,10 +61,17 @@ void Seger::free()
 
 		tw_ptr_ = NULL;
 	}
+
+	if (clist_) {
+	    delete clist_;
+	    clist_ = NULL;
+	}
+
 }
 
 void Seger::init_members()
 {
+	clist_ = NULL;
 	freq_ = NULL;
 	allfreq_ = NULL;
 	tw_ptr_ = NULL;
@@ -75,6 +82,9 @@ void Seger::init()
 	free();
 
 	assert(stream_.length() > 0);
+
+	clist_ = new CList;
+
 	//assert(tw_ptr_->chars().length() > 0);
 	freq_ = new Freq;
 	FreqCounter counter(stream_, freq_);
@@ -93,7 +103,7 @@ void Seger::init()
 
 void Seger::input(unsigned char *input, int length)
 {
-	stream_ = string_type((char *)input);
+	stream_ = string_type((char *)input, length);
 	init();
 }
 
@@ -198,17 +208,17 @@ void Seger::build()
 	int size = local_tw_ptr->size();
 	do {
 		CWords* temp = new CWords(size, w_ptr);
-		clist_.insert(temp);
+		clist_->insert(temp);
 		delete temp;
 		w_ptr = (word_ptr_type)w_ptr->lparent();
 	} while(w_ptr != NULL);
-	clist_.apply_rules();
+	clist_->apply_rules();
 
 	while (!stop) {
 		stop = true;
-		cwords_list::iterator it = clist_.list().begin();
+		cwords_list::iterator it = clist_->list().begin();
 		cwords_list::iterator prev;
-		while( it != clist_.list().end() ) {
+		while( it != clist_->list().end() ) {
 			int n = 0; /// n copies of it
 
 			if ((!((*it)->is_end()))/* || (*it)->reach_limit()*/) {
@@ -227,22 +237,22 @@ void Seger::build()
 				stop = false;
 				//CWords* cws_ptr;
 				//cws_ptr = (*it);
-				//it = clist_.list().erase(it);
-				it = clist_.delete_node(it);
+				//it = clist_->list().erase(it);
+				it = clist_->delete_node(it);
 				//delete cws_ptr;
-				clist_.append(clist);
+				clist_->append(clist);
 				//apply_rules();
-				//it = clist_.list().begin();
+				//it = clist_->list().begin();
 			}
 			else
 				++it;
 			//if (!stop)
-			//	clist_.listopithecus().erase(prev);
+			//	clist_->listopithecus().erase(prev);
 		}
 	}
 
 	// remove those nodes without end
-	// clist_.remove_no_end();
+	// clist_->remove_no_end();
 	if (UNISEG_settings::instance().verbose) {
 		TIMINGS_DECL();
 		TIMINGS_START();
@@ -250,7 +260,7 @@ void Seger::build()
 		cout << "finished building all the possible combinations for :"
 			<< endl << "\""	<< local_tw_ptr->chars() << "\"("
 			<< local_tw_ptr->size()<< ")" << endl
-			<< "with total possibilities: " << clist_.size()
+			<< "with total possibilities: " << clist_->size()
 			<< endl;
 
 		TIMINGS_END("build");
@@ -260,7 +270,7 @@ void Seger::build()
 void Seger::make(CList& clist, string_type& str) {
 	word_ptr_type w_ptr = freq_->find(str);
 
-	//cwords_list::reverse_iterator it = clist_.list().rbegin();
+	//cwords_list::reverse_iterator it = clist_->list().rbegin();
 	//cout << "clist size: " << clist.list().size() << endl;
 	cwords_list::reverse_iterator it = clist.list().rbegin();
 	while(it != clist.list().rend()) {
@@ -294,29 +304,29 @@ void Seger::do_some_calculations() {
  * stored the possible combinations of segmentations
  */
 void Seger::seg() {
-	clist_.cal(freq_);
+	clist_->cal(freq_);
 
 	if (UNISEG_settings::instance().mean == 4
 			|| UNISEG_settings::instance().mean == 5)
-		clist_.sort(false);
+		clist_->sort(false);
 	else
-		clist_.sort(true);
+		clist_->sort(true);
 }
 
 void Seger::show_all() {
-	clist_.show();
+	clist_->show();
 }
 
 void Seger::add_to_list(array_type& cwlist) {
 
-	if (clist_.size() < 1)
+	if (clist_->size() < 1)
 		return;
 
-	assert(clist_.size() > 0);
+	assert(clist_->size() > 0);
 
 	do {
-		array_type temp = clist_.front()->to_array();
-		clist_.list().pop_front();
+		array_type temp = clist_->front()->to_array();
+		clist_->list().pop_front();
 		assert(temp.size() > 0);
 
 		if (temp.size() > 1) {
@@ -350,7 +360,7 @@ void Seger::add_to_list(array_type& cwlist) {
 				break;
 			}
 		}
-	} while (clist_.size() > 0);
+	} while (clist_->size() > 0);
 
 	if (tw_ptr_ != NULL)
 		tw_ptr_->seged(true);

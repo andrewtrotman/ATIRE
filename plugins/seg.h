@@ -16,7 +16,7 @@
 
 class Seger {
 private:
-	CList				clist_;
+	CList				*clist_;
 	Freq				*freq_;    // the frequency records for the input text
 	Freq				*allfreq_;
 	word_ptr_type 		tw_ptr_;

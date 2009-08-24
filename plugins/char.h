@@ -11,16 +11,16 @@
 #include "encoding.h"
 #include "stdio.h"
 
-class ANT_char {
+class UNISEG_char {
 private:
-	ANT_encoding::language lang;
-	ANT_encoding* enc;
+	UNISEG_encoding::language lang;
+	UNISEG_encoding* enc;
 	char *start;
 	size_t bytes;
 
 public:
-	ANT_char(ANT_encoding* encoding) : enc(encoding) {}
-	~ANT_char() {}
+	UNISEG_char(UNISEG_encoding* encoding) : enc(encoding) {}
+	~UNISEG_char() {}
 
 
 };

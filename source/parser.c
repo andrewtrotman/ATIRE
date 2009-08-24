@@ -81,8 +81,8 @@ unsigned char *start, *here;
 		here = segmentation;
 		while (ANT_isspace(*here))
 			here++;
-		start = here++;
-		while (!ANT_isspace(*here))
+		start = here;
+		while (!ANT_isspace(*here) && *here != '\0')
 			here++;
 
 		/*
@@ -99,6 +99,8 @@ unsigned char *start, *here;
 		current_token.start = (char *)start;
 		current_token.string_length = here - start;
 
+		if (current_token.string_length <= 0)
+		    return get_next_token();
 		return &current_token;
 		}
 

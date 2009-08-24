@@ -69,6 +69,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			while ( start < end ) {
 				enc->test_char((unsigned char *)start);
 				string_type str(start, enc->howmanybytes()); // ((*start)->to_string();
+				//string_type str(start, 3);
 				if (enc->lang() == uniseg_encoding::ENGLISH) {
 					// for debug
 					//cout << "before transform: " << str << endl;

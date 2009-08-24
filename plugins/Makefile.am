@@ -6,15 +6,7 @@ AM_LDFLAGS = @LIBS@
 
 CC = g++
 
-ant_src_dir = $(srcdir)/../source/
-
-extra_sources = \
-		$(ant_src_dir)/ctypes.c \
-		$(ant_src_dir)/encoding_utf8.c \
-		$(ant_src_dir)/encoding_factory.c
-
 libuniseq_sources = \
-		$(extra_sources) \
 		uniseg_plugin.c \
 		uniseg_settings.c \
 		word.c \
@@ -28,6 +20,8 @@ libuniseq_sources = \
 		file.c \
 		qfreq.c	\
 		seg.c \
+		encoding_utf8.c \
+		encoding_factory.c \
 		dic.c
 		
 libuniseg_headers = \

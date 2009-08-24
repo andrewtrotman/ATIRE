@@ -10,17 +10,17 @@ typedef Word::string_array							string_array;
 typedef const word_ptr_type							const_word_ptr;
 
 #include <map>
-typedef std::map<string_type, word_ptr_type>		freq_type;
-typedef std::map<string_type, word_ptr_type>		word_map;
+typedef std::map<string_type, word_ptr_type>					freq_type;
+typedef std::map<string_type, word_ptr_type>					word_map;
 
-typedef std::vector<word_ptr_type>					array_type;
-typedef std::vector<array_type >					array_array_type;
+typedef std::vector<word_ptr_type>						array_type;
+typedef std::vector<array_type >						array_array_type;
 
 #include <encoding_factory.h>
 #include <encoding_utf8.h>
-typedef ANT_encoding								uniseg_encoding;
-typedef ANT_encoding_utf8							uniseg_encoding_utf8;
-typedef ANT_encoding_factory						uniseg_encoding_factory;
+typedef UNISEG_encoding								uniseg_encoding;
+typedef UNISEG_encoding_utf8							uniseg_encoding_utf8;
+typedef UNISEG_encoding_factory							uniseg_encoding_factory;
 
 #include <string.h>
 inline std::string get_first_utf8char(unsigned char* c)
@@ -30,12 +30,12 @@ inline std::string get_first_utf8char(unsigned char* c)
 	strncpy(tmp_utf8str, (char*)c, num_of_bytes);
 	tmp_utf8str[num_of_bytes] = '\0';
 	std::string a_char(tmp_utf8str);
-	delete tmp_utf8str;
+	delete [] tmp_utf8str;
 	return a_char;
 }
 
 #include <string>
-typedef std::string::iterator						entity_iterator;
+typedef std::string::iterator							entity_iterator;
 
 inline size_t get_utf8_string_length(const char* c, size_t length)
 {
@@ -60,7 +60,7 @@ inline size_t get_utf8_string_length(std::string& source)
 }
 
 #include <plugin.h>
-typedef ANT_plugin									uniseg_plugin_interface;
-typedef uniseg_plugin_interface						*maker_t();
+typedef ANT_plugin								uniseg_plugin_interface;
+typedef uniseg_plugin_interface							*maker_t();
 
 #endif /* __QTYPE_H_ */
