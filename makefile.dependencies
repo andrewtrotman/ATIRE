@@ -33,7 +33,7 @@ bin/file.obj: source/file.h source/fundamental_types.h source/memory.h source/fi
 bin/file_internals.obj: source/file_internals.h
 bin/hash_table.obj: source/hash_table.h source/string_pair.h source/str.h source/ctypes.h
 bin/index.obj: source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h source/file.h source/fundamental_types.h source/parser.h source/string_pair.h source/str.h source/ctypes.h source/universal_parser.h source/encoding.h source/encoding_factory.h source/parser_readability.h source/readability_factory.h source/readability.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/postings_piece.h source/compress_variable_byte.h source/compress.h source/compression_factory.h source/compression_factory_scheme.h source/memory.h source/indexer_param_block.h source/time_stats.h source/version.h
-bin/indexer_param_block.obj: source/indexer_param_block.h source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/encoding_factory.h source/readability_factory.h source/parser.h source/string_pair.h source/str.h source/ctypes.h source/readability.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/postings_piece.h source/compress_variable_byte.h source/version.h
+bin/indexer_param_block.obj: source/indexer_param_block.h source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/readability_factory.h source/parser.h source/string_pair.h source/str.h source/ctypes.h source/readability.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/postings_piece.h source/compress_variable_byte.h source/version.h source/encoding_factory.h
 bin/learned_wikipedia_stem.obj: source/learned_wikipedia_stem.h
 bin/lovins.obj: source/lovins.h
 bin/maths.obj: source/maths.h
@@ -42,9 +42,9 @@ bin/memory.obj: source/memory.h
 bin/memory_index.obj: source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/memory_index.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/compression_factory.h source/compression_factory_scheme.h source/memory.h source/file.h source/btree.h source/btree_head_node.h source/hash_table.h
 bin/memory_index_hash_node.obj: source/string_pair.h source/str.h source/ctypes.h source/memory.h source/memory_index_hash_node.h source/postings_piece.h source/memory_index_stats.h source/stats.h source/compress_variable_byte.h source/compress.h source/fundamental_types.h
 bin/memory_index_stats.obj: source/memory.h source/memory_index.h source/memory_index_stats.h source/stats.h source/memory_index_hash_node.h source/string_pair.h source/str.h source/ctypes.h source/postings_piece.h source/fundamental_types.h source/compress_variable_byte.h source/compress.h source/compression_factory.h source/compression_factory_scheme.h
-bin/nexi.obj: source/NEXI.h source/string_pair.h source/str.h source/ctypes.h source/parser.h source/NEXI_term.h
+bin/nexi.obj: source/NEXI.h source/string_pair.h source/str.h source/ctypes.h source/encoding_utf8.h source/encoding_ascii.h source/encoding.h source/parser.h source/NEXI_term.h
 bin/paice_husk.obj: source/paice_husk.h
-bin/parser.obj: source/parser.h source/string_pair.h source/str.h source/ctypes.h
+bin/parser.obj: source/parser.h source/string_pair.h source/str.h source/ctypes.h source/plugin_manager.h source/plugin.h
 bin/parser_readability.obj: source/parser_readability.h source/parser.h source/string_pair.h source/str.h source/ctypes.h
 bin/plugin_manager.obj: source/plugin_manager.h source/plugin.h
 bin/porter.obj: source/str.h source/ctypes.h source/porter.h source/btree_iterator.h
@@ -67,7 +67,7 @@ bin/search_engine_accumulator.obj: source/search_engine_accumulator.h
 bin/search_engine_forum.obj: source/search_engine_forum.h
 bin/search_engine_forum_INEX.obj: source/search_engine_forum_INEX.h source/search_engine_forum.h
 bin/search_engine_forum_TREC.obj: source/search_engine_forum_TREC.h source/search_engine_forum.h
-bin/search_engine_readability.obj: source/search_engine_readability.h source/search_engine.h source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/ranking_function.h source/memory.h source/search_engine_btree_leaf.h source/search_engine_accumulator.h source/compress_variable_byte.h
+bin/search_engine_readability.obj: source/search_engine_readability.h source/search_engine.h source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/ranking_function.h source/memory.h source/search_engine_btree_leaf.h source/search_engine_accumulator.h
 bin/search_engine_stats.obj: source/search_engine_stats.h source/time_stats.h source/stats.h
 bin/stats.obj: source/stats.h
 bin/stemmer.obj: source/stemmer.h source/btree_iterator.h source/ranking_function.h source/compress.h source/fundamental_types.h

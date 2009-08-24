@@ -92,7 +92,7 @@ ANT_compress_variable_byte::compress_into(dest, docno);
 	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
 	-----------------------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index_hash_node::add_posting(ANT_string_pair *keyword, long long docno)
+void ANT_memory_index_hash_node::add_posting(long long docno)
 {
 unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
 long needed, remain;
@@ -100,22 +100,13 @@ long needed, remain;
 collection_frequency++;
 if (docno == current_docno)
 	{
-	stats->term_occurences++;
 	if (tf_list_tail->data[tf_node_used - 1]++ > 254)
-		{
 		tf_list_tail->data[tf_node_used - 1] = 254;
-#ifdef NEVER
-		printf("Doc:%lld, '%*.*s': TF trimmed at 255 occurences\n", docno, keyword->length(), keyword->length(), keyword->string());
-#else
-		keyword = keyword;		// this gets around the compiler warning about parameter "keyword" not being used
-#endif
-		}
 	}
 else
 	{
 	document_frequency++;
 	needed = compress_bytes_needed(docno - current_docno);
-	stats->bytes_to_store_docids += needed;
 
 	if (docid_node_used + needed > docid_node_length)
 		{
@@ -155,12 +146,9 @@ else
 		tf_list_tail = tf_list_tail->next;
 		tf_node_used = 0;
 		}
-	stats->bytes_to_store_tfs++;
 	tf_list_tail->data[tf_node_used] = 1;
-	stats->term_occurences++;
 	tf_node_used++;
 	}
-return this;
 }
 
 /*

@@ -125,7 +125,8 @@ if (hash_table[hash_value] == NULL)
 	}
 else
 	node = find_add_node(hash_table[hash_value], string);
-return node->add_posting(string, docno);
+node->add_posting(docno);
+return node;
 }
 
 /*
@@ -146,7 +147,7 @@ if (hash_table[hash_value] == NULL)
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
 node->current_docno = 0;
-node->add_posting(measure_name, score);
+node->add_posting(score);
 }
 
 /*
@@ -227,6 +228,8 @@ long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash
 long terms = 1;
 long long doc_size, tf_size, total, len, impacted_postings_length;
 
+stats->term_occurences += root->collection_frequency;
+
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
 
@@ -246,6 +249,11 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 		serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 		}
 	}
+
+stats->bytes_to_store_docids += doc_size;
+stats->bytes_to_store_tfs += tf_size;
+
+
 if (root->string[0] == '~')			// these are "special" strings in the index (e.g. document lengths)
 	{
 	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);

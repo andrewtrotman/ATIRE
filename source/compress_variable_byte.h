@@ -30,16 +30,24 @@ public:
 */
 inline long ANT_compress_variable_byte::compress_bytes_needed(long long docno)
 {
-if (docno & ((long long)127 << 28))
-	return 5;
-else if (docno & ((long long)127 << 21))
-	return 4;
-else if (docno & ((long long)127 << 14))
-	return 3;
-else if (docno & ((long long)127 << 7))
-	return 2;
-else
+if (docno < ((long long)1 << 7))
 	return 1;
+else if (docno < ((long long)1 << 14))
+	return 2;
+else if (docno < ((long long)1 << 21))
+	return 3;
+else if (docno < ((long long)1 << 28))
+	return 4;
+else if (docno < ((long long)1 << 35))
+	return 5;
+else if (docno < ((long long)1 << 42))
+	return 6;
+else if (docno < ((long long)1 << 49))
+	return 7;
+else if (docno < ((long long)1 << 56))
+	return 8;
+else
+	return 9;
 }
 
 /*
@@ -48,17 +56,33 @@ else
 */
 inline void ANT_compress_variable_byte::compress_into(unsigned char *dest, long long docno)
 {
-if (docno & ((long long)127 << 28))
-	goto five;
-else if (docno & ((long long)127 << 21))
-	goto four;
-else if (docno & ((long long)127 << 14))
-	goto three;
-else if (docno & ((long long)127 << 7))
-	goto two;
-else
+if (docno < ((long long)1 << 7))
 	goto one;
+else if (docno < ((long long)1 << 14))
+	goto two;
+else if (docno < ((long long)1 << 21))
+	goto three;
+else if (docno < ((long long)1 << 28))
+	goto four;
+else if (docno < ((long long)1 << 35))
+	goto five;
+else if (docno < ((long long)1 << 42))
+	goto six;
+else if (docno < ((long long)1 << 49))
+	goto seven;
+else if (docno < ((long long)1 << 56))
+	goto eight;
 
+/*
+	Else we are a nine byte compressed integer
+*/
+	*dest++ = (docno >> 56) & 0x7F;
+eight:
+	*dest++ = (docno >> 49) & 0x7F;
+seven:
+	*dest++ = (docno >> 42) & 0x7F;
+six:
+	*dest++ = (docno >> 35) & 0x7F;
 five:
 	*dest++ = (docno >> 28) & 0x7F;
 four:

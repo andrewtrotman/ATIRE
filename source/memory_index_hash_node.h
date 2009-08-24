@@ -44,7 +44,7 @@ public:
 	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_memory_index_stats *stats);
 	~ANT_memory_index_hash_node();
 	void *operator new(size_t count, ANT_memory *memory);
-	ANT_memory_index_hash_node *add_posting(ANT_string_pair *keyword, long long docno);
+	void add_posting(long long docno);
 	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
 
 	long decompress(unsigned char **from);
