@@ -10,12 +10,19 @@
 
 #include "uniseg_types.h"
 #include "seg.h"
+#include <string>
 
 class UNISEG_plugin : public uniseg_plugin_interface
 {
 private:
-	Seger	seger;
-	unsigned char	**output;
+	Seger		seger_;
+	std::string	output_;
+	std::string	input_;
+	long		count_;
+	UNISEG_encoding *enc_;
+
+private:
+	void cleanup();
 
 public:
 	UNISEG_plugin();

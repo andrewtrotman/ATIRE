@@ -27,17 +27,17 @@ public:
 	bool 					verbose;
 	bool					debug;
 
-	std::vector<int> 		skip;
+	std::vector<int> 			skip;
 	int 					skip_high;
 	int 					skip_low;
 	int 					to_skip; // for all skipping
 
 	int 					max;
 
-	uniseg_encoding::language 	lang;
+	uniseg_encoding::language 		lang;
 
-	std::string 			freqs_path; // string pattern frequency table path
-	std::string 			dics_path;  // dictionary path
+	std::string 				freqs_path; // string pattern frequency table path
+	std::string 				dics_path;  // dictionary path
 	char  					sep[2];
 
 
@@ -46,7 +46,7 @@ public:
 	bool 					reward;
 	bool					optimize;
 
-	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
+	unsigned long 				encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 
 private:
 	void init();

@@ -43,6 +43,14 @@ bool CList::initialize() {
 
 }
 
+void CList::clear_node(cwords_list_iterator& it)
+{
+    CWords* cws_ptr;
+    cws_ptr = (*it);
+    delete cws_ptr;
+    cws_ptr = NULL;
+}
+
 void CList::append(CWords* cwords) {
 	list_.push_back(new CWords(*cwords));
 }
@@ -194,10 +202,7 @@ cwords_list_iterator CList::delete_node(cwords_list_iterator it) {
 			it = list_.erase(it);
 			delete cws_ptr;
  */
-	CWords* cws_ptr;
-	cws_ptr = (*it);
-	delete cws_ptr;
-	cws_ptr = NULL;
+	clear_node(it);
 	//cwords_list_iterator  =
 	return list_.erase(it);
 }

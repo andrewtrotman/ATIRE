@@ -207,10 +207,12 @@ void Seger::build()
 	 */
 	int size = local_tw_ptr->size();
 	do {
-		CWords* temp = new CWords(size, w_ptr);
-		clist_->insert(temp);
-		delete temp;
-		w_ptr = (word_ptr_type)w_ptr->lparent();
+		if (w_ptr->freq() > UNISEG_settings::instance().to_skip) {
+		    CWords* temp = new CWords(size, w_ptr);
+		    clist_->insert(temp);
+		    delete temp;
+		    w_ptr = (word_ptr_type)w_ptr->lparent();
+		}
 	} while(w_ptr != NULL);
 	clist_->apply_rules();
 
@@ -270,16 +272,24 @@ void Seger::build()
 void Seger::make(CList& clist, string_type& str) {
 	word_ptr_type w_ptr = freq_->find(str);
 
+
+
 	//cwords_list::reverse_iterator it = clist_->list().rbegin();
 	//cout << "clist size: " << clist.list().size() << endl;
 	cwords_list::reverse_iterator it = clist.list().rbegin();
 	while(it != clist.list().rend()) {
 		//cout << "1" << endl;
 		assert (w_ptr != NULL);
-		(*it)->append(w_ptr);
-		w_ptr = (word_ptr_type)w_ptr->lparent();
+		if (w_ptr->freq() > UNISEG_settings::instance().to_skip) {
+		    (*it)->append(w_ptr);
+		    ++it;
+		}
+		else {
+		    cwords_list::iterator temp_it = clist.delete_node(--it.base());
+		    it = cwords_list::reverse_iterator(temp_it);
+		}
 
-		++it;
+		w_ptr = (word_ptr_type)w_ptr->lparent();
 	}
 	assert(w_ptr == NULL);
 }

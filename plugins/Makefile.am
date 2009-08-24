@@ -7,6 +7,8 @@ AM_LDFLAGS = @LIBS@
 CC = g++
 
 libuniseq_sources = \
+		encoding_utf8.c \
+		encoding_factory.c \
 		uniseg_plugin.c \
 		uniseg_settings.c \
 		word.c \
@@ -20,8 +22,6 @@ libuniseq_sources = \
 		file.c \
 		qfreq.c	\
 		seg.c \
-		encoding_utf8.c \
-		encoding_factory.c \
 		dic.c
 		
 libuniseg_headers = \

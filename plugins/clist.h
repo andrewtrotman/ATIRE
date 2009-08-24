@@ -18,6 +18,7 @@ public:
 	const cwords_list& list() const { return list_; }
 	cwords_list& list() { return list_; }
 
+	void clear_node(cwords_list_iterator& it);
 
 	bool initialize();
 	void append(CWords* cwords);

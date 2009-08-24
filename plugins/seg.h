@@ -54,6 +54,7 @@ public:
 	void input(unsigned char *, int length);
 
 	int get_count() { return words_list_.size(); }
+	const array_type& best_words() const { return words_list_; }
 
 private:
 	void init();

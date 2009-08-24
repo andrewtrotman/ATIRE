@@ -23,7 +23,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 	//char *to = NULL;
 	char *start = NULL;
 	int count = 0;
-	uniseg_encoding *enc = uniseg_encoding_factory::gen_encoding_scheme((uniseg_encoding_factory::encoding)UNISEG_settings::instance().encoding_scheme);
+	uniseg_encoding *enc = uniseg_encoding_factory::get_encoding();
 
 	if (len < min)
 		return;
