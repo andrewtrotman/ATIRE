@@ -10,13 +10,14 @@
 #include "encoding_utf8.h"
 #include "uniseg_settings.h"
 
-UNISEG_encoding *UNISEG_encoding_factory::enc = NULL;
+//UNISEG_encoding *UNISEG_encoding_factory::enc = NULL;
 
 UNISEG_encoding *UNISEG_encoding_factory::get_encoding()
 {
-    if (!enc)
-	enc = gen_encoding_scheme((encoding)(UNISEG_settings::instance().encoding_scheme));
-    return enc;
+    if (!enc_)
+	enc_ = gen_encoding_scheme((encoding)(UNISEG_settings::instance().encoding_scheme));
+    return enc_;
+    //return gen_encoding_scheme((encoding)(UNISEG_settings::instance().encoding_scheme));
 }
 
 /*

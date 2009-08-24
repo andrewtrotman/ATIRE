@@ -9,6 +9,7 @@
 #include "seg.h"
 #include "qfreq.h"
 #include "encoding_factory.h"
+#include "uniseg_settings.h"
 
 #include <iostream>
 
@@ -19,7 +20,7 @@ UNISEG_plugin::UNISEG_plugin() : uniseg_plugin_interface()
     //output_ = 0;
     count_ = 0;
     //seger = NULL;
-    enc_ = UNISEG_encoding_factory::get_encoding();
+    enc_ = UNISEG_encoding_factory::instance().get_encoding();
 
     // load the string frequency table
     cout << "##################### initializing UNISEG segmentation module ######################" << endl;
@@ -35,7 +36,6 @@ UNISEG_plugin::~UNISEG_plugin()
 
 void UNISEG_plugin::cleanup()
 {
-    delete enc_;
 }
 
 const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length)
@@ -49,7 +49,7 @@ const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length
 	unsigned char *current = c;
 	unsigned char *next = current;
 	unsigned char *end = c + length;
-	const long step = QFreq::instance().count();
+	const long step = UNISEG_settings::instance().max;
 	long segmented_len = 0;
 	long how_far = 0;
 	long distance = 0;
@@ -70,16 +70,17 @@ const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length
 	    seger_.start();
 	    const array_type& words_list = seger_.best_words();
 	    long i = 0;
-	    long size = flag ? words_list.size() - 1 : words_list.size();
+	    long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
 	    for (; i < size; i++) {
 		string_type& word = words_list[i]->chars();
 		output_.append(word + " ");
-		segmented_len = word.length();
+		segmented_len += word.length();
 	    }
 
 	    // put the last segment back to the remaining characters
 	    current += segmented_len;
 	    segmented_len = 0;
+	    count = (words_list.size() == size) ? 0 : count - words_list[size - 1]->size();
 	}
 
 	return get_output();

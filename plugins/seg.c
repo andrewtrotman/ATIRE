@@ -211,8 +211,8 @@ void Seger::build()
 		    CWords* temp = new CWords(size, w_ptr);
 		    clist_->insert(temp);
 		    delete temp;
-		    w_ptr = (word_ptr_type)w_ptr->lparent();
 		}
+		w_ptr = (word_ptr_type)w_ptr->lparent();
 	} while(w_ptr != NULL);
 	clist_->apply_rules();
 

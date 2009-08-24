@@ -18,13 +18,22 @@ class UNISEG_encoding_factory
 public:
 	enum encoding { ASCII, UTF8 };
 
-	static UNISEG_encoding *enc;
+private:
+	UNISEG_encoding *enc_;
 
 public:
-	static UNISEG_encoding *gen_encoding_scheme(encoding what_encoding);
-
-	static UNISEG_encoding *get_encoding();
+	UNISEG_encoding_factory() :enc_(NULL) {}
+	virtual ~UNISEG_encoding_factory() { if (enc_) delete enc_; }
+	UNISEG_encoding *gen_encoding_scheme(encoding what_encoding);
+	UNISEG_encoding *get_encoding();
+	static UNISEG_encoding_factory& instance();
 } ;
+
+inline UNISEG_encoding_factory& UNISEG_encoding_factory::instance()
+{
+	static UNISEG_encoding_factory inst;
+	return inst;
+}
 
 #endif __ENCODING_FACTORY_H__
 

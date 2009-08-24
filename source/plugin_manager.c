@@ -95,8 +95,8 @@ for (int i = 0; i < num_of_plugins; i++)
 	#else
 		char sep[] = { "/" };
 	#endif
-	int len = strlen(PLUGIN_DIRECTORY_NAME) + strlen(sep) + strlen(name) + 1;
-	char *name_with_plugin_path = new char[len];
+	int len = strlen(PLUGIN_DIRECTORY_NAME) + strlen(sep) + strlen(name);
+	char *name_with_plugin_path = new char[len + 1];
 	strcpy(name_with_plugin_path, PLUGIN_DIRECTORY_NAME);
 	strcat(name_with_plugin_path, sep);
 	strcat(name_with_plugin_path, name);
