@@ -76,11 +76,11 @@ public:
 	{
 	unsigned long cp = utf8_to_wide(here);
 
-	return ((cp >= 0x4e00 && cp <= 0x9fff)
-		|| (cp >= 0x3400 && cp <= 0x4dbf)
-		|| (cp >=0x20000 && cp <= 0x2a6df)
-		|| (cp >=0xf900 && cp <= 0xfaff)
-		|| (cp >=0x2f800 && cp <= 0x2fa1f));
+	return ((cp >= 0x4e00 && cp <= 0x9fff)		// CJK Unified Ideographs
+		|| (cp >= 0x3400 && cp <= 0x4dbf)		// CJK Unified Ideographs Extension A
+		|| (cp >=0x20000 && cp <= 0x2a6df)		// CJK Unified Ideographs Extension B
+		|| (cp >=0xf900 && cp <= 0xfaff)		// CJK Compatibility Ideographs
+		|| (cp >=0x2f800 && cp <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
 	}
 
 	/*
