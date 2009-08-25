@@ -14,6 +14,9 @@ char *GA_stemmer::get_next(char *from) {
             stem(term_to_check, stemmed_index_term);
             if (strcmp(stemmed_index_term, stemmed_search_term) == 0) {
                 //		printf("%s\n", term_to_check);
+#ifdef GA_STEMMER_STATS
+				individual->keep_last_stats();
+#endif 
                 return term_to_check;
             }
             if (strncmp(term_to_check, stemmed_search_term, FIXED_SEARCH_LENGTH) != 0)
@@ -32,4 +35,7 @@ char *GA_stemmer::first(char *term) {
 
 void GA_stemmer::print(FILE *fd) {
     individual->print_raw(fd);
+#ifdef GA_STEMMER_STATS
+	individual->print_rule_usage(fd);
+#endif 
 }

@@ -6,7 +6,8 @@
 #include "ga_individual.h"
 #include "vocab.h"
 
-const char *banned[] = {"s"};
+//const char *banned[] = {"s"};
+const char *banned[] = {};
 
 inline int strnmatchlen(const char *a, const char *b, int n) {
     int count = 0;
@@ -85,12 +86,16 @@ inline int GA_individual::is_banned(char *s) {
 }
 
 /*
-Currently returns a pointer to a static array - do not free!
+  Currently returns a pointer to a static array - do not free!
 */
 char *GA_individual::apply(const char *string) {
     unsigned int i, skipping = FALSE;
     int length;
     static char buffer[TMP_BUFFER_SIZE];
+
+#ifdef GA_STEMMER_STATS
+	memset(current_usage_stats, 0, sizeof rule_usage_stats);
+#endif
 
     strncpy(buffer, string, TMP_BUFFER_SIZE);
     buffer[TMP_BUFFER_SIZE - 1] = '\0';
@@ -121,6 +126,10 @@ char *GA_individual::apply(const char *string) {
                 length += to_len - from_len;
 
                 skipping = TRUE;
+
+#ifdef GA_STEMMER_STATS
+				rule_usage_stats[i]++;
+#endif
             }
         }
     }
@@ -193,6 +202,10 @@ void GA_individual::mutate(GA_individual *c, Vocab *v) {
     default:
         fprintf(stderr, "Error in GA_individual::mutate\n");
     }
+
+#ifdef GA_STEMMER_STATS
+	memset(c->rule_usage_stats, 0, sizeof c->rule_usage_stats);
+#endif
 }
 
 /* 
@@ -236,12 +249,17 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
     c->is_evaluated = FALSE;
     c->count = (point + (p2->rules_size() - point2)) / RULE_SIZE;
 
+#ifdef GA_DEBUG
     if (c->sanity_check() == 0) {
         printf("Crossover error, point:%u\n min_point2:%u point2:%u\n", point, min_point2, point2);
         print_raw(stdout);
         p2->print_raw(stdout);
         c->print_raw(stdout);
     }
+#endif
+#ifdef GA_STEMMER_STATS
+	memset(c->rule_usage_stats, 0, sizeof c->rule_usage_stats);
+#endif
 }
 
 /* 
@@ -445,4 +463,21 @@ int GA_individual::sanity_check() {
     }
 
     return 1;
+}
+
+void GA_individual::keep_last_stats() {
+	int i, together = 0;
+	for (i = 0; i < count; i++)
+		if (current_usage_stats[i]) {
+			rule_usage_stats[i]++;
+			together++;
+		}
+	rules_used_together[together]++;
+}
+
+void GA_individual::print_rule_usage(FILE *fd) {
+	int i;
+	for (i = 0; i < count; i++) {
+		fprintf(fd, "%ld ", rule_usage_stats[i]);
+	}
 }

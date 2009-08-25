@@ -5,9 +5,9 @@ EXTSRCDIR = .
 EXTOBJDIR = ./obj
 
 EXTFLAGS = -I$(SRCDIR)
-LDFLAGS = -g -ldl -O3
-CFLAGS = -g -O3 -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR) -DUSE_FLOATED_TF
+LDFLAGS = -g -ldl 
+CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR) -DUSE_FLOATED_TF -DGA_STEMMER_STATS
 
 CC = g++
 
@@ -97,7 +97,7 @@ EXTENSION = \
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
 EXTENSION_W_DIR = $(EXTENSION:%=$(EXTOBJDIR)/%)
 
-all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool
+all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(BINDIR)/qpp
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $(SRCDIR)/$*.c -o $(OBJDIR)/$*.o
@@ -111,7 +111,7 @@ $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(OBJDIR)/ant_api.o $(OBJDIR)/qpp.o 
+$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(OBJDIR)/ant_api.o $(EXTOBJDIR)/qpp.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(BINDIR)/ant_dict : $(OBJECTS_W_DIR) $(OBJDIR)/ant_dictionary.o

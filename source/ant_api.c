@@ -533,21 +533,39 @@ return data->answer_list;
 }
 
 /*
+	ANT_GET_COLLECTION_DETAILS()
+	----------------------------
+*/
+struct collection_details_s *ant_get_collection_details(ANT *ant, struct collection_details_s *collection_details) 
+{
+    ANT_search_engine *search_engine = ((ANT_ant_handle *)ant)->search_engine;
+
+    collection_details->documents_in_collection = search_engine->document_count();
+    collection_details->terms_in_collection = search_engine->get_collection_length();
+
+    return collection_details;
+}
+
+/*
 	ANT_GET_TERM_DETAILS()
 	----------------------
-    Struct becomes caller's responsibility to free, no refunds or warranties.
 */
-struct term_details_s *ant_get_term_details(ANT *ant, char *term) 
+struct term_details_s *ant_get_term_details(ANT *ant, char *term, struct term_details_s *term_details) 
 {
-    struct term_details_s *term_details = (struct term_details_s *)malloc(sizeof *term_details);
     ANT_search_engine *search_engine = ((ANT_ant_handle *)ant)->search_engine;
     ANT_search_engine_btree_leaf internal_details;
-    search_engine->get_postings_details(term, &internal_details);
+    
 
-    term_details->documents_in_collection = search_engine->document_count();
-    term_details->collection_frequency = internal_details.collection_frequency;
-    term_details->document_frequency = internal_details.document_frequency;
-
+	if (search_engine->get_postings_details(term, &internal_details))
+		{
+		term_details->collection_frequency = internal_details.collection_frequency;
+		term_details->document_frequency = internal_details.document_frequency;
+		}
+ 	else 
+		{
+		term_details->collection_frequency = 0;
+		term_details->document_frequency = 0;
+		}
     return term_details;
 }
 

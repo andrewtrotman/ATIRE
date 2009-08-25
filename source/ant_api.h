@@ -10,9 +10,14 @@
 
 struct term_details_s
 {
-    long long documents_in_collection;
 	long long collection_frequency;
 	long document_frequency;
+} ;
+
+struct collection_details_s
+{
+	long long documents_in_collection;
+	long long terms_in_collection;
 } ;
 
 #ifdef  __cplusplus
@@ -31,7 +36,9 @@ void ant_post_processing_stats_init(ANT *ant);
 
 char **ant_search(ANT *ant, long long *hits, char *query, long topic_id = -1);
 
-struct term_details_s *ant_get_term_details(ANT *ant, char *term);
+struct collection_details_s *ant_get_collection_details(ANT *ant, struct collection_details_s *collection_details);
+
+struct term_details_s *ant_get_term_details(ANT *ant, char *term, struct term_details_s *term_details);
 
 double ant_cal_map(ANT *ant);
 

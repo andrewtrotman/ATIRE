@@ -72,7 +72,7 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 
     topic_ids = (long *) malloc(sizeof *topic_ids * query_count);
     for (i = 0; i < query_count; i++) {
-        strip_space_inplace(query);
+        strip_space_inplace(queries[i]);
         if (!have_assessments)
             exit(printf("No assessments given.\n"));
         else
