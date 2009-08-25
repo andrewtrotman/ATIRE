@@ -180,6 +180,7 @@ void GA_individual::mutate(GA_individual *c, Vocab *v) {
     unsigned int position = rand() % count;
 
     memcpy(c, this, sizeof(GA_individual));
+    c->is_evaluated = FALSE;
 
     switch (rand() % 3) {
     case 0:
@@ -271,7 +272,8 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
 */
 void GA_individual::generate(Vocab *v) {
     unsigned int i;
-
+    
+    is_evaluated = FALSE;
     count = (unsigned int) rand() % (GEN_MAX_RULES - GEN_MIN_RULES) + GEN_MIN_RULES;
     memset(rules, '\0', count * RULE_SIZE);
 

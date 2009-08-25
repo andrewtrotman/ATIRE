@@ -9,7 +9,6 @@ double GA_function::call() {
         sum_of_average_precisions += function(param_block, search_engine, ranking_function, queries[i], &hits, 
 											  topic_ids[i], map, stemmer);
     }
-
     return sum_of_average_precisions / (double) (query_count);
 }
 

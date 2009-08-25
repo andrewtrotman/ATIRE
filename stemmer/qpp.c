@@ -75,11 +75,28 @@ char *eat_word(char **string) {
 int main(int argv, char **argc) {
     ANT *ant = ant_easy_init();
     char **query;
-    long i, query_count, query_size;
+    long i, query_count, query_size, query_length;
 	long long docs_returned;
-    double idf, ictf;
+    double total_idf, product_ictf, max_idf, total_scq;
     struct term_details_s t_d;
 	struct collection_details_s c_d;
+
+	/*
+      N.B. : Averaged Similarity Collection Query - ctf = frequency, df = number of documents.
+
+      AvSCQ = 1/n SUM(q in Q) (1 + ln(ctf(q))) * ln(1 + |C|/df(q))
+      AvQL = 1/n SUM(q in Q) strlen(q)
+      AvIDF = 1/n SUM(q in Q) idf(q)
+      MaxIDF = MAX(q in Q) idf(q)
+      AvICTF = 1/n PRODUCT(q in Q) ictf(q)
+      QueryScope = |D| / |C|
+
+      D - docs returned
+      C - collection
+      Q - query
+      q - query term
+      n - |Q| 
+	*/
 
     ant_setup(ant);
 	ant_get_collection_details(ant, &c_d);
@@ -98,36 +115,48 @@ int main(int argv, char **argc) {
 		puts(query[i]);
         term = eat_word(&query[i]); // Skip topic no.
         printf("Query %s: ", term);
-        idf = query_size = 0;
-		ictf = 1;
+        max_idf = 0;
+        total_idf = 0;
+        query_size = 0;
+        query_length = 0;
+        total_scq = 0;
+        product_ictf = 1;
+
         while ((term = eat_word(&query[i]))) {
-			double df, ctf;
-
+            double idf = 0.0;
+            double ictf = 1.0;
+            query_length += strlen(term); 
             query_size++;
-			ant_get_term_details(ant, term, &t_d);
+            ant_get_term_details(ant, term, &t_d);
 
-			if (t_d.document_frequency > 0) {
-				df = (double) c_d.documents_in_collection
-					/ (double) t_d.document_frequency;
-				ctf = (double) c_d.terms_in_collection
-					/ (double) t_d.collection_frequency;
+            if (t_d.document_frequency > 0) {
+                idf = (double) c_d.documents_in_collection
+                    / (double) t_d.document_frequency;
+                ictf = (double) c_d.terms_in_collection
+                    / (double) t_d.collection_frequency;
+            
+                printf("%s:%f, %f ", term, idf, ictf);
 
-				printf("%s:%f, %f ", term, df, ctf);
-
-				idf += df;
-				ictf *= ctf;
-			} else {
-				ctf = 1.0;
-				printf("%s:0.0, 0.0 ", term);
-			}
+                if (idf > max_idf) max_idf = idf;
+                total_idf += idf;
+                product_ictf *= ictf;
+                total_scq += (1 + log(1 / ictf)) * log(1 + idf); 
+            } else {
+                ictf = 1.0;
+                printf("%s:0.0, 0.0 ", term);
+            }
         }
-		printf("\n");
-		printf("AvIDF: %lf\n", idf / query_size);
-        printf("AvICTF: %lf\n", log(ictf) / log(2) / query_size);
+
+        printf("\n");
+        printf("AvSCQ: %lf\n", (double) total_scq / (double) query_size);
+        printf("AvQL: %lf\n", (double) query_length / (double) query_size);
+        printf("AvIDF: %lf\n", total_idf / query_size);
+        printf("MaxIDF: %lf\n", max_idf);
+        printf("AvICTF: %lf\n", log2(product_ictf) / query_size);
         printf("Docs_returned: %lld\n", docs_returned);
-		printf("QueryScope: %lf\n", 
-			   log((double) docs_returned 
-				   / (double) c_d.documents_in_collection));
+        printf("QueryScope: %lf\n", 
+               log((double) docs_returned 
+                   / (double) c_d.documents_in_collection));
     }
 
 	ant_free(ant);

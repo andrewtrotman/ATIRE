@@ -46,7 +46,6 @@ void trie_test(ANT_search_engine *search_engine) {
     queries.
 */
 void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list, char *stemmer_file) {
-    char *query;
 	char **queries;
     long query_count, i;
 	long *topic_ids;
@@ -102,7 +101,8 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 		}
 	} else {
         ga = new GA(POPULATION_SIZE, 
-                    new GA_function(perform_query, params, search_engine, ranking_function, query_count, queries, topic_ids, map, stemmer), search_engine);
+                    new GA_function(perform_query, params, search_engine, ranking_function, query_count, queries, topic_ids, map, stemmer), 
+                    search_engine);
 		ga->run(NUM_OF_GENERATIONS);
 	}
 }

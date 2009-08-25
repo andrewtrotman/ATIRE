@@ -5,8 +5,8 @@ EXTSRCDIR = .
 EXTOBJDIR = ./obj
 
 EXTFLAGS = -I$(SRCDIR)
-LDFLAGS = -g -ldl 
-CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+LDFLAGS = -g -ldl -O3
+CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DONE_PARSER -DHASHER=1 -DHEADER_HASHER=1 \
 	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR) -DUSE_FLOATED_TF -DGA_STEMMER_STATS
 
 CC = g++
@@ -111,6 +111,11 @@ $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
+$(BINDIR)/special_ant.o : $(SRCDIR)/ant.c 
+	$(CC) $(CFLAGS) -DSPECIAL_COMPRESSION=1 -c $^ -o $@
+$(BINDIR)/special_ant : $(OBJECTS_W_DIR) $(OBJDIR)/special_ant.o 
+	$(CC) $(LDFLAGS) -o $@ $^
+
 $(BINDIR)/qpp : $(OBJECTS_W_DIR) $(OBJDIR)/ant_api.o $(EXTOBJDIR)/qpp.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
@@ -118,6 +123,9 @@ $(BINDIR)/ant_dict : $(OBJECTS_W_DIR) $(OBJDIR)/ant_dictionary.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(BINDIR)/ga_ant : $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(BINDIR)/ga_ant_darwin : $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(EXTOBJDIR)/vocab_tool.o : $(EXTSRCDIR)/ga_ant.c
