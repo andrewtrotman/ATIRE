@@ -54,18 +54,10 @@ end_pos_on_disk = 0;
 }
 
 /*
-	ANT_MEMORY_INDEX_HASH_NODE::~ANT_MEMORY_INDEX_HASH_NODE()
-	---------------------------------------------------------
+	ANT_MEMORY_INDEX_HASH_NODE::OPERATOR NEW()
+	------------------------------------------
 */
-ANT_memory_index_hash_node::~ANT_memory_index_hash_node()
-{
-}
-
-/*
-	ANT_MEMORY_INDEX_HASH_NODE::OPERATOR NEW ()
-	-------------------------------------------
-*/
-void *ANT_memory_index_hash_node::operator new (size_t count, ANT_memory *memory)
+void *ANT_memory_index_hash_node::operator new(size_t count, ANT_memory *memory)
 {
 return memory->malloc(count);
 }

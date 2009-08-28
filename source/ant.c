@@ -20,7 +20,6 @@
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
-#include "encoding_utf8.h"
 #include "version.h"
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
@@ -30,6 +29,7 @@
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
+#include "parser.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -75,18 +75,13 @@ public:
 double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
 {
 ANT_time_stats stats;
-long long now, hits;
+long long now, hits, bytes;
 long did_query, first_case;
 char token[1024];
 char *token_start, *token_end, *current;
 size_t token_length;
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-
-/**
- * make the utf8 as the default input encoding
- */
-ANT_encoding_utf8 utf8_enc;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -98,37 +93,34 @@ token_end = query;
 
 while (*token_end != '\0')
 	{
+	/*
+		Step over whitespace
+	*/
 	token_start = token_end;
-	/*while (!ANT_isalnum(*token_start) && *token_start != '\0')
-		token_start++;*/
-	while (!(utf8_enc.is_valid_char((unsigned char*)token_start) || ANT_isdigit(*token_start))	&& *token_start != '\0')
-		token_start++;
+	while (!(ANT_isalnum(*token_start) || ANT_parser::ischinese(token_start)) && *token_start != '\0')
+		token_start += ANT_parser::utf8_bytes(token_start);
 	if (*token_start == '\0')
 		break;
+
+	/*
+		Find the end of the token
+	*/
 	token_end = token_start;
-	/*while (ANT_isalnum(*token_end) || *token_end == '+')
-		token_end++;*/
-	int bytes = 0;
-	while (utf8_enc.is_valid_char((unsigned char*)token_end) || ANT_isdigit(*token_end) || *token_end == '+')
+	while (ANT_isalnum(*token_end) || ANT_parser::ischinese(token_end))
 		{
-		bytes = utf8_enc.howmanybytes();
-		if (bytes > 0)
+		bytes = ANT_parser::utf8_bytes(token_end);
+		if ((bytes > 1) && ANT_parser::ischinese(token_end))
 			{
 			token_end += bytes;
-			bytes = 0;
-			if (utf8_enc.lang() == ANT_encoding::CHINESE)
-				{
-				if (!params->segmentation)
-					break;
-				/**
-				 * TODO Chinese segmentation on query
-				 */
-				//else
-				//
-				}
+			if (!params->segmentation)
+				break;
+			/*
+			else
+				//	segment the Chinese in the query
+			*/
 			}
 		else
-			token_end++;
+			token_end += bytes;
 		}
 	strncpy(token, token_start, token_end - token_start);
 	token[token_end - token_start] = '\0';

@@ -16,22 +16,15 @@
 	ANT_PARSER::ANT_PARSER()
 	------------------------
 */
-#ifdef ONE_PARSER
-	ANT_parser::ANT_parser(long should_segment)
-#else
-	ANT_parser::ANT_parser()
-#endif
+ANT_parser::ANT_parser(long should_segment)
 {
 set_document(NULL);
 
-#ifdef ONE_PARSER
-	segmentation = NULL;
-	if (should_segment && ANT_plugin_manager::instance().is_segmentation_plugin_available())
-		this->should_segment = TRUE;
-	else
-		this->should_segment = FALSE;
-
-#endif
+segmentation = NULL;
+if (should_segment && ANT_plugin_manager::instance().is_segmentation_plugin_available())
+	this->should_segment = TRUE;
+else
+	this->should_segment = FALSE;
 }
 
 /*
@@ -51,16 +44,14 @@ void ANT_parser::set_document(unsigned char *document)
 this->document = current = document;
 }
 
-#ifdef ONE_PARSER
-	/*
-		ANT_PARSER::SEGMENT()
-		---------------------
-	*/
-	void ANT_parser::segment(unsigned char *start, long length)
-	{
-	segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(start, length);
-	}
-#endif
+/*
+	ANT_PARSER::SEGMENT()
+	---------------------
+*/
+void ANT_parser::segment(unsigned char *start, long length)
+{
+segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(start, length);
+}
 
 /*
 	ANT_PARSER::GET_NEXT_TOKEN()
@@ -70,63 +61,56 @@ ANT_string_pair *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
 
-#ifdef ONE_PARSER
-	if (segmentation != NULL)
-		{
-		/*
-			The segmenter has returned a space seperated list of tokens and we now have to work through them.
-			My reading of Eric's Chinese Segmentation code is that each term is followed by a space and
-			the final space is followed by a '\0'.  That is, the last term has a space after it.
-		*/
-		here = segmentation;
-		while (ANT_isspace(*here))
-			here++;
-		start = here;
-		while (!ANT_isspace(*here) && *here != '\0')
-			here++;
-
-		/*
-			Prepare for the next token (next call to get_next_token())
-		*/
-		if (*here == '\0')
-			segmentation = NULL;		// no more tokens in this segmentation
-		else
-			segmentation = here;		// the next token continues on from here
-
-		/*
-			Build the token and return it
-		*/
-		current_token.start = (char *)start;
-		current_token.string_length = here - start;
-
-		if (current_token.string_length <= 0)
-		    return get_next_token();
-		return &current_token;
-		}
-
-#endif
-#ifdef ONE_PARSER
+if (segmentation != NULL)
+	{
 	/*
-		We skip over non-indexable characters before the start of the first token
+		The segmenter has returned a space seperated list of tokens and we now have to work through them.
+		My reading of Eric's Chinese Segmentation code is that each term is followed by a space and
+		the final space is followed by a '\0'.  That is, the last term has a space after it.
 	*/
-	for (;;)
-		{
-		if (isheadchar(*current))
-			break;
-		if (*current & 0x80)
-			{
-			if (ischinese(current))
-				break;
-			current += utf8_bytes(current);
-			}
-		else
-			current++;
-		}
+	here = segmentation;
+	while (ANT_isspace(*here))
+		here++;
+	start = here;
+	while (!ANT_isspace(*here) && *here != '\0')
+		here++;
 
-#else
-	while (!isheadchar(*current))
+	/*
+		Prepare for the next token (next call to get_next_token())
+	*/
+	if (*here == '\0')
+		segmentation = NULL;		// no more tokens in this segmentation
+	else
+		segmentation = here;		// the next token continues on from here
+
+	/*
+		Build the token and return it
+	*/
+	current_token.start = (char *)start;
+	current_token.string_length = here - start;
+
+	if (current_token.string_length <= 0)
+	    return get_next_token();
+	return &current_token;
+	}
+
+/*
+	We skip over non-indexable characters before the start of the first token
+*/
+for (;;)
+	{
+	if (isheadchar(*current))
+		break;
+	if (*current & 0x80)
+		{
+		if (ischinese(current))
+			break;
+		current += utf8_bytes(current);
+		}
+	else
 		current++;
-#endif
+	}
+
 /*
 	Now we look at the first character as it defines how parse the next token
 */
@@ -154,32 +138,30 @@ else if (ANT_isdigit(*current))				// numbers (in the ASCII CodePage)
 	}
 else if (*current == '\0')						// end of string
 	return NULL;
-#ifdef ONE_PARSER
-	else if (*current & 0x80)		// UTF-8 character
+else if (*current & 0x80)		// UTF-8 character
+	{
+	if (ischinese(current))		// Chinese CodePage
 		{
-		if (ischinese(current))		// Chinese CodePage
-			{
-			start = current;
-			current += utf8_bytes(current);		// move on to the next character
+		start = current;
+		current += utf8_bytes(current);		// move on to the next character
 
-			if (should_segment)
-				{
-				while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
-					current += utf8_bytes(current);
-				segment(start, current - start);
-				return get_next_token();
-				}
-			else
-				{
-				current_token.start = (char *)start;
-				current_token.string_length = current - start;
-				}
+		if (should_segment)
+			{
+			while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
+				current += utf8_bytes(current);
+			segment(start, current - start);
+			return get_next_token();
 			}
-		/*
-			There is no else clause because if the high bit is set we already know it must be Chinese
-		*/
+		else
+			{
+			current_token.start = (char *)start;
+			current_token.string_length = current - start;
+			}
 		}
-#endif
+	/*
+		There is no else clause because if the high bit is set we already know it must be Chinese
+	*/
+	}
 else											// everything else (that starts with a '<')
 	{
 	start = ++current;

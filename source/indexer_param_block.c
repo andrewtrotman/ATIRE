@@ -11,10 +11,6 @@
 #include "readability_factory.h"
 #include "version.h"
 
-#ifndef ONE_PARSER
-	#include "encoding_factory.h"
-#endif
-
 #ifndef FALSE
 	#define FALSE 0
 #endif
@@ -34,10 +30,6 @@ trec_docnos = recursive = segmentation = FALSE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
 readability_measure = ANT_readability_factory::NONE;
-
-#ifndef ONE_PARSER
-	encoding_scheme = ANT_encoding_factory::ASCII;
-#endif
 
 statistics = 0;
 logo = TRUE;
@@ -102,15 +94,6 @@ puts("   v            Variable Byte (bytewise) [default]");
 puts("-vc             Validate compression (and report decompression rates)");
 puts("");
 
-#ifndef ONE_PARSER
-	puts("ENCODING");
-	puts("--------");
-	puts("-e[au]          The input text is encoded using one of:");
-	puts("   a            ASCII encoding [default]");
-	puts("   u            UTF8 encoding");
-	puts("");
-#endif
-
 puts("SEGMENTATION");
 puts("------------");
 puts("-S              East-Asian language word segmentation");
@@ -165,24 +148,6 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 		default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
 		}
 }
-#ifndef ONE_PARSER
-	/*
-		ANT_INDEXER_PARAM_BLOCK::ENCODING()
-		-----------------------------------
-	*/
-	void ANT_indexer_param_block::encoding(char *scheme_list)
-	{
-	char *scheme;
-
-	for (scheme = scheme_list; *scheme != '\0'; scheme++)
-		switch (*scheme)
-			{
-			case 'u': encoding_scheme = ANT_encoding_factory::UTF8; break;
-			case 'a': encoding_scheme = ANT_encoding_factory::ASCII; break;
-			default : exit(printf("Unknown encoding scheme: '%c'\n", *scheme)); break;
-			}
-	}
-#endif
 
 /*
 	ANT_INDEXER_PARAM_BLOCK::READABILITY()
@@ -262,13 +227,6 @@ for (param = 1; param < argc; param++)
 			compression_scheme = 0;
 			compression(command + 1);
 			}
-#ifndef ONE_PARSER
-		else if (*command == 'e')
-			{
-			encoding_scheme = 0;
-			encoding(command + 1);
-			}
-#endif
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;
 		else if (*command == 'R')

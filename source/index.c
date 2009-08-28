@@ -8,9 +8,6 @@
 #include "directory_recursive_iterator.h"
 #include "file.h"
 #include "parser.h"
-#ifndef ONE_PARSER
-	#include "universal_parser.h"
-#endif
 #include "parser_readability.h"
 #include "readability_factory.h"
 #include "memory.h"
@@ -86,16 +83,6 @@ else
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 
-#ifndef ONE_PARSER
-	if (param_block.encoding_scheme == ANT_encoding_factory::UTF8)
-		{
-		if (param_block.segmentation)
-			parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, TRUE);
-		else
-			parser = new ANT_universal_parser(ANT_encoding_factory::UTF8, FALSE);
-		}
-	else 
-#endif
 if (param_block.readability_measure == ANT_readability_factory::NONE)
 	parser = new ANT_parser(param_block.segmentation);
 else
