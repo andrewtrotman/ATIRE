@@ -8,6 +8,10 @@
 #include "string_pair.h"
 #include "ctypes.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+
 /*
 	class ANT_PARSER
 */
@@ -24,7 +28,7 @@ protected:
 	static int isheadchar(unsigned char val) { return ANT_isalnum(val) || val == '<' || val == '\0'; }
 
 public:
-	ANT_parser(long should_segment = 0 /* FALSE */);
+	ANT_parser(long should_segment = FALSE);
 	virtual ~ANT_parser();
 
 	static int isXMLnamestartchar(unsigned char val) { return ANT_isalpha(val) || val == ':' || val == '_'; }		// see http://www.w3.org/TR/REC-xml/#NT-NameStartChar
@@ -66,13 +70,20 @@ return 0;
 */
 inline int ANT_parser::ischinese(unsigned char *here)
 {
-unsigned long cp = utf8_to_wide(here);
+unsigned long chinese;
 
-return ((cp >= 0x4e00 && cp <= 0x9fff)		// CJK Unified Ideographs
-	|| (cp >= 0x3400 && cp <= 0x4dbf)		// CJK Unified Ideographs Extension A
-	|| (cp >=0x20000 && cp <= 0x2a6df)		// CJK Unified Ideographs Extension B
-	|| (cp >=0xf900 && cp <= 0xfaff)		// CJK Compatibility Ideographs
-	|| (cp >=0x2f800 && cp <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
+if ((*here & 0x80) == 0)
+	return FALSE;
+else
+	{
+	chinese = utf8_to_wide(here);
+
+	return ((chinese >= 0x4e00 && chinese <= 0x9fff)		// CJK Unified Ideographs
+		|| (chinese >= 0x3400 && chinese <= 0x4dbf)		// CJK Unified Ideographs Extension A
+		|| (chinese >=0x20000 && chinese <= 0x2a6df)		// CJK Unified Ideographs Extension B
+		|| (chinese >=0xf900 && chinese <= 0xfaff)		// CJK Compatibility Ideographs
+		|| (chinese >=0x2f800 && chinese <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
+	}
 }
 
 /*

@@ -6,7 +6,6 @@
 #define __NEXI_H__
 
 #include "string_pair.h"
-#include "encoding_utf8.h"
 
 class ANT_NEXI_term;
 class ANT_string_term;
@@ -21,7 +20,6 @@ private:
 	long successful_parse;
 	ANT_string_pair token;
 	unsigned char *string, *at;
-	ANT_encoding_utf8 character_decoder;
 
 private:
 	ANT_NEXI_term *get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *tag, ANT_string_pair *term, long weight);

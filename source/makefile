@@ -16,8 +16,8 @@ ALL = bitstream.obj \
  maths.obj \
  ctypes.obj \
  parser.obj \
- nexi_term.obj \
- encoding_utf8.obj
+ plugin_manager.obj\
+ nexi_term.obj 
 
 all : nexi.exe test_compression.exe
 

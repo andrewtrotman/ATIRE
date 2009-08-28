@@ -105,6 +105,18 @@ else if (length == 1)
 			return TRUE;
 		else
 			return FALSE;
+	else if (ANT_parser::ischinese(from))
+		{
+		/*
+			If we want to generate one Chinese string for later segmentaton then
+			we want to do the following line:
+
+				return ANT_parser::ischinese(next);					// this string will later need to be segmented
+
+			otherwise Chinese words can be at best one character in length so return FALSE
+		*/
+		return FALSE;
+		}
 	else
 		return FALSE;
 else
@@ -124,6 +136,8 @@ else
 			return TRUE;
 		else
 			return FALSE;
+	else if (ANT_parser::ischinese(from))
+		return ANT_parser::ischinese(next);		// This can only happen if we later segment, it can never happen without segmentation
 	else
 		return FALSE;
 	}
@@ -135,30 +149,30 @@ else
 */
 ANT_string_pair *ANT_NEXI::get_next_token(void)
 {
-long length;
+long length_in_chars, length_in_bytes;
 long bytes;
 
-length = 0;
+length_in_chars = length_in_bytes = 0;
 
 if (*at != '\0')
 	{
 	/*
 		Using the multi-language parser, skip over all characters that are not alphabetic or numberic.
 	*/
-	while (!(character_decoder.is_valid_char(at) || ANT_isdigit(*at)) && *at != '\0')
-		{
-		bytes = character_decoder.howmanybytes();
-		at += bytes;
-		}
+	while (ANT_isspace(*at) && *at != '\0')
+		at++;
 
 	if (*at != '\0')
-		while (*(at + length) != '\0' && ispart(at, length, (at + length)))
-			length++;
+		while (*(at + length_in_bytes) != '\0' && ispart(at, length_in_chars, at + length_in_bytes))
+			{
+			length_in_chars++;
+			length_in_bytes += ANT_parser::utf8_bytes(at);
+			}
 	}
 
 token.start = (char *)at;
-token.string_length = length;
-at += length;
+token.string_length = length_in_bytes;
+at += length_in_bytes;
 return &token;
 }
 
