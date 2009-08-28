@@ -10,6 +10,8 @@
 #include "../source/disk.h"
 #include "link_parts.h"
 
+#pragma warning (disable : 4706)		// assignment within conditional
+
 #define REMOVE_ORPHAN_LINKS 1
 
 #ifdef REMOVE_ORPHAN_LINKS

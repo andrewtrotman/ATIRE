@@ -132,7 +132,7 @@ inline char *get_doc_name(char *file, char *to)
  */
 inline char *to_lower(char *source)
 {
-int i = 0;
+size_t i = 0;
 for (; i < strlen(source); i++)
 	if (source[i] >= 'A' && source[i] <= 'Z')
 		source[i] = source[i] - 'A' + 'a';

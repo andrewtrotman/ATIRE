@@ -12,6 +12,8 @@
 #include "../source/directory_recursive_iterator.h"
 #include "link_parts.h"
 
+#pragma warning(disable: 4706)		// assignment within conditional
+
 #ifndef FALSE
 	#define FALSE 0
 #endif
