@@ -150,7 +150,6 @@ else
 ANT_string_pair *ANT_NEXI::get_next_token(void)
 {
 long length_in_chars, length_in_bytes;
-long bytes;
 
 length_in_chars = length_in_bytes = 0;
 
@@ -469,33 +468,34 @@ if (token[0] != '\0')
 return answer;
 }
 
-/*
-	MAIN()
-	------
-*/
-int main(void)
-{
-ANT_NEXI_term *parsing;
-ANT_NEXI nexi_parser;
-char buffer[1024];
-
-for(;;)
+#ifdef NEVER
+	/*
+		MAIN()
+		------
+	*/
+	int main(void)
 	{
-	printf("]");
-	gets(buffer);
-	if (strcmp(buffer, ".quit") == 0)
-		break;
-	parsing = nexi_parser.parse(buffer);
-	if (parsing != NULL)
+	ANT_NEXI_term *parsing;
+	ANT_NEXI nexi_parser;
+	char buffer[1024];
+
+	for(;;)
 		{
-		if (nexi_parser.get_success_state())
-			parsing->text_render();
-		else
-			puts("Failed to parse");
+		printf("]");
+		gets(buffer);
+		if (strcmp(buffer, ".quit") == 0)
+			break;
+		parsing = nexi_parser.parse(buffer);
+		if (parsing != NULL)
+			{
+			if (nexi_parser.get_success_state())
+				parsing->text_render();
+			else
+				puts("Failed to parse");
+			}
+		puts("");
 		}
-	puts("");
+
+	return 0;
 	}
-
-return 0;
-}
-
+#endif

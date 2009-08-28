@@ -30,6 +30,7 @@
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
 #include "parser.h"
+#include "NEXI.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -137,7 +138,6 @@ while (*token_end != '\0')
 			strlower(token);
 			break;
 			}
-
 	/*
 		process the next search term - either stemmed or not.
 	*/
