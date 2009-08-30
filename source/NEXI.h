@@ -6,8 +6,8 @@
 #define __NEXI_H__
 
 #include "string_pair.h"
+#include "NEXI_term.h"
 
-class ANT_NEXI_term;
 class ANT_string_term;
 
 /*
@@ -17,9 +17,13 @@ class ANT_string_term;
 class ANT_NEXI 
 {
 private:
+	static const size_t MAX_NEXI_TERMS = 1024;
+private:
 	long successful_parse;
 	ANT_string_pair token;
 	unsigned char *string, *at;
+	ANT_NEXI_term pool[MAX_NEXI_TERMS];
+	size_t pool_used;
 
 private:
 	ANT_NEXI_term *get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *tag, ANT_string_pair *term, long weight);
@@ -38,6 +42,7 @@ private:
 	ANT_NEXI_term *read_CAS(void);
 
 public:
+	ANT_NEXI() { pool_used = 0; }
 	ANT_NEXI_term *parse(char *expression);
 	long get_success_state(void) { return successful_parse; }
 } ;

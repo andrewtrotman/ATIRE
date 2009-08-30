@@ -23,7 +23,15 @@ ANT_NEXI_term *ANT_NEXI::get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *t
 {
 ANT_NEXI_term *answer;
 
-answer = new ANT_NEXI_term;
+answer = pool + pool_used;
+
+pool_used++;
+if (pool_used >= MAX_NEXI_TERMS)
+	{
+	parse_error("Out of ANT_NEXI_term nodes while parsing the query");
+	pool_used = MAX_NEXI_TERMS - 1;
+	}
+
 answer->next = answer->parent_path = NULL;
 answer->sign = weight;
 if (tag == NULL)
@@ -366,7 +374,7 @@ do
 		else if (!ANT_isalnum(token[0]))
 			more = FALSE;
 		}
-	else if (!ANT_isalnum(token[0]) && token[0] != '-')		// negative numbers
+	else if (!ANT_isalnum(token[0]) && token[0] != '-' && !ANT_parser::ischinese(token.start))
 		more = FALSE;
 	if (more)
 		{
@@ -465,7 +473,7 @@ else
 if (token[0] != '\0')
 	parse_error("Unexpected end of query");
 
-return answer;
+return successful_parse ? answer : NULL;
 }
 
 #ifdef NEVER

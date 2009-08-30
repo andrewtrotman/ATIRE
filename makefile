@@ -13,8 +13,8 @@ TOOLDIR = tools
 
 FIXED = /link /fixed:no
 
-#MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 -DONE_PARSER -DPURIFY
-MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 -DONE_PARSER
+#MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 -DPURIFY
+MINUS_D = -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 
 
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
@@ -103,6 +103,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
 	$(OBJDIR)\nexi.obj								\
+	$(OBJDIR)\nexi_term_iterator.obj		\
 	$(OBJDIR)\nexi_term.obj
 	
 

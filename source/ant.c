@@ -31,6 +31,7 @@
 #include "ranking_function_readability.h"
 #include "parser.h"
 #include "NEXI.h"
+#include "NEXI_term_iterator.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -68,7 +69,6 @@ public:
     }
 	char *next(void) { return fgets(query, sizeof(query), fp); }
 } ;
-
 /*
 	PERFORM_QUERY()
 	---------------
@@ -76,13 +76,14 @@ public:
 double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
 {
 ANT_time_stats stats;
-long long now, hits, bytes;
-long did_query, first_case;
-char token[1024];
-char *token_start, *token_end, *current;
-size_t token_length;
+long long now, hits;
+long did_query, first_case, token_length;
+char *current, token[1024];
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
+ANT_NEXI parser;
+ANT_NEXI_term_iterator term;
+ANT_NEXI_term *term_string;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -90,42 +91,15 @@ did_query = FALSE;
 now = stats.start_timer();
 search_engine->init_accumulators();
 
-token_end = query;
-
-while (*token_end != '\0')
+for (term_string = term.first(parser.parse(query)); term_string != NULL; term_string = term.next())
 	{
 	/*
-		Step over whitespace
+		Take the search term (as an ANT_string_pair) and convert into a string
+		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
-	token_start = token_end;
-	while (!(ANT_isalnum(*token_start) || ANT_parser::ischinese(token_start)) && *token_start != '\0')
-		token_start += ANT_parser::utf8_bytes(token_start);
-	if (*token_start == '\0')
-		break;
-
-	/*
-		Find the end of the token
-	*/
-	token_end = token_start;
-	while (ANT_isalnum(*token_end) || ANT_parser::ischinese(token_end))
-		{
-		bytes = ANT_parser::utf8_bytes(token_end);
-		if ((bytes > 1) && ANT_parser::ischinese(token_end))
-			{
-			token_end += bytes;
-			if (!params->segmentation)
-				break;
-			/*
-			else
-				//	segment the Chinese in the query
-			*/
-			}
-		else
-			token_end += bytes;
-		}
-	strncpy(token, token_start, token_end - token_start);
-	token[token_end - token_start] = '\0';
-	token_length = token_end - token_start;
+	token_length = term_string->get_term()->string_length < sizeof(token) - 1 ? term_string->get_term()->string_length : sizeof(token) - 1;
+	strncpy(token, term_string->get_term()->start, token_length);
+	token[token_length] = '\0';
 
 	/*
 		Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms

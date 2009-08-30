@@ -22,6 +22,8 @@ public:
 
 public:
 	void text_render(void);
+	ANT_string_pair *get_term(void) { return &term; }
+	long get_sign(void) { return sign; }		// returns 0 for "normal" terms or +ve or -ve for "weighted" terms
 } ;
 
 #endif __NEXI_TERM_H__
