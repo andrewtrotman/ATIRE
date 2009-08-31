@@ -35,6 +35,5 @@ inline UNISEG_encoding_factory& UNISEG_encoding_factory::instance()
 	return inst;
 }
 
-#endif __ENCODING_FACTORY_H__
-
+#endif /* __ENCODING_FACTORY_H__ */
 

@@ -59,8 +59,12 @@ inline size_t get_utf8_string_length(std::string& source)
 	get_utf8_string_length(source.c_str(), source.length());
 }
 
-#include <plugin.h>
-typedef ANT_plugin								uniseg_plugin_interface;
+#ifdef WITH_ANT_PLUGIN
+    #include <plugin.h>
+    typedef ANT_plugin								uniseg_plugin_interface;
+#else
+    class uniseg_plugin_interface {};
+#endif
 typedef uniseg_plugin_interface							*maker_t();
 
 #endif /* __QTYPE_H_ */

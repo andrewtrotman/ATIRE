@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export CFLAGS="$CFLAGS -DWITH_ANT_PLUGIN"
+export CXXFLAGS="CXXFLAGS -DWITH_ANT_PLUGIN"

@@ -39,4 +39,4 @@ public:
 
 inline void UNISEG_encoding::test_char(unsigned char *c) { is_valid_char(c); }
 
-#endif __ENCODING_H__
+#endif /* __ENCODING_H__ */

@@ -43,4 +43,4 @@ if ((*c) >= 'a' && (*c) <= 'z')
 }
 
 
-#endif __ENCODING_ASCII_H__
+#endif /* __ENCODING_ASCII_H__ */

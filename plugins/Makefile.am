@@ -1,6 +1,5 @@
 #AUTOMAKE_OPTIONS = foreign
 
-AM_CFLAGS = -I$(srcdir)/../source/
 AM_CPPFLAGS = $(AM_CFLAGS)
 AM_LDFLAGS = @LIBS@
 

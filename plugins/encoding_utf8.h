@@ -41,4 +41,4 @@ return ((cp >= 0x4e00 && cp <= 0x9fff)
 	|| (cp >=0x2f800 && cp <= 0x2fa1f) );
 }
 
-#endif __ENCODING_UTF8_H__
+#endif /* __ENCODING_UTF8_H__ */

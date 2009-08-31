@@ -106,6 +106,7 @@ extern "C" {
 	   return new UNISEG_plugin;
 	}
 
+#ifdef WITH_ANT_PLUGIN
 	class proxy
 	{
 	public:
@@ -117,6 +118,8 @@ extern "C" {
 	};
 	// our one instance of the proxy
 	proxy p;
+#endif
+
 #ifdef  __cplusplus
 }
 #endif
