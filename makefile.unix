@@ -68,7 +68,6 @@ OBJECTS = \
 	compress_sigma.o \
 	compression_factory.o \
 	readability_dale_chall.o \
-	readability_flesch_kincaid.o \
 	readability_factory.o \
 	search_engine_readability.o \
 	plugin_manager.o \
