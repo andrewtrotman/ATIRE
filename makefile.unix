@@ -7,16 +7,13 @@ LDFLAGS = -g -ldl
 #CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 \
 #         -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
-CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 \
+CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
          -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
 
 CC = g++
 
 OBJECTS = \
-	encoding_utf8.o \
-	encoding_factory.o \
 	parser.o \
-	universal_parser.o \
 	parser_readability.o \
 	memory_index_hash_node.o \
 	memory_index.o \
@@ -71,6 +68,7 @@ OBJECTS = \
 	compress_sigma.o \
 	compression_factory.o \
 	readability_dale_chall.o \
+	readability_flesch_kincaid.o \
 	readability_factory.o \
 	search_engine_readability.o \
 	plugin_manager.o \
@@ -85,7 +83,10 @@ OBJECTS = \
 	ranking_function_lmjm.o \
 	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
-	ranking_function_bm25.o
+	ranking_function_bm25.o \
+	nexi.o \
+	NEXI_term_iterator.o \
+	NEXI_term.o
 
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
 

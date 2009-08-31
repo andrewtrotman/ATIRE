@@ -31,9 +31,8 @@ void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_ac
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
-double bm25;
 long docid;
-double top_row, tf, idf, readability;
+double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
 idf = log((double)(documents) / (double)term_details->document_frequency);
@@ -48,16 +47,18 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		bm25 = idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))));
-		//readability = (document_readability[docid] / 1000.0)  - (15.79 * tf / document_lengths[docid]);
-		if (accumulator[docid].is_zero_rsv())
-			{
-			readability = cutoff - (document_readability[docid] / 1000.0);
-			accumulator[docid].add_rsv((1 - mix) * readability);
-			}
 		
-		//accumulator[docid].add_rsv(readability);
-		accumulator[docid].add_rsv(mix * bm25);
+		/*
+			Add the readability for this document - because a low readability score is better, we add the hardest document minus the actual score.
+			We also only want to only consider the readability once per document.
+		*/
+		if (accumulator[docid].is_zero_rsv())
+			accumulator[docid].add_rsv((1.0 - mix) * (cutoff - (document_readability[docid] / 1000.0)));
+		
+		/*
+			Add the portion of BM25 for this query term
+		*/
+		accumulator[docid].add_rsv(mix * (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))))));
 		}
 	current++;		// skip over the zero
 	}
