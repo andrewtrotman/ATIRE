@@ -21,7 +21,6 @@
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_params.h"
-#include "encoding_utf8.h"
 #include "version.h"
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
@@ -31,6 +30,9 @@
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
+#include "parser.h"
+#include "NEXI.h"
+#include "NEXI_term_iterator.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -260,17 +262,13 @@ double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, A
 {
 ANT_time_stats stats;
 long long now, hits;
-long did_query, first_case;
-char token[1024];
-char *token_start, *token_end, *current;
-size_t token_length;
+long did_query, first_case, token_length;
+char *current, token[1024];
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-
-/**
- * make the utf8 as the default input encoding
- */
-ANT_encoding_utf8 utf8_enc;
+ANT_NEXI parser;
+ANT_NEXI_term_iterator term;
+ANT_NEXI_term *term_string;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -278,45 +276,15 @@ did_query = FALSE;
 now = stats.start_timer();
 search_engine->init_accumulators();
 
-token_end = query;
-
-while (*token_end != '\0')
+for (term_string = term.first(parser.parse(query)); term_string != NULL; term_string = term.next())
 	{
-	token_start = token_end;
-	/*while (!ANT_isalnum(*token_start) && *token_start != '\0')
-		token_start++;*/
-	while (!(utf8_enc.is_valid_char((unsigned char*)token_start) || ANT_isdigit(*token_start))	&& *token_start != '\0')
-		token_start++;
-	if (*token_start == '\0')
-		break;
-	token_end = token_start;
-	/*while (ANT_isalnum(*token_end) || *token_end == '+')
-		token_end++;*/
-	int bytes = 0;
-	while (utf8_enc.is_valid_char((unsigned char*)token_end) || ANT_isdigit(*token_end) || *token_end == '+')
-		{
-		bytes = utf8_enc.howmanybytes();
-		if (bytes > 0)
-			{
-			token_end += bytes;
-			bytes = 0;
-			if (utf8_enc.lang() == ANT_encoding::CHINESE)
-				{
-				if (!params->segmentation)
-					break;
-				/**
-				 * TODO Chinese segmentation on query
-				 */
-				//else
-				//
-				}
-			}
-		else
-			token_end++;
-		}
-	strncpy(token, token_start, token_end - token_start);
-	token[token_end - token_start] = '\0';
-	token_length = token_end - token_start;
+	/*
+		Take the search term (as an ANT_string_pair) and convert into a string
+		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
+	*/
+	token_length = term_string->get_term()->string_length < sizeof(token) - 1 ? term_string->get_term()->string_length : sizeof(token) - 1;
+	strncpy(token, term_string->get_term()->start, token_length);
+	token[token_length] = '\0';
 
 	/*
 		Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms

@@ -24,11 +24,8 @@ AM_CFLAGS += -std=c++0x -pedantic
 #BINDIR = 
 
 library_sources =  \
-	$(SRCDIR)/encoding_utf8.c \
-	$(SRCDIR)/encoding_factory.c \
 	$(SRCDIR)/parser.c \
 	$(SRCDIR)/parser_readability.c \
-	$(SRCDIR)/universal_parser.c \
     $(SRCDIR)/memory_index_hash_node.c \
     $(SRCDIR)/memory_index.c \
     $(SRCDIR)/memory_index_stats.c \
@@ -96,6 +93,9 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_lmjm.c \
 	$(SRCDIR)/ranking_function_divergence.c \
 	$(SRCDIR)/plugin_manager.c 	\
+	$(SRCDIR)/nexi.c \
+	$(SRCDIR)/NEXI_term.c \	
+	$(SRCDIR)/NEXI_term_iterator.c \
 	$(SRCDIR)/ant_api.c
 				
 library_noinst_headers = \
@@ -142,6 +142,8 @@ library_noinst_headers = \
 	$(SRCDIR)/memory_index_hash_node.h	\
 	$(SRCDIR)/memory_index_stats.h	\
 	$(SRCDIR)/NEXI.h	\
+	$(SRCDIR)/NEXI_term.h \
+	$(SRCDIR)/NEXI_term_iterator.h \
 	$(SRCDIR)/paice_husk.h	\
 	$(SRCDIR)/parser.h	\
 	$(SRCDIR)/parser_readability.h	\
