@@ -1,7 +1,6 @@
 /*
 	NEXI.C
 	------
-	FIX:  get_NEXI_term should not call new
 */
 #include "NEXI.h"
 #include "ctypes.h"

@@ -10,7 +10,7 @@
 /*
 	class ANT_NEXI_TERM
 	-------------------
-	This requires some explinatio
+	This requires some explination
 */
 class ANT_NEXI_term
 {
