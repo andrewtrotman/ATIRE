@@ -133,7 +133,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			if (cl.size() > 0) {
 				string_array ca(cl.size());
 				std::copy(cl.begin(), cl.end(), ca.begin());
-				freq_->add(ca);
+				freq_->add(ca, enc->lang());
 			}
 			//cerr << string_type((*from)->begin(), (*to)->end()) << endl;
 		}
@@ -174,7 +174,7 @@ void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
 						    //cerr << "before transform: " << str << endl;
 						    char c = *start;
 
-						    tolower(c);
+						    c = tolower(c);
 						    str.push_back(c);
 						    //cerr << "after transform: " << str << endl;
 						    start += enc->howmanybytes();
@@ -204,8 +204,8 @@ void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
 
 					string_array ca(cl.size());
 					std::copy(cl.begin(), cl.end(), ca.begin());
-					curr = freq.add(ca, true);
-					curr->lang(pre_lang);
+					curr = freq.add(ca, pre_lang, true);
+					//curr->lang(pre_lang);
 //					std::copy(ca.begin(), ca.end(), ostream_iterator<string_type>(cerr, " "));
 //					cerr << endl;
 					cl.clear();

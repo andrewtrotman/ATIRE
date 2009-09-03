@@ -6,15 +6,35 @@
  */
 
 #include "freq.h"
-#include "utilities.h"
+//#include "utilities.h"
 #include "uniseg_settings.h"
 #include "uniseg_types.h"
 
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 
 using namespace std;
+
+inline void array_to_string(string_array& ca, UNISEG_encoding::language lang, string_type& dest, int idx = 0, int len = -1)
+{
+	if (len == -1)
+		len = ca.size();
+
+	assert(idx >= 0);
+	assert(len <= (int)ca.size());
+	string_type sep;
+	if (lang != UNISEG_encoding::CHINESE)
+		sep = " ";
+	int count = 0;
+	for (int i = idx; i < idx + len; i++) {
+		if (count > 0)
+			dest.append(sep);
+		dest.append(ca[i]);
+		count++;
+	}
+}
 
 class NeedSkip {    // function object that returns true for the call
   private:
@@ -77,7 +97,7 @@ void Freq::mergeto(Freq& freq){
 			if (!word) {
 				string_array ca;
 				(*iter)->to_string_array(ca);
-				freq.add(ca);
+				freq.add(ca, (*iter)->lang());
 				//iter = freq_n_[i].erase(iter);
 			}
 			else
@@ -99,10 +119,16 @@ word_ptr_type Freq::find(string_type word) {
 	return NULL;
 }
 
-word_ptr_type Freq::add(string_array& ca, bool allnew, unsigned int freq) {
-	string_type chars = array_to_string<string_array, string_type>(ca);
+word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, bool allnew, unsigned int freq) {
+
 	int size = ca.size();
 	assert(size > 0);
+
+	string_type chars; // = array_to_string<string_array, string_type>(ca);
+	/*
+	 * create key string
+	 */
+	array_to_string(ca, lang, chars);
 
 	word_ptr_type word_ptr = NULL;
 
@@ -150,11 +176,14 @@ word_ptr_type Freq::add(string_array& ca, bool allnew, unsigned int freq) {
 			else
 				word_ptr = new word_type(chars, freq, size);
 
+			word_ptr->lang(lang);
 			/// make the Word linked to the word which is the sub
 			if (word_ptr->size() > 1) {
 
-				string_type lp = array_to_string<string_array, string_type>(ca, 0, size - 1);
-				string_type rp = array_to_string<string_array, string_type>(ca, 1, size - 1);
+				string_type lp;
+				array_to_string(ca, lang, lp, 0, size - 1);
+				string_type rp;
+				array_to_string(ca, lang, rp, 1, size - 1);
 				string_type lc = ca[0];
 				string_type rc = ca[size - 1];
 
@@ -271,10 +300,11 @@ void Freq::pile_up(int max)
 				wa.push_back(next_wp_a[n]->chars());
 				wa_next.push_back(next_wp_a[n]->chars());
 			}
-			cerr << "wa: ";
-			std::copy(wa.begin(), wa.end(), ostream_iterator<string_type>(cerr, " "));
-			cerr << endl;
-			curr = add(wa, true);
+//			cerr << "wa: ";
+//			std::copy(wa.begin(), wa.end(), ostream_iterator<string_type>(cerr, " "));
+//			cerr << endl;
+			curr = add(wa, lparent->lang(), true);
+			//curr->lang(lparent->lang());
 
 			lchar = (word_ptr_type)lparent->lchar();
 			rchar = (word_ptr_type)rparent->rchar();
@@ -291,7 +321,8 @@ void Freq::pile_up(int max)
 
 				word_ptr_type rrparent = freq_n_[i][j + 2];
 				wa_next.push_back(rrparent->rchar()->chars());
-				next = add(wa_next, true);
+				next = add(wa_next, rparent->lang(), true);
+				//next->lang(rparent->lang());
 
 				lchar = (word_ptr_type)rparent->lchar();
 				rchar = (word_ptr_type)rrparent->rchar();
@@ -300,9 +331,9 @@ void Freq::pile_up(int max)
 				next->rparent(rrparent);
 				next->rchar(rchar);
 
-				cerr << "wa_next: ";
-				std::copy(wa_next.begin(), wa_next.end(), ostream_iterator<string_type>(cerr, " "));
-				cerr << endl;
+//				cerr << "wa_next: ";
+//				std::copy(wa_next.begin(), wa_next.end(), ostream_iterator<string_type>(cerr, " "));
+//				cerr << endl;
 				assert(next != NULL);
 //				curr->next(next);
 //				next->pre(curr);
@@ -327,10 +358,10 @@ void Freq::pile_up(int max)
 
 void Freq::showcol(int n) {
 	cerr << endl;
-	cerr << "total arrays #: " << freq_n_.size() << endl;
+	cerr << "total arrays #: " << k_ << endl;
 	cerr << "listing words with size : " << n << endl;
 	cerr << "number of words:" ;
-	if (n < (int)freq_n_.size()) {
+	if (n <= k_) {
 		cerr << freq_n_[n].size() << endl;
 		array_type temp_arr;
 		int i = 0;
@@ -520,7 +551,7 @@ void Freq::add_freq(Freq& freq, int threshold) {
 			if (freqc > threshold) {
 				if (!tmp_wp) {
 					string_array sa = Word::array_to_array(c_wp->array());
-					tmp_wp = freq.add(sa, freqc);
+					tmp_wp = freq.add(sa, c_wp->lang(), freqc);
 
 					assert(tmp_wp != NULL);
 					//tmp_wp->cal_p(this->sum_k(1));

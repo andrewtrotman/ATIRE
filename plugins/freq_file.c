@@ -8,6 +8,7 @@
 #include "uniseg_settings.h"
 #include "freq_file.h"
 #include "utilities.h"
+#include "encoding_factory.h"
 
 #include <string.h>
 #include <iostream>
@@ -110,6 +111,8 @@ void FreqFile::read() {
 
 	File::ropen();
 
+	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
+
 	if (!iofs_) {
 		// An error occurred!
 		// iofs_.gcount() returns the number of bytes read.
@@ -127,10 +130,11 @@ void FreqFile::read() {
 			}
 			string_array ca;
 			/// save them in the array
-			string_type a_char = get_first_utf8char((unsigned char*)&buf);
+			enc->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc->howmanybytes());
 			ca.push_back(a_char);
 
-			freq_.add(ca, value); //->address(count/RECORD_LENGTH);
+			freq_.add(ca, enc->lang(), value); //->address(count/RECORD_LENGTH);
 			count += RECORD_LENGTH;
 			// calculating the total characters appear in the corpus
 			//if (k == 1)
@@ -150,6 +154,8 @@ void FreqFile::read_with_index() {
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
 	unsigned int  value = 0;
+
+	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
 	IndexFile idxf(name_);
 	idxf.path(path_);
@@ -200,11 +206,12 @@ void FreqFile::read_with_index() {
 					}
 
 					/// save them in the array
-					string_type a_char(get_first_utf8char((unsigned char*)&buf));
+					enc->test_char((unsigned char*)&buf);
+					string_type a_char(buf, enc->howmanybytes());
 					string_array aca(ca);
 					aca.push_back(a_char);
 					assert(value > 0);
-					freq_.add(aca, value); //->address(count);
+					freq_.add(aca, enc->lang(), value); //->address(count);
 					count++;
 				}
 			}
@@ -225,11 +232,12 @@ void FreqFile::read_with_index() {
 					}
 
 					/// save them in the array
-					string_type a_char = get_first_utf8char((unsigned char*)&buf);
+					enc->test_char((unsigned char*)&buf);
+					string_type a_char(buf, enc->howmanybytes());
 					string_array aca = ca;
 					aca.insert(aca.begin(), a_char);
 					assert(value > 0);
-					freq_.add(aca, value); //->address(count);
+					freq_.add(aca, enc->lang(), value); //->address(count);
 					count++;
 				}
 			}
