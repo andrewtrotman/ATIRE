@@ -14,8 +14,8 @@
 class QFreq {
 
 private:
-	Freq freq_;
-	int k_;
+	Freq 		freq_;
+	int 		k_;
 	bool 		loaded_;
 
 public:
@@ -24,6 +24,7 @@ public:
 
 	void load_freq(int n = INT_MAX, bool force = false);
 	Freq& freq() { if (!loaded_) load_freq(); return freq_; }
+	Freq& freq_noload() { return freq_; }
 	int k() { return k_; }
 	int count() { return k_; }
 	bool is_loaded() { return loaded_; }

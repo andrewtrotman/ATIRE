@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <iterator>
 
 using namespace std;
 
@@ -53,6 +54,40 @@ void Freq::clone(Freq& freq) {
 	freq.freq_.insert(freq_.begin(), freq_.end());
 }
 
+void Freq::merge(Freq& freq){
+	freq_type::iterator iter;
+	for (iter = freq.set().begin(); iter != freq.set().end();) {
+		word_ptr_type word = find(iter->first);
+		if (!word) {
+			add(iter->second);
+			freq.set().erase(iter++);
+		}
+		else {
+			word->increase(iter->second->freq());
+			++iter;
+		}
+	}
+}
+
+void Freq::mergeto(Freq& freq){
+	for (int i = 1; i <= k_; i++) {
+		array_type::iterator iter = freq_n_[i].begin();
+		for (; iter != freq_n_[i].end();) {
+			word_ptr_type word = freq.find((*iter)->chars());
+			if (!word) {
+				string_array ca;
+				(*iter)->to_string_array(ca);
+				freq.add(ca);
+				//iter = freq_n_[i].erase(iter);
+			}
+			else
+				word->increase();
+
+			++iter;
+		}
+	}
+}
+
 bool Freq::has_word(string_type word) {
 	return (freq_.find(word) != freq_.end());
 }
@@ -64,47 +99,50 @@ word_ptr_type Freq::find(string_type word) {
 	return NULL;
 }
 
-word_ptr_type Freq::add(string_array& ca,  unsigned int freq) {
+word_ptr_type Freq::add(string_array& ca, bool allnew, unsigned int freq) {
 	string_type chars = array_to_string<string_array, string_type>(ca);
 	int size = ca.size();
 	assert(size > 0);
 
-	word_ptr_type word_ptr = find(chars);
+	word_ptr_type word_ptr = NULL;
+
+	if (!allnew)
+		word_ptr = find(chars);
 
 	/*
 	if (UNISEG_settings::instance().load && size <= UNISEG_settings::instance().min) {
 		/// for debug
 		if (word_ptr) {
-			cout << "array size: " << freq_n_.size() << endl;
-			cout << "chars: " << chars << endl;
+			cerr << "array size: " << freq_n_.size() << endl;
+			cerr << "chars: " << chars << endl;
 		}
 		assert(!word_ptr);
 	}
 	*/
 
-	if (word_ptr != NULL) {
+	if (word_ptr) {
 		if (freq == 0)
 			word_ptr->increase();
 		else
 			word_ptr->freq(freq);
 	}
 	else {
-		//cout << "adding new word : " << chars << endl;
+		//cerr << "adding new word : " << chars << endl;
 		bool skip = false;
 
 		if (UNISEG_settings::instance().load) {
 			if (freq > 0 && size > 1) {
-				if (freq <= UNISEG_settings::instance().to_skip)
+				if (UNISEG_settings::instance().do_skip && freq <= UNISEG_settings::instance().to_skip)
 					skip = true;
 
-				if(!skip && UNISEG_settings::instance().skipit(size, freq))
+				if(UNISEG_settings::instance().do_skip && !skip && UNISEG_settings::instance().skipit(size, freq))
 					skip = true;
 			}
 		} // loading
 
 		// for debug
 		//if (skip && size > 22)
-		//	cout << "skipping chars: " << chars << endl;
+		//	cerr << "skipping chars: " << chars << endl;
 
 		if (!skip) {
 			if (freq == 0)
@@ -121,30 +159,31 @@ word_ptr_type Freq::add(string_array& ca,  unsigned int freq) {
 				string_type rc = ca[size - 1];
 
 
-				//cout << "getting " << tmp_it->second->chars()
+				//cerr << "getting " << tmp_it->second->chars()
 				//		<< " address: " << tmp_it->second->address() << endl;
+				if (!allnew) {
+					word_ptr_type lparent = find(lp);
+					word_ptr_type rparent = find(rp);
 
-				word_ptr_type lparent = find(lp);
-				word_ptr_type rparent = find(rp);
+					if (!lparent || !rparent) {
 
-				if (!lparent || !rparent) {
+						// for debug
+						//if (size > 22)
+						//	cerr << "could find parent for chars: " << chars << endl;
 
-					// for debug
-					//if (size > 22)
-					//	cout << "could find parent for chars: " << chars << endl;
+						delete word_ptr;
+						word_ptr = NULL;
+						return word_ptr;
+					}
 
-					delete word_ptr;
-					word_ptr = NULL;
-					return word_ptr;
+					word_ptr->lparent(lparent); word_ptr->lchar(find(lc));
+					word_ptr->rparent(rparent);word_ptr->rchar(find(rc));
+
+					assert(word_ptr->lparent() != NULL);
+					assert(word_ptr->rparent() != NULL);
+					assert(word_ptr->lchar() != NULL);
+					assert(word_ptr->rchar() != NULL);
 				}
-
-				word_ptr->lparent(lparent); word_ptr->lchar(find(lc));
-				word_ptr->rparent(rparent);word_ptr->rchar(find(rc));
-
-				assert(word_ptr->lparent() != NULL);
-				assert(word_ptr->rparent() != NULL);
-				assert(word_ptr->lchar() != NULL);
-				assert(word_ptr->rchar() != NULL);
 
 			} else {
 				word_ptr->lchar(word_ptr);
@@ -168,68 +207,167 @@ word_ptr_type Freq::add(string_array& ca,  unsigned int freq) {
 			word_ptr->array(wa);
 		}
 		//else
-		//	cout << "skipping ..." << endl;
+		//	cerr << "skipping ..." << endl;
 	}
 
 	return word_ptr;
 }
 
-void Freq::add(word_ptr_type word_ptr) {
+void Freq::add(word_ptr_type word_ptr, bool allnew) {
 	//if (word_ptr->chars() == "ettoreximenes")
-	//	cout << " I got you " << endl;
+	//	cerr << " I got you " << endl;
 
 	assert(word_ptr != NULL);
 	if (word_ptr->size() > k_)
 		k_ = word_ptr->size();
 
-	freq_.insert(make_pair(word_ptr->chars(), word_ptr));
+	if (!allnew)
+		freq_.insert(make_pair(word_ptr->chars(), word_ptr));
 	freq_n_[word_ptr->size()].push_back(word_ptr);
 }
 
 void Freq::sort(int k) {
-	cout << endl;
-	cout << "now sorting the results" << endl;
+	cerr << endl;
+	cerr << "now sorting the results" << endl;
 
 	if (freq_n_[k].size() > 0) {
-		cout << "total words: " << freq_n_[k].size() << endl;
-		remove_low(k);
-		cout << "after skipping low: " << freq_n_[k].size() << endl;
+		cerr << "total words: " << freq_n_[k].size() << endl;
+		if (UNISEG_settings::instance().do_skip)
+		    remove_low(k);
+		cerr << "after skipping low: " << freq_n_[k].size() << endl;
 		std::sort(freq_n_[k].begin(), freq_n_[k].end(), Word::cmp_freq);
 	}
 
-	cout << "finished sorting" << endl;
+	cerr << "finished sorting" << endl;
 }
 
-void Freq::show(int n) {
-	cout << endl;
-	cout << "total arrays #: " << freq_n_.size() << endl;
-	cout << "listing words with size : " << n << endl;
-	cout << "number of words:" ;
+void Freq::pile_up(int max)
+{
+	int i = k_;
+	int size = 0;
+	word_ptr_type next = NULL;
+	word_ptr_type curr = NULL;
+	word_ptr_type pre = NULL;
+
+	for (int j = 0; j < freq_n_[i].size(); j++) {
+		word_ptr_type lparent = freq_n_[i][j]; // current word pointer
+		if ((j + 1) < freq_n_[i].size()
+				&& lparent->next() != NULL
+				&& lparent->next() == freq_n_[i][j + 1]) {
+
+			word_ptr_type rparent = freq_n_[i][j + 1];
+			word_ptr_type lchar = NULL;
+			word_ptr_type rchar = NULL;
+
+			string_array wa;
+			string_array wa_next;
+
+			wa.push_back(lparent->lchar()->chars());
+			size = rparent->size();
+			array_type next_wp_a;
+			rparent->subarray(next_wp_a, 0, size);
+			assert(next_wp_a.size() == size);
+			for (int n = 0; n < size; n++) {
+				wa.push_back(next_wp_a[n]->chars());
+				wa_next.push_back(next_wp_a[n]->chars());
+			}
+			cerr << "wa: ";
+			std::copy(wa.begin(), wa.end(), ostream_iterator<string_type>(cerr, " "));
+			cerr << endl;
+			curr = add(wa, true);
+
+			lchar = (word_ptr_type)lparent->lchar();
+			rchar = (word_ptr_type)rparent->rchar();
+			curr->lparent(lparent);
+			curr->lchar(lchar);
+			curr->rparent(rparent);
+			curr->rchar(rchar);
+			assert(curr != NULL);
+
+			if ((j + 2) < freq_n_[i].size()
+					&& rparent->next() != NULL
+					&& rparent->next() == freq_n_[i][j + 2]) {
+				//std::copy(++wa.begin(), wa.end(), wa_next.begin());
+
+				word_ptr_type rrparent = freq_n_[i][j + 2];
+				wa_next.push_back(rrparent->rchar()->chars());
+				next = add(wa_next, true);
+
+				lchar = (word_ptr_type)rparent->lchar();
+				rchar = (word_ptr_type)rrparent->rchar();
+				next->lparent(rparent);
+				next->lchar(lchar);
+				next->rparent(rrparent);
+				next->rchar(rchar);
+
+				cerr << "wa_next: ";
+				std::copy(wa_next.begin(), wa_next.end(), ostream_iterator<string_type>(cerr, " "));
+				cerr << endl;
+				assert(next != NULL);
+//				curr->next(next);
+//				next->pre(curr);
+//				pre = next;
+			} // if
+			curr->pre(pre);
+			curr->next(next);
+			if (next)
+				next->pre(curr);
+			if (pre)
+				pre->next(curr);
+			pre = next;
+			curr = NULL;
+			next = NULL;
+
+			j++;
+		} // if
+	}
+	if (k_ > i && k_ < max)
+		pile_up(max);
+}
+
+void Freq::showcol(int n) {
+	cerr << endl;
+	cerr << "total arrays #: " << freq_n_.size() << endl;
+	cerr << "listing words with size : " << n << endl;
+	cerr << "number of words:" ;
 	if (n < (int)freq_n_.size()) {
-		cout << freq_n_[n].size() << endl;
+		cerr << freq_n_[n].size() << endl;
 		array_type temp_arr;
 		int i = 0;
 		for (i = 0; i < (int)freq_n_[n].size(); i++)
 			temp_arr.push_back(freq_n_[n][i]);
 		std::sort(temp_arr.begin(), temp_arr.end(), Word::cmp_just_freq);
 
-		for (i = 0; i < (int)temp_arr.size(); i++)
-			cout << temp_arr[i]->chars() << ": " <<  temp_arr[i]->freq() << endl;
+		for (i = 0; i < (int)temp_arr.size(); i++) {
+			const array_type& word_a = temp_arr[i]->array();
+			//cerr << ->chars();
+			for (int j = 0; j < word_a.size(); j++) {
+				if (j > 0 /*&& (j < (word_a.size() - 1))*/ && (word_a[j]->lang() != UNISEG_encoding::CHINESE) && (word_a[j]->lang() != UNISEG_encoding::NUMBER))
+					cout << " ";
+				cout << word_a[j]->chars();
+			}
+			cout << ": " <<  temp_arr[i]->freq() << endl;
+		}
 	} else
-		cout << " 0" << endl;
+		cerr << " 0" << endl;
 
+}
+
+void Freq::show(int n) {
+	for (int i = 1; i <= n && i <= k_; i++)
+		showcol(i);
 }
 
 void Freq::show() {
 	freq_type::const_iterator iter;
 	for (iter=freq_.begin(); iter != freq_.end(); ++iter)
-		cout << iter->first << endl;
+		cerr << iter->first << endl;
 }
 
 void Freq::alloc(int k) {
 	assert(k > 0);
 
-	cout << "calculating address for words with size " << k << endl;
+	cerr << "calculating address for words with size " << k << endl;
 
 	if ((int)freq_n_[k].size() < 1) {
 		cerr << "Please do the frequency calculation for "
@@ -246,7 +384,7 @@ void Freq::alloc(int k) {
 		freq += freq_n_[k][i]->freq();
 	}
 
-	cout << "total freq: " << freq << endl;
+	cerr << "total freq: " << freq << endl;
 }
 
 void Freq::remove_low(int k) {
@@ -276,7 +414,7 @@ void Freq::array_to_array(array_type& wa, string_array& ca) {
 		word_ptr_type w_ptr = find(ca[i]);
 
 		//for debug
-		//cout << "finding " << ca[i] << endl;
+		//cerr << "finding " << ca[i] << endl;
 		assert(w_ptr != NULL);
 		wa.push_back(w_ptr);
 	}
@@ -304,10 +442,10 @@ void Freq::cal_avg() {
 
 	//for debug
 	k = 0;
-	cout << "average freq of each size of words" << endl;
+	cerr << "average freq of each size of words" << endl;
 	while (k < UNISEG_settings::MAX_CHARS) {
 		if (freq_n_[k].size() > 0)
-			cout << k << ": " << avg_n_[k] << " (with sum "
+			cerr << k << ": " << avg_n_[k] << " (with sum "
 				<< sum_n_[k] << " on size " << freq_n_[k].size() << ")"
 			    << endl;
 		k++;
@@ -331,7 +469,7 @@ void Freq::assign_freq(Freq& freq) {
 //		}
 
 		if (UNISEG_settings::instance().debug)
-			cout << "Assigning " << iter->second->chars()
+			cerr << "Assigning " << iter->second->chars()
 			<< " with frequency " << freqc << ""
 			<< endl;
 		iter->second->freq(freqc);
@@ -388,7 +526,7 @@ void Freq::add_freq(Freq& freq, int threshold) {
 					//tmp_wp->cal_p(this->sum_k(1));
 
 					if (UNISEG_settings::instance().debug)
-						cout << "Found new string pattern for the 1 of N+1: " << tmp_wp->chars()
+						cerr << "Found new string pattern for the 1 of N+1: " << tmp_wp->chars()
 						<< "(" << tmp_wp->freq() << ")"
 						<< endl;
 				}
@@ -437,16 +575,16 @@ void Freq::show_p() {
 	if (UNISEG_settings::instance().debug) {
 		freq_type::const_iterator iter;
 		for (iter=freq_.begin(); iter != freq_.end(); ++iter)
-			cout << iter->second->chars() << ": " << iter->second->p()
+			cerr << iter->second->chars() << ": " << iter->second->p()
 			<< "(" << iter->second->freq() << ")"
 			<< endl;
 	}
 
-	cout << endl << "The association scores:" << endl;
+	cerr << endl << "The association scores:" << endl;
 	if (UNISEG_settings::instance().debug) {
 		freq_type::const_iterator iter;
 		for (iter=freq_.begin(); iter != freq_.end(); ++iter)
-			cout << iter->second->chars() << ": " << iter->second->a()
+			cerr << iter->second->chars() << ": " << iter->second->a()
 			<< "(" << iter->second->freq() << ")"
 			<< endl;
 	}

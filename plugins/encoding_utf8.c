@@ -13,7 +13,7 @@
 */
 size_t UNISEG_encoding_utf8::test_utf8char(unsigned char *c)
 {
-size_t num_of_bytes = 0;
+size_t num_of_bytes = 1;
 unsigned char code = *c;
 
 if (code >= 0xFC && code <=0xFD)
@@ -33,7 +33,7 @@ for (int i = 0; i < num_of_bytes - 1; i++)
 	code = *c;
 	if (code < 0x80 || code > 0xBF)
 		{
-		num_of_bytes = 0;
+		num_of_bytes = 1;
 		break;
 		}
 	}
@@ -50,6 +50,12 @@ if (0 <= *c && *c <= 0x7F) // ASCII characters
 	{
 	if (isalpha(*c))
 		current_lang = ENGLISH;
+	else if (isspace(*c))
+		current_lang = SPACE;
+	else if (ispunct(*c))
+		current_lang = PUNCT;
+	else if (isdigit(*c))
+		current_lang = NUMBER;
 	else
 		current_lang = ASCIICHAR;
 	bytes = 1;

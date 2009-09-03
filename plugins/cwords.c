@@ -58,8 +58,8 @@ void CWords::copy(const CWords& cwords) {
 		++iit;
 	}
 	//std::copy(cwords.wordtl list fronts().begin(), cwords.words().end(), cwords_.begin());
-	//cout << "cwords size: " << cwords.words().size() << endl;
-	//cout << "cwords_ size: " << cwords_.size() << endl;
+	//cerr << "cwords size: " << cwords.words().size() << endl;
+	//cerr << "cwords_ size: " << cwords_.size() << endl;
 }
 
 void CWords::append(const_word_ptr w_ptr) {
@@ -120,7 +120,7 @@ void CWords::cal_harmonic_mean(Freq* freq) {
 	if (size > 0 && size <= k) {
 		while (	it != cwords_.end()) {
 			//if ((*it)->chars() == "gardenofepicurus")
-			//	cout << "I got you " << endl;
+			//	cerr << "I got you " << endl;
 
 			double wf = static_cast<double>(size * (*it)->freq());
 			double sum = static_cast<double>(allfreq.sum_k(size));
@@ -160,7 +160,7 @@ void CWords::cal_product(Freq* freq) {
 	if (size > 0 && size <= k) {
 		while (	it != cwords_.end()) {
 			//if ((*it)->chars() == "gardenofepicurus")
-			//	cout << "I got you " << endl;
+			//	cerr << "I got you " << endl;
 
 			//double wf = static_cast<double>(size * (*it)->freq());
 			//double p = wf/sum;
@@ -409,7 +409,7 @@ void CWords::get_reward_or_penalty(Freq* freq) {
 
 			if (ipr > 2/*&& prefer_n != n*/) {
 				if (UNISEG_settings::instance().debug)
-					cout << "Discriminate " << to_string() << endl;
+					cerr << "Discriminate " << to_string() << endl;
 				/*ipr = len_/num_w + 1;
 				if (ipr > len_)
 					ipr = len_;*/

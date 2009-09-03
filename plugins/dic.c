@@ -30,7 +30,7 @@ void Dic::save(string_type filename, uniseg_encoding::language lang) {
 		os = &ofs;
 	}
 	else
-		os = &cout;
+		os = &cerr;
 
 	const Dic::word_map& list = list_; //dic_.list();
 	Dic::word_map::const_iterator iter;
@@ -53,7 +53,7 @@ void Dic::load(string_type filename, uniseg_encoding::language lang) {
 	    dicfile.close();
 	  }
 	  else
-		  cout << "Unable to open " << filename << endl;
+		  cerr << "Unable to open " << filename << endl;
 
 }
 
@@ -79,7 +79,7 @@ void Dic::show() {
 		for (; iner_it != list_.end(); iner_it++) {
 			string_type word = iner_it->first;
 			if (get_utf8_string_length(word) == it->first)
-				cout << iner_it->first << endl;
+				cerr << iner_it->first << endl;
 		}
 	}
 }

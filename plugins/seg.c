@@ -139,13 +139,13 @@ const unsigned char *Seger::output()
 //		output_[words_list_.size()] = NULL;
 //
 //		for (int i = 0; i < words_list_.size(); i++) {
-//			//cout << words_list_[i]->chars() << endl;
+//			//cerr << words_list_[i]->chars() << endl;
 //			int len = words_list_[i]->chars().length();
 //			output_[i] = new unsigned char[len];
 //			for (int k = 0; k < len; k++)
 //				output_[i][k] = words_list_[i]->chars()[k];
 //			//strncpy((char *)output_[i], words_list_[i]->chars().c_str(), len);
-//			cout << output_[i] << endl;
+//			cerr << output_[i] << endl;
 //			//output_[i][len] = '\0';
 //		}
 //	}
@@ -159,7 +159,7 @@ const unsigned char *Seger::output()
 //		out[words_list_.size()] = NULL;
 //
 //		for (int i = 0; i < words_list_.size(); i++) {
-//			//cout << words_list_[i]->chars() << endl;
+//			//cerr << words_list_[i]->chars() << endl;
 //			int len = words_list_[i]->chars().length();
 //			out[i] = new unsigned char[len + 1];
 //			for (int k = 0; k < len; k++)
@@ -167,7 +167,7 @@ const unsigned char *Seger::output()
 //			unsigned char *word = out[i];
 //			word[len] = '\0';
 //			//strncpy((char *)out[i], words_list_[i]->chars().c_str(), len);
-//			cout << word << endl;
+//			cerr << word << endl;
 //			//out[i][len] = '\0';
 //		}
 //	}
@@ -225,7 +225,7 @@ void Seger::build()
 
 			if ((!((*it)->is_end()))/* || (*it)->reach_limit()*/) {
 				/// for debug
-				//cout << "it size: " << (*it)->words().size() << endl;
+				//cerr << "it size: " << (*it)->words().size() << endl;
 				/// need n copies of it including the current one
 				int pos = (*it)->pos();
 				n = size - pos;
@@ -259,7 +259,7 @@ void Seger::build()
 		TIMINGS_DECL();
 		TIMINGS_START();
 
-		cout << "finished building all the possible combinations for :"
+		cerr << "finished building all the possible combinations for :"
 			<< endl << "\""	<< local_tw_ptr->chars() << "\"("
 			<< local_tw_ptr->size()<< ")" << endl
 			<< "with total possibilities: " << clist_->size()
@@ -275,10 +275,10 @@ void Seger::make(CList& clist, string_type& str) {
 
 
 	//cwords_list::reverse_iterator it = clist_->list().rbegin();
-	//cout << "clist size: " << clist.list().size() << endl;
+	//cerr << "clist size: " << clist.list().size() << endl;
 	cwords_list::reverse_iterator it = clist.list().rbegin();
 	while(it != clist.list().rend()) {
-		//cout << "1" << endl;
+		//cerr << "1" << endl;
 		assert (w_ptr != NULL);
 		if (w_ptr->freq() > UNISEG_settings::instance().to_skip) {
 		    (*it)->append(w_ptr);
@@ -355,7 +355,7 @@ void Seger::add_to_list(array_type& cwlist) {
 				if (i > 0 && i < (temp.size() -1)) {
 					word_ptr_type iner_w_ptr = allfreq_->find(str);
 					// for debug
-					//cout << "setting " << str << " for being a word or seged" << endl;
+					//cerr << "setting " << str << " for being a word or seged" << endl;
 					//assert(iner_w_ptr != NULL);
 					if (iner_w_ptr != NULL)
 						iner_w_ptr->seged(true);

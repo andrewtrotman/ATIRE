@@ -98,14 +98,14 @@ void CList::show() {
 	cwords_list::iterator it = list_.begin();
 	for (; count++ < n && it != list_.end(); ++it) {
 		// for debug
-		//cout << "cwords size: " << (*it)->words().size() << endl;
-		cout << (*it)->score() << ": ";
+		//cerr << "cwords size: " << (*it)->words().size() << endl;
+		cerr << (*it)->score() << ": ";
 		std::list<word_ptr_type>::const_iterator iit = (*it)->words().begin();
 		while (	iit != (*it)->words().end()) {
-			cout << (*iit)->chars() << "(" << (*iit)->freq() << ")" << " ";
+			cerr << (*iit)->chars() << "(" << (*iit)->freq() << ")" << " ";
 			++iit;
 		}
-		cout << endl;
+		cerr << endl;
 	}
 }
 
@@ -232,7 +232,7 @@ void CList::apply_rules() {
 		remove_two_consecutive_single_chars();
 
 		if (UNISEG_settings::instance().debug)
-			cout << "Removed " << orig_size - size() << " bad segmentations from list" << endl;
+			cerr << "Removed " << orig_size - size() << " bad segmentations from list" << endl;
 	}
 
 }

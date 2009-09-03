@@ -14,6 +14,7 @@
 #include <cassert>
 
 #include "icstring.hpp"
+#include "encoding.h"
 
 class Word
 {
@@ -60,6 +61,11 @@ private:
 	double											right_a_;
 	double											base_;
 
+	Word*											pre_;
+	Word*											next_;
+
+	UNISEG_encoding::language						lang_;
+
 private:
 	void init();
 
@@ -67,6 +73,14 @@ public:
 	Word(string_type chars, int size);
 	Word(string_type chars, int freq, int size);
 	~Word() {}
+
+	const Word* pre() const { return pre_; }
+	const Word* next() const { return next_; }
+	void pre(Word* word) { pre_ = word; }
+	void next(Word* word) { next_ = word; }
+
+	void lang(UNISEG_encoding::language lang) { lang_ = lang; }
+	UNISEG_encoding::language lang() { return lang_; }
 
 	Word& operator ++ ();
 	Word operator ++ (int);
@@ -98,10 +112,11 @@ public:
 	string_type subchars(int idx, int len);
 	void subchars(string_type& substr, int idx, int len);
 
-	array_type subarray(int idx, int len);
+	void subarray(array_type& ca, int idx, int len);
 	Word *subword(int idx, int len);
 
 	void increase() { freq_++; }
+	void increase(unsigned int freq) { freq_ += freq; }
 	void link(Word *w) { children_.push_back(w); }
 	void add(Word *w) { arr_.push_back(w); }
 	const std::vector<Word*>& array() const { return arr_; }
@@ -165,6 +180,8 @@ public:
 	static string_type array_to_string(array_type& wa);
 	static string_type array_to_string(array_type& wa, int idx, int len);
 	static string_array array_to_array(const array_type& wa);
+
+	void to_string_array(string_array& ca);
 
 	bool is_word() { return is_word_; }
 	void is_word(bool b);

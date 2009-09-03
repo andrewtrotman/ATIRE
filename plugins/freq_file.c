@@ -43,7 +43,7 @@ unsigned int FreqFile::cal(array_type& arr) {
 	//File::word_ptr_type last_word = freq_n_[k - 1][freq_n_[k - 1].size() - 1];
 	/*
 	for (int j = 0; j < freq_n_[k - 1].size(); j++)
-		cout << "last word: " << freq_n_[k - 1][j]->chars()
+		cerr << "last word: " << freq_n_[k - 1][j]->chars()
 			<< " address: " << freq_n_[k - 1][j]->address()
 			<< " freq: " << freq_n_[k - 1][j]->freq()<< endl;
 			*/
@@ -62,11 +62,11 @@ void FreqFile::write(array_type& arr) {
 	File::wopen();
 
 	if(!iofs_) {
-	    cout << "Cannot open file for writing.\n";
+	    cerr << "Cannot open file for writing.\n";
 	    return;
 	}
 
-	cout << "expected total size: " << cal(arr) << endl;
+	cerr << "expected total size: " << cal(arr) << endl;
 
 	iofs_.seekp(0, ios::beg);
 
@@ -91,9 +91,9 @@ void FreqFile::write(array_type& arr) {
 
 
 	ofstream::pos_type pos = iofs_.tellp();
-	cout << "number of word: " << arr.size() << endl;
-	//cout << "expected file size: " << size << endl;
-	cout << "actual file size: " << static_cast<int>(pos) << endl;
+	cerr << "number of word: " << arr.size() << endl;
+	//cerr << "expected file size: " << size << endl;
+	cerr << "actual file size: " << static_cast<int>(pos) << endl;
 	//assert(size == static_cast<int>(pos));
 
 	iofs_.close();
@@ -101,7 +101,7 @@ void FreqFile::write(array_type& arr) {
 
 void FreqFile::read() {
 
-	cout << "loading " << name_ << endl;
+	cerr << "loading " << name_ << endl;
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
 	unsigned int  value;
@@ -137,16 +137,16 @@ void FreqFile::read() {
 			//	num += value;
 		}
 
-		cout << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
+		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
 		//if (k == 1)
-		//	cout << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
+		//	cerr << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
 	}
 	iofs_.close();
 }
 
 void FreqFile::read_with_index() {
 
-	cout << "loading " << name_ << endl;
+	cerr << "loading " << name_ << endl;
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
 	unsigned int  value = 0;
@@ -235,10 +235,10 @@ void FreqFile::read_with_index() {
 			}
 		}
 
-		cout << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
-		cout << "actual number of word with size(" << wlen_ << ") : " << count << endl;
+		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
+		cerr << "actual number of word with size(" << wlen_ << ") : " << count << endl;
 		//if (k == 1)
-		//	cout << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
+		//	cerr << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
 	}
 
 	iofs_.close();

@@ -16,7 +16,7 @@
 class UNISEG_encoding
 {
 public:
-	enum language { UNKNOWN, ASCIICHAR, ENGLISH, CHINESE }; // supported languages
+	enum language { UNKNOWN, NUMBER, SPACE, PUNCT, ASCIICHAR, ENGLISH, CHINESE }; // supported languages
 
 protected:
 	language current_lang;

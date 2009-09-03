@@ -1,19 +1,22 @@
 #include "freq_counter.h"
 #include "uniseg_settings.h"
-#include "convert.h"
+#include <ctype.h>
 
 #include <cassert>
 #include <list>
 #include <algorithm>
+#include <iostream>
+#include <iterator>
 
 using namespace std;
 
 void FreqCounter::count(int max, int min)
 {
-const char *start = (char *)stream_.c_str();
-const char *end = start + stream_.length();
+	const char *start = (char *)stream_.c_str();
+	const char *end = start + stream_.length();
 
-add_word(start, end, max, min);
+	//add_word(start, end, max, min);
+	count(start, end, max, min);
 }
 
 void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
@@ -47,15 +50,18 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 	typedef list<string_type>	string_list;
 
 	for (int i = min; i >= 0 && i <= max; i++) {
-	//cout << "I got " << string_type((*begin)->begin(), (*end)->end()) << endl;
+	//cerr << "I got " << string_type((*begin)->begin(), (*end)->end()) << endl;
 	//int i = max;
 		//array_type	ca;
 		//if ( i == max)
-		//	cout << "Stop here , I need to see what you got" << endl;
+		//	cerr << "Stop here , I need to see what you got" << endl;
 		start = (char *)begin;
 		//string_array last_ca;
 		string_list cl; // chars list
 		//for (int j = 0; j < (len - i) + 1; j++) {
+		enc->test_char((unsigned char *)start);
+		uniseg_encoding::language pre_lang = enc->lang();
+
 		while (start < end) {
 			//to = from + i;
 
@@ -65,32 +71,171 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			//	std::copy(last_ca.begin()++, last_ca.end(), ca.begin());
 			if (cl.size() > 0)
 				cl.pop_front();
+//			if (cl.size() > 0 && pre_lang == enc->lang())
+//				cl.pop_front();
+//			else {
+//				pre_lang = enc->lang();
+//				cl.clear();
+//			}
 
 			while ( start < end ) {
-				enc->test_char((unsigned char *)start);
-				string_type str(start, enc->howmanybytes()); // ((*start)->to_string();
 				//string_type str(start, 3);
-				if (enc->lang() == uniseg_encoding::ENGLISH) {
-					// for debug
-					//cout << "before transform: " << str << endl;
-					tolower(str);
-					//cout << "after transform: " << str << endl;
-				}
-				cl.push_back(str);
-				start += enc->howmanybytes();
+				string_type str; // ((*start)->to_string();
 
-				if (cl.size() == i) {
+				if (enc->lang() == uniseg_encoding::ENGLISH
+				    || enc->howmanybytes() > 1) {
+
+					if (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char)
+					    while (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char) {
+						    // for debug
+						    //cerr << "before transform: " << str << endl;
+						    char c = *start;
+
+						    tolower(c);
+						    str.push_back(c);
+						    //cerr << "after transform: " << str << endl;
+						    start += enc->howmanybytes();
+						    enc->test_char((unsigned char *)start);
+						    if (enc->lang() == uniseg_encoding::NUMBER
+						    		|| enc->lang() == uniseg_encoding::PUNCT
+						    		|| enc->lang() == uniseg_encoding::SPACE)
+							    break;
+					    }
+					else {
+						str = string_type(start, enc->howmanybytes());
+						start += enc->howmanybytes();
+						enc->test_char((unsigned char *)start);
+					}
+
+				} else if (enc->lang() == uniseg_encoding::NUMBER) {
+					while (enc->lang() == uniseg_encoding::NUMBER) {
+						str.push_back(*start);
+						start += enc->howmanybytes();
+						enc->test_char((unsigned char *)start);
+					}
+				} else {
+					start += enc->howmanybytes();
+					enc->test_char((unsigned char *)start);
+				}
+
+				if (str.length() > 0) {
+					cl.push_back(str);
+					if (cl.size() == i)
+						break;
+				} else {
+					if (cl.size() < i)
+						cl.clear();
 					break;
 				}
 				//ca.push_back((*start)->to_string());
 			}
 
-			string_array ca(cl.size());
-			std::copy(cl.begin(), cl.end(), ca.begin());
-			freq_->add(ca);
-			//cout << string_type((*from)->begin(), (*to)->end()) << endl;
+			if (cl.size() > 0) {
+				string_array ca(cl.size());
+				std::copy(cl.begin(), cl.end(), ca.begin());
+				freq_->add(ca);
+			}
+			//cerr << string_type((*from)->begin(), (*to)->end()) << endl;
 		}
 	}
+}
+
+void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
+{
+	char *start = NULL;
+	int count = 0;
+	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
+
+	// i - the number of characters depends on min
+	// may from 1, 2, 3, 4, ... till less than max
+	typedef list<string_type>	string_list;
+
+
+		start = (char *)begin;
+		string_list cl; // chars list
+		enc->test_char((unsigned char *)start);
+		uniseg_encoding::language pre_lang = enc->lang();
+
+		word_ptr_type pre = NULL;
+		word_ptr_type curr = NULL;
+
+		while (start < end) {
+
+				//string_type str(start, 3);
+				string_type str; // ((*start)->to_string();
+				bool increase_flag = false;
+
+				if (enc->lang() == uniseg_encoding::ENGLISH
+				    || enc->howmanybytes() > 1) {
+
+					if (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char)
+					    while (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char && start < end) {
+						    // for debug
+						    //cerr << "before transform: " << str << endl;
+						    char c = *start;
+
+						    tolower(c);
+						    str.push_back(c);
+						    //cerr << "after transform: " << str << endl;
+						    start += enc->howmanybytes();
+						    enc->test_char((unsigned char *)start);
+						    if (enc->lang() == uniseg_encoding::NUMBER
+						    		|| enc->lang() == uniseg_encoding::PUNCT
+						    		|| enc->lang() == uniseg_encoding::SPACE)
+							    break;
+					    }
+					else {
+						str = string_type(start, enc->howmanybytes());
+						start += enc->howmanybytes();
+						enc->test_char((unsigned char *)start);
+					}
+
+				} else if (enc->lang() == uniseg_encoding::NUMBER) {
+					while (enc->lang() == uniseg_encoding::NUMBER && start < end) {
+						str.push_back(*start);
+						start += enc->howmanybytes();
+						enc->test_char((unsigned char *)start);
+					}
+				} else
+					increase_flag = true;
+
+				if (str.length() > 0) {
+					cl.push_back(str);
+
+					string_array ca(cl.size());
+					std::copy(cl.begin(), cl.end(), ca.begin());
+					curr = freq.add(ca, true);
+					curr->lang(pre_lang);
+//					std::copy(ca.begin(), ca.end(), ostream_iterator<string_type>(cerr, " "));
+//					cerr << endl;
+					cl.clear();
+
+					if (pre != NULL && pre->lang() == curr->lang()) {
+						pre->next(curr);
+						curr->pre(pre);
+					}
+					pre = curr;
+				} else {
+					if (*start != ' '
+							|| (pre != NULL
+							&& pre->lang() != curr->lang()))
+						pre = NULL;
+				}
+
+				if (increase_flag) {
+					start += enc->howmanybytes();
+					enc->test_char((unsigned char *)start);
+				}
+				pre_lang = enc->lang();
+		}
+}
+
+void FreqCounter::count(const char *begin, const char *end, int max, int min)
+{
+	Freq freq;
+	count_ones(freq, begin, end);
+	freq.pile_up(max);
+	freq.mergeto(*freq_);
 }
 
 void FreqCounter::show_array() {
@@ -100,7 +245,7 @@ void FreqCounter::show_array() {
 			continue;
 		if ( (*it)->freq() < 2)
 			continue;
-		cout << (*it)->chars() << " : " << (*it)->freq() << endl;
+		cerr << (*it)->chars() << " : " << (*it)->freq() << endl;
 	}
 
 }
@@ -152,4 +297,3 @@ void FreqCounter::overall(Freq& freq) {
 	freq_->assign_freq(freq);
 	assign_array();
 }
-

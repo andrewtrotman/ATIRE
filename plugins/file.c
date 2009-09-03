@@ -43,11 +43,11 @@ File::~File() {
 void File::setup() {
 	//name_.append(EXT_NAME);
 	//string path = string(UNISEG_settings::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
-	//cout << "path: " << path << endl;
+	//cerr << "path: " << path << endl;
 	//path.push_back(FILESYSTEM::File<std::string>::SEPARATOR);
 	filename_ = name_ + EXT_NAME;
 	// debug
-	//cout << "setup filename " << filename_ << " "<< name_ << " " << EXT_NAME << endl;
+	//cerr << "setup filename " << filename_ << " "<< name_ << " " << EXT_NAME << endl;
 }
 
 void File::wopen() {
@@ -72,7 +72,7 @@ void File::initialize(unsigned int size) {
 	if (iofs_.is_open()) {
 		iofs_.seekp(0, ios::beg);
 		char c = 0;
-		cout << "initializing file and set size " << size << endl;
+		cerr << "initializing file and set size " << size << endl;
 		for (unsigned int i = 0; i < size; i++)
 			iofs_.write((char* )&c, 1);
 	}
@@ -84,7 +84,7 @@ int File::list(std::string dir, std::vector<std::string> &files, bool recursive)
     struct dirent *dirp;
     if(/*exist() || */(dp  = opendir(dir.c_str())) == NULL) {
     	// TODO throw a error exception
-       // cout << "Error(" << errno << ") opening " << dir << endl;
+       // cerr << "Error(" << errno << ") opening " << dir << endl;
     	return -1;
     }
 

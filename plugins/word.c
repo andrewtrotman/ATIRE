@@ -62,6 +62,11 @@ void Word::init() {
 
 	is_word_ = false;
 	seged_ = false;
+
+	pre_ = NULL;
+	next_ = NULL;
+
+	lang_ = UNISEG_encoding::UNKNOWN;
 }
 
 bool Word::cmp_just_freq(Word *w1, Word *w2) {
@@ -243,12 +248,18 @@ Word::string_array Word::array_to_array(const array_type& wa) {
 	return ca;
 }
 
+void Word::to_string_array(string_array& ca)
+{
+	for (int i = 0; i < (int)arr_.size(); i++)
+		ca.push_back(arr_[i]->chars());
+}
+
 void Word::array(std::vector<Word*> arr) {
 	arr_.clear();
 	for (int i = 0; i < (int)arr.size(); i++)
 		arr_.push_back(arr[i]);
 
-	//std::cout << "size (" << size_ << ":" << arr.size() << ")"std::endl;
+	//std::cerr << "size (" << size_ << ":" << arr.size() << ")"std::endl;
 	assert(size() == (int)arr.size());
 	//std::copy(arr_.begin(), arr_.end(), arr.begin());
 }
@@ -272,13 +283,11 @@ void Word::subchars(string_type& substr, int idx, int len) {
 	assert(count == substr.length());
 }
 
-Word::array_type Word::subarray(int idx, int len) {
+void Word::subarray(array_type& ca, int idx, int len) {
 	assert((idx + len) <= size());
 
-	array_type ca(len);
 	for (int i = 0; i < len; i++)
 		ca.push_back(arr_[idx + i]);
-	return ca;
 }
 
 /**
@@ -364,7 +373,7 @@ void Word::cal_p(double base) {
 	assert(base_ != 0.0);
 	p_ = static_cast<double>(freq())/base_;*/
 #ifdef DEBUG
-		cout << "Calculating probabilty of "
+		cerr << "Calculating probabilty of "
 			<< chars() << " with "
 			<< freq() << " over "
 			<< base << endl;
@@ -403,7 +412,7 @@ void Word::cal_a() {
 //			}
 //		}
 		if (UNISEG_settings::instance().debug)
-						cout << endl << "calculating overall association score for " << this->chars() << endl;
+						cerr << endl << "calculating overall association score for " << this->chars() << endl;
 		left_a_ = cal_a(size_/2);
 		if ((size_ % 2) == 1)
 			right_a_ = cal_a((size_/2) + 1);
@@ -441,7 +450,7 @@ double Word::cal_a(int start) {
 			double tmp = sign * mi * mi;
 
 			if (UNISEG_settings::instance().debug)
-				cout << "calculating association score for log "
+				cerr << "calculating association score for log "
 					<< ww->chars() << "(" << ww->p() << ") over "
 					<< lw->chars() << "(" << lw->p() << ") "
 					<< " "

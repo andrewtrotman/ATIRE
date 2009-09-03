@@ -10,7 +10,7 @@ using namespace std;
 void FreqLoader::load(std::string path, int n) {
 	k_ = 1;
 	//	int num = 0;
-	cout << "Loading files from " << path << endl;
+	cerr << "Loading files from " << path << endl;
 	UNISEG_settings::instance().load = true;
 
 	while (k_ <= n) {
@@ -41,7 +41,7 @@ void FreqLoader::save(std::string path) {
 
 	while(1) {
 
-		cout << "saving freq for words with size " << k << endl;
+		cerr << "saving freq for words with size " << k << endl;
 
 		if (freq_.array_k_size(k) <= 0) {
 			cerr << "No more words to save for size " << k << endl;

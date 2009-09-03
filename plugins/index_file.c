@@ -37,7 +37,7 @@ void IndexFile::alloc(array_type& arr) {
 
 	word_ptr_type word_ptr = arr[0];
 	int ffs = (int)word_ptr->family().first->array().size();
-	cout << "ffs: " << ffs << endl;
+	cerr << "ffs: " << ffs << endl;
 	assert( ffs == (wlen_ - 1));
 	//string_type pre_parent = word_ptr->family().first->chars();
 	Word::Side side = word_ptr->side(); //LEFT;
@@ -99,7 +99,7 @@ void IndexFile::write() {
 	char* char_ptr = NULL;
 	for (int i = 0; i < (int)aa_.size(); i++) {
 
-		//cout << "index chars size: " << (int)aa_[i].ca().size() << endl;
+		//cerr << "index chars size: " << (int)aa_[i].ca().size() << endl;
 		assert((int)aa_[i].ca().size() == (wlen_ - 1));
 		for (int j = 0; j < (int)aa_[i].ca().size(); j++) {
 			char_ptr = (char*)aa_[i].ca()[j].c_str();
@@ -132,7 +132,7 @@ void IndexFile::read() {
 	unsigned int address = 0;
 	int count = 0;
 
-	cout << "loading index file" << filename_ << endl;
+	cerr << "loading index file" << filename_ << endl;
 	while (count < size_) {
 		string_array ca;
 		Address::uint_array addr(ADDRESSES_NUMBER, Address::INVALID_BOUND);

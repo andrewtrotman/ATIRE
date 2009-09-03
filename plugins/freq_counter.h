@@ -51,6 +51,8 @@ public:
 
 private:
 	void add_word(const char *begin, const char *end, int max, int min);
+	void count(const char *begin, const char *end, int max, int min);
+	void count_ones(Freq& freq, const char *begin, const char *end);
 };
 
 #endif /*DOC_FREQ_H_*/

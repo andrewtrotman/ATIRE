@@ -23,10 +23,10 @@ UNISEG_plugin::UNISEG_plugin() : uniseg_plugin_interface()
     enc_ = UNISEG_encoding_factory::instance().get_encoding();
 
     // load the string frequency table
-    cout << "##################### initializing UNISEG segmentation module ######################" << endl;
+    cerr << "##################### initializing UNISEG segmentation module ######################" << endl;
     //seger.load_frqs();
     QFreq::instance().load_freq();
-    cout << "############################# finished initialization ##############################" << endl;
+    cerr << "############################# finished initialization ##############################" << endl;
 }
 
 UNISEG_plugin::~UNISEG_plugin()
@@ -111,7 +111,7 @@ extern "C" {
 	{
 	public:
 	   proxy() {
-		   std::cout << "Registering UNISEG to the plugin factory..." << std::endl;
+		   std::cerr << "Registering UNISEG to the plugin factory..." << std::endl;
 		  // register the maker with the factory
 		   plugin_factory[uniseg_plugin_interface::SEGMENTATION].maker = maker;
 	   }

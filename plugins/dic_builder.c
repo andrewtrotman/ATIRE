@@ -51,9 +51,9 @@ void DicBuilder::build(string_type& text, uniseg_encoding::language lang) {
 					add(word, lang);
 					word.clear();
 				}
-					//cout << " ";
+					//cerr << " ";
 			} else {
-				//cout << endl;
+				//cerr << endl;
 				add(word, lang);
 				break;
 			}
@@ -61,6 +61,6 @@ void DicBuilder::build(string_type& text, uniseg_encoding::language lang) {
 		}
 
 	}
-	//cout << endl;
+	//cerr << endl;
 }
 

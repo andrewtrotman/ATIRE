@@ -31,6 +31,7 @@ public:
 	int 					skip_high;
 	int 					skip_low;
 	int 					to_skip; // for all skipping
+	bool					do_skip;
 
 	int 					max;
 
@@ -45,6 +46,8 @@ public:
 	int 					mi;
 	bool 					reward;
 	bool					optimize;
+
+	bool					split_latin_char;
 
 	unsigned long 				encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 

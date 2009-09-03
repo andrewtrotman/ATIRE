@@ -40,6 +40,7 @@ void UNISEG_settings::init_fields()
 	to_skip = 1;
 	skip_high = 0;
 	skip_low = 0;
+	do_skip = false;
 
 	lang = uniseg_encoding::UNKNOWN;
 
@@ -56,6 +57,8 @@ void UNISEG_settings::init_fields()
 	#endif
 
 	sep[1] = '\0';
+
+	split_latin_char = false;
 
 	encoding_scheme = uniseg_encoding_factory::UTF8;
 }

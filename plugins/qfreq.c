@@ -31,7 +31,7 @@ void QFreq::load_freq(int n, bool force) {
 	/************************************
 	 *  LOAD FREQUENCY TABLE IN MEMORY
 	 ***********************************/
-	cout << "loading frequency files " << endl;
+	cerr << "loading frequency files " << endl;
 
 	FreqLoader loader(freq_);
 

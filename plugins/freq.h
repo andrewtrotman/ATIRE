@@ -38,14 +38,17 @@ public:
 	Freq();
 	virtual ~Freq();
 
+	freq_type& set() { return freq_; }
+
 	word_ptr_type find(string_type word);
 	bool has_word(string_type word);
 
-	word_ptr_type add(string_array& ca, unsigned int freq = 0);
-	void add(word_ptr_type word_ptr);
+	word_ptr_type add(string_array& ca, bool allnew = false, unsigned int freq = 0);
+	void add(word_ptr_type word_ptr, bool allnew = false);
 
 	void sort(int k);
 	void show(int k);
+	void showcol(int k);
 	void show();
 	void alloc(int k = 1);  /// allocate the address
 
@@ -83,7 +86,10 @@ public:
 
 	void to_array(std::vector<word_ptr_type>& wa);
 	void clone(Freq& freq);
+	void merge(Freq& freq);
+	void mergeto(Freq& freq);
 
+	void pile_up(int max);
 private:
 
 	void remove_low(int k);
