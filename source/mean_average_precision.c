@@ -73,23 +73,44 @@ topics[current_topic].number_of_nonrelevant_documents = nonrelevant_documents;
 }
 
 /*
+	ANT_MEAN_AVERAGE_PRECISION::SETUP()
+	-----------------------------------
+*/
+ANT_relevant_topic *ANT_mean_average_precision::setup(long topic, ANT_search_engine *search_engine)
+{
+ANT_relevant_topic topic_key, *got;
+
+results_list = search_engine->accumulator_pointers;
+accumulators = search_engine->accumulator;
+results_list_length = search_engine->document_count();
+
+topic_key.topic = topic;
+got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
+if (got == NULL)
+	fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
+
+return got;
+}
+
+/*
 	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_PRECISION()
 	-----------------------------------------------
 */
 double ANT_mean_average_precision::average_precision(long topic, ANT_search_engine *search_engine)
 {
-ANT_search_engine_accumulator *accumulators, **results_list;
+ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-ANT_relevant_topic topic_key, *got;
-long long current, found_and_relevant, results_list_length;
+long long current, found_and_relevant;
 double precision;
+
+if ((got = setup(topic, search_engine)) == NULL)
+	return 0;
+if (got->number_of_relevant_documents == 0)
+	return 0;
 
 key.topic = topic;
 precision = 0;
 found_and_relevant = 0;
-results_list = search_engine->accumulator_pointers;
-accumulators = search_engine->accumulator;
-results_list_length = search_engine->document_count();
 
 for (current = 0; current < results_list_length; current++)
 	if (!results_list[current]->is_zero_rsv())
@@ -110,20 +131,7 @@ for (current = 0; current < results_list_length; current++)
 				}
 			}
 		}
-
-topic_key.topic = topic;
-got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
-if (got == NULL)
-	{
-	fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
-	precision = 0;
-	}
-else if (got->number_of_relevant_documents == 0)
-	precision = 0;
-else
-	precision /= got->number_of_relevant_documents;
-
-return precision;
+return precision / got->number_of_relevant_documents;
 }
 
 
@@ -133,19 +141,20 @@ return precision;
 */
 double ANT_mean_average_precision::average_generalised_precision(long topic, ANT_search_engine *search_engine)
 {
-ANT_search_engine_accumulator *accumulators, **results_list;
+ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-ANT_relevant_topic topic_key, *got;
-long long current, results_list_length;
+long long current;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
+
+if ((got = setup(topic, search_engine)) == NULL)
+	return 0;
+if (got->number_of_relevant_documents == 0)
+	return 0;
 
 key.topic = topic;
 precision = 0;
 found_and_relevant = 0;
-results_list = search_engine->accumulator_pointers;
-accumulators = search_engine->accumulator;
-results_list_length = search_engine->document_count();
 
 for (current = 0; current < results_list_length; current++)
 	if (!results_list[current]->is_zero_rsv())
@@ -170,19 +179,7 @@ for (current = 0; current < results_list_length; current++)
 			}
 		}
 
-topic_key.topic = topic;
-got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
-if (got == NULL)
-	{
-	puts("Unexpected: Topic not found in topic list");
-	precision = 0;
-	}
-else if (got->number_of_relevant_documents == 0)
-	precision = 0;
-else
-	precision /= got->number_of_relevant_documents;
-
-return precision;
+return precision / (double)got->number_of_relevant_documents;
 }
 
 /*
@@ -191,28 +188,19 @@ return precision;
 */
 double ANT_mean_average_precision::rank_effectiveness(long topic, ANT_search_engine *search_engine)
 {
-ANT_search_engine_accumulator *accumulators, **results_list;
+ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-ANT_relevant_topic topic_key, *got;
-long long current, results_list_length, found_and_nonrelevant, total_nonrelevant;
+long long current, found_and_nonrelevant, total_nonrelevant;
 double precision;
 
-key.topic = topic;
+if ((got = setup(topic, search_engine)) == NULL)
+	return 0;
+
+if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
+	return 1;	// topic has no non-relevant documents so they are all relevant so we score a perfect score
+
 precision = 0;
 found_and_nonrelevant = 0;
-results_list = search_engine->accumulator_pointers;
-accumulators = search_engine->accumulator;
-results_list_length = search_engine->document_count();
-
-topic_key.topic = topic;
-got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
-if (got == NULL)
-	{
-	fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
-	return 0;	// topic has not been assessed (so score 0)
-	}
-if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
-	return 1;	// topic has non-relevant documents so they are all relevant so we score a perfect score
 
 for (current = 0; current < results_list_length; current++)
 	if (!results_list[current]->is_zero_rsv())
@@ -227,8 +215,7 @@ for (current = 0; current < results_list_length; current++)
 			}
 		}
 
-precision /= got->number_of_relevant_documents;
-return precision;
+return precision / got->number_of_relevant_documents;
 }
 
 /*
@@ -237,22 +224,11 @@ return precision;
 */
 double ANT_mean_average_precision::p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n)
 {
-ANT_search_engine_accumulator *accumulators, **results_list;
 ANT_relevant_document key, *relevance_data;
-ANT_relevant_topic topic_key, *got;
-long long current, found_and_relevant, results_list_length, found;
+long long current, found_and_relevant, found;
 
-results_list = search_engine->accumulator_pointers;
-accumulators = search_engine->accumulator;
-results_list_length = search_engine->document_count();
-
-topic_key.topic = topic;
-got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
-if (got == NULL)
-	{
-	fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
+if (setup(topic, search_engine) == NULL)
 	return 0;
-	}
 
 found = found_and_relevant = 0;
 key.topic = topic;
