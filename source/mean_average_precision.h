@@ -28,6 +28,7 @@ public:
 	double average_precision(long topic, ANT_search_engine *search_engine);
 	double average_generalised_precision(long topic, ANT_search_engine *search_engine);
 	double rank_effectiveness(long topic, ANT_search_engine *search_engine);
+	double p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n);
 } ;
 
 #endif __MEAN_AVERAGE_PRECISION_H__

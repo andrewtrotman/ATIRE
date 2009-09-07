@@ -230,3 +230,42 @@ for (current = 0; current < results_list_length; current++)
 precision /= got->number_of_relevant_documents;
 return precision;
 }
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::P_AT_N()
+	------------------------------------
+*/
+double ANT_mean_average_precision::p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n)
+{
+ANT_search_engine_accumulator *accumulators, **results_list;
+ANT_relevant_document key, *relevance_data;
+ANT_relevant_topic topic_key, *got;
+long long current, found_and_relevant, results_list_length, found;
+
+results_list = search_engine->accumulator_pointers;
+accumulators = search_engine->accumulator;
+results_list_length = search_engine->document_count();
+
+topic_key.topic = topic;
+got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
+if (got == NULL)
+	{
+	fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
+	return 0;
+	}
+
+found = found_and_relevant = 0;
+key.topic = topic;
+for (current = 0; current < results_list_length; current++)
+	if (!results_list[current]->is_zero_rsv())
+		{
+		if (++found > precision_point_n)
+			break;
+		key.docid = results_list[current] - accumulators;
+		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+			if (relevance_data->relevant_characters != 0)
+				found_and_relevant++;
+		}
+
+return (double)found_and_relevant / (double)precision_point_n;		// we're computing p@n so divide by n
+}

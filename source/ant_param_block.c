@@ -33,6 +33,7 @@ stemmer_similarity = FALSE;
 stemmer_similarity_threshold = 0.0;
 sort_top_k = LLONG_MAX;
 metric = MAP;
+metric_n = 10;
 assessments_filename = NULL;
 queries_filename = NULL;
 output_forum = NONE;
@@ -110,6 +111,7 @@ puts("-----------------------");
 puts("-m[metric]      Score the result set using");
 puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
 puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
+puts("  P@<n>         Set-based precision at <n> [default=10]");
 puts("  RankEff       Mean Rank Effectiveness (acount for unassessed documents)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
@@ -214,6 +216,18 @@ else if (strcmp(which, "MAgP") == 0)
 	metric = MAgP;
 else if (strcmp(which, "RankEff") == 0)
 	metric = RANKEFF;
+else if (strncmp(which, "P@", 2) == 0)
+	{
+	metric = P_AT_N;
+	if (ANT_isdigit(which[2]))
+		{
+		metric_n = atol(which + 2);
+		if (metric_n == 0)
+			exit(printf("Nice Try... You can't compute P@0!\n"));
+		}
+	else
+		exit(printf("<n> in P@<n> must be numeric (e.g. P@10)"));
+	}
 else
 	exit(printf("Unknown metric:'%s'\n", which));
 }

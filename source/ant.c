@@ -153,6 +153,8 @@ if (map != NULL)
 		average_precision = map->average_generalised_precision(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::RANKEFF)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
+	else if (params->metric == ANT_ANT_param_block::P_AT_N)
+		average_precision = map->p_at_n(topic_id, search_engine, params->metric_n);
 	}
 
 /*
