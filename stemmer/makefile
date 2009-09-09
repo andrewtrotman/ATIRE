@@ -13,52 +13,49 @@ CC = g++
 
 
 OBJECTS = \
-    encoding_utf8.o \
-    encoding_factory.o \
-    parser.o \
-    universal_parser.o \
-    parser_readability.o \
-    memory_index_hash_node.o \
-    memory_index.o \
-    memory_index_stats.o \
-    hash_table.o \
-    postings_piece.o \
-    ctypes.o \
-    file.o \
-    file_internals.o \
-    maths.o \
-    memory.o \
-    search_engine.o \
-    search_engine_accumulator.o \
-    mean_average_precision.o \
-    assessment.o \
-    assessment_ANT.o \
-    assessment_INEX.o \
-    assessment_factory.o \
-    relevant_document.o \
-    stats.o \
-    time_stats.o \
-    search_engine_stats.o \
-    search_engine_forum.o \
-    search_engine_forum_INEX.o \
-    search_engine_forum_TREC.o \
-    str.o \
-    stop_word.o \
-    disk.o \
-    disk_internals.o \
+	parser.o \
+	parser_readability.o \
+	memory_index_hash_node.o \
+	memory_index.o \
+	memory_index_stats.o \
+	hash_table.o \
+	postings_piece.o \
+	ctypes.o \
+	file.o \
+	file_internals.o \
+	maths.o \
+	memory.o \
+	search_engine.o \
+	search_engine_accumulator.o \
+	mean_average_precision.o \
+	assessment.o \
+	assessment_ANT.o \
+	assessment_INEX.o \
+	assessment_factory.o \
+	relevant_document.o \
+	stats.o \
+	time_stats.o \
+	search_engine_stats.o \
+	search_engine_forum.o \
+	search_engine_forum_INEX.o \
+	search_engine_forum_TREC.o \
+	str.o \
+	stop_word.o \
+	disk.o \
+	disk_internals.o \
 	directory_recursive_iterator.o \
-    btree_iterator.o \
-    top_k_sort.o \
-    stemmer_term_similarity.o	\
-    stemmer_term_similarity_threshold.o	\
-    stemmer_term_similarity_weighted.o	\
-    stemmer.o	\
-    porter.o \
-    lovins.o \
-    stemmer_factory.o \
-    paice_husk.o \
-    learned_wikipedia_stem.o \
-    relevant_topic.o \
+	btree_iterator.o \
+	top_k_sort.o \
+	stemmer.o \
+	stemmer_term_similarity.o \
+	stemmer_term_similarity_threshold.o \
+	stemmer_term_similarity_weighted.o \
+	porter.o \
+	lovins.o \
+	stemmer_factory.o \
+	paice_husk.o \
+	learned_wikipedia_stem.o \
+	relevant_topic.o \
 	bitstream.o \
 	compress_elias_gamma.o \
 	compress_elias_delta.o \
@@ -70,29 +67,32 @@ OBJECTS = \
 	compress_none.o \
 	compress_sigma.o \
 	compression_factory.o \
-    readability_dale_chall.o \
-    readability_factory.o \
+	readability_dale_chall.o \
+	readability_factory.o \
 	search_engine_readability.o \
-    plugin_manager.o \
+	plugin_manager.o \
 	indexer_param_block.o \
-    ant_param_block.o \
-    version.o \
-    ranking_function.o \
-    ranking_function_impact.o \
-    ranking_function_readability.o \
-    ranking_function_similarity.o \
-    ranking_function_lmd.o \
-    ranking_function_lmjm.o \
-    ranking_function_bose_einstein.o \
+	ant_param_block.o \
+	version.o \
+	ranking_function.o \
+	ranking_function_impact.o \
+	ranking_function_similarity.o \
+	ranking_function_readability.o \
+	ranking_function_lmd.o \
+	ranking_function_lmjm.o \
+	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
-    ranking_function_bm25.o
+	ranking_function_bm25.o \
+	nexi.o \
+	NEXI_term_iterator.o \
+	NEXI_term.o
 
 EXTENSION = \
     ga.o \
     ga_stemmer.o \
     ga_individual.o \
 	ga_function.o \
-	vocab.o 
+	vocab.o
 
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
 EXTENSION_W_DIR = $(EXTENSION:%=$(EXTOBJDIR)/%)
@@ -111,12 +111,7 @@ $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(BINDIR)/special_ant.o : $(SRCDIR)/ant.c 
-	$(CC) $(CFLAGS) -DSPECIAL_COMPRESSION=1 -c $^ -o $@
-$(BINDIR)/special_ant : $(OBJECTS_W_DIR) $(OBJDIR)/special_ant.o 
-	$(CC) $(LDFLAGS) -o $@ $^
-
-$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(OBJDIR)/ant_api.o $(EXTOBJDIR)/qpp.o 
+$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(EXTOBJDIR)/qpp.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(BINDIR)/ant_dict : $(OBJECTS_W_DIR) $(OBJDIR)/ant_dictionary.o
@@ -139,6 +134,6 @@ depend :
 
 .PHONY : clean
 clean :
-	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o
+	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o $(BINDIR)/qpp $(EXTOBJDIR)/qpp.o
 
 include makefile.dep

@@ -654,3 +654,11 @@ stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;
 } 
+
+/*
+	ANT_SEARCH_ENGINE::GET_ACCUMULATOR_POINTERS()
+	---------------------------------------------
+*/
+ANT_search_engine_accumulator **ANT_search_engine::get_accumulator_pointers() {
+    return accumulator_pointers;
+}

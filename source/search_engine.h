@@ -81,6 +81,8 @@ public:
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
+
+	ANT_search_engine_accumulator **get_accumulator_pointers();
 };
 
 #endif __SEARCH_ENGINE_H__
