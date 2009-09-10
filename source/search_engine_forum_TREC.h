@@ -7,6 +7,7 @@
 #define __SEARCH_ENGINE_FORUM_TREC_H__
 
 #include "search_engine_forum.h"
+#include "search_engine.h"
 
 #define MAX_RUN_NAME_LENGTH 1024
 
@@ -20,7 +21,7 @@ private:
 	char run_id[MAX_RUN_NAME_LENGTH];
 public:
 	ANT_search_engine_forum_TREC(char *filename, char *participant_id, char *run_id, char *task);
-	void write(long topic_id, char **docids, long long hits);
+	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine);
 } ;
 
 

@@ -28,7 +28,7 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 	ANT_SEARCH_ENGINE_FORUM_TREC::WRITE()
 	-------------------------------------
 */
-void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits)
+void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine)
 {
 long long which;
 

@@ -6,6 +6,7 @@
 #define __SEARCH_ENGINE_FORUM_H__
 
 #include <stdio.h>
+#include "search_engine.h"
 
 class ANT_search_engine_forum
 {
@@ -17,7 +18,7 @@ protected:
 
 public:
 	virtual ~ANT_search_engine_forum();
-	virtual void write(long topic_id, char **docids, long long hits) = 0;
+	virtual void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine) = 0;
 } ;
 
 #endif __SEARCH_ENGINE_FORUM_H__

@@ -170,6 +170,8 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	if (strstr(buffer, "<topic") != NULL)
 		{
 		into = title;
+		//the new topic id format for 2009 efficiency track is id="2009-Eff-228"
+		//topic = atol(strstr(buffer, "id=\"2009-Eff-") + 13);
 		topic = atol(strstr(buffer, "id=") + 4);
 		}
 	else if ((title_pos = strstr(buffer, TITLE)) != NULL)

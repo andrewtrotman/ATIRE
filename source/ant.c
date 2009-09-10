@@ -18,6 +18,7 @@
 #include "stemmer_factory.h"
 #include "assessment_factory.h"
 #include "search_engine_forum_INEX.h"
+#include "search_engine_forum_INEX_efficiency.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
 #include "version.h"
@@ -239,6 +240,9 @@ if (params->output_forum == ANT_ANT_param_block::TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 else if (params->output_forum == ANT_ANT_param_block::INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == ANT_ANT_param_block::INEX_EFFICIENCY) {
+	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
+}
 
 sum_of_average_precisions = 0.0;
 number_of_queries = line = 0;
@@ -297,10 +301,13 @@ for (query = input.first(); query != NULL; query = input.next())
 			else
 				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
 	else
-		output->write(topic_id, answer_list, last_to_list);
+		output->write(topic_id, answer_list, last_to_list, search_engine);
 
 	prompt(params);
 	}
+
+	/* free the allocated forum */
+	delete output;
 
 /*
 	Compute Mean Average Precision

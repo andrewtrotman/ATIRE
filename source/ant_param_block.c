@@ -123,6 +123,7 @@ puts("-e[-it]         Export a run file for use in an Evaluation Forum");
 puts("  -             Don't generate a run file [default]");
 puts("  I             INEX 2008 (XML) run format");
 puts("  i             INEX 2009 (TREC++) run format");
+puts("  e             INEX 2009 Efficiency (TREC++) run format");
 puts("  t             TREC run format");
 puts("-o<filename>    Output filename for the run [default=ant.out]");
 puts("-i<id>          Forum participant id is <id> [default=unknown]");
@@ -195,6 +196,7 @@ do
 		{
 		case '-' : output_forum = NONE;   break;
 		case 'I' : output_forum = INEX;   break;
+		case 'e' : output_forum = INEX_EFFICIENCY; break;
 		case 'i' : output_forum = TREC;   break;		// in 2009 INEX moved to the TREC format with extra stuff on the end of each line
 		case 't' : output_forum = TREC;   break;
 		default : exit(printf("Unknown export format: '%c'\n", *forum)); break;

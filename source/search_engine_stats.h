@@ -46,6 +46,10 @@ public:
 	void add_stemming_reencode_time(long long time) { stemming_reencode_time += time; }
 	void add_disk_bytes_read_on_init(long long bytes) { disk_bytes_read_on_init += bytes; }
 	void add_disk_bytes_read_on_search(long long bytes) { disk_bytes_read_on_search += bytes; }
+	long long get_cpu_time() { return accumulator_init_time + decompress_time + rank_time + sort_time + count_relevant_time; }
+	long long get_cpu_time_ms() {return (long long)(get_cpu_time() / (get_clock_tick_frequency() / 1000.0)); }
+	long long get_io_time() { return dictionary_time + posting_read_time; }
+	long long get_io_time_ms() { return (long long)(get_io_time() / (get_clock_tick_frequency() / 1000.0)); }
 } ;
 
 #endif __SEARCH_ENGINE_STATS_H__

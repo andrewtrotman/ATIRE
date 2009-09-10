@@ -38,6 +38,7 @@ OBJECTS = \
 	search_engine_stats.o \
 	search_engine_forum.o \
 	search_engine_forum_INEX.o \
+	search_engine_forum_INEX_efficiency.o \
 	search_engine_forum_TREC.o \
 	str.o \
 	stop_word.o \
