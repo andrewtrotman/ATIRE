@@ -57,6 +57,7 @@ PARTS = \
 	$(OBJDIR)\search_engine_stats.obj				\
 	$(OBJDIR)\search_engine_forum.obj				\
 	$(OBJDIR)\search_engine_forum_INEX.obj			\
+	$(OBJDIR)\search_engine_forum_INEX_efficiency.obj			\
 	$(OBJDIR)\search_engine_forum_TREC.obj			\
 	$(OBJDIR)\str.obj 								\
 	$(OBJDIR)\stop_word.obj 						\
