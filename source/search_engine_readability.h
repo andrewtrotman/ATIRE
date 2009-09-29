@@ -22,8 +22,12 @@ private:
 	long *document_readability;
 	long hardest_document;
 
+private:
+	void initialise(ANT_memory *memory);
+
 public:
 	ANT_search_engine_readability(ANT_memory *memory);
+	ANT_search_engine_readability(const char *index_filename, ANT_memory *memory);
 	virtual ~ANT_search_engine_readability() {};
 
 };

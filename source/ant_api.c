@@ -107,6 +107,8 @@ params->lmjm_l = 0.5;
 params->bm25_k1 = 0.9;
 params->bm25_b = 0.4;
 params->output = stdout;
+params->index_filename = "index.aspt";
+params->doclist_filename = "doclist.aspt";
 }
 
 /*
@@ -139,6 +141,16 @@ ant_params_init((ANT *)data);
 return data;
 }
 
+/*
+	ANT_FILENAMES_INIT()
+	--------------------
+*/
+void ant_filenames_init(ANT* ant, const char *doclist_filename, const char *index_filename)
+{
+struct ANT_ANT_params *params = ant_params(ant);
+params->doclist_filename = doclist_filename;
+params->index_filename = index_filename;
+}
 
 /*
 	MAX()
@@ -161,13 +173,13 @@ return thus_far;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
+char **read_docid_list(const char *doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
 {
 char *document_list_buffer, *filename_list_buffer;
 char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
-if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
+if ((document_list_buffer = ANT_disk::read_entire_file((char *)doclist_filename)) == NULL)
 	exit(fprintf(stderr, "Cannot open document ID list file 'doclist.aspt'\n"));
 
 filename_list_buffer = strnew(document_list_buffer);
@@ -215,7 +227,7 @@ struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 if (params->logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
-data->document_list = read_docid_list(&data->documents_in_id_list, &data->filename_list, &data->mem1, &data->mem2);
+data->document_list = read_docid_list(params->doclist_filename, &data->documents_in_id_list, &data->filename_list, &data->mem1, &data->mem2);
 
 if (params->assessments_filename != NULL)
 	{
@@ -228,12 +240,12 @@ data->answer_list = (char **)data->memory.malloc(sizeof(*data->answer_list) * da
 
 if (params->ranking_function == READABLE)
 	{
-	data->search_engine = data->readable_search_engine = new ANT_search_engine_readability(&data->memory);
+	data->search_engine = data->readable_search_engine = new ANT_search_engine_readability(params->index_filename, &data->memory);
 	data->ranking_function = new ANT_ranking_function_readability(data->readable_search_engine);
 	}
 else
 	{
-	data->search_engine = new ANT_search_engine(&data->memory);
+	data->search_engine = new ANT_search_engine(params->index_filename, &data->memory);
     /*    	if (params->stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
 		ranking_function = new ANT_ranking_function_similarity(search_engine, params->bm25_k1, params->bm25_b);
         else*/

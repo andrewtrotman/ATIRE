@@ -42,6 +42,9 @@ struct ANT_ANT_params
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
+
+	const char *index_filename;
+	const char *doclist_filename;
 	FILE *output;					// the output of ant, stdout is default value
 } ;
 

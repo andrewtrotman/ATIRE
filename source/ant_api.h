@@ -30,6 +30,8 @@ ANT *ant_easy_init();
 
 void ant_setup(ANT *ant);
 
+void ant_filenames_init(ANT* ant, const char *doclist_filename = "doclist.aspt", const char *index_filename = "index.aspt");
+
 ANT_ANT_params *ant_params(ANT *ant);
 
 void ant_post_processing_stats_init(ANT *ant);

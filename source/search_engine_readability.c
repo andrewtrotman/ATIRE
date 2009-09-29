@@ -15,6 +15,24 @@
 */
 ANT_search_engine_readability::ANT_search_engine_readability(ANT_memory *memory) : ANT_search_engine(memory)
 {
+initialise(memory);
+}
+
+/*
+	ANT_SEARCH_ENGINE_READABILITY::ANT_SEARCH_ENGINE_READABILITY()
+	--------------------------------------------------------------
+*/
+ANT_search_engine_readability::ANT_search_engine_readability(const char *filename, ANT_memory *memory) : ANT_search_engine(filename, memory)
+{
+initialise(memory);
+}
+
+/*
+	ANT_SEARCH_ENGINE_READABILITY::INITIALISE()
+	--------------------------------------
+*/
+void ANT_search_engine_readability::initialise(ANT_memory *memory)
+{
 long long current_readability;
 ANT_search_engine_btree_leaf collection_details;
 

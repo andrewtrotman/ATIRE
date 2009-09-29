@@ -36,6 +36,7 @@ private:
 	long long max_header_block_size;
 	long string_length_of_longest_term;
 	long long highest_df;
+	const char *index_filename;
 
 protected:
 	ANT_compressable_integer *decompress_buffer;
@@ -55,9 +56,11 @@ private:
 	long long get_long_long(unsigned char *from) { return *((int64_t *)from); }
 	long get_long(unsigned char *from) { return *((int32_t *)from); }
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
+	void initialise(ANT_memory *memory);
 
 public:
 	ANT_search_engine(ANT_memory *memory);
+	ANT_search_engine(const char *index_filename, ANT_memory *memory);
 	virtual ~ANT_search_engine();
 
 	void init_accumulators(void);
