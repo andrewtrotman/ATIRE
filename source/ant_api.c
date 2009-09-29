@@ -19,6 +19,7 @@
 #include "stemmer_factory.h"
 #include "assessment_factory.h"
 #include "search_engine_forum_INEX.h"
+#include "search_engine_forum_INEX_efficiency.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_params.h"
 #include "version.h"
@@ -474,7 +475,9 @@ if (params->output_forum == TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 else if (params->output_forum == INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
-
+else if (params->output_forum == INEX_EFFICIENCY) {
+	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
+}
 /*
 	Convert from a results list into a list of documents
 */
@@ -495,7 +498,10 @@ if (output == NULL)
 		else
 			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
 else
-	output->write(topic_id, data->answer_list, last_to_list);
+	output->write(topic_id, data->answer_list, last_to_list, data->search_engine);
+
+/* free the allocated forum */
+delete output;
 
 return data->answer_list;
 }

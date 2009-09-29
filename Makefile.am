@@ -49,6 +49,7 @@ library_sources =  \
     $(SRCDIR)/search_engine_stats.c \
     $(SRCDIR)/search_engine_forum.c \
     $(SRCDIR)/search_engine_forum_INEX.c \
+    $(SRCDIR)/search_engine_forum_INEX_efficiency.c	\
     $(SRCDIR)/search_engine_forum_TREC.c \
     $(SRCDIR)/search_engine_readability.c \
     $(SRCDIR)/str.c \
@@ -157,6 +158,7 @@ library_noinst_headers = \
 	$(SRCDIR)/search_engine_btree_node.h	\
 	$(SRCDIR)/search_engine_forum.h	\
 	$(SRCDIR)/search_engine_forum_INEX.h	\
+	$(SRCDIR)/search_engine_forum_INEX_efficiency.h	\
 	$(SRCDIR)/search_engine_forum_TREC.h	\
 	$(SRCDIR)/search_engine.h	\
 	$(SRCDIR)/search_engine_posting.h	\
