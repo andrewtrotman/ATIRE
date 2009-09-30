@@ -16,6 +16,7 @@ public:
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };						// statistics to print (bitstring)
 	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN, DIVERGENCE};	// ranking function
 	enum { /* NONE = 0, */ THRESHOLD = 1, WEIGHTED = 2 }; 					// stemming stuff
+	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1};							// read the index from disk or load at startup
 
 private:
 	int argc;
@@ -46,6 +47,7 @@ public:
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
+	long file_or_memory;				// the index be loaded into memory at startup (TRUE / FALSE)
 
 private:
 	void export_format(char *forum);

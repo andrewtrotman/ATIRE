@@ -19,32 +19,35 @@ class ANT_file
 {
 private:
 	ANT_file_internals *internals;
+	long long buffer_size, buffer_used;
+	long long bytes_written, bytes_read;
+
+protected:
 	long long file_position;
 	unsigned char *buffer;
-	long long buffer_size, buffer_used;
 	ANT_memory *memory;
-	long long bytes_written, bytes_read;
 
 private:
 	void flush(void);
 
 public:
 	ANT_file(ANT_memory *memory);
-	~ANT_file();
+	virtual ~ANT_file();
 
-	long setvbuff(long size);
-	long open(char *filename, char *mode);
-	long close(void);
-	long write(unsigned char *data, long long size);
-	long long puts(char *string);
-	long read(unsigned char *data, long long size);
+	virtual long setvbuff(long size);
+	virtual long open(char *filename, char *mode);
+	virtual long close(void);
+	virtual long write(unsigned char *data, long long size);
+	virtual long long puts(char *string);
+	virtual long read(unsigned char *data, long long size);
 	long read(int64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(int32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
-	long long tell(void);
-	void seek(long long offset_from_start_of_file);
-	long long file_length(void);
+	long long tell(void) { return file_position; }
+	virtual void seek(long long offset_from_start_of_file);
+	virtual long long file_length(void);
+
 	long long get_bytes_read(void) { return bytes_read; }
-	long long get_bytes_written(void) { return bytes_read; }
+	long long get_bytes_written(void) { return bytes_written; }
 } ;
 
 #endif __FILE_H__

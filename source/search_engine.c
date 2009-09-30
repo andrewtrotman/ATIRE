@@ -8,7 +8,7 @@
 #include <math.h>
 #include <limits.h>
 #include "search_engine.h"
-#include "file.h"
+#include "file_memory.h"
 #include "memory.h"
 #include "search_engine_btree_node.h"
 #include "search_engine_btree_leaf.h"
@@ -30,38 +30,7 @@
 	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
 	--------------------------------------
 */
-ANT_search_engine::ANT_search_engine(ANT_memory *memory) : index_filename("index.aspt")
-{
-initialise(memory);
-}
-
-/*
-	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
-	--------------------------------------
-*/
-ANT_search_engine::ANT_search_engine(const char *filename, ANT_memory *memory) : index_filename(filename)
-{
-initialise(memory);
-}
-
-
-/*
-	ANT_SEARCH_ENGINE::~ANT_SEARCH_ENGINE()
-	---------------------------------------
-*/
-ANT_search_engine::~ANT_search_engine()
-{
-index->close();
-delete index;
-delete stats;
-delete stats_for_all_queries;
-}
-
-/*
-	ANT_SEARCH_ENGINE::INITIALISE()
-	--------------------------------------
-*/
-void ANT_search_engine::initialise(ANT_memory *memory)
+ANT_search_engine::ANT_search_engine(ANT_memory *memory, long memory_model, const char *filename)
 {
 int32_t four_byte;
 int64_t eight_byte;
@@ -72,13 +41,17 @@ ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
 
+index_filename = filename;
 trim_postings_k = LLONG_MAX;
 stats = new ANT_search_engine_stats(memory);
 stats_for_all_queries = new ANT_search_engine_stats(memory);
 this->memory = memory;
-index = new ANT_file(memory);
+if (memory_model)
+	index = new ANT_file_memory(memory);
+else
+	index = new ANT_file(memory);
 if (index->open((char *)index_filename, "rb") == 0)
-	exit(printf("Cannot open index file:index.aspt\n"));
+	exit(printf("Cannot open index file:%s\n", index_filename));
 
 /*
 	At the end of the file is a "header" that provides various details:
@@ -201,6 +174,18 @@ memory->realign();
 stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
+}
+
+/*
+	ANT_SEARCH_ENGINE::~ANT_SEARCH_ENGINE()
+	---------------------------------------
+*/
+ANT_search_engine::~ANT_search_engine()
+{
+index->close();
+delete index;
+delete stats;
+delete stats_for_all_queries;
 }
 
 /*

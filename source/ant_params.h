@@ -1,6 +1,6 @@
 /*
 	ANT_PARAMS.H
-	-----------------
+	------------
 */
 #ifndef __ANT_PARAMS_H__
 #define __ANT_PARAMS_H__

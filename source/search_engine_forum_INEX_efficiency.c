@@ -38,6 +38,7 @@ fprintf(file, " text_predicates = \"no\"");
 fprintf(file, " description = \"no\"");
 fprintf(file, " narrative = \"no\"");
 fprintf(file, " />\n");
+#pragma warning (suppress: 4100)
 }
 
 /*

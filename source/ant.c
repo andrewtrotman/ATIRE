@@ -436,12 +436,12 @@ answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	{
-	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory);
+	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory, params.file_or_memory);
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
 	}
 else
 	{
-	search_engine = new ANT_search_engine(&memory);
+	search_engine = new ANT_search_engine(&memory, params.file_or_memory);
     /*    	if (params.stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
 		ranking_function = new ANT_ranking_function_similarity(search_engine, params.bm25_k1, params.bm25_b); 
         else*/

@@ -41,6 +41,7 @@ PARTS = \
 	$(OBJDIR)\postings_piece.obj					\
 	$(OBJDIR)\ctypes.obj 							\
 	$(OBJDIR)\file.obj								\
+	$(OBJDIR)\file_memory.obj						\
 	$(OBJDIR)\file_internals.obj					\
 	$(OBJDIR)\maths.obj 							\
 	$(OBJDIR)\memory.obj 							\
@@ -104,7 +105,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
 	$(OBJDIR)\nexi.obj								\
-	$(OBJDIR)\nexi_term_iterator.obj		\
+	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term.obj
 	
 

@@ -59,8 +59,7 @@ private:
 	void initialise(ANT_memory *memory);
 
 public:
-	ANT_search_engine(ANT_memory *memory);
-	ANT_search_engine(const char *index_filename, ANT_memory *memory);
+	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *index_filename = "index.aspt");
 	virtual ~ANT_search_engine();
 
 	void init_accumulators(void);

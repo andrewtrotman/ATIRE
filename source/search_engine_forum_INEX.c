@@ -44,4 +44,5 @@ for (which = 0; which < hits; which++)
 	}
 
 fprintf(file, "</topic>\n");
+#pragma warning (suppress: 4100)
 }

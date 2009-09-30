@@ -220,15 +220,6 @@ return internals->read_file_64(internals->fp, data, size);
 }
 
 /*
-	ANT_FILE::TELL()
-	----------------
-*/
-long long ANT_file::tell(void)
-{
-return file_position;
-}
-
-/*
 	ANT_FILE::SEEK()
 	----------------
 */

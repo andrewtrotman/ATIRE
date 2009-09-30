@@ -48,6 +48,7 @@ lmd_u = 500.0;
 lmjm_l = 0.5;
 bm25_k1 = 0.9;
 bm25_b = 0.4;
+file_or_memory = INDEX_IN_FILE;
 }
 
 /*
@@ -104,6 +105,7 @@ puts("OPTIMISATIONS");
 puts("-------------");
 puts("-k<n>           Results list accurate to the top <n> (0=all) [default=0]");
 puts("-K<n>           Process no fewer than <n> postings (0=all) [default=0]");
+puts("-M              Load the index into memory at startup");
 puts("");
 
 puts("METRICS AND ASSESSMENTS");
@@ -391,6 +393,8 @@ for (param = 1; param < argc; param++)
 			if (trim_postings_k == 0)
 				trim_postings_k = LLONG_MAX;
 			}
+		else if (*command == 'M')
+			file_or_memory = INDEX_IN_MEMORY;
 		else if (*command == 'm')
 			set_metric(command + 1);
 		else if (*command == 'a') 
