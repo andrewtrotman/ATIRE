@@ -6,8 +6,8 @@
  *      Author: monfee
  */
 
-#ifndef __PLUGIN_H__
-#define __PLUGIN_H__
+#ifndef PLUGIN_H_
+#define PLUGIN_H_
 
 /*
 	class ANT_PLUGIN
@@ -66,4 +66,4 @@ struct ANT_plugin_maker
 
 extern ANT_plugin_maker *plugin_factory;
 
-#endif __PLUGIN_H__
+#endif  /* PLUGIN_H_ */

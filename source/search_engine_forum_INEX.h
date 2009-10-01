@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_FORUM_INEX.H
 	--------------------------
 */
-#ifndef __SEARCH_ENGINE_FORUM_INEX_H__
-#define __SEARCH_ENGINE_FORUM_INEX_H__
+#ifndef SEARCH_ENGINE_FORUM_INEX_H_
+#define SEARCH_ENGINE_FORUM_INEX_H_
 
 #include "search_engine_forum.h"
 #include "search_engine.h"
@@ -18,4 +18,4 @@ public:
 } ;
 
 
-#endif __SEARCH_ENGINE_FORUM_INEX_H__
+#endif  /* SEARCH_ENGINE_FORUM_INEX_H_ */

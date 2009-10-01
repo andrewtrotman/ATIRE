@@ -4,8 +4,8 @@
 	Used to replace the microsoft version that are not inlined!s
 	Modified from Linux.
 */
-#ifndef __CTYPES_H__
-#define __CTYPES_H__
+#ifndef CTYPES_H_
+#define CTYPES_H_
 
 #define _ANT_U       0x01    /* upper */
 #define _ANT_L       0x02    /* lower */
@@ -42,4 +42,4 @@ inline unsigned char ANT_toascii(int c) {return (((unsigned char)(c))&0x7f); }
 inline unsigned char ANT_tolower(unsigned char c) { return ANT_tolower_list[c]; }
 inline unsigned char ANT_toupper(unsigned char c) { return ANT_toupper_list[c]; }
 
-#endif __ANT_CTYPES_H__
+#endif  /* ANT_CTYPES_H_ */

@@ -3,8 +3,8 @@
 	---------------------------------
 */
 
-#ifndef __READABILITY_DALE_CHALL_WORDLIST_H__
-#define __READABILITY_DALE_CHALL_WORDLIST_H__
+#ifndef READABILITY_DALE_CHALL_WORDLIST_H_
+#define READABILITY_DALE_CHALL_WORDLIST_H_
 
 /*
 	ANT_readability_dale_chall_wordlist
@@ -11781,4 +11781,4 @@ static char *ANT_readability_dale_chall_suffixlist[] = {
 
 unsigned long ANT_readability_dale_chall_suffixlist_length = sizeof(ANT_readability_dale_chall_suffixlist) / sizeof(*ANT_readability_dale_chall_suffixlist);
 
-#endif __READABILITY_DALE_CHALL_WORDLIST_H__
+#endif  /* READABILITY_DALE_CHALL_WORDLIST_H_ */

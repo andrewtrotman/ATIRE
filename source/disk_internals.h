@@ -2,8 +2,8 @@
 	DISK_INTERNALS.H
 	----------------
 */
-#ifndef __DISK_INTERNALS_H__
-#define __DISK_INTERNALS_H__
+#ifndef DISK_INTERNALS_H_
+#define DISK_INTERNALS_H_
 
 #ifdef _MSC_VER
 	#include <windows.h>
@@ -34,4 +34,4 @@ public:
 	virtual ~ANT_disk_internals() {}
 } ;
 
-#endif __DISK_INTERNALS_H__
+#endif  /* DISK_INTERNALS_H_ */

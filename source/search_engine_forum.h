@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_FORUM.H
 	---------------------
 */
-#ifndef __SEARCH_ENGINE_FORUM_H__
-#define __SEARCH_ENGINE_FORUM_H__
+#ifndef SEARCH_ENGINE_FORUM_H_
+#define SEARCH_ENGINE_FORUM_H_
 
 #include <stdio.h>
 #include "search_engine.h"
@@ -21,6 +21,6 @@ public:
 	virtual void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine) = 0;
 } ;
 
-#endif __SEARCH_ENGINE_FORUM_H__
+#endif  /* SEARCH_ENGINE_FORUM_H_ */
 
 

@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_BTREE_LEAF.H
 	--------------------------
 */
-#ifndef __SEARCH_ENGINE_BTREE_LEAF_H__
-#define __SEARCH_ENGINE_BTREE_LEAF_H__
+#ifndef SEARCH_ENGINE_BTREE_LEAF_H_
+#define SEARCH_ENGINE_BTREE_LEAF_H_
 
 class ANT_search_engine_btree_leaf
 {
@@ -15,4 +15,4 @@ public:
 	long postings_length;
 } ;
 
-#endif __SEARCH_ENGINE_BTREE_LEAF_H__
+#endif  /* SEARCH_ENGINE_BTREE_LEAF_H_ */

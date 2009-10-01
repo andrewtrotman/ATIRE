@@ -2,8 +2,8 @@
 	NEXI.H
 	------
 */
-#ifndef __NEXI_H__
-#define __NEXI_H__
+#ifndef NEXI_H_
+#define NEXI_H_
 
 #include "string_pair.h"
 #include "NEXI_term.h"
@@ -47,5 +47,5 @@ public:
 	long get_success_state(void) { return successful_parse; }
 } ;
 
-#endif __NEXI_H__
+#endif  /* NEXI_H_ */
 

@@ -3,8 +3,8 @@
 	----------------
 */
 
-#ifndef __FILE_INTERNALS_H__
-#define __FILE_INTERNALS_H__
+#ifndef FILE_INTERNALS_H_
+#define FILE_INTERNALS_H_
 
 #ifdef _MSC_VER
 	#include <windows.h>
@@ -45,4 +45,4 @@ public:
 #endif
 } ;
 
-#endif __FILE_INTERNALS_H__
+#endif  /* FILE_INTERNALS_H_ */

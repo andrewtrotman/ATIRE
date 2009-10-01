@@ -2,8 +2,8 @@
 	NEXI_TERM_ITERATOR.H
 	--------------------
 */
-#ifndef __NEXI_TERM_ITERATOR_H__
-#define __NEXI_TERM_ITERATOR_H__
+#ifndef NEXI_TERM_ITERATOR_H_
+#define NEXI_TERM_ITERATOR_H_
 
 #include "string_pair.h"
 
@@ -23,4 +23,4 @@ public:
 	ANT_NEXI_term *next(void);
 } ;
 
-#endif __NEXI_TERM_ITERATOR_H__
+#endif  /* NEXI_TERM_ITERATOR_H_ */

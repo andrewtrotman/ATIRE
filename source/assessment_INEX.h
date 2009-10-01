@@ -2,8 +2,8 @@
 	ASSESSMENT_INEX.H
 	-----------------
 */
-#ifndef __ASSESSMENT_INEX_H__
-#define __ASSESSMENT_INEX_H__
+#ifndef ASSESSMENT_INEX_H_
+#define ASSESSMENT_INEX_H_
 
 #include "assessment.h"
 
@@ -25,4 +25,4 @@ public:
 
 
 
-#endif __ASSESSMENT_INEX_H__
+#endif  /* ASSESSMENT_INEX_H_ */

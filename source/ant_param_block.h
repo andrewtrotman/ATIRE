@@ -2,8 +2,8 @@
 	ANT_PARAM_BLOCK.H
 	-----------------
 */
-#ifndef __ANT_PARAM_BLOCK_H__
-#define __ANT_PARAM_BLOCK_H__
+#ifndef ANT_PARAM_BLOCK_H_
+#define ANT_PARAM_BLOCK_H_
 /*
 	class ANT_ANT_PARAM_BLOCK
 	-------------------------
@@ -67,5 +67,5 @@ public:
 	long parse(void);
 } ;
 
-#endif __ANT_PARAM_BLOCK_H__
+#endif  /* ANT_PARAM_BLOCK_H_ */
 

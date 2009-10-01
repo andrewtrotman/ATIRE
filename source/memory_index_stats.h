@@ -3,8 +3,8 @@
 	--------------------
 */
 
-#ifndef __MEMORY_INDEX_STATS_H__
-#define __MEMORY_INDEX_STATS_H__
+#ifndef MEMORY_INDEX_STATS_H_
+#define MEMORY_INDEX_STATS_H_
 
 #include "stats.h"
 
@@ -35,4 +35,4 @@ public:
 	virtual void text_render(long which_stats);
 } ;
 
-#endif __MEMORY_INDEX_STATS_H__
+#endif  /* MEMORY_INDEX_STATS_H_ */

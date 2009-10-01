@@ -2,8 +2,8 @@
 	STEMMER_TERM_SIMILARITY_THRESHOLD.H
 	-----------------------------------
 */
-#ifndef __STEMMER_TERM_SIMILARITY_THRESHOLD_H__
-#define __STEMMER_TERM_SIMILARITY_THRESHOLD_H__
+#ifndef STEMMER_TERM_SIMILARITY_THRESHOLD_H_
+#define STEMMER_TERM_SIMILARITY_THRESHOLD_H_
 
 #include "stemmer.h"
 #include "stemmer_term_similarity.h"
@@ -27,4 +27,4 @@ public:
     virtual char *next(void);
 } ;
 
-#endif __STEMMER_TERM_SIMILARITY_THRESHOLD_H__
+#endif  /* STEMMER_TERM_SIMILARITY_THRESHOLD_H_ */

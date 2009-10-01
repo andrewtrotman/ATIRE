@@ -2,8 +2,8 @@
 	STEMMER_LOVINS.H
 	----------------
 */
-#ifndef __STEMMER_LOVINS_H__
-#define __STEMMER_LOVINS_H__
+#ifndef STEMMER_LOVINS_H_
+#define STEMMER_LOVINS_H_
 
 #include <stdio.h>
 #include "ctypes.h"
@@ -22,5 +22,5 @@ public:
 	
 } ;
 
-#endif __STEMMER_LOVINS_H__
+#endif  /* STEMMER_LOVINS_H_ */
 

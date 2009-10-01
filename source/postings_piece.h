@@ -3,8 +3,8 @@
 	----------------
 */
 
-#ifndef __POSTINGS_PIECE_H__
-#define __POSTINGS_PIECE_H__
+#ifndef POSTINGS_PIECE_H_
+#define POSTINGS_PIECE_H_
 
 class ANT_memory;
 
@@ -19,5 +19,5 @@ public:
 	void *operator new (size_t size, ANT_memory *allocator);
 } ;
 
-#endif __POSTINGS_PIECE_H__
+#endif  /* POSTINGS_PIECE_H_ */
 

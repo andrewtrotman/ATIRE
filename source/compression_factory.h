@@ -2,8 +2,8 @@
 	COMPRESSION_FACTORY.H
 	---------------------
 */
-#ifndef __COMPRESSION_FACTORY_H__
-#define __COMPRESSION_FACTORY_H__
+#ifndef COMPRESSION_FACTORY_H_
+#define COMPRESSION_FACTORY_H_
 
 #include <string.h>
 #include "compress.h"
@@ -58,4 +58,4 @@ public:
 
 } ;
 
-#endif __COMPRESSION_FACTORY_H__
+#endif  /* COMPRESSION_FACTORY_H_ */

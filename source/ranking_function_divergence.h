@@ -2,8 +2,8 @@
 	RANKING_FUNCTION_DIVERGENCE.H
 	-----------------------------
 */
-#ifndef __RANKING_FUNCTION_DIVERGENCE_H__
-#define __RANKING_FUNCTION_DIVERGENCE_H__
+#ifndef RANKING_FUNCTION_DIVERGENCE_H_
+#define RANKING_FUNCTION_DIVERGENCE_H_
 
 #include "ranking_function.h"
 
@@ -20,4 +20,4 @@ public:
 	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point);
 } ;
 
-#endif __RANKING_FUNCTION_DIVERGENCE_H__
+#endif  /* RANKING_FUNCTION_DIVERGENCE_H_ */

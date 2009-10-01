@@ -2,8 +2,8 @@
 	COMPRESS_GOLOMB.H
 	-----------------
 */
-#ifndef __COMPRESS_GOLOMB_H__
-#define __COMPRESS_GOLOMB_H__
+#ifndef COMPRESS_GOLOMB_H_
+#define COMPRESS_GOLOMB_H_
 
 #include "compress_elias_delta.h"
 
@@ -33,5 +33,5 @@ public:
 	void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
 } ;
 
-#endif __COMPRESS_GOLOMB_H__
+#endif  /* COMPRESS_GOLOMB_H_ */
 

@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_FORUM_INEX_EFFICIENCY.H
 	--------------------------
 */
-#ifndef __SEARCH_ENGINE_FORUM_INEX_EFFICIENCY_H__
-#define __SEARCH_ENGINE_FORUM_INEX_EFFICIENCY_H__
+#ifndef SEARCH_ENGINE_FORUM_INEX_EFFICIENCY_H_
+#define SEARCH_ENGINE_FORUM_INEX_EFFICIENCY_H_
 
 #include "search_engine_forum.h"
 #include "search_engine.h"
@@ -20,4 +20,4 @@ private:
 } ;
 
 
-#endif __SEARCH_ENGINE_FORUM_INEX_EFFICIENCY_H__
+#endif  /* SEARCH_ENGINE_FORUM_INEX_EFFICIENCY_H_ */

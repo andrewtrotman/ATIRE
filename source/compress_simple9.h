@@ -34,4 +34,4 @@ public:
 	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
 } ;
 
-#endif __COMPRESS_SIMPLE9_H__
+#endif  /* __COMPRESS_SIMPLE9_H__ */

@@ -2,8 +2,8 @@
 	BTREE_ITERATOR.H
 	----------------
 */
-#ifndef __BTREE_ITERATOR_H__
-#define __BTREE_ITERATOR_H__
+#ifndef BTREE_ITERATOR_H_
+#define BTREE_ITERATOR_H_
 
 #if defined(__APPLE__) || defined(linux)
 #include <stddef.h>
@@ -32,4 +32,4 @@ public:
 	virtual ANT_search_engine_btree_leaf *get_postings_details(ANT_search_engine_btree_leaf *term_details);
 } ;
 
-#endif __BTREE_ITERATOR_H__
+#endif  /* BTREE_ITERATOR_H_ */

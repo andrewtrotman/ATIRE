@@ -2,8 +2,8 @@
 	STEMMER_TERM_SIMILARITY_WEIGHTED.H
 	----------------------------------
 */
-#ifndef __STEMMER_TERM_SIMILARITY_WEIGHTED_H__
-#define __STEMMER_TERM_SIMILARITY_WEIGHTED_H__
+#ifndef STEMMER_TERM_SIMILARITY_WEIGHTED_H_
+#define STEMMER_TERM_SIMILARITY_WEIGHTED_H_
 
 #include "stemmer.h"
 #include "stemmer_term_similarity.h"
@@ -27,4 +27,4 @@ public:
     virtual long weight_terms(ANT_weighted_tf *term_weight, char *term);
 } ;
 
-#endif __STEMMER_TERM_SIMILARITY_WEIGHTED_H__
+#endif  /* STEMMER_TERM_SIMILARITY_WEIGHTED_H_ */

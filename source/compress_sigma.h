@@ -3,8 +3,8 @@
 	----------------
 */
 
-#ifndef __COMPRESS_SIGMA_H__
-#define __COMPRESS_SIGMA_H__
+#ifndef COMPRESS_SIGMA_H_
+#define COMPRESS_SIGMA_H_
 
 #include "compress.h"
 #include "compress_carryover12.h"
@@ -41,4 +41,4 @@ public:
 
 
 
-#endif __COMPRESS_SIGMA_H__
+#endif  /* COMPRESS_SIGMA_H_ */

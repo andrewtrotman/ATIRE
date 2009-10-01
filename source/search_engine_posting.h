@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_POSTING.H
 	-----------------------
 */
-#ifndef __SEARCH_ENGINE_POSTING_H__
-#define __SEARCH_ENGINE_POSTING_H__
+#ifndef SEARCH_ENGINE_POSTING_H_
+#define SEARCH_ENGINE_POSTING_H_
 
 #include "compress.h"
 /*
@@ -17,4 +17,4 @@ public:
 	ANT_compressable_integer *tf;
 } ;
 
-#endif __SEARCH_ENGINE_POSTING_H__
+#endif  /* SEARCH_ENGINE_POSTING_H_ */

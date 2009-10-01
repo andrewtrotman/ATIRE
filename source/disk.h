@@ -2,8 +2,8 @@
 	DISK.H
 	------
 */
-#ifndef __DISK_H__
-#define __DISK_H__
+#ifndef DISK_H_
+#define DISK_H_
 
 class ANT_disk_internals;
 class ANT_disk_directory;
@@ -36,4 +36,4 @@ public:
 	virtual char *next(void) { return get_next_filename(); }
 } ;
 
-#endif __DISK_H__
+#endif  /* DISK_H_ */

@@ -2,8 +2,8 @@
 	SEARCH_ENGINE.H
 	---------------
 */
-#ifndef __SEARCH_ENGINE_H__
-#define __SEARCH_ENGINE_H__
+#ifndef SEARCH_ENGINE_H_
+#define SEARCH_ENGINE_H_
 
 #include "compression_factory.h"
 #include "ranking_function.h"
@@ -87,4 +87,4 @@ public:
 	ANT_search_engine_accumulator **get_accumulator_pointers();
 };
 
-#endif __SEARCH_ENGINE_H__
+#endif  /* SEARCH_ENGINE_H_ */

@@ -3,8 +3,8 @@
 	----------------
 */
 
-#ifndef __DISK_DIRECTORY_H__
-#define __DISK_DIRECTORY_H__
+#ifndef DISK_DIRECTORY_H_
+#define DISK_DIRECTORY_H_
 
 #include <stdlib.h>
 #include <limits.h>
@@ -26,4 +26,4 @@ public:
 } ;
 
 
-#endif __DISK_DIRECTORY_H__
+#endif  /* DISK_DIRECTORY_H_ */

@@ -3,8 +3,8 @@
 	--------------------------
 */
 
-#ifndef __SEARCH_ENGINE_BTREE_NODE_H__
-#define __SEARCH_ENGINE_BTREE_NODE_H__
+#ifndef SEARCH_ENGINE_BTREE_NODE_H_
+#define SEARCH_ENGINE_BTREE_NODE_H_
 
 #include "btree.h"
 
@@ -16,4 +16,4 @@ public:
 	long long disk_pos;
 } ;
 
-#endif __SEARCH_ENGINE_BTREE_NODE_H__
+#endif  /* SEARCH_ENGINE_BTREE_NODE_H_ */

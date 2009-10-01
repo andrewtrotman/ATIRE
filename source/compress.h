@@ -3,8 +3,8 @@
 	----------
 */
 
-#ifndef __COMPRESS_H__
-#define __COMPRESS_H__
+#ifndef COMPRESS_H_
+#define COMPRESS_H_
 
 #include "fundamental_types.h"
 
@@ -27,5 +27,5 @@ public:
 	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers) = 0;
 } ;
 
-#endif __COMPRESS_H__
+#endif  /* COMPRESS_H_ */
 

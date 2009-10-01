@@ -3,8 +3,8 @@
 	------------------------
 */
 
-#ifndef __LEARNED_WIKIPEDIA_STEM_H__
-#define __LEARNED_WIKIPEDIA_STEM_H__
+#ifndef LEARNED_WIKIPEDIA_STEM_H_
+#define LEARNED_WIKIPEDIA_STEM_H_
 
 class ANT_learned_wikipedia_stem
 {
@@ -15,4 +15,4 @@ public:
 	virtual size_t stem(const char *term, char *destination);
 } ;
 
-#endif __LEARNED_WIKIPEDIA_STEM_H__
+#endif  /* LEARNED_WIKIPEDIA_STEM_H_ */

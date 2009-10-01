@@ -2,8 +2,8 @@
 	HASH_TABLE.H
 	------------
 */
-#ifndef __HASH_TABLE_H__
-#define __HASH_TABLE_H__
+#ifndef HASH_TABLE_H_
+#define HASH_TABLE_H_
 
 #include "string_pair.h"
 
@@ -161,4 +161,4 @@ inline static unsigned long ANT_hash_24(ANT_string_pair *string)
 #endif
 }
 
-#endif __HASH_TABLE_H__
+#endif  /* HASH_TABLE_H_ */

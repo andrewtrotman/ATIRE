@@ -3,8 +3,8 @@
  * ---------
  */
 
-#ifndef __ANT_API_H__
-#define __ANT_API_H__
+#ifndef ANT_API_H_
+#define ANT_API_H_
 
 #include "ant_params.h"
 
@@ -52,4 +52,4 @@ void ant_free(ANT *ant);
 }
 #endif
 
-#endif /* __ANT_API_H__ */
+#endif  /* /* ANT_API_H_ */ */

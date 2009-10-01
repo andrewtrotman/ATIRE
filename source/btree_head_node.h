@@ -3,8 +3,8 @@
 	-----------------
 */
 
-#ifndef __BTREE_HEAD_NODE_H__
-#define __BTREE_HEAD_NODE_H__
+#ifndef BTREE_HEAD_NODE_H_
+#define BTREE_HEAD_NODE_H_
 
 class ANT_memory_index_hash_node;
 
@@ -15,4 +15,4 @@ public:
 	long long disk_pos;
 } ;
 
-#endif __BTREE_HEAD_NODE_H__
+#endif  /* BTREE_HEAD_NODE_H_ */

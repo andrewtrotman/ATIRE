@@ -3,8 +3,8 @@
 	---------
 */
 
-#ifndef __STEMMER_H__
-#define __STEMMER_H__
+#ifndef STEMMER_H_
+#define STEMMER_H_
 
 #include "btree_iterator.h"
 #include "ranking_function.h"
@@ -31,4 +31,4 @@ public:
     virtual long weight_terms(ANT_weighted_tf *term_weight, char *term);
 } ;
 
-#endif __STEMMER_H__
+#endif  /* STEMMER_H_ */

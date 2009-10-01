@@ -2,8 +2,8 @@
 	ASSESSMENT_ANT.H
 	----------------
 */
-#ifndef __ASSESSMENT_ANT_H__
-#define __ASSESSMENT_ANT_H__
+#ifndef ASSESSMENT_ANT_H_
+#define ASSESSMENT_ANT_H_
 
 #include "assessment.h"
 
@@ -24,4 +24,4 @@ public:
 } ;
 
 
-#endif __ASSESSMENT_ANT_H__
+#endif  /* ASSESSMENT_ANT_H_ */

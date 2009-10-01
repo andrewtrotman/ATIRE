@@ -2,8 +2,8 @@
 	MEMORY_INDEX.H
 	--------------
 */
-#ifndef __MEMORY_INDEX_H__
-#define __MEMORY_INDEX_H__
+#ifndef MEMORY_INDEX_H_
+#define MEMORY_INDEX_H_
 
 #include "memory_index_stats.h"
 #include "memory_index_hash_node.h"
@@ -75,4 +75,4 @@ stats->unique_terms++;
 return new (memory) ANT_memory_index_hash_node(memory, string, stats);
 }
 
-#endif __MEMORY_INDEX_H__
+#endif  /* MEMORY_INDEX_H_ */

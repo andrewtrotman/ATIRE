@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_STATS.H
 	---------------------
 */
-#ifndef __SEARCH_ENGINE_STATS_H__
-#define __SEARCH_ENGINE_STATS_H__
+#ifndef SEARCH_ENGINE_STATS_H_
+#define SEARCH_ENGINE_STATS_H_
 
 #include "time_stats.h"
 
@@ -52,4 +52,4 @@ public:
 	long long get_io_time_ms() { return (long long)(get_io_time() / (get_clock_tick_frequency() / 1000.0)); }
 } ;
 
-#endif __SEARCH_ENGINE_STATS_H__
+#endif  /* SEARCH_ENGINE_STATS_H_ */

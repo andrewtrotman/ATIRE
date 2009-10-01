@@ -3,8 +3,8 @@
 	-------------------
 */
 
-#ifndef __RELEVANT_DOCUMENT_H__
-#define __RELEVANT_DOCUMENT_H__
+#ifndef RELEVANT_DOCUMENT_H_
+#define RELEVANT_DOCUMENT_H_
 
 class ANT_relevant_document
 {
@@ -18,4 +18,4 @@ public:
 	static int compare(const void *a, const void *b);
 } ;
 
-#endif __RELEVANT_DOCUMENT_H__
+#endif  /* RELEVANT_DOCUMENT_H_ */

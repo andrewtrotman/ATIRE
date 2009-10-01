@@ -2,8 +2,8 @@
 	DIRECTORY_ITERATOR.H
 	--------------------
 */
-#ifndef __DIRECTORY_ITERATOR_H__
-#define __DIRECTORY_ITERATOR_H__
+#ifndef DIRECTORY_ITERATOR_H_
+#define DIRECTORY_ITERATOR_H_
 
 #include "disk.h"
 
@@ -21,5 +21,5 @@ public:
 	virtual char *next(void) { return ANT_disk::get_next_filename(); }
 } ;
 
-#endif __DIRECTORY_ITERATOR_H__
+#endif  /* DIRECTORY_ITERATOR_H_ */
 

@@ -3,9 +3,9 @@
 	-------
 */
 
-#ifndef __BTREE_H__
-#define __BTREE_H__
+#ifndef BTREE_H_
+#define BTREE_H_
 
 #define B_TREE_PREFIX_SIZE 4
 
-#endif __BTREE_H__
+#endif  /* BTREE_H_ */

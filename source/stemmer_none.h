@@ -3,8 +3,8 @@
 	--------------
 */
 
-#ifndef __STEMMER_NONE_H__
-#define __STEMMER_NONE_H__
+#ifndef STEMMER_NONE_H_
+#define STEMMER_NONE_H_
 
 #include <string.h>
 #include "stemmer.h"
@@ -22,4 +22,4 @@ public:
 } ;
 
 
-#endif __STEMMER_NONE_H__
+#endif  /* STEMMER_NONE_H_ */

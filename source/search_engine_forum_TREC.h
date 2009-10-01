@@ -3,8 +3,8 @@
 	--------------------------
 */
 
-#ifndef __SEARCH_ENGINE_FORUM_TREC_H__
-#define __SEARCH_ENGINE_FORUM_TREC_H__
+#ifndef SEARCH_ENGINE_FORUM_TREC_H_
+#define SEARCH_ENGINE_FORUM_TREC_H_
 
 #include "search_engine_forum.h"
 #include "search_engine.h"
@@ -25,4 +25,4 @@ public:
 } ;
 
 
-#endif __SEARCH_ENGINE_FORUM_TREC_H__
+#endif  /* SEARCH_ENGINE_FORUM_TREC_H_ */

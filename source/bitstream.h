@@ -2,8 +2,8 @@
 	BITSTREAM.H
 	-----------
 */
-#ifndef __BITSTREAM_H__
-#define __BITSTREAM_H__
+#ifndef BITSTREAM_H_
+#define BITSTREAM_H_
 
 #include "fundamental_types.h"
 
@@ -142,4 +142,4 @@ while (bits-- > 0)
 return ans;
 }
 
-#endif __BITSTREAM_H__
+#endif  /* BITSTREAM_H_ */

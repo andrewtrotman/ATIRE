@@ -2,8 +2,8 @@
 	ANT_RANKING_FUNCTION.H
 	----------------------
 */
-#ifndef __ANT_RANKING_FUNCTION_H__
-#define __ANT_RANKING_FUNCTION_H__
+#ifndef ANT_RANKING_FUNCTION_H_
+#define ANT_RANKING_FUNCTION_H_
 
 #include "compress.h"
 
@@ -62,4 +62,4 @@ public:
 	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point);
 } ;
 
-#endif __ANT_RANKING_FUNCTION_H__
+#endif  /* ANT_RANKING_FUNCTION_H_ */

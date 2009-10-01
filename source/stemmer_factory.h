@@ -2,8 +2,8 @@
 	STEMMER_FACTORY.H
 	-----------------
 */
-#ifndef __STEMMER_FACTORY_H__
-#define __STEMMER_FACTORY_H__
+#ifndef STEMMER_FACTORY_H_
+#define STEMMER_FACTORY_H_
 
 class ANT_stemmer;
 class ANT_search_engine;
@@ -22,4 +22,4 @@ public:
 	static ANT_stemmer *get_stemmer(long which_stemmer, ANT_search_engine *engine, long use_wrapper = NONE, double value = 0.0);
 } ;
 
-#endif __STEMMER_FACTORY_H__
+#endif  /* STEMMER_FACTORY_H_ */

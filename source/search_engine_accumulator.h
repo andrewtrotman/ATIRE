@@ -3,8 +3,8 @@
 	---------------------------
 */
 
-#ifndef __SEARCH_ENGINE_ACCUMULATOR_H__
-#define __SEARCH_ENGINE_ACCUMULATOR_H__
+#ifndef SEARCH_ENGINE_ACCUMULATOR_H_
+#define SEARCH_ENGINE_ACCUMULATOR_H_
 
 #include <stddef.h>		// needed for size_t
 
@@ -43,4 +43,4 @@ public:
 	static inline void swapfunc(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b, long long n);
 } ;
 
-#endif __SEARCH_ENGINE_ACCUMULATOR_H__
+#endif  /* SEARCH_ENGINE_ACCUMULATOR_H_ */

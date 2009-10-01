@@ -2,8 +2,8 @@
 	ASSESSMENT_FACTORY.H
 	--------------------
 */
-#ifndef __ASSESSMENT_FACTORY_H__
-#define __ASSESSMENT_FACTORY_H__
+#ifndef ASSESSMENT_FACTORY_H_
+#define ASSESSMENT_FACTORY_H_
 
 #include "assessment.h"
 
@@ -25,4 +25,4 @@ public:
 
 
 
-#endif __ASSESSMENT_FACTORY_H__
+#endif  /* ASSESSMENT_FACTORY_H_ */

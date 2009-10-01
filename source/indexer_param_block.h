@@ -2,8 +2,8 @@
 	INDEXER_PARAM_BLOCK.H
 	---------------------
 */
-#ifndef __INDEXER_PARAM_BLOCK_H__
-#define __INDEXER_PARAM_BLOCK_H__
+#ifndef INDEXER_PARAM_BLOCK_H_
+#define INDEXER_PARAM_BLOCK_H_
 
 /*
 	class ANT_INDEXER_PARAM_BLOCK
@@ -41,4 +41,4 @@ public:
 	long parse(void);
 } ;
 
-#endif __INDEXER_PARAM_BLOCK_H__
+#endif  /* INDEXER_PARAM_BLOCK_H_ */

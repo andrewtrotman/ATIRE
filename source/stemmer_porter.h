@@ -2,8 +2,8 @@
 	STEMMER_PORTER.H
 	----------------
 */
-#ifndef __STEMMER_PORTER_H__
-#define __STEMMER_PORTER_H__
+#ifndef STEMMER_PORTER_H_
+#define STEMMER_PORTER_H_
 
 #include "stemmer.h"
 #include "porter.h"
@@ -16,5 +16,5 @@ public:
 	
 } ;
 
-#endif __STEMMER_PORTER_H__
+#endif  /* STEMMER_PORTER_H_ */
 

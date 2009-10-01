@@ -24,5 +24,5 @@ public:
 } ;
 
 
-#endif __COMPRESS_CARRYOVER12_H__
+#endif  /* __COMPRESS_CARRYOVER12_H__ */
 

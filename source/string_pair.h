@@ -2,8 +2,8 @@
 	STRING_PAIR.H
 	-------------
 */
-#ifndef __STRING_PAIR_H__
-#define __STRING_PAIR_H__
+#ifndef STRING_PAIR_H_
+#define STRING_PAIR_H_
 
 #include <stdio.h>
 #include "str.h"
@@ -115,4 +115,4 @@ return this;
 }
 
 
-#endif __STRING_PAIR_H__
+#endif  /* STRING_PAIR_H_ */

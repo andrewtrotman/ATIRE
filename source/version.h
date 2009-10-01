@@ -2,12 +2,12 @@
 	VERSION.H
 	---------
 */
-#ifndef __VERSION_H__
-#define __VERSION_H__
+#ifndef VERSION_H_
+#define VERSION_H_
 
 extern long ANT_version;		// version number in BCD
 extern char *ANT_version_string;
 
 void ANT_credits(void);
 
-#endif __VERSION_H__
+#endif  /* VERSION_H_ */

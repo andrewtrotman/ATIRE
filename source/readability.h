@@ -3,8 +3,8 @@
 	-------------
 */
 
-#ifndef __READABILITY_H__
-#define __READABILITY_H__
+#ifndef READABILITY_H_
+#define READABILITY_H_
 
 #include "string_pair.h"
 #include "memory_index.h"
@@ -32,4 +32,4 @@ protected:
 	virtual void handle_node(ANT_memory_index_hash_node *node) {node = node; /* prevent compiler warning */ }
 } ;
 
-#endif __READABILITY_H__
+#endif  /* READABILITY_H_ */

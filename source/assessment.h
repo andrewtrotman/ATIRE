@@ -3,8 +3,8 @@
 	------------
 */
 
-#ifndef __ASSESSMENT_H__
-#define __ASSESSMENT_H__
+#ifndef ASSESSMENT_H_
+#define ASSESSMENT_H_
 
 class ANT_memory;
 class ANT_relevant_document; 
@@ -36,4 +36,4 @@ public:
 	virtual ANT_relevant_document *read(char *filename, long long *reldocs) = 0;
 } ;
 
-#endif __ASSESSMENT_H__
+#endif  /* ASSESSMENT_H_ */

@@ -2,8 +2,8 @@
 	MATHS.H
 	-------
 */
-#ifndef __MATHS_H__
-#define __MATHS_H__
+#ifndef MATHS_H_
+#define MATHS_H_
 #ifdef _MSC_VER
 	#include <crtdefs.h>
 #else
@@ -97,5 +97,5 @@ extern unsigned long ANT_powers_of_two_zero[];
 return ANT_powers_of_two_zero[power];
 }
 
-#endif __MATHS_H__
+#endif  /* MATHS_H_ */
 

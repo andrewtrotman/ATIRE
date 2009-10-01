@@ -3,8 +3,8 @@
 	--------------------------
 */
 
-#ifndef __COMPRESS_SIGMA_FREQUENCY_H__
-#define __COMPRESS_SIGMA_FREQUENCY_H__
+#ifndef COMPRESS_SIGMA_FREQUENCY_H_
+#define COMPRESS_SIGMA_FREQUENCY_H_
 
 #include "compress.h"
 
@@ -21,4 +21,4 @@ public:
 } ;
 
 
-#endif __COMPRESS_SIGMA_FREQUENCY_H__
+#endif  /* COMPRESS_SIGMA_FREQUENCY_H_ */

@@ -2,8 +2,8 @@
 	PARSER_READABILITY.H
 	--------------------
 */
-#ifndef __PARSER_READABILITY_H__
-#define __PARSER_READABILITY_H__
+#ifndef PARSER_READABILITY_H_
+#define PARSER_READABILITY_H_
 
 #include "parser.h"
 
@@ -24,4 +24,4 @@ public:
 	static int issentenceend(unsigned char val) { return val == '.' || val == '!' || val == '?'; }
 } ;
 
-#endif __PARSER_READABILITY_H__
+#endif  /* PARSER_READABILITY_H_ */

@@ -3,8 +3,8 @@
 	------------------------
 */
 
-#ifndef __READABILITY_DALE_CHALL_H__
-#define __READABILITY_DALE_CHALL_H__
+#ifndef READABILITY_DALE_CHALL_H_
+#define READABILITY_DALE_CHALL_H_
 
 #include "readability.h"
 #include "parser_readability.h"
@@ -48,4 +48,4 @@ public:
 	void index(ANT_memory_index *index);
 } ;
 
-#endif __READABILITY_DALE_CHALL_H__
+#endif  /* READABILITY_DALE_CHALL_H_ */

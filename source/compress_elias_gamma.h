@@ -2,8 +2,8 @@
 	COMPRESS_ELIAS_GAMMA.H
 	----------------------
 */
-#ifndef __COMPRESS_ELIAS_GAMMA_H__
-#define __COMPRESS_ELIAS_GAMMA_H__
+#ifndef COMPRESS_ELIAS_GAMMA_H_
+#define COMPRESS_ELIAS_GAMMA_H_
 
 #include "maths.h"
 #include "compress.h"
@@ -59,5 +59,5 @@ return ((((unsigned long long)1) << exp) | bitstream.get_bits(exp)) - 1;
 
 
 
-#endif __COMPRESS_ELIAS_GAMMA_H__
+#endif  /* COMPRESS_ELIAS_GAMMA_H_ */
 

@@ -2,8 +2,8 @@
 	STR.H
 	-----
 */
-#ifndef __STR_H__
-#define __STR_H__
+#ifndef STR_H_
+#define STR_H_
 
 #include <string.h>
 #include "ctypes.h"
@@ -189,4 +189,4 @@ return length;
 
 #endif
 
-#endif __STR_H__
+#endif  /* STR_H_ */

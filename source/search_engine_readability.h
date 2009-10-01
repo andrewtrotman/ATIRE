@@ -2,8 +2,8 @@
 	SEARCH_ENGINE_READABILITY.H
 	---------------------------
 */
-#ifndef __SEARCH_ENGINE_READABILITY_H__
-#define __SEARCH_ENGINE_READABILITY_H__
+#ifndef SEARCH_ENGINE_READABILITY_H_
+#define SEARCH_ENGINE_READABILITY_H_
 
 #include "search_engine.h"
 
@@ -30,4 +30,4 @@ public:
 	virtual ~ANT_search_engine_readability() {};
 };
 
-#endif __SEARCH_ENGINE_READABILITY_H__
+#endif  /* SEARCH_ENGINE_READABILITY_H_ */

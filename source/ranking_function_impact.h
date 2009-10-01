@@ -3,8 +3,8 @@
 	-------------------------
 */
 
-#ifndef __RANKING_FUNCTION_IMPACT_H__
-#define __RANKING_FUNCTION_IMPACT_H__
+#ifndef RANKING_FUNCTION_IMPACT_H_
+#define RANKING_FUNCTION_IMPACT_H_
 
 #include "ranking_function.h"
 
@@ -22,4 +22,4 @@ public:
 } ;
 
 
-#endif __RANKING_FUNCTION_IMPACT_H__
+#endif  /* RANKING_FUNCTION_IMPACT_H_ */

@@ -2,8 +2,8 @@
 	READABILITY_FACTORY.H
 	---------------------
 */
-#ifndef __READABILITY_FACTORY_H__
-#define __READABILITY_FACTORY_H__
+#ifndef READABILITY_FACTORY_H_
+#define READABILITY_FACTORY_H_
 
 #include "parser.h"
 #include "readability.h"
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif __READABILITY_FACTORY_H__
+#endif  /* READABILITY_FACTORY_H_ */

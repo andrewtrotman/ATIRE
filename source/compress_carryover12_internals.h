@@ -98,7 +98,7 @@ while (0)
 #endif
 
 
-#endif __COMPRESS_CARRYOVER12_INTERNALS_H__
+#endif  /* __COMPRESS_CARRYOVER12_INTERNALS_H__ */
 
 
 

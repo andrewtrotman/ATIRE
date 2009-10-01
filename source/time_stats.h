@@ -3,8 +3,8 @@
 	------------
 */
 
-#ifndef __TIME_STATS_H__
-#define __TIME_STATS_H__
+#ifndef TIME_STATS_H_
+#define TIME_STATS_H_
 
 #include "stats.h"
 
@@ -27,4 +27,4 @@ public:
 	void add_cpu_time(long long time) { cpu_time += time; }
 } ;
 
-#endif __TIME_STATS_H__
+#endif  /* TIME_STATS_H_ */

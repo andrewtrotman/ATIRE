@@ -2,8 +2,8 @@
 	COMPRESS_ELIAS_DELTA.H
 	----------------------
 */
-#ifndef __COMPRESS_ELIAS_DELTA_H__
-#define __COMPRESS_ELIAS_DELTA_H__
+#ifndef COMPRESS_ELIAS_DELTA_H_
+#define COMPRESS_ELIAS_DELTA_H_
 
 #include "compress_elias_gamma.h"
 
@@ -49,4 +49,4 @@ long exp = (long)ANT_compress_elias_gamma::decode() - 1;
 return ((((unsigned long long)1) << exp) | bitstream.get_bits(exp)) - 1;
 }
 
-#endif __COMPRESS_ELIAS_DELTA_H__
+#endif  /* COMPRESS_ELIAS_DELTA_H_ */

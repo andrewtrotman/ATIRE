@@ -2,8 +2,8 @@
 	STOP_WORD.H
 	-----------
 */
-#ifndef __STOP_WORD_H__
-#define __STOP_WORD_H__
+#ifndef STOP_WORD_H_
+#define STOP_WORD_H_
 
 class ANT_stop_word
 {
@@ -19,4 +19,4 @@ public:
 } ;
 
 
-#endif __STOP_WORD_H__
+#endif  /* STOP_WORD_H_ */

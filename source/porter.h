@@ -3,8 +3,8 @@
 	--------
 */
 
-#ifndef __PORTER_H__
-#define __PORTER_H__
+#ifndef PORTER_H_
+#define PORTER_H_
 
 #include <stdio.h>
 #include "ctypes.h"
@@ -27,5 +27,5 @@ public:
 	virtual size_t stem(char *term, char *destination);
 } ;
 
-#endif __PORTER_H__
+#endif  /* PORTER_H_ */
 

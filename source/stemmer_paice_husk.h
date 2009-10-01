@@ -3,8 +3,8 @@
 	--------------------
 */
 
-#ifndef __STEMMER_PAICE_HUSK_H__
-#define __STEMMER_PAICE_HUSK_H__
+#ifndef STEMMER_PAICE_HUSK_H_
+#define STEMMER_PAICE_HUSK_H_
 
 #include "stemmer.h"
 #include "paice_husk.h"
@@ -18,4 +18,4 @@ public:
 	virtual size_t stem(char *term, char *destination) { ANT_paice_husk_rule trule = stemmer.stem(term); strcpy(destination, trule.text); return 3; }	
 } ;
 
-#endif __STEMMER_PAICE_HUSK_H__
+#endif  /* STEMMER_PAICE_HUSK_H_ */

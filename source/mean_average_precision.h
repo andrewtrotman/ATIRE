@@ -4,8 +4,8 @@
 	------------------------
 */
 
-#ifndef __MEAN_AVERAGE_PRECISION_H__
-#define __MEAN_AVERAGE_PRECISION_H__
+#ifndef MEAN_AVERAGE_PRECISION_H_
+#define MEAN_AVERAGE_PRECISION_H_
 
 class ANT_memory;
 class ANT_relevant_document;
@@ -38,4 +38,4 @@ public:
 	double p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n);
 } ;
 
-#endif __MEAN_AVERAGE_PRECISION_H__
+#endif  /* MEAN_AVERAGE_PRECISION_H_ */

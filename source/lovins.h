@@ -3,10 +3,10 @@
 	--------
 */
 
-#ifndef __LOVINS_H__
-#define __LOVINS_H__
+#ifndef LOVINS_H_
+#define LOVINS_H_
 
 size_t lovins_stem (char *term, char *destination);
 
-#endif __LOVINS_H__
+#endif  /* LOVINS_H_ */
 

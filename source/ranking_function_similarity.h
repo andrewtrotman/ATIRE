@@ -2,8 +2,8 @@
 	RANKING_FUNCTION_SIMILARITY.H
 	-----------------------
 */
-#ifndef __RANKING_FUNCTION_SIMILARITY_H__
-#define __RANKING_FUNCTION_SIMILARITY_H__
+#ifndef RANKING_FUNCTION_SIMILARITY_H_
+#define RANKING_FUNCTION_SIMILARITY_H_
 
 #include "ranking_function.h"
 
@@ -26,4 +26,4 @@ public:
     virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point);
 } ;
 
-#endif __RANKING_FUNCTION_SIMILARITY_H__
+#endif  /* RANKING_FUNCTION_SIMILARITY_H_ */

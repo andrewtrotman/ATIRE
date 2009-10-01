@@ -3,8 +3,8 @@
 	----------------
 */
 
-#ifndef __RELEVANT_TOPIC_H__
-#define __RELEVANT_TOPIC_H__
+#ifndef RELEVANT_TOPIC_H_
+#define RELEVANT_TOPIC_H_
 
 class ANT_relevant_topic
 {
@@ -17,4 +17,4 @@ public:
 } ;
 
 
-#endif __RELEVANT_TOPIC_H__
+#endif  /* RELEVANT_TOPIC_H_ */

@@ -2,8 +2,8 @@
 	MEMORY_INDEX_HASH_NODE.H
 	------------------------
 */
-#ifndef __MEMORY_INDEX_HASH_NODE_H__
-#define __MEMORY_INDEX_HASH_NODE_H__
+#ifndef MEMORY_INDEX_HASH_NODE_H_
+#define MEMORY_INDEX_HASH_NODE_H_
 
 #include "string_pair.h"
 #include "postings_piece.h"
@@ -82,4 +82,4 @@ ans = (ans << 7) + (**from & 0x7F);
 return ans;
 }
 
-#endif __MEMORY_INDEX_HASH_NODE_H__
+#endif  /* MEMORY_INDEX_HASH_NODE_H_ */

@@ -2,8 +2,8 @@
 	DIRECTORY_RECURSIVE_ITERATOR.H
 	------------------------------
 */
-#ifndef __DIRECTORY_RECURSIVE_ITERATOR_H__
-#define __DIRECTORY_RECURSIVE_ITERATOR_H__
+#ifndef DIRECTORY_RECURSIVE_ITERATOR_H_
+#define DIRECTORY_RECURSIVE_ITERATOR_H_
 
 #include <stdlib.h>
 #include "directory_iterator.h"
@@ -46,4 +46,4 @@ public:
 } ;
 
 
-#endif __DIRECTORY_RECURSIVE_ITERATOR_H__
+#endif  /* DIRECTORY_RECURSIVE_ITERATOR_H_ */

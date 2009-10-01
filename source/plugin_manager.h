@@ -6,8 +6,8 @@
  *      Author: monfee
  */
 
-#ifndef __PLUGIN_MANAGER_H__
-#define __PLUGIN_MANAGER_H__
+#ifndef PLUGIN_MANAGER_H_
+#define PLUGIN_MANAGER_H_
 
 #include "plugin.h"
 
@@ -74,4 +74,4 @@ inline bool ANT_plugin_manager::is_segmentation_plugin_available()
 return segmentation_plugin() != NULL;
 }
 
-#endif /* __PLUGIN_MANAGER_H__ */
+#endif  /* /* PLUGIN_MANAGER_H_ */ */

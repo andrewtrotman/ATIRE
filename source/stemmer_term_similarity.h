@@ -2,8 +2,8 @@
 	STEMMER_TERM_SIMILARITY.H
 	-------------------------
 */
-#ifndef __STEMMER_TERM_SIMILARITY_H__
-#define __STEMMER_TERM_SIMILARITY_H__
+#ifndef STEMMER_TERM_SIMILARITY_H_
+#define STEMMER_TERM_SIMILARITY_H_
 
 #include "stemmer.h"
 
@@ -38,4 +38,4 @@ public:
 	double term_similarity(char *term1, char *term2);
 } ;
 
-#endif __STEMMER_TERM_SIMILARITY_H__
+#endif  /* STEMMER_TERM_SIMILARITY_H_ */

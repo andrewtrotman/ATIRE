@@ -25,4 +25,4 @@ public:
 	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point);
 } ;
 
-#endif __RANKING_FUNCTION_BM25_H__
+#endif  /* __RANKING_FUNCTION_BM25_H__ */

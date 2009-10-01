@@ -3,8 +3,8 @@
 	----------------------------
 */
 
-#ifndef __COMPRESSION_FACTORY_SCHEME_H__
-#define __COMPRESSION_FACTORY_SCHEME_H__
+#ifndef COMPRESSION_FACTORY_SCHEME_H_
+#define COMPRESSION_FACTORY_SCHEME_H_
 
 #include "compress.h"
 
@@ -27,4 +27,4 @@ public:
 } ;
 
 
-#endif __COMPRESSION_FACTORY_SCHEME_H__
+#endif  /* COMPRESSION_FACTORY_SCHEME_H_ */

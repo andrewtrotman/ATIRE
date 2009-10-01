@@ -5,8 +5,8 @@
 	have to make the parts we need ourselves
 */
 
-#ifndef __FUNDAMENTAL_TYPES_H__
-#define __FUNDAMENTAL_TYPES_H__
+#ifndef FUNDAMENTAL_TYPES_H_
+#define FUNDAMENTAL_TYPES_H_
 
 #ifdef _MSC_VER
 	typedef char int8_t;
@@ -24,5 +24,5 @@
 	#include <stdint.h>
 #endif
 
-#endif __FUNDAMENTAL_TYPES_H__
+#endif  /* FUNDAMENTAL_TYPES_H_ */
 

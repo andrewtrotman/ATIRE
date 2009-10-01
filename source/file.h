@@ -3,8 +3,8 @@
 	------
 */
 
-#ifndef __FILE_H__
-#define __FILE_H__
+#ifndef FILE_H_
+#define FILE_H_
 
 #include "fundamental_types.h"
 
@@ -50,4 +50,4 @@ public:
 	long long get_bytes_written(void) { return bytes_written; }
 } ;
 
-#endif __FILE_H__
+#endif  /* FILE_H_ */

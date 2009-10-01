@@ -2,8 +2,8 @@
 	RANKING_FUNCTION_LMJM.H
 	-----------------------
 */
-#ifndef __RANKING_FUNCTION_LMJM_H__
-#define __RANKING_FUNCTION_LMJM_H__
+#ifndef RANKING_FUNCTION_LMJM_H_
+#define RANKING_FUNCTION_LMJM_H_
 
 #include "ranking_function.h"
 
@@ -24,4 +24,4 @@ public:
 } ;
 
 
-#endif __RANKING_FUNCTION_LMJM_H__
+#endif  /* RANKING_FUNCTION_LMJM_H_ */

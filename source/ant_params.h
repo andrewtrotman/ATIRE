@@ -2,8 +2,8 @@
 	ANT_PARAMS.H
 	------------
 */
-#ifndef __ANT_PARAMS_H__
-#define __ANT_PARAMS_H__
+#ifndef ANT_PARAMS_H_
+#define ANT_PARAMS_H_
 
 #include <stdio.h>
 
@@ -48,5 +48,5 @@ struct ANT_ANT_params
 	FILE *output;					// the output of ant, stdout is default value
 } ;
 
-#endif __ANT_PARAMS_H__
+#endif  /* ANT_PARAMS_H_ */
 

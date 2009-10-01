@@ -2,8 +2,8 @@
 	FILE_MEMORY.H
 	-------------
 */
-#ifndef __FILE_MEMORY_H__
-#define __FILE_MEMORY_H__
+#ifndef FILE_MEMORY_H_
+#define FILE_MEMORY_H_
 
 #include "file.h"
 
@@ -27,4 +27,4 @@ public:
 	virtual void seek(long long offset_from_start_of_file);
 } ;
 
-#endif __FILE_MEMORY_H__
+#endif  /* FILE_MEMORY_H_ */

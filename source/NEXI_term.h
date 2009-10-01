@@ -2,8 +2,8 @@
 	NEXI_TERM.H
 	-----------
 */
-#ifndef __NEXI_TERM_H__
-#define __NEXI_TERM_H__
+#ifndef NEXI_TERM_H_
+#define NEXI_TERM_H_
 
 #include "string_pair.h"
 
@@ -26,5 +26,5 @@ public:
 	long get_sign(void) { return sign; }		// returns 0 for "normal" terms or +ve or -ve for "weighted" terms
 } ;
 
-#endif __NEXI_TERM_H__
+#endif  /* NEXI_TERM_H_ */
 

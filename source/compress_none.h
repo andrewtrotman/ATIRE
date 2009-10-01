@@ -2,8 +2,8 @@
 	COMPRESS_NONE.H
 	---------------
 */
-#ifndef __COMPRESS_NONE_H__
-#define __COMPRESS_NONE_H__
+#ifndef COMPRESS_NONE_H_
+#define COMPRESS_NONE_H_
 
 #include "compress.h"
 
@@ -21,4 +21,4 @@ public:
 	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
 } ;
 
-#endif __COMPRESS_NONE_H__
+#endif  /* COMPRESS_NONE_H_ */

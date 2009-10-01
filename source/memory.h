@@ -2,8 +2,8 @@
 	MEMORY.H
 	--------
 */
-#ifndef __MEMORY_H__
-#define __MEMORY_H__
+#ifndef MEMORY_H_
+#define MEMORY_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,5 +69,5 @@ used += bytes;
 return ans;
 }
 
-#endif __MEMORY_H__
+#endif  /* MEMORY_H_ */
 

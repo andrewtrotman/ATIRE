@@ -2,8 +2,8 @@
 	COMPRESS_VARIABLE_BYTE.H
 	------------------------
 */
-#ifndef __COMPRESS_VARIABLE_BYTE_H__
-#define __COMPRESS_VARIABLE_BYTE_H__
+#ifndef COMPRESS_VARIABLE_BYTE_H_
+#define COMPRESS_VARIABLE_BYTE_H_
 
 #include "compress.h"
 
@@ -95,4 +95,4 @@ one:
 	*dest++ = (docno & 0x7F) | 0x80;
 }
 
-#endif __COMPRESS_VARIABLE_BYTE_H__
+#endif  /* COMPRESS_VARIABLE_BYTE_H_ */

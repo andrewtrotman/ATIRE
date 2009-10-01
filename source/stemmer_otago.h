@@ -2,8 +2,8 @@
 	STEMMER_OTAGO.H
 	---------------
 */
-#ifndef __STEMMER_OTAGO_H__
-#define __STEMMER_OTAGO_H__
+#ifndef STEMMER_OTAGO_H_
+#define STEMMER_OTAGO_H_
 
 #include <stdio.h>
 #include "ctypes.h"
@@ -21,4 +21,4 @@ public:
 	virtual size_t stem(char *term, char *destination) { return ANT_learned_wikipedia_stem::stem(term, destination); }
 } ;
 
-#endif __STEMMER_OTAGO_H__
+#endif  /* STEMMER_OTAGO_H_ */

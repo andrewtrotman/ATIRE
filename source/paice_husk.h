@@ -2,8 +2,8 @@
 	PAICE_HUSK.H
 	------------
 */
-#ifndef __PAICE_HUSK_H__
-#define __PAICE_HUSK_H__
+#ifndef PAICE_HUSK_H_
+#define PAICE_HUSK_H_
 
 #define maxwdsz 250 			/* Maximum length of word stemmable */
 #define maxsuffsz 8 			/* Maximum length of suffix */
@@ -47,4 +47,4 @@ public:
 
 extern const char *ANT_paice_husk_rule_set[];
 
-#endif __PAICE_HUSK_H__
+#endif  /* PAICE_HUSK_H_ */

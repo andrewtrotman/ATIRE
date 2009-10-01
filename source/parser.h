@@ -2,8 +2,8 @@
 	PARSER.H
 	--------
 */
-#ifndef __PARSER_H__
-#define __PARSER_H__
+#ifndef PARSER_H_
+#define PARSER_H_
 
 #include "string_pair.h"
 #include "ctypes.h"
@@ -104,4 +104,4 @@ if ((*here & 0xF8) == 0xF0)		// 4-byte sequence
 return 1;		// dunno so make it 1
 }
 
-#endif __PARSER_H__
+#endif  /* PARSER_H_ */
