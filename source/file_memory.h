@@ -5,8 +5,18 @@
 #ifndef FILE_MEMORY_H_
 #define FILE_MEMORY_H_
 
+#ifdef _MSC_VER
+	#define ANT_PRAGMA_UNUSED_PARAMETER warning(suppress: 4100)
+#else
+	#define ANT_PRAGMA_UNUSED_PARAMETER
+#endif
+
 #include "file.h"
 
+/*
+	class ANT_FILE_MEMORY
+	---------------------
+*/
 class ANT_file_memory : public ANT_file
 {
 private:
@@ -15,7 +25,7 @@ private:
 public:
 	ANT_file_memory(ANT_memory *memory) : ANT_file(memory) {}
 
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 	virtual long setvbuff(long size) { return 1; }
 	virtual long open(char *filename, char *mode);
 	virtual long close(void) { return 1; }

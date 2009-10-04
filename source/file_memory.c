@@ -36,6 +36,7 @@ long ANT_file_memory::open(char *filename, char *mode)
 {
 long result = 0;
 
+file_position = 0;
 if (ANT_file::open(filename, mode) != 0)
 	{
 	result = 1;
@@ -47,7 +48,6 @@ if (ANT_file::open(filename, mode) != 0)
 		ANT_file::close();
 		}
 	}
-file_position = 0;
 return result;
 }
 
@@ -58,6 +58,7 @@ return result;
 long ANT_file_memory::read(unsigned char *data, long long size)
 {
 memcpy(data, buffer + file_position, (size_t)size);
+file_position += size;
 return 1;		// success
 }
 

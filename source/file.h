@@ -42,7 +42,7 @@ public:
 	virtual long read(unsigned char *data, long long size);
 	long read(int64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(int32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
-	long long tell(void) { return file_position; }
+	virtual long long tell(void) { return file_position; }
 	virtual void seek(long long offset_from_start_of_file);
 	virtual long long file_length(void);
 
