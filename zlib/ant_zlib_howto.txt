@@ -1,0 +1,20 @@
+ANT_ZLIB_HOWTO.TXT
+------------------
+To get ZLIB built for ANT (under Windows) do the following:
+
+1. Download zlib from http://www.zlib.net/ I use version 1.2.3 (dated July 18, 2005)
+
+2. Decompress into ant\zlib\zlib-1.2.3
+
+3. Change directory to ant\zlib\zlib-1.2.3
+
+4. make -f ..\makefile.msc
+
+This will create ant\zlib\zlib-1.2.3\zlib.lib.  Now tell ANT that we have ZLIB
+
+5. set ANT_HAS_ZLIB=$(TRUE) in the ant\makefile
+
+you can now build ANT
+
+
+
