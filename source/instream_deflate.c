@@ -92,6 +92,8 @@ long long ANT_instream_deflate::read(unsigned char *data, long long size)
 	while (state == Z_OK);
 
 	return -1;			// something has gone wrong
+#else
+	return -1;
 #endif
 }
 
