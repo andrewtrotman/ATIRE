@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "../source/directory_iterator_tar.h"
 #include "../source/instream_deflate.h"
+#include "../source/instream_bz2.h"
 #include "../source/instream_file.h"
 #include "../source/memory.h"
 
@@ -20,8 +21,9 @@ if (argc != 2)
 
 ANT_memory memory;
 ANT_instream_file file(&memory, argv[1]);
-ANT_instream_deflate source(&memory, &file);
+ANT_instream_bz2 source(&memory, &file);
 ANT_directory_iterator_tar tarball(&source);
+
 char *filename;
 
 for (filename = tarball.first(""); filename != NULL; filename = tarball.next())

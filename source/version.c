@@ -84,6 +84,12 @@ puts("Sigma-Encoding          : Vikram Subramanya, Andrew Trotman");
 puts("Elias Delta             : Andrew Trotman");
 puts("Elias Gamma             : Andrew Trotman");
 puts("Golomb                  : Andrew Trotman");
+#ifdef ANT_HAS_ZLIB
+	puts("ZLIB                    : Jean-loup Gailly and Mark Adler (http://www.zlib.net/)");
+#endif
+#ifdef ANT_HAS_BZLIB
+	puts("BZLIB                   : Julian Seward (http://www.bzip.org/)");
+#endif
 puts("");
 
 puts("STEMMERS");

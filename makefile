@@ -12,6 +12,7 @@ TRUE = 1
 #	Declare which external libraries to include
 #
 ANT_HAS_ZLIB = $(TRUE)
+ANT_HAS_BZLIB = $(TRUE)
 
 #
 #	Directories
@@ -22,14 +23,27 @@ BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
 
+#
+#	If we have ZLIB (for the GZIP compression scheme)
+#
 !IF $(ANT_HAS_ZLIB) == $(TRUE)
-
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_ZLIB
 EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I zlib\zlib-1.2.3
 EXTRA_LIBS = $(EXTRA_LIBS) zlib\zlib-1.2.3\zlib.lib
-
 !ENDIF
 
+#
+# If we have BZLIB (for the BZ2 compression scheme)
+#
+!IF $(ANT_HAS_BZLIB) == $(TRUE)
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_BZLIB
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I bzip\bzip2-1.0.5
+EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
+!ENDIF
+
+#
+#	Post configuration, so back to the hard work...
+#
 FIXED = /link /fixed:no
 
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
@@ -124,8 +138,9 @@ PARTS = \
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
-	$(OBJDIR)\instream_file.obj								\
-	$(OBJDIR)\instream_deflate.obj								\
+	$(OBJDIR)\instream_file.obj						\
+	$(OBJDIR)\instream_deflate.obj					\
+	$(OBJDIR)\instream_bz2.obj						\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term.obj

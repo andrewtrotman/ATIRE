@@ -46,6 +46,7 @@ trim_postings_k = LLONG_MAX;
 stats = new ANT_search_engine_stats(memory);
 stats_for_all_queries = new ANT_search_engine_stats(memory);
 this->memory = memory;
+
 if (memory_model)
 	index = new ANT_file_memory(memory);
 else
