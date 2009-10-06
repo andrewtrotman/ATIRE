@@ -191,11 +191,22 @@ long long request;
 if ((chain = (char **)alloc(&request)) == NULL)
 	return NULL;
 
+/*
+	Create a linked list of large blocks of memory.
+*/
 *chain = chunk;
 chunk = (char *)chain;
+
+/*
+	Mark the current location we are to allocate from (which we call at)
+	and the end of the block (chunk_end)
+*/
 at = chunk + sizeof(*chain);
 chunk_end = chunk + request;		// request is the amount it allocated (which might be more than we asked for)
 
+/*
+	This is the amount we have allocated in total
+*/
 allocated += request;
 
 return chunk;
