@@ -2,6 +2,7 @@
 	SEARCH_ENGINE_FORUM_INEX.C
 	--------------------------
 */
+#include "pragma.h"
 #include "search_engine_forum_INEX.h"
 
 /*
@@ -44,5 +45,5 @@ for (which = 0; which < hits; which++)
 	}
 
 fprintf(file, "</topic>\n");
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

@@ -2,6 +2,7 @@
 	SEARCH_ENGINE_FORUM_INEX_EFFICIENCY.C
 	--------------------------
 */
+#include "pragma.h"
 #include "search_engine_forum_INEX_efficiency.h"
 #include "search_engine_stats.h"
 #include "search_engine_accumulator.h"
@@ -38,7 +39,7 @@ fprintf(file, " text_predicates = \"no\"");
 fprintf(file, " description = \"no\"");
 fprintf(file, " narrative = \"no\"");
 fprintf(file, " />\n");
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*

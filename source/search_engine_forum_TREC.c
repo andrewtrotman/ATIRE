@@ -3,6 +3,7 @@
 	--------------------------
 */
 #include <string.h>
+#include "pragma.h"
 #include "search_engine_forum_TREC.h"
 
 /*
@@ -34,5 +35,5 @@ long long which;
 
 for (which = 0; which < hits; which++)
 	fprintf(file, "%ld Q0 %s %lld %lld %s\n", topic_id, docids[which], which + 1, (hits - which), run_id);
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

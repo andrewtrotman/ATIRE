@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "pragma.h"
 #include "memory.h"
 #include "file_memory.h"
 
@@ -15,7 +16,7 @@
 long ANT_file_memory::write(unsigned char *data, long long size)
 {
 exit(printf("Cannot write to an in-memory file\n"));
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
@@ -25,7 +26,7 @@ exit(printf("Cannot write to an in-memory file\n"));
 long long ANT_file_memory::puts(char *string)
 {
 exit(printf("Cannot write to an in-memory file\n"));
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*

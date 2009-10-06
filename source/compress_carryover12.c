@@ -24,8 +24,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "pragma.h"
 
-#pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the same of the C macros
+#pragma ANT_PRAGMA_CONST_CONDITIONAL
 
 #include "compress_carryover12.h"
 #include "compress_carryover12_internals.h"

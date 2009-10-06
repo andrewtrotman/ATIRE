@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-
+#include "pragma.h"
 #include "compress_sigma.h"
 #include "compress_carryover12.h"
 #include "compress_carryover12_internals.h"
@@ -16,7 +16,7 @@
 #include "maths.h"
 #include "compress_sigma_frequency.h"
 
-#pragma warning (disable:4127)			// this is the empty loop warning, which we disable for the some of the C macros in Carryover-12
+#pragma ANT_PRAGMA_CONST_CONDITIONAL
 
 /*
 	ANT_COMPRESS_SIGMA::MAP_CMP()

@@ -9,6 +9,8 @@
 #ifndef PLUGIN_H_
 #define PLUGIN_H_
 
+#include "pragma.h"
+
 /*
 	class ANT_PLUGIN
 	----------------
@@ -29,7 +31,7 @@ public:
 	ANT_PLUGIN::DO_SEGMENTATION()
 	-----------------------------
 */
-#pragma warning (suppress: 4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 inline const unsigned char *ANT_plugin::do_segmentation(unsigned char *c, int length) { return 0; }
 
 /*

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <new>
+#include "pragma.h"
 #include "directory_iterator_tar.h"
 
 /*
@@ -57,6 +58,7 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 	}
 
 return NULL;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*

@@ -3,6 +3,7 @@
 	---------
 */
 #include <string.h>
+#include "pragma.h"
 #include "stemmer.h"
 
 /*
@@ -83,5 +84,5 @@ long ANT_stemmer::weight_terms(ANT_weighted_tf *term_weight, char *term)
 *term_weight = 1;
 
 return 0;
-#pragma warning (suppress:4100)
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

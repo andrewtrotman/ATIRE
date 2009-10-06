@@ -5,12 +5,7 @@
 #ifndef FILE_MEMORY_H_
 #define FILE_MEMORY_H_
 
-#ifdef _MSC_VER
-	#define ANT_PRAGMA_UNUSED_PARAMETER warning(suppress: 4100)
-#else
-	#define ANT_PRAGMA_UNUSED_PARAMETER
-#endif
-
+#include "pragma.h"
 #include "file.h"
 
 /*
