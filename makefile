@@ -197,7 +197,7 @@ all : $(PARTS)		\
 
 $(ANT_TARGETS) : $(PARTS) 
 $(OTHER_TARGETS) : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj
-$(PARTS) : makefile
+$(PARTS) : makefile $(EXTRA_LIBS)
 
 #
 #	Some dependencies need to be explicit (is this an nmake bug)?
@@ -209,6 +209,19 @@ $(BINDIR)\filelist.exe : $(OBJDIR)\filelist.obj
 $(BINDIR)\index.exe : $(OBJDIR)\index.obj
 $(BINDIR)\ant.exe : $(OBJDIR)\ant.obj
 $(BINDIR)\test_tar.exe : $(OBJDIR)\test_tar.obj
+
+#
+#	Make the external libraries
+#
+bzlib\bzip2-1.0.5\libbz2.lib :
+	cd bzlib\bzip2-1.0.5
+	make -f ..\makefile.msc
+	cd ..\..
+
+zlib\zlib-1.2.3\zlib.lib : 
+	cd zlib\zlib-1.2.3
+	make -f ..\makefile.msc
+	cd ..\..
 
 #
 #	Management
