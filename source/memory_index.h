@@ -25,6 +25,7 @@ public:
 
 private:
 	ANT_string_pair *squiggle_length;
+	long hashed_squiggle_length;
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
@@ -37,6 +38,9 @@ private:
 	ANT_compressable_integer *decompressed_postings_list, *impacted_postings;
 	unsigned char *compressed_postings_list;
 	long long compressed_postings_list_length;
+#ifdef QUANTIZED_ORDERING
+	ANT_compressable_integer *document_lengths;
+#endif
 
 private:
 	long hash(ANT_string_pair *string);
@@ -48,6 +52,12 @@ private:
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
 	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
+
+#ifdef QUANTIZED_ORDERING
+	double rsv_all_nodes(ANT_memory_index_hash_node *root);
+	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
+#endif
+
 
 public:
 	ANT_memory_index();

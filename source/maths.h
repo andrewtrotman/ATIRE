@@ -14,7 +14,7 @@
 
 /*
 	ANT_SIGN()
-	------
+	----------
 */
 inline int ANT_sign(char a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
 inline int ANT_sign(short a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
@@ -96,6 +96,13 @@ extern unsigned long ANT_powers_of_two_zero[];
 
 return ANT_powers_of_two_zero[power];
 }
+
+/*
+	MAX()
+	-----
+*/
+inline double max(double first, double second)					{ return first > second ? first : second; }
+inline double max(double first, double second, double third)	{ return max(max(first, second), third); }
 
 #endif  /* MATHS_H_ */
 

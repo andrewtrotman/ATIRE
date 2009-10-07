@@ -51,7 +51,6 @@ public:
 	static int term_compare(const void *a, const void *b);
 } ;
 
-
 /*
 	ANT_MEMORY_INDEX_HASH_NODE::NEW_POSTINGS_PIECE()
 	------------------------------------------------

@@ -18,6 +18,10 @@
 #include "fundamental_types.h"
 #include "compression_factory.h"
 
+#ifdef QUANTIZED_ORDERING
+	#include "maths.h"
+#endif
+
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
 /*
@@ -27,6 +31,7 @@
 ANT_memory_index::ANT_memory_index()
 {
 squiggle_length = new ANT_string_pair("~length");
+hashed_squiggle_length = hash(squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
 stats = new ANT_memory_index_stats(memory);
@@ -36,6 +41,9 @@ serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 largest_docno = 0;
 factory = new ANT_compression_factory;
+#ifdef QUANTIZED_ORDERING
+	document_lengths = NULL;
+#endif
 }
 
 /*
@@ -219,6 +227,77 @@ for (bucket = 0; bucket < 0x100; bucket++)
 return sum + 2 * buckets_used;
 }
 
+#ifdef QUANTIZED_ORDERING
+	/*
+		ANT_MEMORY_INDEX::GET_SERIALISED_POSTINGS()
+		-------------------------------------------
+	*/
+	long long ANT_memory_index::get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size)
+	{
+	long long total;
+
+	*doc_size = serialised_docids_size;
+	*tf_size = serialised_tfs_size;
+	while ((total = root->serialise_postings(serialised_docids, doc_size, serialised_tfs, tf_size)) == 0)
+		{
+		if (*doc_size > serialised_docids_size)
+			{
+			serialised_docids_size = *doc_size;
+			serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
+			}
+		if (*tf_size > serialised_tfs_size)
+			{
+			serialised_tfs_size = *tf_size;
+			serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
+			}
+		}
+	return total;
+	}
+
+	/*
+		ANT_MEMORY_INDEX::RSV_ALL_NODES()
+		---------------------------------
+	*/
+	double ANT_memory_index::rsv_all_nodes(ANT_memory_index_hash_node *root)
+	{
+	double right, left, my_rsv;
+	long long doc_size, tf_size;
+	unsigned char *current, *end;
+
+	/*
+		What is the max from the children of this node?
+	*/
+	left = right = my_rsv = 0;
+	if (root->right != NULL)
+		right = rsv_all_nodes(root->right);
+	if (root->left != NULL)
+		left += rsv_all_nodes(root->left);
+
+	/*
+		Now we compute the score for the current node
+		First get the postings lists (docids and tf scores)
+	*/
+	get_serialised_postings(root, &doc_size, &tf_size);
+
+	/*
+		Now we decompress the docids
+	*/
+	if (root->string[0] == '~')			// these are "special" strings in the index (e.g. document lengths)
+		my_rsv = 0;
+	else
+		{
+		variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
+		end = serialised_tfs + root->document_frequency;
+		for (current = serialised_tfs; current < end; current++)
+			my_rsv = max(my_rsv, (double)*current);
+		}
+	/*
+		now return the max of the three
+	*/
+	return max(left, right, my_rsv);
+	}
+#endif
+
 /*
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
@@ -252,7 +331,6 @@ while ((total = root->serialise_postings(serialised_docids, &doc_size, serialise
 
 stats->bytes_to_store_docids += doc_size;
 stats->bytes_to_store_tfs += tf_size;
-
 
 if (root->string[0] == '~')			// these are "special" strings in the index (e.g. document lengths)
 	{
@@ -463,6 +541,33 @@ compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_l
 impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + 512);		// 512 because the TF and the 0 at the end of each of 255 lists
 stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 
+#ifdef QUANTIZED_ORDERING
+	/*
+		Compute the array of document lengths and other parameters necessary for impact ordering on
+		the relevance ranking functions
+	*/
+	ANT_memory_index_hash_node *node;
+	double max_rsv, max_rsv_for_node;
+	long long doc_size, tf_size;
+
+	node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
+
+	get_serialised_postings(node, &doc_size, &tf_size);
+	document_lengths = (ANT_compressable_integer *)memory->malloc((largest_docno  + 1) * sizeof(ANT_compressable_integer));
+	node->serialise_postings(serialised_docids, &serialised_docids_size, serialised_tfs, &serialised_tfs_size);
+	variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
+
+	/*
+		Now compute the maximum impact score across the collection
+	*/
+	max_rsv = 0;
+	for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
+		if (hash_table[hash_val] != NULL)
+			if ((max_rsv_for_node = rsv_all_nodes(hash_table[hash_val])) > max_rsv)
+				max_rsv = max_rsv_for_node;
+
+	printf("MAX:%f\n", max_rsv);
+#endif
 /*
 	Write the postings
 */

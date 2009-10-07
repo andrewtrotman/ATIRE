@@ -49,6 +49,9 @@ FIXED = /link /fixed:no
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #MINUS_D = $(MINUS_D) -DPURIFY
 
+# Andrew's Hacking
+#MINUS_D = $(MINUS_D) -DQUANTIZED_ORDERING=1
+
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
