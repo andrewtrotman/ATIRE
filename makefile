@@ -52,8 +52,8 @@ MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE)
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE)
+#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE)
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE)
 CC = @cl
 
 #
