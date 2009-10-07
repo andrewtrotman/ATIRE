@@ -23,7 +23,7 @@ public:
 	char filesize_in_bytes[12];
 	char last_modified_time_in_numeric_unix_time_format[12];
 	char checksum_for_header_block[8];
-	char file_type;
+	char file_type;								// '0' or '\0' for file.
 	char name_of_linked_file[100];
 	/*
 		Uniform Standard Tape Archive (UStar) format

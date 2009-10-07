@@ -98,7 +98,7 @@ else if (length == 1)
 			return TRUE;
 		else if (*next == '-')		// hyphenated words
 			return TRUE;
-		else if (*next == '\'')			// apostrophies (don't tell me)
+		else if (*next == '\'')		// apostrophies (don't tell me)
 			return TRUE;
 		else
 			return FALSE;
@@ -134,7 +134,7 @@ else
 		else
 			return FALSE;
 	else if (ANT_parser::isXMLnamestartchar(*from))
-		if (ANT_parser::isXMLnamechar(*next))
+		if (ANT_parser::isXMLnamechar(*next) || *next == '-' || *next == '\'')
 			return TRUE;
 		else
 			return FALSE;

@@ -34,6 +34,7 @@ public:
 
 	virtual char *first(char *wildcard) { return get_first_filename(wildcard); }
 	virtual char *next(void) { return get_next_filename(); }
+	virtual char *read_entire_file(long long *len);
 } ;
 
 #endif  /* DISK_H_ */

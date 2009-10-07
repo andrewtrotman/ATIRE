@@ -13,6 +13,7 @@ class ANT_indexer_param_block
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
+	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ };
 
 private:
 	int argc;
@@ -20,7 +21,7 @@ private:
 
 public:
 	long trec_docnos;					// extract the unique id of the document from the DOCNO XML element (-trec | -docno)
-	long recursive;						// search for files to index in this directory and directories below (-r)
+	long recursive;						// search for files to index in this directory and directories below or in tar files (-r options)
 	unsigned long compression_scheme;	// bitstring of which compression schemes to use
 	long compression_validation;		// decompress all compressed strings and measure the decompression performance
 	long statistics;					// bit pattern of which stats to print at the end of indexing

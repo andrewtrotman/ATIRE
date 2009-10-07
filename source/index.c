@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "directory_iterator_tar.h"
 #include "directory_recursive_iterator.h"
 #include "file.h"
 #include "parser.h"
@@ -16,6 +17,9 @@
 #include "memory_index_stats.h"
 #include "time_stats.h"
 #include "version.h"
+#include "instream_file.h"
+#include "instream_deflate.h"
+#include "instream_bz2.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -42,7 +46,7 @@ int main(int argc, char *argv[])
 {
 ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
-ANT_disk *disk;
+ANT_disk *disk = NULL;
 ANT_parser *parser;
 ANT_readability_factory *readability;
 ANT_string_pair *token;
@@ -57,6 +61,7 @@ char *filename, *uid_start, *uid_end;
 char uid_buffer[1024];
 long long files_that_match;
 long long bytes_indexed, current_file_length;
+ANT_instream *file_stream = NULL, *decompressor = NULL;
 
 if (argc < 2)
 	param_block.usage();
@@ -74,11 +79,6 @@ terms_in_document = 0;
 done_work = FALSE;
 index = new ANT_memory_index;
 id_list.open("doclist.aspt", "wb");
-
-if (param_block.recursive)
-	disk = new ANT_directory_recursive_iterator;
-else
-	disk = new ANT_directory_iterator;
 
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
@@ -98,10 +98,34 @@ readability->set_parser(parser);
 current_file_length = bytes_indexed = 0;
 for (param = first_param; param < argc; param++)
 	{
+	delete disk;
+	delete file_stream;
+	delete decompressor;
+	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
+		disk = new ANT_directory_recursive_iterator;						// this dir and below
+	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
+		{
+		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
+		disk = new ANT_directory_iterator_tar(decompressor);
+		}
+	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
+		{
+		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
+		disk = new ANT_directory_iterator_tar(decompressor);
+		}
+	else
+		disk = new ANT_directory_iterator;									// current directory
+
+
 	files_that_match = 0;
 	now = stats.start_timer();
-	file = (unsigned char *)disk->read_entire_file(filename = disk->first(argv[param]), &current_file_length);
-
+	current_file_length = 0;
+	if ((filename = disk->first(argv[param])) == NULL)
+		file = NULL;
+	else
+		file = (unsigned char *)disk->read_entire_file(&current_file_length);
 	bytes_indexed += current_file_length;
 	stats.add_disk_input_time(stats.stop_timer(now));
 	while (file != NULL)
@@ -170,7 +194,13 @@ for (param = first_param; param < argc; param++)
 		terms_in_document = 0;
 		delete [] file;
 		now = stats.start_timer();
-		file = (unsigned char *)disk->read_entire_file(filename = disk->next(), &current_file_length);
+
+		current_file_length = 0;
+		if ((filename = disk->next()) == NULL)
+			file = NULL;
+		else
+			file = (unsigned char *)disk->read_entire_file(&current_file_length);
+
 		bytes_indexed += current_file_length;
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}

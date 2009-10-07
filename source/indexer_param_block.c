@@ -26,7 +26,8 @@ ANT_indexer_param_block::ANT_indexer_param_block(int argc, char *argv[])
 {
 this->argc = argc;
 this->argv = argv;
-trec_docnos = recursive = segmentation = FALSE;
+trec_docnos = segmentation = FALSE;
+recursive = NONE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
 readability_measure = ANT_readability_factory::NONE;
@@ -67,6 +68,8 @@ puts("");
 puts("FILE HANDLING");
 puts("-------------");
 puts("-r              Recursive search for files in this and directories below this");
+puts("-rtbz2          Search in tar.bz2 files for indexable files");
+puts("-rtgz           Search in tar.gz files for indexable files");
 puts("");
 
 puts("TREC / INEX SPECIFIC");
@@ -207,7 +210,11 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "trec") == 0)
 			trec_docnos = TRUE;
 		else if (strcmp(command, "r") == 0)
-			recursive = TRUE;
+			recursive = DIRECTORIES;
+		else if (strcmp(command, "rtgz") == 0)
+			recursive = TAR_GZ;
+		else if (strcmp(command, "rtbz2") == 0)
+			recursive = TAR_BZ2;
 		else if (strcmp(command, "S") == 0)
 			segmentation = TRUE;
 		else if (strcmp(command, "?") == 0)

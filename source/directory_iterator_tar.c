@@ -54,7 +54,10 @@ bytes_read = 0;
 if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 	{
 	length_of_file_in_bytes = detox(header.filesize_in_bytes);
-	return filename();
+	if (header.file_type == '0' || header.file_type == 0)
+		return filename();		// we're a file
+	else
+		return next();			// we're not a file so go and get one
 	}
 
 return NULL;
@@ -99,7 +102,10 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 		return NULL;		// at end of archive (kinda-sorta, there should be two of these)
 
 	length_of_file_in_bytes = detox(header.filesize_in_bytes);
-	return filename();
+	if (header.file_type == '0' || header.file_type == '\0')
+		return filename();		// we're a file
+	else
+		return next();			// we're not a file so go and get one
 	}
 
 /*
@@ -118,6 +124,7 @@ unsigned char *buffer;
 
 buffer = new (std::nothrow) unsigned char [length_of_file_in_bytes + 1];
 source->read(buffer, length_of_file_in_bytes);
+buffer[length_of_file_in_bytes] = '\0';			// NULL terminate the contents of the file.
 *length = bytes_read = length_of_file_in_bytes;
 
 return (char *)buffer;

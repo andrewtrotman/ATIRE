@@ -215,3 +215,13 @@ char *ANT_disk::get_next_filename(void)
 	return internals->matching_files.gl_pathv[internals->glob_index++];
 #endif
 }
+
+
+/*
+	ANT_DISK::READ_ENTIRE_FILE()
+	----------------------------
+*/
+char *ANT_disk::read_entire_file(long long *len)
+{
+return read_entire_file(internals->fully_qualified_filename, len);
+}
