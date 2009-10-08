@@ -216,8 +216,8 @@ $(BINDIR)\test_tar.exe : $(OBJDIR)\test_tar.obj
 #
 #	Make the external libraries
 #
-bzlib\bzip2-1.0.5\libbz2.lib :
-	cd bzlib\bzip2-1.0.5
+bzip\bzip2-1.0.5\libbz2.lib :
+	cd bzip\bzip2-1.0.5
 	make -f ..\makefile.msc
 	cd ..\..
 

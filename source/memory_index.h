@@ -15,6 +15,9 @@ class ANT_memory_index_hash_node;
 class ANT_memory;
 class ANT_string_pair;
 class ANT_file;
+#ifdef QUANTIZED_ORDERING
+	class ANT_ranking_function;
+#endif
 
 #define HASH_TABLE_SIZE (0x1000000)
 
@@ -40,6 +43,8 @@ private:
 	long long compressed_postings_list_length;
 #ifdef QUANTIZED_ORDERING
 	ANT_compressable_integer *document_lengths;
+	ANT_ranking_function *quantizer;
+	double maximum_collection_rsv, minimum_collection_rsv;
 #endif
 
 private:
@@ -54,7 +59,7 @@ private:
 	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 
 #ifdef QUANTIZED_ORDERING
-	double rsv_all_nodes(ANT_memory_index_hash_node *root);
+	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
 #endif
 

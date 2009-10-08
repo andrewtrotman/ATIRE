@@ -2,6 +2,8 @@
 	RANKING_FUNCTION.C
 	------------------
 */
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
@@ -25,6 +27,35 @@ decompress_buffer = engine->get_decompress_buffer();
 
 stats = engine->get_stats();
 }
+
+#ifdef QUANTIZED_ORDERING
+	/*
+		ANT_RANKING_FUNCTION::ANT_RANKING_FUNCTION()
+		--------------------------------------------
+	*/
+	ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths)
+	{
+	ANT_compressable_integer *current, *end;
+
+	documents_as_integer = documents;
+	this->documents = (double)documents;
+
+	collection_length_in_terms_as_integer = 0;
+	end = document_lengths + documents;
+	for (current = document_lengths; current < end; current++)
+		collection_length_in_terms_as_integer += *current;
+	collection_length_in_terms = (double)collection_length_in_terms_as_integer;
+
+	if (sizeof(this->document_lengths) == sizeof(document_lengths))
+		this->document_lengths = (long *)document_lengths;
+	else
+		exit(printf("Fatal size missmatch in ANT_ranking_function::ANT_ranking_function() during indexing\n"));
+
+	decompress_buffer = NULL;
+
+	stats = NULL;
+	}
+#endif
 
 /*
 	ANT_RANKING_FUNCTION::TF_TO_POSTINGS()

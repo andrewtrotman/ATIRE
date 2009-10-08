@@ -98,11 +98,20 @@ return ANT_powers_of_two_zero[power];
 }
 
 /*
-	MAX()
-	-----
+	ANT_MAX()
+	---------
+	For ANT_MAX we violate the ANT coding rule that says no templates
 */
-inline double max(double first, double second)					{ return first > second ? first : second; }
-inline double max(double first, double second, double third)	{ return max(max(first, second), third); }
+template <class Type> Type ANT_max(Type first, Type second) { return first > second ? first : second; }
+template <class Type> Type ANT_max(Type first, Type second, Type third) { return ANT_max(ANT_max(first, second), third); }
+
+/*
+	ANT_MIN()
+	---------
+	For ANT_MIN we violate the ANT coding rule that says no templates
+*/
+template <class Type> Type ANT_min(Type first, Type second) { return first < second ? first : second; }
+template <class Type> Type ANT_min(Type first, Type second, Type third) { return ANT_min(ANT_min(first, second), third); }
 
 #endif  /* MATHS_H_ */
 

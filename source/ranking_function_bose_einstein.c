@@ -3,6 +3,7 @@
 	--------------------------------
 */
 #include <math.h>
+#include <limits>
 #include "ranking_function_bose_einstein.h"
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
@@ -58,3 +59,82 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+
+
+#ifdef QUANTIZED_ORDERING
+	/*
+		ANT_RANKING_FUNCTION_BOSE_EINSTEIN::GET_MAX_MIN()
+		-------------------------------------------------
+	*/
+	void ANT_ranking_function_bose_einstein::get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
+	{
+	long docid;
+	double max, min, tf, rsv, left, right, tf_prime;
+	unsigned char *current_tf, *end;
+	ANT_compressable_integer *current_docid;
+
+	max = std::numeric_limits<double>::min();
+	min = std::numeric_limits<double>::max();
+
+	left = log(1.0 + (double)collection_frequency / (double)documents);
+	right = log(1.0 + (double)documents / (double)collection_frequency);
+
+	current_tf = term_frequencies;
+	current_docid = document_ids;
+	end = term_frequencies + document_frequency;
+
+	while (current_tf < end)
+		{
+		tf = *current_tf;
+		docid = *current_docid;
+
+		tf_prime = tf * log(1.0 + mean_document_length / (double)document_lengths[docid]);
+		rsv = (left + tf_prime * right) / (tf_prime + 1.0);
+
+		if (rsv > max)
+			max = rsv;
+		if (rsv < min)
+			min = rsv;
+
+		current_tf++;
+		current_docid++;
+		}
+
+	*maximum = max;
+	*minimum = min;
+	}
+
+	/*
+		ANT_RANKING_FUNCTION_BOSE_EINSTEIN::QUANTIZE()
+		----------------------------------------------
+	*/
+	void ANT_ranking_function_bose_einstein::quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
+	{
+	long docid;
+	double tf, rsv, left, right, tf_prime, range;
+	unsigned char *current_tf, *end;
+	ANT_compressable_integer *current_docid;
+
+	range = maximum - minimum;
+	range = range == 0 ? 1 : 0;		// just incase this ever happens (unlikely)
+	left = log(1.0 + (double)collection_frequency / (double)documents);
+	right = log(1.0 + (double)documents / (double)collection_frequency);
+
+	current_tf = term_frequencies;
+	current_docid = document_ids;
+	end = term_frequencies + document_frequency;
+
+	while (current_tf < end)
+		{
+		tf = *current_tf;
+		docid = *current_docid;
+
+		tf_prime = tf * log(1.0 + mean_document_length / (double)document_lengths[docid]);
+		rsv = (left + tf_prime * right) / (tf_prime + 1.0);
+
+		*current_tf = (unsigned char)(rsv / range * 0xFF);			// change the tf value into an impact value
+		current_tf++;
+		current_docid++;
+		}
+	}
+#endif

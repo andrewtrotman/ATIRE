@@ -40,14 +40,25 @@ protected:
 	void compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array);
 
 public:
+	/*
+		This constructor is called from the search engine
+	*/
 	ANT_ranking_function(ANT_search_engine *engine);
+
+#ifdef QUANTIZED_ORDERING
+	/*
+		This constructor is called for quantized impact ordering during indexing
+	*/
+	ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths);
+#endif
+
 	virtual ~ANT_ranking_function() {}
 
 	/*
 		You must override this function if you're going to add a ranking function
 	*/
 	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) = 0;
-	
+
 	/*
 		If you also override this function then you can rank directly from the tf array,
 		but be warned, the search engine does not at this time know the value of term_details->document_frequency
@@ -60,6 +71,16 @@ public:
 		computational cost of the search.
 	*/
 	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point);
+
+#ifdef QUANTIZED_ORDERING
+	/*
+		Functions used for quantised impact ordering.  We need to compute the range of values that will be
+		computed from the ranking function before we quantize.  We also need a function that will take the
+		postings list and quantize it.
+	*/
+	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {}
+	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {}
+#endif
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */
