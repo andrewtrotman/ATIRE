@@ -44,7 +44,7 @@ protected:
 	long long documents;
 	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_weighted_tf *stem_buffer;
-	long *document_lengths;
+	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
@@ -72,7 +72,7 @@ public:
 	ANT_search_engine_accumulator *sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
 	long long document_count(void) { return documents; }
-	long *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
+	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
 	ANT_compressable_integer *get_decompress_buffer(void) { return decompress_buffer; }
 	ANT_search_engine_stats *get_stats(void) { return stats; }
 	void stats_initialise(void);

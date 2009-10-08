@@ -18,11 +18,8 @@
 #include "hash_table.h"
 #include "fundamental_types.h"
 #include "compression_factory.h"
-
-#ifdef QUANTIZED_ORDERING
-	#include "maths.h"
-	#include "ranking_function_bose_einstein.h"
-#endif
+#include "maths.h"
+#include "ranking_function_bose_einstein.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -43,9 +40,7 @@ serialised_tfs_size = 1;
 serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 largest_docno = 0;
 factory = new ANT_compression_factory;
-#ifdef QUANTIZED_ORDERING
-	document_lengths = NULL;
-#endif
+document_lengths = NULL;
 }
 
 /*
@@ -229,78 +224,79 @@ for (bucket = 0; bucket < 0x100; bucket++)
 return sum + 2 * buckets_used;
 }
 
-#ifdef QUANTIZED_ORDERING
-	/*
-		ANT_MEMORY_INDEX::GET_SERIALISED_POSTINGS()
-		-------------------------------------------
-	*/
-	long long ANT_memory_index::get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size)
+/*
+	ANT_MEMORY_INDEX::GET_SERIALISED_POSTINGS()
+	-------------------------------------------
+*/
+long long ANT_memory_index::get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size)
+{
+long long total;
+
+*doc_size = serialised_docids_size;
+*tf_size = serialised_tfs_size;
+while ((total = root->serialise_postings(serialised_docids, doc_size, serialised_tfs, tf_size)) == 0)
 	{
-	long long total;
-
-	*doc_size = serialised_docids_size;
-	*tf_size = serialised_tfs_size;
-	while ((total = root->serialise_postings(serialised_docids, doc_size, serialised_tfs, tf_size)) == 0)
+	if (*doc_size > serialised_docids_size)
 		{
-		if (*doc_size > serialised_docids_size)
-			{
-			serialised_docids_size = *doc_size;
-			serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
-			}
-		if (*tf_size > serialised_tfs_size)
-			{
-			serialised_tfs_size = *tf_size;
-			serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
-			}
+		serialised_docids_size = *doc_size;
+		serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 		}
-	return total;
-	}
-
-	/*
-		ANT_MEMORY_INDEX::RSV_ALL_NODES()
-		---------------------------------
-	*/
-	double ANT_memory_index::rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root)
-	{
-	double right_min, right_max, left_min, left_max, min, max;
-	long long doc_size, tf_size;
-
-	right_max = left_max = max = std::numeric_limits<double>::min();
-	right_min = left_min = min = std::numeric_limits<double>::max();
-	/*
-		What is the max from the children of this node?
-	*/
-	if (root->right != NULL)
-		right_max = rsv_all_nodes(&right_min, root->right);
-	if (root->left != NULL)
-		left_max += rsv_all_nodes(&left_min, root->left);
-
-	/*
-		Now we compute the score for the current node
-		First get the postings lists (docids and tf scores)
-	*/
-	get_serialised_postings(root, &doc_size, &tf_size);
-
-	/*
-		Now we decompress the docids
-	*/
-	if (root->string[0] == '~')			// these are "special" strings in the index (e.g. document lengths)
+	if (*tf_size > serialised_tfs_size)
 		{
-		*minimum = ANT_min(left_min, right_min);
-		return ANT_max(left_max, right_max);	
-		}
-	else
-		{
-		variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
-		quantizer->get_max_min(&max, &min, root->collection_frequency, root->document_frequency, impacted_postings, serialised_tfs);
-		/*
-			now return the max of the three
-		*/
-		*minimum = ANT_min(left_min, right_min, min);
-		return ANT_max(left_max, right_max, max);
+		serialised_tfs_size = *tf_size;
+		serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 		}
 	}
-#endif
+return total;
+}
+
+/*
+	ANT_MEMORY_INDEX::RSV_ALL_NODES()
+	---------------------------------
+*/
+double ANT_memory_index::rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root)
+{
+double right_min, right_max, left_min, left_max, min, max;
+long long doc_size, tf_size;
+
+right_max = left_max = max = std::numeric_limits<double>::min();
+right_min = left_min = min = std::numeric_limits<double>::max();
+/*
+	What is the max from the children of this node?
+*/
+if (root->right != NULL)
+	right_max = rsv_all_nodes(&right_min, root->right);
+if (root->left != NULL)
+	left_max += rsv_all_nodes(&left_min, root->left);
+
+/*
+	Now we compute the score for the current node
+	First get the postings lists (docids and tf scores)
+*/
+get_serialised_postings(root, &doc_size, &tf_size);
+
+/*
+	Now we decompress the docids
+*/
+if (root->string[0] == '~')
+	{
+	/*
+		Ignore "special" strings such as the document lengths array
+	*/
+	*minimum = ANT_min(left_min, right_min);
+	return ANT_max(left_max, right_max);
+	}
+else
+	{
+	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
+	quantizer->get_max_min(&max, &min, root->collection_frequency, root->document_frequency, impacted_postings, serialised_tfs);
+	/*
+		now return the max of the three
+	*/
+	*minimum = ANT_min(left_min, right_min, min);
+	return ANT_max(left_max, right_max, max);
+	}
+}
 
 /*
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
@@ -317,25 +313,7 @@ if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
 
 //printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
-#ifdef QUANTIZED_ORDERING
-	total = get_serialised_postings(root, &doc_size, &tf_size);
-#else
-	doc_size = serialised_docids_size;
-	tf_size = serialised_tfs_size;
-	while ((total = root->serialise_postings(serialised_docids, &doc_size, serialised_tfs, &tf_size)) == 0)
-		{
-		if (doc_size > serialised_docids_size)
-			{
-			serialised_docids_size = doc_size;
-			serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
-			}
-		if (tf_size > serialised_tfs_size)
-			{
-			serialised_tfs_size = tf_size;
-			serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
-			}
-		}
-#endif
+total = get_serialised_postings(root, &doc_size, &tf_size);
 
 stats->bytes_to_store_docids += doc_size;
 stats->bytes_to_store_tfs += tf_size;
@@ -589,7 +567,6 @@ stats->bytes_for_decompression_recompression += compressed_postings_list_length 
 			}
 	maximum_collection_rsv = max_rsv;
 	minimum_collection_rsv = min_rsv;
-	printf("MAX:%f MIN:%f\n", max_rsv, min_rsv);
 #endif
 /*
 	Write the postings

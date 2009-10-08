@@ -22,7 +22,7 @@ end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_p
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;		// do the conversion from integet to float only once.
+	tf = *current++;		// do the conversion from integer to float only once.
 	docid = -1;
 	while (*current != 0)
 		{

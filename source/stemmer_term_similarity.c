@@ -96,7 +96,7 @@ ANT_compressable_integer *current_document, *end;
 double length_b = 0, similarity = 0;
 double idf_a, idf_b, mean;
 long document;
-long *document_lengths;
+ANT_compressable_integer *document_lengths;
 ANT_compressable_integer term_frequency;
 
 if (buffer_length_squared == 0)

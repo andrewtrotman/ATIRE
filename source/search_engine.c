@@ -146,7 +146,7 @@ memory->realign();
 decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
 memory->realign();
 
-document_lengths = (long *)memory->malloc(documents * sizeof(*document_lengths));
+document_lengths = (ANT_compressable_integer *)memory->malloc(documents * sizeof(*document_lengths));
 
 memory->realign();
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);

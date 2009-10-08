@@ -122,7 +122,7 @@ char *ANT_directory_iterator_tar::read_entire_file(long long *length)
 {
 unsigned char *buffer;
 
-buffer = new (std::nothrow) unsigned char [length_of_file_in_bytes + 1];
+buffer = new (std::nothrow) unsigned char [(size_t)(length_of_file_in_bytes + 1)];
 source->read(buffer, length_of_file_in_bytes);
 buffer[length_of_file_in_bytes] = '\0';			// NULL terminate the contents of the file.
 *length = bytes_read = length_of_file_in_bytes;

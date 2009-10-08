@@ -28,34 +28,34 @@ decompress_buffer = engine->get_decompress_buffer();
 stats = engine->get_stats();
 }
 
-#ifdef QUANTIZED_ORDERING
-	/*
-		ANT_RANKING_FUNCTION::ANT_RANKING_FUNCTION()
-		--------------------------------------------
-	*/
-	ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths)
-	{
-	ANT_compressable_integer *current, *end;
+/*
+	ANT_RANKING_FUNCTION::ANT_RANKING_FUNCTION()
+	--------------------------------------------
+*/
+ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths)
+{
+ANT_compressable_integer *current, *end;
 
-	documents_as_integer = documents;
-	this->documents = (double)documents;
+decompress_buffer = NULL;
+engine = NULL;
+stats = NULL;
 
-	collection_length_in_terms_as_integer = 0;
-	end = document_lengths + documents;
-	for (current = document_lengths; current < end; current++)
-		collection_length_in_terms_as_integer += *current;
-	collection_length_in_terms = (double)collection_length_in_terms_as_integer;
+documents_as_integer = documents;
+this->documents = (double)documents;
 
-	if (sizeof(this->document_lengths) == sizeof(document_lengths))
-		this->document_lengths = (long *)document_lengths;
-	else
-		exit(printf("Fatal size missmatch in ANT_ranking_function::ANT_ranking_function() during indexing\n"));
+collection_length_in_terms_as_integer = 0;
+end = document_lengths + documents;
+for (current = document_lengths; current < end; current++)
+	collection_length_in_terms_as_integer += *current;
+collection_length_in_terms = (double)collection_length_in_terms_as_integer;
+mean_document_length = collection_length_in_terms / documents;
 
-	decompress_buffer = NULL;
+this->document_lengths = document_lengths;
 
-	stats = NULL;
-	}
-#endif
+decompress_buffer = NULL;
+
+stats = NULL;
+}
 
 /*
 	ANT_RANKING_FUNCTION::TF_TO_POSTINGS()

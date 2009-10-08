@@ -6,6 +6,7 @@
 #define ANT_RANKING_FUNCTION_H_
 
 #include "compress.h"
+#include "pragma.h"
 
 class ANT_search_engine;
 class ANT_search_engine_accumulator;
@@ -31,7 +32,7 @@ protected:
 	double collection_length_in_terms;
 	long long collection_length_in_terms_as_integer;
 	double mean_document_length;
-	long *document_lengths;
+	ANT_compressable_integer *document_lengths;
 	ANT_compressable_integer *decompress_buffer;
 	ANT_search_engine_stats *stats;
 
@@ -45,13 +46,14 @@ public:
 	*/
 	ANT_ranking_function(ANT_search_engine *engine);
 
-#ifdef QUANTIZED_ORDERING
 	/*
 		This constructor is called for quantized impact ordering during indexing
 	*/
 	ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths);
-#endif
 
+	/*
+		Nothing to destroy
+	*/
 	virtual ~ANT_ranking_function() {}
 
 	/*
@@ -72,15 +74,15 @@ public:
 	*/
 	virtual void relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point);
 
-#ifdef QUANTIZED_ORDERING
 	/*
 		Functions used for quantised impact ordering.  We need to compute the range of values that will be
 		computed from the ranking function before we quantize.  We also need a function that will take the
 		postings list and quantize it.
 	*/
-	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {};
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {}
-#endif
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */
