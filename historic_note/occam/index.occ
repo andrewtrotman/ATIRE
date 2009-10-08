@@ -1,0 +1,114 @@
+#INCLUDE "hostio.inc"
+#USE "hostio.lib"
+#INCLUDE "parser.inc"
+#USE "parser.lib"
+#INCLUDE "asptstring.inc"
+#USE "asptstring.lib"
+#USE "string.lib"
+#INCLUDE "memindex.inc"
+#USE "memindex.lib"
+
+
+--
+-- ADD.TERM()
+-- ----------
+--
+PROC add.term(CHAN OF index.term output, []BYTE term, INT docid)
+  term.t word:
+  SEQ
+    IF
+      aspt.isalpha(term[0])
+        SEQ
+          word[docid] := INT32 docid
+          word[term] := term
+          output ! term; word
+      compare.strings([term FOR 6], "</doc>") = 0
+        docid := docid + 1
+      TRUE
+        SKIP
+:
+
+--
+-- PARSE()
+-- -------
+--
+PROC aspt.parse(VAL []BYTE document, INT docid, CHAN OF index.term output)
+  parser.object ob:
+  [PARSER.MAX.TOKEN.LEN]BYTE token:
+  [PARSER.MAX.TOKEN.LEN]BYTE next_token:
+  BOOL finished:
+  SEQ
+    parser.init(document, ob)
+    parser.get.next.token(ob, token)
+    finished := FALSE
+    WHILE NOT finished
+      SEQ
+        IF
+          token[0] = (BYTE 0)
+            finished := TRUE
+          TRUE
+            PAR
+              add.term(output, token, docid)
+              PAR
+                parser.get.next.token(ob, next_token)
+        IF
+          finished
+            SKIP
+          next_token[0] = (BYTE 0)
+            finished := TRUE
+          TRUE
+            PAR
+              add.term(output, next_token, docid)
+              parser.get.next.token(ob, token)
+    output ! eof
+:
+
+--
+-- READER()
+-- --------
+--
+PROC reader(CHAN OF SP fs, ts, CHAN OF string output, VAL []BYTE filename)
+  [128 * MEGABYTE]BYTE buffer:
+  INT32 file, len:
+  BYTE result:
+  BOOL finished:
+  SEQ
+    finished := FALSE
+    aspt.read.entire.file(fs, ts, filename, buffer, len)
+    output ! line;len::buffer
+    output ! eof
+:
+
+--
+-- PARSER()
+-- ---------
+--
+PROC parser(CHAN OF string input, CHAN OF index.term output)
+  [128 * MEGABYTE]BYTE buffer:
+  INT32 len:
+  BOOL finished:
+  INT docid:
+  SEQ
+    finished := FALSE
+    WHILE (NOT finished)
+      input ? CASE
+        line; len::buffer
+          SEQ
+            aspt.parse([buffer FOR (INT len)], docid, output)
+            docid := docid + 1
+        eof
+          finished := TRUE
+:
+
+--
+-- MAIN()
+-- ------
+--
+PROC main(CHAN OF SP fs, ts)
+  CHAN OF string disk.chanel:
+  CHAN OF index.term term.chanel:
+  PAR
+    reader(fs, ts, disk.chanel, "WSJ7_001")
+    parser(disk.chanel, term.chanel)
+    indexer(fs, ts, term.chanel)
+:

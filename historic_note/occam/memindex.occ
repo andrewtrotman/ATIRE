@@ -1,0 +1,465 @@
+#INCLUDE "hostio.inc"
+#USE "hostio.lib"
+#INCLUDE "parser.inc"
+#USE "parser.lib"
+#INCLUDE "asptstring.inc"
+#USE "asptstring.lib"
+#INCLUDE "memindex.inc"
+#USE "string.lib"
+
+--
+-- INDEXER.HASH()
+-- --------------
+--
+INT FUNCTION indexer.hash(VAL []BYTE string)
+  VALOF
+    SKIP
+    RESULT INT string[0]
+:
+
+--
+-- INDEXER.INIT()
+-- --------------
+--
+PROC indexer.init(mem.index index)
+  INT hash.index:
+  SEQ
+    index[last.posting] := 0
+    index[last.term] := 0
+    PAR hash.index = 0 FOR MEM.INDEX.HASH.TABLE.SIZE
+      index[hash.table][hash.index] := 0
+:
+
+--
+-- INDEXER.NEW.TERM()
+-- ------------------
+--
+PROC indexer.new.term(mem.index index, mem.index.term.ptr ptr, []BYTE term)
+  INT end:
+  SEQ
+    index[last.term] := index[last.term] + 1            -- 0 is reserved for NULL pointers
+    ptr := index[last.term]
+    mem.index.term new.term IS index[terms][ptr]:
+    SEQ
+      PAR i = 0 FOR PARSER.MAX.TOKEN.LEN
+        new.term[term][i] := ' '
+      end := aspt.strlen(term) + 1
+      SEQ j = 0 FOR end
+        new.term[term][j] := term[j]
+--        new.term[term] := term
+      new.term[left] := 0
+      new.term[right] := 0
+      new.term[first.posting] := 0
+      new.term[last.posting] := 0
+:
+
+--
+-- INDEXER.NEW.POSTING()
+-- ---------------------
+--
+PROC indexer.new.posting(mem.index index, mem.index.postings.ptr ptr, INT32 docid)
+  SEQ
+    index[last.posting] := index[last.posting] + 1      -- 0 is reserved for NULL pointers
+    ptr := index[last.posting]
+    new.posting IS index[postings][ptr]:
+    PAR
+      new.posting[docid] := docid
+      new.posting[occurences] := 1
+      new.posting[next.posting] := 0
+:
+
+--
+-- INDEXER.RENDER.TERM()
+-- ---------------------
+--
+PROC indexer.render.term(CHAN OF SP fs, ts, mem.index index, VAL INT which.term)
+  INT posting:
+  BOOL finished:
+  postings IS index[postings]:
+  term IS index[terms][which.term]:
+  SEQ
+    PAR
+      SEQ
+        so.write.string(fs, ts, [term[term] FOR aspt.strlen(term[term])])
+        so.write.string.nl(fs, ts, " -> ")
+      posting := term[first.posting]
+      finished := FALSE
+    WHILE NOT finished
+      SEQ
+        so.write.string(fs, ts, "[")
+        so.write.int32(fs, ts, postings[posting][docid], 1)
+        so.write.string(fs, ts, ",")
+        so.write.int(fs, ts, postings[posting][occurences], 1)
+        so.write.string(fs, ts, "]")
+        posting := postings[posting][next.posting]
+        IF
+          posting = 0
+            PAR
+              so.write.nl(fs, ts)
+              finished := TRUE
+          TRUE
+            SKIP
+:
+
+--
+-- INDEXER.TREE.WALK()
+-- -------------------
+--
+PROC indexer.tree.walk(mem.index.term.ptr new.term, mem.index index, VAL mem.index.term.ptr from, term.t word)
+  INT state:
+  mem.index.term.ptr here:
+  SEQ
+    PAR
+      here := from
+      new.term := 0
+    WHILE new.term = 0
+      SEQ
+        state := compare.strings(index[terms][here][term], word[term])
+        IF
+          state = 0
+            new.term := here
+          state > 0
+            IF
+              index[terms][here][right] = 0
+                SEQ
+                  indexer.new.term(index, new.term, word[term])
+                  index[terms][here][right] := new.term
+              TRUE
+                here := index[terms][here][right]
+          state < 0
+            IF
+              index[terms][here][left] = 0
+                SEQ
+                  indexer.new.term(index, new.term, word[term])
+                  index[terms][here][left] := new.term
+              TRUE
+                here := index[terms][here][left]
+:
+
+--
+-- INDEXER.ADD.POSTING()
+-- ---------------------
+--
+PROC indexer.add.posting(CHAN OF SP fs, ts, mem.index index, term.t word)
+  INT hash.val:
+  mem.index.postings.ptr new.posting:
+  mem.index.term.ptr new.term:
+  SEQ
+    hash.val := indexer.hash(word[term])
+    IF
+      index[hash.table][hash.val] = 0
+        SEQ
+          indexer.new.term(index, new.term, word[term])
+          index[hash.table][hash.val] := new.term
+      TRUE
+        indexer.tree.walk(new.term, index, index[hash.table][hash.val], word)
+    IF
+      index[terms][new.term][first.posting] = 0
+        SEQ
+          indexer.new.posting(index, new.posting, word[docid])
+          new IS index[terms][new.term]:
+          SEQ
+            new[first.posting] := new.posting
+            new[last.posting] := new.posting
+      index[postings][index[terms][new.term][last.posting]][docid] = word[docid]
+        index[postings][index[terms][new.term][last.posting]][occurences] := index[postings][index[terms][new.term][last.posting]][occurences] + 1
+      TRUE
+        SEQ
+          indexer.new.posting(index, new.posting, word[docid])
+          index[postings][index[terms][new.term][last.posting]][next.posting] := new.posting
+          index[terms][new.term][last.posting] := new.posting
+:
+
+--
+-- INDEXER.RENDER()
+-- ----------------
+--
+PROC indexer.render(CHAN OF SP fs, ts, mem.index index)
+  mem.index.term.ptr which.term:
+  SEQ which.term = 0 FOR (INT (index[last.term] + 1))
+    IF
+      index[terms][which.term][first.posting] <> 0
+        indexer.render.term(fs, ts, index, which.term)
+      TRUE
+        SKIP
+:
+
+--
+-- INDEXER.HEAP.SORT.SIFT.DOWN()
+-- -----------------------------
+--
+PROC indexer.heap.soft.sift.down(mem.index index, []mem.index.term.ptr numbers, VAL INT p_root, VAL INT bottom)
+  BOOL done:
+  INT maxChild, root:
+  mem.index.term.ptr temp:
+  SEQ
+    root := p_root
+    done := FALSE
+    WHILE (((root * 2) <= bottom) AND (NOT done))
+      SEQ
+        IF
+          ((root * 2) = bottom)
+            maxChild := root * 2
+          (compare.strings(index[terms][numbers[root * 2]][term], index[terms][numbers[(root * 2) + 1]][term]) > 0)
+            maxChild := root * 2
+          TRUE
+            maxChild := (root * 2) + 1
+
+        IF
+          (compare.strings(index[terms][numbers[root]][term], index[terms][numbers[maxChild]][term]) < 0)
+            SEQ
+              temp := numbers[root]
+              numbers[root] := numbers[maxChild]
+              numbers[maxChild] := temp
+              root := maxChild
+          TRUE
+            done := TRUE
+:
+
+--
+-- INDEXER.HEAP.SORT()
+-- -------------------
+--
+PROC indexer.heap.sort(mem.index index, []mem.index.term.ptr numbers, VAL INT array_size)
+  INT i:
+  mem.index.term.ptr temp:
+  SEQ
+    i := (array_size / 2) - 1
+    WHILE i >= 0
+      SEQ
+        indexer.heap.soft.sift.down(index, numbers, i, array_size)
+        i := i - 1
+    i := array_size - 1
+    WHILE i >= 1
+      SEQ
+        temp := numbers[0]
+        numbers[0] := numbers[i]
+        numbers[i] := temp
+        indexer.heap.soft.sift.down(index, numbers, 0, i - 1)
+        i := i - 1
+:
+
+--
+-- INDEXER.WRITE.POSTING.COMPRESS()
+-- --------------------------------
+--
+PROC indexer.write.posting.compress([]BYTE block, INT pos, VAL INT val)
+  SEQ
+    block[pos] := BYTE ((val >> 24) /\ 255)
+    pos := pos + 1
+    block[pos] := BYTE ((val >> 16) /\ 255)
+    pos := pos + 1
+    block[pos] := BYTE ((val >> 8) /\ 255)
+    pos := pos + 1
+    block[pos] := BYTE ((val >> 0) /\ 255)
+    pos := pos + 1
+:
+
+--
+-- INDEXER.WRITE.POSTING.VB.COMPRESS()
+-- -----------------------------------
+--
+PROC indexer.write.posting.vb.compress([]BYTE block, INT pos, VAL INT val)
+  SEQ
+    IF
+      ((val >> 28) /\ 255) <> 0
+        SEQ
+          block[pos] := BYTE ((val >> 28) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 21) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 14) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 7) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 0) /\ 255)
+          block[pos] := block[pos] \/ 128
+          pos := pos + 1
+      ((val >> 21) /\ 255) <> 0
+        SEQ
+          block[pos] := BYTE ((val >> 21) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 14) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 7) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 0) /\ 255)
+          block[pos] := block[pos] \/ 128
+          pos := pos + 1
+      ((val >> 14) /\ 255) <> 0
+        SEQ
+          block[pos] := BYTE ((val >> 14) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 7) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 0) /\ 255)
+          block[pos] := block[pos] \/ 128
+          pos := pos + 1
+      ((val >> 7) /\ 255) <> 0
+        SEQ
+          block[pos] := BYTE ((val >> 7) /\ 255)
+          pos := pos + 1
+          block[pos] := BYTE ((val >> 0) /\ 255)
+          block[pos] := block[pos] \/ 128
+          pos := pos + 1
+      ((val >> 0) /\ 255) <> 0
+        SEQ
+          block[pos] := BYTE ((val >> 0) /\ 255)
+          block[pos] := block[pos] \/ 128
+          pos := pos + 1
+      TRUE      -- the value is zero
+        SEQ
+          block[pos] := 128
+          pos := pos + 1
+:
+
+--
+-- INDEXER.WRITE.POSTING()
+-- -----------------------
+--
+PROC indexer.write.posting(CHAN OF SP fs, ts, VAL INT32 stream, mem.index index, VAL INT p_posting, INT32 place)
+  [MEM.INDEX.MAX.COMPRESSED.SIZE]BYTE term.block:
+  [MEM.INDEX.MAX.COMPRESSED.SIZE]BYTE freq.block:
+  INT term.pos, freq.pos, written, posting, last, diff:
+  BYTE result:
+  SEQ
+    PAR
+      posting := p_posting
+      term.pos := 0
+      freq.pos := 0
+      so.tell(fs, ts, stream, place, result)
+      last := 0
+    WHILE posting <> 0
+      postings IS index[postings][posting]:
+      SEQ
+        PAR
+          SEQ
+            diff := (INT postings[docid]) - last
+            last := INT postings[docid]
+            indexer.write.posting.vb.compress(term.block, term.pos, diff)
+          indexer.write.posting.vb.compress(freq.block, freq.pos, INT postings[occurences])
+        posting := postings[next.posting]
+
+    so.write(fs, ts, stream, [term.block FROM 0 FOR term.pos], written)
+    so.write(fs, ts, stream, [freq.block FROM 0 FOR freq.pos], written)
+:
+
+--
+-- INDEXER.WRITE.TERM()
+-- --------------------
+--
+PROC indexer.write.term(CHAN OF SP fs, ts, VAL INT32 stream, mem.index index, VAL INT which.term)
+  INT32 where:
+  SEQ
+    indexer.write.posting(fs, ts, stream, index, index[terms][which.term][first.posting], where)
+    index[terms][which.term][disk.location] := where
+:
+
+--
+-- INDEXER.INT.TO.INT()
+-- --------------------
+--
+PROC indexer.int.to.int([]BYTE into, VAL INT32 from)
+  PAR
+    into[0] := BYTE ((from >> 0) /\ 255)
+    into[1] := BYTE ((from >> 8) /\ 255)
+    into[2] := BYTE ((from >> 16) /\ 255)
+    into[3] := BYTE ((from >> 24) /\ 255)
+:
+
+--
+-- INDEXER.WRITE.DICTIONARY()
+-- --------------------------
+--
+PROC indexer.write.dictionary(CHAN OF SP fs, ts, VAL INT32 stream, mem.index index, [] mem.index.term.ptr term.list)
+  INT which, written:
+  BYTE result:
+  INT32 place, root.start, root.end:
+  [4]BYTE int:
+  SEQ
+    SEQ current = 0 FOR (INT index[last.term])
+      SEQ
+        which := term.list[current]
+        so.write(fs, ts, stream, [index[terms][which][term] FROM 0 FOR aspt.strlen(index[terms][which][term])], written)
+        indexer.int.to.int(int, index[terms][which][disk.location])
+        so.write(fs, ts, stream, [int FROM 0 FOR 4], written)
+        IF
+          (current REM MEM.INDEX.TERMS.PER.NODE) = 0
+            SEQ
+              index[terms][which][root.node] := TRUE
+              so.tell(fs, ts, stream, place, result)
+              index[terms][which][disk.location] := place
+          TRUE
+            index[terms][which][root.node] := FALSE
+    --
+    --  now write the root of the b-tree to disk
+    --
+    so.tell(fs, ts, stream, place, result)
+    root.start := place
+    SEQ current = 0 FOR (INT index[last.term])
+      SEQ
+        which := term.list[current]
+        IF
+          index[terms][which][root.node] = TRUE
+            SEQ
+              so.write(fs, ts, stream, [index[terms][which][term] FROM 0 FOR aspt.strlen(index[terms][which][term])], written)
+              indexer.int.to.int(int, index[terms][which][disk.location])
+              so.write(fs, ts, stream, [int FROM 0 FOR 4], written)
+          TRUE
+            SKIP
+    so.tell(fs, ts, stream, place, result)
+    root.end := place
+    so.seek(fs, ts, stream, 0, spo.start, result)
+    indexer.int.to.int(int, root.start)
+    so.write(fs, ts, stream, [int FROM 0 FOR 4], written)
+    indexer.int.to.int(int, root.end)
+    so.write(fs, ts, stream, [int FROM 0 FOR 4], written)
+:
+
+--
+-- INDEXER.WRITE()
+-- --------------
+--
+PROC indexer.write(CHAN OF SP fs, ts, mem.index index)
+  [MEM.INDEX.HEADER.SIZE]BYTE header:
+  [MEM.INDEX.MAX.TERMS]mem.index.term.ptr term.list:
+  mem.index.term.ptr temp:
+  INT32 stream:
+  BYTE result:
+  INT written:
+  SEQ
+    SEQ i = 0 FOR index[last.term]
+      term.list[i] := (mem.index.term.ptr i)
+
+    indexer.heap.sort(index, term.list, index[last.term])
+
+    so.open(fs, ts, "zindex.aspt", spt.binary, spm.new.update, stream, result)
+    so.write(fs, ts, stream, [header FROM 0 FOR MEM.INDEX.HEADER.SIZE], written)
+    SEQ i = 0 FOR (INT index[last.term])
+      indexer.write.term(fs, ts, stream, index, term.list[i])
+    indexer.write.dictionary(fs, ts, stream, index, term.list)
+    so.close(fs, ts, stream, result)
+:
+
+--
+-- INDEXER()
+-- ---------
+--
+PROC indexer(CHAN OF SP fs, ts, CHAN OF index.term input)
+  mem.index index:
+  BOOL finished:
+  term.t word:
+  SEQ
+    indexer.init(index)
+    finished := FALSE
+    WHILE NOT finished
+      input ? CASE
+        term; word
+          indexer.add.posting(fs, ts, index, word)
+        eof
+          SEQ
+            indexer.write(fs, ts, index)
+            PAR
+              finished := TRUE
+--              indexer.render(fs, ts, index)
+:

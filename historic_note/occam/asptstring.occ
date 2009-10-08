@@ -1,0 +1,110 @@
+#INCLUDE "parser.inc"
+#INCLUDE "asptstring.inc"
+#INCLUDE "hostio.inc"
+#USE "hostio.lib"
+
+--
+-- ASPT.ISALPHA()
+-- --------------
+--
+BOOL FUNCTION aspt.isalpha(VAL BYTE char)
+  BOOL ans:
+  VALOF
+    IF 
+      (char >= 'a') AND (char <= 'z')
+        ans := TRUE
+      (char >= 'A') AND (char <= 'Z')
+        ans := TRUE
+      TRUE
+        ans := FALSE
+    RESULT ans
+:
+
+--
+-- ASPT.STRLEN()
+-- -------------
+--
+INT FUNCTION aspt.strlen(VAL []BYTE buffer)
+  INT pos:
+  BOOL keep.going:
+  VALOF
+    SEQ
+      pos, keep.going := 0, TRUE
+      WHILE (keep.going)
+        IF
+          buffer[pos] = (BYTE 0)
+            keep.going := FALSE
+          TRUE
+            pos := pos + 1
+    RESULT pos
+:
+
+--
+-- ASPT.WRITE.STRING()
+-- -------------------
+--
+PROC aspt.write.string(CHAN OF SP fs, ts, []BYTE buffer)
+  INT pos:
+  BOOL keep.going:
+  SEQ
+    pos, keep.going := 0, TRUE
+    WHILE (keep.going)
+      IF
+        buffer[pos] = (BYTE 0)
+          keep.going := FALSE
+        TRUE
+          SEQ
+            so.write.char(fs, ts, buffer[pos])
+            pos := pos + 1
+:
+
+--
+-- ASPT.WRITE.MARKED.STRING()
+-- --------------------------
+--
+PROC aspt.write.marked.string(CHAN OF SP fs, ts, []BYTE buffer)
+  SEQ
+    so.write.string(fs, ts, "[")
+    aspt.write.string(fs, ts, buffer)
+    so.write.string(fs, ts, "]")
+:
+
+--
+-- ASPT.GETS()
+-- -----------
+--
+PROC aspt.gets(CHAN OF SP fs, ts, VAL INT32 streamid, []BYTE data, BYTE result)
+  INT length:
+  SEQ
+    length := 0
+    so.gets(fs, ts, streamid, length, data, result)
+    IF
+      NOT (result = spr.ok)
+        data[0] := BYTE 0
+      TRUE
+        data[length - 1] := BYTE 0
+:
+
+--
+-- ASPT.READ.ENTIRE.FILE()
+-- -----------------------
+--
+PROC aspt.read.entire.file(CHAN OF SP fs, ts, VAL []BYTE filename, []BYTE buffer, INT32 len)
+  BYTE result:
+  INT32 file:
+  INT length:
+  SEQ
+    so.open(fs, ts, filename, spt.binary, spm.input, file, result)
+    IF 
+      result = spr.operation.failed
+        length := 0
+      TRUE
+        SEQ
+          so.seek(fs, ts, file, 0, spo.end, result)
+          so.tell(fs, ts, file, len, result)
+          so.seek(fs, ts, file, 0, spo.start, result)
+          so.read(fs, ts, file, length, [buffer FOR (INT len)])
+          so.close(fs, ts, file, result)
+    buffer[length] := BYTE 0
+:
+

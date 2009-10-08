@@ -1,0 +1,86 @@
+--
+-- PARSER.OCC
+-- ----------
+--
+#INCLUDE "parser.inc"
+#INCLUDE "hostio.inc"
+#USE "asptstring.lib"
+#USE "string.lib"
+
+--
+-- PARSER.INIT()
+-- -------------
+--
+PROC parser.init(VAL []BYTE data, parser.object ob)
+  SEQ
+    ob[token.start] := 0
+    [ob[document] FOR SIZE data] := data
+    ob[document][SIZE data] := 0
+:
+
+--
+-- IS.PART()
+-- ---------
+--
+BOOL FUNCTION is.part(VAL []BYTE string, VAL BYTE next)
+  BOOL status:
+  VALOF
+    IF
+      string[0] = (BYTE 0)
+        status := FALSE
+      next = (BYTE 0)
+        status := FALSE
+      next = '<'
+        status := FALSE
+      string[0] = '<'
+        IF
+          string[(SIZE string) - 1] = '>'
+            status := FALSE
+          TRUE
+            status := TRUE
+      is.digit(string[0])
+        IF
+          is.digit(next)
+            status := TRUE
+          TRUE
+            status := FALSE
+      aspt.isalpha(string[0])
+        IF
+          aspt.isalpha(next)
+            status := TRUE
+          TRUE
+            status := FALSE
+      TRUE
+        IF
+          aspt.isalpha(next)
+            status := FALSE
+          is.digit(next)
+            status := FALSE
+          TRUE
+            status := TRUE
+    RESULT status
+:
+
+--
+-- PARSER.GET.NEXT.TOKEN()
+-- -----------------------
+--
+PROC parser.get.next.token(parser.object ob, []BYTE token)
+  BOOL finished:
+  INT len:
+  SEQ
+    finished, len := FALSE, 1
+    WHILE NOT finished
+      IF
+        len >= (PARSER.MAX.TOKEN.LEN - 1)
+          finished := TRUE
+        is.part([ob[document] FROM ob[token.start] FOR len], ob[document][ob[token.start] + len])
+          len := len + 1
+        TRUE
+          finished := TRUE
+    [token FOR len] := [ob[document] FROM ob[token.start] FOR len]
+    to.lower.case([token FOR len])
+    token[len] := BYTE 0
+    ob[token.start] := ob[token.start] + len
+:
+

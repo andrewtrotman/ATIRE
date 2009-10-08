@@ -1,0 +1,4 @@
+I've been asked several times about the first version of the ANT indexer.  It was written in OCCAM.  It took 2 weeks to port the SPOC OCCAM compiler to run under Vista and then another 2 weeks to write it.  Here it is.  Its the only OCCAM I've ever written.  It procuces an index that is incompatible with ANT so don't bother to compile and run it.  The is no search engine compatible with the indexer and never was - so I don't even know if the indexer works properly.
+
+Enjoy
+Andrew

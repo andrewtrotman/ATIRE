@@ -1,0 +1,62 @@
+#INCLUDE "hostio.inc"
+#USE "hostio.lib"
+#INCLUDE "parser.inc"
+#INCLUDE "asptstring.inc"
+#USE "asptstring.lib"
+
+--
+-- READER()
+-- --------
+--
+PROC reader(CHAN OF SP fs, ts, CHAN OF string output, VAL []BYTE filename)
+  [1024]BYTE buffer:
+  INT32 file:
+  BYTE result:
+  BOOL finished:
+  SEQ
+    finished := FALSE
+    so.open(fs, ts, filename, spt.binary, spm.input, file, result)
+    WHILE (NOT finished)
+      SEQ
+        aspt.gets(fs, ts, file, buffer, result)
+        IF
+          NOT (result = spr.ok)
+            SEQ
+              output ! eof
+              finished := TRUE
+          TRUE
+            output ! line; (INT32 (aspt.strlen(buffer) + 1))::buffer
+    so.close(fs, ts, file, result)
+:
+
+--
+-- WRITER()
+-- --------
+--
+PROC writer(CHAN OF SP fs, ts, CHAN OF string input)
+  [1024]BYTE buffer:
+  INT32 len:
+  BOOL finished:
+  SEQ
+    finished := FALSE
+    WHILE (NOT finished)
+      input ? CASE
+        line; len::buffer
+          SEQ
+--            aspt.write.string(fs, ts, buffer)
+--            so.write.nl(fs, ts)
+            so.write.string.nl(fs, ts, [buffer FOR (INT len)])
+        eof
+          finished := TRUE
+:
+
+--
+-- MAIN()
+-- ------
+--
+PROC main(CHAN OF SP fs, ts)
+  CHAN OF string chan:
+  PAR
+    reader(fs, ts, chan, "list.occ")
+    writer(fs, ts, chan)
+:
