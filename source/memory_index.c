@@ -41,6 +41,7 @@ serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
 largest_docno = 0;
 factory = new ANT_compression_factory;
 document_lengths = NULL;
+quantizer = NULL;
 }
 
 /*
@@ -259,7 +260,7 @@ double ANT_memory_index::rsv_all_nodes(double *minimum, ANT_memory_index_hash_no
 double right_min, right_max, left_min, left_max, min, max;
 long long doc_size, tf_size;
 
-right_max = left_max = max = std::numeric_limits<double>::min();
+right_max = left_max = max = -std::numeric_limits<double>::max();		// min() returns the minumum positive value
 right_min = left_min = min = std::numeric_limits<double>::max();
 /*
 	What is the max from the children of this node?
@@ -306,6 +307,7 @@ long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash
 {
 long terms = 1;
 long long doc_size, tf_size, total, len, impacted_postings_length;
+long long timer;
 
 stats->term_occurences += root->collection_frequency;
 
@@ -326,9 +328,12 @@ if (root->string[0] == '~')			// these are "special" strings in the index (e.g. 
 else
 	{
 	variable_byte.decompress(decompressed_postings_list, serialised_docids, root->document_frequency);
-#ifdef QUANTIZED_ORDERING
-	quantizer->quantize(maximum_collection_rsv, minimum_collection_rsv, root->collection_frequency, root->document_frequency, decompressed_postings_list, serialised_tfs);
-#endif
+	if (quantizer != NULL)
+		{
+		timer = stats->start_timer();
+		quantizer->quantize(maximum_collection_rsv, minimum_collection_rsv, root->collection_frequency, root->document_frequency, decompressed_postings_list, serialised_tfs);
+		stats->time_to_quantize += stats->stop_timer(timer);
+		}
 
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency > 2)
@@ -519,6 +524,10 @@ long terms_in_node, unique_terms = 0, max_terms_in_node = 0, hash_val, where, by
 ANT_file *file;
 ANT_memory_index_hash_node **term_list, **here;
 ANT_btree_head_node *header, *current_header, *last_header;
+ANT_memory_index_hash_node *node;
+double max_rsv_for_node, min_rsv_for_node;
+long long doc_size, tf_size;
+long long timer;
 
 file = new ANT_file(memory);
 file->open(filename, "w+b");
@@ -531,14 +540,18 @@ compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_l
 impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + 512);		// 512 because the TF and the 0 at the end of each of 255 lists
 stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 
-#ifdef QUANTIZED_ORDERING
+/*
+	If we want to quantize the ranking scores for impact ordering in the index then
+	we need to compute the min and max scores the function will produce and then
+	use those later - this takes time so time it.
+*/
+if (quantizer != NULL)
+	{
+	timer = stats->start_timer();
 	/*
 		Compute the array of document lengths and other parameters necessary for impact ordering on
 		the relevance ranking functions
 	*/
-	ANT_memory_index_hash_node *node;
-	double max_rsv, max_rsv_for_node, min_rsv, min_rsv_for_node;
-	long long doc_size, tf_size;
 
 	node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
 
@@ -554,20 +567,23 @@ stats->bytes_for_decompression_recompression += compressed_postings_list_length 
 	/*
 		Now compute the maximum impact score across the collection
 	*/
-	max_rsv = std::numeric_limits<double>::min();
-	min_rsv = std::numeric_limits<double>::max();
+	maximum_collection_rsv = -std::numeric_limits<double>::max();			// min() returns the minimum positive value
+	minimum_collection_rsv = std::numeric_limits<double>::max();
 	for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 		if (hash_table[hash_val] != NULL)
 			{
 			max_rsv_for_node = rsv_all_nodes(&min_rsv_for_node, hash_table[hash_val]);
-			if (max_rsv_for_node > max_rsv)
-				max_rsv = max_rsv_for_node;
-			if (min_rsv_for_node < min_rsv)
-				min_rsv = min_rsv_for_node;
+			if (max_rsv_for_node > maximum_collection_rsv)
+				maximum_collection_rsv = max_rsv_for_node;
+			if (min_rsv_for_node < minimum_collection_rsv)
+				minimum_collection_rsv = min_rsv_for_node;
 			}
-	maximum_collection_rsv = max_rsv;
-	minimum_collection_rsv = min_rsv;
-#endif
+	/*
+		Store how long it took for later.
+	*/
+	stats->time_to_quantize += stats->stop_timer(timer);
+	}
+
 /*
 	Write the postings
 */

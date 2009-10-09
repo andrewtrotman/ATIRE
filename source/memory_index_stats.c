@@ -28,6 +28,7 @@ bytes_in_string_pool = 0;
 disk_buffer = 0;
 bytes_used_to_sort_term_list = 0;
 bytes_for_decompression_recompression = 0;
+time_to_quantize = 0;
 }
 
 /*
@@ -113,4 +114,8 @@ if (type & STAT_MEMORY)
 		printf("Unaccounted for      :%10lld bytes\n", memory->bytes_used() - sum);
 		}
 	}
+
+if (type & STAT_SUMMARY)
+	if (time_to_quantize != 0)
+		print_time("Time to Quantise     :", time_to_quantize);
 }
