@@ -79,10 +79,14 @@ public:
 		computed from the ranking function before we quantize.  We also need a function that will take the
 		postings list and quantize it.
 	*/
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {};
+	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies);
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {}
+
+
+	ANT_compressable_integer *impact_ordering;
+	ANT_search_engine_accumulator *accumulators;
+	virtual void docid_tf_to_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *tf_list, ANT_compressable_integer *docid_list, ANT_compressable_integer *destination);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

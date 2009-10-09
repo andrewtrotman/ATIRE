@@ -7,6 +7,7 @@
 #include <string.h>
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
+#include "search_engine_accumulator.h"
 #include "ranking_function.h"
 #include "search_engine_stats.h"
 
@@ -55,6 +56,13 @@ this->document_lengths = document_lengths;
 decompress_buffer = NULL;
 
 stats = NULL;
+/*
+	This may not be the best way to do this, certainly the memory
+	should be accounted for properly as part of the stats and
+	with an ANT_memory object
+*/
+impact_ordering = new ANT_compressable_integer [(size_t)documents];
+accumulators = new ANT_search_engine_accumulator [(size_t)documents];
 }
 
 /*
@@ -170,4 +178,108 @@ for (current = tf_array; current < end; current++)
 term_details->document_frequency = document_frequency;
 term_details->impacted_length = 0;
 stats->add_stemming_reencode_time(stats->stop_timer(now));
+}
+
+/*
+	ANT_RANKING_FUNCTION::DOCID_TF_TO_POSTINGS()
+	--------------------------------------------
+*/
+void ANT_ranking_function::docid_tf_to_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *tf_list, ANT_compressable_integer *docid_list, ANT_compressable_integer *destination)
+{
+ANT_compressable_integer bucket_prev_docid[0x100];
+long bucket_size[0x100];
+ANT_compressable_integer sum, *pointer[0x100];
+long doc, document_frequency, bucket, buckets_used;
+unsigned char *current, *end;
+ANT_compressable_integer *current_doc;
+
+/*
+	Set all the buckets to empty;
+*/
+memset(bucket_size, 0, sizeof(bucket_size));
+
+/*
+	Set the previous document ID to zero for each bucket (for difference encoding)
+*/
+memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
+
+/*
+	Compute the size of the buckets - and as we are stemming we also have to cap Term Frequency at 255.
+*/
+end = tf_list + documents_as_integer;
+document_frequency = 0;
+for (current = tf_list; current < end; current++)
+	if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
+		{	
+		if (*current >= 0x100)
+			*current = 0xFF;			// cap term frequency at 255
+		bucket_size[(long) *current]++;
+		document_frequency++;						// count the document frequency
+		}
+
+/*
+	Compute the location of the pointers for each bucket
+*/
+buckets_used = sum = 0;
+for (bucket = 0xFF; bucket >= 0; bucket--)
+	{
+	pointer[bucket] = destination + sum + 2 * buckets_used;
+	sum += bucket_size[bucket];
+	if (bucket_size[bucket] != 0)
+		{
+		*pointer[bucket]++ = bucket;
+		buckets_used++;
+		}
+	}
+
+/*
+	Now generate the impact ordering
+*/
+doc = -1;
+current_doc = docid_list;
+for (current = tf_list; current < end; current++)
+	if (*current != 0)
+		{
+		doc += *current_doc++;
+		*pointer[(long)*current]++ = doc - bucket_prev_docid[(long)*current];		// because this list is difference encoded
+		bucket_prev_docid[(long)*current] = doc;
+		}
+
+/*
+	Finally terminate each impact list with a 0
+*/
+for (bucket = 0; bucket < 0x100; bucket++)
+	if (bucket_size[bucket] != 0)
+		*pointer[bucket] = 0;
+
+term_details->document_frequency = document_frequency;
+term_details->impacted_length = sum + 2 * buckets_used;
+}
+
+/*
+	ANT_RANKING_FUNCTION::GET_MAX_MIN()
+	-----------------------------------
+	maximum and minimum are already initialised
+
+	allocate space for impact_ordering
+	allocate space for accumulators
+*/
+void ANT_ranking_function::get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
+{
+ANT_search_engine_btree_leaf term_details;
+ANT_search_engine_accumulator *current, *end;
+
+term_details.document_frequency = (long)document_frequency;
+term_details.collection_frequency = collection_frequency;
+docid_tf_to_postings(&term_details, term_frequencies, document_ids, impact_ordering);
+relevance_rank_top_k(accumulators, &term_details, impact_ordering, documents_as_integer);
+
+end = accumulators + documents_as_integer;
+for (current = accumulators; current < end; current++)
+	{
+	if (current->get_rsv() > *maximum)
+		*maximum = current->get_rsv();
+	if (current->get_rsv() < *minimum)
+		*minimum = current->get_rsv();
+	}
 }
