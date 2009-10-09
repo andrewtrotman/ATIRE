@@ -24,6 +24,15 @@
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
 /*
+	ANT_MEMORY_INDEX::HASH()
+	------------------------
+*/
+inline long ANT_memory_index::hash(ANT_string_pair *string)
+{
+return ANT_hash_24(string);
+}
+
+/*
 	ANT_MEMORY_INDEX::ANT_MEMORY_INDEX()
 	------------------------------------
 */
@@ -77,15 +86,6 @@ if (which_stats & STAT_COMPRESSION)
 long long ANT_memory_index::get_memory_usage(void)
 {
 return memory->bytes_used();
-}
-
-/*
-	ANT_MEMORY_INDEX::HASH()
-	------------------------
-*/
-inline long ANT_memory_index::hash(ANT_string_pair *string)
-{
-return ANT_hash_24(string);
 }
 
 /*
@@ -306,7 +306,7 @@ else
 long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
 long terms = 1;
-long long doc_size, tf_size, total, len, impacted_postings_length;
+long long doc_size, tf_size, len, impacted_postings_length;
 long long timer;
 
 stats->term_occurences += root->collection_frequency;
@@ -315,7 +315,7 @@ if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
 
 //printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
-total = get_serialised_postings(root, &doc_size, &tf_size);
+get_serialised_postings(root, &doc_size, &tf_size);
 
 stats->bytes_to_store_docids += doc_size;
 stats->bytes_to_store_tfs += tf_size;
@@ -556,7 +556,7 @@ if (quantizer != NULL)
 	node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
 
 	get_serialised_postings(node, &doc_size, &tf_size);
-	document_lengths = (ANT_compressable_integer *)memory->malloc((largest_docno  + 1) * sizeof(ANT_compressable_integer));
+	document_lengths = (ANT_compressable_integer *)memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
 	node->serialise_postings(serialised_docids, &serialised_docids_size, serialised_tfs, &serialised_tfs_size);
 	variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
 

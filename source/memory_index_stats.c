@@ -29,6 +29,7 @@ disk_buffer = 0;
 bytes_used_to_sort_term_list = 0;
 bytes_for_decompression_recompression = 0;
 time_to_quantize = 0;
+bytes_to_quantize = 0;
 }
 
 /*
@@ -110,6 +111,8 @@ if (type & STAT_MEMORY)
 		printf("Disk Output Buffer   :%10lld bytes\n", used = disk_buffer);
 		sum += used;
 		printf("Recompression Buffers:%10lld bytes\n", used = bytes_for_decompression_recompression);
+		sum += used;
+		printf("Quantization overhead:%10lld bytes\n", used = bytes_to_quantize);
 		sum += used;
 		printf("Unaccounted for      :%10lld bytes\n", memory->bytes_used() - sum);
 		}

@@ -29,6 +29,7 @@ public:
 	long long bytes_for_decompression_recompression;
 	long disk_buffer;
 	long long time_to_quantize;
+	long long bytes_to_quantize;
 public:
 	ANT_memory_index_stats(ANT_memory *memory = NULL);
 	virtual ~ANT_memory_index_stats();
