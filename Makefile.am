@@ -34,6 +34,7 @@ library_sources =  \
     $(SRCDIR)/ctypes.c \
     $(SRCDIR)/file.c \
     $(SRCDIR)/file_internals.c \
+    $(SRCDIR)/file_memory.c	\
     $(SRCDIR)/maths.c \
     $(SRCDIR)/memory.c \
     $(SRCDIR)/search_engine.c \
@@ -57,6 +58,7 @@ library_sources =  \
     $(SRCDIR)/disk.c \
     $(SRCDIR)/disk_internals.c \
 	$(SRCDIR)/directory_recursive_iterator.c \
+	$(SRCDIR)/directory_iterator_tar.c	\
     $(SRCDIR)/btree_iterator.c \
     $(SRCDIR)/top_k_sort.c \
     $(SRCDIR)/stemmer.c	\
@@ -95,8 +97,11 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_divergence.c \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
-	$(SRCDIR)/NEXI_term.c \	
+	$(SRCDIR)/NEXI_term.c \
 	$(SRCDIR)/NEXI_term_iterator.c \
+	$(SRCDIR)/instream_file.c	\
+	$(SRCDIR)/instream_deflate.c \
+	$(SRCDIR)/instream_bz2.c \
 	$(SRCDIR)/ant_api.c
 				
 library_noinst_headers = \
@@ -125,12 +130,15 @@ library_noinst_headers = \
 	$(SRCDIR)/compress_variable_byte.h	\
 	$(SRCDIR)/ctypes.h	\
 	$(SRCDIR)/directory_iterator.h	\
+	$(SRCDIR)/directory_iterator_tar.h	\
+	$(SRCDIR)/directory_iterator_tar_file_header.h	\
 	$(SRCDIR)/directory_recursive_iterator.h	\
 	$(SRCDIR)/disk_directory.h	\
 	$(SRCDIR)/disk.h	\
 	$(SRCDIR)/disk_internals.h	\
 	$(SRCDIR)/file.h	\
 	$(SRCDIR)/file_internals.h	\
+	$(SRCDIR)/file_memory.h	\
 	$(SRCDIR)/fundamental_types.h	\
 	$(SRCDIR)/hash_table.h	\
 	$(SRCDIR)/indexer_param_block.h	\
@@ -189,6 +197,10 @@ library_noinst_headers = \
 	$(SRCDIR)/ranking_function_lmd.h \
 	$(SRCDIR)/ranking_function_bose_einstein.h \
 	$(SRCDIR)/ranking_function_divergence.h \
+	$(SRCDIR)/instream_file.h	\
+	$(SRCDIR)/instream_deflate.h \
+	$(SRCDIR)/instream_bz2.h \
+	$(SRCDIR)/instream.h \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	
@@ -299,7 +311,8 @@ link_extract_LDADD = ${ANT_LIBS}
 link_extract_DEPENDENCIES = libant.la
 
 link_index_SOURCES = $(LTWDIR)/link_index.c
-link_index_LDFLAGS = -rdynamic
+#link_index_LDFLAGS = -rdynamic
+link_index_LDFLAGS = -static
 link_index_LDADD = ${ANT_LIBS}
 link_index_DEPENDENCIES = libant.la
 
@@ -329,3 +342,4 @@ remove_head_SOURCES = $(LTWDIR)/remove_head.c
 remove_head_LDFLAGS = -rdynamic
 remove_head_LDADD = ${ANT_LIBS}
 remove_head_DEPENDENCIES = libant.la
+

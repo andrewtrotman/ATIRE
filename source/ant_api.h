@@ -52,4 +52,4 @@ void ant_free(ANT *ant);
 }
 #endif
 
-#endif  /* /* ANT_API_H_ */ */
+#endif  /* ANT_API_H_ */
