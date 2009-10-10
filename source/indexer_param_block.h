@@ -5,11 +5,13 @@
 #ifndef INDEXER_PARAM_BLOCK_H_
 #define INDEXER_PARAM_BLOCK_H_
 
+#include "indexer_param_block_rank.h"
+
 /*
 	class ANT_INDEXER_PARAM_BLOCK
 	-----------------------------
 */
-class ANT_indexer_param_block
+class ANT_indexer_param_block : public ANT_indexer_param_block_rank
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
@@ -37,9 +39,10 @@ protected:
 
 public:
 	ANT_indexer_param_block(int argc, char *argv[]);
-	void usage(void);
-	void help(void);
-	long parse(void);
+	virtual ~ANT_indexer_param_block() {}
+	virtual void usage(void);
+	virtual void help(void);
+	virtual long parse(void);
 } ;
 
 #endif  /* INDEXER_PARAM_BLOCK_H_ */

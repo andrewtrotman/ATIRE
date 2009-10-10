@@ -6,10 +6,9 @@
 #define ANT_RANKING_FUNCTION_H_
 
 #include "compress.h"
-#include "pragma.h"
+#include "search_engine_accumulator.h"
 
 class ANT_search_engine;
-class ANT_search_engine_accumulator;
 class ANT_search_engine_btree_leaf;
 class ANT_search_engine_stats;
 
@@ -49,7 +48,7 @@ public:
 	/*
 		This constructor is called for quantized impact ordering during indexing
 	*/
-	ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths);
+	ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths);
 
 	/*
 		Nothing to destroy
@@ -57,9 +56,10 @@ public:
 	virtual ~ANT_ranking_function() {}
 
 	/*
-		You must override this function if you're going to add a ranking function
+		You must override these functions if you're going to add a ranking function.
 	*/
 	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) = 0;
+	virtual ANT_search_engine_accumulator::ANT_accumulator_t rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency);
 
 	/*
 		If you also override this function then you can rank directly from the tf array,
@@ -77,16 +77,13 @@ public:
 	/*
 		Functions used for quantised impact ordering.  We need to compute the range of values that will be
 		computed from the ranking function before we quantize.  We also need a function that will take the
-		postings list and quantize it.
+		postings list and quantize it.  The two default functions provided here call a virtual function
+		rank() that returns the score for an individual document - yes, it is slow, but it is the default
+		behaviour.  Anyone wanting to hack up a ranking function need only supply the one rank() function
+		but anyone wanting efficient support needs to supply several funcitons including these two.
 	*/
 	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies);
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies) {}
-
-
-	ANT_compressable_integer *impact_ordering;
-	ANT_search_engine_accumulator *accumulators;
-	virtual void docid_tf_to_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *tf_list, ANT_compressable_integer *docid_list, ANT_compressable_integer *destination);
+	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

@@ -4,17 +4,19 @@
 */
 #ifndef ANT_PARAM_BLOCK_H_
 #define ANT_PARAM_BLOCK_H_
+
+#include "indexer_param_block_rank.h"
+
 /*
 	class ANT_ANT_PARAM_BLOCK
 	-------------------------
 */
-class ANT_ANT_param_block
+class ANT_ANT_param_block : public ANT_indexer_param_block_rank
 {
 public:
 	enum { MAP, MAgP, RANKEFF, P_AT_N } ;									// metrics
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2, INEX_EFFICIENCY = 4 } ;		// evaluation forum
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };						// statistics to print (bitstring)
-	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN, DIVERGENCE};	// ranking function
 	enum { /* NONE = 0, */ THRESHOLD = 1, WEIGHTED = 2 }; 					// stemming stuff
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1};							// read the index from disk or load at startup
 
@@ -40,11 +42,6 @@ public:
 	char *run_name;						// name of the run (used in the export file)
 	long results_list_length;			// length of the results list as exported
 	long stats;							// which stats to display
-	long ranking_function;				// what ranking function should we use?
-
-	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
-	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
-	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long file_or_memory;				// the index be loaded into memory at startup (TRUE / FALSE)
@@ -54,17 +51,14 @@ private:
 	void term_expansion(char *which);
 	void set_metric(char *which);
 	void set_stats(char *which);
-	void set_ranker(char *which);
-	void get_two_parameters(char *from, double *first, double *second);
-	void get_one_parameter(char *from, double *into);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);
-	~ANT_ANT_param_block();
+	virtual ~ANT_ANT_param_block();
 
-	void usage(void);
-	void help(void);
-	long parse(void);
+	virtual void usage(void);
+	virtual void help(void);
+	virtual long parse(void);
 } ;
 
 #endif  /* ANT_PARAM_BLOCK_H_ */

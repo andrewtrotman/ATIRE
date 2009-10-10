@@ -110,6 +110,8 @@ puts("   d            Dale-Chall");
 puts("   f            Flesch-Kincaid");
 puts("");
 
+ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q');
+
 puts("REPORTING");
 puts("---------");
 puts("-N<n>           Report time and memory every <n> documents [default -N0]");

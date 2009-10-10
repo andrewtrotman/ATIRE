@@ -42,12 +42,7 @@ output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT;
 segmentation = FALSE;
-ranking_function = BM25;
 trim_postings_k = LLONG_MAX;
-lmd_u = 500.0;
-lmjm_l = 0.5;
-bm25_k1 = 0.9;
-bm25_b = 0.4;
 file_or_memory = INDEX_IN_FILE;
 }
 
@@ -138,17 +133,7 @@ puts("------------");
 puts("-S              East-Asian language word segmentation");
 puts("");
 
-puts("RANKING");
-puts("-------");
-puts("-R[function]    Rank the result set using");
-puts("   be           Bose-Einstein");
-puts("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] [default]");
-puts("   divergence   Divergence from randomness using I(ne)B2");
-puts("   impact       Sum of impact scores");
-puts("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500]");
-puts("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1]");
-puts("   readable     The readability search engine (BM25 with Dale-Chall)");
-puts("");
+ANT_indexer_param_block_rank::help("RANKING", 'R');		// ranking dunctions
 
 puts("REPORTING");
 puts("---------");
@@ -272,89 +257,6 @@ else if (*(which + 1) == '-')
     stemmer_similarity = ANT_stemmer_factory::THRESHOLD_SIMILARITY;
     stemmer_similarity_threshold = strtod(which + 2, NULL);
     }
-}
-
-/*
-	ANT_ANT_PARAM_BLOCK::GET_TWO_PARAMETERS()
-	-----------------------------------------
-*/
-void ANT_ANT_param_block::get_two_parameters(char *from, double *first, double *second)
-{
-char *ch;
-
-for (ch = from; *ch != '\0'; ch++)
-	if (*ch == ':')
-		{
-		*first = atof(ch + 1);
-		break;
-		}
-	else
-		puts("Command line parse error");
-
-if (*ch != '\0')
-	for (ch++; *ch != '\0'; ch++)
-		if (*ch == ':')
-			{
-			*second = atof(ch + 1);
-			break;
-			}
-		else if (!(isdigit(*ch) || *ch == '.'))
-			puts("Command line parse error");
-
-//printf("[%s][%f][%f]\n", from, *first, *second);
-}
-
-/*
-	ANT_ANT_PARAM_BLOCK::GET_ONE_PARAMETER()
-	----------------------------------------
-*/
-void ANT_ANT_param_block::get_one_parameter(char *from, double *into)
-{
-char *ch;
-
-for (ch = from; *ch != '\0'; ch++)
-	if (*ch == ':')
-		{
-		*into = atof(ch + 1);
-		break;
-		}
-	else
-		puts("Command line parse error");
-
-//printf("[%s][%f]\n", from, *into);
-}
-
-/*
-	ANT_ANT_PARAM_BLOCK::SET_RANKER()
-	---------------------------------
-*/
-void ANT_ANT_param_block::set_ranker(char *which)
-{
-if (strncmp(which, "BM25", 4) == 0)
-	{
-	ranking_function = BM25;
-	get_two_parameters(which + 4, &bm25_k1, &bm25_b);
-	}
-else if (strncmp(which, "lmd", 3) == 0)
-	{
-	ranking_function = LMD;
-	get_one_parameter(which + 3, &lmd_u);
-	}
-else if (strncmp(which, "lmjm", 4) == 0)
-	{
-	ranking_function = LMJM;
-	get_one_parameter(which + 4, &lmjm_l);
-	}
-else if (strcmp(which, "be") == 0)
-	ranking_function = BOSE_EINSTEIN;
-else if (strcmp(which, "divergence") == 0)
-	ranking_function = DIVERGENCE;
-else if (strcmp(which, "impact") == 0)
-	ranking_function = IMPACT;
-else if (strcmp(which, "readable") == 0)
-	ranking_function = READABLE;
-else
-	exit(printf("Unknown Ranking Function:'%s'\n", which));
 }
 
 /*
