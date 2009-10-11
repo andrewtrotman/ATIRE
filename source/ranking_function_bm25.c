@@ -3,16 +3,17 @@
 	-----------------------
 */
 #include <math.h>
+#include "pragma.h"
 #include "ranking_function_bm25.h"
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
 /*
-	ANT_RANKING_FUNCTION_BM25::ANT_RANKING_FUNCTION_BM25()
-	------------------------------------------------------
+	ANT_RANKING_FUNCTION_BM25::INIT()
+	---------------------------------
 */
-ANT_ranking_function_BM25::ANT_ranking_function_BM25(ANT_search_engine *engine, double k1, double b) : ANT_ranking_function(engine)
+void ANT_ranking_function_BM25::init(double k1, double b)
 {
 const double one_minus_b = 1.0 - b;
 long current;
@@ -43,10 +44,6 @@ delete [] document_prior_probability;
 */
 void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
-#ifdef ANT_BM25_SLOW
-	const double b = this->b;
-	const double one_minus_b = 1.0 - b;
-#endif
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
 long docid;
@@ -95,21 +92,24 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-#ifdef ANT_BM25_SLOW
-		/*
-			This version uses the document lengths from the search_engine object
-			which takes more time.  The fast version is preferred as it is a lot laster
-		*/
-		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
-#else
-		/*
-			This version uses the document prior probabilities computed in the constructor
-			which takes more memory
-		*/
 		accumulator[docid].add_rsv(idf * (top_row / (tf + document_prior_probability[docid])));
-#endif
 		}
 	current++;		// skip over the zero
 	}
 }
 
+/*
+	ANT_RANKING_FUNCTION_BM25::RANK()
+	---------------------------------
+*/
+ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+{
+const double k1_plus_1 = k1 + 1.0;
+double idf, tf, rsv;
+
+tf = (double)term_frequency;
+idf = log((double)documents / (double)document_frequency);
+rsv = idf * ((tf * k1_plus_1) / (tf + document_prior_probability[docid]));
+return ANT_search_engine_accumulator::make_rsv(rsv);
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}

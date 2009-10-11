@@ -3,8 +3,10 @@
 	-----------------------------
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <math.h>
+#include "pragma.h"
 #include "ranking_function_similarity.h"
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
@@ -41,7 +43,7 @@ delete [] document_prior_probability;
 
 /*
 	ANT_RANKING_FUNCTION_SIMILARITY::RELEVANCE_RANK_TOP_K()
-	-------------------------------------------------
+	-------------------------------------------------------
 */
 void ANT_ranking_function_similarity::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
@@ -148,4 +150,15 @@ for (current = tf_array; current < end; current++)
 		}
 
 relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);
+}
+
+
+/*
+	ANT_RANKING_FUNCTION_SIMILARITY::RANK()
+	---------------------------------------
+*/
+ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_similarity::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+{
+exit(printf("Cannot pre-compute the impact of the stemming similarity function (it is meaningless)\n"));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

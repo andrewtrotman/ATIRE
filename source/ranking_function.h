@@ -59,7 +59,7 @@ public:
 		You must override these functions if you're going to add a ranking function.
 	*/
 	virtual void relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) = 0;
-	virtual ANT_search_engine_accumulator::ANT_accumulator_t rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency);
+	virtual ANT_search_engine_accumulator::ANT_accumulator_t rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency) = 0;
 
 	/*
 		If you also override this function then you can rank directly from the tf array,

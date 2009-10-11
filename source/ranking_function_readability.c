@@ -2,7 +2,10 @@
 	RANKING_FUNCTION_READABILITY.C
 	------------------------------
 */
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include "pragma.h"
 #include "ranking_function_readability.h"
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
@@ -64,3 +67,12 @@ while (current < end)
 	}
 }
 
+/*
+	ANT_RANKING_FUNCTION_READABILITY::RANK()
+	----------------------------------------
+*/
+ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_readability::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+{
+exit(printf("Cannot pre-compute the impact of the readability similarity function (it is meaningless)\n"));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}

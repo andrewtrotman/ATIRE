@@ -2,6 +2,7 @@
 	RANKING_FUNCTION_DIVERGENCE.C
 	-----------------------------
 */
+#include "pragma.h"
 #include "maths.h"
 #include "ranking_function_divergence.h"
 #include "search_engine_btree_leaf.h"
@@ -78,3 +79,25 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+
+/*
+	ANT_RANKING_FUNCTION_DIVERGENCE::RANK()
+	---------------------------------------
+*/
+ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_divergence::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+{
+double F, F_plus_1, ne, inf_right, tf, tf_prime, rsv;
+
+F = (double)collection_frequency;
+F_plus_1 = F + 1.0;
+ne = documents * (1.0 - pow((documents - 1.0) / documents, F));
+inf_right = ANT_log2(((double)documents + 1.0) / (ne + 0.5));
+
+tf = term_frequency;
+tf_prime = tf * ANT_log2(1.0 + (double)mean_document_length / (double)length);
+rsv = tf_prime * inf_right * (F_plus_1 / ((double)document_frequency * (tf_prime + 1.0)));
+return ANT_search_engine_accumulator::make_rsv(rsv);
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+
+

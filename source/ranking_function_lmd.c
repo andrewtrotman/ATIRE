@@ -3,6 +3,7 @@
 	----------------------
 */
 #include <math.h>
+#include "pragma.h"
 #include "ranking_function_lmd.h"
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
@@ -47,4 +48,21 @@ while (current < end)
 		}
 	current++;		// skip over the zero
 	}
+}
+
+/*
+	ANT_RANKING_FUNCTION_LMD::RANK()
+	--------------------------------
+*/
+ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_lmd::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+{
+double tf, idf, n, left_hand_side;
+
+n = 3.0;						// this is a hack and should be the length of the query
+tf = term_frequency;
+idf = ((double)collection_length_in_terms / (double)collection_frequency);
+left_hand_side = log (1.0 + (tf / u) * idf);
+
+return ANT_search_engine_accumulator::make_rsv(left_hand_side - n * log(1.0 + ((double)document_lengths[docid] / u)));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

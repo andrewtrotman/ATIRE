@@ -234,12 +234,3 @@ while (current_tf < end)
 	}
 }
 
-/*
-	ANT_RANKING_FUNCTION::RANK()
-	----------------------------
-*/
-ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
-{
-return term_frequency;
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-}

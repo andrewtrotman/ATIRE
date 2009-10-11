@@ -248,6 +248,8 @@ for (param = 1; param < argc; param++)
 			statistics = 0;
 			stats(command + 1);
 			}
+		else if (*command == 'Q')
+			set_ranker(command + 1);
 		else if (strcmp(command, "nologo") == 0)
 			logo = FALSE;
 		else if (strcmp(command, "people") == 0)

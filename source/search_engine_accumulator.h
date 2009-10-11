@@ -28,8 +28,12 @@ private:
 	static inline int compare_pointer(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b);
 
 public:
-	void add_rsv(double score) { rsv += (ANT_accumulator_t)(100 * score); }
-	void add_rsv(long score) { rsv += (ANT_accumulator_t)score; }
+	static inline ANT_accumulator_t make_rsv(double score) { return (ANT_accumulator_t)(100 * score); }
+	static inline ANT_accumulator_t make_rsv(long score) { return (ANT_accumulator_t)score; }
+	void add_rsv(double score) { rsv += make_rsv(score); }
+	void add_rsv(long score) { rsv += make_rsv(score); }
+
+
 	long is_zero_rsv(void) { return rsv == 0; }
 	ANT_accumulator_t get_rsv(void) { return rsv; } 
 
