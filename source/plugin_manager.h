@@ -74,4 +74,4 @@ inline bool ANT_plugin_manager::is_segmentation_plugin_available()
 return segmentation_plugin() != NULL;
 }
 
-#endif  /* /* PLUGIN_MANAGER_H_ */ */
+#endif  /* PLUGIN_MANAGER_H_ */
