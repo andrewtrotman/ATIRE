@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "ranking_function_factory.h"
 #include "directory_iterator_tar.h"
 #include "directory_recursive_iterator.h"
 #include "file.h"
@@ -220,7 +221,7 @@ for (param = first_param; param < argc; param++)
 
 id_list.close();
 now = stats.start_timer();
-index->serialise("index.aspt");
+index->serialise("index.aspt", &param_block);
 stats.add_disk_output_time(stats.stop_timer(now));
 index->text_render(param_block.statistics);
 delete index;

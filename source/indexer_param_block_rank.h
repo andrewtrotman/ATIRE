@@ -5,7 +5,15 @@
 #ifndef INDEXER_PARAM_BLOCK_RANK_H_
 #define INDEXER_PARAM_BLOCK_RANK_H_
 
-class ANT_indexer_param_block_rank
+#include "ranking_function_factory.h"
+
+class ANT_ranking_function;
+
+/*
+	class ANT_INDEXER_PARAM_BLOCK_RANK
+	----------------------------------
+*/
+class ANT_indexer_param_block_rank : public ANT_ranking_function_factory
 {
 public:
 	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN, DIVERGENCE};
@@ -26,6 +34,8 @@ protected:
 
 	virtual void set_ranker(char *which);
 	virtual void help(char *title, char switch_char);
+
+	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths);
 } ;
 
 

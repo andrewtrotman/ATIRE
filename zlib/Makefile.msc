@@ -23,11 +23,11 @@ STATICLIB = zlib.lib
 SHAREDLIB = zlib1.dll
 IMPLIB    = zdll.lib
 
-CC = cl
-AS = ml
-LD = link
-AR = lib
-RC = rc
+CC = @cl
+AS = @ml
+LD = @link
+AR = @lib
+RC = @rc
 #
 # Changed for ANT by Andrew Trotman
 #

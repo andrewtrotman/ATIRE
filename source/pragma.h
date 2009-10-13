@@ -10,11 +10,13 @@
 #define PRAGMA_H_
 
 #ifdef _MSC_VER
-	#define ANT_PRAGMA_UNUSED_PARAMETER  warning(suppress: 4100)		// unreferenced formal parameter
+	#define ANT_PRAGMA_UNUSED_PARAMETER  warning(suppress:4100)		// unreferenced formal parameter
 	#define ANT_PRAGMA_CONST_CONDITIONAL warning(disable:4127)		// conditional expression is constant
+	#define ANT_PRAGMA_UNREACHABLE_CODE  warning(disable:4702)		// unreachable code
 #else
 	#define ANT_PRAGMA_UNUSED_PARAMETER
 	#define ANT_PRAGMA_CONST_CONDITIONAL
+	#define ANT_PRAGMA_UNREACHABLE_CODE
 #endif
 
 

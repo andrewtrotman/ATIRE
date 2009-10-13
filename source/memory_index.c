@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <limits>
+#include "ranking_function_factory.h"
 #include "memory_index_hash_node.h"
 #include "memory_index.h"
 #include "memory_index_stats.h"
@@ -513,7 +514,7 @@ return end;
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
-long ANT_memory_index::serialise(char *filename)
+long ANT_memory_index::serialise(char *filename, ANT_ranking_function_factory *factory)
 {
 uint8_t zero = 0;
 int32_t length_of_longest_term = 0;
@@ -563,7 +564,7 @@ if (quantizer != NULL)
 	/*
 		Create the quantizer
 	*/
-	quantizer = new ANT_ranking_function_bose_einstein(largest_docno, document_lengths);
+	quantizer = factory->get_indexing_ranker(largest_docno, document_lengths);
 	/*
 		Now compute the maximum impact score across the collection
 	*/

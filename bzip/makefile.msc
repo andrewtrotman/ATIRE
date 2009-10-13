@@ -3,7 +3,7 @@
 # K.M. Syring (syring@gsf.de)
 # Fixed up by JRS for bzip2-0.9.5d release.
 
-CC=cl
+CC=@cl
 CFLAGS= -DWIN32 -Ox -D_FILE_OFFSET_BITS=64 -nologo 
 
 OBJS= blocksort.obj  \
@@ -17,7 +17,7 @@ OBJS= blocksort.obj  \
 all: lib 
 
 lib: $(OBJS)
-	lib /out:libbz2.lib $(OBJS)
+	@lib -nologo /out:libbz2.lib $(OBJS)
 
 clean: 
 	del *.obj
@@ -32,5 +32,5 @@ clean:
 	del sample3.tst
 
 .c.obj: 
-	$(CC) $(CFLAGS) -c $*.c -Fo $*.obj
+	$(CC) $(CFLAGS) -c $*.c -Fo$*.obj
 

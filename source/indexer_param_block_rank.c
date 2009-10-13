@@ -7,7 +7,16 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
+#include "pragma.h"
 #include "indexer_param_block_rank.h"
+#include "ranking_function_impact.h"
+#include "ranking_function_bm25.h"
+#include "ranking_function_similarity.h"
+#include "ranking_function_lmd.h"
+#include "ranking_function_lmjm.h"
+#include "ranking_function_bose_einstein.h"
+#include "ranking_function_divergence.h"
+#include "ranking_function_readability.h"
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()
@@ -122,4 +131,35 @@ puts("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u
 puts("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1]");
 puts("   readable     The readability search engine (BM25 with Dale-Chall)");
 puts("");
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK_RANK::GET_INDEXING_RANKER()
+	---------------------------------------------------
+*/
+#pragma ANT_PRAGMA_UNREACHABLE_CODE
+ANT_ranking_function *ANT_indexer_param_block_rank::get_indexing_ranker(long long documents, ANT_compressable_integer *lengths)
+{
+switch (ranking_function)
+	{
+	case BM25:
+		return new ANT_ranking_function_BM25(documents, lengths, bm25_k1, bm25_b);
+	case IMPACT:
+		return new ANT_ranking_function_impact(documents, lengths);
+	case LMD:
+		return new ANT_ranking_function_lmd(documents, lengths, lmd_u);
+	case LMJM:
+		return new ANT_ranking_function_lmd(documents, lengths, lmjm_l);
+	case BOSE_EINSTEIN:
+		return new ANT_ranking_function_bose_einstein(documents, lengths);
+	case DIVERGENCE:
+		return new ANT_ranking_function_divergence(documents, lengths);
+	default:
+		exit(printf("Unknown quantizing function specified during indexing!\n"));
+	}
+/*
+	This is one of those "Can't win" moments.  Some compilers will complain that the line below is
+	unreachable while if you remove others will complain that not all paths return a value!
+*/
+return NULL;
 }

@@ -215,20 +215,20 @@ $(BINDIR)\test_tar.exe : $(OBJDIR)\test_tar.obj
 #	Make the external libraries
 #
 bzip\bzip2-1.0.5\libbz2.lib :
-	cd bzip\bzip2-1.0.5
-	make -f ..\makefile.msc
-	cd ..\..
+	@cd bzip\bzip2-1.0.5
+	@make -nologo -f ..\makefile.msc
+	@cd ..\..
 
 zlib\zlib-1.2.3\zlib.lib : 
-	cd zlib\zlib-1.2.3
-	make -f ..\makefile.msc
-	cd ..\..
+	@cd zlib\zlib-1.2.3
+	@make -nologo -f ..\makefile.msc
+	@cd ..\..
 
 #
 #	Management
 #
 clean :
-	del $(OBJDIR)\*.obj $(BINDIR)\*.exe $(BINDIR)\*.ilk $(BINDIR)\*.pdb $(BINDIR)\*.suo *.pdb
+	del *.obj *.exe *.ilk *.pdb *.suo /s
 
 depend:
 	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
