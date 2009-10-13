@@ -16,7 +16,11 @@ class ANT_ranking_function;
 class ANT_indexer_param_block_rank : public ANT_ranking_function_factory
 {
 public:
-	enum { BM25, IMPACT, READABLE, LMD, LMJM, BOSE_EINSTEIN, DIVERGENCE};
+	enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64};
+
+protected:
+	static const long long index_functions =  BM25 | IMPACT | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE;
+	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE;
 
 public:
 	long ranking_function;				// what ranking function should we use?
@@ -24,6 +28,9 @@ public:
 	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
 	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
+
+private:
+	char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
 
 protected:
 	ANT_indexer_param_block_rank();
@@ -33,7 +40,7 @@ protected:
 	virtual void get_one_parameter(char *from, double *into);
 
 	virtual void set_ranker(char *which);
-	virtual void help(char *title, char switch_char);
+	virtual void help(char *title, char switch_char, long long allowable);
 
 	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths);
 } ;

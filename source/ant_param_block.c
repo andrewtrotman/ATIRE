@@ -133,7 +133,7 @@ puts("------------");
 puts("-S              East-Asian language word segmentation");
 puts("");
 
-ANT_indexer_param_block_rank::help("RANKING", 'R');		// ranking dunctions
+ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking dunctions
 
 puts("REPORTING");
 puts("---------");

@@ -7,7 +7,6 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
-#include "pragma.h"
 #include "indexer_param_block_rank.h"
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
@@ -118,18 +117,26 @@ else
 	ANT_INDEXER_PARAM_BLOCK_RANK::HELP()
 	------------------------------------
 */
-void ANT_indexer_param_block_rank::help(char *title, char switch_char)
+void ANT_indexer_param_block_rank::help(char *title, char switch_char, long long allowable)
 {
 printf("%s\n", title);
 printf("%*.*s\n", strlen(title), strlen(title), "------------------------------------------");
 printf("-%c[function]    Rank the result set using\n", switch_char);
-puts("   be           Bose-Einstein");
-puts("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] [default]");
-puts("   divergence   Divergence from randomness using I(ne)B2");
-puts("   impact       Sum of impact scores");
-puts("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500]");
-puts("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1]");
-puts("   readable     The readability search engine (BM25 with Dale-Chall)");
+
+if (allowable & BOSE_EINSTEIN)
+	printf("   be           Bose-Einstein %s\n", isdefault(BOSE_EINSTEIN));
+if (allowable & BM25)
+	printf("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] %s\n", isdefault(BM25));
+if (allowable & DIVERGENCE)
+	printf("   divergence   Divergence from randomness using I(ne)B2 %s\n", isdefault(DIVERGENCE));
+if (allowable & IMPACT)
+	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
+if (allowable & LMD)
+	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500] %s\n" , isdefault(LMD));
+if (allowable & LMJM)
+	printf("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1] %s\n", isdefault(LMJM));
+if (allowable & READABLE)
+	printf("   readable     The readability search engine (BM25 with Dale-Chall) %s\n", isdefault(READABLE));
 puts("");
 }
 
@@ -137,15 +144,12 @@ puts("");
 	ANT_INDEXER_PARAM_BLOCK_RANK::GET_INDEXING_RANKER()
 	---------------------------------------------------
 */
-#pragma ANT_PRAGMA_UNREACHABLE_CODE
 ANT_ranking_function *ANT_indexer_param_block_rank::get_indexing_ranker(long long documents, ANT_compressable_integer *lengths)
 {
 switch (ranking_function)
 	{
 	case BM25:
 		return new ANT_ranking_function_BM25(documents, lengths, bm25_k1, bm25_b);
-	case IMPACT:
-		return new ANT_ranking_function_impact(documents, lengths);
 	case LMD:
 		return new ANT_ranking_function_lmd(documents, lengths, lmd_u);
 	case LMJM:
@@ -154,12 +158,6 @@ switch (ranking_function)
 		return new ANT_ranking_function_bose_einstein(documents, lengths);
 	case DIVERGENCE:
 		return new ANT_ranking_function_divergence(documents, lengths);
-	default:
-		exit(printf("Unknown quantizing function specified during indexing!\n"));
 	}
-/*
-	This is one of those "Can't win" moments.  Some compilers will complain that the line below is
-	unreachable while if you remove others will complain that not all paths return a value!
-*/
 return NULL;
 }

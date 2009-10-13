@@ -35,6 +35,7 @@ readability_measure = ANT_readability_factory::NONE;
 statistics = 0;
 logo = TRUE;
 reporting_frequency = LLONG_MAX;
+ranking_function = IMPACT;
 }
 
 /*
@@ -110,7 +111,7 @@ puts("   d            Dale-Chall");
 puts("   f            Flesch-Kincaid");
 puts("");
 
-ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q');
+ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
 
 puts("REPORTING");
 puts("---------");

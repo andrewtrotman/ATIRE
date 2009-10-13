@@ -546,25 +546,24 @@ stats->bytes_for_decompression_recompression += compressed_postings_list_length 
 	we need to compute the min and max scores the function will produce and then
 	use those later - this takes time so time it.
 */
-if (quantizer != NULL)
+timer = stats->start_timer();
+/*
+	Compute the array of document lengths and other parameters necessary for impact ordering on
+	the relevance ranking functions
+*/
+
+node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
+
+get_serialised_postings(node, &doc_size, &tf_size);
+document_lengths = (ANT_compressable_integer *)memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
+node->serialise_postings(serialised_docids, &serialised_docids_size, serialised_tfs, &serialised_tfs_size);
+variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
+
+/*
+	Create the quantizer
+*/
+if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths)) != NULL)
 	{
-	timer = stats->start_timer();
-	/*
-		Compute the array of document lengths and other parameters necessary for impact ordering on
-		the relevance ranking functions
-	*/
-
-	node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
-
-	get_serialised_postings(node, &doc_size, &tf_size);
-	document_lengths = (ANT_compressable_integer *)memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
-	node->serialise_postings(serialised_docids, &serialised_docids_size, serialised_tfs, &serialised_tfs_size);
-	variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
-
-	/*
-		Create the quantizer
-	*/
-	quantizer = factory->get_indexing_ranker(largest_docno, document_lengths);
 	/*
 		Now compute the maximum impact score across the collection
 	*/
@@ -579,11 +578,11 @@ if (quantizer != NULL)
 			if (min_rsv_for_node < minimum_collection_rsv)
 				minimum_collection_rsv = min_rsv_for_node;
 			}
-	/*
-		Store how long it took for later.
-	*/
-	stats->time_to_quantize += stats->stop_timer(timer);
 	}
+/*
+	Store how long quantizaton took.
+*/
+stats->time_to_quantize += stats->stop_timer(timer);
 
 /*
 	Write the postings
