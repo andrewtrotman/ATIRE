@@ -118,7 +118,7 @@ for (term_string = term.first(parse_tree); term_string != NULL; term_string = te
 	/*
 		process the next search term - either stemmed or not.
 	*/
-	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers of tag names
+	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers or tag names
 		search_engine->process_one_search_term(token, ranking_function);
 	else
 		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
