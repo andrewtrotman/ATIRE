@@ -15,6 +15,15 @@
 #endif
 
 /*
+	ANT_NEXI::MAKE_POOL()
+	---------------------
+*/
+ANT_NEXI_term *ANT_NEXI::make_pool(long pool_size)
+{
+return new ANT_NEXI_term[pool_size];
+}
+
+/*
 	ANT_NEXI::GET_NEXI_TERM()
 	-------------------------
 */

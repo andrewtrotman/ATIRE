@@ -5,6 +5,10 @@
 #ifndef SEARCH_ENGINE_BTREE_LEAF_H_
 #define SEARCH_ENGINE_BTREE_LEAF_H_
 
+/*
+	class ANT_SEARCH_ENGINE_BTREE_LEAF
+	----------------------------------
+*/
 class ANT_search_engine_btree_leaf
 {
 public:
@@ -16,3 +20,4 @@ public:
 } ;
 
 #endif  /* SEARCH_ENGINE_BTREE_LEAF_H_ */
+

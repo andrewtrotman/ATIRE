@@ -31,7 +31,7 @@
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
 #include "parser.h"
-#include "NEXI.h"
+#include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
 
 #ifndef FALSE
@@ -83,7 +83,7 @@ long did_query, first_case, token_length;
 char *current, token[1024];
 ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
-ANT_NEXI parser;
+ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
 ANT_NEXI_term *parse_tree, *term_string;
 

@@ -22,7 +22,7 @@ private:
 	long successful_parse;
 	ANT_string_pair token;
 	unsigned char *string, *at;
-	ANT_NEXI_term pool[MAX_NEXI_TERMS];
+	ANT_NEXI_term *pool;
 	size_t pool_used;
 
 private:
@@ -41,8 +41,11 @@ private:
 	ANT_NEXI_term *read_CO(ANT_string_pair *path, ANT_string_pair *terms);
 	ANT_NEXI_term *read_CAS(void);
 
+protected:
+	virtual ANT_NEXI_term *make_pool(long pool_size);
+
 public:
-	ANT_NEXI() { pool_used = 0; }
+	ANT_NEXI() { pool = make_pool(MAX_NEXI_TERMS); pool_used = 0; }
 	ANT_NEXI_term *parse(char *expression);
 	long get_success_state(void) { return successful_parse; }
 } ;
