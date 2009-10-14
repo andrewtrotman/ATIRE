@@ -30,7 +30,7 @@ public:
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 
 private:
-	char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
+	const char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
 
 protected:
 	ANT_indexer_param_block_rank();

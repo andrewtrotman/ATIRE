@@ -22,6 +22,7 @@ OBJECTS = \
 	postings_piece.o \
 	ctypes.o \
 	file.o \
+	file_memory.o \
 	file_internals.o \
 	maths.o \
 	memory.o \
@@ -38,11 +39,13 @@ OBJECTS = \
 	search_engine_stats.o \
 	search_engine_forum.o \
 	search_engine_forum_INEX.o \
+	search_engine_forum_INEX_efficiency.o \
 	search_engine_forum_TREC.o \
 	str.o \
 	stop_word.o \
 	disk.o \
 	disk_internals.o \
+	directory_iterator_tar.o \
 	directory_recursive_iterator.o \
 	btree_iterator.o \
 	top_k_sort.o \
@@ -72,6 +75,7 @@ OBJECTS = \
 	search_engine_readability.o \
 	plugin_manager.o \
 	indexer_param_block.o \
+	indexer_param_block_rank.o \
 	ant_param_block.o \
 	version.o \
 	ranking_function.o \
@@ -83,6 +87,9 @@ OBJECTS = \
 	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
 	ranking_function_bm25.o \
+	instream_file.o \
+	instream_deflate.o \
+	instream_bz2.o \
 	nexi.o \
 	NEXI_term_iterator.o \
 	NEXI_term.o

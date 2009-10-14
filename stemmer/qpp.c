@@ -152,6 +152,7 @@ int main(int argv, char **argc) {
 /*
       N.B. : Averaged Similarity Collection Query - ctf = frequency, df = number of documents.
 
+      QL = n
       AvSCQ = 1/n SUM(q in Q) (1 + ln(ctf(q))) * ln(1 + |C|/df(q))
       AvQL = 1/n SUM(q in Q) strlen(q)
       AvIDF = 1/n SUM(q in Q) idf(q)
@@ -167,6 +168,9 @@ int main(int argv, char **argc) {
 
       DocSet is wierd = (SUM(q in Q) df(q)) - DocsReturned 
       It's like which docs have at least 2 terms.
+      TopScore = top BM25 score
+      TopDocs = Docs Returned above 0.8 * top BM25 Score
+
 */
 
     ant_setup();
