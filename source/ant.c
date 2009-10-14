@@ -70,6 +70,7 @@ public:
     }
 	char *next(void) { return fgets(query, sizeof(query), fp); }
 } ;
+
 /*
 	PERFORM_QUERY()
 	---------------
@@ -84,7 +85,7 @@ ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 ANT_NEXI parser;
 ANT_NEXI_term_iterator term;
-ANT_NEXI_term *term_string;
+ANT_NEXI_term *parse_tree, *term_string;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -92,7 +93,8 @@ did_query = FALSE;
 now = stats.start_timer();
 search_engine->init_accumulators();
 
-for (term_string = term.first(parser.parse(query)); term_string != NULL; term_string = term.next())
+parse_tree = parser.parse(query);
+for (term_string = term.first(parse_tree); term_string != NULL; term_string = term.next())
 	{
 	/*
 		Take the search term (as an ANT_string_pair) and convert into a string

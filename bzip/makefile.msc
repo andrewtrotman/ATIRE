@@ -4,7 +4,7 @@
 # Fixed up by JRS for bzip2-0.9.5d release.
 
 CC=@cl
-CFLAGS= -DWIN32 -Ox -D_FILE_OFFSET_BITS=64 -nologo 
+CFLAGS= -DWIN32 -Ox -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
 
 OBJS= blocksort.obj  \
       huffman.obj    \
@@ -17,7 +17,7 @@ OBJS= blocksort.obj  \
 all: lib 
 
 lib: $(OBJS)
-	@lib -nologo /out:libbz2.lib $(OBJS)
+	@lib -nologo /LTCG /out:libbz2.lib $(OBJS)
 
 clean: 
 	del *.obj

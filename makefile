@@ -53,8 +53,8 @@ MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
 #CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE)
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE)
-CC = @cl 
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE) /MP8
+CC = @cl -openmp
 
 #
 #	Libraries
@@ -228,7 +228,7 @@ zlib\zlib-1.2.3\zlib.lib :
 #	Management
 #
 clean :
-	del *.obj *.exe *.ilk *.pdb *.suo /s
+	del *.obj *.exe *.ilk *.pdb *.suo *.lib /s
 
 depend:
 	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies

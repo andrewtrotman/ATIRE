@@ -32,11 +32,11 @@ RC = @rc
 # Changed for ANT by Andrew Trotman
 #
 #CFLAGS  = -nologo -MD -O2 $(LOC)
-CFLAGS  = -nologo -Ox $(LOC)
+CFLAGS  = -nologo -Ox $(LOC) /Zi /fp:fast /GL /Gy /MP8
 
 ASFLAGS = -coff
-LDFLAGS = -nologo -release
-ARFLAGS = -nologo
+LDFLAGS = -nologo -release /LTCG
+ARFLAGS = -nologo /LTCG
 RCFLAGS = /dWIN32 /r
 
 OBJS = adler32.obj compress.obj crc32.obj deflate.obj gzio.obj infback.obj \
