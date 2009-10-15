@@ -85,7 +85,7 @@ ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
-ANT_NEXI_term *parse_tree, *term_string;
+ANT_NEXI_term_ant *parse_tree, *term_string;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -93,8 +93,11 @@ did_query = FALSE;
 now = stats.start_timer();
 search_engine->init_accumulators();
 
-parse_tree = parser.parse(query);
-for (term_string = term.first(parse_tree); term_string != NULL; term_string = term.next())
+/*
+	Parse the queries
+*/
+parse_tree = (ANT_NEXI_term_ant *)parser.parse(query);
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
 	/*
 		Take the search term (as an ANT_string_pair) and convert into a string
@@ -115,11 +118,16 @@ for (term_string = term.first(parse_tree); term_string != NULL; term_string = te
 			strlower(token);
 			break;
 			}
-	/*
-		process the next search term - either stemmed or not.
-	*/
 	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers or tag names
-		search_engine->process_one_search_term(token, ranking_function);
+		search_engine->process_one_term(token, &term_string->term_details);
+	}
+/*
+	process the next search term - either stemmed or not.
+*/
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	{
+	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers or tag names
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
 

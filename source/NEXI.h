@@ -16,13 +16,16 @@ class ANT_string_term;
 */
 class ANT_NEXI 
 {
-private:
+protected:
 	static const size_t MAX_NEXI_TERMS = 1024;
+
 private:
 	long successful_parse;
 	ANT_string_pair token;
 	unsigned char *string, *at;
 	ANT_NEXI_term *pool;
+
+protected:
 	size_t pool_used;
 
 private:
@@ -43,9 +46,10 @@ private:
 
 protected:
 	virtual ANT_NEXI_term *make_pool(long pool_size);
+	virtual ANT_NEXI_term *next_free_node() { return pool + pool_used; } 
 
 public:
-	ANT_NEXI() { pool = make_pool(MAX_NEXI_TERMS); pool_used = 0; }
+	ANT_NEXI(long make_memory = 1) { if (make_memory) pool = make_pool(MAX_NEXI_TERMS); pool_used = 0; }
 	ANT_NEXI_term *parse(char *expression);
 	long get_success_state(void) { return successful_parse; }
 } ;

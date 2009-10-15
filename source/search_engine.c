@@ -389,40 +389,64 @@ return destination;
 }
 
 /*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM()
+	-------------------------------------
+*/
+ANT_search_engine_btree_leaf *ANT_search_engine::process_one_term(char *term, ANT_search_engine_btree_leaf *term_details)
+{
+ANT_search_engine_btree_leaf *verify;
+long long now, bytes_already_read;
+
+bytes_already_read = index->get_bytes_read();
+
+now = stats->start_timer();
+verify = get_postings_details(term, term_details);
+stats->add_dictionary_lookup_time(stats->stop_timer(now));
+
+stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+
+return verify;
+}
+
+/*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
+	--------------------------------------------
+*/
+void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function)
+{
+void *verify;
+long long now, bytes_already_read;
+
+if (term_details != NULL)
+	{
+	bytes_already_read = index->get_bytes_read();
+	now = stats->start_timer();
+	verify = get_postings(term_details, postings_buffer);
+	stats->add_posting_read_time(stats->stop_timer(now));
+	if (verify != NULL)
+		{
+		now = stats->start_timer();
+		factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+		stats->add_decompress_time(stats->stop_timer(now));
+
+		now = stats->start_timer();
+		ranking_function->relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_postings_k);
+		stats->add_rank_time(stats->stop_timer(now));
+		}
+
+	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+	}
+}
+
+/*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
 */
 void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function)
 {
-void *verify;
 ANT_search_engine_btree_leaf term_details;
-long long now;
-long long bytes_already_read;
 
-bytes_already_read = index->get_bytes_read();
-
-now = stats->start_timer();
-verify = get_postings_details(term, &term_details);
-stats->add_dictionary_lookup_time(stats->stop_timer(now));
-
-if (verify != NULL)
-	{
-	now = stats->start_timer();
-	verify = get_postings(&term_details, postings_buffer);
-	stats->add_posting_read_time(stats->stop_timer(now));
-	if (verify != NULL)
-		{
-		now = stats->start_timer();
-		factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-		stats->add_decompress_time(stats->stop_timer(now));
-
-		now = stats->start_timer();
-		ranking_function->relevance_rank_top_k(accumulator, &term_details, decompress_buffer, trim_postings_k);
-		stats->add_rank_time(stats->stop_timer(now));
-		}
-	}
-
-stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+process_one_term_detail(process_one_term(term, &term_details), ranking_function);
 }
 
 /*

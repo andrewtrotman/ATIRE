@@ -31,7 +31,7 @@ ANT_NEXI_term *ANT_NEXI::get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *t
 {
 ANT_NEXI_term *answer;
 
-answer = pool + pool_used;
+answer = next_free_node();
 
 pool_used++;
 if (pool_used >= MAX_NEXI_TERMS)
