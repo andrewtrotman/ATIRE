@@ -402,6 +402,14 @@ bytes_already_read = index->get_bytes_read();
 now = stats->start_timer();
 verify = get_postings_details(term, term_details);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
+if (verify == NULL)
+	{
+	/*
+		The term was not found so set the collection frequency and document frequency to 0
+	*/
+	term_details->collection_frequency = 0;
+	term_details->document_frequency = 0;
+	}
 
 stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 
@@ -417,7 +425,7 @@ void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *te
 void *verify;
 long long now, bytes_already_read;
 
-if (term_details != NULL)
+if (term_details != NULL && term_details->document_frequency > 0)
 	{
 	bytes_already_read = index->get_bytes_read();
 	now = stats->start_timer();
