@@ -10,6 +10,37 @@ LDFLAGS = -ldl
 CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
          -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
 
+#
+# Please use either system or built-in libs, not both
+#
+# use system libz and libbz2 libraries
+USE_SYSTEM_ZLIB = 0
+USE_SYSTEM_BZLIB = 0
+# use ant's built-in libz and libbz2 libraries
+USE_BUILT_IN_ZLIB = 0
+USE_BUILT_IN_BZLIB = 0
+
+ifeq ($(USE_SYSTEM_ZLIB), 1)
+	CFLAGS += -DANT_HAS_ZLIB
+	LDFLAGS += -lz
+endif
+
+ifeq ($(USE_SYSTEM_BZLIB), 1)
+	# use system libbz2 library
+	CFLAGS += -DANT_HAS_BZLIB
+	LDFLAGS += -lbz2
+endif
+
+ifeq ($(USE_BUILT_IN_ZLIB), 1)
+	CFLAGS += -DANT_HAS_ZLIB -I zlib/zlib-1.2.3
+	EXTRA_OBJS += zlib/zlib-1.2.3/libz.a
+endif
+
+ifeq ($(USE_BUILT_IN_BZLIB), 1)
+	CFLAGS += -DANT_HAS_BZLIB -I bzip/bzip2-1.0.5
+	EXTRA_OBJS += bzip/bzip2-1.0.5/libbz2.a
+endif
+
 CC = g++
 
 OBJECTS = \
@@ -102,10 +133,10 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
 clean :
