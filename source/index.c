@@ -8,6 +8,7 @@
 #include "ranking_function_factory.h"
 #include "directory_iterator_tar.h"
 #include "directory_recursive_iterator.h"
+#include "directory_iterator_multiple.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -21,6 +22,7 @@
 #include "instream_file.h"
 #include "instream_deflate.h"
 #include "instream_bz2.h"
+#include "instream_buffer.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -47,7 +49,13 @@ int main(int argc, char *argv[])
 {
 ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
-ANT_disk *disk = NULL;
+ANT_directory_iterator *source = NULL;
+#ifdef PARALLEL_INDEX
+ANT_directory_iterator_multiple *disk = NULL;
+ANT_instream_buffer *instream_file_buffer;
+#else
+ANT_directory_iterator *disk = NULL;
+#endif
 ANT_parser *parser;
 ANT_readability_factory *readability;
 ANT_string_pair *token;
@@ -96,30 +104,50 @@ readability->set_parser(parser);
 /*
 	The first parameter that is not a command line switch is the start of the list of files to index
 */
+#ifdef PARALLEL_INDEX
+	disk = new ANT_directory_iterator_multiple;
+#endif
 current_file_length = bytes_indexed = 0;
+
 for (param = first_param; param < argc; param++)
 	{
+#ifdef PARALLEL_INDEX
+#else
 	delete disk;
 	delete file_stream;
 	delete decompressor;
+#endif
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
-		disk = new ANT_directory_recursive_iterator;						// this dir and below
+		source = new ANT_directory_recursive_iterator;						// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
-		disk = new ANT_directory_iterator_tar(decompressor);
+#ifdef PARALLEL_INDEX
+		instream_file_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_file_buffer);
+#else
+		source = new ANT_directory_iterator_tar(decompressor);
+#endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-		disk = new ANT_directory_iterator_tar(decompressor);
+		source = new ANT_directory_iterator_tar(decompressor);
 		}
 	else
-		disk = new ANT_directory_iterator;									// current directory
+		source = new ANT_directory_iterator;									// current directory
+
+#ifdef PARALLEL_INDEX
+	disk->add_iterator(source);
+	}
 
 
+	{
+#else
+	disk = source;
+#endif
 	files_that_match = 0;
 	now = stats.start_timer();
 	current_file_length = 0;
@@ -132,7 +160,7 @@ for (param = first_param; param < argc; param++)
 	bytes_indexed += current_file_length;
 	while (file != NULL)
 		{
-		#pragma omp parallel sections
+		#pragma omp parallel sections num_threads(2)
 			{
 			#pragma omp section
 				{

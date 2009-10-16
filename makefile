@@ -52,8 +52,8 @@ MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
-#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE) /MP8
+#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
+CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE) /MP8
 CC = @cl
 
 #
@@ -97,7 +97,8 @@ PARTS = \
 	$(OBJDIR)\stop_word.obj 						\
 	$(OBJDIR)\disk.obj 								\
 	$(OBJDIR)\disk_internals.obj 					\
-	$(OBJDIR)\directory_iterator_tar.obj		\
+	$(OBJDIR)\directory_iterator_tar.obj			\
+	$(OBJDIR)\directory_iterator_multiple.obj		\
 	$(OBJDIR)\directory_recursive_iterator.obj		\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\top_k_sort.obj 						\
@@ -126,7 +127,7 @@ PARTS = \
 	$(OBJDIR)\readability_factory.obj				\
 	$(OBJDIR)\search_engine_readability.obj			\
 	$(OBJDIR)\plugin_manager.obj					\
-	$(OBJDIR)\indexer_param_block_rank.obj				\
+	$(OBJDIR)\indexer_param_block_rank.obj			\
 	$(OBJDIR)\indexer_param_block.obj				\
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\
@@ -142,6 +143,7 @@ PARTS = \
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
+	$(OBJDIR)\instream_buffer.obj					\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term.obj
@@ -174,6 +176,13 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_tar.exe
 
 #
+#	List of objects to build
+#
+all : $(PARTS)		\
+      $(ANT_TARGETS)	\
+      $(OTHER_TARGETS)
+
+#
 #	Default dependency rules
 #
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
@@ -189,12 +198,6 @@ OTHER_TARGETS = \
 	@echo Building $@...
 	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Fe$@  $(FIXED)
 
-#
-#	List of objects to build
-#
-all : $(PARTS)		\
-      $(ANT_TARGETS)	\
-      $(OTHER_TARGETS)
 
 $(ANT_TARGETS) : $(PARTS) 
 $(OTHER_TARGETS) : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj
@@ -203,13 +206,12 @@ $(PARTS) : makefile $(EXTRA_LIBS)
 #
 #	Some dependencies need to be explicit (is this an nmake bug)?
 #
-$(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
-$(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
-$(BINDIR)\bindiff.exe : $(OBJDIR)\bindiff.obj
-$(BINDIR)\filelist.exe : $(OBJDIR)\filelist.obj
-$(BINDIR)\index.exe : $(OBJDIR)\index.obj
-$(BINDIR)\ant.exe : $(OBJDIR)\ant.obj
-$(BINDIR)\test_tar.exe : $(OBJDIR)\test_tar.obj
+#$(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
+#$(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
+#$(BINDIR)\bindiff.exe : $(OBJDIR)\bindiff.obj
+#$(BINDIR)\filelist.exe : $(OBJDIR)\filelist.obj
+#$(BINDIR)\index.exe : $(OBJDIR)\index.obj
+#$(BINDIR)\ant.exe : $(OBJDIR)\ant.obj
 
 #
 #	Make the external libraries

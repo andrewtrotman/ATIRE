@@ -22,7 +22,7 @@ private:
 	long long total_written;			// number of bytes returned
 	long long total_read;				// number of bytes read from the source stream
 	unsigned char *buffer;
-	static const long long buffer_length = 16384;			// use a 16K buffer
+	static const long long buffer_length = 1024 * 1024 * 16;			// did use a 16K buffer, now using 16MB buffer
 
 public:
 	ANT_instream_bz2(ANT_memory *memory, ANT_instream *source);
