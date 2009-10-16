@@ -140,7 +140,7 @@ while (current_tf < end)
 	ANT_RANKING_FUNCTION_BOSE_EINSTEIN::RANK()
 	------------------------------------------
 */
-ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_bose_einstein::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_bose_einstein::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
 {
 double tf, rsv, left, right, tf_prime;
 
@@ -150,6 +150,6 @@ right = log(1.0 + (double)documents / (double)collection_frequency);
 tf = term_frequency;
 tf_prime = tf * log(1.0 + mean_document_length / (double)length);
 rsv = (left + tf_prime * right) / (tf_prime + 1.0);
-return ANT_search_engine_accumulator::make_rsv(rsv);
+return rsv;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

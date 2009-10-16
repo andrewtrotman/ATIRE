@@ -38,8 +38,8 @@ while (current < end)
 	ANT_RANKING_FUNCTION_IMPACT::RANK()
 	-----------------------------------
 */
-ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_impact::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_impact::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
 {
-return ANT_search_engine_accumulator::make_rsv((double)term_frequency);
+return (double)term_frequency;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

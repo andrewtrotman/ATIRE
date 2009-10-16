@@ -102,7 +102,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_BM25::RANK()
 	---------------------------------
 */
-ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
 {
 const double k1_plus_1 = k1 + 1.0;
 double idf, tf, rsv;
@@ -110,6 +110,6 @@ double idf, tf, rsv;
 tf = (double)term_frequency;
 idf = log((double)documents / (double)document_frequency);
 rsv = idf * ((tf * k1_plus_1) / (tf + document_prior_probability[docid]));
-return ANT_search_engine_accumulator::make_rsv(rsv);
+return rsv;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

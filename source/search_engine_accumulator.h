@@ -2,12 +2,15 @@
 	SEARCH_ENGINE_ACCUMULATOR.H
 	---------------------------
 */
-
 #ifndef SEARCH_ENGINE_ACCUMULATOR_H_
 #define SEARCH_ENGINE_ACCUMULATOR_H_
 
 #include <stddef.h>		// needed for size_t
 
+/*
+	class ANT_SEARCH_ENGINE_ACCUMULATOR
+	-----------------------------------
+*/
 class ANT_search_engine_accumulator
 {
 public:
@@ -24,7 +27,6 @@ private:
 
 private:
 	static inline void swap(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b) { register ANT_search_engine_accumulator *tmp; tmp = *a; *a = *b; *b = tmp; } 
-	static void top_k_shortsort(ANT_search_engine_accumulator **lo, ANT_search_engine_accumulator **hi);
 	static inline int compare_pointer(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b);
 
 public:
@@ -32,7 +34,6 @@ public:
 	static inline ANT_accumulator_t make_rsv(long score) { return (ANT_accumulator_t)score; }
 	void add_rsv(double score) { rsv += make_rsv(score); }
 	void add_rsv(long score) { rsv += make_rsv(score); }
-
 
 	long is_zero_rsv(void) { return rsv == 0; }
 	ANT_accumulator_t get_rsv(void) { return rsv; } 

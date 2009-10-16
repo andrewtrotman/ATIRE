@@ -152,12 +152,11 @@ for (current = tf_array; current < end; current++)
 relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);
 }
 
-
 /*
 	ANT_RANKING_FUNCTION_SIMILARITY::RANK()
 	---------------------------------------
 */
-ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_similarity::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_similarity::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
 {
 exit(printf("Cannot pre-compute the impact of the stemming similarity function (it is meaningless)\n"));
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

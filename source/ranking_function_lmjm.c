@@ -49,7 +49,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_LMJM::RANK()
 	---------------------------------
 */
-ANT_search_engine_accumulator::ANT_accumulator_t ANT_ranking_function_lmjm::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_lmjm::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
 {
 double one_minus_lambda, idf, rsv;
 
@@ -57,6 +57,6 @@ one_minus_lambda = (1.0 - lambda) / lambda;
 idf = (double)collection_length_in_terms / (double)collection_frequency;
 rsv = log(1 + one_minus_lambda * ((double)term_frequency / (double)length) * idf);
 
-return ANT_search_engine_accumulator::make_rsv(rsv);
+return rsv;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
