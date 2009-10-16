@@ -13,7 +13,7 @@
 	ANT_RANKING_FUNCTION_IMPACT::RELEVANCE_RANK_TOP_K()
 	---------------------------------------------------
 */
-void ANT_ranking_function_impact::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_impact::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 long docid, tf;
 ANT_compressable_integer *current, *end;
@@ -28,7 +28,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator[docid].add_rsv(tf);
+		accumulator->add_rsv(docid, tf);
 		}
 	current++;
 	}

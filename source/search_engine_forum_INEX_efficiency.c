@@ -61,7 +61,6 @@ long long which;
 ANT_search_engine_stats *stats = search_engine->get_stats();
 long long cpu_time_ms = stats->get_cpu_time_ms();
 long long io_time_ms = stats->get_io_time_ms();
-ANT_search_engine_accumulator **accumulator_pointers = search_engine->get_accumulator_pointers();
 
 fprintf(file, "<topic");
 fprintf(file, " topic-id = %s%ld>\n", ANT_search_engine_forum_INEX_efficiency::ID_PREFIX, topic_id);
@@ -77,7 +76,7 @@ for (which = 0; which < hits; which++)
 	fprintf(file, "<file>%s</file>\n", docids[which]);
 	fprintf(file, "<path>/article[1]></path>\n");
 	fprintf(file, "<rank>%lld</rank>\n", which);
-	fprintf(file, "<rsv>%f</rsv>\n", (double)accumulator_pointers[which]->get_rsv());
+	fprintf(file, "<rsv>%d</rsv>\n", hits - which);
 	fprintf(file, "</result>\n");
 	}
 

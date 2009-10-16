@@ -14,7 +14,7 @@
 	------------------------------------------------
 	Language Models with Dirichlet smoothing
 */
-void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 long docid;
 double tf, idf, n;
@@ -44,7 +44,7 @@ while (current < end)
 		{
 		docid += *current++;
 		rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[docid] / u));
-		accumulator[docid].add_rsv(rsv);
+		accumulator->add_rsv(docid, rsv);
 		}
 	current++;		// skip over the zero
 	}

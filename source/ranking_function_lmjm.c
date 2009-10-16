@@ -14,7 +14,7 @@
 	-------------------------------------------------
 	Language Models with Jelinek-Mercer smoothing
 */
-void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 long docid;
 double tf, rsv;
@@ -39,7 +39,7 @@ while (current < end)
 		{
 		docid += *current++;
 		rsv = log(1 + one_minus_lambda * (tf / (double)document_lengths[docid]) * idf);
-		accumulator[docid].add_rsv(rsv);
+		accumulator->add_rsv(docid, rsv);
 		}
 	current++;		// skip over the zero
 	}

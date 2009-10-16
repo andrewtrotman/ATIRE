@@ -80,8 +80,8 @@ ANT_relevant_topic *ANT_mean_average_precision::setup(long topic, ANT_search_eng
 {
 ANT_relevant_topic topic_key, *got;
 
-results_list = search_engine->accumulator_pointers;
-accumulators = search_engine->accumulator;
+results_list = search_engine->results_list->accumulator_pointers;
+accumulators = search_engine->results_list->accumulator;
 results_list_length = search_engine->document_count();
 
 topic_key.topic = topic;

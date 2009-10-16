@@ -46,7 +46,7 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 #
 FIXED = /link /fixed:no
 
-MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 
+MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1 -DNEW_ACCUMULATORS
 #MINUS_D = $(MINUS_D) -DPURIFY
 
 #
@@ -80,6 +80,7 @@ PARTS = \
 	$(OBJDIR)\memory.obj 							\
 	$(OBJDIR)\search_engine.obj 					\
 	$(OBJDIR)\search_engine_accumulator.obj 		\
+	$(OBJDIR)\search_engine_accumulator_array.obj 	\
 	$(OBJDIR)\mean_average_precision.obj 			\
 	$(OBJDIR)\assessment.obj						\
 	$(OBJDIR)\assessment_ANT.obj					\

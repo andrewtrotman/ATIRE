@@ -45,12 +45,8 @@ delete [] document_prior_probability;
 	ANT_RANKING_FUNCTION_SIMILARITY::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------------
 */
-void ANT_ranking_function_similarity::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_similarity::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
-#ifdef ANT_BM25_SLOW
-	const double b = this->b;
-	const double one_minus_b = 1.0 - b;
-#endif
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
 long docid;
@@ -99,19 +95,11 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-#ifdef ANT_BM25_SLOW
-		/*
-			This version uses the document lengths from the search_engine object
-			which takes more time.  The fast version is preferred as it is a lot laster
-		*/
-		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
-#else
 		/*
 			This version uses the document prior probabilities computed in the constructor
 			which takes more memory
 		*/
-		accumulator[docid].add_rsv(idf * (top_row / (tf + document_prior_probability[docid])));
-#endif
+		accumulator->add_rsv(docid, idf * (top_row / (tf + document_prior_probability[docid])));
 		}
 	current++;		// skip over the zero
 	}
@@ -122,7 +110,7 @@ while (current < end)
 	----------------------------------------------------
 	This is the variant that gets called for stemming.
 */
-void ANT_ranking_function_similarity::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point)
+void ANT_ranking_function_similarity::relevance_rank_tf(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point)
 {
 const double k1 = this->k1;
 const double b = this->b;
@@ -142,11 +130,11 @@ end = tf_array + (term_details->document_frequency >= trim_point ? trim_point : 
 for (current = tf_array; current < end; current++)
 	if (*current != 0)
 		{
-        tf = *current >= 0x100 ? 0xFF : *current;
+		tf = *current >= 0x100 ? 0xFF : *current;
 		docid = current - tf_array;
 		top_row = tf * k1_plus_1;
 
-		accumulator[docid].add_rsv(idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+		accumulator->add_rsv(docid, idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
 		}
 
 relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);

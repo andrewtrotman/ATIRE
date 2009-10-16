@@ -13,6 +13,7 @@ class ANT_file;
 class ANT_search_engine_btree_node;
 class ANT_search_engine_btree_leaf;
 class ANT_search_engine_accumulator;
+class ANT_search_engine_accumulator_array;
 class ANT_search_engine_stats;
 class ANT_stemmer;
 class ANT_ranking_function;
@@ -46,8 +47,7 @@ protected:
 	ANT_weighted_tf *stem_buffer;
 	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
-	ANT_search_engine_accumulator *accumulator;
-	ANT_search_engine_accumulator **accumulator_pointers;
+	ANT_search_engine_accumulator_array *results_list;
 	long long stem_buffer_length_in_bytes;
 	long long trim_postings_k;
 	long long collection_length_in_terms;
@@ -71,7 +71,7 @@ public:
 	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function);
 	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function);
-	ANT_search_engine_accumulator *sort_results_list(long long accurrate_rank_point, long long *hits);
+	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
 	long long document_count(void) { return documents; }
 	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
@@ -85,8 +85,6 @@ public:
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
-
-	ANT_search_engine_accumulator **get_accumulator_pointers();
 };
 
 #endif  /* SEARCH_ENGINE_H_ */

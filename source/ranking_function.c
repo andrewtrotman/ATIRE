@@ -138,7 +138,7 @@ term_details->impacted_length = sum + 2 * buckets_used;
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
 	-----------------------------------------
 */
-void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point)
+void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point)
 {
 long long now;
 now = stats->start_timer();

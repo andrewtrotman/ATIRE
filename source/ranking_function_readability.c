@@ -30,7 +30,7 @@ this->document_readability = engine->document_readability;
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
-void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_accumulator *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
@@ -55,13 +55,13 @@ while (current < end)
 			Add the readability for this document - because a low readability score is better, we add the hardest document minus the actual score.
 			We also only want to only consider the readability once per document.
 		*/
-		if (accumulator[docid].is_zero_rsv())
-			accumulator[docid].add_rsv((1.0 - mix) * (cutoff - (document_readability[docid] / 1000.0)));
+		if (accumulator->is_zero_rsv(docid))
+			accumulator->add_rsv(docid, (1.0 - mix) * (cutoff - (document_readability[docid] / 1000.0)));
 		
 		/*
 			Add the portion of BM25 for this query term
 		*/
-		accumulator[docid].add_rsv(mix * (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))))));
+		accumulator->add_rsv(docid, mix * (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))))));
 		}
 	current++;		// skip over the zero
 	}

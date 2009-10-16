@@ -81,7 +81,6 @@ ANT_time_stats stats;
 long long now, hits;
 long did_query, first_case, token_length;
 char *current, token[1024];
-ANT_search_engine_accumulator *ranked_list;
 double average_precision = 0.0;
 ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
@@ -137,7 +136,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 /*
 	Rank the results list
 */
-ranked_list = search_engine->sort_results_list(params->sort_top_k, &hits); // rank
+search_engine->sort_results_list(params->sort_top_k, &hits); // rank
 
 /*
 	Reporting

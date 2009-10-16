@@ -13,6 +13,7 @@
 #include "search_engine_btree_node.h"
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
+#include "search_engine_accumulator_array.h"
 #include "search_engine_stats.h"
 #include "top_k_sort.h"
 #include "ranking_function_bm25.h"
@@ -35,7 +36,7 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory, long memory_model, cons
 int32_t four_byte;
 int64_t eight_byte;
 unsigned char *block;
-long long end, term_header, this_header_block_size, sum, current_length, pointer;
+long long end, term_header, this_header_block_size, sum, current_length;
 long postings_buffer_length, decompressed_integer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
@@ -148,12 +149,7 @@ memory->realign();
 
 document_lengths = (ANT_compressable_integer *)memory->malloc(documents * sizeof(*document_lengths));
 
-memory->realign();
-accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
-memory->realign();
-accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*accumulator_pointers) * documents);
-for (pointer = 0; pointer < documents; pointer++)
-	accumulator_pointers[pointer] = &accumulator[pointer];
+results_list = new (memory) ANT_search_engine_accumulator_array(memory, documents);
 
 /*
 	decompress the document length vector
@@ -234,7 +230,7 @@ void ANT_search_engine::init_accumulators(void)
 long long now;
 
 now = stats->start_timer();
-memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
+results_list->init_accumulators();
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 
@@ -438,7 +434,7 @@ if (term_details != NULL && term_details->document_frequency > 0)
 		stats->add_decompress_time(stats->stop_timer(now));
 
 		now = stats->start_timer();
-		ranking_function->relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_postings_k);
+		ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
 		stats->add_rank_time(stats->stop_timer(now));
 		}
 
@@ -570,7 +566,7 @@ if (verify != NULL)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(accumulator, &stemmed_term_details, stem_buffer, trim_postings_k);
+	ranking_function->relevance_rank_tf(results_list, &stemmed_term_details, stem_buffer, trim_postings_k);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 
@@ -581,41 +577,12 @@ stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_rea
 	ANT_SEARCH_ENGINE::SORT_RESULTS_LIST()
 	--------------------------------------
 */
-ANT_search_engine_accumulator *ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits)
+ANT_search_engine_accumulator **ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits)
 {
 long long now;
-ANT_search_engine_accumulator **current, **back_current, *current_accumulator, *end_accumulator;
 
-/*
-	On first observations it appears as though this array does not need to be
-	re-initialised because the accumulator_pointers array already has a pointer
-	to each accumulator, but they are left in a random order from the previous
-	sort - which is good news (right?). Actually, all the zeros are left at the
-	end which leads to a pathological case in quick-sort taking tens of seconds
-	on the INEX Wikipedia 2009 collection.
-
-	An effective optimisation is to bucket sort into two buckets at the beginning,
-	one bucket is the zeros and the other bucket is the non-zeros.  This is essentially
-	the first particion of the quick-sort before the call to quick sort.  The advantage
-	is that we know in advance what the correct partition value is and that the secone
-	partition (of all zeros) is now already sorted.  We also get (for free) the number
-	of documents we found.
-*/
 now = stats->start_timer();
-
-current = accumulator_pointers;
-back_current = accumulator_pointers + documents - 1;
-end_accumulator = accumulator + documents;
-for (current_accumulator = accumulator; current_accumulator < end_accumulator; current_accumulator++)
-	if (current_accumulator->is_zero_rsv())
-		*back_current-- = current_accumulator;
-	else
-		*current++ = current_accumulator;
-
-/*
-	Return the number of relevant documents.
-*/
-*hits = current - accumulator_pointers;
+*hits = results_list->init_pointers();
 stats->add_count_relevant_documents(stats->stop_timer(now));
 
 /*
@@ -625,11 +592,11 @@ now = stats->start_timer();
 
 //qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 //top_k_sort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
-ANT_search_engine_accumulator::top_k_sort(accumulator_pointers, *hits, accurate_rank_point);
+ANT_search_engine_accumulator::top_k_sort(results_list->accumulator_pointers, *hits, accurate_rank_point);
 
 stats->add_sort_time(stats->stop_timer(now));
 
-return accumulator;
+return NULL;
 }
 
 /*
@@ -642,12 +609,12 @@ long long found;
 ANT_search_engine_accumulator **current, **end;
 
 found = 0;
-end = accumulator_pointers + documents;
-for (current = accumulator_pointers; current < end; current++)
+end = results_list->accumulator_pointers + documents;
+for (current = results_list->accumulator_pointers; current < end; current++)
 	if (!(*current)->is_zero_rsv())
 		{
 		if (found < top_k)		// first page
-			sorted_id_list[found] = document_id_list[*current - accumulator];
+			sorted_id_list[found] = document_id_list[*current - results_list->accumulator];
 		else
 			break;
 		found++;
@@ -691,11 +658,3 @@ stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;
 } 
-
-/*
-	ANT_SEARCH_ENGINE::GET_ACCUMULATOR_POINTERS()
-	---------------------------------------------
-*/
-ANT_search_engine_accumulator **ANT_search_engine::get_accumulator_pointers() {
-    return accumulator_pointers;
-}
