@@ -67,7 +67,7 @@ char *ANT_directory_iterator_multiple::first(char *wildcard)
 {
 current_source = 0;
 
-#pragma omp parallel for num_threads(4)
+#pragma omp parallel for
 for (long current = 0; current < sources_used; current++)
 	if ((filename[current] = sources[current]->first(wildcard)) == NULL)
 		file[current] = NULL;
@@ -107,7 +107,7 @@ while (current_source < sources_used)
 
 if (current_source >= sources_used)
 	{
-#pragma omp parallel for num_threads(4)
+#pragma omp parallel for
 	for (long current = 0; current < sources_used; current++)
 		{
 		/*

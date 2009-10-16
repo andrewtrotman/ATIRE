@@ -160,7 +160,7 @@ for (param = first_param; param < argc; param++)
 	bytes_indexed += current_file_length;
 	while (file != NULL)
 		{
-		#pragma omp parallel sections num_threads(2)
+		#pragma omp parallel sections
 			{
 			#pragma omp section
 				{
