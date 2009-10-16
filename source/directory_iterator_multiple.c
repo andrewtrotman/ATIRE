@@ -69,12 +69,23 @@ current_source = 0;
 
 #pragma omp parallel for num_threads(4)
 for (long current = 0; current < sources_used; current++)
-	{
-	filename[current] = sources[current]->first(wildcard);
-	file[current] = sources[current]->read_entire_file(&length[current]);
-	}
+	if ((filename[current] = sources[current]->first(wildcard)) == NULL)
+		file[current] = NULL;
+	else
+		file[current] = sources[current]->read_entire_file(&length[current]);
 
-return filename[current_source];
+/*
+	Find the first non-empty stream
+*/
+for (current_source = 0; current_source < sources_used; current_source++)
+	if (filename[current_source] != NULL)
+		return filename[current_source];
+
+/*
+	All sources returned EOF
+*/
+current_source = 0;
+return NULL;
 }
 
 /*
@@ -83,17 +94,43 @@ return filename[current_source];
 */
 char *ANT_directory_iterator_multiple::next(void)
 {
+/*
+	Find the next non_empty stream
+*/
 current_source++;
+while (current_source < sources_used)
+	{
+	if (filename[current_source] != NULL)
+		break;
+	current_source++;
+	}
 
 if (current_source >= sources_used)
 	{
 #pragma omp parallel for num_threads(4)
 	for (long current = 0; current < sources_used; current++)
 		{
-		filename[current] = sources[current]->next();
-		file[current] = sources[current]->read_entire_file(&length[current]);
+		/*
+			Re-fill the non-empty streams
+		*/
+		if (filename[current] != NULL)
+			if ((filename[current] = sources[current]->next()) == NULL)
+				file[current] = NULL;
+			else
+				file[current] = sources[current]->read_entire_file(&length[current]);
 		}
+	/*
+		Find the first non-empty stream
+	*/
+	for (current_source = 0; current_source < sources_used; current_source++)
+		if (filename[current_source] != NULL)
+			return filename[current_source];
+
+	/*
+		All sources returned EOF
+	*/
 	current_source = 0;
+	return NULL;
 	}
 
 return filename[current_source];
@@ -106,6 +143,10 @@ return filename[current_source];
 */
 char *ANT_directory_iterator_multiple::read_entire_file(long long *length)
 {
-*length = this->length[current_source];
-return file[current_source];
+if (filename[current_source] != NULL)
+	{
+	*length = this->length[current_source];
+	return file[current_source];
+	}
+return NULL;		// no such file as at EOF of all streams
 }

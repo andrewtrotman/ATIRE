@@ -31,7 +31,7 @@ ANT_instream_buffer::~ANT_instream_buffer()
 */
 long long ANT_instream_buffer::read(unsigned char *data, long long size)
 {
-long where, remainder;
+long long where, remainder;
 
 if (buffer == NULL)
 	buffer = (unsigned char *)memory->malloc(buffer_size);
@@ -43,13 +43,21 @@ if (position + size < position_of_end_of_buffer)
 	}
 else
 	{
+	if (position_of_end_of_buffer < 0)
+		return -1;			// at EOF
 	where = position_of_end_of_buffer - position;
 	remainder = size - where;
 	memcpy(data, buffer + position, where);
 
-	position_of_end_of_buffer = source->read(buffer, buffer_size);
+	if ((position_of_end_of_buffer = source->read(buffer, buffer_size)) <= 0)
+		return where;		// at EOF
+	
+	if (remainder > position_of_end_of_buffer)
+		remainder = position_of_end_of_buffer;
 	memcpy(data + where, buffer, remainder);
 	position = remainder;
+
+	size = where + remainder;			// the amount that we actually managed to get.
 	}
 
 return size;

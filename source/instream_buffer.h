@@ -18,8 +18,8 @@ protected:
 
 protected:
 	unsigned char *buffer;
-	long position;
-	long position_of_end_of_buffer;
+	long long position;
+	long long position_of_end_of_buffer;
 
 public:
 	ANT_instream_buffer(ANT_memory *memory, ANT_instream *source);
