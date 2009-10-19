@@ -82,7 +82,7 @@ if (file_length == NULL)
 
 	if (fstat(fileno(fp), &details) == 0)
 		if ((*file_length = details.st_size) != 0)
-			if ((block = new (std::nothrow) char [(long)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
+			if ((block = new (std::nothrow) char [(size_t)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
 				if (fread(block, (long)details.st_size, 1, fp) == 1)
 					block[details.st_size] = '\0';
 				else

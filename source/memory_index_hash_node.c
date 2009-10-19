@@ -26,6 +26,7 @@ ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_s
 postings_initial_length = 8;
 postings_growth_factor = 1.5;
 
+
 this->stats = stats;
 left = right = NULL;
 this->memory = memory;

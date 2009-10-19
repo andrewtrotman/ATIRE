@@ -556,7 +556,6 @@ node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
 
 get_serialised_postings(node, &doc_size, &tf_size);
 document_lengths = (ANT_compressable_integer *)memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
-node->serialise_postings(serialised_docids, &serialised_docids_size, serialised_tfs, &serialised_tfs_size);
 variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
 
 /*
