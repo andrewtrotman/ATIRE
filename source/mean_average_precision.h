@@ -22,11 +22,8 @@ private:
 	ANT_relevant_topic *topics;
 	long long topics_list_length;
 
-	ANT_search_engine_accumulator *accumulators, **results_list;
-	long long results_list_length;
-
 private:
-	ANT_relevant_topic *setup(long topic, ANT_search_engine *search_engine);
+	ANT_relevant_topic *setup(long topic);
 
 public:
 	ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long long relevance_list_length);

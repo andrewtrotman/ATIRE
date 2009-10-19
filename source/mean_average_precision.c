@@ -11,6 +11,7 @@
 #include "relevant_document.h"
 #include "search_engine.h"
 #include "search_engine_accumulator.h"
+#include "search_engine_result_iterator.h"
 
 /*
 	ANT_MEAN_AVERAGE_PRECISION::ANT_MEAN_AVERAGE_PRECISION()
@@ -76,13 +77,9 @@ topics[current_topic].number_of_nonrelevant_documents = nonrelevant_documents;
 	ANT_MEAN_AVERAGE_PRECISION::SETUP()
 	-----------------------------------
 */
-ANT_relevant_topic *ANT_mean_average_precision::setup(long topic, ANT_search_engine *search_engine)
+ANT_relevant_topic *ANT_mean_average_precision::setup(long topic)
 {
 ANT_relevant_topic topic_key, *got;
-
-results_list = search_engine->results_list->accumulator_pointers;
-accumulators = search_engine->results_list->accumulator;
-results_list_length = search_engine->document_count();
 
 topic_key.topic = topic;
 got = (ANT_relevant_topic *)bsearch(&topic_key, topics, (size_t)topics_list_length, sizeof(topic_key), ANT_relevant_topic::compare);
@@ -98,12 +95,13 @@ return got;
 */
 double ANT_mean_average_precision::average_precision(long topic, ANT_search_engine *search_engine)
 {
+ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
 long long current, found_and_relevant;
 double precision;
 
-if ((got = setup(topic, search_engine)) == NULL)
+if ((got = setup(topic)) == NULL)
 	return 0;
 if (got->number_of_relevant_documents == 0)
 	return 0;
@@ -112,28 +110,27 @@ key.topic = topic;
 precision = 0;
 found_and_relevant = 0;
 
-for (current = 0; current < results_list_length; current++)
-	if (!results_list[current]->is_zero_rsv())
+current = 0;
+for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
+	{
+	current++;
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		{
-		key.docid = results_list[current] - accumulators;
-		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		/*
+			At this point we have an assessment for the document, but it might have been assessed are irrelevant
+		*/
+		if (relevance_data->relevant_characters != 0)
 			{
 			/*
-				At this point we have an assessment for the document, but it might have been assessed are irrelevant
+				At this point we know it was relevant
 			*/
-			if (relevance_data->relevant_characters != 0)
-				{
-				/*
-					At this point we know it was relevant
-				*/
-				found_and_relevant++;
-				precision += (double)found_and_relevant / (double)(current + 1);
-				}
+			found_and_relevant++;
+			precision += (double)found_and_relevant / (double)current;
 			}
 		}
+	}
 return precision / got->number_of_relevant_documents;
 }
-
 
 /*
 	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_GENERALISED_PRECISION()
@@ -141,13 +138,14 @@ return precision / got->number_of_relevant_documents;
 */
 double ANT_mean_average_precision::average_generalised_precision(long topic, ANT_search_engine *search_engine)
 {
+ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
 long long current;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
 
-if ((got = setup(topic, search_engine)) == NULL)
+if ((got = setup(topic)) == NULL)
 	return 0;
 if (got->number_of_relevant_documents == 0)
 	return 0;
@@ -156,28 +154,28 @@ key.topic = topic;
 precision = 0;
 found_and_relevant = 0;
 
-for (current = 0; current < results_list_length; current++)
-	if (!results_list[current]->is_zero_rsv())
+current = 0;
+for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
+	{
+	current++;
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		{
-		key.docid = results_list[current] - accumulators;
-		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		/*
+			We have an assessed document
+		*/
+		if (relevance_data->relevant_characters != 0)
 			{
 			/*
-				We have an assessed document
+				And that document is assessed as relevant
 			*/
-			if (relevance_data->relevant_characters != 0)
-				{
-				/*
-					And that document is assessed as relevant
-				*/
-				doc_precision = (double)relevance_data->relevant_characters / (double)relevance_data->document_length;
-				doc_recall = 1.0;		// we retrieve the whole document so recall is 1.
-				doc_f_score = (1.0 + beta * beta ) * (doc_precision  * doc_recall) / (beta * beta * doc_precision + doc_recall);
-				found_and_relevant += doc_f_score;
-				precision += (double)found_and_relevant / (double)(current + 1);
-				}
+			doc_precision = (double)relevance_data->relevant_characters / (double)relevance_data->document_length;
+			doc_recall = 1.0;		// we retrieve the whole document so recall is 1.
+			doc_f_score = (1.0 + beta * beta ) * (doc_precision  * doc_recall) / (beta * beta * doc_precision + doc_recall);
+			found_and_relevant += doc_f_score;
+			precision += (double)found_and_relevant / current;
 			}
 		}
+	}
 
 return precision / (double)got->number_of_relevant_documents;
 }
@@ -188,12 +186,13 @@ return precision / (double)got->number_of_relevant_documents;
 */
 double ANT_mean_average_precision::rank_effectiveness(long topic, ANT_search_engine *search_engine)
 {
+ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-long long current, found_and_nonrelevant, total_nonrelevant;
+long long found_and_nonrelevant, total_nonrelevant;
 double precision;
 
-if ((got = setup(topic, search_engine)) == NULL)
+if ((got = setup(topic)) == NULL)
 	return 0;
 
 if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
@@ -202,18 +201,12 @@ if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
 precision = 0;
 found_and_nonrelevant = 0;
 
-for (current = 0; current < results_list_length; current++)
-	if (!results_list[current]->is_zero_rsv())
-		{
-		key.docid = results_list[current] - accumulators;
-		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
-			{
-			if (relevance_data->relevant_characters == 0)
-				found_and_nonrelevant++;
-			else
-				precision += 1.0 - ((double)found_and_nonrelevant / (double)total_nonrelevant);
-			}
-		}
+for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters == 0)
+			found_and_nonrelevant++;
+		else
+			precision += 1.0 - ((double)found_and_nonrelevant / (double)total_nonrelevant);
 
 return precision / got->number_of_relevant_documents;
 }
@@ -224,24 +217,23 @@ return precision / got->number_of_relevant_documents;
 */
 double ANT_mean_average_precision::p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n)
 {
+ANT_search_engine_result_iterator iterator;
 ANT_relevant_document key, *relevance_data;
-long long current, found_and_relevant, found;
+long long found_and_relevant, found;
 
-if (setup(topic, search_engine) == NULL)
+if (setup(topic) == NULL)
 	return 0;
 
 found = found_and_relevant = 0;
 key.topic = topic;
-for (current = 0; current < results_list_length; current++)
-	if (!results_list[current]->is_zero_rsv())
-		{
-		if (++found > precision_point_n)
-			break;
-		key.docid = results_list[current] - accumulators;
-		if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
-			if (relevance_data->relevant_characters != 0)
-				found_and_relevant++;
-		}
+for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
+	{
+	if (++found > precision_point_n)
+		break;
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters != 0)
+			found_and_relevant++;
+	}
 
 return (double)found_and_relevant / (double)precision_point_n;		// we're computing p@n so divide by n
 }

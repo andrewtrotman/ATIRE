@@ -13,7 +13,7 @@
 #include "search_engine_btree_node.h"
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
-#include "search_engine_accumulator_array.h"
+#include "search_engine_result.h"
 #include "search_engine_stats.h"
 #include "top_k_sort.h"
 #include "ranking_function_bm25.h"
@@ -149,7 +149,7 @@ memory->realign();
 
 document_lengths = (ANT_compressable_integer *)memory->malloc(documents * sizeof(*document_lengths));
 
-results_list = new (memory) ANT_search_engine_accumulator_array(memory, documents);
+results_list = new (memory) ANT_search_engine_result(memory, documents);
 
 /*
 	decompress the document length vector

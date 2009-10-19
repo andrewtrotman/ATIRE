@@ -42,7 +42,7 @@ delete [] document_prior_probability;
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;

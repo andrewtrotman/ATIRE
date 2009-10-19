@@ -1,16 +1,16 @@
 /*
-	SEARCH_ENGINE_ACCUMULATOR_ARRAY.C
-	---------------------------------
+	SEARCH_ENGINE_RESULT.C
+	----------------------
 */
 #include <string.h>
-#include "search_engine_accumulator_array.h"
+#include "search_engine_result.h"
 #include "memory.h"
 
 /*
-	ANT_SEARCH_ENGINE_ACCUMULATOR_ARRAY::ANT_SEARCH_ENGINE_ACCUMULATOR_ARRAY()
-	--------------------------------------------------------------------------
+	ANT_SEARCH_ENGINE_RESULT::ANT_SEARCH_ENGINE_RESULT()
+	----------------------------------------------------
 */
-ANT_search_engine_accumulator_array::ANT_search_engine_accumulator_array(ANT_memory *memory, long long documents)
+ANT_search_engine_result::ANT_search_engine_result(ANT_memory *memory, long long documents)
 {
 long long pointer;
 
@@ -24,28 +24,28 @@ for (pointer = 0; pointer < documents; pointer++)
 }
 
 /*
-	ANT_SEARCH_ENGINE_ACCUMULATOR_ARRARY::OPERATOR NEW()
-	----------------------------------------------------
+	ANT_SEARCH_ENGINE_RESULT::OPERATOR NEW()
+	----------------------------------------
 */
-void *ANT_search_engine_accumulator_array::operator new(size_t count, ANT_memory *allocator)
+void *ANT_search_engine_result::operator new(size_t count, ANT_memory *allocator)
 {
 return allocator->malloc(count);
 }
 
 /*
-	ANT_SEARCH_ENGINE_ACCUMULATOR_ARRAY::INIT_ACCUMULATORS()
-	--------------------------------------------------------
+	ANT_SEARCH_ENGINE_RESULT::INIT_ACCUMULATORS()
+	---------------------------------------------
 */
-void ANT_search_engine_accumulator_array::init_accumulators(void)
+void ANT_search_engine_result::init_accumulators(void)
 {
 memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 }
 
 /*
-	ANT_SEARCH_ENGINE_ACCUMULATOR_ARRAY::INIT_POINTERS()
-	----------------------------------------------------
+	ANT_SEARCH_ENGINE_RESULT::INIT_POINTERS()
+	-----------------------------------------
 */
-long long ANT_search_engine_accumulator_array::init_pointers(void)
+long long ANT_search_engine_result::init_pointers(void)
 {
 ANT_search_engine_accumulator **current, **back_current, *current_accumulator, *end_accumulator;
 

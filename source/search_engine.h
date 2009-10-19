@@ -13,7 +13,7 @@ class ANT_file;
 class ANT_search_engine_btree_node;
 class ANT_search_engine_btree_leaf;
 class ANT_search_engine_accumulator;
-class ANT_search_engine_accumulator_array;
+class ANT_search_engine_result;
 class ANT_search_engine_stats;
 class ANT_stemmer;
 class ANT_ranking_function;
@@ -26,6 +26,7 @@ class ANT_search_engine
 {
 friend class ANT_btree_iterator;
 friend class ANT_mean_average_precision;
+friend class ANT_search_engine_result_iterator;
 
 private:
 	ANT_search_engine_stats *stats;
@@ -47,7 +48,7 @@ protected:
 	ANT_weighted_tf *stem_buffer;
 	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
-	ANT_search_engine_accumulator_array *results_list;
+	ANT_search_engine_result *results_list;
 	long long stem_buffer_length_in_bytes;
 	long long trim_postings_k;
 	long long collection_length_in_terms;

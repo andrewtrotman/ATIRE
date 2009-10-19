@@ -30,7 +30,7 @@ this->document_readability = engine->document_readability;
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
-void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_accumulator_array *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
