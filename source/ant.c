@@ -306,7 +306,7 @@ for (query = input.first(); query != NULL; query = input.next())
 	if (output == NULL)
 		for (result = 0; result < last_to_list; result++)
 			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
-				printf("%lld:%s\n", result + 1, answer_list[result]);
+				printf("%lld:%s %f\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv());
 			else
 				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
 	else
