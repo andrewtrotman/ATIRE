@@ -269,7 +269,7 @@ right_min = left_min = min = std::numeric_limits<double>::max();
 if (root->right != NULL)
 	right_max = rsv_all_nodes(&right_min, root->right);
 if (root->left != NULL)
-	left_max += rsv_all_nodes(&left_min, root->left);
+	left_max = rsv_all_nodes(&left_min, root->left);
 
 /*
 	Now we compute the score for the current node
