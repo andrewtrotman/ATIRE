@@ -38,16 +38,22 @@ public:
 	long long results_list_length;
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 
-	void add_to_top_k(size_t index)
+	void add_to_top_k(ANT_search_engine_accumulator *which_accumulator, long was_zero)
 		{
-		size_t index_of_smallest;
+		size_t index_of_smallest, current;
 		ANT_search_engine_accumulator::ANT_accumulator_t value_of_smallest;
 
 		if (results_list_length < top_k)
-			accumulator_pointers[results_list_length++] = accumulator + index;		// just put us into the array
+			{
+			/*
+				If we were previously a zero-valued RSV then we cannot be in the top-k accumulators
+				list and so we add it.  If we were a non-zero-valued rsv then we're already there
+			*/
+			if (was_zero)
+				accumulator_pointers[results_list_length++] = which_accumulator;
+			}
 		else
 			{
-			size_t current;
 			/*
 				If we sort here then we're O(n log n) but if we pass the array twice then we're O(2n)
 			*/
@@ -56,19 +62,35 @@ public:
 			/*
 				Find the smallest value in the top-k
 			*/
-			for (current = 1; current < top_k; current++)
+			for (current = 0; current < top_k; current++)
+				{
+				if (accumulator_pointers[current] == which_accumulator)
+					{
+					/*
+						This is the "nasty" case where the score is equal to min_in_top_k
+						and the given element is in the top-k (it might not be if, for exmaple
+						k+1 documents have the minimum score required to be in the top-k).
+
+						By setting index_of_smallest to current the result is that the pointer
+						is updated to itself and the new min in computed (which is necessary
+						because there might be only one document with a score of min_in_top_k.
+					*/
+					index_of_smallest = current;
+					break;
+					}
 				if (accumulator_pointers[current]->get_rsv() < value_of_smallest)
 					{
 					index_of_smallest = current;
 					value_of_smallest = accumulator_pointers[current]->get_rsv();
 					}
+				}
 			/*
 				swap that for the new accumulator
 			*/
-			accumulator_pointers[index_of_smallest] = accumulator + index;
+			accumulator_pointers[index_of_smallest] = which_accumulator;
 
 			/*
-				now find the smallest accumulator
+				now find the now-smallest accumulator
 			*/
 			min_in_top_k = accumulator_pointers[0]->get_rsv();
 			for (current = 1; current < top_k; current++)
@@ -76,25 +98,18 @@ public:
 					min_in_top_k = accumulator_pointers[current]->get_rsv();
 			}
 		}
+	template <class T> inline void add_rsv(size_t index, T score)
+		{
+		long was_zero;
+		ANT_search_engine_accumulator *which = accumulator + index; 
 
-	void add_rsv(size_t index, long score)
-		{
-		if (accumulator[index].get_rsv() > min_in_top_k)
-			accumulator[index].add_rsv(score);				// we're already in the top-k so just add.
+		if (which->get_rsv() > min_in_top_k)
+			which->add_rsv(score);				// we're already in the top-k so just add.
 		else
 			{
-			if (accumulator[index].add_rsv(score) > min_in_top_k)
-				add_to_top_k(index);
-			}
-		}
-	void add_rsv(size_t index, double score)
-		{
-		if (accumulator[index].get_rsv() > min_in_top_k)
-			accumulator[index].add_rsv(score);				// we're already in the top-k so just add.
-		else
-			{
-			if (accumulator[index].add_rsv(score) > min_in_top_k)
-				add_to_top_k(index);
+			was_zero = which->is_zero_rsv();
+			if (which->add_rsv(score) > min_in_top_k)
+ 				add_to_top_k(which, was_zero);
 			}
 		}
 #else
