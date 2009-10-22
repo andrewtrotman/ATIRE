@@ -23,6 +23,7 @@ protected:
 
 public:
 	ANT_NEXI_ant() : ANT_NEXI(0) { ant_pool = make_pool(MAX_NEXI_TERMS); }
+	ANT_NEXI_term_ant *parse(char *expression) { return (ANT_NEXI_term_ant *)ANT_NEXI::parse(expression); }
 } ;
 
 #endif /* NEXI_ANT_H_ */

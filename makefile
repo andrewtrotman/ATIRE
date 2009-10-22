@@ -149,8 +149,8 @@ PARTS = \
 	$(OBJDIR)\instream_buffer.obj					\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_term_iterator.obj				\
+	$(OBJDIR)\nexi_term_ant.obj						\
 	$(OBJDIR)\nexi_term.obj
-	
 
 #
 #	Targets

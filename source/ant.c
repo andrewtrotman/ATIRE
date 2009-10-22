@@ -85,6 +85,8 @@ double average_precision = 0.0;
 ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant *parse_tree, *term_string;
+long terms_in_query, current_term;
+ANT_NEXI_term_ant **term_list;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -97,9 +99,16 @@ search_engine->init_accumulators(params->sort_top_k);
 search_engine->init_accumulators();
 #endif
 /*
-	Parse the queries
+	Parse the query and count the number of search terms
 */
-parse_tree = (ANT_NEXI_term_ant *)parser.parse(query);
+parse_tree = parser.parse(query);
+terms_in_query = 0;
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	terms_in_query++;
+
+/*
+	Load the term details (document frequency, collection frequency, and so on)
+*/
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
 	/*
@@ -125,14 +134,33 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		search_engine->process_one_term(token, &term_string->term_details);
 	}
 /*
-	process the next search term - either stemmed or not.
+	Sort the search terms on the collection frequency (we'd prefer max_impact, but cf will have to do).
 */
+term_list = new ANT_NEXI_term_ant *[terms_in_query];
+current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	term_list[current_term++] = term_string;
+
+/*
+	Sort on collection frequency works better than document_frequency when tested on the TREC Wall Street Collection
+*/
+qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
+
+/*
+	Process each search term - either stemmed or not.
+*/
+for (current_term = 0; current_term < terms_in_query; current_term++)
 	{
-	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers or tag names
+	term_string = term_list[current_term];
+	if (stemmer == NULL || !ANT_islower(*term_string->get_term()->start))		// We don't stem numbers or tag names, of if there is no stemmer
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
+		{
+		token_length = term_string->get_term()->string_length < sizeof(token) - 1 ? term_string->get_term()->string_length : sizeof(token) - 1;
+		strncpy(token, term_string->get_term()->start, token_length);
+		token[token_length] = '\0';
 		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
+		}
 
 	did_query = TRUE;
 	}
