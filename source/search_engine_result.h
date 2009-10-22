@@ -5,7 +5,6 @@
 #ifndef SEARCH_ENGINE_RESULT_H_
 #define SEARCH_ENGINE_RESULT_H_
 
-
 #include <stdio.h>
 #include "search_engine_accumulator.h"
 
@@ -25,6 +24,11 @@ public:		// REMOVE THIS LINE
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long documents;
+#ifdef TOP_K_SEARCH
+	long long top_k;
+	long long results_list_length;
+	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
+#endif
 
 public:
 	ANT_search_engine_result(ANT_memory *memory, long long documents);
@@ -34,9 +38,6 @@ public:
 	ANT_search_engine_accumulator &operator[](size_t index) { return accumulator[index]; }
 
 #ifdef TOP_K_SEARCH
-	long long top_k;
-	long long results_list_length;
-	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 
 	void add_to_top_k(ANT_search_engine_accumulator *which_accumulator, long was_zero)
 		{
@@ -119,7 +120,11 @@ public:
 
 	long is_zero_rsv(size_t index) { return accumulator[index].is_zero_rsv(); }
 	
+#ifdef TOP_K_SEARCH
+	void init_accumulators(long long top_k);
+#else
 	void init_accumulators(void);
+#endif
 	long long init_pointers(void);
 } ;
 

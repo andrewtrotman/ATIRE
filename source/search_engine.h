@@ -65,7 +65,11 @@ public:
 	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *index_filename = "index.aspt");
 	virtual ~ANT_search_engine();
 
+#ifdef TOP_K_SEARCH
+	void init_accumulators(long long top_k);
+#else
 	void init_accumulators(void);
+#endif
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);

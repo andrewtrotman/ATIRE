@@ -36,13 +36,17 @@ return allocator->malloc(count);
 	ANT_SEARCH_ENGINE_RESULT::INIT_ACCUMULATORS()
 	---------------------------------------------
 */
+#ifdef TOP_K_SEARCH
+void ANT_search_engine_result::init_accumulators(long long top_k)
+#else
 void ANT_search_engine_result::init_accumulators(void)
+#endif
 {
 memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 
 #ifdef TOP_K_SEARCH
 	min_in_top_k = 0;
-	top_k = documents;
+	this->top_k = top_k;
 	results_list_length = 0;
 #endif
 

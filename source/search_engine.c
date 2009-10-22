@@ -225,12 +225,20 @@ stats_for_all_queries->add(stats);
 	ANT_SEARCH_ENGINE::INIT_ACCUMULATORS()
 	--------------------------------------
 */
+#ifdef TOP_K_SEARCH
+void ANT_search_engine::init_accumulators(long long top_k)
+#else
 void ANT_search_engine::init_accumulators(void)
+#endif
 {
 long long now;
 
 now = stats->start_timer();
+#ifdef TOP_K_SEARCH
+results_list->init_accumulators(top_k);
+#else
 results_list->init_accumulators();
+#endif
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 

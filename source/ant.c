@@ -90,8 +90,12 @@ search_engine->stats_initialise();		// if we are command-line then report query 
 
 did_query = FALSE;
 now = stats.start_timer();
-search_engine->init_accumulators();
 
+#ifdef TOP_K_SEARCH
+search_engine->init_accumulators(params->sort_top_k);
+#else
+search_engine->init_accumulators();
+#endif
 /*
 	Parse the queries
 */
