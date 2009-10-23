@@ -17,8 +17,8 @@ private:
 	char *current_filename;
 
 public:
-	ANT_directory_iterator() {};
-	virtual ~ANT_directory_iterator() {};
+	ANT_directory_iterator() {}
+	virtual ~ANT_directory_iterator() {}
 
 	virtual char *first(char *wildcard) { return current_filename = ANT_disk::get_first_filename(wildcard); }
 	virtual char *next(void) { return current_filename = ANT_disk::get_next_filename(); }

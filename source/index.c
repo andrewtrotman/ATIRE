@@ -9,6 +9,7 @@
 #include "directory_iterator_tar.h"
 #include "directory_recursive_iterator.h"
 #include "directory_iterator_multiple.h"
+#include "directory_iterator_file.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -60,14 +61,13 @@ ANT_parser *parser;
 ANT_readability_factory *readability;
 ANT_string_pair *token;
 unsigned char *file, *new_file;
-long param, done_work;
+long param;
 ANT_memory_index *index;
 long long doc, now;
 long terms_in_document, first_param;
 ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
-char *filename, *uid_start, *uid_end;
-char uid_buffer[1024];
+char *filename;
 long long files_that_match;
 long long bytes_indexed, current_file_length;
 ANT_instream *file_stream = NULL, *decompressor = NULL;
@@ -85,7 +85,6 @@ if (first_param >= argc)
 
 doc = 0;
 terms_in_document = 0;
-done_work = FALSE;
 index = new ANT_memory_index;
 id_list.open("doclist.aspt", "wb");
 
@@ -136,6 +135,8 @@ for (param = first_param; param < argc; param++)
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
 		source = new ANT_directory_iterator_tar(decompressor);
 		}
+	else if (param_block.trec_docnos)
+		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));
 	else
 		source = new ANT_directory_iterator;									// current directory
 
@@ -165,30 +166,7 @@ for (param = first_param; param < argc; param++)
 			#pragma omp section
 				{
 				files_that_match++;
-				if (param_block.trec_docnos)
-					{
-					/*
-						This is some hacky nastyness for extracting DOCNO from the TREC documents so that we can give the
-						unique ID of the file when we search.
-					*/
-					for (uid_start = strstr((char *)file, "<DOCNO>"); uid_start != NULL; uid_start = strstr(uid_end, "<DOCNO>"))
-						{
-						uid_start += 7;
-						uid_end = strstr(uid_start, "</DOCNO>");
-						if (uid_end - uid_start > (ptrdiff_t)sizeof(uid_buffer))
-							{
-							printf("UID longer than UID buffer, truncating at %ld characters\n", (signed long)sizeof(uid_buffer) - 1);
-							uid_end = uid_start + sizeof(uid_buffer) - 1;
-							}
-						strncpy(uid_buffer, uid_start, uid_end - uid_start);
-						uid_buffer[uid_end - uid_start] = '\0';
-						strip_space_inplace(uid_buffer);
-						id_list.puts(uid_buffer);
-						}
-					}
-				else
-					id_list.puts(filename);		// each document is in a seperate file (so filenames are external document ids)
-				done_work = FALSE;
+				id_list.puts(filename);		// each document is in a seperate file (so filenames are external document ids)
 				doc++;
 				if (doc % param_block.reporting_frequency == 0)
 					report(doc, index, &stats, bytes_indexed);
@@ -196,32 +174,9 @@ for (param = first_param; param < argc; param++)
 				readability->set_document(file);
 				while ((token = readability->get_next_token()) != NULL)
 					{
-					if (param_block.trec_docnos && token->length() == 3 && strncmp(token->start, "DOC", 3) == 0)
-						{
-						/*
-							Multiple documents per file in the TREC data and each is delineated with <DOC>
-						*/
-						if (done_work)
-							{
-							/*
-								Finish-up the previous document by setting its length and it readability score
-								and then reinitialising ready for parsing the next document.
-							*/
-							index->set_document_length(doc, terms_in_document);
-							readability->index(index);
-							doc++;
-							if (doc % param_block.reporting_frequency == 0)
-								report(doc, index, &stats, 0);
-							terms_in_document = 0;
-							}
-						}
-					else /*if (ANT_isalnum(*token->start))*/ // keep all tokens returned from the parser which defines what should be indexed, not here
-						{
-						if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
-							terms_in_document++;
-						readability->handle_node(index->add_term(token, doc));
-						done_work = TRUE;
-						}
+					if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
+						terms_in_document++;
+					readability->handle_node(index->add_term(token, doc));
 					}
 				index->set_document_length(doc, terms_in_document);
 				readability->index(index);

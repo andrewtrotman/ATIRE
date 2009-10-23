@@ -153,7 +153,7 @@ if (hash_table[hash_value] == NULL)
 	}
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
-node->current_docno = 0;
+node->current_docno = -1;
 node->add_posting(score);
 }
 

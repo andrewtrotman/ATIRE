@@ -14,7 +14,10 @@
 	#include <stdio.h>
 #endif
 
-
+/*
+	class ANT_DISK_INTERNALS
+	------------------------
+*/
 class ANT_disk_internals
 {
 public:

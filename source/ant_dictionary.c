@@ -22,6 +22,7 @@ int check_postings = 1;
 */
 long process(ANT_compressable_integer *impact_ordering, size_t document_frequency)
 {
+ANT_compressable_integer tf;
 long docid, max;
 ANT_compressable_integer *current, *end;
 
@@ -33,9 +34,12 @@ while (current < end)
 	{
 	end += 2;
 	docid = -1;
-	current++;						// tf
+	tf = *current++;
 	while (*current != 0)
+		{
 		docid += *current++;
+//		printf("<%lld,%lld>", (long long)tf, (long long)docid);
+		}
 	if (docid > max)
 		max = docid;
 	current++;						// zero
@@ -85,7 +89,19 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 		break;
 	else
 		{
-		if (check_postings)
+#ifdef _MSC_VER
+		/*
+			Convert into a wide string and print that as Windows printf() doesn't do UTF-8
+		*/
+		if (MultiByteToWideChar(CP_UTF8, 0, term, -1, wide, sizeof(wide)) == 0)
+			printf("FAIL ");
+		else
+			wprintf(L"%s ", wide);
+#else
+		printf("%s ", term);
+#endif
+		printf("%lld %d", leaf.collection_frequency, leaf.document_frequency);
+		if (check_postings && *term != '~')		// ~length and others aren't encoded in the usual way
 			{
 			if (leaf.document_frequency > 2)
 				if (leaf.postings_length > postings_list_size)
@@ -101,24 +117,9 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				}
 			factory.decompress(raw, postings_list, leaf.impacted_length);
 			max = process((ANT_compressable_integer *)raw, leaf.document_frequency);
-			}
-#ifdef _MSC_VER
-		/*
-			Convert into a wide string and print that as Windows printf() doesn't do UTF-8
-		*/
-		if (MultiByteToWideChar(CP_UTF8, 0, term, -1, wide, sizeof(wide)) == 0)
-			printf("FAIL ");
-		else
-			wprintf(L"%s ", wide);
-#else
-		printf("%s ", term);
-#endif
-		printf("%lld %d", leaf.collection_frequency, leaf.document_frequency);
-		if (check_postings)
-			{
-			printf(" %lld", (long long)max);
+
 			if (max > search_engine.document_count())
-				printf(" MAX IS TOO LARGE!");
+				printf(" Largest Docno:%lld MAX IS TOO LARGE!", (long long)max);
 			}
 		putchar('\n');
 		}
