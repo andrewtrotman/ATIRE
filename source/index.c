@@ -63,7 +63,7 @@ ANT_string_pair *token;
 unsigned char *file, *new_file;
 long param;
 ANT_memory_index *index;
-long long doc, now;
+long long doc, now, last_report;
 long terms_in_document, first_param;
 ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
@@ -83,6 +83,7 @@ if (param_block.logo)
 if (first_param >= argc)
 	exit(0);				// no files to index so terminate
 
+last_report = 0;
 doc = 0;
 terms_in_document = 0;
 index = new ANT_memory_index;
@@ -166,10 +167,9 @@ for (param = first_param; param < argc; param++)
 			#pragma omp section
 				{
 				files_that_match++;
-				id_list.puts(filename);		// each document is in a seperate file (so filenames are external document ids)
 				doc++;
-				if (doc % param_block.reporting_frequency == 0)
-					report(doc, index, &stats, bytes_indexed);
+				if (doc % param_block.reporting_frequency == 0 && doc != last_report)
+					report(last_report = doc, index, &stats, bytes_indexed);
 
 				readability->set_document(file);
 				while ((token = readability->get_next_token()) != NULL)
@@ -178,8 +178,14 @@ for (param = first_param; param < argc; param++)
 						terms_in_document++;
 					readability->handle_node(index->add_term(token, doc));
 					}
-				index->set_document_length(doc, terms_in_document);
-				readability->index(index);
+				if (terms_in_document == 0)
+					doc--;
+				else
+					{
+					index->set_document_length(doc, terms_in_document);
+					readability->index(index);
+					id_list.puts(filename);		// save the "external" ID of the document
+					}
 				terms_in_document = 0;
 				delete [] file;
 				}
