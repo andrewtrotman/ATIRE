@@ -70,7 +70,8 @@ void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_det
 ANT_compressable_integer bucket_prev_docid[0x100];
 long bucket_size[0x100];
 ANT_compressable_integer sum, *pointer[0x100];
-long doc, document_frequency, bucket, buckets_used;
+ANT_compressable_integer doc;
+long document_frequency, bucket, buckets_used;
 ANT_weighted_tf *current, *end;
 
 /*
@@ -118,9 +119,9 @@ for (bucket = 0xFF; bucket >= 0; bucket--)
 for (current = stem_buffer; current < end; current++)
 	if (*current != 0)
 		{
-		doc = current - stem_buffer + 1;
-		*pointer[(long)*current]++ = doc - bucket_prev_docid[(long)*current];		// because this list is difference encoded
-		bucket_prev_docid[(long)*current] = doc;
+		doc = (ANT_compressable_integer)(current - stem_buffer + 1);
+		*pointer[(size_t)*current]++ = doc - bucket_prev_docid[(size_t)*current];		// because this list is difference encoded
+		bucket_prev_docid[(size_t)*current] = doc;
 		}
 
 /*

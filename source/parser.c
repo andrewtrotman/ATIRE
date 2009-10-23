@@ -149,7 +149,7 @@ else if (*current & 0x80)		// UTF-8 character
 			{
 			while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
 				current += utf8_bytes(current);
-			segment(start, current - start);
+			segment(start, (long)(current - start));
 			return get_next_token();
 			}
 		else

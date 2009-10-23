@@ -204,7 +204,7 @@ for (param = first_param; param < argc; param++)
 						if (done_work)
 							{
 							/*
-								Finish-up the previous document bu setting its length and it readability score
+								Finish-up the previous document by setting its length and it readability score
 								and then reinitialising ready for parsing the next document.
 							*/
 							index->set_document_length(doc, terms_in_document);

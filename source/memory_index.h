@@ -54,7 +54,6 @@ private:
 	long hash(ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
-	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df);
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
@@ -62,6 +61,10 @@ private:
 	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
+
+	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
+	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
+	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 
 public:
 	ANT_memory_index();

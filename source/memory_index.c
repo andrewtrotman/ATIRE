@@ -705,3 +705,53 @@ while (pos < serialised_docids + doc_size)
 putchar('\n');
 }
 
+/*
+	ANT_MEMORY_INDEX::TEXT_RENDER()
+	-------------------------------
+*/
+void ANT_memory_index::text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency)
+{
+long long doc;
+ANT_compressable_integer *current_docid;
+unsigned char *current, *end;
+
+printf("PRE-IMPACT:");
+end = term_frequency + document_frequency;
+current_docid = docid;
+doc = 0;
+for (current = term_frequency; current < end; current++)
+	{
+	doc += *current_docid;							// because the original list is difference encoded
+	printf("<%lld,%lld>", (long long)*current, (long long)doc);
+	current_docid++;
+	}
+printf("\n");
+}
+
+/*
+	ANT_MEMORY_INDEX::TEXT_RENDER()
+	-------------------------------
+*/
+void ANT_memory_index::text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency)
+{
+long docid;
+ANT_compressable_integer *current, *end, tf;
+
+printf("POSTIMPACT:");
+current = impact_ordering;
+end = impact_ordering + document_frequency;
+
+while (current < end)
+	{
+	end += 2;
+	tf = *current++;
+	docid = 0;
+	while (*current != 0)
+		{
+		docid += *current++;
+		printf("<%lld,%lld>", (long long)tf, (long long)docid);
+		}
+	current++;
+	}
+printf("\n");
+}

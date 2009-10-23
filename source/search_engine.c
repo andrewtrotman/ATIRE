@@ -617,7 +617,11 @@ long long found;
 ANT_search_engine_accumulator **current, **end;
 
 found = 0;
+#ifdef TOP_K_SEARCH
+end = results_list->accumulator_pointers + top_k;
+#else
 end = results_list->accumulator_pointers + documents;
+#endif
 for (current = results_list->accumulator_pointers; current < end; current++)
 	if (!(*current)->is_zero_rsv())
 		{

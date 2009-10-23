@@ -14,17 +14,52 @@
 	wchar_t wide[10 * 1024];	// buffer for storing wide character strings before printing them
 #endif
 
+int check_postings = 1;
+
+/*
+	PROCESS()
+	---------
+*/
+long process(ANT_compressable_integer *impact_ordering, size_t document_frequency)
+{
+long docid, max;
+ANT_compressable_integer *current, *end;
+
+max = 0;
+current = impact_ordering;
+end = impact_ordering + document_frequency;
+
+while (current < end)
+	{
+	end += 2;
+	docid = -1;
+	current++;						// tf
+	while (*current != 0)
+		docid += *current++;
+	if (docid > max)
+		max = docid;
+	current++;						// zero
+	}
+
+return max;
+}
+
 /*
 	MAIN()
 	------
 */
 int main(int argc, char *argv[])
 {
+ANT_compressable_integer *raw, max = 0;
+long postings_list_size = 100 * 1024 * 1024;
+long raw_list_size = 100 * 1024 * 1024;
+unsigned char *postings_list = NULL;
 char *term, *first_term, *last_term;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
 ANT_btree_iterator iterator(&search_engine);
 ANT_search_engine_btree_leaf leaf;
+ANT_compression_factory factory;
 
 if (argc == 1)
 	first_term = last_term = NULL;
@@ -41,6 +76,8 @@ else if (argc == 3)
 else
 	exit(printf("Usage:%s [<start word> [<end word>]]\n", argv[0]));
 
+postings_list = (unsigned char *)malloc(postings_list_size);
+raw = (ANT_compressable_integer *)malloc(raw_list_size);
 for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 	{
 	iterator.get_postings_details(&leaf);
@@ -48,6 +85,23 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 		break;
 	else
 		{
+		if (check_postings)
+			{
+			if (leaf.document_frequency > 2)
+				if (leaf.postings_length > postings_list_size)
+					{
+					postings_list_size = 2 * leaf.postings_length;
+					postings_list = (unsigned char *)realloc(postings_list, postings_list_size);
+					}
+			search_engine.get_postings(&leaf, postings_list);
+			if (leaf.impacted_length > raw_list_size)
+				{
+				raw_list_size = 2 * leaf.impacted_length;
+				raw = (ANT_compressable_integer *)realloc(raw, raw_list_size);
+				}
+			factory.decompress(raw, postings_list, leaf.impacted_length);
+			max = process((ANT_compressable_integer *)raw, leaf.document_frequency);
+			}
 #ifdef _MSC_VER
 		/*
 			Convert into a wide string and print that as Windows printf() doesn't do UTF-8
@@ -59,7 +113,14 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 #else
 		printf("%s ", term);
 #endif
-		printf("%lld %d\n", leaf.collection_frequency, leaf.document_frequency);
+		printf("%lld %d", leaf.collection_frequency, leaf.document_frequency);
+		if (check_postings)
+			{
+			printf(" %lld", (long long)max);
+			if (max > search_engine.document_count())
+				printf(" MAX IS TOO LARGE!");
+			}
+		putchar('\n');
 		}
 	}
 
