@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include <ant_link.h>
+#include "ant_link.h"
 
 namespace QLINK {
 

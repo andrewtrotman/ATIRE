@@ -4,13 +4,24 @@
 AC_PREREQ([2.63])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([src/config.h])
-AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE
+#AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_LN_S
 
+AC_ARG_WITH(stpl,
+            AC_HELP_STRING([--with-stpl=DIR],
+                       [Define STPL directory for its include files]),
+        [ if test -d "$withval" ; then
+            CFLAGS="$CFLAGS -I$withval"
+            CXXFLAGS="$CXXFLAGS -I$withval"
+          else
+            AC_MSG_ERROR([Cannot stat directory $withval])
+          fi ] )
+          
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lant':
 AC_CHECK_LIB([ant], [ant_easy_init])
