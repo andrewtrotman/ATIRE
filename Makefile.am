@@ -47,6 +47,8 @@ library_sources =  \
     $(SRCDIR)/relevant_document.c \
     $(SRCDIR)/stats.c \
     $(SRCDIR)/time_stats.c \
+    $(SRCDIR)/search_engine_result.c \
+    $(SRCDIR)/search_engine_result_iterator.c \
     $(SRCDIR)/search_engine_stats.c \
     $(SRCDIR)/search_engine_forum.c \
     $(SRCDIR)/search_engine_forum_INEX.c \
@@ -59,6 +61,7 @@ library_sources =  \
     $(SRCDIR)/disk_internals.c \
 	$(SRCDIR)/directory_recursive_iterator.c \
 	$(SRCDIR)/directory_iterator_tar.c	\
+	$(SRCDIR)/directory_iterator_file.c	\
     $(SRCDIR)/btree_iterator.c \
     $(SRCDIR)/top_k_sort.c \
     $(SRCDIR)/stemmer.c	\
@@ -83,6 +86,7 @@ library_sources =  \
 	$(SRCDIR)/compress_sigma.c \
 	$(SRCDIR)/compression_factory.c \
 	$(SRCDIR)/indexer_param_block.c \
+	$(SRCDIR)/indexer_param_block_rank.c \
 	$(SRCDIR)/ant_param_block.c \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_dale_chall.c \
@@ -130,6 +134,7 @@ library_noinst_headers = \
 	$(SRCDIR)/compress_variable_byte.h	\
 	$(SRCDIR)/ctypes.h	\
 	$(SRCDIR)/directory_iterator.h	\
+	$(SRCDIR)/directory_iterator_file.h	\
 	$(SRCDIR)/directory_iterator_tar.h	\
 	$(SRCDIR)/directory_iterator_tar_file_header.h	\
 	$(SRCDIR)/directory_recursive_iterator.h	\
@@ -142,6 +147,7 @@ library_noinst_headers = \
 	$(SRCDIR)/fundamental_types.h	\
 	$(SRCDIR)/hash_table.h	\
 	$(SRCDIR)/indexer_param_block.h	\
+	$(SRCDIR)/indexer_param_block_rank.h \
 	$(SRCDIR)/learned_wikipedia_stem.h	\
 	$(SRCDIR)/lovins.h	\
 	$(SRCDIR)/maths.h	\
@@ -171,6 +177,8 @@ library_noinst_headers = \
 	$(SRCDIR)/search_engine.h	\
 	$(SRCDIR)/search_engine_posting.h	\
 	$(SRCDIR)/search_engine_stats.h	\
+	$(SRCDIR)/search_engine_result.h \
+	$(SRCDIR)/search_engine_result_iterator.h \
 	$(SRCDIR)/stats.h	\
 	$(SRCDIR)/stemmer_factory.h	\
 	$(SRCDIR)/stemmer.h	\

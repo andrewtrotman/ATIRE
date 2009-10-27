@@ -2,7 +2,7 @@
 	DIRECTORY_ITERATOR_FILE.C
 	-------------------------
 */
-#include <new.h>
+#include <new>
 #include <string.h>
 #include "pragma.h"
 #include "directory_iterator_file.h"
