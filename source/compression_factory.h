@@ -16,7 +16,7 @@
 	class ANT_COMPRESSION_FACTORY
 	-----------------------------
 */
-class ANT_compression_factory : ANT_compress
+class ANT_compression_factory : public ANT_compress
 {
 public:
 	enum {	
@@ -55,7 +55,6 @@ public:
 	void set_validation(long validate) { this->validate = validate; }
 										
 	void text_render(void);
-
 } ;
 
 #endif  /* COMPRESSION_FACTORY_H_ */

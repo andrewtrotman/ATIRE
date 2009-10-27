@@ -127,6 +127,10 @@ PARTS = \
 	$(OBJDIR)\compress_none.obj						\
 	$(OBJDIR)\compress_sigma.obj					\
 	$(OBJDIR)\compression_factory.obj				\
+	$(OBJDIR)\compress_text_none.obj				\
+	$(OBJDIR)\compress_text_bz2.obj					\
+	$(OBJDIR)\compress_text_deflate.obj				\
+	$(OBJDIR)\compression_text_factory.obj			\
 	$(OBJDIR)\readability_dale_chall.obj			\
 	$(OBJDIR)\readability_factory.obj				\
 	$(OBJDIR)\search_engine_readability.obj			\
