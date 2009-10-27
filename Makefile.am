@@ -85,6 +85,10 @@ library_sources =  \
 	$(SRCDIR)/compress_none.c \
 	$(SRCDIR)/compress_sigma.c \
 	$(SRCDIR)/compression_factory.c \
+	$(SRCDIR)/compress_text_deflate.c \
+	$(SRCDIR)/compress_text_none.c \
+	$(SRCDIR)/compress_text_bz2.c \
+	$(SRCDIR)/compression_text_factory.c \
 	$(SRCDIR)/indexer_param_block.c \
 	$(SRCDIR)/indexer_param_block_rank.c \
 	$(SRCDIR)/ant_param_block.c \
@@ -126,12 +130,19 @@ library_noinst_headers = \
 	$(SRCDIR)/compress.h	\
 	$(SRCDIR)/compression_factory.h	\
 	$(SRCDIR)/compression_factory_scheme.h	\
+	$(SRCDIR)/compression_text_factory.h \
 	$(SRCDIR)/compress_none.h	\
 	$(SRCDIR)/compress_relative10.h	\
 	$(SRCDIR)/compress_sigma_frequency.h	\
 	$(SRCDIR)/compress_sigma.h	\
 	$(SRCDIR)/compress_simple9.h	\
 	$(SRCDIR)/compress_variable_byte.h	\
+	$(SRCDIR)/compress_text.h \
+	$(SRCDIR)/compression_text_factory_scheme.h \
+	$(SRCDIR)/compress_text_deflate_internals.h \
+	$(SRCDIR)/compress_text_deflate.h \
+	$(SRCDIR)/compress_text_none.h \
+	$(SRCDIR)/compress_text_bz2.h \
 	$(SRCDIR)/ctypes.h	\
 	$(SRCDIR)/directory_iterator.h	\
 	$(SRCDIR)/directory_iterator_file.h	\

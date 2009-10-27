@@ -7,6 +7,10 @@
 #endif
 #include "compress_text_bz2.h"
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 /*
 	ANT_COMPRESS_TEXT_BZ2::COMPRESS()
 	---------------------------------
