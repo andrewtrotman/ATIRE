@@ -65,7 +65,7 @@ for (which = 0; which < number_of_techniques; which++)
 			}
 		break;
 		}
-
+*destination_length = shortened_destination_length;
 *destination = (unsigned char)which;
 return destination;
 }

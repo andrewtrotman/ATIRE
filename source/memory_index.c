@@ -2,6 +2,7 @@
 	MEMORY_INDEX.C
 	--------------
 */
+#include <new>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -37,10 +38,11 @@ return ANT_hash_24(string);
 	ANT_MEMORY_INDEX::ANT_MEMORY_INDEX()
 	------------------------------------
 */
-ANT_memory_index::ANT_memory_index()
+ANT_memory_index::ANT_memory_index(char *filename)
 {
 squiggle_length = new ANT_string_pair("~length");
 hashed_squiggle_length = hash(squiggle_length);
+squiggle_document_offsets = new ANT_string_pair("~documentoffsets");
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
 stats = new ANT_memory_index_stats(memory);
@@ -52,6 +54,10 @@ largest_docno = 0;
 factory = new ANT_compression_factory;
 document_lengths = NULL;
 quantizer = NULL;
+documents_in_repository = 0;
+factory_text = new (std::nothrow) ANT_compression_text_factory;
+index_file = NULL;
+open_index_file(filename);
 }
 
 /*
@@ -60,10 +66,12 @@ quantizer = NULL;
 */
 ANT_memory_index::~ANT_memory_index()
 {
+close_index_file();
 delete memory;
 delete stats;
 delete factory;
 delete [] squiggle_length;
+delete factory_text;
 }
 
 /*
@@ -140,7 +148,7 @@ return node;
 	ANT_MEMORY_INDEX::SET_DOCUMENT_DETAIL()
 	---------------------------------------
 */
-void ANT_memory_index::set_document_detail(ANT_string_pair *measure_name, long score)
+void ANT_memory_index::set_document_detail(ANT_string_pair *measure_name, long long score)
 {
 long hash_value;
 ANT_memory_index_hash_node *node;
@@ -511,10 +519,39 @@ return end;
 }
 
 /*
+	ANT_MEMORY_INDEX::OPEN_INDEX_FILE()
+	-----------------------------------
+*/
+void ANT_memory_index::open_index_file(char *filename)
+{
+if (index_file == NULL)
+	{
+	index_file = new ANT_file(memory);
+	index_file->open(filename, "w+b");
+	index_file->setvbuff(DISK_BUFFER_SIZE);
+	stats->disk_buffer = DISK_BUFFER_SIZE;
+	}
+}
+
+/*
+	ANT_MEMORY_INDEX::CLOSE_INDEX_FILE()
+	------------------------------------
+*/
+void ANT_memory_index::close_index_file(void)
+{
+if (index_file != NULL)
+	{
+	index_file->close();
+	delete index_file;
+	index_file = NULL;
+	}
+}
+
+/*
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
-long ANT_memory_index::serialise(char *filename, ANT_ranking_function_factory *factory)
+long ANT_memory_index::serialise(ANT_ranking_function_factory *factory)
 {
 uint8_t zero = 0;
 int32_t length_of_longest_term = 0;
@@ -522,18 +559,12 @@ uint32_t longest_postings_size;
 int64_t highest_df = 0;
 uint64_t file_position, terms_in_root, eight_byte;
 long terms_in_node, unique_terms = 0, max_terms_in_node = 0, hash_val, where, bytes, btree_root_size;
-ANT_file *file;
 ANT_memory_index_hash_node **term_list, **here;
 ANT_btree_head_node *header, *current_header, *last_header;
 ANT_memory_index_hash_node *node;
 double max_rsv_for_node, min_rsv_for_node;
 long long doc_size, tf_size;
 long long timer;
-
-file = new ANT_file(memory);
-file->open(filename, "w+b");
-file->setvbuff(DISK_BUFFER_SIZE);
-stats->disk_buffer = DISK_BUFFER_SIZE;
 
 compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
 decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
@@ -589,7 +620,7 @@ stats->time_to_quantize += stats->stop_timer(timer);
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
 		{
-		if ((terms_in_node = serialise_all_nodes(file, hash_table[hash_val])) > max_terms_in_node)
+		if ((terms_in_node = serialise_all_nodes(index_file, hash_table[hash_val])) > max_terms_in_node)
 			max_terms_in_node = terms_in_node;
 		unique_terms += terms_in_node;
 		}
@@ -625,10 +656,10 @@ current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree
 here = term_list;
 while (*here != NULL)
 	{
-	current_header->disk_pos = file->tell();
+	current_header->disk_pos = index_file->tell();
 	current_header->node = *here;
 	current_header++;
-	here = write_node(file, here);
+	here = write_node(index_file, here);
 	}
 last_header = current_header;
 terms_in_root = last_header - header;
@@ -636,52 +667,78 @@ terms_in_root = last_header - header;
 /*
 	Take note of where the header will be located on disk
 */
-file_position = file->tell();
+file_position = index_file->tell();
 
 /*
 	Write the header to disk N then N * (string, offset) pairs
 */
-file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));	// 4 bytes
+index_file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));	// 4 bytes
 
 //printf("Terms in root:%llu\n", (unsigned long long) terms_in_root);
 
 for (current_header = header; current_header < last_header; current_header++)
 	{
-	file->write((unsigned char *)current_header->node->string.string(), current_header->node->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : current_header->node->string.length());
-	file->write(&zero, sizeof(zero));									// 1 byte
+	index_file->write((unsigned char *)current_header->node->string.string(), current_header->node->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : current_header->node->string.length());
+	index_file->write(&zero, sizeof(zero));									// 1 byte
 	eight_byte = current_header->disk_pos;
-	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));		// 8 bytes
+	index_file->write((unsigned char *)&eight_byte, sizeof(eight_byte));		// 8 bytes
 	}
 
 /*
 	Write the location of the header to file
 */
 //printf("Root pos on disk:%llu\n", (unsigned long long) file_position);
-file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 bytes
+index_file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 bytes
 
 /*
 	The string length of the longest term
 */
-file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));		// 4 bytes
+index_file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));		// 4 bytes
 
 /*
 	The maximum length of a compressed posting list
 */
 longest_postings_size = (uint32_t)(serialised_docids_size + serialised_tfs_size);
-file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));	// 4 byte
+index_file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));	// 4 byte
 
 /*
 	and the maximum number of postings in a postings list (that is, the largest document frequencty (DF))
 */
-file->write((unsigned char *)&highest_df, sizeof(highest_df));		// 8 bytes
+index_file->write((unsigned char *)&highest_df, sizeof(highest_df));		// 8 bytes
 
 /*
-	Close (and flush) the file
+	We're done!
 */
-file->close();
-delete file;
-
 return 1;
+}
+
+/*
+	ANT_MEMORY_INDEX::ADD_TO_DOCUMENT_REPOSITORY()
+	----------------------------------------------
+*/
+void ANT_memory_index::add_to_document_repository(char *document, long length)
+{
+unsigned long compressed_length;
+long long start;
+
+if (compressed_document_buffer_size < length + 1)
+	{
+	/*
+		double the size to reduce the number calls
+		add one in case length == 0 because we need to store the factory's scheme byte
+	*/
+	compressed_document_buffer_size = length * 2 + 1;
+	compressed_document_buffer = (char *)memory->malloc(compressed_document_buffer_size);
+	}
+compressed_length = compressed_document_buffer_size;
+if (factory_text->compress(compressed_document_buffer, &compressed_length, document, length) == NULL)
+	exit(printf("Cannot compress document (ID:%lld)\n", documents_in_repository));
+
+start = index_file->tell();
+index_file->write((unsigned char *)compressed_document_buffer, compressed_length);
+add_term(squiggle_document_offsets, start);		// use the search engine itself to store the offsets in the index
+
+documents_in_repository++;
 }
 
 /*

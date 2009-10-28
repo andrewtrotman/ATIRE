@@ -10,6 +10,7 @@
 #include "fundamental_types.h"
 #include "compress_variable_byte.h"
 #include "compression_factory.h"
+#include "compression_text_factory.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -28,6 +29,7 @@ public:
 private:
 	ANT_string_pair *squiggle_length;
 	long hashed_squiggle_length;
+	ANT_string_pair *squiggle_document_offsets;
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
@@ -41,6 +43,8 @@ private:
 	unsigned char *compressed_postings_list;
 	long long compressed_postings_list_length;
 
+	ANT_file *index_file;
+
 	/*
 		These are used for quantization.  We need to store the max and min rsv values 
 		so that we can scale them.  We also need the document lengths array and some
@@ -49,6 +53,17 @@ private:
 	ANT_compressable_integer *document_lengths;
 	ANT_ranking_function *quantizer;
 	double maximum_collection_rsv, minimum_collection_rsv;
+
+	/*
+		Documents that are added to the repository are compressed using the compression
+		factory first.  A list of offsets is stored in a whapping great array which is
+		then written to disk as a footer before the index starts.
+	*/
+	long long documents_in_repository;
+	ANT_compression_text_factory *factory_text;
+	char *compressed_document_buffer;
+	long compressed_document_buffer_size;
+	
 
 private:
 	long hash(ANT_string_pair *string);
@@ -61,23 +76,26 @@ private:
 	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
+	void open_index_file(char *filename);
+	void close_index_file(void);
 
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 
 public:
-	ANT_memory_index();
+	ANT_memory_index(char *filename);
 	~ANT_memory_index();
 
 	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
-	long serialise(char *filename, ANT_ranking_function_factory *factory);
-	void set_document_length(long long docno, long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
-	void set_document_detail(ANT_string_pair *measure_name, long length);
+	long serialise(ANT_ranking_function_factory *factory);
+	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
+	void set_document_detail(ANT_string_pair *measure_name, long long length);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 	void text_render(long what);
 	long long get_memory_usage(void);
+	void add_to_document_repository(char *document, long length);
 } ;
 
 

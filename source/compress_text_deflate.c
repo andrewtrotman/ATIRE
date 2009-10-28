@@ -13,7 +13,7 @@
 ANT_compress_text_deflate::ANT_compress_text_deflate() : ANT_compress_text()
 {
 #ifdef ANT_HAS_ZLIB
-	const int level = 9;		// maximum compression
+	const int level = Z_DEFAULT_COMPRESSION;		// maximum compression
 	internals = new (std::nothrow) ANT_compress_text_deflate_internals;
 
 	internals->stream.zalloc = Z_NULL;

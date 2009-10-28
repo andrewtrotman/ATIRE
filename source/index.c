@@ -51,12 +51,7 @@ int main(int argc, char *argv[])
 ANT_indexer_param_block param_block(argc, argv);
 ANT_time_stats stats;
 ANT_directory_iterator *source = NULL;
-#ifdef PARALLEL_INDEX
-ANT_directory_iterator_multiple *disk = NULL;
-ANT_instream_buffer *instream_file_buffer;
-#else
 ANT_directory_iterator *disk = NULL;
-#endif
 ANT_parser *parser;
 ANT_readability_factory *readability;
 ANT_string_pair *token;
@@ -86,7 +81,7 @@ if (first_param >= argc)
 last_report = 0;
 doc = 0;
 terms_in_document = 0;
-index = new ANT_memory_index;
+index = new ANT_memory_index("index.aspt");
 id_list.open("doclist.aspt", "wb");
 
 index->set_compression_scheme(param_block.compression_scheme);
@@ -104,31 +99,20 @@ readability->set_parser(parser);
 /*
 	The first parameter that is not a command line switch is the start of the list of files to index
 */
-#ifdef PARALLEL_INDEX
-	disk = new ANT_directory_iterator_multiple;
-#endif
 current_file_length = bytes_indexed = 0;
 
 for (param = first_param; param < argc; param++)
 	{
-#ifdef PARALLEL_INDEX
-#else
 	delete disk;
 	delete file_stream;
 	delete decompressor;
-#endif
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
 		source = new ANT_directory_recursive_iterator;						// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
-#ifdef PARALLEL_INDEX
-		instream_file_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_file_buffer);
-#else
 		source = new ANT_directory_iterator_tar(decompressor);
-#endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
 		{
@@ -141,15 +125,7 @@ for (param = first_param; param < argc; param++)
 	else
 		source = new ANT_directory_iterator;									// current directory
 
-#ifdef PARALLEL_INDEX
-	disk->add_iterator(source);
-	}
-
-
-	{
-#else
 	disk = source;
-#endif
 	files_that_match = 0;
 	now = stats.start_timer();
 	current_file_length = 0;
@@ -162,55 +138,58 @@ for (param = first_param; param < argc; param++)
 	bytes_indexed += current_file_length;
 	while (file != NULL)
 		{
-		#pragma omp parallel sections
+		/*
+			Store the document in the repository
+		*/
+//		index->add_to_document_repository((char *)file, current_file_length + 1);		// +1 so that we also get the '\0'
+
+		/*
+			Index the file
+		*/
+		files_that_match++;
+		doc++;
+		if (doc % param_block.reporting_frequency == 0 && doc != last_report)
+			report(last_report = doc, index, &stats, bytes_indexed);
+
+		readability->set_document(file);
+		while ((token = readability->get_next_token()) != NULL)
 			{
-			#pragma omp section
-				{
-				files_that_match++;
-				doc++;
-				if (doc % param_block.reporting_frequency == 0 && doc != last_report)
-					report(last_report = doc, index, &stats, bytes_indexed);
-
-				readability->set_document(file);
-				while ((token = readability->get_next_token()) != NULL)
-					{
-					if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
-						terms_in_document++;
-					readability->handle_node(index->add_term(token, doc));
-					}
-				if (terms_in_document == 0)
-					doc--;
-				else
-					{
-					index->set_document_length(doc, terms_in_document);
-					readability->index(index);
-					id_list.puts(filename);		// save the "external" ID of the document
-					}
-				terms_in_document = 0;
-				delete [] file;
-				}
-
-			#pragma omp section
-				{
-				now = stats.start_timer();
-				current_file_length = 0;
-				if ((filename = disk->next()) == NULL)
-					new_file = NULL;
-				else
-					new_file = (unsigned char *)disk->read_entire_file(&current_file_length);
-				stats.add_disk_input_time(stats.stop_timer(now));
-				}
+			if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
+				terms_in_document++;
+			readability->handle_node(index->add_term(token, doc));
 			}
+		if (terms_in_document == 0)
+			doc--;
+		else
+			{
+			index->set_document_length(doc, terms_in_document);
+			readability->index(index);
+			id_list.puts(filename);		// save the "external" ID of the document
+			}
+		terms_in_document = 0;
+		delete [] file;
+
+		/*
+			Get the next file
+		*/
+		now = stats.start_timer();
+		current_file_length = 0;
+		if ((filename = disk->next()) == NULL)
+			new_file = NULL;
+		else
+			new_file = (unsigned char *)disk->read_entire_file(&current_file_length);
+		stats.add_disk_input_time(stats.stop_timer(now));
 		file = new_file;
 		bytes_indexed += current_file_length;
 		}
+
 	if (files_that_match == 0)
 		printf("Warning: '%s' does not match any files\n", argv[param]);
 	}
 
 id_list.close();
 now = stats.start_timer();
-index->serialise("index.aspt", &param_block);
+index->serialise(&param_block);
 stats.add_disk_output_time(stats.stop_timer(now));
 index->text_render(param_block.statistics);
 delete index;
