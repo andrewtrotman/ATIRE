@@ -3,12 +3,15 @@
 
 AC_PREREQ([2.63])
 AC_INIT([uniseg], [0.1], [lingxiang.tang@gmail.com])
+AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([freq_counter.h])
-AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_LIBTOOL
+
+AM_PROG_CC_C_O
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-luniseg':

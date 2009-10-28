@@ -1,0 +1,16 @@
+COMPILING in *NIX system
+------------------------
+aclocal
+autoconf
+libtoolize --force
+automake --add-missing
+./configure
+make
+
+INSTALL
+--------
+make install
+
+UNINSTALL
+---------
+make uninstall
