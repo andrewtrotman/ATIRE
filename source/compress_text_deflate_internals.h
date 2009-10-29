@@ -17,7 +17,8 @@ class ANT_compress_text_deflate_internals
 {
 #ifdef ANT_HAS_ZLIB
 	public:
-		z_stream stream;
+		z_stream stream;		// for compression (deflation)
+		z_stream instream;		// for decompression (inflation)
 #endif
 };
 

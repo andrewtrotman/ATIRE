@@ -7,9 +7,9 @@
 
 #ifdef _MSC_VER
 	#include <windows.h>
+	#define PATH_MAX MAX_PATH
 #else
 	#include <limits.h>
-	#define MAX_PATH PATH_MAX
 #endif
 
 #include "directory_iterator.h"

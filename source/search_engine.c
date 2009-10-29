@@ -41,6 +41,7 @@ long postings_buffer_length, decompressed_integer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
+ANT_compressable_integer *value;
 
 index_filename = filename;
 trim_postings_k = LLONG_MAX;
@@ -170,9 +171,10 @@ collection_length_in_terms = sum;
 /*
 	Load the positions of the documents from within the index
 */
-if (get_postings_details("~documentoffsets", &collection_details) == NULL)
-	document_offsets = NULL;
-else
+document_offsets = NULL;
+document_longest_raw_length = 0;
+
+if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	{
 	memory->realign();
 	document_offsets = (long long *)memory->malloc(collection_details.document_frequency * sizeof(*document_offsets));
@@ -188,6 +190,13 @@ else
 		document_offsets[current_length] = sum;
 		}
 	document_decompress_buffer = (char *)memory->malloc(document_longest_compressed);
+
+	/*
+		when we call get_decompressed_postings() we get an impact ordered postings list
+		the first value of which is the term-frequency and the second is the value we want
+	*/
+	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
+		document_longest_raw_length = *(value + 1);
 	}
 
 /*
@@ -702,7 +711,7 @@ return decompress_buffer;
 	ANT_SEARCH_ENGINE::GET_DOCUMENT()
 	---------------------------------
 */
-char *ANT_search_engine::get_document(char *destination, long long id)
+char *ANT_search_engine::get_document(char *destination, unsigned long *destination_length, long long id)
 {
 long long start, end;
 
@@ -714,6 +723,8 @@ end = document_offsets[id + 1];
 
 index->seek(start);
 index->read((unsigned char *)document_decompress_buffer, end - start);
+
+document_factory.decompress(destination, destination_length, document_decompress_buffer, (unsigned long)(end - start));
 
 return destination;
 }

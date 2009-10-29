@@ -16,11 +16,12 @@ ANT_compress_text_deflate::ANT_compress_text_deflate() : ANT_compress_text()
 	const int level = Z_DEFAULT_COMPRESSION;		// maximum compression
 	internals = new (std::nothrow) ANT_compress_text_deflate_internals;
 
-	internals->stream.zalloc = Z_NULL;
-	internals->stream.zfree = Z_NULL;
-	internals->stream.opaque = Z_NULL;
+	internals->stream.zalloc = internals->instream.zalloc = Z_NULL;
+	internals->stream.zfree = internals->instream.zfree = Z_NULL;
+	internals->stream.opaque = internals->instream.opaque = Z_NULL;
 
 	deflateInit(&internals->stream, level);
+	inflateInit(&internals->instream);
 #endif
 }
 
@@ -32,6 +33,7 @@ ANT_compress_text_deflate::~ANT_compress_text_deflate()
 {
 #ifdef ANT_HAS_ZLIB
 	deflateEnd(&internals->stream);
+	inflateEnd(&internals->instream);
 #endif
 }
 
@@ -42,7 +44,7 @@ ANT_compress_text_deflate::~ANT_compress_text_deflate()
 char *ANT_compress_text_deflate::compress(char *destination, unsigned long *destination_length, char *source, unsigned long source_length)
 {
 #ifdef ANT_HAS_ZLIB
-	unsigned long success;
+	long success;
 
 	if (deflateReset(&internals->stream) != Z_OK)
 		return NULL;
@@ -68,18 +70,18 @@ char *ANT_compress_text_deflate::compress(char *destination, unsigned long *dest
 char *ANT_compress_text_deflate::decompress(char *destination, unsigned long *destination_length, char *source, unsigned long source_length)
 {
 #ifdef ANT_HAS_ZLIB
-	unsigned long status;
+	long status;
 
-	if (deflateReset(&internals->stream) != Z_OK)
+	if (inflateReset(&internals->instream) != Z_OK)
 		return NULL;
 
-	internals->stream.avail_in = source_length;
-	internals->stream.next_in = (Bytef *)source;
-	internals->stream.avail_out = *destination_length;
-	internals->stream.next_out = (Bytef *)destination;
+	internals->instream.avail_in = source_length;
+	internals->instream.next_in = (Bytef *)source;
+	internals->instream.avail_out = *destination_length;
+	internals->instream.next_out = (Bytef *)destination;
 
-	status = inflate(&internals->stream, Z_FINISH);
-	*destination_length = *destination_length - internals->stream.avail_out;
+	status = inflate(&internals->instream, Z_FINISH);
+	*destination_length = *destination_length - internals->instream.avail_out;
 
 	return status == Z_STREAM_END ? destination : NULL;
 #else

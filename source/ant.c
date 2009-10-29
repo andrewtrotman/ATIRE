@@ -338,7 +338,26 @@ for (query = input.first(); query != NULL; query = input.next())
 	if (output == NULL)
 		for (result = 0; result < last_to_list; result++)
 			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
+				{
+				long longest_len = search_engine->get_longest_document_length();
+				printf("(Longest %d)", longest_len);
+#ifdef NEVER
+/*
+				long long docid;
+				char *pos;
+				static char document_buffer[1024 * 1024];
+				unsigned long len = sizeof(document_buffer);
+
+				docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+				search_engine->get_document(document_buffer, &len, docid);
+				pos = strstr(document_buffer, "<DOCNO>");
+				pos = strchr(pos, 'W');
+				printf("%lld:%s %f %*.*s\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
+*/
+#else
 				printf("%lld:%s %f\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv());
+#endif
+				}
 			else
 				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
 	else

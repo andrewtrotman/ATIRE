@@ -20,16 +20,17 @@ class ANT_ranking_function;
 class ANT_ranking_function_factory;
 
 #define HASH_TABLE_SIZE (0x1000000)
+#define MIN_DOCUMENT_ALLOCATION_SIZE (1024 * 1024)
 
 class ANT_memory_index
 {
 public:
-	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
+	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
+	enum { MODE_ABSOLUTE, MODE_MONOTONIC };
 
 private:
 	ANT_string_pair *squiggle_length;
 	long hashed_squiggle_length;
-	ANT_string_pair *squiggle_document_offsets;
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
@@ -63,7 +64,9 @@ private:
 	ANT_compression_text_factory *factory_text;
 	char *compressed_document_buffer;
 	long compressed_document_buffer_size;
-	
+	long compressed_longest_raw_document_size;			// length of the longest document before compression
+	ANT_string_pair *squiggle_document_offsets;
+	ANT_string_pair *squiggle_document_longest;
 
 private:
 	long hash(ANT_string_pair *string);
@@ -91,7 +94,7 @@ public:
 	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
 	long serialise(ANT_ranking_function_factory *factory);
 	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
-	void set_document_detail(ANT_string_pair *measure_name, long long length);
+	void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	void set_document_compression_scheme(unsigned long scheme) { factory_text->set_scheme(scheme); }
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }

@@ -6,6 +6,7 @@
 #define SEARCH_ENGINE_H_
 
 #include "compression_factory.h"
+#include "compression_text_factory.h"
 #include "ranking_function.h"
 
 class ANT_memory;
@@ -42,9 +43,11 @@ private:
 	/*
 		If the index contains the documents then we need to deserialise the positions and store them
 	*/
+	ANT_compression_text_factory document_factory;
 	long long *document_offsets;
 	long long document_longest_compressed;
 	char *document_decompress_buffer;
+	long document_longest_raw_length;		// length of the longest document in the collection (once it has been decompressed).
 
 protected:
 	ANT_compressable_integer *decompress_buffer;
@@ -98,7 +101,8 @@ public:
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
-	char *get_document(char *destination, long long id);
+	char *get_document(char *destination, unsigned long *destination_length, long long id);
+	long get_longest_document_length(void) { return document_longest_raw_length; }
 };
 
 #endif  /* SEARCH_ENGINE_H_ */

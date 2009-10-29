@@ -43,6 +43,7 @@ ANT_memory_index::ANT_memory_index(char *filename)
 squiggle_length = new ANT_string_pair("~length");
 hashed_squiggle_length = hash(squiggle_length);
 squiggle_document_offsets = new ANT_string_pair("~documentoffsets");
+squiggle_document_longest = new ANT_string_pair("~documentlongest");
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
 stats = new ANT_memory_index_stats(memory);
@@ -55,6 +56,7 @@ factory = new ANT_compression_factory;
 document_lengths = NULL;
 quantizer = NULL;
 documents_in_repository = 0;
+compressed_longest_raw_document_size = 0;
 factory_text = new (std::nothrow) ANT_compression_text_factory;
 index_file = NULL;
 open_index_file(filename);
@@ -175,7 +177,7 @@ return node;
 	ANT_MEMORY_INDEX::SET_DOCUMENT_DETAIL()
 	---------------------------------------
 */
-void ANT_memory_index::set_document_detail(ANT_string_pair *measure_name, long long score)
+void ANT_memory_index::set_document_detail(ANT_string_pair *measure_name, long long score, long mode)
 {
 long hash_value;
 ANT_memory_index_hash_node *node;
@@ -188,7 +190,10 @@ if (hash_table[hash_value] == NULL)
 	}
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
-node->current_docno = -1;
+
+if (mode != MODE_MONOTONIC)
+	node->current_docno = -1;			// store the value rather than the diff
+
 node->add_posting(score);
 }
 
@@ -360,6 +365,14 @@ if (root->string[0] == '~')			// these are "special" strings in the index (e.g. 
 	{
 	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
 	impacted_postings_length = root->document_frequency;
+#ifdef SPECIAL_COMPRESSION
+	if (root->document_frequency <= 2)
+		{
+		decompressed_postings_list[0] = impacted_postings[0];
+		if (root->document_frequency == 2)
+			decompressed_postings_list[1] = impacted_postings[1];
+		}
+#endif
 	}
 else
 	{
@@ -551,12 +564,15 @@ return end;
 */
 void ANT_memory_index::open_index_file(char *filename)
 {
+char file_header[] = "ANT Search Engine Index File\n\0\0";
+
 if (index_file == NULL)
 	{
 	index_file = new ANT_file(memory);
 	index_file->open(filename, "w+b");
 	index_file->setvbuff(DISK_BUFFER_SIZE);
 	stats->disk_buffer = DISK_BUFFER_SIZE;
+	index_file->write((unsigned char *)file_header, sizeof(file_header));
 	}
 }
 
@@ -604,7 +620,10 @@ stats->bytes_for_decompression_recompression += compressed_postings_list_length 
 	But, only add the position if we are using an index with the documents in it.
 */
 if (find_node(hash_table[hash(squiggle_document_offsets)], squiggle_document_offsets) != NULL)
-	add_term(squiggle_document_offsets, index_file->tell());
+	{
+	set_document_detail(squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
+	set_document_detail(squiggle_document_longest, compressed_longest_raw_document_size);		// store the length of the longest document once it is decompressed
+	}
 
 /*
 	If we want to quantize the ranking scores for impact ordering in the index then
@@ -762,10 +781,17 @@ if (compressed_document_buffer_size < length + 1)
 	/*
 		double the size to reduce the number calls
 		add one in case length == 0 because we need to store the factory's scheme byte
+		but we alwasys allocate at least one megabyte
 	*/
-	compressed_document_buffer_size = length * 2 + 1;
+	if ((compressed_document_buffer_size = length * 2 + 1) < MIN_DOCUMENT_ALLOCATION_SIZE)
+		compressed_document_buffer_size = MIN_DOCUMENT_ALLOCATION_SIZE;
+
 	compressed_document_buffer = (char *)memory->malloc(compressed_document_buffer_size);
 	}
+
+if (length > compressed_longest_raw_document_size)
+	compressed_longest_raw_document_size = length;
+
 compressed_length = compressed_document_buffer_size;
 if (factory_text->compress(compressed_document_buffer, &compressed_length, document, length) == NULL)
 	exit(printf("Cannot compress document (ID:%lld)\n", documents_in_repository));
@@ -773,7 +799,7 @@ if (factory_text->compress(compressed_document_buffer, &compressed_length, docum
 start = index_file->tell();
 index_file->write((unsigned char *)compressed_document_buffer, compressed_length);
 stats->bytes_to_store_documents_on_disk += compressed_length;
-add_term(squiggle_document_offsets, start);		// use the search engine itself to store the offsets in the index
+set_document_detail(squiggle_document_offsets, start, MODE_MONOTONIC);		// use the search engine itself to store the offsets in the index
 
 documents_in_repository++;
 stats->time_to_store_documents_on_disk += stats->stop_timer(timer);
