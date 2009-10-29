@@ -67,6 +67,7 @@ private:
 
 private:
 	long hash(ANT_string_pair *string);
+	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
@@ -91,6 +92,7 @@ public:
 	long serialise(ANT_ranking_function_factory *factory);
 	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
 	void set_document_detail(ANT_string_pair *measure_name, long long length);
+	void set_document_compression_scheme(unsigned long scheme) { factory_text->set_scheme(scheme); }
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 	void text_render(long what);

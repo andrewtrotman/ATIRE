@@ -84,6 +84,7 @@ terms_in_document = 0;
 index = new ANT_memory_index("index.aspt");
 id_list.open("doclist.aspt", "wb");
 
+index->set_document_compression_scheme(param_block.document_compression_scheme);
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 
@@ -141,7 +142,8 @@ for (param = first_param; param < argc; param++)
 		/*
 			Store the document in the repository
 		*/
-//		index->add_to_document_repository((char *)file, current_file_length + 1);		// +1 so that we also get the '\0'
+		if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+			index->add_to_document_repository((char *)file, current_file_length + 1);		// +1 so that we also get the '\0'
 
 		/*
 			Index the file

@@ -30,6 +30,8 @@ bytes_used_to_sort_term_list = 0;
 bytes_for_decompression_recompression = 0;
 time_to_quantize = 0;
 bytes_to_quantize = 0;
+time_to_store_documents_on_disk = 0;
+bytes_to_store_documents_on_disk = 0;
 }
 
 /*
@@ -121,4 +123,9 @@ if (type & STAT_MEMORY)
 if (type & STAT_SUMMARY)
 	if (time_to_quantize != 0)
 		print_time("Time to Quantise     :", time_to_quantize);
+	if (time_to_store_documents_on_disk != 0)
+		{
+		print_time("Time to Store Docs   :", time_to_store_documents_on_disk);
+		printf("Bytes to Store Docs  :%10lld bytes\n", bytes_to_store_documents_on_disk);
+		}
 }

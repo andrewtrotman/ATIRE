@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "indexer_param_block.h"
+#include "compression_text_factory.h"
 #include "compression_factory.h"
 #include "readability_factory.h"
 #include "version.h"
@@ -36,6 +37,7 @@ statistics = 0;
 logo = TRUE;
 reporting_frequency = LLONG_MAX;
 ranking_function = IMPACT;
+document_compression_scheme = NONE;
 }
 
 /*
@@ -82,7 +84,7 @@ puts("");
 
 puts("COMPRESSION");
 puts("-----------");
-puts("-c[abBceEgnrsv] Compress postings using one of:");
+puts("-c[abBceEgnrsv] Compress postings using any of:");
 puts("   a            try all schemes and choose the best  (same as -cceEgnrsv)");
 puts("   b            try all bitwise schemes and choose the best  (same as -ceEg)");
 puts("   B            try all Bytewise schemes and choose the best (same as -ccrsSv)");
@@ -95,7 +97,11 @@ puts("   r            Relative-10   (bytewise)");
 puts("   s            Simple-9      (bytewise)");
 puts("   S            Sigma         (bytewise)");
 puts("   v            Variable Byte (bytewise) [default]");
-puts("-vc             Validate compression (and report decompression rates)");
+puts("-vc             Validate posting compression (and report decompression rates)");
+puts("-C[-bz]         Store documents in the repository compressed with one of:");
+puts("   -            don't create the repositorty [default]");
+puts("   b            bz2");
+puts("   z            zip (deflate)");
 puts("");
 
 puts("SEGMENTATION");
@@ -127,6 +133,25 @@ puts("");
 
 exit(0);
 }
+
+/*
+	ANT_INDEXER_PARAM_BLOCK::DOCUMENT_COMPRESSION()
+	-----------------------------------------------
+*/
+void ANT_indexer_param_block::document_compression(char *scheme)
+{
+switch (*scheme)
+	{
+	case '-': document_compression_scheme = NONE; break;
+	case 'b': document_compression_scheme = ANT_compression_text_factory::BZ2; break;
+	case 'z': document_compression_scheme = ANT_compression_text_factory::DEFLATE; break;
+	default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
+	}
+
+if (*(scheme + 1) != '\0')
+	exit(printf("Only one document compresson scheme may be used at a time\n"));
+}
+
 
 /*
 	ANT_INDEXER_PARAM_BLOCK::COMPRESSION()
@@ -231,6 +256,11 @@ for (param = 1; param < argc; param++)
 			reporting_frequency = atol(command + 1);
 			if (reporting_frequency == 0)
 				reporting_frequency = LLONG_MAX;
+			}
+		else if (*command == 'C')
+			{
+			document_compression_scheme = NONE;
+			document_compression(command + 1);
 			}
 		else if (*command == 'c')
 			{

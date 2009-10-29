@@ -39,6 +39,12 @@ private:
 	long string_length_of_longest_term;
 	long long highest_df;
 	const char *index_filename;
+	/*
+		If the index contains the documents then we need to deserialise the positions and store them
+	*/
+	long long *document_offsets;
+	long long document_longest_compressed;
+	char *document_decompress_buffer;
 
 protected:
 	ANT_compressable_integer *decompress_buffer;
@@ -92,6 +98,7 @@ public:
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
+	char *get_document(char *destination, long long id);
 };
 
 #endif  /* SEARCH_ENGINE_H_ */

@@ -15,8 +15,8 @@
 
 
 # optional build flags
-LOC =
-
+LOC = -DASMV -DASMINF -I .
+OBJA = gvmat32c.obj gvmat32.obj inffas32.obj
 
 # variables
 STATICLIB = zlib.lib
@@ -34,14 +34,13 @@ RC = @rc
 #CFLAGS  = -nologo -MD -O2 $(LOC)
 CFLAGS  = -nologo -Ox $(LOC) /Zi /fp:fast /GL /Gy /MP8
 
-ASFLAGS = -coff
+ASFLAGS = -nologo -coff
 LDFLAGS = -nologo -release /LTCG
 ARFLAGS = -nologo /LTCG
 RCFLAGS = /dWIN32 /r
 
 OBJS = adler32.obj compress.obj crc32.obj deflate.obj gzio.obj infback.obj \
        inffast.obj inflate.obj inftrees.obj trees.obj uncompr.obj zutil.obj
-OBJA =
 
 
 # targets
@@ -72,7 +71,10 @@ minigzip_d.exe: minigzip.obj $(IMPLIB)
 .c.obj:
 	$(CC) -c $(CFLAGS) $<
 
-.asm.obj:
+{contrib/masmx86/}.c.obj:
+	$(CC) -c $(CFLAGS) $<
+
+{contrib/masmx86/}.asm.obj:
 	$(AS) -c $(ASFLAGS) $<
 
 adler32.obj: adler32.c zlib.h zconf.h

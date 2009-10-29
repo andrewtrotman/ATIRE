@@ -98,6 +98,33 @@ return memory->bytes_used();
 }
 
 /*
+	ANT_MEMORY_INDEX::FIND_NODE()
+	-----------------------------
+*/
+ANT_memory_index_hash_node *ANT_memory_index::find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string)
+{
+long cmp;
+
+if (root == NULL)
+	return NULL;
+
+while ((cmp = string->strcmp(&(root->string))) != 0)
+	{
+	if (cmp > 0)
+		if (root->left == NULL)
+			return NULL;
+		else
+			root = root->left;
+	else
+		if (root->right == NULL)
+			return NULL;
+		else
+			root = root->right;
+	}
+return root;
+}
+
+/*
 	ANT_MEMORY_INDEX::FIND_ADD_NODE()
 	---------------------------------
 */
@@ -573,6 +600,13 @@ impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postin
 stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 
 /*
+	If we have the documents stored on disk then we need to stor the position of the end of the	final document.
+	But, only add the position if we are using an index with the documents in it.
+*/
+if (find_node(hash_table[hash(squiggle_document_offsets)], squiggle_document_offsets) != NULL)
+	add_term(squiggle_document_offsets, index_file->tell());
+
+/*
 	If we want to quantize the ranking scores for impact ordering in the index then
 	we need to compute the min and max scores the function will produce and then
 	use those later - this takes time so time it.
@@ -720,7 +754,9 @@ void ANT_memory_index::add_to_document_repository(char *document, long length)
 {
 unsigned long compressed_length;
 long long start;
+long long timer;
 
+timer = stats->start_timer();
 if (compressed_document_buffer_size < length + 1)
 	{
 	/*
@@ -736,9 +772,11 @@ if (factory_text->compress(compressed_document_buffer, &compressed_length, docum
 
 start = index_file->tell();
 index_file->write((unsigned char *)compressed_document_buffer, compressed_length);
+stats->bytes_to_store_documents_on_disk += compressed_length;
 add_term(squiggle_document_offsets, start);		// use the search engine itself to store the offsets in the index
 
 documents_in_repository++;
+stats->time_to_store_documents_on_disk += stats->stop_timer(timer);
 }
 
 /*

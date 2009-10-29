@@ -167,6 +167,32 @@ for (current_length = 0; current_length < documents; current_length++)
 mean_document_length = (double)sum / (double)documents;
 collection_length_in_terms = sum;
 
+/*
+	Load the positions of the documents from within the index
+*/
+if (get_postings_details("~documentoffsets", &collection_details) == NULL)
+	document_offsets = NULL;
+else
+	{
+	memory->realign();
+	document_offsets = (long long *)memory->malloc(collection_details.document_frequency * sizeof(*document_offsets));
+	get_postings(&collection_details, postings_buffer);
+	factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
+	document_longest_compressed = sum = 0;
+	for (current_length = 0; current_length < collection_details.document_frequency; current_length++)
+		{
+		if (decompress_buffer[current_length] > document_longest_compressed)
+			document_longest_compressed = decompress_buffer[current_length];
+
+		sum += decompress_buffer[current_length];
+		document_offsets[current_length] = sum;
+		}
+	document_decompress_buffer = (char *)memory->malloc(document_longest_compressed);
+	}
+
+/*
+	Allocate the static space for stemming
+*/
 memory->realign();
 stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
 
@@ -670,3 +696,25 @@ stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;
 } 
+
+
+/*
+	ANT_SEARCH_ENGINE::GET_DOCUMENT()
+	---------------------------------
+*/
+char *ANT_search_engine::get_document(char *destination, long long id)
+{
+long long start, end;
+
+if (document_offsets == NULL)
+	return NULL;
+
+start = document_offsets[id];
+end = document_offsets[id + 1];
+
+index->seek(start);
+index->read((unsigned char *)document_decompress_buffer, end - start);
+
+return destination;
+}
+

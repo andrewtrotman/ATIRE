@@ -30,6 +30,9 @@ public:
 	long disk_buffer;
 	long long time_to_quantize;
 	long long bytes_to_quantize;
+	long long time_to_store_documents_on_disk;
+	long long bytes_to_store_documents_on_disk;;
+
 public:
 	ANT_memory_index_stats(ANT_memory *memory = NULL);
 	virtual ~ANT_memory_index_stats();
