@@ -22,7 +22,7 @@ class ANT_directory_iterator_file : public ANT_directory_iterator
 {
 private:
 	char *file, *document_start, *document_end;
-	char filename[MAX_PATH];
+	char filename[PATH_MAX];
 
 public:
 	ANT_directory_iterator_file(char *file) : ANT_directory_iterator() { this->file = file; }

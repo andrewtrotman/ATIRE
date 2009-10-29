@@ -3,7 +3,7 @@
 	---------------
 */
 
-#include "nexi_term_ant.h"
+#include "NEXI_term_ant.h"
 
 /*
 	ANT_NEXI_TERM_ANT::CMP_COLLECTION_FREQUENCY()

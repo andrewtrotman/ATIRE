@@ -4,11 +4,11 @@ BINDIR = bin
 
 #LDFLAGS = -g -ldl
 #CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 \
-#         -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
+#         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 LDFLAGS = -ldl
 CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
-         -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
+         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
 
 #
 # Please use either system or built-in libs, not both
@@ -59,6 +59,8 @@ OBJECTS = \
 	memory.o \
 	search_engine.o \
 	search_engine_accumulator.o \
+	search_engine_result.o \
+	search_engine_result_iterator.o \
 	mean_average_precision.o \
 	assessment.o \
 	assessment_ANT.o \
@@ -77,6 +79,8 @@ OBJECTS = \
 	disk.o \
 	disk_internals.o \
 	directory_iterator_tar.o \
+	directory_iterator_file.o \
+	directory_iterator_multiple.o \
 	directory_recursive_iterator.o \
 	btree_iterator.o \
 	top_k_sort.o \
@@ -101,10 +105,15 @@ OBJECTS = \
 	compress_none.o \
 	compress_sigma.o \
 	compression_factory.o \
+	compress_text_none.o \
+	compress_text_bz2.o \
+	compress_text_deflate.o \
+	compression_text_factory.o \
 	readability_dale_chall.o \
 	readability_factory.o \
 	search_engine_readability.o \
 	plugin_manager.o \
+	indexer_param_block_rank.o \
 	indexer_param_block.o \
 	indexer_param_block_rank.o \
 	ant_param_block.o \
@@ -123,6 +132,7 @@ OBJECTS = \
 	instream_bz2.o \
 	nexi.o \
 	NEXI_term_iterator.o \
+	NEXI_term_ant.o \
 	NEXI_term.o
 
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
