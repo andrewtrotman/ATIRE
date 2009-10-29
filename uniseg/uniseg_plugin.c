@@ -55,12 +55,13 @@ const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length
 	long distance = 0;
 	long count = 0;
 	bool flag = false;
+	output_.clear();
 
 	while (current < end) {
 	    while ((count < step) && next < end) {
-		enc_->test_char(next);
-		next += enc_->howmanybytes();
-		count++;
+			enc_->test_char(next);
+			next += enc_->howmanybytes();
+			count++;
 	    }
 
 	    flag = next < end;
@@ -71,12 +72,14 @@ const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length
 	    const array_type& words_list = seger_.best_words();
 	    long i = 0;
 	    long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
-	    for (; i < size; i++) {
-		string_type& word = words_list[i]->chars();
-		output_.append(word + " ");
-		segmented_len += word.length();
-	    }
-
+	    if (size > 0)
+			for (; i < size; i++) {
+				string_type& word = words_list[i]->chars();
+				output_.append(word + " ");
+				segmented_len += word.length();
+			}
+	    else
+	    	segmented_len = how_far;
 	    // put the last segment back to the remaining characters
 	    current += segmented_len;
 	    segmented_len = 0;

@@ -45,8 +45,8 @@ void UNISEG_settings::init_fields()
 	lang = uniseg_encoding::UNKNOWN;
 
 	reward = false;
-	mean = 1;
-	mi = 0;
+	mean = 5;
+	mi = 2;
 
 	max = 5;
 

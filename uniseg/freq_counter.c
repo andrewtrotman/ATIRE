@@ -15,8 +15,8 @@ void FreqCounter::count(int max, int min)
 	const char *start = (char *)stream_.c_str();
 	const char *end = start + stream_.length();
 
-	//add_word(start, end, max, min);
-	count(start, end, max, min);
+	add_word(start, end, max, min);
+	//count(start, end, max, min);
 }
 
 void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
@@ -48,19 +48,19 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 	// i - the number of characters depends on min
 	// may from 1, 2, 3, 4, ... till less than max
 	typedef list<string_type>	string_list;
+	uniseg_encoding::language pre_lang;
 
 	for (int i = min; i >= 0 && i <= max; i++) {
 	//cerr << "I got " << string_type((*begin)->begin(), (*end)->end()) << endl;
 	//int i = max;
 		//array_type	ca;
-		//if ( i == max)
-		//	cerr << "Stop here , I need to see what you got" << endl;
+//		if ( i == max)
+//			cerr << "Stop here , I need to see what you got" << endl;
 		start = (char *)begin;
 		//string_array last_ca;
 		string_list cl; // chars list
 		//for (int j = 0; j < (len - i) + 1; j++) {
 		enc->test_char((unsigned char *)start);
-		uniseg_encoding::language pre_lang = enc->lang();
 
 		while (start < end) {
 			//to = from + i;
@@ -81,7 +81,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			while ( start < end ) {
 				//string_type str(start, 3);
 				string_type str; // ((*start)->to_string();
-
+				pre_lang = enc->lang();
 				if (enc->lang() == uniseg_encoding::ENGLISH
 				    || enc->howmanybytes() > 1) {
 
@@ -133,7 +133,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			if (cl.size() > 0) {
 				string_array ca(cl.size());
 				std::copy(cl.begin(), cl.end(), ca.begin());
-				freq_->add(ca, enc->lang());
+				freq_->add(ca, pre_lang);
 			}
 			//cerr << string_type((*from)->begin(), (*to)->end()) << endl;
 		}

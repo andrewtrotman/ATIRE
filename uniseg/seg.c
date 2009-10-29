@@ -88,7 +88,7 @@ void Seger::init()
 	//assert(tw_ptr_->chars().length() > 0);
 	freq_ = new Freq;
 	FreqCounter counter(stream_, freq_);
-	counter.count();
+	counter.count(UNISEG_settings::instance().max, 1);
 
 	if (!allfreq_)
 		allfreq_ = &(QFreq::instance().freq());
@@ -255,7 +255,7 @@ void Seger::build()
 
 	// remove those nodes without end
 	// clist_->remove_no_end();
-	if (UNISEG_settings::instance().verbose) {
+	if (UNISEG_settings::instance().debug) {
 		TIMINGS_DECL();
 		TIMINGS_START();
 
@@ -321,6 +321,9 @@ void Seger::seg() {
 		clist_->sort(false);
 	else
 		clist_->sort(true);
+
+	if (UNISEG_settings::instance().debug)
+		show_all();
 }
 
 void Seger::show_all() {

@@ -119,7 +119,7 @@ word_ptr_type Freq::find(string_type word) {
 	return NULL;
 }
 
-word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, bool allnew, unsigned int freq) {
+word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsigned int freq, bool allnew) {
 
 	int size = ca.size();
 	assert(size > 0);
@@ -303,7 +303,7 @@ void Freq::pile_up(int max)
 //			cerr << "wa: ";
 //			std::copy(wa.begin(), wa.end(), ostream_iterator<string_type>(cerr, " "));
 //			cerr << endl;
-			curr = add(wa, lparent->lang(), true);
+			curr = add(wa, lparent->lang(), 0, true);
 			//curr->lang(lparent->lang());
 
 			lchar = (word_ptr_type)lparent->lchar();
@@ -321,7 +321,8 @@ void Freq::pile_up(int max)
 
 				word_ptr_type rrparent = freq_n_[i][j + 2];
 				wa_next.push_back(rrparent->rchar()->chars());
-				next = add(wa_next, rparent->lang(), true);
+				next = add(wa_next, rparent->lang(), 0, true);
+				assert(next != NULL);
 				//next->lang(rparent->lang());
 
 				lchar = (word_ptr_type)rparent->lchar();
@@ -334,7 +335,6 @@ void Freq::pile_up(int max)
 //				cerr << "wa_next: ";
 //				std::copy(wa_next.begin(), wa_next.end(), ostream_iterator<string_type>(cerr, " "));
 //				cerr << endl;
-				assert(next != NULL);
 //				curr->next(next);
 //				next->pre(curr);
 //				pre = next;
@@ -374,10 +374,10 @@ void Freq::showcol(int n) {
 			//cerr << ->chars();
 			for (int j = 0; j < word_a.size(); j++) {
 				if (j > 0 /*&& (j < (word_a.size() - 1))*/ && (word_a[j]->lang() != UNISEG_encoding::CHINESE) && (word_a[j]->lang() != UNISEG_encoding::NUMBER))
-					cout << " ";
-				cout << word_a[j]->chars();
+					cerr<< " ";
+				cerr<< word_a[j]->chars();
 			}
-			cout << ": " <<  temp_arr[i]->freq() << endl;
+			cerr<< ": " <<  temp_arr[i]->freq() << endl;
 		}
 	} else
 		cerr << " 0" << endl;
@@ -611,8 +611,8 @@ void Freq::show_p() {
 			<< endl;
 	}
 
-	cerr << endl << "The association scores:" << endl;
 	if (UNISEG_settings::instance().debug) {
+		cerr << endl << "The association scores:" << endl;
 		freq_type::const_iterator iter;
 		for (iter=freq_.begin(); iter != freq_.end(); ++iter)
 			cerr << iter->second->chars() << ": " << iter->second->a()

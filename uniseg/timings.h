@@ -25,7 +25,7 @@
 #define TIMINGS_END(name)                                                     \
     gettimeofday(&timings_now, NULL);                                         \
     timings_diff = timings_now.tv_sec - timings_then.tv_sec;                  \
-    printf("%s time: %02i:%02i:%02i (%lu seconds, %lu millis)\n", name,       \
+    fprintf(stderr, "%s time: %02i:%02i:%02i (%lu seconds, %lu millis)\n", name,       \
       (int) timings_diff / 60 / 60, ((int) (timings_diff) / 60) % 60,         \
       ((int) timings_diff) % 60, timings_diff,                                \
       timings_now.tv_usec - timings_then.tv_usec + timings_diff * 1000000)
