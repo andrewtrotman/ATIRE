@@ -15,8 +15,8 @@
 
 
 # optional build flags
-LOC = -DASMV -DASMINF -I .
-OBJA = gvmat32c.obj gvmat32.obj inffas32.obj
+#LOC = -DASMV -DASMINF -I .
+#OBJA = gvmat32c.obj gvmat32.obj inffas32.obj
 
 # variables
 STATICLIB = zlib.lib
