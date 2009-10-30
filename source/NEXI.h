@@ -5,6 +5,7 @@
 #ifndef NEXI_H_
 #define NEXI_H_
 
+#include <stdio.h>
 #include "string_pair.h"
 #include "NEXI_term.h"
 
@@ -45,11 +46,11 @@ private:
 	ANT_NEXI_term *read_CAS(void);
 
 protected:
-	virtual ANT_NEXI_term *make_pool(long pool_size);
 	virtual ANT_NEXI_term *next_free_node() { return pool + pool_used; } 
 
 public:
-	ANT_NEXI(long make_memory = 1) { if (make_memory) pool = make_pool(MAX_NEXI_TERMS); pool_used = 0; }
+	ANT_NEXI(long make_memory = 1) { pool = make_memory ? new ANT_NEXI_term[MAX_NEXI_TERMS] : NULL; pool_used = 0; }
+	virtual ~ANT_NEXI() { delete [] pool; }
 	ANT_NEXI_term *parse(char *expression);
 	long get_success_state(void) { return successful_parse; }
 } ;
