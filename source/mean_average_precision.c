@@ -200,7 +200,7 @@ if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
 
 precision = 0;
 found_and_nonrelevant = 0;
-
+key.topic = topic;
 for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		if (relevance_data->relevant_characters == 0)

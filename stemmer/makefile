@@ -28,6 +28,8 @@ OBJECTS = \
 	memory.o \
 	search_engine.o \
 	search_engine_accumulator.o \
+	search_engine_result.o \
+	search_engine_result_iterator.o \
 	mean_average_precision.o \
 	assessment.o \
 	assessment_ANT.o \
@@ -46,6 +48,8 @@ OBJECTS = \
 	disk.o \
 	disk_internals.o \
 	directory_iterator_tar.o \
+	directory_iterator_file.o \
+	directory_iterator_multiple.o \
 	directory_recursive_iterator.o \
 	btree_iterator.o \
 	top_k_sort.o \
@@ -70,6 +74,10 @@ OBJECTS = \
 	compress_none.o \
 	compress_sigma.o \
 	compression_factory.o \
+	compress_text_none.o \
+	compress_text_bz2.o \
+	compress_text_deflate.o \
+	compression_text_factory.o \
 	readability_dale_chall.o \
 	readability_factory.o \
 	search_engine_readability.o \
@@ -92,6 +100,7 @@ OBJECTS = \
 	instream_bz2.o \
 	nexi.o \
 	NEXI_term_iterator.o \
+	NEXI_term_ant.o \
 	NEXI_term.o
 
 EXTENSION = \
