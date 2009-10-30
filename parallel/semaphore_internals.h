@@ -1,0 +1,22 @@
+/*
+	SEMAPHORE_INTERNALS.H
+	---------------------
+*/
+#ifndef SEMAPHORE_INTERNALS_H_
+#define SEMAPHORE_INTERNALS_H_
+
+/*
+	class ANT_SEMAPHORE_INTERNALS
+	-----------------------------
+*/
+class ANT_semaphore_internals
+{
+public:
+#ifdef _MSC_VER
+	HANDLE handle;
+#else
+	sem_t handle;
+#endif
+} ;
+
+#endif /* SEMAPHORE_INTERNALS_H_ */

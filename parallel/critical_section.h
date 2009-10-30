@@ -5,7 +5,7 @@
 #ifndef CRITICAL_SECTION_H_
 #define CRITICAL_SECTION_H_
 
-class	ANT_critical_section_internals;
+class ANT_critical_section_internals;
 
 /*
 	class ANT_CRITICAL_SECTION

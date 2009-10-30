@@ -20,7 +20,6 @@
 */
 ANT_critical_section::ANT_critical_section()
 {
-internals = NULL;		// can caused re-entry so flag ourselves as in constructor.
 internals = new ANT_critical_section_internals;
 internals->level = 0;
 
@@ -58,8 +57,6 @@ delete internals;
 */
 void ANT_critical_section::enter(void)
 {
-if (internals == NULL)
-	return;		// can be caused by re-entry if the memory allocator is critical_section locked.
 #ifdef NT_CRITICAL_SECTIONS
 	EnterCriticalSection(&internals->mutex);
 	internals->level++;
@@ -78,8 +75,6 @@ if (internals == NULL)
 */
 void ANT_critical_section::leave(void)
 {
-if (internals == NULL)
-	return;		// can be caused by re-entry if the memory allocator is critical_section locked.
 #ifdef NT_CRITICAL_SECTIONS
 	internals->level--;
 	LeaveCriticalSection(&internals->mutex);

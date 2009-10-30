@@ -17,7 +17,7 @@ public:
 	#else
 		pthread_mutex_t mutex;
 	#endif
-	long level;
+	volatile long level;
 } ;
 
 
