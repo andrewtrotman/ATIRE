@@ -8,6 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "../source/disk.h"
+#include "../source/directory_iterator.h"
 #include "link_parts.h"
 
 #pragma warning (disable : 4706)		// assignment within conditional
@@ -609,7 +610,7 @@ exit(printf("Usage:%s [-lowercase] [-noyears] [-runname:name] [-anchors:<n>] [-t
 int main(int argc, char *argv[])
 {
 static char *seperators = " ";
-ANT_disk disk;
+ANT_directory_iterator disk;
 char *file, *token, *where_to;
 char **term_list, **first, **last, **current;
 ANT_link_term *link_index, *index_term, *last_index_term;
@@ -657,7 +658,7 @@ link_index = read_index(argv[index_argv_param], &terms_in_index);
 print_header(runname);
 
 for (param = index_argv_param + 1; param < argc; param++)
-	for (file = disk.read_entire_file(disk.get_first_filename(argv[param])); file != NULL; file = disk.read_entire_file(disk.get_next_filename()))
+	for (file = ANT_disk::read_entire_file(disk.first(argv[param])); file != NULL; file = ANT_disk::read_entire_file(disk.next()))
 		{
 		all_links_in_file_length = 0;
 		orphan_docid = get_doc_id(file);

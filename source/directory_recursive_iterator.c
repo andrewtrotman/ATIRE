@@ -10,7 +10,8 @@
 	#include <fnmatch.h>
 #endif
 #include <stdio.h>
-#include "disk_internals.h"
+#include "disk.h"
+#include "directory_iterator_internals.h"
 #include "disk_directory.h"
 #include "directory_recursive_iterator.h"
 

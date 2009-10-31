@@ -1,5 +1,5 @@
 /*
-	DIRECTORY_ITERATOR_MULTIPLE.H
+	DIRECTORY_ITERATOR_MULTIPLE.C
 	-----------------------------
 */
 #include <stdio.h>
@@ -41,7 +41,7 @@ ANT_directory_iterator **memory;
 
 if (sources_used >= sources_length)
 	{
-	memory = new ANT_directory_iterator *[sources_length += 10];
+	memory = new ANT_directory_iterator *[sources_length += 8];
 	memcpy(memory, sources, sources_used * sizeof(ANT_directory_iterator *));
 	delete [] sources;
 	sources = memory;
@@ -67,7 +67,6 @@ char *ANT_directory_iterator_multiple::first(char *wildcard)
 {
 current_source = 0;
 
-#pragma omp parallel for
 for (long current = 0; current < sources_used; current++)
 	if ((filename[current] = sources[current]->first(wildcard)) == NULL)
 		file[current] = NULL;
@@ -107,7 +106,6 @@ while (current_source < sources_used)
 
 if (current_source >= sources_used)
 	{
-#pragma omp parallel for
 	for (long current = 0; current < sources_used; current++)
 		{
 		/*

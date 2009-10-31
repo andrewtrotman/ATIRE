@@ -162,7 +162,7 @@ for (param = first_param + 1; param < argc; param++)
 	{
 	//filename = disk.get_first_filename(argv[param]);
 	filename = disk.first(argv[param]);
-	file = disk.read_entire_file(filename);
+	file = ANT_disk::read_entire_file(filename);
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
@@ -221,7 +221,7 @@ for (param = first_param + 1; param < argc; param++)
 
 		//filename = disk.get_next_filename();
 		filename = disk.next();
-		file = disk.read_entire_file(filename);
+		file = ANT_disk::read_entire_file(filename);
 		}
 	}
 

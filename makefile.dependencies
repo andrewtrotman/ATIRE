@@ -31,13 +31,15 @@ bin/compress_text_none.obj: source/compress_text_none.h source/compress_text.h
 bin/compress_variable_byte.obj: source/compress_variable_byte.h source/compress.h source/fundamental_types.h
 bin/compression_factory.obj: source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compress_relative10.h source/compress_simple9.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compress_sigma.h source/compress_none.h source/stats.h
 bin/compression_text_factory.obj: source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/compress_text_deflate.h source/compress_text_bz2.h source/compress_text_none.h
+bin/critical_section.obj: source/critical_section.h source/critical_section_internals.h
 bin/ctypes.obj: source/ctypes.h
+bin/directory_iterator.obj: source/directory_iterator.h source/disk.h source/directory_iterator_internals.h
 bin/directory_iterator_file.obj: source/pragma.h source/directory_iterator_file.h source/directory_iterator.h source/disk.h
+bin/directory_iterator_internals.obj: source/directory_iterator_internals.h
 bin/directory_iterator_multiple.obj: source/directory_iterator_multiple.h source/directory_iterator.h source/disk.h
 bin/directory_iterator_tar.obj: source/pragma.h source/directory_iterator_tar.h source/directory_iterator.h source/disk.h source/directory_iterator_tar_file_header.h source/instream.h
-bin/directory_recursive_iterator.obj: source/disk_internals.h source/disk_directory.h source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h
-bin/disk.obj: source/disk.h source/disk_internals.h source/disk_directory.h source/file_internals.h
-bin/disk_internals.obj: source/disk_internals.h
+bin/directory_recursive_iterator.obj: source/directory_iterator_internals.h source/disk_directory.h source/directory_recursive_iterator.h source/directory_iterator.h source/disk.h
+bin/disk.obj: source/disk.h source/file_internals.h
 bin/file.obj: source/file.h source/fundamental_types.h source/memory.h source/file_internals.h
 bin/file_internals.obj: source/file_internals.h
 bin/file_memory.obj: source/pragma.h source/memory.h source/file_memory.h source/file.h source/fundamental_types.h
@@ -88,6 +90,7 @@ bin/search_engine_readability.obj: source/search_engine_readability.h source/sea
 bin/search_engine_result.obj: source/search_engine_result.h source/search_engine_accumulator.h source/memory.h
 bin/search_engine_result_iterator.obj: source/search_engine.h source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/ranking_function.h source/search_engine_accumulator.h source/search_engine_result.h source/search_engine_result_iterator.h
 bin/search_engine_stats.obj: source/search_engine_stats.h source/time_stats.h source/stats.h
+bin/semaphore.obj: source/semaphore.h source/semaphore_internals.h
 bin/stats.obj: source/stats.h
 bin/stemmer.obj: source/pragma.h source/stemmer.h source/btree_iterator.h source/ranking_function.h source/compress.h source/fundamental_types.h source/search_engine_accumulator.h source/search_engine_result.h
 bin/stemmer_factory.obj: source/stemmer_none.h source/stemmer.h source/btree_iterator.h source/ranking_function.h source/compress.h source/fundamental_types.h source/search_engine_accumulator.h source/search_engine_result.h source/stemmer_porter.h source/porter.h source/ctypes.h source/stemmer_lovins.h source/lovins.h source/stemmer_paice_husk.h source/paice_husk.h source/stemmer_otago.h source/learned_wikipedia_stem.h source/stemmer_factory.h source/stemmer_term_similarity_weighted.h source/stemmer_term_similarity.h source/stemmer_term_similarity_threshold.h
@@ -97,6 +100,7 @@ bin/stemmer_term_similarity_weighted.obj: source/stemmer.h source/btree_iterator
 bin/stop_word.obj: source/str.h source/ctypes.h source/stop_word.h
 bin/str.obj: source/str.h source/ctypes.h
 bin/test_compression.obj: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compression_factory.h source/compression_factory_scheme.h source/compress_sigma.h
+bin/threads.obj: source/threads.h
 bin/time_stats.obj: source/time_stats.h source/stats.h
 bin/top_k_sort.obj: source/top_k_sort.h
 bin/INEXqrels_to_run.obj: source/disk.h

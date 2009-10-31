@@ -99,7 +99,8 @@ PARTS = \
 	$(OBJDIR)\str.obj 								\
 	$(OBJDIR)\stop_word.obj 						\
 	$(OBJDIR)\disk.obj 								\
-	$(OBJDIR)\disk_internals.obj 					\
+	$(OBJDIR)\directory_iterator.obj 				\
+	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_iterator_multiple.obj		\
@@ -155,7 +156,10 @@ PARTS = \
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term_ant.obj						\
-	$(OBJDIR)\nexi_term.obj
+	$(OBJDIR)\nexi_term.obj							\
+	$(OBJDIR)\semaphore.obj							\
+	$(OBJDIR)\critical_section.obj					\
+	$(OBJDIR)\threads.obj
 
 #
 #	Targets
@@ -208,7 +212,7 @@ all : $(PARTS)		\
 
 
 $(ANT_TARGETS) : $(PARTS) 
-$(OTHER_TARGETS) : $(OBJDIR)\disk.obj $(OBJDIR)\disk_internals.obj
+$(OTHER_TARGETS) : $(OBJDIR)\disk.obj
 $(PARTS) : makefile $(EXTRA_LIBS)
 
 #

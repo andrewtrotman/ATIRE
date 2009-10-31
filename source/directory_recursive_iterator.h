@@ -6,6 +6,7 @@
 #define DIRECTORY_RECURSIVE_ITERATOR_H_
 
 #include <stdlib.h>
+#include "disk.h"
 #include "directory_iterator.h"
 
 #ifdef _MSC_VER
@@ -14,6 +15,8 @@
 #else
 	#include <limits.h>
 #endif
+
+class ANT_disk_directory;
 
 /*
 	class ANT_DIRECTORY_RECURSIVE_ITERATOR
@@ -42,7 +45,6 @@ public:
 
 	virtual char *first(char *wildcard);
 	virtual char *next(void);
-	using ANT_directory_iterator::read_entire_file;
 	virtual char *read_entire_file(long long *len = 0) { return ANT_disk::read_entire_file(path_buffer, len); }
 } ;
 

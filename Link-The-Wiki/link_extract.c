@@ -78,8 +78,7 @@ if (*argv[1] == '-')
 file_number = 1;
 for (param = first_param; param < argc; param++)
 	{
-	//file = disk.read_entire_file(disk.get_first_filename(argv[param]));
-	file = disk.read_entire_file(disk.first(argv[param]));
+	file = ANT_disk::read_entire_file(disk.first(argv[param]));
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
@@ -131,7 +130,7 @@ for (param = first_param; param < argc; param++)
 
 		delete [] file;
 		//file = disk.read_entire_file(disk.get_next_filename());
-		file = disk.read_entire_file(disk.next());
+		file = ANT_disk::read_entire_file(disk.next());
 		}
 	}
 

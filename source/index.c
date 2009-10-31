@@ -65,7 +65,7 @@ ANT_file id_list(&file_buffer);
 char *filename;
 long long files_that_match;
 long long bytes_indexed, current_file_length;
-ANT_instream *file_stream = NULL, *decompressor = NULL;
+ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 
 if (argc < 2)
 	param_block.usage();
@@ -107,19 +107,22 @@ for (param = first_param; param < argc; param++)
 	delete disk;
 	delete file_stream;
 	delete decompressor;
+	delete instream_buffer;
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
 		source = new ANT_directory_recursive_iterator;						// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
-		source = new ANT_directory_iterator_tar(decompressor);
+		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_buffer);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-		source = new ANT_directory_iterator_tar(decompressor);
+		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_buffer);
 		}
 	else if (param_block.trec_docnos)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));
@@ -198,6 +201,9 @@ delete index;
 delete disk;
 delete parser;
 delete readability;
+delete file_stream;
+delete decompressor;
+delete instream_buffer;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{
