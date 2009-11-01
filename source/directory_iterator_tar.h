@@ -21,7 +21,7 @@ private:
 private:
 	ANT_instream *source;
 	ANT_directory_iterator_tar_file_header header;
-	unsigned char *buffer;
+	unsigned char buffer[TAR_BLOCK_SIZE];
 	long long length_of_file_in_bytes;
 	long long bytes_read;
 
