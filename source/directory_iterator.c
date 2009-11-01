@@ -28,19 +28,19 @@ delete internals;
 	ANT_DIRECTORY_ITERATOR::CONSTRUCT_FULL_PATH()
 	---------------------------------------------
 */
-inline char *ANT_directory_iterator::construct_full_path(char *filename)
+inline char *ANT_directory_iterator::construct_full_path(char *destination, char *filename)
 {
-strcpy(internals->fully_qualified_filename, internals->pathname);
-strcat(internals->fully_qualified_filename, filename);
+strcpy(destination, internals->pathname);
+strcat(destination, filename);
 
-return internals->fully_qualified_filename;
+return destination;
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR::FIRST()
 	-------------------------------
 */
-char *ANT_directory_iterator::first(char *wildcard)
+ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
 {
 char *slash, *colon, *backslash, *max;
 
@@ -72,17 +72,26 @@ if (colon > max)
 *(max + 1) = '\0';
 
 #ifdef _MSC_VER
-	return construct_full_path(internals->file_data.cFileName);
+	construct_full_path(object->filename, internals->file_data.cFileName);
 #else
-	return internals->matching_files.gl_pathv[internals->glob_index++];
+	strcpy(object->filename, internals->matching_files.gl_pathv[internals->glob_index++]);
 #endif
+if (get_file)
+	object->file = ANT_disk::read_entire_file(object->filename, &object->length);
+else
+	{
+	object->length = 0;
+	object->file = NULL;
+	}
+
+return object;
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR::NEXT()
 	------------------------------
 */
-char *ANT_directory_iterator::next(void)
+ANT_directory_iterator_object *ANT_directory_iterator::next(ANT_directory_iterator_object *object, long get_file)
 {
 #ifdef _MSC_VER
 	if (FindNextFile(internals->file_list, &internals->file_data) == 0)
@@ -91,7 +100,7 @@ char *ANT_directory_iterator::next(void)
 		return NULL;
 		}
 
-	return construct_full_path(internals->file_data.cFileName);
+	construct_full_path(object->filename, internals->file_data.cFileName);
 #else
 	if (internals->glob_index == internals->matching_files.gl_pathc)
 		{
@@ -99,15 +108,18 @@ char *ANT_directory_iterator::next(void)
 		return NULL;
 		}
 
-	return internals->matching_files.gl_pathv[internals->glob_index++];
+	strcpy(object->filename, internals->matching_files.gl_pathv[internals->glob_index++]);
 #endif
+
+if (get_file)
+	object->file = ANT_disk::read_entire_file(object->filename, &object->length);
+else
+	{
+	object->length = 0;
+	object->file = NULL;
+	}
+
+return object;
 }
 
-/*
-	ANT_DIRECTORY_ITERATOR::READ_ENTIRE_FILE()
-	------------------------------------------
-*/
-char *ANT_directory_iterator::read_entire_file(long long *len)
-{
-return ANT_disk::read_entire_file(internals->fully_qualified_filename, len);
-}
+

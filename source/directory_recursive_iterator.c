@@ -185,8 +185,6 @@ else if (*root_directory == '\0')
 else
 	strcpy(file_list->path, ".");
 
-
-
 #ifdef _MSC_VER
 	sprintf(path, "%s/*.*", file_list->path);
 	file_list->handle = FindFirstFile(path, &internals->file_data);
@@ -200,6 +198,7 @@ else
 	if (file_list->matching_files.gl_pathc == 0) /* None found */
 		return NULL;
 #endif
+
 return next_match_wildcard(1);
 }
 
@@ -207,19 +206,18 @@ return next_match_wildcard(1);
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
 	-----------------------------------------
 */
-char *ANT_directory_recursive_iterator::first(char *wildcard)
+ANT_directory_iterator_object *ANT_directory_recursive_iterator::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
 {
 char *got;
 
 file_list = handle_stack;
 strcpy(this->wildcard, wildcard);
 
-
 #ifdef _MSC_VER
 	GetCurrentDirectory(sizeof(path_buffer), path_buffer);
 	if ((got = first(path_buffer, "")) == NULL)
 		return NULL;
-	sprintf(path_buffer, "%s/%s", file_list->path, got);
+	sprintf(object->filename, "%s/%s", file_list->path, got);
 #else
 	/* the modification below would not affected the original way of reading files */
 	long last_slash_idx = strlen(wildcard) - 1;
@@ -253,30 +251,46 @@ strcpy(this->wildcard, wildcard);
 		}
 	if ((got = first(path_buffer, "")) == NULL)
 		return NULL;
-	sprintf(path_buffer, "%s", got);
+	sprintf(object->filename, "%s", got);
 #endif
 
-return path_buffer;
+if (get_file)
+	object->file = ANT_disk::read_entire_file(object->filename, &object->length);
+else
+	{
+	object->file = NULL;
+	object->length = 0;
+	}
+
+return object;
 }
 
 /*
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::NEXT()
 	----------------------------------------
 */
-char *ANT_directory_recursive_iterator::next(void)
+ANT_directory_iterator_object *ANT_directory_recursive_iterator::next(ANT_directory_iterator_object *object, long get_file)
 {
 char *got;
 
 #ifdef _MSC_VER
 	if ((got = next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data))) == NULL)
 		return NULL;
-	sprintf(path_buffer, "%s/%s", file_list->path, got);
+	sprintf(object->filename, "%s/%s", file_list->path, got);
 #else
 	if ((got = next_match_wildcard(1)) == NULL)
 		return NULL;
-	sprintf(path_buffer, "%s", got);
+	sprintf(object->filename, "%s", got);
 #endif
 
-return path_buffer;
+if (get_file)
+	object->file = ANT_disk::read_entire_file(object->filename, &object->length);
+else
+	{
+	object->file = NULL;
+	object->length = 0;
+	}
+
+return object;
 }
 

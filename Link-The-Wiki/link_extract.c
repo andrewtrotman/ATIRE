@@ -58,6 +58,7 @@ char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid;
 long lowercase_only, first_param;
+ANT_directory_iterator_object file_object;
 
 if (argc < 2)
 	exit(printf("Usage:%s [-lowercase] <filespec> ...\n", argv[0]));
@@ -78,7 +79,8 @@ if (*argv[1] == '-')
 file_number = 1;
 for (param = first_param; param < argc; param++)
 	{
-	file = ANT_disk::read_entire_file(disk.first(argv[param]));
+	disk.first(&file_object, argv[param]);
+	file = ANT_disk::read_entire_file(file_object.filename);
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
@@ -130,7 +132,8 @@ for (param = first_param; param < argc; param++)
 
 		delete [] file;
 		//file = disk.read_entire_file(disk.get_next_filename());
-		file = ANT_disk::read_entire_file(disk.next());
+		disk.next(&file_object);
+		file = ANT_disk::read_entire_file(file_object.filename);
 		}
 	}
 

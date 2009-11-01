@@ -47,6 +47,7 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 FIXED = /link /fixed:no
 
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
+#MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 #MINUS_D = $(MINUS_D) -DTOP_K_SEARCH
 #MINUS_D = $(MINUS_D) -DPURIFY
 
@@ -100,10 +101,10 @@ PARTS = \
 	$(OBJDIR)\stop_word.obj 						\
 	$(OBJDIR)\disk.obj 								\
 	$(OBJDIR)\directory_iterator.obj 				\
+	$(OBJDIR)\directory_iterator_multiple.obj 		\
 	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
-	$(OBJDIR)\directory_iterator_multiple.obj		\
 	$(OBJDIR)\directory_recursive_iterator.obj		\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\top_k_sort.obj 						\

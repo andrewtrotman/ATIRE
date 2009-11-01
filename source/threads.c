@@ -58,14 +58,12 @@ static long threads_started = 0;
 	ANT_THREAD_ID()
 	---------------
 */
-long ANT_thread_id(void)
+ANT_thread_id_t ANT_thread_id(void)
 {
 #ifdef _MSC_VER
 	return GetCurrentThreadId();
-#elif !defined(__osf__)
-	return pthread_self();
 #else
-	return pthread_getsequence_np(pthread_self());
+	return pthread_self();
 #endif
 }
 

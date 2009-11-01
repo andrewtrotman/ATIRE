@@ -43,9 +43,8 @@ public:
 	ANT_directory_recursive_iterator();
 	virtual ~ANT_directory_recursive_iterator();
 
-	virtual char *first(char *wildcard);
-	virtual char *next(void);
-	virtual char *read_entire_file(long long *len = 0) { return ANT_disk::read_entire_file(path_buffer, len); }
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
 
 

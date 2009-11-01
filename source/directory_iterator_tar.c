@@ -12,15 +12,12 @@
 	ANT_DIRECTORY_ITERATOR_TAR::FILENAME()
 	--------------------------------------
 */
-char *ANT_directory_iterator_tar::filename(void)
+void ANT_directory_iterator_tar::filename(ANT_directory_iterator_object *object)
 {
 if (header.filename_prefix[0] != '\0')
-	{
-	sprintf((char *)buffer, "%s/%s", header.filename_prefix, header.filename);
-	return (char *)buffer;
-	}
+	sprintf(object->filename, "%s/%s", header.filename_prefix, header.filename);
 else
-	return header.filename;
+	strcpy(object->filename, header.filename);
 }
 
 /*
@@ -48,16 +45,21 @@ return result * 8 + (*octal++ - '0');
 	ANT_DIRECTORY_ITERATOR_TAR::FIRST()
 	-----------------------------------
 */
-char *ANT_directory_iterator_tar::first(char *wildcard)
+ANT_directory_iterator_object *ANT_directory_iterator_tar::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
 {
 bytes_read = 0;
 if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 	{
 	length_of_file_in_bytes = detox(header.filesize_in_bytes);
 	if (header.file_type == '0' || header.file_type == 0)
-		return filename();		// we're a file
+		{
+		filename(object);		// we're a file
+		if (get_file)
+			read_entire_file(object);
+		return object;
+		}
 	else
-		return next();			// we're not a file so go and get one
+		return next(object, get_file);			// we're not a file so go and get one
 	}
 
 return NULL;
@@ -68,7 +70,7 @@ return NULL;
 	ANT_DIRECTORY_ITERATOR_TAR::NEXT()
 	----------------------------------
 */
-char *ANT_directory_iterator_tar::next(void)
+ANT_directory_iterator_object *ANT_directory_iterator_tar::next(ANT_directory_iterator_object *object, long get_file)
 {
 long long extras;
 
@@ -103,9 +105,14 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 
 	length_of_file_in_bytes = detox(header.filesize_in_bytes);
 	if (header.file_type == '0' || header.file_type == '\0')
-		return filename();		// we're a file
+		{
+		filename(object);		// we're a file
+		if (get_file)
+			read_entire_file(object);
+		return object;
+		}
 	else
-		return next();			// we're not a file so go and get one
+		return next(object, get_file);			// we're not a file so go and get one
 	}
 
 /*
@@ -118,15 +125,11 @@ return NULL;
 	ANT_DIRECTORY_ITERATOR_TAR::READ_ENTIRE_FILE()
 	----------------------------------------------
 */
-char *ANT_directory_iterator_tar::read_entire_file(long long *length)
+void ANT_directory_iterator_tar::read_entire_file(ANT_directory_iterator_object *object)
 {
-unsigned char *buffer;
-
-buffer = new (std::nothrow) unsigned char [(size_t)(length_of_file_in_bytes + 1)];
-source->read(buffer, length_of_file_in_bytes);
-buffer[length_of_file_in_bytes] = '\0';			// NULL terminate the contents of the file.
-*length = bytes_read = length_of_file_in_bytes;
-
-return (char *)buffer;
+object->file =  new (std::nothrow) char [(size_t)(length_of_file_in_bytes + 1)];
+source->read((unsigned char *)object->file, length_of_file_in_bytes);
+object->file[length_of_file_in_bytes] = '\0';			// NULL terminate the contents of the file.
+object->length = bytes_read = length_of_file_in_bytes;
 }
 

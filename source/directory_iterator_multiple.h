@@ -7,6 +7,10 @@
 
 #include "directory_iterator.h"
 
+class ANT_directory_iterator_multiple_internals;
+class ANT_semaphore;
+class ANT_critical_section;
+
 /*
 	class ANT_DIRECTORY_ITERATOR_MULTIPLE
 	-------------------------------------
@@ -15,20 +19,26 @@ class ANT_directory_iterator_multiple : public ANT_directory_iterator
 {
 protected:
 	ANT_directory_iterator **sources;
+	ANT_directory_iterator_multiple_internals *thread_details;
+	ANT_directory_iterator_object *queue;
+	long insertion_point, removal_point, queue_length;
 	long sources_used, sources_length, current_source;
-	char **filename;
-	char **file;
-	long long *length;
+	long active_threads;
+	ANT_semaphore *empty_count, *fill_count;
+	ANT_critical_section *mutex;
+
+protected:
+	static void *bootstrap(void *param);
+	void produce(ANT_directory_iterator_multiple_internals *internals);
 
 public:
 	ANT_directory_iterator_multiple();
 	virtual ~ANT_directory_iterator_multiple();
 
-	void add_iterator(ANT_directory_iterator *iterator);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 
-	virtual char *first(char *wildcard);
-	virtual char *next(void);
-	virtual char *read_entire_file(long long *length = 0);
+	void add_iterator(ANT_directory_iterator *iterator);
 } ;
 
 

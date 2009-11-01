@@ -21,27 +21,21 @@ private:
 private:
 	ANT_instream *source;
 	ANT_directory_iterator_tar_file_header header;
-	unsigned char buffer[512];
+	unsigned char *buffer;
 	long long length_of_file_in_bytes;
 	long long bytes_read;
 
 private:
 	long detox(char *octal);
-	char *filename(void);
+	void filename(ANT_directory_iterator_object *object);
+	void read_entire_file(ANT_directory_iterator_object *object);
 
 public:
 	ANT_directory_iterator_tar(ANT_instream *source) { this->source = source; }
 	virtual ~ANT_directory_iterator_tar() {}
 
-	virtual char *first(char *wildcard);
-	virtual char *next(void);
-	virtual char *read_entire_file(long long *len = 0);
-
-/*
-	unsigned char *read(unsigned char *buffer, long long size) { bytes_read += size; return file_read(buffer, size); }
-	long long filelength(void) { return length_of_file_in_bytes; }
-	char filetype(void) { return header.file_type; }		// '0' = file '5' = directory
-*/
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
 
 #endif /* DIRECTORY_ITERATOR_TAR_H_ */

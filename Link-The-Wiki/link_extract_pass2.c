@@ -137,6 +137,7 @@ char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
 long lowercase_only, first_param;
+ANT_directory_iterator_object file_object;
 
 if (argc < 3)
 	exit(printf("Usage:%s [-lowercase] <index> <file_to_link> ...\n", argv[0]));
@@ -161,8 +162,13 @@ file_number = 1;
 for (param = first_param + 1; param < argc; param++)
 	{
 	//filename = disk.get_first_filename(argv[param]);
-	filename = disk.first(argv[param]);
-	file = ANT_disk::read_entire_file(filename);
+	if (disk.first(&file_object, argv[param]) == NULL)
+		file = filename = NULL;
+	else
+		{
+		filename = file_object.filename;
+		file = ANT_disk::read_entire_file(filename);
+		}
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
@@ -220,8 +226,13 @@ for (param = first_param + 1; param < argc; param++)
 		file_number++;
 
 		//filename = disk.get_next_filename();
-		filename = disk.next();
-		file = ANT_disk::read_entire_file(filename);
+		if (disk.next(&file_object) == NULL)
+			file = filename = NULL;
+		else
+			{
+			filename = file_object.filename;
+			file = ANT_disk::read_entire_file(filename);
+			}
 		}
 	}
 

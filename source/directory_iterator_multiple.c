@@ -4,7 +4,11 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include "str.h"
+#include "semaphore.h"
+#include "critical_section.h"
 #include "directory_iterator_multiple.h"
+#include "directory_iterator_multiple_internals.h"
 
 /*
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::ANT_DIRECTORY_ITERATOR_MULTIPLE()
@@ -14,9 +18,12 @@ ANT_directory_iterator_multiple::ANT_directory_iterator_multiple() : ANT_directo
 {
 sources_length = sources_used = 0;
 sources = NULL;
-filename = NULL;
-file = NULL;
-length = NULL;
+queue = NULL;
+thread_details = NULL;
+
+mutex = new ANT_critical_section;
+empty_count = new ANT_semaphore(queue_length, queue_length);
+fill_count = new ANT_semaphore(0, queue_length);
 }
 
 /*
@@ -25,10 +32,19 @@ length = NULL;
 */
 ANT_directory_iterator_multiple::~ANT_directory_iterator_multiple()
 {
+ANT_directory_iterator_multiple_internals *current;
+
 delete [] sources;
-delete [] filename;
-delete [] file;
-delete [] length;
+
+for (current = thread_details; current < thread_details + sources_used; current++)
+	delete [] current->wildcard;
+
+delete [] thread_details;
+delete [] queue;
+
+delete mutex;
+delete empty_count;
+delete fill_count;
 }
 
 /*
@@ -41,110 +57,144 @@ ANT_directory_iterator **memory;
 
 if (sources_used >= sources_length)
 	{
-	memory = new ANT_directory_iterator *[sources_length += 8];
+	sources_length += 8;
+	memory = new ANT_directory_iterator *[sources_length];
 	memcpy(memory, sources, sources_used * sizeof(ANT_directory_iterator *));
 	delete [] sources;
 	sources = memory;
 
-	delete [] filename;
-	filename = new char *[sources_length];
+	delete [] thread_details;
+	thread_details = new ANT_directory_iterator_multiple_internals[sources_length];
 
-	delete [] file;
-	file = new char *[sources_length];
-
-	delete [] length;
-	length = new long long [sources_length];
+	queue_length = sources_length * 2;
+	delete [] queue;
+	queue = new ANT_directory_iterator_object [queue_length];
 	}
 sources[sources_used] = iterator;
 sources_used++;
 }
 
 /*
+	ANT_DIRECTORY_ITERATOR_MULTIPLE::PRODUCE()
+	------------------------------------------
+	This is the producer in the classic producer / consumer model
+*/
+void ANT_directory_iterator_multiple::produce(ANT_directory_iterator_multiple_internals *my)
+{
+ANT_directory_iterator_object *got;
+
+for (got = my->iterator->first(&my->file_object, my->wildcard, my->get_file); got != NULL; got = my->iterator->next(&my->file_object, my->get_file))
+	{
+	empty_count->enter();
+	mutex->enter();
+	memcpy(queue + insertion_point, &my->file_object, sizeof(*queue));
+	insertion_point = (insertion_point + 1) % queue_length;
+	mutex->leave();
+	fill_count->leave();
+	}
+
+/*
+	At this point the thread is finished, but we have the remaining problem of
+	signaling back to the consumer that all the producers are done.
+
+	The obvious way to do this is to shove an empty element into the list
+	and to count them at the consumer's end
+*/
+empty_count->enter();
+mutex->enter();
+queue[insertion_point].filename[0] = '\0';
+insertion_point = (insertion_point + 1) % queue_length;
+mutex->leave();
+fill_count->leave();
+
+/*
+	Now the thread is done it'll die its natural death
+*/
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_MULTIPLE::BOOTSTRAP()
+	--------------------------------------------
+*/
+void *ANT_directory_iterator_multiple::bootstrap(void *param)
+{
+ANT_directory_iterator_multiple_internals *current;
+
+current = (ANT_directory_iterator_multiple_internals *)param;
+current->thread_id = ANT_thread_id();
+
+current->parent->produce(current);
+
+return NULL;
+}
+
+/*
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::FIRST()
 	----------------------------------------
 */
-char *ANT_directory_iterator_multiple::first(char *wildcard)
+ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
 {
-current_source = 0;
-
-for (long current = 0; current < sources_used; current++)
-	if ((filename[current] = sources[current]->first(wildcard)) == NULL)
-		file[current] = NULL;
-	else
-		file[current] = sources[current]->read_entire_file(&length[current]);
+long instance;
+ANT_directory_iterator_multiple_internals *current;
 
 /*
-	Find the first non-empty stream
+	Set up this object
 */
-for (current_source = 0; current_source < sources_used; current_source++)
-	if (filename[current_source] != NULL)
-		return filename[current_source];
+insertion_point = removal_point = 0;
+active_threads = sources_used;
 
 /*
-	All sources returned EOF
+	Set up the semaphores
 */
-current_source = 0;
-return NULL;
+mutex = new ANT_critical_section;
+empty_count = new ANT_semaphore(queue_length, queue_length);
+fill_count = new ANT_semaphore(0, queue_length);
+
+/*
+	Start each thread
+*/
+instance = 0;
+for (current = thread_details; current < thread_details + sources_used; current++)
+	{
+	current->iterator = sources[instance];
+	current->parent = this;
+	current->wildcard = strnew(wildcard);
+	current->get_file = get_file;
+	ANT_thread(bootstrap, current);
+	current->instance = instance++;
+	current->files_read = 0;
+	}
+
+/*
+	And then consume
+*/
+return next(object, get_file);
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::NEXT()
 	---------------------------------------
+	This is the consumer in the classic producer / consumer model
 */
-char *ANT_directory_iterator_multiple::next(void)
+ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directory_iterator_object *object, long get_file)
 {
-/*
-	Find the next non_empty stream
-*/
-current_source++;
-while (current_source < sources_used)
+fill_count->enter();
+mutex->enter();
+memcpy(object, queue + removal_point, sizeof(*object));
+removal_point = (removal_point + 1) % queue_length;
+mutex->leave();
+empty_count->leave();
+
+if (*object->filename == '\0')
 	{
-	if (filename[current_source] != NULL)
-		break;
-	current_source++;
+	/*
+		One of the sources has dried-up so we reduce the number active and then get the next
+	*/
+	active_threads--;
+	if (active_threads > 0)
+		return next(object, get_file);
 	}
 
-if (current_source >= sources_used)
-	{
-	for (long current = 0; current < sources_used; current++)
-		{
-		/*
-			Re-fill the non-empty streams
-		*/
-		if (filename[current] != NULL)
-			if ((filename[current] = sources[current]->next()) == NULL)
-				file[current] = NULL;
-			else
-				file[current] = sources[current]->read_entire_file(&length[current]);
-		}
-	/*
-		Find the first non-empty stream
-	*/
-	for (current_source = 0; current_source < sources_used; current_source++)
-		if (filename[current_source] != NULL)
-			return filename[current_source];
-
-	/*
-		All sources returned EOF
-	*/
-	current_source = 0;
-	return NULL;
-	}
-
-return filename[current_source];
+return active_threads != 0 ? object : NULL;
 }
 
-
-/*
-	ANT_DIRECTORY_ITERATOR_MULTIPLE::READ_ENTIRE_FILE()
-	---------------------------------------------------
-*/
-char *ANT_directory_iterator_multiple::read_entire_file(long long *length)
-{
-if (filename[current_source] != NULL)
-	{
-	*length = this->length[current_source];
-	return file[current_source];
-	}
-return NULL;		// no such file as at EOF of all streams
-}

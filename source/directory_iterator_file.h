@@ -24,13 +24,15 @@ private:
 	char *file, *document_start, *document_end;
 	char filename[PATH_MAX];
 
+protected:
+	ANT_directory_iterator_object *read_entire_file(ANT_directory_iterator_object *object);
+
 public:
 	ANT_directory_iterator_file(char *file) : ANT_directory_iterator() { this->file = file; }
 	virtual ~ANT_directory_iterator_file() {}
 
-	virtual char *first(char *wildcard);
-	virtual char *next(void);
-	virtual char *read_entire_file(long long *len = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
 
 #endif /* DIRECTORY_ITERATOR_FILE_H_ */

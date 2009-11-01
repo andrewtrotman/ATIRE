@@ -10,6 +10,7 @@
 #include "directory_recursive_iterator.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_file.h"
+#include "directory_iterator_object.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -55,17 +56,17 @@ ANT_directory_iterator *disk = NULL;
 ANT_parser *parser;
 ANT_readability_factory *readability;
 ANT_string_pair *token;
-unsigned char *file, *new_file;
 long param;
 ANT_memory_index *index;
 long long doc, now, last_report;
 long terms_in_document, first_param;
 ANT_memory file_buffer(1024 * 1024);
 ANT_file id_list(&file_buffer);
-char *filename;
 long long files_that_match;
-long long bytes_indexed, current_file_length;
+long long bytes_indexed;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
+ANT_directory_iterator_object file_object, *current_file;
+ANT_directory_iterator_multiple *parallel_disk;
 
 if (argc < 2)
 	param_block.usage();
@@ -97,17 +98,23 @@ readability = new ANT_readability_factory;
 readability->set_measure(param_block.readability_measure);
 readability->set_parser(parser);
 
+#ifdef PARALLEL_INDEXING
+	parallel_disk = new ANT_directory_iterator_multiple;
+#endif
 /*
 	The first parameter that is not a command line switch is the start of the list of files to index
 */
-current_file_length = bytes_indexed = 0;
+bytes_indexed = 0;
 
 for (param = first_param; param < argc; param++)
 	{
+#ifdef PARALLEL_INDEXING
+#else
 	delete disk;
 	delete file_stream;
 	delete decompressor;
 	delete instream_buffer;
+#endif
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
 		source = new ANT_directory_recursive_iterator;						// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
@@ -128,25 +135,34 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));
 	else
 		source = new ANT_directory_iterator;									// current directory
+#ifdef PARALLEL_INDEXING
+	parallel_disk->add_iterator(source);
+	}
+	disk = parallel_disk;
+	files_that_match = 0;
 
+	now = stats.start_timer();
+	current_file = disk->first(&file_object, "*", ANT_directory_iterator::READ_FILE);
+	stats.add_disk_input_time(stats.stop_timer(now));
+	{
+#else
 	disk = source;
 	files_that_match = 0;
+
 	now = stats.start_timer();
-	current_file_length = 0;
-	if ((filename = disk->first(argv[param])) == NULL)
-		new_file = NULL;
-	else
-		new_file = (unsigned char *)disk->read_entire_file(&current_file_length);
+	current_file = disk->first(&file_object, argv[param], ANT_directory_iterator::READ_FILE);
 	stats.add_disk_input_time(stats.stop_timer(now));
-	file = new_file;
-	bytes_indexed += current_file_length;
-	while (file != NULL)
+#endif
+
+	while (current_file != NULL)
 		{
+		bytes_indexed += current_file->length;
+
 		/*
 			Store the document in the repository
 		*/
 		if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-			index->add_to_document_repository((char *)file, current_file_length + 1);		// +1 so that we also get the '\0'
+			index->add_to_document_repository(current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
 
 		/*
 			Index the file
@@ -156,7 +172,7 @@ for (param = first_param; param < argc; param++)
 		if (doc % param_block.reporting_frequency == 0 && doc != last_report)
 			report(last_report = doc, index, &stats, bytes_indexed);
 
-		readability->set_document(file);
+		readability->set_document((unsigned char *)current_file->file);
 		while ((token = readability->get_next_token()) != NULL)
 			{
 			if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
@@ -169,23 +185,17 @@ for (param = first_param; param < argc; param++)
 			{
 			index->set_document_length(doc, terms_in_document);
 			readability->index(index);
-			id_list.puts(filename);		// save the "external" ID of the document
+			id_list.puts(current_file->filename);		// save the "external" ID of the document
 			}
 		terms_in_document = 0;
-		delete [] file;
+		delete [] current_file->file;
 
 		/*
 			Get the next file
 		*/
 		now = stats.start_timer();
-		current_file_length = 0;
-		if ((filename = disk->next()) == NULL)
-			new_file = NULL;
-		else
-			new_file = (unsigned char *)disk->read_entire_file(&current_file_length);
+		current_file = disk->next(&file_object, ANT_directory_iterator::READ_FILE);
 		stats.add_disk_input_time(stats.stop_timer(now));
-		file = new_file;
-		bytes_indexed += current_file_length;
 		}
 
 	if (files_that_match == 0)

@@ -621,6 +621,7 @@ char *runname = "Unknown";
 char orphan_name[2048];
 double proper_noun_boost = 0.0;
 long num_of_processed_topic = 0;
+ANT_directory_iterator_object file_object, *current_file;
 
 if (argc < 3)
 	usage(argv[0]);		// and exit
@@ -658,8 +659,9 @@ link_index = read_index(argv[index_argv_param], &terms_in_index);
 print_header(runname);
 
 for (param = index_argv_param + 1; param < argc; param++)
-	for (file = ANT_disk::read_entire_file(disk.first(argv[param])); file != NULL; file = ANT_disk::read_entire_file(disk.next()))
+	for (current_file = disk.first(&file_object, argv[param]); current_file != NULL; current_file = disk.next(&file_object))
 		{
+		file = ANT_disk::read_entire_file(file_object.filename);
 		all_links_in_file_length = 0;
 		orphan_docid = get_doc_id(file);
 		get_doc_name(file, orphan_name);
