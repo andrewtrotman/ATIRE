@@ -6,9 +6,9 @@ BINDIR = bin
 #CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 \
 #         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
-LDFLAGS = -ldl
+LDFLAGS = -ldl -pthread
 CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
-         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
+         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 #
 # Please use either system or built-in libs, not both
@@ -77,10 +77,11 @@ OBJECTS = \
 	str.o \
 	stop_word.o \
 	disk.o \
-	disk_internals.o \
+	directory_iterator.o \
+	directory_iterator_multiple.o \
+	directory_iterator_internals.o \
 	directory_iterator_tar.o \
 	directory_iterator_file.o \
-	directory_iterator_multiple.o \
 	directory_recursive_iterator.o \
 	btree_iterator.o \
 	top_k_sort.o \
@@ -130,10 +131,14 @@ OBJECTS = \
 	instream_file.o \
 	instream_deflate.o \
 	instream_bz2.o \
+	instream_buffer.o \
 	nexi.o \
 	NEXI_term_iterator.o \
 	NEXI_term_ant.o \
-	NEXI_term.o
+	NEXI_term.o \
+	semaphore.o \
+	critical_section.o \
+	threads.o
 
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)
 
