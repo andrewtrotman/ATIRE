@@ -87,7 +87,7 @@ long ANT_semaphore::poll(void)
 #else
 	int state;
 
-	sem_getvalue(internals->handle, &state);
+	sem_getvalue(&internals->handle, &state);
 #endif
 
 return state;

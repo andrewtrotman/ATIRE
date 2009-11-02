@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <new>
 #include "pragma.h"
 #include "directory_iterator_tar.h"

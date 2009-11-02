@@ -76,7 +76,7 @@ for (which = 0; which < hits; which++)
 	fprintf(file, "<file>%s</file>\n", docids[which]);
 	fprintf(file, "<path>/article[1]></path>\n");
 	fprintf(file, "<rank>%lld</rank>\n", which);
-	fprintf(file, "<rsv>%d</rsv>\n", hits - which);
+	fprintf(file, "<rsv>%lld</rsv>\n", hits - which);
 	fprintf(file, "</result>\n");
 	}
 

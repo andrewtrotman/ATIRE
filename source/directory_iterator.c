@@ -5,6 +5,7 @@
 #include "disk.h"
 #include "directory_iterator.h"
 #include "directory_iterator_internals.h"
+#include <string.h>
 
 /*
 	ANT_DIRECTORY_ITERATOR::ANT_DIRECTORY_ITERATOR()

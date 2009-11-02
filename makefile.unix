@@ -2,13 +2,19 @@ SRCDIR = source
 OBJDIR = bin
 BINDIR = bin
 
+# debuging compiling and linking
 #LDFLAGS = -g -ldl
 #CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 \
 #         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
+# normal compiling and linking
 LDFLAGS = -ldl -pthread
 CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
          -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
+
+# parallel compiling and linking
+# LDFLAGS += -pthread
+CFLAGS += -DPARALLEL_INDEXING
 
 #
 # Please use either system or built-in libs, not both

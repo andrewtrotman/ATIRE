@@ -22,7 +22,7 @@
 class ANT_directory_iterator_object
 {
 public:
-	char filename[MAX_PATH];		// name of the file
+	char filename[PATH_MAX];		// name of the file
 	char *file;						// contents of the file
 	long long length;				// length of the file
 } ;
