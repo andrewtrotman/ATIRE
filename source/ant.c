@@ -342,7 +342,6 @@ for (query = input.first(); query != NULL; query = input.next())
 			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
 				{
 				long longest_len = search_engine->get_longest_document_length();
-				printf("(Longest %d)", longest_len);
 #ifdef NEVER
 /*
 				long long docid;
