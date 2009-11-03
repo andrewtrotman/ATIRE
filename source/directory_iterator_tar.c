@@ -7,6 +7,7 @@
 #include <string.h>
 #include <new>
 #include "pragma.h"
+#include "ctypes.h"
 #include "directory_iterator_tar.h"
 
 /*
@@ -28,18 +29,32 @@ else
 inline long ANT_directory_iterator_tar::detox(char *octal)
 {
 long result;
+char *end;
 
-result = *octal++ - '0';
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-result = result * 8 + (*octal++ - '0');
-return result * 8 + (*octal++ - '0');
+if (*octal == ' ')
+	{
+	end = octal + 11;		// the spec states 12 bytes of which the final must be a space or '\0'
+	result = 0;
+	while (!ANT_isdigit(*octal) && octal < end)
+		octal++;
+	while (octal < end)
+		result = result * 8 + (*octal++ - '0');
+	return result;
+	}
+else
+	{
+	result = *octal++ - '0';
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	result = result * 8 + (*octal++ - '0');
+	return result * 8 + (*octal - '0');
+	}
 }
 
 /*
