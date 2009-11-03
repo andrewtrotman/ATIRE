@@ -165,6 +165,8 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 	did_query = TRUE;
 	}
 
+delete [] term_list;
+
 /*
 	Rank the results list
 */

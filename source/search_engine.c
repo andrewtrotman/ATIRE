@@ -161,7 +161,7 @@ factory.decompress(decompress_buffer, postings_buffer, collection_details.docume
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
 	{
-	decompressed_integer = decompress_buffer[current_length];
+	decompressed_integer = decompress_buffer[current_length] - 1;		// because the indexer and the search engine count from different numbers.
 	sum += decompressed_integer;
 	document_lengths[current_length] = decompressed_integer;
 	}
