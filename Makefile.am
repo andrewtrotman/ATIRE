@@ -58,10 +58,12 @@ library_sources =  \
     $(SRCDIR)/str.c \
     $(SRCDIR)/stop_word.c \
     $(SRCDIR)/disk.c \
-    $(SRCDIR)/disk_internals.c \
 	$(SRCDIR)/directory_recursive_iterator.c \
+	$(SRCDIR)/directory_iterator.c	\
 	$(SRCDIR)/directory_iterator_tar.c	\
 	$(SRCDIR)/directory_iterator_file.c	\
+	$(SRCDIR)/directory_iterator_multiple.c \
+	$(SRCDIR)/directory_iterator_internals.c \
     $(SRCDIR)/btree_iterator.c \
     $(SRCDIR)/top_k_sort.c \
     $(SRCDIR)/stemmer.c	\
@@ -89,6 +91,7 @@ library_sources =  \
 	$(SRCDIR)/compress_text_none.c \
 	$(SRCDIR)/compress_text_bz2.c \
 	$(SRCDIR)/compression_text_factory.c \
+	$(SRCDIR)/instream_buffer.c \
 	$(SRCDIR)/indexer_param_block.c \
 	$(SRCDIR)/indexer_param_block_rank.c \
 	$(SRCDIR)/ant_param_block.c \
@@ -110,6 +113,9 @@ library_sources =  \
 	$(SRCDIR)/instream_file.c	\
 	$(SRCDIR)/instream_deflate.c \
 	$(SRCDIR)/instream_bz2.c \
+	$(SRCDIR)/semaphore.c \
+	$(SRCDIR)/threads.c \
+	$(SRCDIR)/critical_section.c \
 	$(SRCDIR)/ant_api.c
 				
 library_noinst_headers = \
@@ -144,19 +150,23 @@ library_noinst_headers = \
 	$(SRCDIR)/compress_text_none.h \
 	$(SRCDIR)/compress_text_bz2.h \
 	$(SRCDIR)/ctypes.h	\
+	$(SRCDIR)/critical_section.h \
 	$(SRCDIR)/directory_iterator.h	\
 	$(SRCDIR)/directory_iterator_file.h	\
 	$(SRCDIR)/directory_iterator_tar.h	\
+	$(SRCDIR)/directory_iterator_multiple.h \
+	$(SRCDIR)/directory_iterator_internals.h \
+	$(SRCDIR)/directory_iterator_object.h \
 	$(SRCDIR)/directory_iterator_tar_file_header.h	\
 	$(SRCDIR)/directory_recursive_iterator.h	\
 	$(SRCDIR)/disk_directory.h	\
 	$(SRCDIR)/disk.h	\
-	$(SRCDIR)/disk_internals.h	\
 	$(SRCDIR)/file.h	\
 	$(SRCDIR)/file_internals.h	\
 	$(SRCDIR)/file_memory.h	\
 	$(SRCDIR)/fundamental_types.h	\
 	$(SRCDIR)/hash_table.h	\
+	$(SRCDIR)/instream_buffer.h \
 	$(SRCDIR)/indexer_param_block.h	\
 	$(SRCDIR)/indexer_param_block_rank.h \
 	$(SRCDIR)/learned_wikipedia_stem.h	\
@@ -190,6 +200,7 @@ library_noinst_headers = \
 	$(SRCDIR)/search_engine_stats.h	\
 	$(SRCDIR)/search_engine_result.h \
 	$(SRCDIR)/search_engine_result_iterator.h \
+	$(SRCDIR)/semaphore.h \
 	$(SRCDIR)/stats.h	\
 	$(SRCDIR)/stemmer_factory.h	\
 	$(SRCDIR)/stemmer.h	\
@@ -204,6 +215,7 @@ library_noinst_headers = \
 	$(SRCDIR)/stop_word.h	\
 	$(SRCDIR)/str.h	\
 	$(SRCDIR)/string_pair.h	\
+	$(SRCDIR)/threads.h \
 	$(SRCDIR)/time_stats.h	\
 	$(SRCDIR)/top_k_sort.h	\
 	$(SRCDIR)/readability_factory.h \
@@ -237,7 +249,7 @@ libant_la_SOURCES = $(library_sources)
 # libant_la_HEADERS = $(library_headers)
 # $(library_noinst_headers)
 
-ANT_LIBS = -L. -lant -ldl
+ANT_LIBS = -L. -lant -ldl -lpthread
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
