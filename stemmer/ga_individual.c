@@ -93,9 +93,9 @@ char *GA_individual::apply(const char *string) {
     int length;
     static char buffer[TMP_BUFFER_SIZE];
 
-#ifdef GA_STEMMER_STATS
+	#ifdef GA_STEMMER_STATS
 	memset(current_usage_stats, 0, sizeof rule_usage_stats);
-#endif
+	#endif
 
     strncpy(buffer, string, TMP_BUFFER_SIZE);
     buffer[TMP_BUFFER_SIZE - 1] = '\0';
@@ -127,9 +127,9 @@ char *GA_individual::apply(const char *string) {
 
                 skipping = TRUE;
 
-#ifdef GA_STEMMER_STATS
-				rule_usage_stats[i]++;
-#endif
+				#ifdef GA_STEMMER_STATS
+				current_usage_stats[i]++;
+				#endif
             }
         }
     }
@@ -482,4 +482,12 @@ void GA_individual::print_rule_usage(FILE *fd) {
 	for (i = 0; i < count; i++) {
 		fprintf(fd, "%ld ", rule_usage_stats[i]);
 	}
+	fprintf(fd,"\n");
 }
+
+void GA_individual::clear_rule_usage() {
+	int i;
+	for (i = 0; i < count; i++) 
+		rule_usage_stats[i] = 0;
+}
+

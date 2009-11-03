@@ -636,10 +636,9 @@ now = stats->start_timer();
 //qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 //top_k_sort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
 ANT_search_engine_accumulator::top_k_sort(results_list->accumulator_pointers, *hits, accurate_rank_point);
-
 stats->add_sort_time(stats->stop_timer(now));
 
-return NULL;
+ return results_list->accumulator_pointers;
 }
 
 /*

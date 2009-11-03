@@ -67,6 +67,7 @@ class GA_individual {
 
 	void keep_last_stats(); // For ensuring stats are those which match.
 	void print_rule_usage(FILE *);
+	void clear_rule_usage();
 };
 
 #endif /* __GA_INDIVIDUAL_H__ */

@@ -48,6 +48,7 @@ ifeq ($(USE_BUILT_IN_BZLIB), 1)
 endif
 
 CC = g++
+#CC = icpc 
 
 OBJECTS = \
 	parser.o \

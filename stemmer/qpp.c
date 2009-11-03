@@ -3,11 +3,15 @@
 #include "search_engine_accumulator.h"
 #include "search_engine_btree_leaf.h"
 #include "ranking_function_bm25.h"
+#include "ranking_function_lmd.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include "str.h"
+#include "stemmer_factory.h"
+#include "ga_individual.h"
+#include "ga_stemmer.h"
 
 /*
 	class FILE_ITERATOR
@@ -88,62 +92,104 @@ void ant_setup() {
     search_engine->set_trim_postings_k(LLONG_MAX);
 }
 
+#define SCORES_RETAINED 10
 struct query_data_s {
     long long docs_returned;
-    double top_score;
+    double top_scores[SCORES_RETAINED];
 
     // top_doc_count = number of docs above (top_score * top_threshold)
     double top_threshold;
     long long top_doc_count;
+
+	long query_size;
 };
 
 void perform_query(char *query, query_data_s *data, ANT_stemmer *stemmer) {
-    ANT_search_engine_accumulator **results_list;
+    ANT_search_engine_accumulator **results;
     long long results_list_length, current;
+	int i;
     char *query_copy = strdup(query);
     char *query_ptr = query_copy;
     char *term = eat_word(&query_ptr);
+	long long docs_returned;
 
     search_engine->init_accumulators();
-
+	if (data)
+		data->query_size = 0;
     while ((term = eat_word(&query_ptr))) {
         if (stemmer)
             search_engine->process_one_stemmed_search_term(stemmer, term, ranking_function);
         else
-            search_engine->process_one_search_term(term, ranking_function);
+			search_engine->process_one_search_term(term, ranking_function);
+		if (data)
+			data->query_size++;
     }
-    
-    data->docs_returned = 0;
-    search_engine->sort_results_list(LLONG_MAX, &data->docs_returned);
-    results_list = search_engine->get_accumulator_pointers();
-    results_list_length = search_engine->document_count();
 
-    data->top_score = (double) results_list[0]->get_rsv();
-    data->top_doc_count = 0;
+	docs_returned = 0;
+    results = search_engine->sort_results_list(LLONG_MAX, &docs_returned);
 
+	if (data) {
+		data->docs_returned = docs_returned;
+		for (i = 0; i < SCORES_RETAINED && i < docs_returned; i++)
+			data->top_scores[i] = (double) results[i]->get_rsv();
+		for (; i < SCORES_RETAINED; i++)
+			data->top_scores[i] = 0.0;
 
-    if (!results_list[0]->is_zero_rsv())
-        for (current = 0; current < results_list_length; current++) {
-            if (data->top_score * data->top_threshold > (double) results_list[current]->get_rsv())
-                break;
-            data->top_doc_count++;
-        }
-    
+		data->top_doc_count = 0;
+		
+		if (!results[i]->is_zero_rsv())
+			for (i = 0; i < docs_returned; i++) {
+				if (data->top_scores[0] * data->top_threshold > (double) results[i]->get_rsv())
+					break;
+				data->top_doc_count++;
+			}
+	}
     free(query_copy);
 }
 
-int main(int argv, char **argc) {
+
+void print_ga_stats(char *stemmer_file, char **query, int query_count) {
+    int i;
+	GA_stemmer *stemmer;
+	GA_individual *individual;
+	individual = new GA_individual();
+	individual->load(stemmer_file);
+
+	stemmer = new GA_stemmer(search_engine);
+	stemmer->set_stemmer(individual);
+
+	for (i = 0; i < query_count; i++) {
+		individual->clear_rule_usage();
+		perform_query(query[i], NULL, stemmer);
+		individual->print_rule_usage(stdout);
+	}
+}
+
+
+#define MAX_QUERY_LENGTH 100
+
+int main(int argc, char **argv) {
+	ANT_stemmer *stemmer;
     char **query;
-    long i, query_count, query_size, query_length;
-	long long doc_set;
+	long i, j;
+    long query_count, query_length, query_size;
     long long documents_in_collection, terms_in_collection;
-    double total_idf, product_ictf, max_idf, total_scq;
+	long long doc_set;
+    double total_idf, product_ictf, max_idf, min_idf, total_scq, std_dev_idf, total_scs;
+	double idfs[MAX_QUERY_LENGTH];
     ANT_search_engine_btree_leaf internal_details;
-    struct query_data_s q_d;
+    struct query_data_s q_d, q_d_ws;
+
+	/* Options */
+	int do_top_scores = 0;
+	int use_otago = 0;
+
+	for (i = 0; i < MAX_QUERY_LENGTH; i++)
+		idfs[i] = 0.0;
 
     /*
-      Top scored docs are considered to be those with scores 0.8 of the top doc. 
-      This is entirely score dependent (some scores might have a higher constant amount).
+      Top scored docs are considered to be those with scores of (q_d.top_threshold * top doc) or greater. 
+      This is entirely ranking function dependent (some functions might have a higher constant amount).
 
       NOTE - do this based on the difference between the highest and lowest scores?
      */
@@ -152,13 +198,14 @@ int main(int argv, char **argc) {
 /*
       N.B. : Averaged Similarity Collection Query - ctf = frequency, df = number of documents.
 
-      QL = n
+	  QL = n
       AvSCQ = 1/n SUM(q in Q) (1 + ln(ctf(q))) * ln(1 + |C|/df(q))
+      AvSCS = 1/n SUM(q in Q) log2 (ictf(q) / n)
       AvQL = 1/n SUM(q in Q) strlen(q)
       AvIDF = 1/n SUM(q in Q) idf(q)
       MaxIDF = MAX(q in Q) idf(q)
       AvICTF = 1/n PRODUCT(q in Q) ictf(q)
-      QueryScope = |D| / |C|
+      QueryScope = -log(|D| / |C|)
 
       D - docs returned
       C - collection
@@ -168,34 +215,86 @@ int main(int argv, char **argc) {
 
       DocSet is wierd = (SUM(q in Q) df(q)) - DocsReturned 
       It's like which docs have at least 2 terms.
-      TopScore = top BM25 score
-      TopDocs = Docs Returned above 0.8 * top BM25 Score
 
+	  TopScore = the top BM25 Score
+	  TopDocs = |d in D where score > TopScore * 0.8|
+
+	  StdDevIDF(Gamma1) = StdDev(idfs)
+	  Gamma2 = MaxIDF - MinIDF
+
+	  dTopScore = (TopScore_ws - TopScore) / TopScore
+	  dDocsReturned = (DocsReturned_ws - DocsReturned) / DocsReturned 
+	  dTopDocs = (TopDocs_ws - TopDocs) / TopDocs 
+
+	  X_ws = X with stemming
 */
+
+    if (argc < 2) {
+        fprintf(stderr, "Requires at least one arg.\n");
+        fprintf(stderr, "Usage: %s <query file> [options]\n", argv[0]);
+        fprintf(stderr, "Default is to produce some QPP scores\n");
+        fprintf(stderr, "Options\n-------\n");
+        fprintf(stderr, "t                Print top 10 scores w. stemming and w.o. stemming\n");
+        fprintf(stderr, "tlm              Print top 10 scores w. stemming and w.o. stemming using language modeling\n");
+		fprintf(stderr, "ga <filename>    Use a stemmer from the file and print rule usage stats\n");
+		fprintf(stderr, "o                Use the otago stemmer instead of Porter\n");
+
+        exit(-1);
+	}
 
     ant_setup();
     documents_in_collection = search_engine->document_count();
     terms_in_collection = search_engine->get_collection_length();
+    query = get_queries(&query_count, argv[1]);
 
+	if (argc > 2) {
+		if (strcmp(argv[2], "t") == 0) {
+			do_top_scores = 1; 
+		} else if (strcmp(argv[2], "ga") == 0) {
+			if (argc < 4) { 
+				fprintf(stderr, "This option requires another filename.\n");
+				exit(-1);
+			}
+			print_ga_stats(argv[3], query, query_count);
+			exit(0);
+		} else if (strcmp(argv[2], "o") == 0) {
+			use_otago = 1;
+		} else if (strcmp(argv[2], "tlm") == 0) {
+			do_top_scores = 1; 
+			ranking_function = new ANT_ranking_function_lmd(search_engine);
+		}
+	}
 
-    if (argv != 2)
-        exit(fprintf(stderr, "Requires a single arg.\n"));
+	if (use_otago)
+		stemmer = ANT_stemmer_factory::get_stemmer(ANT_stemmer_factory::OTAGO, search_engine);
+	else
+		stemmer = ANT_stemmer_factory::get_stemmer(ANT_stemmer_factory::PORTER, search_engine);
 
-    query = get_queries(&query_count, argc[1]);
-
-    printf("query_count: %ld\n", query_count);
+	if (do_top_scores) {
+		for (i = 0; i < SCORES_RETAINED; i++)
+			printf("NS%d ", i + 1);
+		for (i = 0; i < SCORES_RETAINED; i++)
+			printf("S%d ", i + 1);
+		puts("");
+	} else 
+		puts("Query QL AvSCQ SCS AvQL AvIDF MaxIDF AvICTF DocsReturned TopDocs TopScore DocsReturnedWS TopDocsWS TopScoreWS DocSet QueryScope StdDevIDF Gamma2");
 
     for (i = 0; i < query_count; i++) {
         char *term;
 
 		perform_query(query[i], &q_d, NULL);
-        term = eat_word(&query[i]); // Skip topic no.
-        printf("Query %s: ", term);
+		perform_query(query[i], &q_d_ws, stemmer);
+        term = eat_word(&query[i]);
+		if (!do_top_scores)
+			printf("%s ", term);
+
         max_idf = 0;
+		min_idf = documents_in_collection;
         total_idf = 0;
         query_size = 0;
         query_length = 0;
         total_scq = 0;
+        total_scs = 0;
         product_ictf = 1;
         doc_set = 0;
 
@@ -204,13 +303,20 @@ int main(int argv, char **argc) {
             long collection_frequency = 0;
             double idf = 0.0;
             double ictf = 1.0;
-            query_length += strlen(term); 
-            query_size++;
-            
+
             if (search_engine->get_postings_details(term, &internal_details)) {
                 document_frequency = internal_details.document_frequency;
                 collection_frequency = internal_details.collection_frequency;
             }
+
+			/* 
+			   PREVENT STOP WORDS! 
+			   (For everything that doesn't rely on the queries being performed)
+			*/
+			if (document_frequency > documents_in_collection / 3) {
+				doc_set += document_frequency; /* Still need this. */
+				continue;
+			}
 
             if (document_frequency > 0) {
                 idf = (double) documents_in_collection
@@ -218,33 +324,58 @@ int main(int argv, char **argc) {
                 ictf = (double)terms_in_collection
                     / (double) collection_frequency;
             
-                printf("%s:%f, %f ", term, idf, ictf);
-
                 if (idf > max_idf) max_idf = idf;
+                if (idf < min_idf) min_idf = idf;
                 total_idf += idf;
                 product_ictf *= ictf;
                 total_scq += (1 + log(1 / ictf)) * log(1 + idf); 
+                total_scs += log2(ictf / q_d.query_size); /* Must use q_d query_size! */
                 doc_set += document_frequency;
+				idfs[query_size] = idf;
             } else {
+				idfs[query_size] = 0.0;
                 ictf = 1.0;
-                printf("%s:0.0, 0.0 ", term);
+                total_scs += log2(1.0 / q_d.query_size); /* Must use q_d query_size! */
             }
+
+            query_length += strlen(term); 
+            query_size++;
         }
 
-        printf("\n");
-        printf("QuerySize: %ld\n", query_size);
-        printf("AvSCQ: %lf\n", (double) total_scq / (double) query_size);
-        printf("AvQL: %lf\n", (double) query_length / (double) query_size);
-        printf("AvIDF: %lf\n", total_idf / query_size);
-        printf("MaxIDF: %lf\n", max_idf);
-        printf("AvICTF: %lf\n", log2(product_ictf) / query_size);
-        printf("Docs_returned: %lld\n", q_d.docs_returned);
-        printf("TopDocs: %lld\n", q_d.top_doc_count);
-        printf("TopScore: %lf\n", q_d.top_score);
-        printf("DocSet: %lld\n", doc_set - q_d.docs_returned);
-        printf("QueryScope: %lf\n", 
-               log((double) q_d.docs_returned 
-                   / (double) documents_in_collection));
+		std_dev_idf = 0;
+		for (j = 0; j < query_size; j++) {
+			double tmp = ((total_idf / query_size) - idfs[j]);
+			std_dev_idf += tmp * tmp;
+		}
+		std_dev_idf = sqrt(std_dev_idf / query_size);
+
+		if (do_top_scores) {
+			for (j = 0; j < SCORES_RETAINED; j++)
+				printf("%lf ", q_d.top_scores[j] / 100);
+			for (j = 0; j < SCORES_RETAINED; j++)
+				printf("%lf ", q_d_ws.top_scores[j] / 100);
+			puts("");
+		} else {
+			printf("%ld ", query_size); // QL
+			printf("%lf ", (double) total_scq / (double) query_size); // AvSCQ
+			printf("%lf ", (double) total_scs / (double) query_size); // SCS
+			printf("%lf ", (double) query_length / (double) query_size); // AvQL
+			printf("%lf ", total_idf / query_size); // AvIDF
+			printf("%lf ", max_idf); // MaxIDF
+			printf("%lf ", log2(product_ictf) / query_size); // AvICTF
+			printf("%lld ", q_d.docs_returned); // DocsReturned
+			printf("%lld ", q_d.top_doc_count); // TopDocs
+			printf("%lf ", q_d.top_scores[0]); // TopScore
+			printf("%lf ", (q_d_ws.docs_returned - q_d.docs_returned) / (double) q_d.docs_returned); // DocsReturnedWS
+			printf("%lf ", (q_d_ws.top_doc_count - q_d.top_doc_count) / (double) q_d.top_doc_count); // TopDocsWS
+			printf("%lf ", (q_d_ws.top_scores[0] - q_d.top_scores[0]) / (double) q_d.top_scores[0]); // TopScoreWS
+			printf("%lld ", doc_set - q_d.docs_returned); // DocSet
+			printf("%lf ", 
+				   -log((double) q_d.docs_returned 
+						/(double) documents_in_collection)); // QueryScope
+			printf("%lf ", std_dev_idf); // StdDevIDF
+			printf("%lf\n", max_idf / min_idf); // Gamma2
+		}
     }
 
     return 0;

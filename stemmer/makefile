@@ -5,11 +5,17 @@ EXTSRCDIR = .
 EXTOBJDIR = ./obj
 
 EXTFLAGS = -I$(SRCDIR)
-LDFLAGS = -g -ldl -O3
-CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DONE_PARSER -DHASHER=1 -DHEADER_HASHER=1 \
-	-Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR) -DUSE_FLOATED_TF -DGA_STEMMER_STATS
+LDFLAGS = -g -ldl -pthread
+DEFINES = -g -DSPECIAL_COMPRESSION -D_CRT_SECURE_NO_WARNINGS -DONE_PARSER -DHASHER=1 \
+    -DHEADER_HASHER=1 -DDO_TOP_SCORES #-DUSE_RADIX
+CFLAGS = -Wall $(DEFINES) -Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR)
+# -DUSE_FLOATED_TF -DGA_STEMMER_STATS
 
-CC = g++
+CC = /home/user/usr/intel/bin/ia32/icpc
+#CC = /home/user/usr/sunstudio12.1/bin/CC
+#CC = /home/user/usr/bin/openCC
+#CC = llvm-g++
+#CC = g++
 
 
 OBJECTS = \
@@ -46,10 +52,11 @@ OBJECTS = \
 	str.o \
 	stop_word.o \
 	disk.o \
-	disk_internals.o \
+	directory_iterator.o \
+	directory_iterator_multiple.o \
+	directory_iterator_internals.o \
 	directory_iterator_tar.o \
 	directory_iterator_file.o \
-	directory_iterator_multiple.o \
 	directory_recursive_iterator.o \
 	btree_iterator.o \
 	top_k_sort.o \
@@ -98,10 +105,14 @@ OBJECTS = \
 	instream_file.o \
 	instream_deflate.o \
 	instream_bz2.o \
+	instream_buffer.o \
 	nexi.o \
 	NEXI_term_iterator.o \
 	NEXI_term_ant.o \
-	NEXI_term.o
+	NEXI_term.o \
+	semaphore.o \
+	critical_section.o \
+	threads.o
 
 EXTENSION = \
     ga.o \
@@ -127,7 +138,12 @@ $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(EXTOBJDIR)/qpp.o 
+
+$(EXTOBJDIR)/qpp_stemmer.o : $(EXTSRCDIR)/ga_stemmer.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DGA_STEMMER_STATS -c $^ -o $@
+$(EXTOBJDIR)/qpp_individual.o : $(EXTSRCDIR)/ga_individual.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DGA_STEMMER_STATS -c $^ -o $@
+$(BINDIR)/qpp : $(OBJECTS_W_DIR) $(EXTOBJDIR)/vocab.o $(EXTOBJDIR)/qpp_stemmer.o $(EXTOBJDIR)/qpp_individual.o $(EXTOBJDIR)/qpp.o 
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(BINDIR)/ant_dict : $(OBJECTS_W_DIR) $(OBJDIR)/ant_dictionary.o
@@ -151,5 +167,3 @@ depend :
 .PHONY : clean
 clean :
 	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o $(BINDIR)/qpp $(EXTOBJDIR)/qpp.o
-
-include makefile.dep
