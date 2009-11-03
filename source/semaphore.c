@@ -4,6 +4,13 @@
 */
 #ifdef _MSC_VER
 	#include <windows.h>
+#elif defined (__APPLE__)
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <mach/mach_init.h>
+	#include <mach/mach_traps.h>
+	#include <mach/semaphore.h>
+	#include <mach/task.h>
 #else
 	#include <semaphore.h>
 #endif
@@ -19,6 +26,8 @@ ANT_semaphore::ANT_semaphore(long initial, long maximum)
 internals = new ANT_semaphore_internals;
 #ifdef _MSC_VER
 	internals->handle = CreateSemaphore(NULL, initial, maximum, NULL);
+#elif defined (__APPLE__)
+	semaphore_create(mach_task_self(), &internals->handle, SYNC_POLICY_FIFO, initial);
 #else
 	sem_init(&internals->handle, 0, initial);
 #endif
@@ -32,6 +41,8 @@ ANT_semaphore::~ANT_semaphore()
 {
 #ifdef _MSC_VER
 	CloseHandle(internals->handle);
+#elif defined(__APPLE__)
+	semaphore_destroy(mach_task_self(), internals->handle);
 #else
 	sem_destroy(&internals->handle);
 #endif
@@ -46,6 +57,8 @@ void ANT_semaphore::enter(void)
 {
 #ifdef _MSC_VER
 	WaitForSingleObject(internals->handle, INFINITE);
+#elif defined(__APPLE__)
+	semaphore_wait(internals->handle);
 #else
 	sem_wait(&internals->handle);
 #endif
@@ -59,6 +72,8 @@ void ANT_semaphore::leave(void)
 {
 #ifdef _MSC_VER
 	ReleaseSemaphore(internals->handle, 1, NULL);
+#elif defined(__APPLE__)
+	semaphore_signal(internals->handle);
 #else
 	sem_post(&internals->handle);
 #endif
@@ -84,6 +99,10 @@ long ANT_semaphore::poll(void)
 		ReleaseSemaphore(internals->handle, 1, &state);
 		state++;		// +1 because ReleaseSemaphore return the previous value
 		}
+#elif defined(__APPLE__)
+	long state = 0;
+
+	exit(printf("semaphore polling is not yet supported on MacOS"));
 #else
 	int state;
 
