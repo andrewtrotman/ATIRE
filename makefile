@@ -158,7 +158,7 @@ PARTS = \
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term_ant.obj						\
 	$(OBJDIR)\nexi_term.obj							\
-	$(OBJDIR)\semaphore.obj							\
+	$(OBJDIR)\semaphores.obj							\
 	$(OBJDIR)\critical_section.obj					\
 	$(OBJDIR)\threads.obj
 

@@ -8,7 +8,7 @@
 #include "directory_iterator.h"
 
 class ANT_directory_iterator_multiple_internals;
-class ANT_semaphore;
+class ANT_semaphores;
 class ANT_critical_section;
 
 /*
@@ -24,7 +24,7 @@ protected:
 	long insertion_point, removal_point, queue_length;
 	long sources_used, sources_length, current_source;
 	long active_threads;
-	ANT_semaphore *empty_count, *fill_count;
+	ANT_semaphores *empty_count, *fill_count;
 	ANT_critical_section *mutex;
 
 protected:

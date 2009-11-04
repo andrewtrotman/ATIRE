@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "str.h"
-#include "semaphore.h"
+#include "semaphores.h"
 #include "critical_section.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_multiple_internals.h"
@@ -22,8 +22,8 @@ queue = NULL;
 thread_details = NULL;
 
 mutex = new ANT_critical_section;
-empty_count = new ANT_semaphore(queue_length, queue_length);
-fill_count = new ANT_semaphore(0, queue_length);
+empty_count = new ANT_semaphores(queue_length, queue_length);
+fill_count = new ANT_semaphores(0, queue_length);
 }
 
 /*
@@ -147,8 +147,8 @@ active_threads = sources_used;
 	Set up the semaphores
 */
 mutex = new ANT_critical_section;
-empty_count = new ANT_semaphore(queue_length, queue_length);
-fill_count = new ANT_semaphore(0, queue_length);
+empty_count = new ANT_semaphores(queue_length, queue_length);
+fill_count = new ANT_semaphores(0, queue_length);
 
 /*
 	Start each thread
