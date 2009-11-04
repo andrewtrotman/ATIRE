@@ -217,26 +217,16 @@ $(OTHER_TARGETS) : $(OBJDIR)\disk.obj
 $(PARTS) : makefile $(EXTRA_LIBS)
 
 #
-#	Some dependencies need to be explicit (is this an nmake bug)?
-#
-#$(BINDIR)\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
-#$(BINDIR)\link_length_correlate.exe : $(OBJDIR)\link_length_correlate.obj
-#$(BINDIR)\bindiff.exe : $(OBJDIR)\bindiff.obj
-#$(BINDIR)\filelist.exe : $(OBJDIR)\filelist.obj
-#$(BINDIR)\index.exe : $(OBJDIR)\index.obj
-#$(BINDIR)\ant.exe : $(OBJDIR)\ant.obj
-
-#
 #	Make the external libraries
 #
 bzip\bzip2-1.0.5\libbz2.lib :
 	@cd bzip\bzip2-1.0.5
-	@make -nologo -f ..\makefile.msc
+	@nmake -nologo -f ..\makefile.msc
 	@cd ..\..
 
 zlib\zlib-1.2.3\zlib.lib : 
 	@cd zlib\zlib-1.2.3
-	@make -nologo -f ..\makefile.msc
+	@nmake -nologo -f ..\makefile.msc
 	@cd ..\..
 
 #
