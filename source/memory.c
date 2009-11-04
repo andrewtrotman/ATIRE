@@ -26,6 +26,10 @@
 	#define GetLargePageMinimum() (4096)
 #endif
 
+#ifndef LARGE_MEMORY_PAGES
+	#define GetLargePageMinimum() (4096)
+#endif
+
 /*
 	ANT_MEMORY::ANT_MEMORY()
 	------------------------
