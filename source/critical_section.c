@@ -7,6 +7,7 @@
 	#define NT_CRITICAL_SECTIONS
 #else
 	#include <pthread.h>
+	#include <asm-generic/errno-base.h>
 #endif
 
 #include <stdio.h>
@@ -24,7 +25,7 @@ internals = new ANT_critical_section_internals;
 internals->level = 0;
 
 #ifdef NT_CRITICAL_SECTIONS
-	InitializeCriticalSection(&internals->mutex); 
+	InitializeCriticalSection(&internals->mutex);
 #else
 	long err;
 

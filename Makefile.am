@@ -113,7 +113,7 @@ library_sources =  \
 	$(SRCDIR)/instream_file.c	\
 	$(SRCDIR)/instream_deflate.c \
 	$(SRCDIR)/instream_bz2.c \
-	$(SRCDIR)/semaphore.c \
+	$(SRCDIR)/semaphores.c \
 	$(SRCDIR)/threads.c \
 	$(SRCDIR)/critical_section.c \
 	$(SRCDIR)/ant_api.c
@@ -200,7 +200,7 @@ library_noinst_headers = \
 	$(SRCDIR)/search_engine_stats.h	\
 	$(SRCDIR)/search_engine_result.h \
 	$(SRCDIR)/search_engine_result_iterator.h \
-	$(SRCDIR)/semaphore.h \
+	$(SRCDIR)/semaphores.h \
 	$(SRCDIR)/stats.h	\
 	$(SRCDIR)/stemmer_factory.h	\
 	$(SRCDIR)/stemmer.h	\
