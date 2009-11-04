@@ -6,6 +6,8 @@
 	#include <windows.h>
 	#define NT_CRITICAL_SECTIONS
 #else
+	#include <errno.h>
+	#include <unistd.h>
 	#include <pthread.h>
 #endif
 
@@ -65,7 +67,7 @@ void ANT_critical_section::enter(void)
 	err = pthread_mutex_lock(&internals->mutex);
 
 	if (err != 0)
-		printf("ANT_critical_section::enter(): err=%d\n", err);
+		printf("ANT_critical_section::enter(): err=%d (%s)\n", err, err == EINVAL ? "EINVAL" : "?");
 #endif
 }
 
