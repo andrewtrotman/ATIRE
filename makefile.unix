@@ -143,7 +143,7 @@ OBJECTS = \
 	NEXI_term_iterator.o \
 	NEXI_term_ant.o \
 	NEXI_term.o \
-	semaphore.o \
+	semaphores.o \
 	critical_section.o \
 	threads.o
 

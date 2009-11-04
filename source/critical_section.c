@@ -6,8 +6,8 @@
 	#include <windows.h>
 	#define NT_CRITICAL_SECTIONS
 #else
+	#include <errno.h>
 	#include <pthread.h>
-	#include <asm-generic/errno-base.h>
 #endif
 
 #include <stdio.h>
@@ -31,7 +31,7 @@ internals->level = 0;
 
 	err = pthread_mutex_init(&internals->mutex, NULL);
 	if (err != 0)
-		printf("ANT_critical_section::ANT_critical_section(): err=%d\n", err);
+		printf("ANT_critical_section::ANT_critical_section(): err=%ld\n", err);
 #endif
 }
 
@@ -47,7 +47,7 @@ ANT_critical_section::~ANT_critical_section()
 	long err;
 	err = pthread_mutex_destroy(&internals->mutex);
 	if (err != 0)
-		printf("ANT_critical_section::~ANT_critical_section(): err=%d\n", err);
+		printf("ANT_critical_section::~ANT_critical_section(): err=%ld\n", err);
 #endif
 delete internals;
 }
@@ -66,7 +66,7 @@ void ANT_critical_section::enter(void)
 	err = pthread_mutex_lock(&internals->mutex);
 
 	if (err != 0)
-		printf("ANT_critical_section::enter(): err=%d (%s)\n", err, err == EINVAL ? "EINVAL" : "?");
+		printf("ANT_critical_section::enter(): err=%ld (%s)\n", err, err == EINVAL ? "EINVAL" : "?");
 #endif
 }
 
@@ -83,6 +83,6 @@ void ANT_critical_section::leave(void)
 	long err;
 	err = pthread_mutex_unlock(&internals->mutex);
 	if (err != 0)
-		printf("ANT_critical_section::leave(): err=%d\n", err);
+		printf("ANT_critical_section::leave(): err=%ld\n", err);
 #endif
 }
