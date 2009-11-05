@@ -98,9 +98,10 @@ puts("   s            Simple-9      (bytewise)");
 puts("   S            Sigma         (bytewise)");
 puts("   v            Variable Byte (bytewise) [default]");
 puts("-vc             Validate posting compression (and report decompression rates)");
-puts("-C[-bz]         Store documents in the repository compressed with one of:");
+puts("-C[-bnz]        Store documents in the repository compressed with one of:");
 puts("   -            don't create the repositorty [default]");
 puts("   b            bz2");
+puts("   n            not-compressed");
 puts("   z            zip (deflate)");
 puts("");
 
@@ -144,6 +145,7 @@ switch (*scheme)
 	{
 	case '-': document_compression_scheme = NONE; break;
 	case 'b': document_compression_scheme = ANT_compression_text_factory::BZ2; break;
+	case 'n': document_compression_scheme = ANT_compression_text_factory::RAW; break;
 	case 'z': document_compression_scheme = ANT_compression_text_factory::DEFLATE; break;
 	default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
 	}

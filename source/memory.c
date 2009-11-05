@@ -27,6 +27,7 @@
 #endif
 
 #ifndef LARGE_MEMORY_PAGES
+	#undef GetLargePageMinimum
 	#define GetLargePageMinimum() (4096)
 #endif
 

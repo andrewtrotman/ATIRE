@@ -10,12 +10,12 @@
 	ANT_SEARCH_ENGINE_RESULT_ITERATOR::FIRST()
 	------------------------------------------
 */
-long long ANT_search_engine_result_iterator::first(ANT_search_engine *engine)
+long long ANT_search_engine_result_iterator::first(ANT_search_engine *engine, long long start)
 {
 search_engine = engine;
 result = engine->results_list;
 results_list_length = engine->document_count();
-current = -1;
+current = start - 1;
 return next();
 }
 

@@ -20,7 +20,6 @@ friend class ANT_search_engine;
 friend class ANT_search_engine_result_iterator;
 
 private:
-public:		// REMOVE THIS LINE
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long documents;

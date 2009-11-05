@@ -14,6 +14,7 @@
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
 #include "search_engine_result.h"
+#include "search_engine_result_iterator.h"
 #include "search_engine_stats.h"
 #include "top_k_sort.h"
 #include "ranking_function_bm25.h"
@@ -705,7 +706,6 @@ stats->add_decompress_time(stats->stop_timer(now));
 return decompress_buffer;
 } 
 
-
 /*
 	ANT_SEARCH_ENGINE::GET_DOCUMENT()
 	---------------------------------
@@ -726,5 +726,41 @@ index->read((unsigned char *)document_decompress_buffer, end - start);
 document_factory.decompress(destination, destination_length, document_decompress_buffer, (unsigned long)(end - start));
 
 return destination;
+}
+
+/*
+	ANT_SEARCH_ENGINE::GET_DOCUMENTS()
+	----------------------------------
+	semanticly: for (x = from; x < to; x++) read_document(x);
+*/
+long long ANT_search_engine::get_documents(char **destination, unsigned long **destination_length, long long from, long long to)
+{
+long long start, end, times, id, get;
+ANT_search_engine_result_iterator current;
+
+if (document_offsets == NULL)
+	return NULL;
+
+times = 0;
+get = to - from;
+for (id = current.first(this, from); id >= 0 && times < get; id = current.next())
+	{
+	/*
+		This isn't really the best way to do this but it will suffice in the mean time.  The best way is to
+		read in increasing docid order as this reduces the number of disk seeks.
+	*/
+	times++;
+	start = document_offsets[id];
+	end = document_offsets[id + 1];
+
+	index->seek(start);
+	index->read((unsigned char *)document_decompress_buffer, end - start);
+
+	document_factory.decompress(*destination, *destination_length, document_decompress_buffer, (unsigned long)(end - start));
+	destination++;
+	destination_length++;
+	}
+
+return times;
 }
 

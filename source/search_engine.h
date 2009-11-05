@@ -57,8 +57,8 @@ protected:
 	ANT_weighted_tf *stem_buffer;
 	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
-public:		// REMOVE THIS LINE
 	ANT_search_engine_result *results_list;
+
 protected:
 	long long stem_buffer_length_in_bytes;
 	long long trim_postings_k;
@@ -101,8 +101,14 @@ public:
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
-	char *get_document(char *destination, unsigned long *destination_length, long long id);
+
+	/*
+		Methods related to the retrieval of documents from the document repository.
+	*/
 	long get_longest_document_length(void) { return document_longest_raw_length; }
+	char *get_document(char *destination, unsigned long *destination_length, long long id); // id is the document number
+	long long get_documents(char **destination, unsigned long **destination_length, long long from) { return get_documents(destination, destination_length, from, from + 1); }
+	long long get_documents(char **destination, unsigned long **destination_length, long long from, long long to); // from and to are relative to the results list.
 };
 
 #endif  /* SEARCH_ENGINE_H_ */

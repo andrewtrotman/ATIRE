@@ -15,7 +15,7 @@ class ANT_compression_text_factory : public ANT_compress_text
 {
 public:
 	enum {	
-		NONE 	=   1, 
+		RAW 	=   1, 
 		DEFLATE =   2, 
 		BZ2  	=   4
 		} ;

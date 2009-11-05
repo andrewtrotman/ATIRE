@@ -34,7 +34,7 @@ static ANT_compress_text_deflate deflate;
 */
 ANT_compression_text_factory_scheme ANT_compression_text_factory::scheme[] =
 {
-{NONE, &none, "none"},				// this must be in position zero as it is the fallback for the faulure case
+{RAW, &none, "none"},				// this must be in position zero as it is the fallback for the faulure case
 {DEFLATE, &deflate, "deflate"},
 {BZ2, &bz2, "BZ2"}
 };
@@ -61,7 +61,7 @@ for (which = 0; which < number_of_techniques; which++)
 			/*
 				Compression failed which means we compress to larger than the input buffer so we resort to no compression
 			*/
-			scheme[which = NONE].scheme->compress(destination + 1, &shortened_destination_length, source, source_length);
+			scheme[which = RAW].scheme->compress(destination + 1, &shortened_destination_length, source, source_length);
 			}
 		break;
 		}

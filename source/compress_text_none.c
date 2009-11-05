@@ -14,7 +14,7 @@ char *ANT_compress_text_none::compress(char *destination, unsigned long *destina
 if (*destination_length < source_length)
 	return NULL;
 
-return (char *)memcpy(destination, source, source_length);
+return (char *)memcpy(destination, source, *destination_length = source_length);
 }
 
 /*
@@ -26,5 +26,5 @@ char *ANT_compress_text_none::decompress(char *destination, unsigned long *desti
 if (*destination_length < source_length)
 	return NULL;
 
-return (char *)memcpy(destination, source, source_length);
+return (char *)memcpy(destination, source, *destination_length = source_length);
 }

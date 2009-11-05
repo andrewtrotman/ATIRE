@@ -23,7 +23,7 @@ public:
 	ANT_search_engine_result_iterator() {}
 	virtual ~ANT_search_engine_result_iterator() {}
 
-	virtual long long first(ANT_search_engine *engine);
+	virtual long long first(ANT_search_engine *engine, long long start = 0);	// start is the position in the results list from which to start (counting from 0)
 	virtual long long next(void);
 } ;
 
