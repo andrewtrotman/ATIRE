@@ -248,6 +248,7 @@ if (file == NULL)
 	return NULL;
 
 now = stats->start_timer();
+filename_buffer[0] = '\0';
 start = strstr(file, "<title>");
 if (start != NULL)
 	if ((end = strstr(start += 7, "</title>")) != NULL)
