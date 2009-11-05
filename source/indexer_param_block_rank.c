@@ -16,6 +16,7 @@
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
+#include "ranking_function_term_count.h"
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()
@@ -109,6 +110,8 @@ else if (strcmp(which, "impact") == 0)
 	ranking_function = IMPACT;
 else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;
+else if (strcmp(which, "termcount") == 0)
+	ranking_function = TERM_COUNT;
 else
 	exit(printf("Unknown Ranking Function:'%s'\n", which));
 }
@@ -137,6 +140,9 @@ if (allowable & LMJM)
 	printf("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1] %s\n", isdefault(LMJM));
 if (allowable & READABLE)
 	printf("   readable     The readability search engine (BM25 with Dale-Chall) %s\n", isdefault(READABLE));
+if (allowable & TERM_COUNT)
+	printf("   termcount    The number of query terms in the document %s\n", isdefault(READABLE));
+
 puts("");
 }
 
@@ -158,6 +164,8 @@ switch (ranking_function)
 		return new ANT_ranking_function_bose_einstein(documents, lengths);
 	case DIVERGENCE:
 		return new ANT_ranking_function_divergence(documents, lengths);
+	case TERM_COUNT:
+		return new ANT_ranking_function_term_count(documents, lengths);
 	}
 return NULL;
 }

@@ -30,6 +30,7 @@
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
+#include "ranking_function_term_count.h"
 #include "parser.h"
 #include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
@@ -341,9 +342,9 @@ for (query = input.first(); query != NULL; query = input.next())
 		for (result = 0; result < last_to_list; result++)
 			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
 				{
-				long longest_len = search_engine->get_longest_document_length();
 #ifdef NEVER
 /*
+				long longest_len = search_engine->get_longest_document_length();
 				long long docid;
 				char *pos;
 				static char document_buffer[1024 * 1024];
@@ -518,6 +519,8 @@ else
         ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
 	else if (params.ranking_function == ANT_ANT_param_block::DIVERGENCE)
 		ranking_function = new ANT_ranking_function_divergence(search_engine);
+	else if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
+		ranking_function = new ANT_ranking_function_term_count(search_engine);
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
