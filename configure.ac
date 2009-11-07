@@ -5,6 +5,7 @@ AC_PREREQ([2.63])
 AC_INIT([ANT], [0.3], [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([source/ant_param_block.c])
 #AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL
@@ -16,6 +17,9 @@ AC_PROG_CXX
 AM_PROG_CC_C_O
 
 # Checks for libraries.
+AC_CHECK_LIB([dl], [dlopen])
+AC_CHECK_LIB([z], [inflateReset], [LIBS="$LIBS -lz"; CXXFLAGS="$CXXFLAGS -DANT_HAS_ZLIB"; CFLAGS="$CXXFLAGS"])
+AC_CHECK_LIB([bz2], [BZ2_bzDecompressInit], [LIBS="$LIBS -lbz2"; CXXFLAGS="$CXXFLAGS -DANT_HAS_BZLIB"; CFLAGS="$CXXFLAGS"])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h limits.h stddef.h stdint.h stdlib.h string.h sys/time.h unistd.h values.h])

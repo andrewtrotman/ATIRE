@@ -1,6 +1,8 @@
 #AUTOMAKE_OPTIONS = foreign
 #SUBDIRS = plugins
 
+ACLOCAL_AMFLAGS = -I m4
+
 SRCDIR = source
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
@@ -10,7 +12,8 @@ AM_LDFLAGS = @LIBS@
 
 # using HEADER HASH FUNCTION
 AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
+		-DSPECIAL_COMPRESSION=1 -DPARALLEL_INDEXING -DTOP_K_SEARCH \
+       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
        
 # using RANDOM HASH FUNCTION       
 #AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DRANDOM_HASHER=1 \
@@ -106,6 +109,7 @@ library_sources =  \
 	$(SRCDIR)/ranking_function_bose_einstein.c \
 	$(SRCDIR)/ranking_function_lmjm.c \
 	$(SRCDIR)/ranking_function_divergence.c \
+	$(SRCDIR)/ranking_function_term_count.c \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
 	$(SRCDIR)/NEXI_term.c \
@@ -228,6 +232,7 @@ library_noinst_headers = \
 	$(SRCDIR)/ranking_function_lmd.h \
 	$(SRCDIR)/ranking_function_bose_einstein.h \
 	$(SRCDIR)/ranking_function_divergence.h \
+	$(SRCDIR)/ranking_function_term_count.h \
 	$(SRCDIR)/instream_file.h	\
 	$(SRCDIR)/instream_deflate.h \
 	$(SRCDIR)/instream_bz2.h \

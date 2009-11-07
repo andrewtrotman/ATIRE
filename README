@@ -1,0 +1,49 @@
+##############################################################
+#
+#          ANT *NIX README FILE  
+#
+###############################################################
+
+1 AUTOTOOLS
+  ---------
+To have autotools to handle the environment setting and libraries checking. Do:
+aclocal
+autoconf
+libtoolize
+touch NEWS README AUTHORS ChangeLog
+automake --add-missing
+
+Alternatively, 
+./scripts/runautotools.sh
+
+
+2 DEBUG BUILD AND RELEASE BUILD
+  -----------------------------
+mkdir -p build/debug
+mkdir -p build/release
+
+
+2.1 COMPILING FOR DEBUG BUILD
+    -------------------------
+cd build/debug
+source ../../scripts/setdebugenv.bash
+../../configure
+
+2.2 COMPILING FOR RELEASE BUILD
+    -------------------------
+cd build/release
+../../configure
+
+The default build in autotools is to use -O2 flag
+
+2.3 COMPILING FOR DEBUG BUILD IN 32 BIT
+    -----------------------------------
+cd build/debug
+source ../../scripts/setdebug32env.bash
+../../configure
+
+3 NOTES
+  -----
+  The autotools will automatically handle the configuration for whether with ZLIB and BZ2LIB support or not 
+  
+
