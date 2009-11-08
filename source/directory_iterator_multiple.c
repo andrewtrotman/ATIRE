@@ -21,9 +21,9 @@ sources = NULL;
 queue = NULL;
 thread_details = NULL;
 
-mutex = new ANT_critical_section;
-empty_count = new ANT_semaphores(queue_length, queue_length);
-fill_count = new ANT_semaphores(0, queue_length);
+mutex = NULL;
+empty_count = NULL;
+fill_count = NULL;
 }
 
 /*

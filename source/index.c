@@ -156,22 +156,22 @@ for (param = first_param; param < argc; param++)
 
 	while (current_file != NULL)
 		{
+		/*
+			How much data do we have?
+		*/
+		files_that_match++;
+		doc++;
 		bytes_indexed += current_file->length;
 
 		/*
-			Store the document in the repository
+			Report
 		*/
-		if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-			index->add_to_document_repository(current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+		if (doc % param_block.reporting_frequency == 0 && doc != last_report)
+			report(last_report = doc, index, &stats, bytes_indexed);
 
 		/*
 			Index the file
 		*/
-		files_that_match++;
-		doc++;
-		if (doc % param_block.reporting_frequency == 0 && doc != last_report)
-			report(last_report = doc, index, &stats, bytes_indexed);
-
 		readability->set_document((unsigned char *)current_file->file);
 		while ((token = readability->get_next_token()) != NULL)
 			{
@@ -185,7 +185,14 @@ for (param = first_param; param < argc; param++)
 			{
 			index->set_document_length(doc, terms_in_document);
 			readability->index(index);
-			id_list.puts(current_file->filename);		// save the "external" ID of the document
+
+			/*
+				Store the document in the repository
+			*/
+			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+				index->add_to_document_repository(NULL, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+//				index->add_to_document_repository(current_file->filename, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+			id_list.puts(current_file->filename);
 			}
 		terms_in_document = 0;
 		delete [] current_file->file;
@@ -201,6 +208,9 @@ for (param = first_param; param < argc; param++)
 	if (files_that_match == 0)
 		printf("Warning: '%s' does not match any files\n", argv[param]);
 	}
+
+if (param_block.reporting_frequency != LLONG_MAX && doc != last_report)
+	report(doc, index, &stats, bytes_indexed);
 
 id_list.close();
 now = stats.start_timer();

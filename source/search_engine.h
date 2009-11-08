@@ -100,6 +100,8 @@ public:
 	void set_trim_postings_k(long long what) { trim_postings_k = what; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
+	long long get_variable(char *name);
+
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
 
 	/*
@@ -107,7 +109,7 @@ public:
 	*/
 	long get_longest_document_length(void) { return document_longest_raw_length; }
 	char *get_document(char *destination, unsigned long *destination_length, long long id); // id is the document number
-	long long get_documents(char **destination, unsigned long **destination_length, long long from) { return get_documents(destination, destination_length, from, from + 1); }
+	long long get_document(char **destination, unsigned long **destination_length, long long from) { return get_documents(destination, destination_length, from, from + 1); }
 	long long get_documents(char **destination, unsigned long **destination_length, long long from, long long to); // from and to are relative to the results list.
 };
 

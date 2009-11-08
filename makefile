@@ -187,6 +187,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\INEXqrels_to_run.exe		\
 	$(BINDIR)\foltbl_to_aspt.exe		\
 	$(BINDIR)\zipf_graph.exe			\
+	$(BINDIR)\get_doclist.exe			\
 	$(BINDIR)\test_tar.exe
 
 #

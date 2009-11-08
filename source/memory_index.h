@@ -57,8 +57,8 @@ private:
 
 	/*
 		Documents that are added to the repository are compressed using the compression
-		factory first.  A list of offsets is stored in a whapping great array which is
-		then written to disk as a footer before the index starts.
+		factory first.  A list of offsets is stored in the index under the name ~documentoffsets
+		the length of the longest document (once decompressed) is stored as ~documentlongest
 	*/
 	long long documents_in_repository;
 	ANT_compression_text_factory *factory_text;
@@ -67,6 +67,13 @@ private:
 	long compressed_longest_raw_document_size;			// length of the longest document before compression
 	ANT_string_pair *squiggle_document_offsets;
 	ANT_string_pair *squiggle_document_longest;
+
+	/*
+		Document filenames are stored in a big buffer after the documents but before the index
+	*/
+	char *document_filenames;
+	static const long long document_filenames_chunk_size = (1024 * 1024);
+	long long document_filenames_used;
 
 private:
 	long hash(ANT_string_pair *string);
@@ -82,6 +89,9 @@ private:
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
 	void open_index_file(char *filename);
 	void close_index_file(void);
+	void add_to_filename_repository(char *filename);
+	void serialise_filenames(char *source,  long depth = 0);
+
 
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
@@ -95,12 +105,13 @@ public:
 	long serialise(ANT_ranking_function_factory *factory);
 	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
 	void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+	void set_variable(ANT_string_pair *measure_name, long long score);
 	void set_document_compression_scheme(unsigned long scheme) { factory_text->set_scheme(scheme); }
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 	void text_render(long what);
 	long long get_memory_usage(void);
-	void add_to_document_repository(char *document, long length);
+	void add_to_document_repository(char *filename, char *document, long length);
 } ;
 
 

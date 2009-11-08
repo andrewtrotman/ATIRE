@@ -60,6 +60,10 @@ compressed_longest_raw_document_size = 0;
 factory_text = new (std::nothrow) ANT_compression_text_factory;
 index_file = NULL;
 open_index_file(filename);
+document_filenames = NULL;
+document_filenames_used = document_filenames_chunk_size;
+compressed_document_buffer_size = 0;
+compressed_document_buffer = NULL;
 }
 
 /*
@@ -195,6 +199,30 @@ if (mode != MODE_MONOTONIC)
 	node->current_docno = -1;			// store the value rather than the diff
 
 node->add_posting(score);
+}
+
+/*
+	ANT_MEMORY_INDEX::SET_VARIABLE()
+	--------------------------------
+*/
+void ANT_memory_index::set_variable(ANT_string_pair *measure_name, long long score)
+{
+long hash_value;
+ANT_memory_index_hash_node *node;
+
+hash_value = hash(measure_name);
+if (hash_table[hash_value] == NULL)
+	{
+	stats->hash_nodes++;
+	node = hash_table[hash_value] = new_memory_index_hash_node(measure_name);
+	}
+else
+	node = find_add_node(hash_table[hash_value], measure_name);
+
+node->current_docno = -1;
+node->add_posting((score >> 32) & 0xFFFFFFFF);
+node->current_docno = -1;
+node->add_posting(score & 0xFFFFFFFF);
 }
 
 /*
@@ -608,6 +636,9 @@ ANT_memory_index_hash_node *node;
 double max_rsv_for_node, min_rsv_for_node;
 long long doc_size, tf_size;
 long long timer;
+ANT_string_pair squiggle_document_filenames_start("~documentfilenamesstart");
+ANT_string_pair squiggle_document_filenames_finish("~documentfilenamesfinish");
+long long pos;
 
 compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
 decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
@@ -616,13 +647,26 @@ impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postin
 stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 
 /*
-	If we have the documents stored on disk then we need to stor the position of the end of the	final document.
+	If we have the documents stored on disk then we need to store the position of the end of the final document.
 	But, only add the position if we are using an index with the documents in it.
 */
 if (find_node(hash_table[hash(squiggle_document_offsets)], squiggle_document_offsets) != NULL)
 	{
 	set_document_detail(squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
 	set_document_detail(squiggle_document_longest, compressed_longest_raw_document_size);		// store the length of the longest document once it is decompressed
+	}
+
+/*
+	If we are storing filenames on disk then store the location of the filename buffer and serialise it.
+*/
+
+if (document_filenames != NULL)
+	{
+	pos = index_file->tell();
+	set_variable(&squiggle_document_filenames_start, pos);
+	serialise_filenames(document_filenames);
+	pos = index_file->tell();
+	set_variable(&squiggle_document_filenames_finish, pos);
 	}
 
 /*
@@ -766,42 +810,96 @@ return 1;
 }
 
 /*
+	ANT_MEMORY_INDEX::ADD_TO_FILENAME_REPOSITORY()
+	----------------------------------------------
+	The filenames are stored in a big buffer.  The start of that buffer points to the
+	start of the previous buffer, and so on until we get a NULL pointer. 
+*/
+void ANT_memory_index::add_to_filename_repository(char *filename)
+{
+size_t length, remaining;
+char *new_buffer;
+
+length = strlen(filename) + 1;		// +1 to include the '\0'
+if ((document_filenames_used + length) > document_filenames_chunk_size)
+	{
+	if ((remaining = document_filenames_chunk_size - document_filenames_used) != 0)
+		memcpy(document_filenames + document_filenames_used, filename, remaining);
+	new_buffer = (char *)memory->malloc(document_filenames_chunk_size);
+	*(char **)new_buffer = document_filenames;
+	document_filenames_used = sizeof(char *);
+
+	filename += remaining;
+	length -= remaining;
+	document_filenames = new_buffer;
+	}
+if (length != 0)
+	{
+	memcpy(document_filenames + document_filenames_used, filename, length);
+	document_filenames_used += length;
+	}
+}
+
+/*
+	ANT_MEMORY_INDEX::SERIALISE_FILENAMES()
+	---------------------------------------
+*/
+void ANT_memory_index::serialise_filenames(char *source, long depth)
+{
+if (source == NULL)
+	return;
+
+serialise_filenames(*(char **)source, depth + 1);
+
+if (depth == 0)
+	index_file->write((unsigned char *)(source + sizeof(char *)), document_filenames_used - sizeof(char *));
+else
+	index_file->write((unsigned char *)(source + sizeof(char *)), document_filenames_chunk_size - sizeof(char *));
+}
+
+/*
 	ANT_MEMORY_INDEX::ADD_TO_DOCUMENT_REPOSITORY()
 	----------------------------------------------
 */
-void ANT_memory_index::add_to_document_repository(char *document, long length)
+void ANT_memory_index::add_to_document_repository(char *filename, char *document, long length)
 {
 unsigned long compressed_length;
-long long start;
-long long timer;
+long long start, timer;
 
 timer = stats->start_timer();
-if (compressed_document_buffer_size < length + 1)
+
+if (filename != NULL)
+	add_to_filename_repository(filename);
+
+if (document != NULL)
 	{
-	/*
-		double the size to reduce the number calls
-		add one in case length == 0 because we need to store the factory's scheme byte
-		but we alwasys allocate at least one megabyte
-	*/
-	if ((compressed_document_buffer_size = length * 2 + 1) < MIN_DOCUMENT_ALLOCATION_SIZE)
-		compressed_document_buffer_size = MIN_DOCUMENT_ALLOCATION_SIZE;
+	if (compressed_document_buffer_size < length + 1)
+		{
+		/*
+			double the size to reduce the number of calls
+			add one in case length == 0 because we need to store the factory's scheme byte
+			but we alwasys allocate at least one megabyte
+		*/
+		if ((compressed_document_buffer_size = length * 2 + 1) < MIN_DOCUMENT_ALLOCATION_SIZE)
+			compressed_document_buffer_size = MIN_DOCUMENT_ALLOCATION_SIZE;
 
-	compressed_document_buffer = (char *)memory->malloc(compressed_document_buffer_size);
+		compressed_document_buffer = (char *)memory->malloc(compressed_document_buffer_size);
+		}
+
+	if (length > compressed_longest_raw_document_size)
+		compressed_longest_raw_document_size = length;
+
+	compressed_length = compressed_document_buffer_size;
+	if (factory_text->compress(compressed_document_buffer, &compressed_length, document, length) == NULL)
+		exit(printf("Cannot compress document (ID:%lld)\n", documents_in_repository));
+
+	start = index_file->tell();
+	index_file->write((unsigned char *)compressed_document_buffer, compressed_length);
+	stats->bytes_to_store_documents_on_disk += compressed_length;
+	set_document_detail(squiggle_document_offsets, start, MODE_MONOTONIC);		// use the search engine itself to store the offsets in the index
+
+	documents_in_repository++;
 	}
-
-if (length > compressed_longest_raw_document_size)
-	compressed_longest_raw_document_size = length;
-
-compressed_length = compressed_document_buffer_size;
-if (factory_text->compress(compressed_document_buffer, &compressed_length, document, length) == NULL)
-	exit(printf("Cannot compress document (ID:%lld)\n", documents_in_repository));
-
-start = index_file->tell();
-index_file->write((unsigned char *)compressed_document_buffer, compressed_length);
-stats->bytes_to_store_documents_on_disk += compressed_length;
-set_document_detail(squiggle_document_offsets, start, MODE_MONOTONIC);		// use the search engine itself to store the offsets in the index
-
-documents_in_repository++;
 stats->time_to_store_documents_on_disk += stats->stop_timer(timer);
 }
 

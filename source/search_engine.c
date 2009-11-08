@@ -222,6 +222,22 @@ delete stats_for_all_queries;
 }
 
 /*
+	ANT_SEARCH_ENGINE::GET_VARIABLE()
+	---------------------------------
+*/
+long long ANT_search_engine::get_variable(char *name)
+{
+ANT_compressable_integer *postings;
+ANT_search_engine_btree_leaf leaf;
+
+postings = get_decompressed_postings(name, &leaf);
+if (leaf.document_frequency == 1)
+	return postings[0];		// 32 bit integer
+else
+	return (((long long)postings[0]) << 32) + (long long)postings[1];		// 64 bit integer
+}
+
+/*
 	ANT_SEARCH_ENGINE::STATS_TEXT_RENDER()
 	--------------------------------------
 */
