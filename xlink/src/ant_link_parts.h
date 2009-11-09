@@ -146,9 +146,9 @@ inline static long get_doc_id(const char *file)
 {
 char *pos;
 
-pos = strstr(file, "<"INEX_ARCHIVE_ARTICLE_ID_SIGNITURE);
+pos = strstr((char*)file, "<"INEX_ARCHIVE_ARTICLE_ID_SIGNITURE);
 if (pos == NULL)
-	pos = strstr(file, "<"ARTICLE_ID_SIGNITURE">");
+	pos = strstr((char*)file, "<"ARTICLE_ID_SIGNITURE">");
 if (pos == NULL) {
 	fprintf(stderr, "Cannot find DOC id <name id=...> or <id> in file\n");
 	return -1;
@@ -164,7 +164,7 @@ inline static long result_to_id(const char *source)
 	const char *target_start = source;/*, *target_end, *target_dot*/
 	char *slash = 0;
 
-	while ((slash = strpbrk(target_start, "\\/")))
+	while ((slash = strpbrk((char*)target_start, "\\/")))
 		target_start = slash + 1;
 
 	const char *pos = target_start;
