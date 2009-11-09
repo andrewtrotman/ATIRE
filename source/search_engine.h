@@ -57,12 +57,12 @@ protected:
 	ANT_weighted_tf *stem_buffer;
 	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
-	ANT_search_engine_result *results_list;
-
-protected:
 	long long stem_buffer_length_in_bytes;
 	long long trim_postings_k;
 	long long collection_length_in_terms;
+
+public:
+	ANT_search_engine_result *results_list;
 
 private:
 	long long get_long_long(unsigned char *from) { return *((int64_t *)from); }

@@ -287,7 +287,7 @@ long long now;
 
 now = stats->start_timer();
 #ifdef TOP_K_SEARCH
-results_list->init_accumulators(top_k);
+results_list->init_accumulators(top_k > documents ? documents : top_k);
 #else
 results_list->init_accumulators();
 #endif
@@ -700,7 +700,7 @@ end = results_list->accumulator_pointers + documents;
 for (current = results_list->accumulator_pointers; current < end; current++)
 	if (!(*current)->is_zero_rsv())
 		{
-		if (found < results_list->top_k)		// first page
+		if (found < top_k)		// first page
 			sorted_id_list[found] = document_id_list[*current - results_list->accumulator];
 		else
 			break;

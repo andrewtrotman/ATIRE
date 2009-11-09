@@ -20,9 +20,11 @@ friend class ANT_search_engine;
 friend class ANT_search_engine_result_iterator;
 
 private:
+public:			// remove this line later
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long documents;
+
 #ifdef TOP_K_SEARCH
 	long long top_k;
 	long long results_list_length;
