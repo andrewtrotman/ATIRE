@@ -35,6 +35,7 @@ public:
 
 	long is_zero_rsv(void) { return rsv == 0; }
 	ANT_accumulator_t get_rsv(void) { return rsv; } 
+	void clear_rsv(void) { rsv = 0; } 
 
 	static int compare(const void *a, const void *b);
 	static int compare_pointer(const void *a, const void *b);

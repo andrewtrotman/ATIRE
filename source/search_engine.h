@@ -104,6 +104,8 @@ public:
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
 
+	long long boolean_results_list(long terms_in_query);
+
 	/*
 		Methods related to the retrieval of documents from the document repository.
 	*/

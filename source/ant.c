@@ -174,6 +174,11 @@ delete [] term_list;
 search_engine->sort_results_list(params->sort_top_k, &hits); // rank
 
 /*
+	Boolean Searching
+*/
+//hits = search_engine->boolean_results_list(terms_in_query);
+
+/*
 	Reporting
 */
 if (params->stats & ANT_ANT_param_block::SHORT)

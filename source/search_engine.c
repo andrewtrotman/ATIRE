@@ -655,7 +655,31 @@ now = stats->start_timer();
 ANT_search_engine_accumulator::top_k_sort(results_list->accumulator_pointers, *hits, accurate_rank_point);
 stats->add_sort_time(stats->stop_timer(now));
 
- return results_list->accumulator_pointers;
+return results_list->accumulator_pointers;
+}
+
+/*
+	ANT_SEARCH_ENGINE::BOOLEAN_RESULTS_LIST()
+	-----------------------------------------
+*/
+long long ANT_search_engine::boolean_results_list(long terms_in_query)
+{
+ANT_search_engine_accumulator **current, **end;
+long long hits = 0;
+
+#ifdef TOP_K_SEARCH
+end = results_list->accumulator_pointers + top_k;
+#else
+end = results_list->accumulator_pointers + documents;
+#endif
+
+for (current = results_list->accumulator_pointers; current < end; current++)
+	if ((*current)->get_rsv() < terms_in_query)
+		(*current)->clear_rsv();
+	else
+		hits++;
+
+return hits;
 }
 
 /*
