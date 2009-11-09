@@ -272,6 +272,34 @@ return *filename_buffer == '\0' ? NULL : filename_buffer;
 }
 
 /*
+	GET_DOCUMENT_AND_EXTRACT()
+	--------------------------
+	This is a temporary function to load each document and to write it to a file
+*/
+char *get_document_and_extract(long long query_id, long long pos, char *filename)
+{
+char *ch, *file;
+
+if (filename[1] == ':')							// windows c:\blah
+	filename += 2;
+
+file = ANT_disk::read_entire_file(filename);
+if (file == NULL)
+	return NULL;
+
+for (ch = file; *ch != '\0'; ch++)
+	if (*ch == '\n' || *ch == '\r')
+		*ch = ' ';
+
+fprintf(stderr, "%lld %lld %s\n", query_id, pos, file);
+
+delete [] file;
+
+return filename;
+}
+
+
+/*
 	ANT()
 	-----
 */
@@ -349,6 +377,7 @@ for (query = input.first(); query != NULL; query = input.next())
 		for (result = 0; result < last_to_list; result++)
 			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
 				{
+//				get_document_and_extract(topic_id, result + 1, answer_list[result])
 #ifdef NEVER
 /*
 				long longest_len = search_engine->get_longest_document_length();

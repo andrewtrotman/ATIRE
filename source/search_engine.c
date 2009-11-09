@@ -222,22 +222,6 @@ delete stats_for_all_queries;
 }
 
 /*
-	ANT_SEARCH_ENGINE::GET_VARIABLE()
-	---------------------------------
-*/
-long long ANT_search_engine::get_variable(char *name)
-{
-ANT_compressable_integer *postings;
-ANT_search_engine_btree_leaf leaf;
-
-postings = get_decompressed_postings(name, &leaf);
-if (leaf.document_frequency == 1)
-	return postings[0];		// 32 bit integer
-else
-	return (((long long)postings[0]) << 32) + (long long)postings[1];		// 64 bit integer
-}
-
-/*
 	ANT_SEARCH_ENGINE::STATS_TEXT_RENDER()
 	--------------------------------------
 */
@@ -665,10 +649,12 @@ return results_list->accumulator_pointers;
 long long ANT_search_engine::boolean_results_list(long terms_in_query)
 {
 ANT_search_engine_accumulator **current, **end;
-long long hits = 0;
+long long now, hits = 0;
+
+now = stats->start_timer();
 
 #ifdef TOP_K_SEARCH
-end = results_list->accumulator_pointers + results_list->top_k;
+end = results_list->accumulator_pointers + results_list->results_list_length;
 #else
 end = results_list->accumulator_pointers + documents;
 #endif
@@ -679,6 +665,10 @@ for (current = results_list->accumulator_pointers; current < end; current++)
 	else
 		hits++;
 
+results_list->results_list_length = hits;
+
+stats->add_rank_time(stats->stop_timer(now));
+
 return hits;
 }
 
@@ -688,24 +678,19 @@ return hits;
 */
 char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k)
 {
-long long found;
 ANT_search_engine_accumulator **current, **end;
+char **into = sorted_id_list;
 
-found = 0;
 #ifdef TOP_K_SEARCH
-end = results_list->accumulator_pointers + results_list->top_k;
+end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
 #else
-end = results_list->accumulator_pointers + documents;
+end = results_list->accumulator_pointers + documents < top_k ? documents : top_k;
 #endif
 for (current = results_list->accumulator_pointers; current < end; current++)
-	if (!(*current)->is_zero_rsv())
-		{
-		if (found < top_k)		// first page
-			sorted_id_list[found] = document_id_list[*current - results_list->accumulator];
-		else
-			break;
-		found++;
-		}
+	if ((*current)->is_zero_rsv())
+		break;
+	else
+		*into++ = document_id_list[*current - results_list->accumulator];
 
 return sorted_id_list;
 }

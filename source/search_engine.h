@@ -100,8 +100,6 @@ public:
 	void set_trim_postings_k(long long what) { trim_postings_k = what; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
-	long long get_variable(char *name);
-
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
 
 	long long boolean_results_list(long terms_in_query);
