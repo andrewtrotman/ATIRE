@@ -1,7 +1,7 @@
 #AM_CPPFLAGS = -std=c++0x  -pedantic -DREMOVE_ORPHAN_LINKS
 AM_CPPFLAGS = -std=c++0x  -pedantic -I $(srcdir)/include/stpl
 
-LTW_LIBS = -lant -ldl
+LTW_LIBS = -lant -lpthread
 
 SRC_DIR = src
 
@@ -104,5 +104,5 @@ noinst_PROGRAMS = ltw
 
 ltw_SOURCES = $(ltw_sources)
 ltw_LDADD = ${LTW_LIBS}
-ltw_LDFLAGS = -static
+#ltw_LDFLAGS = -static
 

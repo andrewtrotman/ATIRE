@@ -26,7 +26,7 @@ AC_ARG_WITH(stpl,
 # FIXME: Replace `main' with a function in `-lant':
 AC_CHECK_LIB([ant], [ant_easy_init])
 # FIXME: Replace `main' with a function in `-ldl':
-AC_CHECK_LIB([dl], [dlopen])
+#AC_CHECK_LIB([dl], [dlopen], [LIBS="$LIBS -ldl"])
 
 # Checks for header files.
 AC_CHECK_HEADERS([netdb.h netinet/in.h stddef.h stdlib.h string.h sys/socket.h unistd.h])

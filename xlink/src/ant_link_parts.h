@@ -164,8 +164,11 @@ inline static long result_to_id(const char *source)
 	const char *target_start = source;/*, *target_end, *target_dot*/
 	char *slash = 0;
 
-	while ((slash = strpbrk((char*)target_start, "\\/")))
+	while (target_start && (slash = strpbrk((char*)target_start, "\\/")))
 		target_start = slash + 1;
+
+	if (!target_start)
+		return -1;
 
 	const char *pos = target_start;
 	while (!isdigit(*pos))

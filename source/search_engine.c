@@ -668,7 +668,7 @@ ANT_search_engine_accumulator **current, **end;
 long long hits = 0;
 
 #ifdef TOP_K_SEARCH
-end = results_list->accumulator_pointers + top_k;
+end = results_list->accumulator_pointers + results_list->top_k;
 #else
 end = results_list->accumulator_pointers + documents;
 #endif
@@ -693,14 +693,14 @@ ANT_search_engine_accumulator **current, **end;
 
 found = 0;
 #ifdef TOP_K_SEARCH
-end = results_list->accumulator_pointers + top_k;
+end = results_list->accumulator_pointers + results_list->top_k;
 #else
 end = results_list->accumulator_pointers + documents;
 #endif
 for (current = results_list->accumulator_pointers; current < end; current++)
 	if (!(*current)->is_zero_rsv())
 		{
-		if (found < top_k)		// first page
+		if (found < results_list->top_k)		// first page
 			sorted_id_list[found] = document_id_list[*current - results_list->accumulator];
 		else
 			break;
