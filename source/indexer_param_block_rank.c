@@ -112,6 +112,8 @@ else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;
 else if (strcmp(which, "termcount") == 0)
 	ranking_function = TERM_COUNT;
+else if (strcmp(which, "allterms") == 0)
+	ranking_function = ALL_TERMS;
 else
 	exit(printf("Unknown Ranking Function:'%s'\n", which));
 }
@@ -137,11 +139,13 @@ if (allowable & IMPACT)
 if (allowable & LMD)
 	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500] %s\n" , isdefault(LMD));
 if (allowable & LMJM)
-	printf("   lmjm:<l>     Langyage Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1] %s\n", isdefault(LMJM));
+	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1] %s\n", isdefault(LMJM));
 if (allowable & READABLE)
 	printf("   readable     The readability search engine (BM25 with Dale-Chall) %s\n", isdefault(READABLE));
 if (allowable & TERM_COUNT)
-	printf("   termcount    The number of query terms in the document %s\n", isdefault(READABLE));
+	printf("   termcount    The number of query terms in the document (Boolean OR) %s\n", isdefault(TERM_COUNT));
+if (allowable & ALL_TERMS)
+	printf("   allterms     Relevant only if all query terms are present (Boolean AND) %s\n", isdefault(ALL_TERMS));
 
 puts("");
 }

@@ -76,7 +76,7 @@ public:
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
+double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer, long boolean)
 {
 ANT_time_stats stats;
 long long now, hits;
@@ -176,7 +176,8 @@ search_engine->sort_results_list(params->sort_top_k, &hits); // rank
 /*
 	Boolean Searching
 */
-//hits = search_engine->boolean_results_list(terms_in_query);
+if (boolean)
+	hits = search_engine->boolean_results_list(terms_in_query);
 
 /*
 	Reporting
@@ -274,7 +275,7 @@ return *filename_buffer == '\0' ? NULL : filename_buffer;
 	ANT()
 	-----
 */
-double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list)
+double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list, long boolean)
 {
 ANT_time_stats post_processing_stats;
 char *query, *name;
@@ -323,7 +324,7 @@ for (query = input.first(); query != NULL; query = input.next())
 	*/
 	number_of_queries++;
 
-	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer);
+	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
 	sum_of_average_precisions += average_precision;
 
 	/*
@@ -478,7 +479,7 @@ ANT_search_engine *search_engine;
 ANT_search_engine_readability *readable_search_engine;
 ANT_mean_average_precision *map = NULL;
 ANT_memory memory;
-long last_param;
+long last_param, boolean = FALSE;
 ANT_ANT_param_block params(argc, argv);
 char **document_list, **answer_list, **filename_list;
 ANT_relevant_document *assessments = NULL;
@@ -527,11 +528,16 @@ else
 		ranking_function = new ANT_ranking_function_divergence(search_engine);
 	else if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
 		ranking_function = new ANT_ranking_function_term_count(search_engine);
+	else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
+		{
+		boolean = TRUE;
+		ranking_function = new ANT_ranking_function_term_count(search_engine);
+		}
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
 search_engine->set_trim_postings_k(params.trim_postings_k);
-ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list);
+ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list, boolean);
 
 delete map;
 delete ranking_function;
