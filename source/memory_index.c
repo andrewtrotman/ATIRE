@@ -219,10 +219,7 @@ if (hash_table[hash_value] == NULL)
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
 
-node->current_docno = -1;
-node->add_posting((score >> 32) & 0xFFFFFFFF);
-node->current_docno = -1;
-node->add_posting(score & 0xFFFFFFFF);
+node->set(score);
 }
 
 /*
@@ -659,7 +656,6 @@ if (find_node(hash_table[hash(squiggle_document_offsets)], squiggle_document_off
 /*
 	If we are storing filenames on disk then store the location of the filename buffer and serialise it.
 */
-
 if (document_filenames != NULL)
 	{
 	pos = index_file->tell();

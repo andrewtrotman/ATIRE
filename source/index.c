@@ -190,8 +190,10 @@ for (param = first_param; param < argc; param++)
 				Store the document in the repository
 			*/
 			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-				index->add_to_document_repository(NULL, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
-//				index->add_to_document_repository(current_file->filename, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+				{
+//				index->add_to_document_repository(NULL, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+				index->add_to_document_repository(current_file->filename, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+				}
 			id_list.puts(current_file->filename);
 			}
 		terms_in_document = 0;

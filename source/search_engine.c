@@ -696,6 +696,31 @@ return sorted_id_list;
 }
 
 /*
+	ANT_SEARCH_ENGINE::GET_VARIABLE()
+	---------------------------------
+*/
+long long ANT_search_engine::get_variable(char *name)
+{
+ANT_search_engine_btree_leaf term_details;
+unsigned long long answer;
+ANT_compressable_integer *bits;
+
+if ((bits = get_decompressed_postings(name, &term_details)) == NULL)
+	answer = 0;
+else
+	{
+	/*
+		The sequence we'll get back is a postings list so it will be [1,<high32>,0,1,<low32>,0]
+		from which we want to extract <high32> and <low32> the high and low 32 bits of the integer
+		so that we can then construct a 64 bit integer from it.
+	*/
+	answer = (((unsigned long long) bits[1]) << 32) | (unsigned long long)bits[4];
+	}
+
+return (long long)answer;
+}
+
+/*
 	ANT_SEARCH_ENGINE::GET_DECOMPRESSED_POSTINGS()
 	----------------------------------------------
 */

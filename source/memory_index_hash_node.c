@@ -23,7 +23,7 @@
 */
 ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_memory_index_stats *stats)
 {
-postings_initial_length = 8;
+postings_initial_length = 10;		// this guarantees a 64 bit integer will fit (an assumption made later) so it must be at least 10
 postings_growth_factor = 1.5;
 
 this->stats = stats;
@@ -78,6 +78,43 @@ return ANT_compress_variable_byte::compress_bytes_needed(docno);
 inline void ANT_memory_index_hash_node::compress_into(unsigned char *dest, long long docno)
 {
 ANT_compress_variable_byte::compress_into(dest, docno);
+}
+
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::SET()
+	---------------------------------
+	This routine is designed to allow a user to "force" a 64-bit integer into the
+	postings lists.  The purpose of this is to make it possible to store 64-bit
+	integer variables in the index.  This frees us from file formats.  Its basicly
+	used for search engine "variables".
+*/
+void ANT_memory_index_hash_node::set(long long value)
+{
+long needed;
+unsigned long top, bottom;
+
+top = (((unsigned long long)value) >> 32) & 0xFFFFFFFF;
+bottom = ((unsigned long long)value) & 0xFFFFFFFF;
+
+collection_frequency += 2;
+document_frequency += 2;
+
+docid_node_used = 0;
+tf_node_used = 0;
+
+needed = compress_bytes_needed(top);
+compress_into(docid_list_tail->data + docid_node_used, top);
+docid_node_used += needed;
+
+tf_list_tail->data[tf_node_used] = 1;
+tf_node_used++;
+
+needed = compress_bytes_needed(bottom - top);		// we fake difference encoding
+compress_into(docid_list_tail->data + docid_node_used, bottom - top);
+docid_node_used += needed;
+
+tf_list_tail->data[tf_node_used] = 1;
+tf_node_used++;
 }
 
 /*

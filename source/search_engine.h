@@ -104,6 +104,8 @@ public:
 
 	long long boolean_results_list(long terms_in_query);
 
+	long long get_variable(char *name);
+
 	/*
 		Methods related to the retrieval of documents from the document repository.
 	*/

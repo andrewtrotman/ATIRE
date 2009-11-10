@@ -72,8 +72,8 @@ private:
 		Document filenames are stored in a big buffer after the documents but before the index
 	*/
 	char *document_filenames;
-	static const long long document_filenames_chunk_size = (1024 * 1024);
-	long long document_filenames_used;
+	static const long document_filenames_chunk_size = (1024 * 1024);
+	long document_filenames_used;
 
 private:
 	long hash(ANT_string_pair *string);
