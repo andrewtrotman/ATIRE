@@ -5,6 +5,7 @@
 #ifndef SEARCH_ENGINE_H_
 #define SEARCH_ENGINE_H_
 
+#include "fundamental_types.h"
 #include "compression_factory.h"
 #include "compression_text_factory.h"
 #include "ranking_function.h"
@@ -65,8 +66,6 @@ public:
 	ANT_search_engine_result *results_list;
 
 private:
-	long long get_long_long(unsigned char *from) { return *((int64_t *)from); }
-	long get_long(unsigned char *from) { return *((int32_t *)from); }
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 	void initialise(ANT_memory *memory);
 

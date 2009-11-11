@@ -10,8 +10,8 @@
 #include "instream.h"
 
 /*
-	class ANT_STREAM_TAR
-	--------------------
+	class ANT_DIRECTORY_ITERATOR_TAR
+	--------------------------------
 */
 class ANT_directory_iterator_tar : public ANT_directory_iterator
 {

@@ -104,6 +104,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_multiple.obj 		\
 	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
+	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_recursive_iterator.obj		\
 	$(OBJDIR)\btree_iterator.obj 					\

@@ -90,7 +90,7 @@ index->read(block, (long)(end - term_header));
 /*
 	The first sizeof(int64_t) bytes of the header are the number of nodes in the root
 */
-btree_nodes = (long)(get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
+btree_nodes = (long)(ANT_get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
 //printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
 block += sizeof(int64_t);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
@@ -111,7 +111,7 @@ for (current++; current < end_of_node_list; current++)
 	while (*block != '\0')
 		block++;
 	block++;
-	current->disk_pos = get_long_long(block);
+	current->disk_pos = ANT_get_long_long(block);
 	block += sizeof(current->disk_pos);
 	}
 current->term = NULL;
@@ -332,11 +332,11 @@ unsigned char *base;
 
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
 base = leaf + leaf_size * term_in_leaf + sizeof(int32_t);		// sizeof(int32_t) is for the number of terms in the node
-term_details->collection_frequency = get_long(base);
-term_details->document_frequency = get_long(base + 4);
-term_details->postings_position_on_disk = get_long_long(base + 8);
-term_details->impacted_length = get_long(base + 16);
-term_details->postings_length = get_long(base + 20);
+term_details->collection_frequency = ANT_get_long(base);
+term_details->document_frequency = ANT_get_long(base + 4);
+term_details->postings_position_on_disk = ANT_get_long_long(base + 8);
+term_details->impacted_length = ANT_get_long(base + 16);
+term_details->postings_length = ANT_get_long(base + 20);
 
 return term_details;
 }
@@ -375,18 +375,18 @@ index->read(btree_leaf_buffer, (long)node_length);
 		CF (4), DF (4), Offset_in_postings (8), DocIDs_Len (4), Postings_len (4), String_pos_in_node (4)
 */
 low = 0;
-high = nodes = (long)get_long(btree_leaf_buffer);
+high = nodes = (long)ANT_get_long(btree_leaf_buffer);
 leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
 
 while (low < high)
 	{
 	mid = (low + high) / 2;
-	if (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (mid + 1)))), term) < 0)
+	if (strcmp((char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (leaf_size * (mid + 1)))), term) < 0)
 		low = mid + 1;
 	else
 		high = mid;
 	}
-if ((low < nodes) && (strcmp((char *)(btree_leaf_buffer + get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
+if ((low < nodes) && (strcmp((char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (leaf_size * (low + 1)))), term) == 0))
 	return get_leaf(btree_leaf_buffer, low, term_details);
 else
 	return NULL;
