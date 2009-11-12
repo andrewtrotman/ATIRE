@@ -106,6 +106,7 @@ bin/threads.obj: source/threads.h
 bin/time_stats.obj: source/time_stats.h source/stats.h
 bin/top_k_sort.obj: source/top_k_sort.h
 bin/INEXqrels_to_run.obj: source/disk.h
+bin/ant_unzip.obj: source/directory_iterator_pkzip.h source/directory_iterator.h source/directory_iterator_object.h
 bin/filelist.obj: source/directory_recursive_iterator.h source/disk.h source/directory_iterator.h source/directory_iterator_object.h
 bin/foltbl_to_aspt.obj: source/disk.h source/str.h source/ctypes.h source/ctypes.h
 bin/get_doclist.obj: source/memory.h source/search_engine.h source/fundamental_types.h source/compression_factory.h source/compress.h source/compression_factory_scheme.h source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/ranking_function.h source/search_engine_accumulator.h source/search_engine_result.h source/search_engine_btree_leaf.h

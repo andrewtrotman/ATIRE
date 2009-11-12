@@ -29,11 +29,11 @@ public:
 	virtual ~ANT_directory_iterator();
 
 	/*
-		These versions of the routines return the state of the next file in the
+		These routines return the state of the next file in the
 		ANT_directory_iterator_object and thus the only state the ANT_directory_iterator
 		object holds is the current location in the directory.  It is pointless moving
 		that state into the ANT_directory_iterator_object because if you want two differnt
-		states in the current directoy you can just create a second iterator.
+		states in the current directory you can just create a second iterator.
 	*/
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);

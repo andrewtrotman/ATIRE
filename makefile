@@ -189,6 +189,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\foltbl_to_aspt.exe		\
 	$(BINDIR)\zipf_graph.exe			\
 	$(BINDIR)\get_doclist.exe			\
+	$(BINDIR)\ant_unzip.exe				\
 	$(BINDIR)\test_tar.exe
 
 #

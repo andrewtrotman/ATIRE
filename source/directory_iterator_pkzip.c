@@ -132,44 +132,83 @@ return next(object, get_file);
 */
 ANT_directory_iterator_object *ANT_directory_iterator_pkzip::next(ANT_directory_iterator_object *object, long get_file)
 {
-#ifdef NEVER
-
-unsigned char buffer[1024];
 ANT_ZIP_local_file_header lfh;
 uint16_t filename_length, extradata_length, method, flags, version;
 uint32_t compressed_data_length, raw_data_length, signature;
+unsigned char *compressed_data;
 
 if (files_read >= directory_files)
-	return 0;
+	return NULL;
 
-fread(&lfh, sizeof(lfh), 1, fp);
-signature = ANT_get_unsigned_long_long(lfh.signature);
+file->read((unsigned char *)&lfh, sizeof(lfh));
+signature = ANT_get_unsigned_long(lfh.signature);
 if (signature != 0x04034b50)
-	puts("Broken Signature");
+	{
+	printf("ANT ZIP Reader found a broken signature (%lx) when expecting a local-file-header signature (%lx)\n", signature, (long)0x04034b50);
+	return NULL;
+	}
 
-filename_length = ANT_get_unsigned_short(lfh.file_name_length);
-fread(buffer, filename_length, 1, fp);
-extradata_length = ANT_get_unsigned_short(lfh.extra_field_length);
+if ((filename_length = ANT_get_unsigned_short(lfh.file_name_length)) == 0)
+	{
+	printf("ANT ZIP Reader Cannot decompress files that don't have names\n");
+	return NULL;
+	}
+if (filename_length > PATH_MAX)
+	{
+	printf("ANT ZIP Reader Filename is %d characters long (which exceeds the Operating system limit of:%d\n", filename_length, PATH_MAX);
+	return NULL;
+	}
+	
+file->read((unsigned char *)object->filename, filename_length);
+object->filename[filename_length] = '\0';
+
 compressed_data_length = ANT_get_unsigned_long(lfh.compressed_size);
 raw_data_length = ANT_get_unsigned_long(lfh.uncompressed_size);
 method = ANT_get_unsigned_short(lfh.compression_method);
 flags = ANT_get_unsigned_short(lfh.general_purpose_bit_flag);
 version = ANT_get_unsigned_short(lfh.version_needed_to_extract);
 
-/*
-	If size == 0 and verson == 10 then we have a directory.
-*/
-printf("%*.*s (%u bytes -> %u bytes (using:%d, v:%d))\n", filename_length, filename_length, buffer, compressed_data_length, raw_data_length, method, version);
+extradata_length = ANT_get_unsigned_short(lfh.extra_field_length);
+read_and_forget(extradata_length);
 
-read_and_toss(extradata_length);
-read_and_toss(compressed_data_length);
+files_read++;
+
+/*
+	If the length of the source file is zero then skip it.
+*/
+if (raw_data_length == 0)
+	return next(object, get_file);
+
+printf("%*.*s (%u bytes -> %u bytes (using:%d, v:%d))\n", filename_length, filename_length, object->filename, compressed_data_length, raw_data_length, method, version);
+
+/*
+	Now load and decompress the file
+*/
+if ((compressed_data = new (std::nothrow) unsigned char [compressed_data_length + 1]) == NULL)
+	{
+	printf("ANT ZIP Reader cannot allocate %ld bytes for the compressed file\n", compressed_data_length);
+	return NULL;
+	}
+file->read(compressed_data, compressed_data_length);
+
+if (method == PKZIP_METHOD_STORED)
+	{
+	compressed_data[compressed_data_length] = '\0';
+	if (get_file)
+		object->file = (char *)compressed_data;
+	else
+		delete [] compressed_data;
+	}
+else
+	{
+	object->file = new char [100];
+	strcpy(object->file, "compressed");
+	delete [] compressed_data;
+	}
+
 if (flags &0x04)
 	exit(printf("FOOTER"));
 
-files_read++;
-return 1;
-#else
 return object;
-#endif
 }
 

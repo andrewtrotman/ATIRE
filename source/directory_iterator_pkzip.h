@@ -18,6 +18,9 @@ class ANT_directory_iterator_pkzip : public ANT_directory_iterator
 {
 private:
 	static const long PKZIP_BLOCK_SIZE = 1024;
+	static const long PKZIP_METHOD_STORED = 0;
+	static const long PKZIP_METHOD_DEFLATE = 8;
+	static const long PKZIP_METHOD_BZ2 = 12;
 
 private:
 	ANT_file *file;
