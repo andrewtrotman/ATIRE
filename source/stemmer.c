@@ -62,7 +62,9 @@ return NULL;
 char *ANT_stemmer::first(char *term)
 {
 stemmed_search_term_length = stem(term, stemmed_search_term);
-return get_next(ANT_btree_iterator::first(stemmed_search_term));
+strncpy(stemmed_search_term_head, stemmed_search_term, stemmed_search_term_length);
+stemmed_search_term_head[stemmed_search_term_length] = '\0';
+return get_next(ANT_btree_iterator::first(stemmed_search_term_head));
 }
 
 /*

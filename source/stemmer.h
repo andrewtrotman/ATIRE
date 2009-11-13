@@ -12,6 +12,7 @@
 class ANT_stemmer : public ANT_btree_iterator
 {
 protected:
+	char stemmed_search_term_head[MAX_TERM_LENGTH];
 	char stemmed_search_term[MAX_TERM_LENGTH];
 	char stemmed_index_term[MAX_TERM_LENGTH];
 	size_t stemmed_search_term_length;
