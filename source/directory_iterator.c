@@ -11,8 +11,11 @@
 	ANT_DIRECTORY_ITERATOR::ANT_DIRECTORY_ITERATOR()
 	------------------------------------------------
 */
-ANT_directory_iterator::ANT_directory_iterator()
+ANT_directory_iterator::ANT_directory_iterator(char *wildcard)
 {
+strncpy(this->wildcard, wildcard, PATH_MAX);
+this->wildcard[PATH_MAX - 1] = '\0';
+
 internals = new ANT_directory_iterator_internals;
 }
 
@@ -41,7 +44,7 @@ return destination;
 	ANT_DIRECTORY_ITERATOR::FIRST()
 	-------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object, char *the_wildcard, long get_file)
 {
 char *slash, *colon, *backslash, *max;
 

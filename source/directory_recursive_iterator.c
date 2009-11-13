@@ -47,10 +47,11 @@
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::ANT_DIRECTORY_RECURSIVE_ITERATOR()
 	--------------------------------------------------------------------
 */
-ANT_directory_recursive_iterator::ANT_directory_recursive_iterator()
+ANT_directory_recursive_iterator::ANT_directory_recursive_iterator(char *the_wildcard)
 {
 handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
-wildcard = new char [PATH_MAX];
+strncpy(wildcard, the_wildcard, PATH_MAX);
+wildcard[PATH_MAX - 1] = '\0';
 file_list = handle_stack;
 }
 
@@ -61,7 +62,6 @@ file_list = handle_stack;
 ANT_directory_recursive_iterator::~ANT_directory_recursive_iterator()
 {
 delete [] handle_stack;
-delete [] wildcard;
 }
 
 /*
@@ -211,7 +211,6 @@ ANT_directory_iterator_object *ANT_directory_recursive_iterator::first(ANT_direc
 char *got;
 
 file_list = handle_stack;
-strcpy(this->wildcard, wildcard);
 
 #ifdef _MSC_VER
 	GetCurrentDirectory(sizeof(path_buffer), path_buffer);

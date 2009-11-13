@@ -27,7 +27,6 @@ class ANT_directory_recursive_iterator : public ANT_directory_iterator
 private:
 	ANT_disk_directory *handle_stack;
 	ANT_disk_directory *file_list;
-	char *wildcard;
 	char path_buffer[PATH_MAX];
 
 private:
@@ -40,7 +39,7 @@ private:
 	char *first(char *root_directory, char *local_directory);
 
 public:
-	ANT_directory_recursive_iterator();
+	ANT_directory_recursive_iterator(char *the_wildcard);
 	virtual ~ANT_directory_recursive_iterator();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);

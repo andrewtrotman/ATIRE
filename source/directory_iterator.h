@@ -20,12 +20,13 @@ public:
 
 protected:
 	ANT_directory_iterator_internals *internals;
+	char wildcard[PATH_MAX];
 
 private:
 	char *construct_full_path(char *destination, char *filename);
 
 public:
-	ANT_directory_iterator();
+	ANT_directory_iterator(char *wildcard = "");
 	virtual ~ANT_directory_iterator();
 
 	/*
@@ -35,7 +36,7 @@ public:
 		that state into the ANT_directory_iterator_object because if you want two differnt
 		states in the current directory you can just create a second iterator.
 	*/
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *the_wildcard, long get_file = 0);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
 

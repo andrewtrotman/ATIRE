@@ -116,7 +116,7 @@ for (param = first_param; param < argc; param++)
 	delete instream_buffer;
 #endif
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
-		source = new ANT_directory_recursive_iterator;						// this dir and below
+		source = new ANT_directory_recursive_iterator(argv[param]);			// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
@@ -134,7 +134,7 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.trec_docnos)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));
 	else
-		source = new ANT_directory_iterator;									// current directory
+		source = new ANT_directory_iterator(argv[param]);					// current directory
 #ifdef PARALLEL_INDEXING
 	parallel_disk->add_iterator(source);
 	}
@@ -207,18 +207,25 @@ for (param = first_param; param < argc; param++)
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 
+#ifdef NEVER
 	if (files_that_match == 0)
 		printf("Warning: '%s' does not match any files\n", argv[param]);
+#endif
 	}
 
 if (param_block.reporting_frequency != LLONG_MAX && doc != last_report)
 	report(doc, index, &stats, bytes_indexed);
 
-id_list.close();
-now = stats.start_timer();
-index->serialise(&param_block);
-stats.add_disk_output_time(stats.stop_timer(now));
-index->text_render(param_block.statistics);
+if (doc == 0)
+	puts("No documents indexed (check your file list)");
+else
+	{
+	id_list.close();
+	now = stats.start_timer();
+	index->serialise(&param_block);
+	stats.add_disk_output_time(stats.stop_timer(now));
+	index->text_render(param_block.statistics);
+	}
 delete index;
 delete disk;
 delete parser;

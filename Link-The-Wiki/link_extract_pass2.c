@@ -130,8 +130,6 @@ else
 int main(int argc, char *argv[])
 {
 static char *seperators = " ";
-//ANT_disk disk;
-ANT_directory_recursive_iterator disk;  // make the recursive pattern matching as for default files reading
 char *file, *token, *where_to, *filename;
 char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
@@ -161,7 +159,7 @@ link_index = read_index(argv[first_param], &terms_in_index);
 file_number = 1;
 for (param = first_param + 1; param < argc; param++)
 	{
-	//filename = disk.get_first_filename(argv[param]);
+	ANT_directory_recursive_iterator disk(argv[param]);  // make the recursive pattern matching as for default files reading
 	if (disk.first(&file_object, argv[param]) == NULL)
 		file = filename = NULL;
 	else

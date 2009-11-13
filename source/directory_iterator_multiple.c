@@ -14,7 +14,7 @@
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::ANT_DIRECTORY_ITERATOR_MULTIPLE()
 	------------------------------------------------------------------
 */
-ANT_directory_iterator_multiple::ANT_directory_iterator_multiple() : ANT_directory_iterator()
+ANT_directory_iterator_multiple::ANT_directory_iterator_multiple()
 {
 sources_length = sources_used = 0;
 sources = NULL;

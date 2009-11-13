@@ -51,8 +51,6 @@ return source;
 */
 int main(int argc, char *argv[])
 {
-//ANT_disk disk;
-ANT_directory_recursive_iterator disk;  // make the recursive pattern matching as for default files reading
 char *file, *start, *end, *from, *ch;
 char *target_start, *target_end, *target_dot;
 char *slash;
@@ -80,6 +78,8 @@ if (*argv[1] == '-')
 file_number = 1;
 for (param = first_param; param < argc; param++)
 	{
+	ANT_directory_recursive_iterator disk(argv[param]);
+
 	disk.first(&file_object, argv[param]);
 	file = ANT_disk::read_entire_file(file_object.filename);
 	while (file != NULL)
