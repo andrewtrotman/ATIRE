@@ -46,4 +46,8 @@ source ../../scripts/setdebug32env.bash
   -----
   The autotools will automatically handle the configuration for whether with ZLIB and BZ2LIB support or not 
   
+4 PARALLEL INDEXING
+  to enable parallel indexing code
+  configure --with-pi
+  
 

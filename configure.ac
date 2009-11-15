@@ -5,7 +5,7 @@ AC_PREREQ([2.63])
 AC_INIT([ANT], [0.3], [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([source/ant_param_block.c])
 #AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_MACRO_DIR([m4])
+#AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL
@@ -16,6 +16,12 @@ AC_PROG_CXX
 
 AM_PROG_CC_C_O
 
+# Check for macros
+AC_ARG_WITH([pi],
+            AC_HELP_STRING([--with-pi],
+                       [Define PARALLEL_INDEXING macro]),
+        [CXXFLAGS="$CXXFLAGS -DPARALLEL_INDEXING"; CFLAGS="$CXXFLAGS"])
+          
 # Checks for libraries.
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([z], [inflateReset], [LIBS="$LIBS -lz"; CXXFLAGS="$CXXFLAGS -DANT_HAS_ZLIB"; CFLAGS="$CXXFLAGS"])

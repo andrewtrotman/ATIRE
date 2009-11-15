@@ -4,6 +4,7 @@ AM_CPPFLAGS = -std=c++0x  -pedantic -I $(srcdir)/include/stpl
 LTW_LIBS = -lant -lpthread
 
 SRC_DIR = src
+TOOLS_DIR = tools
 
 ltw_headers = \
 	$(SRC_DIR)/run.h \
@@ -100,9 +101,10 @@ ltw_sources = \
 	$(SRC_DIR)/wikipedia.cpp \
 	$(SRC_DIR)/ltw.cpp
 
-noinst_PROGRAMS = ltw 
+noinst_PROGRAMS = ltw collection_link_finder
 
 ltw_SOURCES = $(ltw_sources)
 ltw_LDADD = ${LTW_LIBS}
 #ltw_LDFLAGS = -static
 
+collection_link_finder_
