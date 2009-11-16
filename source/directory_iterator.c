@@ -51,6 +51,13 @@ char *slash, *colon, *backslash, *max;
 #ifdef _MSC_VER
 	if ((internals->file_list = FindFirstFile(wildcard, &internals->file_data)) == INVALID_HANDLE_VALUE)
 		return NULL;
+
+	while (internals->file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		if (FindNextFile(internals->file_list, &internals->file_data) == 0)
+			{
+			FindClose(internals->file_list);
+			return NULL;
+			}
 #else
 	glob(wildcard, 0, NULL, &internals->matching_files);
 	internals->glob_index = 0;
@@ -98,11 +105,13 @@ return object;
 ANT_directory_iterator_object *ANT_directory_iterator::next(ANT_directory_iterator_object *object, long get_file)
 {
 #ifdef _MSC_VER
-	if (FindNextFile(internals->file_list, &internals->file_data) == 0)
-		{
-		FindClose(internals->file_list);
-		return NULL;
-		}
+	do
+		if (FindNextFile(internals->file_list, &internals->file_data) == 0)
+			{
+			FindClose(internals->file_list);
+			return NULL;
+			}
+	while (internals->file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 
 	construct_full_path(object->filename, internals->file_data.cFileName);
 #else
