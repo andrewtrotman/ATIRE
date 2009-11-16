@@ -101,12 +101,14 @@ for (;;)
 	{
 	if (isheadchar(*current))
 		break;
-	if (*current & 0x80)
+	if (*current & 0x80) //it is a unicode character
 		{
 		if (ischinese(current))
 			break;
 		current += utf8_bytes(current);
 		}
+	//if(iseuropean(*current))
+	//	break;
 	else
 		current++;
 	}
@@ -114,9 +116,12 @@ for (;;)
 /*
 	Now we look at the first character as it defines how parse the next token
 */
-if (ANT_isalpha(*current))				// alphabetic strings (in the ASCII CodePage)
+if (ANT_isalpha(*current))	// alphabetic strings (in the ASCII CodePage)
 	{
-	*current = ANT_tolower(*current);
+	if(iseuropean(*current)) 
+		printf("und es ist ein %c",*current);
+
+	*current = ANT_tolower(*current); //first charater to lower and save it in start
 	start = current++;
 	while (ANT_isalpha(*current))
 		{
