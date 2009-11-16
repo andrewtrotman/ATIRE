@@ -9,6 +9,7 @@
 
 class ANT_file;
 class ANT_memory;
+class ANT_directory_iterator_pkzip_internals;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_PKZIP
@@ -30,6 +31,7 @@ private:
 	unsigned long long directory_length;
 	unsigned long long directory_files;
 	unsigned long long files_read;
+	ANT_directory_iterator_pkzip_internals *internals;
 
 private:
 	void read_and_forget(unsigned long long bytes);

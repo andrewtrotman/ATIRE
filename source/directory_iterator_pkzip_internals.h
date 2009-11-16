@@ -5,6 +5,18 @@
 #ifndef DIRECTORY_ITERATOR_PKZIP_INTERNALS_H_
 #define DIRECTORY_ITERATOR_PKZIP_INTERNALS_H_
 
+#ifdef ANT_HAS_ZLIB
+	#include "../zlib/zlib-1.2.3/zlib.h"
+#endif
+
+class ANT_directory_iterator_pkzip_internals
+{
+public:
+#ifdef ANT_HAS_ZLIB
+	z_stream stream;
+#endif
+} ;
+
 /*
 	class ANT_ZIP_END_OF_CENTRAL_DIRECTORY_RECORD
 	---------------------------------------------

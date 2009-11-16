@@ -3,6 +3,11 @@
 	--------------------------
 */
 #include <stdio.h>
+
+#ifdef ANT_HAS_ZLIB
+	#include "../zlib/zlib-1.2.3/zlib.h"
+#endif
+
 #include "directory_iterator_pkzip_internals.h"
 #include "directory_iterator_pkzip.h"
 #include "directory_iterator_object.h"
@@ -19,6 +24,14 @@ memory = new ANT_memory(1024 * 1024);
 file = new ANT_file(memory);
 file->open(filename, "rb");
 read_central_directory_header();
+internals = new ANT_directory_iterator_pkzip_internals;
+
+#ifdef ANT_HAS_ZLIB
+	internals->stream.zalloc = Z_NULL;
+	internals->stream.zfree = Z_NULL;
+	internals->stream.opaque = Z_NULL;
+	inflateInit2(&internals->stream, -MAX_WBITS);
+#endif
 }
 
 /*
@@ -28,6 +41,12 @@ read_central_directory_header();
 ANT_directory_iterator_pkzip::~ANT_directory_iterator_pkzip()
 {
 file->close();
+
+#ifdef ANT_HAS_ZLIB
+	inflateEnd(&internals->stream);
+#endif
+
+delete internals;
 
 delete file;
 delete memory;
@@ -199,11 +218,35 @@ if (method == PKZIP_METHOD_STORED)
 	else
 		delete [] compressed_data;
 	}
-else
+else if (method == PKZIP_METHOD_DEFLATE)
 	{
-	object->file = new char [100];
-	strcpy(object->file, "compressed");
+#ifdef ANT_HAS_ZLIB
+	/*
+		Call the Zlib to decompress
+	*/
+	object->file = new char [raw_data_length];
+
+	internals->stream.avail_in = compressed_data_length;
+	internals->stream.next_in = (Bytef *)compressed_data;
+	internals->stream.avail_out = raw_data_length;
+	internals->stream.next_out = (Bytef *)object->file;
+
+	inflateReset(&internals->stream);
+	inflate(&internals->stream, Z_SYNC_FLUSH);
+
 	delete [] compressed_data;
+#else
+	exit(printf("You are trying to decompress a zip file but ZLIB is not included in this build"));
+/*
+	object->filename = '\0';
+	object->file = NULL;
+	delete [] compressed_data;
+	return NULL;
+*/
+#endif
+	}
+else if (method == PKZIP_METHOD_BZ2)
+	{
 	}
 
 if (flags &0x04)
@@ -211,4 +254,3 @@ if (flags &0x04)
 
 return object;
 }
-
