@@ -38,13 +38,14 @@ public:
 	static int ischinese(unsigned char *here);
 	static int ischinese(char *here) { return ischinese((unsigned char *)here); }
 
-	static int iseuropean(unsigned char european);
-	//static int iseuropean(unsigned char *here);
-	//static int iseuropean(char *here) { return iseuropean((unsigned char *)here); }
+	static int iseuropean(unsigned char *here);
+	static int iseuropean(char *here) { return iseuropean((unsigned char *)here); }
 	
 	static unsigned long utf8_to_wide(unsigned char *here);
 	static long utf8_bytes(unsigned char *here);
 	static long utf8_bytes(char *here) { return utf8_bytes((unsigned char *)here); }
+
+	static unsigned char *tolower(unsigned char *here);
 
 	virtual void set_document(unsigned char *document);
 	virtual ANT_string_pair *get_next_token(void);
@@ -95,7 +96,7 @@ else
 	ANT_PARSER::ISEUROPEAN()
 	-----------------------
 	Is the given character from the European(German) CodePoint?
-
+*/
 inline int ANT_parser::iseuropean(unsigned char *here)
 {
 unsigned long european;
@@ -109,7 +110,7 @@ else
 	return ((european == 0x00C4)|| // Ä U+00C4 Latin capital letter A with diaeresis
 		(european == 0x00D6)|| // Ö U+00D6 Latin capital letter O with diaeresis
 		(european == 0x00DC)|| // Ü U+00DC Latin capital letter U with diaeresis
-		(european == 0x1E9E)|| // ẞ U+1E9E LATIN CAPITAL LETTER SHARP S
+		//(european == 0x1E9E)|| // ẞ U+1E9E LATIN CAPITAL LETTER SHARP S
 		(european == 0x00E4)|| // ä U+00E4 Latin small letter a with diaeresis
 		(european == 0x00F6)|| // ö U+00F6 Latin small letter o with diaeresis
 		(european == 0x00FC)|| // ü U+00FC Latin small letter u with diaeresis
@@ -117,19 +118,32 @@ else
 		);
 	}
 }
-*/
 
-inline int ANT_parser::iseuropean(unsigned char european)
+/*
+	ANT_PARSER::TOLOWER()
+	-----------------------
+	to convert bothe ascii and European(German) character to lowercase
+	this is a temporary solution
+*/
+inline unsigned char *ANT_parser::tolower(unsigned char *here)
 {
-	return ((european == 0x00C4)|| // Ä U+00C4 0x00C4 Latin capital letter A with diaeresis
-		(european == 0x00D6)|| // Ö U+00D6 0x00D6 Latin capital letter O with diaeresis
-		(european == 0x00DC)|| // Ü U+00DC 0x00DC Latin capital letter U with diaeresis
-		//(european == 0x1E9E)|| // ẞ U+1E9E 0x1E9E LATIN CAPITAL LETTER SHARP S very unlikely
-		(european == 0x00E4)|| // ä U+00E4 0x00E4 Latin small letter a with diaeresis
-		(european == 0x00F6)|| // ö U+00F6 0x00F6 Latin small letter o with diaeresis
-		(european == 0x00FC)|| // ü U+00FC 0x00FC Latin small letter u with diaeresis
-		(european == 0x00DF)   // ß U+00DF 0x00DF LATIN SMALL LETTER SHARP S
-		);
+	long number_of_bytes =  1;
+
+	if ((*here & 0x80) == 0)
+		*here = ANT_tolower(*here);
+	else if (iseuropean(here))
+		{
+		number_of_bytes = utf8_bytes(here);
+		if (strncmp((char *)here, "Ä", number_of_bytes) == 0)
+			strncpy((char *)here, "ä", number_of_bytes);
+		else if (strncmp((char *)here, "Ö", number_of_bytes) == 0)
+			strncpy((char *)here, "ö", number_of_bytes);
+		else if (strncmp((char *)here, "Ü", number_of_bytes) == 0)
+			strncpy((char *)here, "ü", number_of_bytes);
+//		else if (strncmp((char *)here, "ẞ", number_of_bytes) == 0)
+//			strncpy((char *)here, "ß", number_of_bytes);
+		}
+	return here;
 }
 
 /*

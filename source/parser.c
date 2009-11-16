@@ -60,6 +60,7 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 ANT_string_pair *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
+long lang_flag = 0;
 
 if (segmentation != NULL)
 	{
@@ -105,10 +106,10 @@ for (;;)
 		{
 		if (ischinese(current))
 			break;
+		else if (iseuropean(current))
+			break;
 		current += utf8_bytes(current);
 		}
-	//if(iseuropean(*current))
-	//	break;
 	else
 		current++;
 	}
@@ -116,24 +117,19 @@ for (;;)
 /*
 	Now we look at the first character as it defines how parse the next token
 */
-if (ANT_isalpha(*current))	// alphabetic strings (in the ASCII CodePage)
+if (ANT_isalpha(*current) || (lang_flag = iseuropean(current)))	// alphabetic strings (in the ASCII CodePage) or European speical characters
 	{
-/*
-	The call to iseuropean() below can never return true because ANT_isalpha() will alwasys be
-	false in the case of a high-bit set character - all iseuropean() characters have the high
-	bit set.
-*/
-/*
-	if(iseuropean(*current)) 
-		printf("und es ist ein %c",*current);
-*/
+//	*current = ANT_tolower(*current); //first character to lower and save it in start
+	tolower(current);
+	//start = current++;
+	start = current;
+	current += lang_flag ? utf8_bytes(current) : 1;
 
-	*current = ANT_tolower(*current); //first charater to lower and save it in start
-	start = current++;
-	while (ANT_isalpha(*current))
+	while (ANT_isalpha(*current) || (lang_flag = iseuropean(current)))
 		{
-		*current = ANT_tolower(*current);
-		current++;
+//		*current = ANT_tolower(*current);
+		tolower(current);
+		current += lang_flag ? utf8_bytes(current) : 1;
 		}
 
 	current_token.start = (char *)start;
