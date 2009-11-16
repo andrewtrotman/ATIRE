@@ -5,7 +5,10 @@
 #include <stdio.h>
 
 #ifdef ANT_HAS_ZLIB
-	#include "../zlib/zlib-1.2.3/zlib.h"
+	#include "zlib.h"
+#endif
+#ifdef ANT_HAS_BZLIB
+	#include "bzlib.h"
 #endif
 
 #include "directory_iterator_pkzip_internals.h"
@@ -155,6 +158,9 @@ ANT_ZIP_local_file_header lfh;
 uint16_t filename_length, extradata_length, method, flags, version;
 uint32_t compressed_data_length, raw_data_length, signature;
 unsigned char *compressed_data;
+#ifdef ANT_HAS_BZLIB
+	unsigned int raw_data_length_for_bz2;
+#endif
 
 if (files_read >= directory_files)
 	return NULL;
@@ -198,7 +204,7 @@ files_read++;
 if (raw_data_length == 0)
 	return next(object, get_file);
 
-printf("%*.*s (%u bytes -> %u bytes (using:%d, v:%d))\n", filename_length, filename_length, object->filename, compressed_data_length, raw_data_length, method, version);
+//printf("%*.*s (%u bytes -> %u bytes (using:%d, v:%d))\n", filename_length, filename_length, object->filename, compressed_data_length, raw_data_length, method, version);
 
 /*
 	Now load and decompress the file
@@ -224,7 +230,7 @@ else if (method == PKZIP_METHOD_DEFLATE)
 	/*
 		Call the Zlib to decompress
 	*/
-	object->file = new char [raw_data_length];
+	object->file = new char [raw_data_length + 1];
 
 	internals->stream.avail_in = compressed_data_length;
 	internals->stream.next_in = (Bytef *)compressed_data;
@@ -234,6 +240,7 @@ else if (method == PKZIP_METHOD_DEFLATE)
 	inflateReset(&internals->stream);
 	inflate(&internals->stream, Z_SYNC_FLUSH);
 
+	object->file[raw_data_length] = '\0';
 	delete [] compressed_data;
 #else
 	exit(printf("You are trying to decompress a zip file but ZLIB is not included in this build"));
@@ -247,6 +254,20 @@ else if (method == PKZIP_METHOD_DEFLATE)
 	}
 else if (method == PKZIP_METHOD_BZ2)
 	{
+#ifdef ANT_HAS_BZLIB
+	object->file = new char [raw_data_length + 1];
+	raw_data_length_for_bz2 = raw_data_length;
+	BZ2_bzBuffToBuffDecompress(object->file, &raw_data_length_for_bz2, (char *)compressed_data, compressed_data_length, 0, 0);
+	object->file[raw_data_length] = '\0';
+#else
+	exit(printf("You are trying to decompress a zip file but BZLIB is not included in this build"));
+/*
+	object->filename = '\0';
+	object->file = NULL;
+	delete [] compressed_data;
+	return NULL;
+*/
+#endif
 	}
 
 if (flags &0x04)
