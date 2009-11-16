@@ -118,8 +118,15 @@ for (;;)
 */
 if (ANT_isalpha(*current))	// alphabetic strings (in the ASCII CodePage)
 	{
+/*
+	The call to iseuropean() below can never return true because ANT_isalpha() will alwasys be
+	false in the case of a high-bit set character - all iseuropean() characters have the high
+	bit set.
+*/
+/*
 	if(iseuropean(*current)) 
 		printf("und es ist ein %c",*current);
+*/
 
 	*current = ANT_tolower(*current); //first charater to lower and save it in start
 	start = current++;
