@@ -35,7 +35,7 @@ public:
 	ANT_directory_iterator_multiple();
 	virtual ~ANT_directory_iterator_multiple();
 
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 
 	void add_iterator(ANT_directory_iterator *iterator);

@@ -11,12 +11,11 @@
 	ANT_DIRECTORY_ITERATOR_FILE::FIRST()
 	------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_file::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_file::first(ANT_directory_iterator_object *object, long get_file)
 {
 document_end = document_start = file;
 
 return next(object, get_file);
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*

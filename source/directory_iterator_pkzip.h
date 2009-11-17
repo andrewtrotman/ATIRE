@@ -41,7 +41,7 @@ public:
 	ANT_directory_iterator_pkzip(char *filename);
 	~ANT_directory_iterator_pkzip();
 	
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
 

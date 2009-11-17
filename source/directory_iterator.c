@@ -44,7 +44,7 @@ return destination;
 	ANT_DIRECTORY_ITERATOR::FIRST()
 	-------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object, char *the_wildcard, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object, long get_file)
 {
 char *slash, *colon, *backslash, *max;
 

@@ -117,7 +117,7 @@ for (;;)
 /*
 	Now we look at the first character as it defines how parse the next token
 */
-if (ANT_isalpha(*current) || (lang_flag = iseuropean(current)))	// alphabetic strings (in the ASCII CodePage) or European speical characters
+if (ANT_isalpha(*current) || (lang_flag = iseuropean(current)) != 0)	// alphabetic strings (in the ASCII CodePage) or European speical characters
 	{
 //	*current = ANT_tolower(*current); //first character to lower and save it in start
 	tolower(current);
@@ -125,7 +125,7 @@ if (ANT_isalpha(*current) || (lang_flag = iseuropean(current)))	// alphabetic st
 	start = current;
 	current += lang_flag ? utf8_bytes(current) : 1;
 
-	while (ANT_isalpha(*current) || (lang_flag = iseuropean(current)))
+	while (ANT_isalpha(*current) || (lang_flag = iseuropean(current)) != 0)
 		{
 //		*current = ANT_tolower(*current);
 		tolower(current);

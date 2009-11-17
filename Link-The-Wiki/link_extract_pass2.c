@@ -160,7 +160,7 @@ file_number = 1;
 for (param = first_param + 1; param < argc; param++)
 	{
 	ANT_directory_recursive_iterator disk(argv[param]);  // make the recursive pattern matching as for default files reading
-	if (disk.first(&file_object, argv[param]) == NULL)
+	if (disk.first(&file_object) == NULL)
 		file = filename = NULL;
 	else
 		{

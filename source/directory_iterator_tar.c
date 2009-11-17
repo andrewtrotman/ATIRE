@@ -61,7 +61,7 @@ else
 	ANT_DIRECTORY_ITERATOR_TAR::FIRST()
 	-----------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_tar::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_tar::first(ANT_directory_iterator_object *object, long get_file)
 {
 bytes_read = 0;
 if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
@@ -79,7 +79,6 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 	}
 
 return NULL;
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*

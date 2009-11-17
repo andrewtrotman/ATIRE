@@ -32,12 +32,14 @@ fill_count = NULL;
 */
 ANT_directory_iterator_multiple::~ANT_directory_iterator_multiple()
 {
-ANT_directory_iterator_multiple_internals *current;
+//ANT_directory_iterator_multiple_internals *current;
 
 delete [] sources;
 
+/*
 for (current = thread_details; current < thread_details + sources_used; current++)
 	delete [] current->wildcard;
+*/
 
 delete [] thread_details;
 delete [] queue;
@@ -83,7 +85,7 @@ void ANT_directory_iterator_multiple::produce(ANT_directory_iterator_multiple_in
 {
 ANT_directory_iterator_object *got;
 
-for (got = my->iterator->first(&my->file_object, my->wildcard, my->get_file); got != NULL; got = my->iterator->next(&my->file_object, my->get_file))
+for (got = my->iterator->first(&my->file_object, my->get_file); got != NULL; got = my->iterator->next(&my->file_object, my->get_file))
 	{
 	empty_count->enter();
 	mutex->enter();
@@ -132,7 +134,7 @@ return NULL;
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::FIRST()
 	----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_directory_iterator_object *object, long get_file)
 {
 long instance;
 ANT_directory_iterator_multiple_internals *current;
@@ -158,7 +160,7 @@ for (current = thread_details; current < thread_details + sources_used; current+
 	{
 	current->iterator = sources[instance];
 	current->parent = this;
-	current->wildcard = strnew(wildcard);
+//	current->wildcard = strnew(wildcard);
 	current->get_file = get_file;
 	ANT_thread(bootstrap, current);
 	current->instance = instance++;

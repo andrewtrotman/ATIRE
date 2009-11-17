@@ -610,7 +610,6 @@ exit(printf("Usage:%s [-lowercase] [-noyears] [-runname:name] [-anchors:<n>] [-t
 int main(int argc, char *argv[])
 {
 static char *seperators = " ";
-ANT_directory_iterator disk;
 char *file, *token, *where_to;
 char **term_list, **first, **last, **current;
 ANT_link_term *link_index, *index_term, *last_index_term;
@@ -659,7 +658,9 @@ link_index = read_index(argv[index_argv_param], &terms_in_index);
 print_header(runname);
 
 for (param = index_argv_param + 1; param < argc; param++)
-	for (current_file = disk.first(&file_object, argv[param]); current_file != NULL; current_file = disk.next(&file_object))
+	{
+	ANT_directory_iterator disk(argv[param]);
+	for (current_file = disk.first(&file_object); current_file != NULL; current_file = disk.next(&file_object))
 		{
 		file = ANT_disk::read_entire_file(file_object.filename);
 		all_links_in_file_length = 0;
@@ -755,6 +756,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 #endif
 		num_of_processed_topic++;
 		}
+	}
 fprintf(stderr, "Total %d topics processed\n", num_of_processed_topic);
 print_footer();
 

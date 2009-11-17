@@ -11,6 +11,7 @@
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_file.h"
 #include "directory_iterator_object.h"
+#include "directory_iterator_pkzip.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -131,8 +132,10 @@ for (param = first_param; param < argc; param++)
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_tar(instream_buffer);
 		}
-	else if (param_block.trec_docnos)
+	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));
+	else if (param_block.recursive == ANT_indexer_param_block::PKZIP)
+		source = new ANT_directory_iterator_pkzip(argv[param]);
 	else
 		source = new ANT_directory_iterator(argv[param]);					// current directory
 #ifdef PARALLEL_INDEXING
@@ -142,7 +145,7 @@ for (param = first_param; param < argc; param++)
 	files_that_match = 0;
 
 	now = stats.start_timer();
-	current_file = disk->first(&file_object, "*", ANT_directory_iterator::READ_FILE);
+	current_file = disk->first(&file_object, ANT_directory_iterator::READ_FILE);
 	stats.add_disk_input_time(stats.stop_timer(now));
 	{
 #else

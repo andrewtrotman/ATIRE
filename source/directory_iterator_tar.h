@@ -34,7 +34,7 @@ public:
 	ANT_directory_iterator_tar(ANT_instream *source) { this->source = source; }
 	virtual ~ANT_directory_iterator_tar() {}
 
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, char *wildcard, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
 

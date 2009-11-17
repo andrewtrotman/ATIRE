@@ -25,6 +25,6 @@ ANT_instream_bz2 source(&memory, &file);
 ANT_directory_iterator_tar tarball(&source);
 ANT_directory_iterator_object file_object, *current;
 
-for (current = tarball.first(&file_object, ""); current != NULL; current = tarball.next(&file_object))
+for (current = tarball.first(&file_object); current != NULL; current = tarball.next(&file_object))
 	puts(current->filename);
 }

@@ -19,7 +19,7 @@ if (argc != 2)
 
 unzipper = new ANT_directory_iterator_pkzip(argv[1]);
 
-for (got = unzipper->first(&file, "", TRUE); got != NULL; got = unzipper->next(&file, TRUE))
+for (got = unzipper->first(&file, TRUE); got != NULL; got = unzipper->next(&file, TRUE))
 	{
 	puts("=====");
 	puts(got->filename);

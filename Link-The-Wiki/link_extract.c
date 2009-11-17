@@ -80,7 +80,7 @@ for (param = first_param; param < argc; param++)
 	{
 	ANT_directory_recursive_iterator disk(argv[param]);
 
-	disk.first(&file_object, argv[param]);
+	disk.first(&file_object);
 	file = ANT_disk::read_entire_file(file_object.filename);
 	while (file != NULL)
 		{

@@ -206,7 +206,7 @@ return next_match_wildcard(1);
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
 	-----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_recursive_iterator::first(ANT_directory_iterator_object *object, char *wildcard, long get_file)
+ANT_directory_iterator_object *ANT_directory_recursive_iterator::first(ANT_directory_iterator_object *object, long get_file)
 {
 char *got;
 

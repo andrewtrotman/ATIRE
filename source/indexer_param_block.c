@@ -27,7 +27,7 @@ ANT_indexer_param_block::ANT_indexer_param_block(int argc, char *argv[])
 {
 this->argc = argc;
 this->argv = argv;
-trec_docnos = segmentation = FALSE;
+segmentation = FALSE;
 recursive = NONE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
@@ -72,14 +72,9 @@ puts("FILE HANDLING");
 puts("-------------");
 puts("-r              Recursive search for files in this and directories below this");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
+puts("-rtrec          <DOC>...</DOC> seperates documents, each identified by <DOCNO>docid</DOCNO>");
 puts("-rtgz           Search in tar.gz files for indexable files");
-puts("");
-
-puts("TREC / INEX SPECIFIC");
-puts("--------------------");
-puts("-docno          <DOC>...</DOC> seperates documents (identified by <DOCNO>docid</DOCNO>)");
-puts("                default is each doc in seperate file and docid is filename");
-puts("-trec           see -docno");
+puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
 
 puts("COMPRESSION");
@@ -235,16 +230,16 @@ for (param = 1; param < argc; param++)
 	if (*argv[param] == '-'/* || *argv[param] == '/'*/)		// command line switch
 		{
 		command = argv[param] + 1;
-		if (strcmp(command, "docno") == 0)
-			trec_docnos = TRUE;
-		else if (strcmp(command, "trec") == 0)
-			trec_docnos = TRUE;
-		else if (strcmp(command, "r") == 0)
+		if (strcmp(command, "r") == 0)
 			recursive = DIRECTORIES;
 		else if (strcmp(command, "rtgz") == 0)
 			recursive = TAR_GZ;
 		else if (strcmp(command, "rtbz2") == 0)
 			recursive = TAR_BZ2;
+		else if (strcmp(command, "rzip") == 0)
+			recursive = PKZIP;
+		else if (strcmp(command, "rtrec") == 0)
+			recursive = TREC;
 		else if (strcmp(command, "S") == 0)
 			segmentation = TRUE;
 		else if (strcmp(command, "?") == 0)
