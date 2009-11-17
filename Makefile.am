@@ -270,7 +270,8 @@ noinst_PROGRAMS = ant index ant_dictionary \
 
 ant_SOURCES = $(SRCDIR)/ant_ant.c
 ant_LDADD = ${ANT_LIBS}
-ant_LDFLAGS = -rdynamic
+#ant_LDFLAGS = -rdynamic
+ant_LDFLAGS = -static -export-dynamic
 ant_DEPENDENCIES = libant.la
 
 index_SOURCES = $(SRCDIR)/index.c
