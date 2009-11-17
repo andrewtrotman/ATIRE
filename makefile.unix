@@ -4,16 +4,16 @@ BINDIR = bin
 
 # debuging compiling and linking
 #LDFLAGS = -g -ldl
-#CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 \
+#CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -DONE_PARSER -DTOP_K_SEARCH \
 #         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 # normal compiling and linking
-LDFLAGS = -ldl -pthread
-CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
+LDFLAGS = -ldl
+CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER -DTOP_K_SEARCH \
          -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 # parallel compiling and linking
-# LDFLAGS += -pthread
+LDFLAGS += -pthread
 CFLAGS += -DPARALLEL_INDEXING
 
 #
@@ -88,6 +88,7 @@ OBJECTS = \
 	directory_iterator_multiple.o \
 	directory_iterator_internals.o \
 	directory_iterator_tar.o \
+	directory_iterator_pkzip.o \
 	directory_iterator_file.o \
 	directory_recursive_iterator.o \
 	btree_iterator.o \
@@ -135,6 +136,7 @@ OBJECTS = \
 	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
 	ranking_function_bm25.o \
+	ranking_function_term_count.o \
 	instream_file.o \
 	instream_deflate.o \
 	instream_bz2.o \
@@ -159,6 +161,8 @@ $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 
 $(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+
+$(OBJECTS_W_DIR) : makefile.unix
 
 .PHONY : clean
 clean :
