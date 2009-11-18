@@ -71,6 +71,7 @@ library_sources =  \
 	$(SRCDIR)/directory_iterator_file.c	\
 	$(SRCDIR)/directory_iterator_multiple.c \
 	$(SRCDIR)/directory_iterator_internals.c \
+	$(SRCDIR)/directory_iterator_pkzip.c \
     $(SRCDIR)/btree_iterator.c \
     $(SRCDIR)/top_k_sort.c \
     $(SRCDIR)/stemmer.c	\
@@ -162,6 +163,7 @@ library_noinst_headers = \
 	$(SRCDIR)/directory_iterator.h	\
 	$(SRCDIR)/directory_iterator_file.h	\
 	$(SRCDIR)/directory_iterator_tar.h	\
+	$(SRCDIR)/directory_iterator_pkzip.h \
 	$(SRCDIR)/directory_iterator_multiple.h \
 	$(SRCDIR)/directory_iterator_internals.h \
 	$(SRCDIR)/directory_iterator_object.h \
