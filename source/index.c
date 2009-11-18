@@ -153,7 +153,7 @@ for (param = first_param; param < argc; param++)
 	files_that_match = 0;
 
 	now = stats.start_timer();
-	current_file = disk->first(&file_object/*, argv[param]*/, ANT_directory_iterator::READ_FILE);
+	current_file = disk->first(&file_object, ANT_directory_iterator::READ_FILE);
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 
