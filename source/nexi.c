@@ -93,8 +93,8 @@ else if (length == 1)
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::isXMLnamestartchar(*from))
-		if (ANT_parser::isXMLnamechar(*next))
+	else if (ANT_parser::isXMLnamestartchar(*from)|| ANT_parser::iseuropean(from))
+		if (ANT_parser::isXMLnamechar(*next)||ANT_parser::iseuropean(next))
 			return TRUE;
 		else if (*next == '-')		// hyphenated words
 			return TRUE;
@@ -133,13 +133,13 @@ else
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::isXMLnamestartchar(*from))
-		if (ANT_parser::isXMLnamechar(*next) || *next == '-' || *next == '\'')
+	else if (ANT_parser::isXMLnamestartchar(*from) ||ANT_parser::iseuropean(from))
+		if (ANT_parser::isXMLnamechar(*next) || *next == '-' || *next == '\''||ANT_parser::iseuropean(next))
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_isalnum(*from))
-		if (ANT_isalnum(*next))
+	else if (ANT_isalnum(*from)||ANT_parser::iseuropean(from))
+		if (ANT_isalnum(*next)||ANT_parser::iseuropean(next))
 			return TRUE;
 		else
 			return FALSE;
@@ -172,13 +172,14 @@ if (*at != '\0')
 		while (*(at + length_in_bytes) != '\0' && ispart(at, length_in_chars, at + length_in_bytes))
 			{
 			length_in_chars++;
-			length_in_bytes += ANT_parser::utf8_bytes(at);
+			length_in_bytes += ANT_parser::utf8_bytes(at+ length_in_bytes);
 			}
 	}
 
 token.start = (char *)at;
 token.string_length = length_in_bytes;
 at += length_in_bytes;
+//printf("token.string_length = %i",token.start,token.string_length);
 return &token;
 }
 
@@ -220,7 +221,7 @@ path->string_length = token.start - path->start;
 */
 void ANT_NEXI::parse_error(char *message)
 {
-fprintf(stderr, "NEXI ERROR, column %ld: %s\n", (long)(at - string), message);
+printf(stderr, "NEXI ERROR, column %ld: %s\n", (long)(at - string), message);
 successful_parse = FALSE;
 }
 
