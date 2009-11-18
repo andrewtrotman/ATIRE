@@ -118,6 +118,7 @@ library_sources =  \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
 	$(SRCDIR)/NEXI_term.c \
+	$(SRCDIR)/NEXI_term_ant.c \	
 	$(SRCDIR)/NEXI_term_iterator.c \
 	$(SRCDIR)/instream_file.c	\
 	$(SRCDIR)/instream_deflate.c \
@@ -189,6 +190,7 @@ library_noinst_headers = \
 	$(SRCDIR)/memory_index_stats.h	\
 	$(SRCDIR)/NEXI.h	\
 	$(SRCDIR)/NEXI_term.h \
+	$(SRCDIR)/NEXI_term_ant.h \
 	$(SRCDIR)/NEXI_term_iterator.h \
 	$(SRCDIR)/paice_husk.h	\
 	$(SRCDIR)/parser.h	\

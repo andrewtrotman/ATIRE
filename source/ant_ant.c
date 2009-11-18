@@ -137,7 +137,7 @@ for (query = input.first(); query != NULL; query = input.next())
     else
 	    topic_id = -1;
 
-    ant_search(ant, &hits, query, topic_id);
+    ant_search(ant, &hits, query, topic_id, params->boolean);
 
     prompt(&param_block);
     }

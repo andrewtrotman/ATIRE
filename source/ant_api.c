@@ -31,8 +31,9 @@
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
+#include "ranking_function_term_count.h"
 #include "parser.h"
-#include "NEXI.h"
+#include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
 
 #include <limits.h>
@@ -110,6 +111,7 @@ params->output = stdout;
 params->index_filename = "index.aspt";
 params->doclist_filename = "doclist.aspt";
 params->file_or_memory = INDEX_IN_FILE;
+params->boolean = FALSE;
 }
 
 /*
@@ -262,6 +264,14 @@ else
 	    data->ranking_function = new ANT_ranking_function_bose_einstein(data->search_engine);
 	else if (params->ranking_function == DIVERGENCE)
 	    data->ranking_function = new ANT_ranking_function_divergence(data->search_engine);
+	else if (params->ranking_function == TERM_COUNT)
+		data->ranking_function = new ANT_ranking_function_term_count(data->search_engine);
+	else if (params->ranking_function == ALL_TERMS)
+		{
+		//boolean = TRUE;
+		params->boolean = TRUE;
+		data->ranking_function = new ANT_ranking_function_term_count(data->search_engine);
+		}
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
@@ -272,28 +282,41 @@ data->search_engine->set_trim_postings_k(params->trim_postings_k);
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
+double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
 {
 ANT_time_stats stats;
 long long now, hits;
 long did_query, first_case, token_length;
 char *current, token[1024];
 double average_precision = 0.0;
-ANT_NEXI parser;
+ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
-ANT_NEXI_term *term_string;
+ANT_NEXI_term_ant *parse_tree, *term_string;
+long terms_in_query, current_term;
+ANT_NEXI_term_ant **term_list;
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
 did_query = FALSE;
 now = stats.start_timer();
+
 #ifdef TOP_K_SEARCH
 search_engine->init_accumulators(params->sort_top_k);
 #else
 search_engine->init_accumulators();
 #endif
+/*
+	Parse the query and count the number of search terms
+*/
+parse_tree = parser.parse(query);
+terms_in_query = 0;
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	terms_in_query++;
 
-for (term_string = term.first(parser.parse(query)); term_string != NULL; term_string = term.next())
+/*
+	Load the term details (document frequency, collection frequency, and so on)
+*/
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
 	/*
 		Take the search term (as an ANT_string_pair) and convert into a string
@@ -314,22 +337,53 @@ for (term_string = term.first(parser.parse(query)); term_string != NULL; term_st
 			strlower(token);
 			break;
 			}
+	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers or tag names
+		search_engine->process_one_term(token, &term_string->term_details);
+	}
+/*
+	Sort the search terms on the collection frequency (we'd prefer max_impact, but cf will have to do).
+*/
+term_list = new ANT_NEXI_term_ant *[terms_in_query];
+current_term = 0;
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	term_list[current_term++] = term_string;
 
-	/*
-		process the next search term - either stemmed or not.
-	*/
-	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers of tag names
-		search_engine->process_one_search_term(token, ranking_function);
+/*
+	Sort on collection frequency works better than document_frequency when tested on the TREC Wall Street Collection
+*/
+qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
+
+/*
+	Process each search term - either stemmed or not.
+*/
+for (current_term = 0; current_term < terms_in_query; current_term++)
+	{
+	term_string = term_list[current_term];
+	if (stemmer == NULL || !ANT_islower(*term_string->get_term()->start))		// We don't stem numbers or tag names, of if there is no stemmer
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
+		{
+		token_length = term_string->get_term()->string_length < sizeof(token) - 1 ? term_string->get_term()->string_length : sizeof(token) - 1;
+		strncpy(token, term_string->get_term()->start, token_length);
+		token[token_length] = '\0';
 		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
+		}
 
 	did_query = TRUE;
 	}
+
+delete [] term_list;
 
 /*
 	Rank the results list
 */
 search_engine->sort_results_list(params->sort_top_k, &hits); // rank
+
+/*
+	Boolean Searching
+*/
+if (params->boolean)
+	hits = search_engine->boolean_results_list(terms_in_query);
 
 /*
 	Reporting
@@ -394,6 +448,7 @@ if (file == NULL)
 	return NULL;
 
 now = stats->start_timer();
+filename_buffer[0] = '\0';
 start = strstr(file, "<title>");
 if (start != NULL)
 	if ((end = strstr(start += 7, "</title>")) != NULL)
@@ -410,11 +465,39 @@ stats->add_cpu_time(stats->stop_timer(now));
 return *filename_buffer == '\0' ? NULL : filename_buffer;
 }
 
-/*
-	ANT()
-	-----
+/*	GET_DOCUMENT_AND_EXTRACT()
+	--------------------------
+	This is a temporary function to load each document and to write it to a file
 */
-double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, long topic_id)
+char *get_document_and_extract(long long query_id, long long pos, char *filename)
+{
+char *ch, *file;
+
+if (filename[1] == ':')							// windows c:\blah
+	filename += 2;
+
+file = ANT_disk::read_entire_file(filename);
+if (file == NULL)
+	return NULL;
+
+for (ch = file; *ch != '\0'; ch++)
+	if (*ch == '\n' || *ch == '\r')
+		*ch = ' ';
+
+fprintf(stderr, "%lld %lld %s\n", query_id, pos, file);
+
+delete [] file;
+
+return filename;
+}
+
+
+/*
+	ANT_PERFORM()
+	------------
+	replacement for original ANT function
+*/
+double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, long topic_id, long boolean)
 {
 char /**query, */*name;
 //long topic_id, line, number_of_queries;
@@ -454,7 +537,7 @@ ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_st
 	*/
 	//number_of_queries++;
 
-	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer);
+	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
 	//sum_of_average_precisions += average_precision;
 
 	/*
@@ -474,7 +557,7 @@ return average_precision;
 	ANT_SEARCH()
 	-----------
 */
-char **ant_search(ANT *ant, long long *hits, char *query, long topic_id)
+char **ant_search(ANT *ant, long long *hits, char *query, long topic_id, long boolean)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
@@ -483,7 +566,7 @@ long long result;
 long long last_to_list = 0;
 char *name;
 
-data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, hits, topic_id);
+data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, hits, topic_id, boolean);
 data->number_of_queries++;
 
 ANT_search_engine_forum *output = NULL;
@@ -510,7 +593,26 @@ last_to_list = (*hits) > params->results_list_length ? params->results_list_leng
 if (output == NULL)
 	for (result = 0; result < last_to_list; result++)
 		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
-			fprintf(params->output, "%lld:%s\n", result + 1, data->answer_list[result]);
+			{
+	//				get_document_and_extract(topic_id, result + 1, answer_list[result])
+	#ifdef NEVER
+	/*
+			long longest_len = search_engine->get_longest_document_length();
+			long long docid;
+			char *pos;
+			static char document_buffer[1024 * 1024];
+			unsigned long len = sizeof(document_buffer);
+
+			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+			search_engine->get_document(document_buffer, &len, docid);
+			pos = strstr(document_buffer, "<DOCNO>");
+			pos = strchr(pos, 'W');
+			printf("%lld:%s %f %*.*s\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
+	*/
+	#else
+			printf("%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
+	#endif
+			}
 		else
 			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
 else
