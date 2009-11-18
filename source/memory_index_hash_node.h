@@ -39,6 +39,7 @@ private:
 	inline long compress_bytes_needed(long long val);
 	inline void compress_into(unsigned char *dest, long long docno);
 	ANT_postings_piece *new_postings_piece(long length_in_bytes);
+	void insert_docno(long long docno);
 
 public:
 	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_memory_index_stats *stats);
@@ -60,6 +61,25 @@ inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(long l
 {
 stats->posting_fragments++;
 return new (memory) ANT_postings_piece(memory, length_in_bytes);
+}
+
+/*
+	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
+	-----------------------------------------
+*/
+inline void ANT_memory_index_hash_node::add_posting(long long docno)
+{
+collection_frequency++;
+if (docno == current_docno)
+	{
+	if (tf_list_tail->data[tf_node_used - 1]++ > 254)
+		tf_list_tail->data[tf_node_used - 1] = 254;
+	}
+else
+	{
+	insert_docno(docno - current_docno);
+	current_docno = docno;
+	}
 }
 
 /*

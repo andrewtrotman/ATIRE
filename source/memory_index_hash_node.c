@@ -23,7 +23,7 @@
 */
 ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_memory_index_stats *stats)
 {
-postings_initial_length = 10;		// this guarantees a 64 bit integer will fit (an assumption made later) so it must be at least 10
+postings_initial_length = 8;
 postings_growth_factor = 1.5;
 
 this->stats = stats;
@@ -90,94 +90,66 @@ ANT_compress_variable_byte::compress_into(dest, docno);
 */
 void ANT_memory_index_hash_node::set(long long value)
 {
-long needed;
 unsigned long top, bottom;
 
 top = (((unsigned long long)value) >> 32) & 0xFFFFFFFF;
 bottom = ((unsigned long long)value) & 0xFFFFFFFF;
 
 collection_frequency += 2;
-document_frequency += 2;
-
-docid_node_used = 0;
-tf_node_used = 0;
-
-needed = compress_bytes_needed(top);
-compress_into(docid_list_tail->data + docid_node_used, top);
-docid_node_used += needed;
-
-tf_list_tail->data[tf_node_used] = 1;
-tf_node_used++;
-
-needed = compress_bytes_needed(bottom - top);		// we fake difference encoding
-compress_into(docid_list_tail->data + docid_node_used, bottom - top);
-docid_node_used += needed;
-
-tf_list_tail->data[tf_node_used] = 1;
-tf_node_used++;
+insert_docno(top);
+insert_docno(bottom - top);		// due to difference encoding
 }
 
 /*
-	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
-	-----------------------------------------
+	ANT_MEMORY_INDEX_HASH_NODE::INSERT_DOCNO()
+	------------------------------------------
 */
-void ANT_memory_index_hash_node::add_posting(long long docno)
+void ANT_memory_index_hash_node::insert_docno(long long docno)
 {
 unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
 long needed, remain;
 
-collection_frequency++;
-if (docno == current_docno)
+document_frequency++;
+needed = compress_bytes_needed(docno);
+
+if (docid_node_used + needed > docid_node_length)
 	{
-	if (tf_list_tail->data[tf_node_used - 1]++ > 254)
-		tf_list_tail->data[tf_node_used - 1] = 254;
+	/*
+		Fill to the end of the block
+	*/
+	compress_into(holding_pen, docno);
+	memcpy(docid_list_tail->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
+	remain = needed - (docid_node_length - docid_node_used);
+	/*
+		Allocate the new block
+	*/
+	docid_node_length = (long)(postings_growth_factor * docid_node_length);
+	stats->bytes_allocated_for_docids += docid_node_length;
+	docid_list_tail->next = new_postings_piece(docid_node_length);
+	docid_list_tail = docid_list_tail->next;
+
+	/*
+		And place the "extra" into the beginning of the new block
+	*/
+	memcpy(docid_list_tail->data, holding_pen + (needed - remain), remain);
+	docid_node_used = remain;
 	}
 else
 	{
-	document_frequency++;
-	needed = compress_bytes_needed(docno - current_docno);
-
-	if (docid_node_used + needed > docid_node_length)
-		{
-		/*
-			Fill to the end of the block
-		*/
-		compress_into(holding_pen, docno - current_docno);
-		memcpy(docid_list_tail->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
-		remain = needed - (docid_node_length - docid_node_used);
-		/*
-			Allocate the new block
-		*/
-		docid_node_length = (long)(postings_growth_factor * docid_node_length);
-		stats->bytes_allocated_for_docids += docid_node_length;
-		docid_list_tail->next = new_postings_piece(docid_node_length);
-		docid_list_tail = docid_list_tail->next;
-
-		/*
-			And place the "extra" into the beginning of the new block
-		*/
-		memcpy(docid_list_tail->data, holding_pen + (needed - remain), remain);
-		docid_node_used = remain;
-		}
-	else
-		{
-		compress_into(docid_list_tail->data + docid_node_used, docno - current_docno);
-		docid_node_used += needed;
-		}
-
-	current_docno = docno;
-
-	if (tf_node_used + 1 > tf_node_length)
-		{
-		tf_node_length = (long)(postings_growth_factor * tf_node_length);
-		stats->bytes_allocated_for_tfs += tf_node_length;
-		tf_list_tail->next = new_postings_piece(tf_node_length);
-		tf_list_tail = tf_list_tail->next;
-		tf_node_used = 0;
-		}
-	tf_list_tail->data[tf_node_used] = 1;
-	tf_node_used++;
+	compress_into(docid_list_tail->data + docid_node_used, docno);
+	docid_node_used += needed;
 	}
+
+if (tf_node_used + 1 > tf_node_length)
+	{
+	tf_node_length = (long)(postings_growth_factor * tf_node_length);
+	stats->bytes_allocated_for_tfs += tf_node_length;
+	tf_list_tail->next = new_postings_piece(tf_node_length);
+	tf_list_tail = tf_list_tail->next;
+	tf_node_used = 0;
+	}
+tf_list_tail->data[tf_node_used] = 1;
+tf_node_used++;
 }
 
 /*
