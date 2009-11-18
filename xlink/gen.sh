@@ -36,7 +36,7 @@ fi
 
 echo "Output to: \"$OUT\""
 
-if [ -f OUT ]; then
+if [ -f $OUT ]; then
   pause "The run file is already existing, are you sure to override it? Press Ctrl-C to stop running me"
 fi
 

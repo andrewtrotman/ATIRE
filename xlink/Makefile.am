@@ -107,4 +107,4 @@ ltw_SOURCES = $(ltw_sources)
 ltw_LDADD = ${LTW_LIBS}
 #ltw_LDFLAGS = -static
 
-collection_link_finder_
+collection_link_finder_SOURCES = $(TOOLS_DIR)/collection_link_finder.cpp

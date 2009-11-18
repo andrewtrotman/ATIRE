@@ -2,7 +2,8 @@
  * algorithm_ant_link_this.cpp
  *
  *  Created on: Aug 11, 2009
- *      Author: monfee
+ *      Author: Andrew Troman
+ *      Modified by Eric
  */
 
 #include "algorithm_ant_link_this.h"

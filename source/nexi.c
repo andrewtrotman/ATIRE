@@ -220,7 +220,7 @@ path->string_length = token.start - path->start;
 */
 void ANT_NEXI::parse_error(char *message)
 {
-printf("NEXI ERROR, column %ld: %s\n", (long)(at - string), message);
+fprintf(stderr, "NEXI ERROR, column %ld: %s\n", (long)(at - string), message);
 successful_parse = FALSE;
 }
 
