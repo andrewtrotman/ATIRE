@@ -194,7 +194,7 @@ if (did_query && params->stats & ANT_ANT_param_block::QUERY)
 	search_engine->stats_text_render();
 
 /*
-	Compute average previsions
+	Compute average precision
 */
 if (map != NULL)
 	{
@@ -298,7 +298,6 @@ delete [] file;
 return filename;
 }
 
-
 /*
 	ANT()
 	-----
@@ -375,29 +374,30 @@ for (query = input.first(); query != NULL; query = input.next())
 	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
 	if (output == NULL)
 		for (result = 0; result < last_to_list; result++)
-			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
+//			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
 				{
 //				get_document_and_extract(topic_id, result + 1, answer_list[result])
-#ifdef NEVER
-/*
+#ifndef NEVER
+
 				long longest_len = search_engine->get_longest_document_length();
 				long long docid;
 				char *pos;
-				static char document_buffer[1024 * 1024];
-				unsigned long len = sizeof(document_buffer);
+				char *document_buffer = new char [longest_len + 1];
+				unsigned long len = longest_len;
 
 				docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
 				search_engine->get_document(document_buffer, &len, docid);
 				pos = strstr(document_buffer, "<DOCNO>");
-				pos = strchr(pos, 'W');
+				pos = strpbrk(pos, "wW");
 				printf("%lld:%s %f %*.*s\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
-*/
+				delete [] document_buffer;
+
 #else
 				printf("%lld:%s %f\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv());
 #endif
 				}
-			else
-				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
+//			else
+//				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
 	else
 		output->write(topic_id, answer_list, last_to_list, search_engine);
 

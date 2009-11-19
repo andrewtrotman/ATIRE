@@ -190,7 +190,7 @@ for (param = first_param; param < argc; param++)
 			readability->index(index);
 
 			/*
-				Store the document in the repository
+				Store the document in the repository.
 			*/
 			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
 				{

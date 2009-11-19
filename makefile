@@ -160,6 +160,7 @@ PARTS = \
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term_ant.obj						\
 	$(OBJDIR)\nexi_term.obj							\
+	$(OBJDIR)\event.obj							\
 	$(OBJDIR)\semaphores.obj							\
 	$(OBJDIR)\critical_section.obj					\
 	$(OBJDIR)\threads.obj
@@ -190,6 +191,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\zipf_graph.exe			\
 	$(BINDIR)\get_doclist.exe			\
 	$(BINDIR)\ant_unzip.exe				\
+	$(BINDIR)\producer_consumer.exe				\
 	$(BINDIR)\test_tar.exe
 
 #

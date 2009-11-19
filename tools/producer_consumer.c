@@ -1,59 +1,48 @@
 /*
-semaphore mutex = 1
-semaphore fillCount = 0
-semaphore emptyCount = BUFFER_SIZE
-
-procedure producer() {
-    while (true) {
-        item = produceItem()
-        down(emptyCount)
-        down(mutex)
-        putItemIntoBuffer(item)
-        up(mutex)
-        up(fillCount)
-    }
-    up(fillCount) //the consumer may not finish before the producer.
- }
-
-procedure consumer() {
-    while (true) {
-        down(fillCount)
-        down(mutex)
-        item = removeItemFromBuffer()
-        up(mutex)
-        up(emptyCount)
-        consumeItem(item)
-    }
-}
+	PRODUCER_CONSUMER.C
+	-------------------
 */
 #include <windows.h>
 #include <stdio.h>
-#include "critical_section.h"
-#include "semaphore.h"
-#include "threads.h"
+#include "../source/critical_section.h"
+#include "../source/semaphores.h"
+#include "../source/threads.h"
 
 #define BUFFER_SIZE 10
 
 ANT_critical_section mutex;
-ANT_semaphore fill_count(0, BUFFER_SIZE);
-ANT_semaphore empty_count(BUFFER_SIZE, BUFFER_SIZE);
+ANT_semaphores fill_count(0, BUFFER_SIZE);
+ANT_semaphores empty_count(BUFFER_SIZE, BUFFER_SIZE);
 
 long insertion_point = 0;
 long removal_point = 0;
 long buffer[1024];
 long buffer_length = BUFFER_SIZE;
 
+/*
+	PRODUCE_ITEM()
+	--------------
+*/
 long produce_item(void)
 {
 static long val = 100;
 
 return val++;
 }
+
+/*
+	CONSUME_ITEM()
+	--------------
+*/
 void consume_item(long item)
 {
 printf("%lld ", (long long)item);
 }
 
+/*
+	PUT_ITEM_IN_BUFFER()
+	--------------------
+*/
 void put_item_in_buffer(long value)
 {
 buffer[insertion_point] = value;
@@ -61,6 +50,10 @@ insertion_point = (insertion_point + 1) % buffer_length;
 printf(" [%d] ", value);
 }
 
+/*
+	GET_ITEM_FROM_BUFFER()
+	----------------------
+*/
 long get_item_from_buffer(void)
 {
 long answer;
@@ -70,10 +63,15 @@ removal_point = (removal_point + 1) % buffer_length;
 return answer;
 }
 
+/*
+	PRODUCER()
+	----------
+*/
 void *producer(void *ignore)
 {
 long item;
 
+ignore = NULL;			// be rid of the compiler warning.
 for (;;)
 	{
 	item = produce_item();
@@ -85,6 +83,10 @@ for (;;)
 	}
 }
 
+/*
+	CONSUMER()
+	----------
+*/
 void consumer(void)
 {
 long item = 0;
@@ -101,6 +103,10 @@ while (item < 200)
 	}
 }
 
+/*
+	MAIN()
+	------
+*/
 int main(void)
 {
 ANT_thread(producer, NULL);
