@@ -112,7 +112,7 @@ bin/filelist.obj: source/directory_recursive_iterator.h source/disk.h source/dir
 bin/foltbl_to_aspt.obj: source/disk.h source/str.h source/ctypes.h source/ctypes.h
 bin/get_doclist.obj: source/memory.h source/search_engine.h source/fundamental_types.h source/compression_factory.h source/compress.h source/compression_factory_scheme.h source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/ranking_function.h source/search_engine_accumulator.h source/search_engine_result.h source/search_engine_btree_leaf.h
 bin/get_wikipedia_title.obj: tools/..\source\ctypes.h tools/..\source\str.h source/ctypes.h tools/..\source\disk.h
-bin/producer_consumer.obj: source/critical_section.h source/threads.h
+bin/producer_consumer.obj: source/critical_section.h source/semaphores.h source/threads.h
 bin/term_frequencies.obj: source/disk.h
 bin/test_tar.obj: source/directory_iterator_tar.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_tar_file_header.h source/instream.h source/instream_deflate.h source/instream_bz2.h source/instream_file.h source/memory.h
 bin/topic_tree.obj: source/str.h source/ctypes.h source/disk.h source/stop_word.h source/porter.h source/btree_iterator.h
