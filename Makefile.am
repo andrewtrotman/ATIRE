@@ -118,7 +118,7 @@ library_sources =  \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
 	$(SRCDIR)/NEXI_term.c \
-	$(SRCDIR)/NEXI_term_ant.c \	
+	$(SRCDIR)/NEXI_term_ant.c \
 	$(SRCDIR)/NEXI_term_iterator.c \
 	$(SRCDIR)/instream_file.c	\
 	$(SRCDIR)/instream_deflate.c \
@@ -126,6 +126,7 @@ library_sources =  \
 	$(SRCDIR)/semaphores.c \
 	$(SRCDIR)/threads.c \
 	$(SRCDIR)/critical_section.c \
+	$(SRCDIR)/event.c \
 	$(SRCDIR)/ant_api.c
 				
 library_noinst_headers = \
@@ -245,6 +246,8 @@ library_noinst_headers = \
 	$(SRCDIR)/instream_deflate.h \
 	$(SRCDIR)/instream_bz2.h \
 	$(SRCDIR)/instream.h \
+	$(SRCDIR)/event.h \
+	$(SRCDIR)/event_internals.h \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h
 	

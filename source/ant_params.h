@@ -11,11 +11,11 @@
 	struct ANT_ANT_PARAMS
 	-------------------------
 */
-enum { MAP, MAgP, RANKEFF } ;									// metrics
-enum { /* NONE = 0, */ INEX = 1, TREC = 2, INEX_EFFICIENCY = 4 } ;					// evaluation forum
-enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };				// statistics to print (bitstring)
+enum { MAP, MAgP, RANKEFF, P_AT_N } ;									// metrics
+enum { /* NONE = 0, */ INEX = 1, TREC = 2, INEX_EFFICIENCY = 4 } ;		// evaluation forum
+enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };						// statistics to print (bitstring)
 enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256};		// ranking function
-enum { THRESHOLD = 1, WEIGHTED = 2 }; // Use FALSE as 0
+enum { THRESHOLD = 1, WEIGHTED = 2 }; 									// Use FALSE as 0
 enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1};							// read the index from disk or load at startup
 
 struct ANT_ANT_params
@@ -28,6 +28,7 @@ struct ANT_ANT_params
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long long trim_postings_k;			// trim the postigs lists at no fewer than k
 	long metric;						// which metric to use (MAP, MAgP, etc)
+	long metric_n;						// so we can so P@10, p@30 and so on using one metric
 	char *assessments_filename;			// name of the file containing the assessments for the given queries
 	char *queries_filename;				// name of a file containing one query per line (first token of each line is the query ID)
 	long output_forum;					// export the list of results in INEX or TREC format

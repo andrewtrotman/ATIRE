@@ -400,7 +400,7 @@ if (did_query && params->stats & QUERY)
 	search_engine->stats_text_render();
 
 /*
-	Compute average previsions
+	Compute average prevision
 */
 if (map != NULL)
 	{
@@ -410,6 +410,8 @@ if (map != NULL)
 		average_precision = map->average_generalised_precision(topic_id, search_engine);
 	else if (params->metric == RANKEFF)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
+	else if (params->metric == P_AT_N)
+		average_precision = map->p_at_n(topic_id, search_engine, params->metric_n);
 	}
 
 /*
@@ -596,25 +598,24 @@ if (output == NULL)
 			{
 	//				get_document_and_extract(topic_id, result + 1, answer_list[result])
 	#ifdef NEVER
-	/*
 			long longest_len = search_engine->get_longest_document_length();
 			long long docid;
 			char *pos;
-			static char document_buffer[1024 * 1024];
-			unsigned long len = sizeof(document_buffer);
+			char *document_buffer = new char [longest_len + 1];
+			unsigned long len = longest_len;
 
 			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
 			search_engine->get_document(document_buffer, &len, docid);
 			pos = strstr(document_buffer, "<DOCNO>");
-			pos = strchr(pos, 'W');
-			printf("%lld:%s %f %*.*s\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
-	*/
+			pos = strpbrk(pos, "wW");
+			fprintf(params->output, "%lld:%s %f %*.*s\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
+			delete [] document_buffer;
 	#else
-			printf("%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
+			fprintf(params->output, "%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
 	#endif
 			}
-		else
-			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
+//		else
+//			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
 else
 	output->write(topic_id, data->answer_list, last_to_list, data->search_engine);
 
