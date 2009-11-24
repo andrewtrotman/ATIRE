@@ -201,6 +201,8 @@ all : $(PARTS)		\
       $(ANT_TARGETS)	\
       $(OTHER_TARGETS)
 
+bin\link_index_merge.exe : bin\link_index_merge.obj
+
 #
 #	Default dependency rules
 #

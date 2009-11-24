@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../source/str.h"
 
 char text_buffer[1024 * 1024];
 char index_buffer[1024 * 1024];

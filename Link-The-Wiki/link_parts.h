@@ -9,8 +9,8 @@
 
 #include <ctype.h>
 
-#define INEX_ARCHIVE_ARTICLE_ID_SIGNITURE "name id="
-#define ARTICLE_ID_SIGNITURE "id"
+#define INEX_ARCHIVE_ARTICLE_ID_SIGNITURE "<name id="
+#define ARTICLE_ID_SIGNITURE "<id>"
 #define ARTICLE_NAME_SIGNITURE "title"
 
 /*
@@ -93,9 +93,9 @@ inline static long get_doc_id(char *file)
 {
 char *pos;
 
-pos = strstr(file, "<"INEX_ARCHIVE_ARTICLE_ID_SIGNITURE);
+pos = strstr(file, INEX_ARCHIVE_ARTICLE_ID_SIGNITURE);
 if (pos == NULL)
-	pos = strstr(file, "<"ARTICLE_ID_SIGNITURE);
+	pos = strstr(file, ARTICLE_ID_SIGNITURE);
 if (pos == NULL)
 	exit(printf("Cannot find DOC id <name id=...> or <id> in file\n"));
 while (!isdigit(*pos))
