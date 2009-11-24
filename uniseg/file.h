@@ -17,6 +17,7 @@ class File {
 public:
 	std::string EXT_NAME;
 	static const char SEPARATOR;
+	static const int INT_TYPE_SIZE = sizeof(unsigned int);
 
 protected:
 	std::fstream 			iofs_;
@@ -24,6 +25,8 @@ protected:
 	std::string				filename_;
 	std::string				path_;
 	std::fstream::pos_type	size_;
+
+	char 					*buf_;
 
 public:
 	File() {}
@@ -42,11 +45,13 @@ public:
 	const std::string& path() const { return path_; }
 
 	static int list(std::string dir, std::vector<std::string> &files, bool recursive = false);
+	//static char *read(const char *filename);
 
 protected:
 	bool ropen();
 	void wopen();
 	void setup();
+	void read();
 };
 
 //std::string File::EXT_NAME;

@@ -9,6 +9,7 @@
 #include "uniseg_settings.h"
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 #include <dirent.h>
 #include <sys/types.h>
@@ -38,6 +39,17 @@ File::File(std::string name) :
 }
 
 File::~File() {
+}
+
+void File::read() {
+	if (iofs_.is_open()) {
+		buf_ = new char [static_cast<int>(size_) + 1];
+		iofs_.read (buf_, size_);
+	}
+	/**
+	 * TODO throw an exception when can't open the file
+	 */
+	else  throw std::runtime_error(filename_ + ": Unable to open file");
 }
 
 void File::setup() {

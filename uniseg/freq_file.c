@@ -12,6 +12,9 @@
 
 #include <string.h>
 #include <iostream>
+#include <cassert>
+
+#include <stdio.h>
 
 using namespace std;
 
@@ -105,12 +108,14 @@ void FreqFile::read() {
 	cerr << "loading " << name_ << endl;
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
+	char tmp[INT_TYPE_SIZE];
 	unsigned int  value;
 
 	assert(wlen_ == 1);
 
 	File::ropen();
-
+	File::read();
+	char *current = buf_;
 	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
 	if (!iofs_) {
@@ -123,11 +128,17 @@ void FreqFile::read() {
 		int count = 0;
 
 		while (count < size_) {
-			if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)
-					|| !iofs_.read ((char *)&value, sizeof(unsigned int))) {
-				// Same effect as above
-				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
-			}
+//			if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)
+//					|| !iofs_.read ((char *)&value, sizeof(unsigned int))) {
+//				// Same effect as above
+//				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
+//			}
+			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			current += UNICODE_CHAR_LENGTH;
+			strncpy(tmp, current, INT_TYPE_SIZE);
+			int ret = sscanf(tmp, "%i", &value);
+			assert(ret == INT_TYPE_SIZE);
+			current += INT_TYPE_SIZE;
 			string_array ca;
 			/// save them in the array
 			enc->test_char((unsigned char*)&buf);

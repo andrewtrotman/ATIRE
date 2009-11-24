@@ -11,6 +11,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <stdio.h>
 
 using namespace std;
 
@@ -124,10 +125,13 @@ void IndexFile::read() {
 	if (!iofs_.is_open())
 		File::ropen();
 
+	File::read();
+
+	char tmp[INT_TYPE_SIZE];
+	char *current = buf_;
 	int chars_len = wlen_ - 1;
 
 	int record_length = UNICODE_CHAR_LENGTH * chars_len + ADDRESSES_LENGTH;
-
 	char buf[UNICODE_CHAR_LENGTH];
 	unsigned int address = 0;
 	int count = 0;
@@ -138,23 +142,28 @@ void IndexFile::read() {
 		Address::uint_array addr(ADDRESSES_NUMBER, Address::INVALID_BOUND);
 
 		for (int i = 0; i < chars_len; i++) {
-			if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)) {
-				// Same effect as above
-				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
-			}
+//			if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)) {
+//				// Same effect as above
+//				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
+//			}
 			/// save them in the array
 			string_type a_char =
-				get_first_utf8char((unsigned char*)&buf);
+				get_first_utf8char((unsigned char*)current);
 			ca.push_back(a_char);
+			current += a_char.length();
 		}
 
 		for (int i = 0; i < ADDRESSES_NUMBER; i++) {
-			if (!iofs_.read ((char *)&address, sizeof(unsigned int))) {
-				// Same effect as above
-				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
-			}
+//			if (!iofs_.read ((char *)&address, sizeof(unsigned int))) {
+//				// Same effect as above
+//				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
+//			}
 
-			addr[i] = address;
+			//addr[i] = (int)current;
+			strncpy(tmp, current, INT_TYPE_SIZE);
+			int ret = sscanf(tmp, "%i", &addr[i]);
+			assert(ret == INT_TYPE_SIZE);
+			current += INT_TYPE_SIZE;
 		}
 
 		aa_.push_back(Address(ca, addr));
