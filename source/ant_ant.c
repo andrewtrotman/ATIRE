@@ -71,6 +71,7 @@ params->stemmer_similarity = block->stemmer_similarity;
 params->stemmer_similarity_threshold = block->stemmer_similarity_threshold;
 params->sort_top_k = block->sort_top_k;
 params->metric = block->metric;
+params->metric_n = block->metric_n;
 params->assessments_filename = block->assessments_filename;
 params->queries_filename = block->queries_filename;
 params->output_forum = block->output_forum;
@@ -85,6 +86,7 @@ params->lmd_u = block->lmd_u;
 params->lmjm_l = block->lmjm_l;
 params->bm25_k1 = block->bm25_k1;
 params->bm25_b = block->bm25_b;
+params->file_or_memory = block->file_or_memory;
 }
 
 /*
