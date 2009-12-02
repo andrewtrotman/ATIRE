@@ -47,7 +47,7 @@ long long ANT_search_engine_result_iterator::next(void)
 		New-fangled rvs must be positive version
 	*/
 	current++;
-	if (current > results_list_length)
+	if (current >= results_list_length)
 		return -1;
 
 	if (result->accumulator_pointers[current]->is_zero_rsv())
