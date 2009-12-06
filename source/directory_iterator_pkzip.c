@@ -168,6 +168,11 @@ if (files_read >= directory_files)
 file->read((unsigned char *)&lfh, sizeof(lfh));
 signature = ANT_get_unsigned_long(lfh.signature);
 
+if (signature == 0x02014b50)
+	{
+	printf("Warning:ANT ZIP Reader found the central directory before the number of files specified in the ZIP itself were found!\n");
+	return NULL;		// we've found the central directory header (I'm not sure why we found it before we ran out of files though)
+	}
 if (signature != 0x04034b50)
 	exit(printf("ANT ZIP Reader found a broken signature (%lx) when expecting a local-file-header signature (%lx)\n", signature, (long)0x04034b50));
 if ((filename_length = ANT_get_unsigned_short(lfh.file_name_length)) == 0)
