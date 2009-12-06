@@ -377,7 +377,7 @@ for (query = input.first(); query != NULL; query = input.next())
 //			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
 				{
 //				get_document_and_extract(topic_id, result + 1, answer_list[result])
-#ifndef NEVER
+#ifdef NEVER
 
 				long longest_len = search_engine->get_longest_document_length();
 				long long docid;
