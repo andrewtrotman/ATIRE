@@ -60,7 +60,6 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 ANT_string_pair *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
-long lang_flag = 0;
 
 if (segmentation != NULL)
 	{
@@ -117,19 +116,19 @@ for (;;)
 /*
 	Now we look at the first character as it defines how parse the next token
 */
-if (ANT_isalpha(*current) || (lang_flag = iseuropean(current)) != 0)	// alphabetic strings (in the ASCII CodePage) or European speical characters
+if (ANT_isalpha(*current) || iseuropean(current))	// alphabetic strings (in the ASCII CodePage) or European speical characters
 	{
 //	*current = ANT_tolower(*current); //first character to lower and save it in start
 	tolower(current);
 	//start = current++;
 	start = current;
-	current += lang_flag ? utf8_bytes(current) : 1;
+	current += utf8_bytes(current);
 
-	while (ANT_isalpha(*current) || (lang_flag = iseuropean(current)) != 0)
+	while (ANT_isalpha(*current) || iseuropean(current))
 		{
 //		*current = ANT_tolower(*current);
 		tolower(current);
-		current += lang_flag ? utf8_bytes(current) : 1;
+		current += utf8_bytes(current);
 		}
 
 	current_token.start = (char *)start;
