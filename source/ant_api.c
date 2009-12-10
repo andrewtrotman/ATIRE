@@ -594,10 +594,10 @@ else
 last_to_list = (*hits) > params->results_list_length ? params->results_list_length : (*hits);
 if (output == NULL)
 	for (result = 0; result < last_to_list; result++)
-		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
+//		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
 			{
-	//				get_document_and_extract(topic_id, result + 1, answer_list[result])
-	#ifdef NEVER
+//			get_document_and_extract(topic_id, result + 1, answer_list[result])
+#ifdef NEVER
 			long longest_len = search_engine->get_longest_document_length();
 			long long docid;
 			char *pos;
@@ -610,9 +610,9 @@ if (output == NULL)
 			pos = strpbrk(pos, "wW");
 			fprintf(params->output, "%lld:%s %f %*.*s\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
 			delete [] document_buffer;
-	#else
+#else
 			fprintf(params->output, "%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
-	#endif
+#endif
 			}
 //		else
 //			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
