@@ -1,0 +1,19 @@
+1. Identifiers are never abbreviated.  Abbreviations only make the code harder to read, there is no advantage to calling a variable "br_c", typing its name in full will make the code more readable and take neglagable extra time to code.  There is, therefore, no reason to have single letter variables anywhere in the code.  What is "br_c" anyway?
+
+2. Each class goes in its own source code files (.c and .h).  The name of the file is yyy.c and yyy.h for class ANT_yyy
+
+3. Variables are not declared with block restricted scope except in the case of object that must be done that way.  The reason for this is that block-scoped variables make the code harder to read; and the compiler "folds" then into routine scope and so you can get "weard" crashes that don't match the code.
+
+4. Unnecessary "{" and "}" are removed.  Place "{" and "}" on seperate lines on their own.  ANT does not follow the K&R sytle.  The outer routine block is left justified.  The reason I do it my way is that blocks of code line up verticaly where as in the K&R method they do not.
+
+5. We don't throw exceptions, we don't use RTTI, we don't use templates, and we don't use the STL.
+
+6. We don't include header files in header files unless we can't possibly avoid it.  This is a speed of compilation issue.
+
+7. We don't need to check for NULL before using delete
+
+8. unsigned char *character;  // not unsigned char* character;
+
+9. In class declarations we do types then variables then methods.  Within that we do private before protected before public.  Sometimes this means you have to declare private twice, but it does break the types from the variables from the methods.
+
+10. Only use virtual functions where the methods rarely get called.  In the indexer, get_next_token() is called millions of times - what is the runtime overhead of making that function virtual?  Did you measure it?  Also, what is the runtime overhead of your parser (if it is low then perhaps we can drop the ASCII one).
