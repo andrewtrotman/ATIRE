@@ -58,7 +58,7 @@ void File::setup() {
 	//string path = string(UNISEG_settings::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
 	//cerr << "path: " << path << endl;
 	//path.push_back(FILESYSTEM::File<std::string>::SEPARATOR);
-	filename_ = name_ + EXT_NAME;
+	filename_ = name_ + "." + EXT_NAME;
 	// debug
 	//cerr << "setup filename " << filename_ << " "<< name_ << " " << EXT_NAME << endl;
 }

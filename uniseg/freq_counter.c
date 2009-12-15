@@ -118,7 +118,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 					enc->test_char((unsigned char *)start);
 				}
 
-				if (str.length() > 0) {
+				if ((pre_lang & languages_) && str.length() > 0) {
 					cl.push_back(str);
 					if (cl.size() == i)
 						break;

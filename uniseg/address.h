@@ -27,6 +27,7 @@ private:
 public:
 	Address(string_array ca, uint_array bound) :
 		ca_(ca), bound_(bound) {};
+	~Address() {};
 
 	uint_array& bound() { return bound_; }
 	void bound(uint_array& bound) { std::copy(bound.begin(), bound.end(), bound_.begin()); }
