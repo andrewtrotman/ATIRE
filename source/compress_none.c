@@ -18,7 +18,7 @@ bytes = source_integers * sizeof(ANT_compressable_integer);
 if (bytes > destination_length)
 	return 0;
 
-memcpy(destination, source, (size_t)bytes);
+memmove(destination, source, (size_t)bytes);
 return bytes;
 }
 
@@ -28,6 +28,6 @@ return bytes;
 */
 void ANT_compress_none::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
 {
-memcpy(destination, source, (size_t)(destination_integers * sizeof(ANT_compressable_integer)));
+memmove(destination, source, (size_t)(destination_integers * sizeof(ANT_compressable_integer)));
 }
 
