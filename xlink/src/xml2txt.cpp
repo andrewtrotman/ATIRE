@@ -79,9 +79,9 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 						<< " but the XML2TXT server is not ready!"
 						<< "using the text by striping tags instead" << endl;
 				text = new char[strlen(xml) + 1];
-						strcpy(text, xml);
-						text[strlen(xml)] = '\0';
-						string_clean(text, 0, 0);
+				strcpy(text, xml);
+				text[strlen(xml)] = '\0';
+				string_clean(text, 0, 0);
 			}
 		}
 		else

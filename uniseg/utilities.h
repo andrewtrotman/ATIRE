@@ -48,11 +48,11 @@ inline std::string getext(std::string& source) {
 	return source.substr(source.find_last_of(".") + 1);
 }
 
-inline int bytes_to_int32(char *bytes)
+inline unsigned int bytes_to_int32(char *bytes)
 {
-	//int shift = (int)(*(bytes + 3) << 24 | *(bytes + 2) << 16 | *(bytes + 1) << 8 | *bytes );
-	int plus = (int)(*(bytes + 3) << 24) + (int)(*(bytes + 2) << 16) + (int)(*(bytes + 1) << 8) + (int)(*bytes);
-	return plus;
+	unsigned int shift = (unsigned int)(*(bytes + 3) << 24 | *(bytes + 2) << 16 | *(bytes + 1) << 8 | *bytes );
+	//unsigned int plus = (unsigned int)(*(bytes + 3) << 24) + (unsigned int)(*(bytes + 2) << 16) + (unsigned int)(*(bytes + 1) << 8) + (unsigned int)(*bytes);
+	return shift;
 }
 
 inline void int32_to_bytes(int val, char *bytes)
