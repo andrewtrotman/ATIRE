@@ -62,14 +62,14 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 		text = sys_file::read_entire_file(txtfile);
 	else {
 		if (sys_file::exist(xmlfile)) {
+			if (!content) {
+				content = sys_file::read_entire_file(xmlfile);
+
+				if (!content)
+					throw std::runtime_error(std::string("couldn't find file: ") + xmlfile);
+			}
+
 			if (connected_) {
-				if (!content) {
-					content = sys_file::read_entire_file(xmlfile);
-
-					if (!content)
-						throw std::runtime_error(std::string("couldn't find file: ") + xmlfile);
-				}
-
 				text = convert(content);
 				if (!xml)
 					delete [] content;
@@ -78,10 +78,12 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 				cerr << "Warning: " << "trying to convert " << xmlfile
 						<< " but the XML2TXT server is not ready!"
 						<< "using the text by striping tags instead" << endl;
-				text = new char[strlen(xml) + 1];
-				strcpy(text, xml);
-				text[strlen(xml)] = '\0';
+
+				text = new char[strlen(content) + 1];
+				strcpy(text, content);
+				text[strlen(content)] = '\0';
 				string_clean(text, 0, 0);
+				delete [] content;
 			}
 		}
 		else
