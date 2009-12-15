@@ -9,6 +9,7 @@
 #include "corpus.h"
 #include "corpus_txt.h"
 #include "sys_file.h"
+#include "ant_link_parts.h"
 
 #include <string.h>
 #include <stdexcept>
@@ -73,9 +74,15 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 				if (!xml)
 					delete [] content;
 			}
-			else
+			else {
 				cerr << "Warning: " << "trying to convert " << xmlfile
-						<< " but the XML2TXT server is not ready!" << endl;
+						<< " but the XML2TXT server is not ready!"
+						<< "using the text by striping tags instead" << endl;
+				text = new char[strlen(xml) + 1];
+						strcpy(text, xml);
+						text[strlen(xml)] = '\0';
+						string_clean(text, 0, 0);
+			}
 		}
 		else
 			cerr << "Error: " << "no such file - " << xmlfile << endl;
