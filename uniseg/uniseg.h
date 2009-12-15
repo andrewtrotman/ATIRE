@@ -12,7 +12,7 @@
 #include "seg.h"
 #include <string>
 
-class UNISEG_plugin : public uniseg_plugin_interface
+class UNISEG_uniseg : public uniseg_plugin_interface
 {
 private:
 	Seger		seger_;
@@ -25,8 +25,8 @@ private:
 	void cleanup();
 
 public:
-	UNISEG_plugin();
-	~UNISEG_plugin();
+	UNISEG_uniseg();
+	~UNISEG_uniseg();
 
 	const unsigned char *do_segmentation(unsigned char *c, int length);
 	const unsigned char* get_input();

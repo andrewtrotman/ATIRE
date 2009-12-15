@@ -66,9 +66,9 @@ void UNISEG_settings::init_fields()
 void UNISEG_settings::init_others()
 {
 	if (getenv(DEFAULT_FRQS_V_NAME))
-		freqs_path = std::string(getenv(DEFAULT_FRQS_V_NAME));
+		freqs_path = std::string(getenv(DEFAULT_FRQS_V_NAME)) + std::string(sep);
 	if (getenv(DEFAULT_DICS_V_NAME))
-		dics_path = std::string(getenv(DEFAULT_DICS_V_NAME));
+		dics_path = std::string(getenv(DEFAULT_DICS_V_NAME)) + std::string(sep);
 }
 
 UNISEG_settings& UNISEG_settings::instance()

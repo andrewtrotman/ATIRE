@@ -8,7 +8,7 @@ CC = g++
 libuniseq_sources = \
 		encoding_utf8.c \
 		encoding_factory.c \
-		uniseg_plugin.c \
+		uniseg.c \
 		uniseg_settings.c \
 		word.c \
 		clist.c	\
@@ -53,7 +53,7 @@ libuniseg_headers = \
 		timings.h	\
 		udoc.h	\
 		utilities.h	\
-		uniseg_plugin.h \
+		uniseg.h \
 		word.h			
 
 noinst_HEADERS = $(libuniseq_headers)

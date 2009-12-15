@@ -48,5 +48,19 @@ inline std::string getext(std::string& source) {
 	return source.substr(source.find_last_of(".") + 1);
 }
 
+inline int bytes_to_int32(char *bytes)
+{
+	//int shift = (int)(*(bytes + 3) << 24 | *(bytes + 2) << 16 | *(bytes + 1) << 8 | *bytes );
+	int plus = (int)(*(bytes + 3) << 24) + (int)(*(bytes + 2) << 16) + (int)(*(bytes + 1) << 8) + (int)(*bytes);
+	return plus;
+}
+
+inline void int32_to_bytes(int val, char *bytes)
+{
+	bytes[0] = (int)val;
+	bytes[1] = (int)(val >> 8);
+	bytes[2] = (int)(val >> 16);
+	bytes[3] = (int)(val >> 24);
+}
 
 #endif /* UTILITIES_H_ */

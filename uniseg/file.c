@@ -45,6 +45,7 @@ void File::read() {
 	if (iofs_.is_open()) {
 		buf_ = new char [static_cast<int>(size_) + 1];
 		iofs_.read (buf_, size_);
+		buf_[size_] = '\0';
 	}
 	/**
 	 * TODO throw an exception when can't open the file

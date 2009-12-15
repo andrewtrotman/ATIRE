@@ -8,6 +8,7 @@
 #include "index_file.h"
 #include "word.h"
 #include "address.h"
+#include "utilities.h"
 
 #include <cassert>
 #include <iostream>
@@ -150,7 +151,7 @@ void IndexFile::read() {
 			string_type a_char =
 				get_first_utf8char((unsigned char*)current);
 			ca.push_back(a_char);
-			current += a_char.length();
+			current += UNICODE_CHAR_LENGTH; //a_char.length();
 		}
 
 		for (int i = 0; i < ADDRESSES_NUMBER; i++) {
@@ -161,8 +162,7 @@ void IndexFile::read() {
 
 			//addr[i] = (int)current;
 			strncpy(tmp, current, INT_TYPE_SIZE);
-			int ret = sscanf(tmp, "%i", &addr[i]);
-			assert(ret == INT_TYPE_SIZE);
+			addr[i] = bytes_to_int32(tmp);
 			current += INT_TYPE_SIZE;
 		}
 

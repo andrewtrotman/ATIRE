@@ -5,7 +5,7 @@
  *      Author: monfee
  */
 
-#include "uniseg_plugin.h"
+#include "uniseg.h"
 #include "seg.h"
 #include "qfreq.h"
 #include "encoding_factory.h"
@@ -15,7 +15,7 @@
 
 using namespace std;
 
-UNISEG_plugin::UNISEG_plugin() : uniseg_plugin_interface()
+UNISEG_uniseg::UNISEG_uniseg() : uniseg_plugin_interface()
 {
     //output_ = 0;
     count_ = 0;
@@ -29,16 +29,16 @@ UNISEG_plugin::UNISEG_plugin() : uniseg_plugin_interface()
     cerr << "############################# finished initialization ##############################" << endl;
 }
 
-UNISEG_plugin::~UNISEG_plugin()
+UNISEG_uniseg::~UNISEG_uniseg()
 {
     cleanup();
 }
 
-void UNISEG_plugin::cleanup()
+void UNISEG_uniseg::cleanup()
 {
 }
 
-const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length)
+const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length)
 {
 	if (!c || strlen((char *)c) == 0 || length == 0)
 		return NULL;
@@ -89,24 +89,24 @@ const unsigned char *UNISEG_plugin::do_segmentation(unsigned char *c, int length
 	return get_output();
 }
 
-const unsigned char *UNISEG_plugin::get_input()
+const unsigned char *UNISEG_uniseg::get_input()
 {
 return (unsigned char *)input_.c_str();
 }
 
-const unsigned char *UNISEG_plugin::get_output()
+const unsigned char *UNISEG_uniseg::get_output()
 {
 return (unsigned char *)output_.c_str();
 }
 
-int UNISEG_plugin::get_count() { return count_; }
+int UNISEG_uniseg::get_count() { return count_; }
 
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 	uniseg_plugin_interface *maker() {
-	   return new UNISEG_plugin;
+	   return new UNISEG_uniseg;
 	}
 
 #ifdef WITH_ANT_PLUGIN

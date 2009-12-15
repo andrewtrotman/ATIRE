@@ -82,7 +82,7 @@ void FreqFile::write(array_type& arr) {
 		word_ptr_type word_ptr = arr[i];
 		unsigned int freq = 0;
 
-		chars = (char*)(word_ptr->family().second->chars().c_str());
+		chars = (char *)(word_ptr->family().second->chars().c_str());
 
 		int len = strlen(chars);
 		assert(len <= UNICODE_CHAR_LENGTH);
@@ -136,9 +136,9 @@ void FreqFile::read() {
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
 			strncpy(tmp, current, INT_TYPE_SIZE);
-			int ret = sscanf(tmp, "%i", &value);
-			assert(ret == INT_TYPE_SIZE);
+			value = bytes_to_int32(tmp);
 			current += INT_TYPE_SIZE;
+
 			string_array ca;
 			/// save them in the array
 			enc->test_char((unsigned char*)&buf);
@@ -164,7 +164,9 @@ void FreqFile::read_with_index() {
 	cerr << "loading " << name_ << endl;
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
+	char tmp[INT_TYPE_SIZE];
 	unsigned int  value = 0;
+	char *current = buf_;
 
 	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
@@ -173,6 +175,7 @@ void FreqFile::read_with_index() {
 	idxf.wlen(wlen_);
 	idxf.read();
 	File::ropen();
+	File::read();
 
 	if (!iofs_) {
 		// An error occurred!
@@ -204,24 +207,23 @@ void FreqFile::read_with_index() {
 
 			if (llb != Address::INVALID_BOUND) {
 				pos = llb * RECORD_LENGTH;
-				iofs_.seekg(pos, ios::beg);
-				assert(pos < size_);
+				current = buf_ + pos;
+//				iofs_.seekg(pos, ios::beg);
+//				assert(pos < size_);
 
 				for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
-					if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)
-							|| !iofs_.read ((char *)&value, sizeof(unsigned int))) {
-						// Same effect as above
-						cerr << "Errors when reading file \"" << filename_
-							<< "\" with address(" << j << ")" << endl;
-						continue;
-					}
+					strncpy(buf, current, UNICODE_CHAR_LENGTH);
+					current += UNICODE_CHAR_LENGTH;
+					strncpy(tmp, current, INT_TYPE_SIZE);
+					value = bytes_to_int32(tmp);
+					current += INT_TYPE_SIZE;
 
 					/// save them in the array
 					enc->test_char((unsigned char*)&buf);
 					string_type a_char(buf, enc->howmanybytes());
 					string_array aca(ca);
 					aca.push_back(a_char);
-					assert(value > 0);
+					assert(value >= 0);
 					freq_.add(aca, enc->lang(), value); //->address(count);
 					count++;
 				}
@@ -229,18 +231,17 @@ void FreqFile::read_with_index() {
 
 			if (rlb != Address::INVALID_BOUND) {
 				pos = rlb * RECORD_LENGTH;
-				iofs_.seekg(pos, ios::beg);
-				assert(pos < size_);
+				current = buf_ + pos;
+//				iofs_.seekg(pos, ios::beg);
+//				assert(pos < size_);
 
 				for (unsigned int j = rlb; j <= rhb && j != Address::INVALID_BOUND; j++) {
 
-					if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)
-							|| !iofs_.read ((char *)&value, sizeof(unsigned int))) {
-						// Same effect as above
-						cerr << "Errors when reading file \"" << filename_
-							<< "\" with address(" << j << ")" << endl;
-						continue;
-					}
+					strncpy(buf, current, UNICODE_CHAR_LENGTH);
+					current += UNICODE_CHAR_LENGTH;
+					strncpy(tmp, current, INT_TYPE_SIZE);
+					value = bytes_to_int32(tmp);
+					current += INT_TYPE_SIZE;
 
 					/// save them in the array
 					enc->test_char((unsigned char*)&buf);
