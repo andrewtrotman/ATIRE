@@ -21,10 +21,10 @@ public:
 	UNISEG_encoding_utf8() : UNISEG_encoding_ascii() {}
 	virtual ~UNISEG_encoding_utf8() {}
 
-	virtual bool is_valid_char(unsigned char *c); 	// a valid char will be actual language dependent character for Chinese, a valid char will be an Chinese character rather than symbols or punctuation
-	static size_t test_utf8char(unsigned char *c);			// return number of bytes occupied by the character to test if the input character is a valid utf8 character? could be anything including symbols and punctuation
-	static unsigned long to_codepoint(unsigned char *utf8_char, size_t num_of_bytes);
-	static unsigned long to_codepoint(unsigned char *utf8_char);
+	virtual bool is_valid_char(const unsigned char *c); 	// a valid char will be actual language dependent character for Chinese, a valid char will be an Chinese character rather than symbols or punctuation
+	static size_t test_utf8char(const unsigned char *c);			// return number of bytes occupied by the character to test if the input character is a valid utf8 character? could be anything including symbols and punctuation
+	static unsigned long to_codepoint(const unsigned char *utf8_char, size_t num_of_bytes);
+	static unsigned long to_codepoint(const unsigned char *utf8_char);
 	bool is_chinese_codepoint(unsigned long cp);
 };
 

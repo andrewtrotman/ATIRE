@@ -17,25 +17,6 @@
 
 using namespace std;
 
-inline void array_to_string(string_array& ca, UNISEG_encoding::language lang, string_type& dest, int idx = 0, int len = -1)
-{
-	if (len == -1)
-		len = ca.size();
-
-	assert(idx >= 0);
-	assert(len <= (int)ca.size());
-	string_type sep;
-	if (lang != UNISEG_encoding::CHINESE)
-		sep = " ";
-	int count = 0;
-	for (int i = idx; i < idx + len; i++) {
-		if (count > 0)
-			dest.append(sep);
-		dest.append(ca[i]);
-		count++;
-	}
-}
-
 class NeedSkip {    // function object that returns true for the call
   private:
     int to_skip_;     // to_skip

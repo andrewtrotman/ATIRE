@@ -1,6 +1,8 @@
 #ifndef __QTYPE_H__
 #define __QTYPE_H__
 
+#include <assert.h>
+
 #include <encoding_factory.h>
 #include <encoding_utf8.h>
 typedef UNISEG_encoding								uniseg_encoding;
@@ -9,7 +11,7 @@ typedef UNISEG_encoding_factory							uniseg_encoding_factory;
 
 #include <string.h>
 #include <string>
-inline std::string get_first_utf8char(unsigned char* c)
+inline std::string get_first_utf8char(const unsigned char* c)
 {
 	size_t num_of_bytes = uniseg_encoding_utf8::test_utf8char(c);
 //	char *tmp_utf8str = new char[num_of_bytes + 1];
@@ -48,7 +50,7 @@ inline size_t get_utf8_string_length(std::string& source)
 #include "uniseg_string.h"
 inline void to_string_array(const char *source, string_array& sa)
 {
-	const char *start = source;
+	const unsigned char *start = (const unsigned char *)source;
 	while (*start != '\0') {
 		sa.push_back(get_first_utf8char(start));
 		start += sa.back().length();
@@ -58,6 +60,25 @@ inline void to_string_array(const char *source, string_array& sa)
 inline void to_string_array(string_type& source, string_array& sa)
 {
 	to_string_array(source.c_str(), sa);
+}
+
+inline void array_to_string(string_array& ca, UNISEG_encoding::language lang, string_type& dest, int idx = 0, int len = -1)
+{
+	if (len == -1)
+		len = ca.size();
+
+	assert(idx >= 0);
+	assert(len <= (int)ca.size());
+	string_type sep;
+	if (lang != UNISEG_encoding::CHINESE)
+		sep = " ";
+	int count = 0;
+	for (int i = idx; i < idx + len; i++) {
+		if (count > 0)
+			dest.append(sep);
+		dest.append(ca[i]);
+		count++;
+	}
 }
 
 #ifdef WITH_ANT_PLUGIN

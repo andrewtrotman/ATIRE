@@ -11,7 +11,7 @@
 	UNISEG_ENCODING_UTF8::TEST_UTF8CHAR()
 	----------------------------------
 */
-size_t UNISEG_encoding_utf8::test_utf8char(unsigned char *c)
+size_t UNISEG_encoding_utf8::test_utf8char(const unsigned char *c)
 {
 size_t num_of_bytes = 1;
 unsigned char code = *c;
@@ -44,7 +44,7 @@ return num_of_bytes;
 	UNISEG_ENCODING_UTF8::IS_VALID_CHAR()
 	----------------------------------
 */
-bool UNISEG_encoding_utf8::is_valid_char(unsigned char *c)
+bool UNISEG_encoding_utf8::is_valid_char(const unsigned char *c)
 {
 if (0 <= *c && *c <= 0x7F) // ASCII characters
 	{
@@ -78,7 +78,7 @@ return false;
 	UNISEG_ENCODING_UTF8::TO_CODEPOINT()
 	---------------------------------
 */
-unsigned long UNISEG_encoding_utf8::to_codepoint(unsigned char *utf8_char)
+unsigned long UNISEG_encoding_utf8::to_codepoint(const unsigned char *utf8_char)
 {
 return to_codepoint(utf8_char, test_utf8char(utf8_char));
 }
@@ -87,7 +87,7 @@ return to_codepoint(utf8_char, test_utf8char(utf8_char));
 	UNISEG_ENCODING_UTF8::TO_CODEPOINT()
 	---------------------------------
 */
-unsigned long UNISEG_encoding_utf8::to_codepoint(unsigned char *utf8_char, size_t num_of_bytes)
+unsigned long UNISEG_encoding_utf8::to_codepoint(const unsigned char *utf8_char, size_t num_of_bytes)
 {
 // Identifier with _c suffix mean that it is a constant variable
 const unsigned int max_bytes_c = 6;  // Maximum bytes of utf8 encoding for purpose of shifting into codepoint

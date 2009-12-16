@@ -269,9 +269,19 @@ void FreqFile::read_with_index() {
 	iofs_.close();
 }
 
-void FreqFile::read_term(string_type source)
+void FreqFile::read_term(word_ptr_type word)
 {
 	Address::uint_array& address = word->disk_address();
+	string_array ca;
+	word->to_string_array(ca);
+	char *current = NULL;
+	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
+	char tmp[INT_TYPE_SIZE];
+	unsigned int  value = 0;
+	int count = 0;
+
+	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
+
 	unsigned int llb = address[0];
 	unsigned int lhb = 0, rhb = 0;
 	unsigned int rlb = address[1];
