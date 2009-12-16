@@ -36,6 +36,7 @@ public:
 
 	void write();
 	void read();
+	void read(Freq&	freq);
 	unsigned int cal(array_type& arr);
 	void alloc(array_type& arr);
 

@@ -8,11 +8,11 @@
 #ifndef ADDRESS_H_
 #define ADDRESS_H_
 
-#include "freq.h"
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "uniseg_types.h"
+
+#include "uniseg_string.h"
 
 class Address {
 public:

@@ -10,6 +10,7 @@
 #define __UNISEQ_SETTINGS_H__
 
 #include "uniseg_types.h"
+#include <vector>
 
 class UNISEG_settings
 {

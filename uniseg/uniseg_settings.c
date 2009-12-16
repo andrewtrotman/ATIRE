@@ -8,6 +8,10 @@
 
 #include "uniseg_settings.h"
 
+#include <stdlib.h>
+
+#include <algorithm>
+
 const char UNISEG_settings::DEFAULT_FRQS_V_NAME[] = { "UNISEG_FRQS" };
 const char UNISEG_settings::DEFAULT_DICS_V_NAME[] = { "UNISEG_DICS" };
 const char UNISEG_settings::DEFAULT_VAR[] = {"var"};

@@ -268,3 +268,71 @@ void FreqFile::read_with_index() {
 
 	iofs_.close();
 }
+
+void FreqFile::read_term(string_type source)
+{
+	Address::uint_array& address = word->disk_address();
+	unsigned int llb = address[0];
+	unsigned int lhb = 0, rhb = 0;
+	unsigned int rlb = address[1];
+
+	fstream::pos_type pos = 0;
+	if ( rlb != Address::INVALID_BOUND) {
+		lhb = rlb;
+
+		if (llb != Address::INVALID_BOUND)
+			rlb = lhb + 1;
+
+		rhb = address[2];
+	} else
+		lhb = address[2];
+
+	if (llb != Address::INVALID_BOUND) {
+		pos = llb * RECORD_LENGTH;
+		current = buf_ + pos;
+	//				iofs_.seekg(pos, ios::beg);
+	//				assert(pos < size_);
+
+		for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
+			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			current += UNICODE_CHAR_LENGTH;
+			strncpy(tmp, current, INT_TYPE_SIZE);
+			value = bytes_to_int32(tmp);
+			current += INT_TYPE_SIZE;
+
+			/// save them in the array
+			enc->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc->howmanybytes());
+			string_array aca(ca);
+			aca.push_back(a_char);
+			assert(value >= 0);
+			freq_.add(aca, enc->lang(), value); //->address(count);
+			count++;
+		}
+	}
+
+	if (rlb != Address::INVALID_BOUND) {
+		pos = rlb * RECORD_LENGTH;
+		current = buf_ + pos;
+	//				iofs_.seekg(pos, ios::beg);
+	//				assert(pos < size_);
+
+		for (unsigned int j = rlb; j <= rhb && j != Address::INVALID_BOUND; j++) {
+
+			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			current += UNICODE_CHAR_LENGTH;
+			strncpy(tmp, current, INT_TYPE_SIZE);
+			value = bytes_to_int32(tmp);
+			assert(value >= 0);
+			current += INT_TYPE_SIZE;
+
+			/// save them in the array
+			enc->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc->howmanybytes());
+			string_array aca = ca;
+			aca.insert(aca.begin(), a_char);
+			freq_.add(aca, enc->lang(), value); //->address(count);
+			count++;
+		}
+	}
+}

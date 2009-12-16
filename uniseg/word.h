@@ -15,6 +15,7 @@
 
 #include "icstring.hpp"
 #include "encoding.h"
+#include "address.h"
 
 class Word
 {
@@ -25,12 +26,9 @@ public:
 	typedef std::pair<int, unsigned int> 			IndexFreqPair;
 
 public:
-	typedef std::string	 							string_type;
 	typedef Word									word_type;
 	typedef word_type								*word_ptr_type;
 	typedef std::vector<word_ptr_type>				array_type;
-	typedef std::vector<array_type >				array_array_type;
-	typedef std::vector<string_type>				string_array;
 
 private:
 	string_type 									chars_;
@@ -65,6 +63,7 @@ private:
 	Word*											next_;
 
 	UNISEG_encoding::language						lang_;
+	Address::uint_array								disk_address_;
 
 private:
 	void init();
@@ -92,6 +91,9 @@ public:
 
 	const int address() const { return address_; }
 	void address(int address) { address_ = address; }
+
+	Address::uint_array& disk_address() { return disk_address_; }
+	//void address(int address) { disk_address_ = disk_address; }
 
 	/*due to the fact that the unicode string use more bytes than just one byte, we cann't do this:
 	 * chars_.length(); */
@@ -212,5 +214,15 @@ private:
 inline const Word::Side Word::side() const {
 	return side_;
 }
+
+typedef Word::word_type								word_type;
+typedef Word::word_ptr_type							word_ptr_type;
+typedef const word_ptr_type							const_word_ptr;
+typedef Word::array_type							array_type;
+
+typedef std::map<string_type, word_ptr_type>		freq_type;
+typedef std::map<string_type, word_ptr_type>		word_map;
+
+typedef std::vector<array_type >					array_array_type;
 
 #endif /*__WORD_H__*/

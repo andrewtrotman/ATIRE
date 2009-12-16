@@ -43,7 +43,7 @@ public:
 	word_ptr_type find(string_type word);
 	bool has_word(string_type word);
 
-	word_ptr_type add(string_array& ca, UNISEG_encoding::language lang, unsigned int freq = 0, bool allnew = false);
+	word_ptr_type add(string_array& ca, UNISEG_encoding::language lang, unsigned int freq = -1, bool allnew = false);
 	void add(word_ptr_type word_ptr, bool allnew = false);
 
 	void sort(int k);

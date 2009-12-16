@@ -9,6 +9,7 @@
 #define DIC_H_
 
 #include "uniseg_types.h"
+#include "address.h"
 #include <map>
 
 class Dic {

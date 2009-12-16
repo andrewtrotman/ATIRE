@@ -33,6 +33,9 @@ public:
 	void write(array_type& arr);
 	void read();
 	void read_with_index();
+
+	void read_term(word_ptr_type word);
+
 	unsigned int cal(array_type& arr);
 
 	int wlen() { return wlen_; }

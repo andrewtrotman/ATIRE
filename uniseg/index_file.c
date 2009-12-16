@@ -9,6 +9,7 @@
 #include "word.h"
 #include "address.h"
 #include "utilities.h"
+#include "encoding_factory.h"
 
 #include <cassert>
 #include <iostream>
@@ -172,4 +173,70 @@ void IndexFile::read() {
 	iofs_.close();
 }
 
+void IndexFile::read(Freq&	freq) {
+	assert(wlen_ > 0);
 
+	if (wlen_ == 1)
+		return;
+
+	if (!iofs_.is_open())
+		File::ropen();
+
+	File::read();
+
+	char tmp[INT_TYPE_SIZE];
+	char *current = buf_;
+	int chars_len = wlen_ - 1;
+
+	int record_length = UNICODE_CHAR_LENGTH * chars_len + ADDRESSES_LENGTH;
+	char buf[UNICODE_CHAR_LENGTH];
+	unsigned int address = 0;
+	int count = 0;
+
+	uniseg_encoding::language lang;
+	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
+
+	cerr << "loading index file" << filename_ << endl;
+	while (count < size_) {
+		string_array ca;
+		//Address::uint_array addr(ADDRESSES_NUMBER, Address::INVALID_BOUND);
+
+		enc->test_char((unsigned char*)&buf);
+		string_type a_char(buf, enc->howmanybytes());
+		ca.push_back(a_char);
+		lang = enc->lang();
+
+		for (int i = 1; i < chars_len; i++) {
+//			if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)) {
+//				// Same effect as above
+//				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
+//			}
+			/// save them in the array
+//			string_type a_char =
+//				get_first_utf8char((unsigned char*)current);
+			enc->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc->howmanybytes());
+			ca.push_back(a_char);
+			current += UNICODE_CHAR_LENGTH; //a_char.length();
+		}
+
+		word_ptr_type word = freq.add(ca, lang, 0);
+		Address::uint_array& addr = word->disk_address();
+
+		for (int i = 0; i < ADDRESSES_NUMBER; i++) {
+//			if (!iofs_.read ((char *)&address, sizeof(unsigned int))) {
+//				// Same effect as above
+//				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
+//			}
+
+			//addr[i] = (int)current;
+			strncpy(tmp, current, INT_TYPE_SIZE);
+			//addr[i] = bytes_to_int32(tmp);
+			addr.push_back(bytes_to_int32(tmp));
+			current += INT_TYPE_SIZE;
+		}
+
+		count += record_length;
+	}
+	iofs_.close();
+}

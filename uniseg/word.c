@@ -228,11 +228,11 @@ int Word::counter(Side side) {
 	return 0;
 }
 
-Word::string_type Word::array_to_string(array_type& wa) {
+string_type Word::array_to_string(array_type& wa) {
 	return array_to_string(wa, 0, wa.size());
 }
 
-Word::string_type Word::array_to_string(array_type& wa, int idx, int len) {
+string_type Word::array_to_string(array_type& wa, int idx, int len) {
 	string_type tmp_str;
 	assert(idx >= 0);
 	assert(len <= (int)wa.size());
@@ -241,7 +241,7 @@ Word::string_type Word::array_to_string(array_type& wa, int idx, int len) {
 	return tmp_str;
 }
 
-Word::string_array Word::array_to_array(const array_type& wa) {
+string_array Word::array_to_array(const array_type& wa) {
 	string_array ca;
 	for (int i = 0; i < (int)wa.size(); i++)
 		ca.push_back(wa[i]->chars());
@@ -264,7 +264,7 @@ void Word::array(std::vector<Word*> arr) {
 	//std::copy(arr_.begin(), arr_.end(), arr.begin());
 }
 
-Word::string_type Word::subchars(int idx, int len) {
+string_type Word::subchars(int idx, int len) {
 	string_type substr("");
 	subchars(substr, idx, len);
 	return substr;

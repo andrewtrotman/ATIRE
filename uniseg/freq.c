@@ -147,9 +147,9 @@ word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsign
 	*/
 
 	if (word_ptr) {
-		if (freq == 0)
+		if (freq == -1)
 			word_ptr->increase();
-		else
+		else if (freq > 0)
 			word_ptr->freq(freq);
 	}
 	else {
