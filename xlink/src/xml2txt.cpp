@@ -69,11 +69,8 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 					throw std::runtime_error(std::string("couldn't find file: ") + xmlfile);
 			}
 
-			if (connected_) {
+			if (connected_)
 				text = convert(content);
-				if (!xml)
-					delete [] content;
-			}
 			else {
 				cerr << "Warning: " << "trying to convert " << xmlfile
 						<< " but the XML2TXT server is not ready!"
@@ -83,8 +80,9 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 				strcpy(text, content);
 				text[strlen(content)] = '\0';
 				string_clean(text, 0, 0);
-				delete [] content;
 			}
+			if (!xml)
+				delete [] content;
 		}
 		else
 			cerr << "Error: " << "no such file - " << xmlfile << endl;
