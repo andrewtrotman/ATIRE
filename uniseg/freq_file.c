@@ -75,6 +75,7 @@ void FreqFile::write(array_type& arr) {
 	iofs_.seekp(0, ios::beg);
 
 	string_type pre_parent;
+	int count = 0;
 
 	for (unsigned int i = 0; i < arr.size(); i++) {
 
@@ -88,14 +89,18 @@ void FreqFile::write(array_type& arr) {
 		assert(len <= UNICODE_CHAR_LENGTH);
 
 		freq = word_ptr->freq();
+		if (UNISEG_settings::instance().do_skip && freq <= UNISEG_settings::instance().to_skip)
+			continue;
 
 		iofs_.write(chars, UNICODE_CHAR_LENGTH);
 		iofs_.write((char *)&freq, sizeof(unsigned int));
+		++count;
 	}
 
 
 	ofstream::pos_type pos = iofs_.tellp();
 	cerr << "number of word: " << arr.size() << endl;
+	cerr << "number of saved word: " << count << endl;
 	//cerr << "expected file size: " << size << endl;
 	cerr << "actual file size: " << static_cast<int>(pos) << endl;
 	//assert(size == static_cast<int>(pos));
@@ -241,6 +246,7 @@ void FreqFile::read_with_index() {
 					current += UNICODE_CHAR_LENGTH;
 					strncpy(tmp, current, INT_TYPE_SIZE);
 					value = bytes_to_int32(tmp);
+					assert(value >= 0);
 					current += INT_TYPE_SIZE;
 
 					/// save them in the array
@@ -248,7 +254,6 @@ void FreqFile::read_with_index() {
 					string_type a_char(buf, enc->howmanybytes());
 					string_array aca = ca;
 					aca.insert(aca.begin(), a_char);
-					assert(value > 0);
 					freq_.add(aca, enc->lang(), value); //->address(count);
 					count++;
 				}

@@ -50,7 +50,19 @@ inline std::string getext(std::string& source) {
 
 inline unsigned int bytes_to_int32(char *bytes)
 {
-	unsigned int shift = (unsigned int)(*(bytes + 3) << 24 | *(bytes + 2) << 16 | *(bytes + 1) << 8 | *bytes );
+	unsigned int shift = 0;
+	char *start = bytes;
+	int count = 0;
+	while (/*start && */count < 4) {
+		unsigned int shiftbits = count * 8;
+		unsigned char byte = (unsigned char)(*start);
+		unsigned int ret = byte << shiftbits;
+		shift |= ret;
+		start++;
+		count++;
+	}
+	if (shift >= 4294967181 && shift < 4294967295)
+		std::cerr << "there must be a error somewhere" << std::endl;
 	//unsigned int plus = (unsigned int)(*(bytes + 3) << 24) + (unsigned int)(*(bytes + 2) << 16) + (unsigned int)(*(bytes + 1) << 8) + (unsigned int)(*bytes);
 	return shift;
 }
