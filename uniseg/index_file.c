@@ -220,7 +220,6 @@ void IndexFile::read(Freq&	freq) {
 			enc->test_char((unsigned char*)&buf);
 			string_type a_char(buf, enc->howmanybytes());
 			ca.push_back(a_char);
-			current += UNICODE_CHAR_LENGTH; //a_char.length();
 		}
 
 		word_ptr_type word = freq.add(ca, lang, 0);

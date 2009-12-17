@@ -152,7 +152,7 @@ word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsign
 		//	cerr << "skipping chars: " << chars << endl;
 
 		if (!skip) {
-			if (freq == 0)
+			if (freq <= -1)
 				word_ptr = new word_type(chars, size);
 			else
 				word_ptr = new word_type(chars, freq, size);
@@ -186,18 +186,13 @@ word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsign
 //						return word_ptr;
 //					}
 					if (!lparent) {
-						string_array lca;
-						string_array::iterator end = ca.end();
-						--end;
-						--end;
-						std::copy(lca.begin(), ca.begin(), end);
+						string_array lca(ca);
+						lca.pop_back();
 						lparent = add(lca, lang, 0);
 					}
 					if (!rparent) {
-						string_array::iterator begin = ca.begin();
-						++begin;
-						//std::copy(rca.begin(), begin, ca.end());
-						string_array rca(begin, ca.end());
+						string_array rca(ca);
+						rca.erase(rca.begin());
 						rparent = add(rca, lang, 0);
 					}
 
