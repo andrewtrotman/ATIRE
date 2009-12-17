@@ -9,14 +9,19 @@
 #define QFREQ_H_
 
 #include "freq.h"
+#include "freq_file.h"
 #include <climits>
+#include <vector>
+
+
 
 class QFreq {
 
 private:
-	Freq 		freq_;
-	int 		k_;
-	bool 		loaded_;
+	Freq 					freq_;
+	int 					k_;
+	bool 					loaded_;
+	std::vector<FreqFile *> 	freq_files_;
 
 public:
 	QFreq();
@@ -28,6 +33,8 @@ public:
 	int k() { return k_; }
 	int count() { return k_; }
 	bool is_loaded() { return loaded_; }
+
+	word_ptr_type find(string_type word);
 
 	static QFreq& instance();
 };

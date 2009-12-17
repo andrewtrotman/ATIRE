@@ -67,6 +67,7 @@ void Word::init() {
 	next_ = NULL;
 
 	lang_ = UNISEG_encoding::UNKNOWN;
+	loaded_ = false;
 }
 
 bool Word::cmp_just_freq(Word *w1, Word *w2) {

@@ -64,6 +64,7 @@ private:
 
 	UNISEG_encoding::language						lang_;
 	Address::uint_array								disk_address_;
+	bool											loaded_;
 
 private:
 	void init();

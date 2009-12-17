@@ -52,7 +52,8 @@ void QFreq::load_freq(int n, bool force) {
 	while (k_ <= n) {
 		string name = stringify(k_);
 
-		FreqFile freq_file(name, freq_);
+		freq_files_.push_back(FreqFile(name, freq_));
+		FreqFile& freq_file = freq_files_.back();
 		freq_file.path(UNISEG_settings::instance().freqs_path);
 		freq_file.wlen(k_);
 
@@ -82,6 +83,33 @@ void QFreq::load_freq(int n, bool force) {
 	//k_ = loader.count();
 
 	loaded_ = true;
+}
+
+word_ptr_type QFreq::find(string_type word) {
+	string_array ca;
+	to_string_array(word, ca);
+
+	int min = 1, max = freq_.size();
+	int len = ca.size();
+
+	for (int i = min; i >= 0 && i <= max; i++) {
+		for (int j = 0; j < (len - i) + 1; j++) {
+			//tmp_str.append(ca[j]);
+			string_type tmp_str("");
+			int k = j;
+			while (k < (j + i)) {
+				tmp_str.append(ca[k]);
+				++k;
+			}
+			word_ptr_type tmp_word = freq_.find(tmp_str);
+			freq_files_[i].read_term(tmp_word);
+			//word_ptr_type tmp_word = freq_.find();
+		}
+	}
+//	freq_type::const_iterator it = freq_.find(word);
+//	if (it != freq_.end())
+//		return it->second;
+	return NULL;
 }
 
 QFreq& QFreq::instance() {
