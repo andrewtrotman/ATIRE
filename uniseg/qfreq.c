@@ -52,14 +52,14 @@ void QFreq::load_freq(int n, bool force) {
 	while (k_ <= n) {
 		string name = stringify(k_);
 
-		freq_files_.push_back(FreqFile(name, freq_));
-		FreqFile& freq_file = freq_files_.back();
-		freq_file.path(UNISEG_settings::instance().freqs_path);
-		freq_file.wlen(k_);
+		freq_files_.push_back(new FreqFile(name, freq_));
+		FreqFile *freq_file = freq_files_.back();
+		freq_file->path(UNISEG_settings::instance().freqs_path);
+		freq_file->wlen(k_);
 
-		if (!freq_file.exist()) {
+		if (!freq_file->exist()) {
 			k_--;
-			std::cerr << "No such file:" << freq_file.fullpathname() << std::endl;
+			std::cerr << "No such file:" << freq_file->fullpathname() << std::endl;
 			break;
 		}
 
@@ -67,14 +67,14 @@ void QFreq::load_freq(int n, bool force) {
 			/************************************
 			 * LOAD THE INDEX OF TERMS ONLY FIRST
 			 ************************************/
-			//freq_file.read_with_index();
+			//freq_file->read_with_index();
 			IndexFile idxf(name);
 			idxf.path(UNISEG_settings::instance().freqs_path);
 			idxf.wlen(k_);
 			idxf.read(freq_);
 		}
 		else
-			freq_file.read();
+			freq_file->read();
 
 		k_++;
 	}
@@ -102,7 +102,7 @@ word_ptr_type QFreq::find(string_type word) {
 				++k;
 			}
 			word_ptr_type tmp_word = freq_.find(tmp_str);
-			freq_files_[i].read_term(tmp_word);
+			freq_files_[i]->read_term(tmp_word);
 			//word_ptr_type tmp_word = freq_.find();
 		}
 	}

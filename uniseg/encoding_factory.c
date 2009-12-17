@@ -15,7 +15,7 @@
 UNISEG_encoding *UNISEG_encoding_factory::get_encoding()
 {
     if (!enc_)
-	enc_ = gen_encoding_scheme((encoding)(UNISEG_settings::instance().encoding_scheme));
+    	enc_ = gen_encoding_scheme((encoding)(UNISEG_settings::instance().encoding_scheme));
     return enc_;
     //return gen_encoding_scheme((encoding)(UNISEG_settings::instance().encoding_scheme));
 }

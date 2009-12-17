@@ -9,18 +9,17 @@
 #define QFREQ_H_
 
 #include "freq.h"
-#include "freq_file.h"
 #include <climits>
 #include <vector>
 
-
+class FreqFile;
 
 class QFreq {
 
 private:
-	Freq 					freq_;
-	int 					k_;
-	bool 					loaded_;
+	Freq 						freq_;
+	int 						k_;
+	bool 						loaded_;
 	std::vector<FreqFile *> 	freq_files_;
 
 public:

@@ -22,13 +22,13 @@ public:
 	UNISEG_encoding_ascii() : UNISEG_encoding() {}
 	virtual ~UNISEG_encoding_ascii() {}
 
-	virtual bool is_valid_char(unsigned char *c); // for English, a valid char will be an alphabet character
+	virtual bool is_valid_char(const unsigned char *c); // for English, a valid char will be an alphabet character
 
 	virtual void UNISEG_tolower(unsigned char *c);
 	virtual void UNISEG_toupper(unsigned char *c);
 };
 
-inline bool UNISEG_encoding_ascii::is_valid_char(unsigned char *c) { return isalpha(*c); }
+inline bool UNISEG_encoding_ascii::is_valid_char(const unsigned char *c) { return isalpha(*c); }
 
 inline void UNISEG_encoding_ascii::UNISEG_tolower(unsigned char *c)
 {

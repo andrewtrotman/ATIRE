@@ -200,7 +200,8 @@ void IndexFile::read(Freq&	freq) {
 	while (count < size_) {
 		string_array ca;
 		//Address::uint_array addr(ADDRESSES_NUMBER, Address::INVALID_BOUND);
-
+		strncpy(buf, current, UNICODE_CHAR_LENGTH);
+		current += UNICODE_CHAR_LENGTH;
 		enc->test_char((unsigned char*)&buf);
 		string_type a_char(buf, enc->howmanybytes());
 		ca.push_back(a_char);
@@ -214,6 +215,8 @@ void IndexFile::read(Freq&	freq) {
 			/// save them in the array
 //			string_type a_char =
 //				get_first_utf8char((unsigned char*)current);
+			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			current += UNICODE_CHAR_LENGTH;
 			enc->test_char((unsigned char*)&buf);
 			string_type a_char(buf, enc->howmanybytes());
 			ca.push_back(a_char);
