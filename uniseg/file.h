@@ -46,12 +46,12 @@ public:
 
 	static int list(std::string dir, std::vector<std::string> &files, bool recursive = false);
 	//static char *read(const char *filename);
+	void read_in_memory();
 
 protected:
 	bool ropen();
 	void wopen();
 	void setup();
-	void read();
 };
 
 //std::string File::EXT_NAME;

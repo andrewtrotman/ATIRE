@@ -55,13 +55,14 @@ void QFreq::load_freq(int n, bool force) {
 		freq_files_.push_back(new FreqFile(name, freq_));
 		FreqFile *freq_file = freq_files_.back();
 		freq_file->path(UNISEG_settings::instance().freqs_path);
-		freq_file->wlen(k_);
 
 		if (!freq_file->exist()) {
 			k_--;
 			std::cerr << "No such file:" << freq_file->fullpathname() << std::endl;
 			break;
 		}
+		freq_file->wlen(k_);
+		freq_file->read_in_memory();
 
 		if (k_ > 1) {
 			/************************************

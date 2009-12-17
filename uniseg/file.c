@@ -41,7 +41,9 @@ File::File(std::string name) :
 File::~File() {
 }
 
-void File::read() {
+void File::read_in_memory() {
+	if (!iofs_.is_open())
+		ropen();
 	if (iofs_.is_open()) {
 		buf_ = new char [static_cast<int>(size_) + 1];
 		iofs_.read (buf_, size_);

@@ -152,7 +152,7 @@ word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsign
 		//	cerr << "skipping chars: " << chars << endl;
 
 		if (!skip) {
-			if (freq <= -1)
+			if (freq == -1)
 				word_ptr = new word_type(chars, size);
 			else
 				word_ptr = new word_type(chars, freq, size);

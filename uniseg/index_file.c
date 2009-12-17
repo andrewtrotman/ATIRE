@@ -124,10 +124,10 @@ void IndexFile::read() {
 	if (wlen_ == 1)
 		return;
 
-	if (!iofs_.is_open())
-		File::ropen();
+//	if (!iofs_.is_open())
+//		File::ropen();
 
-	File::read();
+	File::read_in_memory();
 
 	char tmp[INT_TYPE_SIZE];
 	char *current = buf_;
@@ -179,10 +179,10 @@ void IndexFile::read(Freq&	freq) {
 	if (wlen_ == 1)
 		return;
 
-	if (!iofs_.is_open())
-		File::ropen();
+//	if (!iofs_.is_open())
+//		File::ropen();
 
-	File::read();
+	File::read_in_memory();
 
 	char tmp[INT_TYPE_SIZE];
 	char *current = buf_;

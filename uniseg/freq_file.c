@@ -110,7 +110,7 @@ void FreqFile::write(array_type& arr) {
 
 void FreqFile::read() {
 
-	cerr << "loading " << name_ << endl;
+	cerr << "loading " << filename_ << endl;
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
 	char tmp[INT_TYPE_SIZE];
@@ -118,18 +118,18 @@ void FreqFile::read() {
 
 	assert(wlen_ == 1);
 
-	File::ropen();
-	File::read();
+//	File::ropen();
+//	File::read_in_memory();
 	char *current = buf_;
 	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
-	if (!iofs_) {
-		// An error occurred!
-		// iofs_.gcount() returns the number of bytes read.
-		// calling iofs_.clear() will reset the stream state
-		// so it is usable again.
-		cerr << "unable to open file \"" << name_ << "\"" << endl;
-	} else {
+//	if (!iofs_) {
+//		// An error occurred!
+//		// iofs_.gcount() returns the number of bytes read.
+//		// calling iofs_.clear() will reset the stream state
+//		// so it is usable again.
+//		cerr << "unable to open file \"" << name_ << "\"" << endl;
+//	} else {
 		int count = 0;
 
 		while (count < size_) {
@@ -160,7 +160,7 @@ void FreqFile::read() {
 		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
 		//if (k == 1)
 		//	cerr << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
-	}
+//	}
 	iofs_.close();
 }
 
@@ -179,8 +179,8 @@ void FreqFile::read_with_index() {
 	idxf.path(path_);
 	idxf.wlen(wlen_);
 	idxf.read();
-	File::ropen();
-	File::read();
+//	File::ropen();
+	File::read_in_memory();
 
 	if (!iofs_) {
 		// An error occurred!
@@ -316,7 +316,9 @@ void FreqFile::read_term(word_ptr_type word)
 			string_array aca(ca);
 			aca.push_back(a_char);
 			assert(value >= 0);
-			freq_.add(aca, enc->lang(), value); //->address(count);
+			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
+			// debug
+			cerr << "add new word: " << ret_word->chars() << endl;
 			count++;
 		}
 	}
@@ -341,7 +343,8 @@ void FreqFile::read_term(word_ptr_type word)
 			string_type a_char(buf, enc->howmanybytes());
 			string_array aca = ca;
 			aca.insert(aca.begin(), a_char);
-			freq_.add(aca, enc->lang(), value); //->address(count);
+			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
+			cerr << "add new word: " << ret_word->chars() << endl;
 			count++;
 		}
 	}
