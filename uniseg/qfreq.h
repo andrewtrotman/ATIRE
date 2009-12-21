@@ -34,6 +34,7 @@ public:
 	bool is_loaded() { return loaded_; }
 
 	word_ptr_type find(string_type word);
+	void load(word_ptr_type word);
 
 	static QFreq& instance();
 };

@@ -295,7 +295,26 @@ void Seger::make(CList& clist, string_type& str) {
 }
 
 void Seger::assign_freq() {
-	freq_->assign_freq(*allfreq_);
+	//freq_->assign_freq(*allfreq_);
+	std::map<word_ptr_type, word_ptr_type> word_pairs;
+	freq_type& freq = freq_->set();
+	freq_type::const_iterator iter;
+	for (iter = freq.begin(); iter != freq.end(); ++iter) {
+		word_ptr_type local_word  = iter->second;
+		word_ptr_type global_word = allfreq_->find(local_word->chars());
+		QFreq::instance().load(global_word);
+		word_pairs.insert(make_pair(local_word, global_word));
+	}
+
+	std::map<word_ptr_type, word_ptr_type>::iterator p_iter;
+	for (p_iter = word_pairs.begin(); p_iter != word_pairs.end(); ++p_iter) {
+		word_ptr_type local_word  = p_iter->first;
+		word_ptr_type global_word = p_iter->second;
+		if (!global_word)
+			local_word->freq(1);
+		else
+			local_word->freq(global_word->freq());
+	}
 }
 
 void Seger::justify(unsigned int min) {

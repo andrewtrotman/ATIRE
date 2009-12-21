@@ -271,6 +271,9 @@ void FreqFile::read_with_index() {
 
 void FreqFile::read_term(word_ptr_type word)
 {
+	if (word->is_loaded())
+		return;
+
 	Address::uint_array& address = word->disk_address();
 	string_array ca;
 	word->to_string_array(ca);
@@ -344,8 +347,9 @@ void FreqFile::read_term(word_ptr_type word)
 			string_array aca = ca;
 			aca.insert(aca.begin(), a_char);
 			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
-			cerr << "add new word: " << ret_word->chars() << endl;
+//			cerr << "add new word: " << ret_word->chars() << endl;
 			count++;
 		}
 	}
+	word->set_loaded(true);
 }

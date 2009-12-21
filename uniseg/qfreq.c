@@ -103,12 +103,20 @@ word_ptr_type QFreq::find(string_type word) {
 				++k;
 			}
 			word_ptr_type tmp_word = freq_.find(tmp_str);
-			if (tmp_word != NULL)
-				freq_files_[i]->read_term(tmp_word);
+			load(tmp_word);
 			//word_ptr_type tmp_word = freq_.find();
 		}
 	}
 	return freq_.find(word);
+}
+
+void QFreq::load(word_ptr_type word)
+{
+	int len = 1;
+	if (word != NULL && (len = word->size()) <= freq_files_.size()) {
+		assert(len > 0);
+		freq_files_[len - 1]->read_term(word);
+	}
 }
 
 QFreq& QFreq::instance() {

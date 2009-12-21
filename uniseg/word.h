@@ -208,6 +208,9 @@ public:
 	void base(double base) { base_ = base; }
 	double base() { return base_; }
 
+	bool is_loaded() { return loaded_; }
+	void set_loaded(bool b) { loaded_ = b; }
+
 private:
 	double cal_a(int start);
 };
