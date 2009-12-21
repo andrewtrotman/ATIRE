@@ -16,13 +16,14 @@
 
 using namespace std;
 
-Word::Word(string_type chars, int size) : chars_(chars), size_(size) {
+Word::Word(string_type chars, int size) :
+	chars_(chars), size_(size), disk_address_(3, Address::INVALID_BOUND) {
 	freq_ =  1;
 	init();
 }
 
 Word::Word(string_type chars, int freq, int size) :
-	chars_(chars), freq_(freq), size_(size) {
+	chars_(chars), freq_(freq), size_(size), disk_address_(3, Address::INVALID_BOUND) {
 	init();
 }
 

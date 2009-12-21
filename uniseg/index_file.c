@@ -223,6 +223,7 @@ void IndexFile::read(Freq&	freq) {
 		}
 
 		word_ptr_type word = freq.add(ca, lang, 0);
+//		cerr << "add new word for index: " << word->chars() << endl;
 		Address::uint_array& addr = word->disk_address();
 
 		for (int i = 0; i < ADDRESSES_NUMBER; i++) {
@@ -233,8 +234,8 @@ void IndexFile::read(Freq&	freq) {
 
 			//addr[i] = (int)current;
 			strncpy(tmp, current, INT_TYPE_SIZE);
-			//addr[i] = bytes_to_int32(tmp);
-			addr.push_back(bytes_to_int32(tmp));
+			addr[i] = bytes_to_int32(tmp);
+			//addr.push_back(bytes_to_int32(tmp));
 			current += INT_TYPE_SIZE;
 		}
 

@@ -90,11 +90,11 @@ word_ptr_type QFreq::find(string_type word) {
 	string_array ca;
 	to_string_array(word, ca);
 
-	int min = 1, max = freq_.size();
-	int len = ca.size();
+	int min = 1, max = ca.size(); //freq_.array_size();
+	//int len = ca.size();
 
-	for (int i = min; i >= 0 && i <= max; i++) {
-		for (int j = 0; j < (len - i) + 1; j++) {
+	for (int i = min; i <= max; i++) {
+		for (int j = 0; j < (max - i) + 1; j++) {
 			//tmp_str.append(ca[j]);
 			string_type tmp_str("");
 			int k = j;
@@ -103,14 +103,12 @@ word_ptr_type QFreq::find(string_type word) {
 				++k;
 			}
 			word_ptr_type tmp_word = freq_.find(tmp_str);
-			freq_files_[i]->read_term(tmp_word);
+			if (tmp_word != NULL)
+				freq_files_[i]->read_term(tmp_word);
 			//word_ptr_type tmp_word = freq_.find();
 		}
 	}
-//	freq_type::const_iterator it = freq_.find(word);
-//	if (it != freq_.end())
-//		return it->second;
-	return NULL;
+	return freq_.find(word);
 }
 
 QFreq& QFreq::instance() {
