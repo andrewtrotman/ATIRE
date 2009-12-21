@@ -24,15 +24,15 @@ private:
 	//int			len_; /// the length of whole unsegmented document
 
 public:
-	FreqCounter(Freq* freq)
-		: freq_(freq), languages_(uniseg_encoding::UNKNOWN) {}
+	FreqCounter(Freq* freq, uniseg_encoding::language lang = uniseg_encoding::CHINESE)
+		: freq_(freq), languages_(lang) {}
 
 	/**
 	 * @param stream The content character stream
 	 * @param freq The map for the frequcecies of words
 	 */
-	FreqCounter(string_type stream, Freq* freq)
-			: stream_(stream), freq_(freq), languages_(uniseg_encoding::UNKNOWN) {}
+	FreqCounter(string_type stream, Freq* freq, uniseg_encoding::language lang = uniseg_encoding::CHINESE)
+			: stream_(stream), freq_(freq), languages_(lang) {}
 	~FreqCounter() {}
 
 	void count(int max, int min = 1);
