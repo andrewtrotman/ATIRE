@@ -102,6 +102,7 @@ word_ptr_type QFreq::find(string_type word) {
 				tmp_str.append(ca[k]);
 				++k;
 			}
+
 			word_ptr_type tmp_word = freq_.find(tmp_str);
 			load(tmp_word);
 			//word_ptr_type tmp_word = freq_.find();
@@ -115,7 +116,7 @@ void QFreq::load(word_ptr_type word)
 	int len = 1;
 	if (word != NULL && (len = word->size()) <= freq_files_.size()) {
 		assert(len > 0);
-		freq_files_[len - 1]->read_term(word);
+		freq_files_[len]->read_term(word);
 	}
 }
 

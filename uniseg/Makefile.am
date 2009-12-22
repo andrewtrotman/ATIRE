@@ -6,6 +6,7 @@ AM_LDFLAGS = @LIBS@
 CC = g++
 
 libuniseq_sources = \
+		stop_word.c \
 		encoding_utf8.c \
 		encoding_factory.c \
 		uniseg.c \
@@ -24,6 +25,7 @@ libuniseq_sources = \
 		dic.c
 		
 libuniseg_headers = \
+		stop_word.h \
 		address.h	\
 		anyoption.h	\
 		clist.h	\

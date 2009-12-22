@@ -106,6 +106,9 @@ word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsign
 	assert(size > 0);
 
 	string_type chars; // = array_to_string<string_array, string_type>(ca);
+	//debug
+	if (chars == "我们")
+		cerr << "got you " << endl;
 	/*
 	 * create key string
 	 */

@@ -321,7 +321,7 @@ void FreqFile::read_term(word_ptr_type word)
 			assert(value >= 0);
 			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
 			// debug
-//			cerr << "add new word: " << ret_word->chars() << endl;
+			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
 	}
@@ -347,7 +347,7 @@ void FreqFile::read_term(word_ptr_type word)
 			string_array aca = ca;
 			aca.insert(aca.begin(), a_char);
 			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
-//			cerr << "add new word: " << ret_word->chars() << endl;
+			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
 	}
