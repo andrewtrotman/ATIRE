@@ -39,6 +39,7 @@ public:
 	void remove_two_consecutive_single_chars();
 
 	CWords* front();
+	CWords* second();
 	int size() { return list_.size(); }
 
 	cwords_list_iterator delete_node(cwords_list_iterator it);

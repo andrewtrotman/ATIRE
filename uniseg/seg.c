@@ -356,8 +356,15 @@ void Seger::add_to_list(array_type& cwlist) {
 
 	assert(clist_->size() > 0);
 
+	CWords *first = clist_->front();
+	CWords *second = clist_->second();
+
+	int stop_word_count1 = first->chinese_stop_word_count();
+	int stop_word_count2 = second->chinese_stop_word_count();
+
+	CWords *best = (stop_word_count2 > stop_word_count1) ? second : first;
 	do {
-		array_type temp = clist_->front()->to_array();
+		array_type temp = best->to_array();
 		clist_->list().pop_front();
 		assert(temp.size() > 0);
 

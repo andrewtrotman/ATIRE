@@ -9,6 +9,7 @@
 #include "uniseg_settings.h"
 #include "uniseg_settings.h"
 #include "qfreq.h"
+#include "stop_word.h"
 
 using namespace std;
 
@@ -467,4 +468,17 @@ string_type CWords::to_string() {
 		++it;
 	}
 	return str;
+}
+
+int CWords::chinese_stop_word_count()
+{
+	int count = 0;
+	std::list<word_ptr_type>::const_iterator it = cwords_.begin();
+
+	while (	it != cwords_.end()) {
+		if ((*it)->size() == 1 && StopWord::is_chinese_stop_word((*it)->chars().c_str()))
+			++count;
+		++it;
+	}
+	return count;
 }

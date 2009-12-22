@@ -67,13 +67,16 @@ libuniseg_la_SOURCES = $(libuniseq_sources)
 #libuniseg_la_HEADERS = $(libuniseq_headers)
 #libuniseg_la_LDFLAGS = -shared
 
-noinst_PROGRAMS = test/uniseg
+noinst_PROGRAMS = test/uniseg test/stopword
 
 test_uniseg_SOURCES = test/uniseg.c
 test_uniseg_LDADD = -L. -luniseg
 test_uniseg_LDFLAGS = -static
 test_uniseg_DEPENDENCIES = libuniseg.la
 test_uniseg_CFLAGS =
+
+test_stopword_SOURCES = test/stopword.c stop_word.c
+test_stopword_CFLAGS =
 
 TESTS = test/uniseg
 

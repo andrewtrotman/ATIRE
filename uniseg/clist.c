@@ -75,6 +75,14 @@ CWords* CList::front()  {
 	return (list_.size() > 0) ? list_.front() : NULL;
 }
 
+CWords* CList::second()  {
+	if (list_.size() < 2)
+		return NULL;
+	cwords_list_iterator begin = list_.begin();
+	++begin;
+	return (*begin);
+}
+
 void CList::cal(Freq* freq) {
 	cwords_list::iterator it = list_.begin();
 	for (; it != list_.end(); ++it) {

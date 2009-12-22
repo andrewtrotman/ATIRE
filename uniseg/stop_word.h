@@ -9,7 +9,7 @@
 #define STOP_WORD_H_
 
 class StopWord {
-private:
+public:
 	static char *chinese_stop_word_list[];
 	static long chinese_stop_word_list_len;
 
@@ -17,7 +17,7 @@ public:
 	StopWord();
 	virtual ~StopWord();
 
-	bool is_chinese_stop_word(const char *term);
+	static bool is_chinese_stop_word(const char *term);
 };
 
 #endif /* STOP_WORD_H_ */

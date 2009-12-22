@@ -49,6 +49,8 @@ public:
 	static void h_score(double s) { highest_s_ = s; }
 	static void l_score(double s) { lowest_s_ = s; }
 
+	int chinese_stop_word_count();
+
 private:
 	void copy(const CWords& cwords);
 	void adjust_pos(const_word_ptr w_ptr);

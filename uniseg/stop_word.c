@@ -27,10 +27,17 @@ return strcmp(*(char **)one, *(char **)two);
 
 bool StopWord::is_chinese_stop_word(const char *term)
 {
-if (bsearch(&term, chinese_stop_word_list, chinese_stop_word_list_len, sizeof(*chinese_stop_word_list), char_star_star_strcmp) == NULL)
+//if (bsearch(&term, chinese_stop_word_list, chinese_stop_word_list_len, sizeof(*chinese_stop_word_list), char_star_star_strcmp) == NULL)
+//	return false;
+//
+//return true;
+	for (int i = 0; i < StopWord::chinese_stop_word_list_len; i++) {
+		const char *stopword = StopWord::chinese_stop_word_list[i];
+		if (strcmp(term, stopword) == 0)
+			return true;
+		//cout <<  stopword << endl;
+	}
 	return false;
-
-return true;
 }
 
 char *StopWord::chinese_stop_word_list[] = {
