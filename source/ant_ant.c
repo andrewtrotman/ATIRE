@@ -140,6 +140,7 @@ for (query = input.first(); query != NULL; query = input.next())
 	    topic_id = -1;
 
     ant_search(ant, &hits, query, topic_id, params->boolean);
+    forum_output(ant, topic_id, hits);
 
     prompt(&param_block);
     }

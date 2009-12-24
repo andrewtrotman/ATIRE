@@ -36,7 +36,7 @@ if ((document_start = strstr(document_end, "<DOC")) != NULL)
 		}
 	else if ((document_id_start = strstr(document_start, "id=\"")) != NULL)
 		{
-		document_id_end = strchr(document_id_start += 5, '"');
+		document_id_end = strchr(document_id_start += 4, '"');
 		if (document_id_end)
 			document_start = strchr(document_id_end, '>') + 1;
 		}

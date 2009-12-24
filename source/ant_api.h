@@ -46,6 +46,8 @@ double ant_cal_map(ANT *ant);
 
 void ant_stat(ANT *ant);
 
+void forum_output(ANT *ant, long topic_id, long long hits);
+
 void ant_free(ANT *ant);
 
 #ifdef  __cplusplus

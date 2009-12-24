@@ -47,8 +47,15 @@
 #endif
 
 /*
- * ANT_ANT_HANDLE
- * --------------
+   GLOBAL VARIABLES
+   ----------------
+   Since some of the variables could not be declared in ant_params struct, so they have to be declared as global variables
+ */
+ANT_search_engine_forum *output = NULL;
+
+/*
+   ANT_ANT_HANDLE
+   --------------
  */
 struct ANT_ant_handle
 {
@@ -276,6 +283,13 @@ else
 //printf("Index contains %lld documents\n", search_engine->document_count());
 
 data->search_engine->set_trim_postings_k(params->trim_postings_k);
+
+if (params->output_forum == TREC)
+	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == INEX)
+	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == INEX_EFFICIENCY)
+	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
 }
 
 /*
@@ -501,9 +515,9 @@ return filename;
 */
 double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, long topic_id, long boolean)
 {
-char /**query, */*name;
+//char /**query, */*name;
 //long topic_id, line, number_of_queries;
-long long hits, result, last_to_list;
+long long hits;//, result, last_to_list;
 double average_precision = 0.0;
 
 //ANT_ANT_file_iterator input(params->queries_filename);
@@ -564,63 +578,8 @@ char **ant_search(ANT *ant, long long *hits, char *query, long topic_id, long bo
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
 
-long long result;
-long long last_to_list = 0;
-char *name;
-
-data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, ant_params(ant), query, data->filename_list, data->document_list, data->answer_list, hits, topic_id, boolean);
+data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, params, query, data->filename_list, data->document_list, data->answer_list, hits, topic_id, boolean);
 data->number_of_queries++;
-
-ANT_search_engine_forum *output = NULL;
-if (params->output_forum == TREC)
-	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
-else if (params->output_forum == INEX)
-	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
-else if (params->output_forum == INEX_EFFICIENCY) {
-	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
-}
-/*
-	Convert from a results list into a list of documents
-*/
-if (output == NULL)
-    data->search_engine->generate_results_list(data->filename_list, data->answer_list, *hits);
-else
-    data->search_engine->generate_results_list(data->document_list, data->answer_list, *hits);
-
-
-/*
-	Display the list of results (either to the user or to a run file)
-*/
-last_to_list = (*hits) > params->results_list_length ? params->results_list_length : (*hits);
-if (output == NULL)
-	for (result = 0; result < last_to_list; result++)
-//		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
-			{
-//			get_document_and_extract(topic_id, result + 1, answer_list[result])
-#ifdef NEVER
-			long longest_len = search_engine->get_longest_document_length();
-			long long docid;
-			char *pos;
-			char *document_buffer = new char [longest_len + 1];
-			unsigned long len = longest_len;
-
-			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
-			search_engine->get_document(document_buffer, &len, docid);
-			pos = strstr(document_buffer, "<DOCNO>");
-			pos = strpbrk(pos, "wW");
-			fprintf(params->output, "%lld:%s %f %*.*s\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
-			delete [] document_buffer;
-#else
-			fprintf(params->output, "%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
-#endif
-			}
-//		else
-//			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
-else
-	output->write(topic_id, data->answer_list, last_to_list, data->search_engine);
-
-/* free the allocated forum */
-delete output;
 
 return data->answer_list;
 }
@@ -712,6 +671,59 @@ ANT_stats::print_operating_system_process_time();
 }
 
 /*
+	FORUM_OUTPUT()
+	--------------
+ */
+void forum_output(ANT *ant, long topic_id, long long hits)
+{
+struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+struct ANT_ANT_params *params = ant_params(ant);
+
+long long result;
+long long last_to_list = 0;
+
+/*
+	Convert from a results list into a list of documents
+*/
+if (output == NULL)
+    data->search_engine->generate_results_list(data->filename_list, data->answer_list, hits);
+else
+    data->search_engine->generate_results_list(data->document_list, data->answer_list, hits);
+
+
+/*
+	Display the list of results (either to the user or to a run file)
+*/
+last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
+if (output == NULL)
+	for (result = 0; result < last_to_list; result++)
+//		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
+			{
+//			get_document_and_extract(topic_id, result + 1, answer_list[result])
+#ifdef NEVER
+			long longest_len = search_engine->get_longest_document_length();
+			long long docid;
+			char *pos;
+			char *document_buffer = new char [longest_len + 1];
+			unsigned long len = longest_len;
+
+			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+			search_engine->get_document(document_buffer, &len, docid);
+			pos = strstr(document_buffer, "<DOCNO>");
+			pos = strpbrk(pos, "wW");
+			fprintf(params->output, "%lld:%s %f %*.*s\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
+			delete [] document_buffer;
+#else
+			fprintf(params->output, "%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
+#endif
+			}
+//		else
+//			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
+else
+	output->write(topic_id, data->answer_list, last_to_list, data->search_engine);
+}
+
+/*
 	ANT_FREE()
 	-----------
 */
@@ -729,6 +741,10 @@ delete [] data->document_list;
 delete [] data->filename_list;
 delete [] data->mem1;
 delete [] data->mem2;
+
+/* free the allocated forum */
+if (output != NULL)
+	delete output;
 
 free(ant);
 }

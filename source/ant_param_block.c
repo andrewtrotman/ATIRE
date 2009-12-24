@@ -316,7 +316,10 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'n')
 			run_name = command + 1;
 		else if (*command == 'o')
-			output_filename = command + 1;
+			{
+			if (*(command + 1) != '\0')
+				output_filename = command + 1;
+			}
 		else if (*command == 'l')
 			results_list_length = atol(command + 1);
 		else if (*command == 's')

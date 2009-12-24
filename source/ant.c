@@ -318,9 +318,8 @@ if (params->output_forum == ANT_ANT_param_block::TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 else if (params->output_forum == ANT_ANT_param_block::INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
-else if (params->output_forum == ANT_ANT_param_block::INEX_EFFICIENCY) {
+else if (params->output_forum == ANT_ANT_param_block::INEX_EFFICIENCY)
 	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
-}
 
 sum_of_average_precisions = 0.0;
 number_of_queries = line = 0;
