@@ -98,7 +98,10 @@ int main(int argc, char *argv[])
 ANT_ANT_param_block param_block(argc, argv);
 long last_param;
 char *query;
-long topic_id, line;
+char *query_start;
+long line;
+char topic_id[1024]; // the topic id not necessary has to be number
+long topic_id_len = 0;
 long long hits;
 
 last_param = param_block.parse();
@@ -132,12 +135,16 @@ for (query = input.first(); query != NULL; query = input.next())
 
     if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
 	    {
-	    topic_id = atol(query);
+	    //topic_id = atol(query);
+    	query_start = query;
 	    if ((query = strchr(query, ' ')) == NULL)
 		    exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+	    topic_id_len = query - query_start;
+	    strncpy(topic_id, query_start, topic_id_len);
+	    topic_id[topic_id_len] = '\0';
 	    }
     else
-	    topic_id = -1;
+	    strcpy(topic_id, "-1");
 
     ant_search(ant, &hits, query, topic_id, params->boolean);
     forum_output(ant, topic_id, hits);

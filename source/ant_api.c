@@ -296,7 +296,7 @@ else if (params->output_forum == INEX_EFFICIENCY)
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
+double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, const char *topic/*long topic_id*/, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
 {
 ANT_time_stats stats;
 long long now, hits;
@@ -308,6 +308,7 @@ ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant *parse_tree, *term_string;
 long terms_in_query, current_term;
 ANT_NEXI_term_ant **term_list;
+long topic_id = atol(topic);
 
 search_engine->stats_initialise();		// if we are command-line then report query by query stats
 
@@ -405,7 +406,7 @@ if (params->boolean)
 if (params->stats & SHORT)
 	{
 	if (topic_id >= 0)
-		fprintf(params->output, "Topic:%ld ", topic_id);
+		fprintf(params->output, "Topic:%s ", topic_id);
 	fprintf(params->output, "Query '%s' found %lld documents ", query, hits);
 	stats.print_time("(", stats.stop_timer(now), ")");
 	}
@@ -513,7 +514,7 @@ return filename;
 	------------
 	replacement for original ANT function
 */
-double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, long topic_id, long boolean)
+double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, const char *topic_id/*long topic_id*/, long boolean)
 {
 //char /**query, */*name;
 //long topic_id, line, number_of_queries;
@@ -560,7 +561,7 @@ ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_st
 		Report the average precision for the query
 	*/
 	if (map != NULL && params->stats & SHORT)
-		fprintf(params->output, "Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+		fprintf(params->output, "Topic:%s Average Precision:%f\n", topic_id , average_precision);
 
 	//prompt(params);
 	//}
@@ -573,7 +574,7 @@ return average_precision;
 	ANT_SEARCH()
 	-----------
 */
-char **ant_search(ANT *ant, long long *hits, char *query, long topic_id, long boolean)
+char **ant_search(ANT *ant, long long *hits, char *query, const char *topic_id/*long topic_id*/, long boolean)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
@@ -588,7 +589,7 @@ return data->answer_list;
 	ANT_GET_COLLECTION_DETAILS()
 	----------------------------
 */
-struct collection_details_s *ant_get_collection_details(ANT *ant, struct collection_details_s *collection_details) 
+struct collection_details_s *ant_get_collection_details(ANT *ant, struct collection_details_s *collection_details)
 {
     ANT_search_engine *search_engine = ((ANT_ant_handle *)ant)->search_engine;
 
@@ -602,18 +603,18 @@ struct collection_details_s *ant_get_collection_details(ANT *ant, struct collect
 	ANT_GET_TERM_DETAILS()
 	----------------------
 */
-struct term_details_s *ant_get_term_details(ANT *ant, char *term, struct term_details_s *term_details) 
+struct term_details_s *ant_get_term_details(ANT *ant, char *term, struct term_details_s *term_details)
 {
     ANT_search_engine *search_engine = ((ANT_ant_handle *)ant)->search_engine;
     ANT_search_engine_btree_leaf internal_details;
-    
+
 
 	if (search_engine->get_postings_details(term, &internal_details))
 		{
 		term_details->collection_frequency = internal_details.collection_frequency;
 		term_details->document_frequency = internal_details.document_frequency;
 		}
- 	else 
+ 	else
 		{
 		term_details->collection_frequency = 0;
 		term_details->document_frequency = 0;
@@ -674,7 +675,7 @@ ANT_stats::print_operating_system_process_time();
 	FORUM_OUTPUT()
 	--------------
  */
-void forum_output(ANT *ant, long topic_id, long long hits)
+void forum_output(ANT *ant, const char *topic_id/*long topic_id*/, long long hits)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
@@ -720,7 +721,7 @@ if (output == NULL)
 //		else
 //			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
 else
-	output->write(topic_id, data->answer_list, last_to_list, data->search_engine);
+	output->write(atol(topic_id), data->answer_list, last_to_list, data->search_engine);
 }
 
 /*
