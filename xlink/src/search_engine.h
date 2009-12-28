@@ -8,27 +8,24 @@
 #ifndef SEARCH_ENGINE_H_
 #define SEARCH_ENGINE_H_
 
-namespace QLINK {
-	typedef	void * SE;
+typedef	void * SE;
 
-	class search_engine
-	{
-	protected:
-		char **docids_;
-		long long hits_;
+class search_engine
+{
+protected:
+	char **docids_;
+	long long hits_;
 
-	private:
-		SE	instance_;
+private:
+	SE	instance_;
 
-	public:
-		search_engine();
-		virtual ~search_engine();
+public:
+	search_engine();
+	virtual ~search_engine();
 
-		long long hits() { return hits_; }
-		char **docids() const { return docids_; }
-		virtual void search(const char *term) = 0;
-	};
-
-}
+	long long hits() { return hits_; }
+	char **docids() const { return docids_; }
+	virtual void search(const char *term) = 0;
+};
 
 #endif /* SEARCH_ENGINE_H_ */

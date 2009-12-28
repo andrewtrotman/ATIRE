@@ -9,8 +9,6 @@
 
 #include <ant_api.h>
 
-using namespace QLINK;
-
 #define FALSE 0;
 
 search_engine_ant::search_engine_ant(const char *doclist_filename, const char *index_filename)

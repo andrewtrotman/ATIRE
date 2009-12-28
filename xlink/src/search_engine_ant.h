@@ -10,21 +10,18 @@
 
 #include "search_engine.h"
 
-namespace QLINK {
-	typedef void ANT;
+typedef void ANT;
 
-	class search_engine_ant: public QLINK::search_engine
-	{
-	private:
-		ANT	*ant_;
+class search_engine_ant: public search_engine
+{
+private:
+	ANT	*ant_;
 
-	public:
-		search_engine_ant(const char *doclist_filename = "doclist.aspt", const char *index_filename = "index.aspt");
-		virtual ~search_engine_ant();
+public:
+	search_engine_ant(const char *doclist_filename = "doclist.aspt", const char *index_filename = "index.aspt");
+	virtual ~search_engine_ant();
 
-		void search(const char * term);
-	};
-
-}
+	void search(const char * term);
+};
 
 #endif /* SEARCH_ENGINE_ANT_H_ */

@@ -7,8 +7,6 @@
 
 #include "search_engine.h"
 
-using namespace QLINK;
-
 search_engine::search_engine()
 {
 	hits_ = 0;
