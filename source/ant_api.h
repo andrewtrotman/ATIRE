@@ -36,7 +36,7 @@ ANT_ANT_params *ant_params(ANT *ant);
 
 void ant_post_processing_stats_init(ANT *ant);
 
-char **ant_search(ANT *ant, long long *hits, char *query, const char *topic_id/*long topic_id = -1*/, long boolean = 0);
+char **ant_search(ANT *ant, long long *hits, char *query, const char *topic_id = ""/*long topic_id = -1*/, long boolean = 0);
 
 struct collection_details_s *ant_get_collection_details(ANT *ant, struct collection_details_s *collection_details);
 
