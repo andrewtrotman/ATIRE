@@ -163,10 +163,16 @@ length_in_chars = length_in_bytes = 0;
 if (*at != '\0')
 	{
 	/*
-		Using the multi-language parser, skip over all characters that are not alphabetic or numberic.
+		Using the multi-language parser, skip over all characters that are not alphabetic or numeric.
 	*/
 	while (ANT_isspace(*at) && *at != '\0')
 		at++;
+
+	/*
+	 * skip the non-character, e.g. symbol and punctuation in other languages
+	 */
+	while ((*at & 0x80) && !ANT_parser::ischinese(at) && !ANT_parser::iseuropean(at))
+		at += ANT_parser::utf8_bytes(at);
 
 	if (*at != '\0')
 		while (*(at + length_in_bytes) != '\0' && ispart(at, length_in_chars, at + length_in_bytes))
