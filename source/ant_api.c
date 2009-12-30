@@ -582,6 +582,15 @@ struct ANT_ANT_params *params = ant_params(ant);
 data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, params, query, data->filename_list, data->document_list, data->answer_list, hits, topic_id, boolean);
 data->number_of_queries++;
 
+/*
+	Convert from a results list into a list of documents
+*/
+if (output == NULL)
+    data->search_engine->generate_results_list(data->filename_list, data->answer_list, *hits);
+else
+    data->search_engine->generate_results_list(data->document_list, data->answer_list, *hits);
+
+
 return data->answer_list;
 }
 
@@ -682,15 +691,6 @@ struct ANT_ANT_params *params = ant_params(ant);
 
 long long result;
 long long last_to_list = 0;
-
-/*
-	Convert from a results list into a list of documents
-*/
-if (output == NULL)
-    data->search_engine->generate_results_list(data->filename_list, data->answer_list, hits);
-else
-    data->search_engine->generate_results_list(data->document_list, data->answer_list, hits);
-
 
 /*
 	Display the list of results (either to the user or to a run file)
