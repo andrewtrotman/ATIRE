@@ -115,7 +115,7 @@ for (int i = 0; i < num_of_plugins; i++)
 			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
 		else
 			{
-			printf("found plugin(%s)\n", name_with_plugin_path);
+			fprintf(stderr, "found plugin(%s)\n", name_with_plugin_path);
 			plugin_factory[plugin_ids[i]].plugin = plugin_factory[plugin_ids[i]].maker();
 			}
 #endif
