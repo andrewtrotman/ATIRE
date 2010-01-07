@@ -306,21 +306,26 @@ void FreqFile::read_term(word_ptr_type word)
 	//				iofs_.seekg(pos, ios::beg);
 	//				assert(pos < size_);
 
+		// load word that character is on the right side of the this word
 		for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
-			strncpy(tmp, current, INT_TYPE_SIZE);
-			value = bytes_to_int32(tmp);
-			current += INT_TYPE_SIZE;
-
-			/// save them in the array
 			enc->test_char((unsigned char*)&buf);
 			string_type a_char(buf, enc->howmanybytes());
 			string_array aca(ca);
 			aca.push_back(a_char);
-			assert(value >= 0);
-			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
 			// debug
+//			if (word->chars() == "\347\272\246" && a_char == "\346\227\246")
+//				cerr << "I got you" << endl;
+
+			memcpy(tmp, current, INT_TYPE_SIZE);
+			value = bytes_to_int32(tmp);
+			current += INT_TYPE_SIZE;
+
+			/// save them in the array
+			assert(value > 0);
+			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
+
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
@@ -332,13 +337,14 @@ void FreqFile::read_term(word_ptr_type word)
 	//				iofs_.seekg(pos, ios::beg);
 	//				assert(pos < size_);
 
+		// load word that character is on the left side of the this word
 		for (unsigned int j = rlb; j <= rhb && j != Address::INVALID_BOUND; j++) {
 
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
-			strncpy(tmp, current, INT_TYPE_SIZE);
+			memcpy(tmp, current, INT_TYPE_SIZE);
 			value = bytes_to_int32(tmp);
-			assert(value >= 0);
+			assert(value > 0);
 			current += INT_TYPE_SIZE;
 
 			/// save them in the array

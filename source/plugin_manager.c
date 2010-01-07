@@ -77,6 +77,34 @@ delete [] plugin_factory;
 }
 
 /*
+	ANT_PLUGIN_MANAGER::LOAD_LIBRARY()
+	----------------------------------
+*/
+void ANT_plugin_manager::load_library(const char *library_file, int id)
+{
+#ifdef _MSC_VER
+		/*
+		 * please help with implementation of loading dynamic library on Windows
+		 */
+
+#else
+		plugin_factory[plugin_ids[id]].dlib = dlopen(library_file, RTLD_NOW);
+		if (plugin_factory[plugin_ids[id]].dlib == NULL )
+			printf("opening plugin(%s) failed: %s\n", library_file, dlerror());
+		else
+			{
+			fprintf(stderr, "found plugin(%s)\n", library_file);
+			if (plugin_factory[plugin_ids[id]].maker == NULL)
+				{
+				fprintf(stderr, "this library wasn't made as a ANT plugin, please make sure WITH_ANT_PLUGIN macro is defined\n", library_file);
+				return;
+				}
+			plugin_factory[plugin_ids[id]].plugin = plugin_factory[plugin_ids[id]].maker();
+			}
+#endif
+}
+
+/*
 	ANT_PLUGIN_MANAGER::LOAD()
 	--------------------------
 */
@@ -103,25 +131,11 @@ for (int i = 0; i < num_of_plugins; i++)
 	name_with_plugin_path[len] = '\0';
 	struct stat plugin_stat;
 	if (stat( name_with_plugin_path, &plugin_stat ) != -1)
-		{
-#ifdef _MSC_VER
-		/*
-		 * please help with implementation of loading dynamic library on Windows
-		 */
-
-#else
-		plugin_factory[plugin_ids[i]].dlib = dlopen(name_with_plugin_path, RTLD_NOW);
-		if (plugin_factory[plugin_ids[i]].dlib == NULL )
-			printf("opening plugin(%s) failed: %s\n", name_with_plugin_path, dlerror());
-		else
-			{
-			fprintf(stderr, "found plugin(%s)\n", name_with_plugin_path);
-			plugin_factory[plugin_ids[i]].plugin = plugin_factory[plugin_ids[i]].maker();
-			}
-#endif
-		}
+		load_library(name_with_plugin_path, i);
 	else
-		fprintf(stderr, "no plugin found for : %s\n", name_with_plugin_path);
+		load_library(name, i);
+//	else
+//		fprintf(stderr, "no plugin found for : %s\n", name_with_plugin_path);
 	delete [] name_with_plugin_path;
 	}
 

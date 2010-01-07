@@ -28,6 +28,9 @@ public:
 	static int				num_of_plugins;
 	static char				*plugin_names[]; // plugin dynamic library name array, e.g segmentation module on linux named libuniseg.so, on Windows named uniseg.dll
 
+private:
+	void load_library(const char *library_file, int id);
+
 public:
 	ANT_plugin_manager();
 	~ANT_plugin_manager();

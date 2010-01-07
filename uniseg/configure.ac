@@ -13,6 +13,15 @@ AC_PROG_LIBTOOL
 
 AM_PROG_CC_C_O
 
+AC_ARG_ENABLE(ant,
+            AC_HELP_STRING([--enable-ant],
+                       [to make uniseg as a plugin a ANT search engine]),
+        [
+            CFLAGS="$CFLAGS -DWITH_ANT_PLUGIN"
+            CXXFLAGS="$CXXFLAGS -DWITH_ANT_PLUGIN"
+            ]
+		)
+
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-luniseg':
 # AC_CHECK_LIB([uniseg], [main])

@@ -302,7 +302,8 @@ void Seger::assign_freq() {
 	for (iter = freq.begin(); iter != freq.end(); ++iter) {
 		word_ptr_type local_word  = iter->second;
 		word_ptr_type global_word = allfreq_->find(local_word->chars());
-		QFreq::instance().load(global_word);
+		if (global_word)
+			QFreq::instance().load(global_word);
 		word_pairs.insert(make_pair(local_word, global_word));
 	}
 
@@ -310,7 +311,7 @@ void Seger::assign_freq() {
 	for (p_iter = word_pairs.begin(); p_iter != word_pairs.end(); ++p_iter) {
 		word_ptr_type local_word  = p_iter->first;
 		word_ptr_type global_word = p_iter->second;
-		if (!global_word)
+		if (!global_word || global_word->freq() <= 0)
 			local_word->freq(1);
 		else
 			local_word->freq(global_word->freq());
@@ -360,7 +361,7 @@ void Seger::add_to_list(array_type& cwlist) {
 	CWords *second = clist_->second();
 
 	int stop_word_count1 = first->chinese_stop_word_count();
-	int stop_word_count2 = second->chinese_stop_word_count();
+	int stop_word_count2 = second == NULL ? -1 : second->chinese_stop_word_count();
 
 	CWords *best = (stop_word_count2 > stop_word_count1) ? second : first;
 	do {

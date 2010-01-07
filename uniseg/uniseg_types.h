@@ -82,7 +82,7 @@ inline void array_to_string(string_array& ca, UNISEG_encoding::language lang, st
 }
 
 #ifdef WITH_ANT_PLUGIN
-    #include <plugin.h>
+    #include "../source/plugin.h"
     typedef ANT_plugin								uniseg_plugin_interface;
 #else
     class uniseg_plugin_interface {};
