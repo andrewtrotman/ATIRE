@@ -107,7 +107,7 @@ params->run_name = params->participant_id = "unknown";
 params->output_filename = "ant.out";
 params->results_list_length = -1;
 params->stats = SHORT;
-params->segmentation = FALSE;
+params->segmentation = TRUE; // if the segmentation module is not available, then segment the query into characters
 params->ranking_function = BM25;
 params->trim_postings_k = LLONG_MAX;
 params->lmd_u = 500.0;
@@ -299,7 +299,7 @@ else if (params->output_forum == INEX_EFFICIENCY)
 double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, const char *topic/*long topic_id*/, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
 {
 ANT_time_stats stats;
-long long now, hits;
+long long now, hits = 0;
 long did_query, first_case, token_length;
 char *current, token[1024];
 double average_precision = 0.0;

@@ -22,6 +22,7 @@ protected:
 
 private:
 	long successful_parse;
+	long segmentation;
 	ANT_string_pair token;
 	unsigned char *string, *at;
 	ANT_NEXI_term *pool;
@@ -53,6 +54,7 @@ public:
 	virtual ~ANT_NEXI() { delete [] pool; }
 	ANT_NEXI_term *parse(char *expression);
 	long get_success_state(void) { return successful_parse; }
+	void set_segmentation(long to_segment) { segmentation = to_segment; }
 } ;
 
 #endif  /* NEXI_H_ */

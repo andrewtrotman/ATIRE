@@ -121,8 +121,14 @@ else if (length == 1)
 				return ANT_parser::ischinese(next);					// this string will later need to be segmented
 
 			otherwise Chinese words can be at best one character in length so return FALSE
+
+			by default, we segment the whole Chinese string into single characters,
+			if segmentation is set to false, we won't do anything. This could happen when we segment the string manually
+			either in the console, the query file or segmented query passed by other programs
 		*/
-		return FALSE;
+		if (segmentation)
+			return FALSE;
+		return TRUE;
 		}
 	else
 		return FALSE;
