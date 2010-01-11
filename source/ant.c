@@ -102,6 +102,7 @@ search_engine->init_accumulators();
 /*
 	Parse the query and count the number of search terms
 */
+parser.set_segmentation(params->segmentation);
 parse_tree = parser.parse(query);
 terms_in_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())

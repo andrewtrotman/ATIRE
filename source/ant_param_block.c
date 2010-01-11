@@ -41,7 +41,7 @@ run_name = participant_id = "unknown";
 output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT;
-segmentation = FALSE;
+segmentation = TRUE;
 trim_postings_k = LLONG_MAX;
 file_or_memory = INDEX_IN_FILE;
 }
@@ -130,7 +130,9 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S              East-Asian language word segmentation");
+puts("-S              East-Asian language word segmentation, this is set by default");
+puts("                String is segmented into characters.");
+puts("  n             No segmentation, search with input terms");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking dunctions
@@ -325,7 +327,13 @@ for (param = 1; param < argc; param++)
 		else if (*command == 's')
 			set_stats(command + 1);
 		else if (strcmp(command, "S") == 0)
-			segmentation = TRUE;
+			{
+			++command;
+			if (*command = 'n')
+				segmentation = FALSE;
+			else
+				segmentation = TRUE;
+			}
 		else if (*command == 'R')
 			set_ranker(command + 1);
 		else if (strcmp(command, "people") == 0)
