@@ -93,11 +93,11 @@ void Seger::init()
 	if (!allfreq_)
 		allfreq_ = &(QFreq::instance().freq());
 
-	if (!tw_ptr_)
-		tw_ptr_ = allfreq_->find(stream_);
-
 	assign_freq();
 	do_some_calculations();
+
+	if (!tw_ptr_)
+		tw_ptr_ = allfreq_->find(stream_);
 	//justify(0);
 }
 
