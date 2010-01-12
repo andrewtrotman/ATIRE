@@ -55,35 +55,51 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 	long distance = 0;
 	long count = 0;
 	bool flag = false;
+	bool stop = false;
 	output_.clear();
+	count_ = 0;
 
 	while (current < end) {
 	    while ((count < step) && next < end) {
 			enc_->test_char(next);
-			next += enc_->howmanybytes();
-			count++;
+
+			if (enc_->lang() == uniseg_encoding::CHINESE) {
+				next += enc_->howmanybytes();
+				count++;
+			}
+			else
+				break;
 	    }
 
-	    flag = next < end;
+		how_far = next - current;
 
-	    how_far = next - current;
-	    seger_.input(current, how_far);
-	    seger_.start();
-	    const array_type& words_list = seger_.best_words();
-	    long i = 0;
-	    long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
-	    if (size > 0)
-			for (; i < size; i++) {
-				string_type& word = words_list[i]->chars();
-				output_.append(word + " ");
-				segmented_len += word.length();
-			}
-	    else
-	    	segmented_len = how_far;
-	    // put the last segment back to the remaining characters
-	    current += segmented_len;
-	    segmented_len = 0;
-	    count = (words_list.size() == size) ? 0 : count - words_list[size - 1]->size();
+	    flag = next < end;
+	    if (how_far > 0 && count > 1) {
+			seger_.input(current, how_far);
+			seger_.start();
+			const array_type& words_list = seger_.best_words();
+			long i = 0;
+			long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
+			if (size > 0)
+				for (; i < size; i++) {
+					string_type& word = words_list[i]->chars();
+					output_.append(word + " ");
+					segmented_len += word.length();
+				}
+			else
+				segmented_len = how_far;
+			// put the last segment back to the remaining characters
+			current += segmented_len;
+			segmented_len = 0;
+			count_ += (words_list.size() == size) ? 0 : count - words_list[size - 1]->size();
+	    }
+	    else {
+			how_far = how_far > 0 ? how_far : enc_->howmanybytes();
+			output_.append((const char *)current, (size_t)how_far);
+			current += how_far;
+	    }
+		count = 0;
+		next = current;
 	}
 
 	return get_output();

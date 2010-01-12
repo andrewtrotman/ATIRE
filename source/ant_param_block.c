@@ -326,7 +326,7 @@ for (param = 1; param < argc; param++)
 			results_list_length = atol(command + 1);
 		else if (*command == 's')
 			set_stats(command + 1);
-		else if (strcmp(command, "S") == 0)
+		else if (*command == 'S')
 			{
 			++command;
 			if (*command = 'n')

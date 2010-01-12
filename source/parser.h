@@ -12,6 +12,10 @@
 	#define FALSE 0
 #endif
 
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	class ANT_PARSER
 */
@@ -35,6 +39,10 @@ public:
 	static int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
 
 	virtual void segment(unsigned char *start, long length);
+
+	static int isutf8(unsigned char *here);
+	static int isutf8(char *here) { return isutf8((unsigned char *)here); }
+
 	static int ischinese(unsigned char *here);
 	static int ischinese(char *here) { return ischinese((unsigned char *)here); }
 
@@ -70,6 +78,26 @@ return 0;
 }
 
 /*
+	ANT_PARSER::ISUTF8()
+	--------------------------
+	if it is valid uft8 bytes
+*/
+inline int ANT_parser::isutf8(unsigned char *here)
+{
+int number_of_bytes = utf8_bytes(here);
+int i = 1;
+
+for (; i < number_of_bytes; ++i)
+	{
+	++here;
+	char c = (*here) >> 6;
+	if (c != 2)
+		return FALSE;
+	}
+return TRUE;
+}
+
+/*
 	ANT_PARSER::ISCHINESE()
 	-----------------------
 	Is the given character from the Chinese CodePoint?
@@ -78,7 +106,7 @@ inline int ANT_parser::ischinese(unsigned char *here)
 {
 unsigned long chinese;
 
-if ((*here & 0x80) == 0)
+if (!isutf8(here)/*(*here & 0x80) == 0*/)
 	return FALSE;
 else
 	{
@@ -101,7 +129,7 @@ inline int ANT_parser::iseuropean(unsigned char *here)
 {
 unsigned long european;
 
-if ((*here & 0x80) == 0)
+if (!isutf8(here)/*(*here & 0x80) == 0*/)
 	return FALSE;
 else
 	{
