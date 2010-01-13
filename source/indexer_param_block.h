@@ -37,6 +37,7 @@ protected:
 	void compression(char *schemes);
 	void readability(char *measures);
 	void stats(char *stat_list);
+	void segment(char *segment_flag);
 
 public:
 	ANT_indexer_param_block(int argc, char *argv[]);

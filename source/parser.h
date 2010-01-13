@@ -21,6 +21,15 @@
 */
 class ANT_parser
 {
+public:
+	/*
+	 * This might be confusing. For Chinese, no segmentation means documents are indexed by characters only;
+	 * DOUBLE_SEGMENTATION means string is segmented into words and also single characters for indexing
+	 * ONFLY_SEGMENTATION means segment the sentence using the Chinese segmentation module when parsing the document
+	 * If ONFLY_SEGMENTATION is not set, but SHOULD_SEGMENT is still set that means the text is segmented.
+	 */
+	enum {NOSEGMENTATION = 0, SHOULD_SEGMENT = 1, ONFLY_SEGMENTATION = 2, DOUBLE_SEGMENTATION = 4};
+
 protected:
 	unsigned char *document;
 	unsigned char *current;
@@ -32,7 +41,7 @@ protected:
 	static int isheadchar(unsigned char val) { return ANT_isalnum(val) || val == '<' || val == '\0'; }
 
 public:
-	ANT_parser(long should_segment = FALSE);
+	ANT_parser(long should_segment = NOSEGMENTATION);
 	virtual ~ANT_parser();
 
 	static int isXMLnamestartchar(unsigned char val) { return ANT_isalpha(val) || val == ':' || val == '_'; }		// see http://www.w3.org/TR/REC-xml/#NT-NameStartChar

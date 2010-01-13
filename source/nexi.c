@@ -128,7 +128,7 @@ else if (length == 1)
 		*/
 		if (segmentation)
 			return FALSE;
-		return TRUE;
+		return *next != ' ';
 		}
 	else
 		return FALSE;
@@ -386,7 +386,7 @@ do
 		else if (!ANT_isalnum(token[0]))
 			more = FALSE;
 		}
-	else if (!ANT_isalnum(token[0]) && token[0] != '-' && !ANT_parser::ischinese(token.start))
+	else if (!ANT_isalnum(token[0]) && token[0] != '-' && !ANT_parser::ischinese(token.start) && !ANT_parser::iseuropean(token.start))
 		more = FALSE;
 	if (more)
 		{

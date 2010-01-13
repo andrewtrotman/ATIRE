@@ -27,7 +27,7 @@ ANT_indexer_param_block::ANT_indexer_param_block(int argc, char *argv[])
 {
 this->argc = argc;
 this->argv = argv;
-segmentation = FALSE;
+segmentation = ANT_parser::NOSEGMENTATION;
 recursive = NONE;
 compression_validation = FALSE;
 compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
@@ -102,7 +102,9 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S              East-Asian language word segmentation");
+puts("-S[s]           East-Asian language word segmentation, double segmentations by default");
+puts("   s            Single segmentation, only index what we have");
+puts("   o            Use a segmentation module to segment string on fly");
 puts("");
 
 puts("READABILITY");
@@ -196,6 +198,26 @@ for (measure = measures; *measure != '\0'; measure++)
 }
 
 /*
+	ANT_INDEXER_PARAM_BLOCK::SEGMENTATION()
+	--------------------------------------
+*/
+void ANT_indexer_param_block::segment(char *segment_flags)
+{
+char *segment_flag;
+
+segmentation |= ANT_parser::SHOULD_SEGMENT;
+segmentation |= ANT_parser::DOUBLE_SEGMENTATION;
+
+for (segment_flag = segment_flags; *segment_flag != '\0'; segment_flag++)
+	switch (*segment_flag)
+		{
+		case 's': segmentation -= ANT_parser::DOUBLE_SEGMENTATION; break; // only index what we have
+		case 'o': segmentation |= ANT_parser::ONFLY_SEGMENTATION; break;
+		default : exit(printf("Unknown segmentation flag: '%c'\n", *segment_flag)); break;
+		}
+}
+
+/*
 	ANT_INDEXER_PARAM_BLOCK::STATS()
 	--------------------------------
 */
@@ -241,7 +263,7 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "rtrec") == 0)
 			recursive = TREC;
 		else if (strcmp(command, "S") == 0)
-			segmentation = TRUE;
+			segment(command + 1);
 		else if (strcmp(command, "?") == 0)
 			help();
 		else if (strcmp(command, "h") == 0)

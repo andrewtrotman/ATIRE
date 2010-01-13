@@ -19,12 +19,12 @@
 ANT_parser::ANT_parser(long should_segment)
 {
 set_document(NULL);
+this->should_segment = should_segment;
 
 segmentation = NULL;
-if (should_segment && ANT_plugin_manager::instance().is_segmentation_plugin_available())
-	this->should_segment = TRUE;
-else
-	this->should_segment = FALSE;
+if ((this->should_segment & ONFLY_SEGMENTATION) == ONFLY_SEGMENTATION)
+	if (!ANT_plugin_manager::instance().is_segmentation_plugin_available())
+		this->should_segment -= ONFLY_SEGMENTATION;
 }
 
 /*
@@ -156,14 +156,16 @@ else if (*current & 0x80)		// UTF-8 character
 			{
 			while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
 				current += utf8_bytes(current);
-			segment(start, (long)(current - start));
-			return get_next_token();
+
+			if ((should_segment & ONFLY_SEGMENTATION) == ONFLY_SEGMENTATION)
+				{
+				segment(start, (long)(current - start));
+				return get_next_token();
+				}
 			}
-		else
-			{
-			current_token.start = (char *)start;
-			current_token.string_length = current - start;
-			}
+
+		current_token.start = (char *)start;
+		current_token.string_length = current - start;
 		}
 	/*
 		There is no else clause because if the high bit is set we already know it must be Chinese
