@@ -128,7 +128,7 @@ else if (length == 1)
 		*/
 		if (segmentation)
 			return FALSE;
-		return *next != ' ';
+		return !ANT_parser::ischinese(next);
 		}
 	else
 		return FALSE;
@@ -170,14 +170,9 @@ if (*at != '\0')
 	{
 	/*
 		Using the multi-language parser, skip over all characters that are not alphabetic or numeric.
+		Also skip the non-character, e.g. symbol and punctuation in other languages
 	*/
-	while (ANT_isspace(*at) && *at != '\0')
-		at++;
-
-	/*
-	 * skip the non-character, e.g. symbol and punctuation in other languages
-	 */
-	while ((*at & 0x80) && !ANT_parser::ischinese(at) && !ANT_parser::iseuropean(at))
+	while ((ANT_isspace(*at) && *at != '\0') || ((*at & 0x80) && !ANT_parser::ischinese(at) && !ANT_parser::iseuropean(at)))
 		at += ANT_parser::utf8_bytes(at);
 
 	if (*at != '\0')
