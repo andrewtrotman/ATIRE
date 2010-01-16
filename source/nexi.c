@@ -128,7 +128,7 @@ else if (length == 1)
 		*/
 		if (segmentation)
 			return FALSE;
-		return !ANT_parser::ischinese(next);
+		return ANT_parser::ischinese(next);
 		}
 	else
 		return FALSE;

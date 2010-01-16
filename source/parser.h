@@ -115,7 +115,7 @@ inline int ANT_parser::ischinese(unsigned char *here)
 {
 unsigned long chinese;
 
-if (!isutf8(here)/*(*here & 0x80) == 0*/)
+if ((*here & 0x80) == 0 || !isutf8(here))
 	return FALSE;
 else
 	{
@@ -138,7 +138,7 @@ inline int ANT_parser::iseuropean(unsigned char *here)
 {
 unsigned long european;
 
-if (!isutf8(here)/*(*here & 0x80) == 0*/)
+if ((*here & 0x80) == 0 || !isutf8(here)/**/)
 	return FALSE;
 else
 	{
