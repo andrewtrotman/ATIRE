@@ -130,9 +130,8 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S              East-Asian language word segmentation, this is set by default");
-puts("                String is segmented into characters.");
-puts("  n             No segmentation, search with input terms");
+puts("-S[n]           East-Asian language word segmentation, query is segmented into characters by default");
+puts("   n            No segmentation, search with the input terms separated by space");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking dunctions

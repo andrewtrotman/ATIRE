@@ -102,7 +102,7 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S[s]           East-Asian language word segmentation, double segmentations by default");
+puts("-S[so]           East-Asian language word segmentation, double segmentations by default");
 puts("   s            Single segmentation, only index what we have");
 puts("   o            Use a segmentation module to segment string on fly");
 puts("");
