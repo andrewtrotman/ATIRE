@@ -221,3 +221,20 @@ const bool link_string_target_compare::operator()(const link *a, const link * b)
 		return cmp > 0;
 	}
 }
+
+const bool link_compare::operator()(const link *one, const link * two) const
+{
+	//link *one = NULL, *two = NULL;
+	double diff = 0.0;
+
+	//one = (link *)a;
+	//two = (link *)b;
+
+	diff = two->gamma - one->gamma;
+	if (diff < 0)
+		return true;
+	else if (diff > 0)
+		return false;
+	else
+		return one->place_in_file > two->place_in_file; // ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
+}

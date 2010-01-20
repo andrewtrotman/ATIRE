@@ -483,6 +483,7 @@ void algorithm_ant_link_this::process_topic(ltw_topic *a_topic)
 void algorithm_ant_link_this::process_terms(char **term_list, const char *source)
 {
 	search_anchor_from_link_analysis(links_, term_list, source);
+	fprintf(stderr, "Total %d links found\n", links_->all_links_length());
 	links_->sort_links();
 }
 
@@ -559,6 +560,9 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 			offset = place - source;
 			term_len = strlen(last_index_term->term);
 
+			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
+
+			is_stopword = false;
 			if (!strpbrk(last_index_term->term, "- "))
 				is_stopword = language::isstopword(last_index_term->term);
 
@@ -567,11 +571,12 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 				buffer[term_len] = '\0';
 				if (!lx->find(buffer)) {
 					lx->push_link(*first, offset, buffer, last_index_term->postings[0]->docid, gamma, last_index_term);
+					// debug
+					fprintf(stderr, "found a %s anchor\n", buffer);
 					links_count++;
 				}
 			}
 
-//				printf("%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
 		}
 	}
 	// debug

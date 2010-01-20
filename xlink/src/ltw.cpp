@@ -26,8 +26,11 @@ void create_run(int argc, char **argv)
 			next_argv_param = index_argv_param + 1;
 			if (*argv[next_argv_param] != '-')
 				config_file = argv[++index_argv_param];
-		} else if (*what == '-') {
-			if (!strchr(what, ':'))
+		} else if (strncmp(what, "-index", 6) == 0) {
+			++index_argv_param;
+		}else if (*what == '-') {
+
+//			if (!strchr(what, ':'))
 				index_argv_param++;
 		} else
 			break;

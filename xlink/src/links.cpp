@@ -331,7 +331,7 @@ void links::sort_links()
 		//std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), link::compare);
 		//deduplicate_links();
 		//qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), link::final_compare);
-		std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), link::final_compare);
+		std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), link_compare()/*link::final_compare*/);
 
 		// after sorting
 //		for (int i = 0; i < all_links_in_file_.size(); i++) {

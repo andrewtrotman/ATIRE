@@ -40,7 +40,7 @@ void algorithm_ltw_incoming_search_tn::process_topic(ltw_topic *a_topic)
 {
 	hits_ = 0;
 	long long result = 0;
-	docids_ = ant_search(ant_, &hits_, (char *)a_topic->get_name(), 100);
+	docids_ = ant_search(ant_, &hits_, (char *)a_topic->get_name());
 	ANT_link_term *node = NULL;
 
 	const long long last_to_list = links_->links_to_print();
