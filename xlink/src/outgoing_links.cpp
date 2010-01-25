@@ -107,10 +107,11 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 
 	print_link_tag_header();
 
-	while ((links_already_printed.size() < links_to_print)) {
-		stop_sign = TRUE;
+//	while ((links_already_printed.size() < links_to_print)) {
+//		stop_sign = TRUE;
 
 		while ((result < all_links_in_file_.size()) && (links_already_printed.size() < links_to_print)) {
+			anchors_printed = current_anchor = 0;
 			current_link = reinterpret_cast<outgoing_link *>(all_links_in_file_[result]);
 			if (strlen(current_link->link_term->term) == 0)
 				{
@@ -128,9 +129,10 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 			//has_link = FALSE;
 			//anchors_printed = current_anchor = 0;
 			//fprintf(stderr, "curent term: \"%s\", with posting length %d\n", current_link->link_term->term, current_link->link_term->postings_length);
-			if ((current_anchor < current_link->link_term->postings.size()) /*&& (anchors_printed < max_targets_per_anchor)*/) {
+			while ((current_anchor < current_link->link_term->postings.size()) && (anchors_printed < max_targets_per_anchor)) {
 				ANT_link_posting& current_posting = *current_link->link_term->postings[current_anchor];
 				long current_posting_docid = current_posting.docid;
+
 				if (std::find(links_already_printed.begin(), links_already_printed.end(), current_posting_docid)
 					== links_already_printed.end()) {
 					long docid = current_link->link_term->postings[current_anchor]->docid;
@@ -144,33 +146,33 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 						#endif
 							printf(", ");
 						current_link->print_target(current_anchor);
-						fprintf(stderr, "%s (gamma = %f)\n", current_link->link_term->term, current_link->gamma);
+						anchors_printed++;
+						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
 					}
 					else
 						cerr << "No such file:" << docfile << endl;
-					//anchors_printed++;
 					//links_already_printed.size()++;
 //					if (/*anchors_printed >= max_targets_per_anchor || */links_already_printedlength >= links_all)
 //						{
 //						stop_sign = 1;
 //						break;
 //						}
-					stop_sign = false;
+//					stop_sign = false;
 					//has_link = TRUE;
 				}
-				//current_anchor++;
+				current_anchor++;
 			} // if current_anchor
 			result++;
 			//if (has_link) links_printed++;
 		} // iner while
 
 
-		if (stop_sign)
-			break;
-
-		current_anchor++;
-		result = 0;
-	}
+//		if (stop_sign)
+//			break;
+//
+//		current_anchor++;
+//		result = 0;
+//	}
 
 	print_link_tag_footer();
 

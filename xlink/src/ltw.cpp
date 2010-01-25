@@ -29,9 +29,8 @@ void create_run(int argc, char **argv)
 		} else if (strncmp(what, "-index", 6) == 0) {
 			++index_argv_param;
 		}else if (*what == '-') {
-
 //			if (!strchr(what, ':'))
-				index_argv_param++;
+//				index_argv_param++;
 		} else
 			break;
 	}
