@@ -20,6 +20,7 @@ public:
    proxy(){
 	   ltw_task::alorithm_names[""] = ltw_task::LTW_NONE;
 	   ltw_task::alorithm_names["LTW_ANT"] = ltw_task::LTW_ANT;
+	   ltw_task::alorithm_names["LTW_PAGE_NAME"] = ltw_task::LTW_PAGE_NAME;
 	   ltw_task::alorithm_names["LTW_ANT_AND_PAGE"] = ltw_task::LTW_ANT_AND_PAGE;
 	   ltw_task::alorithm_names["LTW_TEARA_BASE"] = ltw_task::LTW_TEARA_BASE;
 	   ltw_task::alorithm_names["LTW_TANG"] = ltw_task::LTW_TANG;

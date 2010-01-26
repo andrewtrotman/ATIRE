@@ -147,7 +147,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 							printf(", ");
 						current_link->print_target(current_anchor);
 						anchors_printed++;
-						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
+//						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
 					}
 					else
 						cerr << "No such file:" << docfile << endl;

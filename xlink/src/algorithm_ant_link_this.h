@@ -17,7 +17,7 @@
 
 namespace QLINK {
 
-	class algorithm_ant_link_this: public algorithm
+	class algorithm_ant_link_this: virtual public algorithm
 	{
 	private:
 	//	#define MAX_LINKS_IN_FILE (1024 * 1024)
@@ -26,8 +26,6 @@ namespace QLINK {
 	//
 	//	ANT_link *links_in_orphan; //[MAX_LINKS_IN_FILE];
 	//	long *links_in_orphan_length;
-
-		long lowercase_only;					// are we in lowercase or mixed-case matching mode?
 
 		//std::vector<ANT_link_term *>	link_index_;
 		ANT_link_term *	link_index_;
@@ -39,10 +37,9 @@ namespace QLINK {
 		long print_mode;
 
 	protected:
-		char buffer[1024 * 1024];
+		char buffer_[1024 * 1024];
 		char orphan_name_[2048];
 		long orphan_docid_;
-		const char *text_;
 		long terms_in_index;
 
 	private:

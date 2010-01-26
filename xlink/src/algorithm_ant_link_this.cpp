@@ -41,7 +41,7 @@
 using namespace QLINK;
 using namespace std;
 
-//char algorithm_ant_link_this::buffer[1024 * 1024];
+//char algorithm_ant_link_this::buffer_[1024 * 1024];
 
 algorithm_ant_link_this::algorithm_ant_link_this() : algorithm()
 {
@@ -90,20 +90,20 @@ if ((fp = fopen(filename, "rb")) == NULL) {
 	return;
 }
 
-fgets(buffer, sizeof(buffer), fp);
-sscanf(buffer, "%d %s", &unique_terms, tmp);
+fgets(buffer_, sizeof(buffer_), fp);
+sscanf(buffer_, "%d %s", &unique_terms, tmp);
 term = link_index_ = new ANT_link_term [unique_terms];
 
 long count = 0;
-while (fgets(buffer, sizeof(buffer), fp) != NULL)
+while (fgets(buffer_, sizeof(buffer_), fp) != NULL)
 	{
 	count++;
 	//term = new ANT_link_term;
 
-	term_end = strchr(buffer, ':');
+	term_end = strchr(buffer_, ':');
 	postings = count_char (term_end, '>');
-	//term->term = strnnew(buffer, term_end - buffer);
-	term->term = strndup(buffer, term_end - buffer);
+	//term->term = strnnew(buffer_, term_end - buffer_);
+	term->term = strndup(buffer_, term_end - buffer_);
 	if (!term->term) {
 		fprintf(stderr, "reading term error at %d, should be load %d terms", count, unique_terms);
 		unique_terms = count;
@@ -436,33 +436,11 @@ int algorithm_ant_link_this::init_params()
 
 void algorithm_ant_link_this::process_topic_text()
 {
-	static const char *seperators = " ";
-	char *token;
-	char **term_list/*, **first, **last, **current*/;
-	char *filecopy = strdup(text_);
-
-
-//	long long *all_links_in_file_length = links_->all_links_length_ptr();
-//	*all_links_in_file_length = 0;
-
-	//string_clean(filecopy, lowercase_only, 0);
-	if (lowercase_only)
-		string_tolower(filecopy);
-
-	/*current = */term_list = new char *[strlen(filecopy)];		// this is the worst case by far
-//	for (token = strtok(filecopy, seperators); token != NULL; token = strtok(NULL, seperators))
-//		*current++ = token;
-//	*current = NULL;
-	string_to_list(filecopy, term_list);
-
-	process_terms(term_list, filecopy);
+	algorithm::process_topic_text();
 
 #ifdef REMOVE_ORPHAN_LINKS
 	add_or_subtract_orphan_links(ADD_ORPHAN_LINKS, link_index_, terms_in_index);
 #endif
-	// segmnet fault for delete term list
-	delete [] term_list;
-	free(filecopy);
 }
 
 void algorithm_ant_link_this::process_topic(ltw_topic *a_topic)
@@ -476,8 +454,8 @@ void algorithm_ant_link_this::process_topic(ltw_topic *a_topic)
 	generate_collection_link_set(xml);
 	add_or_subtract_orphan_links(SUBTRACT_ORPHAN_LINKS, link_index_, terms_in_index);
 #endif
-	text_ = a_topic->get_text();
-	process_topic_text();
+
+	algorithm::process_topic(a_topic);
 }
 
 void algorithm_ant_link_this::process_terms(char **term_list, const char *source)
@@ -511,14 +489,14 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 
 	for (first = term_list; *first != NULL; first++)
 		{
-		where_to = buffer;
+		where_to = buffer_;
 		last_index_term = NULL;
 		for (last = first; *last != NULL; last++)
 			{
-			if (where_to == buffer)
+			if (where_to == buffer_)
 				{
-				strcpy(buffer, *first);
-				where_to = buffer + strlen(buffer);
+				strcpy(buffer_, *first);
+				where_to = buffer_ + strlen(buffer_);
 				}
 			else
 				{
@@ -527,20 +505,20 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 				where_to += strlen(*last);
 				}
 
-//			vector<ANT_link_term *>::iterator iter = std::find_if(link_index_.begin(), link_index_.end(), term_part_equal(buffer));
+//			vector<ANT_link_term *>::iterator iter = std::find_if(link_index_.begin(), link_index_.end(), term_part_equal(buffer_));
 //			if (iter != link_index_.end())
 //				index_term = *iter;
 //			else
 //				break;
-			index_term = find_term_in_list(buffer, link_index_, terms_in_index, orphan_docid_);
+			index_term = find_term_in_list(buffer_, link_index_, terms_in_index, orphan_docid_);
 
 			if (index_term == NULL)
 				break;									// we're after the last term in the list
 
-			if (strcmp(buffer, index_term->term) == 0)
+			if (strcmp(buffer_, index_term->term) == 0)
 				last_index_term = index_term;			// we're a term in the list, but might be a longer one so keep looking
 
-			if (strncmp(buffer, index_term->term, strlen(buffer)) != 0)
+			if (strncmp(buffer_, index_term->term, strlen(buffer_)) != 0)
 				break;									// we can't be a substring so we're done
 			}
 
@@ -560,19 +538,19 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 			offset = place - source;
 			term_len = strlen(last_index_term->term);
 
-			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
+//			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
 
 			is_stopword = false;
 			if (!strpbrk(last_index_term->term, "- "))
 				is_stopword = language::isstopword(last_index_term->term);
 
 			if (!is_stopword) {
-				strncpy(buffer, offset + text_, term_len);
-				buffer[term_len] = '\0';
-				if (!lx->find(buffer)) {
-					lx->push_link(*first, offset, buffer, last_index_term->postings[0]->docid, gamma, last_index_term);
+				strncpy(buffer_, offset + text_, term_len);
+				buffer_[term_len] = '\0';
+				if (!lx->find(buffer_)) {
+					lx->push_link(*first, offset, buffer_, last_index_term->postings[0]->docid, gamma, last_index_term);
 					// debug
-					fprintf(stderr, "found a %s anchor\n", buffer);
+//					fprintf(stderr, "found a %s anchor\n", buffer__);
 					links_count++;
 				}
 			}

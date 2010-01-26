@@ -35,6 +35,8 @@ namespace QLINK {
 //		ANT_link *links_in_orphan; //[MAX_LINKS_IN_FILE];
 //		long *links_in_orphan_length;
 		algorithm_config		*config_;
+		const char 				*text_;
+		long 					lowercase_only;					// are we in lowercase or mixed-case matching mode?
 
 	public:
 		algorithm(links *links_list);
@@ -44,14 +46,16 @@ namespace QLINK {
 		virtual int init_params() {}
 		virtual void process_topic(char *filename) {}
 		virtual void process_topic_content(char *file) {}
-		virtual void process_topic(ltw_topic *a_topic) {}
-		virtual void process_links(ltw_topic *a_topic, algorithm *bep_algor) {}
+		virtual void process_topic(ltw_topic *a_topic);
+		virtual void process_links(ltw_topic *a_topic, algorithm *bep_algor);
 		virtual void process_links(const char *file, algorithm *bep_algor) {}
+		virtual void process_topic_text();
 
 		int topic_param_start() { return topic_param_start_; }
 		void set_links_container(links *container);
 
-	//protected:
+	protected:
+		virtual void process_terms(char **term_list, const char *source) {}
 
 	};
 

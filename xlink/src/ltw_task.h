@@ -38,7 +38,8 @@ namespace QLINK {
 							  LTW_INCOMING_SEARCH_TN = 3,
 							  LTW_A2B_INCOMING_SEARCH_TN = 4,
 							  LTW_ANT_AND_PAGE = 5,
-							  LTW_TEARA_BASE = 6
+							  LTW_TEARA_BASE = 6,
+							  LTW_PAGE_NAME = 7
 
 							  //NUMBER_OF_LTW_ALGORITHMS
 							  };
