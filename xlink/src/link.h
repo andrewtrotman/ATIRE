@@ -53,5 +53,10 @@ namespace QLINK {
 	public:
 		const bool operator()(const link *a, const link * b) const;
 	};
+
+	class term_compare {
+	public:
+		const bool operator()(const link *a, const link * b) const;
+	};
 }
 #endif /* LINK_H_ */

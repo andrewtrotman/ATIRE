@@ -273,8 +273,8 @@ QLINK::link *links::push_link(char *buffer, long docid, ANT_link_term *node)
 
 QLINK::link *links::push_link(link *lnk)
 {
-	push_link(lnk->place_in_file, lnk->offset, lnk->term, lnk->target_document, lnk->gamma, lnk->link_term);
-	return lnk;
+	return push_link(lnk->place_in_file, lnk->offset, lnk->term, lnk->target_document, lnk->gamma, lnk->link_term);
+	//return lnk;
 }
 
 /*
@@ -343,7 +343,7 @@ void links::sort_links()
 
 void links::sort_links_by_term()
 {
-	std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), link::term_compare);
+	std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), term_compare());
 }
 
 QLINK::link *links::find(const char *term)

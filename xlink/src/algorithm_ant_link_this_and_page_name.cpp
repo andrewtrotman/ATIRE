@@ -43,7 +43,7 @@ void algorithm_ant_link_this_and_page_name::merge_links()
 	link *k_link = NULL, *g_link = NULL;
 	int i = 0;
 	for (i = 0; i < k_link_array.size(); i++)
-		algorithm::links_->push_link(k_link_array[i]);
+		links_->push_link(k_link_array[i]);
 
 	for (i = 0; i < g_link_array.size(); i++) {
 		g_link = g_link_array[i];

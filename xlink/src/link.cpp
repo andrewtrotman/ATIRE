@@ -238,3 +238,30 @@ const bool link_compare::operator()(const link *one, const link * two) const
 	else
 		return one->place_in_file > two->place_in_file; // ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
 }
+
+const bool term_compare::operator()(const link *one, const link *two) const
+{
+//link *one = NULL, *two = NULL;
+bool cmp;
+
+//one = (link *)a;
+//two = (link *)b;
+int ret = 0;
+long one_term_count = count_char(one->term, ' ') + 1;
+long two_term_count = count_char(two->term, ' ') + 1;
+
+if (one_term_count == two_term_count) {
+	if (strlen(one->term) == strlen(two->term)) {
+		if ((ret = strcmp(one->term, two->term)) == 0)
+			cmp = one->target_document > two->target_document;
+		else
+			cmp = ret > 0;
+	}
+	else
+		cmp = strlen(one->term) > strlen(two->term);
+}
+else
+	cmp = one_term_count > two_term_count;
+
+return cmp;
+}
