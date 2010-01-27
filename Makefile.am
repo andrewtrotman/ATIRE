@@ -30,7 +30,7 @@ AM_CFLAGS += -std=c++0x -pedantic
 #OBJDIR = 
 #BINDIR = 
 
-library_sources =  \
+core_sources =  \
 	$(SRCDIR)/parser.c \
 	$(SRCDIR)/parser_readability.c \
     $(SRCDIR)/memory_index_hash_node.c \
@@ -100,9 +100,6 @@ library_sources =  \
 	$(SRCDIR)/compress_text_bz2.c \
 	$(SRCDIR)/compression_text_factory.c \
 	$(SRCDIR)/instream_buffer.c \
-	$(SRCDIR)/indexer_param_block.c \
-	$(SRCDIR)/indexer_param_block_rank.c \
-	$(SRCDIR)/ant_param_block.c \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_dale_chall.c \
 	$(SRCDIR)/version.c \
@@ -126,10 +123,9 @@ library_sources =  \
 	$(SRCDIR)/semaphores.c \
 	$(SRCDIR)/threads.c \
 	$(SRCDIR)/critical_section.c \
-	$(SRCDIR)/event.c \
-	$(SRCDIR)/ant_api.c
+	$(SRCDIR)/event.c 
 				
-library_noinst_headers = \
+core_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
 	$(SRCDIR)/assessment_ANT.h	\
 	$(SRCDIR)/assessment_factory.h	\
@@ -258,34 +254,57 @@ library_headers = \
 includedir = $(prefix)/include
 include_HEADERS = $(library_headers)
 	
-lib_LTLIBRARIES = libant.la
+lib_LTLIBRARIES = libantcore.la libant.la
 
+libantcore_la_SOURCES = $(core_sources)
+libantcore_la_LIBADD = -ldl -lpthread
+
+libant_la_SOURCES = ant_api.c
+libant_la_DEPENDENCIES = libantcore.la
+libant_la_LIBADD = -L. -lantcore
+libant_la_LIBFLAGS = -static
 # libant_ladir = $(prefix)/lib
-libant_la_SOURCES = $(library_sources)
 # libant_la_HEADERS = $(library_headers)
 # $(library_noinst_headers)
 
-ANT_LIBS = -L. -lant -ldl -lpthread
+#ANT_LIBS = -L. -lantcore -ldl -lpthread
+ANT_LIBS = -L. -lantcore
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-noinst_PROGRAMS = ant index ant_dictionary \
+noinst_PROGRAMS = ant ant_ant index ant_dictionary \
 			ant_plugins filelist remove_head link_extract link_index \
 			link_this link_index_merge link_extract_pass2 link_length_correlate \
 			topic_tree_cas bindiff term_frequencies topic_tree INEXqrels_to_run \
 			foltbl_to_aspt zipf_graph
 
-ant_SOURCES = $(SRCDIR)/ant_ant.c
+ant_SOURCES = \
+	$(SRCDIR)/ant.c \
+	$(SRCDIR)/indexer_param_block_rank.c \
+	$(SRCDIR)/ant_param_block.c
 ant_LDADD = ${ANT_LIBS}
 #ant_LDFLAGS = -rdynamic
 ant_LDFLAGS = -static -export-dynamic
-ant_DEPENDENCIES = libant.la
+ant_DEPENDENCIES = libantcore.la
 
-index_SOURCES = $(SRCDIR)/index.c
+ant_ant_SOURCES = \
+	$(SRCDIR)/ant_ant.c \
+	$(SRCDIR)/indexer_param_block_rank.c \
+	$(SRCDIR)/ant_param_block.c
+ant_ant_LDADD = ${ANT_LIBS} -lant
+#ant_ant_LDFLAGS = -rdynamic
+ant_ant_LDFLAGS = -static -export-dynamic
+ant_ant_DEPENDENCIES = libant.la
+
+index_SOURCES = \
+	$(SRCDIR)/index.c \
+	$(SRCDIR)/indexer_param_block.c \
+	$(SRCDIR)/indexer_param_block_rank.c \
+	$(SRCDIR)/ant_param_block.c
 index_LDADD = ${ANT_LIBS}
 #index_LDFLAGS = -rdynamic
 index_LDFLAGS = -static -export-dynamic
-index_DEPENDENCIES = libant.la
+index_DEPENDENCIES = libantcore.la
 
 ant_dictionary_SOURCES = $(SRCDIR)/ant_dictionary.c 
 ant_dictionary_LDADD = ${ANT_LIBS}
@@ -311,42 +330,42 @@ ant_plugins_DEPENDENCIES =
 filelist_SOURCES = $(TOOLDIR)/filelist.c
 filelist_LDFLAGS = -rdynamic
 filelist_LDADD = ${ANT_LIBS}
-filelist_DEPENDENCIES = libant.la
+filelist_DEPENDENCIES = libantcore.la
 
 topic_tree_cas_SOURCES = $(TOOLDIR)/topic_tree_cas.c
 topic_tree_cas_LDFLAGS = -rdynamic
 topic_tree_cas_LDADD = ${ANT_LIBS}
-topic_tree_cas_DEPENDENCIES = libant.la
+topic_tree_cas_DEPENDENCIES = libantcore.la
 
 bindiff_SOURCES = $(TOOLDIR)/bindiff.c
 bindiff_LDFLAGS = -rdynamic
 bindiff_LDADD = ${ANT_LIBS}
-bindiff_DEPENDENCIES = libant.la
+bindiff_DEPENDENCIES = libantcore.la
 
 term_frequencies_SOURCES = $(TOOLDIR)/term_frequencies.c
 term_frequencies_LDFLAGS = -rdynamic
 term_frequencies_LDADD = ${ANT_LIBS}
-term_frequencies_DEPENDENCIES = libant.la
+term_frequencies_DEPENDENCIES = libantcore.la
 
 topic_tree_SOURCES = $(TOOLDIR)/topic_tree.c
 topic_tree_LDFLAGS = -rdynamic
 topic_tree_LDADD = ${ANT_LIBS}
-topic_tree_DEPENDENCIES = libant.la
+topic_tree_DEPENDENCIES = libantcore.la
 
 INEXqrels_to_run_SOURCES = $(TOOLDIR)/INEXqrels_to_run.c
 INEXqrels_to_run_LDFLAGS = -rdynamic
 INEXqrels_to_run_LDADD = ${ANT_LIBS}
-INEXqrels_to_run_DEPENDENCIES = libant.la
+INEXqrels_to_run_DEPENDENCIES = libantcore.la
 
 foltbl_to_aspt_SOURCES = $(TOOLDIR)/foltbl_to_aspt.c
 foltbl_to_aspt_LDFLAGS = -rdynamic
 foltbl_to_aspt_LDADD = ${ANT_LIBS}
-foltbl_to_aspt_DEPENDENCIES = libant.la
+foltbl_to_aspt_DEPENDENCIES = libantcore.la
 
 zipf_graph_SOURCES = $(TOOLDIR)/zipf_graph.c
 zipf_graph_LDFLAGS = -rdynamic
 zipf_graph_LDADD = ${ANT_LIBS}
-zipf_graph_DEPENDENCIES = libant.la
+zipf_graph_DEPENDENCIES = libantcore.la
 
 #################################################################################
 #                               LINK-THE-WIKI
@@ -356,38 +375,38 @@ link_extract_SOURCES = $(LTWDIR)/link_extract.c
 #link_extract_LDFLAGS = -rdynamic
 link_extract_LDFLAGS = -static
 link_extract_LDADD = ${ANT_LIBS}
-link_extract_DEPENDENCIES = libant.la
+link_extract_DEPENDENCIES = libantcore.la
 
 link_index_SOURCES = $(LTWDIR)/link_index.c
 #link_index_LDFLAGS = -rdynamic
 link_index_LDFLAGS = -static
 link_index_LDADD = ${ANT_LIBS}
-link_index_DEPENDENCIES = libant.la
+link_index_DEPENDENCIES = libantcore.la
 
 link_this_SOURCES = $(LTWDIR)/link_this.c
 #link_this_LDFLAGS = -rdynamic
 link_this_LDFLAGS = -static
 link_this_LDADD = ${ANT_LIBS}
-link_this_DEPENDENCIES = libant.la
+link_this_DEPENDENCIES = libantcore.la
 
 link_index_merge_SOURCES = $(LTWDIR)/link_index_merge.c
 link_index_merge_LDFLAGS = -rdynamic
 link_index_merge_LDADD = ${ANT_LIBS}
-link_index_merge_DEPENDENCIES = libant.la
+link_index_merge_DEPENDENCIES = libantcore.la
 
 link_extract_pass2_SOURCES = $(LTWDIR)/link_extract_pass2.c
 #link_extract_pass2_LDFLAGS = -rdynamic
 link_extract_pass2_LDFLAGS = -static
 link_extract_pass2_LDADD = ${ANT_LIBS}
-link_extract_pass2_DEPENDENCIES = libant.la
+link_extract_pass2_DEPENDENCIES = libantcore.la
 
 link_length_correlate_SOURCES = $(LTWDIR)/link_length_correlate.c
 link_length_correlate_LDFLAGS = -rdynamic
 link_length_correlate_LDADD = ${ANT_LIBS}
-link_length_correlate_DEPENDENCIES = libant.la
+link_length_correlate_DEPENDENCIES = libantcore.la
 
 remove_head_SOURCES = $(LTWDIR)/remove_head.c
 remove_head_LDFLAGS = -rdynamic
 remove_head_LDADD = ${ANT_LIBS}
-remove_head_DEPENDENCIES = libant.la
+remove_head_DEPENDENCIES = libantcore.la
 
