@@ -20,10 +20,12 @@ using namespace QLINK;
 algorithm::algorithm(links *links_list)
 {
 	set_links_container(links_list);
+	init();
 }
 
 algorithm::algorithm()
 {
+	init();
 }
 
 algorithm::~algorithm()
@@ -32,6 +34,12 @@ algorithm::~algorithm()
 		delete config_;
 		config_ = NULL;
 	}
+}
+
+void algorithm::init()
+{
+	config_ = NULL;
+	lowercase_only = 0;
 }
 
 void algorithm::set_links_container(links *container)

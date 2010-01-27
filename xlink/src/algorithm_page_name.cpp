@@ -27,6 +27,8 @@ namespace QLINK
 	algorithm_page_name::algorithm_page_name()
 	{
 		config_ = new algorithm_config;
+		g_links_ = NULL;
+		loaded_ = false;
 	}
 
 	algorithm_page_name::~algorithm_page_name()
@@ -48,11 +50,13 @@ namespace QLINK
 		if (g_links_)
 			delete g_links_;
 		g_links_ = new links;
+
+		load_names();
 	}
 
 	void algorithm_page_name::load_names()
 	{
-		if (!config_)
+		if (!config_ || loaded_)
 			return;
 
 		string filename(config_->get_value("titles_file"));
@@ -132,6 +136,8 @@ namespace QLINK
 	//			cerr << "found a match (" << iter->first << ") for the easy indexing" << endl;
 	//		++iter;
 	//	}
+
+		loaded_ = true;
 	}
 
 	void algorithm_page_name::process_terms(char **term_list, const char *source)

@@ -33,6 +33,7 @@ namespace QLINK
 	protected:
 		page_map_t		names_map_;
 		links			*g_links_;
+		bool			loaded_;
 
 	protected:
 		void process_terms(char **term_list, const char *source);

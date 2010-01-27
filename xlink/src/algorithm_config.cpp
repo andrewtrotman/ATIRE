@@ -9,8 +9,9 @@
 
 using namespace QLINK;
 
+const char *algorithm_config::DEFAULT_CONFIG_FILENAME = "algorithm.conf";
 
-algorithm_config::algorithm_config() : config("algorithm.conf") {
+algorithm_config::algorithm_config() : config(DEFAULT_CONFIG_FILENAME) {
 
 }
 

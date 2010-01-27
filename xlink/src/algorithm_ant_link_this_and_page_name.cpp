@@ -32,7 +32,6 @@ void algorithm_ant_link_this_and_page_name::init()
 	//config_ = new algorithm_config("algorithm_ant_link_this_and_page_name.conf");
 	g_links_ = NULL;
 	k_links_ = NULL;
-	load_names();
 }
 
 void algorithm_ant_link_this_and_page_name::merge_links()

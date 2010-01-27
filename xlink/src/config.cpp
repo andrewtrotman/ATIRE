@@ -15,12 +15,13 @@ using namespace stpl;
 using namespace QLINK;
 
 
-config::config(const char *name) : name_(name) {
+config::config(const char *name) {
+	name_ = name;
 	load();
 }
 
 config::~config() {
-
+	name_.clear();
 }
 
 void config::load()

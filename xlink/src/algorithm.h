@@ -57,6 +57,8 @@ namespace QLINK {
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}
 
+	private:
+		void init();
 	};
 
 }

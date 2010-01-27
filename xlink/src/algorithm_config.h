@@ -16,6 +16,9 @@
 namespace QLINK {
 	class algorithm_config: public config {
 	public:
+		static const char *DEFAULT_CONFIG_FILENAME;
+
+	public:
 		algorithm_config(const char *name);
 		algorithm_config();
 		virtual ~algorithm_config();
