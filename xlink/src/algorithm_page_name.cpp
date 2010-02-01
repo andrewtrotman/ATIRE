@@ -26,9 +26,7 @@ namespace QLINK
 
 	algorithm_page_name::algorithm_page_name()
 	{
-		config_ = new algorithm_config;
-		g_links_ = NULL;
-		loaded_ = false;
+		init();
 	}
 
 	algorithm_page_name::~algorithm_page_name()
@@ -38,18 +36,12 @@ namespace QLINK
 			if (iter->second)
 				delete iter->second;
 		}
-
-		if (g_links_) {
-			delete g_links_;
-			g_links_ = NULL;
-		}
 	}
 
 	void algorithm_page_name::init()
 	{
-		if (g_links_)
-			delete g_links_;
-		g_links_ = new links;
+		config_ = new algorithm_config;
+		loaded_ = false;
 
 		load_names();
 	}
@@ -140,12 +132,15 @@ namespace QLINK
 		loaded_ = true;
 	}
 
+	void algorithm_page_name::process_terms(links *lx, char **term_list, const char *source)
+	{
+		search_anchor_by_page_nam(lx, term_list, source);
+		lx->sort_links_by_term();
+	}
+
 	void algorithm_page_name::process_terms(char **term_list, const char *source)
 	{
-		//g_links_->require_cleanup();
-		init();
-		search_anchor_by_page_nam(g_links_, term_list, source);
-		g_links_->sort_links_by_term();
+		process_terms(links_, term_list, source);
 	}
 
 	void algorithm_page_name::search_anchor_by_page_nam(links* lx, char **term_list, const char *source)
@@ -218,7 +213,8 @@ namespace QLINK
 					buffer[term_len] = '\0';
 					node = last_index_entry->second; //new ANT_link_term;
 					//node->term = strdup(last_index_entry->first.c_str());
-					link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
+					if (!lx->find(buffer))
+						link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
 					//lnk->require_cleanup();
 					//create_posting(last_index_entry->second, lnk);
 				}
@@ -248,20 +244,5 @@ namespace QLINK
 	//	}
 	//}
 
-	void algorithm_page_name::calculate_g_links_score(double max, double min)
-	{
-		std::vector<link *>& link_array = g_links_->all_links();
-		link *lnk = NULL;
-
-		if (link_array.size() > 0) {
-			long max_term_count = count_char(link_array[0]->term, ' ');
-			double step = (max - min) / ((double)max_term_count - 1.0);
-			for (int i = 0; i < link_array.size(); i++) {
-				lnk = link_array[i];
-				long term_count = count_char(lnk->term, ' ');
-				lnk->gamma = max - (step * (double)(max_term_count - term_count));
-			}
-		}
-	}
 
 }

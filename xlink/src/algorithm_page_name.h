@@ -32,16 +32,15 @@ namespace QLINK
 
 	protected:
 		page_map_t		names_map_;
-		links			*g_links_;
 		bool			loaded_;
 
 	protected:
 		void process_terms(char **term_list, const char *source);
+		void process_terms(links *lx, char **term_list, const char *source);
 		void search_anchor_by_page_nam(links* lx, char **term_list, const char *source);
 
 		//wiki_entry_array *find_page(char *name);
 		//void create_posting(wiki_entry_array& wea, link* lnk);
-		void calculate_g_links_score(double max, double min);
 		void load_names();
 
 	private:

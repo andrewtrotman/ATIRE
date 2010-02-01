@@ -39,7 +39,7 @@ algorithm::~algorithm()
 void algorithm::init()
 {
 	config_ = NULL;
-	lowercase_only = 0;
+	lowercase_only = TRUE; // true by default
 }
 
 void algorithm::set_links_container(links *container)

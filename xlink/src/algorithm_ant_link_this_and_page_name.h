@@ -18,6 +18,7 @@ namespace QLINK {
 	{
 	private:
 		links			*k_links_;
+		links			*g_links_;
 
 	public:
 		algorithm_ant_link_this_and_page_name(links *links_list);
@@ -30,6 +31,7 @@ namespace QLINK {
 
 	private:
 		void init();
+		void calculate_g_links_score(double max, double min);
 	};
 
 }
