@@ -736,6 +736,8 @@ struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 if (data->post_processing_stats != NULL)
     delete data->post_processing_stats;
 
+free(data->answer_list);
+
 delete data->map;
 delete data->ranking_function;
 delete data->search_engine;
