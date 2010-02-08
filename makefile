@@ -49,24 +49,26 @@ FIXED = /link /fixed:no
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 -DSPECIAL_COMPRESSION=1
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 MINUS_D = $(MINUS_D) -DTOP_K_SEARCH
-#MINUS_D = $(MINUS_D) -DPURIFY
+MINUS_D = $(MINUS_D) -DPURIFY
 
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE) /MP8
+CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
+#CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE) /MP8
 CC = @cl
 
 #
 #	Libraries
 #
-WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib
+WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 
 #
 #	Objects
 #
 PARTS = \
+	$(OBJDIR)\channel_file.obj						\
+	$(OBJDIR)\channel_socket.obj					\
 	$(OBJDIR)\parser.obj 							\
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\memory_index_hash_node.obj			\
@@ -108,7 +110,6 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_recursive_iterator.obj		\
 	$(OBJDIR)\btree_iterator.obj 					\
-	$(OBJDIR)\top_k_sort.obj 						\
 	$(OBJDIR)\stemmer.obj							\
 	$(OBJDIR)\stemmer_term_similarity.obj			\
 	$(OBJDIR)\stemmer_term_similarity_threshold.obj	\
@@ -152,6 +153,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
 	$(OBJDIR)\ranking_function_term_count.obj		\
+	$(OBJDIR)\ranking_function_inner_product.obj	\
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
@@ -160,10 +162,12 @@ PARTS = \
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term_ant.obj						\
 	$(OBJDIR)\nexi_term.obj							\
-	$(OBJDIR)\event.obj							\
-	$(OBJDIR)\semaphores.obj							\
+	$(OBJDIR)\sockets.obj							\
+	$(OBJDIR)\event.obj								\
+	$(OBJDIR)\semaphores.obj						\
 	$(OBJDIR)\critical_section.obj					\
-	$(OBJDIR)\threads.obj
+	$(OBJDIR)\threads.obj							\
+	$(OBJDIR)\unicode_case.obj
 
 #
 #	Targets
@@ -174,6 +178,7 @@ ANT_TARGETS = \
 	$(BINDIR)\ant_dictionary.exe
 
 OTHER_TARGETS = \
+	$(BINDIR)\make_case_conversion_table.exe 				\
 	$(BINDIR)\filelist.exe 				\
 	$(BINDIR)\remove_head.exe 			\
 	$(BINDIR)\link_extract.exe 			\
@@ -191,8 +196,9 @@ OTHER_TARGETS = \
 	$(BINDIR)\zipf_graph.exe			\
 	$(BINDIR)\get_doclist.exe			\
 	$(BINDIR)\ant_unzip.exe				\
-	$(BINDIR)\producer_consumer.exe				\
-	$(BINDIR)\test_tar.exe
+	$(BINDIR)\producer_consumer.exe		\
+	$(BINDIR)\test_tar.exe				\
+	$(BINDIR)\test_unicode_case_convert.exe
 
 #
 #	List of objects to build
@@ -202,6 +208,9 @@ all : $(PARTS)		\
       $(OTHER_TARGETS)
 
 bin\link_index_merge.exe : bin\link_index_merge.obj
+bin\make_case_conversion_table.exe : bin\make_case_conversion_table.obj
+bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
+
 
 #
 #	Default dependency rules

@@ -14,7 +14,7 @@
 class ANT_ANT_param_block : public ANT_indexer_param_block_rank
 {
 public:
-	enum { MAP, MAgP, RANKEFF, P_AT_N } ;									// metrics
+	enum { MAP, MAgP, RANKEFF, P_AT_N, SUCCESS_AT_N } ;						// metrics
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2, INEX_EFFICIENCY = 4 } ;		// evaluation forum
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };						// statistics to print (bitstring)
 	enum { /* NONE = 0, */ THRESHOLD = 1, WEIGHTED = 2 }; 					// stemming stuff
@@ -45,6 +45,8 @@ public:
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long file_or_memory;				// the index be loaded into memory at startup (TRUE / FALSE)
+
+	unsigned short port;				// TCP/IP port for ANT SERVER, or 0 for not a server
 
 private:
 	void export_format(char *forum);

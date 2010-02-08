@@ -76,7 +76,7 @@ close_index_file();
 delete memory;
 delete stats;
 delete factory;
-delete [] squiggle_length;
+delete squiggle_length;
 delete factory_text;
 }
 
@@ -640,7 +640,7 @@ long long pos;
 compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
 decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
 compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
-impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + 512);		// 512 because the TF and the 0 at the end of each of 255 lists
+impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + (512 * sizeof(*decompressed_postings_list)));		// 512 because the TF and the 0 at the end of each of 255 lists
 stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 
 /*

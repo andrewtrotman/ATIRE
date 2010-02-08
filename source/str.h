@@ -38,6 +38,22 @@ return (*((new_str = strncpy(new char [(size_t)(len + 1)], str, (size_t)len)) + 
 }
 
 /*
+	STRRENEW()
+	----------
+	realloc using new
+*/
+inline char *strrenew(const char *str, long long old_length, long long new_length)
+{
+char *new_str;
+
+new_str = new char [(size_t)new_length];
+if (str == NULL)
+	return new_str;
+else
+	return (char *)memcpy(new_str, str, (size_t)(old_length < new_length ? old_length : new_length));
+}
+
+/*
 	STRIP_END_PUNC()
 	----------------
 */

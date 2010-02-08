@@ -1,6 +1,9 @@
 /*
 	ASSESSMENT_INEX.C
 	-----------------
+	This code reads assessment files in the INEX 2008 native format
+	That format is:
+	TopicID Q0 DocID RelBytes DocLength [passage level assessment stuff]
 */
 #include <string.h>
 #include "assessment_INEX.h"

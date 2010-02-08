@@ -6,6 +6,7 @@
 #define MATHS_H_
 #ifdef _MSC_VER
 	#include <crtdefs.h>
+	#include <stdlib.h>
 #else
 	#include <stddef.h>
 #endif
@@ -112,6 +113,19 @@ template <class Type> Type ANT_max(Type first, Type second, Type third) { return
 */
 template <class Type> Type ANT_min(Type first, Type second) { return first < second ? first : second; }
 template <class Type> Type ANT_min(Type first, Type second, Type third) { return ANT_min(ANT_min(first, second), third); }
+
+/*
+	ATOLL()
+	-------
+	atol() for long long integers
+*/
+inline long long atoll(const char *string)
+{
+/*
+	I guess the first person to compile this on Linux / MacOS will add the appropriate lines of code here.
+*/
+return _atoi64(string);
+}
 
 #endif  /* MATHS_H_ */
 

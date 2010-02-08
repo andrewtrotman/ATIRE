@@ -69,6 +69,7 @@ long long length_of_token;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 ANT_directory_iterator_multiple *parallel_disk;
+char *copy_of_document;
 
 if (argc < 2)
 	param_block.usage();
@@ -158,8 +159,16 @@ for (param = first_param; param < argc; param++)
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 
+	copy_of_document = NULL;
 	while (current_file != NULL)
 		{
+		/*
+			If we're going to shove it in the repository then we need to make a copy 
+			as the parser does case-folding inplace
+		*/
+		if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+			copy_of_document = strnew(current_file->file);
+
 		/*
 			How much data do we have?
 		*/
@@ -204,12 +213,13 @@ for (param = first_param; param < argc; param++)
 			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
 				{
 //				index->add_to_document_repository(NULL, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
-				index->add_to_document_repository(current_file->filename, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
+				index->add_to_document_repository(current_file->filename, copy_of_document, current_file->length + 1);		// +1 so that we also get the '\0'
 				}
 			id_list.puts(current_file->filename);
 			}
 		terms_in_document = 0;
 		delete [] current_file->file;
+		delete [] copy_of_document;
 
 		/*
 			Get the next file

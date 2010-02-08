@@ -1,38 +1,118 @@
 /*
 	CTYPES.C
 	--------
-	Taken from Linux sources.
+	re-write using no prior code.
 */
 
 #include "ctypes.h"
-
 unsigned short ANT_ctype[] =
 	{
-	_ANT_C,         _ANT_C,                _ANT_C,        _ANT_C,        _ANT_C,        _ANT_C,                _ANT_C,        _ANT_C,	/* 0-7 */
-	_ANT_C,         _ANT_C|_ANT_S,         _ANT_C|_ANT_S, _ANT_C|_ANT_S, _ANT_C|_ANT_S, _ANT_C|_ANT_S,         _ANT_C,        _ANT_C,	/* 8-15 */
-	_ANT_C,         _ANT_C,                _ANT_C,        _ANT_C,        _ANT_C,        _ANT_C,                _ANT_C,        _ANT_C,	/* 16-23 */
-	_ANT_C,         _ANT_C,                _ANT_C,        _ANT_C,        _ANT_C,        _ANT_C,                _ANT_C,        _ANT_C,	/* 24-31 */
-	_ANT_S|_ANT_SP, _ANT_P,                _ANT_P,        _ANT_P,        _ANT_P,        _ANT_P,                _ANT_P,        _ANT_P,	/* 32-39 */
-	_ANT_P,         _ANT_P,                _ANT_P,        _ANT_P,        _ANT_P,        _ANT_P,                _ANT_P,        _ANT_P,	/* 40-47 */
-	_ANT_D,         _ANT_D,                _ANT_D,        _ANT_D,        _ANT_D,        _ANT_D,                _ANT_D,        _ANT_D,	/* 48-55 */
-	_ANT_D,         _ANT_D,                _ANT_P,        _ANT_P,        _ANT_P,        _ANT_P,                _ANT_P,        _ANT_P,	/* 56-63 */
-	_ANT_P,         _ANT_VO|_ANT_U|_ANT_X, _ANT_U|_ANT_X, _ANT_U|_ANT_X, _ANT_U|_ANT_X, _ANT_VO|_ANT_U|_ANT_X, _ANT_U|_ANT_X, _ANT_U,	/* 64-71 */
-	_ANT_U,         _ANT_VO|_ANT_U,        _ANT_U,        _ANT_U,        _ANT_U,        _ANT_U,                _ANT_U,        _ANT_VO|_ANT_U,	/* 72-79 */
-	_ANT_U,         _ANT_U,                _ANT_U,        _ANT_U,        _ANT_U,        _ANT_VO|_ANT_U,        _ANT_U,        _ANT_U,	/* 80-87 */
-	_ANT_U,         _ANT_Y|_ANT_U,         _ANT_U,        _ANT_P,        _ANT_P,        _ANT_P,                _ANT_P,        _ANT_P,	/* 88-95 */
-	_ANT_P,         _ANT_VO|_ANT_L|_ANT_X, _ANT_L|_ANT_X, _ANT_L|_ANT_X, _ANT_L|_ANT_X, _ANT_VO|_ANT_L|_ANT_X, _ANT_L|_ANT_X, _ANT_L,	/* 96-103 */
-	_ANT_L,         _ANT_VO|_ANT_L,        _ANT_L,        _ANT_L,        _ANT_L,        _ANT_L,                _ANT_L,        _ANT_VO|_ANT_L,	/* 104-111 */
-	_ANT_L,         _ANT_L,                _ANT_L,        _ANT_L,        _ANT_L,        _ANT_VO|_ANT_L,        _ANT_L,        _ANT_L,	/* 112-119 */
-	_ANT_L,         _ANT_Y|_ANT_L,         _ANT_L,        _ANT_P,        _ANT_P,        _ANT_P,                _ANT_P,        _ANT_C,	/* 120-127 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 128-143 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 144-159 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 160-175 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 176-191 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 192-207 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 208-223 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 224-239 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                /* 240-255 */
+	ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL|ANT_CTYPE_SPACE, ANT_CTYPE_CONTROL|ANT_CTYPE_SPACE, ANT_CTYPE_CONTROL|ANT_CTYPE_SPACE, ANT_CTYPE_CONTROL|ANT_CTYPE_SPACE, ANT_CTYPE_CONTROL|ANT_CTYPE_SPACE, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, 
+	ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, ANT_CTYPE_CONTROL, 
+	ANT_CTYPE_SPACE|ANT_CTYPE_HARD_SPACE, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, 
+	ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_DIGIT|ANT_CTYPE_HEX, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, 
+	ANT_CTYPE_PUNC, ANT_CTYPE_UPPER|ANT_CTYPE_HEX|ANT_CTYPE_VOWEL, ANT_CTYPE_UPPER|ANT_CTYPE_HEX, ANT_CTYPE_UPPER|ANT_CTYPE_HEX, ANT_CTYPE_UPPER|ANT_CTYPE_HEX, ANT_CTYPE_UPPER|ANT_CTYPE_HEX|ANT_CTYPE_VOWEL, ANT_CTYPE_UPPER|ANT_CTYPE_HEX, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER|ANT_CTYPE_VOWEL, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER|ANT_CTYPE_VOWEL, 
+	ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER|ANT_CTYPE_VOWEL, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER, ANT_CTYPE_UPPER|ANT_CTYPE_Y, ANT_CTYPE_UPPER, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, 
+	ANT_CTYPE_PUNC, ANT_CTYPE_LOWER|ANT_CTYPE_HEX|ANT_CTYPE_VOWEL, ANT_CTYPE_LOWER|ANT_CTYPE_HEX, ANT_CTYPE_LOWER|ANT_CTYPE_HEX, ANT_CTYPE_LOWER|ANT_CTYPE_HEX, ANT_CTYPE_LOWER|ANT_CTYPE_HEX|ANT_CTYPE_VOWEL, ANT_CTYPE_LOWER|ANT_CTYPE_HEX, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER|ANT_CTYPE_VOWEL, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER|ANT_CTYPE_VOWEL, 
+	ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER|ANT_CTYPE_VOWEL, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER, ANT_CTYPE_LOWER|ANT_CTYPE_Y, ANT_CTYPE_LOWER, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_PUNC, ANT_CTYPE_CONTROL, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+} ;
+
+/*
+	The program below generates the table above.
+*/
+/*
+	#include <stdio.h>
+	#include <ctype.h>
+	#include <string.h>
+
+	enum { UPPER = 1, LOWER = 2, DIGIT = 4, CONTROL = 8, PUNC = 16, SPACE = 32, HEX = 64, HARD_SPACE = 128, VOWEL = 256, Y = 512 };
+
+	char *names[] =
+	{
+	"ANT_CTYPE_UPPER",
+	"ANT_CTYPE_LOWER",
+	"ANT_CTYPE_DIGIT",
+	"ANT_CTYPE_CONTROL",
+	"ANT_CTYPE_PUNC",
+	"ANT_CTYPE_SPACE",
+	"ANT_CTYPE_HEX",
+	"ANT_CTYPE_HARD_SPACE",
+	"ANT_CTYPE_VOWEL",
+	"ANT_CTYPE_Y",
 	} ;
+
+	void print_this(long ch)
+	{
+	char **pos;
+	long times = 0;
+
+	pos = names;
+	while (ch > 0)
+		{
+		if ((ch & 1) != 0)
+			{
+			printf("%s%s", times == 0 ? "" : "|", *pos);
+			times++;
+			}
+		ch >>= 1;
+		pos++;
+		}
+	}
+
+	int main(void)
+	{
+	long bits;
+	unsigned long ch;
+
+	printf("unsigned short ANT_ctype[] =\n{");
+	for (ch = 0; ch <= 0xFF; ch++)
+		{
+		bits = 0;
+
+		if (isupper(ch))
+			bits |= UPPER;
+		if (islower(ch))
+			bits |= LOWER;
+		if (isdigit(ch))
+			bits |= DIGIT;
+		if (iscntrl(ch))
+			bits |= CONTROL;
+		if (ispunct(ch))
+			bits |= PUNC;
+		if (isspace(ch))
+			bits |= SPACE;
+		if (isxdigit(ch))
+			bits |= HEX;
+		if (ch == 0x20)
+			bits |= HARD_SPACE;
+		if (ch != 0 && strchr("aeiouAEIOU", ch) != NULL)
+			bits |= VOWEL;
+		if (ch != 0 && strchr("yY", ch) != NULL)
+			bits |= Y;
+
+
+		if (ch % 16 == 0)
+			printf("\n");
+
+		if (bits == 0)
+			printf("0");
+		else
+			print_this(bits);
+
+		if (ch != 0xFF)
+			printf(", ");
+		}
+	printf("\n} ;");
+	}
+*/
 
 unsigned char ANT_tolower_list[] =
 	{

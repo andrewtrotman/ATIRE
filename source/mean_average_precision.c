@@ -237,3 +237,33 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iter
 
 return (double)found_and_relevant / (double)precision_point_n;		// we're computing p@n so divide by n
 }
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::SUCCESS_AT_N()
+	------------------------------------------
+	This is an Otago "special" metric that returns 1 if the topic has at least one relevant
+	document in the top n and 0 if it has none.  If all relevance is equal then it returns
+	the success rate at point n.
+*/
+double ANT_mean_average_precision::success_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n)
+{
+ANT_search_engine_result_iterator iterator;
+ANT_relevant_document key, *relevance_data;
+long long found_and_relevant, found;
+
+if (setup(topic) == NULL)
+	return 0;
+
+found = found_and_relevant = 0;
+key.topic = topic;
+for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
+	{
+	if (++found > precision_point_n)
+		break;
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters != 0)
+			found_and_relevant++;
+	}
+
+return found_and_relevant == 0 ? 0.0 : 1.0;
+}

@@ -1,9 +1,7 @@
-
 /*
 	MEAN_AVERAGE_PRECISION.H
 	------------------------
 */
-
 #ifndef MEAN_AVERAGE_PRECISION_H_
 #define MEAN_AVERAGE_PRECISION_H_
 
@@ -33,6 +31,7 @@ public:
 	double average_generalised_precision(long topic, ANT_search_engine *search_engine);
 	double rank_effectiveness(long topic, ANT_search_engine *search_engine);
 	double p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n);
+	double success_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n);
 } ;
 
 #endif  /* MEAN_AVERAGE_PRECISION_H_ */

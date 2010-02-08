@@ -17,6 +17,7 @@
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
+#include "ranking_function_inner_product.h"
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()
@@ -114,6 +115,8 @@ else if (strcmp(which, "termcount") == 0)
 	ranking_function = TERM_COUNT;
 else if (strcmp(which, "allterms") == 0)
 	ranking_function = ALL_TERMS;
+else if (strcmp(which, "tfidf") == 0)
+	ranking_function = INNER_PRODUCT;
 else
 	exit(printf("Unknown Ranking Function:'%s'\n", which));
 }
@@ -146,6 +149,8 @@ if (allowable & TERM_COUNT)
 	printf("   termcount    The number of query terms in the document (Boolean OR) %s\n", isdefault(TERM_COUNT));
 if (allowable & ALL_TERMS)
 	printf("   allterms     Relevant only if all query terms are present (Boolean AND) %s\n", isdefault(ALL_TERMS));
+if (allowable & INNER_PRODUCT)
+	printf("   tfidf        TF.IDF (vector space inner product) %s\n", isdefault(ALL_TERMS));
 
 puts("");
 }
@@ -170,6 +175,8 @@ switch (ranking_function)
 		return new ANT_ranking_function_divergence(documents, lengths);
 	case TERM_COUNT:
 		return new ANT_ranking_function_term_count(documents, lengths);
+	case INNER_PRODUCT:
+		return new ANT_ranking_function_inner_product(documents, lengths);
 	}
 return NULL;
 }

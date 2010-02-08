@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include "maths.h"
 #include "str.h"
 #include "memory.h"
 #include "ctypes.h"
@@ -31,9 +32,13 @@
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
+#include "ranking_function_inner_product.h"
 #include "parser.h"
 #include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
+#include "sockets.h"
+#include "channel_file.h"
+#include "channel_socket.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -52,6 +57,8 @@ class ANT_ANT_file_iterator
 {
 private:
 	FILE *fp;
+
+protected:
 	char query[1024];
 
 public:
@@ -64,19 +71,62 @@ public:
 		if (fp == NULL)
 			exit(printf("Cannot open topic file:'%s'\n", filename));
 		}
-	~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
-	char *first(void) { 
-        fseek(fp, 0, SEEK_SET);
-        return fgets(query, sizeof(query), fp); 
-    }
-	char *next(void) { return fgets(query, sizeof(query), fp); }
+	virtual ~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
+
+	virtual char *first(void) 
+		{ 
+		fseek(fp, 0, SEEK_SET);
+		return fgets(query, sizeof(query), fp); 
+		}
+	virtual char *next(void) { return fgets(query, sizeof(query), fp); }
+} ;
+
+/*
+	class ANT_ANT_FILE_ITERATOR_TCPIP
+	---------------------------------
+*/
+class ANT_ANT_file_iterator_tcpip : public ANT_ANT_file_iterator
+{
+private:
+	ANT_socket socket;
+	long connected;
+	long port;
+
+public:
+	ANT_ANT_file_iterator_tcpip(long port) : ANT_ANT_file_iterator(NULL) { this->port = port; connected = FALSE; }
+	virtual ~ANT_ANT_file_iterator_tcpip() { }
+
+	virtual char *first(void) { return next(); }
+	virtual char *next(void)
+		{
+		char *message;
+
+		do
+			{
+			if (!connected)
+				socket.listen((unsigned short)port);
+			connected = TRUE;
+			if ((message = socket.gets()) == NULL)
+				{
+				connected = FALSE;		// socket has closed and so we retry
+				socket.close();
+				}
+			}
+		while (message == NULL);
+
+		strncpy(query, message, sizeof(query));
+		query[sizeof(query) - 1] = '\0';
+		delete [] message;
+
+		return query;
+		}
 } ;
 
 /*
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer, long boolean)
+double perform_query(ANT_channel *outchannel, ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer, long boolean)
 {
 ANT_time_stats stats;
 long long now, hits;
@@ -95,9 +145,9 @@ did_query = FALSE;
 now = stats.start_timer();
 
 #ifdef TOP_K_SEARCH
-search_engine->init_accumulators(params->sort_top_k);
+	search_engine->init_accumulators(params->sort_top_k);
 #else
-search_engine->init_accumulators();
+	search_engine->init_accumulators();
 #endif
 /*
 	Parse the query and count the number of search terms
@@ -187,7 +237,9 @@ if (params->stats & ANT_ANT_param_block::SHORT)
 	{
 	if (topic_id >= 0)
 		printf("Topic:%ld ", topic_id);
-	printf("Query '%s' found %lld documents ", query, hits);
+	sprintf(token, "Query '%s' found %lld documents ", query, hits);
+	outchannel->puts(token);
+puts(token);
 	stats.print_time("(", stats.stop_timer(now), ")");
 	}
 
@@ -207,6 +259,8 @@ if (map != NULL)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::P_AT_N)
 		average_precision = map->p_at_n(topic_id, search_engine, params->metric_n);
+	else if (params->metric == ANT_ANT_param_block::SUCCESS_AT_N)
+		average_precision = map->success_at_n(topic_id, search_engine, params->metric_n);
 	}
 
 /*
@@ -235,85 +289,40 @@ if (params->queries_filename == NULL)
 }
 
 /*
-	GET_DOCUMENT_AND_PARSE()
-	------------------------
-*/
-char *get_document_and_parse(char *filename, ANT_time_stats *stats)
-{
-static char filename_buffer[1024];
-char *start, *end, *file;
-long long now, length;
-
-if (filename[1] == ':')							// windows c:\blah
-	filename += 2;
-
-now = stats->start_timer();
-file = ANT_disk::read_entire_file(filename);
-stats->add_disk_input_time(stats->stop_timer(now));
-
-if (file == NULL)
-	return NULL;
-
-now = stats->start_timer();
-filename_buffer[0] = '\0';
-start = strstr(file, "<title>");
-if (start != NULL)
-	if ((end = strstr(start += 7, "</title>")) != NULL)
-		{
-		length = end - start < (sizeof(filename_buffer) - 2) ? end - start : sizeof(filename_buffer) - 2;
-		strncpy(filename_buffer, start, (size_t)length);
-		filename_buffer[length] = '\0';
-		}
-
-delete [] file;
-
-stats->add_cpu_time(stats->stop_timer(now));
-
-return *filename_buffer == '\0' ? NULL : filename_buffer;
-}
-
-/*
-	GET_DOCUMENT_AND_EXTRACT()
-	--------------------------
-	This is a temporary function to load each document and to write it to a file
-*/
-char *get_document_and_extract(long long query_id, long long pos, char *filename)
-{
-char *ch, *file;
-
-if (filename[1] == ':')							// windows c:\blah
-	filename += 2;
-
-file = ANT_disk::read_entire_file(filename);
-if (file == NULL)
-	return NULL;
-
-for (ch = file; *ch != '\0'; ch++)
-	if (*ch == '\n' || *ch == '\r')
-		*ch = ' ';
-
-fprintf(stderr, "%lld %lld %s\n", query_id, pos, file);
-
-delete [] file;
-
-return filename;
-}
-
-/*
 	ANT()
 	-----
 */
 double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list, long boolean)
 {
+char *print_buffer;
 ANT_time_stats post_processing_stats;
-char *query, *name;
+char *query;
 long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
-ANT_ANT_file_iterator input(params->queries_filename);
 ANT_search_engine_forum *output = NULL;
 long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
 ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_stemmer(params->stemmer, search_engine, params->stemmer_similarity, params->stemmer_similarity_threshold);
+long length_of_longest_document;
+unsigned long current_document_length;
+long long docid;
+char *document_buffer, *title_start, *title_end;
+
+#ifdef NEVER
+	//ANT_ANT_file_iterator input(params->queries_filename);
+	ANT_ANT_file_iterator_tcpip input(8088);
+#else
+	ANT_channel *inchannel, *outchannel;
+	if (params->port == 0)
+		{
+		inchannel = new ANT_channel_file(params->queries_filename);		// stdin
+		outchannel = new ANT_channel_file();							// stdout
+		}
+	else
+		inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
+#endif
+
+print_buffer = new char [1024 * 1024];
 
 if (params->output_forum == ANT_ANT_param_block::TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
@@ -322,10 +331,21 @@ else if (params->output_forum == ANT_ANT_param_block::INEX)
 else if (params->output_forum == ANT_ANT_param_block::INEX_EFFICIENCY)
 	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
 
+length_of_longest_document = search_engine->get_longest_document_length();
+document_buffer = new char [length_of_longest_document + 1];
+
 sum_of_average_precisions = 0.0;
 number_of_queries = line = 0;
 prompt(params);
+
+#ifdef NEVER
 for (query = input.first(); query != NULL; query = input.next())
+#else
+for (query = inchannel->gets(); query != NULL; query = inchannel->gets())
+/*
+	FIX THE LEAK HERE  (query is leaked)
+*/
+#endif
 	{
 	line++;
 	/*
@@ -334,6 +354,18 @@ for (query = input.first(); query != NULL; query = input.next())
 	strip_space_inplace(query);
 	if (strcmp(query, ".quit") == 0)
 		break;
+	if (strncmp(query, ".get ", 5) == 0)
+		{
+		*document_buffer = '\0';
+		if ((current_document_length = length_of_longest_document) != 0)
+			{
+			search_engine->get_document(document_buffer, &current_document_length, atoll(query + 5));
+			sprintf(print_buffer, "%lld", current_document_length);
+			outchannel->puts(print_buffer);
+			outchannel->write(document_buffer, current_document_length);
+			}
+		continue;
+		}
 	if (*query == '\0')
 		continue;			// ignore blank lines
 
@@ -351,7 +383,7 @@ for (query = input.first(); query != NULL; query = input.next())
 	*/
 	number_of_queries++;
 
-	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
+	average_precision = perform_query(outchannel, params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
 	sum_of_average_precisions += average_precision;
 
 	/*
@@ -374,38 +406,34 @@ for (query = input.first(); query != NULL; query = input.next())
 	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
 	if (output == NULL)
 		for (result = 0; result < last_to_list; result++)
-//			if ((name = get_document_and_parse(answer_list[result], &post_processing_stats)) == NULL)
+			{
+			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+			if ((current_document_length = length_of_longest_document) == 0)
+				title_start = "";
+			else
 				{
-//				get_document_and_extract(topic_id, result + 1, answer_list[result])
-#ifdef NEVER
-
-				long longest_len = search_engine->get_longest_document_length();
-				long long docid;
-				char *pos;
-				char *document_buffer = new char [longest_len + 1];
-				unsigned long len = longest_len;
-
-				docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
-				search_engine->get_document(document_buffer, &len, docid);
-				pos = strstr(document_buffer, "<DOCNO>");
-				pos = strpbrk(pos, "wW");
-				printf("%lld:%s %f %*.*s\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
-				delete [] document_buffer;
-
-#else
-				printf("%lld:%s %f\n", result + 1, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv());
-#endif
+				search_engine->get_document(document_buffer, &current_document_length, docid);
+				if ((title_start = strstr(document_buffer, "<title>")) == NULL)
+					title_start = "";
+				else if ((title_end = strstr(title_start += 7, "</title>")) != NULL)
+					*title_end = '\0';
 				}
-//			else
-//				printf("%lld:(%s) %s\n", result + 1, answer_list[result], name);
+			sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), title_start);
+			outchannel->puts(print_buffer);
+			}
 	else
 		output->write(topic_id, answer_list, last_to_list, search_engine);
 
 	prompt(params);
 	}
 
-	/* free the allocated forum */
-	delete output;
+/* free the allocated forum */
+delete output;
+
+/*
+	delete the document buffer
+*/
+delete [] document_buffer;
 
 /*
 	Compute Mean Average Precision
@@ -557,6 +585,8 @@ else
 		ranking_function = new ANT_ranking_function_divergence(search_engine);
 	else if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
 		ranking_function = new ANT_ranking_function_term_count(search_engine);
+	else if (params.ranking_function == ANT_ANT_param_block::INNER_PRODUCT)
+		ranking_function = new ANT_ranking_function_inner_product(search_engine);
 	else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
 		{
 		boolean = TRUE;

@@ -26,7 +26,7 @@
 #endif
 
 long ANT_version = 0x0003;		// version number in BCD
-char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008, 2009 Andrew Trotman, University of Otago";
+char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2010 Andrew Trotman, University of Otago";
 
 
 /*
@@ -53,18 +53,11 @@ puts("HASHING ALGORITHMS");
 puts("------------------");
 puts("Random Hash             : Andrew Trotman");
 puts("ANT Hash                : Andrew Trotman");
-
-#if HASHER == FAST_HASHER
-	puts("SuperFastHash           : Paul Hsieh (http://www.azillionmonkeys.com/qed/hash.html) ");
-#else
-	puts("SuperFastHash (unused)  : Paul Hsieh (http://www.azillionmonkeys.com/qed/hash.html) ");
-#endif
 puts("");
 
 puts("SORTING ALGORITHMS");
 puts("------------------");
-puts("qsort                   : Microsoft (from the Visual C/C++ runtime library)");
-puts("qsort (alternate)       : J.L. Bentley, M.D. McIlroy");
+puts("qsort (top-k addapted)  : J.L. Bentley, M.D. McIlroy");
 puts("");
 
 puts("FILE MANIPULATION");

@@ -25,6 +25,7 @@
 */
 ANT_ANT_param_block::ANT_ANT_param_block(int argc, char *argv[])
 {
+port = 0;
 this->argc = argc;
 this->argv = argv;
 logo = TRUE;
@@ -109,9 +110,12 @@ puts("-m[metric]      Score the result set using");
 puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
 puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
 puts("  P@<n>         Set-based precision at <n> [default=10]");
+puts("  S@<n>         Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
 puts("  RankEff       Mean Rank Effectiveness (acount for unassessed documents)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
+puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=6809]");
+
 puts("");
 
 puts("TREC / INEX SPECIFIC");
@@ -218,6 +222,18 @@ else if (strncmp(which, "P@", 2) == 0)
 	else
 		exit(printf("<n> in P@<n> must be numeric (e.g. P@10)"));
 	}
+else if (strncmp(which, "S@", 2) == 0)
+	{
+	metric = SUCCESS_AT_N;
+	if (ANT_isdigit(which[2]))
+		{
+		metric_n = atol(which + 2);
+		if (metric_n == 0)
+			exit(printf("Nice Try... You can't compute S@0!\n"));
+		}
+	else
+		exit(printf("<n> in S@<n> must be numeric (e.g. S@10)"));
+	}
 else
 	exit(printf("Unknown metric:'%s'\n", which));
 }
@@ -301,15 +317,22 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'm')
 			set_metric(command + 1);
 		else if (*command == 'a') 
-            if (*(command + 1) == '\0' && param < argc - 1) 
-                assessments_filename = argv[++param];
-            else
-                assessments_filename = command + 1;
+			if (*(command + 1) == '\0' && param < argc - 1) 
+				assessments_filename = argv[++param];
+			else
+				assessments_filename = command + 1;
 		else if (*command == 'q')
-            if (*(command + 1) == '\0' && param < argc - 1) 
-                queries_filename = argv[++param];
-            else
-                queries_filename = command + 1;
+			{
+			if (command[1] == ':')
+				port = isdigit(command[2]) ? atol(command + 2) : 6809;
+			else
+				{
+				if (*(command + 1) == '\0' && param < argc - 1) 
+					queries_filename = argv[++param];
+				else
+					queries_filename = command + 1;
+				}
+			}
 		else if (*command == 'e')
 			export_format(command + 1);
 		else if (*command == 'i')
@@ -328,7 +351,7 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'S')
 			{
 			++command;
-			if (*command = 'n')
+			if (*command == 'n')
 				segmentation = FALSE;
 			else
 				segmentation = TRUE;
