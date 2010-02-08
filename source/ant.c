@@ -50,86 +50,13 @@
 const char *PROMPT = "]";
 
 /*
-	class ANT_ANT_FILE_ITERATOR
-	---------------------------
-*/
-class ANT_ANT_file_iterator
-{
-private:
-	FILE *fp;
-
-protected:
-	char query[1024];
-
-public:
-	ANT_ANT_file_iterator(char *filename)
-		{
-		if (filename == NULL)
-			fp = stdin;
-		else
-			fp = fopen(filename, "rb");
-		if (fp == NULL)
-			exit(printf("Cannot open topic file:'%s'\n", filename));
-		}
-	virtual ~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
-
-	virtual char *first(void) 
-		{ 
-		fseek(fp, 0, SEEK_SET);
-		return fgets(query, sizeof(query), fp); 
-		}
-	virtual char *next(void) { return fgets(query, sizeof(query), fp); }
-} ;
-
-/*
-	class ANT_ANT_FILE_ITERATOR_TCPIP
-	---------------------------------
-*/
-class ANT_ANT_file_iterator_tcpip : public ANT_ANT_file_iterator
-{
-private:
-	ANT_socket socket;
-	long connected;
-	long port;
-
-public:
-	ANT_ANT_file_iterator_tcpip(long port) : ANT_ANT_file_iterator(NULL) { this->port = port; connected = FALSE; }
-	virtual ~ANT_ANT_file_iterator_tcpip() { }
-
-	virtual char *first(void) { return next(); }
-	virtual char *next(void)
-		{
-		char *message;
-
-		do
-			{
-			if (!connected)
-				socket.listen((unsigned short)port);
-			connected = TRUE;
-			if ((message = socket.gets()) == NULL)
-				{
-				connected = FALSE;		// socket has closed and so we retry
-				socket.close();
-				}
-			}
-		while (message == NULL);
-
-		strncpy(query, message, sizeof(query));
-		query[sizeof(query) - 1] = '\0';
-		delete [] message;
-
-		return query;
-		}
-} ;
-
-/*
 	PERFORM_QUERY()
 	---------------
 */
 double perform_query(ANT_channel *outchannel, ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer, long boolean)
 {
 ANT_time_stats stats;
-long long now, hits;
+long long now, hits, search_time;
 long did_query, first_case, token_length;
 char *current, token[1024];
 double average_precision = 0.0;
@@ -231,16 +158,21 @@ if (boolean)
 	hits = search_engine->boolean_results_list(terms_in_query);
 
 /*
+	How long did it take?
+*/
+search_time = stats.stop_timer(now);
+
+/*
 	Reporting
 */
 if (params->stats & ANT_ANT_param_block::SHORT)
 	{
 	if (topic_id >= 0)
 		printf("Topic:%ld ", topic_id);
-	sprintf(token, "Query '%s' found %lld documents ", query, hits);
+	sprintf(token, "Query '%s' found %lld documents in %lld ms", query, hits, stats.time_to_milliseconds(search_time));
 	outchannel->puts(token);
-puts(token);
-	stats.print_time("(", stats.stop_timer(now), ")");
+//	puts(token);
+//	stats.print_time("(", stats.stop_timer(now), ")");
 	}
 
 if (did_query && params->stats & ANT_ANT_param_block::QUERY)
@@ -284,7 +216,7 @@ return average_precision;
 */
 void prompt(ANT_ANT_param_block *params)
 {
-if (params->queries_filename == NULL)
+if (params->queries_filename == NULL && params->port == 0)		// coming from stdin
 	printf(PROMPT);
 }
 
@@ -296,7 +228,7 @@ double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_funct
 {
 char *print_buffer;
 ANT_time_stats post_processing_stats;
-char *query;
+char *command, *query;
 long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision;
@@ -308,19 +240,14 @@ unsigned long current_document_length;
 long long docid;
 char *document_buffer, *title_start, *title_end;
 
-#ifdef NEVER
-	//ANT_ANT_file_iterator input(params->queries_filename);
-	ANT_ANT_file_iterator_tcpip input(8088);
-#else
-	ANT_channel *inchannel, *outchannel;
-	if (params->port == 0)
-		{
-		inchannel = new ANT_channel_file(params->queries_filename);		// stdin
-		outchannel = new ANT_channel_file();							// stdout
-		}
-	else
-		inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
-#endif
+ANT_channel *inchannel, *outchannel;
+if (params->port == 0)
+	{
+	inchannel = new ANT_channel_file(params->queries_filename);		// stdin
+	outchannel = new ANT_channel_file();							// stdout
+	}
+else
+	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
 
 print_buffer = new char [1024 * 1024];
 
@@ -336,47 +263,43 @@ document_buffer = new char [length_of_longest_document + 1];
 
 sum_of_average_precisions = 0.0;
 number_of_queries = line = 0;
-prompt(params);
 
-#ifdef NEVER
-for (query = input.first(); query != NULL; query = input.next())
-#else
-for (query = inchannel->gets(); query != NULL; query = inchannel->gets())
-/*
-	FIX THE LEAK HERE  (query is leaked)
-*/
-#endif
+prompt(params);
+for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
 	{
 	line++;
 	/*
 		Parsing to get the topic number
 	*/
-	strip_space_inplace(query);
-	if (strcmp(query, ".quit") == 0)
+	strip_space_inplace(command);
+	if (strcmp(command, ".quit") == 0)
 		break;
-	if (strncmp(query, ".get ", 5) == 0)
+	if (strncmp(command, ".get ", 5) == 0)
 		{
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
 			{
-			search_engine->get_document(document_buffer, &current_document_length, atoll(query + 5));
+			search_engine->get_document(document_buffer, &current_document_length, atoll(command + 5));
 			sprintf(print_buffer, "%lld", current_document_length);
 			outchannel->puts(print_buffer);
 			outchannel->write(document_buffer, current_document_length);
 			}
 		continue;
 		}
-	if (*query == '\0')
+	if (*command == '\0')
 		continue;			// ignore blank lines
 
 	if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
 		{
-		topic_id = atol(query);
-		if ((query = strchr(query, ' ')) == NULL)
-			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
+		topic_id = atol(command);
+		if ((query = strchr(command, ' ')) == NULL)
+			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, command));
 		}
 	else
+		{
 		topic_id = -1;
+		query = command;
+		}
 
 	/*
 		Do the query and compute average precision
@@ -424,7 +347,7 @@ for (query = inchannel->gets(); query != NULL; query = inchannel->gets())
 	else
 		output->write(topic_id, answer_list, last_to_list, search_engine);
 
-	prompt(params);
+	delete [] command;
 	}
 
 /* free the allocated forum */

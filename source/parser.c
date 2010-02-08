@@ -93,7 +93,6 @@ if (segmentation != NULL)
 	    return get_next_token();
 	return &current_token;
 	}
-
 /*
 	We skip over non-indexable characters before the start of the first token
 */
@@ -118,16 +117,13 @@ for (;;)
 */
 if (ANT_isalpha(*current) || iseuropean(current))	// alphabetic strings (in the ASCII CodePage) or European speical characters
 	{
-//	*current = ANT_tolower(*current); //first character to lower and save it in start
-	tolower(current);
-	//start = current++;
 	start = current;
+	tolower(current);		// this is ANT_parser::tolower()
 	current += utf8_bytes(current);
 
 	while (ANT_isalpha(*current) || iseuropean(current))
 		{
-//		*current = ANT_tolower(*current);
-		tolower(current);
+		tolower(current);	// this is ANT_parser::tolower()
 		current += utf8_bytes(current);
 		}
 

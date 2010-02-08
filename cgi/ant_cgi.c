@@ -5,11 +5,14 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "../source/str.h"
 #include "../source/channel_socket.h"
 #include "../source/maths.h"
 #include "../source/disk.h"
 #include "header.h"
+
+#define RESULTS_PER_PAGE 10
 
 /*
 	PROCESS_RESULT()
@@ -25,16 +28,31 @@ char *filename, *space, *title, *from;
 double rsv;
 
 result_number = atol(result);
+
 antid = atoll(from = (strchr(result, ':') + 1));
 
 filename = strchr(from, ':') + 1;
 
-space = strchr(result, ' ');
+space = filename;
+while (isspace(*space))
+	space++;
+while (!isspace(*space))
+	space++;
 *space++ = '\0';
-rsv = atof(space);
-title = strchr(space, ' ') + 1;
+while (isspace(*space))
+	space++;
 
-printf("<tr><td><a href=ant_getdoc_cgi.exe?ID=%lld><b>%s</b></a><br>\n%s<br><br>\n\n</td></tr>", antid, title, filename);
+rsv = atof(space);
+
+title = strchr(space, ' ');
+
+if (title != NULL && *title != '\0')
+	title++;
+
+if (title != NULL && *title != '\0')
+	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld><b>%s</b></a><br>\n%s<br><br>\n\n</li>", antid, title, filename);
+else
+	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld><b>%s</b></a><br><br>\n\n</li>", antid, filename);
 }
 
 /*
@@ -68,8 +86,8 @@ for (ch = query_string; *ch != '\0'; ch++)
 /*
 	Output stuff
 */
-puts("Pragma: no-cache");
-puts("Cache-Control: no-cache");
+//puts("Pragma: no-cache");
+//puts("Cache-Control: no-cache");
 puts("Content-Type: text/html\n\n");
 
 socket = new ANT_channel_socket(8088, "localhost");
@@ -82,17 +100,20 @@ if ((result = socket->gets()) == NULL)
 	}
 
 hits = atol(strpbrk(result, "1234567890"));
-if (hits > 10)
-	hits = 10;
+if (hits > RESULTS_PER_PAGE)
+	hits = RESULTS_PER_PAGE;
 
-ANT_CGI_header();
-//puts("<center><table width=80%>");
+ANT_CGI_header(query_string);
+puts("<font size=+1><b>");
+puts(result);
+puts("</b></font><br>");
+puts("<ol>");
 for (current = 0; current < hits; current++)
 	{
 	result = socket->gets();
 	process_result(result);
 	}
-//puts("</center></table>");
+puts("</ol>");
 puts(ANT_disk::read_entire_file("footer.htm"));
 
 return 0;

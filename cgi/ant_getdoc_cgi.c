@@ -87,7 +87,7 @@ document = new char[(size_t)(size + 1)];
 socket->read(document, size);
 document[size] = '\0';
 
-ANT_CGI_header();
+ANT_CGI_header();;
 process_result(document);
 puts(ANT_disk::read_entire_file("footer.htm"));
 

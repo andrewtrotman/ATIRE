@@ -29,30 +29,15 @@ return next();
 */
 long long ANT_search_engine_result_iterator::next(void)
 {
-#ifdef NEVER
-	/*
-		This is the old "rsv can be negative" version
-	*/
-	current++;
-	while (current < results_list_length)
-		if (result->accumulator_pointers[current]->is_zero_rsv())
-			current++;
-		else
-			return result->accumulator_pointers[current] - result->accumulator;
-
+/*
+	New-fangled rvs must be positive version
+*/
+current++;
+if (current >= results_list_length)
 	return -1;
 
-#else
-	/*
-		New-fangled rvs must be positive version
-	*/
-	current++;
-	if (current >= results_list_length)
-		return -1;
-
-	if (result->accumulator_pointers[current]->is_zero_rsv())
-		return -1;
-	else
-		return result->accumulator_pointers[current] - result->accumulator;
-#endif
+if (result->accumulator_pointers[current]->is_zero_rsv())
+	return -1;
+else
+	return result->accumulator_pointers[current] - result->accumulator;
 }

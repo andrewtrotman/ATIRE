@@ -9,6 +9,8 @@
 #define FUNDAMENTAL_TYPES_H_
 
 #ifdef _MSC_VER
+	#define inline __forceinline
+
 	typedef char int8_t;
 	typedef unsigned char uint8_t;
 

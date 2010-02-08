@@ -29,11 +29,7 @@ char *document_id_start = NULL, *document_id_end = NULL;
 if ((document_start = strstr(document_end, "<DOC")) != NULL)
 	{
 	if ((document_id_start = strstr(document_start, "<DOCNO>")) != NULL)
-		{
 		document_id_end = strstr(document_id_start += 7, "</DOCNO>");
-		if (document_id_end != NULL)
-			document_start = document_id_end + 8;
-		}
 	else if ((document_id_start = strstr(document_start, "id=\"")) != NULL)
 		{
 		document_id_end = strchr(document_id_start += 4, '"');
@@ -43,6 +39,7 @@ if ((document_start = strstr(document_end, "<DOC")) != NULL)
 
 	if (document_id_end != NULL && (document_end = strstr(document_id_end, "</DOC>")) != NULL)
 		{
+		document_end += 6;
 		strncpy(object->filename, document_id_start, document_id_end - document_id_start);
 		object->filename[document_id_end - document_id_start] = '\0';
 		if (get_file)

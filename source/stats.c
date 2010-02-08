@@ -42,7 +42,7 @@ long long ANT_stats::print_time(char *message, long long time_taken, char *end_m
 char *units = "milliseconds";
 long long hours, minutes, seconds, milliseconds;
 
-milliseconds = (long long)(time_taken / (get_clock_tick_frequency() / 1000.0));
+milliseconds = time_to_milliseconds(time_taken);
 seconds = milliseconds / 1000;
 minutes = seconds / 60;
 hours = minutes / 60;

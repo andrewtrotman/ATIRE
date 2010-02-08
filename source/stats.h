@@ -8,6 +8,10 @@
 
 class ANT_memory;
 
+/*
+	class ANT_STATS
+	---------------
+*/
 class ANT_stats
 {
 public:
@@ -18,6 +22,8 @@ public:
 public:
 	ANT_stats(ANT_memory *memory = 0);
 	virtual ~ANT_stats();
+
+	long long time_to_milliseconds(long long quantums) { return (long long)(quantums / (get_clock_tick_frequency() / 1000.0)); }
 
 	long long print_elapsed_time(long spaced_out = 0);
 	long long print_time(char *message, long long time_taken, char *end_message = "");

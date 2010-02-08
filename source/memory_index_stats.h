@@ -8,6 +8,10 @@
 
 #include "stats.h"
 
+/*
+	class ANT_MEMORY_INDEX_STATS
+	----------------------------
+*/
 class ANT_memory_index_stats : public ANT_stats
 {
 public:

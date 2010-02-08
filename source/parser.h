@@ -16,6 +16,10 @@
 	#define TRUE (!FALSE)
 #endif
 
+#ifdef _MSC_VER
+	#define inline __forceinline
+#endif
+
 /*
 	class ANT_PARSER
 	----------------
@@ -62,7 +66,7 @@ public:
 
 	static unsigned char *tolower(unsigned char *here);
 
-	virtual void set_document(unsigned char *document);
+	void set_document(unsigned char *document);
 	virtual ANT_string_pair *get_next_token(void);
 } ;
 
@@ -143,23 +147,23 @@ else
 */
 inline unsigned char *ANT_parser::tolower(unsigned char *here)
 {
-	long number_of_bytes = 1;
+long number_of_bytes = 1;
 
-	if ((*here & 0x80) == 0)
-		*here = ANT_tolower(*here);
-	else if (iseuropean(here))
-		{
-		number_of_bytes = utf8_bytes(here);
-		if (strncmp((char *)here, "Ä", number_of_bytes) == 0)
-			strncpy((char *)here, "ä", number_of_bytes);
-		else if (strncmp((char *)here, "Ö", number_of_bytes) == 0)
-			strncpy((char *)here, "ö", number_of_bytes);
-		else if (strncmp((char *)here, "Ü", number_of_bytes) == 0)
-			strncpy((char *)here, "ü", number_of_bytes);
+if ((*here & 0x80) == 0)
+	*here = ANT_tolower(*here);
+else if (iseuropean(here))
+	{
+	number_of_bytes = utf8_bytes(here);
+	if (strncmp((char *)here, "Ä", number_of_bytes) == 0)
+		strncpy((char *)here, "ä", number_of_bytes);
+	else if (strncmp((char *)here, "Ö", number_of_bytes) == 0)
+		strncpy((char *)here, "ö", number_of_bytes);
+	else if (strncmp((char *)here, "Ü", number_of_bytes) == 0)
+		strncpy((char *)here, "ü", number_of_bytes);
 //		else if (strncmp((char *)here, "ẞ", number_of_bytes) == 0)
 //			strncpy((char *)here, "ß", number_of_bytes);
-		}
-	return here;
+	}
+return here;
 }
 
 /*

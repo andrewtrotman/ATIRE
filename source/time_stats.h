@@ -8,6 +8,10 @@
 
 #include "stats.h"
 
+/*
+	class ANT_TIME_STATS
+	--------------------
+*/
 class ANT_time_stats : public ANT_stats
 {
 public:

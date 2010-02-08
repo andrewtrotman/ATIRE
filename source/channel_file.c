@@ -93,6 +93,7 @@ connect();
 if (feof(infile))
 	return NULL;
 
+buffer = new char [old_length = block_size + 2];
 /*
 	Else we do a gets() and stop when we hit the terminator
 */

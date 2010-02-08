@@ -53,14 +53,31 @@ if (!connected)
 }
 
 /*
+	ANT_CHANNEL_SOCKET::RESET_SOCKET()
+	----------------------------------
+*/
+void ANT_channel_socket::reset_socket(void)
+{
+socket->close();
+connected = FALSE;
+connect();
+}
+
+/*
 	ANT_CHANNEL_SOCKET::BLOCK_WRITE()
 	---------------------------------
 	returns the number of bytes written or -ve on errror
 */
 long ANT_channel_socket::block_write(char *data, long length)
 {
-connect();
-return socket->block_write(data, length);
+long answer;
+
+do
+	if ((answer = socket->block_write(data, length)) < length)
+		reset_socket();
+while (answer < length);
+
+return answer;
 }
 
 /*
@@ -69,8 +86,14 @@ return socket->block_write(data, length);
 */
 char *ANT_channel_socket::block_read(char *into, long length)
 {
-connect();
-return socket->block_read(into, length);
+char *answer;
+
+do
+	if ((answer = socket->block_read(into, length)) == NULL)
+		reset_socket();
+while (answer == NULL);
+
+return answer;
 }
 
 /*
@@ -79,6 +102,12 @@ return socket->block_read(into, length);
 */
 char *ANT_channel_socket::getsz(char terminator)
 {
-connect();
-return socket->getsz(terminator);
+char *answer;
+
+do
+	if ((answer = socket->getsz(terminator)) == NULL)
+		reset_socket();
+while (answer == NULL);
+
+return answer;
 }

@@ -22,6 +22,7 @@ private:
 
 private:
 	void connect(void);
+	void reset_socket(void);
 
 protected:
 	virtual long block_write(char *source, long length);

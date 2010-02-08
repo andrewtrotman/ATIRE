@@ -118,6 +118,8 @@ for (param = first_param; param < argc; param++)
 	delete decompressor;
 	delete instream_buffer;
 #endif
+
+	now = stats.start_timer();
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
 		source = new ANT_directory_recursive_iterator(argv[param]);			// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
@@ -140,6 +142,8 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_pkzip(argv[param]);
 	else
 		source = new ANT_directory_iterator(argv[param]);					// current directory
+	stats.add_disk_input_time(stats.stop_timer(now));
+
 #ifdef PARALLEL_INDEXING
 	parallel_disk->add_iterator(source);
 	}
@@ -194,7 +198,7 @@ for (param = first_param; param < argc; param++)
 			if ((param_block.segmentation & ANT_parser::DOUBLE_SEGMENTATION) == ANT_parser::DOUBLE_SEGMENTATION && (token->start[0] & 0x80) && token->string_length > 4) // (> 4) means more than one character
 				while (token->string_length > 0)
 					{//new_token = new
-					length_of_token =ANT_parser::utf8_bytes(token->start);
+					length_of_token = ANT_parser::utf8_bytes(token->start);
 					readability->handle_node(index->add_term(&(ANT_string_pair(token->start, length_of_token)), doc));
 					token->start += length_of_token;
 					token->string_length -= length_of_token;
@@ -211,16 +215,12 @@ for (param = first_param; param < argc; param++)
 				Store the document in the repository.
 			*/
 			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-				{
-//				index->add_to_document_repository(NULL, current_file->file, current_file->length + 1);		// +1 so that we also get the '\0'
 				index->add_to_document_repository(current_file->filename, copy_of_document, current_file->length + 1);		// +1 so that we also get the '\0'
-				}
 			id_list.puts(current_file->filename);
 			}
 		terms_in_document = 0;
 		delete [] current_file->file;
 		delete [] copy_of_document;
-
 		/*
 			Get the next file
 		*/
