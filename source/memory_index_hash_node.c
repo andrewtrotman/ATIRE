@@ -6,7 +6,7 @@
 #include "string_pair.h"
 #include "memory.h"
 #include "memory_index_hash_node.h"
-#include "memory_index_stats.h"
+#include "stats_memory_index.h"
 #include "postings_piece.h"
 #include "compress_variable_byte.h"
 
@@ -21,7 +21,7 @@
 	ANT_MEMORY_INDEX_HASH_NODE::ANT_MEMORY_INDEX_HASH_NODE()
 	--------------------------------------------------------
 */
-ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_memory_index_stats *stats)
+ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_stats_memory_index *stats)
 {
 postings_initial_length = 8;
 postings_growth_factor = 1.5;

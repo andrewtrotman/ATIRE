@@ -14,7 +14,7 @@
 #include "mean_average_precision.h"
 #include "disk.h"
 #include "relevant_document.h"
-#include "time_stats.h"
+#include "stats_time.h"
 #include "stemmer.h"
 #include "stemmer_factory.h"
 #include "assessment_factory.h"
@@ -55,7 +55,7 @@ const long MAX_TITLE_LENGTH = 1024;
 */
 double perform_query(ANT_channel *outchannel, ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer, long boolean)
 {
-ANT_time_stats stats;
+ANT_stats_time stats;
 long long now, hits, search_time;
 long did_query, first_case, token_length;
 char *current, token[1024];
@@ -227,7 +227,7 @@ if (params->queries_filename == NULL && params->port == 0)		// coming from stdin
 double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list, long boolean)
 {
 char *print_buffer, *ch;
-ANT_time_stats post_processing_stats;
+ANT_stats_time post_processing_stats;
 char *command, *query;
 long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;

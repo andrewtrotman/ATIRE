@@ -20,8 +20,8 @@
 #include "memory.h"
 #include "memory_index.h"
 #include "indexer_param_block.h"
-#include "memory_index_stats.h"
-#include "time_stats.h"
+#include "stats_memory_index.h"
+#include "stats_time.h"
 #include "version.h"
 #include "instream_file.h"
 #include "instream_deflate.h"
@@ -39,7 +39,7 @@
 	REPORT()
 	--------
 */
-void report(long long doc, ANT_memory_index *index, ANT_time_stats *stats, long long bytes_indexed)
+void report(long long doc, ANT_memory_index *index, ANT_stats_time *stats, long long bytes_indexed)
 {
 printf("%lld Documents (%lld bytes) in %lld bytes of memory in ", doc, bytes_indexed, index->get_memory_usage());
 stats->print_elapsed_time();
@@ -52,7 +52,7 @@ stats->print_elapsed_time();
 int main(int argc, char *argv[])
 {
 ANT_indexer_param_block param_block(argc, argv);
-ANT_time_stats stats;
+ANT_stats_time stats;
 ANT_directory_iterator *source = NULL;
 ANT_directory_iterator *disk = NULL;
 ANT_parser *parser;

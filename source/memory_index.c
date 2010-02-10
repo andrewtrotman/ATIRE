@@ -11,7 +11,7 @@
 #include "ranking_function_factory.h"
 #include "memory_index_hash_node.h"
 #include "memory_index.h"
-#include "memory_index_stats.h"
+#include "stats_memory_index.h"
 #include "memory.h"
 #include "string_pair.h"
 #include "file.h"
@@ -46,7 +46,7 @@ squiggle_document_offsets = new ANT_string_pair("~documentoffsets");
 squiggle_document_longest = new ANT_string_pair("~documentlongest");
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
-stats = new ANT_memory_index_stats(memory);
+stats = new ANT_stats_memory_index(memory);
 serialised_docids_size = 1;
 serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
@@ -87,9 +87,9 @@ delete factory_text;
 void ANT_memory_index::text_render(long which_stats)
 {
 if (which_stats & STAT_SUMMARY)
-	stats->text_render(ANT_memory_index_stats::STAT_SUMMARY);
+	stats->text_render(ANT_stats_memory_index::STAT_SUMMARY);
 if (which_stats & STAT_MEMORY)
-	stats->text_render(ANT_memory_index_stats::STAT_MEMORY);
+	stats->text_render(ANT_stats_memory_index::STAT_MEMORY);
 if (which_stats & STAT_COMPRESSION)
 	factory->text_render();
 }

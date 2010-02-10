@@ -9,7 +9,7 @@
 	ANT_SEARCH_ENGINE_STATS::ANT_SEARCH_ENGINE_STATS()
 	--------------------------------------------------
 */
-ANT_search_engine_stats::ANT_search_engine_stats(ANT_memory *memory) : ANT_time_stats(memory)
+ANT_search_engine_stats::ANT_search_engine_stats(ANT_memory *memory) : ANT_stats_time(memory)
 {
 initialise();
 }
@@ -32,7 +32,7 @@ queries = 0;
 */
 void ANT_search_engine_stats::add(ANT_search_engine_stats *which)
 {
-ANT_time_stats::add(which);
+ANT_stats_time::add(which);
 this->decompress_time += which->decompress_time;
 this->posting_read_time += which->posting_read_time;
 this->rank_time += which->rank_time;

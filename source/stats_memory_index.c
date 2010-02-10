@@ -1,18 +1,18 @@
 /*
-	MEMORY_INDEX_STATS.C
+	STATS_MEMORY_INDEX.C
 	--------------------
 */
 #include <stdio.h>
 #include "memory.h"
 #include "memory_index.h"
-#include "memory_index_stats.h"
+#include "stats_memory_index.h"
 #include "postings_piece.h"
 
 /*
-	ANT_MEMORY_INDEX_STATS::ANT_MEMORY_INDEX_STATS()
+	ANT_STATS_MEMORY_INDEX::ANT_STATS_MEMORY_INDEX()
 	------------------------------------------------
 */
-ANT_memory_index_stats::ANT_memory_index_stats(ANT_memory *memory) : ANT_stats(memory)
+ANT_stats_memory_index::ANT_stats_memory_index(ANT_memory *memory) : ANT_stats(memory)
 {
 hash_nodes = 0;
 unique_terms = 0;
@@ -35,18 +35,18 @@ bytes_to_store_documents_on_disk = 0;
 }
 
 /*
-	ANT_MEMORY_INDEX_STATS::~ANT_MEMORY_INDEX_STATS()
+	ANT_STATS_MEMORY_INDEX::~ANT_STATS_MEMORY_INDEX()
 	-------------------------------------------------
 */
-ANT_memory_index_stats::~ANT_memory_index_stats()
+ANT_stats_memory_index::~ANT_stats_memory_index()
 {
 }
 
 /*
-	ANT_MEMORY_INDEX_STATS::TEXT_RENDER()
+	ANT_STATS_MEMORY_INDEX::TEXT_RENDER()
 	-------------------------------------
 */
-void ANT_memory_index_stats::text_render(long type)
+void ANT_stats_memory_index::text_render(long type)
 {
 long long used, sum;
 

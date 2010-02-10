@@ -14,7 +14,7 @@
 #include "mean_average_precision.h"
 #include "disk.h"
 #include "relevant_document.h"
-#include "time_stats.h"
+#include "stats_time.h"
 #include "stemmer.h"
 #include "stemmer_factory.h"
 #include "assessment_factory.h"
@@ -60,7 +60,7 @@ ANT_search_engine_forum *output = NULL;
 struct ANT_ant_handle
 {
 ANT_stats stats;
-ANT_time_stats *post_processing_stats;
+ANT_stats_time *post_processing_stats;
 ANT_ANT_params params;
 ANT_search_engine *search_engine;
 ANT_search_engine_readability *readable_search_engine;
@@ -127,7 +127,7 @@ params->boolean = FALSE;
 */
 void ant_post_processing_stats_init(ANT *ant)
 {
-((ANT_ant_handle *)ant)->post_processing_stats = new ANT_time_stats;
+((ANT_ant_handle *)ant)->post_processing_stats = new ANT_stats_time;
 }
 
 /*
@@ -298,7 +298,7 @@ else if (params->output_forum == INEX_EFFICIENCY)
 */
 double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, const char *topic/*long topic_id*/, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
 {
-ANT_time_stats stats;
+ANT_stats_time stats;
 long long now, hits = 0;
 long did_query, first_case, token_length;
 char *current, token[1024];
@@ -449,7 +449,7 @@ return average_precision;
 	GET_DOCUMENT_AND_PARSE()
 	------------------------
 */
-char *get_document_and_parse(char *filename, ANT_time_stats *stats)
+char *get_document_and_parse(char *filename, ANT_stats_time *stats)
 {
 static char filename_buffer[1024];
 char *start, *end, *file;

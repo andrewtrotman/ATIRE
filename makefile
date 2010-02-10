@@ -73,7 +73,7 @@ PARTS = \
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
-	$(OBJDIR)\memory_index_stats.obj				\
+	$(OBJDIR)\stats_memory_index.obj				\
 	$(OBJDIR)\hash_table.obj						\
 	$(OBJDIR)\postings_piece.obj					\
 	$(OBJDIR)\ctypes.obj 							\
@@ -93,7 +93,7 @@ PARTS = \
 	$(OBJDIR)\assessment_factory.obj				\
 	$(OBJDIR)\relevant_document.obj 				\
 	$(OBJDIR)\stats.obj								\
-	$(OBJDIR)\time_stats.obj						\
+	$(OBJDIR)\stats_time.obj						\
 	$(OBJDIR)\search_engine_stats.obj				\
 	$(OBJDIR)\search_engine_forum.obj				\
 	$(OBJDIR)\search_engine_forum_INEX.obj			\

@@ -23,7 +23,7 @@ OBJECTS = \
 	parser_readability.o \
 	memory_index_hash_node.o \
 	memory_index.o \
-	memory_index_stats.o \
+	stats_memory_index.o \
 	hash_table.o \
 	postings_piece.o \
 	ctypes.o \
@@ -43,7 +43,7 @@ OBJECTS = \
 	assessment_factory.o \
 	relevant_document.o \
 	stats.o \
-	time_stats.o \
+	stats_time.o \
 	search_engine_stats.o \
 	search_engine_forum.o \
 	search_engine_forum_INEX.o \

@@ -1,18 +1,17 @@
 /*
-	MEMORY_INDEX_STATS.H
+	STATS_MEMORY_INDEX.H
 	--------------------
 */
-
-#ifndef MEMORY_INDEX_STATS_H_
-#define MEMORY_INDEX_STATS_H_
+#ifndef STATS_MEMORY_INDEX_H_
+#define STATS_MEMORY_INDEX_H_
 
 #include "stats.h"
 
 /*
-	class ANT_MEMORY_INDEX_STATS
+	class ANT_STATS_MEMORY_INDEX
 	----------------------------
 */
-class ANT_memory_index_stats : public ANT_stats
+class ANT_stats_memory_index : public ANT_stats
 {
 public:
 	enum {STAT_MEMORY = 1, STAT_SUMMARY = 2} ;
@@ -38,10 +37,12 @@ public:
 	long long bytes_to_store_documents_on_disk;
 
 public:
-	ANT_memory_index_stats(ANT_memory *memory = NULL);
-	virtual ~ANT_memory_index_stats();
+	ANT_stats_memory_index(ANT_memory *memory = NULL);
+	virtual ~ANT_stats_memory_index();
 
 	virtual void text_render(long which_stats);
 } ;
 
-#endif  /* MEMORY_INDEX_STATS_H_ */
+
+
+#endif /* STATS_MEMORY_INDEX_H_ */

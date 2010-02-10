@@ -5,13 +5,13 @@
 #ifndef SEARCH_ENGINE_STATS_H_
 #define SEARCH_ENGINE_STATS_H_
 
-#include "time_stats.h"
+#include "stats_time.h"
 
 /*
 	class ANT_SEARCH_ENGINE_STATS
 	-----------------------------
 */
-class ANT_search_engine_stats : public ANT_time_stats
+class ANT_search_engine_stats : public ANT_stats_time
 {
 public:
 	long long decompress_time;

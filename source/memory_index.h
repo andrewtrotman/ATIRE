@@ -5,7 +5,7 @@
 #ifndef MEMORY_INDEX_H_
 #define MEMORY_INDEX_H_
 
-#include "memory_index_stats.h"
+#include "stats_memory_index.h"
 #include "memory_index_hash_node.h"
 #include "fundamental_types.h"
 #include "compress_variable_byte.h"
@@ -36,7 +36,7 @@ private:
 	unsigned char *serialised_docids, *serialised_tfs;
 	long long serialised_docids_size, serialised_tfs_size;
 	long long largest_docno;
-	ANT_memory_index_stats *stats;
+	ANT_stats_memory_index *stats;
 
 	ANT_compress_variable_byte variable_byte;
 	ANT_compression_factory *factory;

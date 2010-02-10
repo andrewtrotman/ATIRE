@@ -7,11 +7,11 @@
 
 #include "string_pair.h"
 #include "postings_piece.h"
-#include "memory_index_stats.h"
+#include "stats_memory_index.h"
 
 class ANT_memory;
 class ANT_postings_piece;
-class ANT_memory_index_stats;
+class ANT_stats_memory_index;
 
 #ifdef _MSC_VER
 	#define inline __forceinline
@@ -36,7 +36,7 @@ public:
 	long long current_docno;
 	long long collection_frequency, document_frequency;
 	ANT_memory *memory;
-	ANT_memory_index_stats *stats;
+	ANT_stats_memory_index *stats;
 	long long docids_pos_on_disk, end_pos_on_disk, impacted_length;
 
 private:
@@ -46,7 +46,7 @@ private:
 	void insert_docno(long long docno);
 
 public:
-	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_memory_index_stats *stats);
+	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
 	~ANT_memory_index_hash_node() {};
 	void *operator new(size_t count, ANT_memory *memory);
 	void set(long long value);

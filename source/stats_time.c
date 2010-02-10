@@ -1,8 +1,9 @@
 /*
-	TIME_STATS.C
+	STATS_TIME.C
 	------------
 */
-#include "time_stats.h"
+
+#include "stats_time.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -12,19 +13,19 @@
 #endif
 
 /*
-	ANT_TIME_STATS::ADD_DISK_INPUT_TIME()
+	ANT_STATS_TIME::ADD_DISK_INPUT_TIME()
 	-------------------------------------
 */
-ANT_time_stats::ANT_time_stats(ANT_memory *memory) : ANT_stats(memory)
+ANT_stats_time::ANT_stats_time(ANT_memory *memory) : ANT_stats(memory)
 {
 disk_input_time = disk_output_time = cpu_time = 0;
 }
 
 /*
-	ANT_TIME_STATS::ADD()
+	ANT_STATS_TIME::ADD()
 	---------------------
 */
-void ANT_time_stats::add(ANT_time_stats *which)
+void ANT_stats_time::add(ANT_stats_time *which)
 {
 this->disk_input_time += which->disk_input_time;
 this->disk_output_time += which->disk_output_time;
@@ -32,10 +33,10 @@ this->cpu_time += which->cpu_time;
 }
 
 /*
-	ANT_TIME_STATS::TEXT_RENDER()
+	ANT_STATS_TIME::TEXT_RENDER()
 	-----------------------------
 */
-void ANT_time_stats::text_render(void)
+void ANT_stats_time::text_render(void)
 {
 long long now;
 
