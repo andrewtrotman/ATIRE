@@ -100,7 +100,10 @@ buffer = new char [old_length = block_size + 2];
 while ((next = fgetc(infile)) != terminator)
 	{
 	if  (next == EOF)
-		break;
+		if (used == 0)
+			return NULL;
+		else
+			break;
 		
 	if (used >= buffer_length)
 		{

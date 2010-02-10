@@ -74,6 +74,7 @@ puts("-r              Recursive search for files in this and directories below t
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtrec          <DOC>...</DOC> seperates documents, each identified by <DOCNO>docid</DOCNO>");
 puts("-rtgz           Search in tar.gz files for indexable files");
+puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
 
@@ -262,6 +263,8 @@ for (param = 1; param < argc; param++)
 			recursive = PKZIP;
 		else if (strcmp(command, "rtrec") == 0)
 			recursive = TREC;
+		else if (strcmp(command, "rwarcgz") == 0)
+			recursive = WARC_GZ;
 		else if (strcmp(command, "S") == 0)
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)

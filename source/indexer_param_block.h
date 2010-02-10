@@ -15,7 +15,7 @@ class ANT_indexer_param_block : public ANT_indexer_param_block_rank
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
-	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, PKZIP, TREC };
+	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, PKZIP, TREC, WARC_GZ };
 
 private:
 	int argc;

@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "ranking_function_factory.h"
 #include "directory_iterator_tar.h"
+#include "directory_iterator_warc.h"
 #include "directory_recursive_iterator.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_file.h"
@@ -135,6 +136,13 @@ for (param = first_param; param < argc; param++)
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_tar(instream_buffer);
+		}
+	else if (param_block.recursive == ANT_indexer_param_block::WARC_GZ)
+		{
+		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
+		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_warc(instream_buffer);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));

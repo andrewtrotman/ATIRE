@@ -48,7 +48,7 @@
 #endif
 
 const char *PROMPT = "]";
-
+const long MAX_TITLE_LENGTH = 1024;
 /*
 	PERFORM_QUERY()
 	---------------
@@ -226,7 +226,7 @@ if (params->queries_filename == NULL && params->port == 0)		// coming from stdin
 */
 double ant(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_param_block *params, char **filename_list, char **document_list, char **answer_list, long boolean)
 {
-char *print_buffer;
+char *print_buffer, *ch;
 ANT_time_stats post_processing_stats;
 char *command, *query;
 long topic_id, line, number_of_queries;
@@ -249,7 +249,7 @@ if (params->port == 0)
 else
 	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
 
-print_buffer = new char [1024 * 1024];
+print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
 if (params->output_forum == ANT_ANT_param_block::TREC)
 	output = new ANT_search_engine_forum_TREC(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
@@ -337,9 +337,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				{
 				search_engine->get_document(document_buffer, &current_document_length, docid);
 				if ((title_start = strstr(document_buffer, "<title>")) == NULL)
-					title_start = "";
-				else if ((title_end = strstr(title_start += 7, "</title>")) != NULL)
-					*title_end = '\0';
+					if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
+						title_start = "";
+				if (*title_start != '\0')
+					{
+					title_start += 7;
+					if ((title_end = strstr(title_start, "</title>")) == NULL)
+						title_end = strstr(title_start, "</TITLE>");
+					if (title_end != NULL)
+						{
+						if (title_end - title_start > MAX_TITLE_LENGTH)
+							title_end = title_start + MAX_TITLE_LENGTH;
+						*title_end = '\0';
+						for (ch = title_start; *ch != '\0'; ch++)
+							if (!ANT_isprint(*ch))
+								*ch = ' ';
+						}
+					}
 				}
 			sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), title_start);
 			outchannel->puts(print_buffer);

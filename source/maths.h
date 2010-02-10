@@ -119,13 +119,8 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 	-------
 	atol() for long long integers
 */
-inline long long atoll(const char *string)
-{
-/*
-	I guess the first person to compile this on Linux / MacOS will add the appropriate lines of code here.
-*/
-return _atoi64(string);
-}
+inline long long atoll(const char *string) { return _atoi64(string); }
+inline long long atoll(const unsigned char *string) { return atoll((char *)string); }
 
 #endif  /* MATHS_H_ */
 

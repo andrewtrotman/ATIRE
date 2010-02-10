@@ -54,9 +54,9 @@ MINUS_D = $(MINUS_D) -DTOP_K_SEARCH
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-#CFLAGS = /Od /W4 -D_CRT_SECURE_NO_WARNINGS -D_DEBUG /nologo /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
-CFLAGS = /W4 -D_CRT_SECURE_NO_WARNINGS /nologo /Zi $(MINUS_D) /Ox /fp:fast /GL /Gy $(EXTRA_INCLUDE) /MP8
-CC = @cl
+#CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
+CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8
+CC = @cl /nologo 
 
 #
 #	Libraries
@@ -106,6 +106,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_multiple.obj 		\
 	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
+	$(OBJDIR)\directory_iterator_warc.obj			\
 	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_recursive_iterator.obj		\

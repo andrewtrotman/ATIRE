@@ -4,11 +4,19 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include "../source/directory_iterator_warc.h"
 #include "../source/directory_iterator_tar.h"
 #include "../source/instream_deflate.h"
 #include "../source/instream_bz2.h"
 #include "../source/instream_file.h"
 #include "../source/memory.h"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
 
 /*
 	MAIN()
@@ -20,11 +28,16 @@ if (argc != 2)
 	exit(printf(""));
 
 ANT_memory memory;
+ANT_directory_iterator_object file_object, *current;
 ANT_instream_file file(&memory, argv[1]);
 ANT_instream_bz2 source(&memory, &file);
 ANT_directory_iterator_tar tarball(&source);
-ANT_directory_iterator_object file_object, *current;
+//ANT_instream_deflate source(&memory, &file);
+//ANT_directory_iterator_warc tarball(&source);
 
-for (current = tarball.first(&file_object); current != NULL; current = tarball.next(&file_object))
+for (current = tarball.first(&file_object, TRUE); current != NULL; current = tarball.next(&file_object, TRUE))
+	{
 	puts(current->filename);
+	delete [] current->file;
+	}
 }

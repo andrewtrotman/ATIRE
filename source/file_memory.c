@@ -58,6 +58,7 @@ return result;
 */
 long ANT_file_memory::read(unsigned char *data, long long size)
 {
+//printf("READ %lld bytes\n", size);
 memcpy(data, buffer + file_position, (size_t)size);
 file_position += size;
 return 1;		// success
