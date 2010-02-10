@@ -15,7 +15,7 @@
 #include "search_engine_accumulator.h"
 #include "search_engine_result.h"
 #include "search_engine_result_iterator.h"
-#include "search_engine_stats.h"
+#include "stats_search_engine.h"
 #include "ranking_function_bm25.h"
 #include "stemmer.h"
 #include "compress_variable_byte.h"
@@ -45,8 +45,8 @@ ANT_compressable_integer *value;
 
 index_filename = filename;
 trim_postings_k = LLONG_MAX;
-stats = new ANT_search_engine_stats(memory);
-stats_for_all_queries = new ANT_search_engine_stats(memory);
+stats = new ANT_stats_search_engine(memory);
+stats_for_all_queries = new ANT_stats_search_engine(memory);
 this->memory = memory;
 
 if (memory_model)

@@ -1,10 +1,10 @@
 /*
 	SEARCH_ENGINE_FORUM_INEX_EFFICIENCY.C
-	--------------------------
+	-------------------------------------
 */
 #include "pragma.h"
 #include "search_engine_forum_INEX_efficiency.h"
-#include "search_engine_stats.h"
+#include "stats_search_engine.h"
 #include "search_engine_accumulator.h"
 #include "stdlib.h"
 
@@ -13,7 +13,7 @@ const char* const ANT_search_engine_forum_INEX_efficiency::ID_PREFIX = "2009-Eff
 
 /*
 	ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY::ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY()
-	------------------------------------------------------------
+	----------------------------------------------------------------------------------
 */
 ANT_search_engine_forum_INEX_efficiency::ANT_search_engine_forum_INEX_efficiency(char *filename, char *participant_id, char *run_id, long result_list_length, char *task) : ANT_search_engine_forum(filename)
 {
@@ -44,7 +44,7 @@ fprintf(file, " />\n");
 
 /*
 	ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY::~ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY()
-	-------------------------------------------------------------
+	-----------------------------------------------------------------------------------
 */
 ANT_search_engine_forum_INEX_efficiency::~ANT_search_engine_forum_INEX_efficiency()
 {
@@ -53,12 +53,12 @@ fprintf(file, "</efficiency-submission>");
 
 /*
 	ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY::WRITE()
-	-------------------------------------
+	------------------------------------------------
 */
 void ANT_search_engine_forum_INEX_efficiency::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine)
 {
 long long which;
-ANT_search_engine_stats *stats = search_engine->get_stats();
+ANT_stats_search_engine *stats = search_engine->get_stats();
 long long cpu_time_ms = stats->get_cpu_time_ms();
 long long io_time_ms = stats->get_io_time_ms();
 

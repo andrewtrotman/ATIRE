@@ -44,7 +44,7 @@ OBJECTS = \
 	relevant_document.o \
 	stats.o \
 	stats_time.o \
-	search_engine_stats.o \
+	stats_search_engine.o \
 	search_engine_forum.o \
 	search_engine_forum_INEX.o \
 	search_engine_forum_INEX_efficiency.o \

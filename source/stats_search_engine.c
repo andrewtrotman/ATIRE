@@ -1,24 +1,25 @@
 /*
-	SEARCH_ENGINE_STATS.C
+	STATS_SEARCH_ENGINE.C
 	---------------------
 */
+
 #include <stdio.h>
-#include "search_engine_stats.h"
+#include "stats_search_engine.h"
 
 /*
-	ANT_SEARCH_ENGINE_STATS::ANT_SEARCH_ENGINE_STATS()
+	ANT_STATS_SEARCH_ENGINE::ANT_STATS_SEARCH_ENGINE()
 	--------------------------------------------------
 */
-ANT_search_engine_stats::ANT_search_engine_stats(ANT_memory *memory) : ANT_stats_time(memory)
+ANT_stats_search_engine::ANT_stats_search_engine(ANT_memory *memory) : ANT_stats_time(memory)
 {
 initialise();
 }
 
 /*
-	ANT_SEARCH_ENGINE_STATS::INITIALISE()
+	ANT_STATS_SEARCH_ENGINE::INITIALISE()
 	-------------------------------------
 */
-void ANT_search_engine_stats::initialise(void)
+void ANT_stats_search_engine::initialise(void)
 {
 stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = 0;
 sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
@@ -27,10 +28,10 @@ queries = 0;
 }
 
 /*
-	ANT_SEARCH_ENGINE_STATS::ADD()
+	ANT_STATS_SEARCH_ENGINE::ADD()
 	------------------------------
 */
-void ANT_search_engine_stats::add(ANT_search_engine_stats *which)
+void ANT_stats_search_engine::add(ANT_stats_search_engine *which)
 {
 ANT_stats_time::add(which);
 this->decompress_time += which->decompress_time;
@@ -48,10 +49,10 @@ this->disk_bytes_read_on_search += which->disk_bytes_read_on_search;
 }
 
 /*
-	ANT_SEARCH_ENGINE_STATS::TEXT_RENDER()
+	ANT_STATS_SEARCH_ENGINE::TEXT_RENDER()
 	--------------------------------------
 */
-void ANT_search_engine_stats::text_render(void)
+void ANT_stats_search_engine::text_render(void)
 {
 long long min, sum;
 

@@ -11,7 +11,7 @@
 
 class ANT_search_engine;
 class ANT_search_engine_btree_leaf;
-class ANT_search_engine_stats;
+class ANT_stats_search_engine;
 
 #ifdef USE_FLOATED_TF
 typedef double ANT_weighted_tf;
@@ -34,7 +34,7 @@ protected:
 	double mean_document_length;
 	ANT_compressable_integer *document_lengths;
 	ANT_compressable_integer *decompress_buffer;
-	ANT_search_engine_stats *stats;
+	ANT_stats_search_engine *stats;
 
 protected:
 	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer);

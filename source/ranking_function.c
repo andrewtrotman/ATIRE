@@ -10,7 +10,7 @@
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
 #include "ranking_function.h"
-#include "search_engine_stats.h"
+#include "stats_search_engine.h"
 
 /*
 	ANT_RANKING_FUNCTION::ANT_RANKING_FUNCTION()

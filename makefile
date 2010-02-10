@@ -94,7 +94,7 @@ PARTS = \
 	$(OBJDIR)\relevant_document.obj 				\
 	$(OBJDIR)\stats.obj								\
 	$(OBJDIR)\stats_time.obj						\
-	$(OBJDIR)\search_engine_stats.obj				\
+	$(OBJDIR)\stats_search_engine.obj				\
 	$(OBJDIR)\search_engine_forum.obj				\
 	$(OBJDIR)\search_engine_forum_INEX.obj			\
 	$(OBJDIR)\search_engine_forum_INEX_efficiency.obj			\

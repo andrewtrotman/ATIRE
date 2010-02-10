@@ -1,17 +1,17 @@
 /*
-	SEARCH_ENGINE_STATS.H
+	STATS_SEARCH_ENGINE.H
 	---------------------
 */
-#ifndef SEARCH_ENGINE_STATS_H_
-#define SEARCH_ENGINE_STATS_H_
+#ifndef STATS_SEARCH_ENGINE_H_
+#define STATS_SEARCH_ENGINE_H_
 
 #include "stats_time.h"
 
 /*
-	class ANT_SEARCH_ENGINE_STATS
+	class ANT_STATS_SEARCH_ENGINE
 	-----------------------------
 */
-class ANT_search_engine_stats : public ANT_stats_time
+class ANT_stats_search_engine : public ANT_stats_time
 {
 public:
 	long long decompress_time;
@@ -28,12 +28,12 @@ public:
 	long long disk_bytes_read_on_search;	// total bytes read from the disk durin the search
 
 public:
-	ANT_search_engine_stats(ANT_memory *memory) ;
-	virtual ~ANT_search_engine_stats() {}
+	ANT_stats_search_engine(ANT_memory *memory) ;
+	virtual ~ANT_stats_search_engine() {}
 	virtual void text_render(void);
 
 	void initialise(void);
-	void add(ANT_search_engine_stats *what);
+	void add(ANT_stats_search_engine *what);
 
 	void add_posting_read_time(long long time) { posting_read_time += time; }
 	void add_decompress_time(long long time) { decompress_time += time; }
@@ -52,4 +52,6 @@ public:
 	long long get_io_time_ms() { return (long long)(get_io_time() / (get_clock_tick_frequency() / 1000.0)); }
 } ;
 
-#endif  /* SEARCH_ENGINE_STATS_H_ */
+
+
+#endif /* STATS_SEARCH_ENGINE_H_ */

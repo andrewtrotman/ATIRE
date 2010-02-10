@@ -16,7 +16,7 @@ class ANT_search_engine_btree_node;
 class ANT_search_engine_btree_leaf;
 class ANT_search_engine_accumulator;
 class ANT_search_engine_result;
-class ANT_search_engine_stats;
+class ANT_stats_search_engine;
 class ANT_stemmer;
 class ANT_ranking_function;
 
@@ -31,8 +31,8 @@ friend class ANT_mean_average_precision;
 friend class ANT_search_engine_result_iterator;
 
 private:
-	ANT_search_engine_stats *stats;
-	ANT_search_engine_stats *stats_for_all_queries;
+	ANT_stats_search_engine *stats;
+	ANT_stats_search_engine *stats_for_all_queries;
 	ANT_memory *memory;
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
@@ -91,7 +91,7 @@ public:
 	long long document_count(void) { return documents; }
 	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
 	ANT_compressable_integer *get_decompress_buffer(void) { return decompress_buffer; }
-	ANT_search_engine_stats *get_stats(void) { return stats; }
+	ANT_stats_search_engine *get_stats(void) { return stats; }
 	void stats_initialise(void);
 	void stats_text_render(void);
 	void stats_all_text_render(void);
