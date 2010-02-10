@@ -62,7 +62,7 @@ long long ANT_instream_bz2::read(unsigned char *data, long long size)
 			return -1;		// error
 		}
 
-	internals->stream.avail_out = size;
+	internals->stream.avail_out = (unsigned int)size;
 	internals->stream.next_out = (char *)data;
 
 	do
@@ -71,7 +71,7 @@ long long ANT_instream_bz2::read(unsigned char *data, long long size)
 			{
 			if ((got = source->read(buffer, buffer_length)) < 0)
 				return -1;			// the instream is at EOF and so we are too
-			internals->stream.avail_in = got;
+			internals->stream.avail_in = (unsigned int)got;
 			internals->stream.next_in = (char *)buffer;	
 			}
 

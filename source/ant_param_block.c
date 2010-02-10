@@ -324,7 +324,7 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'q')
 			{
 			if (command[1] == ':')
-				port = isdigit(command[2]) ? atol(command + 2) : 6809;
+				port = (unsigned short)(isdigit(command[2]) ? atol(command + 2) : 6809);
 			else
 				{
 				if (*(command + 1) == '\0' && param < argc - 1) 
