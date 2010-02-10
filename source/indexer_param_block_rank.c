@@ -142,7 +142,7 @@ if (allowable & IMPACT)
 if (allowable & LMD)
 	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500] %s\n" , isdefault(LMD));
 if (allowable & LMJM)
-	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<n> [default l=0.1] %s\n", isdefault(LMJM));
+	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l=0.1] %s\n", isdefault(LMJM));
 if (allowable & READABLE)
 	printf("   readable     The readability search engine (BM25 with Dale-Chall) %s\n", isdefault(READABLE));
 if (allowable & TERM_COUNT)

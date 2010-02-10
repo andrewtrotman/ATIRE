@@ -30,13 +30,15 @@ private:
 	char path_buffer[PATH_MAX];
 
 private:
-	/*
-		These routines are used for the recursive_get_next_filename routines
-	*/
 	long push_directory(void);
 	long pop_directory(void);
-	char *next_match_wildcard(long at_end);
+	char *next_match_wildcard(void);
+#ifdef _MSC_VER
+	long ANT_directory_recursive_iterator::get_next_candidate(void);
+#else
 	char *first(char *root_directory, char *local_directory);
+	static long ANT_directory_recursive_iterator::PathMatchSpec(const char *str, const char *pattern)
+#endif
 
 public:
 	ANT_directory_recursive_iterator(char *the_wildcard);
@@ -45,6 +47,5 @@ public:
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
 } ;
-
 
 #endif  /* DIRECTORY_RECURSIVE_ITERATOR_H_ */

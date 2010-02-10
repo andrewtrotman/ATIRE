@@ -72,7 +72,7 @@ puts("FILE HANDLING");
 puts("-------------");
 puts("-r              Recursive search for files in this and directories below this");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
-puts("-rtrec          <DOC>...</DOC> seperates documents, each identified by <DOCNO>docid</DOCNO>");
+puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
 puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
@@ -103,7 +103,7 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S[so]           East-Asian language word segmentation, double segmentations by default");
+puts("-S[so]          East-Asian word segmentation [default double-segmentation]");
 puts("   s            Single segmentation, only index what we have");
 puts("   o            Use a segmentation module to segment string on fly");
 puts("");

@@ -16,32 +16,13 @@
 #include "directory_recursive_iterator.h"
 
 #define HANDLE_STACK_SIZE (PATH_MAX / 2)		/* because every second char must be a '\' */
+
 #ifndef FALSE
-	#define FALSE (0)
+	#define FALSE 0
 #endif
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
-
-#ifndef _MSC_VER
-	/*
-		PATHMATCHSPEC()
-		---------------
-	*/
-	static long PathMatchSpec(const char *str, const char *pattern)
-	{
-		char *fn = (char *)str;
-		char *tmp = fn;
-
-		while (*tmp != '\0') {
-			if (*tmp == '/') fn = tmp + 1;
-			tmp++;
-		}
-
-		return fnmatch(pattern, fn, FNM_PATHNAME) == 0; /* 0 = success */
-	}
-#endif
-
 
 /*
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::ANT_DIRECTORY_RECURSIVE_ITERATOR()
@@ -53,6 +34,7 @@ handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
 strncpy(wildcard, the_wildcard, PATH_MAX);
 wildcard[PATH_MAX - 1] = '\0';
 file_list = handle_stack;
+file_list->first_time = TRUE;
 }
 
 /*
@@ -73,6 +55,7 @@ long ANT_directory_recursive_iterator::push_directory(void)
 if (file_list < handle_stack + HANDLE_STACK_SIZE)
 	{
 	file_list++;
+	file_list->first_time = TRUE;
 	return TRUE;
 	}
 return FALSE;
@@ -92,48 +75,128 @@ if (file_list > handle_stack)
 return FALSE;
 }
 
+
+#ifdef _MSC_VER
+	/*
+		ANT_DIRECTORY_RECURSIVE_ITERATOR::GET_NEXT_CANDIDATE()
+		------------------------------------------------------
+	*/
+	long ANT_directory_recursive_iterator::get_next_candidate(void)
+	{
+	long success;
+
+	do
+		{
+		success = TRUE;
+		if (file_list->first_time)
+			{
+			file_list->first_time = FALSE;
+			if ((file_list->handle = FindFirstFile(file_list->path, &internals->file_data)) == INVALID_HANDLE_VALUE)
+				success = FALSE;
+			}
+		else
+			if (FindNextFile(file_list->handle, &internals->file_data) == 0)
+				success = FALSE;
+
+		if (!success)
+			{
+			FindClose(file_list->handle);
+			if (pop_directory() == FALSE)
+				return FALSE;
+			}
+		}
+	while (!success);
+
+	return TRUE;
+	}
+#else
+	/*
+		ANT_DIRECTORY_RECURSIVE_ITERATOR::PATHMATCHSPEC()
+		-------------------------------------------------
+	*/
+	long ANT_directory_recursive_iterator::PathMatchSpec(const char *str, const char *pattern)
+	{
+	char *fn = (char *)str;
+	char *tmp = fn;
+
+	while (*tmp != '\0')
+		{
+		if (*tmp == '/')
+			fn = tmp + 1;
+		tmp++;
+		}
+
+	return fnmatch(pattern, fn, FNM_PATHNAME) == 0; /* 0 = success */
+	}
+
+	/*
+		ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
+		-----------------------------------------
+	*/
+	char *ANT_directory_recursive_iterator::first(char *root_directory, char *local_directory)
+	{
+	char path[PATH_MAX];
+
+	if (*local_directory != '\0' && *root_directory != '\0')
+		sprintf(file_list->path, "%s", local_directory);
+	else if (*local_directory == '\0')
+		strcpy(file_list->path, root_directory);
+	else if (*root_directory == '\0')
+		strcpy(file_list->path, local_directory);
+	else
+		strcpy(file_list->path, ".");
+
+	sprintf(path, "%s*", file_list->path);
+	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
+	file_list->glob_index = 0;
+
+	if (file_list->matching_files.gl_pathc == 0) /* None found */
+		return NULL;
+
+	return next_match_wildcard();
+	}
+#endif
+
 /*
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::NEXT_MATCH_WILDCARD()
 	-------------------------------------------------------
 */
-char *ANT_directory_recursive_iterator::next_match_wildcard(long at_end)
+char *ANT_directory_recursive_iterator::next_match_wildcard(void)
 {
-char *dir, *file;
-long match = FALSE;
+#ifdef _MSC_VER
+	ANT_disk_directory *current_file_list;
+	long path_length;
 
-while (!match)
-	{
-	#ifdef _MSC_VER
-		if (at_end == 0)
-			{
-			FindClose(file_list->handle);
-			if (pop_directory())
-				return next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data));
-			else
-				return NULL;
-			}
-		else if (internals->file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	while (get_next_candidate())
+		{
+		if (internals->file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
 			if (!(strcmp(internals->file_data.cFileName, ".") == 0 || strcmp(internals->file_data.cFileName, "..") == 0))
 				{
-				dir = file_list->path;
+				current_file_list = file_list;
 				push_directory();
-				if ((file = first(dir, internals->file_data.cFileName)) != NULL)
-					return file;
+				path_length = strlen(current_file_list->path) - 4;
+				sprintf(file_list->path, "%*.*s/%s/*.*", path_length, path_length, current_file_list->path, internals->file_data.cFileName);
 				}
 			}
 		else
-			if ((match = PathMatchSpec(internals->file_data.cFileName, wildcard)) != 0)
-				break;
-		at_end = FindNextFile(file_list->handle, &internals->file_data);
-	#else
+			if (PathMatchSpec(internals->file_data.cFileName, wildcard))
+				return internals->file_data.cFileName;
+		}
+	return NULL;
+#else
+	char *dir, *file;
+	long match = FALSE, at_end = 1;
+
+	while (!match)
+		{
 		if (at_end == 0 || file_list->matching_files.gl_pathv[file_list->glob_index] == NULL)
 			{
 			globfree(&file_list->matching_files);
 			if (pop_directory())
 				{
 				file_list->glob_index++;
-				return next_match_wildcard(1);
+				return next_match_wildcard();
 				}
 			else
 				return NULL;
@@ -154,53 +217,11 @@ while (!match)
 			if ((match = PathMatchSpec(file_list->matching_files.gl_pathv[file_list->glob_index], wildcard)) != 0)
 				break;
 		at_end = !(file_list->glob_index++ == file_list->matching_files.gl_pathc);
-	#endif
-	}
-
-#ifdef _MSC_VER
-	return internals->file_data.cFileName;
-#else
+		}
 	return file_list->matching_files.gl_pathv[file_list->glob_index++];
 #endif
 }
 
-/*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
-	-----------------------------------------
-*/
-char *ANT_directory_recursive_iterator::first(char *root_directory, char *local_directory)
-{
-char path[PATH_MAX];
-
-if (*local_directory != '\0' && *root_directory != '\0')
-#ifdef _MSC_VER
-	sprintf(file_list->path, "%s/%s", root_directory, local_directory);
-#else
-	sprintf(file_list->path, "%s", local_directory);
-#endif
-else if (*local_directory == '\0')
-	strcpy(file_list->path, root_directory);
-else if (*root_directory == '\0')
-	strcpy(file_list->path, local_directory);
-else
-	strcpy(file_list->path, ".");
-
-#ifdef _MSC_VER
-	sprintf(path, "%s/*.*", file_list->path);
-	file_list->handle = FindFirstFile(path, &internals->file_data);
-	if (file_list->handle == INVALID_HANDLE_VALUE)
-		return NULL;
-#else
-	sprintf(path, "%s*", file_list->path);
-	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
-	file_list->glob_index = 0;
-
-	if (file_list->matching_files.gl_pathc == 0) /* None found */
-		return NULL;
-#endif
-
-return next_match_wildcard(1);
-}
 
 /*
 	ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
@@ -208,20 +229,21 @@ return next_match_wildcard(1);
 */
 ANT_directory_iterator_object *ANT_directory_recursive_iterator::first(ANT_directory_iterator_object *object, long get_file)
 {
-char *got;
-
 file_list = handle_stack;
 
 #ifdef _MSC_VER
-	GetCurrentDirectory(sizeof(path_buffer), path_buffer);
-	if ((got = first(path_buffer, "")) == NULL)
-		return NULL;
-	sprintf(object->filename, "%s/%s", file_list->path, got);
+	file_list->first_time = TRUE;
+	GetCurrentDirectory(sizeof(file_list->path), file_list->path);
+	strcat(file_list->path, "/*.*");
+
+	return next(object, get_file);
 #else
 	/* the modification below would not affected the original way of reading files */
 	long last_slash_idx = strlen(wildcard) - 1;
 	char *last_char = wildcard + last_slash_idx; // searching backward
 	char *slash = last_char;
+	char *got;
+
 	while (slash != wildcard)
 		{
 		if(*slash == '/')
@@ -251,17 +273,17 @@ file_list = handle_stack;
 	if ((got = first(path_buffer, "")) == NULL)
 		return NULL;
 	sprintf(object->filename, "%s", got);
+
+	if (get_file)
+		object->file = ANT_disk::read_entire_file(object->filename, &object->length);
+	else
+		{
+		object->file = NULL;
+		object->length = 0;
+		}
+
+	return object;
 #endif
-
-if (get_file)
-	object->file = ANT_disk::read_entire_file(object->filename, &object->length);
-else
-	{
-	object->file = NULL;
-	object->length = 0;
-	}
-
-return object;
 }
 
 /*
@@ -273,11 +295,14 @@ ANT_directory_iterator_object *ANT_directory_recursive_iterator::next(ANT_direct
 char *got;
 
 #ifdef _MSC_VER
-	if ((got = next_match_wildcard(FindNextFile(file_list->handle, &internals->file_data))) == NULL)
+	long path_length;
+
+	if ((got = next_match_wildcard()) == NULL)
 		return NULL;
-	sprintf(object->filename, "%s/%s", file_list->path, got);
+	path_length = strlen(file_list->path) - 4;
+	sprintf(object->filename, "%*.*s/%s", path_length, path_length, file_list->path, got);
 #else
-	if ((got = next_match_wildcard(1)) == NULL)
+	if ((got = next_match_wildcard()) == NULL)
 		return NULL;
 	sprintf(object->filename, "%s", got);
 #endif

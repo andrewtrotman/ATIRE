@@ -18,6 +18,7 @@ class ANT_disk_directory
 public:
 #ifdef _MSC_VER
 	HANDLE handle;
+	long first_time;
 #else
 	glob_t matching_files;
 	unsigned int glob_index;
