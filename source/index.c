@@ -8,7 +8,7 @@
 #include "ranking_function_factory.h"
 #include "directory_iterator_tar.h"
 #include "directory_iterator_warc.h"
-#include "directory_recursive_iterator.h"
+#include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_file.h"
 #include "directory_iterator_object.h"
@@ -122,7 +122,7 @@ for (param = first_param; param < argc; param++)
 
 	now = stats.start_timer();
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
-		source = new ANT_directory_recursive_iterator(argv[param]);			// this dir and below
+		source = new ANT_directory_iterator_recursive(argv[param]);			// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);

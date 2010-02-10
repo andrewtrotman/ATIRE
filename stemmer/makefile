@@ -57,7 +57,7 @@ OBJECTS = \
 	directory_iterator_internals.o \
 	directory_iterator_tar.o \
 	directory_iterator_file.o \
-	directory_recursive_iterator.o \
+	directory_iterator_recursive.o \
 	btree_iterator.o \
 	top_k_sort.o \
 	stemmer.o \

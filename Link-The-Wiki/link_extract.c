@@ -9,7 +9,7 @@
 #include <ctype.h>
 
 #include "../source/disk.h"
-#include "../source/directory_recursive_iterator.h"
+#include "../source/directory_iterator_recursive.h"
 #include "link_parts.h"
 
 #pragma warning(disable: 4706)		// assignment within conditional
@@ -78,7 +78,7 @@ if (*argv[1] == '-')
 file_number = 1;
 for (param = first_param; param < argc; param++)
 	{
-	ANT_directory_recursive_iterator disk(argv[param]);
+	ANT_directory_iterator_recursive disk(argv[param]);
 
 	disk.first(&file_object);
 	file = ANT_disk::read_entire_file(file_object.filename);

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "../source/disk.h"
-#include "../source/directory_recursive_iterator.h"
+#include "../source/directory_iterator_recursive.h"
 #include "link_parts.h"
 
 #ifndef FALSE
@@ -159,7 +159,7 @@ link_index = read_index(argv[first_param], &terms_in_index);
 file_number = 1;
 for (param = first_param + 1; param < argc; param++)
 	{
-	ANT_directory_recursive_iterator disk(argv[param]);  // make the recursive pattern matching as for default files reading
+	ANT_directory_iterator_recursive disk(argv[param]);  // make the recursive pattern matching as for default files reading
 	if (disk.first(&file_object) == NULL)
 		file = filename = NULL;
 	else

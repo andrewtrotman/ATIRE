@@ -1,5 +1,5 @@
 /*
-	DIRECTORY_RECURSIVE_ITERATOR.C
+	DIRECTORY_ITERATOR_RECURSIVE.C
 	------------------------------
 */
 #ifdef _MSC_VER
@@ -13,7 +13,7 @@
 #include "disk.h"
 #include "directory_iterator_internals.h"
 #include "disk_directory.h"
-#include "directory_recursive_iterator.h"
+#include "directory_iterator_recursive.h"
 
 #define HANDLE_STACK_SIZE (PATH_MAX / 2)		/* because every second char must be a '\' */
 
@@ -25,10 +25,10 @@
 #endif
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::ANT_DIRECTORY_RECURSIVE_ITERATOR()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::ANT_DIRECTORY_ITERATOR_RECURSIVE()
 	--------------------------------------------------------------------
 */
-ANT_directory_recursive_iterator::ANT_directory_recursive_iterator(char *the_wildcard)
+ANT_directory_iterator_recursive::ANT_directory_iterator_recursive(char *the_wildcard)
 {
 handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
 strncpy(wildcard, the_wildcard, PATH_MAX);
@@ -38,19 +38,19 @@ file_list->first_time = TRUE;
 }
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::~ANT_DIRECTORY_RECURSIVE_ITERATOR()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::~ANT_DIRECTORY_ITERATOR_RECURSIVE()
 	---------------------------------------------------------------------
 */
-ANT_directory_recursive_iterator::~ANT_directory_recursive_iterator()
+ANT_directory_iterator_recursive::~ANT_directory_iterator_recursive()
 {
 delete [] handle_stack;
 }
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::PUSH_DIRECTORY()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::PUSH_DIRECTORY()
 	--------------------------------------------------
 */
-long ANT_directory_recursive_iterator::push_directory(void)
+long ANT_directory_iterator_recursive::push_directory(void)
 {
 if (file_list < handle_stack + HANDLE_STACK_SIZE)
 	{
@@ -62,10 +62,10 @@ return FALSE;
 }
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::POP_DIRECTORY()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::POP_DIRECTORY()
 	-------------------------------------------------
 */
-long ANT_directory_recursive_iterator::pop_directory(void)
+long ANT_directory_iterator_recursive::pop_directory(void)
 {
 if (file_list > handle_stack)
 	{
@@ -78,10 +78,10 @@ return FALSE;
 
 #ifdef _MSC_VER
 	/*
-		ANT_DIRECTORY_RECURSIVE_ITERATOR::GET_NEXT_CANDIDATE()
+		ANT_DIRECTORY_ITERATOR_RECURSIVE::GET_NEXT_CANDIDATE()
 		------------------------------------------------------
 	*/
-	long ANT_directory_recursive_iterator::get_next_candidate(void)
+	long ANT_directory_iterator_recursive::get_next_candidate(void)
 	{
 	long success;
 
@@ -111,10 +111,10 @@ return FALSE;
 	}
 #else
 	/*
-		ANT_DIRECTORY_RECURSIVE_ITERATOR::PATHMATCHSPEC()
+		ANT_DIRECTORY_ITERATOR_RECURSIVE::PATHMATCHSPEC()
 		-------------------------------------------------
 	*/
-	long ANT_directory_recursive_iterator::PathMatchSpec(const char *str, const char *pattern)
+	long ANT_directory_iterator_recursive::PathMatchSpec(const char *str, const char *pattern)
 	{
 	char *fn = (char *)str;
 	char *tmp = fn;
@@ -130,10 +130,10 @@ return FALSE;
 	}
 
 	/*
-		ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
+		ANT_DIRECTORY_ITERATOR_RECURSIVE::FIRST()
 		-----------------------------------------
 	*/
-	char *ANT_directory_recursive_iterator::first(char *root_directory, char *local_directory)
+	char *ANT_directory_iterator_recursive::first(char *root_directory, char *local_directory)
 	{
 	char path[PATH_MAX];
 
@@ -158,10 +158,10 @@ return FALSE;
 #endif
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::NEXT_MATCH_WILDCARD()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::NEXT_MATCH_WILDCARD()
 	-------------------------------------------------------
 */
-char *ANT_directory_recursive_iterator::next_match_wildcard(void)
+char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 {
 #ifdef _MSC_VER
 	ANT_disk_directory *current_file_list;
@@ -224,10 +224,10 @@ char *ANT_directory_recursive_iterator::next_match_wildcard(void)
 
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::FIRST()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::FIRST()
 	-----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_recursive_iterator::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_recursive::first(ANT_directory_iterator_object *object, long get_file)
 {
 file_list = handle_stack;
 
@@ -287,10 +287,10 @@ file_list = handle_stack;
 }
 
 /*
-	ANT_DIRECTORY_RECURSIVE_ITERATOR::NEXT()
+	ANT_DIRECTORY_ITERATOR_RECURSIVE::NEXT()
 	----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_recursive_iterator::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_recursive::next(ANT_directory_iterator_object *object, long get_file)
 {
 char *got;
 

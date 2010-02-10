@@ -109,7 +109,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_warc.obj			\
 	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
-	$(OBJDIR)\directory_recursive_iterator.obj		\
+	$(OBJDIR)\directory_iterator_recursive.obj		\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\stemmer.obj							\
 	$(OBJDIR)\stemmer_term_similarity.obj			\
