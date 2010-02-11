@@ -38,11 +38,11 @@ private:
 	long get_next_candidate(void);
 #else
 	char *first(char *root_directory, char *local_directory);
-	static long PathMatchSpec(const char *str, const char *pattern)
+	static long PathMatchSpec(const char *str, const char *pattern);
 #endif
 
 public:
-	ANT_directory_iterator_recursive(char *the_wildcard);
+	ANT_directory_iterator_recursive(const char *the_wildcard);
 	virtual ~ANT_directory_iterator_recursive();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);

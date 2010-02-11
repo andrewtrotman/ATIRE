@@ -28,13 +28,15 @@
 	ANT_DIRECTORY_ITERATOR_RECURSIVE::ANT_DIRECTORY_ITERATOR_RECURSIVE()
 	--------------------------------------------------------------------
 */
-ANT_directory_iterator_recursive::ANT_directory_iterator_recursive(char *the_wildcard)
+ANT_directory_iterator_recursive::ANT_directory_iterator_recursive(const char *the_wildcard)
 {
 handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
 strncpy(wildcard, the_wildcard, PATH_MAX);
 wildcard[PATH_MAX - 1] = '\0';
 file_list = handle_stack;
+#ifdef _MSC_VER
 file_list->first_time = TRUE;
+#endif
 }
 
 /*
@@ -55,7 +57,9 @@ long ANT_directory_iterator_recursive::push_directory(void)
 if (file_list < handle_stack + HANDLE_STACK_SIZE)
 	{
 	file_list++;
+	#ifdef _MSC_VER
 	file_list->first_time = TRUE;
+	#endif
 	return TRUE;
 	}
 return FALSE;

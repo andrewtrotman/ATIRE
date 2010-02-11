@@ -35,10 +35,10 @@ core_sources =  \
 	$(SRCDIR)/parser_readability.c \
     $(SRCDIR)/memory_index_hash_node.c \
     $(SRCDIR)/memory_index.c \
-    $(SRCDIR)/memory_index_stats.c \
     $(SRCDIR)/hash_table.c \
     $(SRCDIR)/postings_piece.c \
     $(SRCDIR)/ctypes.c \
+    $(SRCDIR)/unicode_case.c \
     $(SRCDIR)/file.c \
     $(SRCDIR)/file_internals.c \
     $(SRCDIR)/file_memory.c	\
@@ -53,10 +53,11 @@ core_sources =  \
     $(SRCDIR)/assessment_factory.c \
     $(SRCDIR)/relevant_document.c \
     $(SRCDIR)/stats.c \
-    $(SRCDIR)/time_stats.c \
+	$(SRCDIR)/stats_time.c	\
+	$(SRCDIR)/stats_memory_index.c \
+	$(SRCDIR)/stats_search_engine.c	\
     $(SRCDIR)/search_engine_result.c \
     $(SRCDIR)/search_engine_result_iterator.c \
-    $(SRCDIR)/search_engine_stats.c \
     $(SRCDIR)/search_engine_forum.c \
     $(SRCDIR)/search_engine_forum_INEX.c \
     $(SRCDIR)/search_engine_forum_INEX_efficiency.c	\
@@ -65,15 +66,15 @@ core_sources =  \
     $(SRCDIR)/str.c \
     $(SRCDIR)/stop_word.c \
     $(SRCDIR)/disk.c \
-	$(SRCDIR)/directory_recursive_iterator.c \
+	$(SRCDIR)/directory_iterator_recursive.c \
 	$(SRCDIR)/directory_iterator.c	\
 	$(SRCDIR)/directory_iterator_tar.c	\
 	$(SRCDIR)/directory_iterator_file.c	\
 	$(SRCDIR)/directory_iterator_multiple.c \
 	$(SRCDIR)/directory_iterator_internals.c \
 	$(SRCDIR)/directory_iterator_pkzip.c \
+	$(SRCDIR)/directory_iterator_warc.c \
     $(SRCDIR)/btree_iterator.c \
-    $(SRCDIR)/top_k_sort.c \
     $(SRCDIR)/stemmer.c	\
     $(SRCDIR)/porter.c \
     $(SRCDIR)/lovins.c \
@@ -112,6 +113,7 @@ core_sources =  \
 	$(SRCDIR)/ranking_function_lmjm.c \
 	$(SRCDIR)/ranking_function_divergence.c \
 	$(SRCDIR)/ranking_function_term_count.c \
+	$(SRCDIR)/ranking_function_inner_product.c \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
 	$(SRCDIR)/NEXI_term.c \
@@ -123,7 +125,10 @@ core_sources =  \
 	$(SRCDIR)/semaphores.c \
 	$(SRCDIR)/threads.c \
 	$(SRCDIR)/critical_section.c \
-	$(SRCDIR)/event.c 
+	$(SRCDIR)/sockets.c \
+	$(SRCDIR)/event.c \
+	$(SRCDIR)/channel_file.c \
+	$(SRCDIR)/channel_socket.c
 				
 core_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -166,7 +171,8 @@ core_noinst_headers = \
 	$(SRCDIR)/directory_iterator_internals.h \
 	$(SRCDIR)/directory_iterator_object.h \
 	$(SRCDIR)/directory_iterator_tar_file_header.h	\
-	$(SRCDIR)/directory_recursive_iterator.h	\
+	$(SRCDIR)/directory_iterator_recursive.h	\
+	$(SRCDIR)/directory_iterator_warc.h \
 	$(SRCDIR)/disk_directory.h	\
 	$(SRCDIR)/disk.h	\
 	$(SRCDIR)/file.h	\
@@ -184,7 +190,6 @@ core_noinst_headers = \
 	$(SRCDIR)/memory.h	\
 	$(SRCDIR)/memory_index.h	\
 	$(SRCDIR)/memory_index_hash_node.h	\
-	$(SRCDIR)/memory_index_stats.h	\
 	$(SRCDIR)/NEXI.h	\
 	$(SRCDIR)/NEXI_term.h \
 	$(SRCDIR)/NEXI_term_ant.h \
@@ -206,11 +211,13 @@ core_noinst_headers = \
 	$(SRCDIR)/search_engine_forum_TREC.h	\
 	$(SRCDIR)/search_engine.h	\
 	$(SRCDIR)/search_engine_posting.h	\
-	$(SRCDIR)/search_engine_stats.h	\
 	$(SRCDIR)/search_engine_result.h \
 	$(SRCDIR)/search_engine_result_iterator.h \
 	$(SRCDIR)/semaphores.h \
 	$(SRCDIR)/stats.h	\
+	$(SRCDIR)/stats_time.h	\
+	$(SRCDIR)/stats_search_engine.h	\
+	$(SRCDIR)/stats_memory_index.h \
 	$(SRCDIR)/stemmer_factory.h	\
 	$(SRCDIR)/stemmer.h	\
 	$(SRCDIR)/stemmer_lovins.h	\
@@ -221,12 +228,11 @@ core_noinst_headers = \
 	$(SRCDIR)/stemmer_term_similarity.h \
 	$(SRCDIR)/stemmer_term_similarity_threshold.h \
 	$(SRCDIR)/stemmer_term_similarity_weighted.h \
+	$(SRCDIR)/sockets.h \
 	$(SRCDIR)/stop_word.h	\
 	$(SRCDIR)/str.h	\
 	$(SRCDIR)/string_pair.h	\
 	$(SRCDIR)/threads.h \
-	$(SRCDIR)/time_stats.h	\
-	$(SRCDIR)/top_k_sort.h	\
 	$(SRCDIR)/readability_factory.h \
 	$(SRCDIR)/readability_dale_chall.h \
 	$(SRCDIR)/version.h \
@@ -238,6 +244,7 @@ core_noinst_headers = \
 	$(SRCDIR)/ranking_function_bose_einstein.h \
 	$(SRCDIR)/ranking_function_divergence.h \
 	$(SRCDIR)/ranking_function_term_count.h \
+	$(SRCDIR)/ranking_function_inner_product.h \
 	$(SRCDIR)/instream_file.h	\
 	$(SRCDIR)/instream_deflate.h \
 	$(SRCDIR)/instream_bz2.h \
@@ -245,7 +252,13 @@ core_noinst_headers = \
 	$(SRCDIR)/event.h \
 	$(SRCDIR)/event_internals.h \
 	$(SRCDIR)/plugin.h \
-	$(SRCDIR)/plugin_manager.h
+	$(SRCDIR)/plugin_manager.h \
+	$(SRCDIR)/unicode_pair.h \
+	$(SRCDIR)/unicode_case.h \
+	$(SRCDIR)/channel.h \
+	$(SRCDIR)/channel_file.h \
+	$(SRCDIR)/channel_socket.h \
+	$(SRCDIR)/sockets_internals.h
 	
 library_headers = \
 	$(SRCDIR)/ant_api.h \
@@ -259,7 +272,7 @@ lib_LTLIBRARIES = libantcore.la libant.la
 libantcore_la_SOURCES = $(core_sources)
 libantcore_la_LIBADD = -ldl -lpthread
 
-libant_la_SOURCES = ant_api.c
+libant_la_SOURCES = $(SRCDIR)/ant_api.c
 libant_la_DEPENDENCIES = libantcore.la
 libant_la_LIBADD = -L. -lantcore
 libant_la_LIBFLAGS = -static
