@@ -6,11 +6,10 @@
 #define MATHS_H_
 #ifdef _MSC_VER
 	#include <crtdefs.h>
-	#include <stdlib.h>
 #else
 	#include <stddef.h>
 #endif
-
+#include <stdlib.h>
 #include <math.h>
 
 /*
@@ -121,8 +120,10 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 */
 #ifdef _MSC_VER
 inline long long atoll(const char *string) { return _atoi64(string); }
+inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
+#else
+inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
 #endif
-inline long long atoll(const unsigned char *string) { return atoll((char *)string); }
 
 #endif  /* MATHS_H_ */
 

@@ -51,11 +51,14 @@ CC = g++
 #CC = icpc 
 
 OBJECTS = \
+	sockets.o \
+	channel_file.o \
+	channel_socket.o \
 	parser.o \
 	parser_readability.o \
 	memory_index_hash_node.o \
 	memory_index.o \
-	memory_index_stats.o \
+	stats_memory_index.o \
 	hash_table.o \
 	postings_piece.o \
 	ctypes.o \
@@ -75,8 +78,8 @@ OBJECTS = \
 	assessment_factory.o \
 	relevant_document.o \
 	stats.o \
-	time_stats.o \
-	search_engine_stats.o \
+	stats_time.o \
+	stats_search_engine.o \
 	search_engine_forum.o \
 	search_engine_forum_INEX.o \
 	search_engine_forum_INEX_efficiency.o \
@@ -88,11 +91,11 @@ OBJECTS = \
 	directory_iterator_multiple.o \
 	directory_iterator_internals.o \
 	directory_iterator_tar.o \
+	directory_iterator_warc.o \
 	directory_iterator_pkzip.o \
 	directory_iterator_file.o \
-	directory_recursive_iterator.o \
+	directory_iterator_recursive.o \
 	btree_iterator.o \
-	top_k_sort.o \
 	stemmer.o \
 	stemmer_term_similarity.o \
 	stemmer_term_similarity_threshold.o \
@@ -136,6 +139,7 @@ OBJECTS = \
 	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
 	ranking_function_bm25.o \
+	ranking_function_inner_product.o \
 	ranking_function_term_count.o \
 	instream_file.o \
 	instream_deflate.o \
@@ -147,6 +151,8 @@ OBJECTS = \
 	NEXI_term.o \
 	semaphores.o \
 	critical_section.o \
+	focus.o\
+	focus_lowest_tag.o \
 	threads.o
 
 OBJECTS_W_DIR = $(OBJECTS:%=$(OBJDIR)/%)

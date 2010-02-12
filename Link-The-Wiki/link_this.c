@@ -421,6 +421,7 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 			if (links_already_printed_length > 1)
 				printf(", ");
 			printf("%d", all_links_in_file[result].link_term->postings[current_anchor].docid);
+			fprintf(stderr, "%s -> %d (gamma = %f)\n", all_links_in_file[result].link_term->term, all_links_in_file[result].link_term->postings[current_anchor].docid, all_links_in_file[result].gamma);
 			anchors_printed++;
 			links_already_printed_length++;
 			if (/*anchors_printed >= max_targets_per_anchor || */links_already_printed_length >= array_size)
@@ -738,7 +739,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 				if (ispropper_noun(buffer))
 					gamma += proper_noun_boost;
 				push_link(*first, last_index_term->term, last_index_term->postings[0].docid, gamma, last_index_term);
-//				printf("%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);
+				//fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);
 				}
 			}
 
@@ -746,6 +747,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 
 		deduplicate_links();
 		qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
+		//fprintf(stderr, "Total %d links found\n", all_links_in_file_length);
 
 		print_links(orphan_docid, orphan_name, anchors_per_run, targets_per_link, print_mode);
 
