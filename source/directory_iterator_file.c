@@ -28,10 +28,14 @@ char *document_id_start = NULL, *document_id_end = NULL;
 
 if ((document_start = strstr(document_end, "<DOC")) != NULL)
 	{
-	if ((document_id_start = strstr(document_start, "<DOCNO>")) != NULL)
-		document_id_end = strstr(document_id_start += 7, "</DOCNO>");
-	else if ((document_id_start = strstr(document_start, "id=\"")) != NULL)
+	if (*(document_start + 4) == '>')
 		{
+		document_id_start = strstr(document_start, "<DOCNO>");
+		document_id_end = strstr(document_id_start += 7, "</DOCNO>");
+		}
+	else
+		{
+		document_id_start = strstr(document_start, "id=\"");
 		document_id_end = strchr(document_id_start += 4, '"');
 		if (document_id_end)
 			document_start = strchr(document_id_end, '>') + 1;
