@@ -122,7 +122,7 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 #ifdef _MSC_VER
 inline long long atoll(const char *string) { return _atoi64(string); }
 #endif
-inline long long atoll(const unsigned char *string) { return atoll(string); }
+inline long long atoll(const unsigned char *string) { return atoll((char *)string); }
 
 #endif  /* MATHS_H_ */
 
