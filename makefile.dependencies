@@ -122,6 +122,7 @@ bin/producer_consumer.obj: source/critical_section.h source/semaphores.h source/
 bin/term_frequencies.obj: source/disk.h
 bin/test_tar.obj: source/directory_iterator_warc.h source/instream.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_tar.h source/directory_iterator_tar_file_header.h source/instream_deflate.h source/instream_bz2.h source/instream_file.h source/memory.h
 bin/test_unicode_case_convert.obj: source/unicode_case.h
+bin/textsplitter.obj: source/directory_iterator.h source/directory_iterator_object.h
 bin/topic_tree.obj: source/str.h source/ctypes.h source/disk.h source/stop_word.h source/porter.h source/btree_iterator.h
 bin/topic_tree_cas.obj: source/str.h source/ctypes.h source/disk.h
 bin/zipf_graph.obj: source/disk.h

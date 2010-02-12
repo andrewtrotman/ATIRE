@@ -22,6 +22,7 @@ unsigned char *into;
 /*
 	Do a series of gets's until we find the given string
 */
+buffer[string_length] = '\0';		// prevent early accidental termination
 do
 	do
 		{

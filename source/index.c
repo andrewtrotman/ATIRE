@@ -200,11 +200,15 @@ for (param = first_param; param < argc; param++)
 		readability->set_document((unsigned char *)current_file->file);
 		while ((token = readability->get_next_token()) != NULL)
 			{
-			if (!ANT_isupper(token->start[0]))			// uppercase words are XML tags
+			if (ANT_islowernum(token->start[0]))
+				{
 				terms_in_document++;
-			readability->handle_node(index->add_term(token, doc));
-			if ((param_block.segmentation & ANT_parser::DOUBLE_SEGMENTATION) == ANT_parser::DOUBLE_SEGMENTATION && (token->start[0] & 0x80) && token->string_length > 4) // (> 4) means more than one character
-				while (token->string_length > 0)
+				readability->handle_node(index->add_term(token, doc));			// indexable term
+				}
+			else if (ANT_isupper(token->start[0]))
+				readability->handle_node(index->add_term(token, doc));			// open tag
+			else if ((param_block.segmentation & ANT_parser::DOUBLE_SEGMENTATION) == ANT_parser::DOUBLE_SEGMENTATION && (token->start[0] & 0x80) && token->string_length > 4) // (> 4) means more than one character
+				while (token->string_length > 0)								// chinese
 					{
 					length_of_token = ANT_parser::utf8_bytes(token->start);
 					ANT_string_pair next_character(token->start, length_of_token);

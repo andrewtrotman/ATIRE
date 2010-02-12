@@ -20,6 +20,7 @@ public:
 
 	static char *read_entire_file(char *filename, long long *len = 0);
 	static char **buffer_to_list(char *buffer, long long *lines);
+	static char *write_entire_file(char *filename, char *string, long length);
 } ;
 
 #endif  /* DISK_H_ */

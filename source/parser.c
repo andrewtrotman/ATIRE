@@ -180,37 +180,49 @@ else											// everything else (that starts with a '<')
 		current_token.start = (char *)start;
 		current_token.string_length = current - start;
 
-		while (*current != '>')
+		while (*current != '>' && *current != '\0')
 			{
 			if (*current == '"')
-				while (*current != '"')
+				while (*current != '"' && *current != '\0')
 					current++;
 			else if (*current == '\'')
-				while (*current != '\'')
+				while (*current != '\'' && *current != '\0')
 					current++;
 			current++;
 			}
 		}
 	else
 		{
-		if (*current == '/')					// </tag>	(XML Close tag)
-			while (*current != '>')
-				current++;
-		else if (*current == '?')					// <? ... ?> (XML Processing Instructions)
-			{
-			current++; // current has to move to next character before we do the comparison again
-			while (*current != '?' && *(current + 1) != '>')
-				current++;
-			}
-		else if (*current == '!')				// <! ... > (
-			{
-			if (*(current + 1) == '-' && *(current + 2) == '-')		// <!-- /// --> (XML Comment)
-				while (!((*current == '-') && (*(current + 1) == '-') && (*(current + 2) == '>')))
+		if (*current != '\0')
+			if (*current == '/')					// </tag>	(XML Close tag)
+				{
+				while (*current != '>' && *current != '\0')
 					current++;
-			else								// nasty XML stuff like <![CDATA[<greeting>Hello, world!</greeting>]]>
-				while (*current != '>')
-					current++;
-			}
+				/*
+					New rules as of 11 Feb 2010, We return close tags as well as open tags
+					because we need these for result focusing.
+				*/
+				current_token.start = (char *)start;
+				current_token.string_length = current - start;
+				return &current_token;
+				}
+			else if (*current == '?')					// <? ... ?> (XML Processing Instructions)
+				{
+				current++; // current has to move to next character before we do the comparison again
+				if (*current != '\0')
+					while (*current != '?' && *(current + 1) != '>' && *(current + 1) != '\0')
+						current++;
+				}
+			else if (*current == '!')				// <! ... > (
+				{
+				if (*(current + 1) != '\0' && *(current + 2) != '\0')
+					if (*(current + 1) == '-' && *(current + 2) == '-')		// <!-- /// --> (XML Comment)
+						while (*(current + 2) != '\0' && !((*current == '-') && (*(current + 1) == '-') && (*(current + 2) == '>')))
+							current++;
+					else								// nasty XML stuff like <![CDATA[<greeting>Hello, world!</greeting>]]>
+						while (*current != '>' && *current != '\0')
+							current++;
+				}
 		return get_next_token();		// ditch and return the next character after where we are
 		}
 	}

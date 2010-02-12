@@ -23,6 +23,8 @@ enum {
 	ANT_CTYPE_ISVOWELY = ANT_CTYPE_VOWEL | ANT_CTYPE_Y,
 	ANT_CTYPE_ISGRAPH  = ANT_CTYPE_PUNC | ANT_CTYPE_UPPER | ANT_CTYPE_LOWER | ANT_CTYPE_DIGIT,
 	ANT_CTYPE_ISPRINT = ANT_CTYPE_PUNC | ANT_CTYPE_ISALNUM | ANT_CTYPE_HARD_SPACE
+
+	ANT_CTYPE_ISLOWERNUM = ANT_CTYPE_LOWER | ANT_CTYPE_DIGIT,						// special for indexing purposes
 } ;
 
 extern unsigned short ANT_ctype[];
@@ -52,6 +54,11 @@ inline int ANT_isgraph(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISGRAPH) != 
 inline int ANT_isprint(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISPRINT) != 0; }
 inline int ANT_iscntrl(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_CONTROL) != 0; }
 inline int ANT_isascii(int c) { return (unsigned char)(c) <= 0x7f; }
+
+/*
+	Special IS() routines for ANT indexing
+*/
+inline int ANT_islowernum(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISLOWERNUM) != 0; }
 
 /*
 	TO() routines

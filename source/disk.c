@@ -77,6 +77,25 @@ return block;
 }
 
 /*
+	ANT_DISK::WRITE_ENTIRE_FILE()
+	-----------------------------
+*/
+char *ANT_disk::write_entire_file(char *filename, char *buffer, long length)
+{
+FILE *fp;
+long success;
+
+if ((fp = fopen(filename, "wb")) == NULL)
+	return NULL;
+
+success = fwrite(buffer, length, 1, fp);
+
+fclose(fp);
+
+return success == 1 ? buffer : NULL;
+}
+
+/*
 	ANT_DISK::BUFFER_TO_LIST()
 	--------------------------
 */

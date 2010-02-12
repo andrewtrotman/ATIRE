@@ -152,7 +152,6 @@ dest[len] = '\0';
 return dest;
 }
 
-
 /*
 	STRCOUNTCHR()
 	-------------
@@ -170,38 +169,37 @@ while ((token = strchr(token, ch)) != NULL)
 return out;
 }
 
-
 #ifndef _MSC_VER
 
-/*
-	STRLOWER()
-	----------
-*/
-inline char *strlower(char *string)
-{
-unsigned char *ch;
+	/*
+		STRLOWER()
+		----------
+	*/
+	inline char *strlower(char *string)
+	{
+	unsigned char *ch;
 
-for (ch = (unsigned char *)string; *ch != '\0'; ch++)
-	*ch = ANT_tolower(*ch);
+	for (ch = (unsigned char *)string; *ch != '\0'; ch++)
+		*ch = ANT_tolower(*ch);
 
-return string;
-}
+	return string;
+	}
 
 #endif
 
 #ifdef __APPLE__
 
-/*
-	STRNLEN()
-	---------
-*/
-inline size_t strnlen(char *string, size_t max) 
-{
-size_t length = 0;
-while (length < max && string[length] != '\0')
-	length++;
-return length;
-}
+	/*
+		STRNLEN()
+		---------
+	*/
+	inline size_t strnlen(char *string, size_t max) 
+	{
+	size_t length = 0;
+	while (length < max && string[length] != '\0')
+		length++;
+	return length;
+	}
 
 #endif
 
