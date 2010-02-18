@@ -119,11 +119,9 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 	atol() for long long integers
 */
 #ifdef _MSC_VER
-inline long long atoll(const char *string) { return _atoi64(string); }
-inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
-#else
-inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
+	inline long long atoll(const char *string) { return _atoi64(string); }
 #endif
+inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
 
 #endif  /* MATHS_H_ */
 

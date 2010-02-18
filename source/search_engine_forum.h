@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include "search_engine.h"
 
+/*
+	class ANT_SEARCH_ENGINE_FORUM
+	-----------------------------
+*/
 class ANT_search_engine_forum
 {
 protected:

@@ -173,6 +173,7 @@ if (hash_table[hash_value] == NULL)
 	}
 else
 	node = find_add_node(hash_table[hash_value], string);
+
 node->add_posting(docno);
 return node;
 }
@@ -372,7 +373,7 @@ else
 long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
 long terms = 1;
-long long doc_size, tf_size, len, impacted_postings_length;
+long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
 long long timer;
 
 stats->term_occurences += root->collection_frequency;
@@ -422,33 +423,35 @@ else
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency <= 2)
 		{
-		root->docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
+		root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
 		if (root->document_frequency == 2)
 			{
-			root->impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
-			root->end_pos_on_disk = serialised_tfs[1] + root->docids_pos_on_disk;		// because root->docids_pos_on_disk is subtracted later
+			root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
+			root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk;		// because root->docids_pos_on_disk is subtracted later
 			}
 		else
-			root->impacted_length = root->end_pos_on_disk = 0;
+			root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
 		}
 	else
 		{
 		len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
-		root->docids_pos_on_disk = file->tell();
+		current_disk_position = file->tell();
 		file->write(compressed_postings_list, len);
 
-		root->impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-		root->end_pos_on_disk = file->tell();
+		root->in_disk.docids_pos_on_disk = current_disk_position;
+		root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+		root->in_disk.end_pos_on_disk = file->tell();
 		}
 #else
 	len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
-	root->docids_pos_on_disk = file->tell();
+	current_disk_position = file->tell();
 	file->write(compressed_postings_list, len);
 
-	root->impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-	root->end_pos_on_disk = file->tell();
+	root->in_disk.docids_pos_on_disk = current_disk_position;
+	root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+	root->in_disk.end_pos_on_disk = file->tell();
 #endif
 
 if (root->left != NULL)
@@ -556,13 +559,13 @@ for (current = start; current < end; current++)
 	four_byte = (uint32_t)(*current)->document_frequency;
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	eight_byte = (uint64_t)((*current)->docids_pos_on_disk);
+	eight_byte = (uint64_t)((*current)->in_disk.docids_pos_on_disk);
 	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
 
-	four_byte = (uint32_t)((*current)->impacted_length);
+	four_byte = (uint32_t)((*current)->in_disk.impacted_length);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-	four_byte = (uint32_t)((*current)->end_pos_on_disk - (*current)->docids_pos_on_disk);
+	four_byte = (uint32_t)((*current)->in_disk.end_pos_on_disk - (*current)->in_disk.docids_pos_on_disk);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 	four_byte = (uint32_t)string_pos;

@@ -20,7 +20,7 @@
 	1:34:id:data\142000.xml 420.000000 Symphonic black metal
 	<rank>:<ANTID>:<filename> <RSV> <NAME>
 */
-void process_result(char *result)
+void process_result(char *result, char *query)
 {
 long long antid;
 long result_number;
@@ -50,9 +50,9 @@ if (title != NULL && *title != '\0')
 	title++;
 
 if (title != NULL && *title != '\0')
-	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld><b>%s</b></a><br>\n%s<br><br>\n\n</li>", antid, title, filename);
+	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld&Q=%s><b>%s</b></a><br>\n%s<br><br>\n\n</li>", antid, query, title, filename);
 else
-	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld><b>%s</b></a><br><br>\n\n</li>", antid, filename);
+	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld&Q=%s><b>%s</b></a><br><br>\n\n</li>", antid, query, filename);
 }
 
 /*
@@ -74,13 +74,12 @@ if (query_string == NULL)
 	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
 
 query_string = strnew(query_string + 1);
+
 /*
-	Should really URL decode this string but we'll stick with replacing '+' with ' ' at the moment
+	Should really URL decode this string.
 */
 for (ch = query_string; *ch != '\0'; ch++)
-	if (*ch == '+')
-		*ch = ' ';
-	else if (*ch == '.')		// outlawed as they are special ANT commands
+	if (!isalnum(*ch))
 		*ch = ' ';
 
 /*
@@ -108,10 +107,15 @@ puts("<font size=+1><b>");
 puts(result);
 puts("</b></font><br>");
 puts("<ol>");
+
+for (ch = query_string; *ch != '\0'; ch++)
+	if (!isalnum(*ch))
+		*ch = '+';
+
 for (current = 0; current < hits; current++)
 	{
 	result = socket->gets();
-	process_result(result);
+	process_result(result, query_string);
 	}
 puts("</ol>");
 puts(ANT_disk::read_entire_file("footer.htm"));

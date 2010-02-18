@@ -138,7 +138,7 @@ for (i = 1; i < number_of_words; i++)
 			}
 		else
 			{
-			term_frequency = prev->node->tf_list_tail->data[prev->node->tf_node_used - 1];
+			term_frequency = prev->node->in_memory.tf_list_tail->data[prev->node->tf_node_used - 1];
 			/*
 				if it's only occured as title-case then it's a name
 				cheap/fugly approximaion
@@ -163,7 +163,7 @@ while (wordlist_position < ANT_readability_dale_chall_wordlist_length &&
 
 if (comparison != 0)
 	{
-	term_frequency = prev->node->tf_list_tail->data[prev->node->tf_node_used - 1];
+	term_frequency = prev->node->in_memory.tf_list_tail->data[prev->node->tf_node_used - 1];
 	number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
 	}
 

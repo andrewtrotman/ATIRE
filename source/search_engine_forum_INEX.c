@@ -4,6 +4,8 @@
 */
 #include "pragma.h"
 #include "search_engine_forum_INEX.h"
+#include "parser.h"
+#include "focus_result.h"
 
 /*
 	ANT_SEARCH_ENGINE_FORUM_INEX::ANT_SEARCH_ENGINE_FORUM_INEX()
@@ -24,6 +26,51 @@ fprintf(file, "<collections>\n<collection>wikipedia</collection>\n</collections>
 ANT_search_engine_forum_INEX::~ANT_search_engine_forum_INEX()
 {
 fprintf(file, "</inex-submission>");
+}
+
+/*
+	ANT_SEARCH_ENGINE_FORUM_INEX::FOCUS_TO_INEX()
+	---------------------------------------------
+	Given the document and a the start and end pointers
+	generate the INEX offsets for the pointers.  INEX counts
+	in Unicode characters excluding XML tags
+*/
+ANT_focus_result *ANT_search_engine_forum_INEX::focus_to_INEX(char *document, ANT_focus_result *result)
+{
+long long offset;
+char *current;
+long bytes;
+
+result->INEX_start = result->INEX_finish = offset = 0;
+current = document;
+while (*current != '\0')
+	{
+	if (current < result->start)
+		result->INEX_start = offset;
+	if (current < result->finish)
+		result->INEX_finish = offset;
+
+	if (*current == '<')
+		while (*current != '>' && *current != '\0')
+			current++;
+	else
+		{
+		bytes = ANT_parser::utf8_bytes(current);
+		offset += bytes;
+		/*
+			We do this the long way incase we get a high but set character as the 
+			last character of the file and it isn't a UTF-8 formatted document.
+		*/
+		while (bytes > 0)
+			{
+			bytes--;
+			if (*current++ == '\0')
+				return result;
+			}
+		}
+	}
+
+return result;
 }
 
 /*

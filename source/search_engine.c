@@ -196,7 +196,11 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 		the first value of which is the term-frequency and the second is the value we want
 	*/
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
+#ifdef SPECIAL_COMPRESSION
 		document_longest_raw_length = *(value + 1);
+#else
+		document_longest_raw_length = *value;
+#endif
 	}
 
 /*
@@ -468,12 +472,52 @@ if (term_details != NULL && term_details->document_frequency > 0)
 	{
 	bytes_already_read = index->get_bytes_read();
 	now = stats->start_timer();
+
+#ifndef TOP_K_READ_AND_DECOMPRESSOR
 	verify = get_postings(term_details, postings_buffer);
+#else
+	/*
+		The maximum number of bytes we need to read is the worst case for compression * the cost of the
+		tf and 0 bytes (of which there are at most 510).  So we need 5 * df + 510 at worst (for 32 bit integers)
+	*/
+	long bytes;
+
+	if (term_details->document_frequency > trim_postings_k)
+		{
+		bytes = 510 + 5 * trim_postings_k;
+		if (term_details->postings_length > bytes)
+			term_details->postings_length = bytes;
+		}
+
+	verify = get_postings(term_details, postings_buffer);
+#endif
 	stats->add_posting_read_time(stats->stop_timer(now));
 	if (verify != NULL)
 		{
 		now = stats->start_timer();
+#ifndef TOP_K_READ_AND_DECOMPRESSOR
 		factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+#else
+		/*
+			The maximum number of postings we need to decompress in the worst case is the case where each posting has
+			a different quantised impact... that is 3*n.  But, there are only 255 possible impacts and so if n > 255
+			then it is n + 510 (remember, we can't use 0 as an impact).  Of course we never decompress more postings
+			than there are.
+		*/
+		long long end;
+
+		if (term_details->document_frequency <= trim_postings_k)
+			end = term_details->impacted_length;
+		else
+			{
+			end = trim_postings_k < 0xFF ? trim_postings_k * 3 : trim_postings_k + 510;
+			if (end > term_details->impacted_length)
+				end = term_details->impacted_length;
+			}
+
+		factory.decompress(decompress_buffer, postings_buffer, end);
+		decompress_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
+#endif
 		stats->add_decompress_time(stats->stop_timer(now));
 
 		now = stats->start_timer();
@@ -663,7 +707,9 @@ for (current = results_list->accumulator_pointers; current < end; current++)
 	else
 		hits++;
 
+#ifdef TOP_K_SEARCH
 results_list->results_list_length = hits;
+#endif
 
 stats->add_rank_time(stats->stop_timer(now));
 
@@ -682,7 +728,7 @@ char **into = sorted_id_list;
 #ifdef TOP_K_SEARCH
 end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
 #else
-end = results_list->accumulator_pointers + documents < top_k ? documents : top_k;
+end = results_list->accumulator_pointers + (documents < top_k ? documents : top_k);
 #endif
 for (current = results_list->accumulator_pointers; current < end; current++)
 	if ((*current)->is_zero_rsv())

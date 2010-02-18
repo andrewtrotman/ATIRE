@@ -261,6 +261,7 @@ else if (params->output_forum == ANT_ANT_param_block::INEX_EFFICIENCY)
 	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
 
 length_of_longest_document = search_engine->get_longest_document_length();
+
 document_buffer = new char [length_of_longest_document + 1];
 
 sum_of_average_precisions = 0.0;
@@ -283,7 +284,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			{
 			search_engine->get_document(document_buffer, &current_document_length, atoll(command + 5));
 
-#ifdef NEVER
+#ifndef NEVER
 /*
 	Andrew's experimental code to test focusing
 */
@@ -292,13 +293,23 @@ ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant *parse_tree, *term_string;
 ANT_focus_lowest_tag focusser;
 ANT_focus_result focused_result;
-static char marker[] = "\n<><><><><><><><><><>\n";
+static unsigned char unsigned_marker[] = {0xFF, 0x00};
+static char *marker = (char *)unsigned_marker;
 
 parse_tree = parser.parse(command + 5);
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	focusser.add_term(&term_string->term);
 
 focusser.focus((unsigned char *)document_buffer, &focused_result);
+/*
+	Test code to generate INEX FOL format.
+*/
+/*
+{
+ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, &focused_result);
+printf("%s %lld %lld\n", filename_list[atoll(command + 5)], focused_result.INEX_start, focused_result.INEX_finish - focused_result.INEX_start);
+}
+*/
 
 sprintf(print_buffer, "%lld", (long long)current_document_length + strlen(marker) + strlen(marker));
 outchannel->puts(print_buffer);

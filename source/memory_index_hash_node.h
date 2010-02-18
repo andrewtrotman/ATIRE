@@ -8,8 +8,8 @@
 #include "string_pair.h"
 #include "postings_piece.h"
 #include "stats_memory_index.h"
+#include "memory.h"
 
-class ANT_memory;
 class ANT_postings_piece;
 class ANT_stats_memory_index;
 
@@ -24,12 +24,19 @@ class ANT_stats_memory_index;
 class ANT_memory_index_hash_node
 {
 private:
-	long postings_initial_length;
-	double postings_growth_factor;
+	static const long postings_initial_length;
+	static const double postings_growth_factor;
+
 public:
 	ANT_string_pair string;
 	ANT_memory_index_hash_node *left, *right;
-	ANT_postings_piece *docid_list_head, *docid_list_tail, *tf_list_head, *tf_list_tail;
+
+	union
+		{
+		struct { ANT_postings_piece *docid_list_head, *docid_list_tail, *tf_list_head, *tf_list_tail; } in_memory;
+		struct { long long docids_pos_on_disk, end_pos_on_disk, impacted_length; } in_disk;
+		} ;
+
 	long docid_node_used, docid_node_length;
 	long tf_node_used, tf_node_length;
 
@@ -37,7 +44,6 @@ public:
 	long long collection_frequency, document_frequency;
 	ANT_memory *memory;
 	ANT_stats_memory_index *stats;
-	long long docids_pos_on_disk, end_pos_on_disk, impacted_length;
 
 private:
 	inline long compress_bytes_needed(long long val);
@@ -48,12 +54,12 @@ private:
 public:
 	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
 	~ANT_memory_index_hash_node() {};
-	void *operator new(size_t count, ANT_memory *memory);
+	void *operator new(size_t count, ANT_memory *memory) { return memory->malloc(count); }
 	void set(long long value);
 	void add_posting(long long docno);
 	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
 
-	long decompress(unsigned char **from);
+	static long decompress(unsigned char **from);
 	static int term_compare(const void *a, const void *b);
 } ;
 
@@ -76,8 +82,8 @@ inline void ANT_memory_index_hash_node::add_posting(long long docno)
 collection_frequency++;
 if (docno == current_docno)
 	{
-	if (tf_list_tail->data[tf_node_used - 1]++ > 254)
-		tf_list_tail->data[tf_node_used - 1] = 254;
+	if (in_memory.tf_list_tail->data[tf_node_used - 1]++ > 254)
+		in_memory.tf_list_tail->data[tf_node_used - 1] = 254;
 	}
 else
 	{
@@ -89,6 +95,7 @@ else
 /*
 	ANT_MEMORY_INDEX_HASH_NODE::DECOMPRESS()
 	----------------------------------------
+	The postings are stored variable byte encoded and so we decode the variable byte here.
 */
 inline long ANT_memory_index_hash_node::decompress(unsigned char **from)
 {

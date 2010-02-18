@@ -3,6 +3,7 @@
 	----------------
 */
 #include <stdio.h>
+#include <ctype.h>
 #include "../source/maths.h"
 #include "../source/str.h"
 #include "../source/channel_socket.h"
@@ -14,9 +15,10 @@
 	----------------
 	XML file
 */
-void process_result(char *result)
+void process_result(unsigned char *result)
 {
-char *ch, *from = result;
+unsigned char *ch, *from = result;
+long enter_highlight = 1;
 
 for (ch = result; *ch != '\0'; ch++)
 	{
@@ -38,6 +40,16 @@ for (ch = result; *ch != '\0'; ch++)
 		fwrite("<br>", 4, 1, stdout);
 		from = ch + 1;
 		}
+	else if (*ch == 0xFF)
+		{
+		fwrite(from, ch - from, 1, stdout);
+		if (enter_highlight)
+			fwrite("<font color=800000>", 19, 1, stdout);
+		else
+			fwrite("</font>", 7, 1, stdout);
+		enter_highlight = !enter_highlight;
+		from = ch + 1;
+		}
 	}
 }
 
@@ -51,7 +63,7 @@ char buffer[1024];
 ANT_channel_socket *socket;
 char *result, *query_string = getenv("QUERY_STRING");
 long long docid, size;
-char *document;
+char *document, *hightlight_terms, *ch;
 
 if (query_string == NULL)
 	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
@@ -62,8 +74,13 @@ if (query_string == NULL)
 	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
 
 docid = atoll(query_string + 1);
+if ((hightlight_terms = strchr(query_string + 1, '=')) == NULL)
+	hightlight_terms = "";
 
-sprintf(buffer, ".get %lld", docid);
+sprintf(buffer, ".get %lld %s", docid, hightlight_terms);
+for (ch = buffer + 1; *ch != '\0'; ch++)
+	if (!isalnum(*ch))
+		*ch = ' ';
 
 /*
 	Output stuff
@@ -88,7 +105,7 @@ socket->read(document, size);
 document[size] = '\0';
 
 ANT_CGI_header();;
-process_result(document);
+process_result((unsigned char *)document);
 puts(ANT_disk::read_entire_file("footer.htm"));
 
 return 0;
