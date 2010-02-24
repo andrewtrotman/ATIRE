@@ -421,7 +421,7 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 			if (links_already_printed_length > 1)
 				printf(", ");
 			printf("%d", all_links_in_file[result].link_term->postings[current_anchor].docid);
-			fprintf(stderr, "%s -> %d (gamma = %f)\n", all_links_in_file[result].link_term->term, all_links_in_file[result].link_term->postings[current_anchor].docid, all_links_in_file[result].gamma);
+			//fprintf(stderr, "%s -> %d (gamma = %f)\n", all_links_in_file[result].link_term->term, all_links_in_file[result].link_term->postings[current_anchor].docid, all_links_in_file[result].gamma);
 			anchors_printed++;
 			links_already_printed_length++;
 			if (/*anchors_printed >= max_targets_per_anchor || */links_already_printed_length >= array_size)

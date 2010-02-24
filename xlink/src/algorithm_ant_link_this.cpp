@@ -540,11 +540,11 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 
 //			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
 
-			is_stopword = false;
-			if (!strpbrk(last_index_term->term, "- "))
-				is_stopword = language::isstopword(last_index_term->term);
-
-			if (!is_stopword) {
+//			is_stopword = false;
+//			if (!strpbrk(last_index_term->term, "- "))
+//				is_stopword = language::isstopword(last_index_term->term);
+//
+//			if (!is_stopword) {
 				strncpy(buffer_, offset + text_, term_len);
 				buffer_[term_len] = '\0';
 				if (!lx->find(buffer_)) {
@@ -553,7 +553,7 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 //					fprintf(stderr, "found a %s anchor\n", buffer__);
 					links_count++;
 				}
-			}
+//			}
 
 		}
 	}
