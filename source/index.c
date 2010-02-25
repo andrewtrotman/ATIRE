@@ -10,6 +10,7 @@
 #include "directory_iterator_warc.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
+#include "directory_iterator_compressor.h"
 #include "directory_iterator_file.h"
 #include "directory_iterator_object.h"
 #include "directory_iterator_pkzip.h"
@@ -70,7 +71,6 @@ long length_of_token;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 ANT_directory_iterator_multiple *parallel_disk;
-char *copy_of_document;
 
 if (argc < 2)
 	param_block.usage();
@@ -89,7 +89,6 @@ terms_in_document = 0;
 index = new ANT_memory_index("index.aspt");
 id_list.open("doclist.aspt", "wb");
 
-index->set_document_compression_scheme(param_block.document_compression_scheme);
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 
@@ -150,12 +149,20 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_pkzip(argv[param]);
 	else
 		source = new ANT_directory_iterator(argv[param]);					// current directory
+
 	stats.add_disk_input_time(stats.stop_timer(now));
 
 #ifdef PARALLEL_INDEXING
 	parallel_disk->add_iterator(source);
 	}
 	disk = parallel_disk;
+	if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+		{
+		ANT_compression_text_factory *factory_text = new ANT_compression_text_factory;
+		factory_text->set_scheme(param_block.document_compression_scheme);
+		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text);
+		}
+
 	files_that_match = 0;
 
 	now = stats.start_timer();
@@ -171,16 +178,8 @@ for (param = first_param; param < argc; param++)
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 
-	copy_of_document = NULL;
 	while (current_file != NULL)
 		{
-		/*
-			If we're going to shove it in the repository then we need to make a copy 
-			as the parser does case-folding inplace
-		*/
-		if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-			copy_of_document = strnew(current_file->file);
-
 		/*
 			How much data do we have?
 		*/
@@ -228,12 +227,15 @@ for (param = first_param; param < argc; param++)
 				Store the document in the repository.
 			*/
 			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-				index->add_to_document_repository(current_file->filename, copy_of_document, (long)(current_file->length + 1));		// +1 so that we also get the '\0'
+				{
+				index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
+				delete [] current_file->compressed;
+				}
 			id_list.puts(current_file->filename);
 			}
 		terms_in_document = 0;
 		delete [] current_file->file;
-		delete [] copy_of_document;
+
 		/*
 			Get the next file
 		*/

@@ -25,6 +25,8 @@ public:
 	char filename[PATH_MAX];		// name of the file
 	char *file;						// contents of the file
 	long long length;				// length of the file
+	char *compressed;				// the file compressed
+	long long compressed_length;	// compressed length of the file
 } ;
 
 #endif /* DIRECTORY_ITERATOR_OBJECT_H_ */

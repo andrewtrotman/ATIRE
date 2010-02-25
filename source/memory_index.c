@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <limits>
+#include "ranking_function.h"
 #include "ranking_function_factory.h"
 #include "memory_index_hash_node.h"
 #include "memory_index.h"
@@ -21,7 +22,6 @@
 #include "fundamental_types.h"
 #include "compression_factory.h"
 #include "maths.h"
-#include "ranking_function_bose_einstein.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -57,13 +57,10 @@ document_lengths = NULL;
 quantizer = NULL;
 documents_in_repository = 0;
 compressed_longest_raw_document_size = 0;
-factory_text = new (std::nothrow) ANT_compression_text_factory;
 index_file = NULL;
 open_index_file(filename);
 document_filenames = NULL;
 document_filenames_used = document_filenames_chunk_size;
-compressed_document_buffer_size = 0;
-compressed_document_buffer = NULL;
 }
 
 /*
@@ -77,7 +74,6 @@ delete memory;
 delete stats;
 delete factory;
 delete squiggle_length;
-delete factory_text;
 }
 
 /*
@@ -860,9 +856,8 @@ else
 	ANT_MEMORY_INDEX::ADD_TO_DOCUMENT_REPOSITORY()
 	----------------------------------------------
 */
-void ANT_memory_index::add_to_document_repository(char *filename, char *document, long length)
+void ANT_memory_index::add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long raw_length)
 {
-unsigned long compressed_length;
 long long start, timer;
 
 timer = stats->start_timer();
@@ -870,30 +865,13 @@ timer = stats->start_timer();
 if (filename != NULL)
 	add_to_filename_repository(filename);
 
-if (document != NULL)
+if (compressed_document != NULL)
 	{
-	if (compressed_document_buffer_size < length + 1)
-		{
-		/*
-			double the size to reduce the number of calls
-			add one in case length == 0 because we need to store the factory's scheme byte
-			but we alwasys allocate at least one megabyte
-		*/
-		if ((compressed_document_buffer_size = length * 2 + 1) < MIN_DOCUMENT_ALLOCATION_SIZE)
-			compressed_document_buffer_size = MIN_DOCUMENT_ALLOCATION_SIZE;
-
-		compressed_document_buffer = (char *)memory->malloc(compressed_document_buffer_size);
-		}
-
-	if (length > compressed_longest_raw_document_size)
-		compressed_longest_raw_document_size = length;
-
-	compressed_length = compressed_document_buffer_size;
-	if (factory_text->compress(compressed_document_buffer, &compressed_length, document, length) == NULL)
-		exit(printf("Cannot compress document (ID:%lld)\n", documents_in_repository));
+	if (raw_length > compressed_longest_raw_document_size)
+		compressed_longest_raw_document_size = raw_length;
 
 	start = index_file->tell();
-	index_file->write((unsigned char *)compressed_document_buffer, compressed_length);
+	index_file->write((unsigned char *)compressed_document, compressed_length);
 	stats->bytes_to_store_documents_on_disk += compressed_length;
 	set_document_detail(squiggle_document_offsets, start, MODE_MONOTONIC);		// use the search engine itself to store the offsets in the index
 

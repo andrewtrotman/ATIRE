@@ -17,29 +17,56 @@
 #endif
 
 /*
-	static
-	------
-	Declaration of an object of each of the known compression types,
-	pointers to these are used below as the objects to do the compression
-	and decompression on demand.
+	ANT_COMPRESSION_TEXT_FACTORY::ANT_COMPRESSION_TEXT_FACTORY()
+	------------------------------------------------------------
+	We have to do this at run-time because the compression objects might call code that
+	isn't necessarily re-entrant from multiple threads.
 */
-static ANT_compress_text_none none;
-static ANT_compress_text_bz2 bz2;
-static ANT_compress_text_deflate deflate;
+ANT_compression_text_factory::ANT_compression_text_factory()
+{
+schemes_to_use = DEFLATE;
+
+scheme = new ANT_compression_text_factory_scheme[number_of_techniques = 3];
+scheme[0].scheme_id = 0;
+scheme[0].scheme = new ANT_compress_text_none;
+scheme[0].name = "none";
+
+scheme[1].scheme_id = 1;
+scheme[1].scheme = new ANT_compress_text_deflate;
+scheme[1].name = "deflate";
+
+scheme[2].scheme_id = 2;
+scheme[2].scheme = new ANT_compress_text_bz2;
+scheme[2].name = "BZ2";
+}
 
 /*
-	ANT_compression_text_factory::scheme[]
-	--------------------------------------
-	The known compression schemes that can be used
+	ANT_COMPRESSION_TEXT_FACTORY::~ANT_COMPRESSION_TEXT_FACTORY()
+	-------------------------------------------------------------
 */
-ANT_compression_text_factory_scheme ANT_compression_text_factory::scheme[] =
+ANT_compression_text_factory::~ANT_compression_text_factory()
 {
-{RAW, &none, "none"},				// this must be in position zero as it is the fallback for the faulure case
-{DEFLATE, &deflate, "deflate"},
-{BZ2, &bz2, "BZ2"}
-};
+long current;
 
-long ANT_compression_text_factory::number_of_techniques = sizeof(ANT_compression_text_factory::scheme) / sizeof(*ANT_compression_text_factory::scheme);
+for (current = 0; current < number_of_techniques; current++)
+	 delete scheme[current].scheme;
+
+delete [] scheme;
+}
+
+/*
+	ANT_COMPRESSION_TEXT_FACTORY::REPLICATE()
+	-----------------------------------------
+*/
+ANT_compression_text_factory *ANT_compression_text_factory::replicate(void)
+{
+ANT_compression_text_factory *answer;
+
+answer = new ANT_compression_text_factory;
+answer->set_scheme(schemes_to_use);
+
+return answer;
+}
 
 /*
 	ANT_COMPRESSION_TEXT_FACTORY::COMPRESS()

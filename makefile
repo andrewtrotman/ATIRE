@@ -106,6 +106,7 @@ PARTS = \
 	$(OBJDIR)\disk.obj 								\
 	$(OBJDIR)\directory_iterator.obj 				\
 	$(OBJDIR)\directory_iterator_multiple.obj 		\
+	$(OBJDIR)\directory_iterator_compressor.obj 	\
 	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
 	$(OBJDIR)\directory_iterator_warc.obj			\

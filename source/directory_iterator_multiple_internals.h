@@ -21,7 +21,6 @@ public:
 	ANT_directory_iterator *iterator;
 	ANT_directory_iterator_multiple *parent;
 	ANT_directory_iterator_object file_object;
-//	char *wildcard;
 	long get_file;
 	ANT_thread_id_t thread_id;						// the OS thread ID
 	long instance;									// which thread we are

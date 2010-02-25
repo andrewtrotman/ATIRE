@@ -47,7 +47,13 @@ public:
 	void *malloc(long long bytes);
 	long long bytes_allocated(void) { return allocated; }
 	long long bytes_used(void) { return used; }
-	void realign(void) { allocated += (allocated % sizeof(long long) == 0) ? 0 : sizeof(long long) - allocated % sizeof(long long); }		//
+	/*
+		realign() does two things.  First, it aligns the next block of memory on the correct boundary for the largest
+		type we know about (a 64-bit long long) to avoid memory miss-allignment overheads.  Second, and as a consequence,
+		it cache-line aligns the next memory allocation (Intel uses a 64-byte cache line) thus reducing the number of
+		cache misses if we process the memory sequentially.
+	*/
+	void realign(void) { allocated += (allocated % sizeof(long long) == 0) ? 0 : sizeof(long long) - allocated % sizeof(long long); }
 } ;
 
 /*

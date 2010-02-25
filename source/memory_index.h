@@ -20,8 +20,11 @@ class ANT_ranking_function;
 class ANT_ranking_function_factory;
 
 #define HASH_TABLE_SIZE (0x1000000)
-#define MIN_DOCUMENT_ALLOCATION_SIZE (1024 * 1024)
 
+/*
+	class ANT_MEMORY_INDEX
+	----------------------
+*/
 class ANT_memory_index
 {
 public:
@@ -61,9 +64,6 @@ private:
 		the length of the longest document (once decompressed) is stored as ~documentlongest
 	*/
 	long long documents_in_repository;
-	ANT_compression_text_factory *factory_text;
-	char *compressed_document_buffer;
-	long compressed_document_buffer_size;
 	long compressed_longest_raw_document_size;			// length of the longest document before compression
 	ANT_string_pair *squiggle_document_offsets;
 	ANT_string_pair *squiggle_document_longest;
@@ -92,7 +92,6 @@ private:
 	void add_to_filename_repository(char *filename);
 	void serialise_filenames(char *source,  long depth = 0);
 
-
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
@@ -106,12 +105,11 @@ public:
 	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
 	void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	void set_variable(ANT_string_pair *measure_name, long long score);
-	void set_document_compression_scheme(unsigned long scheme) { factory_text->set_scheme(scheme); }
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 	void text_render(long what);
 	long long get_memory_usage(void);
-	void add_to_document_repository(char *filename, char *document, long length);
+	void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
 } ;
 
 

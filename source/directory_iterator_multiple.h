@@ -6,10 +6,9 @@
 #define DIRECTORY_ITERATOR_MULTIPLE_H_
 
 #include "directory_iterator.h"
+#include "producer_consumer.h"
 
 class ANT_directory_iterator_multiple_internals;
-class ANT_semaphores;
-class ANT_critical_section;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_MULTIPLE
@@ -17,15 +16,16 @@ class ANT_critical_section;
 */
 class ANT_directory_iterator_multiple : public ANT_directory_iterator
 {
+private:
+	static const long sources_growth_factor = 8;
+
 protected:
 	ANT_directory_iterator **sources;
 	ANT_directory_iterator_multiple_internals *thread_details;
-	ANT_directory_iterator_object *queue;
-	long insertion_point, removal_point, queue_length;
 	long sources_used, sources_length, current_source;
 	long active_threads;
-	ANT_semaphores *empty_count, *fill_count;
-	ANT_critical_section *mutex;
+	ANT_producer_consumer <ANT_directory_iterator_object> *producer;
+	ANT_critical_section mutex;
 
 protected:
 	static void *bootstrap(void *param);
