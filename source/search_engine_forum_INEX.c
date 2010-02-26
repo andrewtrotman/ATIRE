@@ -43,6 +43,11 @@ long bytes;
 
 result->INEX_start = result->INEX_finish = offset = 0;
 current = document;
+
+for (current = document; *current != '\0'; current++)
+	if (*current == '<' && *(current + 1) != '!' && *(current + 1) != '?')
+		break;
+
 while (*current != '\0')
 	{
 	if (current < result->start)
@@ -51,12 +56,33 @@ while (*current != '\0')
 		result->INEX_finish = offset;
 
 	if (*current == '<')
+		{
+		/*
+			XML Tags
+		*/
 		while (*current != '>' && *current != '\0')
 			current++;
+
+		if (*current != '\0')
+			current++;
+		}
+	else if (*current == '&')
+		{
+		/*
+			XML Entity References
+		*/
+		while (*current != ' ' && *current != ';' && *current != '\0')
+			current++;
+
+		offset++;
+		if (*current != '\0')
+			current++;
+		}
 	else
 		{
 		bytes = ANT_parser::utf8_bytes(current);
-		offset += bytes;
+		offset++;
+
 		/*
 			We do this the long way incase we get a high but set character as the 
 			last character of the file and it isn't a UTF-8 formatted document.

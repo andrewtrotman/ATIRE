@@ -25,9 +25,19 @@ while ((token = parser.get_next_token()) != NULL)
 		{
 		if (!found_first)
 			{
+#ifdef NEVER
+			/*
+				This is before-the-tag (used for display purposes)
+			*/
 			result->start = token->start;
 			while (*result->start != '<' && result->start > (char *)document)
 				result->start--;
+#else
+			/*
+				This is the first-character-of-tag (used for INEX Focused Retrieval purposes)
+			*/
+			result->start = strchr(token->start, '>');
+#endif
 			}
 		}
 	else if (token->start[0] == '/')		// end token

@@ -3,13 +3,15 @@
 	-----------------
 	This code reads assessment files in the INEX 2008 native format
 	That format is:
-	TopicID Q0 DocID RelBytes DocLength [passage level assessment stuff]
+	TopicID Q0 DocID RelBytes DocLength [BEPOffset [Offset:Length]]
 */
 #include <string.h>
 #include "assessment_INEX.h"
 #include "relevant_document.h"
+#include "relevant_document_passage.h"
 #include "memory.h"
 #include "disk.h"
+#include "str.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -24,10 +26,11 @@
 */
 ANT_relevant_document *ANT_assessment_INEX::read(char *filename, long long *reldocs)
 {
-char *file, **lines, **current;
-long topic, document, document_length, relevant_characters, relevant_documents, *document_pointer, **found;
+char *file, **lines, **current, *space;
+long topic, document, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, *document_pointer, **found;
 long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
+ANT_relevant_document_passage *current_passage, *all_passages, *passage_list_for_this_document;
 long params, missing_warned = FALSE, length_warned = FALSE;
 
 /*
@@ -41,9 +44,11 @@ lines = ANT_disk::buffer_to_list(file, &lines_in_file);
 	count the number of relevant documents
 */
 relevant_documents = 0;
+relevant_passages = 0;
 for (current = lines; *current != 0; current++)
 	{
 	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
+	relevant_passages += strcountchr(*current, ':');
 	if (params == 4)
 		relevant_documents++;
 	}
@@ -52,6 +57,7 @@ for (current = lines; *current != 0; current++)
 	allocate space for the assessments
 */
 current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(sizeof(*all_assessments) * relevant_documents);
+current_passage = all_passages = (ANT_relevant_document_passage *)memory->malloc(sizeof(*all_passages) * relevant_passages);
 
 /*
 	generate the list of relevant documents
@@ -59,8 +65,9 @@ current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(s
 document_pointer = &document;
 for (current = lines; *current != 0; current++)
 	{
-	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
-	if (params == 4)
+	best_entry_point = 0;
+	params = sscanf(*current, "%ld %*s %ld %ld %ld %ld", &topic, &document, &relevant_characters, &document_length, &best_entry_point);
+	if (params >= 4)
 		{
 		found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
 		if (found == NULL)
@@ -79,8 +86,34 @@ for (current = lines; *current != 0; current++)
 			relevant_characters = document_length;			// recover by setting the amount of relevant material to the length of the document (ie 100% precision).
 			length_warned = TRUE;
 			}
+		/*
+			Find each relevant passage and build the chain
+		*/
+		passage_list_for_this_document = NULL;
+		if (relevant_characters != 0)
+			{
+			passage_list_for_this_document = current_passage;
+			space = strchr(*current, ':');
+			while (*space != ' ')
+				space--;
+			space = strpbrk(space, "1234567890");
+			do
+				{
+				params = sscanf(space, "%ld:%ld", &current_passage->offset, &current_passage->length);
+				current_passage->next = current_passage + 1;
+				current_passage++;
+				if ((space = strchr(space, ' ')) != NULL)
+					space = strpbrk(space, "1234567890");
+				}
+			while (space != NULL);
+			(current_passage - 1)->next = NULL;		// NULL terminate the end of the previous list
+			}
+
 		current_assessment->document_length = document_length;
 		current_assessment->relevant_characters = relevant_characters;
+		current_assessment->passage_list = passage_list_for_this_document;
+		current_assessment->number_of_relevant_passages = current_passage - passage_list_for_this_document;
+		current_assessment->best_entry_point = best_entry_point;
 		current_assessment++;
 		}
 	}

@@ -304,12 +304,11 @@ focusser.focus((unsigned char *)document_buffer, &focused_result);
 /*
 	Test code to generate INEX FOL format.
 */
-/*
 {
 ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, &focused_result);
 printf("%s %lld %lld\n", filename_list[atoll(command + 5)], focused_result.INEX_start, focused_result.INEX_finish - focused_result.INEX_start);
 }
-*/
+
 
 sprintf(print_buffer, "%lld", (long long)current_document_length + strlen(marker) + strlen(marker));
 outchannel->puts(print_buffer);

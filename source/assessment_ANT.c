@@ -31,6 +31,9 @@ for (current = lines; *current != NULL; current++)
 	if ((sscanf(*current, "%ld %lld", &current_assessment->topic, &current_assessment->docid)) != 2)
 		exit(printf("%s line %ld:Cannot extract '<queryid> <docid>'\n", filename, current_assessment - all_assessments));
 	current_assessment->document_length = current_assessment->relevant_characters = 1024;		// fake the length and proportion of the document that are relevant
+	current_assessment->passage_list = NULL;
+	current_assessment->number_of_relevant_passages = 0;
+	current_assessment->best_entry_point = 0;
 	current_assessment++;
 	}
 
