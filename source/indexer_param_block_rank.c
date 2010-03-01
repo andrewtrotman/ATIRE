@@ -26,7 +26,7 @@
 ANT_indexer_param_block_rank::ANT_indexer_param_block_rank()
 {
 ranking_function = BM25;
-lmd_u = 500.0;
+lmd_u = 6750.0;
 lmjm_l = 0.5;
 bm25_k1 = 0.9;
 bm25_b = 0.4;
@@ -140,7 +140,7 @@ if (allowable & DIVERGENCE)
 if (allowable & IMPACT)
 	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
 if (allowable & LMD)
-	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=500] %s\n" , isdefault(LMD));
+	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=6750] %s\n" , isdefault(LMD));
 if (allowable & LMJM)
 	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l=0.1] %s\n", isdefault(LMJM));
 if (allowable & READABLE)
