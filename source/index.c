@@ -211,7 +211,7 @@ for (param = first_param; param < argc; param++)
 				}
 			else if (ANT_isupper(token->start[0]))
 				readability->handle_node(index->add_term(token, doc));			// open tag
-			else if ((token->start[0] & 0x80) && ANT_parser::isutf8(token->start))
+			else if ((token->start[0] & 0x80) && (ANT_parser::ischinese(token->start) || ANT_parser::iseuropean(token->start)))
 				{
 				terms_in_document++; // keep counting number of terms, but for dual indexing only number of the words is recorded
 				readability->handle_node(index->add_term(token, doc));
