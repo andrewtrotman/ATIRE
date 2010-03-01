@@ -33,7 +33,7 @@ public:
 		ONFLY_SEGMENTATION means segment the sentence using the Chinese segmentation module when parsing the document
 		If ONFLY_SEGMENTATION is not set, but SHOULD_SEGMENT is still set that means the text is segmented.
 	 */
-	enum { NOSEGMENTATION = 0, SHOULD_SEGMENT = 1, ONFLY_SEGMENTATION = 2, DOUBLE_SEGMENTATION = 4 };
+	enum { NOSEGMENTATION = 0, SHOULD_SEGMENT = 1, ONFLY_SEGMENTATION = 2, DOUBLE_SEGMENTATION = 4, BIGRAM_SEGMENTATION = 8 };
 
 protected:
 	unsigned char *document;
@@ -53,6 +53,9 @@ public:
 	static int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
 
 	virtual void segment(unsigned char *start, long length);
+
+	static int isutf8(unsigned char *here);
+	static int isutf8(char *here) { return isutf8((unsigned char *)here); }
 
 	static int ischinese(unsigned char *here);
 	static int ischinese(char *here) { return ischinese((unsigned char *)here); }
@@ -83,10 +86,29 @@ else if ((*here & 0xE0) == 0xC0)	// 2-byte sequence
 	return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
 else if ((*here & 0xF0) == 0xE0)	// 3-byte sequence
 	return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
-else if ((*here & 0xF8) == 0xF0)	// 4-byte sequence
+if ((*here & 0xF8) == 0xF0)	// 4-byte sequence
 	return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 1) & 0x3F);
-else
-	return 0;
+return 0;
+}
+
+/*
+	ANT_PARSER::ISUTF8()
+	--------------------------
+	if it is valid uft8 bytes
+*/
+inline int ANT_parser::isutf8(unsigned char *here)
+{
+int number_of_bytes = utf8_bytes(here);
+int i = 1;
+
+for (; i < number_of_bytes; ++i)
+	{
+	++here;
+	char c = (*here) >> 6;
+	if (c != 2)
+		return FALSE;
+	}
+return TRUE;
 }
 
 /*
@@ -98,7 +120,7 @@ inline int ANT_parser::ischinese(unsigned char *here)
 {
 unsigned long chinese;
 
-if ((*here & 0x80) == 0)
+if (!isutf8(here)/*(*here & 0x80) == 0*/)
 	return FALSE;
 else
 	{
@@ -121,7 +143,7 @@ inline int ANT_parser::iseuropean(unsigned char *here)
 {
 unsigned long european;
 
-if ((*here & 0x80) == 0)
+if (!isutf8(here)/*(*here & 0x80) == 0*/)
 	return FALSE;
 else
 	{
@@ -142,7 +164,7 @@ else
 /*
 	ANT_PARSER::TOLOWER()
 	---------------------
-	to convert bo the ASCII and European(German) character to lowercase
+	to convert both the ASCII and European(German) character to lowercase
 	this is a temporary solution
 */
 inline unsigned char *ANT_parser::tolower(unsigned char *here)

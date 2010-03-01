@@ -128,7 +128,9 @@ core_sources =  \
 	$(SRCDIR)/sockets.c \
 	$(SRCDIR)/event.c \
 	$(SRCDIR)/channel_file.c \
-	$(SRCDIR)/channel_socket.c
+	$(SRCDIR)/channel_socket.c \
+	$(SRCDIR)/focus.c \
+	$(SRCDIR)/focus_lowest_tag.c
 				
 core_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -235,6 +237,7 @@ core_noinst_headers = \
 	$(SRCDIR)/threads.h \
 	$(SRCDIR)/readability_factory.h \
 	$(SRCDIR)/readability_dale_chall.h \
+	$(SRCDIR)/relevant_document_passage.h \
 	$(SRCDIR)/version.h \
 	$(SRCDIR)/ranking_function.h	\
 	$(SRCDIR)/ranking_function_readability.h	\
@@ -258,7 +261,11 @@ core_noinst_headers = \
 	$(SRCDIR)/channel.h \
 	$(SRCDIR)/channel_file.h \
 	$(SRCDIR)/channel_socket.h \
-	$(SRCDIR)/sockets_internals.h
+	$(SRCDIR)/sockets_internals.h \
+	$(SRCDIR)/focus.h \
+	$(SRCDIR)/focus_result.h \
+	$(SRCDIR)/focus_lowest_tag.h \
+	$(SRCDIR)/focus_hash_node.h
 	
 library_headers = \
 	$(SRCDIR)/ant_api.h \

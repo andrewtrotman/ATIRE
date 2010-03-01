@@ -9,6 +9,13 @@
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_multiple_internals.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::ANT_DIRECTORY_ITERATOR_MULTIPLE()
 	------------------------------------------------------------------

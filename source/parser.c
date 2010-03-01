@@ -60,6 +60,7 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 ANT_string_pair *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
+long word_count = 0, pre_length_of_token = 0;
 
 if (segmentation != NULL)
 	{
@@ -145,13 +146,20 @@ else if (*current & 0x80)		// UTF-8 character
 	{
 	if (ischinese(current))		// Chinese CodePage
 		{
+		word_count = 1;
 		start = current;
 		current += utf8_bytes(current);		// move on to the next character
 
 		if (should_segment)
 			{
 			while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
-				current += utf8_bytes(current);
+				{
+				pre_length_of_token = utf8_bytes(current);
+				current += pre_length_of_token;
+				++word_count;
+				if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && word_count >= 2)
+					break;
+				}
 
 			if ((should_segment & ONFLY_SEGMENTATION) == ONFLY_SEGMENTATION)
 				{
@@ -162,6 +170,10 @@ else if (*current & 0x80)		// UTF-8 character
 
 		current_token.start = (char *)start;
 		current_token.string_length = current - start;
+
+		// post-processing, for bigram indexing, needs move backfoward
+		if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && ischinese(current))
+			current -= pre_length_of_token;
 		}
 	/*
 		There is no else clause because if the high bit is set we already know it must be Chinese

@@ -103,9 +103,11 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S[so]          East-Asian word segmentation [default double-segmentation]");
+puts("-S[sodb]        East-Asian word segmentation [default double-segmentation]");
 puts("   s            Single segmentation, only index what we have");
 puts("   o            Use a segmentation module to segment string on fly");
+puts("   d            Double(dual) segmentation, with words and single characters");
+puts("   b            Segmentation using bigram");
 puts("");
 
 puts("READABILITY");
@@ -207,13 +209,14 @@ void ANT_indexer_param_block::segment(char *segment_flags)
 char *segment_flag;
 
 segmentation |= ANT_parser::SHOULD_SEGMENT;
-segmentation |= ANT_parser::DOUBLE_SEGMENTATION;
 
 for (segment_flag = segment_flags; *segment_flag != '\0'; segment_flag++)
 	switch (*segment_flag)
 		{
 		case 's': segmentation -= ANT_parser::DOUBLE_SEGMENTATION; break; // only index what we have
 		case 'o': segmentation |= ANT_parser::ONFLY_SEGMENTATION; break;
+		case 'd': segmentation |= ANT_parser::DOUBLE_SEGMENTATION; break;
+		case 'b': segmentation |= ANT_parser::BIGRAM_SEGMENTATION; break;
 		default : exit(printf("Unknown segmentation flag: '%c'\n", *segment_flag)); break;
 		}
 }
@@ -265,7 +268,7 @@ for (param = 1; param < argc; param++)
 			recursive = TREC;
 		else if (strcmp(command, "rwarcgz") == 0)
 			recursive = WARC_GZ;
-		else if (strcmp(command, "S") == 0)
+		else if (*command == 'S')
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)
 			help();
