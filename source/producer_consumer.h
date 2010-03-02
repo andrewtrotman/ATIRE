@@ -9,6 +9,8 @@
 #include "semaphores.h"
 #include "critical_section.h"
 
+#include <string.h>
+
 /*
 	class ANT_PRODUCER_CONSUMER
 	---------------------------

@@ -74,6 +74,7 @@ core_sources =  \
 	$(SRCDIR)/directory_iterator_internals.c \
 	$(SRCDIR)/directory_iterator_pkzip.c \
 	$(SRCDIR)/directory_iterator_warc.c \
+	$(SRCDIR)/directory_iterator_compressor.c \
     $(SRCDIR)/btree_iterator.c \
     $(SRCDIR)/stemmer.c	\
     $(SRCDIR)/porter.c \
@@ -175,6 +176,7 @@ core_noinst_headers = \
 	$(SRCDIR)/directory_iterator_tar_file_header.h	\
 	$(SRCDIR)/directory_iterator_recursive.h	\
 	$(SRCDIR)/directory_iterator_warc.h \
+	$(SRCDIR)/directory_iterator_compressor.h \
 	$(SRCDIR)/disk_directory.h	\
 	$(SRCDIR)/disk.h	\
 	$(SRCDIR)/file.h	\
@@ -216,6 +218,7 @@ core_noinst_headers = \
 	$(SRCDIR)/search_engine_result.h \
 	$(SRCDIR)/search_engine_result_iterator.h \
 	$(SRCDIR)/semaphores.h \
+	$(SRCDIR)/producer_consumer.h \
 	$(SRCDIR)/stats.h	\
 	$(SRCDIR)/stats_time.h	\
 	$(SRCDIR)/stats_search_engine.h	\

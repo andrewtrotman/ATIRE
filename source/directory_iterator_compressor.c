@@ -4,6 +4,7 @@
 */
 #include <new>
 #include <stdio.h>
+#include <stdlib.h>
 #include "directory_iterator_compressor.h"
 #include "compression_text_factory.h"
 #include "threads.h"
