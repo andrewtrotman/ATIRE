@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void Dic::add(string_type word, uniseg_encoding::language lang) {
+void Dic::add(string_type word, long lang) {
 	if (word.length() > 0 && !find(word)) {
 		list_.insert(std::make_pair(word, lang));
 		update_stat(get_utf8_string_length(word), 1);
@@ -22,7 +22,7 @@ bool Dic::find(string_type word) {
 	return list_.find(word) != list_.end();
 }
 
-void Dic::save(string_type filename, uniseg_encoding::language lang) {
+void Dic::save(string_type filename, long lang) {
 	std::ofstream 			ofs;
 	ostream* os;
 
@@ -43,7 +43,7 @@ void Dic::save(string_type filename, uniseg_encoding::language lang) {
     	ofs.close();
 }
 
-void Dic::load(string_type filename, uniseg_encoding::language lang) {
+void Dic::load(string_type filename, long lang) {
 	  string line;
 	  ifstream dicfile(filename.c_str());
 	  if (dicfile.is_open()) {

@@ -36,7 +36,7 @@ public:
 
 	int 					max;
 
-	uniseg_encoding::language 		lang;
+	long 		lang;
 
 	std::string 				freqs_path; // string pattern frequency table path
 	std::string 				dics_path;  // dictionary path

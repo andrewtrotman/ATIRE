@@ -62,7 +62,7 @@ private:
 	Word*											pre_;
 	Word*											next_;
 
-	UNISEG_encoding::language						lang_;
+	long						lang_;
 	Address::uint_array								disk_address_;
 	bool											loaded_;
 
@@ -79,8 +79,8 @@ public:
 	void pre(Word* word) { pre_ = word; }
 	void next(Word* word) { next_ = word; }
 
-	void lang(UNISEG_encoding::language lang) { lang_ = lang; }
-	UNISEG_encoding::language lang() { return lang_; }
+	void lang(long lang) { lang_ = lang; }
+	long lang() { return lang_; }
 
 	Word& operator ++ ();
 	Word operator ++ (int);

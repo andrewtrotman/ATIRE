@@ -13,7 +13,7 @@
 
 class UNISEG_char {
 private:
-	UNISEG_encoding::language lang;
+	long lang;
 	UNISEG_encoding* enc;
 	char *start;
 	size_t bytes;

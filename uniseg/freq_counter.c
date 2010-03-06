@@ -48,7 +48,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 	// i - the number of characters depends on min
 	// may from 1, 2, 3, 4, ... till less than max
 	typedef list<string_type>	string_list;
-	uniseg_encoding::language pre_lang;
+	long pre_lang;
 
 	for (int i = min; i >= 0 && i <= max; i++) {
 	//cerr << "I got " << string_type((*begin)->begin(), (*end)->end()) << endl;
@@ -154,7 +154,7 @@ void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
 		start = (char *)begin;
 		string_list cl; // chars list
 		enc->test_char((unsigned char *)start);
-		uniseg_encoding::language pre_lang = enc->lang();
+		long pre_lang = enc->lang();
 
 		word_ptr_type pre = NULL;
 		word_ptr_type curr = NULL;

@@ -62,7 +62,7 @@ inline void to_string_array(string_type& source, string_array& sa)
 	to_string_array(source.c_str(), sa);
 }
 
-inline void array_to_string(string_array& ca, UNISEG_encoding::language lang, string_type& dest, int idx = 0, int len = -1)
+inline void array_to_string(string_array& ca, long lang, string_type& dest, int idx = 0, int len = -1)
 {
 	if (len == -1)
 		len = ca.size();

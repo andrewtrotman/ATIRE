@@ -100,7 +100,7 @@ word_ptr_type Freq::find(string_type word) {
 	return NULL;
 }
 
-word_ptr_type Freq::add(string_array& ca, UNISEG_encoding::language lang, unsigned int freq, bool allnew) {
+word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool allnew) {
 
 	int size = ca.size();
 	assert(size > 0);

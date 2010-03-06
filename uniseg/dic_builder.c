@@ -16,12 +16,12 @@ using namespace std;
 DicBuilder::DicBuilder(Dic* dic) : dic_(dic) {
 	count_ = 0;
 }
-void DicBuilder::add(string_type word, uniseg_encoding::language lang) {
+void DicBuilder::add(string_type word, long lang) {
 	dic_->add(word, lang);
 	count_++;
 }
 
-void DicBuilder::build(string_type& text, uniseg_encoding::language lang) {
+void DicBuilder::build(string_type& text, long lang) {
 
 	typedef Doc::entity_iterator	iterator;
 	Doc doc(UNISEG_settings::instance().lang(), text);

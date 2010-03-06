@@ -193,7 +193,7 @@ void IndexFile::read(Freq&	freq) {
 	unsigned int address = 0;
 	int count = 0;
 
-	uniseg_encoding::language lang;
+	long lang;
 	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
 	cerr << "loading index file" << filename_ << endl;
