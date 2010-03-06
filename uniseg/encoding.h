@@ -32,6 +32,7 @@ public:
 	virtual void test_char(const unsigned char *c); // trying to find out the language of the character, and how many bytes it occupies
 
 	size_t howmanybytes() { return bytes; }
+	size_t howmanybytes(const unsigned char *c) { test_char(c); return bytes; }
 	long lang() { return current_lang; }
 
 	bool is_english() { return current_lang == ENGLISH; }
