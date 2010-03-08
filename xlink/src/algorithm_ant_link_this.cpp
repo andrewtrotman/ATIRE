@@ -140,12 +140,16 @@ while (fgets(buffer_, sizeof(buffer_), fp) != NULL)
 			//bubble_sort1<vector<ANT_link_posting *> >(term->postings);
 			//std::sort(term->postings.begin(), term->postings.end(), ANT_link_posting::compare);
 			//qsort(term->postings, term->postings_length, sizeof(term->postings[0]), ANT_link_posting::compare);
-		//debug
-//		for (int i = 0; i < term->postings.size(); i++)
-//			fprintf(stderr, "%d ", term->postings[i]->link_frequency);
+
 //		fprintf(stderr, "\n");
 	//}
-
+		//debug
+//		if (strcmp(term->term, "elder") == 0) {
+//			fprintf(stderr, "%s:", term->term);
+//			for (int i = 0; i < term->postings.size(); i++)
+//				fprintf(stderr, "(%d, %d)", term->postings[i]->docid, term->postings[i]->link_frequency);
+//			fprintf(stderr, "\n");
+//		}
 	term++;
 
 	// for debug
@@ -538,7 +542,7 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 			offset = place - source;
 			term_len = strlen(last_index_term->term);
 
-//			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
+			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
 
 //			is_stopword = false;
 //			if (!strpbrk(last_index_term->term, "- "))
@@ -547,12 +551,20 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 //			if (!is_stopword) {
 				strncpy(buffer_, offset + text_, term_len);
 				buffer_[term_len] = '\0';
-				if (!lx->find(buffer_)) {
-					lx->push_link(*first, offset, buffer_, last_index_term->postings[0]->docid, gamma, last_index_term);
+//				if (strcmp(last_index_term->term, "the church of england") == 0)
+//					fputs("I got you", stderr);
+				//if (!lx->find(buffer_)) {
+					//lx->push_link(*first, offset, buffer_, last_index_term->postings[0]->docid, gamma, last_index_term);
+				if (!lx->find(last_index_term->term)) {
+					lx->push_link(*first, offset, last_index_term->term, last_index_term->postings[0]->docid, gamma, last_index_term);
 					// debug
 //					fprintf(stderr, "found a %s anchor\n", buffer__);
 					links_count++;
 				}
+				else
+					fprintf(stderr, "Duplicated");
+				fprintf(stderr, "\n");
+
 //			}
 
 		}

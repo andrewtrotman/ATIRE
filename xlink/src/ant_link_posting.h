@@ -26,20 +26,24 @@ public:
 	virtual ~ANT_link_posting();
 	static bool compare(const ANT_link_posting *a, const ANT_link_posting *b);
 
-	bool operator>(const ANT_link_posting& a) {
-		return this->link_frequency > a.link_frequency;
-	}
+//	bool operator>(const ANT_link_posting& a) {
+//		if (link_frequency == a.link_frequency)
+//			return docid < a.docid;
+//		return this->link_frequency > a.link_frequency;
+//	}
 
-	bool operator<(const ANT_link_posting& a) {
-		return this->link_frequency < a.link_frequency;
-	}
+//	bool operator<(const ANT_link_posting& a) {
+//		return this->link_frequency < a.link_frequency;
+//	}
 
 	friend bool operator<(const ANT_link_posting& a, const ANT_link_posting& b) {
 		return a.link_frequency < b.link_frequency;
 	}
 
 	friend bool operator>(const ANT_link_posting& a, const ANT_link_posting& b) {
-		return a.link_frequency > b.link_frequency;
+		if (a.doc_link_frequency == b.doc_link_frequency)
+			return a.docid < b.docid;
+		return a.doc_link_frequency > b.doc_link_frequency;
 	}
 
 //	bool operator > (const ANT_link_posting *a) {

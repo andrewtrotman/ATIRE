@@ -100,6 +100,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 	#ifdef REMOVE_ORPHAN_LINKS
 	links_already_printed.push_back(orphan_docid);		// fake having already printed the oprhan itself.
 	//links_already_printed_length = 1;
+	++links_to_print;
 	#endif
 
 	result = 0;
@@ -111,6 +112,9 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 //		stop_sign = TRUE;
 
 		while ((result < all_links_in_file_.size()) && (links_already_printed.size() < links_to_print)) {
+			//debug
+			//fprintf(stderr, "%s -> %d (gamma = %f)\n", all_links_in_file_[result]->link_term->term, all_links_in_file_[result]->link_term->postings[current_anchor]->docid, all_links_in_file_[result]->gamma);
+
 			anchors_printed = current_anchor = 0;
 			current_link = reinterpret_cast<outgoing_link *>(all_links_in_file_[result]);
 			if (strlen(current_link->link_term->term) == 0)
@@ -147,7 +151,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 							printf(", ");
 						current_link->print_target(current_anchor);
 						anchors_printed++;
-//						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
+						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
 					}
 					else
 						cerr << "No such file:" << docfile << endl;
@@ -173,7 +177,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 //		current_anchor++;
 //		result = 0;
 //	}
-
+	fprintf(stderr, "total %d links printed.\n", links_already_printed.size());
 	print_link_tag_footer();
 
 	//delete [] links_already_printed;
