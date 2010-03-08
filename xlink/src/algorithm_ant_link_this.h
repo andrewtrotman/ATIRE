@@ -66,7 +66,7 @@ namespace QLINK {
 		algorithm_ant_link_this();
 		virtual ~algorithm_ant_link_this();
 
-		int init_params();
+		//int init_params();
 		//void process_topic(char *filename);
 		virtual void process_topic_text();
 		virtual void process_topic(ltw_topic *a_topic);

@@ -7,7 +7,6 @@
  */
 
 #include "algorithm_ant_link_this.h"
-#include "cmdline_options.h"
 #include "ant_link_parts.h"
 #include "sys_file.h"
 #include "assert.h"
@@ -415,11 +414,6 @@ for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
 //print_header(runname);
 
 return index_argv_param + 1;
-}
-
-int algorithm_ant_link_this::init_params()
-{
-	return init_params(cmdline_options::argc, cmdline_options::argv);
 }
 
 //void algorithm_ant_link_this::process_topic(char *filename)

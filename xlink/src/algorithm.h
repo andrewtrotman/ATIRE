@@ -37,13 +37,16 @@ namespace QLINK {
 		algorithm_config		*config_;
 		const char 				*text_;
 		long 					lowercase_only;					// are we in lowercase or mixed-case matching mode?
+		long					stopword_no_;
 
 	public:
 		algorithm(links *links_list);
 		algorithm();
 		virtual ~algorithm();
 
-		virtual int init_params() {}
+		virtual int init_params(int argc, char *argv[]);
+		virtual int init_params();
+
 		virtual void process_topic(char *filename) {}
 		virtual void process_topic_content(char *file) {}
 		virtual void process_topic(ltw_topic *a_topic);

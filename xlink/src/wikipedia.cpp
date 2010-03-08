@@ -22,7 +22,7 @@ wikipedia::~wikipedia()
 {
 }
 
-std::pair<std::string, std::string> wikipedia::process_title(std::string& orig)
+std::pair<std::string, std::string> wikipedia::process_title(std::string& orig, bool lowercase)
 {
 	std::string title("");
 	std::string desc("");
@@ -56,7 +56,7 @@ std::pair<std::string, std::string> wikipedia::process_title(std::string& orig)
 
 		if (!isalnum(*it))
 			*it = ' ';
-		title.push_back(tolower(*it));
+		title.push_back(lowercase ? tolower(*it) : *it);
 	}
 	string::size_type pos = title.find_last_not_of(" ");
 	title.erase(pos + 1);

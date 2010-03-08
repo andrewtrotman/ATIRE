@@ -8,6 +8,8 @@
 #include "algorithm.h"
 #include "ltw_topic.h"
 #include "ant_link_parts.h"
+#include "algorithm_config.h"
+#include "cmdline_options.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -39,7 +41,27 @@ algorithm::~algorithm()
 void algorithm::init()
 {
 	config_ = NULL;
-	lowercase_only = TRUE; // true by default
+	lowercase_only = FALSE; // true by default
+	stopword_no_ = FALSE;
+}
+
+int algorithm::init_params()
+{
+	return init_params(cmdline_options::argc, cmdline_options::argv);
+}
+
+int algorithm::init_params(int argc, char *argv[])
+{
+	int index_argv_param = 0;
+
+	for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
+		if (strcmp(argv[index_argv_param], "-lowercase") == 0)
+			lowercase_only = TRUE;
+		else if (strcmp(argv[index_argv_param], "-stopword") == 0) {
+			stopword_no_ = TRUE;
+			break;
+		}
+
 }
 
 void algorithm::set_links_container(links *container)

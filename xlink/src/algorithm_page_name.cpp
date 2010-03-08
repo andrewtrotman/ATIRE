@@ -68,7 +68,7 @@ namespace QLINK
 				if (pos != string::npos) {
 					unsigned long doc_id = atol(line.c_str());
 					string wiki_title(line, ++pos);
-					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title);
+					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only);
 					//struct wiki_entry a_entry;
 					ANT_link_posting *a_entry = new ANT_link_posting;
 					a_entry->docid = doc_id;
@@ -203,8 +203,9 @@ namespace QLINK
 
 			if (last_index_entry != names_map_.end()) {
 				bool to_skip = false;
-				if (!strpbrk(last_index_entry->first.c_str(), "- "))
-					to_skip = language::isstopword(last_index_entry->first.c_str());
+				if (stopword_no_)
+					if (!strpbrk(last_index_entry->first.c_str(), "- "))
+						to_skip = language::isstopword(last_index_entry->first.c_str());
 
 				if (!to_skip) {
 					offset = *first - source;
@@ -213,8 +214,14 @@ namespace QLINK
 					buffer[term_len] = '\0';
 					node = last_index_entry->second; //new ANT_link_term;
 					//node->term = strdup(last_index_entry->first.c_str());
-					if (!lx->find(buffer))
-						link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
+					fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
+					if (!lx->find(last_index_entry->second->term))
+						link * lnk = lx->push_link(NULL, offset, last_index_entry->second->term, last_index_entry->second->postings[0]->docid, 0.0, node);
+//					if (!lx->find(last_index_term->term))
+//						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
+					else
+						fprintf(stderr, "Duplicated");
+					fprintf(stderr, "\n");
 					//lnk->require_cleanup();
 					//create_posting(last_index_entry->second, lnk);
 				}
