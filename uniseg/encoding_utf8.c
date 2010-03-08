@@ -46,7 +46,7 @@ return num_of_bytes;
 */
 bool UNISEG_encoding_utf8::is_valid_char(const unsigned char *c)
 {
-if (*c & 0x80) // ASCII characters
+if (!(*c & 0x80)) // ASCII characters
 	{
 	if (isalpha(*c))
 		current_lang = ENGLISH;
