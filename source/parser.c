@@ -171,7 +171,7 @@ else if (*current & 0x80)		// UTF-8 character
 		current_token.start = (char *)start;
 		current_token.string_length = current - start;
 
-		// post-processing, for bigram indexing, needs move backfoward
+		// post-processing, for bigram indexing, needs move backward
 		if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && ischinese(current))
 			current -= pre_length_of_token;
 		}

@@ -31,7 +31,6 @@ libuniseg_headers = \
 		clist.h	\
 		convert.h	\
 		cwords.h	\
-		dic_builder.h	\
 		dic.h	\
 		doc_base.h	\
 		doc_freq.h	\
