@@ -204,6 +204,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\ant_unzip.exe				\
 	$(BINDIR)\producer_consumer.exe		\
 	$(BINDIR)\test_tar.exe				\
+	$(BINDIR)\test_stop.exe				\
 	$(BINDIR)\textsplitter.exe			\
 	$(BINDIR)\test_unicode_case_convert.exe
 

@@ -1,6 +1,10 @@
 /*
 	STOP_WORD.C
 	-----------
+	We'll use the NCBI wrd_stop stop word list of 313 terms extracted from Medline.
+	Its use is unrestricted (see here:http://mbr.nlm.nih.gov/).  The list can be 
+	downloaded from here: http://mbr.nlm.nih.gov/Download/2009/WordCounts/wrd_stop
+
 */
 #include <stdio.h>
 #include <stdlib.h>

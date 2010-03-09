@@ -13,7 +13,7 @@ bin/ant_param_block.obj: source/str.h source/ctypes.h source/ant_param_block.h s
 bin/ant_plugins.obj: source/plugin_manager.h source/plugin.h source/pragma.h
 bin/assessment.obj: source/str.h source/ctypes.h source/memory.h source/assessment.h
 bin/assessment_ANT.obj: source/disk.h source/assessment_ANT.h source/assessment.h source/memory.h source/relevant_document.h
-bin/assessment_INEX.obj: source/assessment_INEX.h source/assessment.h source/relevant_document.h source/memory.h source/disk.h
+bin/assessment_INEX.obj: source/assessment_INEX.h source/assessment.h source/relevant_document.h source/relevant_document_passage.h source/memory.h source/disk.h source/str.h source/ctypes.h
 bin/assessment_factory.obj: source/str.h source/ctypes.h source/assessment_factory.h source/assessment.h source/assessment_ANT.h source/assessment_INEX.h
 bin/bitstream.obj: source/bitstream.h source/fundamental_types.h
 bin/btree_iterator.obj: source/file.h source/fundamental_types.h source/search_engine.h source/compression_factory.h source/compress.h source/compression_factory_scheme.h source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/ranking_function.h source/search_engine_accumulator.h source/search_engine_result.h source/search_engine_btree_node.h source/btree.h source/btree_iterator.h
@@ -123,6 +123,7 @@ bin/get_wikipedia_title.obj: tools/..\source\ctypes.h tools/..\source\str.h sour
 bin/make_case_conversion_table.obj: source/disk.h
 bin/producer_consumer.obj: source/critical_section.h source/semaphores.h source/threads.h
 bin/term_frequencies.obj: source/disk.h
+bin/test_stop.obj: source/stop_word.h
 bin/test_tar.obj: source/directory_iterator_warc.h source/instream.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_tar.h source/directory_iterator_tar_file_header.h source/instream_deflate.h source/instream_bz2.h source/instream_file.h source/memory.h
 bin/test_unicode_case_convert.obj: source/unicode_case.h
 bin/textsplitter.obj: source/directory_iterator.h source/directory_iterator_object.h source/ctypes.h source/disk.h
