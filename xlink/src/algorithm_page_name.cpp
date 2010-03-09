@@ -136,6 +136,8 @@ namespace QLINK
 	{
 		search_anchor_by_page_nam(lx, term_list, source);
 		lx->sort_links_by_term();
+
+
 	}
 
 	void algorithm_page_name::process_terms(char **term_list, const char *source)

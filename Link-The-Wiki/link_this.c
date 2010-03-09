@@ -198,7 +198,7 @@ ANT_link_posting *one, *two;
 one = (ANT_link_posting *)a;
 two = (ANT_link_posting *)b;
 
-return two->link_frequency > one->link_frequency ? 1 : two->link_frequency == one->link_frequency ? 0 : -1;
+return two->doc_link_frequency > one->doc_link_frequency ? 1 : two->doc_link_frequency == one->doc_link_frequency ? (two->docid < one->docid ? 1 : -1) : -1;
 }
 
 /*
@@ -748,6 +748,8 @@ for (param = index_argv_param + 1; param < argc; param++)
 		deduplicate_links();
 		qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
 		//fprintf(stderr, "Total %d links found\n", all_links_in_file_length);
+		//for (int i = 0; i < all_links_in_file_length; ++i)
+		//	fprintf(stderr, "#%d: %s, %f, %d\n", (i+1), all_links_in_file[i].term, all_links_in_file[i].gamma, all_links_in_file[i].target_document);
 
 		print_links(orphan_docid, orphan_name, anchors_per_run, targets_per_link, print_mode);
 
