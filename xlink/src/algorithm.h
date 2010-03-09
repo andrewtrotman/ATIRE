@@ -36,6 +36,7 @@ namespace QLINK {
 //		long *links_in_orphan_length;
 		algorithm_config		*config_;
 		const char 				*text_;
+		const char 				*xml_;
 		long 					lowercase_only;					// are we in lowercase or mixed-case matching mode?
 		long					stopword_no_;
 

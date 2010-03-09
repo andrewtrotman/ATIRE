@@ -35,11 +35,13 @@ void config::load()
 
 void config::show()
 {
+#ifdef DEBUG
 	cerr << "------------------------- PROGRAM SETTINGS ------------------------------------" << endl;
 	PropertiesFile::entity_iterator it = properties_.iter_begin();
 	for (; it != properties_.iter_end(); it++)
 		cerr << (*it)->name() << ":" << (*it)->value() << endl;
 	cerr << "-------------------------------------------------------------------------------" << endl;
+#endif
 }
 
 config::string_type	config::get_value(string_type name)

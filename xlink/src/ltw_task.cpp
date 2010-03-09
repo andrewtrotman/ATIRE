@@ -107,7 +107,7 @@ void ltw_task::init()
 		break;
 	case LTW_NONE:
 	default:
-		cerr << "No algorithm for gernerating incoming links specified" << endl;
+		//cerr << "No algorithm for gernerating incoming links specified" << endl;
 		break;
 	}
 }
@@ -136,7 +136,7 @@ void ltw_task::perform()
 		for (name = disk.first(); name != NULL ; name = disk.next())
 		{
 			count++;
-			cerr << "Processing #" << count << ": " << name << endl;
+			//cerr << "Processing #" << count << ": " << name << endl;
 			//char *file = disk.read_entire_file(name);
 			ltw_topic a_topic(name);
 			a_topic.xml_to_text();

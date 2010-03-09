@@ -89,7 +89,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 	//char *orphan_name = "Unknown";
 	const long links_all = links_to_print * max_targets_per_anchor;
 	const long array_size = links_all * 2;
-	long stop_sign = 0;
+	long stop_sign = 0, test = 0;
 
 	outgoing_link *current_link = NULL;
 
@@ -117,6 +117,10 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 
 			anchors_printed = current_anchor = 0;
 			current_link = reinterpret_cast<outgoing_link *>(all_links_in_file_[result]);
+
+			if (strcasecmp(current_link->term, "railway station") == 0)
+				test = 0;
+
 			if (strlen(current_link->link_term->term) == 0)
 				{
 				result++;		// in the case of empty term
@@ -153,8 +157,8 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 						anchors_printed++;
 						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
 					}
-					else
-						cerr << "No such file:" << docfile << endl;
+//					else
+//						cerr << "No such file:" << docfile << endl;
 					//links_already_printed.size()++;
 //					if (/*anchors_printed >= max_targets_per_anchor || */links_already_printedlength >= links_all)
 //						{
@@ -177,7 +181,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 //		current_anchor++;
 //		result = 0;
 //	}
-	fprintf(stderr, "total %d links printed.\n", links_already_printed.size());
+//	fprintf(stderr, "total %d links printed.\n", links_already_printed.size());
 	print_link_tag_footer();
 
 	//delete [] links_already_printed;

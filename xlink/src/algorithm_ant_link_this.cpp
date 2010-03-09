@@ -143,12 +143,12 @@ while (fgets(buffer_, sizeof(buffer_), fp) != NULL)
 //		fprintf(stderr, "\n");
 	//}
 		//debug
-//		if (strcmp(term->term, "elder") == 0) {
-//			fprintf(stderr, "%s:", term->term);
-//			for (int i = 0; i < term->postings.size(); i++)
-//				fprintf(stderr, "(%d, %d)", term->postings[i]->docid, term->postings[i]->link_frequency);
-//			fprintf(stderr, "\n");
-//		}
+		if (strcmp(term->term, "railway station") == 0) {
+			fprintf(stderr, "%s:", term->term);
+			for (int i = 0; i < term->postings.size(); i++)
+				fprintf(stderr, "(%d, %d)", term->postings[i]->docid, term->postings[i]->link_frequency);
+			fprintf(stderr, "\n");
+		}
 	term++;
 
 	// for debug
@@ -306,8 +306,10 @@ for (current = 0; current < links_->orphan_links_length(); current++)
 	if (found != NULL)
 		{
 		for (posting = 0; posting < found->postings.size(); posting++)
-			if (found->postings[posting]->docid == links_in_orphan[current]->target_document)
+			if (found->postings[posting]->docid == links_in_orphan[current]->target_document) {
 				found->postings[posting]->doc_link_frequency = found->postings[posting]->doc_link_frequency + add_or_subtract;
+				//fprintf(stderr, "add %d to anchor %s\n", add_or_subtract, key->term);
+			}
 
 		if (found->postings.size() > 1)
 			std::sort(found->postings.begin(), found->postings.end(), pointer_greater_than<ANT_link_posting>());
@@ -489,6 +491,10 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 		{
 		where_to = buffer_;
 		last_index_term = NULL;
+
+		if (strcasecmp(buffer_, "railway station") == 0)
+			offset = 0;
+
 		for (last = first; *last != NULL; last++)
 			{
 			if (where_to == buffer_)
@@ -555,8 +561,8 @@ void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char *
 //					fprintf(stderr, "found a %s anchor\n", buffer__);
 					links_count++;
 				}
-				else
-					fprintf(stderr, "Duplicated");
+//				else
+//					fprintf(stderr, "Duplicated");
 				fprintf(stderr, "\n");
 
 //			}

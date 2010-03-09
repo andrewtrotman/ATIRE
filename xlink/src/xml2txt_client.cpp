@@ -83,7 +83,7 @@ bool xml2txt_client::connect_server()
 
 	/* connect to PORT on HOST */
 	if (connect(sd_, (struct sockaddr *) &serv_addr_, sizeof(serv_addr_)) == -1) {
-		perror("connect");
+		//perror("connect");
 		return false;
 	}
 	return true;

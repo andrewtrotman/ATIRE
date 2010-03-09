@@ -201,7 +201,7 @@ bool link::operator==(const link& rhs)
 
 bool link::operator==(const char *term)
 {
-	int cmp = strcasecmp(this->term, term);
+	int cmp = strcmp(this->term, term);
 	return cmp == 0;
 }
 
@@ -222,7 +222,7 @@ const bool link_string_target_compare::operator()(const link *a, const link * b)
 	}
 }
 
-const bool link_compare::operator()(const link *one, const link * two) const
+const bool link_compare::operator() (const link *one, const link * two) const
 {
 	//link *one = NULL, *two = NULL;
 	double diff = 0.0;
@@ -236,7 +236,8 @@ const bool link_compare::operator()(const link *one, const link * two) const
 	else if (diff > 0)
 		return false;
 	else
-		return one->place_in_file > two->place_in_file; // ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
+		return two->target_document > one->target_document;
+		//return one->place_in_file > two->place_in_file ? true : one->place_in_file == two->place_in_file ? one->target_document < two->target_document : false;
 }
 
 const bool term_compare::operator()(const link *one, const link *two) const

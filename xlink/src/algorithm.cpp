@@ -77,12 +77,14 @@ void algorithm::set_links_container(links *container)
 void algorithm::process_topic(ltw_topic *a_topic)
 {
 	text_ = a_topic->get_text();
+	xml_ = a_topic->get_content();
 	process_topic_text();
 }
 
 void algorithm::process_links(ltw_topic *a_topic, algorithm *bep_algor)
 {
 	text_ = a_topic->get_text();
+	xml_ = a_topic->get_content();
 }
 
 void algorithm::process_topic_text()
@@ -90,22 +92,21 @@ void algorithm::process_topic_text()
 
 	static const char *seperators = " ";
 	char *token;
-	char **term_list/*, **first, **last, **current*/;
-	char *filecopy = strdup(text_);
-
+	char **term_list, **current/*, **first, **last*/;
+	char *filecopy = strdup(xml_);
 
 //	long long *all_links_in_file_length = links_->all_links_length_ptr();
 //	*all_links_in_file_length = 0;
 
-	//string_clean(filecopy, lowercase_only, 0);
-	if (lowercase_only)
-		string_tolower(filecopy);
+	string_clean(filecopy, lowercase_only);
+//	if (lowercase_only)
+//		string_tolower(filecopy);
 
-	/*current = */term_list = new char *[strlen(filecopy)];		// this is the worst case by far
-//	for (token = strtok(filecopy, seperators); token != NULL; token = strtok(NULL, seperators))
-//		*current++ = token;
-//	*current = NULL;
-	string_to_list(filecopy, term_list);
+	current = term_list = new char *[strlen(filecopy)];		// this is the worst case by far
+	for (token = strtok(filecopy, seperators); token != NULL; token = strtok(NULL, seperators))
+		*current++ = token;
+	*current = NULL;
+	//string_to_list(filecopy, term_list);
 
 	process_terms(term_list, filecopy);
 

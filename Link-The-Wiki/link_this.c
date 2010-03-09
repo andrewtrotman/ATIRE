@@ -152,7 +152,8 @@ if (diff < 0)
 else if (diff > 0)
 	return 1;
 else
-	return one->place_in_file > two->place_in_file ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
+	return two->target_document < one->target_document ? 1 : -1;
+	//return one->place_in_file > two->place_in_file ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
 }
 
 /*
@@ -198,7 +199,7 @@ ANT_link_posting *one, *two;
 one = (ANT_link_posting *)a;
 two = (ANT_link_posting *)b;
 
-return two->doc_link_frequency > one->doc_link_frequency ? 1 : two->doc_link_frequency == one->doc_link_frequency ? (two->docid < one->docid ? 1 : -1) : -1;
+return two->doc_link_frequency > one->doc_link_frequency ? 1 : (two->doc_link_frequency == one->doc_link_frequency ? (two->docid < one->docid ? 1 : -1) : -1);
 }
 
 /*
@@ -421,9 +422,10 @@ while ((result < all_links_in_file_length) && (links_printed < links_to_print))
 			if (links_already_printed_length > 1)
 				printf(", ");
 			printf("%d", all_links_in_file[result].link_term->postings[current_anchor].docid);
-			//fprintf(stderr, "%s -> %d (gamma = %f)\n", all_links_in_file[result].link_term->term, all_links_in_file[result].link_term->postings[current_anchor].docid, all_links_in_file[result].gamma);
+			fprintf(stderr, "%s -> %d (gamma = %f)\n", all_links_in_file[result].link_term->term, all_links_in_file[result].link_term->postings[current_anchor].docid, all_links_in_file[result].gamma);
 			anchors_printed++;
 			links_already_printed_length++;
+			links_printed++;
 			if (/*anchors_printed >= max_targets_per_anchor || */links_already_printed_length >= array_size)
 				{
 				stop_sign = 1;
@@ -568,7 +570,10 @@ for (current = 0; current < links_in_orphan_length; current++)
 		{
 		for (posting = 0; posting < found->postings_length; posting++)
 			if (found->postings[posting].docid == links_in_orphan[current].target_document)
+				{
 				found->postings[posting].doc_link_frequency = found->postings[posting].doc_link_frequency + add_or_subtract;
+				//fprintf(stderr, "add %d to anchor %s\n", add_or_subtract, key.term);
+				}
 
 		if (found->postings_length > 1)
 			qsort(found->postings, found->postings_length, sizeof(found->postings[0]), ANT_link_posting::compare);
@@ -739,7 +744,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 				if (ispropper_noun(buffer))
 					gamma += proper_noun_boost;
 				push_link(*first, last_index_term->term, last_index_term->postings[0].docid, gamma, last_index_term);
-				//fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);
+				fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", last_index_term->term, last_index_term->postings[0].docid, numerator, denominator);
 				}
 			}
 
@@ -747,9 +752,9 @@ for (param = index_argv_param + 1; param < argc; param++)
 
 		deduplicate_links();
 		qsort(all_links_in_file, (size_t)all_links_in_file_length, sizeof(*all_links_in_file), ANT_link::final_compare);
-		//fprintf(stderr, "Total %d links found\n", all_links_in_file_length);
-		//for (int i = 0; i < all_links_in_file_length; ++i)
-		//	fprintf(stderr, "#%d: %s, %f, %d\n", (i+1), all_links_in_file[i].term, all_links_in_file[i].gamma, all_links_in_file[i].target_document);
+		fprintf(stderr, "Total %d links found\n", all_links_in_file_length);
+		for (int i = 0; i < all_links_in_file_length; ++i)
+			fprintf(stderr, "#%d: %s, %f, %d\n", (i+1), all_links_in_file[i].term, all_links_in_file[i].gamma, all_links_in_file[i].target_document);
 
 		print_links(orphan_docid, orphan_name, anchors_per_run, targets_per_link, print_mode);
 
@@ -761,7 +766,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 		num_of_processed_topic++;
 		}
 	}
-fprintf(stderr, "Total %d topics processed\n", num_of_processed_topic);
+//fprintf(stderr, "Total %d topics processed\n", num_of_processed_topic);
 print_footer();
 
 return 0;
