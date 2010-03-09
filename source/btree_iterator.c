@@ -67,7 +67,10 @@ search_engine->index->seek(node_position);
 search_engine->index->read(btree_leaf_buffer, node_length);
 
 if (before_first_term)	// then we are before the first term so use the first term in the node
-	leaf = 0;
+	{
+	leaf = -1;
+	return next();
+	}
 else
 	{
 	length_of_term = strlen(term);
