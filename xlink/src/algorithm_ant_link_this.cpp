@@ -143,12 +143,12 @@ while (fgets(buffer_, sizeof(buffer_), fp) != NULL)
 //		fprintf(stderr, "\n");
 	//}
 		//debug
-		if (strcmp(term->term, "railway station") == 0) {
-			fprintf(stderr, "%s:", term->term);
-			for (int i = 0; i < term->postings.size(); i++)
-				fprintf(stderr, "(%d, %d)", term->postings[i]->docid, term->postings[i]->link_frequency);
-			fprintf(stderr, "\n");
-		}
+//		if (strcmp(term->term, "railway station") == 0) {
+//			fprintf(stderr, "%s:", term->term);
+//			for (int i = 0; i < term->postings.size(); i++)
+//				fprintf(stderr, "(%d, %d)", term->postings[i]->docid, term->postings[i]->link_frequency);
+//			fprintf(stderr, "\n");
+//		}
 	term++;
 
 	// for debug

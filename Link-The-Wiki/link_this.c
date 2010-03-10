@@ -152,8 +152,8 @@ if (diff < 0)
 else if (diff > 0)
 	return 1;
 else
-	return two->target_document < one->target_document ? 1 : -1;
-	//return one->place_in_file > two->place_in_file ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
+	//return two->target_document < one->target_document ? 1 : -1;
+	return one->place_in_file > two->place_in_file ? 1 : one->place_in_file == two->place_in_file ? 0 : -1;
 }
 
 /*

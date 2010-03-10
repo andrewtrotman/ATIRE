@@ -145,7 +145,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 					== links_already_printed.end()) {
 					long docid = current_link->link_term->postings[current_anchor]->docid;
 					std::string docfile = corpus::instance().id2docpath(docid);
-					if (sys_file::exist(docfile.c_str())) {
+					//if (sys_file::exist(docfile.c_str())) {
 						links_already_printed.push_back(docid);
 						#ifdef REMOVE_ORPHAN_LINKS
 						if (links_already_printed.size() > 2)
@@ -156,7 +156,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 						current_link->print_target(current_anchor);
 						anchors_printed++;
 						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
-					}
+					//}
 //					else
 //						cerr << "No such file:" << docfile << endl;
 					//links_already_printed.size()++;
