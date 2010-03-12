@@ -48,7 +48,7 @@ ifeq ($(USE_BUILT_IN_BZLIB), 1)
 endif
 
 CC = g++
-#CC = icpc 
+#CC = icpc
 
 OBJECTS = \
 	sockets.o \
@@ -88,6 +88,7 @@ OBJECTS = \
 	stop_word.o \
 	disk.o \
 	directory_iterator.o \
+	directory_iterator_compressor.o \
 	directory_iterator_multiple.o \
 	directory_iterator_internals.o \
 	directory_iterator_tar.o \
@@ -165,7 +166,7 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.c
 $(BINDIR)/index : $(OBJECTS_W_DIR) $(OBJDIR)/index.o
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
-$(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o 
+$(BINDIR)/ant : $(OBJECTS_W_DIR) $(OBJDIR)/ant.o
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(OBJECTS_W_DIR) : makefile.unix
