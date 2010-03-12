@@ -13,7 +13,7 @@
 */
 ANT_instream_file::ANT_instream_file(ANT_memory *memory, char *filename) : ANT_instream(memory)
 {
-this->filename = (char *)memory->malloc(strlen(filename));
+this->filename = (char *)memory->malloc(strlen(filename) + 1);
 strcpy(this->filename, filename);
 memory->realign();
 

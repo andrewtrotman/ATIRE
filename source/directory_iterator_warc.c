@@ -17,12 +17,13 @@
 */
 unsigned char *ANT_directory_iterator_warc::find_string(char *string, long string_length)
 {
-unsigned char *into;
+unsigned char *into, *end;
 
 /*
 	Do a series of gets's until we find the given string
 */
 buffer[string_length] = '\0';		// prevent early accidental termination
+end = buffer + sizeof(buffer) - 1;
 do
 	do
 		{
@@ -34,8 +35,22 @@ do
 			if (source->read(into, 1) != 1)
 				return NULL;		// at EOF
 			}
-		while (*into != '\n');
+		while (*into != '\n' && into < end);
 		*into = '\0';
+
+		/*
+			In the case of buffer overflow we read to end of line and star over.  This shouldn't happen very often,
+			but it does happen because there are some very long WARC-Target-URI in the TREC ClueWeb09 collection
+			in documents such as clueweb09-en0000-05-10880 which as a 1486 character WARC-Target-URI!
+		*/
+		if (into == end)
+			{
+			do
+				if (source->read(into, 1) != 1)
+					return NULL;		// at EOF
+			while (*into != '\n');
+			continue;
+			}
 		}
 	while (buffer[string_length] != ':');			// check for the ':' in the right place
 while (strncmp((char *)buffer, string, string_length) != 0);	// now check for the TREC-ID

@@ -61,6 +61,7 @@ ANT_string_pair *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
 long word_count = 0, pre_length_of_token = 0;
+long character_bytes;
 
 if (segmentation != NULL)
 	{
@@ -107,7 +108,13 @@ for (;;)
 			break;
 		else if (iseuropean(current))
 			break;
-		current += utf8_bytes(current);
+		/*
+			We have a nasty case here (in ClueWeb09) that the last character of the file is a badly formed utf-8 character
+			and so we have to check each character to see if we're at EOF yet
+		*/
+		for (character_bytes = utf8_bytes(current); character_bytes > 0; character_bytes--)
+			if (*current++ == '\0')
+				return NULL;
 		}
 	else
 		current++;
