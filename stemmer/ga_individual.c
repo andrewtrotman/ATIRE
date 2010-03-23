@@ -468,7 +468,7 @@ int GA_individual::sanity_check() {
 }
 
 void GA_individual::keep_last_stats() {
-	int i, together = 0;
+	unsigned int i, together = 0;
 	for (i = 0; i < count; i++)
 		if (current_usage_stats[i]) {
 			rule_usage_stats[i]++;
@@ -478,7 +478,7 @@ void GA_individual::keep_last_stats() {
 }
 
 void GA_individual::print_rule_usage(FILE *fd) {
-	int i;
+	unsigned int i;
 	for (i = 0; i < count; i++) {
 		fprintf(fd, "%ld ", rule_usage_stats[i]);
 	}
@@ -486,7 +486,7 @@ void GA_individual::print_rule_usage(FILE *fd) {
 }
 
 void GA_individual::clear_rule_usage() {
-	int i;
+	unsigned int i;
 	for (i = 0; i < count; i++) 
 		rule_usage_stats[i] = 0;
 }

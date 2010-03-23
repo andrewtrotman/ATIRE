@@ -12,7 +12,7 @@
 #include "mean_average_precision.h"
 #include "disk.h"
 #include "relevant_document.h"
-#include "time_stats.h"
+#include "stats_time.h"
 #include "stemmer.h"
 #include "stemmer_factory.h"
 #include "assessment_factory.h"
@@ -67,14 +67,14 @@ public:
 */
 double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL)
 {
-ANT_time_stats stats;
+ANT_stats_time stats;
 long long now;
 long did_query;
 char token[1024];
 char *token_start, *token_end;
 long long hits;
 size_t token_length;
-ANT_search_engine_accumulator *ranked_list;
+ANT_search_engine_accumulator **ranked_list;
 double average_precision = 0.0;
 
 /*

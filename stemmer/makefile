@@ -11,14 +11,17 @@ DEFINES = -g -DSPECIAL_COMPRESSION -D_CRT_SECURE_NO_WARNINGS -DONE_PARSER -DHASH
 CFLAGS = -Wall $(DEFINES) -Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR)
 # -DUSE_FLOATED_TF -DGA_STEMMER_STATS
 
-CC = /home/user/usr/intel/bin/ia32/icpc
+#CC = /home/user/usr/intel/bin/ia32/icpc
 #CC = /home/user/usr/sunstudio12.1/bin/CC
 #CC = /home/user/usr/bin/openCC
 #CC = llvm-g++
-#CC = g++
+CC = g++
 
 
 OBJECTS = \
+	sockets.o \
+	channel_file.o \
+	channel_socket.o \
 	parser.o \
 	parser_readability.o \
 	memory_index_hash_node.o \
@@ -53,13 +56,15 @@ OBJECTS = \
 	stop_word.o \
 	disk.o \
 	directory_iterator.o \
+	directory_iterator_compressor.o \
 	directory_iterator_multiple.o \
 	directory_iterator_internals.o \
 	directory_iterator_tar.o \
+	directory_iterator_warc.o \
+	directory_iterator_pkzip.o \
 	directory_iterator_file.o \
 	directory_iterator_recursive.o \
 	btree_iterator.o \
-	top_k_sort.o \
 	stemmer.o \
 	stemmer_term_similarity.o \
 	stemmer_term_similarity_threshold.o \
@@ -89,6 +94,7 @@ OBJECTS = \
 	readability_factory.o \
 	search_engine_readability.o \
 	plugin_manager.o \
+	indexer_param_block_rank.o \
 	indexer_param_block.o \
 	indexer_param_block_rank.o \
 	ant_param_block.o \
@@ -102,6 +108,8 @@ OBJECTS = \
 	ranking_function_bose_einstein.o \
 	ranking_function_divergence.o \
 	ranking_function_bm25.o \
+	ranking_function_inner_product.o \
+	ranking_function_term_count.o \
 	instream_file.o \
 	instream_deflate.o \
 	instream_bz2.o \
@@ -110,8 +118,10 @@ OBJECTS = \
 	NEXI_term_iterator.o \
 	NEXI_term_ant.o \
 	NEXI_term.o \
-	semaphore.o \
+	semaphores.o \
 	critical_section.o \
+	focus.o \
+	focus_lowest_tag.o \
 	threads.o
 
 EXTENSION = \
