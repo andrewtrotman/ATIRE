@@ -2,6 +2,7 @@
 	FOCUS_LOWEST_TAG.C
 	------------------
 */
+#include "focus_result_factory.h"
 #include "focus_lowest_tag.h"
 #include "parser.h"
 
@@ -9,11 +10,19 @@
 	ANT_FOCUS_LOWEST_TAG::FOCUS()
 	-----------------------------
 */
-ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, ANT_focus_result *result)
+ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, long *results_length)
 {
+ANT_focus_result *result;
 ANT_string_pair *token;
 long found_first, find_last;
 
+if ((result = result_factory->new_result()) == NULL)
+	{
+	*results_length = 0;
+	return NULL;
+	}
+
+*results_length = 1;
 find_last = found_first = FALSE;
 
 result->start = result->finish = (char *)document;

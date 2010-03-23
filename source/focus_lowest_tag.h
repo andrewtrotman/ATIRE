@@ -18,11 +18,10 @@ private:
 	ANT_parser parser;
 
 public:
-	ANT_focus_lowest_tag() : ANT_focus() {}
+	ANT_focus_lowest_tag(ANT_focus_result_factory *result_factory) : ANT_focus(result_factory) {}
 	virtual ~ANT_focus_lowest_tag() {}
 
-	virtual ANT_focus_result *focus(unsigned char *document, ANT_focus_result *result);
-
+	virtual ANT_focus_result *focus(unsigned char *document, long *results_length);
 } ;
 
 #endif /* FOCUS_LOWEST_TAG_H_ */

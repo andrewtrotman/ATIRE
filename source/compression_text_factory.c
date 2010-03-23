@@ -31,11 +31,11 @@ scheme[0].scheme_id = 0;
 scheme[0].scheme = new ANT_compress_text_none;
 scheme[0].name = "none";
 
-scheme[1].scheme_id = 1;
+scheme[1].scheme_id = 2;
 scheme[1].scheme = new ANT_compress_text_deflate;
 scheme[1].name = "deflate";
 
-scheme[2].scheme_id = 2;
+scheme[2].scheme_id = 4;
 scheme[2].scheme = new ANT_compress_text_bz2;
 scheme[2].name = "BZ2";
 }
@@ -92,7 +92,7 @@ for (which = 0; which < number_of_techniques; which++)
 			}
 		break;
 		}
-*destination_length = shortened_destination_length;
+*destination_length = shortened_destination_length + 1;
 *destination = (unsigned char)which;
 return destination;
 }

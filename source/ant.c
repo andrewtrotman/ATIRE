@@ -39,6 +39,7 @@
 #include "sockets.h"
 #include "channel_file.h"
 #include "channel_socket.h"
+#include "focus_result_factory.h"
 #include "focus_lowest_tag.h"
 
 #ifndef FALSE
@@ -288,36 +289,37 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 /*
 	Andrew's experimental code to test focusing
 */
+ANT_focus_result_factory focus_result_factory(2000);		// allow a results list of up-to 2000 focused results
 ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant *parse_tree, *term_string;
-ANT_focus_lowest_tag focusser;
-ANT_focus_result focused_result;
+ANT_focus_lowest_tag focusser(&focus_result_factory);
+ANT_focus_result *focused_result;
 static unsigned char unsigned_marker[] = {0xFF, 0x00};
 static char *marker = (char *)unsigned_marker;
+long focused_results_list_length;
 
 parse_tree = parser.parse(command + 5);
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	focusser.add_term(&term_string->term);
 
-focusser.focus((unsigned char *)document_buffer, &focused_result);
+focused_result = focusser.focus((unsigned char *)document_buffer, &focused_results_list_length);
 /*
 	Test code to generate INEX FOL format.
 */
 {
-ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, &focused_result);
-printf("%s %lld %lld\n", filename_list[atoll(command + 5)], focused_result.INEX_start, focused_result.INEX_finish - focused_result.INEX_start);
+ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, focused_result);
+printf("%s %lld %lld\n", filename_list[atoll(command + 5)], focused_result->INEX_start, focused_result->INEX_finish - focused_result->INEX_start);
 }
-
 
 sprintf(print_buffer, "%lld", (long long)current_document_length + strlen(marker) + strlen(marker));
 outchannel->puts(print_buffer);
 
-outchannel->write(document_buffer, focused_result.start - document_buffer);
+outchannel->write(document_buffer, focused_result->start - document_buffer);
 outchannel->write(marker, strlen(marker));
-outchannel->write(focused_result.start, focused_result.finish - focused_result.start);
+outchannel->write(focused_result->start, focused_result->finish - focused_result->start);
 outchannel->write(marker, strlen(marker));
-outchannel->write(focused_result.finish, current_document_length - (focused_result.finish - document_buffer));
+outchannel->write(focused_result->finish, current_document_length - (focused_result->finish - document_buffer));
 #else
 
 			sprintf(print_buffer, "%lld", current_document_length);

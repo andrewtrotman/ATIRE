@@ -44,7 +44,7 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 #
 #	Post configuration, so back to the hard work...
 #
-FIXED = /link /fixed:no
+FIXED = /link /fixed:no /opt:ref
 
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 
 MINUS_D = $(MINUS_D) -DSPECIAL_COMPRESSION=1
@@ -173,6 +173,7 @@ PARTS = \
 	$(OBJDIR)\threads.obj							\
 	$(OBJDIR)\focus.obj								\
 	$(OBJDIR)\focus_lowest_tag.obj					\
+	$(OBJDIR)\focus_result_factory.obj				\
 	$(OBJDIR)\unicode_case.obj
 
 #
