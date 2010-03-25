@@ -79,6 +79,7 @@ now = stats.start_timer();
 #else
 	search_engine->init_accumulators();
 #endif
+
 /*
 	Parse the query and count the number of search terms
 */
@@ -207,6 +208,7 @@ if (map != NULL)
 	Add the time it took to search to the global stats for the search engine
 */
 search_engine->stats_add();
+
 /*
 	Return the precision
 */
@@ -234,6 +236,7 @@ ANT_stats_time post_processing_stats;
 char *command, *query;
 long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
+long long focused_bytes_parsed, total_focused_bytes_parsed = 0, focused_documents_parsed, total_focused_documents_parsed = 0;
 double average_precision, sum_of_average_precisions, mean_average_precision;
 ANT_search_engine_forum *output = NULL;
 long have_assessments = params->assessments_filename == NULL ? FALSE : TRUE;
@@ -367,9 +370,80 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 		search_engine->generate_results_list(document_list, answer_list, hits);
 
 	/*
-		Display the list of results (either to the user or to a run file)
+		How many results to display on the screen.
 	*/
 	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
+
+	/*
+		Apply focused retrieval to the resuts (this needs to be instrumented)
+	*/
+	if (params->focussing_algorithm != ANT_ANT_param_block::NONE && length_of_longest_document != 0)
+		{
+		long long time_to_focus, now = post_processing_stats.start_timer();
+		long top_k = params->sort_top_k > 2000 ? 2000 : (long)params->sort_top_k;		// allow a results list of up-to 2000 focused results
+		ANT_focus_result *focused_result;
+		ANT_NEXI_ant parser;
+		ANT_NEXI_term_iterator term;
+		ANT_NEXI_term_ant *parse_tree, *term_string;
+		ANT_focus_result_factory focus_result_factory(top_k);
+		ANT_focus_lowest_tag *focusser;
+		long focused_hits, passages, current_passage;
+
+		focused_bytes_parsed = 0;
+		focused_documents_parsed = 0;
+		if (params->focussing_algorithm == ANT_ANT_param_block::RANGE)
+			focusser = new ANT_focus_lowest_tag(&focus_result_factory);
+		else
+			focusser = new ANT_focus_lowest_tag(&focus_result_factory);		// default on error
+
+		/*
+			Parse (a second time - FIX this in the API) and pass the terms to the focusser
+		*/
+		parser.set_segmentation(params->segmentation);
+		parse_tree = parser.parse(query);
+		for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+			focusser->add_term(&term_string->term);
+
+		/*
+			Now focus each result until we have the designated number of results in the focused results list
+		*/
+		focused_hits = 0;
+		for (result = 0; result < hits; result++)
+			{
+			focused_documents_parsed++;
+			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+			current_document_length = length_of_longest_document;
+
+			search_engine->get_document(document_buffer, &current_document_length, docid);
+			focused_bytes_parsed += current_document_length;
+			focused_result = focusser->focus((unsigned char *)document_buffer, &passages, search_engine->results_list->accumulator_pointers[result]);
+
+			if ((focused_hits += passages) > top_k)
+				break;
+/*
+			for (current_passage = 0; current_passage < passages; current_passage++)
+				{
+				ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, focused_result + current_passage);
+				printf("%lld:%s (%lld-%lld) %f\n", (long long)docid, answer_list[result], focused_result[current_passage].INEX_start, focused_result[current_passage].INEX_finish - focused_result[current_passage].INEX_start, (double)focused_result[current_passage].get_rsv());
+				}
+*/
+			}
+
+		delete focusser;
+		post_processing_stats.add_cpu_time(time_to_focus = post_processing_stats.stop_timer(now));
+		if (params->stats & ANT_ANT_param_block::QUERY)
+			{
+			printf("Focused documents    :%lld\n", focused_documents_parsed);
+			printf("Focused bytes        :%lld\n", focused_bytes_parsed);
+			post_processing_stats.print_time("Focusing time        :", time_to_focus);
+			}
+		total_focused_bytes_parsed += focused_bytes_parsed;
+		total_focused_documents_parsed += focused_documents_parsed;
+		}
+
+	/*
+		Display the list of results (either to the user or to a run file)
+	*/
 	if (output == NULL)
 		for (result = 0; result < last_to_list; result++)
 			{
@@ -432,8 +506,12 @@ if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
 if (params->stats & ANT_ANT_param_block::SUM)
 	{
 	search_engine->stats_all_text_render();
-	post_processing_stats.print_time("Post Processing I/O  :", post_processing_stats.disk_input_time);
-	post_processing_stats.print_time("Post Processing CPU  :", post_processing_stats.cpu_time);
+	if (total_focused_documents_parsed != 0)
+		{
+		printf("Focused documents    :%lld\n", total_focused_documents_parsed);
+		printf("Focused bytes        :%lld\n", total_focused_bytes_parsed);
+		post_processing_stats.print_time("Focusing time        :", post_processing_stats.cpu_time);
+		}
 	}
 
 /*

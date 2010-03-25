@@ -9,6 +9,7 @@
 #include "focus_result.h"
 
 class ANT_focus_result_factory;
+class ANT_search_engine_accumulator;
 
 /*
 	class ANT_FOCUS
@@ -40,7 +41,7 @@ public:
 	virtual ~ANT_focus() {}
 
 	long add_term(ANT_string_pair *string);
-	virtual ANT_focus_result *focus(unsigned char *document, long *results_length) = 0;
+	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, ANT_search_engine_accumulator *document_accumulator = NULL) = 0;
 } ;
 
 #endif /* FOCUS_H_ */

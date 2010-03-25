@@ -45,6 +45,7 @@ stats = SHORT;
 segmentation = TRUE;
 trim_postings_k = LLONG_MAX;
 file_or_memory = INDEX_IN_FILE;
+focussing_algorithm = NONE;
 }
 
 /*
@@ -84,17 +85,17 @@ puts("");
 
 puts("TERM EXPANSION");
 puts("--------------");
-puts("-t[-hlops][+-<th>]      Term expansion, one of:");
-puts("  -                    None [default]");
-puts("  h                    Paice Husk stemming");
-puts("  l                    Lovins stemming");
-puts("  o                    Otago stemming");
-puts("  p                    Porter stemming");
-puts("  s                    S-Striping stemming");
+puts("-t[-hlops][+-<th>]  Term expansion, one of:");
+puts("  -             None [default]");
+puts("  h             Paice Husk stemming");
+puts("  l             Lovins stemming");
+puts("  o             Otago stemming");
+puts("  p             Porter stemming");
+puts("  s             S-Striping stemming");
 #ifdef USE_FLOATED_TF
-puts("   +<th>               Stemmed terms tfs weighted by term similarity. [default=1]");
+puts("   +<th>        Stemmed terms tfs weighted by term similarity. [default=1]");
 #endif
-puts("   -<th>               Stemmed terms cutoff with term similarity. [default=0]");
+puts("   -<th>        Stemmed terms cutoff with term similarity. [default=0]");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -114,8 +115,7 @@ puts("  S@<n>         Set-based success (1=found at least 1 relevant or 0=none) 
 puts("  RankEff       Mean Rank Effectiveness (acount for unassessed documents)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
-puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=6809]");
-
+puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=8088]");
 puts("");
 
 puts("TREC / INEX SPECIFIC");
@@ -135,19 +135,26 @@ puts("");
 puts("SEGMENTATION");
 puts("------------");
 puts("-S[n]           East-Asian language word segmentation, query is segmented into characters by default");
-puts("   n            No segmentation, search with the input terms separated by space");
+puts("  n             No segmentation, search with the input terms separated by space");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking dunctions
 
+puts("FOCUSED RETRIEVAL");
+puts("-----------------");
+puts("-f[-r]          Focus the results list");
+puts("  -             ARTICLE: Article retrieval [default]");
+puts("  r             RANGE: Start tag before the first occurence to end tag after last");
+puts("");
+
 puts("REPORTING");
 puts("---------");
 puts("-s[-aqQs]       Report statistics");
-puts("   -            No statistics");
-puts("   a            All statistics (same as -sqQs)");
-puts("   q            Query by query statistics");
-puts("   Q            Sum of query by query statistics for this run");
-puts("   s            Short reporting (hits, average precision, etc) [default]");
+puts("  -             No statistics");
+puts("  a             All statistics (same as -sqQs)");
+puts("  q             Query by query statistics");
+puts("  Q             Sum of query by query statistics for this run");
+puts("  s             Short reporting (hits, average precision, etc) [default]");
 
 exit(0);
 }
@@ -277,6 +284,23 @@ else if (*(which + 1) == '-')
 }
 
 /*
+	ANT_ANT_PARAM_BLOCK::SET_FOCUSED_RANKER()
+	-----------------------------------------
+*/
+void ANT_ANT_param_block::set_focused_ranker(char *which)
+{
+if (*(which + 1) != '\0')
+	exit(printf("Only one focusing algorithm is permitted\n"));
+
+switch (*which)
+	{
+	case '-' : focussing_algorithm = NONE; break;
+	case 'r' : focussing_algorithm = RANGE; break;
+	default : exit(printf("Unknown focusing algorithm: '%c'\n", *which)); break;
+	}
+}
+
+/*
 	ANT_ANT_PARAM_BLOCK::PARSE()
 	----------------------------
 */
@@ -324,7 +348,7 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'q')
 			{
 			if (command[1] == ':')
-				port = (unsigned short)(isdigit(command[2]) ? atol(command + 2) : 6809);
+				port = (unsigned short)(isdigit(command[2]) ? atol(command + 2) : 8088);
 			else
 				{
 				if (*(command + 1) == '\0' && param < argc - 1) 
@@ -358,6 +382,8 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'R')
 			set_ranker(command + 1);
+		else if (*command == 'f')
+			set_focused_ranker(command + 1);
 		else if (strcmp(command, "people") == 0)
 			{
 			ANT_credits();

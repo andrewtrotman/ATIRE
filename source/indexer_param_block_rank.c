@@ -132,7 +132,7 @@ printf("%*.*s\n", strlen(title), strlen(title), "-------------------------------
 printf("-%c[function]    Rank the result set using\n", switch_char);
 
 if (allowable & BOSE_EINSTEIN)
-	printf("   be           Bose-Einstein %s\n", isdefault(BOSE_EINSTEIN));
+	printf("   be           Bose-Einstein GL2%s\n", isdefault(BOSE_EINSTEIN));
 if (allowable & BM25)
 	printf("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4] %s\n", isdefault(BM25));
 if (allowable & DIVERGENCE)

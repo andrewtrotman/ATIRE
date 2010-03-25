@@ -19,6 +19,7 @@ public:
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };						// statistics to print (bitstring)
 	enum { /* NONE = 0, */ THRESHOLD = 1, WEIGHTED = 2 }; 					// stemming stuff
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1};							// read the index from disk or load at startup
+	enum { /* NONE = 0, */ RANGE = 1};										// focused retrieval
 
 private:
 	int argc;
@@ -48,11 +49,14 @@ public:
 
 	unsigned short port;				// TCP/IP port for ANT SERVER, or 0 for not a server
 
+	long focussing_algorithm;			// focused retrieval relevance ranking algorithm
+
 private:
 	void export_format(char *forum);
 	void term_expansion(char *which);
 	void set_metric(char *which);
 	void set_stats(char *which);
+	void set_focused_ranker(char *which);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);

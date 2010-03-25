@@ -21,7 +21,7 @@ public:
 	ANT_focus_lowest_tag(ANT_focus_result_factory *result_factory) : ANT_focus(result_factory) {}
 	virtual ~ANT_focus_lowest_tag() {}
 
-	virtual ANT_focus_result *focus(unsigned char *document, long *results_length);
+	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, ANT_search_engine_accumulator *document_accumulator = NULL);
 } ;
 
 #endif /* FOCUS_LOWEST_TAG_H_ */
