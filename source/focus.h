@@ -41,7 +41,7 @@ public:
 	virtual ~ANT_focus() {}
 
 	long add_term(ANT_string_pair *string);
-	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, long long docid = 0, ANT_search_engine_accumulator *document_accumulator = NULL) = 0;
+	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, long long docid = 0, char *document_name = NULL, ANT_search_engine_accumulator *document_accumulator = NULL) = 0;
 } ;
 
 #endif /* FOCUS_H_ */

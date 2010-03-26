@@ -14,6 +14,7 @@ ANT_search_engine_forum_INEX_focus::ANT_search_engine_forum_INEX_focus(char *fil
 {
 strncpy(this->run_id, run_id, sizeof(this->run_id));
 this->run_id[sizeof(this->run_id) - 1] = '\0';
+
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
@@ -23,10 +24,14 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 */
 void ANT_search_engine_forum_INEX_focus::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
 {
-long long which;
+long which;
+ANT_focus_result *current;
 
-for (which = 0; which < hits; which++)
-	fprintf(file, "%ld Q0 %s %lld %lld %s\n", topic_id, docids[which], which + 1, (hits - which), run_id);
+if (focused_results != NULL)
+	for (which = 0; which < hits; which++)
+		if ((current = focused_results->get(which)) != NULL)
+			fprintf(file, "%ld Q0 %s %lld %lld %s %lld %lld\n", topic_id, current->document_name, (long long)(which + 1), hits - which, run_id, current->INEX_start, current->INEX_finish);
+
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 

@@ -56,8 +56,8 @@ MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
-#CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
-CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8
+CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
+#CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8
 CC = @cl /nologo 
 
 #
@@ -99,6 +99,7 @@ PARTS = \
 	$(OBJDIR)\stats_search_engine.obj				\
 	$(OBJDIR)\search_engine_forum.obj				\
 	$(OBJDIR)\search_engine_forum_INEX.obj			\
+	$(OBJDIR)\search_engine_forum_INEX_bep.obj	\
 	$(OBJDIR)\search_engine_forum_INEX_focus.obj	\
 	$(OBJDIR)\search_engine_forum_INEX_efficiency.obj			\
 	$(OBJDIR)\search_engine_forum_TREC.obj			\

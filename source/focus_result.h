@@ -16,7 +16,8 @@ class ANT_focus_result
 friend class ANT_focus_results_list;
 
 public:
-	long long docid;
+	long long docid;											// the search engine's id for the document
+	char *document_name;										// the unique name of the document (e.g. the TREC ID)
 	ANT_search_engine_accumulator::ANT_accumulator_t rsv;		// rsv of the passage (using what ever accumulator type the search engine uses)
 	char *start, *finish;										// passage as pointers into the document
 	long long INEX_start, INEX_finish;							// passage as INEX offsets into the document

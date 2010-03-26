@@ -10,7 +10,7 @@
 	ANT_FOCUS_LOWEST_TAG::FOCUS()
 	-----------------------------
 */
-ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, long *results_length, long long docid, ANT_search_engine_accumulator *document_accumulator)
+ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, long *results_length, long long docid, char *document_name, ANT_search_engine_accumulator *document_accumulator)
 {
 ANT_focus_result *result;
 ANT_string_pair *token;
@@ -28,6 +28,7 @@ find_last = found_first = FALSE;
 result->start = result->finish = (char *)document;
 result->set_rsv(document_accumulator == NULL ? 1 : document_accumulator->get_rsv());
 result->docid = docid;
+result->document_name = document_name;
 parser.set_document(document);
 
 while ((token = parser.get_next_token()) != NULL)

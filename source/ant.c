@@ -20,6 +20,8 @@
 #include "assessment_factory.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_INEX_efficiency.h"
+#include "search_engine_forum_INEX_focus.h"
+#include "search_engine_forum_INEX_bep.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_param_block.h"
 #include "version.h"
@@ -245,6 +247,8 @@ long length_of_longest_document;
 unsigned long current_document_length;
 long long docid;
 char *document_buffer, *title_start, *title_end;
+long top_k = params->sort_top_k > 2000 ? 2000 : (long)params->sort_top_k;		// allow a results list of up-to 2000 focused results
+ANT_focus_results_list focus_results_list(top_k);
 
 ANT_channel *inchannel, *outchannel;
 if (params->port == 0)
@@ -263,6 +267,10 @@ else if (params->output_forum == ANT_ANT_param_block::INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 else if (params->output_forum == ANT_ANT_param_block::INEX_EFFICIENCY)
 	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
+else if (params->output_forum == ANT_ANT_param_block::INEX_FOCUS)
+	output = new ANT_search_engine_forum_INEX_focus(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == ANT_ANT_param_block::INEX_BEP)
+	output = new ANT_search_engine_forum_INEX_bep(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 
 length_of_longest_document = search_engine->get_longest_document_length();
 
@@ -375,22 +383,20 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
 
 	/*
-		Apply focused retrieval to the resuts (this needs to be instrumented)
+		Apply focused retrieval to the resuts
 	*/
+	focused_bytes_parsed = focused_documents_parsed = 0;
 	if (params->focussing_algorithm != ANT_ANT_param_block::NONE && length_of_longest_document != 0)
 		{
-		long long time_to_focus, now = post_processing_stats.start_timer();
-		long top_k = params->sort_top_k > 2000 ? 2000 : (long)params->sort_top_k;		// allow a results list of up-to 2000 focused results
+		long long now = post_processing_stats.start_timer();
+		long long time_to_focus;
 		ANT_focus_result *focused_result;
 		ANT_NEXI_ant parser;
 		ANT_NEXI_term_iterator term;
 		ANT_NEXI_term_ant *parse_tree, *term_string;
-		ANT_focus_results_list focus_results_list(top_k);
 		ANT_focus_lowest_tag *focusser;
 		long focused_hits, passages, current_passage;
 
-		focused_bytes_parsed = 0;
-		focused_documents_parsed = 0;
 		if (params->focussing_algorithm == ANT_ANT_param_block::RANGE)
 			focusser = new ANT_focus_lowest_tag(&focus_results_list);
 		else
@@ -416,17 +422,20 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 
 			search_engine->get_document(document_buffer, &current_document_length, docid);
 			focused_bytes_parsed += current_document_length;
-			focused_result = focusser->focus((unsigned char *)document_buffer, &passages, docid, search_engine->results_list->accumulator_pointers[result]);
+			focused_result = focusser->focus((unsigned char *)document_buffer, &passages, docid, answer_list[result], search_engine->results_list->accumulator_pointers[result]);
 
 			if ((focused_hits += passages) > top_k)
 				break;
-/*
-			for (current_passage = 0; current_passage < passages; current_passage++)
-				{
-				ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, focused_result + current_passage);
-				printf("%lld:%s (%lld-%lld) %f\n", (long long)docid, answer_list[result], focused_result[current_passage].INEX_start, focused_result[current_passage].INEX_finish - focused_result[current_passage].INEX_start, (double)focused_result[current_passage].get_rsv());
-				}
-*/
+
+			/*
+				Generate output in INEX compatible format
+			*/
+			if (output != NULL)
+				for (current_passage = 0; current_passage < passages; current_passage++)
+					{
+					ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, focused_result + current_passage);
+//					printf("%lld:%s (%lld-%lld) %f\n", (long long)docid, answer_list[result], focused_result[current_passage].INEX_start, focused_result[current_passage].INEX_finish - focused_result[current_passage].INEX_start, (double)focused_result[current_passage].get_rsv());
+					}
 			}
 
 		delete focusser;
@@ -445,7 +454,7 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 		Display the list of results (either to the user or to a run file)
 	*/
 	if (output != NULL)
-		output->write(topic_id, answer_list, last_to_list, search_engine, NULL);
+		output->write(topic_id, answer_list, last_to_list, search_engine, focused_documents_parsed == 0 ? NULL : &focus_results_list);
 	else
 		for (result = 0; result < last_to_list; result++)
 			{
