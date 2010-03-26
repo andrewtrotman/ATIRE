@@ -39,7 +39,7 @@
 #include "sockets.h"
 #include "channel_file.h"
 #include "channel_socket.h"
-#include "focus_result_factory.h"
+#include "focus_results_list.h"
 #include "focus_lowest_tag.h"
 
 #ifndef FALSE
@@ -292,11 +292,11 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 /*
 	Andrew's experimental code to test focusing
 */
-ANT_focus_result_factory focus_result_factory(2000);		// allow a results list of up-to 2000 focused results
+ANT_focus_results_list focus_results_list(2000);		// allow a results list of up-to 2000 focused results
 ANT_NEXI_ant parser;
 ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant *parse_tree, *term_string;
-ANT_focus_lowest_tag focusser(&focus_result_factory);
+ANT_focus_lowest_tag focusser(&focus_results_list);
 ANT_focus_result *focused_result;
 static unsigned char unsigned_marker[] = {0xFF, 0x00};
 static char *marker = (char *)unsigned_marker;
@@ -385,16 +385,16 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 		ANT_NEXI_ant parser;
 		ANT_NEXI_term_iterator term;
 		ANT_NEXI_term_ant *parse_tree, *term_string;
-		ANT_focus_result_factory focus_result_factory(top_k);
+		ANT_focus_results_list focus_results_list(top_k);
 		ANT_focus_lowest_tag *focusser;
 		long focused_hits, passages, current_passage;
 
 		focused_bytes_parsed = 0;
 		focused_documents_parsed = 0;
 		if (params->focussing_algorithm == ANT_ANT_param_block::RANGE)
-			focusser = new ANT_focus_lowest_tag(&focus_result_factory);
+			focusser = new ANT_focus_lowest_tag(&focus_results_list);
 		else
-			focusser = new ANT_focus_lowest_tag(&focus_result_factory);		// default on error
+			focusser = new ANT_focus_lowest_tag(&focus_results_list);		// default on error
 
 		/*
 			Parse (a second time - FIX this in the API) and pass the terms to the focusser
@@ -416,7 +416,7 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 
 			search_engine->get_document(document_buffer, &current_document_length, docid);
 			focused_bytes_parsed += current_document_length;
-			focused_result = focusser->focus((unsigned char *)document_buffer, &passages, search_engine->results_list->accumulator_pointers[result]);
+			focused_result = focusser->focus((unsigned char *)document_buffer, &passages, docid, search_engine->results_list->accumulator_pointers[result]);
 
 			if ((focused_hits += passages) > top_k)
 				break;
@@ -444,7 +444,9 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 	/*
 		Display the list of results (either to the user or to a run file)
 	*/
-	if (output == NULL)
+	if (output != NULL)
+		output->write(topic_id, answer_list, last_to_list, search_engine, NULL);
+	else
 		for (result = 0; result < last_to_list; result++)
 			{
 			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
@@ -475,8 +477,6 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 			sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, answer_list[result], (double)search_engine->results_list->accumulator_pointers[result]->get_rsv(), title_start);
 			outchannel->puts(print_buffer);
 			}
-	else
-		output->write(topic_id, answer_list, last_to_list, search_engine);
 
 	delete [] command;
 	}

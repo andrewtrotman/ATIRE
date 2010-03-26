@@ -13,12 +13,13 @@
 */
 class ANT_focus_result
 {
-friend class ANT_focus_result_factory;
+friend class ANT_focus_results_list;
 
 public:
-	char *start, *finish;
-	long long INEX_start, INEX_finish;
-	ANT_search_engine_accumulator::ANT_accumulator_t rsv;		// use what ever type we are using in the search engine
+	long long docid;
+	ANT_search_engine_accumulator::ANT_accumulator_t rsv;		// rsv of the passage (using what ever accumulator type the search engine uses)
+	char *start, *finish;										// passage as pointers into the document
+	long long INEX_start, INEX_finish;							// passage as INEX offsets into the document
 
 	void clear_rsv(void) { rsv = 0; }
 	void set_rsv(ANT_search_engine_accumulator::ANT_accumulator_t score) { rsv = score; }

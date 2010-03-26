@@ -99,6 +99,7 @@ PARTS = \
 	$(OBJDIR)\stats_search_engine.obj				\
 	$(OBJDIR)\search_engine_forum.obj				\
 	$(OBJDIR)\search_engine_forum_INEX.obj			\
+	$(OBJDIR)\search_engine_forum_INEX_focus.obj	\
 	$(OBJDIR)\search_engine_forum_INEX_efficiency.obj			\
 	$(OBJDIR)\search_engine_forum_TREC.obj			\
 	$(OBJDIR)\str.obj 								\
@@ -173,7 +174,7 @@ PARTS = \
 	$(OBJDIR)\threads.obj							\
 	$(OBJDIR)\focus.obj								\
 	$(OBJDIR)\focus_lowest_tag.obj					\
-	$(OBJDIR)\focus_result_factory.obj				\
+	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_case.obj
 
 #

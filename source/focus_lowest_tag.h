@@ -18,10 +18,10 @@ private:
 	ANT_parser parser;
 
 public:
-	ANT_focus_lowest_tag(ANT_focus_result_factory *result_factory) : ANT_focus(result_factory) {}
+	ANT_focus_lowest_tag(ANT_focus_results_list *result_factory) : ANT_focus(result_factory) {}
 	virtual ~ANT_focus_lowest_tag() {}
 
-	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, ANT_search_engine_accumulator *document_accumulator = NULL);
+	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, long long docid = 0, ANT_search_engine_accumulator *document_accumulator = NULL);
 } ;
 
 #endif /* FOCUS_LOWEST_TAG_H_ */

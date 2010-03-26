@@ -14,7 +14,7 @@ public:
 	ANT_search_engine_forum_INEX_efficiency(char *filename, char *participant_id, char *run_id, long result_list_length, char *task);
 	virtual ~ANT_search_engine_forum_INEX_efficiency();
 
-	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine);
+	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results);
 private:
 	static const char* const ID_PREFIX;
 } ;

@@ -2,7 +2,7 @@
 	FOCUS_LOWEST_TAG.C
 	------------------
 */
-#include "focus_result_factory.h"
+#include "focus_results_list.h"
 #include "focus_lowest_tag.h"
 #include "parser.h"
 
@@ -10,7 +10,7 @@
 	ANT_FOCUS_LOWEST_TAG::FOCUS()
 	-----------------------------
 */
-ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, long *results_length, ANT_search_engine_accumulator *document_accumulator)
+ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, long *results_length, long long docid, ANT_search_engine_accumulator *document_accumulator)
 {
 ANT_focus_result *result;
 ANT_string_pair *token;
@@ -22,11 +22,12 @@ if ((result = result_factory->new_result()) == NULL)
 	return NULL;
 	}
 
-*results_length = 1;
+*results_length = 1;					// number of passages we found in the document
 find_last = found_first = FALSE;
 
 result->start = result->finish = (char *)document;
 result->set_rsv(document_accumulator == NULL ? 1 : document_accumulator->get_rsv());
+result->docid = docid;
 parser.set_document(document);
 
 while ((token = parser.get_next_token()) != NULL)

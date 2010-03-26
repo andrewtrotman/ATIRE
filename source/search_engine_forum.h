@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "search_engine.h"
+#include "focus_results_list.h"
 
 /*
 	class ANT_SEARCH_ENGINE_FORUM
@@ -22,9 +23,8 @@ protected:
 
 public:
 	virtual ~ANT_search_engine_forum();
-	virtual void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine) = 0;
+	virtual void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results) = 0;
 } ;
 
 #endif  /* SEARCH_ENGINE_FORUM_H_ */
-
 

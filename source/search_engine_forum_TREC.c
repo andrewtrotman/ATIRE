@@ -12,24 +12,16 @@
 */
 ANT_search_engine_forum_TREC::ANT_search_engine_forum_TREC(char *filename, char *participant_id, char *run_id, char *task) : ANT_search_engine_forum(filename)
 {
-/*
-	These lines remove the compiler warnings about unused parameters
-*/
-task = NULL;
-participant_id = NULL;
-
-/*
-	Now get on with it
-*/
 strncpy(this->run_id, run_id, sizeof(this->run_id));
 this->run_id[sizeof(this->run_id) - 1] = '\0';
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
 	ANT_SEARCH_ENGINE_FORUM_TREC::WRITE()
 	-------------------------------------
 */
-void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine)
+void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
 {
 long long which;
 

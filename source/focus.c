@@ -19,7 +19,7 @@
 	ANT_FOCUS::ANT_FOCUS()
 	----------------------
 */
-ANT_focus::ANT_focus(ANT_focus_result_factory *factory)
+ANT_focus::ANT_focus(ANT_focus_results_list *factory)
 {
 /*
 	Empty the hash table and initialise the current_node pointer

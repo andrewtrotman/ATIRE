@@ -55,7 +55,7 @@ fprintf(file, "</efficiency-submission>");
 	ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY::WRITE()
 	------------------------------------------------
 */
-void ANT_search_engine_forum_INEX_efficiency::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine)
+void ANT_search_engine_forum_INEX_efficiency::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
 {
 long long which;
 ANT_stats_search_engine *stats = search_engine->get_stats();
@@ -81,4 +81,5 @@ for (which = 0; which < hits; which++)
 	}
 
 fprintf(file, "</topic>\n");
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

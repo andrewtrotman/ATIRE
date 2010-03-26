@@ -22,7 +22,7 @@ public:
 
 	static ANT_focus_result *focus_to_INEX(char *document, ANT_focus_result *result);
 
-	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine);
+	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results);
 } ;
 
 
