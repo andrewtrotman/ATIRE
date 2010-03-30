@@ -33,6 +33,7 @@ stemmer = 0;
 stemmer_similarity = FALSE;
 stemmer_similarity_threshold = 0.0;
 sort_top_k = LLONG_MAX;
+focus_top_k = 2000;
 metric = MAP;
 metric_n = 10;
 assessments_filename = NULL;
@@ -100,19 +101,21 @@ puts("");
 
 puts("OPTIMISATIONS");
 puts("-------------");
-puts("-k<n>           Results list accurate to the top <n> (0=all) [default=0]");
-puts("-K<n>           Process no fewer than <n> postings (0=all) [default=0]");
+puts("-k<n>           Top-k search. Document results list accurate to the top <n> (0=all) [default=0]");
+puts("-F<n>           Focus-k. Focused results list accurate to the top <n> [default=2000]");
+puts("-K<n>           Static pruning. Process no fewer than <n> postings (0=all) [default=0]");
 puts("-M              Load the index into memory at startup");
 puts("");
 
 puts("METRICS AND ASSESSMENTS");
 puts("-----------------------");
 puts("-m[metric]      Score the result set using");
-puts("  MAP           Uninterpolated Mean Average Precision (TREC) [default]");
-puts("  MAgP          Uninterpolated Mean Average generalised Precision (INEX)");
-puts("  P@<n>         Set-based precision at <n> [default=10]");
-puts("  S@<n>         Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
-puts("  RankEff       Mean Rank Effectiveness (acount for unassessed documents)");
+puts("  MAP           Documents, Uninterpolated Mean Average Precision (TREC) [default]");
+puts("  MAgP          Documents, Uninterpolated Mean Average generalised Precision (INEX)");
+//puts("  MAgPf         Passages, Uninterpolated Mean Average generalised Precision (INEX)");
+puts("  P@<n>         Documents, Set-based precision at <n> [default=10]");
+puts("  S@<n>         Documents, Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
+puts("  RankEff       Documents, Mean Rank Effectiveness (acount for unassessed documents)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
 puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=8088]");
@@ -219,6 +222,8 @@ if (strcmp(which, "MAP") == 0)
 	metric = MAP;
 else if (strcmp(which, "MAgP") == 0)
 	metric = MAgP;
+else if (strcmp(which, "MAgPf") == 0)
+	metric = MAgPf;
 else if (strcmp(which, "RankEff") == 0)
 	metric = RANKEFF;
 else if (strncmp(which, "P@", 2) == 0)
@@ -340,6 +345,8 @@ for (param = 1; param < argc; param++)
 			if (trim_postings_k == 0)
 				trim_postings_k = LLONG_MAX;
 			}
+		else if (*command == 'F')
+			focus_top_k = atol(command + 1);
 		else if (*command == 'M')
 			file_or_memory = INDEX_IN_MEMORY;
 		else if (*command == 'm')

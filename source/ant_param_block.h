@@ -14,7 +14,7 @@
 class ANT_ANT_param_block : public ANT_indexer_param_block_rank
 {
 public:
-	enum { MAP, MAgP, RANKEFF, P_AT_N, SUCCESS_AT_N } ;									// metrics
+	enum { MAP, MAgP, MAgPf, RANKEFF, P_AT_N, SUCCESS_AT_N } ;							// metrics
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };									// statistics to print (bitstring)
 	enum { /* NONE = 0, */ INEX = 1, TREC = 2, INEX_EFFICIENCY = 4, INEX_FOCUS = 8, INEX_BEP = 16 } ;	// evaluation forum
 	enum { /* NONE = 0, */ THRESHOLD = 1, WEIGHTED = 2 }; 								// stemming stuff
@@ -50,6 +50,7 @@ public:
 	unsigned short port;				// TCP/IP port for ANT SERVER, or 0 for not a server
 
 	long focussing_algorithm;			// focused retrieval relevance ranking algorithm
+	long focus_top_k;					// number of focussing accumulators
 
 private:
 	void export_format(char *forum);

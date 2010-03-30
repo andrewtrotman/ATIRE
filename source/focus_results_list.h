@@ -26,6 +26,7 @@ public:
 	void rewind(void);
 
 	ANT_focus_result *get(long index) { return index < result_used ? result + index : NULL; }
+	long get_list_length(void) { return result_used; }
 } ;
 
 #endif /* FOCUS_RESULTS_LIST_H_ */

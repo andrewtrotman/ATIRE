@@ -9,9 +9,11 @@
 #include "memory.h"
 #include "relevant_topic.h"
 #include "relevant_document.h"
+#include "relevant_document_passage.h"
 #include "search_engine.h"
 #include "search_engine_accumulator.h"
 #include "search_engine_result_iterator.h"
+#include "focus_results_list.h"
 
 /*
 	ANT_MEAN_AVERAGE_PRECISION::ANT_MEAN_AVERAGE_PRECISION()
@@ -133,10 +135,11 @@ return precision / got->number_of_relevant_documents;
 }
 
 /*
-	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_GENERALISED_PRECISION()
-	-----------------------------------------------------------
+	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_GENERALISED_PRECISION_DOCUMENT()
+	--------------------------------------------------------------------
+	MAgP computed for whole documents
 */
-double ANT_mean_average_precision::average_generalised_precision(long topic, ANT_search_engine *search_engine)
+double ANT_mean_average_precision::average_generalised_precision_document(long topic, ANT_search_engine *search_engine)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
@@ -175,6 +178,104 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iter
 			precision += (double)found_and_relevant / current;
 			}
 		}
+	}
+
+return precision / (double)got->number_of_relevant_documents;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::MAGP_CROSSOVER()
+	--------------------------------------------
+	Compute the crossover between the passage and the relevant passage and return it.
+	The units are characters.
+*/
+long long ANT_mean_average_precision::MAgP_crossover(long long start, long long finish, long long relevant_start, long long relevant_finish)
+{
+if (finish <= relevant_start)
+	return 0;			// the entire passage is before the relevant passage
+
+if (start >= relevant_finish)
+	return 0;			// the entire passage is after the relevant passage
+
+if (start <= relevant_start && finish >= relevant_finish)
+	return relevant_finish - relevant_start;		// the passage encloses the relevant passage
+
+if (start <= relevant_start && finish <= relevant_finish)
+	return finish - relevant_start;				// crosses over, start before relevant_start
+
+if (start >= relevant_start && finish >= relevant_finish)
+	return relevant_finish - start;				// crosses over, end after relevant_finish
+
+printf("Cannot compute intersection between (%ld-%ld) and (%ld-%ld)\n", start, finish, relevant_start, relevant_finish);
+return 0;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_GENERALISED_PRECISION_FOCUSED()
+	-------------------------------------------------------------------
+	MAgP for focused results
+*/
+double ANT_mean_average_precision::average_generalised_precision_focused(long topic, ANT_focus_results_list *results_list)
+{
+ANT_search_engine_result_iterator iterator;
+ANT_relevant_topic *got;
+ANT_relevant_document key, *relevance_data;
+ANT_relevant_document_passage *which_passage;
+long number_of_documents, current_focused_result;
+long long previous_docid;
+double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
+const double beta = 0.25;
+ANT_focus_result *result;
+long found_relevant_bytes, found_bytes, relevant_bytes;
+
+if ((got = setup(topic)) == NULL)
+	return 0;
+if (got->number_of_relevant_documents == 0)
+	return 0;
+
+key.topic = topic;
+precision = 0;
+found_and_relevant = 0;
+
+number_of_documents = found_relevant_bytes  = 0;
+found_bytes = relevant_bytes = 1;
+doc_precision = doc_recall = 0;
+previous_docid = -1;
+result = NULL;
+for (current_focused_result = 0; current_focused_result < results_list->get_list_length(); current_focused_result++)
+	{
+	result = results_list->get(current_focused_result);
+	key.docid = result->docid;
+	if (result->docid != previous_docid)
+		{
+		number_of_documents++;
+		doc_precision = (double)found_relevant_bytes / (double)found_bytes;
+		doc_recall = (double)found_relevant_bytes / (double)relevant_bytes;
+		doc_f_score = (1.0 + beta * beta ) * (doc_precision  * doc_recall) / (beta * beta * doc_precision + doc_recall);
+		found_and_relevant += doc_f_score;		  
+		precision += (double)found_and_relevant / number_of_documents;
+		found_bytes = found_relevant_bytes = relevant_bytes = 0;
+		}
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters != 0)
+			{
+			relevant_bytes = relevance_data->relevant_characters;
+			found_bytes += (long)(result->INEX_finish - result->INEX_start);
+			for (which_passage = relevance_data->passage_list; which_passage != NULL; which_passage = which_passage->next)
+				found_relevant_bytes += (long)MAgP_crossover(result->INEX_start, result->INEX_finish, which_passage->offset, which_passage->offset + which_passage->length);
+			}
+	previous_docid = result->docid;
+	}
+
+if (result != NULL && result->docid != previous_docid)
+	{
+	number_of_documents++;
+	doc_precision = (double)found_relevant_bytes / (double)found_bytes;
+	doc_recall = (double)found_relevant_bytes / (double)relevant_bytes;
+	doc_f_score = (1.0 + beta * beta ) * (doc_precision  * doc_recall) / (beta * beta * doc_precision + doc_recall);
+	found_and_relevant += doc_f_score;		  
+	precision += (double)found_and_relevant / number_of_documents;
+	found_bytes = found_relevant_bytes = relevant_bytes = 0;
 	}
 
 return precision / (double)got->number_of_relevant_documents;

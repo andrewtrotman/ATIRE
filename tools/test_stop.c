@@ -2,6 +2,7 @@
 	TEST_STOP.C
 	-----------
 */
+#include <string.h>
 #include <stdio.h>
 #include "../source/stop_word.h"
 
@@ -16,11 +17,12 @@ long what;
 
 char buffer[1024];
 
-while (1)
+gets(buffer);
+while (strcmp(buffer, ".quit") != 0)
 	{
-	gets(buffer);
 	what = stopper.isstop(buffer);
 	printf("%s is%s a stop word\n", buffer, what ? "" : " not");
+	gets(buffer);
 	}
 
 return 0;

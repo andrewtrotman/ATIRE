@@ -192,13 +192,16 @@ if (map != NULL)
 	if (params->metric == ANT_ANT_param_block::MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::MAgP)
-		average_precision = map->average_generalised_precision(topic_id, search_engine);
+		average_precision = map->average_generalised_precision_document(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::RANKEFF)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::P_AT_N)
 		average_precision = map->p_at_n(topic_id, search_engine, params->metric_n);
 	else if (params->metric == ANT_ANT_param_block::SUCCESS_AT_N)
 		average_precision = map->success_at_n(topic_id, search_engine, params->metric_n);
+	/*
+		else it might be a focused evaluation metric
+	*/
 	}
 
 /*
@@ -247,8 +250,8 @@ long length_of_longest_document;
 unsigned long current_document_length;
 long long docid;
 char *document_buffer, *title_start, *title_end;
-long top_k = params->sort_top_k > 2000 ? 2000 : (long)params->sort_top_k;		// allow a results list of up-to 2000 focused results
-ANT_focus_results_list focus_results_list(top_k);
+long focus_top_k = params->focus_top_k;
+ANT_focus_results_list focus_results_list(focus_top_k);
 
 ANT_channel *inchannel, *outchannel;
 if (params->port == 0)
@@ -361,7 +364,7 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 	number_of_queries++;
 
 	average_precision = perform_query(outchannel, params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
-	sum_of_average_precisions += average_precision;
+	sum_of_average_precisions += average_precision;		// zero if we're using a focused metric
 
 	/*
 		Report the average precision for the query
@@ -397,6 +400,8 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 		ANT_focus_lowest_tag *focusser;
 		long focused_hits, passages, current_passage;
 
+		focus_results_list.rewind();
+
 		if (params->focussing_algorithm == ANT_ANT_param_block::RANGE)
 			focusser = new ANT_focus_lowest_tag(&focus_results_list);
 		else
@@ -424,7 +429,7 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 			focused_bytes_parsed += current_document_length;
 			focused_result = focusser->focus((unsigned char *)document_buffer, &passages, docid, answer_list[result], search_engine->results_list->accumulator_pointers[result]);
 
-			if ((focused_hits += passages) > top_k)
+			if ((focused_hits += passages) >= focus_top_k)
 				break;
 
 			/*
@@ -448,6 +453,20 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 			}
 		total_focused_bytes_parsed += focused_bytes_parsed;
 		total_focused_documents_parsed += focused_documents_parsed;
+
+		/*
+			Compute precision using a focused metric
+		*/
+		if (map != NULL)
+			{
+			if (params->metric == ANT_ANT_param_block::MAgPf)
+				average_precision = map->average_generalised_precision_focused(topic_id, &focus_results_list);
+
+			sum_of_average_precisions += average_precision;
+
+			if (params->stats & ANT_ANT_param_block::SHORT)
+				printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+			}
 		}
 
 	/*

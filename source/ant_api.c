@@ -423,7 +423,7 @@ if (map != NULL)
 	if (params->metric == MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
 	else if (params->metric == MAgP)
-		average_precision = map->average_generalised_precision(topic_id, search_engine);
+		average_precision = map->average_generalised_precision_document(topic_id, search_engine);
 	else if (params->metric == RANKEFF)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
 	else if (params->metric == P_AT_N)
