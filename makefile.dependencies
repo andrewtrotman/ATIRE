@@ -14,7 +14,8 @@ bin/ant_plugins.obj: source/plugin_manager.h source/plugin.h source/pragma.h
 bin/assessment.obj: source/str.h source/ctypes.h source/memory.h source/assessment.h
 bin/assessment_ANT.obj: source/disk.h source/assessment_ANT.h source/assessment.h source/memory.h source/relevant_document.h
 bin/assessment_INEX.obj: source/assessment_INEX.h source/assessment.h source/relevant_document.h source/relevant_document_passage.h source/memory.h source/disk.h source/str.h source/ctypes.h
-bin/assessment_factory.obj: source/str.h source/ctypes.h source/assessment_factory.h source/assessment.h source/assessment_ANT.h source/assessment_INEX.h
+bin/assessment_TREC.obj: source/assessment_TREC.h source/assessment.h source/relevant_document.h source/memory.h source/disk.h source/str.h source/ctypes.h
+bin/assessment_factory.obj: source/str.h source/ctypes.h source/assessment_factory.h source/assessment.h source/assessment_ANT.h source/assessment_TREC.h source/assessment_INEX.h
 bin/bitstream.obj: source/bitstream.h source/fundamental_types.h
 bin/btree_iterator.obj: source/file.h source/fundamental_types.h source/search_engine.h source/compression_factory.h source/compress.h source/compression_factory_scheme.h source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/ranking_function.h source/search_engine_accumulator.h source/search_engine_result.h source/search_engine_btree_node.h source/btree.h source/btree_iterator.h
 bin/channel_file.obj: source/channel_file.h source/channel.h source/str.h source/ctypes.h
