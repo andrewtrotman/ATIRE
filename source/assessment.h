@@ -19,6 +19,8 @@ friend class ANT_assessment_factory;
 
 protected:
 	ANT_memory *memory;
+	char **docid_list;
+	char ***sorted_docid_list;
 	long long documents;
 	long *numeric_docid_list;
 	long **sorted_numeric_docid_list;

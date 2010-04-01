@@ -465,7 +465,7 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 			sum_of_average_precisions += average_precision;
 
 			if (params->stats & ANT_ANT_param_block::SHORT)
-				printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+				printf("Topic:%ld Focused Average Precision:%f\n", topic_id , average_precision);
 			}
 		}
 

@@ -91,6 +91,7 @@ PARTS = \
 	$(OBJDIR)\mean_average_precision.obj 			\
 	$(OBJDIR)\assessment.obj						\
 	$(OBJDIR)\assessment_ANT.obj					\
+	$(OBJDIR)\assessment_TREC.obj					\
 	$(OBJDIR)\assessment_INEX.obj					\
 	$(OBJDIR)\assessment_factory.obj				\
 	$(OBJDIR)\relevant_document.obj 				\

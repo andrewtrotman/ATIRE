@@ -17,6 +17,7 @@
 #endif
 
 extern "C" int char_star_star_strcmp(const void *one, const void *two);
+extern "C" int char_star_star_star_strcmp(const void *one, const void *two);
 
 /*
 	STRNEW()

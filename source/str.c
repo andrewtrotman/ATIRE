@@ -13,4 +13,12 @@ extern "C" int char_star_star_strcmp(const void *one, const void *two)
 return strcmp(*(char **)one, *(char **)two);
 }
 
+/*
+	C" INT CHAR_STAR_STAR_STAR_STRCMP()
+	-----------------------------------
+*/
+extern "C" int char_star_star_star_strcmp(const void *one, const void *two)
+{
+return strcmp(**(char ***)one, **(char ***)two);
+}
 

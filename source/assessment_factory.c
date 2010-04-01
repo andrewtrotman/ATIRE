@@ -7,6 +7,7 @@
 #include "str.h"
 #include "assessment_factory.h"
 #include "assessment_ANT.h"
+#include "assessment_TREC.h"
 #include "assessment_INEX.h"
 
 /*
@@ -40,6 +41,8 @@ if (separators == 1)
 	factory = new ANT_assessment_ANT();
 else if (separators >= 4)
 	factory = new ANT_assessment_INEX();
+else if (separators == 3)
+	factory = new ANT_assessment_TREC();
 else
 	exit(fprintf(stderr, "Unrecognised assessment format.\n"));
 

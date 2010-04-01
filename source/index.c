@@ -266,7 +266,7 @@ for (param = first_param; param < argc; param++)
 				index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
 				delete [] current_file->compressed;
 				}
-			id_list.puts(current_file->filename);
+			id_list.puts(strip_space_inplace(current_file->filename));
 			}
 		terms_in_document = 0;
 		delete [] current_file->file;

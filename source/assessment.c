@@ -16,6 +16,8 @@ memory = what->memory;
 documents = what->documents;
 numeric_docid_list = what->numeric_docid_list;
 sorted_numeric_docid_list = what->sorted_numeric_docid_list;
+docid_list = what->docid_list;
+sorted_docid_list = what->sorted_docid_list;
 }
 
 /*
@@ -55,11 +57,17 @@ return thus_far;
 */
 ANT_assessment::ANT_assessment(ANT_memory *mem, char **docid_list, long long documents)
 {
-char **current, *slish, *slosh, *slash, *start;
+char ***string, **current, *slish, *slosh, *slash, *start;
 long *current_docid, **current_sorted_docid;
 
 memory = mem;
 this->documents = documents;
+this->docid_list = docid_list;
+string = sorted_docid_list = (char ***)memory->malloc(sizeof(*sorted_docid_list) * documents);
+for (current = docid_list; *current != NULL; current++)
+	*string++ = current;
+qsort(sorted_docid_list, (size_t)documents, sizeof(*sorted_docid_list), char_star_star_star_strcmp);
+
 current_docid = numeric_docid_list = (long *)memory->malloc(sizeof(*numeric_docid_list) * documents);
 current_sorted_docid = sorted_numeric_docid_list = (long **)memory->malloc(sizeof(*sorted_numeric_docid_list) * documents);
 for (current = docid_list; *current != NULL; current++)
