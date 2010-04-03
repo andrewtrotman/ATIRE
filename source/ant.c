@@ -461,6 +461,8 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 			{
 			if (params->metric == ANT_ANT_param_block::MAgPf)
 				average_precision = map->average_generalised_precision_focused(topic_id, &focus_results_list);
+			else if (params->metric == ANT_ANT_param_block::MAiP)
+				average_precision = map->average_interpolated_precision(topic_id, &focus_results_list);
 
 			sum_of_average_precisions += average_precision;
 

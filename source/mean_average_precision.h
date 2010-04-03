@@ -33,6 +33,7 @@ public:
 	~ANT_mean_average_precision() {}
 	
 	double average_precision(long topic, ANT_search_engine *search_engine);
+	double average_interpolated_precision(long topic, ANT_focus_results_list *results_list);
 	double average_generalised_precision_document(long topic, ANT_search_engine *search_engine);
 	long long MAgP_crossover(long long start, long long finish, long long relevant_start, long long relevant_finish);
 	double average_generalised_precision_focused(long topic, ANT_focus_results_list *results_list);

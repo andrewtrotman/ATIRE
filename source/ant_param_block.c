@@ -113,6 +113,7 @@ puts("-m[metric]      Score the result set using");
 puts("  MAP           Documents, Uninterpolated Mean Average Precision (TREC) [default]");
 puts("  MAgP          Documents, Uninterpolated Mean Average generalised Precision (INEX)");
 //puts("  MAgPf         Passages, Uninterpolated Mean Average generalised Precision (INEX)");
+//puts("  MAiPf         Passages, Measn Average interpolated Precision (INEX)");
 puts("  P@<n>         Documents, Set-based precision at <n> [default=10]");
 puts("  S@<n>         Documents, Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
 puts("  RankEff       Documents, Mean Rank Effectiveness (acount for unassessed documents)");
@@ -220,6 +221,8 @@ void ANT_ANT_param_block::set_metric(char *which)
 {
 if (strcmp(which, "MAP") == 0)
 	metric = MAP;
+else if (strcmp(which, "MAiP") == 0)
+	metric = MAiP;
 else if (strcmp(which, "MAgP") == 0)
 	metric = MAgP;
 else if (strcmp(which, "MAgPf") == 0)

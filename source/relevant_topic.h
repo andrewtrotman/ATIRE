@@ -14,6 +14,7 @@ public:
 	long topic;
 	long number_of_relevant_documents;
 	long number_of_nonrelevant_documents;
+	long long number_of_relevant_characters;
 } ;
 
 

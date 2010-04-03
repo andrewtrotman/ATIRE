@@ -2,9 +2,9 @@
 	MEAN_AVERAGE_PRECISION.C
 	------------------------
 */
+#include <new>
 #include <stdio.h>
 #include <string.h>
-
 #include "mean_average_precision.h"
 #include "memory.h"
 #include "relevant_topic.h"
@@ -14,6 +14,7 @@
 #include "search_engine_accumulator.h"
 #include "search_engine_result_iterator.h"
 #include "focus_results_list.h"
+#include "precision_recall.h"
 
 /*
 	ANT_MEAN_AVERAGE_PRECISION::ANT_MEAN_AVERAGE_PRECISION()
@@ -21,7 +22,7 @@
 */
 ANT_mean_average_precision::ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long long relevance_list_length)
 {
-long long current;
+long long current, relevant_characters;
 long last_topic, current_topic, relevant_documents, nonrelevant_documents;
 
 /*
@@ -51,6 +52,7 @@ for (current = 0; current < relevance_list_length; current++)
 topics = (ANT_relevant_topic *)memory->malloc(sizeof(*topics) * topics_list_length);
 
 last_topic = this->relevance_list[0].topic;	// init with the first topic
+relevant_characters = this->relevance_list[0].relevant_characters;
 relevant_documents = this->relevance_list[0].relevant_characters == 0 ? 0 : 1;
 nonrelevant_documents = relevant_documents ? 0 : 1;
 current_topic = 0;
@@ -60,19 +62,26 @@ for (current = 1; current < relevance_list_length; current++)
 		topics[current_topic].topic = last_topic;
 		topics[current_topic].number_of_relevant_documents = relevant_documents;
 		topics[current_topic].number_of_nonrelevant_documents = nonrelevant_documents;
+		topics[current_topic].number_of_relevant_characters = relevant_characters;
+
 		current_topic++;
 		last_topic = this->relevance_list[current].topic;
+		relevant_characters = this->relevance_list[current].relevant_characters;
 		relevant_documents = this->relevance_list[current].relevant_characters == 0 ? 0 : 1;
 		nonrelevant_documents = relevant_documents ? 0 : 1;
 		}
 	else if (this->relevance_list[current].relevant_characters == 0)
 		nonrelevant_documents++;
 	else
+		{
 		relevant_documents++;
+		relevant_characters += this->relevance_list[current].relevant_characters;
+		}
 
 topics[current_topic].topic = last_topic;
 topics[current_topic].number_of_relevant_documents = relevant_documents;
 topics[current_topic].number_of_nonrelevant_documents = nonrelevant_documents;
+topics[current_topic].number_of_relevant_characters = relevant_characters;
 }
 
 /*
@@ -132,6 +141,80 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iter
 		}
 	}
 return precision / got->number_of_relevant_documents;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::AVERAGE_INTERPOLATED_PRECISION()
+	------------------------------------------------------------
+	101 point average interpolated precision focused.
+*/
+double ANT_mean_average_precision::average_interpolated_precision(long topic, ANT_focus_results_list *results_list)
+{
+long long found_relevant_characters, found_characters, relevant_characters;
+long current_focused_result, current_point;
+ANT_focus_result *result;
+ANT_relevant_topic *got;
+ANT_relevant_document key, *relevance_data;
+ANT_relevant_document_passage *which_passage;
+ANT_precision_recall points[101];
+double precision, recall;
+
+if ((got = setup(topic)) == NULL)
+	return 0;
+if (got->number_of_relevant_documents == 0)
+	return 0;
+
+key.topic = topic;
+found_relevant_characters = found_characters = relevant_characters = 0;
+
+/*
+	Initialise the 101 points
+*/
+for (current_point = 0; current_point < 101; current_point++)
+	{
+	points[current_point].recall = (double)current_point / 100.0;
+	points[current_point].precision = 0.0;
+	}
+
+/*
+	Compute precision and recall at each result
+*/
+for (current_focused_result = 0; current_focused_result < results_list->get_list_length(); current_focused_result++)
+	{
+	result = results_list->get(current_focused_result);
+	key.docid = result->docid;
+	found_characters += result->INEX_finish - result->INEX_start;
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters != 0)
+			{
+			relevant_characters += relevance_data->relevant_characters;
+			for (which_passage = relevance_data->passage_list; which_passage != NULL; which_passage = which_passage->next)
+				found_relevant_characters += (long)MAgP_crossover(result->INEX_start, result->INEX_finish, which_passage->offset, which_passage->offset + which_passage->length);
+			}
+	precision = (double)found_relevant_characters / (double)found_characters;
+	recall = (double)found_relevant_characters / (double)got->number_of_relevant_characters;
+
+	/*
+		Update the 101 points
+	*/
+	for (current_point = (long)(recall * 100); current_point >= 0; current_point--)
+		if (precision > points[current_point].precision)
+			points[current_point].precision = precision;
+		else
+			break;			// we only need to go back far enough that it can have an effect
+	}
+
+/*
+	Compute the sum of the 101 interpolated precisions
+*/
+precision = 0;
+for (current_point = 0; current_point < 101; current_point++)
+	precision += points[current_point].precision;
+
+/*
+	Return the average interpolated precision
+*/
+return precision / 101.0;
 }
 
 /*
@@ -217,7 +300,6 @@ return 0;
 */
 double ANT_mean_average_precision::average_generalised_precision_focused(long topic, ANT_focus_results_list *results_list)
 {
-ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
 ANT_relevant_document_passage *which_passage;
