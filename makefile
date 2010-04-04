@@ -175,6 +175,7 @@ PARTS = \
 	$(OBJDIR)\critical_section.obj					\
 	$(OBJDIR)\threads.obj							\
 	$(OBJDIR)\focus.obj								\
+	$(OBJDIR)\focus_article.obj					\
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_case.obj

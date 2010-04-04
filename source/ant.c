@@ -42,6 +42,7 @@
 #include "channel_file.h"
 #include "channel_socket.h"
 #include "focus_results_list.h"
+#include "focus_article.h"
 #include "focus_lowest_tag.h"
 
 #ifndef FALSE
@@ -397,15 +398,17 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 		ANT_NEXI_ant parser;
 		ANT_NEXI_term_iterator term;
 		ANT_NEXI_term_ant *parse_tree, *term_string;
-		ANT_focus_lowest_tag *focusser;
+		ANT_focus *focusser;
 		long focused_hits, passages, current_passage;
 
 		focus_results_list.rewind();
 
 		if (params->focussing_algorithm == ANT_ANT_param_block::RANGE)
-			focusser = new ANT_focus_lowest_tag(&focus_results_list);
+			focusser = new ANT_focus_lowest_tag(&focus_results_list);	// closest open tag to first occurence to closest close tag of last.
+		else if (params->focussing_algorithm == ANT_ANT_param_block::ARTICLE)
+			focusser = new ANT_focus_article(&focus_results_list);		// return the whole article
 		else
-			focusser = new ANT_focus_lowest_tag(&focus_results_list);		// default on error
+			focusser = new ANT_focus_article(&focus_results_list);		// default on error
 
 		/*
 			Parse (a second time - FIX this in the API) and pass the terms to the focusser

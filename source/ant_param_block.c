@@ -148,8 +148,8 @@ ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// rankin
 
 puts("FOCUSED RETRIEVAL");
 puts("-----------------");
-puts("-f[-r]          Focus the results list");
-puts("  -             ARTICLE: Article retrieval [default]");
+puts("-f[ar]          Focus the results list");
+puts("  a             ARTICLE: Article retrieval [default]");
 puts("  r             RANGE: Start tag before the first occurence to end tag after last");
 puts("");
 
@@ -188,10 +188,10 @@ do
 while (*which != '\0');
 }
 
-
 /*
 	ANT_ANT_PARAM_BLOCK::EXPORT_FORMAT()
 	------------------------------------
+		focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
 */
 void ANT_ANT_param_block::export_format(char *forum)
 {
@@ -203,9 +203,13 @@ do
 		case 'I' : output_forum = INEX;   break;
 		case 'e' : output_forum = INEX_EFFICIENCY; break;
 		case 'i' : output_forum = TREC;   break;			// in 2009 INEX moved to the TREC format with extra stuff on the end of each line
-		case 'f' : output_forum = INEX_FOCUS;   break;		// the INEX 2009 format with focused results included
 		case 'b' : output_forum = INEX_BEP;   break;		// the INEX 2009 format with best entry points
 		case 't' : output_forum = TREC;   break;
+		case 'f' : 											// the INEX 2009 format with focused results included
+			output_forum = INEX_FOCUS;
+			if (focussing_algorithm == NONE)
+				focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
+			break;
 		default : exit(printf("Unknown export format: '%c'\n", *forum)); break;
 		}
 	forum++;
@@ -221,12 +225,20 @@ void ANT_ANT_param_block::set_metric(char *which)
 {
 if (strcmp(which, "MAP") == 0)
 	metric = MAP;
-else if (strcmp(which, "MAiP") == 0)
-	metric = MAiP;
 else if (strcmp(which, "MAgP") == 0)
 	metric = MAgP;
 else if (strcmp(which, "MAgPf") == 0)
+	{
 	metric = MAgPf;
+	if (focussing_algorithm == NONE)
+		focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
+	}
+else if (strcmp(which, "MAiP") == 0)
+	{
+	metric = MAiP;
+	if (focussing_algorithm == NONE)
+		focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
+	}
 else if (strcmp(which, "RankEff") == 0)
 	metric = RANKEFF;
 else if (strncmp(which, "P@", 2) == 0)
@@ -307,6 +319,7 @@ if (*(which + 1) != '\0')
 switch (*which)
 	{
 	case '-' : focussing_algorithm = NONE; break;
+	case 'a' : focussing_algorithm = ARTICLE; break;
 	case 'r' : focussing_algorithm = RANGE; break;
 	default : exit(printf("Unknown focusing algorithm: '%c'\n", *which)); break;
 	}
