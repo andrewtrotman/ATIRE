@@ -107,7 +107,7 @@ struct query_data_s {
 void perform_query(char *query, query_data_s *data, ANT_stemmer *stemmer) {
     ANT_search_engine_accumulator **results;
     long long results_list_length, current;
-	int i;
+    int i;
     char *query_copy = strdup(query);
     char *query_ptr = query_copy;
     char *term = eat_word(&query_ptr);
@@ -272,9 +272,9 @@ int main(int argc, char **argv) {
 
 	if (do_top_scores) {
 		for (i = 0; i < SCORES_RETAINED; i++)
-			printf("NS%d ", i + 1);
+			printf("NS%ld ", i + 1);
 		for (i = 0; i < SCORES_RETAINED; i++)
-			printf("S%d ", i + 1);
+			printf("S%ld ", i + 1);
 		puts("");
 	} else 
 		puts("Query QL AvSCQ SCS AvQL AvIDF MaxIDF AvICTF DocsReturned TopDocs TopScore DocsReturnedWS TopDocsWS TopScoreWS DocSet QueryScope StdDevIDF Gamma2");

@@ -43,6 +43,7 @@ OBJECTS = \
 	assessment.o \
 	assessment_ANT.o \
 	assessment_INEX.o \
+	assessment_TREC.o \
 	assessment_factory.o \
 	relevant_document.o \
 	stats.o \
@@ -50,6 +51,8 @@ OBJECTS = \
 	stats_search_engine.o \
 	search_engine_forum.o \
 	search_engine_forum_INEX.o \
+	search_engine_forum_INEX_bep.o \
+	search_engine_forum_INEX_focus.o \
 	search_engine_forum_INEX_efficiency.o \
 	search_engine_forum_TREC.o \
 	str.o \
@@ -121,8 +124,12 @@ OBJECTS = \
 	semaphores.o \
 	critical_section.o \
 	focus.o \
+	focus_article.o \
 	focus_lowest_tag.o \
+	focus_results_list.o \
+	unicode_case.o \
 	threads.o
+
 
 EXTENSION = \
     ga.o \

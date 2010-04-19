@@ -146,7 +146,7 @@ if (map != NULL)
 	if (params->metric == ANT_ANT_param_block::MAP)
 		average_precision = map->average_precision(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::MAgP)
-		average_precision = map->average_generalised_precision(topic_id, search_engine);
+		average_precision = map->average_generalised_precision_document(topic_id, search_engine);
 	else if (params->metric == ANT_ANT_param_block::RANKEFF)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
     }
