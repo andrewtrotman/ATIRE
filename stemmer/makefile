@@ -184,3 +184,22 @@ depend :
 .PHONY : clean
 clean :
 	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o $(BINDIR)/qpp $(EXTOBJDIR)/qpp.o
+
+
+#
+# For experiments in chapter 3
+#
+$(EXTOBJDIR)/ga_individual_no_m.o : $(EXTSRCDIR)/ga_individual.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DNO_MEASURE -c $^ -o $@
+$(BINDIR)/ga_ant_no_m : $(OBJECTS_W_DIR) $(EXTOBJDIR)/ga.o $(EXTOBJDIR)/ga_stemmer.o $(EXTOBJDIR)/ga_function.o $(EXTOBJDIR)/vocab.o $(EXTOBJDIR)/ga_individual_no_m.o $(EXTOBJDIR)/ga_ant.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(EXTOBJDIR)/ga_individual_no_sep.o : $(EXTSRCDIR)/ga_individual.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DNO_SEPARATORS -c $^ -o $@
+$(BINDIR)/ga_ant_no_sep : $(OBJECTS_W_DIR) $(EXTOBJDIR)/ga.o $(EXTOBJDIR)/ga_stemmer.o $(EXTOBJDIR)/ga_function.o $(EXTOBJDIR)/vocab.o $(EXTOBJDIR)/ga_individual_no_sep.o $(EXTOBJDIR)/ga_ant.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(EXTOBJDIR)/ga_individual_no_m_or_sep.o : $(EXTSRCDIR)/ga_individual.c
+	$(CC) $(EXTFLAGS) $(CFLAGS) -DNO_MEASURE -DNO_SEPARATORS -c $^ -o $@
+$(BINDIR)/ga_ant_no_m_or_sep : $(OBJECTS_W_DIR) $(EXTOBJDIR)/ga.o $(EXTOBJDIR)/ga_stemmer.o $(EXTOBJDIR)/ga_function.o $(EXTOBJDIR)/vocab.o $(EXTOBJDIR)/ga_individual_no_m_or_sep.o $(EXTOBJDIR)/ga_ant.o
+	$(CC) $(LDFLAGS) -o $@ $^

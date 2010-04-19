@@ -6,6 +6,13 @@
 #include "ga_individual.h"
 #include "vocab.h"
 
+/*
+  COMPILE OPTIONS:
+    NO_SEPARATORS - don't use separators for rules
+    NO_MEASURE    - don't use measure for rules
+*/
+
+
 //const char *banned[] = {"s"};
 const char *banned[] = {};
 
@@ -102,6 +109,9 @@ char *GA_individual::apply(const char *string) {
     length = strlen(buffer);
 
     for (i = 0; i < count; i++) {
+#ifdef NO_SEPARATORS
+        if (skipping) return buffer;
+#endif
         if (measure(i) == SEPARATOR) {
             /* Stop skipping at separator */
             skipping = FALSE;
@@ -109,10 +119,14 @@ char *GA_individual::apply(const char *string) {
             /* Check that rule can be applied */
             int from_len = strnlen(rule_from(i), RULE_STRING_MAX); 
 
+#ifdef NO_MEASURE
+            if (strncmp(buffer + length - from_len,
+                        rule_from(i), RULE_STRING_MAX) == 0) {
+#else
             if (m(buffer, length - 1) >= measure(i) &&
                 strncmp(buffer + length - from_len,
                         rule_from(i), RULE_STRING_MAX) == 0) {
-
+#endif
                 int to_len = strnlen(rule_to(i), RULE_STRING_MAX); 
 
                 /* Ensure that the first SACROSANCT_CHARS are respected */ 
@@ -223,7 +237,7 @@ void GA_individual::crossover(GA_individual *p2, GA_individual *c) {
 
     unsigned int point2 = random_from(min_point2, p2->count);
 
-    switch (random_from (0, 2)) {
+    switch (random_from(0, 2)) {
     case 0: // MEASURE
         point = point * RULE_SIZE;
         point2 = point2 * RULE_SIZE;
