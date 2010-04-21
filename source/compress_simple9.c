@@ -8,6 +8,7 @@
 	A. Trotman, V. Subramanya (2007), Sigma encoded inverted files, Proceedings of CIKM 2007, pp 983-986
 
 	Substantially re-written and converted for use in ANT by Andrew Trotman (2009)
+	Released undeer BSD license (see compress_sigma.c)
 */
 #include <stdio.h>
 #include "compress_simple9.h"

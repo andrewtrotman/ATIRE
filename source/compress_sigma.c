@@ -3,6 +3,46 @@
 	----------------
 	This code is the original Sigma code ported to ANT.  For details see:
 	A. Trotman, V. Subramanya, Sigma encoded inverted files, CIKM 2007, pp 983-986
+
+	This code has been released BSD by Andrew Trotman and Vikram Subramanya.  Here's
+	the Email Exchange:
+
+
+	> From: "Vikram Subramanya" <vikram.s3@cs.ucsd.edu>
+	> To: "Andrew Trotman" <andrew@cs.otago.ac.nz>
+	> Cc: "andrew Trotman" <andrew.trotman@otago.ac.nz>
+	> Sent: Wednesday, April 21, 2010 12:57 PM
+	> Subject: Re: Compression Code
+	>
+	>
+	>> Oh, absolutely. I would be delighted to see that the code we wrote will see
+	>> sunshine! Thanks for asking.
+	>> 
+	>> Vikram
+	>> 
+	>> 
+	>> On Tue, Apr 20, 2010 at 5:53 PM, Andrew Trotman <andrew@cs.otago.ac.nz>wrote:
+	>> 
+	>>> Hi Vikram,
+	>>>
+	>>> I hope all is well.
+	>>>
+	>>> I've been working on a new search engine and I want to release my changes
+	>>> to our code under the BSD licence.  My university is asking that I get your
+	>>> agreement for this as you contributed to the code base.  Are you happy for
+	>>> our code to be released under the BSD license?
+	>>>
+	>>> Thanks
+	>>> Andrew.
+	>>>
+	>>>
+	>> 
+	>> 
+	>> -- 
+	>> Vikram Subramanya
+	>> 
+	>> Grad Student | UCSD CSE
+	>>
 */
 #include <string.h>
 #include <stdio.h>
