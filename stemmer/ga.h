@@ -5,8 +5,8 @@
 #include "ga_individual.h"
 
 const unsigned int DEFAULT_TOURNAMENT_SIZE = 2;
-const unsigned int DEFAULT_MUTATION_RATE = 15; // out of 100
-const unsigned int DEFAULT_CROSSOVER_RATE = 70; // out of 100
+const unsigned int DEFAULT_MUTATION_RATE = 10; // out of 100
+const unsigned int DEFAULT_CROSSOVER_RATE = 80; // out of 100
 enum { NO_ELITISM, USE_ELITISM };
 
 class Vocab;

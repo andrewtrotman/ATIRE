@@ -4,10 +4,17 @@ BINDIR = ../bin
 EXTSRCDIR = .
 EXTOBJDIR = ./obj
 
+#PROFILE = -fprofile-generate
+#PROFILE = -fprofile-use
+
+#OPTIM_OR_DEBUG = -g
+OPTIM_OR_DEBUG = -O3 
+
 EXTFLAGS = -I$(SRCDIR)
-LDFLAGS = -g -ldl -pthread
-DEFINES = -g -DSPECIAL_COMPRESSION -D_CRT_SECURE_NO_WARNINGS -DONE_PARSER -DHASHER=1 \
-    -DHEADER_HASHER=1 -DDO_TOP_SCORES #-DUSE_RADIX
+LDFLAGS = $(OPTIM_OR_DEBUG) $(PROFILE) -ldl -pthread
+DEFINES = $(OPTIM_OR_DEBUG) $(PROFILE) -DSPECIAL_COMPRESSION -D_CRT_SECURE_NO_WARNINGS \
+	-DONE_PARSER -DHASHER=1 \
+	-DHEADER_HASHER=1 -DDO_TOP_SCORES 
 CFLAGS = -Wall $(DEFINES) -Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -I$(SRCDIR)
 # -DUSE_FLOATED_TF -DGA_STEMMER_STATS
 
@@ -16,6 +23,7 @@ CFLAGS = -Wall $(DEFINES) -Wno-endif-labels -Wno-missing-braces -I$(EXTSRCDIR) -
 #CC = /home/user/usr/bin/openCC
 #CC = llvm-g++
 CC = g++
+#CC = icpc 
 
 
 OBJECTS = \
@@ -183,7 +191,9 @@ depend :
 
 .PHONY : clean
 clean :
-	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o $(BINDIR)/qpp $(EXTOBJDIR)/qpp.o
+	-rm $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/ga_ant $(BINDIR)/vocab_tool $(OBJECTS_W_DIR) $(EXTENSION_W_DIR) $(EXTOBJDIR)/ga_ant.o $(OBJDIR)/ant.o $(OBJDIR)/index.o $(EXTOBJDIR)/vocab_tool.o $(BINDIR)/qpp $(EXTOBJDIR)/qpp.o $(EXTOBJDIR)/qpp_individual.o $(EXTOBJDIR)/qpp_stemmer.o
+	-rm $(EXTOBJDIR)/ga_ant_no_m.o $(EXTOBJDIR)/ga_ant_no_sep.o $(EXTOBJDIR)/ga_ant_no_m_or_sep.o
+	-rm $(BINDIR)/ga_ant_no_m $(BINDIR)/ga_ant_no_sep $(BINDIR)/ga_ant_no_m_or_sep 
 
 
 #

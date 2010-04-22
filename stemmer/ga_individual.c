@@ -43,6 +43,7 @@ j being the start of the suffix to remove
 inline static int m(const char *s, int j) {
     int n = 0;
     int i = 0;
+    // 
     while(TRUE) {
         if (i > j) return n;
         if (!consonant_p(s, i)) break; 
@@ -98,6 +99,9 @@ inline int GA_individual::is_banned(char *s) {
 char *GA_individual::apply(const char *string) {
     unsigned int i, skipping = FALSE;
     int length;
+#ifndef NO_MEASURE
+    int buffer_m;
+#endif
     static char buffer[TMP_BUFFER_SIZE];
 
 	#ifdef GA_STEMMER_STATS
@@ -107,6 +111,9 @@ char *GA_individual::apply(const char *string) {
     strncpy(buffer, string, TMP_BUFFER_SIZE);
     buffer[TMP_BUFFER_SIZE - 1] = '\0';
     length = strlen(buffer);
+#ifndef NO_MEASURE
+    buffer_m = m(buffer, length - 1); // Cache measure
+#endif
 
     for (i = 0; i < count; i++) {
 #ifdef NO_SEPARATORS
@@ -123,7 +130,7 @@ char *GA_individual::apply(const char *string) {
             if (strncmp(buffer + length - from_len,
                         rule_from(i), RULE_STRING_MAX) == 0) {
 #else
-            if (m(buffer, length - 1) >= measure(i) &&
+            if (buffer_m >= measure(i) &&
                 strncmp(buffer + length - from_len,
                         rule_from(i), RULE_STRING_MAX) == 0) {
 #endif
@@ -138,6 +145,10 @@ char *GA_individual::apply(const char *string) {
 
                 buffer[length - from_len + to_len] = '\0';
                 length += to_len - from_len;
+
+#ifndef NO_MEASURE
+                buffer_m = m(buffer, length - 1); // recalc measure
+#endif                
 
                 skipping = TRUE;
 

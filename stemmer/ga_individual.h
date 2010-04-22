@@ -13,7 +13,7 @@ const int GEN_MIN_RULES = 5;    // Minimum size when generating.
 const int GEN_MAX_RULES = 30;   // Maximum size when generating.
 const int MAX_INDIVIDUAL_SIZE = (RULE_SIZE * MAX_RULES);
 const int MEASURE_MAX = 5;
-const int SACROSANCT_CHARS = 2;
+const int SACROSANCT_CHARS = 3;
 
 class Vocab;
 

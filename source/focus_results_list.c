@@ -2,7 +2,7 @@
 	FOCUS_RESULTS_LIST.C
 	--------------------
 */
-#include <new.h>
+#include <new>
 #include <stdio.h>
 #include "focus_results_list.h"
 #include "focus_result.h"

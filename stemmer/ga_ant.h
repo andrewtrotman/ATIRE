@@ -17,7 +17,7 @@
 #include "ranking_function_bm25.h"
 
 #define NUM_OF_GENERATIONS 200
-#define POPULATION_SIZE 100
+#define POPULATION_SIZE 200 
 
 double perform_query(ANT_ANT_param_block *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, long topic_id, ANT_mean_average_precision *map, ANT_stemmer *stemmer);
 char **get_queries(long *query_count, ANT_ANT_param_block *params);
@@ -100,10 +100,11 @@ void ga_ant(ANT_search_engine *search_engine, ANT_mean_average_precision *map, A
 			fprintf(stderr, "%d %f\n", count++, result / (double)query_count);
 		}
 	} else {
-        ga = new GA(POPULATION_SIZE, 
+	printf("POP: %ld GENS: %ld\n", params->ga_population, params->ga_generations);
+        ga = new GA(params->ga_population, 
                     new GA_function(perform_query, params, search_engine, ranking_function, query_count, queries, topic_ids, map, stemmer), 
                     search_engine);
-		ga->run(NUM_OF_GENERATIONS);
+		ga->run(params->ga_generations);
 	}
 }
 
