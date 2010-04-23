@@ -63,11 +63,11 @@ long long cpu_time_ms = stats->get_cpu_time_ms();
 long long io_time_ms = stats->get_io_time_ms();
 
 fprintf(file, "<topic");
-fprintf(file, " topic-id = %s%ld>\n", ANT_search_engine_forum_INEX_efficiency::ID_PREFIX, topic_id);
-fprintf(file, " total_time_ms = %lld\n", (cpu_time_ms + io_time_ms));
-fprintf(file, " cpu_time_ms = %lld\n", cpu_time_ms);
-fprintf(file, " io_time_ms = %lld\n", io_time_ms);
-fprintf(file, " io_bytes = %lld\n", stats->disk_bytes_read_on_search);
+fprintf(file, " topic-id = \"%s%ld\"\n", ANT_search_engine_forum_INEX_efficiency::ID_PREFIX, topic_id);
+fprintf(file, " total_time_ms = \"%lld\"\n", (cpu_time_ms + io_time_ms));
+fprintf(file, " cpu_time_ms = \"%lld\"\n", cpu_time_ms);
+fprintf(file, " io_time_ms = \"%lld\"\n", io_time_ms);
+fprintf(file, " io_bytes = \"%lld\"\n", stats->disk_bytes_read_on_search);
 fprintf(file, ">\n");
 
 for (which = 0; which < hits; which++)
