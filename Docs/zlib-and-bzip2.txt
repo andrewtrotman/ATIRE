@@ -4,7 +4,8 @@ For UNIX-like operating systems, you have two options get the required libs link
 
 (A) Option 1, use system default zlib and bzip2 libs
 
-	(1) make sure your system has already the required libs installed
+	(1) make sure your system has already the required libs installed.
+		On Ubuntu 9.10, package zlib1g-dev and libbz2-dev have to be installed
 	(2) enabling the following variables in makefile.unix
 		USE_SYSTEM_ZLIB = 1
 		USE_SYSTEM_BZLIB = 1
@@ -22,4 +23,4 @@ For UNIX-like operating systems, you have two options get the required libs link
 	(6) then 'make -f makefile.unix'
 
 
-For how to link zlib and bzip2 libs in Windows, please refers to ant/zlib/ant_zlib_howto.txt 
+For how to link zlib and bzip2 libs in Windows, please refers to ant/zlib/ant_zlib_howto.txt
