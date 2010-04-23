@@ -17,6 +17,9 @@ public:
 	long long postings_position_on_disk;
 	long impacted_length;
 	long postings_length;
+#ifdef TERM_LOCAL_MAX_IMPACT
+	unsigned char local_max_impact;
+#endif
 } ;
 
 #endif  /* SEARCH_ENGINE_BTREE_LEAF_H_ */

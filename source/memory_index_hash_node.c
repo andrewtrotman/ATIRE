@@ -51,7 +51,7 @@ tf_node_length = postings_initial_length;
 tf_node_used = 0;
 stats->bytes_allocated_for_tfs += postings_initial_length;
 
-collection_frequency = document_frequency = current_docno = 0;
+collection_frequency = document_frequency = current_docno = term_local_max_impact = 0;
 }
 
 /*

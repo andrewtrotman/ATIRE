@@ -251,6 +251,9 @@ for (param = first_param; param < argc; param++)
 			is_previous_token_chinese = FALSE;
 			previous_token_start = NULL;
 			}
+		/*
+		 *  An empty file should not be counted
+		 */
 		if (terms_in_document == 0)
 			doc--;
 		else

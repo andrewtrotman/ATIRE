@@ -16,6 +16,20 @@
 	#define TRUE (!FALSE)
 #endif
 
+#ifdef TERM_LOCAL_MAX_IMPACT
+	/*
+		CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, local_max_impact, String_pos_in_node
+		(4 + 4 + 8 + 4 + 4 + 1 + 4)
+	 */
+	const long ANT_btree_iterator::LEAF_SIZE = 29;
+#else
+	/*
+		CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
+		(4 + 4 + 8 + 4 + 4 + 4)
+	*/
+	const long ANT_btree_iterator::LEAF_SIZE = 28;
+#endif
+
 /*
 	ANT_BTREE_ITERATOR::ANT_BTREE_ITERATOR()
 	----------------------------------------
@@ -44,7 +58,7 @@ char *ANT_btree_iterator::first(char *term)
 long long node_length, node_position;
 long exact_match, terms_in_leaf;
 size_t length_of_term;
-long low, high, mid, leaf_size;
+long low, high, mid;
 long before_first_term = FALSE;
 
 if (term == NULL)
@@ -93,12 +107,11 @@ else
 
 	low = 0;
 	high = terms_in_leaf = ANT_get_long(btree_leaf_buffer);
-	leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
 
 	while (low < high)
 		{
 		mid = (low + high) / 2;
-		if (strcmp((char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (leaf_size * (mid + 1)))), term) < 0)
+		if (strcmp((char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (LEAF_SIZE * (mid + 1)))), term) < 0)
 			low = mid + 1;
 		else
 			high = mid;
@@ -107,7 +120,7 @@ else
 	if (leaf >= terms_in_leaf)
 		return next();
 	else
-		strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (leaf_size * (leaf + 1)))));
+		strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (LEAF_SIZE * (leaf + 1)))));
 	}
 return keyword;
 }
@@ -119,7 +132,6 @@ return keyword;
 char *ANT_btree_iterator::next(void)
 {
 long long node_length, node_position;
-long leaf_size;
 
 leaf++;
 
@@ -140,8 +152,7 @@ if (leaf >= ANT_get_long(btree_leaf_buffer))
 	search_engine->index->read(btree_leaf_buffer, node_length);
 	}
 
-leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
-strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (leaf_size * (leaf + 1)))));
+strcpy(keyword + keyword_head_length, (char *)(btree_leaf_buffer + ANT_get_long(btree_leaf_buffer + (LEAF_SIZE * (leaf + 1)))));
 return keyword;
 }
 

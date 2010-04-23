@@ -30,6 +30,8 @@ public:
 	virtual char *first(char *term);
 	virtual char *next(void);
 	virtual ANT_search_engine_btree_leaf *get_postings_details(ANT_search_engine_btree_leaf *term_details);
+
+	static const long LEAF_SIZE;
 } ;
 
 #endif  /* BTREE_ITERATOR_H_ */

@@ -91,7 +91,7 @@ end = stem_buffer + documents_as_integer;
 document_frequency = 0;
 for (current = stem_buffer; current < end; current++)
 	if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
-		{	
+		{
 		if (*current >= 0x100)
 			*current = 0xFF;			// cap term frequency at 255
 		bucket_size[(long) *current]++;

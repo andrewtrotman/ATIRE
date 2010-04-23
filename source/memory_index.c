@@ -22,6 +22,8 @@
 #include "fundamental_types.h"
 #include "compression_factory.h"
 #include "maths.h"
+#include "btree_iterator.h"
+#include "pdebug.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -223,7 +225,7 @@ node->set(score);
 	ANT_MEMORY_INDEX::IMPACT_ORDER()
 	--------------------------------
 */
-long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency)
+long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
 {
 ANT_compressable_integer sum, bucket_size[0x100], bucket_prev_docid[0x100];
 ANT_compressable_integer *pointer[0x100], *current_docid, doc;
@@ -281,6 +283,12 @@ for (current = term_frequency; current < end; current++)
 for (bucket = 0; bucket < 0x100; bucket++)
 	if (bucket_size[bucket] != 0)
 		*pointer[bucket] = 0;
+
+
+/*
+ * The first frequency or impact-value is the max local impact for the term
+ */
+*max_local = ((unsigned char*)destination)[0];
 
 /*
 	Return the length of the impact ordered list
@@ -408,18 +416,21 @@ else
 
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency > 2)
-		impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
+		impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
 	else
 		impacted_postings_length = 0;
 #else
-	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency);
+	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
 #endif
 	}
 
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency <= 2)
 		{
+		// store the first postings(4 bytes) in the higher order of the 8 bytes
+		// and store the first term frequency (4 bytes) in the lower order of the 8 bytes
 		root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
+		//use impacted_length and end_pos_on_disk to store the second postings and term frequency
 		if (root->document_frequency == 2)
 			{
 			root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
@@ -529,6 +540,9 @@ unsigned char zero = 0;
 uint64_t eight_byte;
 uint32_t four_byte, string_pos;
 uint32_t terms_in_node, current_node_head_length;
+#ifdef TERM_LOCAL_MAX_IMPACT
+unsigned char one_byte;
+#endif
 ANT_memory_index_hash_node **current, **end;
 
 /*
@@ -546,7 +560,7 @@ file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));		// 4 bytes
 	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
 */
 current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (uint32_t)(*start)->string.length();
-string_pos = (uint32_t)(end - start) * (1 * 8 + 5 * 4) + 4;
+string_pos = (uint32_t)(end - start) * ANT_btree_iterator::LEAF_SIZE + 4;
 for (current = start; current < end; current++)
 	{
 	four_byte = (uint32_t)(*current)->collection_frequency;
@@ -563,6 +577,11 @@ for (current = start; current < end; current++)
 
 	four_byte = (uint32_t)((*current)->in_disk.end_pos_on_disk - (*current)->in_disk.docids_pos_on_disk);
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+#ifdef TERM_LOCAL_MAX_IMPACT
+	one_byte = (unsigned char)((*current)->term_local_max_impact);
+	file->write((unsigned char *)&one_byte, sizeof(one_byte));
+#endif
 
 	four_byte = (uint32_t)string_pos;
 	file->write((unsigned char *)&four_byte, sizeof(four_byte));
@@ -729,6 +748,8 @@ for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 		where += generate_term_list(hash_table[hash_val], term_list, where, &length_of_longest_term, &highest_df);
 term_list[unique_terms] = NULL;
 
+dbg_printf("unique_terms: %ld\n", unique_terms);
+
 /*
 	Sort the term list
 */
@@ -736,6 +757,7 @@ qsort(term_list, unique_terms, sizeof(*term_list), ANT_memory_index_hash_node::t
 
 /*
 	Work out how many nodes there are in the root of the b-tree
+	(Counts the number of nodes in the first-level of the dictionary)
 */
 btree_root_size = 0;
 for (here = term_list; *here != NULL; here = find_end_of_node(here))
@@ -743,6 +765,8 @@ for (here = term_list; *here != NULL; here = find_end_of_node(here))
 
 /*
 	Write the term list and generate the header list
+	(Generate the first-level of the dictionary, and write the dictionary's
+	  secondary-level to disk)
 */
 current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree_head_node) * btree_root_size);
 here = term_list;
@@ -756,13 +780,18 @@ while (*here != NULL)
 last_header = current_header;
 terms_in_root = last_header - header;
 
+dbg_printf("btree_root_size++: %ld, terms_in_root: %ld\n", btree_root_size, terms_in_root);
+
 /*
 	Take note of where the header will be located on disk
+	(Remember where the first-level of the dictionary gets started)
 */
 file_position = index_file->tell();
 
 /*
 	Write the header to disk N then N * (string, offset) pairs
+	(Write the number of the terms in the dictionary's first-level, and
+	 write all terms of the first-level to disk)
 */
 index_file->write((unsigned char *)&terms_in_root, sizeof(terms_in_root));	// 4 bytes
 
@@ -808,7 +837,7 @@ return 1;
 	ANT_MEMORY_INDEX::ADD_TO_FILENAME_REPOSITORY()
 	----------------------------------------------
 	The filenames are stored in a big buffer.  The start of that buffer points to the
-	start of the previous buffer, and so on until we get a NULL pointer. 
+	start of the previous buffer, and so on until we get a NULL pointer.
 */
 void ANT_memory_index::add_to_filename_repository(char *filename)
 {

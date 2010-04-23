@@ -44,6 +44,7 @@
 #include "focus_results_list.h"
 #include "focus_article.h"
 #include "focus_lowest_tag.h"
+#include "pdebug.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -127,10 +128,14 @@ current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	term_list[current_term++] = term_string;
 
+#ifdef TERM_LOCAL_MAX_IMPACT
+qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_local_max_impact);
+#else
 /*
 	Sort on collection frequency works better than document_frequency when tested on the TREC Wall Street Collection
 */
 qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
+#endif
 
 /*
 	Process each search term - either stemmed or not.
@@ -138,6 +143,9 @@ qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_coll
 for (current_term = 0; current_term < terms_in_query; current_term++)
 	{
 	term_string = term_list[current_term];
+#ifdef TERM_LOCAL_MAX_IMPACT
+	dbg_printf("local_max_impact: %d\n", term_string->term_details.local_max_impact);
+#endif
 	if (stemmer == NULL || !ANT_islower(*term_string->get_term()->start))		// We don't stem numbers or tag names, of if there is no stemmer
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
@@ -660,7 +668,7 @@ else
 	{
 	search_engine = new ANT_search_engine(&memory, params.file_or_memory);
     /*    	if (params.stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
-		ranking_function = new ANT_ranking_function_similarity(search_engine, params.bm25_k1, params.bm25_b); 
+		ranking_function = new ANT_ranking_function_similarity(search_engine, params.bm25_k1, params.bm25_b);
         else*/
     if (params.ranking_function == ANT_ANT_param_block::BM25)
 		ranking_function = new ANT_ranking_function_BM25(search_engine, params.bm25_k1, params.bm25_b);

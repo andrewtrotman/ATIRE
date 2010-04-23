@@ -16,8 +16,8 @@ class ANT_search_engine_accumulator
 public:
 	/*
 		ANT_accumulator_t is the type used for storing rsv scores in the search engine.  Experiments with 50 topics
-		on the TREC WSJ collection suggest that using fixed point arrithmatic accurate to 2 decimal places is faster than
-		using floating point arithmatic.  The effect on precision is in the 5th decimal place (negligable) and so can be ignored.
+		on the TREC WSJ collection suggest that using fixed point arithmetic accurate to 2 decimal places is faster than
+		using floating point arithmetic.  The effect on precision is in the 5th decimal place (negligible) and so can be ignored.
 		For higher accuracy at an execution cost set ANT_accumulator_t to a double (or float).
 	*/
 	typedef short ANT_accumulator_t;			// short or double
@@ -26,7 +26,7 @@ private:
 	ANT_accumulator_t rsv;
 
 private:
-	static inline void swap(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b) { register ANT_search_engine_accumulator *tmp; tmp = *a; *a = *b; *b = tmp; } 
+	static inline void swap(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b) { register ANT_search_engine_accumulator *tmp; tmp = *a; *a = *b; *b = tmp; }
 	static inline int compare_pointer(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b);
 
 public:
@@ -34,8 +34,8 @@ public:
 	ANT_accumulator_t add_rsv(long score) { return rsv += (ANT_accumulator_t)score; }
 
 	long is_zero_rsv(void) { return rsv == 0; }
-	ANT_accumulator_t get_rsv(void) { return rsv; } 
-	void clear_rsv(void) { rsv = 0; } 
+	ANT_accumulator_t get_rsv(void) { return rsv; }
+	void clear_rsv(void) { rsv = 0; }
 
 	static int compare(const void *a, const void *b);
 	static int compare_pointer(const void *a, const void *b);

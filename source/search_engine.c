@@ -333,13 +333,17 @@ ANT_search_engine_btree_leaf *ANT_search_engine::get_leaf(unsigned char *leaf, l
 long leaf_size;
 unsigned char *base;
 
-leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
+// length of a leaf node (sum of cf, df, etc. sizes)
+leaf_size = ANT_btree_iterator::LEAF_SIZE;
 base = leaf + leaf_size * term_in_leaf + sizeof(int32_t);		// sizeof(int32_t) is for the number of terms in the node
 term_details->collection_frequency = ANT_get_long(base);
 term_details->document_frequency = ANT_get_long(base + 4);
 term_details->postings_position_on_disk = ANT_get_long_long(base + 8);
 term_details->impacted_length = ANT_get_long(base + 16);
 term_details->postings_length = ANT_get_long(base + 20);
+#ifdef TERM_LOCAL_MAX_IMPACT
+term_details->local_max_impact = ANT_get_short(base + 24);
+#endif
 
 return term_details;
 }
@@ -379,7 +383,8 @@ index->read(btree_leaf_buffer, (long)node_length);
 */
 low = 0;
 high = nodes = (long)ANT_get_long(btree_leaf_buffer);
-leaf_size = 28;		// length of a leaf node (sum of cf, df, etc. sizes)
+// length of a leaf node (sum of cf, df, etc. sizes)
+leaf_size = ANT_btree_iterator::LEAF_SIZE;
 
 while (low < high)
 	{
@@ -585,7 +590,7 @@ while (term != NULL)
 		get the location of the postings on disk
 	*/
 	now = stats->start_timer();
-	stemmer->get_postings_details(&term_details); 
+	stemmer->get_postings_details(&term_details);
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 	/*
@@ -621,9 +626,9 @@ while (term != NULL)
 			{
 			document += *current_document++;
 			/*
-				Only weight TFs if we're using floats, this makes no sense for integer tfs. 
+				Only weight TFs if we're using floats, this makes no sense for integer tfs.
 			*/
-			#ifdef USE_FLOATED_TF 
+			#ifdef USE_FLOATED_TF
 				if (weight_terms)
 					stem_buffer[document] += term_frequency * tf_weight;
 				else
@@ -646,7 +651,7 @@ while (term != NULL)
 	}
 
 /*
-	Finally, if we had no problem loading the search terms then 
+	Finally, if we had no problem loading the search terms then
 	do the relevance ranking as if it was a single search term
 */
 if (verify != NULL)
@@ -798,7 +803,7 @@ factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_le
 stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;
-} 
+}
 
 /*
 	ANT_SEARCH_ENGINE::GET_DOCUMENT()

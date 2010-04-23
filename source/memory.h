@@ -11,7 +11,7 @@
 
 #if defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
 	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
-#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4) || defined(__APPLE__) 
+#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4) || defined(__APPLE__) || (__WORDSIZE == 32)
 	const long long ANT_memory_block_size_for_allocation = 64 * 1024 * 1024;
 #else
 	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
@@ -49,7 +49,7 @@ public:
 	long long bytes_used(void) { return used; }
 	/*
 		realign() does two things.  First, it aligns the next block of memory on the correct boundary for the largest
-		type we know about (a 64-bit long long) to avoid memory miss-allignment overheads.  Second, and as a consequence,
+		type we know about (a 64-bit long long) to avoid memory miss-alignment overheads.  Second, and as a consequence,
 		it cache-line aligns the next memory allocation (Intel uses a 64-byte cache line) thus reducing the number of
 		cache misses if we process the memory sequentially.
 	*/

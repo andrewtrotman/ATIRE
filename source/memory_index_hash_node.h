@@ -45,6 +45,17 @@ public:
 	ANT_memory *memory;
 	ANT_stats_memory_index *stats;
 
+
+//#ifdef TERM_LOCAL_MAX_IMPACT
+	/*
+	 *  this value is the max impact for the current term. The impact can be either
+	 *  term frequency or quantised rsv value. This requires a extra byte in the
+	 *  structure of the dictionary.
+	 *
+	 */
+	unsigned char term_local_max_impact;
+//#endif
+
 private:
 	inline long compress_bytes_needed(long long val);
 	inline void compress_into(unsigned char *dest, long long docno);

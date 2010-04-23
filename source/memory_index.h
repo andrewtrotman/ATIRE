@@ -50,7 +50,7 @@ private:
 	ANT_file *index_file;
 
 	/*
-		These are used for quantization.  We need to store the max and min rsv values 
+		These are used for quantization.  We need to store the max and min rsv values
 		so that we can scale them.  We also need the document lengths array and some
 		form of quantizer
 	*/
@@ -84,7 +84,7 @@ private:
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df);
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
-	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
+	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
 	void open_index_file(char *filename);
@@ -102,7 +102,7 @@ public:
 
 	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
 	long serialise(ANT_ranking_function_factory *factory);
-	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
+	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; }
 	void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	void set_variable(ANT_string_pair *measure_name, long long score);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
