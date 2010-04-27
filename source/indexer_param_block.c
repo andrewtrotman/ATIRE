@@ -103,8 +103,7 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S[sodb]        East-Asian word segmentation [default double-segmentation]");
-puts("   s            Single segmentation, only index what we have");
+puts("-S[odb]        East-Asian word segmentation, Chinese segment is the text separated by non-Chinese");
 puts("   o            Use a segmentation module to segment string on fly");
 puts("   d            Double(dual) segmentation, with words and single characters");
 puts("   b            Segmentation using bigram");
@@ -213,7 +212,7 @@ segmentation |= ANT_parser::SHOULD_SEGMENT;
 for (segment_flag = segment_flags; *segment_flag != '\0'; segment_flag++)
 	switch (*segment_flag)
 		{
-		case 's': segmentation -= ANT_parser::DOUBLE_SEGMENTATION; break; // only index what we have
+		//case 's': segmentation -= segmentation & ANT_parser::DOUBLE_SEGMENTATION; break; // only index what we have
 		case 'o': segmentation |= ANT_parser::ONFLY_SEGMENTATION; break;
 		case 'd': segmentation |= ANT_parser::DOUBLE_SEGMENTATION; break;
 		case 'b': segmentation |= ANT_parser::BIGRAM_SEGMENTATION; break;

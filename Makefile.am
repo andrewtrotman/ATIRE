@@ -12,7 +12,7 @@ AM_LDFLAGS = @LIBS@
 
 # using HEADER HASH FUNCTION
 AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
-		-DSPECIAL_COMPRESSION=1 -DTOP_K_SEARCH \
+		-DSPECIAL_COMPRESSION=1 -DTOP_K_SEARCH -DTOP_K_READ_AND_DECOMPRESSOR \
        -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
        
 # for parallel indexing, but it will be configured by configure script with --with-pi option
@@ -50,6 +50,7 @@ core_sources =  \
     $(SRCDIR)/assessment.c \
     $(SRCDIR)/assessment_ANT.c \
     $(SRCDIR)/assessment_INEX.c \
+    $(SRCDIR)/assessment_TREC.c \
     $(SRCDIR)/assessment_factory.c \
     $(SRCDIR)/relevant_document.c \
     $(SRCDIR)/stats.c \
@@ -61,6 +62,8 @@ core_sources =  \
     $(SRCDIR)/search_engine_forum.c \
     $(SRCDIR)/search_engine_forum_INEX.c \
     $(SRCDIR)/search_engine_forum_INEX_efficiency.c	\
+	$(SRCDIR)/search_engine_forum_INEX_bep.c \
+	$(SRCDIR)/search_engine_forum_INEX_focus.c \
     $(SRCDIR)/search_engine_forum_TREC.c \
     $(SRCDIR)/search_engine_readability.c \
     $(SRCDIR)/str.c \
@@ -131,7 +134,9 @@ core_sources =  \
 	$(SRCDIR)/channel_file.c \
 	$(SRCDIR)/channel_socket.c \
 	$(SRCDIR)/focus.c \
-	$(SRCDIR)/focus_lowest_tag.c
+	$(SRCDIR)/focus_article.c \
+	$(SRCDIR)/focus_lowest_tag.c \
+	$(SRCDIR)/focus_results_list.c 
 				
 core_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -139,6 +144,7 @@ core_noinst_headers = \
 	$(SRCDIR)/assessment_factory.h	\
 	$(SRCDIR)/assessment.h	\
 	$(SRCDIR)/assessment_INEX.h	\
+	$(SRCDIR)/assessment_TREC.h \
 	$(SRCDIR)/bitstream.h	\
 	$(SRCDIR)/btree.h	\
 	$(SRCDIR)/btree_head_node.h	\
@@ -212,6 +218,8 @@ core_noinst_headers = \
 	$(SRCDIR)/search_engine_forum.h	\
 	$(SRCDIR)/search_engine_forum_INEX.h	\
 	$(SRCDIR)/search_engine_forum_INEX_efficiency.h	\
+	$(SRCDIR)/search_engine_forum_INEX_bep.h \
+	$(SRCDIR)/search_engine_forum_INEX_focus.h \
 	$(SRCDIR)/search_engine_forum_TREC.h	\
 	$(SRCDIR)/search_engine.h	\
 	$(SRCDIR)/search_engine_posting.h	\
@@ -266,9 +274,11 @@ core_noinst_headers = \
 	$(SRCDIR)/channel_socket.h \
 	$(SRCDIR)/sockets_internals.h \
 	$(SRCDIR)/focus.h \
+	$(SRCDIR)/focus_article.h \
 	$(SRCDIR)/focus_result.h \
 	$(SRCDIR)/focus_lowest_tag.h \
-	$(SRCDIR)/focus_hash_node.h
+	$(SRCDIR)/focus_hash_node.h \
+	$(SRCDIR)/focus_results_list.h
 	
 library_headers = \
 	$(SRCDIR)/ant_api.h \

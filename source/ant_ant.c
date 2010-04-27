@@ -11,6 +11,7 @@
 #include "ant_api.h"
 #include "ant_param_block.h"
 #include "str.h"
+#include "channel.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -22,40 +23,12 @@
 const char *PROMPT = "]";
 
 /*
-	class ANT_ANT_FILE_ITERATOR
-	---------------------------
-*/
-class ANT_ANT_file_iterator
-{
-private:
-	FILE *fp;
-	char query[1024];
-
-public:
-	ANT_ANT_file_iterator(char *filename)
-		{
-		if (filename == NULL)
-			fp = stdin;
-		else
-			fp = fopen(filename, "rb");
-		if (fp == NULL)
-			exit(printf("Cannot open topic file:'%s'\n", filename));
-		}
-	~ANT_ANT_file_iterator() { if (fp != NULL) fclose(fp); }
-	char *first(void) {
-        fseek(fp, 0, SEEK_SET);
-        return fgets(query, sizeof(query), fp);
-    }
-	char *next(void) { return fgets(query, sizeof(query), fp); }
-} ;
-
-/*
 	PROMPT()
 	--------
 */
 void prompt(ANT_ANT_param_block *params)
 {
-if (params->queries_filename == NULL)
+if (params->queries_filename == NULL && params->port == 0)		// coming from stdin
 	printf(PROMPT);
 }
 
@@ -87,6 +60,7 @@ params->lmjm_l = block->lmjm_l;
 params->bm25_k1 = block->bm25_k1;
 params->bm25_b = block->bm25_b;
 params->file_or_memory = block->file_or_memory;
+params->port = block->port;
 }
 
 /*
@@ -97,7 +71,7 @@ int main(int argc, char *argv[])
 {
 ANT_ANT_param_block param_block(argc, argv);
 long last_param;
-char *query;
+char *command, *query;
 char *query_start;
 long line;
 char topic_id[1024]; // the topic id not necessary has to be number
@@ -105,8 +79,6 @@ long topic_id_len = 0;
 long long hits;
 
 last_param = param_block.parse();
-
-ANT_ANT_file_iterator input(param_block.queries_filename);
 
 //ant(search_engine, ranking_function, map, &params, filename_list, document_list, answer_list);
 ANT *ant = ant_easy_init();
@@ -119,38 +91,49 @@ ant_setup(ant);
 
 ant_post_processing_stats_init(ant);
 
+ANT_channel *inchannel = (ANT_channel *)params->inchannel;
 line = 0;
 prompt(&param_block);
-for (query = input.first(); query != NULL; query = input.next())
+for (command = inchannel->gets(); command != NULL; prompt(&param_block), command = inchannel->gets())
     {
     line++;
     /*
 	    Parsing to get the topic number
     */
-    strip_space_inplace(query);
-    if (strcmp(query, ".quit") == 0)
+    strip_space_inplace(command);
+    if (strcmp(command, ".quit") == 0)
 	    break;
-    if (*query == '\0')
+	if (strncmp(command, ".get ", 5) == 0)
+		{
+		get_document(ant, command);
+		continue;
+		}
+    if (*command == '\0')
 	    continue;			// ignore blank lines
 
     if (have_assessments || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
 	    {
 	    //topic_id = atol(query);
-    	query_start = query;
-	    if ((query = strchr(query, ' ')) == NULL)
+    	query_start = command;
+	    if ((query = strchr(command, ' ')) == NULL)
 		    exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, query));
 	    topic_id_len = query - query_start;
 	    strncpy(topic_id, query_start, topic_id_len);
 	    topic_id[topic_id_len] = '\0';
 	    }
     else
-	    strcpy(topic_id, "-1");
+		{
+		strcpy(topic_id, "-1");
+		query = command;
+		}
 
     ant_search(ant, &hits, query, topic_id, params->boolean);
-    forum_output(ant, topic_id, hits);
+    forum_output(ant, topic_id, hits, query);
 
     prompt(&param_block);
     }
+
+delete [] command;
 
 ant_cal_map(ant);
 ant_stat(ant);

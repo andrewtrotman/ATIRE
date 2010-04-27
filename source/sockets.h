@@ -58,4 +58,4 @@ public:
 	unsigned int whtonl(unsigned int num);
 } ;
 
-#endif __SOCKETS_H__
+#endif /* __SOCKETS_H__ */

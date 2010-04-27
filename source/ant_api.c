@@ -5,6 +5,7 @@
 
 #include "ant_api.h"
 
+#include "maths.h"
 #include "str.h"
 #include "memory.h"
 #include "ctypes.h"
@@ -20,6 +21,8 @@
 #include "assessment_factory.h"
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_INEX_efficiency.h"
+#include "search_engine_forum_INEX_focus.h"
+#include "search_engine_forum_INEX_bep.h"
 #include "search_engine_forum_TREC.h"
 #include "ant_params.h"
 #include "version.h"
@@ -32,9 +35,17 @@
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
+#include "ranking_function_inner_product.h"
 #include "parser.h"
 #include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
+#include "sockets.h"
+#include "channel_file.h"
+#include "channel_socket.h"
+#include "focus_results_list.h"
+#include "focus_article.h"
+#include "focus_lowest_tag.h"
+#include "pdebug.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -45,6 +56,8 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+const long MAX_TITLE_LENGTH = 1024;
 
 /*
    GLOBAL VARIABLES
@@ -74,6 +87,8 @@ char *mem1, *mem2;
 
 double average_precision, sum_of_average_precisions;
 long number_of_queries;
+
+char *document_buffer, *title_start, *title_end;
 };
 
 /*
@@ -290,16 +305,96 @@ else if (params->output_forum == INEX)
 	output = new ANT_search_engine_forum_INEX(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
 else if (params->output_forum == INEX_EFFICIENCY)
 	output = new ANT_search_engine_forum_INEX_efficiency(params->output_filename, params->participant_id, params->run_name, params->results_list_length, "RelevantInContext");
+else if (params->output_forum == INEX_FOCUS)
+	output = new ANT_search_engine_forum_INEX_focus(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+else if (params->output_forum == INEX_BEP)
+	output = new ANT_search_engine_forum_INEX_bep(params->output_filename, params->participant_id, params->run_name, "RelevantInContext");
+
+if (params->port == 0)
+	{
+	params->inchannel = (void *)new ANT_channel_file(params->queries_filename);		// stdin
+	params->outchannel = (void *)new ANT_channel_file();							// stdout
+	}
+else
+	params->inchannel = params->outchannel = (void *)new ANT_channel_socket(params->port);	// in/out to given port
+
+params->length_of_longest_document = data->search_engine->get_longest_document_length();
+data->document_buffer = new char [params->length_of_longest_document + 1];
+}
+
+/*
+    GET_DOCUMENT()
+    --------------
+ */
+void get_document(ANT *ant, char *command)
+{
+struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+struct ANT_ANT_params *params = &data->params;
+ANT_channel *outchannel;
+outchannel = (ANT_channel *)params->outchannel;
+unsigned long current_document_length;
+char *document_buffer = data->document_buffer;
+char *print_buffer = new char [MAX_TITLE_LENGTH + 1024];
+
+*document_buffer = '\0';
+if ((current_document_length = params->length_of_longest_document) != 0)
+	{
+	data->search_engine->get_document(document_buffer, &current_document_length, atoll(command + 5));
+
+#ifndef NEVER
+/*
+Andrew's experimental code to test focusing
+*/
+ANT_focus_results_list focus_results_list(2000);		// allow a results list of up-to 2000 focused results
+ANT_NEXI_ant parser;
+ANT_NEXI_term_iterator term;
+ANT_NEXI_term_ant *parse_tree, *term_string;
+ANT_focus_lowest_tag focusser(&focus_results_list);
+ANT_focus_result *focused_result;
+static unsigned char unsigned_marker[] = {0xFF, 0x00};
+static char *marker = (char *)unsigned_marker;
+long focused_results_list_length;
+
+parse_tree = parser.parse(command + 5);
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+focusser.add_term(&term_string->term);
+
+focused_result = focusser.focus((unsigned char *)document_buffer, &focused_results_list_length);
+/*
+Test code to generate INEX FOL format.
+*/
+{
+ANT_search_engine_forum_INEX::focus_to_INEX(document_buffer, focused_result);
+fprintf(stderr, "%s %lld %lld\n", data->filename_list[atoll(command + 5)], focused_result->INEX_start, focused_result->INEX_finish - focused_result->INEX_start);
+}
+
+sprintf(print_buffer, "%lld", (long long)current_document_length + strlen(marker) + strlen(marker));
+outchannel->puts(print_buffer);
+
+outchannel->write(document_buffer, focused_result->start - document_buffer);
+outchannel->write(marker, strlen(marker));
+outchannel->write(focused_result->start, focused_result->finish - focused_result->start);
+outchannel->write(marker, strlen(marker));
+outchannel->write(focused_result->finish, current_document_length - (focused_result->finish - document_buffer));
+#else
+
+	sprintf(print_buffer, "%lld", current_document_length);
+	outchannel->puts(print_buffer);
+	outchannel->write(document_buffer, current_document_length);
+#endif
+	}
+
+delete [] print_buffer;
 }
 
 /*
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, const char *topic/*long topic_id*/, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
+double perform_query(ANT_channel *outchannel, ANT_ANT_params *params, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, char *query, long long *matching_documents, const char *topic/*long topic_id*/, ANT_mean_average_precision *map, ANT_stemmer *stemmer = NULL, long boolean = FALSE)
 {
 ANT_stats_time stats;
-long long now, hits = 0;
+long long now, hits = 0, search_time;;
 long did_query, first_case, token_length;
 char *current, token[1024];
 double average_precision = 0.0;
@@ -316,10 +411,11 @@ did_query = FALSE;
 now = stats.start_timer();
 
 #ifdef TOP_K_SEARCH
-search_engine->init_accumulators(params->sort_top_k);
+	search_engine->init_accumulators(params->sort_top_k);
 #else
-search_engine->init_accumulators();
+	search_engine->init_accumulators();
 #endif
+
 /*
 	Parse the query and count the number of search terms
 */
@@ -364,10 +460,14 @@ current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	term_list[current_term++] = term_string;
 
+#ifdef TERM_LOCAL_MAX_IMPACT
+	qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_local_max_impact);
+#else
 /*
 	Sort on collection frequency works better than document_frequency when tested on the TREC Wall Street Collection
 */
 qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
+#endif
 
 /*
 	Process each search term - either stemmed or not.
@@ -375,6 +475,9 @@ qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_coll
 for (current_term = 0; current_term < terms_in_query; current_term++)
 	{
 	term_string = term_list[current_term];
+#ifdef TERM_LOCAL_MAX_IMPACT
+	dbg_printf("local_max_impact: %d\n", term_string->term_details.local_max_impact);
+#endif
 	if (stemmer == NULL || !ANT_islower(*term_string->get_term()->start))		// We don't stem numbers or tag names, of if there is no stemmer
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
@@ -402,14 +505,22 @@ if (params->boolean)
 	hits = search_engine->boolean_results_list(terms_in_query);
 
 /*
+ * 	How long did it take?
+*/
+search_time = stats.stop_timer(now);
+
+/*
 	Reporting
 */
 if (params->stats & SHORT)
 	{
 	if (topic_id >= 0)
 		fprintf(params->output, "Topic:%s ", topic_id);
-	fprintf(params->output, "Query '%s' found %lld documents ", query, hits);
-	stats.print_time("(", stats.stop_timer(now), ")");
+	//fprintf(params->output, "Query '%s' found %lld documents ", query, hits);
+	sprintf(token, "Query '%s' found %lld documents in %lld ms", query, hits, stats.time_to_milliseconds(search_time));
+	outchannel->puts(token);
+//	puts(token);
+//	stats.print_time("(", stats.stop_timer(now), ")");
 	}
 
 if (did_query && params->stats & QUERY)
@@ -428,6 +539,11 @@ if (map != NULL)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
 	else if (params->metric == P_AT_N)
 		average_precision = map->p_at_n(topic_id, search_engine, params->metric_n);
+	else if (params->metric == SUCCESS_AT_N)
+		average_precision = map->success_at_n(topic_id, search_engine, params->metric_n);
+	/*
+		else it might be a focused evaluation metric
+	*/
 	}
 
 /*
@@ -439,6 +555,7 @@ if (map != NULL)
 	Add the time it took to search to the global stats for the search engine
 */
 search_engine->stats_add();
+
 /*
 	Return the precision
 */
@@ -446,76 +563,11 @@ return average_precision;
 }
 
 /*
-	GET_DOCUMENT_AND_PARSE()
-	------------------------
-*/
-char *get_document_and_parse(char *filename, ANT_stats_time *stats)
-{
-static char filename_buffer[1024];
-char *start, *end, *file;
-long long now, length;
-
-if (filename[1] == ':')							// windows c:\blah
-	filename += 2;
-
-now = stats->start_timer();
-file = ANT_disk::read_entire_file(filename);
-stats->add_disk_input_time(stats->stop_timer(now));
-
-if (file == NULL)
-	return NULL;
-
-now = stats->start_timer();
-filename_buffer[0] = '\0';
-start = strstr(file, "<title>");
-if (start != NULL)
-	if ((end = strstr(start += 7, "</title>")) != NULL)
-		{
-		length = end - start < 1022 ? end - start : 1022;
-		strncpy(filename_buffer, start, length);
-		filename_buffer[length] = '\0';
-		}
-
-delete [] file;
-
-stats->add_cpu_time(stats->stop_timer(now));
-
-return *filename_buffer == '\0' ? NULL : filename_buffer;
-}
-
-/*	GET_DOCUMENT_AND_EXTRACT()
-	--------------------------
-	This is a temporary function to load each document and to write it to a file
-*/
-char *get_document_and_extract(long long query_id, long long pos, char *filename)
-{
-char *ch, *file;
-
-if (filename[1] == ':')							// windows c:\blah
-	filename += 2;
-
-file = ANT_disk::read_entire_file(filename);
-if (file == NULL)
-	return NULL;
-
-for (ch = file; *ch != '\0'; ch++)
-	if (*ch == '\n' || *ch == '\r')
-		*ch = ' ';
-
-fprintf(stderr, "%lld %lld %s\n", query_id, pos, file);
-
-delete [] file;
-
-return filename;
-}
-
-
-/*
 	ANT_PERFORM()
 	------------
 	replacement for original ANT function
 */
-double ant_perform(ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, const char *topic_id/*long topic_id*/, long boolean)
+double ant_perform(ANT_channel *outchannel, ANT_search_engine *search_engine, ANT_ranking_function *ranking_function, ANT_mean_average_precision *map, ANT_ANT_params *params, char *query, char **filename_list, char **document_list, char **answer_list, long long *num_of_retrieved, const char *topic_id/*long topic_id*/, long boolean)
 {
 //char /**query, */*name;
 //long topic_id, line, number_of_queries;
@@ -555,7 +607,7 @@ ANT_stemmer *stemmer = params->stemmer == 0 ? NULL : ANT_stemmer_factory::get_st
 	*/
 	//number_of_queries++;
 
-	average_precision = perform_query(params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
+	average_precision = perform_query(outchannel, params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
 	//sum_of_average_precisions += average_precision;
 
 	/*
@@ -580,7 +632,7 @@ char **ant_search(ANT *ant, long long *hits, char *query, const char *topic_id/*
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
 
-data->sum_of_average_precisions += ant_perform(data->search_engine, data->ranking_function, data->map, params, query, data->filename_list, data->document_list, data->answer_list, hits, topic_id, boolean);
+data->sum_of_average_precisions += ant_perform((ANT_channel *)params->outchannel, data->search_engine, data->ranking_function, data->map, params, query, data->filename_list, data->document_list, data->answer_list, hits, topic_id, boolean); // zero if we're using a focused metric
 data->number_of_queries++;
 
 /*
@@ -685,44 +737,180 @@ ANT_stats::print_operating_system_process_time();
 	FORUM_OUTPUT()
 	--------------
  */
-void forum_output(ANT *ant, const char *topic_id/*long topic_id*/, long long hits)
+void forum_output(ANT *ant, const char *topic_id/*long topic_id*/, long long hits, char *query)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
 struct ANT_ANT_params *params = ant_params(ant);
 
 long long result;
 long long last_to_list = 0;
+long focus_top_k = params->focus_top_k;
+ANT_focus_results_list focus_results_list(focus_top_k);
+long long focused_bytes_parsed, total_focused_bytes_parsed = 0, focused_documents_parsed, total_focused_documents_parsed = 0;
+unsigned long current_document_length;
+long length_of_longest_document = data->search_engine->get_longest_document_length();
+long long docid;
+char *title_start, *title_end;
+char *print_buffer = new char [MAX_TITLE_LENGTH + 1024];
+char *ch;
+/*
+	How many results to display on the screen.
+*/
+//last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
+//if (output == NULL)
+//	for (result = 0; result < last_to_list; result++)
+////		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
+//			{
+////			get_document_and_extract(topic_id, result + 1, answer_list[result])
+//#ifdef NEVER
+//			long longest_len = search_engine->get_longest_document_length();
+//			long long docid;
+//			char *pos;
+//			char *document_buffer = new char [longest_len + 1];
+//			unsigned long len = longest_len;
+//
+//			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+//			search_engine->get_document(document_buffer, &len, docid);
+//			pos = strstr(document_buffer, "<DOCNO>");
+//			pos = strpbrk(pos, "wW");
+//			fprintf(params->output, "%lld:%s %f %*.*s\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
+//			delete [] document_buffer;
+//#else
+//			fprintf(params->output, "%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
+//#endif
+//			}
+////		else
+////			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
+//else
+//	output->write(atol(topic_id), data->answer_list, last_to_list, data->search_engine, &focus_results_list);
+
+
+/*
+	Apply focused retrieval to the resuts
+*/
+focused_bytes_parsed = focused_documents_parsed = 0;
+if (params->focussing_algorithm != NONE && length_of_longest_document != 0)
+	{
+	long long now = data->post_processing_stats->start_timer();
+	long long time_to_focus;
+	ANT_focus_result *focused_result;
+	ANT_NEXI_ant parser;
+	ANT_NEXI_term_iterator term;
+	ANT_NEXI_term_ant *parse_tree, *term_string;
+	ANT_focus *focusser;
+	long focused_hits, passages, current_passage;
+
+	focus_results_list.rewind();
+
+	if (params->focussing_algorithm == RANGE)
+		focusser = new ANT_focus_lowest_tag(&focus_results_list);	// closest open tag to first occurence to closest close tag of last.
+	else if (params->focussing_algorithm == ARTICLE)
+		focusser = new ANT_focus_article(&focus_results_list);		// return the whole article
+	else
+		focusser = new ANT_focus_article(&focus_results_list);		// default on error
+
+	/*
+		Parse (a second time - FIX this in the API) and pass the terms to the focusser
+	*/
+	parser.set_segmentation(params->segmentation);
+	parse_tree = parser.parse(query);
+	for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+		focusser->add_term(&term_string->term);
+
+	/*
+		Now focus each result until we have the designated number of results in the focused results list
+	*/
+	focused_hits = 0;
+	for (result = 0; result < hits; result++)
+		{
+		focused_documents_parsed++;
+		docid = data->search_engine->results_list->accumulator_pointers[result] - data->search_engine->results_list->accumulator;
+		current_document_length = length_of_longest_document;
+
+		data->search_engine->get_document(data->document_buffer, &current_document_length, docid);
+		focused_bytes_parsed += current_document_length;
+		focused_result = focusser->focus((unsigned char *)data->document_buffer, &passages, docid, data->answer_list[result], data->search_engine->results_list->accumulator_pointers[result]);
+
+		if ((focused_hits += passages) >= focus_top_k)
+			break;
+
+		/*
+			Generate output in INEX compatible format
+		*/
+		if (output != NULL)
+			for (current_passage = 0; current_passage < passages; current_passage++)
+				{
+				ANT_search_engine_forum_INEX::focus_to_INEX(data->document_buffer, focused_result + current_passage);
+//					printf("%lld:%s (%lld-%lld) %f\n", (long long)docid, answer_list[result], focused_result[current_passage].INEX_start, focused_result[current_passage].INEX_finish - focused_result[current_passage].INEX_start, (double)focused_result[current_passage].get_rsv());
+				}
+		}
+
+	delete focusser;
+	data->post_processing_stats->add_cpu_time(time_to_focus = data->post_processing_stats->stop_timer(now));
+	if (params->stats & QUERY)
+		{
+		printf("Focused documents    :%lld\n", focused_documents_parsed);
+		printf("Focused bytes        :%lld\n", focused_bytes_parsed);
+		data->post_processing_stats->print_time("Focusing time        :", time_to_focus);
+		}
+	total_focused_bytes_parsed += focused_bytes_parsed;
+	total_focused_documents_parsed += focused_documents_parsed;
+
+	/*
+		Compute precision using a focused metric
+	*/
+	if (data->map != NULL)
+		{
+		if (params->metric == MAgPf)
+			data->average_precision = data->map->average_generalised_precision_focused(atoi(topic_id), &focus_results_list);
+		else if (params->metric == MAiP)
+			data->average_precision = data->map->average_interpolated_precision(atoi(topic_id), &focus_results_list);
+
+		data->sum_of_average_precisions += data->average_precision;
+
+		if (params->stats & SHORT)
+			printf("Topic:%s Focused Average Precision:%f\n", topic_id , data->average_precision);
+		}
+	}
 
 /*
 	Display the list of results (either to the user or to a run file)
 */
-last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
-if (output == NULL)
-	for (result = 0; result < last_to_list; result++)
-//		if ((name = get_document_and_parse(data->answer_list[result], data->post_processing_stats)) == NULL)
-			{
-//			get_document_and_extract(topic_id, result + 1, answer_list[result])
-#ifdef NEVER
-			long longest_len = search_engine->get_longest_document_length();
-			long long docid;
-			char *pos;
-			char *document_buffer = new char [longest_len + 1];
-			unsigned long len = longest_len;
-
-			docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
-			search_engine->get_document(document_buffer, &len, docid);
-			pos = strstr(document_buffer, "<DOCNO>");
-			pos = strpbrk(pos, "wW");
-			fprintf(params->output, "%lld:%s %f %*.*s\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), 14, 14, pos);
-			delete [] document_buffer;
-#else
-			fprintf(params->output, "%lld:%s %f\n", result + 1, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv());
-#endif
-			}
-//		else
-//			fprintf(params->output, "%lld:(%s) %s\n", result + 1, data->answer_list[result], name);
+if (output != NULL)
+	output->write(atoi(topic_id), data->answer_list, last_to_list, data->search_engine, focused_documents_parsed == 0 ? NULL : &focus_results_list);
 else
-	output->write(atol(topic_id), data->answer_list, last_to_list, data->search_engine);
+	for (result = 0; result < last_to_list; result++)
+		{
+		docid = data->search_engine->results_list->accumulator_pointers[result] - data->search_engine->results_list->accumulator;
+		if ((current_document_length = length_of_longest_document) == 0)
+			title_start = "";
+		else
+			{
+		data->search_engine->get_document(data->document_buffer, &current_document_length, docid);
+			if ((title_start = strstr(data->document_buffer, "<title>")) == NULL)
+				if ((title_start = strstr(data->document_buffer, "<TITLE>")) == NULL)
+					title_start = "";
+			if (*title_start != '\0')
+				{
+				title_start += 7;
+				if ((title_end = strstr(title_start, "</title>")) == NULL)
+					title_end = strstr(title_start, "</TITLE>");
+				if (title_end != NULL)
+					{
+					if (title_end - title_start > MAX_TITLE_LENGTH)
+						title_end = title_start + MAX_TITLE_LENGTH;
+					*title_end = '\0';
+					for (ch = title_start; *ch != '\0'; ch++)
+						if (!ANT_isprint(*ch))
+							*ch = ' ';
+					}
+				}
+			}
+		sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, data->answer_list[result], (double)data->search_engine->results_list->accumulator_pointers[result]->get_rsv(), title_start);
+		((ANT_channel *)params->outchannel)->puts(print_buffer);
+		}
+
+delete [] print_buffer;
 }
 
 /*
@@ -732,6 +920,11 @@ else
 void ant_free(ANT *ant)
 {
 struct ANT_ant_handle *data = (ANT_ant_handle *)ant;
+
+/*
+	delete the document buffer
+*/
+delete [] data->document_buffer;
 
 if (data->post_processing_stats != NULL)
     delete data->post_processing_stats;

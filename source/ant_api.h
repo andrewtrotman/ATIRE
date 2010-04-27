@@ -36,6 +36,8 @@ ANT_ANT_params *ant_params(ANT *ant);
 
 void ant_post_processing_stats_init(ANT *ant);
 
+void get_document(ANT *ant, char *command);
+
 char **ant_search(ANT *ant, long long *hits, char *query, const char *topic_id = ""/*long topic_id = -1*/, long boolean = 0);
 
 struct collection_details_s *ant_get_collection_details(ANT *ant, struct collection_details_s *collection_details);
@@ -46,7 +48,7 @@ double ant_cal_map(ANT *ant);
 
 void ant_stat(ANT *ant);
 
-void forum_output(ANT *ant, const char *topic_id/*long topic_id*/, long long hits);
+void forum_output(ANT *ant, const char *topic_id/*long topic_id*/, long long hits, char *query);
 
 void ant_free(ANT *ant);
 
