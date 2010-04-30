@@ -86,7 +86,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 				    || enc->howmanybytes() > 1) {
 
 					if (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char)
-					    while (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char) {
+					    while (start < end && enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char) {
 						    // for debug
 						    //cerr << "before transform: " << str << endl;
 						    char c = *start;
@@ -108,7 +108,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 					}
 
 				} else if (enc->lang() == uniseg_encoding::NUMBER) {
-					while (enc->lang() == uniseg_encoding::NUMBER) {
+					while (start < end && enc->lang() == uniseg_encoding::NUMBER) {
 						str.push_back(*start);
 						start += enc->howmanybytes();
 						enc->test_char((unsigned char *)start);

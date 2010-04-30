@@ -39,6 +39,7 @@ void FreqFile::init() {
 	EXT_NAME = "frq";
 	wlen_ = 0;
 	File::setup();
+	loaded_ = false;
 }
 
 unsigned int FreqFile::cal(array_type& arr) {
@@ -109,7 +110,8 @@ void FreqFile::write(array_type& arr) {
 }
 
 void FreqFile::read() {
-
+	if (loaded_)
+		return;
 	cerr << "loading " << filename_ << endl;
 
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
@@ -146,11 +148,11 @@ void FreqFile::read() {
 
 			string_array ca;
 			/// save them in the array
-			enc->test_char((unsigned char*)&buf);
-			string_type a_char(buf, enc->howmanybytes());
+			enc_->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc_->howmanybytes());
 			ca.push_back(a_char);
 
-			freq_.add(ca, enc->lang(), value); //->address(count/RECORD_LENGTH);
+			freq_.add(ca, enc_->lang(), value); //->address(count/RECORD_LENGTH);
 			count += RECORD_LENGTH;
 			// calculating the total characters appear in the corpus
 			//if (k == 1)
@@ -162,9 +164,12 @@ void FreqFile::read() {
 		//	cerr << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
 //	}
 	iofs_.close();
+	loaded_ = true;
 }
 
 void FreqFile::read_with_index() {
+	if (loaded_)
+		return;
 
 	cerr << "loading " << name_ << endl;
 
@@ -172,8 +177,6 @@ void FreqFile::read_with_index() {
 	char tmp[INT_TYPE_SIZE];
 	unsigned int  value = 0;
 	char *current = buf_;
-
-	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
 	IndexFile idxf(name_);
 	idxf.path(path_);
@@ -224,12 +227,12 @@ void FreqFile::read_with_index() {
 					current += INT_TYPE_SIZE;
 
 					/// save them in the array
-					enc->test_char((unsigned char*)&buf);
-					string_type a_char(buf, enc->howmanybytes());
+					enc_->test_char((unsigned char*)&buf);
+					string_type a_char(buf, enc_->howmanybytes());
 					string_array aca(ca);
 					aca.push_back(a_char);
 					assert(value >= 0);
-					freq_.add(aca, enc->lang(), value); //->address(count);
+					freq_.add(aca, enc_->lang(), value); //->address(count);
 					count++;
 				}
 			}
@@ -250,11 +253,11 @@ void FreqFile::read_with_index() {
 					current += INT_TYPE_SIZE;
 
 					/// save them in the array
-					enc->test_char((unsigned char*)&buf);
-					string_type a_char(buf, enc->howmanybytes());
+					enc_->test_char((unsigned char*)&buf);
+					string_type a_char(buf, enc_->howmanybytes());
 					string_array aca = ca;
 					aca.insert(aca.begin(), a_char);
-					freq_.add(aca, enc->lang(), value); //->address(count);
+					freq_.add(aca, enc_->lang(), value); //->address(count);
 					count++;
 				}
 			}
@@ -267,6 +270,7 @@ void FreqFile::read_with_index() {
 	}
 
 	iofs_.close();
+	loaded_ = true;
 }
 
 void FreqFile::read_term(word_ptr_type word)
@@ -310,8 +314,8 @@ void FreqFile::read_term(word_ptr_type word)
 		for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
-			enc->test_char((unsigned char*)&buf);
-			string_type a_char(buf, enc->howmanybytes());
+			enc_->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc_->howmanybytes());
 			string_array aca(ca);
 			aca.push_back(a_char);
 			// debug
@@ -324,7 +328,7 @@ void FreqFile::read_term(word_ptr_type word)
 
 			/// save them in the array
 			assert(value > 0);
-			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
+			word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
 
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
@@ -348,14 +352,30 @@ void FreqFile::read_term(word_ptr_type word)
 			current += INT_TYPE_SIZE;
 
 			/// save them in the array
-			enc->test_char((unsigned char*)&buf);
-			string_type a_char(buf, enc->howmanybytes());
+			enc_->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc_->howmanybytes());
 			string_array aca = ca;
 			aca.insert(aca.begin(), a_char);
-			word_ptr_type ret_word = freq_.add(aca, enc->lang(), value); //->address(count);
+			word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
 	}
 	word->set_loaded(true);
+}
+
+void FreqFile::load_index()
+{
+	if (wlen_ > 1) {
+		idxf_.path(path_);
+		idxf_.wlen(wlen_);
+		idxf_.read(freq_);
+	}
+}
+
+void FreqFile::load()
+{
+	array_type& word_array = freq_.array_k(wlen_ - 1);
+	for (int i = 0; i < word_array.size(); ++i)
+		read_term(word_array[i]);
 }

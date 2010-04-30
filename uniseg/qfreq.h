@@ -35,6 +35,7 @@ public:
 
 	word_ptr_type find(string_type word);
 	void load(word_ptr_type word);
+	void load(int index = -1);
 
 	static QFreq& instance();
 };

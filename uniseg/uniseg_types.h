@@ -3,9 +3,9 @@
 
 #include <assert.h>
 
-#include <encoding_factory.h>
-#include <encoding_utf8.h>
-typedef UNISEG_encoding								uniseg_encoding;
+#include "encoding_factory.h"
+#include "encoding_utf8.h""
+typedef UNISEG_encoding									uniseg_encoding;
 typedef UNISEG_encoding_utf8							uniseg_encoding_utf8;
 typedef UNISEG_encoding_factory							uniseg_encoding_factory;
 

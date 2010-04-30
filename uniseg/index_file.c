@@ -9,7 +9,6 @@
 #include "word.h"
 #include "address.h"
 #include "utilities.h"
-#include "encoding_factory.h"
 
 #include <cassert>
 #include <iostream>
@@ -194,7 +193,6 @@ void IndexFile::read(Freq&	freq) {
 	int count = 0;
 
 	long lang;
-	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
 
 	cerr << "loading index file" << filename_ << endl;
 	while (count < size_) {
@@ -202,10 +200,10 @@ void IndexFile::read(Freq&	freq) {
 		//Address::uint_array addr(ADDRESSES_NUMBER, Address::INVALID_BOUND);
 		strncpy(buf, current, UNICODE_CHAR_LENGTH);
 		current += UNICODE_CHAR_LENGTH;
-		enc->test_char((unsigned char*)&buf);
-		string_type a_char(buf, enc->howmanybytes());
+		enc_->test_char((unsigned char*)&buf);
+		string_type a_char(buf, enc_->howmanybytes());
 		ca.push_back(a_char);
-		lang = enc->lang();
+		lang = enc_->lang();
 
 		for (int i = 1; i < chars_len; i++) {
 //			if (!iofs_.read (buf, UNICODE_CHAR_LENGTH)) {
@@ -217,8 +215,8 @@ void IndexFile::read(Freq&	freq) {
 //				get_first_utf8char((unsigned char*)current);
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
-			enc->test_char((unsigned char*)&buf);
-			string_type a_char(buf, enc->howmanybytes());
+			enc_->test_char((unsigned char*)&buf);
+			string_type a_char(buf, enc_->howmanybytes());
 			ca.push_back(a_char);
 		}
 

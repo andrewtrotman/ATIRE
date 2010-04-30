@@ -11,6 +11,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "uniseg_types.h"
 
 class File {
 
@@ -27,6 +28,8 @@ protected:
 	std::fstream::pos_type	size_;
 
 	char 					*buf_;
+	bool					in_memory_;
+	uniseg_encoding 		*enc_;
 
 public:
 	File() {}

@@ -42,12 +42,16 @@ File::~File() {
 }
 
 void File::read_in_memory() {
+	if (in_memory_)
+		return;
+
 	if (!iofs_.is_open())
 		ropen();
 	if (iofs_.is_open()) {
 		buf_ = new char [static_cast<int>(size_) + 1];
 		iofs_.read (buf_, size_);
 		buf_[size_] = '\0';
+		in_memory_ = true;
 	}
 	/**
 	 * TODO throw an exception when can't open the file
@@ -63,6 +67,8 @@ void File::setup() {
 	filename_ = name_ + "." + EXT_NAME;
 	// debug
 	//cerr << "setup filename " << filename_ << " "<< name_ << " " << EXT_NAME << endl;
+	in_memory_ = false;
+	enc_ = uniseg_encoding_factory::instance().get_encoding();
 }
 
 void File::wopen() {

@@ -64,18 +64,21 @@ void QFreq::load_freq(int n, bool force) {
 		freq_file->wlen(k_);
 		freq_file->read_in_memory();
 
-		if (k_ > 1) {
-			/************************************
-			 * LOAD THE INDEX OF TERMS ONLY FIRST
-			 ************************************/
-			//freq_file->read_with_index();
-			IndexFile idxf(name);
-			idxf.path(UNISEG_settings::instance().freqs_path);
-			idxf.wlen(k_);
-			idxf.read(freq_);
-		}
-		else
+//		if (k_ > 1) {
+//			/************************************
+//			 * LOAD THE INDEX OF TERMS ONLY FIRST
+//			 ************************************/
+//			//freq_file->read_with_index();
+//			IndexFile idxf(name);
+//			idxf.path(UNISEG_settings::instance().freqs_path);
+//			idxf.wlen(k_);
+//			idxf.read(freq_);
+//		}
+//		else
+		if (k_ == 1)
 			freq_file->read();
+		else
+			freq_file->load_index();
 
 		k_++;
 	}
@@ -117,6 +120,21 @@ void QFreq::load(word_ptr_type word)
 	if (word != NULL && (len = word->size()) <= freq_files_.size()) {
 		assert(len > 0);
 		freq_files_[len]->read_term(word);
+	}
+}
+
+void QFreq::load(int index)
+{
+	if (index > 1) {
+		if (index > freq_files_.size())
+			index = freq_files_.size();
+
+		--index;
+		freq_files_[index]->load();
+	}
+	else if (index == -1) {
+		for (int i = 1; i < freq_files_.size(); i++)
+			freq_files_[i]->load();
 	}
 }
 

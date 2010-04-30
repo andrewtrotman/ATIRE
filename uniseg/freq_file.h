@@ -20,14 +20,15 @@ public:
 
 private:
 	Freq& 		freq_;
-	//IndexFile 	idxf_;
+	IndexFile 	idxf_;
 	int			wlen_;
+	bool		loaded_;
 
 public:
 	FreqFile(std::string name, Freq& freq) :
-		File::File(name), freq_(freq)/*, idxf_(name)*/ { init(); }
+		File::File(name), freq_(freq), idxf_(name) { init(); }
 	FreqFile(std::string name, unsigned int size, Freq& freq) :
-		File::File(name, size), freq_(freq)/*, idxf_(name)*/ { init(); }
+		File::File(name, size), freq_(freq), idxf_(name) { init(); }
 	virtual ~FreqFile();
 
 	void write(array_type& arr);
@@ -40,6 +41,9 @@ public:
 
 	int wlen() { return wlen_; }
 	void wlen(int len) { wlen_ = len;/* idxf_.wlen(len);*/ }
+
+	void load_index();
+	void load();
 
 private:
 	void init();

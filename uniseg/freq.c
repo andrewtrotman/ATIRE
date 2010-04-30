@@ -107,8 +107,8 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 
 	string_type chars; // = array_to_string<string_array, string_type>(ca);
 	//debug
-	if (chars == "我们")
-		cerr << "got you " << endl;
+//	if (chars == "我们")
+//		cerr << "got you " << endl;
 	/*
 	 * create key string
 	 */
