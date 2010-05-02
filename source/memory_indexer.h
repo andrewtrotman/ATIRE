@@ -5,7 +5,10 @@
 #ifndef MEMORY_INDEXER_H_
 #define MEMORY_INDEXER_H_
 
+#include "pragma.h"
 #include "memory_indexer_node.h"
+
+#pragma ANT_PRAGMA_UNUSED_PARAMETER_DISABLE
 
 class ANT_ranking_function_factory;
 
