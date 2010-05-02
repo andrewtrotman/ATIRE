@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "pragma.h"
-#include "memory.h"
 #include "file_memory.h"
 
 /*
@@ -42,7 +41,7 @@ if (ANT_file::open(filename, mode) != 0)
 	{
 	result = 1;
 	length_of_file = ANT_file::file_length();
-	if ((buffer = (unsigned char *)memory->malloc(length_of_file)) != NULL)
+	if ((buffer = (unsigned char *)malloc(length_of_file)) != NULL)
 		{
 		if (ANT_file::read(buffer, length_of_file) == 0)
 			result = 0;

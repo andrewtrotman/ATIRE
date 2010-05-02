@@ -8,7 +8,6 @@
 
 #include "fundamental_types.h"
 
-class ANT_memory;
 class ANT_file_internals;
 
 /*
@@ -25,13 +24,12 @@ private:
 protected:
 	long long file_position;
 	unsigned char *buffer;
-	ANT_memory *memory;
 
 private:
 	void flush(void);
 
 public:
-	ANT_file(ANT_memory *memory);
+	ANT_file(void);
 	virtual ~ANT_file();
 
 	virtual long setvbuff(long size);

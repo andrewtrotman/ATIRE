@@ -17,7 +17,6 @@
 	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
 #endif
 
-
 /*
 	class ANT_MEMORY
 	----------------
@@ -34,11 +33,11 @@ private:
 
 protected:
 	void *alloc(long long *size);
+	void dealloc(char *buffer);
 	void *get_chained_block(long long bytes);
 #ifdef _MSC_VER
 	long set_privilege(char *priv_name, long enable);
 #endif
-
 
 public:
 	ANT_memory(long long block_size_for_allocation = ANT_memory_block_size_for_allocation);
@@ -47,13 +46,8 @@ public:
 	void *malloc(long long bytes);
 	long long bytes_allocated(void) { return allocated; }
 	long long bytes_used(void) { return used; }
-	/*
-		realign() does two things.  First, it aligns the next block of memory on the correct boundary for the largest
-		type we know about (a 64-bit long long) to avoid memory miss-alignment overheads.  Second, and as a consequence,
-		it cache-line aligns the next memory allocation (Intel uses a 64-byte cache line) thus reducing the number of
-		cache misses if we process the memory sequentially.
-	*/
-	void realign(void) { allocated += (allocated % sizeof(long long) == 0) ? 0 : sizeof(long long) - allocated % sizeof(long long); }
+	void realign(void);
+	void rewind(void);
 } ;
 
 /*

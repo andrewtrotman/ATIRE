@@ -24,7 +24,7 @@
 ANT_directory_iterator_pkzip::ANT_directory_iterator_pkzip(char *filename)
 {
 memory = new ANT_memory(1024 * 1024);
-file = new ANT_file(memory);
+file = new ANT_file;
 file->open(filename, "rb");
 read_central_directory_header();
 internals = new ANT_directory_iterator_pkzip_internals;

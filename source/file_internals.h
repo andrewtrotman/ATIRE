@@ -26,6 +26,10 @@
 	#endif
 #endif
 
+/*
+	class ANT_FILE_INTERNALS
+	------------------------
+*/
 class ANT_file_internals
 {
 public:

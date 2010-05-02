@@ -15,7 +15,9 @@ ANT_readability_dale_chall::ANT_readability_dale_chall()
 {
 number_of_words = number_of_sentences = number_of_unfamiliar_words = 0;
 /*
-	Biggest document in wiki07/08 is 65003 - dirty to avoid expanding
+	Biggest document in wiki07/08 is 65003 so we set the constant to something larger
+	so that in that collection (and smaller) it never needs to expand.  In larger
+	collections it will automatically expand.
 */
 size = 65005; 
 words_encountered = new word[size];
@@ -138,7 +140,7 @@ for (i = 1; i < number_of_words; i++)
 			}
 		else
 			{
-			term_frequency = prev->node->in_memory.tf_list_tail->data[prev->node->tf_node_used - 1];
+			term_frequency = prev->node->term_frequency;
 			/*
 				if it's only occured as title-case then it's a name
 				cheap/fugly approximaion
@@ -163,7 +165,7 @@ while (wordlist_position < ANT_readability_dale_chall_wordlist_length &&
 
 if (comparison != 0)
 	{
-	term_frequency = prev->node->in_memory.tf_list_tail->data[prev->node->tf_node_used - 1];
+	term_frequency = prev->node->term_frequency;
 	number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
 	}
 
@@ -180,7 +182,7 @@ return (long)(1000 * ((0.049 * number_of_words / number_of_sentences) + (15.79 *
 	ANT_READABILITY_DALE_CHALL::HANDLE_NODE()
 	-----------------------------------------
 */
-void ANT_readability_dale_chall::handle_node(ANT_memory_index_hash_node *node)
+void ANT_readability_dale_chall::handle_node(ANT_memory_indexer_node *node)
 {
 /*
 	If we've been given a tag or number to deal with, then just ignore it.
@@ -222,7 +224,7 @@ number_of_words++;
 	ANT_READABILITY_DALE_CHALL::INDEX()
 	-----------------------------------
 */
-void ANT_readability_dale_chall::index(ANT_memory_index *index)
+void ANT_readability_dale_chall::index(ANT_memory_indexer *index)
 {
 index->set_document_detail(measure_name, score());
 

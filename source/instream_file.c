@@ -41,7 +41,7 @@ if (bytes == 0)		// read no bytes
 
 if (file == NULL)
 	{
-	file = new ANT_file(memory);
+	file = new ANT_file;
 	if ((file->open(filename, "rb")) == 0)
 		file_length = 0;
 	else

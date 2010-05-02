@@ -6,6 +6,7 @@
 #define STRING_PAIR_H_
 
 #include <stdio.h>
+#include "memory.h"
 #include "str.h"
 
 /*
@@ -23,6 +24,8 @@ public:
 	ANT_string_pair(char *name) { start = name; string_length = ::strlen(name); }
 	ANT_string_pair(char *source, long len) : start(source), string_length(len) {}
 
+	void *operator new (size_t count, ANT_memory *memory) { return memory->malloc(count); }
+	void *operator new (size_t count) { return new char [count]; }
 	unsigned char operator[](long pos) { return (unsigned char)start[pos]; }
 
 	size_t length(void) { return string_length; }

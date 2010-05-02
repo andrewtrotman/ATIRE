@@ -28,7 +28,7 @@ const double ANT_memory_index_hash_node::postings_growth_factor = 1.5;
 	ANT_MEMORY_INDEX_HASH_NODE::ANT_MEMORY_INDEX_HASH_NODE()
 	--------------------------------------------------------
 */
-ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_stats_memory_index *stats)
+ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_stats_memory_index *stats) : ANT_memory_indexer_node()
 {
 this->stats = stats;
 left = right = NULL;

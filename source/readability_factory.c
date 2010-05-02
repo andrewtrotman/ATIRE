@@ -116,7 +116,7 @@ measures_to_use = what_measure;
 	READABILITY_FACTORY::HANDLE_NODE()
 	----------------------------------
 */
-void ANT_readability_factory::handle_node(ANT_memory_index_hash_node *node)
+void ANT_readability_factory::handle_node(ANT_memory_indexer_node *node)
 {
 long which;
 
@@ -132,7 +132,7 @@ for (which = 0; which < number_of_measures; which++)
 	READABILITY_FACTORY::INDEX()
 	----------------------------
 */
-void ANT_readability_factory::index(ANT_memory_index *index)
+void ANT_readability_factory::index(ANT_memory_indexer *index)
 {
 long which;
 

@@ -5,6 +5,7 @@
 #ifndef MEMORY_INDEX_H_
 #define MEMORY_INDEX_H_
 
+#include "memory_indexer.h"
 #include "stats_memory_index.h"
 #include "memory_index_hash_node.h"
 #include "fundamental_types.h"
@@ -25,11 +26,10 @@ class ANT_ranking_function_factory;
 	class ANT_MEMORY_INDEX
 	----------------------
 */
-class ANT_memory_index
+class ANT_memory_index : public ANT_memory_indexer
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
-	enum { MODE_ABSOLUTE, MODE_MONOTONIC };
 
 private:
 	ANT_string_pair *squiggle_length;
@@ -96,20 +96,21 @@ private:
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 
+	void set_variable(ANT_string_pair *measure_name, long long score);
+
 public:
 	ANT_memory_index(char *filename);
-	~ANT_memory_index();
+	virtual ~ANT_memory_index();
 
-	ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
-	long serialise(ANT_ranking_function_factory *factory);
-	void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; }
-	void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
-	void set_variable(ANT_string_pair *measure_name, long long score);
-	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
-	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
-	void text_render(long what);
-	long long get_memory_usage(void);
-	void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
+	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
+	virtual void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
+	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+	virtual void text_render(long what);
+	virtual void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
+	virtual void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
+	virtual void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
+	virtual long serialise(ANT_ranking_function_factory *factory);
+	virtual long long get_memory_usage(void);
 } ;
 
 

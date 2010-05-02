@@ -75,6 +75,7 @@ PARTS = \
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
+	$(OBJDIR)\memory_index_one.obj 					\
 	$(OBJDIR)\stats_memory_index.obj				\
 	$(OBJDIR)\hash_table.obj						\
 	$(OBJDIR)\postings_piece.obj					\
@@ -100,7 +101,7 @@ PARTS = \
 	$(OBJDIR)\stats_search_engine.obj				\
 	$(OBJDIR)\search_engine_forum.obj				\
 	$(OBJDIR)\search_engine_forum_INEX.obj			\
-	$(OBJDIR)\search_engine_forum_INEX_bep.obj	\
+	$(OBJDIR)\search_engine_forum_INEX_bep.obj		\
 	$(OBJDIR)\search_engine_forum_INEX_focus.obj	\
 	$(OBJDIR)\search_engine_forum_INEX_efficiency.obj			\
 	$(OBJDIR)\search_engine_forum_TREC.obj			\
@@ -175,7 +176,7 @@ PARTS = \
 	$(OBJDIR)\critical_section.obj					\
 	$(OBJDIR)\threads.obj							\
 	$(OBJDIR)\focus.obj								\
-	$(OBJDIR)\focus_article.obj					\
+	$(OBJDIR)\focus_article.obj						\
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_case.obj
@@ -216,14 +217,13 @@ OTHER_TARGETS = \
 #
 #	List of objects to build
 #
-all : $(PARTS)		\
-      $(ANT_TARGETS)	\
+all : $(PARTS) \
+      $(ANT_TARGETS) \
       $(OTHER_TARGETS)
 
 bin\link_index_merge.exe : bin\link_index_merge.obj
 bin\make_case_conversion_table.exe : bin\make_case_conversion_table.obj
 bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
-
 
 #
 #	Default dependency rules

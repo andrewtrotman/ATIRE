@@ -40,10 +40,99 @@
 	REPORT()
 	--------
 */
-void report(long long doc, ANT_memory_index *index, ANT_stats_time *stats, long long bytes_indexed)
+void report(long long doc, ANT_memory_indexer *index, ANT_stats_time *stats, long long bytes_indexed)
 {
 printf("%lld Documents (%lld bytes) in %lld bytes of memory in ", doc, bytes_indexed, index->get_memory_usage());
 stats->print_elapsed_time();
+}
+
+/*
+	INDEX_DOCUMENT()
+	----------------
+*/
+long index_document(ANT_memory_indexer *indexer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
+{
+ANT_string_pair *token;
+long terms_in_document, length_of_token, length_of_previous_token, is_previous_token_chinese;
+char *previous_token_start;
+
+/*
+	Initialise
+*/
+terms_in_document = 0;
+
+/*
+	Initialise the Chinese parser
+*/
+previous_token_start = NULL;
+length_of_previous_token = 0;
+is_previous_token_chinese = FALSE;
+
+/*
+	Index the file
+*/
+readability->set_document((unsigned char *)current_file->file);
+while ((token = readability->get_next_token()) != NULL)
+	{
+	/*
+	 * a bit redudant, the code below.
+	 * I think the original code from revision 656 should be fine, except the chinese handling part
+	 */
+	if (ANT_islowernum(token->start[0]))
+		{
+		terms_in_document++;
+		readability->handle_node(indexer->add_term(token, doc));			// indexable term
+		}
+	else if (ANT_isupper(token->start[0]))
+		readability->handle_node(indexer->add_term(token, doc));			// open tag
+	else if ((token->start[0] & 0x80) && (ANT_parser::ischinese(token->start) || ANT_parser::iseuropean(token->start)))
+		{
+		terms_in_document++; // keep counting number of terms, but for dual indexing only number of the words is recorded
+		readability->handle_node(indexer->add_term(token, doc));
+
+		if (ANT_parser::ischinese(token->start))
+			{
+			if ((segmentation & ANT_parser::DOUBLE_SEGMENTATION) == ANT_parser::DOUBLE_SEGMENTATION && token->string_length > 4) // (> 4) means more than one character
+				{
+				// move a character forward, try not to re-index the last single character in previous bigram
+				length_of_token = ANT_parser::utf8_bytes(token->start);
+				if ((segmentation & ANT_parser::BIGRAM_SEGMENTATION) == ANT_parser::BIGRAM_SEGMENTATION && is_previous_token_chinese && previous_token_start != NULL && (token->start + length_of_token) == (previous_token_start + length_of_previous_token))
+					{
+					previous_token_start = token->start;
+					length_of_previous_token = token->string_length;
+					token->start += length_of_token;
+					token->string_length -= length_of_token;
+					}
+				else
+					{
+					previous_token_start = token->start;
+					length_of_previous_token = token->string_length;
+					}
+
+				while (token->string_length > 0)								// chinese
+					{
+					length_of_token = ANT_parser::utf8_bytes(token->start);
+					ANT_string_pair next_character(token->start, length_of_token);
+					readability->handle_node(indexer->add_term(&next_character, doc));
+					token->start += length_of_token;
+					token->string_length -= length_of_token;
+					}
+				}
+			is_previous_token_chinese = TRUE;
+			continue;
+			}
+		}
+	is_previous_token_chinese = FALSE;
+	previous_token_start = NULL;
+	}
+
+if (terms_in_document != 0)
+	{
+	indexer->set_document_length(doc, terms_in_document);
+	readability->index(indexer);
+	}
+
+return terms_in_document;
 }
 
 /*
@@ -58,17 +147,13 @@ ANT_directory_iterator *source = NULL;
 ANT_directory_iterator *disk = NULL;
 ANT_parser *parser;
 ANT_readability_factory *readability;
-ANT_string_pair *token;
-long param;
-ANT_memory_index *index;
+ANT_memory_indexer *index;
 long long doc, now, last_report;
-long terms_in_document, first_param;
+long param, first_param;
 ANT_memory file_buffer(1024 * 1024);
-ANT_file id_list(&file_buffer);
+ANT_file id_list;
 long long files_that_match;
 long long bytes_indexed;
-long length_of_token, is_previous_token_chinese, length_of_previous_token;
-char *previous_token_start;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 ANT_directory_iterator_multiple *parallel_disk;
@@ -86,7 +171,6 @@ if (first_param >= argc)
 
 last_report = 0;
 doc = 0;
-terms_in_document = 0;
 index = new ANT_memory_index("index.aspt");
 id_list.open("doclist.aspt", "wb");
 
@@ -195,72 +279,17 @@ for (param = first_param; param < argc; param++)
 			report(last_report = doc, index, &stats, bytes_indexed);
 
 		/*
-			Index the file
+			Index, this call returns the number of terms we found in the document
 		*/
-		readability->set_document((unsigned char *)current_file->file);
-		while ((token = readability->get_next_token()) != NULL)
+		if (index_document(index, param_block.segmentation, readability, doc, current_file) == 0)
 			{
 			/*
-			 * a bit redudant, the code below.
-			 * I think the original code from revision 656 should be fine, except the chinese handling part
-			 */
-			if (ANT_islowernum(token->start[0]))
-				{
-				terms_in_document++;
-				readability->handle_node(index->add_term(token, doc));			// indexable term
-				}
-			else if (ANT_isupper(token->start[0]))
-				readability->handle_node(index->add_term(token, doc));			// open tag
-			else if ((token->start[0] & 0x80) && (ANT_parser::ischinese(token->start) || ANT_parser::iseuropean(token->start)))
-				{
-				terms_in_document++; // keep counting number of terms, but for dual indexing only number of the words is recorded
-				readability->handle_node(index->add_term(token, doc));
-
-				if (ANT_parser::ischinese(token->start))
-					{
-					if ((param_block.segmentation & ANT_parser::DOUBLE_SEGMENTATION) == ANT_parser::DOUBLE_SEGMENTATION && token->string_length > 4) // (> 4) means more than one character
-						{
-						// move a character forward, try not to re-index the last single character in previous bigram
-						length_of_token = ANT_parser::utf8_bytes(token->start);
-						if ((param_block.segmentation & ANT_parser::BIGRAM_SEGMENTATION) == ANT_parser::BIGRAM_SEGMENTATION && is_previous_token_chinese && previous_token_start != NULL && (token->start + length_of_token) == (previous_token_start + length_of_previous_token))
-							{
-							previous_token_start = token->start;
-							length_of_previous_token = token->string_length;
-							token->start += length_of_token;
-							token->string_length -= length_of_token;
-							}
-						else
-							{
-							previous_token_start = token->start;
-							length_of_previous_token = token->string_length;
-							}
-
-						while (token->string_length > 0)								// chinese
-							{
-							length_of_token = ANT_parser::utf8_bytes(token->start);
-							ANT_string_pair next_character(token->start, length_of_token);
-							readability->handle_node(index->add_term(&next_character, doc));
-							token->start += length_of_token;
-							token->string_length -= length_of_token;
-							}
-						}
-					is_previous_token_chinese = TRUE;
-					continue;
-					}
-				}
-			is_previous_token_chinese = FALSE;
-			previous_token_start = NULL;
-			}
-		/*
-		 *  An empty file should not be counted
-		 */
-		if (terms_in_document == 0)
+				pretend we never saw the document
+			*/
 			doc--;
+			}
 		else
 			{
-			index->set_document_length(doc, terms_in_document);
-			readability->index(index);
-
 			/*
 				Store the document in the repository.
 			*/
@@ -271,7 +300,6 @@ for (param = first_param; param < argc; param++)
 				}
 			id_list.puts(strip_space_inplace(current_file->filename));
 			}
-		terms_in_document = 0;
 		delete [] current_file->file;
 
 		/*

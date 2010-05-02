@@ -18,7 +18,8 @@ private:
 	long long length_of_file;
 
 public:
-	ANT_file_memory(ANT_memory *memory) : ANT_file(memory) {}
+	ANT_file_memory() : ANT_file() {}
+	virtual ~ANT_file_memory() {}
 
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 	virtual long setvbuff(long size) { return 1; }

@@ -11,14 +11,14 @@
 #include <stdlib.h>
 #include "memory.h"
 
-#if _WIN32_WINNT < 0x0600			// prior to Vista
+#if (_WIN32_WINNT < 0x0600) || (_MSC_VER < 1500) 			// prior to Vista or prior to Visual Studio 2008
 	/*
 		If you compile under XP then GetLargePageMinimum() doesn't exist; it is first seen in
 		Server 2003 and Vista.  So, if you have a version of the compiler from the XP era then
 		we need to fake this method because you might compile under XP and run under Vista (or
 		later) which would cause the run-time check to succeed so a function stub is needed.
 		The solution is to require Microsoft C/C++ version 15.00 or later, but some existing
-		ANT users don't have that.
+		users don't have that.
 
 		The hack is to set the large page size to the small page size (4096 bytes) in the case 
 		of compiled under XP but run under Vista.
@@ -71,15 +71,7 @@ while (chunk != NULL)
 	{
 	killer = chunk;
 	chunk = *(char **)chunk;
-	#ifdef _MSC_VER
-		#ifdef PURIFY
-			::free(killer);
-		#else
-			VirtualFree(killer, 0, MEM_RELEASE);
-		#endif
-	#else
-		free(killer);
-	#endif
+	dealloc(killer);
 	}
 }
 
@@ -175,6 +167,27 @@ void *ANT_memory::alloc(long long *size)
 }
 
 /*
+	ANT_MEMORY::DEALLOC()
+	---------------------
+	Give pages back to the Operating System.  In Windows this works because VirtualAlloc() and
+	VirtualFree() actually do this.  On other operating systems the C/C++ run time library will
+	typically hold on to those pages in case they are needed later.  The Windows way is better
+	becuase it makes the pages available again later rather then fragmenting the C RTL heap.
+*/
+void ANT_memory::dealloc(char *buffer)
+{
+#ifdef _MSC_VER
+	#ifdef PURIFY
+		::free(buffer);
+	#else
+		VirtualFree(buffer, 0, MEM_RELEASE);
+	#endif
+#else
+	::free(buffer);
+#endif
+}
+
+/*
 	ANT_MEMORY::GET_CHAINED_BLOCK()
 	-------------------------------
 	The bytes parameter is passed to this routine simply so that we can be sure to
@@ -183,30 +196,34 @@ void *ANT_memory::alloc(long long *size)
 void *ANT_memory::get_chained_block(long long bytes)
 {
 char **chain;
-long long request;
+long long request, *size;
 
 #ifdef PURIFY
-	request = bytes + sizeof(*chain);
+	request = bytes + sizeof(*chain) + sizeof(bytes);
 #else
 	if (bytes > block_size)
 		block_size = bytes;			// extend the largest allocate block size
 
-	request = block_size + sizeof(*chain);
+	request = block_size + sizeof(*chain) + sizeof(bytes);
 #endif
 if ((chain = (char **)alloc(&request)) == NULL)
 	return NULL;
 
 /*
 	Create a linked list of large blocks of memory.
+	the first sizeof(char *) bytes are the pointer to the previous block
+	whereas the next sizeof{bytes) bytes are the size of this block
 */
 *chain = chunk;
 chunk = (char *)chain;
+size = (long long *)(chunk + sizeof(*chain));
+*size = bytes;
 
 /*
 	Mark the current location we are to allocate from (which we call at)
 	and the end of the block (chunk_end)
 */
-at = chunk + sizeof(*chain);
+at = chunk + sizeof(*chain) + sizeof(bytes);
 chunk_end = chunk + request;		// request is the amount it allocated (which might be more than we asked for)
 
 /*
@@ -215,4 +232,57 @@ chunk_end = chunk + request;		// request is the amount it allocated (which might
 allocated += request;
 
 return chunk;
+}
+
+/*
+	ANT_MEMORY::REALIGN()
+	---------------------
+	realign() does two things.  First, it aligns the next block of memory on the correct boundary for the largest
+	type we know about (a 64-bit long long) to avoid memory miss-allignment overheads.  Second, and as a consequence,
+	it cache-line aligns the next memory allocation (Intel uses a 64-byte cache line) thus reducing the number of
+	cache misses if we process the memory sequentially.
+*/
+void ANT_memory::realign(void)
+{
+long long padding;
+
+padding = (allocated % sizeof(long long) == 0) ? 0 : sizeof(long long) - allocated % sizeof(long long);
+
+/*
+	this might overflow if we're at the end of a block but that doesn't matter because the next call to malloc()
+	will notice that the overflow and allocate a new block.
+*/
+at += padding;
+allocated += padding;
+used += padding;
+}
+
+/*
+	ANT_MEMORY::REWIND()
+	--------------------
+*/
+void ANT_memory::rewind(void)
+{
+char *chain, *next_block;
+long long *request;
+
+/*
+	Free all memory blocks except for the first one
+*/
+if (chunk != NULL)
+	{
+	chain = chunk;
+	while ((next_block = *(char **)chain) != NULL)
+		{
+		dealloc(chain);
+		chain = next_block;
+		}
+	}
+
+/*
+	Set up initialisation to start at the beginning of the remaining block
+*/
+request = (long long *)(chunk + sizeof(chain));
+chunk_end = chunk + *request;
+at = chunk + sizeof(chain) + sizeof(*request);
 }

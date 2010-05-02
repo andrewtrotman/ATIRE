@@ -50,9 +50,9 @@ stats_for_all_queries = new ANT_stats_search_engine(memory);
 this->memory = memory;
 
 if (memory_model)
-	index = new ANT_file_memory(memory);
+	index = new ANT_file_memory;
 else
-	index = new ANT_file(memory);
+	index = new ANT_file;
 if (index->open((char *)index_filename, "rb") == 0)
 	exit(printf("Cannot open index file:%s\n", index_filename));
 

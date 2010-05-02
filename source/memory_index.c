@@ -611,7 +611,7 @@ char file_header[] = "ANT Search Engine Index File\n\0\0";
 
 if (index_file == NULL)
 	{
-	index_file = new ANT_file(memory);
+	index_file = new ANT_file;
 	index_file->open(filename, "w+b");
 	index_file->setvbuff(DISK_BUFFER_SIZE);
 	stats->disk_buffer = DISK_BUFFER_SIZE;

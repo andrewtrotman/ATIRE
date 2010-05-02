@@ -5,6 +5,7 @@
 #ifndef MEMORY_INDEX_HASH_NODE_H_
 #define MEMORY_INDEX_HASH_NODE_H_
 
+#include "memory_indexer_node.h"
 #include "string_pair.h"
 #include "postings_piece.h"
 #include "stats_memory_index.h"
@@ -21,14 +22,13 @@ class ANT_stats_memory_index;
 	class ANT_MEMORY_INDEX_HASH_NODE
 	--------------------------------
 */
-class ANT_memory_index_hash_node
+class ANT_memory_index_hash_node : public ANT_memory_indexer_node
 {
 private:
 	static const long postings_initial_length;
 	static const double postings_growth_factor;
 
 public:
-	ANT_string_pair string;
 	ANT_memory_index_hash_node *left, *right;
 
 	union
@@ -64,8 +64,6 @@ private:
 
 public:
 	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
-	~ANT_memory_index_hash_node() {};
-	void *operator new(size_t count, ANT_memory *memory) { return memory->malloc(count); }
 	void set(long long value);
 	void add_posting(long long docno);
 	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
@@ -95,11 +93,13 @@ if (docno == current_docno)
 	{
 	if (in_memory.tf_list_tail->data[tf_node_used - 1]++ > 254)
 		in_memory.tf_list_tail->data[tf_node_used - 1] = 254;
+	term_frequency++;
 	}
 else
 	{
 	insert_docno(docno - current_docno);
 	current_docno = docno;
+	term_frequency = 1;
 	}
 }
 

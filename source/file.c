@@ -4,7 +4,6 @@
 */
 #include <string.h>
 #include "file.h"
-#include "memory.h"
 #include "file_internals.h"
 
 #ifdef linux
@@ -23,10 +22,9 @@
 	ANT_FILE::ANT_FILE()
 	--------------------
 */
-ANT_file::ANT_file(ANT_memory *memory)
+ANT_file::ANT_file(void)
 {
 internals = new ANT_file_internals;
-this->memory = memory;
 buffer = NULL;
 buffer_size = 0;
 buffer_used = 0;
@@ -43,6 +41,7 @@ ANT_file::~ANT_file()
 {
 close();
 delete internals;
+delete [] buffer;
 }
 
 /*
@@ -51,8 +50,9 @@ delete internals;
 */
 long ANT_file::setvbuff(long size)
 {
+delete [] buffer;
 buffer_size = size;
-buffer = (unsigned char *)memory->malloc(size);
+buffer = (unsigned char *)malloc(size);
 
 return buffer == NULL ? 0 : 1;
 }
@@ -129,6 +129,11 @@ void ANT_file::flush(void)
 {
 if (buffer_used > 0)
 	{
+	/*
+		All physical output to the disk happens with this one line of code.  If this is
+		done with blocking I/O then this causes a bottleneck as we wait for the OS
+		to write to disk.  By using double buffering we can alleviate this problem
+	*/
 	internals->write_file_64(internals->fp, buffer, buffer_used);
 	buffer_used = 0;
 	}

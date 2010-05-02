@@ -32,8 +32,8 @@ public:
 	virtual ~ANT_readability_factory();
 	
 	ANT_string_pair *get_next_token(void);
-	void handle_node(ANT_memory_index_hash_node *node);
-	void index(ANT_memory_index *index);
+	void handle_node(ANT_memory_indexer_node *node);
+	void index(ANT_memory_indexer *index);
 	
 	void set_document(unsigned char *document);
 	void set_measure(unsigned long value);

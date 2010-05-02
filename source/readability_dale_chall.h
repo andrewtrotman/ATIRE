@@ -20,7 +20,7 @@ class ANT_readability_dale_chall : public ANT_readability
 private:
 	struct word
 	{
-	ANT_memory_index_hash_node *node;
+	ANT_memory_indexer_node *node;
 	unsigned long istitle;
 	};
 
@@ -39,13 +39,13 @@ private:
 protected:
 	long score(void);
 	void handle_token(ANT_string_pair *token);
-	void handle_node(ANT_memory_index_hash_node *node);
+	void handle_node(ANT_memory_indexer_node *node);
 
 public:
 	ANT_readability_dale_chall();
 	virtual ~ANT_readability_dale_chall() {};
 	
-	void index(ANT_memory_index *index);
+	void index(ANT_memory_indexer *index);
 } ;
 
 #endif  /* READABILITY_DALE_CHALL_H_ */
