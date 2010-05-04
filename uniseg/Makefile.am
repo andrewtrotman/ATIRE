@@ -22,7 +22,8 @@ libuniseq_sources = \
 		file.c \
 		qfreq.c	\
 		seg.c \
-		dic.c
+		dic.c \
+		dic2freq.c
 		
 libuniseg_headers = \
 		stop_word.h \
@@ -32,6 +33,7 @@ libuniseg_headers = \
 		convert.h	\
 		cwords.h	\
 		dic.h	\
+		dic2freq.h	\
 		doc_base.h	\
 		doc_freq.h	\
 		doc.h	\

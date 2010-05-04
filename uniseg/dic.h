@@ -14,27 +14,27 @@
 
 class Dic {
 public:
-	typedef std::map<string_type, long>	word_map;
+	typedef std::map<string_type, long>				word_map;
 	typedef std::map<int, int>						stat_map;
 
 private:
 	word_map										list_;
 	stat_map										stat_;
 
-	//long									lang_;
+	long											lang_;
 
 public:
-	Dic() {}
+	Dic(long lang = 0) : lang_(lang) {}
 	~Dic() {}
 
 	const word_map& list() const { return list_; }
 	const stat_map& stat() const { return stat_; }
 
-	void add(string_type, long);
+	void add(string_type, long freq);
 
 	bool find(string_type word);
 	//long lang() { return lang_; }
-	void save(string_type filename, long lang);
+	void save(string_type filename);
 	void load(string_type filename, long lang);
 
 	int size() { return list_.size(); }

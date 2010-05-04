@@ -82,8 +82,10 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 			long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
 			if (size > 0)
 				for (; i < size; i++) {
+					if (i > 0)
+						output_.append(" ");
 					string_type& word = words_list[i]->chars();
-					output_.append(word + " ");
+					output_.append(word);
 					segmented_len += word.length();
 				}
 			else
