@@ -35,6 +35,8 @@ core_sources =  \
 	$(SRCDIR)/parser_readability.c \
     $(SRCDIR)/memory_index_hash_node.c \
     $(SRCDIR)/memory_index.c \
+	$(SRCDIR)/memory_index_one.c	\
+	$(SRCDIR)/memory_indexer.c	\
     $(SRCDIR)/hash_table.c \
     $(SRCDIR)/postings_piece.c \
     $(SRCDIR)/ctypes.c \
@@ -200,6 +202,10 @@ core_noinst_headers = \
 	$(SRCDIR)/memory.h	\
 	$(SRCDIR)/memory_index.h	\
 	$(SRCDIR)/memory_index_hash_node.h	\
+	$(SRCDIR)/memory_index_one_node.h	\
+	$(SRCDIR)/memory_index_one.h	\
+	$(SRCDIR)/memory_indexer_node.h	\
+	$(SRCDIR)/memory_indexer.h	\
 	$(SRCDIR)/NEXI.h	\
 	$(SRCDIR)/NEXI_term.h \
 	$(SRCDIR)/NEXI_term_ant.h \

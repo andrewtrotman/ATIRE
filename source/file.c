@@ -17,6 +17,7 @@
 	#include <sys/stat.h>
 	#include <unistd.h>
 #endif
+#include <stdlib.h>
 
 /*
 	ANT_FILE::ANT_FILE()
