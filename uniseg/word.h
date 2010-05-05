@@ -50,7 +50,8 @@ private:
 	unsigned int 									lcounter_;
 	unsigned int 									rcounter_;
 
-	bool 											is_word_;
+	bool 											is_word_;  // is actual word based on vocabulary
+	bool											is_candidate_word_; // probably a candidate word
 	bool 											seged_;
 
 	double											p_;
@@ -188,6 +189,10 @@ public:
 
 	bool is_word() { return is_word_; }
 	void is_word(bool b);
+
+	bool is_candidate_word() { return is_word_; }
+	void is_candidate_word(bool b);
+
 	bool seged() { return seged_; }
 	void seged(bool b) { seged_ = b; }
 	void seged_if(unsigned int freq);

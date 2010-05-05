@@ -140,6 +140,11 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 	}
 }
 
+void FreqCounter::count_segmented()
+{
+
+}
+
 void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
 {
 	char *start = NULL;

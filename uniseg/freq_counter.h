@@ -37,6 +37,7 @@ public:
 
 	void count(int max, int min = 1);
 	void count() { count(get_utf8_string_length(stream_), 1); }
+	void count_segmented();
 	string_type& stream() { return stream_; }
 	void stream(string_type& str) { stream_ = str; }
 

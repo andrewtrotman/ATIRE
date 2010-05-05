@@ -310,8 +310,13 @@ Word* Word::subword(int idx, int len) {
 	return w_ptr;
 }
 
+
 void Word::is_word(bool b) {
 	is_word_ = b;
+}
+
+void Word::is_candidate_word(bool b) {
+	is_candidate_word_ = b;
 	if (b) seged_ = b;
 
 	word_ptr_type lp_ptr = lparent_;
