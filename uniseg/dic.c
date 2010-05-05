@@ -72,7 +72,7 @@ void Dic::load(string_type filename, long lang) {
 	      if (freq <= 0)
 	    	  freq = 1;
 
-	      add(line.substr(0, pos + 1), freq);
+	      add(line.substr(0, pos), freq);
 	    }
 	    dicfile.close();
 	  }

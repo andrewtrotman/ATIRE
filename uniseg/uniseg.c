@@ -73,6 +73,9 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 
 		how_far = next - current;
 
+		if (output_.length() > 0)
+			output_.append(" ");
+
 	    flag = next < end;
 	    if (how_far > 0 && count > 1) {
 			seger_.input(current, how_far);

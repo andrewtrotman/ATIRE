@@ -360,14 +360,15 @@ void Freq::showcol(int n) {
 		array_type temp_arr;
 		int i = 0;
 		for (i = 0; i < (int)freq_n_[n].size(); i++)
-			temp_arr.push_back(freq_n_[n][i]);
+			if (freq_n_[n][i]->freq() > 0)
+				temp_arr.push_back(freq_n_[n][i]);
 		std::sort(temp_arr.begin(), temp_arr.end(), Word::cmp_just_freq);
 
 		for (i = 0; i < (int)temp_arr.size(); i++) {
 			const array_type& word_a = temp_arr[i]->array();
 			//cerr << ->chars();
 			for (int j = 0; j < word_a.size(); j++) {
-				if (j > 0 /*&& (j < (word_a.size() - 1))*/ && (word_a[j]->lang() != UNISEG_encoding::CHINESE) && (word_a[j]->lang() != UNISEG_encoding::NUMBER))
+				if (j > 0 /*&& (j < (word_a.size() - 1))*/ && (word_a[j]->lang() != uniseg_encoding::CHINESE) && (word_a[j]->lang() != UNISEG_encoding::NUMBER))
 					cerr<< " ";
 				cerr<< word_a[j]->chars();
 			}

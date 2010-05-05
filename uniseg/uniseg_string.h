@@ -79,7 +79,7 @@ inline void array_to_string(string_array& ca, long lang, string_type& dest, int 
 	assert(idx >= 0);
 	assert(len <= (int)ca.size());
 	string_type sep;
-	if (lang != UNISEG_encoding::CHINESE)
+	if (lang != uniseg_encoding::CHINESE)
 		sep = " ";
 	int count = 0;
 	for (int i = idx; i < idx + len; i++) {
