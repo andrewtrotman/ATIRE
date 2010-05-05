@@ -29,9 +29,6 @@ port = 0;
 this->argc = argc;
 this->argv = argv;
 logo = TRUE;
-stemmer = 0;
-stemmer_similarity = FALSE;
-stemmer_similarity_threshold = 0.0;
 sort_top_k = LLONG_MAX;
 focus_top_k = 2000;
 metric = MAP;
@@ -47,14 +44,6 @@ segmentation = TRUE;
 trim_postings_k = LLONG_MAX;
 file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
-}
-
-/*
-	ANT_ANT_PARAM_BLOCK::ANT_ANT_PARAM_BLOCK()
-	------------------------------------------
-*/
-ANT_ANT_param_block::~ANT_ANT_param_block()
-{
 }
 
 /*
@@ -84,20 +73,7 @@ puts("-nologo         Suppress banner");
 puts("-people         Display credits");
 puts("");
 
-puts("TERM EXPANSION");
-puts("--------------");
-puts("-t[-hlops][+-<th>]  Term expansion, one of:");
-puts("  -             None [default]");
-puts("  h             Paice Husk stemming");
-puts("  l             Lovins stemming");
-puts("  o             Otago stemming");
-puts("  p             Porter stemming");
-puts("  s             S-Striping stemming");
-#ifdef USE_FLOATED_TF
-puts("   +<th>        Stemmed terms tfs weighted by term similarity. [default=1]");
-#endif
-puts("   -<th>        Stemmed terms cutoff with term similarity. [default=0]");
-puts("");
+ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("OPTIMISATIONS");
 puts("-------------");
@@ -144,7 +120,7 @@ puts("-S[n]           East-Asian language word segmentation, query is segmented 
 puts("  n             No segmentation, search with the input terms separated by space");
 puts("");
 
-ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking dunctions
+ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking functions
 
 puts("FOCUSED RETRIEVAL");
 puts("-----------------");
@@ -270,44 +246,6 @@ else
 }
 
 /*
-	ANT_ANT_PARAM_BLOCK::TERM_EXPANSION()
-	-------------------------------------
-*/
-void ANT_ANT_param_block::term_expansion(char *which)
-{
-if (*(which + 1) != '\0' && *(which + 1) != '+' && *(which + 1) != '-')
-	exit(printf("Only one term expansion algorithm is permitted: '%c'\n", *which));
-
-switch (*which)
-	{
-	case '-' : stemmer = ANT_stemmer_factory::NONE;       break;
-	case 'h' : stemmer = ANT_stemmer_factory::PAICE_HUSK; break;
-	case 'l' : stemmer = ANT_stemmer_factory::LOVINS;     break;
-	case 'o' : stemmer = ANT_stemmer_factory::OTAGO;      break;
-	case 'p' : stemmer = ANT_stemmer_factory::PORTER;     break;
-	case 's' : stemmer = ANT_stemmer_factory::S_STRIPPER; break;
-	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
-	}
-if (*(which + 1) == '+')
-#ifdef USE_FLOATED_TF
-    {
-    stemmer_similarity = ANT_stemmer_factory::WEIGHTED_SIMILARITY;
-    if (*(which + 2) != '\0')
-        stemmer_similarity_threshold = strtod(which + 2, NULL);
-    else 
-        stemmer_similarity_threshold = 1.0;
-    }
-#else
-	exit(printf("Not compilied with floating point tf, option unsupported.\n"));
-#endif
-else if (*(which + 1) == '-')
-    {
-    stemmer_similarity = ANT_stemmer_factory::THRESHOLD_SIMILARITY;
-    stemmer_similarity_threshold = strtod(which + 2, NULL);
-    }
-}
-
-/*
 	ANT_ANT_PARAM_BLOCK::SET_FOCUSED_RANKER()
 	-----------------------------------------
 */
@@ -348,7 +286,7 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "nologo") == 0)
 			logo = FALSE;
 		else if (*command == 't')
-			term_expansion(command + 1);
+			term_expansion(command + 1, TRUE);
 		else if (*command == 'k')
 			{
 			sort_top_k = atol(command + 1);

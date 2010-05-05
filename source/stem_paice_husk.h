@@ -1,13 +1,19 @@
 /*
-	PAICE_HUSK.H
-	------------
+	STEM_PAICE_HUSK.H
+	-----------------
 */
-#ifndef PAICE_HUSK_H_
-#define PAICE_HUSK_H_
+#ifndef STEM_PAICE_HUSK_H_
+#define STEM_PAICE_HUSK_H_
+
+#include "stem.h"
 
 #define maxwdsz 250 			/* Maximum length of word stemmable */
 #define maxsuffsz 8 			/* Maximum length of suffix */
 
+/*
+	class ANT_PAICE_HUSK_RULE
+	-------------------------
+*/
 class ANT_paice_husk_rule
 {
 public:
@@ -22,7 +28,11 @@ public:
 	ANT_paice_husk_rule *next;	/* Next item in linked list */
 };
 
-class ANT_paice_husk
+/*
+	class ANT_STEM_PAICE_HUSK
+	-------------------------
+*/
+class ANT_stem_paice_husk : public ANT_stem
 {
 private:
 	ANT_paice_husk_rule ttable[26];
@@ -40,11 +50,14 @@ private:
 	int isvowel(char s);
 	int isconsonant(char s);
 	int acceptable(char *s);
+
+	virtual ANT_paice_husk_rule raw_stem(char *s);
 public:
-	ANT_paice_husk();
-	ANT_paice_husk_rule stem(char *s);
+	ANT_stem_paice_husk();
+	virtual ~ANT_stem_paice_husk() {}
+	virtual size_t stem(char *term, char *destination);
 } ;
 
 extern const char *ANT_paice_husk_rule_set[];
 
-#endif  /* PAICE_HUSK_H_ */
+#endif /* STEM_PAICE_HUSK_H_ */

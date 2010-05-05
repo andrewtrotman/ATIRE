@@ -28,6 +28,11 @@
 #include "instream_deflate.h"
 #include "instream_bz2.h"
 #include "instream_buffer.h"
+#include "stem_porter.h"
+#include "stem_lovins.h"
+#include "stem_otago.h"
+#include "stem_paice_husk.h"
+#include "stem_s.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -50,7 +55,7 @@ stats->print_elapsed_time();
 	INDEX_DOCUMENT()
 	----------------
 */
-long index_document(ANT_memory_indexer *indexer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
+long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
 ANT_string_pair *token;
 long terms_in_document, length_of_token, length_of_previous_token, is_previous_token_chinese;
@@ -281,7 +286,7 @@ for (param = first_param; param < argc; param++)
 		/*
 			Index, this call returns the number of terms we found in the document
 		*/
-		if (index_document(index, param_block.segmentation, readability, doc, current_file) == 0)
+		if (index_document(index, NULL, param_block.segmentation, readability, doc, current_file) == 0)
 			{
 			/*
 				pretend we never saw the document

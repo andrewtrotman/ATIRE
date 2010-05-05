@@ -23,9 +23,13 @@ switch (which_stemmer)
 	case NONE: 			stemmer = new ANT_stemmer_none(engine);			break;
 	case S_STRIPPER: 	stemmer = new ANT_stemmer(engine);				break;
 	case PORTER: 		stemmer = new ANT_stemmer_porter(engine);		break;
-	case LOVINS:		stemmer = new ANT_stemmer_lovins(engine);		break;
-	case PAICE_HUSK:	stemmer = new ANT_stemmer_paice_husk(engine);	break;
 	case OTAGO:			stemmer = new ANT_stemmer_otago(engine);		break;
+#ifdef ANT_HAS_LOVINS
+	case LOVINS:		stemmer = new ANT_stemmer_lovins(engine);		break;
+#endif
+#ifdef ANT_HAS_PAICE_HUSK
+	case PAICE_HUSK:	stemmer = new ANT_stemmer_paice_husk(engine);	break;
+#endif
 	default:            break;
 	}
 

@@ -1,15 +1,17 @@
 /*
-	PORTER.C
-	--------
+	STEM_PORTER.C
+	-------------
+	Generate the stem of a word using Porter's algorythm
+	M.F. Porter, An algoritm for suffix stripping, Program, Vol 14, No 3, pp 130-137, July 1980
 */
 #include "str.h"
-#include "porter.h"
+#include "stem_porter.h"
 
 /*
-	ANT_PORTER::LENGTH()
-	--------------------
+	ANT_STEM_PORTER::LENGTH()
+	-------------------------
 */
-long ANT_porter::length(char *reversed)
+long ANT_stem_porter::length(char *reversed)
 {
 char *end, was;
 long size;
@@ -42,10 +44,10 @@ return size;
 }
 
 /*
-	ANT_PORTER::HAS_VOWEL()
-	-----------------------
+	ANT_STEM_PORTER::HAS_VOWEL()
+	----------------------------
 */
-long ANT_porter::has_vowel(char *what)
+long ANT_stem_porter::has_vowel(char *what)
 {
 char *pos;
 
@@ -60,14 +62,14 @@ return 0;
 }
 
 /*
-	ANT_PORTER::STEM()
-	------------------
+	ANT_STEM_PORTER::STEM()
+	-----------------------
 	Generate the stem of a word using Porter's algorythm
 	M.F. Porter, An algoritm for suffix stripping, Program, Vol 14, No 3, pp 130-137, July 1980
 
 	parameter "destination" must not overlap parameter "what"
 */
-size_t ANT_porter::stem(char *what, char *destination)
+size_t ANT_stem_porter::stem(char *what, char *destination)
 {
 long kill_dups = 0;
 char *reverse, *at;
@@ -292,7 +294,6 @@ strrev(destination, at);
 	to make the search engine start at the first two characters, but it is not OK to use it for 
 	anything else.
 */
-//return strlen(destination);
 return 2;
 }
 

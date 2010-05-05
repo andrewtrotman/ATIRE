@@ -87,8 +87,12 @@ puts("");
 
 puts("STEMMERS");
 puts("--------");
-puts("Paice Husk              : Andrew Stark (http://www.scientificpsychic.com/paice/paice.c)");
-puts("Lovins                  : Linh Huynh, Eibe Frank (http://www.cs.waikato.ac.nz/~eibe/stemmers/index.html)");
+#ifdef ANT_HAS_PAICE_HUSK
+	puts("Paice Husk              : Andrew Stark (http://www.scientificpsychic.com/paice/paice.c)");
+#endif
+#ifdef ANT_HAS_LOVINS
+	puts("Lovins                  : Linh Huynh, Eibe Frank (http://www.cs.waikato.ac.nz/~eibe/stemmers/index.html)");
+#endif
 puts("Otago                   : Vaughn Wood");
 puts("Porter                  : Andrew Trotman");
 puts("S-stripper              : Andrew Trotman");

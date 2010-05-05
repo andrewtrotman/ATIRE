@@ -9,7 +9,7 @@
 #include "../source/str.h"
 #include "../source/disk.h"
 #include "../source/stop_word.h"
-#include "../source/porter.h"
+#include "../source/stem_porter.h"
 
 #define MAX_TERMS_PER_QUERY 30
 #define MAX_QUERY_LENGTH 2048
@@ -20,7 +20,7 @@ static char *SEPERATORS = " []()\"'";
 
 FILE *netfile, *statsfile;
 
-ANT_porter stemmer;
+ANT_stem_porter stemmer;
 ANT_stop_word stopper;
 
 /*

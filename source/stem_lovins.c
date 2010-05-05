@@ -1,6 +1,6 @@
 /*
-	LOVINS.C
-	--------
+	STEM_LOVINS.C
+	-------------
 	OK, I didn't want to do this but it looks like there isn't much choice.  This code
 	was originally written by Linh Huynh (linh@kbs.citri.edu.au) (C) 1994 and released
 	under GPL 2 with the following attached:
@@ -18,12 +18,19 @@
 	use function prototypes and used Pascal strings (with a length byte at the start).  
 	I've removed the crap, made it pass through the Microsoft C/C++ compiler
 	and converted into C NULL-termunated strngs.
+
+	As ANT is going to be released BSD and this Lovins code is GPL we have an open-source
+	license conflict.  Consequently this Lovins code is NOT part of ANT but is provided
+	as is under GPL.
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pragma.h"
-#include "lovins.h"
+#include "stem_lovins.h"
+
+#ifdef _MSC_VER
+	#pragma warning(disable:4100)
+#endif
 
 #define MIN_STEM_LENGTH 2
 #define MAX_ENDING_SIZE 11
@@ -58,50 +65,32 @@ static int n(char ch) { return (ch != 'n'); } /* Rule number 32    */
 *      - end        : pointer points to the end of the possible stem.
 *
 *************************************************************************/
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int B(int stem_length, char *end) { return (stem_length >= 3); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int C(int stem_length, char *end) { return (stem_length >= 4); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int D(int stem_length, char *end) { return (stem_length >= 5); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int E(int stem_length, char *end) { return (*end != 'e'); }
 static int F(int stem_length, char *end) { return ((stem_length >= 3) && (*end != 'e')); }
 static int G(int stem_length, char *end) { return ((stem_length >= 3) && (*end == 'f')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int H(int stem_length, char *end) { return ((*end == 't') || ((*end == 'l') && (*(end - 1) == 'l'))); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int I(int stem_length, char *end) { return ((*end != 'o') && (*end != 'e')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int J(int stem_length, char *end) { return ((*end != 'a') && (*end != 'e')); }
 static int K(int stem_length, char *end) { return ((stem_length >= 3) && ((*end == 'l') || (*end == 'i') || ((*end == 'e') && (*(end - 2) == 'u')))); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int L(int stem_length, char *end) { return (*end == 's') ? (*(end - 1) == 'o') : ((*end != 'u') && (*end != 'x')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int M(int stem_length, char *end) { return ((*end != 'a') && (*end != 'c') && (*end != 'e') && (*end != 'm')); }
 static int N(int stem_length, char *end) { return (stem_length >= 3) ? (*(end - 2) == 's') ? (stem_length >= 4) : 1 : 0; }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int O(int stem_length, char *end) { return ((*end == 'l') || (*end == 'i')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int P(int stem_length, char *end) { return (*end != 'c'); }
 static int Q(int stem_length, char *end) { return ((stem_length >= 3) && (*end != 'l') && (*end != 'n')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int R(int stem_length, char *end) { return ((*end == 'n') || (*end == 'r')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int S(int stem_length, char *end) { return (*end == 't') ? (*(end - 1) != 't') : ((*end == 'r') && (*(end - 1) == 'd')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int T(int stem_length, char *end) { return (*end == 't') ? (*(end - 1) != 'o') : (*end == 's'); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int U(int stem_length, char *end) { return ((*end == 'l') || (*end == 'm') || (*end == 'n') || (*end == 'r')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int V(int stem_length, char *end) { return (*end == 'c'); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int W(int stem_length, char *end) { return ((*end != 's') && (*end != 'u')); }
 static int X(int stem_length, char *end) { return (*end == 'e') ? ((stem_length >= 3) && (*(end - 2) == 'u')) : ((*end == 'l') || (*end == 'i')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int Y(int stem_length, char *end) { return ((*end == 'n') && (*(end - 1) == 'i')); }
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int Z(int stem_length, char *end) { return (*end != 'f'); }
+
 static int AA(int stem_length, char *end)
 {
 char p1, p2;
@@ -116,10 +105,9 @@ else if (p1 == 's')
 	return (p2 == 'e');
 else
 	return ((p1 == 'd') || (p1 == 'f') || (p1 == 'l') || (p1 == 't'));
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
+
 static int BB (int stem_length, char *end) { return ((stem_length > 2) && (strncmp (end - 2, "met", 3) != 0) && ((stem_length < 4) || (strncmp (end - 3, "ryst", 4) != 0))) ? 1 : 0; } /* CHANGED by EF */ 
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
 static int CC (int stem_length, char *end) { return (*end == 'l'); }
 
 /* =========================================================================
@@ -764,10 +752,10 @@ return stem_end;
 /**************************************************************************/
 
 /*
-	LOVINS_STEM ()
-	--------------
+	ANT_STEM_LOVINS::STEM()
+	-----------------------
 */
-size_t lovins_stem(char *term, char *destination)
+size_t ANT_stem_lovins::stem(char *term, char *destination)
 {
 int length;
 char *stem_end;

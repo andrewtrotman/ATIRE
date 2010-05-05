@@ -1,12 +1,12 @@
 /*
-	LEARNED_WIKIPEDIA_STEM.C
-	------------------------
+	STEM_OTAGO.C
+	------------
 	Stemmer learned for the INEX wikipedia collection.  It was learned by Vaughn Wood using 
 	Genetic Programming.
 */
 #include <string.h>
 #include "pragma.h"
-#include "learned_wikipedia_stem.h"
+#include "stem_otago.h"
 
 #pragma ANT_PRAGMA_CONST_CONDITIONAL
 
@@ -74,10 +74,10 @@ while(1)
 }
 
 /*
-	ANT_LEARNED_WIKIPEDIA_STEM::STEM()
-	----------------------------------
+	ANT_STEM_OTAGO::STEM()
+	----------------------
 */
-size_t ANT_learned_wikipedia_stem::stem (const char *string, char *buffer){
+size_t ANT_stem_otago::stem(const char *string, char *buffer) {
     size_t length;
 
     strncpy(buffer, string, TMP_BUFFER_SIZE);

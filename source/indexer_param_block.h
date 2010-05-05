@@ -6,12 +6,13 @@
 #define INDEXER_PARAM_BLOCK_H_
 
 #include "indexer_param_block_rank.h"
+#include "indexer_param_block_stem.h"
 
 /*
 	class ANT_INDEXER_PARAM_BLOCK
 	-----------------------------
 */
-class ANT_indexer_param_block : public ANT_indexer_param_block_rank
+class ANT_indexer_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;

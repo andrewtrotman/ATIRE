@@ -118,6 +118,7 @@ puts("   f            Flesch-Kincaid");
 puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
+ANT_indexer_param_block_stem::help(FALSE);
 
 puts("REPORTING");
 puts("---------");
@@ -305,6 +306,8 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'Q')
 			set_ranker(command + 1);
+		else if (*command == 't')
+			term_expansion(command + 1, FALSE);
 		else if (strcmp(command, "nologo") == 0)
 			logo = FALSE;
 		else if (strcmp(command, "people") == 0)

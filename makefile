@@ -13,6 +13,8 @@ TRUE = 1
 #
 ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
+ANT_HAS_LOVINS = $(TRUE)
+ANT_HAS_PAICE_HUSK = $(TRUE)
 
 #
 #	Directories
@@ -39,6 +41,22 @@ EXTRA_LIBS = $(EXTRA_LIBS) zlib\zlib-1.2.3\zlib.lib
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_BZLIB
 EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I bzip\bzip2-1.0.5
 EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
+!ENDIF
+
+#
+#	Now for GPL / BSD license conflicts.
+#
+!IF $(ANT_HAS_LOVINS) == $(TRUE)
+STEM_LOVINS = $(OBJDIR)\stem_lovins.obj
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LOVINS
+!ELSE
+STEM_LOVINS = 
+!ENDIF
+!IF $(ANT_HAS_PAICE_HUSK) == $(TRUE)
+STEM_PAICE_HUSK = $(OBJDIR)\stem_paice_husk.obj
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_PAICE_HUSK
+!ELSE
+STEM_PAICE_HUSK = 
 !ENDIF
 
 #
@@ -122,11 +140,12 @@ PARTS = \
 	$(OBJDIR)\stemmer_term_similarity.obj			\
 	$(OBJDIR)\stemmer_term_similarity_threshold.obj	\
 	$(OBJDIR)\stemmer_term_similarity_weighted.obj	\
-	$(OBJDIR)\porter.obj							\
-	$(OBJDIR)\lovins.obj							\
+	$(OBJDIR)\stem_porter.obj						\
+	$(STEM_LOVINS)									\
+	$(STEM_PAICE_HUSK)								\
 	$(OBJDIR)\stemmer_factory.obj					\
-	$(OBJDIR)\paice_husk.obj						\
-	$(OBJDIR)\learned_wikipedia_stem.obj			\
+	$(OBJDIR)\stem_otago.obj						\
+	$(OBJDIR)\stem_s.obj							\
 	$(OBJDIR)\relevant_topic.obj					\
 	$(OBJDIR)\bitstream.obj							\
 	$(OBJDIR)\compress_elias_gamma.obj				\
@@ -148,6 +167,7 @@ PARTS = \
 	$(OBJDIR)\search_engine_readability.obj			\
 	$(OBJDIR)\plugin_manager.obj					\
 	$(OBJDIR)\indexer_param_block_rank.obj			\
+	$(OBJDIR)\indexer_param_block_stem.obj			\
 	$(OBJDIR)\indexer_param_block.obj				\
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\

@@ -1,16 +1,20 @@
 /*
-	PORTER.H
-	--------
+	STEM_PORTER.H
+	-------------
 */
-
-#ifndef PORTER_H_
-#define PORTER_H_
+#ifndef STEM_PORTER_H_
+#define STEM_PORTER_H_
 
 #include <stdio.h>
 #include "ctypes.h"
 #include "btree_iterator.h"		// for MAX_TERM_LENGTH only
+#include "stem.h"
 
-class ANT_porter
+/*
+	class ANT_STEM_PORTER
+	---------------------
+*/
+class ANT_stem_porter : public ANT_stem
 {
 private:
 	char workspace[MAX_TERM_LENGTH];
@@ -22,10 +26,9 @@ private:
 	long has_vowel(char *what);
 
 public:
-	ANT_porter() {}
-	virtual ~ANT_porter() {}
+	ANT_stem_porter() {}
+	virtual ~ANT_stem_porter() {}
 	virtual size_t stem(char *term, char *destination);
 } ;
 
-#endif  /* PORTER_H_ */
-
+#endif /* STEM_PORTER_H_ */

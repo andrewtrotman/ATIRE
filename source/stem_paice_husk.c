@@ -1,8 +1,10 @@
 /*
-	PAICE_HUSK.C
-	------------
+	STEM_PAICE_HUSK.C
+	-----------------
 	Stemmer Program 1994-5,by Andrew Stark   Started 12-9-94.
 	Taken and adapted for use with ANT by Andrew Trotman (2009)
+	The license is not at all clear.
+
 	When I got this code it was in C and read the rule set from an input file
 	as ANT does not have config files the rules are now inlined.  The "right"
 	way to do this is to embed the right structures, but the easy way is to
@@ -17,7 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "paice_husk.h"
+#include "stem_paice_husk.h"
 
 #define maxlinelength 80 		/* Maximun length of line read from file */
 #define stop 2 				/* Stop here */
@@ -27,20 +29,20 @@
 #define blank '?' 				/* For when replace string is empty */
 
 /*
-	ANT_PAICE_HUSK::ANT_PAICE_HUSK()
-	--------------------------------
+	ANT_STEM_PAICE_HUSK::ANT_STEM_PAICE_HUSK()
+	------------------------------------------
 */
-ANT_paice_husk::ANT_paice_husk(void)
+ANT_stem_paice_husk::ANT_stem_paice_husk(void)
 {
 inittable(ttable);
 readrules(ttable); /* Read in a rule set from the file */
 }
 
 /*
-	ANT_PAICE_HUSK::TBLINDEX()
-	--------------------------
+	ANT_STEM_PAICE_HUSK::TBLINDEX()
+	-------------------------------
 */
-int ANT_paice_husk::tblindex(char *s)
+int ANT_stem_paice_husk::tblindex(char *s)
 {
 int x;
 
@@ -51,10 +53,10 @@ return (*(s + x) - 'a'); /* Return number from 0..25 */
 }
 
 /*
-	ANT_PAICE_HUSK::ISVALIDSTR()
-	----------------------------
+	ANT_STEM_PAICE_HUSK::ISVALIDSTR()
+	---------------------------------
 */
-int ANT_paice_husk::isvalidstr(char *s)
+int ANT_stem_paice_husk::isvalidstr(char *s)
 {
 int x;
 
@@ -65,10 +67,10 @@ return 1; /* ..otherwise,it`s ok */
 }
 
 /*
-	ANT_PAICE_HUSK::ADDRULE()
-	-------------------------
+	ANT_STEM_PAICE_HUSK::ADDRULE()
+	------------------------------
 */
-char ANT_paice_husk::addrule(ANT_paice_husk_rule r,ANT_paice_husk_rule t[26])
+char ANT_stem_paice_husk::addrule(ANT_paice_husk_rule r,ANT_paice_husk_rule t[26])
 {
 int x;
 ANT_paice_husk_rule *temp;
@@ -91,10 +93,10 @@ return 1;
 }
 
 /*
-	ANT_PAICE_HUSK::APPLYRULE()
-	---------------------------
+	ANT_STEM_PAICE_HUSK::APPLYRULE()
+	--------------------------------
 */
-int ANT_paice_husk::applyrule(ANT_paice_husk_rule *r,char *word,int isintact)
+int ANT_stem_paice_husk::applyrule(ANT_paice_husk_rule *r,char *word,int isintact)
 {
 /* Apply the rule r to word,leaving results in word.Return stop,continue */
 /* or notapply as appropriate */
@@ -125,10 +127,10 @@ else
 }
 
 /*
-	ANT_PAICE_HUSK::RULEWALK()
-	--------------------------
+	ANT_STEM_PAICE_HUSK::RULEWALK()
+	-------------------------------
 */
-int ANT_paice_husk::rulewalk(char *word,ANT_paice_husk_rule t[26],int isintact,ANT_paice_husk_rule *used)
+int ANT_stem_paice_husk::rulewalk(char *word,ANT_paice_husk_rule t[26],int isintact,ANT_paice_husk_rule *used)
 {
 int x;
 int result;
@@ -155,8 +157,8 @@ return stop; /* If no rule was used,then we can stop */
 }
 
 /*
-	ANT_PAICE_HUSK::MAKERULE()
-	--------------------------
+	ANT_STEM_PAICE_HUSK::MAKERULE()
+	-------------------------------
 	Warning!In this form, makerule will fail (crash) if rule format is
 	not exactly right!
 
@@ -164,7 +166,7 @@ return stop; /* If no rule was used,then we can stop */
 	flags is one of:"protect","intact","continue","protint","contint",or
 	"stop" (without the inverted commas in the actual file).
 */
-ANT_paice_husk_rule ANT_paice_husk::makerule(char *s,int line)
+ANT_paice_husk_rule ANT_stem_paice_husk::makerule(char *s,int line)
 {
 ANT_paice_husk_rule temp;
 
@@ -255,10 +257,10 @@ return temp;
 }
 
 /*
-	ANT_PAICE_HUSK::READRULES()
-	---------------------------
+	ANT_STEM_PAICE_HUSK::READRULES()
+	--------------------------------
 */
-void ANT_paice_husk::readrules(ANT_paice_husk_rule ttable[26])
+void ANT_stem_paice_husk::readrules(ANT_paice_husk_rule ttable[26])
 {
 char copy[maxlinelength];
 const char **line;
@@ -276,10 +278,10 @@ for (line = ANT_paice_husk_rule_set; *line != NULL; line++)
 } 
 
 /*
-	ANT_PAICE_HUSK::FLAGERROR()
-	---------------------------
+	ANT_STEM_PAICE_HUSK::FLAGERROR()
+	--------------------------------
 */
-int ANT_paice_husk::flagerror(char *s)
+int ANT_stem_paice_husk::flagerror(char *s)
 {
 return (strcmp(s, "continue") && /* If s is not equal to "continue".. */
 	strcmp(s, "intact") && /* ..or "intact".. */
@@ -290,11 +292,11 @@ return (strcmp(s, "continue") && /* If s is not equal to "continue".. */
 }
 
 /*
-	ANT_PAICE_HUSK::STEM()
-	----------------------
+	ANT_STEM_PAICE_HUSK::RAW_STEM()
+	-------------------------------
 	Stem the word,using the given table
 */
-ANT_paice_husk_rule ANT_paice_husk::stem(char *s)
+ANT_paice_husk_rule ANT_stem_paice_husk::raw_stem(char *s)
 {
 int isintact = 1;
 int result;
@@ -334,10 +336,21 @@ return r; /* Return the rule,stemmed */
 } 
 
 /*
-	ANT_PAICE_HUSK::INITTABLE()
+	ANT_STEM_PAICE_HUSK::STEM()
 	---------------------------
 */
-void ANT_paice_husk::inittable(ANT_paice_husk_rule t[26])
+size_t ANT_stem_paice_husk::stem(char *term, char *destination)
+{
+ANT_paice_husk_rule trule = raw_stem(term);
+strcpy(destination, trule.text);
+return 3;
+}
+
+/*
+	ANT_STEM_PAICE_HUSK::INITTABLE()
+	--------------------------------
+*/
+void ANT_stem_paice_husk::inittable(ANT_paice_husk_rule t[26])
 {
 int x;
 
@@ -350,12 +363,12 @@ for(x = 0; x < 26;x++)
 }
 
 /*
-	ANT_PAICE_HUSK::ISVOWEL()
-	-------------------------
+	ANT_STEM_PAICE_HUSK::ISVOWEL()
+	------------------------------
 	Return true (1) if it's a vowel,or false otherwise
 	NB - Treats 'y' as a vowel for the stemming purposes!
 */
-int ANT_paice_husk::isvowel(char s)
+int ANT_stem_paice_husk::isvowel(char s)
 {
 switch (s)
 	{
@@ -366,24 +379,24 @@ return 0;
 }
 
 /*
-	ANT_PAICE_HUSK::ISCONSONANT()
-	-----------------------------
+	ANT_STEM_PAICE_HUSK::ISCONSONANT()
+	----------------------------------
 	Return true (1) if it's a consonant,or false otherwise
 */
-int ANT_paice_husk::isconsonant(char s)
+int ANT_stem_paice_husk::isconsonant(char s)
 {
 return islower(s) && !isvowel(s);
 } 
 
 /*
-	ANT_PAICE_HUSK::ACCEPTABLE()
-	----------------------------
+	ANT_STEM_PAICE_HUSK::ACCEPTABLE()
+	---------------------------------
 	Acceptability condition:if the stem begins with a vowel,then it
 	must contain at least 2 letters,one of which must be a consonant
 	If, however, it begins with a vowel then it must contain three
 	letters and at least one of these must be a vowel or 'y', ok?
 */
-int ANT_paice_husk::acceptable(char *s)
+int ANT_stem_paice_husk::acceptable(char *s)
 {
 int x;
 char *ch;
