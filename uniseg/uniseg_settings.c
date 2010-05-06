@@ -7,14 +7,18 @@
  */
 
 #include "uniseg_settings.h"
+#include "config.h"
 
 #include <stdlib.h>
 
 #include <algorithm>
+#include <string>
 
 const char UNISEG_settings::DEFAULT_FRQS_V_NAME[] = { "UNISEG_FRQS" };
 const char UNISEG_settings::DEFAULT_DICS_V_NAME[] = { "UNISEG_DICS" };
 const char UNISEG_settings::DEFAULT_VAR[] = {"var"};
+const char UNISEG_settings::DEFAULT_CONF[] = {"conf"};
+const char UNISEG_settings::DEFAULT_CONF_FILE[] = {"freqs.conf"};
 const char UNISEG_settings::DEFAULT_INDEX[] = {"index"};
 const char UNISEG_settings::DEFAULT_ZH[] = {"zh"};
 const char UNISEG_settings::DEFAULT_EN[] = {"en"};
@@ -102,4 +106,17 @@ bool UNISEG_settings::skipit(int size, int freq)
 		}
 	}
 	return false;
+}
+
+void UNISEG_settings::load_conf(const char *filename)
+{
+	Config conf;
+	if (conf.load(filename)) {
+		std::string temp = conf.get_property("freq_dir");
+		if (temp.length() > 0)
+			freqs_path = temp + std::string(sep);
+		temp = conf.get_property("training_dir");
+		if (temp.length() > 0)
+			training_path = temp + std::string(sep);
+	}
 }

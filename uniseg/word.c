@@ -394,7 +394,13 @@ void Word::cal_p(double base) {
 }
 
 void Word::cal_a() {
+
 	right_a_ = left_a_ = 0.0;
+
+	if (lparent_->is_word() && rparent_->is_word()) {
+		left_a_ = log(this->p() / (lparent_->p()*rparent_->p()));
+		return;
+	}
 
 	if (size_ == 1)
 		return;
@@ -419,7 +425,7 @@ void Word::cal_a() {
 //			}
 //		}
 		if (UNISEG_settings::instance().debug)
-						cerr << endl << "calculating overall association score for " << this->chars() << endl;
+			cerr << endl << "calculating overall association score for " << this->chars() << endl;
 		left_a_ = cal_a(size_/2);
 		if ((size_ % 2) == 1)
 			right_a_ = cal_a((size_/2) + 1);

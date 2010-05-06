@@ -19,6 +19,8 @@ public:
 	static const char DEFAULT_FRQS_V_NAME[];
 	static const char DEFAULT_DICS_V_NAME[];
 	static const char DEFAULT_VAR[];
+	static const char DEFAULT_CONF[];
+	static const char DEFAULT_CONF_FILE[];
 	static const char DEFAULT_INDEX[];
 	static const char DEFAULT_ZH[];
 	static const char DEFAULT_EN[];
@@ -28,7 +30,7 @@ public:
 	bool 					verbose;
 	bool					debug;
 
-	std::vector<int> 			skip;
+	std::vector<int> 		skip;
 	int 					skip_high;
 	int 					skip_low;
 	int 					to_skip; // for all skipping
@@ -36,10 +38,13 @@ public:
 
 	int 					max;
 
-	long 		lang;
+	long 					lang;
 
-	std::string 				freqs_path; // string pattern frequency table path
-	std::string 				dics_path;  // dictionary path
+	std::string 			freqs_path; // string pattern frequency table path
+	std::string 			dics_path;  // dictionary path
+	std::string				training_path;
+
+	std::string				conf_file;
 	char  					sep[2];
 
 
@@ -50,7 +55,7 @@ public:
 
 	bool					split_latin_char;
 
-	unsigned long 				encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
+	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 
 private:
 	void init();
@@ -64,5 +69,6 @@ public:
 	static UNISEG_settings& instance();
 
 	bool skipit(int size, int freq);
+	void load_conf(const char *filename);
 };
 #endif /* __UNISEQ_SETTINGS_H__ */

@@ -142,7 +142,91 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 
 void FreqCounter::count_segmented()
 {
+	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
+	const char *start = (char *)stream_.c_str();
+	//const char *end = start + stream_.length();
+	word_ptr_type ww_ptr = NULL;
+	word_ptr_type first_ptr = NULL;
+	word_ptr_type second_ptr = NULL;
 
+	while (*start != '\0') {
+		string first;
+
+		enc->test_char((unsigned char *)start);
+		// skip the non
+		while (*start != '\0' && enc->lang() != languages_) {
+			start += enc->howmanybytes();
+			enc->test_char((unsigned char *)start);
+		}
+
+		// get the first word
+		while (*start != '\0' && enc->lang() == languages_) {
+			first.append(string_type(start, enc->howmanybytes()));
+			start += enc->howmanybytes();
+			enc->test_char((unsigned char *)start);
+		}
+
+		string_array ca1;
+		to_string_array(first, ca1);
+		first_ptr = freq_->add(ca1, languages_);
+		first_ptr->is_word(true);
+
+
+
+		while (*start != '\0') {
+			string second;
+			bool restart = false;
+
+			// skip the non
+			while (*start != '\0' && *start == ' ')
+				++start;
+
+			enc->test_char((unsigned char *)start);
+			if (*start != '\0' && enc->lang() != languages_) {
+				start += enc->howmanybytes();
+				break;
+			}
+
+			// get the second
+			// enc->test_char((unsigned char *)start);
+			while (*start != '\0' && enc->lang() == languages_) {
+				second.append(string_type(start, enc->howmanybytes()));
+				start += enc->howmanybytes();
+				enc->test_char((unsigned char *)start);
+			}
+
+			if (second.length() == 0)
+				break;
+
+			string_array ca2;
+			to_string_array(second, ca2);
+			second_ptr = freq_->add(ca2, languages_);
+			second_ptr->is_word(true);
+
+			//string word_pair = first + second;
+			string_array ca(ca1.size() + ca2.size());
+			std::merge(ca1.begin(), ca1.end(), ca2.begin(), ca2.end(), ca.begin());
+			//to_string_array(word_pair, ca);
+			word_ptr_type ww_ptr = freq_->add(ca, languages_);
+//			word_ptr_type w_ptr;
+//
+//			w_ptr = freq_->find(first);
+//			assert(w_ptr != NULL);
+//			if (!w_ptr->is_word())
+//				w_ptr->is_word(true);
+//			w_ptr->increase();
+//			ww_ptr->lparent(w_ptr);
+//
+//			w_ptr = freq_->find(second);
+//			assert(w_ptr != NULL);
+//
+//			if (!w_ptr->is_word())
+//				w_ptr->is_word(true);
+//			w_ptr->increase();
+
+			first = second;
+		}
+	}
 }
 
 void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)

@@ -309,12 +309,16 @@ void CWords::cal_reverse_mi2(Freq* freq) {
 			assert(tmp_w != NULL);
 			//}
 
-			if (tmp_w->size() == 3) {
-				score_ += (lmin < rmin) ? tmp_w->left_a() : tmp_w->right_a();
-			} else if (tmp_w->size() == 4) {
-				score_ += tmp_w->left_a();
-			} else
+			if (tmp_w->lparent()->is_word() && tmp_w->rparent()->is_word()) {
 				score_ += tmp_w->a();
+			} {
+				if (tmp_w->size() == 3) {
+					score_ += (lmin < rmin) ? tmp_w->left_a() : tmp_w->right_a();
+				} else if (tmp_w->size() == 4) {
+					score_ += tmp_w->left_a();
+				} else
+					score_ += tmp_w->a();
+			}
 		}
 
 		curr = next;

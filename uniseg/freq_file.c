@@ -70,7 +70,6 @@ void FreqFile::write(array_type& arr) {
 	    cerr << "Cannot open file for writing.\n";
 	    return;
 	}
-
 	cerr << "expected total size: " << cal(arr) << endl;
 
 	iofs_.seekp(0, ios::beg);
@@ -94,7 +93,14 @@ void FreqFile::write(array_type& arr) {
 			continue;
 
 		iofs_.write(chars, UNICODE_CHAR_LENGTH);
-		iofs_.write((char *)&freq, sizeof(unsigned int));
+		if (word_ptr->lparent()->is_word() && word_ptr->rparent()->is_word()) {
+			char tmp[INT_TYPE_SIZE];
+			int32_to_bytes(freq, tmp);
+			tmp[INT_TYPE_SIZE - 1] = word_ptr->lparent()->size();
+			iofs_.write(tmp, INT_TYPE_SIZE);
+		}
+		else
+			iofs_.write((char *)&freq, sizeof(unsigned int));
 		++count;
 	}
 
@@ -323,6 +329,13 @@ void FreqFile::read_term(word_ptr_type word)
 //				cerr << "I got you" << endl;
 
 			memcpy(tmp, current, INT_TYPE_SIZE);
+
+			/*
+			 * the last byte is used for indicating where is the stop of a word
+			 */
+			int word_where = (int)tmp[3];
+			tmp[INT_TYPE_SIZE - 1] = 0;
+
 			value = bytes_to_int32(tmp);
 			current += INT_TYPE_SIZE;
 
@@ -330,6 +343,20 @@ void FreqFile::read_term(word_ptr_type word)
 			assert(value > 0);
 			word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
 
+			if (word_where > 0) {
+				string lparent = ret_word->subchars(0, word_where);
+				string rparent = ret_word->subchars(word_where, ret_word->size() - word_where);
+
+				word_ptr_type a_word = freq_.find(lparent);
+				assert(a_word != NULL);
+				ret_word->lparent(a_word);
+				a_word->is_word(true);
+
+				a_word = freq_.find(rparent);
+				assert(a_word != NULL);
+				ret_word->rparent(a_word);
+				a_word->is_word(true);
+			}
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
