@@ -404,13 +404,13 @@ void Word::cal_a() {
 
 	right_a_ = left_a_ = 0.0;
 
+	if (size_ == 1)
+		return;
+
 	if (left_->is_word() && right_->is_word()) {
 		left_a_ = log(this->p() / (left_->p()*right_->p()));
 		return;
 	}
-
-	if (size_ == 1)
-		return;
 
 	if (size_ == 2) {
 		assert(rchar_ != NULL);

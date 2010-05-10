@@ -47,6 +47,7 @@ public:
 
 private:
 	void init();
+	void add_word(string_array& ca, char *freq_bytes);
 };
 
 //const std::string FreqFile::EXT_NAME = ".frq";

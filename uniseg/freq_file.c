@@ -96,7 +96,9 @@ void FreqFile::write(array_type& arr) {
 		if (wlen_ > 1 && word_ptr->left() != NULL && word_ptr->right() != NULL && word_ptr->left()->is_word() && word_ptr->right()->is_word()) {
 			char tmp[INT_TYPE_SIZE];
 			int32_to_bytes(freq, tmp);
-			tmp[INT_TYPE_SIZE - 1] = word_ptr->lparent()->size();
+			int word_where = word_ptr->left()->size();
+			assert(word_where <= word_ptr->size());
+			tmp[INT_TYPE_SIZE - 1] = word_where;
 			iofs_.write(tmp, INT_TYPE_SIZE);
 		}
 		else
@@ -290,7 +292,7 @@ void FreqFile::read_term(word_ptr_type word)
 	char *current = NULL;
 	char buf[UNICODE_CHAR_LENGTH] = {0x0, 0x0, 0x0, 0x0};
 	char tmp[INT_TYPE_SIZE];
-	unsigned int  value = 0;
+
 	int count = 0;
 
 	uniseg_encoding *enc = uniseg_encoding_factory::instance().get_encoding();
@@ -320,43 +322,19 @@ void FreqFile::read_term(word_ptr_type word)
 		for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
+
 			enc_->test_char((unsigned char*)&buf);
 			string_type a_char(buf, enc_->howmanybytes());
 			string_array aca(ca);
 			aca.push_back(a_char);
 			// debug
-//			if (word->chars() == "\347\272\246" && a_char == "\346\227\246")
-//				cerr << "I got you" << endl;
+		//			if (word->chars() == "\347\272\246" && a_char == "\346\227\246")
+		//				cerr << "I got you" << endl;
 
 			memcpy(tmp, current, INT_TYPE_SIZE);
-
-			/*
-			 * the last byte is used for indicating where is the stop of a word
-			 */
-			int word_where = (int)tmp[3];
-			tmp[INT_TYPE_SIZE - 1] = 0;
-
-			value = bytes_to_int32(tmp);
 			current += INT_TYPE_SIZE;
 
-			/// save them in the array
-			// assert(value > 0);
-			word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
-
-			if (word_where > 0) {
-				string left = ret_word->subchars(0, word_where);
-				string right = ret_word->subchars(word_where, ret_word->size() - word_where);
-
-				word_ptr_type a_word = freq_.find(left);
-				assert(a_word != NULL);
-				ret_word->left(a_word);
-				a_word->is_word(true);
-
-				a_word = freq_.find(right);
-				assert(a_word != NULL);
-				ret_word->right(a_word);
-				a_word->is_word(true);
-			}
+			add_word(aca, tmp);
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
@@ -373,22 +351,57 @@ void FreqFile::read_term(word_ptr_type word)
 
 			strncpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
-			memcpy(tmp, current, INT_TYPE_SIZE);
-			value = bytes_to_int32(tmp);
-			//assert(value > 0);
-			current += INT_TYPE_SIZE;
-
 			/// save them in the array
 			enc_->test_char((unsigned char*)&buf);
 			string_type a_char(buf, enc_->howmanybytes());
 			string_array aca = ca;
 			aca.insert(aca.begin(), a_char);
-			word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
+
+			memcpy(tmp, current, INT_TYPE_SIZE);
+
+			//value = bytes_to_int32(tmp);
+			//assert(value > 0);
+			current += INT_TYPE_SIZE;
+
+			add_word(aca, tmp);
+			//word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
 	}
 	word->set_loaded(true);
+}
+
+void FreqFile::add_word(string_array& aca, char *freq_bytes)
+{
+	/*
+	 * the last byte is used for indicating where is the stop of a word
+	 */
+	int word_where = (int)freq_bytes[3];
+	freq_bytes[INT_TYPE_SIZE - 1] = 0;
+
+	unsigned int  value = bytes_to_int32(freq_bytes);
+	if (value > 16777000)
+		cerr << "Unbelievable." << endl;
+
+	/// save them in the array
+	// assert(value > 0);
+	word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
+
+	if (word_where > 0) {
+		string left = ret_word->subchars(0, word_where);
+		string right = ret_word->subchars(word_where, ret_word->size() - word_where);
+
+		word_ptr_type a_word = freq_.find(left);
+		assert(a_word != NULL);
+		ret_word->left(a_word);
+		a_word->is_word(true);
+
+		a_word = freq_.find(right);
+		assert(a_word != NULL);
+		ret_word->right(a_word);
+		a_word->is_word(true);
+	}
 }
 
 void FreqFile::load_index()

@@ -367,10 +367,18 @@ void Freq::showcol(int n, int min) {
 		for (i = 0; i < (int)temp_arr.size(); i++) {
 			const array_type& word_a = temp_arr[i]->array();
 			//cerr << ->chars();
-			for (int j = 0; j < word_a.size(); j++) {
-				if (j > 0 /*&& (j < (word_a.size() - 1))*/ && (word_a[j]->lang() != uniseg_encoding::CHINESE) && (word_a[j]->lang() != UNISEG_encoding::NUMBER))
-					cerr<< " ";
-				cerr<< word_a[j]->chars();
+			if ((temp_arr[i]->lang() != uniseg_encoding::CHINESE) && (temp_arr[i]->lang() != UNISEG_encoding::NUMBER))
+				for (int j = 0; j < word_a.size(); j++) {
+					if (j > 0 /*&& (j < (word_a.size() - 1))*/)
+						cerr<< " ";
+					cerr<< word_a[j]->chars();
+				}
+			else {
+				if (temp_arr[i]->left() != NULL && temp_arr[i]->left()->is_word()
+						&& temp_arr[i]->right() != NULL && temp_arr[i]->right()->is_word())
+					cerr << temp_arr[i]->left()->chars() << " " << temp_arr[i]->right()->chars();
+				else
+					temp_arr[i]->chars();
 			}
 			cerr<< ": " <<  temp_arr[i]->freq() << endl;
 		}

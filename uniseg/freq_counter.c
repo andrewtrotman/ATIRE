@@ -148,6 +148,8 @@ void FreqCounter::count_segmented()
 	word_ptr_type ww_ptr = NULL;
 	word_ptr_type first_ptr = NULL;
 	word_ptr_type second_ptr = NULL;
+	string_array *ca1 = NULL;
+	string_array *ca2 = NULL;
 
 	while (*start != '\0') {
 		string first;
@@ -159,6 +161,9 @@ void FreqCounter::count_segmented()
 			enc->test_char((unsigned char *)start);
 		}
 
+		if (*start == '\0')
+			break;
+
 		// get the first word
 		while (*start != '\0' && enc->lang() == languages_) {
 			first.append(string_type(start, enc->howmanybytes()));
@@ -166,12 +171,13 @@ void FreqCounter::count_segmented()
 			enc->test_char((unsigned char *)start);
 		}
 
-		string_array ca1;
-		to_string_array(first, ca1);
-		first_ptr = freq_->add(ca1, languages_);
+		if (ca1 != NULL)
+			delete ca1;
+
+		ca1 = new string_array;
+		to_string_array(first, *ca1);
+		first_ptr = freq_->add(*ca1, languages_);
 		first_ptr->is_word(true);
-
-
 
 		while (*start != '\0') {
 			string second;
@@ -198,14 +204,20 @@ void FreqCounter::count_segmented()
 			if (second.length() == 0)
 				break;
 
-			string_array ca2;
-			to_string_array(second, ca2);
-			second_ptr = freq_->add(ca2, languages_);
+			if (ca2 != NULL)
+				delete ca2;
+			ca2 = new string_array;
+			to_string_array(second, *ca2);
+			second_ptr = freq_->add(*ca2, languages_);
 			second_ptr->is_word(true);
 
 			//string word_pair = first + second;
-			string_array ca(ca1.size() + ca2.size());
-			std::merge(ca1.begin(), ca1.end(), ca2.begin(), ca2.end(), ca.begin());
+			//string_array ca(ca1->size() + ca2->size());
+			//std::merge(ca1->begin(), ca1->end(), ca2->begin(), ca2->end(), ca.begin());
+			string_array ca(*ca1);
+			//std::copy(ca2->begin(), ca2->end(), ca.end());
+			for (int i = 0; i < ca2->size(); ++i)
+				ca.push_back((*ca2)[i]);
 			//to_string_array(word_pair, ca);
 			word_ptr_type ww_ptr = freq_->add(ca, languages_);
 			ww_ptr->left(first_ptr);
@@ -227,8 +239,18 @@ void FreqCounter::count_segmented()
 //			w_ptr->increase();
 
 			first = second;
+			first_ptr = second_ptr;
+			second_ptr = NULL;
+			delete ca1;
+			ca1 = ca2;
+			ca2 = NULL;
 		}
 	}
+
+	if (ca1 != NULL)
+		delete ca1;
+	if (ca2 != NULL)
+		delete ca2;
 }
 
 void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
