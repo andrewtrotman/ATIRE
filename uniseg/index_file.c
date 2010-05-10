@@ -38,9 +38,9 @@ void IndexFile::alloc(array_type& arr) {
 	Address::uint_array bound(ADDRESSES_NUMBER, Address::INVALID_BOUND);
 
 	word_ptr_type word_ptr = arr[0];
-	int ffs = (int)word_ptr->family().first->array().size();
-	cerr << "ffs: " << ffs << endl;
-	assert( ffs == (wlen_ - 1));
+//	int ffs = (int)word_ptr->family().first->array().size();
+//	cerr << "ffs: " << ffs << endl;
+//	assert( ffs == (wlen_ - 1));
 	//string_type pre_parent = word_ptr->family().first->chars();
 	Word::Side side = word_ptr->side(); //LEFT;
 	assert(side != Word::UNKNOWN);

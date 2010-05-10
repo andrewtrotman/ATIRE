@@ -1,4 +1,4 @@
-COMPILING in *NIX system
+1. COMPILING in *NIX system
 ------------------------
 aclocal
 autoconf
@@ -14,3 +14,13 @@ make install
 UNINSTALL
 ---------
 make uninstall
+
+2. TO USE UNISEG WITH ANT
+-------------------------
+
+On Linux:
+add "-DWITH_ANT_PLUGIN" in compiler option
+
+or with automake
+source ant/scrits/setuniseg.sh
+then ant/configure

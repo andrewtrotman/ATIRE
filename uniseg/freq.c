@@ -350,7 +350,7 @@ void Freq::pile_up(int max)
 		pile_up(max);
 }
 
-void Freq::showcol(int n) {
+void Freq::showcol(int n, int min) {
 	cerr << endl;
 	cerr << "total arrays #: " << k_ << endl;
 	cerr << "listing words with size : " << n << endl;
@@ -360,7 +360,7 @@ void Freq::showcol(int n) {
 		array_type temp_arr;
 		int i = 0;
 		for (i = 0; i < (int)freq_n_[n].size(); i++)
-			if (freq_n_[n][i]->freq() > 0)
+			if (freq_n_[n][i]->freq() >= min)
 				temp_arr.push_back(freq_n_[n][i]);
 		std::sort(temp_arr.begin(), temp_arr.end(), Word::cmp_just_freq);
 
@@ -379,9 +379,9 @@ void Freq::showcol(int n) {
 
 }
 
-void Freq::show(int n) {
+void Freq::show(int n, int min) {
 	for (int i = 1; i <= n && i <= k_; i++)
-		showcol(i);
+		showcol(i, min);
 }
 
 void Freq::show() {
@@ -460,7 +460,7 @@ void Freq::cal_sum() {
 
 void Freq::cal_avg() {
 	int k = 0;
-	while (k < UNISEG_settings::MAX_CHARS) {
+	while (k <= k_/*UNISEG_settings::MAX_CHARS*/) {
 		if (freq_n_[k].size() > 0)
 			avg_n_[k] = static_cast<float>(sum_n_[k])/freq_n_[k].size();
 		k++;
@@ -469,7 +469,7 @@ void Freq::cal_avg() {
 	//for debug
 	k = 0;
 	cerr << "average freq of each size of words" << endl;
-	while (k < UNISEG_settings::MAX_CHARS) {
+	while (k <= k_) {
 		if (freq_n_[k].size() > 0)
 			cerr << k << ": " << avg_n_[k] << " (with sum "
 				<< sum_n_[k] << " on size " << freq_n_[k].size() << ")"

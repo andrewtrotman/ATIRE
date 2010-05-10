@@ -47,8 +47,8 @@ public:
 	void add(word_ptr_type word_ptr, bool allnew = false);
 
 	void sort(int k);
-	void show(int k);
-	void showcol(int k);
+	void show(int k, int min = 1);
+	void showcol(int k, int min = 1);
 	void show();
 	void alloc(int k = 1);  /// allocate the address
 

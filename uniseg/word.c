@@ -292,6 +292,13 @@ void Word::subarray(array_type& ca, int idx, int len) {
 		ca.push_back(arr_[idx + i]);
 }
 
+void Word::subarray(string_array& ca, int idx, int len) {
+	assert((idx + len) <= size());
+
+	for (int i = 0; i < len; i++)
+		ca.push_back(arr_[idx + i]->chars());
+}
+
 /**
  * looking for a sub-word
  */
@@ -397,8 +404,8 @@ void Word::cal_a() {
 
 	right_a_ = left_a_ = 0.0;
 
-	if (lparent_->is_word() && rparent_->is_word()) {
-		left_a_ = log(this->p() / (lparent_->p()*rparent_->p()));
+	if (left_->is_word() && right_->is_word()) {
+		left_a_ = log(this->p() / (left_->p()*right_->p()));
 		return;
 	}
 

@@ -208,6 +208,8 @@ void FreqCounter::count_segmented()
 			std::merge(ca1.begin(), ca1.end(), ca2.begin(), ca2.end(), ca.begin());
 			//to_string_array(word_pair, ca);
 			word_ptr_type ww_ptr = freq_->add(ca, languages_);
+			ww_ptr->left(first_ptr);
+			ww_ptr->right(second_ptr);
 //			word_ptr_type w_ptr;
 //
 //			w_ptr = freq_->find(first);

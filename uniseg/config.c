@@ -37,6 +37,7 @@ bool Config::load(const char *filename)
 			if (pos != string::npos) {
 				  const char *start = line.c_str();
 				  start += pos;
+				  ++start;
 				  while (isspace(*start))
 					  ++start;
 				  properties_.back().value = string(start);

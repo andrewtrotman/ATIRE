@@ -93,7 +93,7 @@ void FreqFile::write(array_type& arr) {
 			continue;
 
 		iofs_.write(chars, UNICODE_CHAR_LENGTH);
-		if (word_ptr->lparent()->is_word() && word_ptr->rparent()->is_word()) {
+		if (wlen_ > 1 && word_ptr->left() != NULL && word_ptr->right() != NULL && word_ptr->left()->is_word() && word_ptr->right()->is_word()) {
 			char tmp[INT_TYPE_SIZE];
 			int32_to_bytes(freq, tmp);
 			tmp[INT_TYPE_SIZE - 1] = word_ptr->lparent()->size();
@@ -340,21 +340,21 @@ void FreqFile::read_term(word_ptr_type word)
 			current += INT_TYPE_SIZE;
 
 			/// save them in the array
-			assert(value > 0);
+			// assert(value > 0);
 			word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
 
 			if (word_where > 0) {
-				string lparent = ret_word->subchars(0, word_where);
-				string rparent = ret_word->subchars(word_where, ret_word->size() - word_where);
+				string left = ret_word->subchars(0, word_where);
+				string right = ret_word->subchars(word_where, ret_word->size() - word_where);
 
-				word_ptr_type a_word = freq_.find(lparent);
+				word_ptr_type a_word = freq_.find(left);
 				assert(a_word != NULL);
-				ret_word->lparent(a_word);
+				ret_word->left(a_word);
 				a_word->is_word(true);
 
-				a_word = freq_.find(rparent);
+				a_word = freq_.find(right);
 				assert(a_word != NULL);
-				ret_word->rparent(a_word);
+				ret_word->right(a_word);
 				a_word->is_word(true);
 			}
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
@@ -375,7 +375,7 @@ void FreqFile::read_term(word_ptr_type word)
 			current += UNICODE_CHAR_LENGTH;
 			memcpy(tmp, current, INT_TYPE_SIZE);
 			value = bytes_to_int32(tmp);
-			assert(value > 0);
+			//assert(value > 0);
 			current += INT_TYPE_SIZE;
 
 			/// save them in the array

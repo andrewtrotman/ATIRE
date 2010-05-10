@@ -40,10 +40,12 @@ private:
 	array_type 										arr_; /// the Word *array mapping to each parent character(s)
 	array_type										children_; /// the Word *array linked to children character(s)
 	std::map<std::string, Word*> 					rcchar_;  /// the right single characters of all its children
-	Word 											*lparent_;
-	Word 											*rparent_;
+	Word 											*lparent_; // left most size_ - 1 of characters
+	Word 											*rparent_; // right most size_ - 1 of characters
 	Word 											*lchar_;
 	Word 											*rchar_;
+	Word 											*left_;  // the left parent is actual a word, if not then equals lparent
+	Word 											*right_; // the right parent is actual a word, if not then equals rparent
 
 	Side 											side_; // the lefe or right indicator of parent with the highest frequency
 
@@ -117,6 +119,7 @@ public:
 	void subchars(string_type& substr, int idx, int len);
 
 	void subarray(array_type& ca, int idx, int len);
+	void subarray(string_array& ca, int idx, int len);
 	Word *subword(int idx, int len);
 
 	void increase() { freq_++; }
@@ -134,7 +137,7 @@ public:
 	const Word *lparent() const { return lparent_; }
 	Word *lparent() { return lparent_; }
 	void lparent(Word *lparent) {
-		lparent_ = lparent;
+		lparent_ = left_ = lparent;
 		if (lparent_ != NULL && lparent_ != this) {
 			lparent_->link(this);
 		}
@@ -142,10 +145,22 @@ public:
 	const Word *rparent() const { return rparent_; }
 	Word *rparent() { return rparent_; }
 	void rparent(Word *rparent) {
-		rparent_ = rparent;
+		rparent_ = right_ = rparent;
 		if (rparent_ != NULL && rparent != this)
 			rparent_->link(this);
 	}
+
+	const Word *left() const { return left_; }
+	Word *left() { return left_; }
+	void left(Word *left) {
+		left_ = left;
+	}
+	const Word *right() const { return right_; }
+	Word *right() { return right_; }
+	void right(Word *right) {
+		right_ = right;
+	}
+
 	const Word *lchar() const { return lchar_; }
 	void lchar(Word *lchar) {
 		assert(lchar->size() == 1);
