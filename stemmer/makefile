@@ -80,11 +80,11 @@ OBJECTS = \
 	stemmer_term_similarity.o \
 	stemmer_term_similarity_threshold.o \
 	stemmer_term_similarity_weighted.o \
-	porter.o \
-	lovins.o \
+	stem_porter.o \
+	stem_lovins.o \
 	stemmer_factory.o \
-	paice_husk.o \
-	learned_wikipedia_stem.o \
+	stem_paice_husk.o \
+	stem_otago.o \
 	relevant_topic.o \
 	bitstream.o \
 	compress_elias_gamma.o \

@@ -46,6 +46,7 @@ void ANT_channel_file::connect(void)
 if (filename != NULL && infile == stdin)
 	{
 	infile = fopen(filename, "a+b");		// open for append
+	fseek(infile, 0L, SEEK_SET);
 	outfile = infile;
 	}
 }
