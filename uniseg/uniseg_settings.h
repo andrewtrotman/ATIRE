@@ -37,6 +37,7 @@ public:
 	bool					do_skip;
 
 	int 					max;
+	int 					min;
 
 	long 					lang;
 

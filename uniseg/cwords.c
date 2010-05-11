@@ -279,7 +279,12 @@ void CWords::cal_reverse_mi2(Freq* freq) {
 		string_type lr_str = lw->chars() + rw->chars();
 		word_ptr_type lr_w = freq->find(lr_str);
 		assert(lr_w != NULL);
-		assert(lr_w->p() != 0.0);
+		//assert(lr_w->p() != 0.0);
+
+		if (lr_w->p() == 0.0) {
+			score_ = std::numeric_limits<double>::max();
+			return;
+		}
 
 		if (UNISEG_settings::instance().mi <= 0) {
 				double mi = log(lr_w->p()/(lw->p()*rw->p()));

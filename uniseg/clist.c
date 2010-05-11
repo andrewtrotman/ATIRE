@@ -229,8 +229,10 @@ void CList::apply_rules() {
 		/**
 		 * Rule #1
 		 */
-		remove(1);
-		remove(0);
+		for (int i = 0; i <= UNISEG_settings::instance().to_skip; ++i)
+			remove(i);
+//		remove(1);
+//		remove(0);
 		//if (tw_ptr_ != NULL)
 		//	remove(tw_ptr_->freq(), tw_ptr_);
 
