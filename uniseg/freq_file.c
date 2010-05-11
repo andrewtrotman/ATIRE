@@ -93,11 +93,18 @@ void FreqFile::write(array_type& arr) {
 			continue;
 
 		iofs_.write(chars, UNICODE_CHAR_LENGTH);
-		if (wlen_ > 1 && word_ptr->left() != NULL && word_ptr->right() != NULL && word_ptr->left()->is_word() && word_ptr->right()->is_word()) {
+		unsigned int word_where = 0;
+		if (word_ptr->is_word()
+				|| (word_ptr->left() != NULL && word_ptr->right() != NULL && word_ptr->left()->is_word() && word_ptr->right()->is_word())) {
+			if (word_ptr->is_word())
+				word_where = 0xFF;
+			else {
+				word_where = word_ptr->left()->size();
+				assert(word_where <= word_ptr->size());
+			}
 			char tmp[INT_TYPE_SIZE];
 			int32_to_bytes(freq, tmp);
-			int word_where = word_ptr->left()->size();
-			assert(word_where <= word_ptr->size());
+
 			tmp[INT_TYPE_SIZE - 1] = word_where;
 			iofs_.write(tmp, INT_TYPE_SIZE);
 		}
@@ -148,10 +155,10 @@ void FreqFile::read() {
 //				// Same effect as above
 //				cerr << "Errors when reading file \"" << name_ << "\"" << endl;
 //			}
-			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			memcpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
-			strncpy(tmp, current, INT_TYPE_SIZE);
-			value = bytes_to_int32(tmp);
+			memcpy(tmp, current, INT_TYPE_SIZE);
+			//value = bytes_to_int32(tmp);
 			current += INT_TYPE_SIZE;
 
 			string_array ca;
@@ -160,7 +167,8 @@ void FreqFile::read() {
 			string_type a_char(buf, enc_->howmanybytes());
 			ca.push_back(a_char);
 
-			freq_.add(ca, enc_->lang(), value); //->address(count/RECORD_LENGTH);
+//			freq_.add(ca, enc_->lang(), value); //->address(count/RECORD_LENGTH);
+			add_word(ca, tmp);
 			count += RECORD_LENGTH;
 			// calculating the total characters appear in the corpus
 			//if (k == 1)
@@ -228,9 +236,9 @@ void FreqFile::read_with_index() {
 //				assert(pos < size_);
 
 				for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
-					strncpy(buf, current, UNICODE_CHAR_LENGTH);
+					memcpy(buf, current, UNICODE_CHAR_LENGTH);
 					current += UNICODE_CHAR_LENGTH;
-					strncpy(tmp, current, INT_TYPE_SIZE);
+					memcpy(tmp, current, INT_TYPE_SIZE);
 					value = bytes_to_int32(tmp);
 					current += INT_TYPE_SIZE;
 
@@ -253,9 +261,9 @@ void FreqFile::read_with_index() {
 
 				for (unsigned int j = rlb; j <= rhb && j != Address::INVALID_BOUND; j++) {
 
-					strncpy(buf, current, UNICODE_CHAR_LENGTH);
+					memcpy(buf, current, UNICODE_CHAR_LENGTH);
 					current += UNICODE_CHAR_LENGTH;
-					strncpy(tmp, current, INT_TYPE_SIZE);
+					memcpy(tmp, current, INT_TYPE_SIZE);
 					value = bytes_to_int32(tmp);
 					assert(value >= 0);
 					current += INT_TYPE_SIZE;
@@ -320,7 +328,7 @@ void FreqFile::read_term(word_ptr_type word)
 
 		// load word that character is on the right side of the this word
 		for (unsigned int j = llb; j <= lhb && j != Address::INVALID_BOUND; j++) {
-			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			memcpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
 
 			enc_->test_char((unsigned char*)&buf);
@@ -349,7 +357,7 @@ void FreqFile::read_term(word_ptr_type word)
 		// load word that character is on the left side of the this word
 		for (unsigned int j = rlb; j <= rhb && j != Address::INVALID_BOUND; j++) {
 
-			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			memcpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
 			/// save them in the array
 			enc_->test_char((unsigned char*)&buf);
@@ -388,7 +396,9 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 	// assert(value > 0);
 	word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
 
-	if (word_where > 0) {
+	if (word_where == 0xFF)
+		ret_word->is_word(true);
+	else if (word_where > 0) {
 		string left = ret_word->subchars(0, word_where);
 		string right = ret_word->subchars(word_where, ret_word->size() - word_where);
 

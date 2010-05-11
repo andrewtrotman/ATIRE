@@ -378,7 +378,7 @@ void Freq::showcol(int n, int min) {
 						&& temp_arr[i]->right() != NULL && temp_arr[i]->right()->is_word())
 					cerr << temp_arr[i]->left()->chars() << " " << temp_arr[i]->right()->chars();
 				else
-					temp_arr[i]->chars();
+					cerr << temp_arr[i]->chars();
 			}
 			cerr<< ": " <<  temp_arr[i]->freq() << endl;
 		}

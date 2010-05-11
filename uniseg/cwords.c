@@ -245,21 +245,26 @@ void CWords::cal_reverse_mi2(Freq* freq) {
 	if (cwords_.size() < 1) {
 		cerr << "No segmentations found for a list" << endl;
 		return;
-	} else if (cwords_.size() == 1) {
-		score_ = std::numeric_limits<double>::max();
-		int len = (*cwords_.begin())->size();
-		if (len == 2 && (*cwords_.begin())->a() > 0) 			// = 2
-			score_ = 0.0;
-//		else if (len == 3)	// maybe the = 3
-//			score_ = 9.0;
-//		else 	// >= 4
-//			score_ = 0.0; //4.5;
+	}
 
+	std::list<word_ptr_type>::const_iterator curr = cwords_.begin();
+
+	if (cwords_.size() == 1) {
+		if ((*curr)->is_word())
+			score_ = std::numeric_limits<double>::min();
+		else {
+			score_ = std::numeric_limits<double>::max();
+			int len = (*curr)->size();
+			if (len == 2 && (*curr)->a() > 0) 			// = 2
+				score_ = 0.0;
+	//		else if (len == 3)	// maybe the = 3
+	//			score_ = 9.0;
+	//		else 	// >= 4
+	//			score_ = 0.0; //4.5;
+		}
 		return;
 	}
 
-
-	std::list<word_ptr_type>::const_iterator curr = cwords_.begin();
 	std::list<word_ptr_type>::const_iterator next = curr;
 	next++;
 
