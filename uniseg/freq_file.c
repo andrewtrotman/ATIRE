@@ -385,7 +385,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 	/*
 	 * the last byte is used for indicating where is the stop of a word
 	 */
-	int word_where = (int)freq_bytes[3];
+	unsigned char word_where = (unsigned char)freq_bytes[3];
 	freq_bytes[INT_TYPE_SIZE - 1] = 0;
 
 	unsigned int  value = bytes_to_int32(freq_bytes);

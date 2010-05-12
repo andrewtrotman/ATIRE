@@ -380,7 +380,10 @@ void Freq::showcol(int n, int min) {
 				else
 					cerr << temp_arr[i]->chars();
 			}
-			cerr<< ": " <<  temp_arr[i]->freq() << endl;
+			cerr<< ": " <<  temp_arr[i]->freq();
+			if (temp_arr[i]->is_word())
+				cerr << "(word)";
+			cerr << endl;
 		}
 	} else
 		cerr << " 0" << endl;
