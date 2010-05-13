@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include "ctypes.h"
 #include "search_engine.h"
 #include "file_memory.h"
 #include "memory.h"
@@ -18,6 +19,7 @@
 #include "stats_search_engine.h"
 #include "ranking_function_bm25.h"
 #include "stemmer.h"
+#include "stemmer_factory.h"
 #include "compress_variable_byte.h"
 
 #ifndef FALSE
@@ -36,7 +38,7 @@ ANT_search_engine::ANT_search_engine(ANT_memory *memory, long memory_model, cons
 int32_t four_byte;
 int64_t eight_byte;
 unsigned char *block;
-long long end, term_header, this_header_block_size, sum, current_length;
+long long end, term_header, this_header_block_size, sum, current_length, which_stemmer;
 long postings_buffer_length, decompressed_integer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
@@ -48,6 +50,7 @@ trim_postings_k = LLONG_MAX;
 stats = new ANT_stats_search_engine(memory);
 stats_for_all_queries = new ANT_stats_search_engine(memory);
 this->memory = memory;
+this->stemmer = NULL;
 
 if (memory_model)
 	index = new ANT_file_memory;
@@ -208,6 +211,12 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 */
 memory->realign();
 stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
+
+/*
+	If we have a stemmed index then build a stemmer for use on the search terms
+*/
+if ((which_stemmer = get_variable("~stemmer")) != 0)
+	stemmer = ANT_stemmer_factory::get_core_stemmer(which_stemmer);
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
 }
@@ -448,6 +457,16 @@ long long now, bytes_already_read;
 bytes_already_read = index->get_bytes_read();
 
 now = stats->start_timer();
+
+/*
+	If we have a stemmed index the stem the search term
+*/
+if (stemmer != NULL && ANT_islower(*term))
+	{
+	stemmer->stem(term, stemmed_term);
+	term = stemmed_term;
+	}
+
 verify = get_postings_details(term, term_details);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
 if (verify == NULL)

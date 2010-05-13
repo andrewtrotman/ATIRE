@@ -9,6 +9,7 @@
 #include "compression_factory.h"
 #include "compression_text_factory.h"
 #include "ranking_function.h"
+#include "btree_iterator.h"
 
 class ANT_memory;
 class ANT_file;
@@ -17,6 +18,7 @@ class ANT_search_engine_btree_leaf;
 class ANT_search_engine_accumulator;
 class ANT_search_engine_result;
 class ANT_stats_search_engine;
+class ANT_stem;
 class ANT_stemmer;
 class ANT_ranking_function;
 
@@ -41,6 +43,7 @@ private:
 	long string_length_of_longest_term;
 	long long highest_df;
 	const char *index_filename;
+
 	/*
 		If the index contains the documents then we need to deserialise the positions and store them
 	*/
@@ -49,6 +52,12 @@ private:
 	long long document_longest_compressed;
 	char *document_decompress_buffer;
 	long document_longest_raw_length;		// length of the longest document in the collection (once it has been decompressed).
+
+	/*
+		If the index is stemmed then we need a stemmer to stem the query terms
+	*/
+	ANT_stem *stemmer;
+	char stemmed_term[MAX_TERM_LENGTH];
 
 protected:
 	ANT_compressable_integer *decompress_buffer;
