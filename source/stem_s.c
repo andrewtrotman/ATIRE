@@ -9,7 +9,7 @@
 	ANT_STEM_S::STEM()
 	------------------
 */
-size_t ANT_stem_s::stem(char *term, char *destination)
+size_t ANT_stem_s::stem(const char *term, char *destination)
 {
 size_t len;
 

@@ -18,7 +18,7 @@ class ANT_stemmer_otago : public ANT_stemmer, public ANT_stem_otago
 {
 public:
 	ANT_stemmer_otago(ANT_search_engine *search_engine) : ANT_stemmer(search_engine), ANT_stem_otago() {}
-	virtual size_t stem(char *term, char *destination) { return ANT_stem_otago::stem(term, destination); }
+	virtual size_t stem(const char *term, char *destination) { return ANT_stem_otago::stem(term, destination); }
 } ;
 
 #endif  /* STEMMER_OTAGO_H_ */

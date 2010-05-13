@@ -706,6 +706,12 @@ variable_byte.decompress(document_lengths, serialised_docids, node->document_fre
 if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths)) != NULL)
 	{
 	/*
+		Store (in the index) the fact that we're a quantized index
+	*/
+	ANT_string_pair squiggle_quantized("~quantized");
+	set_variable(&squiggle_quantized, 1);
+
+	/*
 		Now compute the maximum impact score across the collection
 	*/
 	maximum_collection_rsv = -std::numeric_limits<double>::max();			// min() returns the minimum positive value

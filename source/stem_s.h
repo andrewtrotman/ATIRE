@@ -16,7 +16,7 @@ class ANT_stem_s : public ANT_stem
 public:
 	ANT_stem_s() {}
 	virtual ~ANT_stem_s() {}
-	virtual size_t stem(char *term, char *destination);
+	virtual size_t stem(const char *term, char *destination);
 } ;
 
 #endif /* STEM_S_H_ */

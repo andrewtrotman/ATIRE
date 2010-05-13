@@ -28,11 +28,9 @@
 #include "instream_deflate.h"
 #include "instream_bz2.h"
 #include "instream_buffer.h"
-#include "stem_porter.h"
-#include "stem_lovins.h"
-#include "stem_otago.h"
-#include "stem_paice_husk.h"
-#include "stem_s.h"
+#include "stem.h"
+#include "stemmer_factory.h"
+#include "btree_iterator.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -57,6 +55,7 @@ stats->print_elapsed_time();
 */
 long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
+char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
 ANT_string_pair *token;
 long terms_in_document, length_of_token, length_of_previous_token, is_previous_token_chinese;
 char *previous_token_start;
@@ -83,7 +82,20 @@ while ((token = readability->get_next_token()) != NULL)
 	 * a bit redudant, the code below.
 	 * I think the original code from revision 656 should be fine, except the chinese handling part
 	 */
-	if (ANT_islowernum(token->start[0]))
+	if (ANT_islower(token->start[0]))
+		{
+		terms_in_document++;
+		if (stemmer == NULL)
+			readability->handle_node(indexer->add_term(token, doc));			// indexable the term
+		else
+			{
+			token->strncpy(term, MAX_TERM_LENGTH);
+			stemmer->stem(term, token_stem_internals);
+			ANT_string_pair token_stem(token_stem_internals);
+			readability->handle_node(indexer->add_term(&token_stem, doc));			// indexable the stem of the term
+			}
+		}
+	else if (ANT_isdigit(token->start[0]))
 		{
 		terms_in_document++;
 		readability->handle_node(indexer->add_term(token, doc));			// indexable term
@@ -162,6 +174,7 @@ long long bytes_indexed;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 ANT_directory_iterator_multiple *parallel_disk;
+ANT_stem *stemmer = NULL;
 
 if (argc < 2)
 	param_block.usage();
@@ -186,6 +199,17 @@ if (param_block.readability_measure == ANT_readability_factory::NONE)
 	parser = new ANT_parser(param_block.segmentation);
 else
 	parser = new ANT_parser_readability();
+
+if (param_block.stemmer != 0)
+	{
+	/*
+		The user has asked for a stemmed index and so we create a stemmer
+		and store the fact in the index (so that the search engine knows)
+	*/
+	ANT_string_pair squiggle_quantized("~stemmer");
+	index->set_variable(&squiggle_quantized, param_block.stemmer);
+	stemmer = ANT_stemmer_factory::get_core_stemmer(param_block.stemmer);
+	}
 
 readability = new ANT_readability_factory;
 readability->set_measure(param_block.readability_measure);
@@ -286,7 +310,7 @@ for (param = first_param; param < argc; param++)
 		/*
 			Index, this call returns the number of terms we found in the document
 		*/
-		if (index_document(index, NULL, param_block.segmentation, readability, doc, current_file) == 0)
+		if (index_document(index, stemmer, param_block.segmentation, readability, doc, current_file) == 0)
 			{
 			/*
 				pretend we never saw the document

@@ -33,7 +33,7 @@ public:
 	virtual char *first(char *term);
 	virtual char *next(void);
 
-	virtual size_t stem(char *term, char *destination) { return stemmer.stem(term, destination); }		// returns the longest stem that could possibly match this stem given the algorithm (2 in the case of Porter).
+	virtual size_t stem(const char *term, char *destination) { return stemmer.stem(term, destination); }		// returns the longest stem that could possibly match this stem given the algorithm (2 in the case of Porter).
 
 	virtual long weight_terms(ANT_weighted_tf *term_weight, char *term);
 } ;

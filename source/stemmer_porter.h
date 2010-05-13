@@ -16,7 +16,7 @@ class ANT_stemmer_porter : public ANT_stemmer, public ANT_stem_porter
 {
 public:
 	ANT_stemmer_porter(ANT_search_engine *search_engine) : ANT_stemmer(search_engine), ANT_stem_porter() {}
-	virtual size_t stem(char *term, char *destination) { return ANT_stem_porter::stem(term, destination); }
+	virtual size_t stem(const char *term, char *destination) { return ANT_stem_porter::stem(term, destination); }
 	
 } ;
 

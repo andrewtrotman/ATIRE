@@ -55,7 +55,7 @@ private:
 public:
 	ANT_stem_paice_husk();
 	virtual ~ANT_stem_paice_husk() {}
-	virtual size_t stem(char *term, char *destination);
+	virtual size_t stem(const char *term, char *destination);
 } ;
 
 extern const char *ANT_paice_husk_rule_set[];

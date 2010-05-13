@@ -69,7 +69,7 @@ return 0;
 
 	parameter "destination" must not overlap parameter "what"
 */
-size_t ANT_stem_porter::stem(char *what, char *destination)
+size_t ANT_stem_porter::stem(const char *what, char *destination)
 {
 long kill_dups = 0;
 char *reverse, *at;

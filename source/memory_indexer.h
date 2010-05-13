@@ -35,6 +35,7 @@ public:
 	virtual void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length) {}
 	virtual long serialise(ANT_ranking_function_factory *factory) { return 0; }
 	virtual long long get_memory_usage(void) { return 0; }
+	virtual void set_variable(ANT_string_pair *measure_name, long long score) {}
 } ;
 
 

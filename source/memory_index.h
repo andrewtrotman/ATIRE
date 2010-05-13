@@ -96,12 +96,11 @@ private:
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 
-	void set_variable(ANT_string_pair *measure_name, long long score);
-
 public:
 	ANT_memory_index(char *filename);
 	virtual ~ANT_memory_index();
 
+	virtual void set_variable(ANT_string_pair *measure_name, long long score);
 	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);

@@ -9,6 +9,10 @@
 #include <string.h>
 #include "stemmer.h"
 
+/*
+	class ANT_STEMMER_NONE
+	----------------------
+*/
 class ANT_stemmer_none : public ANT_stemmer
 {
 public:
@@ -18,7 +22,7 @@ public:
 	virtual char *first(char *term) { return ANT_btree_iterator::first(term); }
 	virtual char *next(void) { return NULL; }
 
-	virtual size_t stem(char *term, char *dest) {  return strlen(strcpy(dest, term)); }
+	virtual size_t stem(const char *term, char *dest) {  return strlen(strcpy(dest, term)); }
 } ;
 
 

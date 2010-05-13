@@ -339,9 +339,9 @@ return r; /* Return the rule,stemmed */
 	ANT_STEM_PAICE_HUSK::STEM()
 	---------------------------
 */
-size_t ANT_stem_paice_husk::stem(char *term, char *destination)
+size_t ANT_stem_paice_husk::stem(const char *term, char *destination)
 {
-ANT_paice_husk_rule trule = raw_stem(term);
+ANT_paice_husk_rule trule = raw_stem((char *)term);
 strcpy(destination, trule.text);
 return 3;
 }

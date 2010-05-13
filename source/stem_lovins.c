@@ -2,7 +2,7 @@
 	STEM_LOVINS.C
 	-------------
 	OK, I didn't want to do this but it looks like there isn't much choice.  This code
-	was originally written by Linh Huynh (linh@kbs.citri.edu.au) (C) 1994 and released
+	was originally written by Linh Huynh (linh@kbs.citri.edu.au) (c) 1994 and released
 	under GPL 2 with the following attached:
 
 	This program is free software; you can redistribute it and/or modify
@@ -755,7 +755,7 @@ return stem_end;
 	ANT_STEM_LOVINS::STEM()
 	-----------------------
 */
-size_t ANT_stem_lovins::stem(char *term, char *destination)
+size_t ANT_stem_lovins::stem(const char *term, char *destination)
 {
 int length;
 char *stem_end;

@@ -15,23 +15,21 @@
 	class ANT_STEMMER_LOVINS 
 	------------------------
 */
-class ANT_stemmer_lovins : public ANT_stemmer
-{
-private:
-	ANT_stem_lovins stemmer;
-
-public:
-	ANT_stemmer_lovins(ANT_search_engine *search_engine) : ANT_stemmer(search_engine) {}
-	virtual size_t stem(char *term, char *destination) 
-	{
 #ifdef ANT_HAS_LOVINS
-	stemmer.stem(term, destination);
-	return 3;
+	class ANT_stemmer_lovins : public ANT_stemmer, public ANT_stem_lovins
+	{
+	public:
+		ANT_stemmer_lovins(ANT_search_engine *search_engine) : ANT_stemmer(search_engine), ANT_stem_lovins() {}
+		virtual size_t stem(const char *term, char *destination) { return stemmer.stem(term, destination), 3; }
+	} ;
 #else
-	return strlen(strcpy(destination, term));
+	class ANT_stemmer_lovins : public ANT_stemmer
+	{
+	public:
+		ANT_stemmer_lovins(ANT_search_engine *search_engine) : ANT_stemmer(search_engine) {}
+		virtual size_t stem(const char *term, char *destination) { return strlen(strcpy(destination, term)); }
+	} ;
 #endif
-	}
-} ;
 
 #endif  /* STEMMER_LOVINS_H_ */
 

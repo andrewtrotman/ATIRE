@@ -2,6 +2,7 @@
 	STEMMER_FACTORY.C
 	-----------------
 */
+#include "stem_none.h"
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
 #include "stemmer_lovins.h"
@@ -44,3 +45,27 @@ switch (use_wrapper)
 return stemmer;
 }
 
+/*
+	ANT_STEMMER_FACTORY::GET_CORE_STEMMER()
+	---------------------------------------
+*/
+ANT_stem *ANT_stemmer_factory::get_core_stemmer(long which_stemmer)
+{
+ANT_stem *stemmer = NULL;
+switch (which_stemmer)
+	{
+	case NONE: 			stemmer = new ANT_stem_none;			break;
+	case S_STRIPPER: 	stemmer = new ANT_stem_s;				break;
+	case PORTER: 		stemmer = new ANT_stem_porter;			break;
+	case OTAGO:			stemmer = new ANT_stem_otago;			break;
+#ifdef ANT_HAS_LOVINS
+	case LOVINS:		stemmer = new ANT_stem_lovins;			break;
+#endif
+#ifdef ANT_HAS_PAICE_HUSK
+	case PAICE_HUSK:	stemmer = new ANT_stem_paice_husk;		break;
+#endif
+	default:            break;
+	}
+
+return stemmer;
+}

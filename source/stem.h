@@ -14,7 +14,7 @@ class ANT_stem
 public:
 	ANT_stem() {}
 	virtual ~ANT_stem() {}
-	virtual size_t stem(char *term, char *destination) = 0;
+	virtual size_t stem(const char *term, char *destination) = 0;
 } ;
 
 #endif /* STEM_H_ */

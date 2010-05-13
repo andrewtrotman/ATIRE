@@ -28,7 +28,7 @@ private:
 public:
 	ANT_stem_porter() {}
 	virtual ~ANT_stem_porter() {}
-	virtual size_t stem(char *term, char *destination);
+	virtual size_t stem(const char *term, char *destination);
 } ;
 
 #endif /* STEM_PORTER_H_ */
