@@ -16,11 +16,13 @@
 
 const char UNISEG_settings::DEFAULT_FRQS_V_NAME[] = { "UNISEG_FRQS" };
 const char UNISEG_settings::DEFAULT_DICS_V_NAME[] = { "UNISEG_DICS" };
+const char UNISEG_settings::DEFAULT_TDICS_V_NAME[] = { "UNISEG_TDICS" };
 const char UNISEG_settings::DEFAULT_VAR[] = {"var"};
 const char UNISEG_settings::DEFAULT_CONF[] = {"conf"};
 const char UNISEG_settings::DEFAULT_CONF_FILE[] = {"freqs.conf"};
 const char UNISEG_settings::DEFAULT_INDEX[] = {"index"};
 const char UNISEG_settings::DEFAULT_ZH[] = {"zh"};
+const char UNISEG_settings::DEFAULT_TR[] = {"tr"};
 const char UNISEG_settings::DEFAULT_EN[] = {"en"};
 
 UNISEG_settings::UNISEG_settings()
@@ -69,6 +71,9 @@ void UNISEG_settings::init_fields()
 	split_latin_char = false;
 
 	encoding_scheme = uniseg_encoding_factory::UTF8;
+
+	stop_word_check = false;
+	oov_check = false;
 }
 
 void UNISEG_settings::init_others()
@@ -77,6 +82,8 @@ void UNISEG_settings::init_others()
 		freqs_path = std::string(getenv(DEFAULT_FRQS_V_NAME)) + std::string(sep);
 	if (getenv(DEFAULT_DICS_V_NAME))
 		dics_path = std::string(getenv(DEFAULT_DICS_V_NAME)) + std::string(sep);
+	if (getenv(DEFAULT_TDICS_V_NAME))
+		training_path = std::string(getenv(DEFAULT_TDICS_V_NAME)) + std::string(sep);
 }
 
 UNISEG_settings& UNISEG_settings::instance()

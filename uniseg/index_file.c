@@ -6,7 +6,7 @@
  */
 
 #include "index_file.h"
-#include "word.h"
+#include "freq.h"
 #include "address.h"
 #include "utilities.h"
 
@@ -172,7 +172,7 @@ void IndexFile::read() {
 	iofs_.close();
 }
 
-void IndexFile::read(Freq&	freq) {
+void IndexFile::read(Freq *freq) {
 	assert(wlen_ > 0);
 
 	if (wlen_ == 1)
@@ -220,7 +220,7 @@ void IndexFile::read(Freq&	freq) {
 			ca.push_back(a_char);
 		}
 
-		word_ptr_type word = freq.add(ca, lang, 0);
+		word_ptr_type word = freq->add(ca, lang, 0);
 //		cerr << "add new word for index: " << word->chars() << endl;
 		Address::uint_array& addr = word->disk_address();
 

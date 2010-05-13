@@ -130,14 +130,17 @@ int File::list(std::string dir, std::vector<std::string> &files, bool recursive)
 }
 
 bool File::exist() {
+	exist(filename_.c_str());
+}
+
+bool File::exist(const char *filename)
+{
 	bool success = true;
 	struct stat my_stat;
 
-	if( stat( filename_.c_str(), &my_stat ) == -1 )
+	if( stat( filename, &my_stat ) == -1 )
 		success = false;
 
 	return success;
 }
-
-
 

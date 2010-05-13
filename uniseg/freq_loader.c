@@ -16,7 +16,7 @@ void FreqLoader::load(std::string path, int n) {
 	while (k_ <= n) {
 
 
-		FreqFile freq_file(stringify(k_), freq_);
+		FreqFile freq_file(stringify(k_), &freq_);
 		freq_file.path(path);
 		freq_file.wlen(k_);
 
@@ -48,7 +48,7 @@ void FreqLoader::save(std::string path) {
 			break;
 		}
 
-		FreqFile freq_file(stringify(k), freq_);
+		FreqFile freq_file(stringify(k), &freq_);
 		//freq_file.path(UNISEG_settings::instance().wd());
 		freq_file.path(path);
 		freq_file.wlen(k);

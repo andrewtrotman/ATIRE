@@ -9,9 +9,11 @@
 #define INDEX_FILE_H_
 
 #include "file.h"
-#include "freq.h"
 #include "address.h"
 #include "uniseg_types.h"
+#include "word.h"
+
+class Freq;
 
 class IndexFile : public File {
 
@@ -36,7 +38,7 @@ public:
 
 	void write();
 	void read();
-	void read(Freq&	freq);
+	void read(Freq	*freq);
 	unsigned int cal(array_type& arr);
 	void alloc(array_type& arr);
 

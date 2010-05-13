@@ -11,10 +11,13 @@
 #include <map>
 #include <string>
 #include <cassert>
+#include <climits>
+
 #include <icstring.hpp>
 
 #include "word.h"
 #include "uniseg_types.h"
+#include "freq_file.h"
 
 class Freq {
 public:
@@ -24,15 +27,17 @@ public:
 
 private:
 	/// for more than one character (2, 3, 4, 5 ...)
-	freq_type	freq_;
-
+	freq_type					freq_;
 	/// the single character which is separated by the known boundaray
 	/// like punctuation, sybomls and other character in different lanaguages
-	array_type	freq_1_;
-	array_array_type	freq_n_;
+	array_type					freq_1_;
+	array_array_type			freq_n_;
 	std::vector<unsigned int>	sum_n_;
-	std::vector<double>	avg_n_;
-	int k_;
+	std::vector<double>			avg_n_;
+	int 						k_;
+
+	bool 						loaded_;
+	std::vector<FreqFile *> 	freq_files_;
 
 public:
 	Freq();
@@ -90,6 +95,11 @@ public:
 	void mergeto(Freq& freq);
 
 	void pile_up(int max);
+
+	void load(word_ptr_type word);
+	void load(int index = -1);
+
+	void load_freq(std::string path, int n = INT_MAX, bool force = false);
 private:
 
 	void remove_low(int k);

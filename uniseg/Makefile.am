@@ -27,7 +27,8 @@ libuniseq_sources = \
 		dic2freq.c
 		
 libuniseg_headers = \
-		config.h
+		string_utils.h \
+		config.h \
 		stop_word.h \
 		address.h	\
 		anyoption.h	\

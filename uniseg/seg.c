@@ -305,6 +305,15 @@ void Seger::assign_freq() {
 		if (global_word) {
 			QFreq::instance().load(global_word);
 			local_word->freq(global_word->freq());
+			local_word->is_word(global_word->is_word());
+			if (global_word->left() != NULL && global_word->left()->is_word()) {
+				local_word->left(freq_->find(global_word->left()->chars()));
+				local_word->left()->is_word(true);
+			}
+			if (global_word->right() != NULL && global_word->right()->is_word()) {
+				local_word->right(freq_->find(global_word->right()->chars()));
+				local_word->right()->is_word(true);
+			}
 		}
 		else
 			local_word->freq(0);
@@ -364,10 +373,15 @@ void Seger::add_to_list(array_type& cwlist) {
 	CWords *first = clist_->front();
 	CWords *second = clist_->second();
 
-	int stop_word_count1 = first->chinese_stop_word_count();
-	int stop_word_count2 = second == NULL ? -1 : second->chinese_stop_word_count();
+	CWords *best = first;
 
-	CWords *best = (stop_word_count2 > stop_word_count1) ? second : first;
+	if (UNISEG_settings::instance().stop_word_check) {
+		int stop_word_count1 = first->chinese_stop_word_count();
+		int stop_word_count2 = second == NULL ? -1 : second->chinese_stop_word_count();
+
+		if ((stop_word_count2 > stop_word_count1))
+		best =  second;
+	}
 	do {
 		array_type temp = best->to_array();
 		clist_->list().pop_front();

@@ -6,9 +6,11 @@
  */
 
 #include "freq.h"
+#include "convert.h"
 //#include "utilities.h"
 #include "uniseg_settings.h"
 #include "uniseg_types.h"
+#include "file.h"
 
 #include <iostream>
 #include <algorithm>
@@ -35,6 +37,9 @@ Freq::Freq() : sum_n_(UNISEG_settings::MAX_CHARS, 0), avg_n_(UNISEG_settings::MA
 		//array_type freq_n;
 		freq_n_.push_back(array_type());
 	}
+
+	k_ = -1;
+	loaded_ = false;
 }
 
 Freq::~Freq() {
@@ -635,4 +640,92 @@ void Freq::to_array(std::vector<word_ptr_type>& wa) {
 	}
 }
 
+void Freq::load(word_ptr_type word)
+{
+	int len = 1;
+	if (word != NULL && (len = word->size()) <= freq_files_.size()) {
+		assert(len > 0);
+		freq_files_[len]->read_term(word);
+	}
+}
 
+void Freq::load(int index)
+{
+	if (index > 1) {
+		if (index > freq_files_.size())
+			index = freq_files_.size();
+
+		--index;
+		freq_files_[index]->load();
+	}
+	else if (index == -1) {
+		for (int i = 1; i < freq_files_.size(); i++)
+			freq_files_[i]->load();
+	}
+}
+
+void Freq::load_freq(std::string path, int n, bool force) {
+
+	if (k_ > -1 && !force)
+		return;
+
+	/************************************
+	 *  LOAD FREQUENCY TABLE IN MEMORY
+	 ***********************************/
+	cerr << "loading frequency files " << endl;
+
+	//FreqLoader loader(freq_);
+
+	if (path.length() <= 0 || File::exist(path.c_str())) {
+		cerr << "cann't find the frequency table path " << endl;
+		return;
+		//exit(-1);
+	}
+
+	//loader.load(UNISEG_settings::instance().freqs_path, n);
+	k_ = 1;
+	//	int num = 0;
+	cerr << "Loading files from " << path << endl;
+	UNISEG_settings::instance().load = true;
+
+	while (k_ <= n) {
+		string name = stringify(k_);
+
+		FreqFile *freq_file = new FreqFile(name, this);
+		freq_file->path(path);
+
+		if (!freq_file->exist()) {
+			k_--;
+			std::cerr << "No such file:" << freq_file->fullpathname() << std::endl;
+			delete freq_file;
+			break;
+		}
+
+		freq_file->wlen(k_);
+		freq_file->read_in_memory();
+		freq_files_.push_back(freq_file);
+
+//		if (k_ > 1) {
+//			/************************************
+//			 * LOAD THE INDEX OF TERMS ONLY FIRST
+//			 ************************************/
+//			//freq_file->read_with_index();
+//			IndexFile idxf(name);
+//			idxf.path(UNISEG_settings::instance().freqs_path);
+//			idxf.wlen(k_);
+//			idxf.read(freq_);
+//		}
+//		else
+		if (k_ == 1)
+			freq_file->read();
+		else
+			freq_file->load_index();
+
+		k_++;
+	}
+
+	cal_sum_n_avg();
+	//k_ = loader.count();
+
+	loaded_ = true;
+}

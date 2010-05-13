@@ -39,6 +39,8 @@ public:
 
 	void initialize(unsigned int size);
 	bool exist();
+	static bool exist(const char *filename);
+
 	const std::string& fullpathname() const { return filename_; }
 
 	const std::string& name() const { return name_; }

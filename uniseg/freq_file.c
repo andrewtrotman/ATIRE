@@ -6,6 +6,7 @@
  */
 
 #include "uniseg_settings.h"
+#include "freq.h"
 #include "freq_file.h"
 #include "utilities.h"
 #include "encoding_factory.h"
@@ -44,7 +45,7 @@ void FreqFile::init() {
 
 unsigned int FreqFile::cal(array_type& arr) {
 	//if (arr[0]->address() == INVALID)
-	//	freq_.alloc(k);
+	//	freq_->alloc(k);
 	//File::word_ptr_type last_word = freq_n_[k - 1][freq_n_[k - 1].size() - 1];
 	/*
 	for (int j = 0; j < freq_n_[k - 1].size(); j++)
@@ -167,7 +168,7 @@ void FreqFile::read() {
 			string_type a_char(buf, enc_->howmanybytes());
 			ca.push_back(a_char);
 
-//			freq_.add(ca, enc_->lang(), value); //->address(count/RECORD_LENGTH);
+//			freq_->add(ca, enc_->lang(), value); //->address(count/RECORD_LENGTH);
 			add_word(ca, tmp);
 			count += RECORD_LENGTH;
 			// calculating the total characters appear in the corpus
@@ -175,7 +176,7 @@ void FreqFile::read() {
 			//	num += value;
 		}
 
-		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
+		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_->array_k_size(wlen_) << endl;
 		//if (k == 1)
 		//	cerr << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
 //	}
@@ -248,7 +249,7 @@ void FreqFile::read_with_index() {
 					string_array aca(ca);
 					aca.push_back(a_char);
 					assert(value >= 0);
-					freq_.add(aca, enc_->lang(), value); //->address(count);
+					freq_->add(aca, enc_->lang(), value); //->address(count);
 					count++;
 				}
 			}
@@ -273,13 +274,13 @@ void FreqFile::read_with_index() {
 					string_type a_char(buf, enc_->howmanybytes());
 					string_array aca = ca;
 					aca.insert(aca.begin(), a_char);
-					freq_.add(aca, enc_->lang(), value); //->address(count);
+					freq_->add(aca, enc_->lang(), value); //->address(count);
 					count++;
 				}
 			}
 		}
 
-		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_.array_k_size(wlen_) << endl;
+		cerr << "loaded number of word with size(" << wlen_ << ") : " << freq_->array_k_size(wlen_) << endl;
 		cerr << "actual number of word with size(" << wlen_ << ") : " << count << endl;
 		//if (k == 1)
 		//	cerr << "total characters: " << num << " approximily " << num*3/(1024*1024) << "m" << endl;
@@ -372,7 +373,7 @@ void FreqFile::read_term(word_ptr_type word)
 			current += INT_TYPE_SIZE;
 
 			add_word(aca, tmp);
-			//word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
+			//word_ptr_type ret_word = freq_->add(aca, enc_->lang(), value); //->address(count);
 			//cerr << "add new word: " << ret_word->chars() << " " << ret_word->freq() << endl;
 			count++;
 		}
@@ -394,7 +395,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 
 	/// save them in the array
 	// assert(value > 0);
-	word_ptr_type ret_word = freq_.add(aca, enc_->lang(), value); //->address(count);
+	word_ptr_type ret_word = freq_->add(aca, enc_->lang(), value); //->address(count);
 
 	if (word_where == 0xFF)
 		ret_word->is_word(true);
@@ -402,12 +403,12 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 		string left = ret_word->subchars(0, word_where);
 		string right = ret_word->subchars(word_where, ret_word->size() - word_where);
 
-		word_ptr_type a_word = freq_.find(left);
+		word_ptr_type a_word = freq_->find(left);
 		assert(a_word != NULL);
 		ret_word->left(a_word);
 		a_word->is_word(true);
 
-		a_word = freq_.find(right);
+		a_word = freq_->find(right);
 		assert(a_word != NULL);
 		ret_word->right(a_word);
 		a_word->is_word(true);
@@ -425,7 +426,7 @@ void FreqFile::load_index()
 
 void FreqFile::load()
 {
-	array_type& word_array = freq_.array_k(wlen_ - 1);
+	array_type& word_array = freq_->array_k(wlen_ - 1);
 	for (int i = 0; i < word_array.size(); ++i)
 		read_term(word_array[i]);
 }

@@ -18,11 +18,13 @@ public:
 	static const int MAX_CHARS = 100;
 	static const char DEFAULT_FRQS_V_NAME[];
 	static const char DEFAULT_DICS_V_NAME[];
+	static const char DEFAULT_TDICS_V_NAME[];  // training dics, the dic with frequency and boundary information
 	static const char DEFAULT_VAR[];
 	static const char DEFAULT_CONF[];
 	static const char DEFAULT_CONF_FILE[];
 	static const char DEFAULT_INDEX[];
 	static const char DEFAULT_ZH[];
+	static const char DEFAULT_TR[];
 	static const char DEFAULT_EN[];
 
 public:
@@ -55,6 +57,9 @@ public:
 	bool					optimize;
 
 	bool					split_latin_char;
+
+	bool					stop_word_check;
+	bool					oov_check;
 
 	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 

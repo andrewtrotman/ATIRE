@@ -9,7 +9,8 @@
 #define FREQ_FILE_H_
 
 #include "index_file.h"
-#include "freq.h"
+
+class Freq;
 
 class FreqFile : public File {
 
@@ -19,15 +20,15 @@ public:
 	//static const std::string EXT_NAME;
 
 private:
-	Freq& 		freq_;
+	Freq 		*freq_;
 	IndexFile 	idxf_;
 	int			wlen_;
 	bool		loaded_;
 
 public:
-	FreqFile(std::string name, Freq& freq) :
+	FreqFile(std::string name, Freq *freq) :
 		File::File(name), freq_(freq), idxf_(name) { init(); }
-	FreqFile(std::string name, unsigned int size, Freq& freq) :
+	FreqFile(std::string name, unsigned int size, Freq *freq) :
 		File::File(name, size), freq_(freq), idxf_(name) { init(); }
 	virtual ~FreqFile();
 

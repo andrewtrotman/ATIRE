@@ -17,25 +17,25 @@ class FreqFile;
 class QFreq {
 
 private:
-	Freq 						freq_;
-	int 						k_;
-	bool 						loaded_;
-	std::vector<FreqFile *> 	freq_files_;
+	Freq 						freq_stat_;
+	Freq 						freq_training_;
+	//int 						k_;
 
 public:
 	QFreq();
 	~QFreq();
 
 	void load_freq(int n = INT_MAX, bool force = false);
-	Freq& freq() { if (!loaded_) load_freq(); return freq_; }
-	Freq& freq_noload() { return freq_; }
-	int k() { return k_; }
-	int count() { return k_; }
-	bool is_loaded() { return loaded_; }
+	Freq& freq();
+	Freq& freq_stat() { return freq_stat_; }
 
-	word_ptr_type find(string_type word);
+	Freq& freq_training() { return freq_training_; }
+	//int k() { return k_; }
+	//int count() { return k_; }
+	//bool is_loaded() { return loaded_; }
+
 	void load(word_ptr_type word);
-	void load(int index = -1);
+	word_ptr_type find(string_type word);
 
 	static QFreq& instance();
 };
