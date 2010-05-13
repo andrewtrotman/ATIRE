@@ -17,6 +17,7 @@ public:
 	ANT_stem_s() {}
 	virtual ~ANT_stem_s() {}
 	virtual size_t stem(const char *term, char *destination);
+	virtual char *name(void) { return "S-Stripper"; }
 } ;
 
 #endif /* STEM_S_H_ */

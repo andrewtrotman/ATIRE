@@ -216,7 +216,10 @@ stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (s
 	If we have a stemmed index then build a stemmer for use on the search terms
 */
 if ((which_stemmer = get_variable("~stemmer")) != 0)
+	{
 	stemmer = ANT_stemmer_factory::get_core_stemmer(which_stemmer);
+	printf("This index was stemmed using %s, search terms will be stemmed\n", stemmer->name());
+	}
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
 }

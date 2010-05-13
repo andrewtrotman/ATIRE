@@ -17,6 +17,7 @@ public:
 	ANT_stem_lovins() {}
 	virtual ~ANT_stem_lovins() {}
 	virtual size_t stem(const char *term, char *destination);
+	virtual char *name(void) { return "Lovens"; }
 } ;
 
 #endif /* STEM_LOVINS_H_ */

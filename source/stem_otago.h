@@ -17,6 +17,7 @@ public:
 	ANT_stem_otago() {}
 	virtual ~ANT_stem_otago() {}
 	virtual size_t stem(const char *term, char *destination);
+	virtual char *name(void) { return "the Otago Stemmer"; }
 } ;
 
 #endif /* STEM_OTAGO_H_ */

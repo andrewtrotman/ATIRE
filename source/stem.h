@@ -15,6 +15,7 @@ public:
 	ANT_stem() {}
 	virtual ~ANT_stem() {}
 	virtual size_t stem(const char *term, char *destination) = 0;
+	virtual char *name(void) = 0;
 } ;
 
 #endif /* STEM_H_ */

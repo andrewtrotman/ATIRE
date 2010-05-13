@@ -19,6 +19,7 @@ public:
 	ANT_stem_none() {}
 	virtual ~ANT_stem_none() {}
 	virtual size_t stem(const char *term, char *destination) { return strlen(strcpy(destination, term)); }
+	virtual char *name(void) { return "Nothing"; }
 } ;
 
 #endif /* STEM_NONE_H_ */
