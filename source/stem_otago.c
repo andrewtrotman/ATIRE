@@ -85,8 +85,8 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
 
     length = strlen(buffer);
 
-    do {
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 3, "shi", 4) == 0 && length > 6) {
+    do {	/* the m()>=0 below is removed because it is always true! (it asks whether unsigned int >= 0) */
+        if (/*m(buffer, length - 1) >= 0 && */strncmp(buffer + length - 3, "shi", 4) == 0 && length > 6) {
             strncpy(buffer + length - 3, "f", 4);
             buffer[length - 2] = '\0';
             length -= 2;
@@ -114,18 +114,18 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
             length -= 1;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 3, "ics", 4) == 0 && length > 6) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 3, "ics", 4) == 0 && length > 6) {
             strncpy(buffer + length - 3, "e", 4);
             buffer[length - 2] = '\0';
             length -= 2;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 2, "ii", 4) == 0 && length > 5) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 2, "ii", 4) == 0 && length > 5) {
             strncpy(buffer + length - 2, "sr", 4);
             buffer[length - 0] = '\0';
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 3, "ito", 4) == 0 && length > 6) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 3, "ito", 4) == 0 && length > 6) {
             strncpy(buffer + length - 3, "ng", 4);
             buffer[length - 1] = '\0';
             length -= 1;
@@ -137,7 +137,7 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
             length += 1;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 1, "q", 4) == 0 && length > 4) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 1, "q", 4) == 0 && length > 4) {
             buffer[length - 1] = '\0';
             length -= 1;
             break;
@@ -152,7 +152,7 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
             buffer[length - 0] = '\0';
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 3, "ice", 4) == 0 && length > 6) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 3, "ice", 4) == 0 && length > 6) {
             strncpy(buffer + length - 3, "s", 4);
             buffer[length - 2] = '\0';
             length -= 2;
@@ -182,13 +182,13 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
             length += 2;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 1, "f", 4) == 0 && length > 4) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 1, "f", 4) == 0 && length > 4) {
             strncpy(buffer + length - 1, "uow", 4);
             buffer[length - -2] = '\0';
             length += 2;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 1, "q", 4) == 0 && length > 4) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 1, "q", 4) == 0 && length > 4) {
             buffer[length - 1] = '\0';
             length -= 1;
             break;
@@ -206,7 +206,7 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
             length -= 1;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 2, "sl", 4) == 0 && length > 5) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 2, "sl", 4) == 0 && length > 5) {
             strncpy(buffer + length - 2, "anu", 4);
             buffer[length - -1] = '\0';
             length += 1;
@@ -228,7 +228,7 @@ size_t ANT_stem_otago::stem(const char *string, char *buffer) {
             length -= 2;
             break;
         }
-        if (m(buffer, length - 1) >= 0 && strncmp(buffer + length - 3, "ean", 4) == 0 && length > 6) {
+        if (/*m(buffer, length - 1) >= 0 && */ strncmp(buffer + length - 3, "ean", 4) == 0 && length > 6) {
             buffer[length - 3] = '\0';
             length -= 3;
             break;

@@ -6,6 +6,7 @@
 #define SEARCH_ENGINE_RESULT_H_
 
 #include <stdio.h>
+#include "pragma.h"
 #include "search_engine_accumulator.h"
 
 class ANT_memory;
@@ -35,6 +36,7 @@ public:
 	ANT_search_engine_result(ANT_memory *memory, long long documents);
 	virtual ~ANT_search_engine_result() {}
 
+#pragma ANT_PRAGMA_NO_DELETE
 	void *operator new(size_t bytes, ANT_memory *allocator);
 	ANT_search_engine_accumulator &operator[](size_t index) { return accumulator[index]; }
 

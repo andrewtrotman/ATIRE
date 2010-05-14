@@ -417,7 +417,9 @@ do
 	}
 while (1);
 
-return NULL;
+#ifndef __INTEL_COMPILER
+	return NULL;
+#endif
 }
 
 /*

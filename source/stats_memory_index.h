@@ -41,6 +41,7 @@ public:
 	virtual ~ANT_stats_memory_index();
 
 	virtual void text_render(long which_stats);
+	using ANT_stats::text_render;
 } ;
 
 
