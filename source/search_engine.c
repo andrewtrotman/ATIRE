@@ -462,9 +462,9 @@ bytes_already_read = index->get_bytes_read();
 now = stats->start_timer();
 
 /*
-	If we have a stemmed index the stem the search term
+	If we have a stemmed index and the length of the term is greater then 3 then stem the search term
 */
-if (stemmer != NULL && ANT_islower(*term))
+if (stemmer != NULL && ANT_islower(*term) && (*(term + 1) != '\0' && *(term + 2) != '\0'))
 	{
 	stemmer->stem(term, stemmed_term);
 	term = stemmed_term;

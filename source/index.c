@@ -85,7 +85,7 @@ while ((token = readability->get_next_token()) != NULL)
 	if (ANT_islower(token->start[0]))
 		{
 		terms_in_document++;
-		if (stemmer == NULL)
+		if (stemmer == NULL || token->string_length <= 3)
 			readability->handle_node(indexer->add_term(token, doc));			// indexable the term
 		else
 			{
