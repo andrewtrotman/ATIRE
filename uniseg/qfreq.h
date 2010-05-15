@@ -35,7 +35,11 @@ public:
 	//bool is_loaded() { return loaded_; }
 
 	void load(word_ptr_type word);
-	word_ptr_type find(string_type word);
+	word_ptr_type find(string_type& word);
+
+	bool eligibility_check(word_ptr_type word);
+	bool need_eligibility_check();
+	bool is_possible_oov(string_type& word);
 
 	static QFreq& instance();
 };

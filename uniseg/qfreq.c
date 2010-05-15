@@ -38,10 +38,12 @@ void QFreq::load(word_ptr_type word)
 Freq& QFreq::freq()
 {
 	/*if (!loaded_) load_freq(); */
-	return freq_stat_;
+	if (freq_stat_.array_size() > 0)
+		return freq_stat_;
+	return freq_training_;
 }
 
-word_ptr_type QFreq::find(string_type word) {
+word_ptr_type QFreq::find(string_type& word) {
 	string_array ca;
 	to_string_array(word, ca);
 
@@ -65,6 +67,36 @@ word_ptr_type QFreq::find(string_type word) {
 		}
 	}
 	return freq_stat_.find(word);
+}
+
+
+bool QFreq::need_eligibility_check()
+{
+	if (freq_training_.array_size() > 1) {
+		return true;
+	}
+	return false;
+}
+
+bool QFreq::eligibility_check(word_ptr_type word)
+{
+	string word_str = word->chars();
+	if (freq_training_.array_size() > 0) {
+		word_ptr_type w_ptr = freq_training_.find(word_str);
+
+		if (UNISEG_settings::instance().oov_check && freq_stat_.array_size() > 0) {
+			if (!w_ptr || !w_ptr->is_word())
+				return is_possible_oov(word_str);
+			return true;
+		}
+		return !w_ptr ? false : w_ptr->is_word();
+	}
+	return true;
+}
+
+inline bool QFreq::is_possible_oov(string_type& word)
+{
+	return false;
 }
 
 QFreq& QFreq::instance() {

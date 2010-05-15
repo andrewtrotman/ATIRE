@@ -407,11 +407,15 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 		assert(a_word != NULL);
 		ret_word->left(a_word);
 		a_word->is_word(true);
+		int len = a_word->size();
 
 		a_word = freq_->find(right);
 		assert(a_word != NULL);
 		ret_word->right(a_word);
 		a_word->is_word(true);
+		len += a_word->size();
+
+		assert(ret_word->size() == len);
 	}
 }
 

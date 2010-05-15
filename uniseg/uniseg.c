@@ -56,6 +56,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 	long count = 0;
 	bool flag = false;
 	bool stop = false;
+	bool need_eligibility_check = QFreq::instance().need_eligibility_check();
 	output_.clear();
 	count_ = 0;
 
@@ -85,11 +86,31 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 			long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
 			if (size > 0)
 				for (; i < size; i++) {
-					if (i > 0)
+				bool has_word_pair = words_list[i]->has_word_pair();
+					if (i > 0 /*&& *(output_.end()--) != ' '*/)
 						output_.append(" ");
-					string_type& word = words_list[i]->chars();
-					output_.append(word);
-					segmented_len += word.length();
+					if (words_list[i]->size() == 1
+							|| has_word_pair
+							|| (need_eligibility_check && QFreq::instance().eligibility_check(words_list[i]))) {
+						string_type& word = words_list[i]->chars();
+						if (has_word_pair)
+							output_.append(words_list[i]->left()->chars() + " " + words_list[i]->right()->chars());
+						else
+							output_.append(word);
+						segmented_len += word.length();
+					}
+					else {
+						word_ptr_type lparent = words_list[i]->lparent();
+						assert(lparent != NULL);
+						while (lparent->size() > 1 && !lparent->is_word()) {
+							if (lparent->lparent() != NULL)
+								lparent = lparent->lparent();
+							else
+								break;
+						}
+						output_.append(lparent->chars());
+						segmented_len += lparent->chars().length();
+					}
 				}
 			else
 				segmented_len = how_far;

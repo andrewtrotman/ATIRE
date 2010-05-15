@@ -336,7 +336,7 @@ void Seger::justify(unsigned int min) {
 }
 
 void Seger::do_some_calculations() {
-	freq_->cal_word_p(QFreq::instance().freq().sum_k(1));
+	freq_->cal_word_p(/*QFreq::instance().freq()*/allfreq_->sum_k(1));
 
 	freq_->cal_word_a();
 

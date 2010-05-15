@@ -676,8 +676,8 @@ void Freq::load_freq(std::string path, int n, bool force) {
 
 	//FreqLoader loader(freq_);
 
-	if (path.length() <= 0 || File::exist(path.c_str())) {
-		cerr << "cann't find the frequency table path " << endl;
+	if (path.length() <= 0 || !File::exist(path.c_str())) {
+		cerr << "cann't find the frequency table path: " << path << endl;
 		return;
 		//exit(-1);
 	}

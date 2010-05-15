@@ -205,6 +205,8 @@ public:
 	bool is_word() { return is_word_; }
 	void is_word(bool b);
 
+	bool has_word_pair() { return (left_ != NULL && right_ != NULL) ? (left_->is_word() && right_->is_word()) : false;}
+
 	bool is_candidate_word() { return is_word_; }
 	void is_candidate_word(bool b);
 
