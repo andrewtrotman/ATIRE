@@ -9,8 +9,8 @@
 #define QFREQ_H_
 
 #include "freq.h"
+#include "dic.h"
 #include <climits>
-#include <vector>
 
 class FreqFile;
 
@@ -19,6 +19,7 @@ class QFreq {
 private:
 	Freq 						freq_stat_;
 	Freq 						freq_training_;
+	Dic							dic_;
 	//int 						k_;
 
 public:

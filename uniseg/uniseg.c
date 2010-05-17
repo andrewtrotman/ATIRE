@@ -86,7 +86,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 			long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
 			if (size > 0)
 				for (; i < size; i++) {
-				bool has_word_pair = words_list[i]->has_word_pair();
+					bool has_word_pair = words_list[i]->has_word_pair() && !words_list[i]->is_word();
 					if (i > 0 /*&& *(output_.end()--) != ' '*/)
 						output_.append(" ");
 					if (words_list[i]->size() == 1

@@ -49,12 +49,17 @@ void Dic::save(string_type filename) {
     	ofs.close();
 }
 
-void Dic::load(string_type filename, long lang) {
+void Dic::load(string_type filename, long lang)
+{
+	lang_ = lang;
+	load(filename);
+}
+
+void Dic::load(string_type filename)
+{
 	  string line;
 	  string::size_type pos;
 	  long freq = 1;
-	  if (lang_ != lang)
-		  lang_ = lang;
 
 	  ifstream dicfile(filename.c_str());
 	  if (dicfile.is_open()) {

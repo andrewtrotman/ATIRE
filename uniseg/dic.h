@@ -36,6 +36,7 @@ public:
 	//long lang() { return lang_; }
 	void save(string_type filename);
 	void load(string_type filename, long lang);
+	void load(string_type filename);
 
 	int size() { return list_.size(); }
 

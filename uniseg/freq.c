@@ -111,13 +111,15 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 	assert(size > 0);
 
 	string_type chars; // = array_to_string<string_array, string_type>(ca);
-	//debug
-//	if (chars == "我们")
-//		cerr << "got you " << endl;
+
 	/*
 	 * create key string
 	 */
 	array_to_string(ca, lang, chars);
+
+	// debug
+//	if (chars == "红灯笼" || chars == "\347\272\242\347\201\257\347\254\274")
+//		cerr << "got you " << endl;
 
 	word_ptr_type word_ptr = NULL;
 
