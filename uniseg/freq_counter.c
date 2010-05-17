@@ -82,7 +82,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 				//string_type str(start, 3);
 				string_type str; // ((*start)->to_string();
 				pre_lang = enc->lang();
-				if (enc->lang() == uniseg_encoding::ENGLISH
+				if (enc->lang() == uniseg_encoding::ALPHA
 				    || enc->howmanybytes() > 1) {
 
 					if (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char)
@@ -278,7 +278,7 @@ void FreqCounter::count_ones(Freq& freq, const char *begin, const char *end)
 				string_type str; // ((*start)->to_string();
 				bool increase_flag = false;
 
-				if (enc->lang() == uniseg_encoding::ENGLISH
+				if (enc->lang() == uniseg_encoding::ALPHA
 				    || enc->howmanybytes() > 1) {
 
 					if (enc->lang() != uniseg_encoding::CHINESE && !UNISEG_settings::instance().split_latin_char)

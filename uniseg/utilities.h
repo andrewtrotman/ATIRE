@@ -15,19 +15,20 @@
 #include <vector>
 
 template<typename T, typename ST>
-inline ST array_to_string(const T& arr, int idx, int len) {
-	ST tmp_str;
+inline void arraytostring(const T& arr, ST& str, int idx = 0, int len = -1) {
+	if (len == -1)
+		len = arr.size();
+
 	assert(idx >= 0);
 	assert(len <= (int)arr.size());
 	for (int i = idx; i < (idx + len); i++)
-		tmp_str.append(arr[i]);
-	return tmp_str;
+		str.append(arr[i]);
 }
 
-template<typename T, typename ST>
-inline ST array_to_string(const T& arr) {
-	return array_to_string<T, ST>(arr, 0, arr.size());
-}
+//template<typename T>
+//inline std::string arraytostring(const T& arr) {
+//	return arraytostring(arr, 0, arr.size());
+//}
 
 template<typename T>
 inline void chars_to_array(const char* source, T& arr) {

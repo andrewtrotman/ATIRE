@@ -158,7 +158,7 @@ void CList::remove_two_consecutive_single_chars() {
 	 *
 	 * but for the ancient Chinese, that could be possible
 	 */
-	if (UNISEG_settings::instance().lang == uniseg_encoding::ENGLISH) {
+	if (UNISEG_settings::instance().lang == uniseg_encoding::ALPHA) {
 		cwords_list::iterator it = list_.begin();
 		for (; it != list_.end();) {
 			bool to_remove = false;

@@ -393,7 +393,7 @@ void CWords::get_reward_or_penalty(Freq* freq) {
 		double cons_v = 0.0;
 		double cons_p = 1.16;
 
-		if (UNISEG_settings::instance().lang == uniseg_encoding::ENGLISH)
+		if (UNISEG_settings::instance().lang == uniseg_encoding::ALPHA)
 			cons_v = sqrt(2 * n);
 		else if (UNISEG_settings::instance().lang == uniseg_encoding::CHINESE)
 			cons_v = 9.0;

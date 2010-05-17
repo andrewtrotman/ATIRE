@@ -33,6 +33,7 @@ public:
 	void add(string_type, long freq);
 
 	bool find(string_type word);
+	bool fuzzy_search(const string_type word);
 	//long lang() { return lang_; }
 	void save(string_type filename);
 	void load(string_type filename, long lang);

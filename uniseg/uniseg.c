@@ -10,6 +10,7 @@
 #include "qfreq.h"
 #include "encoding_factory.h"
 #include "uniseg_settings.h"
+#include "utilities.h"
 
 #include <iostream>
 
@@ -61,21 +62,82 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 	count_ = 0;
 
 	while (current < end) {
-	    while ((count < step) && next < end) {
-			enc_->test_char(next);
-
-			if (enc_->lang() == uniseg_encoding::CHINESE) {
-				next += enc_->howmanybytes();
-				count++;
-			}
-			else
-				break;
-	    }
-
-		how_far = next - current;
+		count = 0;
 
 		if (output_.length() > 0)
 			output_.append(" ");
+
+		while (current < end && isspace(*current))
+			output_.push_back(*current++);
+
+		next = current;
+		while (next < end) {
+			enc_->test_char(next);
+			if (enc_->lang() == uniseg_encoding::CHINESE)
+				while (next < end && enc_->lang() == uniseg_encoding::CHINESE && count < step) {
+					next += enc_->howmanybytes();
+					enc_->test_char(next);
+					count++;
+				}
+
+			if (count > 0)
+				break;
+
+//			if (*next & 80) {
+//				current = next += enc_->howmanybytes();
+//				enc_->test_char(next);
+//				while (next < end && enc_->lang() != uniseg_encoding::CHINESE && enc_->lang() != uniseg_encoding::SPACE) {
+//					next += enc_->howmanybytes();
+//					output_.append((const char *)current, enc_->howmanybytes());
+//					enc_->test_char(next);
+//					current = next;
+//				}
+//			}
+//			else {
+				string_array temp_word_array;
+				unsigned char *pre = next;
+				next += enc_->howmanybytes();
+				temp_word_array.push_back(string_type(pre, next));
+				enc_->test_char(next);
+
+				while (next < end && enc_->lang() != uniseg_encoding::CHINESE && enc_->lang() != uniseg_encoding::SPACE) {
+					pre = next;
+					next += enc_->howmanybytes();
+					temp_word_array.push_back(string_type(pre, next));
+					enc_->test_char(next);
+				}
+
+				while (next < end && enc_->lang() == uniseg_encoding::CHINESE) {
+					pre = next;
+					next += enc_->howmanybytes();
+					temp_word_array.push_back(string_type(pre, next));
+					string_type word_str;
+					arraytostring(temp_word_array, word_str);
+					if (QFreq::instance().fuzzy_search_dic(word_str)) {
+						next += enc_->howmanybytes();
+						enc_->test_char(next);
+					}
+					else {
+						temp_word_array.pop_back();
+						break;
+					}
+				}
+				while (temp_word_array.size() > 1 && (*temp_word_array.back().c_str() & 0x80)) {
+					string_type word_str;
+					arraytostring(temp_word_array, word_str);
+					if (!QFreq::instance().is_word(word_str))
+						temp_word_array.pop_back();
+					else
+						break;
+				}
+				string_type non_all_chinese_word;
+				arraytostring(temp_word_array, non_all_chinese_word);
+				output_.append(non_all_chinese_word);
+				current += non_all_chinese_word.length();
+			//}
+		}
+
+		how_far = next - current;
 
 	    flag = next < end;
 	    if (how_far > 0 && count > 1) {
@@ -119,13 +181,11 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 			segmented_len = 0;
 			count_ += (words_list.size() == size) ? 0 : count - words_list[size - 1]->size();
 	    }
-	    else {
-			how_far = how_far > 0 ? how_far : enc_->howmanybytes();
+	    else if (how_far > 0) {
+			//how_far = how_far > 0 ? how_far : enc_->howmanybytes();
 			output_.append((const char *)current, (size_t)how_far);
 			current += how_far;
 	    }
-		count = 0;
-		next = current;
 	}
 
 	return get_output();
@@ -133,12 +193,12 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 
 const unsigned char *UNISEG_uniseg::get_input()
 {
-return (unsigned char *)input_.c_str();
+	return (unsigned char *)input_.c_str();
 }
 
 const unsigned char *UNISEG_uniseg::get_output()
 {
-return (unsigned char *)output_.c_str();
+	return (unsigned char *)output_.c_str();
 }
 
 int UNISEG_uniseg::get_count() { return count_; }

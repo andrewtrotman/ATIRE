@@ -49,7 +49,7 @@ bool UNISEG_encoding_utf8::is_valid_char(const unsigned char *c)
 if (!(*c & 0x80)) // ASCII characters
 	{
 	if (isalpha(*c))
-		current_lang = ENGLISH;
+		current_lang = ALPHA;
 	else if (isspace(*c))
 		current_lang = SPACE;
 	else if (ispunct(*c))
@@ -59,7 +59,7 @@ if (!(*c & 0x80)) // ASCII characters
 	else
 		current_lang = ASCIICHAR;
 	bytes = 1;
-	return current_lang == ENGLISH;
+	return current_lang == ALPHA;
 	}
 
 bytes = test_utf8char(c);
