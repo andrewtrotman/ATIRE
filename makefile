@@ -3,6 +3,12 @@
 #
 
 #
+#	Which compiler are we using
+#
+#COMPILER=INTEL
+COMPILER=MICROSOFT
+
+#
 #	Define TRUE and FALSE
 #
 FALSE = 0
@@ -74,9 +80,15 @@ MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
+
+!IF "$(COMPILER)" == "INTEL"
+CC = @icl /nologo
+CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
+!ELSE
+CC = @cl /nologo
 #CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
 CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8
-CC = @cl /nologo 
+!ENDIF
 
 #
 #	Libraries
@@ -271,12 +283,12 @@ $(PARTS) : makefile $(EXTRA_LIBS)
 #
 bzip\bzip2-1.0.5\libbz2.lib :
 	@cd bzip\bzip2-1.0.5
-	@nmake -nologo -f ..\makefile.msc
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER)
 	@cd ..\..
 
 zlib\zlib-1.2.3\zlib.lib : 
 	@cd zlib\zlib-1.2.3
-	@nmake -nologo -f ..\makefile.msc
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER)
 	@cd ..\..
 
 #

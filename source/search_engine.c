@@ -46,7 +46,7 @@ ANT_compress_variable_byte variable_byte;
 ANT_compressable_integer *value;
 
 index_filename = filename;
-trim_postings_k = LLONG_MAX;
+trim_postings_k = LONG_MAX;
 stats = new ANT_stats_search_engine(memory);
 stats_for_all_queries = new ANT_stats_search_engine(memory);
 this->memory = memory;

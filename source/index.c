@@ -235,34 +235,34 @@ for (param = first_param; param < argc; param++)
 
 	now = stats.start_timer();
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
-		source = new ANT_directory_iterator_recursive(argv[param]);			// this dir and below
+		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);			// this dir and below
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::WARC_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_warc(instream_buffer);
+		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
-		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]));
+		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::PKZIP)
-		source = new ANT_directory_iterator_pkzip(argv[param]);
+		source = new ANT_directory_iterator_pkzip(argv[param], ANT_directory_iterator::READ_FILE);
 	else
-		source = new ANT_directory_iterator(argv[param]);					// current directory
+		source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
 
 	stats.add_disk_input_time(stats.stop_timer(now));
 
@@ -274,13 +274,13 @@ for (param = first_param; param < argc; param++)
 		{
 		ANT_compression_text_factory *factory_text = new ANT_compression_text_factory;
 		factory_text->set_scheme(param_block.document_compression_scheme);
-		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text);
+		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text, ANT_directory_iterator::READ_FILE);
 		}
 
 	files_that_match = 0;
 
 	now = stats.start_timer();
-	current_file = disk->first(&file_object, ANT_directory_iterator::READ_FILE);
+	current_file = disk->first(&file_object);
 	stats.add_disk_input_time(stats.stop_timer(now));
 	{
 #else
@@ -288,7 +288,7 @@ for (param = first_param; param < argc; param++)
 	files_that_match = 0;
 
 	now = stats.start_timer();
-	current_file = disk->first(&file_object, ANT_directory_iterator::READ_FILE);
+	current_file = disk->first(&file_object)
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 
@@ -335,7 +335,7 @@ for (param = first_param; param < argc; param++)
 			Get the next file
 		*/
 		now = stats.start_timer();
-		current_file = disk->next(&file_object, ANT_directory_iterator::READ_FILE);
+		current_file = disk->next(&file_object);
 		stats.add_disk_input_time(stats.stop_timer(now));
 		}
 

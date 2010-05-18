@@ -45,6 +45,7 @@ public:
 	virtual ~ANT_indexer_param_block() {}
 	virtual void usage(void);
 	virtual void help(void);
+	using ANT_indexer_param_block_rank::help;
 	virtual long parse(void);
 } ;
 

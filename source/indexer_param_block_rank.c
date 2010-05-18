@@ -128,7 +128,7 @@ else
 void ANT_indexer_param_block_rank::help(char *title, char switch_char, long long allowable)
 {
 printf("%s\n", title);
-printf("%*.*s\n", strlen(title), strlen(title), "------------------------------------------");
+printf("%*.*s\n", (int)strlen(title), (int)strlen(title), "------------------------------------------");
 printf("-%c[function]    Rank the result set using\n", switch_char);
 
 if (allowable & BOSE_EINSTEIN)

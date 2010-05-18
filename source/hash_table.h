@@ -14,7 +14,7 @@ extern unsigned char ANT_header_hash_encode[];
 	ANT_RANDOM_HASH_8()
 	-------------------
 */
-inline static unsigned int ANT_random_hash_8(char *string, size_t length, unsigned int seed)
+static inline unsigned int ANT_random_hash_8(char *string, size_t length, unsigned int seed)
 {
 unsigned char *ch;
 size_t pos;
@@ -31,7 +31,7 @@ return seed;
 	ANT_RANDOM_HASH_24()
 	--------------------
 */
-inline static unsigned long ANT_random_hash_8_24(ANT_string_pair *string)
+static inline unsigned long ANT_random_hash_8_24(ANT_string_pair *string)
 {
 long hash1, hash2, hash3;
 
@@ -45,7 +45,7 @@ return (hash1 << 16) + (hash2 << 8) + hash3;
 	ANT_MEMORY_INDEX::ANT_HEADER_HASH_24()
 	--------------------------------------
 */
-inline static unsigned long ANT_header_hash_24(ANT_string_pair *string)
+static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 {
 /*
 	This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer.
@@ -75,7 +75,7 @@ return ans;
 	8-bit version of the header hash function - this one uses the first character and the
 	length of the string.
 */
-inline static unsigned long ANT_header_hash_8(ANT_string_pair *string)
+static inline unsigned long ANT_header_hash_8(ANT_string_pair *string)
 {
 unsigned long ans;
 
@@ -96,7 +96,7 @@ return ans;
 	ANT_HASH_24()
 	-------------
 */
-inline static unsigned long ANT_hash_24(ANT_string_pair *string)
+static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 {
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"
@@ -115,7 +115,7 @@ inline static unsigned long ANT_hash_24(ANT_string_pair *string)
 	ANT_HASH_8()
 	------------
 */
-inline static unsigned long ANT_hash_8(ANT_string_pair *string)
+static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 {
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"

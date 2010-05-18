@@ -26,11 +26,11 @@ private:
 	void read_entire_file(ANT_directory_iterator_object *object);
 
 public:
-	ANT_directory_iterator_warc(ANT_instream *source) { this->source = source; }
+	ANT_directory_iterator_warc(ANT_instream *source, long get_file = 0) : ANT_directory_iterator("", get_file) { this->source = source; }
 	virtual ~ANT_directory_iterator_warc() {}
 
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0) { return next(object, get_file); }
-	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 } ;
 
 #endif /* DIRECTORY_ITERATOR_WARC_H_ */

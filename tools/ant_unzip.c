@@ -17,14 +17,12 @@ ANT_directory_iterator_object file, *got;
 if (argc != 2)
 	exit(printf("usage:%s <infile.zip>\n", argv[0]));
 
-unzipper = new ANT_directory_iterator_pkzip(argv[1]);
+unzipper = new ANT_directory_iterator_pkzip(argv[1], ANT_directory_iterator::READ_FILE);
 
-for (got = unzipper->first(&file, TRUE); got != NULL; got = unzipper->next(&file, TRUE))
+for (got = unzipper->first(&file); got != NULL; got = unzipper->next(&file))
 	{
 	puts("=====");
 	puts(got->filename);
 	puts(got->file);
 	}
-
-
 }

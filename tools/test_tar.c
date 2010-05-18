@@ -25,17 +25,17 @@
 int main(int argc, char *argv[])
 {
 if (argc != 2)
-	exit(printf(""));
+	exit(printf("Nope"));
 
 ANT_memory memory;
 ANT_directory_iterator_object file_object, *current;
 ANT_instream_file file(&memory, argv[1]);
 ANT_instream_bz2 source(&memory, &file);
-ANT_directory_iterator_tar tarball(&source);
+ANT_directory_iterator_tar tarball(&source, ANT_directory_iterator::READ_FILE);
 //ANT_instream_deflate source(&memory, &file);
-//ANT_directory_iterator_warc tarball(&source);
+//ANT_directory_iterator_warc tarball(&source, ANT_directory_iterator::READ_FILE);
 
-for (current = tarball.first(&file_object, TRUE); current != NULL; current = tarball.next(&file_object, TRUE))
+for (current = tarball.first(&file_object); current != NULL; current = tarball.next(&file_object))
 	{
 	puts(current->filename);
 	delete [] current->file;

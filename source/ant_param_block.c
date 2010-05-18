@@ -41,7 +41,7 @@ output_filename = "ant.out";
 results_list_length = -1;
 stats = SHORT | PRECISION;
 segmentation = TRUE;
-trim_postings_k = LLONG_MAX;
+trim_postings_k = LONG_MAX;
 file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
 }
@@ -299,7 +299,7 @@ for (param = 1; param < argc; param++)
 			{
 			trim_postings_k = atol(command + 1);
 			if (trim_postings_k == 0)
-				trim_postings_k = LLONG_MAX;
+				trim_postings_k = LONG_MAX;
 			}
 		else if (*command == 'F')
 			focus_top_k = atol(command + 1);

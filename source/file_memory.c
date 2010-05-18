@@ -46,7 +46,7 @@ if (ANT_file::open(filename, mode) != 0)
 	if (length_of_file > (size_t)-1)
 		exit(printf("%s (%lld bytes) does not fit in memory (max allowable alloc size is (%lld bytes)).  Try compiling 64-bit", filename, (long long)length_of_file, (long long)((size_t)-1)));
 
-	if ((buffer = (unsigned char *)malloc(length_of_file)) != NULL)
+	if ((buffer = (unsigned char *)malloc((size_t)length_of_file)) != NULL)
 		{
 		if (ANT_file::read(buffer, length_of_file) == 0)
 			result = 0;

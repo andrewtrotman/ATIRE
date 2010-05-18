@@ -28,7 +28,7 @@ private:
 public:
 	long logo;							// display the ANT banner logo or not
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
-	long long trim_postings_k;			// trim the postigs lists at no fewer than k
+	long trim_postings_k;				// trim the postigs lists at no fewer than k
 	long metric;						// which metric to use (MAP, MAgP, etc)
 	long metric_n;						// so we can so P@10, p@30 and so on using one metric
 	char *assessments_filename;			// name of the file containing the assessments for the given queries
@@ -60,6 +60,7 @@ public:
 
 	virtual void usage(void);
 	virtual void help(void);
+	using ANT_indexer_param_block_rank::help;
 	virtual long parse(void);
 } ;
 

@@ -42,11 +42,11 @@ private:
 #endif
 
 public:
-	ANT_directory_iterator_recursive(const char *the_wildcard);
+	ANT_directory_iterator_recursive(const char *the_wildcard, long get_file = 0);
 	virtual ~ANT_directory_iterator_recursive();
 
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
-	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 } ;
 
 

@@ -28,7 +28,7 @@
 	ANT_DIRECTORY_ITERATOR_RECURSIVE::ANT_DIRECTORY_ITERATOR_RECURSIVE()
 	--------------------------------------------------------------------
 */
-ANT_directory_iterator_recursive::ANT_directory_iterator_recursive(const char *the_wildcard)
+ANT_directory_iterator_recursive::ANT_directory_iterator_recursive(const char *the_wildcard, long get_file) : ANT_directory_iterator((char *)the_wildcard, get_file)
 {
 handle_stack = new ANT_disk_directory [HANDLE_STACK_SIZE];
 strncpy(wildcard, the_wildcard, PATH_MAX);
@@ -180,7 +180,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 				current_file_list = file_list;
 				push_directory();
 				path_length = strlen(current_file_list->path) - 4;
-				sprintf(file_list->path, "%*.*s/%s/*.*", path_length, path_length, current_file_list->path, internals->file_data.cFileName);
+				sprintf(file_list->path, "%*.*s/%s/*.*", (int)path_length, (int)path_length, current_file_list->path, internals->file_data.cFileName);
 				}
 			}
 		else
@@ -231,7 +231,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 	ANT_DIRECTORY_ITERATOR_RECURSIVE::FIRST()
 	-----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_recursive::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_recursive::first(ANT_directory_iterator_object *object)
 {
 file_list = handle_stack;
 
@@ -240,7 +240,7 @@ file_list = handle_stack;
 	GetCurrentDirectory(sizeof(file_list->path), file_list->path);
 	strcat(file_list->path, "/*.*");
 
-	return next(object, get_file);
+	return next(object);
 #else
 	/* the modification below would not affected the original way of reading files */
 	long last_slash_idx = strlen(wildcard) - 1;
@@ -294,7 +294,7 @@ file_list = handle_stack;
 	ANT_DIRECTORY_ITERATOR_RECURSIVE::NEXT()
 	----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_recursive::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_recursive::next(ANT_directory_iterator_object *object)
 {
 char *got;
 
@@ -304,7 +304,7 @@ char *got;
 	if ((got = next_match_wildcard()) == NULL)
 		return NULL;
 	path_length = strlen(file_list->path) - 4;
-	sprintf(object->filename, "%*.*s/%s", path_length, path_length, file_list->path, got);
+	sprintf(object->filename, "%*.*s/%s", (int)path_length, (int)path_length, file_list->path, got);
 #else
 	if ((got = next_match_wildcard()) == NULL)
 		return NULL;

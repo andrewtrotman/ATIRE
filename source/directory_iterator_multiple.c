@@ -20,7 +20,7 @@
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::ANT_DIRECTORY_ITERATOR_MULTIPLE()
 	------------------------------------------------------------------
 */
-ANT_directory_iterator_multiple::ANT_directory_iterator_multiple()
+ANT_directory_iterator_multiple::ANT_directory_iterator_multiple(long get_file) : ANT_directory_iterator("", get_file)
 {
 sources_length = sources_used = 0;
 sources = NULL;
@@ -74,7 +74,7 @@ ANT_directory_iterator_object *got;
 /*
 	Exhaust the supply
 */
-for (got = my->iterator->first(&my->file_object, my->get_file); got != NULL; got = my->iterator->next(&my->file_object, my->get_file))
+for (got = my->iterator->first(&my->file_object); got != NULL; got = my->iterator->next(&my->file_object))
 	producer->add(&my->file_object);
 
 /*
@@ -112,7 +112,7 @@ return NULL;
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::FIRST()
 	----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_directory_iterator_object *object)
 {
 long instance;
 ANT_directory_iterator_multiple_internals *current;
@@ -140,7 +140,7 @@ for (current = thread_details; current < thread_details + sources_used; current+
 /*
 	And then consume
 */
-return next(object, get_file);
+return next(object);
 }
 
 /*
@@ -148,7 +148,7 @@ return next(object, get_file);
 	---------------------------------------
 	This is the consumer in the classic producer / consumer model
 */
-ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directory_iterator_object *object)
 {
 long finished = FALSE;
 

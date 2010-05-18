@@ -21,7 +21,7 @@
 	ANT_DIRECTORY_ITERATOR_COMPRESSOR::ANT_DIRECTORY_ITERATOR_COMPRESSOR()
 	----------------------------------------------------------------------
 */
-ANT_directory_iterator_compressor::ANT_directory_iterator_compressor(ANT_directory_iterator *source, long threads, ANT_compression_text_factory *compressor) : ANT_directory_iterator()
+ANT_directory_iterator_compressor::ANT_directory_iterator_compressor(ANT_directory_iterator *source, long threads, ANT_compression_text_factory *compressor, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->compressor = compressor;
 this->threads = threads;
@@ -53,7 +53,7 @@ unsigned long size;
 	to add 2 to the length we allocate and 1 the the length we compress.
 */
 object->compressed = new (std::nothrow) char [size = (size_t)(object->length + 2)];		// +1 because we might have to store the file "raw" and need the first byte to say so
-if (compressor->compress(object->compressed, &size, object->file, object->length + 1) == NULL)
+if (compressor->compress(object->compressed, &size, object->file, (unsigned long)(object->length + 1)) == NULL)
 	exit(printf("Cannot compress document (name:%s)\n", object->filename));
 object->compressed_length = size;
 store->add(object);
@@ -70,7 +70,7 @@ ANT_directory_iterator_object object;
 
 my_compressor = compressor->replicate();
 
-while (source->next(&object, get_file) != NULL)
+while (source->next(&object) != NULL)
 	work_one(my_compressor, &object);
 
 object.filename[0] = '\0';
@@ -95,7 +95,7 @@ return NULL;
 	ANT_DIRECTORY_ITERATOR_COMPRESSOR::FIRST()
 	------------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_compressor::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_compressor::first(ANT_directory_iterator_object *object)
 {
 long instance;
 
@@ -104,7 +104,7 @@ long instance;
 	to get around the problem of not knowing who should call first().
 */
 this->get_file = get_file;
-if (source->first(object, get_file) != NULL)
+if (source->first(object) != NULL)
 	work_one(compressor, object);
 else
 	{
@@ -121,14 +121,14 @@ else
 for (instance = 0; instance < threads; instance++)
 	ANT_thread(bootstrap, this);
 
-return next(object, get_file);
+return next(object);
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR_COMPRESSOR::NEXT()
 	-----------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_compressor::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_compressor::next(ANT_directory_iterator_object *object)
 {
 long finished = FALSE;
 

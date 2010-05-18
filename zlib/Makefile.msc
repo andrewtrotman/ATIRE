@@ -23,11 +23,20 @@ STATICLIB = zlib.lib
 SHAREDLIB = zlib1.dll
 IMPLIB    = zdll.lib
 
+!IF "$(COMPILER)"=="INTEL"
+CC = @icl
+AS = @ml
+LD = @xilink
+AR = @xilib
+RC = @rc
+!ELSE
 CC = @cl
 AS = @ml
 LD = @link
 AR = @lib
 RC = @rc
+!ENDIF
+
 #
 # Changed for ANT by Andrew Trotman
 #
@@ -44,8 +53,12 @@ OBJS = adler32.obj compress.obj crc32.obj deflate.obj gzio.obj infback.obj \
 
 
 # targets
-all: $(STATICLIB) $(SHAREDLIB) $(IMPLIB) \
-     example.exe minigzip.exe example_d.exe minigzip_d.exe
+# changes for ANT by Andrew Trotman
+
+all: $(STATICLIB)
+
+#all: $(STATICLIB) $(SHAREDLIB) $(IMPLIB) \
+#     example.exe minigzip.exe example_d.exe minigzip_d.exe
 
 $(STATICLIB): $(OBJS) $(OBJA)
 	$(AR) $(ARFLAGS) -out:$@ $(OBJS) $(OBJA)

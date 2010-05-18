@@ -61,7 +61,7 @@ else
 	ANT_DIRECTORY_ITERATOR_TAR::FIRST()
 	-----------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_tar::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_tar::first(ANT_directory_iterator_object *object)
 {
 bytes_read = 0;
 if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
@@ -75,7 +75,7 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 		return object;
 		}
 	else
-		return next(object, get_file);			// we're not a file so go and get one
+		return next(object);			// we're not a file so go and get one
 	}
 
 return NULL;
@@ -85,7 +85,7 @@ return NULL;
 	ANT_DIRECTORY_ITERATOR_TAR::NEXT()
 	----------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_tar::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_tar::next(ANT_directory_iterator_object *object)
 {
 long long extras;
 
@@ -127,7 +127,7 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 		return object;
 		}
 	else
-		return next(object, get_file);			// we're not a file so go and get one
+		return next(object);			// we're not a file so go and get one
 	}
 
 /*

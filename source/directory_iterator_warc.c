@@ -62,7 +62,7 @@ return buffer + string_length + 1;
 	ANT_DIRECTORY_ITERATOR_WARC::NEXT()
 	-----------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_warc::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_warc::next(ANT_directory_iterator_object *object)
 {
 unsigned char *filename, *file_length;
 

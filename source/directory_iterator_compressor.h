@@ -30,11 +30,11 @@ private:
 	static void *bootstrap(void *param);
 
 public:
-	ANT_directory_iterator_compressor(ANT_directory_iterator *source, long threads, ANT_compression_text_factory *compressor);
+	ANT_directory_iterator_compressor(ANT_directory_iterator *source, long threads, ANT_compression_text_factory *compressor, long get_file = 0);
 	~ANT_directory_iterator_compressor();
 
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
-	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 } ;
 
 

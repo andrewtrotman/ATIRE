@@ -68,7 +68,7 @@ if (type & STAT_MEMORY)
 	printf("\nINTERNAL MEMORY BREAKDOWN\n-------------------------\n");
 	printf("Hash nodes total     :%10d nodes\n", HASH_TABLE_SIZE);
 	printf("Hash nodes used      :%10ld nodes\n", hash_nodes);
-	printf("Hash nodes used      :%10ld bytes\n", hash_nodes * sizeof(ANT_memory_index_hash_node));
+	printf("Hash nodes used      :%10ld bytes\n", (long)(hash_nodes * sizeof(ANT_memory_index_hash_node)));
 	printf("HASH utilisation     :%10.2f%%\n", ((double)hash_nodes / (double)HASH_TABLE_SIZE) * 100);
 
 	printf("Mem used for docIDs  :%10lld bytes\n", bytes_to_store_docids);

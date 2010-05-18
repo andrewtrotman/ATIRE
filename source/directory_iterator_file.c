@@ -11,18 +11,18 @@
 	ANT_DIRECTORY_ITERATOR_FILE::FIRST()
 	------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_file::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_file::first(ANT_directory_iterator_object *object)
 {
 document_end = document_start = file;
 
-return next(object, get_file);
+return next(object);
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILE::NEXT()
 	-----------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_file::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_file::next(ANT_directory_iterator_object *object)
 {
 char *document_id_start = NULL, *document_id_end = NULL;
 

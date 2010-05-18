@@ -32,11 +32,11 @@ protected:
 	void produce(ANT_directory_iterator_multiple_internals *internals);
 
 public:
-	ANT_directory_iterator_multiple();
+	ANT_directory_iterator_multiple(long get_file = 0);
 	virtual ~ANT_directory_iterator_multiple();
 
-	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object, long get_file = 0);
-	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object, long get_file = 0);
+	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
+	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 
 	void add_iterator(ANT_directory_iterator *iterator);
 } ;

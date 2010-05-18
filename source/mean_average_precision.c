@@ -289,7 +289,7 @@ if (start <= relevant_start && finish <= relevant_finish)
 if (start >= relevant_start && finish >= relevant_finish)
 	return relevant_finish - start;				// crosses over, end after relevant_finish
 
-printf("Cannot compute intersection between (%ld-%ld) and (%ld-%ld)\n", start, finish, relevant_start, relevant_finish);
+printf("Cannot compute intersection between (%lld-%lld) and (%lld-%lld)\n", start, finish, relevant_start, relevant_finish);
 return 0;
 }
 

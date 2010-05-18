@@ -17,14 +17,14 @@
 int main(int argc, char *argv[])
 {
 ANT_directory_iterator_object ob, *path;
-ANT_directory_iterator its(argv[1]);
+ANT_directory_iterator its(argv[1], ANT_directory_iterator::READ_FILE);
 char destination[1024];
 char *filename, *ch;
 
 if (argc != 2 && argc != 3)
 	exit(printf("usage:%s <directory\\*.xml> [-]", argv[0]));
 
-for (path = its.first(&ob, TRUE); path != NULL; path = its.next(&ob,TRUE))
+for (path = its.first(&ob); path != NULL; path = its.next(&ob))
 	{
 	/*
 		Get the name of the file

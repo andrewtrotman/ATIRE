@@ -20,8 +20,8 @@ public:
 	enum { WEIGHTED_SIMILARITY = 1, THRESHOLD_SIMILARITY };
 
 public:
-	static ANT_stemmer *get_stemmer(long which_stemmer, ANT_search_engine *engine, long use_wrapper = NONE, double value = 0.0);
-	static ANT_stem *get_core_stemmer(long which_stemmer);
+	static ANT_stemmer *get_stemmer(long long which_stemmer, ANT_search_engine *engine, long use_wrapper = NONE, double value = 0.0);
+	static ANT_stem *get_core_stemmer(long long which_stemmer);
 } ;
 
 #endif  /* STEMMER_FACTORY_H_ */

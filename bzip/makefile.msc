@@ -3,7 +3,14 @@
 # K.M. Syring (syring@gsf.de)
 # Fixed up by JRS for bzip2-0.9.5d release.
 
+!IF "$(COMPILER)"=="INTEL"
+CC=@icl
+LIB=@xilib
+!ELSE
 CC=@cl
+LIB=@lib
+!ENDIF
+
 CFLAGS= -DWIN32 -Ox -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
 
 OBJS= blocksort.obj  \
@@ -17,7 +24,7 @@ OBJS= blocksort.obj  \
 all: lib 
 
 lib: $(OBJS)
-	@lib -nologo /LTCG /out:libbz2.lib $(OBJS)
+	$(LIB) -nologo /LTCG /out:libbz2.lib $(OBJS)
 
 clean: 
 	del *.obj

@@ -71,7 +71,7 @@ for (current = lines; *current != 0; current++)
 		if (found == NULL)
 			{
 			if (!missing_warned)
-				printf("Warning: DOC '%ld' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
+				printf("Warning: DOC '%s' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
 			missing_warned = TRUE;
 			}
 		else

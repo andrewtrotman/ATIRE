@@ -16,7 +16,7 @@
 	ANT_STEMMER_FACTORY::GET_STEMMER()
 	----------------------------------
 */
-ANT_stemmer *ANT_stemmer_factory::get_stemmer(long which_stemmer, ANT_search_engine *engine, long use_wrapper, double value)
+ANT_stemmer *ANT_stemmer_factory::get_stemmer(long long which_stemmer, ANT_search_engine *engine, long use_wrapper, double value)
 {
 ANT_stemmer *stemmer = NULL;
 switch (which_stemmer)
@@ -49,7 +49,7 @@ return stemmer;
 	ANT_STEMMER_FACTORY::GET_CORE_STEMMER()
 	---------------------------------------
 */
-ANT_stem *ANT_stemmer_factory::get_core_stemmer(long which_stemmer)
+ANT_stem *ANT_stemmer_factory::get_core_stemmer(long long which_stemmer)
 {
 ANT_stem *stemmer = NULL;
 switch (which_stemmer)

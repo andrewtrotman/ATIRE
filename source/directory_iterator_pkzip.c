@@ -21,7 +21,7 @@
 	ANT_DIRECTORY_ITERATOR_PKZIP::ANT_DIRECTORY_ITERATOR_PKZIP()
 	------------------------------------------------------------
 */
-ANT_directory_iterator_pkzip::ANT_directory_iterator_pkzip(char *filename)
+ANT_directory_iterator_pkzip::ANT_directory_iterator_pkzip(char *filename, long get_file) : ANT_directory_iterator(filename, get_file)
 {
 memory = new ANT_memory(1024 * 1024);
 file = new ANT_file;
@@ -139,20 +139,20 @@ file->read(buffer, bytes % sizeof(buffer));
 	ANT_DIRECTORY_ITERATOR_PKZIP::FIRST()
 	-------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_pkzip::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_pkzip::first(ANT_directory_iterator_object *object)
 {
 files_read = 0;
 read_central_directory_header();
 file->seek(0);
 
-return next(object, get_file);
+return next(object);
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR_PKZIP::NEXT()
 	------------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator_pkzip::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator_pkzip::next(ANT_directory_iterator_object *object)
 {
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_local_file_header lfh;
 uint16_t filename_length, extradata_length, method, flags, version;
@@ -201,7 +201,7 @@ files_read++;
 	If the length of the source file is zero then skip it.
 */
 if (raw_data_length == 0)
-	return next(object, get_file);
+	return next(object);
 
 //printf("%*.*s (%u bytes -> %u bytes (using:%d, v:%d))\n", filename_length, filename_length, object->filename, compressed_data_length, raw_data_length, method, version);
 
@@ -209,7 +209,7 @@ if (raw_data_length == 0)
 	Now load and decompress the file
 */
 if ((compressed_data = new (std::nothrow) unsigned char [compressed_data_length + 1]) == NULL)
-	exit(printf("ANT ZIP Reader cannot allocate %ld bytes for the compressed file\n", compressed_data_length));
+	exit(printf("ANT ZIP Reader cannot allocate %lu bytes for the compressed file\n", compressed_data_length));
 
 file->read(compressed_data, compressed_data_length);
 

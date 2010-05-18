@@ -11,10 +11,12 @@
 	ANT_DIRECTORY_ITERATOR::ANT_DIRECTORY_ITERATOR()
 	------------------------------------------------
 */
-ANT_directory_iterator::ANT_directory_iterator(char *wildcard)
+ANT_directory_iterator::ANT_directory_iterator(char *wildcard, long get_file)
 {
 strncpy(this->wildcard, wildcard, PATH_MAX);
 this->wildcard[PATH_MAX - 1] = '\0';
+
+this->get_file = get_file;
 
 internals = new ANT_directory_iterator_internals;
 }
@@ -44,7 +46,7 @@ return destination;
 	ANT_DIRECTORY_ITERATOR::FIRST()
 	-------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator::first(ANT_directory_iterator_object *object)
 {
 char *slash, *colon, *backslash, *max;
 
@@ -72,15 +74,15 @@ slash = strrchr(internals->pathname, '/');
 backslash = strrchr(internals->pathname, '\\');
 colon = strrchr(internals->pathname, ':');
 
-max = internals->pathname - 1;
+max = internals->pathname;
 if (slash > max)
-	max = slash;
+	max = slash + 1;
 if (backslash > max)
-	max = backslash;
+	max = backslash + 1;
 if (colon > max)
-	max = colon;
+	max = colon + 1;
 
-*(max + 1) = '\0';
+*max = '\0';
 
 #ifdef _MSC_VER
 	construct_full_path(object->filename, internals->file_data.cFileName);
@@ -102,7 +104,7 @@ return object;
 	ANT_DIRECTORY_ITERATOR::NEXT()
 	------------------------------
 */
-ANT_directory_iterator_object *ANT_directory_iterator::next(ANT_directory_iterator_object *object, long get_file)
+ANT_directory_iterator_object *ANT_directory_iterator::next(ANT_directory_iterator_object *object)
 {
 #ifdef _MSC_VER
 	do
