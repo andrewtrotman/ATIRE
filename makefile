@@ -5,8 +5,8 @@
 #
 #	Which compiler are we using
 #
-#COMPILER=INTEL
-COMPILER=MICROSOFT
+COMPILER=INTEL
+#COMPILER=MICROSOFT
 
 #
 #	Define TRUE and FALSE
@@ -83,7 +83,7 @@ MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
 
 !IF "$(COMPILER)" == "INTEL"
 CC = @icl /nologo
-CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
+CFLAGS = -D_RELEASE /O3 /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
 !ELSE
 CC = @cl /nologo
 #CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
