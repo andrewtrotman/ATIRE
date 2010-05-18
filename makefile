@@ -5,8 +5,8 @@
 #
 #	Which compiler are we using
 #
-COMPILER=INTEL
-#COMPILER=MICROSOFT
+#COMPILER=INTEL
+COMPILER=MICROSOFT
 
 #
 #	Define TRUE and FALSE
