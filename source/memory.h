@@ -60,7 +60,7 @@ void *ans;
 
 if (chunk == NULL || at + bytes > chunk_end)
 	if (get_chained_block(bytes) == NULL)
-		exit(printf("ANT:Out of memory:%lld bytes requested %lld bytes used %lld bytes allocated\n", (long long)bytes, used, allocated));
+		exit(printf("ANT:Out of memory:%lld bytes requested %lld bytes used %lld bytes allocated\n", (long long)bytes, (long long)used, (long long)allocated));
 
 ans = at;
 at += bytes;

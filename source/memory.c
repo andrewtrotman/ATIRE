@@ -206,6 +206,7 @@ long long request, *size;
 
 	request = block_size + sizeof(*chain) + sizeof(bytes);
 #endif
+
 if ((chain = (char **)alloc(&request)) == NULL)
 	return NULL;
 

@@ -39,7 +39,7 @@ output_forum = NONE;
 run_name = participant_id = "unknown";
 output_filename = "ant.out";
 results_list_length = -1;
-stats = SHORT;
+stats = SHORT | PRECISION;
 segmentation = TRUE;
 trim_postings_k = LLONG_MAX;
 file_or_memory = INDEX_IN_FILE;
@@ -134,6 +134,7 @@ puts("---------");
 puts("-s[-aqQs]       Report statistics");
 puts("  -             No statistics");
 puts("  a             All statistics (same as -sqQs)");
+puts("  p             Mean precision scores (if computed)");
 puts("  q             Query by query statistics");
 puts("  Q             Sum of query by query statistics for this run");
 puts("  s             Short reporting (hits, average precision, etc) [default]");
@@ -153,7 +154,8 @@ do
 	switch (*which)
 		{
 		case '-' : stats = NONE;					break;
-		case 'a' : stats |= QUERY | SUM | SHORT;	break;
+		case 'a' : stats |= QUERY | SUM | SHORT | PRECISION;	break;
+		case 'p' : stats |= PRECISION;				break;
 		case 'q' : stats |= QUERY;					break;
 		case 'Q' : stats |= SUM;    				break;
 		case 's' : stats |= SHORT;    				break;

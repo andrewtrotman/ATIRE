@@ -538,7 +538,7 @@ mean_average_precision = sum_of_average_precisions / (double)number_of_queries;
 /*
 	Report MAP
 */
-if (map != NULL && params->stats & ANT_ANT_param_block::SHORT)
+if (map != NULL && params->stats & ANT_ANT_param_block::PRECISION)
 	printf("\nProcessed %ld topics (MAP:%f)\n\n", number_of_queries, mean_average_precision);
 
 /*
