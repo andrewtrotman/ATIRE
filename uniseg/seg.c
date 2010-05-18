@@ -397,7 +397,7 @@ void Seger::add_to_list(array_type& cwlist) {
 				if (!w_ptr)
 					continue;
 
-				w_ptr->is_word(true);
+				//w_ptr->is_word(true);
 				cwlist.push_back(w_ptr);
 
 				if (i > 0 && i < (temp.size() -1)) {
@@ -413,7 +413,7 @@ void Seger::add_to_list(array_type& cwlist) {
 		}
 		else {
 			if (tw_ptr_ != NULL) {
-				tw_ptr_->is_word(true);
+				//tw_ptr_->is_word(true);
 				cwlist.push_back(tw_ptr_);
 				break;
 			}

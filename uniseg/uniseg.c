@@ -55,7 +55,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 	long how_far = 0;
 	long distance = 0;
 	long count = 0;
-	bool flag = false;
+	bool in_middle_flag = false;
 	bool stop = false;
 	bool need_eligibility_check = QFreq::instance().need_eligibility_check();
 	output_.clear();
@@ -63,6 +63,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 
 	while (current < end) {
 		count = 0;
+		in_middle_flag = false;
 
 		if (output_.length() > 0)
 			output_.append(" ");
@@ -71,7 +72,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 			output_.push_back(*current++);
 
 		next = current;
-		while (next < end) {
+		if (next < end) {
 			enc_->test_char(next);
 			if (enc_->lang() == uniseg_encoding::CHINESE)
 				while (next < end && enc_->lang() == uniseg_encoding::CHINESE && count < step) {
@@ -80,8 +81,11 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 					count++;
 				}
 
-			if (count > 0)
-				break;
+			if (enc_->lang() == uniseg_encoding::CHINESE)
+				in_middle_flag = true;
+
+			if (count <= 0) {
+				//break;
 
 //			if (*next & 80) {
 //				current = next += enc_->howmanybytes();
@@ -113,14 +117,11 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 					temp_word_array.push_back(string_type(pre, next));
 					string_type word_str;
 					arraytostring(temp_word_array, word_str);
-					if (QFreq::instance().fuzzy_search_dic(word_str)) {
-						next += enc_->howmanybytes();
-						enc_->test_char(next);
-					}
-					else {
+					if (!QFreq::instance().fuzzy_search_dic(word_str)) {
 						temp_word_array.pop_back();
 						break;
 					}
+					enc_->test_char(next);
 				}
 				while (temp_word_array.size() > 1 && (*temp_word_array.back().c_str() & 0x80)) {
 					string_type word_str;
@@ -134,35 +135,36 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 				arraytostring(temp_word_array, non_all_chinese_word);
 				output_.append(non_all_chinese_word);
 				current += non_all_chinese_word.length();
-			//}
+				continue;
+			}
 		}
 
 		how_far = next - current;
 
-	    flag = next < end;
 	    if (how_far > 0 && count > 1) {
 			seger_.input(current, how_far);
 			seger_.start();
 			const array_type& words_list = seger_.best_words();
 			long i = 0;
-			long size = (flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
+			long size = (in_middle_flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
 			if (size > 0)
 				for (; i < size; i++) {
-					bool has_word_pair = words_list[i]->has_word_pair() && !words_list[i]->is_word();
+					word_ptr_type current_word = words_list[i];
+					bool has_word_pair = current_word->has_word_pair() && !current_word->is_word();
 					if (i > 0 /*&& *(output_.end()--) != ' '*/)
 						output_.append(" ");
-					if (words_list[i]->size() == 1
+					if (current_word->size() == 1
 							|| has_word_pair
-							|| (need_eligibility_check && QFreq::instance().eligibility_check(words_list[i]))) {
-						string_type& word = words_list[i]->chars();
+							|| (need_eligibility_check && QFreq::instance().eligibility_check(current_word))) {
+						string_type& word = current_word->chars();
 						if (has_word_pair)
-							output_.append(words_list[i]->left()->chars() + " " + words_list[i]->right()->chars());
+							output_.append(current_word->left()->chars() + " " + current_word->right()->chars());
 						else
 							output_.append(word);
 						segmented_len += word.length();
 					}
 					else {
-						word_ptr_type lparent = words_list[i]->lparent();
+						word_ptr_type lparent = current_word->lparent();
 						assert(lparent != NULL);
 						while (lparent->size() > 1 && !lparent->is_word()) {
 							if (lparent->lparent() != NULL)

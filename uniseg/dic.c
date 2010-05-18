@@ -31,7 +31,7 @@ struct partial_equal_to<pair<string, long> > : public binary_function<pair<strin
   {
 	  if (__x.first.length() > __y.first.length())
 		  return false;
-	  return __x.first.substr(0, __y.first.length()) == __y.first;
+	  return __y.first.substr(0, __x.first.length()) == __x.first;
   }
 };
 
@@ -58,7 +58,7 @@ bool Dic::fuzzy_search(const string_type word)
 //	const std::binder1st<EqualTo> equal_to_this =
 //	        std::bind1st (EqualTo (), word);
 	pair<string, long> key_pair = make_pair(word, 1);
-	std::find_if(list_.begin(), list_.end(), bind1st(partial_equal_to<pair<string, long> >(), key_pair)) != list_.end();
+	return std::find_if(list_.begin(), list_.end(), bind1st(partial_equal_to<pair<string, long> >(), key_pair)) != list_.end();
 }
 
 void Dic::save(string_type filename) {

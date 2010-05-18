@@ -319,6 +319,8 @@ Word* Word::subword(int idx, int len) {
 
 
 void Word::is_word(bool b) {
+//	if (this->chars_ == "\345\244\247\345\216\205\347\232\204" || chars_ == "大厅的")
+//		cerr << "got you" << endl;
 	is_word_ = b;
 }
 
