@@ -298,26 +298,49 @@ void Seger::assign_freq() {
 	//freq_->assign_freq(*allfreq_);
 	std::map<word_ptr_type, word_ptr_type> word_pairs;
 	freq_type& freq = freq_->set();
-	freq_type::const_iterator iter;
-	for (iter = freq.begin(); iter != freq.end(); ++iter) {
-		word_ptr_type local_word  = iter->second;
-		word_ptr_type global_word = allfreq_->find(local_word->chars());
-		if (global_word) {
-			QFreq::instance().load(global_word);
-			local_word->freq(global_word->freq());
-			local_word->is_word(global_word->is_word());
-			if (global_word->left() != NULL && global_word->left()->is_word()) {
-				local_word->left(freq_->find(global_word->left()->chars()));
-				local_word->left()->is_word(true);
+//	freq_type::const_iterator iter;
+//	for (iter = freq.begin(); iter != freq.end(); ++iter) {
+//		word_ptr_type local_word  = iter->second;
+//		word_ptr_type global_word = allfreq_->find(local_word->chars());
+//		if (global_word) {
+//			QFreq::instance().load(global_word);
+//			local_word->freq(global_word->freq());
+//			local_word->is_word(global_word->is_word());
+//			if (global_word->left() != NULL && global_word->left()->is_word()) {
+//				local_word->left(freq_->find(global_word->left()->chars()));
+//				local_word->left()->is_word(true);
+//			}
+//			if (global_word->right() != NULL && global_word->right()->is_word()) {
+//				local_word->right(freq_->find(global_word->right()->chars()));
+//				local_word->right()->is_word(true);
+//			}
+//		}
+//		else
+//			local_word->freq(0);
+//		//word_pairs.insert(make_pair(local_word, global_word));
+//	}
+	int step = freq_->array_size() < allfreq_->array_size() ? freq_->array_size() : allfreq_->array_size();
+	for (int i = 1; i < step; ++i) {
+		array_type& word_array = freq_->array_k(i);
+		for (int j = 0; j < word_array.size(); ++j) {
+			word_ptr_type local_word  = word_array[j];
+			word_ptr_type global_word = allfreq_->find(local_word->chars());
+			if (global_word) {
+				QFreq::instance().load(global_word);
+				local_word->freq(global_word->freq());
+				local_word->is_word(global_word->is_word());
+				if (global_word->left() != NULL && global_word->left()->is_word()) {
+					local_word->left(freq_->find(global_word->left()->chars()));
+					local_word->left()->is_word(true);
+				}
+				if (global_word->right() != NULL && global_word->right()->is_word()) {
+					local_word->right(freq_->find(global_word->right()->chars()));
+					local_word->right()->is_word(true);
+				}
 			}
-			if (global_word->right() != NULL && global_word->right()->is_word()) {
-				local_word->right(freq_->find(global_word->right()->chars()));
-				local_word->right()->is_word(true);
-			}
+			else
+				local_word->freq(0);
 		}
-		else
-			local_word->freq(0);
-		//word_pairs.insert(make_pair(local_word, global_word));
 	}
 
 //	std::map<word_ptr_type, word_ptr_type>::iterator p_iter;
