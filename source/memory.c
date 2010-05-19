@@ -278,12 +278,13 @@ if (chunk != NULL)
 		dealloc(chain);
 		chain = next_block;
 		}
-	}
 
-/*
-	Set up initialisation to start at the beginning of the remaining block
-*/
-request = (long long *)(chunk + sizeof(chain));
-chunk_end = chunk + *request;
-at = chunk + sizeof(chain) + sizeof(*request);
+	/*
+		Set up initialisation to start at the beginning of the remaining block
+	*/
+	chunk = chain;
+	request = (long long *)(chunk + sizeof(chain));
+	chunk_end = chunk + *request;
+	at = chunk + sizeof(chain) + sizeof(*request);
+	}
 }

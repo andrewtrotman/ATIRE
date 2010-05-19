@@ -16,7 +16,7 @@ class ANT_memory_indexer_node
 {
 public:
 	ANT_string_pair string;
-	long term_frequency;
+	long long term_frequency;
 
 public:
 	void *operator new(size_t count, ANT_memory *memory) { return memory->malloc(count); }

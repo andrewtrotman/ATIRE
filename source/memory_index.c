@@ -12,6 +12,8 @@
 #include "ranking_function_factory.h"
 #include "memory_index_hash_node.h"
 #include "memory_index.h"
+#include "memory_index_one.h"
+#include "memory_index_one_node.h"
 #include "stats_memory_index.h"
 #include "memory.h"
 #include "string_pair.h"
@@ -42,7 +44,6 @@ return ANT_hash_24(string);
 */
 ANT_memory_index::ANT_memory_index(char *filename)
 {
-squiggle_length = new ANT_string_pair("~length");
 hashed_squiggle_length = hash(squiggle_length);
 squiggle_document_offsets = new ANT_string_pair("~documentoffsets");
 squiggle_document_longest = new ANT_string_pair("~documentlongest");
@@ -75,7 +76,6 @@ close_index_file();
 delete memory;
 delete stats;
 delete factory;
-delete squiggle_length;
 }
 
 /*
@@ -90,15 +90,6 @@ if (which_stats & STAT_MEMORY)
 	stats->text_render(ANT_stats_memory_index::STAT_MEMORY);
 if (which_stats & STAT_COMPRESSION)
 	factory->text_render();
-}
-
-/*
-	ANT_MEMORY_INDEX::GET_MEMORY_USAGE()
-	------------------------------------
-*/
-long long ANT_memory_index::get_memory_usage(void)
-{
-return memory->bytes_used();
 }
 
 /*
@@ -156,7 +147,7 @@ return root;
 	ANT_MEMORY_INDEX::ADD_TERM()
 	----------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string, long long docno)
+ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string, long long docno, unsigned char term_frequency)
 {
 long hash_value;
 ANT_memory_index_hash_node *node;
@@ -172,7 +163,7 @@ if (hash_table[hash_value] == NULL)
 else
 	node = find_add_node(hash_table[hash_value], string);
 
-node->add_posting(docno);
+node->add_posting(docno, term_frequency);
 return node;
 }
 
@@ -219,6 +210,47 @@ else
 	node = find_add_node(hash_table[hash_value], measure_name);
 
 node->set(score);
+}
+
+/*
+	ANT_MEMORY_INDEX::ADD_INDEXED_DOCUMENT_NODE()
+	---------------------------------------------
+*/
+void ANT_memory_index::add_indexed_document_node(ANT_memory_index_one_node *node, long long docno)
+{
+/*
+	Add the term at the current node
+*/
+if (node->mode == MODE_ABSOLUTE)
+	set_document_detail(&node->string, node->term_frequency, node->mode);
+else
+	add_term(&node->string, docno, (unsigned char)(node->term_frequency > 0xFE ? 0xFE : node->term_frequency));
+
+/*
+	Now check the left and the right subtrees for hash collisions
+*/
+if  (node->left != NULL)
+	add_indexed_document_node(node->left, docno);
+
+if  (node->right != NULL)
+	add_indexed_document_node(node->right, docno);
+}
+
+/*
+	ANT_MEMORY_INDEX::ADD_INDEXED_DOCUMENT()
+	----------------------------------------
+*/
+void ANT_memory_index::add_indexed_document(ANT_memory_index_one *index, long long docno)
+{
+long node;
+
+/*
+	March through the hash table of the indexed document looking for non-NULL nodes
+	then add those nodes to the collection's hash table
+*/
+for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
+	if (index->hash_table[node] != NULL)
+		add_indexed_document_node(index->hash_table[node], docno);
 }
 
 /*

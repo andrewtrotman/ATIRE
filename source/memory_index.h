@@ -15,12 +15,13 @@
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
+class ANT_memory_index_one;
+class ANT_memory_index_one_node;
 class ANT_string_pair;
 class ANT_file;
 class ANT_ranking_function;
 class ANT_ranking_function_factory;
 
-#define HASH_TABLE_SIZE (0x1000000)
 
 /*
 	class ANT_MEMORY_INDEX
@@ -29,10 +30,12 @@ class ANT_ranking_function_factory;
 class ANT_memory_index : public ANT_memory_indexer
 {
 public:
+	static const long HASH_TABLE_SIZE = 0x1000000;
+
+public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
 
 private:
-	ANT_string_pair *squiggle_length;
 	long hashed_squiggle_length;
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
@@ -92,6 +95,8 @@ private:
 	void add_to_filename_repository(char *filename);
 	void serialise_filenames(char *source,  long depth = 0);
 
+	void add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
+
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
@@ -100,16 +105,20 @@ public:
 	ANT_memory_index(char *filename);
 	virtual ~ANT_memory_index();
 
-	virtual void set_variable(ANT_string_pair *measure_name, long long score);
-	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno);
+	void set_variable(ANT_string_pair *measure_name, long long score);
+
+	void text_render(long what);
+	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
+	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
+	void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
+	long serialise(ANT_ranking_function_factory *factory);
+
+	void add_indexed_document(ANT_memory_index_one *index, long long docno);
+
+	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, unsigned char term_frequency = 1);
+	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
-	virtual void text_render(long what);
-	virtual void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
-	virtual void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
-	virtual void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
-	virtual long serialise(ANT_ranking_function_factory *factory);
-	virtual long long get_memory_usage(void);
 } ;
 
 

@@ -17,11 +17,21 @@
 #endif
 
 /*
+	ANT_MEMORY_INDEX_ONE::HASH()
+	----------------------------
+*/
+inline long ANT_memory_index_one::hash(ANT_string_pair *string)
+{
+return ANT_hash_24(string) % HASH_TABLE_SIZE;
+}
+
+/*
 	ANT_MEMORY_INDEX_ONE::ANT_MEMORY_INDEX_ONE()
 	--------------------------------------------
 */
 ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory)
 {
+hashed_squiggle_length = hash(squiggle_length);
 this->memory = memory;
 rewind();
 }
@@ -46,6 +56,7 @@ ANT_memory_index_one_node *node;
 
 node = new (memory) ANT_memory_index_one_node;
 node->left = node->right = NULL;
+node->mode = MODE_ABSOLUTE;
 node->string.start = (char *)memory->malloc(pair->string_length + 1);
 pair->strcpy(node->string.start);
 node->term_frequency = 0;
@@ -79,21 +90,44 @@ return root;
 }
 
 /*
-	ANT_MEMORY_INDEX_ONE::ADD_TERM()
-	--------------------------------
+	ANT_MEMORY_INDEX_ONE::ADD()
+	---------------------------
 */
-ANT_memory_indexer_node *ANT_memory_index_one::add_term(ANT_string_pair *string, long long docno)
+ANT_memory_index_one_node *ANT_memory_index_one::add(ANT_string_pair *string, long long docno, unsigned char extra_term_frequency)
 {
 ANT_memory_index_one_node *answer;
-long hash = ANT_hash_24(string) % HASH_TABLE_SIZE;
+long hash_value = hash(string);
 
-if (hash_table[hash] == 0)
-	answer = hash_table[hash] = new_hash_node(string);
+if (hash_table[hash_value] == NULL)
+	answer = hash_table[hash_value] = new_hash_node(string);
 else
-	answer = find_add_node(hash_table[hash], string);
+	answer = find_add_node(hash_table[hash_value], string);
 
-answer->term_frequency++;
+answer->term_frequency += extra_term_frequency;
 
 return answer;
 }
 
+/*
+	ANT_MEMORY_INDEX_ONE::ADD_TERM()
+	--------------------------------
+*/
+ANT_memory_indexer_node *ANT_memory_index_one::add_term(ANT_string_pair *string, long long docno, unsigned char extra_term_frequency)
+{
+return add(string, docno, extra_term_frequency);
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::SET_DOCUMENT_DETAIL()
+	-------------------------------------------
+*/
+void ANT_memory_index_one::set_document_detail(ANT_string_pair *string, long long score, long mode)
+{
+ANT_memory_index_one_node *node = add(string, 0, score);
+
+if (node != NULL)
+	{
+	node->term_frequency = score;
+	node->mode = mode;
+	}
+}

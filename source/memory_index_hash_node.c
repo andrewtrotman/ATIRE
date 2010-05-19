@@ -96,7 +96,7 @@ insert_docno(bottom - top);		// due to difference encoding
 	ANT_MEMORY_INDEX_HASH_NODE::INSERT_DOCNO()
 	------------------------------------------
 */
-void ANT_memory_index_hash_node::insert_docno(long long docno)
+void ANT_memory_index_hash_node::insert_docno(long long docno, unsigned char initial_term_frequency)
 {
 unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
 long needed, remain;
@@ -140,7 +140,7 @@ if (tf_node_used + 1 > tf_node_length)
 	in_memory.tf_list_tail = in_memory.tf_list_tail->next;
 	tf_node_used = 0;
 	}
-in_memory.tf_list_tail->data[tf_node_used] = 1;
+in_memory.tf_list_tail->data[tf_node_used] = initial_term_frequency;
 tf_node_used++;
 }
 
