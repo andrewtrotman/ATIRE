@@ -66,7 +66,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 		in_middle_flag = false;
 
 		if (output_.length() > 0)
-			output_.append(" ");
+			output_.append("  ");
 
 		while (current < end && isspace(*current))
 			output_.push_back(*current++);
@@ -152,7 +152,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 					word_ptr_type current_word = words_list[i];
 					bool has_word_pair = current_word->has_word_pair() && !current_word->is_word();
 					if (i > 0 /*&& *(output_.end()--) != ' '*/)
-						output_.append(" ");
+						output_.append("  ");
 					if (current_word->size() == 1
 							|| has_word_pair
 							|| (need_eligibility_check && QFreq::instance().eligibility_check(current_word))) {
@@ -176,8 +176,10 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 						segmented_len += lparent->chars().length();
 					}
 				}
-			else
+			else {
 				segmented_len = how_far;
+				output_.append(string_type(current, current + how_far) + "  ");
+			}
 			// put the last segment back to the remaining characters
 			current += segmented_len;
 			segmented_len = 0;

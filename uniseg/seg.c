@@ -60,6 +60,7 @@ void Seger::free()
 		freq_ = NULL;
 
 		tw_ptr_ = NULL;
+		tw_ptr_local_ = NULL;
 	}
 
 	if (clist_) {
@@ -75,6 +76,7 @@ void Seger::init_members()
 	freq_ = NULL;
 	allfreq_ = NULL;
 	tw_ptr_ = NULL;
+	tw_ptr_local_ = NULL;
 }
 
 void Seger::init()
@@ -82,8 +84,6 @@ void Seger::init()
 	free();
 
 	assert(stream_.length() > 0);
-
-	clist_ = new CList;
 
 	//assert(tw_ptr_->chars().length() > 0);
 	freq_ = new Freq;
@@ -98,6 +98,8 @@ void Seger::init()
 
 	if (!tw_ptr_)
 		tw_ptr_ = allfreq_->find(stream_);
+
+	tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
 	//justify(0);
 }
 
@@ -107,10 +109,10 @@ void Seger::input(unsigned char *input, int length)
 	init();
 }
 
-void Seger::load_frqs()
-{
-	QFreq::instance().load_freq();
-}
+//void Seger::load_frqs()
+//{
+//	QFreq::instance().load_freq();
+//}
 
 void Seger::start()
 {
@@ -187,6 +189,7 @@ const unsigned char *Seger::output()
 
 void Seger::build()
 {
+	clist_ = new CList;
 	bool stop = false;
 	word_ptr_type local_tw_ptr = freq_->find(stream_);
 	word_ptr_type w_ptr = local_tw_ptr;
@@ -394,20 +397,21 @@ void Seger::add_to_list(array_type& cwlist) {
 	assert(clist_->size() > 0);
 
 	CWords *first = clist_->front();
-	CWords *second = clist_->second();
-
 	CWords *best = first;
 
-	if (UNISEG_settings::instance().stop_word_check) {
+	if (UNISEG_settings::instance().stop_word_check && clist_->size() > 1) {
 		int stop_word_count1 = first->chinese_stop_word_count();
-		int stop_word_count2 = second == NULL ? -1 : second->chinese_stop_word_count();
 
-		if ((stop_word_count2 > stop_word_count1))
-		best =  second;
+		CWords *second = clist_->second();
+		int stop_word_count2 = /*second == NULL ? -1 : */second->chinese_stop_word_count();
+
+		if ((stop_word_count2 > stop_word_count1)) {
+			clist_->list().pop_front();
+			best =  second;
+		}
 	}
 	do {
 		array_type temp = best->to_array();
-		clist_->list().pop_front();
 		assert(temp.size() > 0);
 
 		if (temp.size() > 1) {
@@ -441,6 +445,8 @@ void Seger::add_to_list(array_type& cwlist) {
 				break;
 			}
 		}
+		clist_->list().pop_front();
+		best = clist_->front();
 	} while (clist_->size() > 0);
 
 	if (tw_ptr_ != NULL)

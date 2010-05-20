@@ -15,11 +15,12 @@
 #include "clist.h"
 
 class Seger {
-private:
+protected:
 	CList				*clist_;
 	Freq				*freq_;    // the frequency records for the input text
 	Freq				*allfreq_;
 	word_ptr_type 		tw_ptr_;
+	word_ptr_type 		tw_ptr_local_;
 	string_type 		stream_;  // for the incoming document which will be segmented
 	string_type			stream_out_;  // store the segmented text, words are seperated by spaces
 
@@ -33,20 +34,17 @@ public:
 	Seger();
 	~Seger();
 
-	void load_frqs();
-	void start();
+	//void load_frqs();
+	virtual void start();
+
 	//unsigned char **output();
 	//int output(unsigned char **out);
 	//void free_output();
 	const unsigned char *output();
 
-	void build();
 	void show_all();
-	void seg();
-
 	void free();
 
-	void add_to_list(array_type& cwlist);
 	void mark_the_seged();
 
 	string_type& stream() { return stream_; }
@@ -59,10 +57,16 @@ public:
 private:
 	void init();
 	void init_members();
+
+protected:
 	void make(CList& clist, string_type& str);
 	void assign_freq();
 	void justify(unsigned int min = 2);
 	void do_some_calculations();
+
+	virtual void seg();
+	virtual void build();
+	virtual void add_to_list(array_type& cwlist);
 };
 
 #endif /* __SEG_H__ */

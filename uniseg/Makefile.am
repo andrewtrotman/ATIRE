@@ -23,6 +23,7 @@ libuniseq_sources = \
 		file.c \
 		qfreq.c	\
 		seg.c \
+		seg2.c \
 		dic.c \
 		dic2freq.c
 		
@@ -56,6 +57,7 @@ libuniseg_headers = \
 		qzer.h	\
 		range.h	\
 		seg.h	\
+		seg2.h	\		
 		timings.h	\
 		udoc.h	\
 		utilities.h	\
