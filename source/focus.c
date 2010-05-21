@@ -133,8 +133,8 @@ else
 }
 
 /*
-	ADD_TERM()
-	----------
+	ANT_FOCUS::ADD_TERM()
+	---------------------
 */
 long ANT_focus::add_term(ANT_string_pair *string)
 {

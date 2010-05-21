@@ -147,7 +147,7 @@ return root;
 	ANT_MEMORY_INDEX::ADD_TERM()
 	----------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string, long long docno, unsigned char term_frequency)
+ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string, long long docno, long term_frequency)
 {
 long hash_value;
 ANT_memory_index_hash_node *node;
@@ -221,10 +221,10 @@ void ANT_memory_index::add_indexed_document_node(ANT_memory_index_one_node *node
 /*
 	Add the term at the current node
 */
-if (node->mode == MODE_ABSOLUTE)
+if (node->string[0] == '~')
 	set_document_detail(&node->string, node->term_frequency, node->mode);
 else
-	add_term(&node->string, docno, (unsigned char)(node->term_frequency > 0xFE ? 0xFE : node->term_frequency));
+	add_term(&node->string, docno, node->term_frequency);
 
 /*
 	Now check the left and the right subtrees for hash collisions
@@ -251,6 +251,8 @@ long node;
 for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
 	if (index->hash_table[node] != NULL)
 		add_indexed_document_node(index->hash_table[node], docno);
+
+largest_docno = docno;
 }
 
 /*

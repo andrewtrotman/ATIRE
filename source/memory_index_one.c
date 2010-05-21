@@ -59,6 +59,7 @@ node->left = node->right = NULL;
 node->mode = MODE_ABSOLUTE;
 node->string.start = (char *)memory->malloc(pair->string_length + 1);
 pair->strcpy(node->string.start);
+node->string.string_length = pair->string_length;
 node->term_frequency = 0;
 
 return node;
@@ -93,7 +94,7 @@ return root;
 	ANT_MEMORY_INDEX_ONE::ADD()
 	---------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::add(ANT_string_pair *string, long long docno, unsigned char extra_term_frequency)
+ANT_memory_index_one_node *ANT_memory_index_one::add(ANT_string_pair *string, long long docno, long extra_term_frequency)
 {
 ANT_memory_index_one_node *answer;
 long hash_value = hash(string);
@@ -104,6 +105,7 @@ else
 	answer = find_add_node(hash_table[hash_value], string);
 
 answer->term_frequency += extra_term_frequency;
+answer->mode = MODE_MONOTONIC;
 
 return answer;
 }
@@ -112,7 +114,7 @@ return answer;
 	ANT_MEMORY_INDEX_ONE::ADD_TERM()
 	--------------------------------
 */
-ANT_memory_indexer_node *ANT_memory_index_one::add_term(ANT_string_pair *string, long long docno, unsigned char extra_term_frequency)
+ANT_memory_indexer_node *ANT_memory_index_one::add_term(ANT_string_pair *string, long long docno, long extra_term_frequency)
 {
 return add(string, docno, extra_term_frequency);
 }

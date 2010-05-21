@@ -65,7 +65,7 @@ private:
 public:
 	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
 	void set(long long value);
-	void add_posting(long long docno, unsigned char extra_term_frequency = 1);
+	void add_posting(long long docno, long extra_term_frequency = 1);
 	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
 
 	static long decompress(unsigned char **from);
@@ -86,16 +86,16 @@ return new (memory) ANT_postings_piece(memory, length_in_bytes);
 	ANT_MEMORY_INDEX_HASH_NODE::ADD_POSTING()
 	-----------------------------------------
 */
-inline void ANT_memory_index_hash_node::add_posting(long long docno, unsigned char extra_term_frequency)
+inline void ANT_memory_index_hash_node::add_posting(long long docno, long extra_term_frequency)
 {
-collection_frequency++;
+collection_frequency += extra_term_frequency;
 if (docno == current_docno)
 	{
 	/*
 		If we can add without overflowing then do so otherwise cap at 254
 	*/
 	if (in_memory.tf_list_tail->data[tf_node_used - 1] + extra_term_frequency <= 254)
-		in_memory.tf_list_tail->data[tf_node_used - 1] += extra_term_frequency;
+		in_memory.tf_list_tail->data[tf_node_used - 1] += (unsigned char)extra_term_frequency;
 	else
 		in_memory.tf_list_tail->data[tf_node_used - 1] = 254;
 
@@ -103,7 +103,7 @@ if (docno == current_docno)
 	}
 else
 	{
-	insert_docno(docno - current_docno, extra_term_frequency);
+	insert_docno(docno - current_docno, extra_term_frequency > 254 ? 254 : (unsigned char)extra_term_frequency);
 	current_docno = docno;
 	term_frequency = extra_term_frequency;
 	}

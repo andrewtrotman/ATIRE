@@ -202,12 +202,15 @@ else											// everything else (that starts with a '<')
 		while (*current != '>' && *current != '\0')
 			{
 			if (*current == '"')
-				while (*current != '"' && *current != '\0')
+				do
 					current++;
+				while (*current != '"' && *current != '\0');
 			else if (*current == '\'')
-				while (*current != '\'' && *current != '\0')
+				do
 					current++;
-			current++;
+				while (*current != '\'' && *current != '\0');
+			else
+				current++;
 			}
 		}
 	else

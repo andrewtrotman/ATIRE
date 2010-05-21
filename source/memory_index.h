@@ -115,7 +115,7 @@ public:
 
 	void add_indexed_document(ANT_memory_index_one *index, long long docno);
 
-	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, unsigned char term_frequency = 1);
+	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, long term_frequency = 1);
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
