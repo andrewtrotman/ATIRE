@@ -158,7 +158,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							|| (need_eligibility_check && QFreq::instance().eligibility_check(current_word))) {
 						string_type& word = current_word->chars();
 						if (has_word_pair)
-							output_.append(current_word->left()->chars() + " " + current_word->right()->chars());
+							output_.append(current_word->left()->chars() + "  " + current_word->right()->chars());
 						else
 							output_.append(word);
 						segmented_len += word.length();
@@ -174,6 +174,9 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 						}
 						output_.append(lparent->chars());
 						segmented_len += lparent->chars().length();
+						break;
+//						output_.append(current_word->to_string());
+//						segmented_len += current_word->chars().length();
 					}
 				}
 			else {

@@ -61,8 +61,9 @@ private:
 protected:
 	void make(CList& clist, string_type& str);
 	void assign_freq();
+	void assign_freq(word_ptr_type local_word, word_ptr_type global_word);
 	void justify(unsigned int min = 2);
-	void do_some_calculations();
+	virtual void do_some_calculations();
 
 	virtual void seg();
 	virtual void build();

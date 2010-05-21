@@ -266,23 +266,30 @@ void Word::array(std::vector<Word*> arr) {
 	//std::copy(arr_.begin(), arr_.end(), arr.begin());
 }
 
-string_type Word::subchars(int idx, int len) {
+string_type Word::to_string(string_type sep)
+{
+	return subchars(0, arr_.size(), sep);
+}
+
+string_type Word::subchars(int idx, int len, string_type sep) {
 	string_type substr("");
-	subchars(substr, idx, len);
+	subchars(substr, idx, len, sep);
 	return substr;
 }
 
-void Word::subchars(string_type& substr, int idx, int len) {
+void Word::subchars(string_type& substr, int idx, int len, string_type sep) {
 	assert(substr.length() == 0);
 	assert((idx + len) <= size());
 
 	int count = 0;
 	for (int i = idx; i < (idx + len); i++) {
+		if (i > idx)
+			substr.append(sep);
 		string_type str = arr_[i]->chars();
 		substr.append(str);
-		count += str.length();
+		//count += str.length();
 	}
-	assert(count == substr.length());
+	//assert(count == substr.length());
 }
 
 void Word::subarray(array_type& ca, int idx, int len) {
@@ -398,7 +405,10 @@ void Word::cal_p(double base) {
 	assert(base != 0.0);
 
 	//if (p == 0.0)
-	p_ = static_cast<double>(freq())/base;
+	int f = freq();
+//	if (f == 0)
+//		f = 1;
+	p_ = static_cast<double>(f)/base;
 
 }
 
@@ -410,7 +420,7 @@ void Word::cal_a() {
 		return;
 
 	if (left_->is_word() && right_->is_word()) {
-		left_a_ = log(this->p() / (left_->p()*right_->p()));
+		left_a_ = (log(this->p() / (left_->p()*right_->p())));
 		return;
 	}
 
@@ -418,31 +428,24 @@ void Word::cal_a() {
 		assert(rchar_ != NULL);
 		assert(lparent_ != NULL);
 		assert(lparent_->size() == 1);
-		left_a_ = log(p_ / (lparent_->p()*rchar_->p()));
-	} else {
-//		int start = size_/2;
-//
-//		for (int i = start; i > 0; i--) {
-//			for (int j = start; j < size_; j++) {
-//				Word* lw = this->subword(i - 1, start - i + 1);
-//				Word* rw = this->subword(start, j - start + 1);
-//				assert(lw != NULL);
-//				assert(rw != NULL);
-//
-//				double mi = log(p_ / (lw->p()*rw_->p()));
-//				left_a_ += mi;
-//			}
-//		}
+		left_a_ = (log(p_ / (lparent_->p()*rchar_->p())));
+	} else if ((size_ % 2) == 0){
+		left_a_ =  cal_ngmi_a(size_/2);
+	}
+	else {
 		if (UNISEG_settings::instance().debug)
 			cerr << endl << "calculating overall association score for " << this->chars() << endl;
-		left_a_ = cal_a(size_/2);
-		if ((size_ % 2) == 1)
-			right_a_ = cal_a((size_/2) + 1);
+		left_a_ = cal_ngmi_a(size_/2);
+
+		right_a_ = cal_ngmi_a((size_/2) + 1);
 
 	}
+	if (UNISEG_settings::instance().debug)
+		cerr << "calculating association score for " <<this->chars()	<< " and get "	<< "(" << left_a_ << ", " << right_a_ << ")"
+			<< endl;
 }
 
-double Word::cal_a(int start) {
+double Word::cal_ngmi_a(int start) {
 	double a = 0.0;
 
 	if (UNISEG_settings::instance().mean == 5
@@ -453,6 +456,7 @@ double Word::cal_a(int start) {
 		a = std::numeric_limits<double>::min();
 
 	int count = 0;
+	bool stop_flag = false;
 	for (int i = start; i > 0; i--) {
 		for (int j = start; j < size_; j++) {
 			count++;
@@ -466,10 +470,26 @@ double Word::cal_a(int start) {
 			assert((lw->size() + rw->size()) == ww_len);
 			Word* ww = this->subword(i -1, ww_len);
 			assert(ww != NULL);
+			/**
+			 * TODO if there is word before, possible ambiguity
+			 */
+//			if (ww->is_word()) {
+//				stop_flag = true;
+//				a = std::numeric_limits<double>::max();
+//				break;
+//
 
-			double mi = log(ww->p() / (lw->p()*rw->p()));
-			double sign = (mi > 0) ? 1.0 : -1.0;
-			double tmp = sign * mi * mi;
+			double mi, sign, tmp;
+
+			if (ww->p() == 0)
+				tmp = 0.0;
+			else if (lw->p() == 0.0 || rw->p() == 0.0)
+				tmp = std::numeric_limits<double>::max();
+			else {
+				mi = log(ww->p() / (lw->p() * rw->p()));
+				sign = (mi > 0) ? 1.0 : -1.0;
+				tmp = sign * mi * mi;
+			}
 
 			if (UNISEG_settings::instance().debug)
 				cerr << "calculating association score for log "
@@ -508,11 +528,19 @@ double Word::cal_a(int start) {
 			}
 
 		}
+
+		if (stop_flag)
+			break;
 	}
 
 	if (UNISEG_settings::instance().mean == 5
 			&& UNISEG_settings::instance().mi == 4)
 		a /= count;
 
+	int mid = size_ / 2;
+	if (start > mid)
+		right_a_ = a;
+	else
+		left_a_ = a;
 	return a;
 }

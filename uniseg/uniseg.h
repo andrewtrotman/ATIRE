@@ -9,17 +9,17 @@
 #define __UNISEG_PLUGIN_H__
 
 #include "uniseg_types.h"
-#include "seg.h"
+#include "seg2.h"
 #include <string>
 
 class UNISEG_uniseg : public uniseg_plugin_interface
 {
 private:
-	Seger		seger_;
-	std::string	output_;
-	std::string	input_;
-	long		count_;
-	UNISEG_encoding *enc_;
+	Seger2				seger_;
+	std::string			output_;
+	std::string			input_;
+	long				count_;
+	UNISEG_encoding 	*enc_;
 
 private:
 	void cleanup();

@@ -17,6 +17,7 @@ private:
 	std::vector<double>		boundary_score_;
 
 public:
+	Seger2();
 	Seger2(const string_type stream);
 	Seger2(const char* stream, size_t length);
 	virtual ~Seger2();
@@ -25,6 +26,7 @@ protected:
 	virtual void seg();
 	virtual void build();
 	void add_to_list(array_type& cwlist);
+	void do_some_calculations();
 };
 
 #endif /* SEG2_H_ */

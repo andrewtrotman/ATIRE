@@ -86,6 +86,7 @@ public:
 	void cal_word_p(double base);
 	void show_p();
 	void cal_word_a();
+	void cal_word_ngmi_a(double base);
 
 	void clear() { freq_.clear(); }
 

@@ -554,7 +554,6 @@ void Freq::reduce_freq(Freq& freq, word_ptr_type tw_ptr) {
 }
 
 void Freq::add_freq(Freq& freq, int threshold) {
-
 	for (int i = 1; i <= k_; i++) {
 		for (int j = 0; j < freq_n_[i].size(); j++) {
 			word_ptr_type c_wp = freq_n_[i][j]; // current word pointer
@@ -599,20 +598,24 @@ void Freq::cal_word_p(double base) {
 }
 
 void Freq::cal_word_a() {
-//	freq_type::const_iterator iter;
-//	for (iter=freq_.begin(); iter != freq_.end(); ++iter)
-//		iter->second->cal_p(base);
 
 	freq_type::const_iterator iter;
 	for (iter=freq_.begin(); iter != freq_.end(); ++iter) {
-//		size = iter->second->size();
-//		word_ptr_type w_ptr = iter->second;
-//		if (size > 2) {
-//
-//		}
+
 		if (iter->second->size() <= 4)
 			iter->second->cal_a();
 	}
+}
+
+void Freq::cal_word_ngmi_a(double base) {
+	int step = k_ < 4 ? k_ : 4;
+	for (int i = 1; i <= step; i++)
+		for (int j = 0; j < freq_n_[i].size(); j++)
+			freq_n_[i][j]->cal_p(base);
+
+	if (k_ >= 4)
+		for (int j = 0; j < freq_n_[4].size(); j++)
+			freq_n_[4][j]->cal_a();
 }
 
 void Freq::show_p() {

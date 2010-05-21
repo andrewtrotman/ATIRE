@@ -89,17 +89,17 @@ void Seger::init()
 	freq_ = new Freq;
 	FreqCounter counter(stream_, freq_);
 	counter.count(UNISEG_settings::instance().max, 1);
+	tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
 
 	if (!allfreq_)
 		allfreq_ = &(QFreq::instance().freq());
 
+	tw_ptr_ = allfreq_->find(stream_);
+	assign_freq(tw_ptr_local_, tw_ptr_);
+
 	assign_freq();
 	do_some_calculations();
 
-	if (!tw_ptr_)
-		tw_ptr_ = allfreq_->find(stream_);
-
-	tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
 	//justify(0);
 }
 
@@ -109,17 +109,11 @@ void Seger::input(unsigned char *input, int length)
 	init();
 }
 
-//void Seger::load_frqs()
-//{
-//	QFreq::instance().load_freq();
-//}
-
 void Seger::start()
 {
 	build();
 	//apply_rules();
 	seg();
-
 
 	add_to_list(words_list_);
 	//mark_the_seged();
@@ -133,59 +127,6 @@ const unsigned char *Seger::output()
 	}
 	return (unsigned char *)stream_out_.c_str();
 }
-
-//unsigned char** Seger::output()
-//{
-//	if (!output_ && words_list_.size() > 0) {
-//		output_ = new unsigned char *[words_list_.size() + 1];
-//		output_[words_list_.size()] = NULL;
-//
-//		for (int i = 0; i < words_list_.size(); i++) {
-//			//cerr << words_list_[i]->chars() << endl;
-//			int len = words_list_[i]->chars().length();
-//			output_[i] = new unsigned char[len];
-//			for (int k = 0; k < len; k++)
-//				output_[i][k] = words_list_[i]->chars()[k];
-//			//strncpy((char *)output_[i], words_list_[i]->chars().c_str(), len);
-//			cerr << output_[i] << endl;
-//			//output_[i][len] = '\0';
-//		}
-//	}
-//	return output_;
-//}
-//
-//int Seger::output(unsigned char** out)
-//{
-//	if (!out && words_list_.size() > 0) {
-//		out = new unsigned char *[words_list_.size() + 1];
-//		out[words_list_.size()] = NULL;
-//
-//		for (int i = 0; i < words_list_.size(); i++) {
-//			//cerr << words_list_[i]->chars() << endl;
-//			int len = words_list_[i]->chars().length();
-//			out[i] = new unsigned char[len + 1];
-//			for (int k = 0; k < len; k++)
-//				out[i][k] = words_list_[i]->chars()[k];
-//			unsigned char *word = out[i];
-//			word[len] = '\0';
-//			//strncpy((char *)out[i], words_list_[i]->chars().c_str(), len);
-//			cerr << word << endl;
-//			//out[i][len] = '\0';
-//		}
-//	}
-//	return words_list_.size();
-//}
-//
-//void Seger::free_output()
-//{
-//	int i = 0;
-//	while (output_[i]) {
-//		delete output_[i];
-//		i++;
-//	}
-//	delete [] output_;
-//	output_ = NULL;
-//}
 
 void Seger::build()
 {
@@ -301,60 +242,35 @@ void Seger::assign_freq() {
 	//freq_->assign_freq(*allfreq_);
 	std::map<word_ptr_type, word_ptr_type> word_pairs;
 	freq_type& freq = freq_->set();
-//	freq_type::const_iterator iter;
-//	for (iter = freq.begin(); iter != freq.end(); ++iter) {
-//		word_ptr_type local_word  = iter->second;
-//		word_ptr_type global_word = allfreq_->find(local_word->chars());
-//		if (global_word) {
-//			QFreq::instance().load(global_word);
-//			local_word->freq(global_word->freq());
-//			local_word->is_word(global_word->is_word());
-//			if (global_word->left() != NULL && global_word->left()->is_word()) {
-//				local_word->left(freq_->find(global_word->left()->chars()));
-//				local_word->left()->is_word(true);
-//			}
-//			if (global_word->right() != NULL && global_word->right()->is_word()) {
-//				local_word->right(freq_->find(global_word->right()->chars()));
-//				local_word->right()->is_word(true);
-//			}
-//		}
-//		else
-//			local_word->freq(0);
-//		//word_pairs.insert(make_pair(local_word, global_word));
-//	}
+
 	int step = freq_->array_size() < allfreq_->array_size() ? freq_->array_size() : allfreq_->array_size();
 	for (int i = 1; i < step; ++i) {
 		array_type& word_array = freq_->array_k(i);
 		for (int j = 0; j < word_array.size(); ++j) {
 			word_ptr_type local_word  = word_array[j];
 			word_ptr_type global_word = allfreq_->find(local_word->chars());
-			if (global_word) {
-				QFreq::instance().load(global_word);
-				local_word->freq(global_word->freq());
-				local_word->is_word(global_word->is_word());
-				if (global_word->left() != NULL && global_word->left()->is_word()) {
-					local_word->left(freq_->find(global_word->left()->chars()));
-					local_word->left()->is_word(true);
-				}
-				if (global_word->right() != NULL && global_word->right()->is_word()) {
-					local_word->right(freq_->find(global_word->right()->chars()));
-					local_word->right()->is_word(true);
-				}
-			}
-			else
-				local_word->freq(0);
+			assign_freq(local_word, global_word);
 		}
 	}
+}
 
-//	std::map<word_ptr_type, word_ptr_type>::iterator p_iter;
-//	for (p_iter = word_pairs.begin(); p_iter != word_pairs.end(); ++p_iter) {
-//		word_ptr_type local_word  = p_iter->first;
-//		word_ptr_type global_word = p_iter->second;
-//		if (!global_word || global_word->freq() <= 0)
-//			local_word->freq(0);
-//		else
-//			local_word->freq(global_word->freq());
-//	}
+void Seger::assign_freq(word_ptr_type local_word, word_ptr_type global_word)
+{
+	if (global_word) {
+		QFreq::instance().load(global_word);
+		local_word->freq(global_word->freq());
+		local_word->is_word(global_word->is_word());
+		if (global_word->left() != NULL && global_word->left()->is_word()) {
+			local_word->left(freq_->find(global_word->left()->chars()));
+			local_word->left()->is_word(true);
+		}
+		if (global_word->right() != NULL && global_word->right()->is_word()) {
+			local_word->right(freq_->find(global_word->right()->chars()));
+			local_word->right()->is_word(true);
+		}
+	}
+	else
+		local_word->freq(0);
 }
 
 void Seger::justify(unsigned int min) {

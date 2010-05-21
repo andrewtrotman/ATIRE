@@ -115,8 +115,8 @@ public:
 	const string_type& chars() const { return chars_; }
 	string_type& chars() { return chars_; }
 
-	string_type subchars(int idx, int len);
-	void subchars(string_type& substr, int idx, int len);
+	string_type subchars(int idx, int len, string_type sep = "");
+	void subchars(string_type& substr, int idx, int len, string_type sep = "");
 
 	void subarray(array_type& ca, int idx, int len);
 	void subarray(string_array& ca, int idx, int len);
@@ -126,8 +126,9 @@ public:
 	void increase(unsigned int freq) { freq_ += freq; }
 	void link(Word *w) { children_.push_back(w); }
 	void add(Word *w) { arr_.push_back(w); }
-	const std::vector<Word*>& array() const { return arr_; }
+	const array_type& array() const { return arr_; }
 	void array(std::vector<Word*> arr);
+	string_type to_string(string_type sep = "  ");
 
 	//Word *word(int idx);
 	unsigned int highest_freq();
@@ -233,8 +234,7 @@ public:
 	bool is_loaded() { return loaded_; }
 	void set_loaded(bool b) { loaded_ = b; }
 
-private:
-	double cal_a(int start);
+	double cal_ngmi_a(int start);
 };
 
 inline const Word::Side Word::side() const {
