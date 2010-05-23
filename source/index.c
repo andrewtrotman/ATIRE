@@ -193,9 +193,9 @@ if (first_param >= argc)
 
 last_report = 0;
 doc = 0;
-single_document_index_memory = new ANT_memory(4 * 1024*1024);		// allocate 4MB to each document indexed in parallel (one or two pages depending on OS configuration)
-single_document_index = new ANT_memory_index_one (single_document_index_memory);
 index = new ANT_memory_index("index.aspt");
+single_document_index_memory = new ANT_memory(4 * 1024*1024);		// allocate 4MB to each document indexed in parallel (one or two pages depending on OS configuration)
+single_document_index = new ANT_memory_index_one (single_document_index_memory, index);
 id_list.open("doclist.aspt", "wb");
 
 index->set_compression_scheme(param_block.compression_scheme);

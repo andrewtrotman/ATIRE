@@ -20,7 +20,6 @@
 #include "file.h"
 #include "btree.h"
 #include "btree_head_node.h"
-#include "hash_table.h"
 #include "fundamental_types.h"
 #include "compression_factory.h"
 #include "maths.h"
@@ -28,15 +27,6 @@
 #include "pdebug.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
-
-/*
-	ANT_MEMORY_INDEX::HASH()
-	------------------------
-*/
-inline long ANT_memory_index::hash(ANT_string_pair *string)
-{
-return ANT_hash_24(string);
-}
 
 /*
 	ANT_MEMORY_INDEX::ANT_MEMORY_INDEX()
@@ -224,7 +214,12 @@ void ANT_memory_index::add_indexed_document_node(ANT_memory_index_one_node *node
 if (node->string[0] == '~')
 	set_document_detail(&node->string, node->term_frequency, node->mode);
 else
-	add_term(&node->string, docno, node->term_frequency);
+	{
+	if (node->final_node == NULL)
+		add_term(&node->string, docno, node->term_frequency);
+	else
+		node->final_node->add_posting(docno, node->term_frequency);
+	}
 
 /*
 	Now check the left and the right subtrees for hash collisions

@@ -12,6 +12,7 @@
 #include "compress_variable_byte.h"
 #include "compression_factory.h"
 #include "compression_text_factory.h"
+#include "hash_table.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -29,6 +30,8 @@ class ANT_ranking_function_factory;
 */
 class ANT_memory_index : public ANT_memory_indexer
 {
+friend class ANT_memory_index_one;
+
 public:
 	static const long HASH_TABLE_SIZE = 0x1000000;
 
@@ -79,7 +82,7 @@ private:
 	long document_filenames_used;
 
 private:
-	long hash(ANT_string_pair *string);
+	long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);

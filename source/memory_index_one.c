@@ -7,6 +7,8 @@
 #include "string_pair.h"
 #include "memory_index_one.h"
 #include "memory_index_one_node.h"
+#include "memory_index.h"
+#include "memory_index_hash_node.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -29,10 +31,11 @@ return ANT_hash_24(string) % HASH_TABLE_SIZE;
 	ANT_MEMORY_INDEX_ONE::ANT_MEMORY_INDEX_ONE()
 	--------------------------------------------
 */
-ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory)
+ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index)
 {
 hashed_squiggle_length = hash(squiggle_length);
 this->memory = memory;
+this->final_index = index;
 rewind();
 }
 
@@ -52,6 +55,8 @@ memset(hash_table, 0, sizeof(hash_table));
 */
 ANT_memory_index_one_node *ANT_memory_index_one::new_hash_node(ANT_string_pair *pair)
 {
+long hash_value;
+ANT_memory_index_hash_node *root;
 ANT_memory_index_one_node *node;
 
 node = new (memory) ANT_memory_index_one_node;
@@ -61,6 +66,13 @@ node->string.start = (char *)memory->malloc(pair->string_length + 1);
 pair->strcpy(node->string.start);
 node->string.string_length = pair->string_length;
 node->term_frequency = 0;
+
+hash_value = final_index->hash(pair);
+root = final_index->hash_table[hash_value];
+if (root == NULL)
+	node->final_node = NULL;
+else
+	node->final_node = final_index->find_node(root, pair);
 
 return node;
 }

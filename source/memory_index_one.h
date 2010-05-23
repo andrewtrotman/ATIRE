@@ -26,9 +26,10 @@ private:
 		single document, but small enough that itterating over the whole hash table will be fast, Otherwise
 		the sequential cost post indexing will be too large.
 	*/
-	static const long HASH_TABLE_SIZE = 0x10000;
+	static const long HASH_TABLE_SIZE = 0x100;
 	ANT_memory_index_one_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
+	ANT_memory_index *final_index;
 	long hashed_squiggle_length;
 
 private:
@@ -38,7 +39,7 @@ private:
 	ANT_memory_index_one_node *add(ANT_string_pair *string, long long docno, long extra_term_frequency);
 
 public:
-	ANT_memory_index_one(ANT_memory *memory);
+	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index);
 	virtual ~ANT_memory_index_one() {}
 
 	void rewind(void);

@@ -7,6 +7,8 @@
 
 #include "memory_indexer.h"
 
+class ANT_memory_index_hash_node;
+
 /*
 	class ANT_MEMORY_INDEX_ONE_NODE
 	-------------------------------
@@ -21,7 +23,8 @@ class ANT_memory_index_one_node : public ANT_memory_indexer_node
 {
 public:
 	ANT_memory_index_one_node *left, *right;	// for hash table direct chaining
-	long mode;									// this is the mode used in set_document_detail (only applicable when string[0]='~');
+	long mode;									// the mode used in set_document_detail (only applicable when string[0]='~');
+	ANT_memory_index_hash_node *final_node;		// the node from the ANT_memory_index structure into which this term is later added
 
 public:
 	ANT_memory_index_one_node() : ANT_memory_indexer_node () { left = right = NULL; }
