@@ -109,13 +109,55 @@ void Seger::input(unsigned char *input, int length)
 	init();
 }
 
+void Seger::input(string_type& stream)
+{
+	stream_ = stream;
+	init();
+}
+
 void Seger::start()
 {
-	build();
-	//apply_rules();
-	seg();
+	if (tw_ptr_local_->size() < 3 && QFreq::instance().freq_training().array_size() > 0) {
+		if (tw_ptr_local_->size() == 3) {
+			if (tw_ptr_local_->lparent()->is_word()) {
+				if (tw_ptr_local_->rparent()->is_word()) { // all parents are words
+					if (tw_ptr_local_->rparent()->freq() < tw_ptr_local_->lparent()->freq()) {
+						words_list_.push_back(tw_ptr_local_->lparent());
+						words_list_.push_back(tw_ptr_local_->rchar());
+					}
+					else {
+						words_list_.push_back(tw_ptr_local_->lchar());
+						words_list_.push_back(tw_ptr_local_->rparent());
+					}
+				}
+				else {
+					words_list_.push_back(tw_ptr_local_->lparent());
+					words_list_.push_back(tw_ptr_local_->rchar());
+				}
+				return;
+			}
+			else {
+				if (tw_ptr_local_->rparent()->is_word()) {
+					words_list_.push_back(tw_ptr_local_->lchar());
+					words_list_.push_back(tw_ptr_local_->rparent());
+					return;
+				}
+			}
+		} else {
+			if (tw_ptr_local_->is_word()) {
+				words_list_.push_back(tw_ptr_local_);
+				return;
+			}
+		}
+		std::copy(tw_ptr_local_->array().begin(), tw_ptr_local_->array().end(), words_list_.begin());
+	}
+	else {
+		build();
+		//apply_rules();
+		seg();
 
-	add_to_list(words_list_);
+		add_to_list(words_list_);
+	}
 	//mark_the_seged();
 }
 

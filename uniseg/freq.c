@@ -615,7 +615,7 @@ void Freq::cal_word_ngmi_a(double base) {
 
 	if (k_ >= 4)
 		for (int j = 0; j < freq_n_[4].size(); j++)
-			freq_n_[4][j]->cal_a();
+			freq_n_[4][j]->cal_ngmi_a(2);
 }
 
 void Freq::show_p() {

@@ -74,6 +74,8 @@ void UNISEG_settings::init_fields()
 
 	stop_word_check = false;
 	oov_check = false;
+
+	threshold = 0.0;
 }
 
 void UNISEG_settings::init_others()

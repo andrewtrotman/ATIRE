@@ -430,14 +430,14 @@ void Word::cal_a() {
 		assert(lparent_->size() == 1);
 		left_a_ = (log(p_ / (lparent_->p()*rchar_->p())));
 	} else if ((size_ % 2) == 0){
-		left_a_ =  cal_ngmi_a(size_/2);
+		left_a_ =  cal_a(size_/2);
 	}
 	else {
 		if (UNISEG_settings::instance().debug)
 			cerr << endl << "calculating overall association score for " << this->chars() << endl;
-		left_a_ = cal_ngmi_a(size_/2);
+		left_a_ = cal_a(size_/2);
 
-		right_a_ = cal_ngmi_a((size_/2) + 1);
+		right_a_ = cal_a((size_/2) + 1);
 
 	}
 	if (UNISEG_settings::instance().debug)
@@ -445,15 +445,8 @@ void Word::cal_a() {
 			<< endl;
 }
 
-double Word::cal_ngmi_a(int start) {
-	double a = 0.0;
-
-	if (UNISEG_settings::instance().mean == 5
-				&& UNISEG_settings::instance().mi == 2)
-		a = std::numeric_limits<double>::max();
-	else if (UNISEG_settings::instance().mean == 5
-			&& UNISEG_settings::instance().mi == 3)
-		a = std::numeric_limits<double>::min();
+void Word::cal_ngmi_a(int start) {
+	double a = 0.0 - std::numeric_limits<double>::max();
 
 	int count = 0;
 	bool stop_flag = false;
@@ -482,7 +475,7 @@ double Word::cal_ngmi_a(int start) {
 			double mi, sign, tmp;
 
 			if (ww->p() == 0)
-				tmp = 0.0;
+				continue; //tmp = std::numeric_limits<double>::max(); //0.0;
 			else if (lw->p() == 0.0 || rw->p() == 0.0)
 				tmp = std::numeric_limits<double>::max();
 			else {
@@ -490,6 +483,64 @@ double Word::cal_ngmi_a(int start) {
 				sign = (mi > 0) ? 1.0 : -1.0;
 				tmp = sign * mi * mi;
 			}
+
+			if (UNISEG_settings::instance().debug)
+				cerr << "calculating association score for log "
+					<< ww->chars() << "(" << ww->p() << ") over "
+					<< lw->chars() << "(" << lw->p() << ") "
+					<< " "
+					<< rw->chars() << "(" << rw->p() << ") "
+					<< " and get "
+					<< tmp
+					<< endl;
+
+			if (mi < 0)
+				assert(sign == -1.0);
+
+			if (tmp > a)
+				a = tmp;
+
+		}
+
+		if (stop_flag)
+			break;
+	}
+
+	int mid = size_ / 2;
+	if (start > mid)
+		right_a_ = a;
+	else
+		left_a_ = a;
+}
+
+double Word::cal_a(int start) {
+	double a = 0.0;
+
+	if (UNISEG_settings::instance().mean == 5
+				&& UNISEG_settings::instance().mi == 2)
+		a = std::numeric_limits<double>::max();
+	else if (UNISEG_settings::instance().mean == 5
+			&& UNISEG_settings::instance().mi == 3)
+		a = std::numeric_limits<double>::min();
+
+	int count = 0;
+	for (int i = start; i > 0; i--) {
+		for (int j = start; j < size_; j++) {
+			count++;
+			Word* lw = this->subword(i - 1, start - i + 1);
+			Word* rw = this->subword(start, j - start + 1);
+
+			assert(lw != NULL);
+			assert(rw != NULL);
+
+			int ww_len = j - i + 2;
+			assert((lw->size() + rw->size()) == ww_len);
+			Word* ww = this->subword(i -1, ww_len);
+			assert(ww != NULL);
+
+			double mi = log(ww->p() / (lw->p()*rw->p()));
+			double sign = (mi > 0) ? 1.0 : -1.0;
+			double tmp = sign * mi * mi;
 
 			if (UNISEG_settings::instance().debug)
 				cerr << "calculating association score for log "
@@ -528,19 +579,11 @@ double Word::cal_ngmi_a(int start) {
 			}
 
 		}
-
-		if (stop_flag)
-			break;
 	}
 
 	if (UNISEG_settings::instance().mean == 5
 			&& UNISEG_settings::instance().mi == 4)
 		a /= count;
 
-	int mid = size_ / 2;
-	if (start > mid)
-		right_a_ = a;
-	else
-		left_a_ = a;
 	return a;
 }

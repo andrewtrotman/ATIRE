@@ -50,6 +50,7 @@ public:
 	string_type& stream() { return stream_; }
 	string_type& stream_out() { return stream_out_; }
 	void input(unsigned char *, int length);
+	void input(string_type& stream);
 
 	int get_count() { return words_list_.size(); }
 	const array_type& best_words() const { return words_list_; }

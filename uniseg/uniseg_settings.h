@@ -63,6 +63,8 @@ public:
 
 	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 
+	double					threshold;
+
 private:
 	void init();
 	void init_fields();

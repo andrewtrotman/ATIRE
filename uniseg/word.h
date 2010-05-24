@@ -163,12 +163,14 @@ public:
 	}
 
 	const Word *lchar() const { return lchar_; }
+	Word *lchar() { return lchar_; }
 	void lchar(Word *lchar) {
 		assert(lchar->size() == 1);
 		lchar_ = lchar;
 	}
 
 	const Word *rchar() const { return rchar_; }
+	Word *rchar() { return rchar_; }
 	void rchar(Word *rchar) {
 		//assert(this->lparent_ != NULL);
 		rchar_ = rchar;
@@ -234,7 +236,8 @@ public:
 	bool is_loaded() { return loaded_; }
 	void set_loaded(bool b) { loaded_ = b; }
 
-	double cal_ngmi_a(int start);
+	void cal_ngmi_a(int start);
+	double cal_a(int start);
 };
 
 inline const Word::Side Word::side() const {

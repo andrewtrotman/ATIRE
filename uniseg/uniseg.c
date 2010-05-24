@@ -140,59 +140,61 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 		}
 
 		how_far = next - current;
-
+		string_type input((char *)current, how_far);
 	    if (how_far > 0 && count > 1) {
-			seger_.input(current, how_far);
-			seger_.start();
-			const array_type& words_list = seger_.best_words();
-			long i = 0;
-			long size = (in_middle_flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
-			if (size > 0)
-				for (; i < size; i++) {
-					word_ptr_type current_word = words_list[i];
-					bool has_word_pair = current_word->has_word_pair() && !current_word->is_word();
-					if (i > 0 /*&& *(output_.end()--) != ' '*/)
-						output_.append("  ");
-					if (current_word->size() == 1
-							|| has_word_pair
-							|| (need_eligibility_check && QFreq::instance().eligibility_check(current_word))) {
-						string_type& word = current_word->chars();
-						if (has_word_pair)
-							output_.append(current_word->left()->chars() + "  " + current_word->right()->chars());
-						else
-							output_.append(word);
-						segmented_len += word.length();
-					}
-					else {
-						word_ptr_type lparent = current_word->lparent();
-						assert(lparent != NULL);
-						while (lparent->size() > 1 && !lparent->is_word()) {
-							if (lparent->lparent() != NULL)
-								lparent = lparent->lparent();
+	    	if (count <= QFreq::instance().freq_training().array_size() && !QFreq::instance().is_word(input)) {
+				seger_.input(input);
+				seger_.start();
+				const array_type& words_list = seger_.best_words();
+				long i = 0;
+				long size = (in_middle_flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
+				if (size > 0)
+					for (; i < size; i++) {
+						word_ptr_type current_word = words_list[i];
+						bool has_word_pair = current_word->has_word_pair() && !current_word->is_word();
+						if (i > 0 /*&& *(output_.end()--) != ' '*/)
+							output_.append("  ");
+						if (current_word->size() == 1
+								|| has_word_pair
+								|| (need_eligibility_check && QFreq::instance().eligibility_check(current_word))) {
+							string_type& word = current_word->chars();
+							if (has_word_pair)
+								output_.append(current_word->left()->chars() + "  " + current_word->right()->chars());
 							else
-								break;
+								output_.append(word);
+							segmented_len += word.length();
 						}
-						output_.append(lparent->chars());
-						segmented_len += lparent->chars().length();
-						break;
-//						output_.append(current_word->to_string());
-//						segmented_len += current_word->chars().length();
+						else {
+							word_ptr_type lparent = current_word;
+							assert(lparent != NULL);
+							while (lparent->size() > 1 && !lparent->is_word()) {
+								if (lparent->lparent() != NULL)
+									lparent = lparent->lparent();
+								else
+									break;
+							}
+							output_.append(lparent->chars());
+							segmented_len += lparent->chars().length();
+							break;
+	//						output_.append(current_word->to_string());
+	//						segmented_len += current_word->chars().length();
+						}
 					}
+				else {
+					segmented_len = how_far;
+					output_.append(string_type(current, current + how_far) + "  ");
 				}
-			else {
-				segmented_len = how_far;
-				output_.append(string_type(current, current + how_far) + "  ");
+				// put the last segment back to the remaining characters
+				current += segmented_len;
+				segmented_len = 0;
+				count_ += (words_list.size() == size) ? 0 : count - words_list[size - 1]->size();
+				continue;
 			}
-			// put the last segment back to the remaining characters
-			current += segmented_len;
-			segmented_len = 0;
-			count_ += (words_list.size() == size) ? 0 : count - words_list[size - 1]->size();
 	    }
-	    else if (how_far > 0) {
-			//how_far = how_far > 0 ? how_far : enc_->howmanybytes();
-			output_.append((const char *)current, (size_t)how_far);
-			current += how_far;
-	    }
+
+		//how_far = how_far > 0 ? how_far : enc_->howmanybytes();
+		output_.append(input);
+		current += how_far;
 	}
 
 	return get_output();
