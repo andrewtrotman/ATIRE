@@ -14,7 +14,7 @@
 class ANT_phonetic_soundex : public ANT_stem
 {
 protected:
-	char *ANT_phonetic_soundex::soundex(char *dest, const char *what);
+	size_t ANT_phonetic_soundex::soundex(char *dest, const char *what);
 
 public:
 	ANT_phonetic_soundex() {}
@@ -54,7 +54,7 @@ for (ch = what + 1; *ch != '\0'; ch++)
 		last = current;
 		}
 	}
-return 4;
+return 1;
 }
 
 

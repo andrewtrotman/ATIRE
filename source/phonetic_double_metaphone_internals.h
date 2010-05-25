@@ -74,9 +74,6 @@ typedef char tchar;
 	#define _tcscat strcat
 	#define _tcsupy strupr
 	#define _tcsstr	strstr
-
-	#define	_tcsncmp strncmp
-	#define _tcsupr strupr
 #endif //!_UNICODE
 
 //Macro to preceed literal strings with "L", which denotes a unicode string, for unicode builds, or

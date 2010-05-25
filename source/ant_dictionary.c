@@ -9,10 +9,12 @@
 #include "search_engine.h"
 #include "btree_iterator.h"
 #include "search_engine_btree_leaf.h"
+#include "phonetic_double_metaphone.h"
 #ifdef _MSC_VER
 	#include <windows.h>
 	wchar_t wide[10 * 1024];	// buffer for storing wide character strings before printing them
 #endif
+char metaphone_buffer[1024];	// buffer for storing the metaphone version of the string
 
 int check_postings = 1;
 
@@ -20,7 +22,7 @@ int check_postings = 1;
 	PROCESS()
 	---------
 */
-long process(ANT_compressable_integer *impact_ordering, size_t document_frequency)
+long process(ANT_compressable_integer *impact_ordering, size_t document_frequency, long verbose)
 {
 ANT_compressable_integer tf;
 long docid, max;
@@ -38,7 +40,8 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-//		printf("<%lld,%lld>", (long long)tf, (long long)docid);
+		if (verbose)
+			printf("<%lld,%lld>", (long long)docid, (long long)tf);
 		}
 	if (docid > max)
 		max = docid;
@@ -54,6 +57,7 @@ return max;
 */
 int main(int argc, char *argv[])
 {
+ANT_phonetic_double_metaphone meta;
 ANT_compressable_integer *raw, max = 0;
 long postings_list_size = 100 * 1024 * 1024;
 long raw_list_size = 100 * 1024 * 1024;
@@ -64,21 +68,27 @@ ANT_search_engine search_engine(&memory);
 ANT_btree_iterator iterator(&search_engine);
 ANT_search_engine_btree_leaf leaf;
 ANT_compression_factory factory;
+long metaphone, print_wide, print_postings;
+long param;
 
-if (argc == 1)
-	first_term = last_term = NULL;
-else if (argc == 2)
+first_term = last_term = NULL;
+print_postings = print_wide = metaphone = FALSE;
+
+for (param = 1; param < argc; param++)
 	{
-	first_term = argv[1];
-	last_term = NULL;
+	if (strcmp(argv[param], "-s") == 0)
+		first_term = argv[++param];
+	else if (strcmp(argv[param], "-e") == 0)
+		last_term = argv[++param];
+	else if (strcmp(argv[param], "-d") == 0)
+		metaphone = TRUE;
+	else if (strcmp(argv[param], "-u") == 0)
+		print_wide = TRUE;
+	else if (strcmp(argv[param], "-p") == 0)
+		print_postings = TRUE;
+	else
+		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-u<nicodeWideChars>] [-p<rintPostings>]\n", argv[0]));
 	}
-else if (argc == 3)
-	{
-	first_term = argv[1];
-	last_term = argv[2];
-	}
-else
-	exit(printf("Usage:%s [<start word> [<end word>]]\n", argv[0]));
 
 postings_list = (unsigned char *)malloc(postings_list_size);
 raw = (ANT_compressable_integer *)malloc(raw_list_size);
@@ -89,14 +99,25 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 		break;
 	else
 		{
+		if (metaphone)
+			{
+			if (isalpha(*term))
+				meta.stem(term, metaphone_buffer);
+			else
+				strcpy(metaphone_buffer, "-");
+			printf("%s ", metaphone_buffer);
+			}
 #ifdef _MSC_VER
 		/*
 			Convert into a wide string and print that as Windows printf() doesn't do UTF-8
 		*/
-		if (MultiByteToWideChar(CP_UTF8, 0, term, -1, wide, sizeof(wide)) == 0)
-			printf("FAIL ");
+		if (print_wide)
+			if (MultiByteToWideChar(CP_UTF8, 0, term, -1, wide, sizeof(wide)) == 0)
+				printf("FAIL ");
+			else
+				wprintf(L"%s ", wide);
 		else
-			wprintf(L"%s ", wide);
+			printf("%s ", term);
 #else
 		printf("%s ", term);
 #endif
@@ -116,7 +137,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				raw = (ANT_compressable_integer *)realloc(raw, raw_list_size);
 				}
 			factory.decompress(raw, postings_list, leaf.impacted_length);
-			max = process((ANT_compressable_integer *)raw, leaf.document_frequency);
+			max = process((ANT_compressable_integer *)raw, leaf.document_frequency, print_postings);
 
 			if (max > search_engine.document_count())
 				printf(" Largest Docno:%lld MAX IS TOO LARGE!", (long long)max);

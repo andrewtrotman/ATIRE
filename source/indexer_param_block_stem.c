@@ -42,7 +42,6 @@ else
 printf("Term expansion, one of:\n");
 
 puts("  -             None [default]");
-puts("  d             Double Metaphone phonetics");
 #ifdef ANT_HAS_PAICE_HUSK
 puts("  h             Paice Husk stemming");
 #endif
@@ -52,6 +51,7 @@ puts("  l             Lovins stemming");
 puts("  o             Otago stemming");
 puts("  p             Porter stemming");
 puts("  s             S-Striping stemming");
+puts("  D             Double Metaphone phonetics");
 puts("  S             Soundex phonetics");
 if (has_cutoff)
 	{
@@ -75,7 +75,6 @@ if (*(which + 1) != '\0' && *(which + 1) != '+' && *(which + 1) != '-')
 switch (*which)
 	{
 	case '-' : stemmer = ANT_stemmer_factory::NONE;       break;
-	case 'd' : stemmer = ANT_stemmer_factory::DOUBLE_METAPHONE;       break;
 #ifdef ANT_HAS_PAICE_HUSK
 	case 'h' : stemmer = ANT_stemmer_factory::PAICE_HUSK; break;
 #endif
@@ -85,6 +84,7 @@ switch (*which)
 	case 'p' : stemmer = ANT_stemmer_factory::PORTER;     break;
 	case 'o' : stemmer = ANT_stemmer_factory::OTAGO;      break;
 	case 's' : stemmer = ANT_stemmer_factory::S_STRIPPER; break;
+	case 'D' : stemmer = ANT_stemmer_factory::DOUBLE_METAPHONE;       break;
 	case 'S' : stemmer = ANT_stemmer_factory::SOUNDEX; break;
 	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
 	}
