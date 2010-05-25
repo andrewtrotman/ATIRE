@@ -13,6 +13,7 @@
 #include "freq_counter.h"
 
 #include <cassert>
+#include <cmath>
 
 #include <iterator>
 #define TIME_BUILD
@@ -91,8 +92,12 @@ void Seger::init()
 	counter.count(UNISEG_settings::instance().max, 1);
 	tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
 
-	if (!allfreq_)
+	if (!allfreq_) {
 		allfreq_ = &(QFreq::instance().freq());
+		base_ = allfreq_->sum_k(1);
+		double p = 1.0 / base_;
+		UNISEG_settings::instance().threshold = log(p);
+	}
 
 	tw_ptr_ = allfreq_->find(stream_);
 	assign_freq(tw_ptr_local_, tw_ptr_);
@@ -328,7 +333,7 @@ void Seger::justify(unsigned int min) {
 }
 
 void Seger::do_some_calculations() {
-	freq_->cal_word_p(/*QFreq::instance().freq()*/allfreq_->sum_k(1));
+	freq_->cal_word_p(base_);
 
 	freq_->cal_word_a();
 

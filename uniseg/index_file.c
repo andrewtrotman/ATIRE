@@ -161,7 +161,7 @@ void IndexFile::read() {
 //			}
 
 			//addr[i] = (int)current;
-			strncpy(tmp, current, INT_TYPE_SIZE);
+			memcpy(tmp, current, INT_TYPE_SIZE);
 			addr[i] = bytes_to_int32(tmp);
 			current += INT_TYPE_SIZE;
 		}
@@ -198,7 +198,7 @@ void IndexFile::read(Freq *freq) {
 	while (count < size_) {
 		string_array ca;
 		//Address::uint_array addr(ADDRESSES_NUMBER, Address::INVALID_BOUND);
-		strncpy(buf, current, UNICODE_CHAR_LENGTH);
+		memcpy(buf, current, UNICODE_CHAR_LENGTH);
 		current += UNICODE_CHAR_LENGTH;
 		enc_->test_char((unsigned char*)&buf);
 		string_type a_char(buf, enc_->howmanybytes());
@@ -213,7 +213,7 @@ void IndexFile::read(Freq *freq) {
 			/// save them in the array
 //			string_type a_char =
 //				get_first_utf8char((unsigned char*)current);
-			strncpy(buf, current, UNICODE_CHAR_LENGTH);
+			memcpy(buf, current, UNICODE_CHAR_LENGTH);
 			current += UNICODE_CHAR_LENGTH;
 			enc_->test_char((unsigned char*)&buf);
 			string_type a_char(buf, enc_->howmanybytes());
@@ -221,6 +221,8 @@ void IndexFile::read(Freq *freq) {
 		}
 
 		word_ptr_type word = freq->add(ca, lang, 0);
+		if (word->chars() == "业化")
+			cerr << "Stop here!" << endl;
 //		cerr << "add new word for index: " << word->chars() << endl;
 		Address::uint_array& addr = word->disk_address();
 
@@ -231,7 +233,7 @@ void IndexFile::read(Freq *freq) {
 //			}
 
 			//addr[i] = (int)current;
-			strncpy(tmp, current, INT_TYPE_SIZE);
+			memcpy(tmp, current, INT_TYPE_SIZE);
 			addr[i] = bytes_to_int32(tmp);
 			//addr.push_back(bytes_to_int32(tmp));
 			current += INT_TYPE_SIZE;

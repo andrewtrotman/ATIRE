@@ -12,6 +12,7 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
+#include <iterator>
 
 #include "uniseg_settings.h"
 
@@ -36,7 +37,7 @@ Seger2::~Seger2()
 
 void Seger2::do_some_calculations() {
 	//freq_->cal_word_p(allfreq_->sum_k(1));
-	freq_->cal_word_ngmi_a(allfreq_->sum_k(1));
+	freq_->cal_word_ngmi_a(base_);
 	//freq_->show_p();
 }
 
@@ -111,6 +112,16 @@ void Seger2::seg()
 
 	if (words_list_.size() == 0)
 		words_list_.push_back(tw_ptr_local_);
+
+	if (UNISEG_settings::instance().debug) {
+		cerr << "threshold: " << UNISEG_settings::instance().threshold << endl;
+		cerr << "  ";
+		copy (boundary_score_.begin(), boundary_score_.end(), ostream_iterator<double>(cerr, "  "));
+		cerr << endl;
+		for (i = 0; i < words_list_.size(); ++i)
+			cerr << words_list_[i]->chars() << "  ";
+		cerr << endl;
+	}
 }
 
 void Seger2::add_to_list(array_type& cwlist)

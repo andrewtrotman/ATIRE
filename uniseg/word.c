@@ -368,15 +368,19 @@ void Word::children_do(void (*function_ptr)(Word*)) {
 
 void Word:: adjust(int freq)
 {
-	if (this->chars() == "邓小平理论")
-		cerr << "Stop here!" << endl;
+//	if (this->chars() == "邓小平理论")
+//		cerr << "Stop here!" << endl;
 
 	if (lparent() != NULL) {
+		if (lparent()->chars() == "化下")
+			cerr << "Stop here!" << endl;
 		lparent()->adjust_freq(freq);
 		lparent()->adjust(freq);
 	}
 
 	if (rparent() != NULL) {
+		if (rparent()->chars() == "化下")
+			cerr << "Stop here!" << endl;
 		rparent()->adjust_freq(freq);
 		rparent()->adjust(freq);
 	}
@@ -478,8 +482,10 @@ void Word::cal_ngmi_a(int start) {
 
 			double mi, sign, tmp;
 
-			if (ww->p() == 0)
-				continue; //tmp = std::numeric_limits<double>::max(); //0.0;
+			if (ww->p() == 0.0 && lw->p() != 0.0 && rw->p() != 0.0)
+				continue; //tmp = -std::numeric_limits<double>::max(); //continue; //tmp = std::numeric_limits<double>::max(); //0.0;
+//			else if (ww->p() == 0.0 && (lw->p() != 0.0 || rw->p() != 0.0))
+//				tmp = -std::numeric_limits<double>::max();
 			else if (lw->p() == 0.0 || rw->p() == 0.0)
 				tmp = std::numeric_limits<double>::max();
 			else {
@@ -498,8 +504,8 @@ void Word::cal_ngmi_a(int start) {
 					<< tmp
 					<< endl;
 
-			if (mi < 0)
-				assert(sign == -1.0);
+//			if (mi < 0)
+//				assert(sign == -1.0);
 
 			/*
 			 *

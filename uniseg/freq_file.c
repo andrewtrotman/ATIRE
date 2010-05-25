@@ -97,8 +97,11 @@ void FreqFile::write(array_type& arr) {
 		unsigned int word_where = 0;
 		if (word_ptr->is_word()
 				|| (word_ptr->left() != NULL && word_ptr->right() != NULL && word_ptr->left()->is_word() && word_ptr->right()->is_word())) {
-			if (word_ptr->is_word())
+			if (word_ptr->is_word()) {
+				if (word_ptr->chars() == "\344\270\232\345\214\226\344\270\213")
+					cerr << "stop here" << endl;
 				word_where = 0xFF;
+			}
 			else {
 				word_where = word_ptr->left()->size();
 				assert(word_where <= word_ptr->size());

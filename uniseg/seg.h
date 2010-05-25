@@ -25,6 +25,7 @@ protected:
 	string_type			stream_out_;  // store the segmented text, words are seperated by spaces
 
 	array_type			words_list_;   // top ranking candidate words aka segmented words
+	double				base_;
 	//unsigned char 		**output_;  // same content with words_, but for the easy access of other programs
 
 public:
