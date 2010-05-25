@@ -117,7 +117,7 @@ void Seger::input(string_type& stream)
 
 void Seger::start()
 {
-	if (tw_ptr_local_->size() < 3 && QFreq::instance().freq_training().array_size() > 0) {
+	if (tw_ptr_local_->size() < 4 && QFreq::instance().freq_training().array_size() > 0) {
 		if (tw_ptr_local_->size() == 3) {
 			if (tw_ptr_local_->lparent()->is_word()) {
 				if (tw_ptr_local_->rparent()->is_word()) { // all parents are words
@@ -149,6 +149,7 @@ void Seger::start()
 				return;
 			}
 		}
+		words_list_.resize(tw_ptr_local_->array().size(), word_ptr_type(NULL));
 		std::copy(tw_ptr_local_->array().begin(), tw_ptr_local_->array().end(), words_list_.begin());
 	}
 	else {
@@ -283,23 +284,30 @@ void Seger::make(CList& clist, string_type& str) {
 void Seger::assign_freq() {
 	//freq_->assign_freq(*allfreq_);
 	std::map<word_ptr_type, word_ptr_type> word_pairs;
+	std::map<word_ptr_type, word_ptr_type>::iterator it;
 	freq_type& freq = freq_->set();
 
 	int step = freq_->array_size() < allfreq_->array_size() ? freq_->array_size() : allfreq_->array_size();
+
+	// need to load the frequency first, and during the loading the frequency could be changed
 	for (int i = 1; i < step; ++i) {
 		array_type& word_array = freq_->array_k(i);
 		for (int j = 0; j < word_array.size(); ++j) {
 			word_ptr_type local_word  = word_array[j];
 			word_ptr_type global_word = allfreq_->find(local_word->chars());
-			assign_freq(local_word, global_word);
+			if (global_word)
+				QFreq::instance().load(global_word);
+			word_pairs.insert(make_pair(local_word, global_word));
 		}
 	}
+
+	for (it = word_pairs.begin(); it != word_pairs.end(); ++it)
+		assign_freq(it->first, it->second);
 }
 
 void Seger::assign_freq(word_ptr_type local_word, word_ptr_type global_word)
 {
 	if (global_word) {
-		QFreq::instance().load(global_word);
 		local_word->freq(global_word->freq());
 		local_word->is_word(global_word->is_word());
 		if (global_word->left() != NULL && global_word->left()->is_word()) {

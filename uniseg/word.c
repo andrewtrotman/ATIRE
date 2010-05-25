@@ -366,30 +366,34 @@ void Word::children_do(void (*function_ptr)(Word*)) {
 	}
 }
 
-void Word::justify(unsigned int min) {
-	if (lparent() != NULL)
-		lparent()->justify();
+void Word:: adjust(int freq)
+{
+	if (this->chars() == "邓小平理论")
+		cerr << "Stop here!" << endl;
 
+	if (lparent() != NULL) {
+		lparent()->adjust_freq(freq);
+		lparent()->adjust(freq);
+	}
 
-	if (rparent() != NULL)
-		rparent()->justify();
-
-	if (lparent() != NULL)
-		lparent()->reduce_freq(freq(), min);
-
-
-	if (rparent() != NULL)
-		rparent()->reduce_freq(freq(), min);
+	if (rparent() != NULL) {
+		rparent()->adjust_freq(freq);
+		rparent()->adjust(freq);
+	}
 }
 
-void Word::reduce_freq(unsigned int freq, unsigned int min) {
-	if (freq_ == min)
+void Word::adjust_freq(int freq)
+{
+	if ((freq_ + freq) < 0) {
+		freq_ = 0;
 		return;
+	}
 
-	freq_ = (freq_ > freq) ? freq_ - freq : 0;
+	freq_ += freq; //(freq_ > freq) ? freq_ - freq : 0;
 }
 
-void Word::cal_p(double base) {
+void Word::cal_p(double base)
+{
 /*	if (base_ == 0.0)
 		base_ = base;
 
@@ -446,7 +450,7 @@ void Word::cal_a() {
 }
 
 void Word::cal_ngmi_a(int start) {
-	double a = 0.0 - std::numeric_limits<double>::max();
+	double a = std::numeric_limits<double>::max();
 
 	int count = 0;
 	bool stop_flag = false;
@@ -479,9 +483,9 @@ void Word::cal_ngmi_a(int start) {
 			else if (lw->p() == 0.0 || rw->p() == 0.0)
 				tmp = std::numeric_limits<double>::max();
 			else {
-				mi = log(ww->p() / (lw->p() * rw->p()));
-				sign = (mi > 0) ? 1.0 : -1.0;
-				tmp = sign * mi * mi;
+				tmp = mi = log(ww->p() / (lw->p() * rw->p()));
+//				sign = (mi > 0) ? 1.0 : -1.0;
+//				tmp = sign * mi * mi;
 			}
 
 			if (UNISEG_settings::instance().debug)
@@ -497,7 +501,11 @@ void Word::cal_ngmi_a(int start) {
 			if (mi < 0)
 				assert(sign == -1.0);
 
-			if (tmp > a)
+			/*
+			 *
+			 *
+			 */
+			if (tmp < a)
 				a = tmp;
 
 		}
@@ -511,6 +519,10 @@ void Word::cal_ngmi_a(int start) {
 		right_a_ = a;
 	else
 		left_a_ = a;
+
+	if (UNISEG_settings::instance().debug)
+		cerr << "calculating association score for " <<this->chars()	<< " and get "	<< "(" << left_a_ << ", " << right_a_ << ")"
+			<< endl;
 }
 
 double Word::cal_a(int start) {

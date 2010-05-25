@@ -217,8 +217,8 @@ public:
 	void seged(bool b) { seged_ = b; }
 	void seged_if(unsigned int freq);
 
-	void justify(unsigned int min = 2);
-	void reduce_freq(unsigned int freq, unsigned int min = 0);
+	void adjust(int freq);
+	void adjust_freq(int freq);
 
 	void cal_p(double base);
 	void cal_a();

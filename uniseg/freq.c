@@ -583,7 +583,7 @@ void Freq::add_freq(Freq& freq, int threshold) {
 
 void Freq::justify(unsigned int min) {
 	for (int i = 0; i < freq_n_[k_].size(); i++)
-		freq_n_[k_][i]->justify(min);
+		freq_n_[k_][i]->adjust(min);
 }
 
 void Freq::cal_word_p(double base) {

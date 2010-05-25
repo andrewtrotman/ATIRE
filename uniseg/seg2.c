@@ -62,7 +62,7 @@ void Seger2::build()
 		//tmp_w = freq->find(tmp_str);
 		tmp_w = tw_ptr_local_->subword(lmin, rmax - lmin + 1);
 		if (tmp_w->is_word()) {
-			i = rmax + 1;
+			i += 2;
 			continue;
 		}
 
@@ -104,8 +104,10 @@ void Seger2::seg()
 			last = i + 1;
 		}
 	}
-	word = tw_ptr_local_->subword(last, i - last);
-	words_list_.push_back(word);
+	if (last < tw_ptr_local_->size()) {
+		word = tw_ptr_local_->subword(last, tw_ptr_local_->size() - last);
+		words_list_.push_back(word);
+	}
 
 	if (words_list_.size() == 0)
 		words_list_.push_back(tw_ptr_local_);
