@@ -16,7 +16,7 @@ class ANT_search_engine;
 class ANT_stemmer_factory
 {
 public:
-	enum { NONE, S_STRIPPER, PORTER, LOVINS, PAICE_HUSK, OTAGO };
+	enum { NONE, S_STRIPPER, PORTER, LOVINS, PAICE_HUSK, OTAGO, DOUBLE_METAPHONE };
 	enum { WEIGHTED_SIMILARITY = 1, THRESHOLD_SIMILARITY };
 
 public:

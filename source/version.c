@@ -49,12 +49,6 @@ puts("Andrew Trotman");
 puts("Shlomo Geva");
 puts("");
 
-puts("HASHING ALGORITHMS");
-puts("------------------");
-puts("Random Hash             : Andrew Trotman");
-puts("ANT Hash                : Andrew Trotman");
-puts("");
-
 puts("SORTING ALGORITHMS");
 puts("------------------");
 puts("qsort (top-k addapted)  : J.L. Bentley, M.D. McIlroy");
@@ -93,6 +87,7 @@ puts("--------");
 #ifdef ANT_HAS_LOVINS
 	puts("Lovins                  : Linh Huynh, Eibe Frank (http://www.cs.waikato.ac.nz/~eibe/stemmers/index.html)");
 #endif
+puts("Double Metaphone        : Adam J. Nelson, Lawrence Phillips (http://www.apocryph.org/metaphone/)");
 puts("Otago                   : Vaughn Wood");
 puts("Porter                  : Andrew Trotman");
 puts("S-stripper              : Andrew Trotman");

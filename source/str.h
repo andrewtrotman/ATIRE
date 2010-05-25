@@ -186,6 +186,20 @@ return out;
 	return string;
 	}
 
+	/*
+		STRUPPER()
+		----------
+	*/
+	inline char *strupper(char *string)
+	{
+	unsigned char *ch;
+
+	for (ch = (unsigned char *)string; *ch != '\0'; ch++)
+		*ch = ANT_toupper(*ch);
+
+	return string;
+	}
+
 #endif
 
 #ifdef __APPLE__

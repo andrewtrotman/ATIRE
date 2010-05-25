@@ -318,7 +318,8 @@ for (param = first_param; param < argc; param++)
 		*/
 #ifdef PARALLEL_INDEXING_DOCUMENTS
 		terms_in_document = index_document(single_document_index, stemmer, param_block.segmentation, readability, doc, current_file);
-		index->add_indexed_document(single_document_index, doc);
+		if (terms_in_document != 0)
+			index->add_indexed_document(single_document_index, doc);
 		single_document_index->rewind();
 #else
 		terms_in_document = index_document(index, stemmer, param_block.segmentation, readability, doc, current_file);

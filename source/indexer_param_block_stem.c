@@ -42,6 +42,7 @@ else
 printf("Term expansion, one of:\n");
 
 puts("  -             None [default]");
+puts("  d             Double Metaphone phonetics");
 #ifdef ANT_HAS_PAICE_HUSK
 puts("  h             Paice Husk stemming");
 #endif
@@ -73,6 +74,7 @@ if (*(which + 1) != '\0' && *(which + 1) != '+' && *(which + 1) != '-')
 switch (*which)
 	{
 	case '-' : stemmer = ANT_stemmer_factory::NONE;       break;
+	case 'd' : stemmer = ANT_stemmer_factory::DOUBLE_METAPHONE;       break;
 #ifdef ANT_HAS_PAICE_HUSK
 	case 'h' : stemmer = ANT_stemmer_factory::PAICE_HUSK; break;
 #endif
