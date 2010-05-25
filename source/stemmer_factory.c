@@ -12,6 +12,7 @@
 #include "stemmer_term_similarity_weighted.h"
 #include "stemmer_term_similarity_threshold.h"
 #include "phonetic_iterator_double_metaphone.h"
+#include "phonetic_iterator_soundex.h"
 
 /*
 	ANT_STEMMER_FACTORY::GET_STEMMER()
@@ -33,6 +34,7 @@ switch (which_stemmer)
 	case PAICE_HUSK:	stemmer = new ANT_stemmer_paice_husk(engine);	break;
 #endif
 	case DOUBLE_METAPHONE: stemmer = new ANT_phonetic_iterator_double_metaphone(engine); break;
+	case SOUNDEX: stemmer = new ANT_phonetic_iterator_soundex(engine); break;
 	default:            break;
 	}
 
@@ -67,6 +69,7 @@ switch (which_stemmer)
 	case PAICE_HUSK:	stemmer = new ANT_stem_paice_husk;		break;
 #endif
 	case DOUBLE_METAPHONE: stemmer = new ANT_phonetic_double_metaphone; break;
+	case SOUNDEX: 		stemmer = new ANT_phonetic_soundex; 	break;
 
 	default:            break;
 	}

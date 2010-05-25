@@ -52,6 +52,7 @@ puts("  l             Lovins stemming");
 puts("  o             Otago stemming");
 puts("  p             Porter stemming");
 puts("  s             S-Striping stemming");
+puts("  S             Soundex phonetics");
 if (has_cutoff)
 	{
 	#ifdef USE_FLOATED_TF
@@ -84,6 +85,7 @@ switch (*which)
 	case 'p' : stemmer = ANT_stemmer_factory::PORTER;     break;
 	case 'o' : stemmer = ANT_stemmer_factory::OTAGO;      break;
 	case 's' : stemmer = ANT_stemmer_factory::S_STRIPPER; break;
+	case 'S' : stemmer = ANT_stemmer_factory::SOUNDEX; break;
 	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
 	}
 if (!has_cutoff)

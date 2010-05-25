@@ -16,7 +16,7 @@
 #else
 	#define _tcsncmp strncmp
 	#ifdef _MSC_VER
-		#define _tcsupr strupr
+		#define _tcsupr _strupr
 	#else
 		#define _tcsupr strupper
 	#endif
