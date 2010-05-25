@@ -379,7 +379,9 @@ private:
 				else
 					current	+=1;
 				break;
-
+/*
+	ANT:This is the C cedilla French Character
+*/
 			case 'Ç':
 				addMetaphoneCharacter(_TEXT("S"));
 				current += 1;
@@ -740,6 +742,9 @@ private:
 				addMetaphoneCharacter(_TEXT("N"));
 				break;
 
+/*
+	ANT:This is the N tilde Character (Spanish ene)
+*/
 			case 'Ñ':
 				current += 1;
 				addMetaphoneCharacter(_TEXT("N"));

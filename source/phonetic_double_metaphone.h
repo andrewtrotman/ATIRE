@@ -1,6 +1,9 @@
 /*
 	PHONETIC_DOUBLE_METAPHONE.H
 	---------------------------
+	For the original articles on Metaphone and Double Metaphone see:
+	Philips, L. (2000) The Double Metaphone Search Algorithm, C/C++ Users Journal archive, 18(6):38-43
+
 	Interface library for Adam J. Nelson's 2003 Metaphone code.  That code has an "unrestricted license"
 	for usage instructions on his code see: http://www.codeproject.com/kb/string/dmetaphone1.aspx
 */
