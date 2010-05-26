@@ -128,4 +128,3 @@ void Seger2::add_to_list(array_type& cwlist)
 {
 
 }
-

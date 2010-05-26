@@ -110,19 +110,22 @@ void Seger::init()
 
 pair<word_ptr_type, word_ptr_type> Seger::get_leftmost_word(word_ptr_type word)
 {
-	word_ptr_type pre = NULL, cur;
+	word_ptr_type pre = NULL, cur, final = NULL;
 	int len = 1;
-	while ( len < word->size() && (cur = word->subword(0, len))->is_word()) {
+	while ( len <= word->size() && ((cur = word->subword(0, len))->is_word() || QFreq::instance().fuzzy_search_dic(cur->chars()))) {
 		pre = cur;
 		++len;
 	}
 
-	if (cur != NULL && cur->has_word_pair())
-		return make_pair(cur, word->subword(cur->size(), word->size() - cur->size()));
+	if (cur != NULL && cur->size() > 2 && cur->has_word_pair())
+		final = cur;
+	else if (pre != NULL)
+		final = pre;
 
-	if (pre != NULL)
-		return make_pair(pre, word->subword(pre->size(), word->size() - pre->size()));
-
+	if (final != NULL) {
+		word_ptr_type right = (final->size() == word->size()) ? (word_ptr_type)NULL : word->subword(final->size(), word->size() - final->size());
+		return make_pair(final, right);
+	}
 	return make_pair(word->lchar(), word->rparent());
 }
 
