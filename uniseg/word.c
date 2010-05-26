@@ -372,14 +372,14 @@ void Word:: adjust(int freq)
 //		cerr << "Stop here!" << endl;
 
 	if (lparent() != NULL) {
-		if (lparent()->chars() == "化下")
+		if (lparent()->chars() == "工作最")
 			cerr << "Stop here!" << endl;
 		lparent()->adjust_freq(freq);
 		lparent()->adjust(freq);
 	}
 
 	if (rparent() != NULL) {
-		if (rparent()->chars() == "化下")
+		if (rparent()->chars() == "工作最")
 			cerr << "Stop here!" << endl;
 		rparent()->adjust_freq(freq);
 		rparent()->adjust(freq);
@@ -455,6 +455,7 @@ void Word::cal_a() {
 
 void Word::cal_ngmi_a(int start) {
 	double a = std::numeric_limits<double>::max();
+	double mi, sign, tmp = std::numeric_limits<double>::max();
 
 	int count = 0;
 	bool stop_flag = false;
@@ -480,14 +481,12 @@ void Word::cal_ngmi_a(int start) {
 //				break;
 //
 
-			double mi, sign, tmp;
-
 			if (ww->p() == 0.0 && lw->p() != 0.0 && rw->p() != 0.0)
 				continue; //tmp = -std::numeric_limits<double>::max(); //continue; //tmp = std::numeric_limits<double>::max(); //0.0;
 //			else if (ww->p() == 0.0 && (lw->p() != 0.0 || rw->p() != 0.0))
 //				tmp = -std::numeric_limits<double>::max();
 			else if (lw->p() == 0.0 || rw->p() == 0.0)
-				tmp = std::numeric_limits<double>::max();
+				tmp = std::numeric_limits<double>::max() - 1; // change a bit the tmp value
 			else {
 				tmp = mi = log(ww->p() / (lw->p() * rw->p()));
 //				sign = (mi > 0) ? 1.0 : -1.0;
@@ -503,10 +502,6 @@ void Word::cal_ngmi_a(int start) {
 					<< " and get "
 					<< tmp
 					<< endl;
-
-//			if (mi < 0)
-//				assert(sign == -1.0);
-
 			/*
 			 *
 			 *
@@ -519,6 +514,9 @@ void Word::cal_ngmi_a(int start) {
 		if (stop_flag)
 			break;
 	}
+
+	if (tmp == std::numeric_limits<double>::max() && a == tmp)
+		a = -std::numeric_limits<double>::max();
 
 	int mid = size_ / 2;
 	if (start > mid)

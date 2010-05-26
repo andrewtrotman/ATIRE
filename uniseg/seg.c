@@ -108,6 +108,24 @@ void Seger::init()
 	//justify(0);
 }
 
+pair<word_ptr_type, word_ptr_type> Seger::get_leftmost_word(word_ptr_type word)
+{
+	word_ptr_type pre = NULL, cur;
+	int len = 1;
+	while ( len < word->size() && (cur = word->subword(0, len))->is_word()) {
+		pre = cur;
+		++len;
+	}
+
+	if (cur != NULL && cur->has_word_pair())
+		return make_pair(cur, word->subword(cur->size(), word->size() - cur->size()));
+
+	if (pre != NULL)
+		return make_pair(pre, word->subword(pre->size(), word->size() - pre->size()));
+
+	return make_pair(word->lchar(), word->rparent());
+}
+
 void Seger::input(unsigned char *input, int length)
 {
 	stream_ = string_type((char *)input, length);

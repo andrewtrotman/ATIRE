@@ -165,17 +165,40 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							segmented_len += word.length();
 						}
 						else {
-							word_ptr_type lparent = current_word;
-							assert(lparent != NULL);
-							while (lparent->size() > 1 && !lparent->is_word()) {
-								if (lparent->lparent() != NULL)
-									lparent = lparent->lparent();
+//							word_ptr_type lparent = current_word;
+//							assert(lparent != NULL);
+//							while (lparent->size() > 1 && !lparent->is_word()) {
+//								if (lparent->lparent() != NULL)
+//									lparent = lparent->lparent();
+//								else
+//									break;
+//							}
+							word_ptr_type tmp = NULL;
+//							int tmp_count = 0;
+							std::pair<word_ptr_type, word_ptr_type> word_pair = seger_.get_leftmost_word(current_word);
+							while (word_pair.second != NULL && !word_pair.second->is_word()) {
+//								if (tmp_count != 0)
+//									output_.append("  ");
+								if (word_pair.first->has_word_pair())
+									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  ");
 								else
-									break;
+									output_.append(word_pair.first->chars() + "  ");
+								word_pair = seger_.get_leftmost_word(word_pair.second);
 							}
-							output_.append(lparent->chars());
-							segmented_len += lparent->chars().length();
-							break;
+							if (word_pair.second != NULL) {
+								if (word_pair.first->has_word_pair())
+									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  " + word_pair.second->chars());
+								else
+									output_.append(word_pair.first->chars() + "  " + word_pair.second->chars());
+							}
+							else {
+								if (word_pair.first->has_word_pair())
+									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars());
+								else
+									output_.append(word_pair.first->chars());
+							}
+							segmented_len += current_word->chars().length();
+							//break;
 	//						output_.append(current_word->to_string());
 	//						segmented_len += current_word->chars().length();
 						}
