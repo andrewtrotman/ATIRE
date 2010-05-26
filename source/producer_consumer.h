@@ -5,7 +5,6 @@
 #ifndef PRODUCER_CONSUMER_H_
 #define PRODUCER_CONSUMER_H_
 
-
 #include "semaphores.h"
 #include "critical_section.h"
 

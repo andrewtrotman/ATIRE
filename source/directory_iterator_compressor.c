@@ -103,7 +103,6 @@ long instance;
 	The first object we get the slow way and then we start all the threads.  We do this
 	to get around the problem of not knowing who should call first().
 */
-this->get_file = get_file;
 if (source->first(object) != NULL)
 	work_one(compressor, object);
 else
