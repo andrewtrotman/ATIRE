@@ -211,7 +211,6 @@ public:
 	void is_word(bool b);
 
 	bool has_word_pair();
-	bool check_word_pair();
 
 	bool is_candidate_word() { return is_word_; }
 	void is_candidate_word(bool b);

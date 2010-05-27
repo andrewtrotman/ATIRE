@@ -408,6 +408,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 		ret_word->adjust(ret_word->freq());
 	}
 	else if (word_where > 0) {
+		assert(ret_word->size() > 1);
 		string left = ret_word->subchars(0, word_where);
 		string right = ret_word->subchars(word_where, ret_word->size() - word_where);
 

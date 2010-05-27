@@ -56,6 +56,7 @@ public:
 	int get_count() { return words_list_.size(); }
 	const array_type& best_words() const { return words_list_; }
 
+	static bool check_word_pair(word_ptr_type word);
 	static std::pair<word_ptr_type, word_ptr_type> get_leftmost_word(word_ptr_type word);
 	static std::pair<word_ptr_type, word_ptr_type> break_tie(word_ptr_type word);
 

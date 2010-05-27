@@ -179,22 +179,22 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							while (word_pair.second != NULL && !word_pair.second->is_word()) {
 //								if (tmp_count != 0)
 //									output_.append("  ");
-								if (word_pair.first->has_word_pair())
-									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  ");
-								else
+//								if (word_pair.first->has_word_pair())
+//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  ");
+//								else
 									output_.append(word_pair.first->chars() + "  ");
 								word_pair = seger_.get_leftmost_word(word_pair.second);
 							}
 							if (word_pair.second != NULL) {
-								if (word_pair.first->has_word_pair())
-									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  " + word_pair.second->chars());
-								else
+//								if (word_pair.first->has_word_pair())
+//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  " + word_pair.second->chars());
+//								else
 									output_.append(word_pair.first->chars() + "  " + word_pair.second->chars());
 							}
 							else {
-								if (word_pair.first->has_word_pair())
-									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars());
-								else
+//								if (word_pair.first->has_word_pair())
+//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars());
+//								else
 									output_.append(word_pair.first->chars());
 							}
 							segmented_len += current_word->chars().length();

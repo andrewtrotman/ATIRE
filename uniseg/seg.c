@@ -131,12 +131,39 @@ pair<word_ptr_type, word_ptr_type> Seger::get_leftmost_word(word_ptr_type word)
 	return make_pair(word->lchar(), word->rparent());
 }
 
+bool Seger::check_word_pair(word_ptr_type word)
+{
+	bool flag = false;
+	int size = word->size();
+	if (size > 3 && word->left() == NULL && word->right() == NULL){
+		word_ptr_type left = word->subword(0, size/2);
+		word_ptr_type right = word->subword(size/2, size - size/2);
+		if ((left->is_word() || QFreq::instance().fuzzy_search_dic(left->chars())) && (right->is_word() || QFreq::instance().fuzzy_search_dic(right->chars()))) {
+			word->left(left);
+			word->right(right);
+			flag = true;
+		}
+		else {
+			if ((size % 2) == 1) {
+				left = word->subword(0, size/2 + 1);
+				right = word->subword(size/2 + 1, size - size/2 - 1);
+				if ((left->is_word() || QFreq::instance().fuzzy_search_dic(left->chars())) && (right->is_word() || QFreq::instance().fuzzy_search_dic(right->chars()))) {
+					word->left(left);
+					word->right(right);
+					flag = true;
+				}
+			}
+		}
+	}
+	return flag; //word->has_word_pair();
+}
+
 std::pair<word_ptr_type, word_ptr_type> Seger::break_tie(word_ptr_type word)
 {
 	pair<word_ptr_type, word_ptr_type> a_pair;
-	if (word->check_word_pair())
-		a_pair = make_pair(word->left(), word->right());
-	else {
+//	if (check_word_pair(word))
+//		a_pair = make_pair(word->left(), word->right());
+//	else {
 		if (word->rparent()->is_word() || QFreq::instance().fuzzy_search_dic(word->rparent()->chars())) {
 			if (word->lparent()->is_word()) { // all parents are words
 				if (word->lparent()->freq() < word->rparent()->freq())
@@ -153,7 +180,7 @@ std::pair<word_ptr_type, word_ptr_type> Seger::break_tie(word_ptr_type word)
 			else
 				a_pair = make_pair(word->lchar(), word->rparent());
 		}
-	}
+	//}
 	return a_pair;
 }
 
@@ -365,7 +392,8 @@ void Seger::assign_freq(word_ptr_type local_word, word_ptr_type global_word)
 		local_word->freq(global_word->freq());
 		local_word->is_word(global_word->is_word());
 		if (global_word->left() != NULL && global_word->left()->is_word()) {
-			local_word->left(freq_->find(global_word->left()->chars()));
+			word_ptr_type tmp = freq_->find(global_word->left()->chars());
+			local_word->left(tmp);
 			local_word->left()->is_word(true);
 		}
 		if (global_word->right() != NULL && global_word->right()->is_word()) {
