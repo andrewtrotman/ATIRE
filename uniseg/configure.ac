@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([uniseg], [0.4.0], [lingxiang.tang@gmail.com])
+AC_INIT([uniseg], [0.4.2], [lingxiang.tang@gmail.com])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([freq_counter.h])
 

@@ -65,9 +65,11 @@ private:
 	Word*											pre_;
 	Word*											next_;
 
-	long						lang_;
+	long											lang_;
 	Address::uint_array								disk_address_;
 	bool											loaded_;
+
+	long											df_;   // collection document frequency
 
 private:
 	void init();
@@ -138,7 +140,7 @@ public:
 	const Word *lparent() const { return lparent_; }
 	Word *lparent() { return lparent_; }
 	void lparent(Word *lparent) {
-		lparent_ = left_ = lparent;
+		lparent_ = lparent;
 		if (lparent_ != NULL && lparent_ != this) {
 			lparent_->link(this);
 		}
@@ -146,7 +148,7 @@ public:
 	const Word *rparent() const { return rparent_; }
 	Word *rparent() { return rparent_; }
 	void rparent(Word *rparent) {
-		rparent_ = right_ = rparent;
+		rparent_ = rparent;
 		if (rparent_ != NULL && rparent != this)
 			rparent_->link(this);
 	}
@@ -208,7 +210,8 @@ public:
 	bool is_word() { return is_word_; }
 	void is_word(bool b);
 
-	bool has_word_pair() { return (left_ != NULL && right_ != NULL) ? (left_->is_word() && right_->is_word() && (left_->size() + right_->size()) == size()) : false;}
+	bool has_word_pair();
+	bool check_word_pair();
 
 	bool is_candidate_word() { return is_word_; }
 	void is_candidate_word(bool b);

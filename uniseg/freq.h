@@ -39,6 +39,9 @@ private:
 	bool 						loaded_;
 	std::vector<FreqFile *> 	freq_files_;
 
+	long						number_of_documents_;
+	long						average_document_length_;
+
 public:
 	Freq();
 	virtual ~Freq();

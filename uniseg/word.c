@@ -160,6 +160,37 @@ unsigned int Word::highest_freq() {
 	return freq_;
 }
 
+bool Word::has_word_pair()
+{
+	if (this->is_word())
+		return false;
+
+	return (left_ != NULL && right_ != NULL) ? (left_->is_word() && right_->is_word() && (left_->size() + right_->size()) == size()) : false;;
+}
+
+bool Word::check_word_pair()
+{
+	if (size_ > 4 && left_ == NULL && right_ == NULL){
+		word_ptr_type left = subword(0, size_/2);
+		word_ptr_type right = subword(size_/2, size_ - size_/2);
+		if (left->is_word() && right->is_word()) {
+			left_ = left;
+			right_ = right;
+		}
+		else {
+			if ((size_ % 2) == 1) {
+				left = subword(0, size_/2 + 1);
+				right = subword(size_/2 + 1, size_ - size_/2 - 1);
+				if (left->is_word() && right->is_word()) {
+					left_ = left;
+					right_ = right;
+				}
+			}
+		}
+	}
+	return has_word_pair();
+}
+
 /*
 Word* Word::word(int idx) {
 	assert(idx <= arr_.size());
