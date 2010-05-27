@@ -15,6 +15,8 @@
 	#include <limits.h>
 #endif
 
+class ANT_memory_index_one;
+
 /*
 	class ANT_DIRECTORY_ITERATOR_OBJECT
 	-----------------------------------
@@ -27,6 +29,8 @@ public:
 	long long length;				// length of the file
 	char *compressed;				// the file compressed
 	long long compressed_length;	// compressed length of the file
+	ANT_memory_index_one *index;	// the document once indexed
+	long terms;						// the number of terms in the document (computed by indexing it)
 } ;
 
 #endif /* DIRECTORY_ITERATOR_OBJECT_H_ */

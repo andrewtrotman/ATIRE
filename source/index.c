@@ -14,6 +14,7 @@
 #include "directory_iterator_file.h"
 #include "directory_iterator_object.h"
 #include "directory_iterator_pkzip.h"
+#include "directory_iterator_preindex.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -166,8 +167,6 @@ ANT_directory_iterator *disk = NULL;
 ANT_parser *parser;
 ANT_readability_factory *readability;
 ANT_memory_index *index;
-ANT_memory_index_one *single_document_index;
-ANT_memory *single_document_index_memory;
 long long doc, now, last_report;
 long param, first_param;
 ANT_memory file_buffer(1024 * 1024);
@@ -194,8 +193,6 @@ if (first_param >= argc)
 last_report = 0;
 doc = 0;
 index = new ANT_memory_index("index.aspt");
-single_document_index_memory = new ANT_memory(4 * 1024*1024);		// allocate 4MB to each document indexed in parallel (one or two pages depending on OS configuration)
-single_document_index = new ANT_memory_index_one (single_document_index_memory, index);
 id_list.open("doclist.aspt", "wb");
 
 index->set_compression_scheme(param_block.compression_scheme);
@@ -224,6 +221,7 @@ readability->set_parser(parser);
 #ifdef PARALLEL_INDEXING
 	parallel_disk = new ANT_directory_iterator_multiple;
 #endif
+
 /*
 	The first parameter that is not a command line switch is the start of the list of files to index
 */
@@ -283,6 +281,10 @@ for (param = first_param; param < argc; param++)
 		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text, ANT_directory_iterator::READ_FILE);
 		}
 
+	#ifdef PARALLEL_INDEXING_DOCUMENTS
+	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 8, ANT_directory_iterator::READ_FILE);
+	#endif
+
 	files_that_match = 0;
 
 	now = stats.start_timer();
@@ -317,10 +319,9 @@ for (param = first_param; param < argc; param++)
 			Index, this call returns the number of terms we found in the document
 		*/
 #ifdef PARALLEL_INDEXING_DOCUMENTS
-		terms_in_document = index_document(single_document_index, stemmer, param_block.segmentation, readability, doc, current_file);
-		if (terms_in_document != 0)
-			index->add_indexed_document(single_document_index, doc);
-		single_document_index->rewind();
+		index->add_indexed_document(current_file->index, doc);
+		delete current_file->index;
+		terms_in_document = current_file->terms;
 #else
 		terms_in_document = index_document(index, stemmer, param_block.segmentation, readability, doc, current_file);
 #endif
@@ -372,8 +373,6 @@ else
 	stats.add_disk_output_time(stats.stop_timer(now));
 	index->text_render(param_block.statistics);
 	}
-delete single_document_index;
-delete single_document_index_memory;
 delete index;
 delete disk;
 delete parser;

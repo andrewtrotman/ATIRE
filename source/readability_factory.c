@@ -28,6 +28,11 @@ measure[2] = NULL;//new ANT_readability;
 */
 ANT_readability_factory::~ANT_readability_factory()
 {
+ANT_readability **current;
+
+for (current = measure; *current != NULL; current++)
+	delete *current;
+
 delete [] measure;
 }
 

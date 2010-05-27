@@ -40,7 +40,7 @@ private:
 
 public:
 	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index);
-	virtual ~ANT_memory_index_one() {}
+	virtual ~ANT_memory_index_one();
 
 	void rewind(void);
 

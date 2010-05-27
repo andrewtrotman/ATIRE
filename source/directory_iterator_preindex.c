@@ -6,7 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "directory_iterator_preindex.h"
+#include "directory_iterator_preindex_internals.h"
 #include "threads.h"
+#include "memory.h"
+#include "memory_index_one.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -20,10 +23,14 @@
 	ANT_DIRECTORY_ITERATOR_PREINDEX::ANT_DIRECTORY_ITERATOR_PREINDEX()
 	------------------------------------------------------------------
 */
-ANT_directory_iterator_preindex::ANT_directory_iterator_preindex(ANT_directory_iterator *source, long threads, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_preindex::ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document index_document_method, ANT_memory_index *final_index, long threads, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->threads = threads;
 this->source = source;
+this->final_index = final_index;
+this->param_block = param_block;
+this->index_document = index_document_method;
+
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
 }
 
@@ -40,8 +47,14 @@ delete store;
 	ANT_DIRECTORY_ITERATOR_PREINDEX::WORK_ONE()
 	-------------------------------------------
 */
-void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *object)
+void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *object, ANT_directory_iterator_preindex_internals *internals)
 {
+long terms;
+
+object->index = new ANT_memory_index_one(new ANT_memory(1024 * 1024), final_index);
+terms = (*index_document)(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object);
+object->terms = terms;
+
 store->add(object);
 }
 
@@ -49,12 +62,12 @@ store->add(object);
 	ANT_DIRECTORY_ITERATOR_PREINDEX::WORK()
 	---------------------------------------
 */
-void ANT_directory_iterator_preindex::work()
+void ANT_directory_iterator_preindex::work(ANT_directory_iterator_preindex_internals *internals)
 {
 ANT_directory_iterator_object object;
 
 while (source->next(&object) != NULL)
-	work_one(&object);
+	work_one(&object, internals);
 
 object.filename[0] = '\0';
 store->add(&object);
@@ -66,8 +79,12 @@ store->add(&object);
 */
 void *ANT_directory_iterator_preindex::bootstrap(void *param)
 {
-((ANT_directory_iterator_preindex *)param)->work();
+ANT_directory_iterator_preindex_internals *internals;
 
+internals = (ANT_directory_iterator_preindex_internals *)param;
+internals->parent->work(internals);
+
+delete internals;
 return NULL;
 }
 
@@ -78,13 +95,15 @@ return NULL;
 ANT_directory_iterator_object *ANT_directory_iterator_preindex::first(ANT_directory_iterator_object *object)
 {
 long instance;
+ANT_directory_iterator_preindex_internals *next_thread;
 
 /*
 	The first object we get the slow way and then we start all the threads.  We do this
 	to get around the problem of not knowing who should call first().
 */
+next_thread = new ANT_directory_iterator_preindex_internals(this);
 if (source->first(object) != NULL)
-	work_one(object);
+	work_one(object, next_thread);
 else
 	{
 	/*
@@ -94,11 +113,16 @@ else
 	store->add(object);
 	}
 
+delete next_thread;
+
 /*
 	Now we start each thread.
 */
 for (instance = 0; instance < threads; instance++)
-	ANT_thread(bootstrap, this);
+	{
+	next_thread = new ANT_directory_iterator_preindex_internals(this);
+	ANT_thread(bootstrap, next_thread);
+	}
 
 return next(object);
 }

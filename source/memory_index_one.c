@@ -40,6 +40,15 @@ rewind();
 }
 
 /*
+	ANT_MEMORY_INDEX_ONE::~ANT_MEMORY_INDEX_ONE()
+	---------------------------------------------
+*/
+ANT_memory_index_one::~ANT_memory_index_one()
+{
+delete memory;
+}
+
+/*
 	ANT_MEMORY_INDEX_ONE::REWIND()
 	------------------------------
 */

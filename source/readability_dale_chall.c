@@ -25,6 +25,16 @@ measure_name = new ANT_string_pair("~dalechall");
 }
 
 /*
+	ANT_READABILITY_DALE_CHALL::~ANT_READABILITY_DALE_CHALL()
+	---------------------------------------------------------
+*/
+ANT_readability_dale_chall::~ANT_readability_dale_chall()
+{
+delete [] words_encountered;
+delete measure_name;
+}
+
+/*
 	ANT_READABILITY_DALE_CHALL::HANDLE_TOKEN()
 	------------------------------------------
 */
