@@ -209,8 +209,8 @@ else											// everything else (that starts with a '<')
 				do
 					current++;
 				while (*current != '\'' && *current != '\0');
-			else
-				current++;
+			if (*current != '\0')
+				current++;		// the else case as well as skipping over the quote
 			}
 		}
 	else

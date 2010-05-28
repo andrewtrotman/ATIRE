@@ -47,7 +47,7 @@
 */
 void report(long long doc, ANT_memory_indexer *index, ANT_stats_time *stats, long long bytes_indexed)
 {
-printf("%lld Documents (%lld bytes) in %lld bytes of memory in ", doc, bytes_indexed, index->get_memory_usage());
+printf("%lld Documents (%lld bytes) in %lld bytes of memory in ", (long long)doc, (long long)bytes_indexed, (long long)index->get_memory_usage());
 stats->print_elapsed_time();
 }
 
@@ -282,7 +282,7 @@ for (param = first_param; param < argc; param++)
 		}
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
-	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 8, ANT_directory_iterator::READ_FILE);
+	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 32, ANT_directory_iterator::READ_FILE);
 	#endif
 
 	files_that_match = 0;
