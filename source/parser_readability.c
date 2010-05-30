@@ -12,7 +12,7 @@ ANT_string_pair *ANT_parser_readability::get_next_token(void)
 {
 unsigned char *start;
 
-while (!isheadchar(*current) && !issentenceend(*current))
+while (!ANT_isheadchar(*current) && !issentenceend(*current))
 	current++;
 
 if (issentenceend(*current))
@@ -51,9 +51,9 @@ else if (*current == '\0')						// end of string
 else											// everything else (that starts with a '<')
 	{
 	start = current++; // keep the < so readability can know it's a tag
-	if (isXMLnamestartchar(*current))
+	if (ANT_isXMLnamestartchar(*current))
 		{
-		while (isXMLnamechar(*current))
+		while (ANT_isXMLnamechar(*current))
 			{
 			*current = ANT_toupper(*current);
 			current++;

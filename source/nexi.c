@@ -93,8 +93,8 @@ else if (length == 1)
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::isXMLnamestartchar(*from) || ANT_parser::iseuropean(from))
-		if (ANT_parser::isXMLnamechar(*next) || ANT_parser::iseuropean(next))
+	else if (ANT_isXMLnamestartchar(*from) || ANT_parser::iseuropean(from))
+		if (ANT_isXMLnamechar(*next) || ANT_parser::iseuropean(next))
 			return TRUE;
 		else if (*next == '-')		// hyphenated words
 			return TRUE;
@@ -139,8 +139,8 @@ else
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::isXMLnamestartchar(*from) ||ANT_parser::iseuropean(from))
-		if (ANT_parser::isXMLnamechar(*next) || *next == '-' || *next == '\''||ANT_parser::iseuropean(next))
+	else if (ANT_isXMLnamestartchar(*from) ||ANT_parser::iseuropean(from))
+		if (ANT_isXMLnamechar(*next) || *next == '-' || *next == '\''||ANT_parser::iseuropean(next))
 			return TRUE;
 		else
 			return FALSE;
@@ -203,7 +203,7 @@ more = TRUE;
 do
 	{
 	get_next_token();
-	if (ANT_parser::isXMLnamestartchar(token[0]))
+	if (ANT_isXMLnamestartchar(token[0]))
 		continue;
 	else if (token.true_strcmp("//") == 0)
 		continue;
@@ -294,7 +294,7 @@ return answer;
 long ANT_NEXI::read_term(ANT_string_pair *term)
 {
 *term = *get_next_token();
-if (ANT_parser::isXMLnamestartchar(token[0]))
+if (ANT_isXMLnamestartchar(token[0]))
 	return TRUE;
 if (ANT_isalnum(token[0]))
 	return TRUE;
@@ -313,7 +313,7 @@ return FALSE;
 long ANT_NEXI::read_phraseless_term(ANT_string_pair *term)
 {
 *term = *get_next_token();
-if (ANT_parser::isXMLnamestartchar(token[0]))
+if (ANT_isXMLnamestartchar(token[0]))
 	return TRUE;
 if (ANT_isalnum(token[0]))
 	return TRUE;

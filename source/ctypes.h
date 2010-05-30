@@ -17,6 +17,9 @@ enum {
 	ANT_CTYPE_HARD_SPACE = 128, 		// character 0x20
 	ANT_CTYPE_VOWEL = 256, 
 	ANT_CTYPE_Y = 512,
+	ANT_CTYPE_HEADCHAR = 1024,			// ANT parser start of token
+	ANT_CTYPE_XML_NAME_START = 2048,
+	ANT_CTYPE_XML_NAME = 4096,
 
 	ANT_CTYPE_ISALPHA = ANT_CTYPE_UPPER | ANT_CTYPE_LOWER,
 	ANT_CTYPE_ISALNUM = ANT_CTYPE_ISALPHA | ANT_CTYPE_DIGIT,
@@ -59,6 +62,9 @@ inline int ANT_isascii(int c) { return (unsigned char)(c) <= 0x7f; }
 	Special IS() routines for ANT indexing
 */
 inline int ANT_islowernum(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISLOWERNUM) != 0; }
+inline int ANT_isheadchar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_HEADCHAR) != 0; }
+inline int ANT_isXMLnamestartchar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_XML_NAME_START) != 0; }
+inline int ANT_isXMLnamechar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_XML_NAME) != 0; }
 
 /*
 	TO() routines

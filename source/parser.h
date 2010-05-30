@@ -42,15 +42,19 @@ protected:
 	unsigned char *segmentation;
 	long should_segment;
 
+/*
 protected:
 	static int isheadchar(unsigned char val) { return ANT_isalnum(val) || val == '<' || val == '\0'; }
+*/
 
 public:
 	ANT_parser(long should_segment = NOSEGMENTATION);
 	virtual ~ANT_parser();
 
+/*
 	static int isXMLnamestartchar(unsigned char val) { return ANT_isalpha(val) || val == ':' || val == '_'; }		// see http://www.w3.org/TR/REC-xml/#NT-NameStartChar
 	static int isXMLnamechar(unsigned char val) { return isXMLnamestartchar(val) || ANT_isdigit(val) || val == '.' || val == '-'; } // see http://www.w3.org/TR/REC-xml/#NT-NameChar
+*/
 
 	virtual void segment(unsigned char *start, long length);
 
@@ -93,7 +97,7 @@ return 0;
 
 /*
 	ANT_PARSER::ISUTF8()
-	--------------------------
+	--------------------
 	if it is valid uft8 bytes
 */
 inline int ANT_parser::isutf8(unsigned char *here)

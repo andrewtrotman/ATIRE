@@ -44,7 +44,7 @@ private:
 public:
 	ANT_phonetic_double_metaphone() {}
 	virtual ~ANT_phonetic_double_metaphone() {}
-	virtual size_t stem(const char *term, char *destination) { generator.computeKeys(term); strcpy(destination, generator.getPrimaryKey()); return 1; }
+	virtual size_t stem(const char *term, char *destination) { generator.computeKeys(term); strcpy(destination, generator.getPrimaryKey()); strlower(destination); return 1; }
 	virtual char *name(void) { return "Double Metaphone"; }
 } ;
 

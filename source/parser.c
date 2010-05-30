@@ -100,7 +100,7 @@ if (segmentation != NULL)
 */
 for (;;)
 	{
-	if (isheadchar(*current))
+	if (ANT_isheadchar(*current))
 		break;
 	if (*current & 0x80) //it is a unicode character
 		{
@@ -126,14 +126,17 @@ for (;;)
 if (ANT_isalpha(*current) || iseuropean(current))	// alphabetic strings (in the ASCII CodePage) or European speical characters
 	{
 	start = current;
-	tolower(current);		// this is ANT_parser::tolower()
-	current += utf8_bytes(current);
-
-	while (ANT_isalpha(*current) || iseuropean(current))
+	do
 		{
-		tolower(current);	// this is ANT_parser::tolower()
+		tolower(current);		// this is ANT_parser::tolower()
 		current += utf8_bytes(current);
+		while (ANT_isalpha(*current))
+			{
+			*current = ANT_tolower(*current);
+			current++;
+			}
 		}
+	while (iseuropean(current));
 
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
@@ -189,9 +192,9 @@ else if (*current & 0x80)		// UTF-8 character
 else											// everything else (that starts with a '<')
 	{
 	start = ++current;
-	if (isXMLnamestartchar(*current))
+	if (ANT_isXMLnamestartchar(*current))
 		{
-		while (isXMLnamechar(*current))
+		while (ANT_isXMLnamechar(*current))
 			{
 			*current = ANT_toupper(*current);
 			current++;

@@ -282,7 +282,7 @@ for (param = first_param; param < argc; param++)
 		}
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
-	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 32, ANT_directory_iterator::READ_FILE);
+	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 8, ANT_directory_iterator::READ_FILE);
 	#endif
 
 	files_that_match = 0;
@@ -318,6 +318,7 @@ for (param = first_param; param < argc; param++)
 		/*
 			Index, this call returns the number of terms we found in the document
 		*/
+		now = stats.start_timer();
 #ifdef PARALLEL_INDEXING_DOCUMENTS
 		index->add_indexed_document(current_file->index, doc);
 		delete current_file->index;
@@ -325,6 +326,8 @@ for (param = first_param; param < argc; param++)
 #else
 		terms_in_document = index_document(index, stemmer, param_block.segmentation, readability, doc, current_file);
 #endif
+		stats.add_indexing_time(stats.stop_timer(now));
+
 		if (terms_in_document == 0)
 			{
 			/*

@@ -17,6 +17,7 @@ public:
 	long long disk_input_time;
 	long long disk_output_time;
 	long long cpu_time;
+	long long indexing_time;
 
 public:
 	ANT_stats_time(ANT_memory *memory = 0);
@@ -27,6 +28,7 @@ public:
 
 	void add_disk_input_time(long long time) { disk_input_time += time; }
 	void add_disk_output_time(long long time) { disk_output_time += time; }
+	void add_indexing_time(long long time) { indexing_time += time; }
 	void add_cpu_time(long long time) { cpu_time += time; }
 } ;
 
