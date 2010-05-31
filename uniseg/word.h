@@ -33,7 +33,7 @@ public:
 private:
 	string_type 									chars_;
 
-	unsigned int 									freq_;
+	unsigned int 									freq_;  // term frequency
 	int 											address_;
 	int 											size_; /// number of characters
 
@@ -70,6 +70,7 @@ private:
 	bool											loaded_;
 
 	long											df_;   // collection document frequency
+	double											idf_;
 
 private:
 	void init();
@@ -136,6 +137,7 @@ public:
 	unsigned int highest_freq();
 	static bool cmp_freq(Word *w1, Word *w2);
 	static bool cmp_just_freq(Word *w1, Word *w2);
+	static bool cmp_idf(Word *w1, Word *w2);
 
 	const Word *lparent() const { return lparent_; }
 	Word *lparent() { return lparent_; }
@@ -235,11 +237,19 @@ public:
 	void base(double base) { base_ = base; }
 	double base() { return base_; }
 
+	void cal_idf(double number_of_documents);
+
 	bool is_loaded() { return loaded_; }
 	void set_loaded(bool b) { loaded_ = b; }
 
 	void cal_ngmi_a(int start);
 	double cal_a(int start);
+
+	long df() { return df_; }
+	double idf() { return idf_; }
+	void increase_document_frequency() { ++df_; }
+
+	void print(bool details);
 };
 
 inline const Word::Side Word::side() const {

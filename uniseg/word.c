@@ -72,6 +72,9 @@ void Word::init() {
 
 	left_ = NULL;
 	right_ = NULL;
+
+	df_ = 0;
+	idf_ = 0.0;
 }
 
 bool Word::cmp_just_freq(Word *w1, Word *w2) {
@@ -81,6 +84,14 @@ bool Word::cmp_just_freq(Word *w1, Word *w2) {
 	if (s1 == s2)
 		return w1->freq() > w2->freq();
 	return s1 > s2;
+}
+
+bool Word::cmp_idf(Word *w1, Word *w2)
+{
+	if (w1->idf() != w2->idf())
+		return w1->idf() > w2->idf();
+
+	return cmp_just_freq(w1, w2);
 }
 
 bool Word::cmp_freq(Word *w1, Word *w2) {
@@ -613,4 +624,34 @@ double Word::cal_a(int start) {
 		a /= count;
 
 	return a;
+}
+
+void Word::cal_idf(double number_of_documents)
+{
+	idf_ = log((double)number_of_documents/double(df_ + 1));
+}
+
+void Word::print(bool details)
+{
+	const array_type& word_a = array();
+	if ((lang() != uniseg_encoding::CHINESE) && (lang() != UNISEG_encoding::NUMBER))
+		for (int j = 0; j < word_a.size(); j++) {
+			if (j > 0 /*&& (j < (word_a.size() - 1))*/)
+				cerr<< " ";
+			cerr<< word_a[j]->chars();
+		}
+	else {
+		if (left() != NULL && left()->is_word()
+				&& right() != NULL && right()->is_word())
+			cerr << left()->chars() << " " << right()->chars();
+		else
+			cerr << chars();
+	}
+	cerr<< ": " <<  freq();
+	if (is_word())
+		cerr << "(word)";
+
+	if (details)
+		cerr << "   (df: " << df() << " idf: " << idf() << ")";
+	cerr << endl;
 }

@@ -39,6 +39,8 @@ private:
 	bool 						loaded_;
 	std::vector<FreqFile *> 	freq_files_;
 
+	long						current_document_id_;
+	long						previous_document_id_;
 	long						number_of_documents_;
 	long						average_document_length_;
 
@@ -55,8 +57,8 @@ public:
 	void add(word_ptr_type word_ptr, bool allnew = false);
 
 	void sort(int k);
-	void show(int k, int min = 1);
-	void showcol(int k, int min = 1);
+	void show(int k, int, bool details = false);
+	void showcol(int k, int, bool details);
 	void show();
 	void alloc(int k = 1);  /// allocate the address
 
@@ -91,6 +93,8 @@ public:
 	void cal_word_a();
 	void cal_word_ngmi_a(double base);
 
+	void cal_word_idf();
+
 	void clear() { freq_.clear(); }
 
 	void to_array(std::vector<word_ptr_type>& wa);
@@ -104,6 +108,16 @@ public:
 	void load(int index = -1);
 
 	void load_freq(std::string path, int n = INT_MAX, bool force = false);
+
+	void set_average_document_length(long length) { average_document_length_ =  length; }
+	long get_average_document_length() { return average_document_length_; }
+
+	void set_number_of_documents(long number) { number_of_documents_ = number; }
+	long get_number_of_documents() { return number_of_documents_; }
+	void increase_number_of_documents() { ++number_of_documents_; }
+
+	void set_current_document_id(long id);
+
 private:
 
 	void remove_low(int k);

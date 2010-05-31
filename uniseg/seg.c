@@ -135,10 +135,11 @@ bool Seger::check_word_pair(word_ptr_type word)
 {
 	bool flag = false;
 	int size = word->size();
-	if (size > 3 && word->left() == NULL && word->right() == NULL){
+	if (size > 3 && word->left() == NULL && word->right() == NULL) {
 		word_ptr_type left = word->subword(0, size/2);
 		word_ptr_type right = word->subword(size/2, size - size/2);
-		if ((left->is_word() || QFreq::instance().fuzzy_search_dic(left->chars())) && (right->is_word() || QFreq::instance().fuzzy_search_dic(right->chars()))) {
+		//if ((left->is_word() || QFreq::instance().fuzzy_search_dic(left->chars())) && (right->is_word() || QFreq::instance().fuzzy_search_dic(right->chars()))) {
+		if (left->is_word() && right->is_word()) {
 			word->left(left);
 			word->right(right);
 			flag = true;
@@ -147,7 +148,8 @@ bool Seger::check_word_pair(word_ptr_type word)
 			if ((size % 2) == 1) {
 				left = word->subword(0, size/2 + 1);
 				right = word->subword(size/2 + 1, size - size/2 - 1);
-				if ((left->is_word() || QFreq::instance().fuzzy_search_dic(left->chars())) && (right->is_word() || QFreq::instance().fuzzy_search_dic(right->chars()))) {
+				//if ((left->is_word() || QFreq::instance().fuzzy_search_dic(left->chars())) && (right->is_word() || QFreq::instance().fuzzy_search_dic(right->chars()))) {
+				if (left->is_word() && right->is_word()) {
 					word->left(left);
 					word->right(right);
 					flag = true;
@@ -161,9 +163,9 @@ bool Seger::check_word_pair(word_ptr_type word)
 std::pair<word_ptr_type, word_ptr_type> Seger::break_tie(word_ptr_type word)
 {
 	pair<word_ptr_type, word_ptr_type> a_pair;
-//	if (check_word_pair(word))
-//		a_pair = make_pair(word->left(), word->right());
-//	else {
+	if (check_word_pair(word))
+		a_pair = make_pair(word->left(), word->right());
+	else {
 		if (word->rparent()->is_word() || QFreq::instance().fuzzy_search_dic(word->rparent()->chars())) {
 			if (word->lparent()->is_word()) { // all parents are words
 				if (word->lparent()->freq() < word->rparent()->freq())
@@ -180,7 +182,7 @@ std::pair<word_ptr_type, word_ptr_type> Seger::break_tie(word_ptr_type word)
 			else
 				a_pair = make_pair(word->lchar(), word->rparent());
 		}
-	//}
+	}
 	return a_pair;
 }
 

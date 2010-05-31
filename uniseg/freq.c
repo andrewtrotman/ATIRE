@@ -12,6 +12,8 @@
 #include "uniseg_types.h"
 #include "file.h"
 
+#include <math.h>
+
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -40,12 +42,21 @@ Freq::Freq() : sum_n_(UNISEG_settings::MAX_CHARS, 0), avg_n_(UNISEG_settings::MA
 
 	k_ = -1;
 	loaded_ = false;
+	number_of_documents_ = 0;
+	current_document_id_ = 0;
+	previous_document_id_ = 0;
 }
 
 Freq::~Freq() {
 	freq_type::const_iterator iter;
     for (iter=freq_.begin(); iter != freq_.end(); ++iter)
     	delete iter->second;
+}
+
+void Freq::set_current_document_id(long id)
+{
+	previous_document_id_ = current_document_id_;
+	current_document_id_ = id;
 }
 
 /** TODO
@@ -240,6 +251,9 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 		//	cerr << "skipping ..." << endl;
 	}
 
+	if (previous_document_id_ == 0 || previous_document_id_ != current_document_id_)
+		word_ptr->increase_document_frequency();
+
 	return word_ptr;
 }
 
@@ -357,7 +371,7 @@ void Freq::pile_up(int max)
 		pile_up(max);
 }
 
-void Freq::showcol(int n, int min) {
+void Freq::showcol(int n, int min, bool details) {
 	cerr << endl;
 	cerr << "total arrays #: " << k_ << endl;
 	cerr << "listing words with size : " << n << endl;
@@ -371,35 +385,17 @@ void Freq::showcol(int n, int min) {
 				temp_arr.push_back(freq_n_[n][i]);
 		std::sort(temp_arr.begin(), temp_arr.end(), Word::cmp_just_freq);
 
-		for (i = 0; i < (int)temp_arr.size(); i++) {
-			const array_type& word_a = temp_arr[i]->array();
+		for (i = 0; i < (int)temp_arr.size(); i++)
 			//cerr << ->chars();
-			if ((temp_arr[i]->lang() != uniseg_encoding::CHINESE) && (temp_arr[i]->lang() != UNISEG_encoding::NUMBER))
-				for (int j = 0; j < word_a.size(); j++) {
-					if (j > 0 /*&& (j < (word_a.size() - 1))*/)
-						cerr<< " ";
-					cerr<< word_a[j]->chars();
-				}
-			else {
-				if (temp_arr[i]->left() != NULL && temp_arr[i]->left()->is_word()
-						&& temp_arr[i]->right() != NULL && temp_arr[i]->right()->is_word())
-					cerr << temp_arr[i]->left()->chars() << " " << temp_arr[i]->right()->chars();
-				else
-					cerr << temp_arr[i]->chars();
-			}
-			cerr<< ": " <<  temp_arr[i]->freq();
-			if (temp_arr[i]->is_word())
-				cerr << "(word)";
-			cerr << endl;
-		}
+			temp_arr[i]->print(details);
 	} else
 		cerr << " 0" << endl;
 
 }
 
-void Freq::show(int n, int min) {
+void Freq::show(int n, int min, bool details) {
 	for (int i = 1; i <= n && i <= k_; i++)
-		showcol(i, min);
+		showcol(i, min, details);
 }
 
 void Freq::show() {
@@ -733,4 +729,11 @@ void Freq::load_freq(std::string path, int n, bool force) {
 	//k_ = loader.count();
 
 	loaded_ = true;
+}
+
+void Freq::cal_word_idf()
+{
+	freq_type::const_iterator iter;
+	for (iter=freq_.begin(); iter != freq_.end(); ++iter)
+		iter->second->cal_idf(number_of_documents_);
 }
