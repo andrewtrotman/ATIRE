@@ -9,6 +9,7 @@
 #include "stats_memory_index.h"
 #include "postings_piece.h"
 #include "compress_variable_byte.h"
+#include "barrier.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -52,6 +53,13 @@ tf_node_used = 0;
 stats->bytes_allocated_for_tfs += postings_initial_length;
 
 collection_frequency = document_frequency = current_docno = term_local_max_impact = 0;
+
+/*
+	As we need this code complete before we add it to the structure (because it'll be seen by another thread)
+	it is necessary to flush the cache to memory with a write-barrier (sfence in Intel speak)
+	And now flush to memory
+*/
+ANT_write_barrier();
 }
 
 /*
