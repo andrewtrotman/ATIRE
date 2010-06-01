@@ -31,6 +31,10 @@ private:
 public:
 	ANT_memory_index_hash_node *left, *right;
 
+/*
+	Thw point of this union is that the in_disk objects are never needed at the same time as the in_memory objects
+	and therefore we can reduce the index-time memory footprint by overlapping them.
+*/
 	union
 		{
 		struct { ANT_postings_piece *docid_list_head, *docid_list_tail, *tf_list_head, *tf_list_tail; } in_memory;
