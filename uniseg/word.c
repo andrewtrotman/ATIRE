@@ -13,6 +13,7 @@
 
 #include "uniseg_settings.h"
 #include "uniseg_types.h"
+#include "qfreq.h"
 
 using namespace std;
 
@@ -334,6 +335,9 @@ void Word::subarray(string_array& ca, int idx, int len) {
 Word* Word::subword(int idx, int len) {
 	Word* w_ptr = this;
 
+	if (len == 1)
+		return arr_[idx];
+
 	for (int i = 0; i < idx; i++)
 		w_ptr = w_ptr->rparent();
 
@@ -393,24 +397,29 @@ void Word:: adjust(int freq)
 //	if (this->chars() == "邓小平理论")
 //		cerr << "Stop here!" << endl;
 
-	if (lparent() != NULL) {
-		if (lparent()->chars() == "工作最")
-			cerr << "Stop here!" << endl;
-		lparent()->adjust_freq(freq);
-		lparent()->adjust(freq);
-	}
+//	if (lparent() != NULL) {
+////		if (lparent()->chars() == "工作最")
+////			cerr << "Stop here!" << endl;
+//		lparent()->adjust_freq(freq);
+//		lparent()->adjust(freq);
+//	}
+//
+//	if (rparent() != NULL) {
+////		if (rparent()->chars() == "工作最")
+////			cerr << "Stop here!" << endl;
+//		rparent()->adjust_freq(freq);
+//		rparent()->adjust(freq);
+//	}
 
-	if (rparent() != NULL) {
-		if (rparent()->chars() == "工作最")
-			cerr << "Stop here!" << endl;
-		rparent()->adjust_freq(freq);
-		rparent()->adjust(freq);
-	}
+	for (int i = 1; i <= (size_ - 1); ++i)
+		for (int j = 0; j < (size_ - i + 1); ++j)
+			subword(j, i)->adjust_freq(freq);
 }
 
 void Word::adjust_freq(int freq)
 {
-	if ((freq_ + freq) < 0) {
+	int tmp_freq = (int)freq_;
+	if ((tmp_freq + freq) < 0) {
 		freq_ = 0;
 		return;
 	}
@@ -648,7 +657,7 @@ void Word::print(bool details)
 			cerr << chars();
 	}
 	cerr<< ": " <<  freq();
-	if (is_word())
+	if (is_word() || QFreq::instance().is_word(chars()))
 		cerr << "(word)";
 
 	if (details)

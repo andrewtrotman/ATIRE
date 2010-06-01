@@ -246,6 +246,7 @@ public:
 	double cal_a(int start);
 
 	long df() { return df_; }
+	void df(long number) { df_ = number; }
 	double idf() { return idf_; }
 	void increase_document_frequency() { ++df_; }
 

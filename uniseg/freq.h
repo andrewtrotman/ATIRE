@@ -86,7 +86,9 @@ public:
 	void reduce_freq(Freq& freq, word_ptr_type tw_ptr);
 	void add_freq(Freq& freq, int threshold = 1);
 
-	void justify(unsigned int min = 2);
+	void justify(unsigned int freq);
+	void smooth();
+	void extend(int k);
 
 	void cal_word_p(double base);
 	void show_p();

@@ -17,7 +17,7 @@ using namespace std;
 
 
 QFreq::QFreq() {
-
+	dic_.load(UNISEG_settings::instance().dics_path);
 }
 
 QFreq::~QFreq() {
@@ -27,7 +27,6 @@ QFreq::~QFreq() {
 void QFreq::load_freq(int n, bool force) {
 	freq_stat_.load_freq(UNISEG_settings::instance().freqs_path, n, force);
 	freq_training_.load_freq(UNISEG_settings::instance().training_path, n, force);
-	dic_.load(UNISEG_settings::instance().dics_path);
 }
 
 void QFreq::load(word_ptr_type word)
