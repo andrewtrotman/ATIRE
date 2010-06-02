@@ -133,7 +133,8 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			if (cl.size() > 0) {
 				string_array ca(cl.size());
 				std::copy(cl.begin(), cl.end(), ca.begin());
-				freq_->add(ca, pre_lang);
+				word_ptr_type ret_word = freq_->add(ca, pre_lang);
+				assert(ret_word->freq() > 0);
 			}
 			//cerr << string_type((*from)->begin(), (*to)->end()) << endl;
 		}

@@ -76,6 +76,9 @@ void Word::init() {
 
 	df_ = 0;
 	idf_ = 0.0;
+	icf_ = 0.0;
+
+	last_seen_document_id_ = 0;
 }
 
 bool Word::cmp_just_freq(Word *w1, Word *w2) {
@@ -90,7 +93,15 @@ bool Word::cmp_just_freq(Word *w1, Word *w2) {
 bool Word::cmp_idf(Word *w1, Word *w2)
 {
 	if (w1->idf() != w2->idf())
-		return w1->idf() > w2->idf();
+		return w1->idf() < w2->idf();
+
+	return cmp_just_freq(w1, w2);
+}
+
+bool Word::cmp_icf(Word *w1, Word *w2)
+{
+	if (w1->icf() != w2->icf())
+		return w1->icf() < w2->icf();
 
 	return cmp_just_freq(w1, w2);
 }
@@ -412,14 +423,19 @@ void Word:: adjust(int freq)
 //	}
 
 	for (int i = 1; i <= (size_ - 1); ++i)
-		for (int j = 0; j < (size_ - i + 1); ++j)
-			subword(j, i)->adjust_freq(freq);
+		for (int j = 0; j < (size_ - i + 1); ++j) {
+			word_ptr_type word = subword(j, i);
+			if (word->freq() > 0)
+				word->adjust_freq(freq);
+			else
+				cerr << "already zero!" << endl;
+		}
 }
 
 void Word::adjust_freq(int freq)
 {
 	int tmp_freq = (int)freq_;
-	if ((tmp_freq + freq) < 0) {
+	if ((tmp_freq + freq) <= 0) {
 		freq_ = 0;
 		return;
 	}
@@ -637,7 +653,12 @@ double Word::cal_a(int start) {
 
 void Word::cal_idf(double number_of_documents)
 {
-	idf_ = log((double)number_of_documents/double(df_ + 1));
+	idf_ = log((double)number_of_documents/double(df_));
+}
+
+void Word::cal_icf(double number_of_terms)
+{
+	icf_ = log((double)(number_of_terms + 1)/double(freq_));
 }
 
 void Word::print(bool details)
@@ -661,6 +682,6 @@ void Word::print(bool details)
 		cerr << "(word)";
 
 	if (details)
-		cerr << "   (df: " << df() << " idf: " << idf() << ")";
+		cerr << "   (df: " << df() << " idf: " << idf() << " icf: " << icf() << ")";
 	cerr << endl;
 }

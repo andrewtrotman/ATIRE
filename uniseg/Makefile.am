@@ -6,6 +6,8 @@ AM_LDFLAGS = @LIBS@
 CC = g++
 
 libuniseq_sources = \
+		sys_file.c \
+		sys_files.c \
 		config.c \
 		stop_word.c \
 		encoding_utf8.c \
@@ -28,6 +30,8 @@ libuniseq_sources = \
 		dic2freq.c
 		
 libuniseg_headers = \
+		sys_file.h \
+		sys_files.h \
 		string_utils.h \
 		config.h \
 		stop_word.h \
@@ -57,7 +61,7 @@ libuniseg_headers = \
 		qzer.h	\
 		range.h	\
 		seg.h	\
-		seg2.h	\		
+		seg2.h	\
 		timings.h	\
 		udoc.h	\
 		utilities.h	\

@@ -44,7 +44,6 @@ Freq::Freq() : sum_n_(UNISEG_settings::MAX_CHARS, 0), avg_n_(UNISEG_settings::MA
 	loaded_ = false;
 	number_of_documents_ = 0;
 	current_document_id_ = 0;
-	previous_document_id_ = 0;
 }
 
 Freq::~Freq() {
@@ -55,7 +54,7 @@ Freq::~Freq() {
 
 void Freq::set_current_document_id(long id)
 {
-	previous_document_id_ = current_document_id_;
+	//previous_document_id_ = current_document_id_;
 	current_document_id_ = id;
 }
 
@@ -251,9 +250,10 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 		//	cerr << "skipping ..." << endl;
 	}
 
-	if (previous_document_id_ == 0 || previous_document_id_ != current_document_id_)
+	if (word_ptr->get_last_seen_document_id() != current_document_id_)
 		word_ptr->increase_document_frequency();
 
+	word_ptr->set_last_seen_document_id(current_document_id_);
 	return word_ptr;
 }
 
@@ -462,14 +462,18 @@ void Freq::array_to_array(array_type& wa, string_array& ca) {
 
 void Freq::cal_sum() {
 	int k = 0;
-	while (k < UNISEG_settings::MAX_CHARS) {
+	while (k <= k_/*UNISEG_settings::MAX_CHARS*/) {
+		cal_sum_k(k);
+		k++;
+	}
+}
+
+void Freq::cal_sum_k(int k) {
 		int freq = 0;
 		for (int i = 0; i < (int)freq_n_[k].size(); i++) {
 			freq += freq_n_[k][i]->freq();
 		}
 		sum_n_[k] = freq;
-		k++;
-	}
 }
 
 void Freq::cal_avg() {
@@ -731,22 +735,36 @@ void Freq::load_freq(std::string path, int n, bool force) {
 	loaded_ = true;
 }
 
-void Freq::cal_word_idf()
+void Freq::cal_word()
 {
 	freq_type::const_iterator iter;
-	for (iter=freq_.begin(); iter != freq_.end(); ++iter)
+	for (iter=freq_.begin(); iter != freq_.end(); ++iter) {
 		iter->second->cal_idf(number_of_documents_);
+		iter->second->cal_icf((double)sum_k(1)/2.5);
+	}
 }
 
 void Freq::smooth()
 {
-	int i, j;
-	for (i = k_; i > 1; --i)
-		for (int j = 0; j < freq_n_[i].size(); j++)
-			if (freq_n_[i][j]->freq() > 0)
-				freq_n_[i][j]->adjust(-freq_n_[i][j]->freq());
+//	int i, j;
+//	for (i = k_; i > 1; --i)
+//		for (int j = 0; j < freq_n_[i].size(); j++)
+//			if (freq_n_[i][j]->freq() > 0)
+//				freq_n_[i][j]->adjust(-freq_n_[i][j]->freq());
 
 	extend(k_);
+
+//	for (int i = k_; i > 1; --i)
+//		smooth(i);
+}
+
+void Freq::smooth(int k)
+{
+//	int i, j;
+//	for (i = k_; i > 1; --i)
+		for (int j = 0; j < freq_n_[k].size(); j++)
+			if (freq_n_[k][j]->freq() > 0)
+				freq_n_[k][j]->adjust(-freq_n_[k][j]->freq());
 }
 
 void Freq::extend(int k)
@@ -754,7 +772,10 @@ void Freq::extend(int k)
 	for (int i = 1; i < freq_n_[k].size(); ++i) {
 		word_ptr_type first = freq_n_[k][i - 1];
 		word_ptr_type second = freq_n_[k][i];
-		if (first->freq() == second->freq() && (first->lparent() == second->rparent() || first->rparent() == second->lparent())) {
+
+		if (first->freq() == second->freq() &&
+				((first->lparent() == second->rparent() && first->lparent()->freq() == first->freq())
+					|| (first->rparent() == second->lparent()) && first->rparent()->freq() == first->freq())) {
 				string_array ca;
 				if (first->lparent() == second->rparent()) {
 					second->to_string_array(ca);
@@ -765,8 +786,8 @@ void Freq::extend(int k)
 					ca.push_back(second->rchar()->chars());
 				}
 				word_ptr_type new_word = add(ca, first->lang(), first->freq());
-				first->adjust_freq(-first->freq());
-				second->adjust_freq(-second->freq());
+//				first->adjust_freq(-first->freq());
+//				second->adjust_freq(-second->freq());
 				new_word->df(first->df());
 		}
 	}

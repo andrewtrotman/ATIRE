@@ -40,7 +40,7 @@ private:
 	std::vector<FreqFile *> 	freq_files_;
 
 	long						current_document_id_;
-	long						previous_document_id_;
+
 	long						number_of_documents_;
 	long						average_document_length_;
 
@@ -74,10 +74,11 @@ public:
 
 	std::vector<unsigned int>& sum_array() { return sum_n_; }
 	std::vector<double>& avg_array() { return avg_n_; }
-	unsigned int sum_k(int k) { return sum_n_[k]; }
+	unsigned int sum_k(int k) { if (sum_n_[k] == 0) cal_sum_k(k); return sum_n_[k]; }
 	double avg_k(int k) { return avg_n_[k]; }
 
 	void cal_sum();
+	void cal_sum_k(int k);
 	void cal_avg();
 	void cal_sum_n_avg();
 
@@ -88,6 +89,7 @@ public:
 
 	void justify(unsigned int freq);
 	void smooth();
+	void smooth(int k);
 	void extend(int k);
 
 	void cal_word_p(double base);
@@ -95,7 +97,7 @@ public:
 	void cal_word_a();
 	void cal_word_ngmi_a(double base);
 
-	void cal_word_idf();
+	void cal_word();
 
 	void clear() { freq_.clear(); }
 

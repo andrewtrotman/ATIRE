@@ -71,6 +71,9 @@ private:
 
 	long											df_;   // collection document frequency
 	double											idf_;
+	double											icf_;
+
+	long											last_seen_document_id_;
 
 private:
 	void init();
@@ -138,6 +141,7 @@ public:
 	static bool cmp_freq(Word *w1, Word *w2);
 	static bool cmp_just_freq(Word *w1, Word *w2);
 	static bool cmp_idf(Word *w1, Word *w2);
+	static bool cmp_icf(Word *w1, Word *w2);
 
 	const Word *lparent() const { return lparent_; }
 	Word *lparent() { return lparent_; }
@@ -238,6 +242,7 @@ public:
 	double base() { return base_; }
 
 	void cal_idf(double number_of_documents);
+	void cal_icf(double number_of_terms);
 
 	bool is_loaded() { return loaded_; }
 	void set_loaded(bool b) { loaded_ = b; }
@@ -248,7 +253,11 @@ public:
 	long df() { return df_; }
 	void df(long number) { df_ = number; }
 	double idf() { return idf_; }
+	double icf() { return icf_; }
 	void increase_document_frequency() { ++df_; }
+
+	void set_last_seen_document_id(long id) { last_seen_document_id_ = id; }
+	long get_last_seen_document_id() { return last_seen_document_id_; }
 
 	void print(bool details);
 };
