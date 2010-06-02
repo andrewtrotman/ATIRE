@@ -41,6 +41,13 @@ File::File(std::string name) :
 File::~File() {
 }
 
+void File::set_fullpathname(const char *name)
+{
+	filename_ = name;
+	path_ = filename_.substr(0, filename_.rfind("/") + 1);
+	name_ = filename_.substr(path_.length(), filename_.rfind(".") - path_.length());
+}
+
 void File::read_in_memory() {
 	if (in_memory_)
 		return;
@@ -64,7 +71,8 @@ void File::setup() {
 	//string path = string(UNISEG_settings::instance().home()); //string(&FILESYSTEM::File<std::string>::SEPARATOR);
 	//cerr << "path: " << path << endl;
 	//path.push_back(FILESYSTEM::File<std::string>::SEPARATOR);
-	filename_ = name_ + "." + EXT_NAME;
+//	if (filename_.length() == 0)
+//		filename_ = name_ + "." + EXT_NAME;
 	// debug
 	//cerr << "setup filename " << filename_ << " "<< name_ << " " << EXT_NAME << endl;
 	in_memory_ = false;

@@ -42,6 +42,7 @@ public:
 	static bool exist(const char *filename);
 
 	const std::string& fullpathname() const { return filename_; }
+	void set_fullpathname(const char *name);
 
 	const std::string& name() const { return name_; }
 	void name(std::string name) { name_ = name; }

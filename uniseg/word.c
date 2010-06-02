@@ -425,10 +425,10 @@ void Word:: adjust(int freq)
 	for (int i = 1; i <= (size_ - 1); ++i)
 		for (int j = 0; j < (size_ - i + 1); ++j) {
 			word_ptr_type word = subword(j, i);
-			if (word->freq() > 0)
+//			if (word->freq() > 0)
 				word->adjust_freq(freq);
-			else
-				cerr << "already zero!" << endl;
+//			else
+//				cerr << "already zero!" << endl;
 		}
 }
 

@@ -37,7 +37,7 @@ private:
 	int 						k_;
 
 	bool 						loaded_;
-	std::vector<FreqFile *> 	freq_files_;
+	std::map<int, FreqFile *> 	freq_files_;
 
 	long						current_document_id_;
 

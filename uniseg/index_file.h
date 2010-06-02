@@ -30,6 +30,7 @@ private:
 	address_array	aa_;
 
 public:
+	IndexFile() { init(); }
 	IndexFile(std::string name/*, Freq& freq*/) :
 		File::File(name)/*, freq_(freq) */{ init(); }
 	IndexFile(std::string name, unsigned int size/*, Freq& freq*/) :

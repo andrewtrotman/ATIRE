@@ -65,6 +65,8 @@ void FreqFile::write(array_type& arr) {
 	if (arr.size() <= 0)
 		return;
 
+	array_type should_save_words;
+
 	File::wopen();
 
 	if(!iofs_) {
@@ -82,6 +84,10 @@ void FreqFile::write(array_type& arr) {
 
 		char *chars;
 		word_ptr_type word_ptr = arr[i];
+
+		if (UNISEG_settings::instance().on_training && (!word_ptr->has_word_pair() && !word_ptr->is_word()))
+			continue;
+
 		unsigned int freq = 0;
 
 		chars = (char *)(word_ptr->family().second->chars().c_str());
@@ -90,6 +96,7 @@ void FreqFile::write(array_type& arr) {
 		assert(len <= UNICODE_CHAR_LENGTH);
 
 		freq = word_ptr->freq();
+
 		if (UNISEG_settings::instance().do_skip && freq <= UNISEG_settings::instance().to_skip)
 			continue;
 
@@ -98,8 +105,8 @@ void FreqFile::write(array_type& arr) {
 		if (word_ptr->is_word()
 				|| (word_ptr->left() != NULL && word_ptr->right() != NULL && word_ptr->left()->is_word() && word_ptr->right()->is_word())) {
 			if (word_ptr->is_word()) {
-				if (word_ptr->chars() == "\344\270\232\345\214\226\344\270\213")
-					cerr << "stop here" << endl;
+//				if (word_ptr->chars() == "\344\270\232\345\214\226\344\270\213")
+//					cerr << "stop here" << endl;
 				word_where = 0xFF;
 			}
 			else {
@@ -114,9 +121,10 @@ void FreqFile::write(array_type& arr) {
 		}
 		else
 			iofs_.write((char *)&freq, sizeof(unsigned int));
+
+		should_save_words.push_back(word_ptr);
 		++count;
 	}
-
 
 	ofstream::pos_type pos = iofs_.tellp();
 	cerr << "number of word: " << arr.size() << endl;
@@ -126,6 +134,18 @@ void FreqFile::write(array_type& arr) {
 	//assert(size == static_cast<int>(pos));
 
 	iofs_.close();
+
+	// writh the index file
+	if (should_save_words.size() > 0) {
+		if (wlen_ > 1) {
+			idxf_.path(path_);
+			idxf_.wlen(wlen_);
+			idxf_.alloc(should_save_words);
+			idxf_.write();
+		}
+	}
+	else
+		remove(filename_.c_str());
 }
 
 void FreqFile::read() {
@@ -431,6 +451,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 void FreqFile::load_index()
 {
 	if (wlen_ > 1) {
+		idxf_.name(name_);
 		idxf_.path(path_);
 		idxf_.wlen(wlen_);
 		idxf_.read(freq_);

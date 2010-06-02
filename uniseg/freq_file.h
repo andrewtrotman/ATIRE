@@ -26,6 +26,7 @@ private:
 	bool		loaded_;
 
 public:
+	FreqFile(Freq *freq) : freq_(freq) { init(); }
 	FreqFile(std::string name, Freq *freq) :
 		File::File(name), freq_(freq), idxf_(name) { init(); }
 	FreqFile(std::string name, unsigned int size, Freq *freq) :

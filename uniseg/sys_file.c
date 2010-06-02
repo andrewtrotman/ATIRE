@@ -219,9 +219,11 @@ void sys_file::list(const char *name)
 	stat(&stat_, pathfile);
 
 	bool isdir = false;
+	bool has_separator = strlen(name) > strlen(SEPARATOR) && strncmp(name + strlen(name) - strlen(SEPARATOR), SEPARATOR, strlen(SEPARATOR)) == 0;
 
 	if (isdir = S_ISDIR(stat_.st_mode)) {
-		strcat(pathfile, SEPARATOR);
+		if (!has_separator)
+			strcat(pathfile, SEPARATOR);
 		strcat(pathfile, pattern_);
 	}
 
