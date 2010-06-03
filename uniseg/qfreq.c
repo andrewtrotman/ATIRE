@@ -27,6 +27,9 @@ QFreq::~QFreq() {
 void QFreq::load_freq(int n, bool force) {
 	freq_stat_.load_freq(UNISEG_settings::instance().freqs_path, n, force);
 	freq_training_.load_freq(UNISEG_settings::instance().training_path, n, force);
+
+	if (freq_training_.array_size() > 1)
+		UNISEG_settings::instance().with_training_info = true;
 }
 
 void QFreq::load(word_ptr_type word)
@@ -45,7 +48,8 @@ Freq& QFreq::freq()
 
 bool QFreq::is_word(string_type& word)
 {
-	return dic_.find(word);
+	bool ret = dic_.find(word);
+	return ret;
 }
 
 word_ptr_type QFreq::find(string_type& word) {

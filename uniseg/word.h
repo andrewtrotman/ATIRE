@@ -102,6 +102,7 @@ public:
 	const int address() const { return address_; }
 	void address(int address) { address_ = address; }
 
+	Address::uint_array& init_disk_address();
 	Address::uint_array& disk_address() { return disk_address_; }
 	//void address(int address) { disk_address_ = disk_address; }
 

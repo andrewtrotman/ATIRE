@@ -18,13 +18,13 @@
 using namespace std;
 
 Word::Word(string_type chars, int size) :
-	chars_(chars), size_(size), disk_address_(3, Address::INVALID_BOUND) {
+	chars_(chars), size_(size)/*, disk_address_(3, Address::INVALID_BOUND)*/ {
 	freq_ =  1;
 	init();
 }
 
 Word::Word(string_type chars, int freq, int size) :
-	chars_(chars), freq_(freq), size_(size), disk_address_(3, Address::INVALID_BOUND) {
+	chars_(chars), freq_(freq), size_(size)/*, disk_address_(3, Address::INVALID_BOUND) */{
 	init();
 }
 
@@ -79,6 +79,12 @@ void Word::init() {
 	icf_ = 0.0;
 
 	last_seen_document_id_ = 0;
+}
+
+Address::uint_array& Word::init_disk_address()
+{
+	disk_address_.resize(3, Address::INVALID_BOUND);
+	return disk_address_;
 }
 
 bool Word::cmp_just_freq(Word *w1, Word *w2) {

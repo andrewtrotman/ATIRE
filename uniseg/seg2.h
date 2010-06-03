@@ -22,6 +22,8 @@ public:
 	Seger2(const char* stream, size_t length);
 	virtual ~Seger2();
 
+	std::vector<double>& boundary_score() { return boundary_score_; }
+
 protected:
 	virtual void seg();
 	virtual void build();

@@ -61,6 +61,7 @@ public:
 	bool					stop_word_check;
 	bool					oov_check;
 	bool					on_training;
+	bool					with_training_info;
 
 	unsigned long 			encoding_scheme;		// which encoding scheme to be used for input text, currently UTF-8 and ASCII supported
 

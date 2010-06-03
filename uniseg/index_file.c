@@ -224,7 +224,7 @@ void IndexFile::read(Freq *freq) {
 		if (word->chars() == "业化")
 			cerr << "Stop here!" << endl;
 //		cerr << "add new word for index: " << word->chars() << endl;
-		Address::uint_array& addr = word->disk_address();
+		Address::uint_array& addr = word->init_disk_address();
 
 		for (int i = 0; i < ADDRESSES_NUMBER; i++) {
 //			if (!iofs_.read ((char *)&address, sizeof(unsigned int))) {

@@ -75,6 +75,7 @@ public:
 	std::vector<unsigned int>& sum_array() { return sum_n_; }
 	std::vector<double>& avg_array() { return avg_n_; }
 	unsigned int sum_k(int k) { if (sum_n_[k] == 0) cal_sum_k(k); return sum_n_[k]; }
+	long sum();
 	double avg_k(int k) { return avg_n_[k]; }
 
 	void cal_sum();

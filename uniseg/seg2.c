@@ -62,10 +62,15 @@ void Seger2::build()
 		//		+ rw->subchars(0, rmin);
 		//tmp_w = freq->find(tmp_str);
 		tmp_w = tw_ptr_local_->subword(lmin, rmax - lmin + 1);
-		if (tmp_w->is_word()) {
-			i += 2;
+		if (UNISEG_settings::instance().with_training_info && tmp_w->has_word_pair()) {
+			boundary_score_[i - 1] = -std::numeric_limits<double>::max();
+			i += 1;
 			continue;
 		}
+//		if (tmp_w->is_word()) {
+//			i += 1;
+//			continue;
+//		}
 
 		if (!tmp_w) cerr << "the not found string is "
 						<< lmin << " " << rmax

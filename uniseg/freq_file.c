@@ -315,7 +315,7 @@ void FreqFile::read_with_index() {
 
 void FreqFile::read_term(word_ptr_type word)
 {
-	if (word->is_loaded())
+	if (word->disk_address().size() == 0 || word->is_loaded())
 		return;
 
 	Address::uint_array& address = word->disk_address();

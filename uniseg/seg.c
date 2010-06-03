@@ -94,7 +94,10 @@ void Seger::init()
 
 	if (!allfreq_) {
 		allfreq_ = &(QFreq::instance().freq());
-		base_ = allfreq_->sum_k(1);
+		if (UNISEG_settings::instance().with_training_info)
+			base_ = allfreq_->sum();
+		else
+			base_ = allfreq_->sum_k(1);
 		double p = 1.0 / base_;
 		UNISEG_settings::instance().threshold = log(p);
 	}
@@ -378,7 +381,7 @@ void Seger::assign_freq() {
 		for (int j = 0; j < word_array.size(); ++j) {
 			word_ptr_type local_word  = word_array[j];
 			word_ptr_type global_word = allfreq_->find(local_word->chars());
-			if (global_word)
+			if (global_word && global_word->disk_address().size() > 0)
 				QFreq::instance().load(global_word);
 			word_pairs.insert(make_pair(local_word, global_word));
 		}

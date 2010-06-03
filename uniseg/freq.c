@@ -86,6 +86,14 @@ void Freq::merge(Freq& freq){
 	}
 }
 
+long Freq::sum()
+{
+	long sum;
+	for (int i = 1; i <= k_; ++i)
+		sum += sum_k(i);
+	return sum;
+}
+
 void Freq::mergeto(Freq& freq){
 	for (int i = 1; i <= k_; i++) {
 		array_type::iterator iter = freq_n_[i].begin();
@@ -649,12 +657,8 @@ void Freq::to_array(std::vector<word_ptr_type>& wa) {
 void Freq::load(word_ptr_type word)
 {
 	int len = 1;
-	if (word != NULL && (len = word->size()) <= freq_files_.size()) {
-		assert(len > 0);
-		if (freq_files_.find(len) == freq_files_.end())
-			return;
+	if (word != NULL && freq_files_.find(++(len = word->size())) != freq_files_.end())
 		freq_files_[len]->read_term(word);
-	}
 }
 
 void Freq::load(int index)

@@ -75,7 +75,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 		if (next < end) {
 			enc_->test_char(next);
 			if (enc_->lang() == uniseg_encoding::CHINESE)
-				while (next < end && enc_->lang() == uniseg_encoding::CHINESE && count < step) {
+				while (next < end && enc_->lang() == uniseg_encoding::CHINESE /*&& count < step*/) {
 					next += enc_->howmanybytes();
 					enc_->test_char(next);
 					count++;
@@ -142,10 +142,12 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 		how_far = next - current;
 		string_type input((char *)current, how_far);
 	    if (how_far > 0 && count > 1) {
-	    	if (count <= QFreq::instance().freq_training().array_size() && !QFreq::instance().is_word(input)) {
+	    	if (/*count <= QFreq::instance().freq_training().array_size() && */!QFreq::instance().is_word(input)) {
 				seger_.input(input);
 				seger_.start();
+				std::vector<double>& boundary_score = seger_.boundary_score();
 				const array_type& words_list = seger_.best_words();
+				long word_count = 0;
 				long i = 0;
 				long size = (in_middle_flag && words_list.size() > 1) ? words_list.size() - 1 : words_list.size();
 				if (size > 0)
@@ -163,8 +165,56 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							else
 								output_.append(word);
 							segmented_len += word.length();
+							word_count +=  current_word->size();
 						}
 						else {
+							/* 2010.06.03 */
+							std::vector<double>::iterator begin = boundary_score.begin() + word_count;
+							std::vector<double>::iterator end = begin + (current_word->size() - 1);
+
+							std::vector<double>::iterator pos = min_element(begin, end);
+							string right_left;
+							while ((end - begin) > 1) {
+								word_ptr_type l_word = current_word->subword(begin - boundary_score.begin() - word_count, pos - begin + 1);
+								word_ptr_type r_word = current_word->subword(pos - begin + 1, end - pos);
+
+								if (l_word->is_word() && r_word->is_word()) {
+									output_.append(l_word->chars() + "  " + r_word->chars());
+									begin = end = pos;
+									break;
+								}
+								else if (l_word->is_word()) {
+									output_.append(l_word->chars() + "  ");
+									begin = pos + 1;
+								}
+								else if (r_word->is_word()){
+									right_left.insert(0, string("  ") + r_word->chars());
+									end = pos;
+								}
+								else {
+									if (l_word->has_word_pair()) {
+										output_.append(l_word->left()->chars() + "  " + l_word->right()->chars());
+										begin = pos + 1;
+									}
+									else if (r_word->has_word_pair()){
+										right_left.insert(0, string("  ") + r_word->left()->chars() + "  " + r_word->right()->chars());
+										end = pos;
+									}
+									if (l_word->size() < r_word->size()) {
+										output_.append(l_word->chars() + "  ");
+										begin = pos + 1;
+									}
+									else {
+										right_left.insert(0, string("  ") + r_word->chars());
+										end = pos;
+									}
+								}
+
+								pos = min_element(begin, end);
+							}
+							if ((end - begin) > 0)
+								output_.append(current_word->subword(begin - boundary_score.begin() - word_count, end - begin + 1)->chars());
+							output_.append(right_left);
 //							word_ptr_type lparent = current_word;
 //							assert(lparent != NULL);
 //							while (lparent->size() > 1 && !lparent->is_word()) {
@@ -173,34 +223,34 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 //								else
 //									break;
 //							}
-							word_ptr_type tmp = NULL;
-//							int tmp_count = 0;
-							std::pair<word_ptr_type, word_ptr_type> word_pair = seger_.get_leftmost_word(current_word);
-							while (word_pair.second != NULL && !word_pair.second->is_word()) {
-//								if (tmp_count != 0)
-//									output_.append("  ");
-//								if (word_pair.first->has_word_pair())
-//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  ");
-//								else
-									output_.append(word_pair.first->chars() + "  ");
-								word_pair = seger_.get_leftmost_word(word_pair.second);
-							}
-							if (word_pair.second != NULL) {
-//								if (word_pair.first->has_word_pair())
-//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  " + word_pair.second->chars());
-//								else
-									output_.append(word_pair.first->chars() + "  " + word_pair.second->chars());
-							}
-							else {
-//								if (word_pair.first->has_word_pair())
-//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars());
-//								else
-									output_.append(word_pair.first->chars());
-							}
-							segmented_len += current_word->chars().length();
+//							word_ptr_type tmp = NULL;
+////							int tmp_count = 0;
+//							std::pair<word_ptr_type, word_ptr_type> word_pair = seger_.get_leftmost_word(current_word);
+//							while (word_pair.second != NULL && !word_pair.second->is_word()) {
+////								if (tmp_count != 0)
+////									output_.append("  ");
+////								if (word_pair.first->has_word_pair())
+////									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  ");
+////								else
+//									output_.append(word_pair.first->chars() + "  ");
+//								word_pair = seger_.get_leftmost_word(word_pair.second);
+//							}
+//							if (word_pair.second != NULL) {
+////								if (word_pair.first->has_word_pair())
+////									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  " + word_pair.second->chars());
+////								else
+//									output_.append(word_pair.first->chars() + "  " + word_pair.second->chars());
+//							}
+//							else {
+////								if (word_pair.first->has_word_pair())
+////									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars());
+////								else
+//									output_.append(word_pair.first->chars());
+//							}
+//							segmented_len += current_word->chars().length();
 							//break;
 	//						output_.append(current_word->to_string());
-	//						segmented_len += current_word->chars().length();
+							segmented_len += current_word->chars().length();
 						}
 					}
 				else {
