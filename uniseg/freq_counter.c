@@ -133,7 +133,7 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			if (cl.size() > 0) {
 				string_array ca(cl.size());
 				std::copy(cl.begin(), cl.end(), ca.begin());
-				word_ptr_type ret_word = freq_->add(ca, pre_lang);
+				word_ptr_type ret_word = freq_->add(ca); //, pre_lang);
 				assert(ret_word->freq() > 0);
 			}
 			//cerr << string_type((*from)->begin(), (*to)->end()) << endl;
@@ -177,7 +177,7 @@ void FreqCounter::count_segmented()
 
 		ca1 = new string_array;
 		to_string_array(first, *ca1);
-		first_ptr = freq_->add(*ca1, languages_);
+		first_ptr = freq_->add(*ca1); //, languages_);
 		first_ptr->is_word(true);
 
 		while (*start != '\0') {
@@ -209,7 +209,7 @@ void FreqCounter::count_segmented()
 				delete ca2;
 			ca2 = new string_array;
 			to_string_array(second, *ca2);
-			second_ptr = freq_->add(*ca2, languages_);
+			second_ptr = freq_->add(*ca2); //, languages_);
 			second_ptr->is_word(true);
 
 			//string word_pair = first + second;
@@ -220,7 +220,7 @@ void FreqCounter::count_segmented()
 			for (int i = 0; i < ca2->size(); ++i)
 				ca.push_back((*ca2)[i]);
 			//to_string_array(word_pair, ca);
-			word_ptr_type ww_ptr = freq_->add(ca, languages_);
+			word_ptr_type ww_ptr = freq_->add(ca); //, languages_);
 			ww_ptr->left(first_ptr);
 			ww_ptr->right(second_ptr);
 //			word_ptr_type w_ptr;

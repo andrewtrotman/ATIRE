@@ -272,7 +272,7 @@ void FreqFile::read_with_index() {
 					string_array aca(ca);
 					aca.push_back(a_char);
 					assert(value >= 0);
-					freq_->add(aca, enc_->lang(), value); //->address(count);
+					freq_->add(aca, /*enc_->lang(), */value); //->address(count);
 					count++;
 				}
 			}
@@ -297,7 +297,7 @@ void FreqFile::read_with_index() {
 					string_type a_char(buf, enc_->howmanybytes());
 					string_array aca = ca;
 					aca.insert(aca.begin(), a_char);
-					freq_->add(aca, enc_->lang(), value); //->address(count);
+					freq_->add(aca, /*enc_->lang(), */value); //->address(count);
 					count++;
 				}
 			}
@@ -418,7 +418,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 
 	/// save them in the array
 	// assert(value > 0);
-	word_ptr_type ret_word = freq_->add(aca, enc_->lang(), value); //->address(count);
+	word_ptr_type ret_word = freq_->add(aca, /*enc_->lang(), */value); //->address(count);
 
 	if (ret_word->chars() == "工作最"/* || ret_word->chars() == "\347\272\242\347\201\257\347\254\274"*/)
 		cerr << "got you " << endl;

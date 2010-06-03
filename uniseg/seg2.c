@@ -63,7 +63,7 @@ void Seger2::build()
 		//tmp_w = freq->find(tmp_str);
 		tmp_w = tw_ptr_local_->subword(lmin, rmax - lmin + 1);
 		if (UNISEG_settings::instance().with_training_info && tmp_w->has_word_pair()) {
-			boundary_score_[i - 1] = -std::numeric_limits<double>::max();
+			boundary_score_[lmin + tmp_w->left()->size() - 1] = -std::numeric_limits<double>::max();
 			i += 1;
 			continue;
 		}

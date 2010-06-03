@@ -124,7 +124,7 @@ word_ptr_type Freq::find(string_type word) {
 	return NULL;
 }
 
-word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool allnew) {
+word_ptr_type Freq::add(string_array& ca, /*long lang, */unsigned int freq, bool allnew) {
 
 	int size = ca.size();
 	assert(size > 0);
@@ -134,7 +134,7 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 	/*
 	 * create key string
 	 */
-	array_to_string(ca, lang, chars);
+	array_to_string(ca, /*lang, */chars);
 
 	// debug
 //	if (chars == "红灯笼" || chars == "\347\272\242\347\201\257\347\254\274")
@@ -186,14 +186,14 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 			else
 				word_ptr = new word_type(chars, freq, size);
 
-			word_ptr->lang(lang);
+			//word_ptr->lang(lang);
 			/// make the Word linked to the word which is the sub
 			if (word_ptr->size() > 1) {
 
 				string_type lp;
-				array_to_string(ca, lang, lp, 0, size - 1);
+				array_to_string(ca, /*lang, */lp, 0, size - 1);
 				string_type rp;
-				array_to_string(ca, lang, rp, 1, size - 1);
+				array_to_string(ca, /*lang, */rp, 1, size - 1);
 				string_type lc = ca[0];
 				string_type rc = ca[size - 1];
 
@@ -217,12 +217,12 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 					if (!lparent) {
 						string_array lca(ca);
 						lca.pop_back();
-						lparent = add(lca, lang, 0);
+						lparent = add(lca, /*lang,*/ 0);
 					}
 					if (!rparent) {
 						string_array rca(ca);
 						rca.erase(rca.begin());
-						rparent = add(rca, lang, 0);
+						rparent = add(rca, /*lang, */0);
 					}
 
 					word_ptr->lparent(lparent); word_ptr->lchar(find(lc));
@@ -327,7 +327,7 @@ void Freq::pile_up(int max)
 //			cerr << "wa: ";
 //			std::copy(wa.begin(), wa.end(), ostream_iterator<string_type>(cerr, " "));
 //			cerr << endl;
-			curr = add(wa, lparent->lang(), 0, true);
+			curr = add(wa, /*lparent->lang(), */0, true);
 			//curr->lang(lparent->lang());
 
 			lchar = (word_ptr_type)lparent->lchar();
@@ -345,7 +345,7 @@ void Freq::pile_up(int max)
 
 				word_ptr_type rrparent = freq_n_[i][j + 2];
 				wa_next.push_back(rrparent->rchar()->chars());
-				next = add(wa_next, rparent->lang(), 0, true);
+				next = add(wa_next, /*rparent->lang(), */0, true);
 				assert(next != NULL);
 				//next->lang(rparent->lang());
 

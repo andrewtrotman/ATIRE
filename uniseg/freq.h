@@ -53,7 +53,8 @@ public:
 	word_ptr_type find(string_type word);
 	bool has_word(string_type word);
 
-	word_ptr_type add(string_array& ca, long lang, unsigned int freq = -1, bool allnew = false);
+	//word_ptr_type add(string_array& ca, long lang, unsigned int freq = -1, bool allnew = false);
+	word_ptr_type add(string_array& ca, unsigned int freq = -1, bool allnew = false);
 	void add(word_ptr_type word_ptr, bool allnew = false);
 
 	void sort(int k);

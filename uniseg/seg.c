@@ -88,9 +88,13 @@ void Seger::init()
 
 	//assert(tw_ptr_->chars().length() > 0);
 	freq_ = new Freq;
-	FreqCounter counter(stream_, freq_);
-	counter.count(UNISEG_settings::instance().max, 1);
-	tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
+
+	//FreqCounter counter(stream_, freq_);
+	//counter.count(UNISEG_settings::instance().max, 1);
+	string_array ca;
+	to_string_array(stream_, ca);
+	//tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
+	tw_ptr_local_ = freq_->add(ca);
 
 	if (!allfreq_) {
 		allfreq_ = &(QFreq::instance().freq());
@@ -132,6 +136,34 @@ pair<word_ptr_type, word_ptr_type> Seger::get_leftmost_word(word_ptr_type word)
 		return make_pair(final, right);
 	}
 	return make_pair(word->lchar(), word->rparent());
+}
+
+void Seger::get_leftmost_word_segmentation(word_ptr_type word, std::string& output)
+{
+	word_ptr_type tmp = NULL;
+//							int tmp_count = 0;
+	std::pair<word_ptr_type, word_ptr_type> word_pair = get_leftmost_word(word);
+	while (word_pair.second != NULL && !word_pair.second->is_word()) {
+//								if (tmp_count != 0)
+//									output_.append("  ");
+//								if (word_pair.first->has_word_pair())
+//									output_.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  ");
+//								else
+		output.append(word_pair.first->chars() + "  ");
+		word_pair = get_leftmost_word(word_pair.second);
+	}
+	if (word_pair.second != NULL) {
+//								if (word_pair.first->has_word_pair())
+//									output.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars() + "  " + word_pair.second->chars());
+//								else
+		output.append(word_pair.first->chars() + "  " + word_pair.second->chars());
+	}
+	else {
+//								if (word_pair.first->has_word_pair())
+//									output.append(word_pair.first->left()->chars() + "  " + word_pair.first->right()->chars());
+//								else
+		output.append(word_pair.first->chars());
+	}
 }
 
 bool Seger::check_word_pair(word_ptr_type word)

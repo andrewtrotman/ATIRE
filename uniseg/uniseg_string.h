@@ -71,7 +71,7 @@ inline void to_string_array(const string_type& source, string_array& sa)
 	to_string_array(source.c_str(), sa);
 }
 
-inline void array_to_string(string_array& ca, long lang, string_type& dest, int idx = 0, int len = -1)
+inline void array_to_string(string_array& ca, /*long lang, */string_type& dest, int idx = 0, int len = -1)
 {
 	if (len == -1)
 		len = ca.size();
@@ -79,8 +79,8 @@ inline void array_to_string(string_array& ca, long lang, string_type& dest, int 
 	assert(idx >= 0);
 	assert(len <= (int)ca.size());
 	string_type sep;
-	if (lang != uniseg_encoding::CHINESE)
-		sep = " ";
+//	if (lang != uniseg_encoding::CHINESE)
+//		sep = " ";
 	int count = 0;
 	for (int i = idx; i < idx + len; i++) {
 		if (count > 0)
