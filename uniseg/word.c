@@ -427,15 +427,23 @@ void Word:: adjust(int freq)
 //		rparent()->adjust_freq(freq);
 //		rparent()->adjust(freq);
 //	}
-
 	for (int i = 1; i <= (size_ - 1); ++i)
 		for (int j = 0; j < (size_ - i + 1); ++j) {
 			word_ptr_type word = subword(j, i);
-//			if (word->freq() > 0)
-				word->adjust_freq(freq);
+			word->adjust_freq(freq);
 //			else
 //				cerr << "already zero!" << endl;
 		}
+}
+
+void  Word::adjust_negative(int freq)
+{
+for (int i = 1; i <= (size_ - 1); ++i)
+	for (int j = 0; j < (size_ - i + 1); ++j) {
+		word_ptr_type word = subword(j, i);
+		if (word->freq() == freq)
+			word->adjust_freq(-freq);
+	}
 }
 
 void Word::adjust_freq(int freq)
@@ -670,19 +678,19 @@ void Word::cal_icf(double number_of_terms)
 void Word::print(bool details)
 {
 	const array_type& word_a = array();
-	if ((lang() != uniseg_encoding::CHINESE) && (lang() != UNISEG_encoding::NUMBER))
-		for (int j = 0; j < word_a.size(); j++) {
-			if (j > 0 /*&& (j < (word_a.size() - 1))*/)
-				cerr<< " ";
-			cerr<< word_a[j]->chars();
-		}
-	else {
+//	if ((lang() != uniseg_encoding::CHINESE) && (lang() != UNISEG_encoding::NUMBER))
+//		for (int j = 0; j < word_a.size(); j++) {
+//			if (j > 0 /*&& (j < (word_a.size() - 1))*/)
+//				cerr<< " ";
+//			cerr<< word_a[j]->chars();
+//		}
+//	else {
 		if (left() != NULL && left()->is_word()
 				&& right() != NULL && right()->is_word())
 			cerr << left()->chars() << " " << right()->chars();
 		else
 			cerr << chars();
-	}
+//	}
 	cerr<< ": " <<  freq();
 	if (is_word() || QFreq::instance().is_word(chars()))
 		cerr << "(word)";

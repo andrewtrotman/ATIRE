@@ -32,6 +32,7 @@ private:
 	/// like punctuation, sybomls and other character in different lanaguages
 	array_type					freq_1_;
 	array_array_type			freq_n_;
+
 	std::vector<unsigned int>	sum_n_;
 	std::vector<double>			avg_n_;
 	int 						k_;
@@ -43,6 +44,9 @@ private:
 
 	long						number_of_documents_;
 	long						average_document_length_;
+
+	std::vector<std::pair<std::string, long> >	doc_;
+	UNISEG_encoding 			*enc_;
 
 public:
 	Freq();
@@ -88,6 +92,7 @@ public:
 	void set_seged(Freq& freq, unsigned int freqc);
 	void reduce_freq(Freq& freq, word_ptr_type tw_ptr);
 	void add_freq(Freq& freq, int threshold = 1);
+	void add_word_freq(word_ptr_type tw_ptr, unsigned int freq);
 
 	void justify(unsigned int freq);
 	void smooth();
@@ -123,6 +128,8 @@ public:
 	void increase_number_of_documents() { ++number_of_documents_; }
 
 	void set_current_document_id(long id);
+
+	void count_doc(std::string& doc, bool clean);
 
 private:
 

@@ -45,6 +45,8 @@ Freq::Freq() : sum_n_(UNISEG_settings::MAX_CHARS, 0), avg_n_(UNISEG_settings::MA
 	loaded_ = false;
 	number_of_documents_ = 0;
 	current_document_id_ = 0;
+
+	enc_ = UNISEG_encoding_factory::instance().get_encoding();
 }
 
 Freq::~Freq() {
@@ -166,15 +168,15 @@ word_ptr_type Freq::add(string_array& ca, /*long lang, */unsigned int freq, bool
 		//cerr << "adding new word : " << chars << endl;
 		bool skip = false;
 
-		if (UNISEG_settings::instance().load) {
-			if (freq > 0 && size > 1) {
-				if (UNISEG_settings::instance().do_skip && freq <= UNISEG_settings::instance().to_skip)
-					skip = true;
-
-				if(UNISEG_settings::instance().do_skip && !skip && UNISEG_settings::instance().skipit(size, freq))
-					skip = true;
-			}
-		} // loading
+//		if (UNISEG_settings::instance().load) {
+//			if (freq > 0 && size > 1) {
+//				if (UNISEG_settings::instance().do_skip && freq <= UNISEG_settings::instance().to_skip)
+//					skip = true;
+//
+//				if(UNISEG_settings::instance().do_skip && !skip && UNISEG_settings::instance().skipit(size, freq))
+//					skip = true;
+//			}
+//		} // loading
 
 		// for debug
 		//if (skip && size > 22)
@@ -276,7 +278,7 @@ void Freq::add(word_ptr_type word_ptr, bool allnew) {
 
 	if (!allnew)
 		freq_.insert(make_pair(word_ptr->chars(), word_ptr));
-	freq_n_[word_ptr->size()].push_back(word_ptr);
+	//freq_n_[word_ptr->size()].push_back(word_ptr);
 }
 
 void Freq::sort(int k) {
@@ -789,10 +791,10 @@ void Freq::smooth()
 //			if (freq_n_[i][j]->freq() > 0)
 //				freq_n_[i][j]->adjust(-freq_n_[i][j]->freq());
 
-	extend(k_);
+//	extend(k_);
 
-//	for (int i = k_; i > 1; --i)
-//		smooth(i);
+	for (int i = k_; i > 1; --i)
+		smooth(i);
 }
 
 void Freq::smooth(int k)
@@ -801,7 +803,7 @@ void Freq::smooth(int k)
 //	for (i = k_; i > 1; --i)
 		for (int j = 0; j < freq_n_[k].size(); j++)
 			if (freq_n_[k][j]->freq() > 0)
-				freq_n_[k][j]->adjust(-freq_n_[k][j]->freq());
+				freq_n_[k][j]->adjust_negative(freq_n_[k][j]->freq());
 }
 
 void Freq::extend(int k)
@@ -822,7 +824,8 @@ void Freq::extend(int k)
 					first->to_string_array(ca);
 					ca.push_back(second->rchar()->chars());
 				}
-				word_ptr_type new_word = add(ca, first->lang(), first->freq());
+				word_ptr_type new_word = add(ca, /*first->lang(), */first->freq());
+				new_word->adjust_negative(first->freq());
 //				first->adjust_freq(-first->freq());
 //				second->adjust_freq(-second->freq());
 				new_word->df(first->df());
@@ -833,4 +836,73 @@ void Freq::extend(int k)
 		sort(k + 1);
 		extend(k + 1);
 	}
+}
+
+void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
+{
+	word_ptr_type p_word;
+
+	for (int i = 1; i <= (word->size() - 1); ++i)
+		for (int j = 0; j < (word->size() - i + 1); ++j) {
+			p_word = word->subword(j, i);
+			p_word->adjust_freq(freq);
+
+			if (p_word->freq() > UNISEG_settings::instance().to_skip && !p_word->assigned()) {
+				freq_n_[p_word->size()].push_back(p_word);
+				p_word->assigned(true);
+			}
+		}
+
+	p_word = word;
+	if (p_word->freq() > UNISEG_settings::instance().to_skip && !p_word->assigned()) {
+		freq_n_[p_word->size()].push_back(p_word);
+		p_word->assigned(true);
+	}
+}
+
+void Freq::count_doc(std::string& doc, bool clean)
+{
+	if (clean)
+		doc_.clear();
+
+	unsigned char *current = (unsigned char *)doc.c_str();
+	unsigned char *next = current;
+	unsigned char *end = current + doc.length();
+
+	while (next < end) {
+
+		enc_->test_char(next);
+		string not_target_string;
+		unsigned char *pre = next;
+		while (next < end && enc_->lang() != uniseg_encoding::CHINESE) {
+			pre = next;
+			next += enc_->howmanybytes();
+			//temp_word_array.push_back(string_type(pre, next));
+			not_target_string.append(string_type(pre, next));
+			enc_->test_char(next);
+		}
+
+		if (not_target_string.length() > 0)
+			doc_.push_back(make_pair(not_target_string, (long)uniseg_encoding::UNKNOWN));
+
+		string_array ca;
+		string target_string;
+		while (next < end && enc_->lang() == uniseg_encoding::CHINESE /*&& count < step*/) {
+			pre = next;
+			next += enc_->howmanybytes();
+			ca.push_back(string_type(pre, next));
+			target_string.append(ca.back());
+			enc_->test_char(next);
+		}
+
+		if (target_string.length() > 0) {
+			doc_.push_back(make_pair(target_string, (long)uniseg_encoding::CHINESE));
+			//if (!find(target_string)) {
+				word_ptr_type ret_word = add(ca);
+				//ret_word->adjust(ret_word->freq());
+				add_word_freq(ret_word, 1);
+			//}
+		}
+	}
+	smooth();
 }

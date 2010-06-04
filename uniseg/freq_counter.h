@@ -21,22 +21,24 @@ private:
 	Freq*		freq_;
 	array_type	wa_;
 	int			languages_;
+	UNISEG_encoding 	*enc_;
 	//int			len_; /// the length of whole unsegmented document
 
 public:
 	FreqCounter(Freq* freq, long lang = uniseg_encoding::CHINESE)
-		: freq_(freq), languages_(lang) {}
+		: freq_(freq), languages_(lang) { init(); }
 
 	/**
 	 * @param stream The content character stream
 	 * @param freq The map for the frequcecies of words
 	 */
 	FreqCounter(string_type stream, Freq* freq, long lang = uniseg_encoding::CHINESE)
-			: stream_(stream), freq_(freq), languages_(lang) {}
+			: stream_(stream), freq_(freq), languages_(lang) { init(); }
 	~FreqCounter() {}
 
 	void count(int max, int min = 1);
 	void count() { count(get_utf8_string_length(stream_), 1); }
+	void auto_count();
 	void count_segmented();
 	string_type& stream() { return stream_; }
 	void stream(string_type& str) { stream_ = str; }
@@ -57,6 +59,8 @@ private:
 	void add_word(const char *begin, const char *end, int max, int min);
 	void count(const char *begin, const char *end, int max, int min);
 	void count_ones(Freq& freq, const char *begin, const char *end);
+
+	void init();
 };
 
 #endif /*DOC_FREQ_H_*/

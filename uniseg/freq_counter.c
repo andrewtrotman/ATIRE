@@ -10,6 +10,11 @@
 
 using namespace std;
 
+void FreqCounter::init()
+{
+	enc_ = UNISEG_encoding_factory::instance().get_encoding();
+}
+
 void FreqCounter::count(int max, int min)
 {
 	const char *start = (char *)stream_.c_str();
@@ -63,20 +68,8 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 		enc->test_char((unsigned char *)start);
 
 		while (start < end) {
-			//to = from + i;
-
-			//char *start = from;
-			//string_array ca;
-			//if (last_ca.size() > 0 && (last_ca.size() - 1) > 0)
-			//	std::copy(last_ca.begin()++, last_ca.end(), ca.begin());
 			if (cl.size() > 0)
 				cl.pop_front();
-//			if (cl.size() > 0 && pre_lang == enc->lang())
-//				cl.pop_front();
-//			else {
-//				pre_lang = enc->lang();
-//				cl.clear();
-//			}
 
 			while ( start < end ) {
 				//string_type str(start, 3);
@@ -139,6 +132,12 @@ void FreqCounter::add_word(const char *begin, const char *end, int max, int min)
 			//cerr << string_type((*from)->begin(), (*to)->end()) << endl;
 		}
 	}
+}
+
+void FreqCounter::auto_count()
+{
+
+
 }
 
 void FreqCounter::count_segmented()

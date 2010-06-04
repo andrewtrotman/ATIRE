@@ -45,7 +45,7 @@ void UNISEG_settings::init_fields()
 	#endif
 
 	verbose = true;
-	load = true;
+	load = false;
 
 	to_skip = 1;
 	skip_high = 0;

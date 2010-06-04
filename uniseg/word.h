@@ -74,6 +74,7 @@ private:
 	double											icf_;
 
 	long											last_seen_document_id_;
+	bool											assigned_;
 
 private:
 	void init();
@@ -227,6 +228,7 @@ public:
 	void seged_if(unsigned int freq);
 
 	void adjust(int freq);
+	void adjust_negative(int freq);
 	void adjust_freq(int freq);
 
 	void cal_p(double base);
@@ -261,6 +263,9 @@ public:
 	long get_last_seen_document_id() { return last_seen_document_id_; }
 
 	void print(bool details);
+
+	bool assigned() { return assigned_; }
+	void assigned(bool b) { assigned_ = true; }
 };
 
 inline const Word::Side Word::side() const {
