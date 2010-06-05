@@ -79,6 +79,7 @@ void Word::init() {
 	icf_ = 0.0;
 
 	last_seen_document_id_ = 0;
+	is_passage_ = false;
 }
 
 Address::uint_array& Word::init_disk_address()
@@ -698,4 +699,9 @@ void Word::print(bool details)
 	if (details)
 		cerr << "   (df: " << df() << " idf: " << idf() << " icf: " << icf() << ")";
 	cerr << endl;
+}
+
+void Word::segment()
+{
+
 }

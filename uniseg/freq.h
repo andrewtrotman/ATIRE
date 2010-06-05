@@ -45,7 +45,7 @@ private:
 	long						number_of_documents_;
 	long						average_document_length_;
 
-	std::vector<std::pair<std::string, long> >	doc_;
+	std::vector<word_ptr_type>	doc_;
 	UNISEG_encoding 			*enc_;
 
 public:
@@ -96,7 +96,7 @@ public:
 
 	void justify(unsigned int freq);
 	void smooth();
-	void smooth(int k);
+	void smooth(int k, bool only_substr);
 	void extend(int k);
 
 	void cal_word_p(double base);

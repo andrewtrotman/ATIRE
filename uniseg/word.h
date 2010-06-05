@@ -74,7 +74,11 @@ private:
 	double											icf_;
 
 	long											last_seen_document_id_;
+
 	bool											assigned_;
+	bool											is_passage_;
+
+	array_type										segments_;
 
 private:
 	void init();
@@ -265,7 +269,12 @@ public:
 	void print(bool details);
 
 	bool assigned() { return assigned_; }
-	void assigned(bool b) { assigned_ = true; }
+	void assigned(bool b) { assigned_ = b; }
+
+	bool is_passage() { return is_passage_; }
+	void is_passage(bool b) { is_passage_ = b; }
+
+	void segment();
 };
 
 inline const Word::Side Word::side() const {

@@ -273,9 +273,6 @@ void Freq::add(word_ptr_type word_ptr, bool allnew) {
 	//	cerr << " I got you " << endl;
 
 	assert(word_ptr != NULL);
-	if (word_ptr->size() > k_)
-		k_ = word_ptr->size();
-
 	if (!allnew)
 		freq_.insert(make_pair(word_ptr->chars(), word_ptr));
 	//freq_n_[word_ptr->size()].push_back(word_ptr);
@@ -794,16 +791,26 @@ void Freq::smooth()
 //	extend(k_);
 
 	for (int i = k_; i > 1; --i)
-		smooth(i);
+		smooth(i, false);
+
+	for (int i = k_; i > 1; --i)
+		smooth(i, true);
 }
 
-void Freq::smooth(int k)
+void Freq::smooth(int k, bool only_substr)
 {
 //	int i, j;
 //	for (i = k_; i > 1; --i)
-		for (int j = 0; j < freq_n_[k].size(); j++)
-			if (freq_n_[k][j]->freq() > 0)
-				freq_n_[k][j]->adjust_negative(freq_n_[k][j]->freq());
+		for (int j = 0; j < freq_n_[k].size(); j++) {
+			if (only_substr && freq_n_[k][j]->is_passage())
+				continue;
+			if (freq_n_[k][j]->freq() > 0) {
+				if (!only_substr)
+					freq_n_[k][j]->adjust_negative(freq_n_[k][j]->freq());
+				else
+					freq_n_[k][j]->adjust(-freq_n_[k][j]->freq());
+			}
+		}
 }
 
 void Freq::extend(int k)
@@ -842,22 +849,25 @@ void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
 {
 	word_ptr_type p_word;
 
-	for (int i = 1; i <= (word->size() - 1); ++i)
+	for (int i = 1; i <= word->size(); ++i)
 		for (int j = 0; j < (word->size() - i + 1); ++j) {
 			p_word = word->subword(j, i);
-			p_word->adjust_freq(freq);
+			if (word != p_word)
+				p_word->adjust_freq(freq);
 
 			if (p_word->freq() > UNISEG_settings::instance().to_skip && !p_word->assigned()) {
+				if (p_word->size() > k_)
+					k_ = p_word->size();
 				freq_n_[p_word->size()].push_back(p_word);
 				p_word->assigned(true);
 			}
 		}
 
-	p_word = word;
-	if (p_word->freq() > UNISEG_settings::instance().to_skip && !p_word->assigned()) {
-		freq_n_[p_word->size()].push_back(p_word);
-		p_word->assigned(true);
-	}
+//	p_word = word;
+//	if (p_word->freq() > UNISEG_settings::instance().to_skip && !p_word->assigned()) {
+//		freq_n_[p_word->size()].push_back(p_word);
+//		p_word->assigned(true);
+//	}
 }
 
 void Freq::count_doc(std::string& doc, bool clean)
@@ -868,39 +878,46 @@ void Freq::count_doc(std::string& doc, bool clean)
 	unsigned char *current = (unsigned char *)doc.c_str();
 	unsigned char *next = current;
 	unsigned char *end = current + doc.length();
-
+	word_ptr_type ret_word = NULL;
 	while (next < end) {
 
 		enc_->test_char(next);
-		string not_target_string;
+		string_array not_target_string;
 		unsigned char *pre = next;
 		while (next < end && enc_->lang() != uniseg_encoding::CHINESE) {
 			pre = next;
 			next += enc_->howmanybytes();
 			//temp_word_array.push_back(string_type(pre, next));
-			not_target_string.append(string_type(pre, next));
+			not_target_string.push_back(string_type(pre, next));
 			enc_->test_char(next);
 		}
 
-		if (not_target_string.length() > 0)
-			doc_.push_back(make_pair(not_target_string, (long)uniseg_encoding::UNKNOWN));
+		if (not_target_string.size() > 0) {
+			ret_word = add(not_target_string, 0);
+			ret_word->lang((long)uniseg_encoding::UNKNOWN);
+			//doc_.push_back(make_pair(not_target_string, (long)uniseg_encoding::UNKNOWN));
+			doc_.push_back(ret_word);
+		}
 
 		string_array ca;
-		string target_string;
+		//string target_string;
 		while (next < end && enc_->lang() == uniseg_encoding::CHINESE /*&& count < step*/) {
 			pre = next;
 			next += enc_->howmanybytes();
 			ca.push_back(string_type(pre, next));
-			target_string.append(ca.back());
+			//target_string.append(ca.back());
 			enc_->test_char(next);
 		}
 
-		if (target_string.length() > 0) {
-			doc_.push_back(make_pair(target_string, (long)uniseg_encoding::CHINESE));
+		if (ca.size() > 0) {
+			//doc_.push_back(make_pair(target_string, (long)uniseg_encoding::CHINESE));
 			//if (!find(target_string)) {
-				word_ptr_type ret_word = add(ca);
-				//ret_word->adjust(ret_word->freq());
+				ret_word = add(ca);
+				ret_word->lang((long)uniseg_encoding::CHINESE);
+				ret_word->is_passage(true);
 				add_word_freq(ret_word, 1);
+				doc_.push_back(ret_word);
+				//ret_word->adjust(ret_word->freq());
 			//}
 		}
 	}

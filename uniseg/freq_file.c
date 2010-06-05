@@ -81,24 +81,20 @@ void FreqFile::write(array_type& arr) {
 	int count = 0;
 
 	for (unsigned int i = 0; i < arr.size(); i++) {
-
-		char *chars;
 		word_ptr_type word_ptr = arr[i];
 
 		if (UNISEG_settings::instance().on_training && (!word_ptr->has_word_pair() && !word_ptr->is_word()))
 			continue;
 
-		unsigned int freq = 0;
+		unsigned int freq = word_ptr->freq();
 
-		chars = (char *)(word_ptr->family().second->chars().c_str());
+		if (/*UNISEG_settings::instance().do_skip && */freq < UNISEG_settings::instance().to_skip)
+			continue;
+
+		char *chars = (char *)(word_ptr->family().second->chars().c_str());
 
 		int len = strlen(chars);
 		assert(len <= UNICODE_CHAR_LENGTH);
-
-		freq = word_ptr->freq();
-
-		if (UNISEG_settings::instance().do_skip && freq <= UNISEG_settings::instance().to_skip)
-			continue;
 
 		iofs_.write(chars, UNICODE_CHAR_LENGTH);
 		unsigned int word_where = 0;
