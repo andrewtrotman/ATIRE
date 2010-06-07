@@ -126,7 +126,7 @@ word_ptr_type Freq::find(string_type word) {
 	return NULL;
 }
 
-word_ptr_type Freq::add(string_array& ca, /*long lang, */unsigned int freq, bool allnew) {
+word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool allnew) {
 
 	int size = ca.size();
 	assert(size > 0);
@@ -188,7 +188,7 @@ word_ptr_type Freq::add(string_array& ca, /*long lang, */unsigned int freq, bool
 			else
 				word_ptr = new word_type(chars, freq, size);
 
-			//word_ptr->lang(lang);
+			word_ptr->lang(lang);
 			/// make the Word linked to the word which is the sub
 			if (word_ptr->size() > 1) {
 
@@ -219,12 +219,12 @@ word_ptr_type Freq::add(string_array& ca, /*long lang, */unsigned int freq, bool
 					if (!lparent) {
 						string_array lca(ca);
 						lca.pop_back();
-						lparent = add(lca, /*lang,*/ 0);
+						lparent = add(lca, lang, 0);
 					}
 					if (!rparent) {
 						string_array rca(ca);
 						rca.erase(rca.begin());
-						rparent = add(rca, /*lang, */0);
+						rparent = add(rca, lang, 0);
 					}
 
 					word_ptr->lparent(lparent); word_ptr->lchar(find(lc));
@@ -261,6 +261,9 @@ word_ptr_type Freq::add(string_array& ca, /*long lang, */unsigned int freq, bool
 		//	cerr << "skipping ..." << endl;
 	}
 
+	if (word_ptr->chars() == "送行")
+		cerr << "stop here" << endl;
+
 	if (word_ptr->get_last_seen_document_id() != current_document_id_)
 		word_ptr->increase_document_frequency();
 
@@ -280,6 +283,9 @@ void Freq::add(word_ptr_type word_ptr, bool allnew) {
 
 void Freq::add_to_array(word_ptr_type word_ptr)
 {
+	if (word_ptr->chars() == "送行")
+		cerr << "stop here" << endl;
+
 	freq_n_[word_ptr->size()].push_back(word_ptr);
 	if (word_ptr->size() > k_)
 		k_ = word_ptr->size();
@@ -333,7 +339,7 @@ void Freq::pile_up(int max)
 //			cerr << "wa: ";
 //			std::copy(wa.begin(), wa.end(), ostream_iterator<string_type>(cerr, " "));
 //			cerr << endl;
-			curr = add(wa, /*lparent->lang(), */0, true);
+			curr = add(wa, lparent->lang(), 0, true);
 			//curr->lang(lparent->lang());
 
 			lchar = (word_ptr_type)lparent->lchar();
@@ -351,7 +357,7 @@ void Freq::pile_up(int max)
 
 				word_ptr_type rrparent = freq_n_[i][j + 2];
 				wa_next.push_back(rrparent->rchar()->chars());
-				next = add(wa_next, /*rparent->lang(), */0, true);
+				next = add(wa_next, rparent->lang(), 0, true);
 				assert(next != NULL);
 				//next->lang(rparent->lang());
 
@@ -533,6 +539,63 @@ void Freq::assign_freq(Freq& freq) {
 			<< endl;
 		iter->second->freq(freqc);
 	}
+}
+
+void Freq::assign_freq_for_segmentation(Freq& source_freq, double base)
+{
+	std::map<word_ptr_type, word_ptr_type> word_pairs;
+	std::map<word_ptr_type, word_ptr_type>::iterator it;
+	freq_type& freq_map = set();
+
+	// need to load the frequency first, and during the loading the frequency could be changed
+//	for (int i = 1; i < 3; ++i) {
+//		array_type& word_array = array_k(i);
+//		for (int j = 0; j < word_array.size(); ++j) {
+	for (freq_type::iterator local_it = freq_map.begin(); local_it != freq_map.end(); ++local_it) {
+			word_ptr_type local_word  = local_it->second; //word_array[j];
+			if (!(local_word->lang() & uniseg_encoding::CHINESE))
+				continue;
+			//freq_->add_to_array(local_word);
+
+			word_ptr_type global_word = source_freq.find(local_word->chars());
+			if (global_word && global_word->disk_address().size() > 0)
+				source_freq.load(global_word);
+			word_pairs.insert(make_pair(local_word, global_word));
+//		}
+	}
+
+	for (it = word_pairs.begin(); it != word_pairs.end(); ++it) {
+		if (it->first->size() <= 4) {
+			assign_freq_for_segmentation(it->first, it->second);
+			it->first->cal_p(base);
+		}
+	}
+
+	for (it = word_pairs.begin(); it != word_pairs.end(); ++it)
+		if (it->first->size() == 4)
+			it->first->cal_ngmi_a(2);
+}
+
+void Freq::assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word)
+{
+	if (local_word->chars() == "送行")
+		cerr << "stop here" << endl;
+
+	if (global_word) {
+		local_word->freq(local_word->freq() + global_word->freq());
+		local_word->is_word(global_word->is_word());
+		if (global_word->left() != NULL && global_word->left()->is_word()) {
+			word_ptr_type tmp = find(global_word->left()->chars());
+			local_word->left(tmp);
+			local_word->left()->is_word(true);
+		}
+		if (global_word->right() != NULL && global_word->right()->is_word()) {
+			local_word->right(find(global_word->right()->chars()));
+			local_word->right()->is_word(true);
+		}
+	}
+//	else
+//		local_word->freq(0);
 }
 
 void Freq::cal_sum_n_avg() {
@@ -809,13 +872,14 @@ void Freq::smooth(int k, bool only_substr)
 //	int i, j;
 //	for (i = k_; i > 1; --i)
 		for (int j = 0; j < freq_n_[k].size(); j++) {
-			if (only_substr && freq_n_[k][j]->is_passage())
+			word_ptr_type word = freq_n_[k][j];
+			if (only_substr && word->is_passage())
 				continue;
-			if (freq_n_[k][j]->freq() > 0) {
+			if (word->freq() > 0) {
 				if (!only_substr)
-					freq_n_[k][j]->adjust_negative(freq_n_[k][j]->freq());
+					word->adjust_negative(word->freq());
 				else
-					freq_n_[k][j]->adjust(-freq_n_[k][j]->freq());
+					word->adjust(-word->freq());
 			}
 		}
 }
@@ -838,7 +902,7 @@ void Freq::extend(int k)
 					first->to_string_array(ca);
 					ca.push_back(second->rchar()->chars());
 				}
-				word_ptr_type new_word = add(ca, /*first->lang(), */first->freq());
+				word_ptr_type new_word = add(ca, first->lang(), first->freq());
 				new_word->adjust_negative(first->freq());
 //				first->adjust_freq(-first->freq());
 //				second->adjust_freq(-second->freq());
@@ -859,6 +923,10 @@ void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
 	for (int i = 1; i <= word->size(); ++i)
 		for (int j = 0; j < (word->size() - i + 1); ++j) {
 			p_word = word->subword(j, i);
+
+			if (p_word->chars() == "送行")
+				cerr << "stop here" << endl;
+
 			if (word != p_word)
 				p_word->adjust_freq(freq);
 
@@ -880,12 +948,18 @@ void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
 
 void Freq::count_doc(std::string& doc, bool clean)
 {
+	count_doc(doc.c_str(), doc.length(), clean);
+}
+
+void Freq::count_doc(const char *doc, long len, bool clean)
+{
+
 	if (clean)
 		doc_.clear();
 
-	unsigned char *current = (unsigned char *)doc.c_str();
+	unsigned char *current = (unsigned char *)doc;
 	unsigned char *next = current;
-	unsigned char *end = current + doc.length();
+	unsigned char *end = current + len;
 	word_ptr_type ret_word = NULL;
 	while (next < end) {
 
@@ -901,8 +975,7 @@ void Freq::count_doc(std::string& doc, bool clean)
 		}
 
 		if (not_target_string.size() > 0) {
-			ret_word = add(not_target_string, 0);
-			ret_word->lang((long)uniseg_encoding::UNKNOWN);
+			ret_word = add(not_target_string, (long)uniseg_encoding::UNKNOWN, 0);
 			//doc_.push_back(make_pair(not_target_string, (long)uniseg_encoding::UNKNOWN));
 			doc_.push_back(ret_word);
 		}
@@ -920,8 +993,7 @@ void Freq::count_doc(std::string& doc, bool clean)
 		if (ca.size() > 0) {
 			//doc_.push_back(make_pair(target_string, (long)uniseg_encoding::CHINESE));
 			//if (!find(target_string)) {
-				ret_word = add(ca);
-				ret_word->lang((long)uniseg_encoding::CHINESE);
+				ret_word = add(ca, (long)uniseg_encoding::CHINESE);
 				ret_word->is_passage(true);
 				add_word_freq(ret_word, 1);
 				doc_.push_back(ret_word);

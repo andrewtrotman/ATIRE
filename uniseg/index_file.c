@@ -220,7 +220,7 @@ void IndexFile::read(Freq *freq) {
 			ca.push_back(a_char);
 		}
 
-		word_ptr_type word = freq->add(ca, /*lang, */0);
+		word_ptr_type word = freq->add(ca, lang, 0);
 		if (word->chars() == "业化")
 			cerr << "Stop here!" << endl;
 //		cerr << "add new word for index: " << word->chars() << endl;

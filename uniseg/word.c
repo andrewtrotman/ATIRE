@@ -431,6 +431,10 @@ void Word:: adjust(int freq)
 	for (int i = 1; i <= (size_ - 1); ++i)
 		for (int j = 0; j < (size_ - i + 1); ++j) {
 			word_ptr_type word = subword(j, i);
+
+			if (word->chars() == "送行")
+				cerr << "stop here" << endl;
+
 			word->adjust_freq(freq);
 //			else
 //				cerr << "already zero!" << endl;
@@ -442,6 +446,10 @@ void  Word::adjust_negative(int freq)
 for (int i = 1; i <= (size_ - 1); ++i)
 	for (int j = 0; j < (size_ - i + 1); ++j) {
 		word_ptr_type word = subword(j, i);
+
+		if (word->chars() == "送行")
+			cerr << "stop here" << endl;
+
 		if (word->freq() == freq)
 			word->adjust_freq(-freq);
 	}

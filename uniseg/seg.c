@@ -57,7 +57,7 @@ void Seger::free()
 		words_list_.clear();
 
 	if (freq_) {
-		delete freq_;
+//		delete freq_;
 		freq_ = NULL;
 
 		tw_ptr_ = NULL;
@@ -75,7 +75,7 @@ void Seger::init_members()
 {
 	clist_ = NULL;
 	freq_ = NULL;
-	allfreq_ = NULL;
+	freq_stat_ = &(QFreq::instance().freq());
 	tw_ptr_ = NULL;
 	tw_ptr_local_ = NULL;
 }
@@ -87,30 +87,28 @@ void Seger::init()
 	assert(stream_.length() > 0);
 
 	//assert(tw_ptr_->chars().length() > 0);
-	freq_ = new Freq;
+//	freq_ = new Freq;
+	freq_ = QFreq::instance().freq_text();
 
 	//FreqCounter counter(stream_, freq_);
 	//counter.count(UNISEG_settings::instance().max, 1);
-	string_array ca;
-	to_string_array(stream_, ca);
-	//tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
-	tw_ptr_local_ = freq_->add(ca);
+//	string_array ca;
+//	to_string_array(stream_, ca);
+//	//tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
+//	tw_ptr_local_ = freq_->add(ca);
+	tw_ptr_local_ = freq_->find(stream_);
+	assert(tw_ptr_local_ != NULL);
+//	if (!tw_ptr_local_) {
+//		string_array ca;
+//		to_string_array(stream_, ca);
+//		tw_ptr_local_ = freq_->add(ca);
+//	}
 
-	if (!allfreq_) {
-		allfreq_ = &(QFreq::instance().freq());
-		if (UNISEG_settings::instance().with_training_info)
-			base_ = allfreq_->sum();
-		else
-			base_ = allfreq_->sum_k(1);
-		double p = 1.0 / base_;
-		UNISEG_settings::instance().threshold = log(p);
-	}
+	tw_ptr_ = freq_stat_->find(stream_);
+//	assign_freq(tw_ptr_local_, tw_ptr_);
 
-	tw_ptr_ = allfreq_->find(stream_);
-	assign_freq(tw_ptr_local_, tw_ptr_);
-
-	assign_freq();
-	do_some_calculations();
+//	assign_freq();
+//	do_some_calculations();
 
 	//justify(0);
 }
@@ -400,12 +398,12 @@ void Seger::make(CList& clist, string_type& str) {
 }
 
 void Seger::assign_freq() {
-	//freq_->assign_freq(*allfreq_);
+	//freq_->assign_freq(*freq_stat_);
 	std::map<word_ptr_type, word_ptr_type> word_pairs;
 	std::map<word_ptr_type, word_ptr_type>::iterator it;
 	freq_type& freq = freq_->set();
 
-	//int step = freq_->array_size() < allfreq_->array_size() ? freq_->array_size() : allfreq_->array_size();
+	//int step = freq_->array_size() < freq_stat_->array_size() ? freq_->array_size() : freq_stat_->array_size();
 
 	// need to load the frequency first, and during the loading the frequency could be changed
 	//for (int i = 1; i < step; ++i) {
@@ -415,7 +413,7 @@ void Seger::assign_freq() {
 			word_ptr_type local_word  = local_it->second; //word_array[j];
 			freq_->add_to_array(local_word);
 
-			word_ptr_type global_word = allfreq_->find(local_word->chars());
+			word_ptr_type global_word = freq_stat_->find(local_word->chars());
 			if (global_word && global_word->disk_address().size() > 0)
 				QFreq::instance().load(global_word);
 			word_pairs.insert(make_pair(local_word, global_word));
@@ -429,7 +427,7 @@ void Seger::assign_freq() {
 void Seger::assign_freq(word_ptr_type local_word, word_ptr_type global_word)
 {
 	if (global_word) {
-		local_word->freq(global_word->freq());
+		local_word->freq(local_word->freq() + global_word->freq());
 		local_word->is_word(global_word->is_word());
 		if (global_word->left() != NULL && global_word->left()->is_word()) {
 			word_ptr_type tmp = freq_->find(global_word->left()->chars());
@@ -507,7 +505,7 @@ void Seger::add_to_list(array_type& cwlist) {
 
 			for (int i = 0; i < temp.size(); i++) {
 				str.append(temp[i]->chars());
-				word_ptr_type w_ptr = allfreq_->find(temp[i]->chars());
+				word_ptr_type w_ptr = freq_stat_->find(temp[i]->chars());
 
 				if (!w_ptr)
 					continue;
@@ -516,7 +514,7 @@ void Seger::add_to_list(array_type& cwlist) {
 				cwlist.push_back(w_ptr);
 
 				if (i > 0 && i < (temp.size() -1)) {
-					word_ptr_type iner_w_ptr = allfreq_->find(str);
+					word_ptr_type iner_w_ptr = freq_stat_->find(str);
 					// for debug
 					//cerr << "setting " << str << " for being a word or seged" << endl;
 					//assert(iner_w_ptr != NULL);
@@ -547,7 +545,7 @@ void Seger::mark_the_seged() {
 	/// to set some other words for being seged as well
 	if (tw_ptr_ != NULL) {
 		const unsigned int freq = tw_ptr_->freq();
-		freq_->set_seged(*allfreq_, freq);
+		freq_->set_seged(*freq_stat_, freq);
 	}
 }
 

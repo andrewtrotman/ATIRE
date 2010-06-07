@@ -18,7 +18,9 @@ class Seger {
 protected:
 	CList				*clist_;
 	Freq				*freq_;    // the frequency records for the input text
-	Freq				*allfreq_;
+	Freq				*freq_stat_;  // some other statistical information
+	Freq				*freq_training_; // statistical information from training
+
 	word_ptr_type 		tw_ptr_;
 	word_ptr_type 		tw_ptr_local_;
 	string_type 		stream_;  // for the incoming document which will be segmented
@@ -56,6 +58,8 @@ public:
 	int get_count() { return words_list_.size(); }
 	const array_type& best_words() const { return words_list_; }
 
+	virtual void do_some_calculations();
+
 	static bool check_word_pair(word_ptr_type word);
 	static std::pair<word_ptr_type, word_ptr_type> get_leftmost_word(word_ptr_type word);
 	static std::pair<word_ptr_type, word_ptr_type> break_tie(word_ptr_type word);
@@ -70,7 +74,6 @@ protected:
 	void assign_freq();
 	void assign_freq(word_ptr_type local_word, word_ptr_type global_word);
 	void justify(unsigned int min = 2);
-	virtual void do_some_calculations();
 
 	virtual void seg();
 	virtual void build();

@@ -57,8 +57,8 @@ public:
 	word_ptr_type find(string_type word);
 	bool has_word(string_type word);
 
-	//word_ptr_type add(string_array& ca, long lang, unsigned int freq = -1, bool allnew = false);
-	word_ptr_type add(string_array& ca, unsigned int freq = -1, bool allnew = false);
+	word_ptr_type add(string_array& ca, long lang = 0, unsigned int freq = -1, bool allnew = false);
+	//word_ptr_type add(string_array& ca, unsigned int freq = -1, bool allnew = false);
 	void add(word_ptr_type word_ptr, bool allnew = false);
 	void add_to_array(word_ptr_type word_ptr);
 
@@ -92,6 +92,8 @@ public:
 	void cal_sum_n_avg();
 
 	void assign_freq(Freq& freq);
+	void assign_freq_for_segmentation(Freq& freq, double base);
+	void assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word);
 	void set_seged(Freq& freq, unsigned int freqc);
 	void reduce_freq(Freq& freq, word_ptr_type tw_ptr);
 	void add_freq(Freq& freq, int threshold = 1);
@@ -133,6 +135,7 @@ public:
 	void set_current_document_id(long id);
 
 	void count_doc(std::string& doc, bool clean);
+	void count_doc(const char *doc, long len, bool clean);
 
 private:
 

@@ -13,23 +13,47 @@
 
 #include <iostream>
 
+#include <math.h>
+
 using namespace std;
 
 
 QFreq::QFreq() {
 	dic_.load(UNISEG_settings::instance().dics_path);
+	freq_text_ = NULL;
+	create_new_freq();
 }
 
 QFreq::~QFreq() {
+	clear();
+}
 
+void QFreq::clear()
+{
+	if (freq_text_) {
+		delete freq_text_;
+		freq_text_ = NULL;
+	}
+}
+
+void QFreq::create_new_freq()
+{
+	clear();
+	freq_text_ = new Freq;
 }
 
 void QFreq::load_freq(int n, bool force) {
 	freq_stat_.load_freq(UNISEG_settings::instance().freqs_path, n, force);
 	freq_training_.load_freq(UNISEG_settings::instance().training_path, n, force);
 
-	if (freq_training_.freq_files().size() > 0)
+	if (freq_training_.freq_files().size() > 0) {
 		UNISEG_settings::instance().with_training_info = true;
+		base_ = freq_training_.sum();
+	}
+	else
+		base_ = freq_stat_.sum_k(1);
+	double p = 1.0 / base_;
+	UNISEG_settings::instance().threshold = log(p);
 }
 
 void QFreq::load(word_ptr_type word)

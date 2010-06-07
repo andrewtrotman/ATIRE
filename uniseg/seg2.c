@@ -36,7 +36,7 @@ Seger2::~Seger2()
 }
 
 void Seger2::do_some_calculations() {
-	//freq_->cal_word_p(allfreq_->sum_k(1));
+	//freq_->cal_word_p(freq_stat_->sum_k(1));
 	freq_->cal_word_ngmi_a(base_);
 	//freq_->show_p();
 }
