@@ -278,6 +278,13 @@ void Freq::add(word_ptr_type word_ptr, bool allnew) {
 	//freq_n_[word_ptr->size()].push_back(word_ptr);
 }
 
+void Freq::add_to_array(word_ptr_type word_ptr)
+{
+	freq_n_[word_ptr->size()].push_back(word_ptr);
+	if (word_ptr->size() > k_)
+		k_ = word_ptr->size();
+}
+
 void Freq::sort(int k) {
 	cerr << endl;
 	cerr << "now sorting the results" << endl;
@@ -858,7 +865,8 @@ void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
 			if (p_word->freq() > UNISEG_settings::instance().to_skip && !p_word->assigned()) {
 				if (p_word->size() > k_)
 					k_ = p_word->size();
-				freq_n_[p_word->size()].push_back(p_word);
+				//freq_n_[p_word->size()].push_back(p_word);
+				add_to_array(p_word);
 				p_word->assigned(true);
 			}
 		}

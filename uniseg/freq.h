@@ -60,6 +60,7 @@ public:
 	//word_ptr_type add(string_array& ca, long lang, unsigned int freq = -1, bool allnew = false);
 	word_ptr_type add(string_array& ca, unsigned int freq = -1, bool allnew = false);
 	void add(word_ptr_type word_ptr, bool allnew = false);
+	void add_to_array(word_ptr_type word_ptr);
 
 	void sort(int k);
 	void show(int k, int, bool details = false);
@@ -76,6 +77,8 @@ public:
 
 	array_type& array_k(int k) { return freq_n_[k]; }
 	void array_to_array(array_type& wa, string_array& ca);
+
+	std::map<int, FreqFile *>& freq_files() { return freq_files_; }
 
 	std::vector<unsigned int>& sum_array() { return sum_n_; }
 	std::vector<double>& avg_array() { return avg_n_; }

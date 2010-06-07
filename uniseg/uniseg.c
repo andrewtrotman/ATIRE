@@ -158,6 +158,7 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							output_.append("  ");
 						if (current_word->size() == 1
 								|| has_word_pair
+								|| current_word->is_word()
 								|| (need_eligibility_check && QFreq::instance().eligibility_check(current_word))) {
 							string_type& word = current_word->chars();
 							if (has_word_pair)
@@ -165,7 +166,6 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							else
 								output_.append(word);
 							segmented_len += word.length();
-							word_count +=  current_word->size();
 						}
 						else {
 							/* 2010.06.03 */
@@ -174,21 +174,23 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 
 							std::vector<double>::iterator pos = min_element(begin, end);
 							word_ptr_type tmp_word = current_word;
+
+							if (current_word->chars() == "声明了")
+								cerr << "stop here" << endl;
+							string to_become;
 							string right_left;
 							while ((end - begin) > 1) {
-								word_ptr_type l_word = tmp_word->subword(begin - boundary_score.begin() - word_count, pos - begin + 1);
+								word_ptr_type l_word = tmp_word->subword(0/*begin - boundary_score.begin() - word_count*/, pos - begin + 1);
 								word_ptr_type r_word = tmp_word->subword(pos - begin + 1, end - pos);
 
 								if (l_word->is_word() && r_word->is_word()) {
-									output_.append(l_word->chars() + "  " + r_word->chars());
-									word_count += current_word->size();
+									to_become.append(l_word->chars() + "  " + r_word->chars());
 //									begin = end = pos;
 									tmp_word = NULL;
 									break;
 								}
 								else if (l_word->size() > 1 && l_word->is_word()) {
-									output_.append(l_word->chars() + "  ");
-									word_count += l_word->size();
+									to_become.append(l_word->chars() + "  ");
 									tmp_word = r_word;
 									begin = pos + 1;
 								}
@@ -199,9 +201,8 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 								}
 								else {
 									if (l_word->has_word_pair()) {
-										output_.append(l_word->left()->chars() + "  " + l_word->right()->chars() + "  ");
+										to_become.append(l_word->left()->chars() + "  " + l_word->right()->chars() + "  ");
 										begin = pos + 1;
-										word_count += l_word->size();
 										tmp_word = r_word;
 									}
 									else if (r_word->has_word_pair()){
@@ -211,13 +212,13 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 									}
 									else {
 //										if (l_word->size() < r_word->size()) {
-//										output_.append(l_word->chars() + "  ");
+//										to_become.append(l_word->chars() + "  ");
 //										begin = pos + 1;
 //									}
 //									else {
 //										right_left.insert(0, string("  ") + r_word->chars());
 //										end = pos;
-										seger_.get_leftmost_word_segmentation(tmp_word, output_);
+										seger_.get_leftmost_word_segmentation(tmp_word, to_become);
 //										begin = end = pos;
 										tmp_word = NULL;
 										break;
@@ -228,16 +229,16 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							}
 							if (tmp_word != NULL) {
 								if (tmp_word->is_word())
-									output_.append(tmp_word->chars());
+									to_become.append(tmp_word->chars());
 								else {
 									/**
 									 * TODO check possible OOV here or somewhere else
 									 */
-									seger_.get_leftmost_word_segmentation(tmp_word, output_);
+									seger_.get_leftmost_word_segmentation(tmp_word, to_become);
 								}
 							}
-							//	output_.append(current_word->subword(begin - boundary_score.begin() - word_count, end - begin + 1)->chars());
-							output_.append(right_left);
+							//	to_become.append(current_word->subword(begin - boundary_score.begin() - word_count, end - begin + 1)->chars());
+							to_become.append(right_left);
 //							word_ptr_type lparent = current_word;
 //							assert(lparent != NULL);
 //							while (lparent->size() > 1 && !lparent->is_word()) {
@@ -250,8 +251,11 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 //							segmented_len += current_word->chars().length();
 							//break;
 	//						output_.append(current_word->to_string());
+							cerr << current_word->chars() << " > " << to_become << endl;
+							output_.append(to_become);
 							segmented_len += current_word->chars().length();
 						}
+						word_count +=  current_word->size();
 					}
 				else {
 					segmented_len = how_far;

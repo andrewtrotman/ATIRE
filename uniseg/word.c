@@ -521,6 +521,8 @@ void Word::cal_ngmi_a(int start) {
 
 	int count = 0;
 	bool stop_flag = false;
+	Word* left_p = subword(0, start - 0);
+	Word* right_p = subword(start, size_ - start);
 	for (int i = start; i > 0; i--) {
 		for (int j = start; j < size_; j++) {
 			count++;
@@ -550,7 +552,10 @@ void Word::cal_ngmi_a(int start) {
 			else if (lw->p() == 0.0 || rw->p() == 0.0)
 				tmp = std::numeric_limits<double>::max() - 1; // change a bit the tmp value
 			else {
-				tmp = mi = log(ww->p() / (lw->p() * rw->p()));
+				if (ww->has_word_pair() && (ww->left() == left_p || ww->right() == right_p))
+					tmp = -std::numeric_limits<double>::max();
+				else
+					tmp = mi = log(ww->p() / (lw->p() * rw->p()));
 //				sign = (mi > 0) ? 1.0 : -1.0;
 //				tmp = sign * mi * mi;
 			}

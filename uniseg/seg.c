@@ -405,18 +405,21 @@ void Seger::assign_freq() {
 	std::map<word_ptr_type, word_ptr_type>::iterator it;
 	freq_type& freq = freq_->set();
 
-	int step = freq_->array_size() < allfreq_->array_size() ? freq_->array_size() : allfreq_->array_size();
+	//int step = freq_->array_size() < allfreq_->array_size() ? freq_->array_size() : allfreq_->array_size();
 
 	// need to load the frequency first, and during the loading the frequency could be changed
-	for (int i = 1; i < step; ++i) {
-		array_type& word_array = freq_->array_k(i);
-		for (int j = 0; j < word_array.size(); ++j) {
-			word_ptr_type local_word  = word_array[j];
+	//for (int i = 1; i < step; ++i) {
+		//array_type& word_array = freq_->array_k(i);
+		//for (int j = 0; j < word_array.size(); ++j) {
+	for (freq_type::iterator local_it = freq.begin(); local_it != freq.end(); ++local_it) {
+			word_ptr_type local_word  = local_it->second; //word_array[j];
+			freq_->add_to_array(local_word);
+
 			word_ptr_type global_word = allfreq_->find(local_word->chars());
 			if (global_word && global_word->disk_address().size() > 0)
 				QFreq::instance().load(global_word);
 			word_pairs.insert(make_pair(local_word, global_word));
-		}
+		//}
 	}
 
 	for (it = word_pairs.begin(); it != word_pairs.end(); ++it)

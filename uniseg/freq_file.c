@@ -415,6 +415,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 	/// save them in the array
 	// assert(value > 0);
 	word_ptr_type ret_word = freq_->add(aca, /*enc_->lang(), */value); //->address(count);
+	freq_->add_to_array(ret_word);
 
 	if (ret_word->chars() == "工作最"/* || ret_word->chars() == "\347\272\242\347\201\257\347\254\274"*/)
 		cerr << "got you " << endl;
