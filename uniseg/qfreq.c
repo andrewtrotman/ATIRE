@@ -10,6 +10,7 @@
 #include "freq_loader.h"
 #include "freq_file.h"
 #include "index_file.h"
+#include "dic2freq.h"
 
 #include <iostream>
 
@@ -20,6 +21,8 @@ using namespace std;
 
 QFreq::QFreq() {
 	dic_.load(UNISEG_settings::instance().dics_path);
+	dic_.lang(uniseg_encoding::CHINESE);
+
 	freq_text_ = NULL;
 	create_new_freq();
 }
@@ -48,12 +51,16 @@ void QFreq::load_freq(int n, bool force) {
 
 	if (freq_training_.freq_files().size() > 0) {
 		UNISEG_settings::instance().with_training_info = true;
+		Dic2Freq::dic2freq2(&dic_, &freq_training_, dic_.lang());
 		base_ = freq_training_.sum();
 	}
-	else
+	else {
 		base_ = freq_stat_.sum_k(1);
+		Dic2Freq::dic2freq2(&dic_, &freq_stat_, dic_.lang());
+	}
 	double p = 1.0 / base_;
 	UNISEG_settings::instance().threshold = log(p);
+
 }
 
 void QFreq::load(word_ptr_type word)

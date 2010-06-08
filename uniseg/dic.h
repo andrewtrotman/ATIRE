@@ -30,6 +30,9 @@ public:
 	const word_map& list() const { return list_; }
 	const stat_map& stat() const { return stat_; }
 
+	long lang() { return lang_; }
+	void lang(long l) { lang_ += l; }
+
 	void add(string_type, long freq);
 
 	bool find(string_type word);

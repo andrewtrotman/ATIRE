@@ -560,8 +560,12 @@ void Word::cal_ngmi_a(int start) {
 			else if (lw->p() == 0.0 || rw->p() == 0.0)
 				tmp = std::numeric_limits<double>::max() - 1; // change a bit the tmp value
 			else {
-				if (ww->has_word_pair() && (ww->left() == left_p || ww->right() == right_p))
-					tmp = -std::numeric_limits<double>::max();
+				if (ww->has_word_pair()) {
+					if (ww->left() == left_p || ww->right() == right_p)
+						tmp = -std::numeric_limits<double>::max();
+					else if (!ww->is_word())
+						continue;
+				}
 				else
 					tmp = mi = log(ww->p() / (lw->p() * rw->p()));
 //				sign = (mi > 0) ? 1.0 : -1.0;

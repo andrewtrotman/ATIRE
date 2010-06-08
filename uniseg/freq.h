@@ -100,8 +100,9 @@ public:
 	void add_word_freq(word_ptr_type tw_ptr, unsigned int freq);
 
 	void justify(unsigned int freq);
-	void smooth();
+	void smooth(bool only_substr = false);
 	void smooth(int k, bool only_substr);
+	void smooth_passage();
 	void extend(int k);
 
 	void cal_word_p(double base);

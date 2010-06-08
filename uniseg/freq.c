@@ -574,6 +574,9 @@ void Freq::assign_freq_for_segmentation(Freq& source_freq, double base)
 	for (it = word_pairs.begin(); it != word_pairs.end(); ++it)
 		if (it->first->size() == 4)
 			it->first->cal_ngmi_a(2);
+
+	smooth();
+	smooth(true);
 }
 
 void Freq::assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word)
@@ -850,7 +853,7 @@ void Freq::cal_word()
 	}
 }
 
-void Freq::smooth()
+void Freq::smooth(bool only_substr)
 {
 //	int i, j;
 //	for (i = k_; i > 1; --i)
@@ -861,10 +864,10 @@ void Freq::smooth()
 //	extend(k_);
 
 	for (int i = k_; i > 1; --i)
-		smooth(i, false);
+		smooth(i, only_substr);
 
-	for (int i = k_; i > 1; --i)
-		smooth(i, true);
+//	for (int i = k_; i > 1; --i)
+//		smooth(i, true);
 }
 
 void Freq::smooth(int k, bool only_substr)
@@ -873,7 +876,7 @@ void Freq::smooth(int k, bool only_substr)
 //	for (i = k_; i > 1; --i)
 		for (int j = 0; j < freq_n_[k].size(); j++) {
 			word_ptr_type word = freq_n_[k][j];
-			if (only_substr && word->is_passage())
+			if (word->is_passage())
 				continue;
 			if (word->freq() > 0) {
 				if (!only_substr)
@@ -882,6 +885,13 @@ void Freq::smooth(int k, bool only_substr)
 					word->adjust(-word->freq());
 			}
 		}
+}
+
+void Freq::smooth_passage()
+{
+	for (int i = 0; i < doc_.size(); ++i)
+		if (doc_[i]->lang() & uniseg_encoding::CHINESE)
+			doc_[i]->adjust_negative(doc_[i]->freq());
 }
 
 void Freq::extend(int k)
@@ -1001,5 +1011,9 @@ void Freq::count_doc(const char *doc, long len, bool clean)
 			//}
 		}
 	}
-	smooth();
+	word_ptr_type test_word = find("送行");
+	smooth_passage();
+//	smooth();
+	test_word = find("送行");
+	cerr << "stop here" << endl;
 }

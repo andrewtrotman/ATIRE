@@ -18,6 +18,7 @@ public:
 	virtual ~Dic2Freq();
 
 	static void dic2freq(Dic *dic, Freq *freq, long lang);
+	static void dic2freq2(Dic *dic, Freq *freq, long lang);
 };
 
 #endif /* DIC2FREQ_H_ */
