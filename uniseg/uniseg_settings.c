@@ -77,6 +77,8 @@ void UNISEG_settings::init_fields()
 
 	threshold = 0.0;
 	on_training = false;
+
+	oov_threshold = 5;
 }
 
 void UNISEG_settings::init_others()

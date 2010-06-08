@@ -66,6 +66,9 @@ public:
 	void show(int k, int, bool details = false);
 	void showcol(int k, int, bool details);
 	void show();
+
+	void show_oov();
+
 	void alloc(int k = 1);  /// allocate the address
 
 	int size() { return freq_.size(); }
@@ -137,6 +140,8 @@ public:
 
 	void count_doc(std::string& doc, bool clean);
 	void count_doc(const char *doc, long len, bool clean);
+
+	void check_oov(word_ptr_type word, int threshold);
 
 private:
 

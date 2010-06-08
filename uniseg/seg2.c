@@ -69,6 +69,8 @@ void Seger2::build()
 				continue;
 			}
 			else if (tmp_w->is_word()) {
+				if ((i - 2) > 0)
+					boundary_score_[i - 2] = std::numeric_limits<double>::max();
 				i += 1;
 				continue;
 			}
@@ -138,4 +140,82 @@ void Seger2::seg()
 void Seger2::add_to_list(array_type& cwlist)
 {
 
+}
+
+void Seger2::find_boundary(std::vector<double>::iterator begin, std::vector<double>::iterator end, word_ptr_type current_word, std::string& to_become)
+{
+	std::vector<double>::iterator pos = min_element(begin, end);
+	word_ptr_type tmp_word = current_word;
+
+	if (current_word->chars() == "千年的")
+		cerr << "stop here" << endl;
+
+	string right_left;
+	while ((end - begin) > 1) {
+		word_ptr_type l_word = tmp_word->subword(0/*begin - boundary_score.begin() - word_count*/, pos - begin + 1);
+		word_ptr_type r_word = tmp_word->subword(pos - begin + 1, end - pos);
+
+		if (l_word->is_word() && r_word->is_word()
+				|| (r_word->is_candidate_word() && l_word->is_candidate_word())) {
+			to_become.append(l_word->chars() + "  " + r_word->chars());
+	//									begin = end = pos;
+			tmp_word = NULL;
+			break;
+		}
+		else if (l_word->size() > 1 && (l_word->is_word() || l_word->is_candidate_word())) {
+			to_become.append(l_word->chars() + "  ");
+			tmp_word = r_word;
+			begin = pos + 1;
+		}
+		else if (r_word->size() > 1 && (r_word->is_word() || r_word->is_candidate_word())) {
+			right_left.insert(0, string("  ") + r_word->chars());
+			tmp_word = l_word;
+			end = pos;
+		}
+		else {
+			if (l_word->has_word_pair()) {
+				to_become.append(l_word->left()->chars() + "  " + l_word->right()->chars() + "  ");
+				begin = pos + 1;
+				tmp_word = r_word;
+			}
+			else if (r_word->has_word_pair()){
+				right_left.insert(0, string("  ") + r_word->left()->chars() + "  " + r_word->right()->chars());
+				end = pos;
+				tmp_word = l_word;
+			}
+			else {
+	//										if (l_word->size() < r_word->size()) {
+	//										to_become.append(l_word->chars() + "  ");
+	//										begin = pos + 1;
+	//									}
+	//									else {
+	//										right_left.insert(0, string("  ") + r_word->chars());
+	//										end = pos;
+				Seger::get_leftmost_word_segmentation(l_word, to_become);
+//				find_boundary(begin, pos, l_word, to_become);
+				string left_right;
+//				find_boundary(pos + 1, end, r_word, left_right);
+				Seger::get_leftmost_word_segmentation(r_word, left_right);
+				left_right.insert(0, string("  "));
+				right_left.insert(0, left_right);
+	//										begin = end = pos;
+				tmp_word = NULL;
+				break;
+			}
+		}
+
+		pos = min_element(begin, end);
+	}
+	if (tmp_word != NULL) {
+		if (tmp_word->is_word())
+			to_become.append(tmp_word->chars());
+		else {
+			/**
+			 * TODO check possible OOV here or somewhere else
+			 */
+			Seger::get_leftmost_word_segmentation(tmp_word, to_become);
+		}
+	}
+	//	to_become.append(current_word->subword(begin - boundary_score.begin() - word_count, end - begin + 1)->chars());
+	to_become.append(right_left);
 }

@@ -529,73 +529,78 @@ void Word::cal_ngmi_a(int start) {
 
 	int count = 0;
 	bool stop_flag = false;
-	Word* left_p = subword(0, start - 0);
-	Word* right_p = subword(start, size_ - start);
-	for (int i = start; i > 0; i--) {
-		for (int j = start; j < size_; j++) {
-			count++;
-			Word* lw = this->subword(i - 1, start - i + 1);
-			Word* rw = this->subword(start, j - start + 1);
 
-			assert(lw != NULL);
-			assert(rw != NULL);
+	if (!is_word()) {
+		Word* left_p = subword(0, start - 0);
+		Word* right_p = subword(start, size_ - start);
+		for (int i = start; i > 0; i--) {
+			for (int j = start; j < size_; j++) {
+				count++;
+				Word* lw = this->subword(i - 1, start - i + 1);
+				Word* rw = this->subword(start, j - start + 1);
 
-			int ww_len = j - i + 2;
-			assert((lw->size() + rw->size()) == ww_len);
-			Word* ww = this->subword(i -1, ww_len);
-			assert(ww != NULL);
-			/**
-			 * TODO if there is word before, possible ambiguity
-			 */
-//			if (ww->is_word()) {
-//				stop_flag = true;
-//				a = std::numeric_limits<double>::max();
-//				break;
-//
+				assert(lw != NULL);
+				assert(rw != NULL);
 
-			if (ww->p() == 0.0 && lw->p() != 0.0 && rw->p() != 0.0)
-				continue; //tmp = -std::numeric_limits<double>::max(); //continue; //tmp = std::numeric_limits<double>::max(); //0.0;
-//			else if (ww->p() == 0.0 && (lw->p() != 0.0 || rw->p() != 0.0))
-//				tmp = -std::numeric_limits<double>::max();
-			else if (lw->p() == 0.0 || rw->p() == 0.0)
-				tmp = std::numeric_limits<double>::max() - 1; // change a bit the tmp value
-			else {
-				if (ww->has_word_pair()) {
-					if (ww->left() == left_p || ww->right() == right_p)
-						tmp = -std::numeric_limits<double>::max();
-					else if (!ww->is_word())
+				int ww_len = j - i + 2;
+				assert((lw->size() + rw->size()) == ww_len);
+				Word* ww = this->subword(i -1, ww_len);
+				assert(ww != NULL);
+				/**
+				 * TODO if there is word before, possible ambiguity
+				 */
+	//			if (ww->is_word()) {
+	//				stop_flag = true;
+	//				a = std::numeric_limits<double>::max();
+	//				break;
+	//
+
+				if (ww->p() == 0.0 && lw->p() != 0.0 && rw->p() != 0.0)
+					continue; //tmp = -std::numeric_limits<double>::max(); //continue; //tmp = std::numeric_limits<double>::max(); //0.0;
+	//			else if (ww->p() == 0.0 && (lw->p() != 0.0 || rw->p() != 0.0))
+	//				tmp = -std::numeric_limits<double>::max();
+				else if (lw->p() == 0.0 || rw->p() == 0.0)
+					tmp = std::numeric_limits<double>::max() - 1; // change a bit the tmp value
+				else {
+					if (ww->has_word_pair()) {
+						if (ww->size() > 2 && (ww->left() == left_p || ww->right() == right_p)) {
+							tmp = -std::numeric_limits<double>::max();
+						}
+						else if (!ww->is_word())
+							continue;
+					} else if (ww->size() > 2 && lw->is_word() && rw->is_word())
 						continue;
+					else
+						tmp = mi = log(ww->p() / (lw->p() * rw->p()));
+	//				sign = (mi > 0) ? 1.0 : -1.0;
+	//				tmp = sign * mi * mi;
 				}
-				else
-					tmp = mi = log(ww->p() / (lw->p() * rw->p()));
-//				sign = (mi > 0) ? 1.0 : -1.0;
-//				tmp = sign * mi * mi;
+
+				if (UNISEG_settings::instance().debug)
+					cerr << "calculating association score for log "
+						<< ww->chars() << "(" << ww->p() << ") over "
+						<< lw->chars() << "(" << lw->p() << ") "
+						<< " "
+						<< rw->chars() << "(" << rw->p() << ") "
+						<< " and get "
+						<< tmp
+						<< endl;
+				/*
+				 *
+				 *
+				 */
+				if (tmp < a)
+					a = tmp;
+
 			}
 
-			if (UNISEG_settings::instance().debug)
-				cerr << "calculating association score for log "
-					<< ww->chars() << "(" << ww->p() << ") over "
-					<< lw->chars() << "(" << lw->p() << ") "
-					<< " "
-					<< rw->chars() << "(" << rw->p() << ") "
-					<< " and get "
-					<< tmp
-					<< endl;
-			/*
-			 *
-			 *
-			 */
-			if (tmp < a)
-				a = tmp;
-
+			if (stop_flag)
+				break;
 		}
 
-		if (stop_flag)
-			break;
+		if (tmp == std::numeric_limits<double>::max() && a == tmp)
+			a = -std::numeric_limits<double>::max();
 	}
-
-	if (tmp == std::numeric_limits<double>::max() && a == tmp)
-		a = -std::numeric_limits<double>::max();
 
 	int mid = size_ / 2;
 	if (start > mid)

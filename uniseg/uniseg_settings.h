@@ -67,6 +67,8 @@ public:
 
 	double					threshold;
 
+	int						oov_threshold;
+
 private:
 	void init();
 	void init_fields();

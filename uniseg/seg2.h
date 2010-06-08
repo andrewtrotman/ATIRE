@@ -24,6 +24,8 @@ public:
 
 	std::vector<double>& boundary_score() { return boundary_score_; }
 
+	void find_boundary(std::vector<double>::iterator begin, std::vector<double>::iterator end, word_ptr_type current_word, std::string& to_become);
+
 protected:
 	virtual void seg();
 	virtual void build();

@@ -122,11 +122,11 @@ pair<word_ptr_type, word_ptr_type> Seger::get_leftmost_word(word_ptr_type word)
 		++len;
 	}
 
-	if (cur != NULL && cur->size() > 2 /*&& cur->has_word_pair()*/) {
+	/*if (cur != NULL && cur->size() > 2 && cur->has_word_pair()) {
 		pair<word_ptr_type, word_ptr_type> a_pair = break_tie(cur);
 		final = a_pair.first;
 	}
-	else if (pre != NULL)
+	else*/ if (pre != NULL)
 		final = pre;
 
 	if (final != NULL) {
@@ -196,9 +196,9 @@ bool Seger::check_word_pair(word_ptr_type word)
 std::pair<word_ptr_type, word_ptr_type> Seger::break_tie(word_ptr_type word)
 {
 	pair<word_ptr_type, word_ptr_type> a_pair;
-	if (check_word_pair(word))
-		a_pair = make_pair(word->left(), word->right());
-	else {
+//	if (check_word_pair(word))
+//		a_pair = make_pair(word->left(), word->right());
+//	else {
 		if (word->rparent()->is_word() || QFreq::instance().fuzzy_search_dic(word->rparent()->chars())) {
 			if (word->lparent()->is_word()) { // all parents are words
 				if (word->lparent()->freq() < word->rparent()->freq())
@@ -215,7 +215,7 @@ std::pair<word_ptr_type, word_ptr_type> Seger::break_tie(word_ptr_type word)
 			else
 				a_pair = make_pair(word->lchar(), word->rparent());
 		}
-	}
+//	}
 	return a_pair;
 }
 

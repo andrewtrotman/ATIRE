@@ -574,9 +574,6 @@ void Freq::assign_freq_for_segmentation(Freq& source_freq, double base)
 	for (it = word_pairs.begin(); it != word_pairs.end(); ++it)
 		if (it->first->size() == 4)
 			it->first->cal_ngmi_a(2);
-
-	smooth();
-	smooth(true);
 }
 
 void Freq::assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word)
@@ -890,8 +887,10 @@ void Freq::smooth(int k, bool only_substr)
 void Freq::smooth_passage()
 {
 	for (int i = 0; i < doc_.size(); ++i)
-		if (doc_[i]->lang() & uniseg_encoding::CHINESE)
+		if (doc_[i]->lang() & uniseg_encoding::CHINESE) {
 			doc_[i]->adjust_negative(doc_[i]->freq());
+			doc_[i]->adjust_freq(-doc_[i]->freq());
+		}
 }
 
 void Freq::extend(int k)
@@ -1013,7 +1012,29 @@ void Freq::count_doc(const char *doc, long len, bool clean)
 	}
 	word_ptr_type test_word = find("送行");
 	smooth_passage();
-//	smooth();
+	smooth();
+	smooth(true);
+
 	test_word = find("送行");
 	cerr << "stop here" << endl;
+}
+
+void Freq::show_oov()
+{
+	cerr << "OOV: " << endl;
+	int i, j;
+	for (i = k_; i > 1; --i) {
+		for (int j = 0; j < freq_n_[i].size(); j++) {
+			word_ptr_type word = freq_n_[i][j];
+			if (word->is_candidate_word())
+				cerr << word->chars() << ": " << word->freq()<< endl ;
+			}
+		}
+}
+
+void Freq::check_oov(word_ptr_type word, int threshold)
+{
+	array_type::iterator it = std::find(freq_n_[word->size()].begin(), freq_n_[word->size()].end(), word);
+	if (it != freq_n_[word->size()].end() && word->freq() > threshold)
+		word->is_candidate_word(true);
 }
