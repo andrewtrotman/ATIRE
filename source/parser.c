@@ -100,9 +100,9 @@ if (segmentation != NULL)
 */
 for (;;)
 	{
-	if (ANT_isheadchar(*current))
+	if (ANT_ispuncheadchar(*current))
 		break;
-	if (*current & 0x80) //it is a unicode character
+	else if (*current & 0x80) //it is a unicode character
 		{
 		if (ischinese(current))
 			break;
@@ -152,6 +152,15 @@ else if (ANT_isdigit(*current))				// numbers (in the ASCII CodePage)
 	}
 else if (*current == '\0')						// end of string
 	return NULL;
+else if (ANT_ispunct(*current) && *current != '<')
+	{
+	start = current++;
+	while (ANT_ispunct(*current))
+		current++;
+
+	current_token.start = (char *)start;
+	current_token.string_length = current - start;
+	}
 else if (*current & 0x80)		// UTF-8 character
 	{
 	if (ischinese(current))		// Chinese CodePage

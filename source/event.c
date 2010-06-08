@@ -153,3 +153,16 @@ long ANT_event::poll(void)
 	return got;
 #endif
 }
+
+/*
+	ANT_EVENT::PULSE()
+	------------------
+*/
+void ANT_event::pulse(void)
+{
+#ifdef NT_EVENTS
+	PulseEvent(internals->event);
+#else
+	exit(printf("ANT_event::pulse() Not written yet (except for Windows)\n"));
+#endif
+}

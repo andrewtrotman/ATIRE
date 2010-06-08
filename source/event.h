@@ -24,6 +24,7 @@ public:
 	virtual void signal(void);
 	virtual void clear(void);
 	virtual long poll(void);		// CLEARed=0   SIGNALed=1
+	virtual void pulse(void);
 } ;
 
 #endif /* EVENT_H_ */

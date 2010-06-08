@@ -23,7 +23,6 @@ class ANT_file;
 class ANT_ranking_function;
 class ANT_ranking_function_factory;
 
-
 /*
 	class ANT_MEMORY_INDEX
 	----------------------
@@ -82,7 +81,7 @@ private:
 	long document_filenames_used;
 
 private:
-	long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
+	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);

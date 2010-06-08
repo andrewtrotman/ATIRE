@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <new>
 
+#include "critical_section.h"
+
 #if defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
 	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
 #elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4) || defined(__APPLE__) || (__WORDSIZE == 32)
@@ -24,6 +26,7 @@
 class ANT_memory
 {
 private:
+	ANT_critical_section critter;
 	char *chunk, *at, *chunk_end;
 	long long used;
 	long long allocated;
@@ -44,6 +47,7 @@ public:
 	~ANT_memory();
 
 	void *malloc(long long bytes);
+	void *synchronised_malloc(long long bytes);
 	long long bytes_allocated(void) { return allocated; }
 	long long bytes_used(void) { return used; }
 	void realign(void);
@@ -69,5 +73,19 @@ used += bytes;
 return ans;
 }
 
-#endif  /* MEMORY_H_ */
+/*
+	ANT_MEMORY::SYNCHRONISED_MALLOC()
+	---------------------------------
+*/
+inline void *ANT_memory::synchronised_malloc(long long bytes)
+{
+void *ans;
 
+critter.enter();
+ans = malloc(bytes);
+critter.leave();
+
+return ans;
+}
+
+#endif  /* MEMORY_H_ */

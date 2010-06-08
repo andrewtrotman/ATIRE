@@ -1,16 +1,16 @@
 /*
-	FOCUS_LOWEST_TAG.C
-	------------------
+	FOCUS_SENTENCE_TF.C
+	-------------------
 */
 #include "focus_results_list.h"
-#include "focus_lowest_tag.h"
+#include "focus_sentnece_tf.h"
 #include "parser.h"
 
 /*
-	ANT_FOCUS_LOWEST_TAG::FOCUS()
-	-----------------------------
+	ANT_FOCUS_SENTENCE_TF::FOCUS()
+	------------------------------
 */
-ANT_focus_result *ANT_focus_lowest_tag::focus(unsigned char *document, long *results_length, long long docid, char *document_name, ANT_search_engine_accumulator *document_accumulator)
+ANT_focus_result *ANT_focus_sentence_tf::focus(unsigned char *document, long *results_length, long long docid, char *document_name, ANT_search_engine_accumulator *document_accumulator)
 {
 ANT_focus_result *result;
 ANT_string_pair *token;
@@ -33,6 +33,10 @@ parser.set_document(document);
 
 while ((token = parser.get_next_token()) != NULL)
 	{
+	if (ANT_ispunct(token->start[0]))
+		{
+		}
+
 	if (ANT_isupper(token->start[0]))
 		{
 		if (!found_first)

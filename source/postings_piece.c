@@ -7,8 +7,8 @@
 #include "memory.h"
 
 /*
-	ANT_POSTINGS_PIECE::OPERATOR NEW ()
-	-----------------------------------
+	ANT_POSTINGS_PIECE::OPERATOR NEW()
+	----------------------------------
 */
 void *ANT_postings_piece::operator new (size_t bytes, ANT_memory *allocator)
 {

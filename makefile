@@ -72,9 +72,9 @@ FIXED = /link /fixed:no /opt:ref
 
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 
 MINUS_D = $(MINUS_D) -DSPECIAL_COMPRESSION=1
-MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 MINUS_D = $(MINUS_D) -DTOP_K_SEARCH
 MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
+MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 #MINUS_D = $(MINUS_D) -DPURIFY
 
@@ -87,8 +87,8 @@ CC = @icl /nologo
 CFLAGS = -D_RELEASE /O3 /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
 !ELSE
 CC = @cl /nologo
-#CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL
-CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8
+#CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
 !ENDIF
 
 #
@@ -209,6 +209,7 @@ PARTS = \
 	$(OBJDIR)\event.obj								\
 	$(OBJDIR)\semaphores.obj						\
 	$(OBJDIR)\critical_section.obj					\
+	$(OBJDIR)\barrier.obj							\
 	$(OBJDIR)\threads.obj							\
 	$(OBJDIR)\focus.obj								\
 	$(OBJDIR)\focus_article.obj						\

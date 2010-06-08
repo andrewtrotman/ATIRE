@@ -24,7 +24,7 @@
 */
 inline long ANT_memory_index_one::hash(ANT_string_pair *string)
 {
-return ANT_hash_24(string) % HASH_TABLE_SIZE;
+return ANT_memory_index::hash(string) % HASH_TABLE_SIZE;
 }
 
 /*

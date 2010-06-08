@@ -27,6 +27,7 @@ private:
 		the sequential cost post indexing will be too large.
 	*/
 	static const long HASH_TABLE_SIZE = 0x100;
+
 	ANT_memory_index_one_node *hash_table[HASH_TABLE_SIZE];
 	ANT_memory *memory;
 	ANT_memory_index *final_index;

@@ -23,5 +23,4 @@ public:
 	ANT_memory_indexer_node() { term_frequency = 0; }
 } ;
 
-
 #endif /* MEMORY_INDEXER_NODE_H_ */

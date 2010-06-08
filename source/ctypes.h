@@ -63,6 +63,7 @@ inline int ANT_isascii(int c) { return (unsigned char)(c) <= 0x7f; }
 */
 inline int ANT_islowernum(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISLOWERNUM) != 0; }
 inline int ANT_isheadchar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_HEADCHAR) != 0; }
+inline int ANT_ispuncheadchar(int c) { return (ANT_to_ctype(c) & (ANT_CTYPE_HEADCHAR | ANT_CTYPE_PUNC)) != 0; }
 inline int ANT_isXMLnamestartchar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_XML_NAME_START) != 0; }
 inline int ANT_isXMLnamechar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_XML_NAME) != 0; }
 

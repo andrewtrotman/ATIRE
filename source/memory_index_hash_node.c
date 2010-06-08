@@ -9,7 +9,7 @@
 #include "stats_memory_index.h"
 #include "postings_piece.h"
 #include "compress_variable_byte.h"
-#include "barrier.h"
+#include "fence.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -56,10 +56,9 @@ collection_frequency = document_frequency = current_docno = term_local_max_impac
 
 /*
 	As we need this code complete before we add it to the structure (because it'll be seen by another thread)
-	it is necessary to flush the cache to memory with a write-barrier (sfence in Intel speak)
-	And now flush to memory
+	it is necessary to force the write to finish with a write-barrier (sfence in Intel speak)
 */
-ANT_write_barrier();
+ANT_write_fence();
 }
 
 /*

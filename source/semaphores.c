@@ -76,3 +76,4 @@ void ANT_semaphores::leave(void)
 	sem_post(&internals->handle);
 #endif
 }
+

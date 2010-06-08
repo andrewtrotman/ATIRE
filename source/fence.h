@@ -1,20 +1,20 @@
 /*
-	BARRIER.H
-	---------
+	FENCE.H
+	-------
 */
-#ifndef BARRIER_H_
-#define BARRIER_H_
+#ifndef FENCE_H_
+#define FENCE_H_
 
 #ifdef _MSC_VER
 	#include <intrin.h>
 #endif
 /*
-	ANT_WRITE_BARRIER()
-	-------------------
+	ANT_WRITE_FENCE()
+	-----------------
 	This method ensures all writes are flushed to memory so that future reads
 	from other threads get the value written.  Intel call it a fence.
 */
-static inline void ANT_write_barrier(void)
+static inline void ANT_write_fence(void)
 {
 #ifdef _MSC_VER
 	#ifdef __INTEL_COMPILER
@@ -29,4 +29,4 @@ static inline void ANT_write_barrier(void)
 #endif
 }
 
-#endif /* BARRIER_H_ */
+#endif /* FENCE_H_ */
