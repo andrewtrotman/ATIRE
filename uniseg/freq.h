@@ -95,8 +95,8 @@ public:
 	void cal_sum_n_avg();
 
 	void assign_freq(Freq& freq);
-	void assign_freq_for_segmentation(Freq& freq, double base);
-	void assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word);
+	void assign_freq_for_segmentation(Freq& freq, double base, bool joint_freq);
+	void assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word, bool joint_freq);
 	void set_seged(Freq& freq, unsigned int freqc);
 	void reduce_freq(Freq& freq, word_ptr_type tw_ptr);
 	void add_freq(Freq& freq, int threshold = 1);
@@ -138,8 +138,8 @@ public:
 
 	void set_current_document_id(long id);
 
-	void count_doc(std::string& doc, bool clean);
-	void count_doc(const char *doc, long len, bool clean);
+	void count_doc(std::string& doc, bool clean, bool smoothit);
+	void count_doc(const char *doc, long len, bool clean, bool smoothit);
 
 	void check_oov(word_ptr_type word, int threshold);
 

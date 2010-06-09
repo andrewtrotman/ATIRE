@@ -63,6 +63,7 @@ void Word::init() {
 	rcounter_ = 0;
 
 	is_word_ = false;
+	is_candidate_word_ = false;
 	seged_ = false;
 
 	pre_ = NULL;
@@ -376,18 +377,20 @@ void Word::is_word(bool b) {
 }
 
 void Word::is_candidate_word(bool b) {
+	if (chars() == "中没有不完整的实例")
+		cerr << "stop here" << endl;
 	is_candidate_word_ = b;
-	if (b) seged_ = b;
-
-	word_ptr_type lp_ptr = lparent_;
-
-	while (lp_ptr != NULL && !lp_ptr->is_word()) {
-		if (lp_ptr->freq() == freq_)
-			lp_ptr->seged(true);
-		else
-			break;
-		lp_ptr = lp_ptr->lparent();
-	}
+//	if (b) seged_ = b;
+//
+//	word_ptr_type lp_ptr = lparent_;
+//
+//	while (lp_ptr != NULL && !lp_ptr->is_word()) {
+//		if (lp_ptr->freq() == freq_)
+//			lp_ptr->seged(true);
+//		else
+//			break;
+//		lp_ptr = lp_ptr->lparent();
+//	}
 }
 
 void Word::seged_if(unsigned int freq) {
@@ -527,8 +530,13 @@ void Word::cal_ngmi_a(int start) {
 	double a = std::numeric_limits<double>::max();
 	double mi, sign, tmp = std::numeric_limits<double>::max();
 
+	bool split_it = false;
+
 	int count = 0;
 	bool stop_flag = false;
+
+	if (chars() == "共和党委")
+		cerr << "stop here" << endl;
 
 	if (!is_word()) {
 		Word* left_p = subword(0, start - 0);
@@ -562,14 +570,18 @@ void Word::cal_ngmi_a(int start) {
 				else if (lw->p() == 0.0 || rw->p() == 0.0)
 					tmp = std::numeric_limits<double>::max() - 1; // change a bit the tmp value
 				else {
-					if (ww->has_word_pair()) {
-						if (ww->size() > 2 && (ww->left() == left_p || ww->right() == right_p)) {
-							tmp = -std::numeric_limits<double>::max();
-						}
-						else if (!ww->is_word())
-							continue;
-					} else if (ww->size() > 2 && lw->is_word() && rw->is_word())
+					/*if (ww->is_word())
+						tmp =  std::numeric_limits<double>::max() / 2.0;
+					else */if (!ww->is_word() && ww->has_word_pair()) {
+						//if (ww->size() > 2 && (ww->left() == left_p || ww->right() == right_p)) {
+							//tmp = -std::numeric_limits<double>::max();
+							split_it = true;
+						//}
+						//else
 						continue;
+					}
+					else if (!ww->is_word() && ww->size() > 2 && lw->is_word() && rw->is_word()) //
+						tmp = UNISEG_settings::instance().threshold;
 					else
 						tmp = mi = log(ww->p() / (lw->p() * rw->p()));
 	//				sign = (mi > 0) ? 1.0 : -1.0;
@@ -598,7 +610,7 @@ void Word::cal_ngmi_a(int start) {
 				break;
 		}
 
-		if (tmp == std::numeric_limits<double>::max() && a == tmp)
+		if ((tmp == std::numeric_limits<double>::max() && a == tmp) || (a == std::numeric_limits<double>::max() && split_it))
 			a = -std::numeric_limits<double>::max();
 	}
 

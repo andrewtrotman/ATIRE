@@ -96,11 +96,11 @@ void Seger2::build()
 			if (len < 4)
 				tmp_w->cal_ngmi_a(i - lmin);
 
-//			if (len == 3) {
-//				score = ((i - lmin) < 2) ? tmp_w->left_a() : tmp_w->right_a();
-//			} else if (len == 4) {
-//				score = tmp_w->left_a();
-//			} else
+			if (len == 3) {
+				score = ((i - lmin) < 2) ? tmp_w->left_a() : tmp_w->right_a();
+			} else if (len == 4) {
+				score = tmp_w->left_a();
+			} else
 				score = tmp_w->a();
 //		}
 		boundary_score_[i - 1] = score;

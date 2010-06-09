@@ -68,6 +68,7 @@ public:
 	double					threshold;
 
 	int						oov_threshold;
+	long					focused_document_size;
 
 private:
 	void init();

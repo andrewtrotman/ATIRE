@@ -224,7 +224,7 @@ public:
 
 	bool has_word_pair();
 
-	bool is_candidate_word() { return is_word_; }
+	bool is_candidate_word() { return is_candidate_word_; }
 	void is_candidate_word(bool b);
 
 	bool seged() { return seged_; }

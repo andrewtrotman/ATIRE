@@ -264,10 +264,6 @@ word_ptr_type Freq::add(string_array& ca, long lang, unsigned int freq, bool all
 	if (word_ptr->chars() == "送行")
 		cerr << "stop here" << endl;
 
-	if (word_ptr->get_last_seen_document_id() != current_document_id_)
-		word_ptr->increase_document_frequency();
-
-	word_ptr->set_last_seen_document_id(current_document_id_);
 	return word_ptr;
 }
 
@@ -541,7 +537,7 @@ void Freq::assign_freq(Freq& freq) {
 	}
 }
 
-void Freq::assign_freq_for_segmentation(Freq& source_freq, double base)
+void Freq::assign_freq_for_segmentation(Freq& source_freq, double base, bool joint_freq)
 {
 	std::map<word_ptr_type, word_ptr_type> word_pairs;
 	std::map<word_ptr_type, word_ptr_type>::iterator it;
@@ -566,7 +562,7 @@ void Freq::assign_freq_for_segmentation(Freq& source_freq, double base)
 
 	for (it = word_pairs.begin(); it != word_pairs.end(); ++it) {
 		if (it->first->size() <= 4) {
-			assign_freq_for_segmentation(it->first, it->second);
+			assign_freq_for_segmentation(it->first, it->second, joint_freq);
 			it->first->cal_p(base);
 		}
 	}
@@ -576,13 +572,13 @@ void Freq::assign_freq_for_segmentation(Freq& source_freq, double base)
 			it->first->cal_ngmi_a(2);
 }
 
-void Freq::assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word)
+void Freq::assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type global_word, bool joint_freq)
 {
 	if (local_word->chars() == "送行")
 		cerr << "stop here" << endl;
 
 	if (global_word) {
-		local_word->freq(local_word->freq() + global_word->freq());
+		local_word->freq((joint_freq ? local_word->freq() : 0 ) + global_word->freq());
 		local_word->is_word(global_word->is_word());
 		if (global_word->left() != NULL && global_word->left()->is_word()) {
 			word_ptr_type tmp = find(global_word->left()->chars());
@@ -594,8 +590,10 @@ void Freq::assign_freq_for_segmentation(word_ptr_type local_word, word_ptr_type 
 			local_word->right()->is_word(true);
 		}
 	}
-//	else
-//		local_word->freq(0);
+	else {
+		if (!joint_freq)
+			local_word->freq(0);
+	}
 }
 
 void Freq::cal_sum_n_avg() {
@@ -946,6 +944,11 @@ void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
 				add_to_array(p_word);
 				p_word->assigned(true);
 			}
+
+			if (p_word->get_last_seen_document_id() != current_document_id_) {
+				p_word->increase_document_frequency();
+				p_word->set_last_seen_document_id(current_document_id_);
+			}
 		}
 
 //	p_word = word;
@@ -955,21 +958,25 @@ void Freq::add_word_freq(word_ptr_type word, unsigned int freq)
 //	}
 }
 
-void Freq::count_doc(std::string& doc, bool clean)
+void Freq::count_doc(std::string& doc, bool clean, bool smoothit)
 {
-	count_doc(doc.c_str(), doc.length(), clean);
+	count_doc(doc.c_str(), doc.length(), clean, smoothit);
 }
 
-void Freq::count_doc(const char *doc, long len, bool clean)
+void Freq::count_doc(const char *doc, long len, bool clean, bool smoothit)
 {
-
 	if (clean)
 		doc_.clear();
+
+	++current_document_id_;
 
 	unsigned char *current = (unsigned char *)doc;
 	unsigned char *next = current;
 	unsigned char *end = current + len;
 	word_ptr_type ret_word = NULL;
+
+	long accumulated_size = 0;
+
 	while (next < end) {
 
 		enc_->test_char(next);
@@ -1009,11 +1016,22 @@ void Freq::count_doc(const char *doc, long len, bool clean)
 				//ret_word->adjust(ret_word->freq());
 			//}
 		}
+
+		accumulated_size += next - current;
+
+		if (UNISEG_settings::instance().focused_document_size > 0 && accumulated_size > UNISEG_settings::instance().focused_document_size) {
+			++current_document_id_;
+			accumulated_size = 0;
+		}
+		current = next;
 	}
 	word_ptr_type test_word = find("送行");
-	smooth_passage();
-	smooth();
-	smooth(true);
+
+	if (smoothit) {
+		smooth_passage();
+		smooth();
+		smooth(true);
+	}
 
 	test_word = find("送行");
 	cerr << "stop here" << endl;
@@ -1027,7 +1045,8 @@ void Freq::show_oov()
 		for (int j = 0; j < freq_n_[i].size(); j++) {
 			word_ptr_type word = freq_n_[i][j];
 			if (word->is_candidate_word())
-				cerr << word->chars() << ": " << word->freq()<< endl ;
+				word->print(true);
+//				cerr << word->chars() << ": " << word->freq()<< endl ;
 			}
 		}
 }

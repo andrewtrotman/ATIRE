@@ -79,6 +79,7 @@ void UNISEG_settings::init_fields()
 	on_training = false;
 
 	oov_threshold = 5;
+	focused_document_size = 0;
 }
 
 void UNISEG_settings::init_others()
