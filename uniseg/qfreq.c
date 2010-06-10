@@ -62,8 +62,10 @@ void QFreq::load_freq(int n, bool force) {
 
 void QFreq::load_dic()
 {
+	cerr << "loading dict..." << endl;
 	dic_.load(UNISEG_settings::instance().dics_path);
 	dic_.lang(uniseg_encoding::CHINESE);
+	cerr << "Total " << dic_.size() << " entries in dict" << endl;
 }
 
 void QFreq::load(word_ptr_type word)
@@ -115,6 +117,11 @@ word_ptr_type QFreq::find(string_type& word) {
 bool QFreq::fuzzy_search_dic(string_type word)
 {
 	return dic_.fuzzy_search(word);
+}
+
+bool QFreq::fuzzy_search_dic_right(string_type word)
+{
+	return dic_.fuzzy_search_right(word);
 }
 
 bool QFreq::need_eligibility_check()

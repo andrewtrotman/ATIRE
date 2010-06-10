@@ -35,6 +35,26 @@ struct partial_equal_to<pair<string, long> > : public binary_function<pair<strin
   }
 };
 
+template<typename _Tp>
+struct partial_equal_to_right : public binary_function<_Tp, _Tp, bool>
+{
+  bool
+  operator()(const _Tp& __x, const _Tp& __y) const
+  { return __x == __y; }
+};
+
+template<>
+struct partial_equal_to_right<pair<string, long> > : public binary_function<pair<string, long>, pair<string, long>, bool>
+{
+  bool
+  operator()(const pair<string, long>& __x, const pair<string, long>& __y) const
+  {
+	  if (__x.first.length() > __y.first.length())
+		  return false;
+	  return __y.first.substr(__y.first.length() - __x.first.length(), __x.first.length()) == __x.first;
+  }
+};
+
 void Dic::add(string_type word, long freq) {
 	if (word.length() <= 0)
 		return;
@@ -59,6 +79,12 @@ bool Dic::fuzzy_search(const string_type word)
 //	        std::bind1st (EqualTo (), word);
 	pair<string, long> key_pair = make_pair(word, 1);
 	return std::find_if(list_.begin(), list_.end(), bind1st(partial_equal_to<pair<string, long> >(), key_pair)) != list_.end();
+}
+
+bool Dic::fuzzy_search_right(const string_type word)
+{
+	pair<string, long> key_pair = make_pair(word, 1);
+	return std::find_if(list_.begin(), list_.end(), bind1st(partial_equal_to_right<pair<string, long> >(), key_pair)) != list_.end();
 }
 
 void Dic::save(string_type filename) {

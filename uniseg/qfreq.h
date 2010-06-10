@@ -47,6 +47,7 @@ public:
 	void load(word_ptr_type word);
 	word_ptr_type find(string_type& word);
 	bool fuzzy_search_dic(string_type word);
+	bool fuzzy_search_dic_right(string_type word);
 
 	bool is_word(string_type& word);
 

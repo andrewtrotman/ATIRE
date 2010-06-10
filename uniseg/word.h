@@ -232,7 +232,7 @@ public:
 	void seged(bool b) { seged_ = b; }
 	void seged_if(unsigned int freq);
 
-	void adjust(int freq);
+	void adjust(int freq, bool for_zero = false);
 	void adjust_negative(int freq);
 	void adjust_freq(int freq);
 

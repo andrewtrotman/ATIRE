@@ -147,7 +147,7 @@ void Seger2::find_boundary(std::vector<double>::iterator begin, std::vector<doub
 	std::vector<double>::iterator pos = min_element(begin, end);
 	word_ptr_type tmp_word = current_word;
 
-	if (current_word->chars() == "千年的")
+	if (current_word->chars() == "不同的紙")
 		cerr << "stop here" << endl;
 
 	string right_left;
@@ -173,17 +173,17 @@ void Seger2::find_boundary(std::vector<double>::iterator begin, std::vector<doub
 			end = pos;
 		}
 		else {
-			if (l_word->has_word_pair()) {
-				to_become.append(l_word->left()->chars() + "  " + l_word->right()->chars() + "  ");
-				begin = pos + 1;
-				tmp_word = r_word;
-			}
-			else if (r_word->has_word_pair()){
-				right_left.insert(0, string("  ") + r_word->left()->chars() + "  " + r_word->right()->chars());
-				end = pos;
-				tmp_word = l_word;
-			}
-			else {
+//			if (l_word->has_word_pair()) {
+//				to_become.append(l_word->left()->chars() + "  " + l_word->right()->chars() + "  ");
+//				begin = pos + 1;
+//				tmp_word = r_word;
+//			}
+//			else if (r_word->has_word_pair()){
+//				right_left.insert(0, string("  ") + r_word->left()->chars() + "  " + r_word->right()->chars());
+//				end = pos;
+//				tmp_word = l_word;
+//			}
+//			else {
 	//										if (l_word->size() < r_word->size()) {
 	//										to_become.append(l_word->chars() + "  ");
 	//										begin = pos + 1;
@@ -191,17 +191,19 @@ void Seger2::find_boundary(std::vector<double>::iterator begin, std::vector<doub
 	//									else {
 	//										right_left.insert(0, string("  ") + r_word->chars());
 	//										end = pos;
-				Seger::get_leftmost_word_segmentation(l_word, to_become);
+				string left_left;
+				Seger::get_rightmost_word_segmentation(l_word, left_left);
 //				find_boundary(begin, pos, l_word, to_become);
+				to_become.append(left_left);
 				string left_right;
 //				find_boundary(pos + 1, end, r_word, left_right);
-				Seger::get_leftmost_word_segmentation(r_word, left_right);
+				Seger::get_rightmost_word_segmentation(r_word, left_right);
 				left_right.insert(0, string("  "));
 				right_left.insert(0, left_right);
 	//										begin = end = pos;
 				tmp_word = NULL;
 				break;
-			}
+//			}
 		}
 
 		pos = min_element(begin, end);
@@ -213,7 +215,9 @@ void Seger2::find_boundary(std::vector<double>::iterator begin, std::vector<doub
 			/**
 			 * TODO check possible OOV here or somewhere else
 			 */
-			Seger::get_leftmost_word_segmentation(tmp_word, to_become);
+			string left_right;
+			Seger::get_rightmost_word_segmentation(tmp_word, left_right);
+			to_become.append(left_right);
 		}
 	}
 	//	to_become.append(current_word->subword(begin - boundary_score.begin() - word_count, end - begin + 1)->chars());

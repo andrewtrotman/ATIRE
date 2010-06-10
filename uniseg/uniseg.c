@@ -168,22 +168,6 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							segmented_len += word.length();
 						}
 						else {
-							/* 2010.06.03 */
-							std::vector<double>::iterator begin = boundary_score.begin() + word_count;
-							std::vector<double>::iterator end = begin + (current_word->size() - 1);
-
-//							word_ptr_type lparent = current_word;
-//							assert(lparent != NULL);
-//							while (lparent->size() > 1 && !lparent->is_word()) {
-//								if (lparent->lparent() != NULL)
-//									lparent = lparent->lparent();
-//								else
-//									break;
-//							}
-
-//							segmented_len += current_word->chars().length();
-							//break;
-	//						output_.append(current_word->to_string());
 							/*
 							 * Check if it is OOV
 							 */
@@ -192,8 +176,13 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 							string to_become;
 							if (current_word->is_candidate_word())
 								to_become = current_word->chars();
-							else
+							else {
+								/* 2010.06.03 */
+								std::vector<double>::iterator begin = boundary_score.begin() + word_count;
+								std::vector<double>::iterator end = begin + (current_word->size() - 1);
 								seger_.find_boundary(begin, end, current_word, to_become);
+//								seger_.get_rightmost_word_segmentation(current_word, to_become);
+							}
 							cerr << current_word->chars() << " > " << to_become << endl;
 							output_.append(to_become);
 							segmented_len += current_word->chars().length();

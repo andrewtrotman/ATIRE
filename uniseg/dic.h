@@ -37,6 +37,7 @@ public:
 
 	bool find(string_type word);
 	bool fuzzy_search(const string_type word);
+	bool fuzzy_search_right(const string_type word);
 	//long lang() { return lang_; }
 	void save(string_type filename);
 	void load(string_type filename, long lang);

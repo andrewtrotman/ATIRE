@@ -164,6 +164,39 @@ void Seger::get_leftmost_word_segmentation(word_ptr_type word, std::string& outp
 	}
 }
 
+pair<word_ptr_type, word_ptr_type> Seger::get_rightmost_word(word_ptr_type word)
+{
+	word_ptr_type pre = NULL, cur, final = NULL;
+	int len = 1, word_size = word->size();
+	while ( len <= word_size && (/*(cur = word->subword(0, len))->is_word() || */QFreq::instance().fuzzy_search_dic_right((cur = word->subword(word_size - len, len))->chars()))) {
+		pre = cur;
+		++len;
+	}
+
+	if (pre != NULL)
+		final = pre;
+
+	if (final != NULL) {
+		word_ptr_type left = (final->size() == word->size()) ? (word_ptr_type)NULL : word->subword(0, word->size() - final->size());
+		return make_pair(left, final);
+	}
+	return make_pair(word->lparent(), word->rchar());
+}
+
+void Seger::get_rightmost_word_segmentation(word_ptr_type word, std::string& output)
+{
+	word_ptr_type tmp = NULL;
+	std::pair<word_ptr_type, word_ptr_type> word_pair = get_rightmost_word(word);
+	while (word_pair.first != NULL && !word_pair.first->is_word()) {
+		output.insert(0, string("  ") + word_pair.second->chars());
+		word_pair = get_rightmost_word(word_pair.first);
+	}
+	if (word_pair.first != NULL)
+		output.insert(0, word_pair.first->chars() + "  " + word_pair.second->chars());
+	else
+		output.insert(0, word_pair.second->chars());
+}
+
 bool Seger::check_word_pair(word_ptr_type word)
 {
 	bool flag = false;

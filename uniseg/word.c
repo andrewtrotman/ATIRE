@@ -418,7 +418,7 @@ void Word::children_do(void (*function_ptr)(Word*)) {
 	}
 }
 
-void Word:: adjust(int freq)
+void Word:: adjust(int freq, bool for_zero)
 {
 //	if (this->chars() == "邓小平理论")
 //		cerr << "Stop here!" << endl;
@@ -443,7 +443,13 @@ void Word:: adjust(int freq)
 			if (word->chars() == "送行")
 				cerr << "stop here" << endl;
 
-			word->adjust_freq(freq);
+			if (!for_zero)
+				word->adjust_freq(freq);
+			else {
+				if (word->freq() <= 0)
+					word->adjust_freq(freq);
+			}
+
 //			else
 //				cerr << "already zero!" << endl;
 		}

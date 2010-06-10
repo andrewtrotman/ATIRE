@@ -46,7 +46,7 @@ void Dic2Freq::dic2freq2(Dic *dic, Freq *freq, long lang)
 			string_array ca;
 			to_string_array(iter->first, ca);
 			dic_word = freq->add(ca, lang, 1);
-			dic_word->adjust(1);
+			dic_word->adjust(1, true);
 		}
 		else {
 			if (dic_word->freq() == 0)

@@ -61,9 +61,13 @@ public:
 	virtual void do_some_calculations();
 
 	static bool check_word_pair(word_ptr_type word);
-	static std::pair<word_ptr_type, word_ptr_type> get_leftmost_word(word_ptr_type word);
 	static std::pair<word_ptr_type, word_ptr_type> break_tie(word_ptr_type word);
+
+	static std::pair<word_ptr_type, word_ptr_type> get_leftmost_word(word_ptr_type word);
 	static void get_leftmost_word_segmentation(word_ptr_type word, std::string& output);
+
+	static std::pair<word_ptr_type, word_ptr_type> get_rightmost_word(word_ptr_type word);
+	static void get_rightmost_word_segmentation(word_ptr_type word, std::string& output);
 
 private:
 	void init();
