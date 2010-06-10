@@ -457,7 +457,13 @@ void FreqFile::load_index()
 
 void FreqFile::load()
 {
-	array_type& word_array = freq_->array_k(wlen_ - 1);
-	for (int i = 0; i < word_array.size(); ++i)
-		read_term(word_array[i]);
+//	array_type& word_array = freq_->array_k(wlen_ - 1);
+//	for (int i = 0; i < word_array.size(); ++i)
+//		read_term(word_array[i]);
+
+	freq_type& word_map = freq_->set();
+	for (freq_type::iterator it = word_map.begin(); it != word_map.end(); ++it) {
+		if (it->second->size() == (wlen_ - 1))
+			read_term(it->second);
+	}
 }

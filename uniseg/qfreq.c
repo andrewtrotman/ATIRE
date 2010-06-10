@@ -20,9 +20,6 @@ using namespace std;
 
 
 QFreq::QFreq() {
-	dic_.load(UNISEG_settings::instance().dics_path);
-	dic_.lang(uniseg_encoding::CHINESE);
-
 	freq_text_ = NULL;
 	create_new_freq();
 }
@@ -61,6 +58,12 @@ void QFreq::load_freq(int n, bool force) {
 	double p = 1.0 / base_;
 	UNISEG_settings::instance().threshold = log(p);
 
+}
+
+void QFreq::load_dic()
+{
+	dic_.load(UNISEG_settings::instance().dics_path);
+	dic_.lang(uniseg_encoding::CHINESE);
 }
 
 void QFreq::load(word_ptr_type word)

@@ -177,6 +177,7 @@ void FreqCounter::count_segmented()
 		ca1 = new string_array;
 		to_string_array(first, *ca1);
 		first_ptr = freq_->add(*ca1); //, languages_);
+		freq_->add_to_array(first_ptr);
 		first_ptr->is_word(true);
 
 		while (*start != '\0') {
@@ -209,6 +210,7 @@ void FreqCounter::count_segmented()
 			ca2 = new string_array;
 			to_string_array(second, *ca2);
 			second_ptr = freq_->add(*ca2); //, languages_);
+			freq_->add_to_array(second_ptr);
 			second_ptr->is_word(true);
 
 			//string word_pair = first + second;
@@ -220,6 +222,7 @@ void FreqCounter::count_segmented()
 				ca.push_back((*ca2)[i]);
 			//to_string_array(word_pair, ca);
 			word_ptr_type ww_ptr = freq_->add(ca); //, languages_);
+			freq_->add_to_array(ww_ptr);
 			ww_ptr->left(first_ptr);
 			ww_ptr->right(second_ptr);
 //			word_ptr_type w_ptr;

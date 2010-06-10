@@ -31,6 +31,8 @@ public:
 	~QFreq();
 
 	void load_freq(int n = INT_MAX, bool force = false);
+	void load_dic();
+
 	Freq& freq();
 	Freq& freq_stat() { return freq_stat_; }
 

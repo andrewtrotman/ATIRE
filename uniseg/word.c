@@ -114,6 +114,25 @@ bool Word::cmp_icf(Word *w1, Word *w2)
 	return cmp_just_freq(w1, w2);
 }
 
+bool Word::cmp_address(const Word *w1, const Word *w2)
+{
+	int a1 = INVALID, a2 = INVALID;
+
+	a1 = w1->address();
+	a2 = w2->address();
+
+	//assert( a1 != INVALID);
+	//assert( a2 != INVALID);
+
+	if (a1 == INVALID ) {
+		if (a2 == INVALID)
+			return false;
+		else
+			return true;
+	}
+	return a1 < a2;
+}
+
 bool Word::cmp_freq(Word *w1, Word *w2) {
 	int h1, h2;
 	if (!w1->has_parent() || !w2->has_parent())
@@ -144,28 +163,14 @@ bool Word::cmp_freq(Word *w1, Word *w2) {
 		assert(w1->parent());
 		assert(w2->parent());
 
-		int a1 = INVALID, a2 = INVALID;
 		if (w1->parent()->chars() != w2->parent()->chars()) {
-			a1 = w1->parent()->address();
-			a2 = w2->parent()->address();
-
-			assert( a1 != INVALID);
-			assert( a2 != INVALID);
-
-			return a1 < a2;
+			cmp_address(w1->parent(), w2->parent());
 		}
 		Side s1 = w1->side();
 		Side s2 = w2->side();
 
 		if (s1 == s2) {
-
-			a1 = w1->parent2()->address();
-			a2 = w2->parent2()->address();
-
-			assert( a1 != INVALID);
-			assert( a2 != INVALID);
-
-			return a1 < a2;
+			cmp_address(w1->parent2(), w2->parent2());
 		}
 		return s1 < s2;
 	}

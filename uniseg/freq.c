@@ -1054,6 +1054,9 @@ void Freq::show_oov()
 void Freq::check_oov(word_ptr_type word, int threshold)
 {
 	array_type::iterator it = std::find(freq_n_[word->size()].begin(), freq_n_[word->size()].end(), word);
-	if (it != freq_n_[word->size()].end() && word->freq() > threshold)
-		word->is_candidate_word(true);
+	if (it != freq_n_[word->size()].end() && word->freq() > threshold && word->df() < 4) {
+		double final_t = (double)word->freq() / (double)word->df();
+		if (final_t > 2.3)
+			word->is_candidate_word(true);
+	}
 }

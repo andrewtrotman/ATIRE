@@ -148,6 +148,7 @@ public:
 	static bool cmp_just_freq(Word *w1, Word *w2);
 	static bool cmp_idf(Word *w1, Word *w2);
 	static bool cmp_icf(Word *w1, Word *w2);
+	static bool cmp_address(const Word *w1, const Word *w2);
 
 	const Word *lparent() const { return lparent_; }
 	Word *lparent() { return lparent_; }
