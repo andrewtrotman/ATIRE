@@ -422,7 +422,7 @@ void FreqFile::add_word(string_array& aca, char *freq_bytes)
 
 	if (word_where == 0xFF) {
 		ret_word->is_word(true);
-		ret_word->adjust(ret_word->freq());
+		ret_word->adjust(ret_word->freq(), true);
 	}
 	else if (word_where > 0) {
 		assert(ret_word->size() > 1);

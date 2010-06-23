@@ -112,7 +112,7 @@ void Seger2::seg()
 	int last = 0, i = 0;
 	word_ptr_type word = NULL;
 	for (; i < boundary_score_.size(); ++i) {
-		if (boundary_score_[i] < UNISEG_settings::instance().threshold) {// should be boundary
+		if (boundary_score_[i] <= UNISEG_settings::instance().threshold) {// should be boundary
 			word = tw_ptr_local_->subword(last, i + 1 - last);
 			words_list_.push_back(word);
 			last = i + 1;

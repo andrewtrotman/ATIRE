@@ -133,7 +133,8 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 				}
 				string_type non_all_chinese_word;
 				arraytostring(temp_word_array, non_all_chinese_word);
-				output_.append(non_all_chinese_word);
+				if (non_all_chinese_word != "\357\273\277")
+					output_.append(non_all_chinese_word);
 				current += non_all_chinese_word.length();
 				continue;
 			}
