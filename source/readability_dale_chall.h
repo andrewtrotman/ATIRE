@@ -25,7 +25,7 @@ private:
 	};
 
 private:
-	ANT_string_pair *measure_name;
+	static ANT_string_pair measure_name;
 	size_t number_of_sentences;
 	size_t number_of_words;
 	size_t number_of_unfamiliar_words;

@@ -34,6 +34,11 @@ producer = NULL;
 */
 ANT_directory_iterator_multiple::~ANT_directory_iterator_multiple()
 {
+long current;
+
+for (current = 0; current < sources_used; current++)
+	delete sources[current];
+
 delete [] sources;
 delete [] thread_details;
 delete producer;
@@ -129,12 +134,13 @@ active_threads = sources_used;
 instance = 0;
 for (current = thread_details; current < thread_details + sources_used; current++)
 	{
+	memset(&current->file_object, 0, sizeof(current->file_object));
 	current->iterator = sources[instance];
 	current->parent = this;
 	current->get_file = get_file;
-	ANT_thread(bootstrap, current);
 	current->instance = instance++;
 	current->files_read = 0;
+	ANT_thread(bootstrap, current);
 	}
 
 /*

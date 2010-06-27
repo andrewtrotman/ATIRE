@@ -20,7 +20,7 @@
 */
 class ANT_directory_iterator_file : public ANT_directory_iterator
 {
-private:
+protected:
 	char *file, *document_start, *document_end;
 	char filename[PATH_MAX];
 

@@ -87,8 +87,8 @@ CC = @icl /nologo
 CFLAGS = -D_RELEASE /O3 /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
 !ELSE
 CC = @cl /nologo
-#CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
-CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
+CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+#CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
 !ENDIF
 
 #
@@ -106,6 +106,7 @@ PARTS = \
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
+	$(OBJDIR)\memory_indexer.obj 						\
 	$(OBJDIR)\memory_index_one.obj 					\
 	$(OBJDIR)\stats_memory_index.obj				\
 	$(OBJDIR)\hash_table.obj						\
@@ -149,6 +150,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_warc.obj			\
 	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
+	$(OBJDIR)\directory_iterator_csv.obj			\
 	$(OBJDIR)\directory_iterator_recursive.obj		\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\stemmer.obj							\

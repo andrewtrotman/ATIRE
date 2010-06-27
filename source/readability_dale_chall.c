@@ -7,6 +7,8 @@
 #include "readability_dale_chall.h"
 #include "readability_dale_chall_wordlist.h"
 
+ANT_string_pair ANT_readability_dale_chall::measure_name("~dalechall");
+
 /*
 	ANT_READABILITY_DALE_CHALL::ANT_READABILITY_DALE_CHALL()
 	--------------------------------------------------------
@@ -21,7 +23,6 @@ number_of_words = number_of_sentences = number_of_unfamiliar_words = 0;
 */
 size = 65005; 
 words_encountered = new word[size];
-measure_name = new ANT_string_pair("~dalechall");
 }
 
 /*
@@ -31,7 +32,6 @@ measure_name = new ANT_string_pair("~dalechall");
 ANT_readability_dale_chall::~ANT_readability_dale_chall()
 {
 delete [] words_encountered;
-delete measure_name;
 }
 
 /*
@@ -236,7 +236,7 @@ number_of_words++;
 */
 void ANT_readability_dale_chall::index(ANT_memory_indexer *index)
 {
-index->set_document_detail(measure_name, score());
+index->set_document_detail(&measure_name, score());
 
 number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
 }

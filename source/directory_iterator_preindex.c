@@ -41,6 +41,7 @@ store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
 ANT_directory_iterator_preindex::~ANT_directory_iterator_preindex()
 {
 delete store;
+delete source;
 }
 
 /*

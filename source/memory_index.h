@@ -70,8 +70,8 @@ private:
 	*/
 	long long documents_in_repository;
 	long compressed_longest_raw_document_size;			// length of the longest document before compression
-	ANT_string_pair *squiggle_document_offsets;
-	ANT_string_pair *squiggle_document_longest;
+	static ANT_string_pair squiggle_document_offsets;
+	static ANT_string_pair squiggle_document_longest;
 
 	/*
 		Document filenames are stored in a big buffer after the documents but before the index
@@ -119,7 +119,7 @@ public:
 
 	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, long term_frequency = 1);
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
-	virtual void set_document_length(long long docno, long long length) { set_document_detail(squiggle_length, length); largest_docno = docno; } 
+	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 } ;
 

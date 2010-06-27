@@ -26,6 +26,9 @@ ANT_directory_iterator_object *ANT_directory_iterator_file::next(ANT_directory_i
 {
 char *document_id_start = NULL, *document_id_end = NULL;
 
+if (document_end == NULL)
+	return NULL;
+
 if ((document_start = strstr(document_end, "<DOC")) != NULL)
 	{
 	if (*(document_start + 4) == '>')

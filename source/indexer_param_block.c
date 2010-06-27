@@ -71,6 +71,7 @@ puts("");
 puts("FILE HANDLING");
 puts("-------------");
 puts("-r              Recursive search for files in this and directories below this");
+puts("-rcsv           Each document is a single line of the given file");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
 puts("-rtgz           Search in tar.gz files for indexable files");
@@ -266,6 +267,8 @@ for (param = 1; param < argc; param++)
 			recursive = PKZIP;
 		else if (strcmp(command, "rtrec") == 0)
 			recursive = TREC;
+		else if (strcmp(command, "rcsv") == 0)
+			recursive = CSV;
 		else if (strcmp(command, "rwarcgz") == 0)
 			recursive = WARC_GZ;
 		else if (*command == 'S')

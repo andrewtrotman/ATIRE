@@ -155,7 +155,7 @@ else if (*current == '\0')						// end of string
 else if (ANT_ispunct(*current) && *current != '<')
 	{
 	start = current++;
-	while (ANT_ispunct(*current))
+	while (ANT_ispunct(*current) && *current != '<')		// this catches the case of punction before a tag "blah.</b>"
 		current++;
 
 	current_token.start = (char *)start;
@@ -231,7 +231,10 @@ else											// everything else (that starts with a '<')
 			if (*current == '/')					// </tag>	(XML Close tag)
 				{
 				while (*current != '>' && *current != '\0')
+					{
+					*current = ANT_toupper(*current);
 					current++;
+					}
 				/*
 					New rules as of 11 Feb 2010, We return close tags as well as open tags
 					because we need these for result focusing.

@@ -33,7 +33,7 @@ return ANT_memory_index::hash(string) % HASH_TABLE_SIZE;
 */
 ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index)
 {
-hashed_squiggle_length = hash(squiggle_length);
+hashed_squiggle_length = hash(&squiggle_length);
 this->memory = memory;
 this->final_index = index;
 rewind();

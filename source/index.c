@@ -12,6 +12,7 @@
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_compressor.h"
 #include "directory_iterator_file.h"
+#include "directory_iterator_csv.h"
 #include "directory_iterator_object.h"
 #include "directory_iterator_pkzip.h"
 #include "directory_iterator_preindex.h"
@@ -263,6 +264,8 @@ for (param = first_param; param < argc; param++)
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
+	else if (param_block.recursive == ANT_indexer_param_block::CSV)
+		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::PKZIP)
 		source = new ANT_directory_iterator_pkzip(argv[param], ANT_directory_iterator::READ_FILE);
 	else

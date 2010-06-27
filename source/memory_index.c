@@ -28,15 +28,16 @@
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
+ANT_string_pair ANT_memory_index::squiggle_document_offsets("~documentoffsets");
+ANT_string_pair ANT_memory_index::squiggle_document_longest("~documentlongest");
+
 /*
 	ANT_MEMORY_INDEX::ANT_MEMORY_INDEX()
 	------------------------------------
 */
 ANT_memory_index::ANT_memory_index(char *filename)
 {
-hashed_squiggle_length = hash(squiggle_length);
-squiggle_document_offsets = new ANT_string_pair("~documentoffsets");
-squiggle_document_longest = new ANT_string_pair("~documentlongest");
+hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
 stats = new ANT_stats_memory_index(memory);
@@ -694,10 +695,10 @@ stats->bytes_for_decompression_recompression += compressed_postings_list_length 
 	If we have the documents stored on disk then we need to store the position of the end of the final document.
 	But, only add the position if we are using an index with the documents in it.
 */
-if (find_node(hash_table[hash(squiggle_document_offsets)], squiggle_document_offsets) != NULL)
+if (find_node(hash_table[hash(&squiggle_document_offsets)], &squiggle_document_offsets) != NULL)
 	{
-	set_document_detail(squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
-	set_document_detail(squiggle_document_longest, compressed_longest_raw_document_size);		// store the length of the longest document once it is decompressed
+	set_document_detail(&squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
+	set_document_detail(&squiggle_document_longest, compressed_longest_raw_document_size);		// store the length of the longest document once it is decompressed
 	}
 
 /*
@@ -723,7 +724,7 @@ timer = stats->start_timer();
 	the relevance ranking functions
 */
 
-node = find_add_node(hash_table[hashed_squiggle_length], squiggle_length);
+node = find_add_node(hash_table[hashed_squiggle_length], &squiggle_length);
 
 get_serialised_postings(node, &doc_size, &tf_size);
 document_lengths = (ANT_compressable_integer *)memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
@@ -937,7 +938,7 @@ if (compressed_document != NULL)
 	start = index_file->tell();
 	index_file->write((unsigned char *)compressed_document, compressed_length);
 	stats->bytes_to_store_documents_on_disk += compressed_length;
-	set_document_detail(squiggle_document_offsets, start, MODE_MONOTONIC);		// use the search engine itself to store the offsets in the index
+	set_document_detail(&squiggle_document_offsets, start, MODE_MONOTONIC);		// use the search engine itself to store the offsets in the index
 
 	documents_in_repository++;
 	}

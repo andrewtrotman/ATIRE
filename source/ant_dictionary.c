@@ -10,6 +10,7 @@
 #include "btree_iterator.h"
 #include "search_engine_btree_leaf.h"
 #include "phonetic_double_metaphone.h"
+#include "phonetic_soundex.h"
 #ifdef _MSC_VER
 	#include <windows.h>
 	wchar_t wide[10 * 1024];	// buffer for storing wide character strings before printing them
@@ -57,7 +58,7 @@ return max;
 */
 int main(int argc, char *argv[])
 {
-ANT_phonetic_double_metaphone meta;
+ANT_stem *meta = NULL;
 ANT_compressable_integer *raw, max = 0;
 long postings_list_size = 100 * 1024 * 1024;
 long raw_list_size = 100 * 1024 * 1024;
@@ -81,13 +82,21 @@ for (param = 1; param < argc; param++)
 	else if (strcmp(argv[param], "-e") == 0)
 		last_term = argv[++param];
 	else if (strcmp(argv[param], "-d") == 0)
+		{
 		metaphone = TRUE;
+		meta = new ANT_phonetic_double_metaphone;
+		}
+	else if (strcmp(argv[param], "-x") == 0)
+		{
+		metaphone = TRUE;
+		meta = new ANT_phonetic_soundex;
+		}
 	else if (strcmp(argv[param], "-u") == 0)
 		print_wide = TRUE;
 	else if (strcmp(argv[param], "-p") == 0)
 		print_postings = TRUE;
 	else
-		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-u<nicodeWideChars>] [-p<rintPostings>]\n", argv[0]));
+		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<sounded>] [-u<nicodeWideChars>] [-p<rintPostings>]\n", argv[0]));
 	}
 
 postings_list = (unsigned char *)malloc(postings_list_size);
@@ -102,7 +111,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 		if (metaphone)
 			{
 			if (isalpha(*term))
-				meta.stem(term, metaphone_buffer);
+				meta->stem(term, metaphone_buffer);
 			else
 				strcpy(metaphone_buffer, "-");
 			printf("%s ", metaphone_buffer);

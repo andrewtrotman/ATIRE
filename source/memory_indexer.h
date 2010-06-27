@@ -23,11 +23,11 @@ public:
 	enum { MODE_ABSOLUTE, MODE_MONOTONIC };
 
 protected:
-	ANT_string_pair *squiggle_length;
+	static ANT_string_pair squiggle_length;
 
 public:
-	ANT_memory_indexer() { squiggle_length = new ANT_string_pair("~length"); }
-	virtual ~ANT_memory_indexer() { delete squiggle_length; }
+	ANT_memory_indexer() { }
+	virtual ~ANT_memory_indexer() { }
 
 	virtual ANT_memory_indexer_node *add_term(ANT_string_pair *string, long long docno, long extra_term_frequency = 1) = 0;
 	virtual void set_document_length(long long docno, long long length) = 0;

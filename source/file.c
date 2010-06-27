@@ -53,7 +53,7 @@ long ANT_file::setvbuff(long size)
 {
 delete [] buffer;
 buffer_size = size;
-buffer = (unsigned char *)malloc(size);
+buffer = new unsigned char [size];
 
 return buffer == NULL ? 0 : 1;
 }
@@ -108,17 +108,22 @@ return 1;
 */
 long ANT_file::close(void)
 {
-if (internals->fp != NULL)
-	{
-	flush();
-	#ifdef _MSC_VER
+#ifdef _MSC_VER
+	if (internals->fp != INVALID_HANDLE_VALUE)
+		{
+		flush();
 		CloseHandle(internals->fp);
 		internals->fp = INVALID_HANDLE_VALUE;
-	#else
+		}
+#else
+	if (internals->fp != NULL)
+		{
+		flush();
 		fclose(internals->fp);
 		internals->fp = NULL;
-	#endif
-	}
+		}
+#endif
+
 return 1;
 }
 
