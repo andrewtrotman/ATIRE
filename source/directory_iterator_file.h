@@ -29,7 +29,7 @@ protected:
 
 public:
 	ANT_directory_iterator_file(char *file, long get_file = 0) : ANT_directory_iterator("", get_file) { this->file = file; }
-	virtual ~ANT_directory_iterator_file() {}
+	virtual ~ANT_directory_iterator_file() { delete [] file; }
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);

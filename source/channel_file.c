@@ -35,6 +35,8 @@ ANT_channel_file::~ANT_channel_file()
 */
 if (outfile != stdout)
 	fclose(outfile);
+
+delete [] filename;
 }
 
 /*
@@ -102,7 +104,10 @@ while ((next = fgetc(infile)) != terminator)
 	{
 	if  (next == EOF)
 		if (used == 0)
+			{
+			delete [] buffer;
 			return NULL;
+			}
 		else
 			break;
 		

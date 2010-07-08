@@ -51,7 +51,11 @@ new_str = new char [(size_t)new_length];
 if (str == NULL)
 	return new_str;
 else
-	return (char *)memcpy(new_str, str, (size_t)(old_length < new_length ? old_length : new_length));
+	{
+	memcpy(new_str, str, (size_t)(old_length < new_length ? old_length : new_length));
+	delete [] str;
+	return new_str;
+	}
 }
 
 /*

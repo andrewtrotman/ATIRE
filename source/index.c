@@ -299,7 +299,7 @@ for (param = first_param; param < argc; param++)
 	files_that_match = 0;
 
 	now = stats.start_timer();
-	current_file = disk->first(&file_object)
+	current_file = disk->first(&file_object);
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 

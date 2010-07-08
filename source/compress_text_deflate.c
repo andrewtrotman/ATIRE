@@ -34,6 +34,7 @@ ANT_compress_text_deflate::~ANT_compress_text_deflate()
 #ifdef ANT_HAS_ZLIB
 	deflateEnd(&internals->stream);
 	inflateEnd(&internals->instream);
+	delete internals;
 #endif
 }
 

@@ -261,8 +261,8 @@ long long docid;
 char *document_buffer, *title_start, *title_end;
 long focus_top_k = params->focus_top_k;
 ANT_focus_results_list focus_results_list(focus_top_k);
-
 ANT_channel *inchannel, *outchannel;
+
 if (params->port == 0)
 	{
 	inchannel = new ANT_channel_file(params->queries_filename);		// stdin
@@ -554,6 +554,14 @@ if (params->stats & ANT_ANT_param_block::SUM)
 		post_processing_stats.print_time("Focusing time        :", post_processing_stats.cpu_time);
 		}
 	}
+
+/*
+	Clean up
+*/
+delete inchannel;
+if (inchannel != outchannel)
+	delete outchannel;
+delete [] print_buffer;
 
 /*
 	And finally report MAP

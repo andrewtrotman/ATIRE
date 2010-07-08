@@ -5,8 +5,8 @@
 #
 #	Which compiler are we using
 #
-#COMPILER=INTEL
 COMPILER=MICROSOFT
+#COMPILER=INTEL
 
 #
 #	Define TRUE and FALSE
@@ -82,13 +82,16 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 #	Compiler and flags (the top line is debug, the bottom is release)
 #
 
+!IF "$(COMPILER)" == "MICROSOFT"
+CC = @cl /nologo
+#CFLAGS = -D_DEBUG   /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
+!ENDIF
+
 !IF "$(COMPILER)" == "INTEL"
 CC = @icl /nologo
-CFLAGS = -D_RELEASE /O3 /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
-!ELSE
-CC = @cl /nologo
-CFLAGS = -D_DEBUG /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
-#CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
+#CFLAGS = -D_DEBUG   /Od /W4 /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+CFLAGS  = -D_RELEASE /O3 /W4 /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
 !ENDIF
 
 #
