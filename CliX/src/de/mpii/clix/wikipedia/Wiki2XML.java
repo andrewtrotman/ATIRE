@@ -20,7 +20,7 @@ public class Wiki2XML {
     
     public static boolean debugWikiMarkup=false;
     
-    static String inputfile;
+    static ArrayList<String> inputfile = new ArrayList<String> ();
     
     static String annofile=null;
     
@@ -37,6 +37,10 @@ public class Wiki2XML {
     public static String articleFile="";
 
     public static String catFile="";
+    
+    public static ArrayList<String> subFolders = new ArrayList<String> ();
+    
+    public static int inputPos = 0;
 
 //	public static final String templateExpanderURI="http://infao5602:8088/wiki/index.php/Special:ExpandTemplates";
 //	public static final String templateExpanderURI="http://localhost:8088/wiki/index.php/Special:ExpandTemplates";
@@ -93,8 +97,13 @@ public class Wiki2XML {
             	{
             		usage(); System.exit(1);
             	}
-            }
-            
+            }else if(arg.startsWith("-subFolders=")){
+            	String subFolder = arg.substring("-subFolders=".length());
+            	StringTokenizer token = new StringTokenizer(subFolder,"|");
+            	while(token.hasMoreElements()){
+            		subFolders.add(token.nextToken());
+            	}
+            }            
             else if (arg.compareTo("-Dmarkup")==0)
             {
             	debugWikiMarkup=true;
@@ -126,7 +135,7 @@ public class Wiki2XML {
             }
             else if (arg.startsWith("-outputdir="))
             {
-            	WikiHandler.outputDir=arg.substring("-outputdir=".length());
+            	WikiHandler.outputDir=arg.substring("-outputdir=".length()) + File.separator;            	
             }
             else
             {
@@ -138,14 +147,13 @@ public class Wiki2XML {
                     System.exit(1);
                 }
                 
-                inputfile=arg;
-                break;
+                inputfile.add(arg);                
             }
         }
         
         if (articleFile.length()==0) WikiHandler.articles=Collections.synchronizedMap(new HashMap<String,String>());
         if (redirectionsFile.length()==0) WikiHandler.redirections=Collections.synchronizedMap(new HashMap<String,String>());
-//        else
+        else
         	collectRedirections=false;
         
         work();
@@ -169,7 +177,7 @@ public class Wiki2XML {
             		Thread.sleep(60000);    			
         		}
         		catch(Exception e)
-        		{
+        		{        			
         			System.err.println("watchdog thread interrupted.");
         			continue;
         		}
@@ -198,7 +206,7 @@ public class Wiki2XML {
 	static void work()
 	{
         boolean zippedInput=false;   
-        if (inputfile.endsWith("bz2")) zippedInput=true;
+       
         
         // start handler threads
         
@@ -206,7 +214,7 @@ public class Wiki2XML {
 		handlerthreads=new Thread[numThreads];
 		synchronized(handlers)
 		{
-			queue=new java.util.concurrent.ArrayBlockingQueue<workitem>(100);
+			queue=new java.util.concurrent.ArrayBlockingQueue<workitem>(500);
 			
 			for (int i=0;i<numThreads;i++)
 			{
@@ -237,29 +245,35 @@ public class Wiki2XML {
     			System.out.println("Collect templates");
     			
     			TemplateReader temp=new TemplateReader();
-    			
-    	        InputStream stream=null;
-    	        if (zippedInput) stream=new CBZip2InputStream(new FileInputStream(inputfile));
-    	        else stream=new BufferedInputStream(new FileInputStream(inputfile));
-
-    			parser.parse(stream,temp);
-    			
-    			stream.close();
+    			InputStream stream=null;
+    			for(int i=0; i<inputfile.size();i++){
+	    	        
+	    	        if (zippedInput) stream=new CBZip2InputStream(new FileInputStream(inputfile.get(i)));
+	    	        else stream=new BufferedInputStream(new FileInputStream(inputfile.get(i)));
+	
+	    			parser.parse(stream,temp);
+	    			
+	    			stream.close();
+    			}
             }
             
             if (collectRedirections)
             {
     			System.out.println("Phase 0 - collect redirections and categories");
-
-    	        InputStream stream=null;
-    	        if (zippedInput) stream=new CBZip2InputStream(new FileInputStream(inputfile));
-    	        else stream=new BufferedInputStream(new FileInputStream(inputfile));
-
-    			handler.reset(0);
-    			parser.parse(stream,handler);
-    			
-    			stream.close();
-
+    			for(int i=0; i<inputfile.size();i++){
+    			    if (inputfile.get(i).endsWith("bz2")) zippedInput=true;
+    			    FileInputStream fis=new FileInputStream(inputfile.get(i));
+	    	        fis.skip(2);
+	    	        InputStream stream = null;
+	    	        if (zippedInput) 
+	    	        	stream=new CBZip2InputStream(fis);
+	    	        else 
+	    	        	stream=new BufferedInputStream(fis);
+	    	        handler.setCurrentFile(i);
+	    			handler.reset(0);
+	    			parser.parse(stream,handler);	    			
+	    			stream.close();
+    			}
 //              WikiHandler.dumpArticles("articles.txt");
 //              
 //              WikiHandler.dumpRedirections("redirections.txt");
@@ -268,15 +282,21 @@ public class Wiki2XML {
             }
             
 			System.out.println("Phase 1 - generate XML");
-
-	        InputStream stream=null;
-	        if (zippedInput) stream=new CBZip2InputStream(new FileInputStream(inputfile));
-	        else stream=new BufferedInputStream(new FileInputStream(inputfile));
-
-			handler.reset(1);
-			parser.parse(stream,handler);
-			
-			stream.close();
+			for(int i=0;i<inputfile.size();i++){
+			    FileInputStream fis=new FileInputStream(inputfile.get(i));
+    	        fis.skip(2);				
+		        InputStream stream=null;
+		        handler = new WikiHandler();
+		        if (zippedInput) 
+		        	stream=new CBZip2InputStream(fis);
+		        else 
+		        	stream=new BufferedInputStream(fis);
+		        handler.setCurrentFile(i);
+				handler.reset(1);
+				parser.parse(stream,handler);
+				
+				stream.close();
+			}
 		}
 		catch(SAXParseException e)
 		{
@@ -304,7 +324,7 @@ public class Wiki2XML {
 		
 		for (int i=0;i<numThreads;i++)
 		{
-			queue.add(handlers[i].new workitem(null,null,null,null,null,null,null));
+			queue.add(handlers[i].new workitem(null,null,null,null,null,null,null,0));
 		}
 
 	}

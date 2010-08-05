@@ -40,10 +40,12 @@ import de.mpii.clix.wikipedia.Wiki2XML.annotation;
 //public class WikiHandler implements ContentHandler
 public class WikiHandler extends DefaultHandler implements Runnable
 {
-	public static int phase=1; // 0 - collect, 1 - generate
+	public static int phase=0; // 0 - collect, 1 - generate
 	
 	public static String outputDir="c:/YAWN3/";
-
+	
+	public int currentFile = 0;
+	
 	private String templateBaseURL="TemplateStore/"; // *relative* to outputDir
 		
 	private class element
@@ -69,11 +71,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	final boolean createImageLinks=true;
 	final boolean createHTMLImage=false;
 	
-	final boolean createRedirections=false;
+	final boolean createRedirections=true;
 	
 	final boolean createFiles=true;
 	
-	final boolean expandTemplates=true;
+	final boolean expandTemplates=false;
 	
 	final boolean createEntities=true;
 	
@@ -85,7 +87,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 	final boolean minimizeLabels=false;
 	
-	final boolean createTags=false; // create tags in the output (otherwise, the output will just be the plan text)
+	final boolean createTags=true; // create tags in the output (otherwise, the output will just be the plan text)
 	
 	// this affects only intra-wiki links at the moment
 	
@@ -232,7 +234,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
     {
     	expandOnce=new HashSet<String>();
     }
-    
+    public void setCurrentFile(int i){
+    	currentFile = i;
+    }
     // templates that will be handled by the converter, not forwarded to the server
   
     // (currently broken)
@@ -289,7 +293,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
         
         try
         {
-        	URL u=new URL("file",null,"c:\\projects\\clix\\wordnet\\dict");
+        	//URL u=new URL("file",null,"c:\\projects\\clix\\wordnet\\dict");
+        	URL u=new URL("file",null,"/usr/share/wordnet-3.0/dict");
         	dict = new edu.mit.jwi.Dictionary(u);
         	dict.open();
 //            JWNL.initialize(new FileInputStream("file_properties.xml"));
@@ -325,7 +330,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
 	public void endDocument() throws SAXException
 	{
-		if (articleCount%100!=0) status();
+		if (articleCount%100 != 0) 
+			status();
 		
 		if (phase==0)
 			System.out.println("collected "+redirections.size()+" redirections\n");
@@ -435,11 +441,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				}
 				else if ((phase==1)&&(ignoreAll==false)&&(buggyArticle==false)&&(articleCount%Wiki2XML.numFragments==Wiki2XML.myFragment))
 				{
-					if (articleCount<1648700)
-					{
-						articleCount++; return;
-					}
-					workitem w=new workitem(currentTitle,currentID, currentTimestamp,currentAuthor, currentAuthorID, currentContent,currentRevisionID);
+//					if (articleCount<1648700)
+//					{
+//						articleCount++; return;
+//					}
+					workitem w=new workitem(currentTitle,currentID, currentTimestamp,currentAuthor, currentAuthorID, currentContent,currentRevisionID,currentFile);
 					while (true)
 					{
 						try
@@ -447,11 +453,17 @@ public class WikiHandler extends DefaultHandler implements Runnable
 							if (Wiki2XML.queue.offer(w,1,TimeUnit.DAYS)) break;
 						}
 						catch(Exception e)
-						{}
+						{
+							e.printStackTrace();
+						}
 						System.err.println("[main thread] queue at capacity limit even after really long time, probably something is broken.");
 						System.exit(1);
 					}
+				} 
+				else {
+					problem("This page was not processed");
 				}
+					
 				buggyArticle=false;
 				
 				articleCount++;
@@ -609,10 +621,13 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //            for (int i=0;i<categoryTags.size();i++)
 //                closeTagLn(xml,cit.previous());
 
-			if (createAnnotations) closeAnnotationTags(categoryTags,xml);
+			if (createAnnotations) 
+				closeAnnotationTags(categoryTags,xml);
 
-			if (isRedirect==false) closeTagLn(xml,WikiConstants.articleTag);
-			else				   xml.append("</redirect>");
+			if (isRedirect==false) 
+				closeTagLn(xml,WikiConstants.articleTag);
+			else				   
+				xml.append("</redirect>");
 		
 			if (((isRedirect==false)||((isRedirect)&&(createRedirections)))&&(testXML(xml.toString())==false))
 			{
@@ -620,7 +635,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				invalidCount++;
 				buggyArticle=true;
 				lastArticleWasBuggy=true;
-				dumpXMLFile(useArticleIDs?currentID:currentTitle,xml.toString(),true);
+				dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),true);
 				//System.out.println(contentStore);
 			}
 			else if (buggyArticle)
@@ -631,7 +646,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 			if ((buggyArticle==false)&&(createFiles))
 			{
-				if ((isRedirect==false)||((isRedirect)&&(createRedirections))) dumpXMLFile(useArticleIDs?currentID:currentTitle,xml.toString(),false);
+				if ((isRedirect==false)||((isRedirect)&&(createRedirections))) dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),false);
 			}
 		}	
 		currentTitle=null;
@@ -687,7 +702,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	String currentAuthorID=null;
 	String currentAuthor=null;
 	
-	boolean isRedirect=false;
+	boolean isRedirect=true;
 	
 	public void startElement(String namespaceURI, String localName, String qualifiedName, Attributes arg3) throws SAXException
 	{
@@ -862,7 +877,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //		t=content.split("&amp;");
 //		System.out.println("&amp: "+t.length);
      
-        if (templates.size()>0)
+        if (templates!=null && templates.size()>0)
         {
 //        	fixTemplates(content,res);
         	embedTemplates(content,res);
@@ -948,7 +963,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //			System.out.println("replace link: ["+title+"] -> ["+redirections.get(title)+"]");
 //			title=redirections.get(title);
 		}
-		return createFileName(title,true,currentTitle,false,false);
+		return createFileName(title, title,true,currentTitle,false,false);
 	}
 
 
@@ -989,6 +1004,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 	private String createFileName(
 			String filename,
+			String title,
 			boolean relative,
 			String owntitle,
 			boolean buggy,
@@ -997,29 +1013,43 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if (filename.length()==0) return "";
 		
 		String dir="";
-		String lcname=filename.toLowerCase();
+		String subFolder = "";
+		if(Wiki2XML.subFolders != null && Wiki2XML.subFolders.size() != 0){
+			subFolder = Wiki2XML.subFolders.get(currentFile);
+		}
+		String lcname=title.toLowerCase();
 		if (!relative)
 		{
 			if (lcname.startsWith("image:"))
 			{
-				filename=filename.substring(6);
+				filename=filename.substring(filename.indexOf(':') + 1);
 				dir=outputDir+"images/";
 			}
-			else if (lcname.startsWith("template:"))
+			else if (lcname.startsWith("template:") || lcname.startsWith("模板:"))
 			{
-				filename=filename.substring(9);
+				filename=filename.substring(filename.indexOf(':') + 1);
 				dir=outputDir+"templates/";
 			}
 			else if (lcname.startsWith("wikipedia:"))
 			{
-				filename=filename.substring(10);
+				filename=filename.substring(filename.indexOf(':') + 1);
 				dir=outputDir+"wikipedia/";
 			}
-			else if (lcname.startsWith("category:"))
+			else if (lcname.startsWith("category:") || lcname.startsWith("分类:"))
 			{
-				filename=filename.substring(9);
+				filename=filename.substring(filename.indexOf(':') + 1);
 				dir=outputDir+"categories/";
 			}
+			else if (lcname.startsWith("帮助:"))
+			{
+				filename=filename.substring(filename.indexOf(':') + 1);
+				dir=outputDir+"helps/";
+			}	
+			else if (lcname.startsWith("file:") || lcname.startsWith("文件:"))
+			{
+				filename=filename.substring(filename.indexOf(':') + 1);
+				dir=outputDir+"files/";
+			}	
 			else
 			{
 				dir=outputDir+"pages/";
@@ -1031,7 +1061,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		{
 				dir=climbDirs;
 		}
-		
+		if(subFolder.length() != 0){
+			dir += subFolder + "/";
+		}	
 		filename = cleanInternalLink(filename);
 		//System.out.println("new filename: "+filename);
 		
@@ -1102,13 +1134,14 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
 	private boolean dumpXMLFile(
 			String filename,
+			String title,
 			String content, boolean buggy)
 	{
 		//System.out.println("dumpXMLFile("+filename+","+content.length()+" bytes)");
 		
 		try {
 
-			filename = createFileName(filename, false,null,buggy,true);
+			filename = createFileName(filename, title, false,null,buggy,true);
 
 			File outputFile = new File(filename);
 			FileOutputStream stream=new FileOutputStream(outputFile);
@@ -1168,29 +1201,32 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if (createTags==false) return true;
 		
 		boolean result=true;
-		try
-		{
-			StringReader reader=new StringReader(file);
-			
-			InputSource input = new InputSource(reader);
-			input.setSystemId(createFileName(useArticleIDs?currentID:currentTitle,false,null,false,false));
-			
-			parser.parse(input,handler);
-			
-			reader.close();
-		}
-		catch(SAXParseException e)
-		{
-			System.out.println("SAXParse exception while testing XML: "+e.getMessage());				
-			result=false;
-		}
-		catch(Exception e)
-		{
-			problem("exception: "+e);
-			result=false;
-		}
-		
 		return result;
+//		try
+//		{
+//			StringReader reader=new StringReader(file);
+//			
+//			InputSource input = new InputSource(reader);
+//			input.setSystemId(createFileName(useArticleIDs?currentID:currentTitle,false,null,false,false));
+//			
+//			parser.parse(input,handler);
+//			
+//			reader.close();
+//		}
+//		catch(SAXParseException e)
+//		{
+//			e.printStackTrace();
+//			System.out.println("SAXParse exception while testing XML: "+e.getMessage());				
+//			result=false;
+//		}
+//		catch(Exception e)
+//		{
+//			e.printStackTrace();
+//			problem("exception: "+e);
+//			result=false;
+//		}
+//		
+//		return result;
 	}
 	
 	private void status()
@@ -3875,7 +3911,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
     		if (arr[i]=='{') open++;
     		else if (arr[i]=='}') open--;
     		else if ((arr[i]=='|')&&(open==0))
-    			arr[i]='�';
+    			arr[i]='�';
     	}
     	return new String(arr);
     }
@@ -3892,7 +3928,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
     	
     	for (int i=0;i<arr.length;i++)
     	{
-    		if (arr[i]=='�')
+    		if (arr[i]=='�')
     			arr[i]='|';
     	}
     	return new String(arr);
@@ -4193,7 +4229,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
     	    // links
             int nextLink=content.indexOf("[[", pos);
             if ((nextLink>-1)&&(nextLink+2<end)&&(nextLink<minidx))
-            {
+            {            	
                 minidx=nextLink;
                 nextOp=OP_LINK;
             }
@@ -4569,6 +4605,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //               		}
 //                }
             	// workaround for dangling [ symbols that are not part of links (for example, in interval definitions)
+            	
             	if (!((minidx+1<endidx)&&(content.charAt(minidx-1)!='[')&&(content.charAt(minidx+1)!='h')&&(content.charAt(minidx+1)!='f')&&(content.charAt(minidx+1)!='[')))
             	{
             		currentLinkCount++;
@@ -5074,7 +5111,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
             }
             else
             {
-                target=content.substring(start, idx);
+                target=content.substring(start, idx);                
                 text=content.substring(idx+1, end);
             }
             // create link
@@ -5229,6 +5266,19 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 handleContent(text,res);
 //              res.append(XML.XMLify2(text));
             }
+        }else if(content.substring(start, end).indexOf(":") != -1){
+        	int titlePos = content.indexOf(":", start);
+        	String title = content.substring(titlePos + 1,end);
+        	while(title.indexOf(":") != -1){      	
+        		title = title.substring(title.indexOf(":") + 1);
+        	}
+        	if(articles.containsKey(title)){
+        		String link = articles.get(title);
+        		
+        		String url=makeWikiURL(link);
+        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\"");
+        		closeTag(res,WikiConstants.wikilinkTag);
+        	}
         }
     }
     
@@ -6942,13 +6992,14 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		String id;
 		String lastmod;
 		String editor;
+		int    currentFile;
 		String editorid;
 		String content;
 		String revision;
 		
-		public workitem(String t, String i, String l, String e, String eid, String c, String r)
+		public workitem(String t, String i, String l, String e, String eid, String c, String r,int cf)
 		{
-			title=t; id=i; lastmod=l; editor=e; content=c; editorid=eid; revision=r;
+			title=t; id=i; lastmod=l; editor=e; content=c; editorid=eid; revision=r; currentFile=cf;
 		}
 	}
 	
@@ -6982,10 +7033,13 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				currentRevisionID=w.revision;
 				currentTimestamp=w.lastmod;
 				currentTitle=w.title;
+				currentFile=w.currentFile;
 								
 				long start=System.currentTimeMillis();
-				if (w.content.length()>0) currentContent=makeXML(w.content);
-				else currentContent="";
+				if (w.content.length()>0) 
+					currentContent=makeXML(w.content);
+				else 
+					currentContent="";
 				
 				boolean ignored=(currentContent.length()==0);
 				
@@ -6999,13 +7053,16 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				
 				else if ((w.content.length()>=10)&&(w.content.substring(0,10).toLowerCase().startsWith("#redirect")))
 					type="REDIR";
-				else if (ignored) type="IGN";
+				else if (ignored) 
+					type="IGN";
 				
 				System.out.println("["+Thread.currentThread().getId()+"-"+cnt+"]\t"+fillup(w.title,30)+"\t"+type+"\tparse:"+toSeconds(parse-start)+"\tstore:"+toSeconds(end-parse));
 			}
 		}
 		catch(Exception e)
 		{
+			
+			e.printStackTrace();
 			System.err.println(e);
 		}
 	}
@@ -7128,6 +7185,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
         }
         catch(Exception e)
         {
+        	e.printStackTrace();
         	System.err.println(e);
         	e.printStackTrace();
         }
@@ -7179,6 +7237,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
         }
         catch(Exception e)
         {
+        	e.printStackTrace();
         	System.err.println(e);
         	e.printStackTrace();
         }
@@ -7264,6 +7323,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
         }
         catch(Exception e)
         {
+        	e.printStackTrace();
         	System.err.println(e);
         	e.printStackTrace();
         }
@@ -7339,7 +7399,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
         	}
         }
         catch(Exception e)
-        {
+        {        	
         	System.err.println(e);
         	e.printStackTrace();
         }
