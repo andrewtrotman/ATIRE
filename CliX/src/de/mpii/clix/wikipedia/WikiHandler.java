@@ -71,7 +71,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	final boolean createImageLinks=true;
 	final boolean createHTMLImage=false;
 	
-	final boolean createRedirections=false;
+	final boolean createRedirections=true;
 	
 	final boolean createFiles=true;
 	
@@ -642,7 +642,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 			else				   
 				xml.append("</redirect>");
 		
-			if (((isRedirect==false)||((isRedirect)&&(createRedirections)))&&(testXML(xml.toString())==false))
+			if (((isRedirect==false)/*||((isRedirect)&&(createRedirections))*/)&&(testXML(xml.toString())==false))
 			{
 				System.out.println("["+articleCount+"] "+currentTitle+(currentTimestamp!=null?"["+currentTimestamp+"]":"")+": generated XML is probably buggy, skip this.");
 				invalidCount++;
@@ -659,7 +659,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 			if ((buggyArticle==false)&&(createFiles))
 			{
-				if ((isRedirect==false)||((isRedirect)&&(createRedirections))) 
+				if ((isRedirect==false)/*||((isRedirect)&&(createRedirections))*/) 
 					dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),false);
 			}
 		}	
@@ -5154,7 +5154,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
         		}
         		validLink=false;
         	}
-        	else validLink=true;
+        	else 
+        		validLink=true;
         	
             if (validLink)
             {
@@ -5185,7 +5186,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 while (redirections.containsKey(link))
                 {
                     i++;
-                    if (i>20) break;
+                    if (i>20) 
+                    	break;
                     link=redirections.get(link);
                 }
                 

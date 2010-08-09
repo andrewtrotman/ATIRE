@@ -32,7 +32,7 @@ public class Wiki2XML {
     
     public static String startAtPage="";
     
-    public static String redirectionsFile="redirections.txt";
+    public static String redirectionsFile="";
     
     public static String articleFile="";
 
@@ -279,7 +279,7 @@ public class Wiki2XML {
     			}
 //              WikiHandler.dumpArticles("articles.txt");
 //              
-    			WikiHandler.dumpRedirections(handler.outputDir + File.separator + redirectionsFile);
+    			WikiHandler.dumpRedirections(handler.outputDir + File.separator + "redirections.txt");
 //              
 //              System.exit(1);
             }
