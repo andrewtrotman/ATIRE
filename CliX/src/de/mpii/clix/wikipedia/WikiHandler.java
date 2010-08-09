@@ -42,7 +42,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 {
 	public static int phase=0; // 0 - collect, 1 - generate
 	
-	public static String outputDir="c:/YAWN3/";
+	public static String outputDir="/tmp/YAWN3/";
 	
 	public int currentFile = 0;
 	
@@ -71,7 +71,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	final boolean createImageLinks=true;
 	final boolean createHTMLImage=false;
 	
-	final boolean createRedirections=true;
+	final boolean createRedirections=false;
 	
 	final boolean createFiles=true;
 	
@@ -347,6 +347,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		
 		if (el.content!=null)
 		{
+//			// debug
+//			if ((phase==1) && currentID != null && currentID.equals("1010"))
+//				System.err.println("I got you!");
+			
 			if (el.tag.equals("text"))
 			{
 				// it does not make sense to convert these articles as they contain partial markup,
@@ -403,7 +407,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 					}
 					if ((buggyArticle==false)&&((phase==1)||(collectConcepts)))
 						currentContent=el.content.toString();
-					else currentContent="";
+					else 
+						currentContent="";
 				}
 			}
 			else if (el.tag.equals("title"))
@@ -441,16 +446,21 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				}
 				else if ((phase==1)&&(ignoreAll==false)&&(buggyArticle==false)&&(articleCount%Wiki2XML.numFragments==Wiki2XML.myFragment))
 				{
+					// debug
+//					if (currentID.equals("1010"))
+//						System.err.println("I got you!");
 //					if (articleCount<1648700)
 //					{
 //						articleCount++; return;
 //					}
 					workitem w=new workitem(currentTitle,currentID, currentTimestamp,currentAuthor, currentAuthorID, currentContent,currentRevisionID,currentFile);
+					currentContent = null;
 					while (true)
 					{
 						try
 						{
-							if (Wiki2XML.queue.offer(w,1,TimeUnit.DAYS)) break;
+							if (Wiki2XML.queue.offer(w,1,TimeUnit.DAYS)) 
+								break;
 						}
 						catch(Exception e)
 						{
@@ -517,8 +527,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 			if ((generateStylesheet)&&(currentTitle!=null))
 			{
-				if (xslt) xml.append(xsltLink());
-				else	  xml.append(cssLink());
+				if (xslt) 
+					xml.append(xsltLink());
+				else	  
+					xml.append(cssLink());
 			}
 			
 			if ((createEntities)&&(createTags))
@@ -533,7 +545,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //            for (int i=0;i<categoryTags.size();i++)
 //                openTagLn(xml,cit.next());
 
-			if (createAnnotations) openAnnotationTags(categoryTags,xml,true);
+			if (createAnnotations) 
+				openAnnotationTags(categoryTags,xml,true);
             openTagLn(xml,WikiConstants.headerTag);
             
 			if (currentTitle!=null)
@@ -646,7 +659,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 			if ((buggyArticle==false)&&(createFiles))
 			{
-				if ((isRedirect==false)||((isRedirect)&&(createRedirections))) dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),false);
+				if ((isRedirect==false)||((isRedirect)&&(createRedirections))) 
+					dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),false);
 			}
 		}	
 		currentTitle=null;
@@ -5087,17 +5101,26 @@ public class WikiHandler extends DefaultHandler implements Runnable
         //check if we're dealing with special namespaces
         
     	// such a link just adds a link to the category page, but does not add the page to the category.
-    	if (content.substring(start).toLowerCase().startsWith(":category:"))
+    	String lc_content = content.substring(start).toLowerCase();
+    	int category_len = 0;
+    	if ((lc_content.startsWith("：category:") && (category_len = "：category:".length()) > 0) 
+    			|| (lc_content.startsWith("：模板:") && (category_len = "：模板:".length()) > 0))
     	{
-    		if (start+":category".length()<end) handleContent(content.substring(start+":category:".length(), end),res);
+    		if (start + category_len < end) 
+    			handleContent(content.substring(start + category_len, end), res);
     		return;
     	}
     	
-    	if (content.charAt(start)==':') start++; // ignore any leading : (which is a shortcut for the current article namespace)
+    	if (content.charAt(start)==':') 
+    		start++; // ignore any leading : (which is a shortcut for the current article namespace)
     	
-        if (content.substring(start).toLowerCase().startsWith("image:"))
+        if (lc_content.startsWith("image:") 
+        		|| lc_content.startsWith("文件:")
+        		|| lc_content.startsWith("档案:")
+        		|| lc_content.startsWith("图像:"))
             handleImageLink(content,start,end,res);
-        else if (content.substring(start).toLowerCase().startsWith("category:"))
+        else if (lc_content.startsWith("category:")
+        		|| lc_content.startsWith("模板:"))
             handleCategory(content,start,end,res);
         else if (((content.length()>=start+"portal:".length())&&(content.substring(start,start+"portal:".length()).toLowerCase().startsWith("portal:")))||(content.indexOf(':',start)==-1)||(content.indexOf(':', start)>=end))
         {

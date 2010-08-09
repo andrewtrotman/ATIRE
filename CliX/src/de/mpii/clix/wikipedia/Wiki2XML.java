@@ -32,7 +32,7 @@ public class Wiki2XML {
     
     public static String startAtPage="";
     
-    public static String redirectionsFile="";
+    public static String redirectionsFile="redirections.txt";
     
     public static String articleFile="";
 
@@ -135,7 +135,8 @@ public class Wiki2XML {
             }
             else if (arg.startsWith("-outputdir="))
             {
-            	WikiHandler.outputDir=arg.substring("-outputdir=".length()) + File.separator;            	
+            	WikiHandler.outputDir=arg.substring("-outputdir=".length()) + File.separator;
+            	
             }
             else
             {
@@ -151,8 +152,10 @@ public class Wiki2XML {
             }
         }
         
-        if (articleFile.length()==0) WikiHandler.articles=Collections.synchronizedMap(new HashMap<String,String>());
-        if (redirectionsFile.length()==0) WikiHandler.redirections=Collections.synchronizedMap(new HashMap<String,String>());
+        if (articleFile.length()==0) 
+        	WikiHandler.articles=Collections.synchronizedMap(new HashMap<String,String>());
+        if (redirectionsFile.length()==0) 
+        	WikiHandler.redirections=Collections.synchronizedMap(new HashMap<String,String>());
         else
         	collectRedirections=false;
         
@@ -276,7 +279,7 @@ public class Wiki2XML {
     			}
 //              WikiHandler.dumpArticles("articles.txt");
 //              
-//              WikiHandler.dumpRedirections("redirections.txt");
+    			WikiHandler.dumpRedirections(handler.outputDir + File.separator + redirectionsFile);
 //              
 //              System.exit(1);
             }

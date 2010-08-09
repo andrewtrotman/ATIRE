@@ -142,6 +142,8 @@ const unsigned char *UNISEG_uniseg::do_segmentation(unsigned char *c, int length
 
 		how_far = next - current;
 		string_type input((char *)current, how_far);
+		if (input == "考虑到日本债务水平已然相当于国内生产总值")
+			cerr << "stop here" << endl;
 	    if (how_far > 0 && count > 1) {
 	    	if (/*count <= QFreq::instance().freq_training().array_size() && */!QFreq::instance().is_word(input)) {
 				seger_.input(input);

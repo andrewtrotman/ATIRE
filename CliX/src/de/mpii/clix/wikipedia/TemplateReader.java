@@ -266,7 +266,8 @@ public class TemplateReader extends DefaultHandler
 		String lcname=filename.toLowerCase();
 		if (!relative)
 		{
-			if (lcname.startsWith("template:"))
+			if (lcname.startsWith("template:")
+					|| lcname.startsWith("模板:"))
 			{
 				filename=filename.substring(9);
 			}
