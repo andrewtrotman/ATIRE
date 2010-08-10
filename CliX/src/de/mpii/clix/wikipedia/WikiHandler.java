@@ -648,7 +648,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				invalidCount++;
 				buggyArticle=true;
 				lastArticleWasBuggy=true;
-				dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),true);
+				dumpXMLFile(useArticleIDs?currentID:currentTitle, xml.toString(),true);
 				//System.out.println(contentStore);
 			}
 			else if (buggyArticle)
@@ -660,7 +660,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 			if ((buggyArticle==false)&&(createFiles))
 			{
 				if ((isRedirect==false)/*||((isRedirect)&&(createRedirections))*/) 
-					dumpXMLFile(useArticleIDs?currentID:currentTitle, currentTitle, xml.toString(),false);
+					dumpXMLFile(useArticleIDs?currentID:currentTitle, xml.toString(),false);
 			}
 		}	
 		currentTitle=null;
@@ -977,7 +977,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //			System.out.println("replace link: ["+title+"] -> ["+redirections.get(title)+"]");
 //			title=redirections.get(title);
 		}
-		return createFileName(title, title,true,currentTitle,false,false);
+		return createFileName(title, true,currentTitle,false,false);
 	}
 
 
@@ -1018,7 +1018,6 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 	private String createFileName(
 			String filename,
-			String title,
 			boolean relative,
 			String owntitle,
 			boolean buggy,
@@ -1031,49 +1030,57 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if(Wiki2XML.subFolders != null && Wiki2XML.subFolders.size() != 0){
 			subFolder = Wiki2XML.subFolders.get(currentFile);
 		}
-		String lcname=title.toLowerCase();
-		if (!relative)
-		{
+		String lcname=owntitle.toLowerCase();
+//		if (!relative)
+//		{
 			if (lcname.startsWith("image:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
-				dir=outputDir+"images/";
+				dir="images/";
 			}
 			else if (lcname.startsWith("template:") || lcname.startsWith("模板:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
-				dir=outputDir+"templates/";
+				dir="templates/";
 			}
 			else if (lcname.startsWith("wikipedia:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
-				dir=outputDir+"wikipedia/";
+				dir="wikipedia/";
 			}
 			else if (lcname.startsWith("category:") || lcname.startsWith("分类:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
-				dir=outputDir+"categories/";
+				dir="categories/";
 			}
 			else if (lcname.startsWith("帮助:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
-				dir=outputDir+"helps/";
+				dir="helps/";
 			}	
 			else if (lcname.startsWith("file:") || lcname.startsWith("文件:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
-				dir=outputDir+"files/";
+				dir="files/";
 			}	
 			else
 			{
-				dir=outputDir+"pages/";
+				dir="pages/";
 			}
 			if (buggy)
 				dir +="buggy/";
+//		}
+//		else
+//		{
+//				dir=climbDirs;
+//		}
+		if (relative)
+		{
+			dir = climbDirs + dir;
 		}
 		else
 		{
-				dir=climbDirs;
+			dir = outputDir + dir;
 		}
 		if(subFolder.length() != 0){
 			dir += subFolder + "/";
@@ -1148,14 +1155,13 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
 	private boolean dumpXMLFile(
 			String filename,
-			String title,
 			String content, boolean buggy)
 	{
 		//System.out.println("dumpXMLFile("+filename+","+content.length()+" bytes)");
 		
 		try {
 
-			filename = createFileName(filename, title, false,null,buggy,true);
+			filename = createFileName(filename, false, currentTitle, buggy, true);
 
 			File outputFile = new File(filename);
 			FileOutputStream stream=new FileOutputStream(outputFile);

@@ -279,7 +279,7 @@ public class Wiki2XML {
     			}
 //              WikiHandler.dumpArticles("articles.txt");
 //              
-    			WikiHandler.dumpRedirections(handler.outputDir + File.separator + "redirections.txt");
+    			WikiHandler.dumpRedirections(handler.outputDir + "redirections.txt");
 //              
 //              System.exit(1);
             }
