@@ -138,6 +138,15 @@ public class Wiki2XML {
             	WikiHandler.outputDir=arg.substring("-outputdir=".length()) + File.separator;
             	
             }
+            else if (arg.startsWith("-lang="))
+            {
+            	String langs = arg.substring("-outputdir=".length());
+            	StringTokenizer st = new StringTokenizer(langs, "|");
+            	while(st.hasMoreTokens()) {
+            	    String lang = st.nextToken();
+            	    WikiHandler.languageLinks.add(lang);
+            	} 
+            }            
             else
             {
                 // we need at least one more parameter
@@ -250,9 +259,15 @@ public class Wiki2XML {
     			TemplateReader temp=new TemplateReader();
     			InputStream stream=null;
     			for(int i=0; i<inputfile.size();i++){
-	    	        
-	    	        if (zippedInput) stream=new CBZip2InputStream(new FileInputStream(inputfile.get(i)));
-	    	        else stream=new BufferedInputStream(new FileInputStream(inputfile.get(i)));
+    			    if (inputfile.get(i).endsWith("bz2")) 
+    			    	zippedInput=true;
+    			    FileInputStream fis=new FileInputStream(inputfile.get(i));
+	    	        if (zippedInput) {
+		    	        fis.skip(2);
+	    	        	stream=new CBZip2InputStream(fis);
+	    	        }
+	    	        else 
+	    	        	stream=new BufferedInputStream(fis);
 	
 	    			parser.parse(stream,temp);
 	    			
@@ -264,12 +279,14 @@ public class Wiki2XML {
             {
     			System.out.println("Phase 0 - collect redirections and categories");
     			for(int i=0; i<inputfile.size();i++){
-    			    if (inputfile.get(i).endsWith("bz2")) zippedInput=true;
+    			    if (inputfile.get(i).endsWith("bz2")) 
+    			    	zippedInput=true;
     			    FileInputStream fis=new FileInputStream(inputfile.get(i));
-	    	        fis.skip(2);
 	    	        InputStream stream = null;
-	    	        if (zippedInput) 
+	    	        if (zippedInput) {
+		    	        fis.skip(2);
 	    	        	stream=new CBZip2InputStream(fis);
+	    	        }
 	    	        else 
 	    	        	stream=new BufferedInputStream(fis);
 	    	        handler.setCurrentFile(i);
@@ -277,7 +294,7 @@ public class Wiki2XML {
 	    			parser.parse(stream,handler);	    			
 	    			stream.close();
     			}
-//              WikiHandler.dumpArticles("articles.txt");
+    			WikiHandler.dumpArticles(handler.outputDir + "articles.txt");
 //              
     			WikiHandler.dumpRedirections(handler.outputDir + "redirections.txt");
 //              
@@ -286,12 +303,13 @@ public class Wiki2XML {
             
 			System.out.println("Phase 1 - generate XML");
 			for(int i=0;i<inputfile.size();i++){
-			    FileInputStream fis=new FileInputStream(inputfile.get(i));
-    	        fis.skip(2);				
+			    FileInputStream fis=new FileInputStream(inputfile.get(i));			
 		        InputStream stream=null;
 		        handler = new WikiHandler();
-		        if (zippedInput) 
+		        if (zippedInput) {
+	    	        fis.skip(2);	
 		        	stream=new CBZip2InputStream(fis);
+		        }
 		        else 
 		        	stream=new BufferedInputStream(fis);
 		        handler.setCurrentFile(i);

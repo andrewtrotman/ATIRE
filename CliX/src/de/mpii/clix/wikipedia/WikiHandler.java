@@ -42,8 +42,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
 {
 	public static int phase=0; // 0 - collect, 1 - generate
 	
-	public static String outputDir="/tmp/YAWN3/";
-	
+	public static String outputDir=".";
+	    
+    public static ArrayList<String> languageLinks = new ArrayList<String>();
+
 	public int currentFile = 0;
 	
 	private String templateBaseURL="TemplateStore/"; // *relative* to outputDir
@@ -965,7 +967,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	}
 
 
-	private String makeWikiURL(String title)
+	private String makeWikiURL(String title, String realTitle, String namespace)
 	{
 		if (title==null) title="";
 		
@@ -973,11 +975,12 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if (redirections.containsKey(title))
 		{
 			String newtitle=redirections.get(title);
-			if (newtitle.length()>0) title=newtitle;
+			if (newtitle.length()>0) 
+				title=newtitle;
 //			System.out.println("replace link: ["+title+"] -> ["+redirections.get(title)+"]");
 //			title=redirections.get(title);
 		}
-		return createFileName(title, true,currentTitle,false,false);
+		return createFileName(title, true, realTitle,false,false, namespace);
 	}
 
 
@@ -1021,7 +1024,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 			boolean relative,
 			String owntitle,
 			boolean buggy,
-			boolean create)
+			boolean create,
+			String namespace)
 	{
 		if (filename.length()==0) return "";
 		
@@ -1076,7 +1080,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //		}
 		if (relative)
 		{
-			dir = climbDirs + dir;
+			if (namespace != null && namespace.length() > 0)
+				dir = climbDirs + climbDirs + namespace + File.separator + dir;
+			else
+				dir = climbDirs + dir;
 		}
 		else
 		{
@@ -1161,7 +1168,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		
 		try {
 
-			filename = createFileName(filename, false, currentTitle, buggy, true);
+			filename = createFileName(filename, false, currentTitle, buggy, true, "");
 
 			File outputFile = new File(filename);
 			FileOutputStream stream=new FileOutputStream(outputFile);
@@ -2256,7 +2263,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				String p=parameters.get("1");
 				if (p!=null)
 				{
-					return makeWikiURL(p);
+					return makeWikiURL(p, "", "");
 				}
 				else return "";
 			}
@@ -3102,7 +3109,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 {
                     pair c=it.next();
 //                    System.out.println("\t"+c);
-                    writePageConceptMapping.setString(1,makeWikiURL(currentTitle));
+                    writePageConceptMapping.setString(1,makeWikiURL(currentTitle, currentTitle, ""));
                     writePageConceptMapping.setString(2,c.concept);
                     writePageConceptMapping.setString(3, c.id);
                     writePageConceptMapping.addBatch();
@@ -5199,7 +5206,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 
                 boolean linkExists=((link.length()==0)||(articles.containsKey(link)));
                 
-                String url=makeWikiURL(useArticleIDs?articles.get(link):link);
+                String url=makeWikiURL(useArticleIDs?articles.get(link):link, link, "");
 
                 if (anchor!=null)
                 {
@@ -5299,16 +5306,24 @@ public class WikiHandler extends DefaultHandler implements Runnable
             }
         }else if(content.substring(start, end).indexOf(":") != -1){
         	int titlePos = content.indexOf(":", start);
-        	String title = content.substring(titlePos + 1,end);
-        	while(title.indexOf(":") != -1){      	
-        		title = title.substring(title.indexOf(":") + 1);
-        	}
-        	if(articles.containsKey(title)){
-        		String link = articles.get(title);
-        		
-        		String url=makeWikiURL(link);
-        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\"");
-        		closeTag(res,WikiConstants.wikilinkTag);
+        	String namespace = content.substring(start, titlePos);
+        	
+        	if (languageLinks.contains(namespace)) {
+	        	String title = content.substring(titlePos + 1,end);
+	        	while(title.indexOf(":") != -1){      	
+	        		title = title.substring(title.indexOf(":") + 1);
+	        	}
+	        	/*
+	        	 * TODO:
+	        	 * the articles should contains all the articles that needs to be processed
+	        	 */
+	        	if(articles.containsKey(title)){
+	        		String link = articles.get(title);
+	        		
+	        		String url=makeWikiURL(link, title, namespace);
+	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\"");
+	        		closeTag(res,WikiConstants.wikilinkTag);
+	        	}
         	}
         }
     }
