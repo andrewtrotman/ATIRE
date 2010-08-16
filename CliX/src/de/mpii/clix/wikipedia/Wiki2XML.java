@@ -247,8 +247,10 @@ public class Wiki2XML {
 		    SAXParser parser = factory.newSAXParser();
 		    WikiHandler handler = new WikiHandler();
 		    
-		    if (startAtPage.length()!=0) handler.ignoreAll=true;
-		    else handler.ignoreAll=false;
+		    if (startAtPage.length()!=0) 
+		    	handler.ignoreAll=true;
+		    else 
+		    	handler.ignoreAll=false;
 		    
 			factory.setFeature("http://apache.org/xml/features/validation/schema",true);
 		    
@@ -293,10 +295,15 @@ public class Wiki2XML {
 	    			handler.reset(0);
 	    			parser.parse(stream,handler);	    			
 	    			stream.close();
+
+	    			String namespace = "";
+	    			if (handler.languageLinks.size() > 0)
+	    				handler.languageLinks.get(handler.languageLinks.size() - 1);
+	    			WikiHandler.dumpArticles(handler.outputDir + namespace + "articles.txt");          
+	    			WikiHandler.dumpRedirections(handler.outputDir + namespace + "redirections.txt");
+	    			
     			}
-    			WikiHandler.dumpArticles(handler.outputDir + "articles.txt");
-//              
-    			WikiHandler.dumpRedirections(handler.outputDir + "redirections.txt");
+
 //              
 //              System.exit(1);
             }

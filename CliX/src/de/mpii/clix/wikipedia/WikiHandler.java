@@ -732,6 +732,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		el.tag=qualifiedName;
 		
 		elementStack.addFirst(el);
+		
+		if (elementStack.size() == 1) {
+			String lang = arg3.getValue("xml:lang");
+			languageLinks.add(lang);
+		}
 	}
 
 //	public void startPrefixMapping(String arg0, String arg1) throws SAXException {
