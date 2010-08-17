@@ -45,6 +45,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	public static String outputDir=".";
 	    
     public static ArrayList<String> languageLinks = new ArrayList<String>();
+    
+    private static String wildcard = "";
 
 	public int currentFile = 0;
 	
@@ -7191,7 +7193,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		}
 	}
 
-	public static void readArticles(String inputfile)
+	public static void readArticles(String inputfile /* could be wildcard*/)
 	{
 		System.out.println("preloading article ids (this may take a while, expect approximately 7.6 million entries)...");
 
@@ -7202,6 +7204,23 @@ public class WikiHandler extends DefaultHandler implements Runnable
         BufferedReader reader=null;
         
         long start=System.currentTimeMillis();
+        
+        String inputFileDir = ".";
+        wildcard = inputfile;
+        int lastIndex = 0;
+        if ((lastIndex = inputfile.lastIndexOf(File.separator)) > -1) {
+        	inputFileDir = inputfile.substring(0, lastIndex);
+        	wildcard = inputfile.substring(lastIndex + 1);
+        }
+        
+        File[] arrFile = new File(inputFileDir).listFiles(new FilenameFilter()
+        {
+        	public boolean accept(File dir, String name)
+        	{
+        		return (name.toLowerCase().matches(wildcard));
+        	}
+        });
+
         
         try
         {
