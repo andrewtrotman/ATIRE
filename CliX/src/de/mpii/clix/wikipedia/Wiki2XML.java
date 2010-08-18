@@ -41,6 +41,8 @@ public class Wiki2XML {
     public static ArrayList<String> subFolders = new ArrayList<String> ();
     
     public static int inputPos = 0;
+    
+    private static boolean phaseZeroOnly = false;
 
 //	public static final String templateExpanderURI="http://infao5602:8088/wiki/index.php/Special:ExpandTemplates";
 //	public static final String templateExpanderURI="http://localhost:8088/wiki/index.php/Special:ExpandTemplates";
@@ -146,7 +148,11 @@ public class Wiki2XML {
             	    String lang = st.nextToken();
             	    WikiHandler.languageLinks.add(lang);
             	} 
-            }            
+            }   
+            else if (arg.startsWith("-phase0"))
+            {
+            	phaseZeroOnly = true;
+            } 
             else
             {
                 // we need at least one more parameter
@@ -173,7 +179,7 @@ public class Wiki2XML {
 
     public static void usage()
     {
-        System.out.println("usage: "+Wiki2XML.class.getName()+" [-numthreads=?] [-numfragments=?] [-myfragment=?] [-startatpage=?] [-outputdir=?] [-annofile=?] [-articlefile=?] [-redirfile=?] [-Dmarkup] input");
+        System.out.println("usage: "+Wiki2XML.class.getName()+" [-numthreads=?] [-numfragments=?] [-myfragment=?] [-startatpage=?] [-outputdir=?] [-annofile=?] [-articlefile=?] [-redirfile=?] [-Dmarkup] [-phase0] input");
     }
 
     private static class watchdog extends Thread
@@ -304,8 +310,8 @@ public class Wiki2XML {
 	    			
     			}
 
-//              
-//              System.exit(1);
+    			if (phaseZeroOnly)
+    				System.exit(1);
             }
             
 			System.out.println("Phase 1 - generate XML");

@@ -8,6 +8,8 @@ import org.xml.sax.*;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 import java.sql.*;
 
@@ -7192,6 +7194,49 @@ public class WikiHandler extends DefaultHandler implements Runnable
 			System.out.println("cannot dump to "+fname+": "+e);
 		}
 	}
+	
+	static class WildcardFiles implements FileFilter
+	{
+	   Pattern pattern;
+	 
+	   WildcardFiles(String search)
+	   {
+		   search = search.replaceAll("\\.", "\\.");  
+		   search = search.replaceAll("?", "."); 
+		   search = search.replaceAll("*", ".*");
+ 
+		   pattern = Pattern.compile(search);
+	
+//			File[] arrFile = new File(inputFileDir).listFiles(new FilenameFilter()
+//			{
+//				public boolean accept(File dir, String name)
+//				{
+//					return (name.toLowerCase().matches(wildcard));
+//				}
+//			});	      
+	   }
+	 
+	   public boolean accept(File file)
+	   {
+	      Matcher matcher = pattern.matcher(file.getName());
+	 
+	      return matcher.matches();
+	   }
+	   
+	   public static File[] listFiles(String inputfile) 
+	   {
+			String inputFileDir = ".";
+			wildcard = inputfile;
+			int lastIndex = 0;
+			if ((lastIndex = inputfile.lastIndexOf(File.separator)) > -1) {
+				inputFileDir = inputfile.substring(0, lastIndex);
+				wildcard = inputfile.substring(lastIndex + 1);
+			}
+			File[] arrFile = new File(inputFileDir).listFiles(new WildcardFiles(wildcard));
+		    return arrFile;
+	   }
+	}
+
 
 	public static void readArticles(String inputfile /* could be wildcard*/)
 	{
@@ -7205,59 +7250,48 @@ public class WikiHandler extends DefaultHandler implements Runnable
         
         long start=System.currentTimeMillis();
         
-        String inputFileDir = ".";
-        wildcard = inputfile;
-        int lastIndex = 0;
-        if ((lastIndex = inputfile.lastIndexOf(File.separator)) > -1) {
-        	inputFileDir = inputfile.substring(0, lastIndex);
-        	wildcard = inputfile.substring(lastIndex + 1);
-        }
+
+        File[] arrFile = WildcardFiles.listFiles(inputfile);
         
-        File[] arrFile = new File(inputFileDir).listFiles(new FilenameFilter()
+        for (File onefile : arrFile) 
         {
-        	public boolean accept(File dir, String name)
-        	{
-        		return (name.toLowerCase().matches(wildcard));
-        	}
-        });
-
-        
-        try
-        {
-        	stream=new CBZip2InputStream(new FileInputStream(inputfile));
-        	reader=new BufferedReader(new InputStreamReader(stream));
-
-        	int cnt=0;
-        	
-        	while (true)
-        	{
-        		String line=reader.readLine();
-        		
-        		if (line==null)
-        		{
-        			break;
-        		}
-        		
-//        		System.out.println(line);
-
-        		String tokens[]=line.split("\t");
-        		
-        		if (tokens.length!=2) continue;
-        		
-        		articles.put(tokens[0], tokens[1]);
-        		if (++cnt%100000==0)
-        		{
-        			long end=System.currentTimeMillis();
-        			
-        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+articles.size()+" articles found");
-        		}
-        	}
-        }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
-        	System.err.println(e);
-        	e.printStackTrace();
+	        try
+	        {
+	        	stream=new CBZip2InputStream(new FileInputStream(onefile));
+	        	reader=new BufferedReader(new InputStreamReader(stream));
+	
+	        	int cnt=0;
+	        	
+	        	while (true)
+	        	{
+	        		String line=reader.readLine();
+	        		
+	        		if (line==null)
+	        		{
+	        			break;
+	        		}
+	        		
+	//        		System.out.println(line);
+	
+	        		String tokens[]=line.split("\t");
+	        		
+	        		if (tokens.length!=2) continue;
+	        		
+	        		articles.put(tokens[0], tokens[1]);
+	        		if (++cnt%100000==0)
+	        		{
+	        			long end=System.currentTimeMillis();
+	        			
+	        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+articles.size()+" articles found");
+	        		}
+	        	}
+	        }
+	        catch(Exception e)
+	        {
+	        	e.printStackTrace();
+	        	System.err.println(e);
+	        	e.printStackTrace();
+	        }
         }
 
 	}
