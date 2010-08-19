@@ -47,8 +47,6 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	public static String outputDir=".";
 	    
     public static ArrayList<String> languageLinks = new ArrayList<String>();
-    
-    private static String wildcard = "";
 
 	public int currentFile = 0;
 	
@@ -460,7 +458,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //						articleCount++; return;
 //					}
 					workitem w=new workitem(currentTitle,currentID, currentTimestamp,currentAuthor, currentAuthorID, currentContent,currentRevisionID,currentFile);
-					currentContent = null;
+					currentContent = "";
 					while (true)
 					{
 						try
@@ -1051,6 +1049,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				filename=filename.substring(filename.indexOf(':') + 1);
 				dir="images/";
 			}
+//			if (lcname.startsWith("portal:"))
+//			{
+//				filename=filename.substring(filename.indexOf(':') + 1);
+//				dir="portals/";
+//			}
 			else if (lcname.startsWith("template:") || lcname.startsWith("模板:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
@@ -1087,17 +1090,14 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //		{
 //				dir=climbDirs;
 //		}
+		if (namespace != null && namespace.length() > 0)
+			dir = namespace + File.separator + dir;	
+		
 		if (relative)
-		{
-			if (namespace != null && namespace.length() > 0)
-				dir = climbDirs + climbDirs + namespace + File.separator + dir;
-			else
-				dir = climbDirs + dir;
-		}
+			dir = climbDirs + climbDirs + dir;
 		else
-		{
 			dir = outputDir + dir;
-		}
+		
 		if(subFolder.length() != 0){
 			dir += subFolder + "/";
 		}	
@@ -1177,7 +1177,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		
 		try {
 
-			filename = createFileName(filename, false, currentTitle, buggy, true, "");
+			filename = createFileName(filename, false, currentTitle, buggy, true, languageLinks.get(languageLinks.size() - 1));
 
 			File outputFile = new File(filename);
 			FileOutputStream stream=new FileOutputStream(outputFile);
@@ -1867,6 +1867,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		internalTemplates.add("CURRENTTIME");
 		internalTemplates.add("CURRENTTIME");
 	}
+	
 	private String handleTemplate(String templateText)
 	{
 //		if (debugTemplates) System.out.println("handleTemplate("+templateText+")");
@@ -4190,6 +4191,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
     private final static int OP_LIST=5;
     private final static int OP_DOUBLELF=6;
     private final static int OP_INDENT=7;
+    private final static int OP_TEMPLATE=8;
     
     private boolean haveParagraph=false;
     
@@ -4269,6 +4271,14 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 minidx=nextLink;
                 nextOp=OP_LINK;
             }
+    	    // templates
+            int nextTemplate=content.indexOf("{{", pos);
+            if (content.indexOf("{{{", pos) != nextTemplate)
+	            if ((nextTemplate>-1)&&(nextTemplate+2<end)&&(nextTemplate<minidx))
+	            {            	
+	                minidx=nextTemplate;
+	                nextOp=OP_TEMPLATE;
+	            }
 
             // weblinks
             int nextWebLink=content.indexOf("[", pos);
@@ -4417,6 +4427,21 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 handleWebLink(content,minidx+1,endidx-1,res);
                 pos=endidx;
                 break;
+                
+    	    case OP_TEMPLATE:
+    	    	endidx = nextTemplate + 1;
+                while ((endidx<end))
+                {
+                	if (content.charAt(endidx)=='}' && content.charAt(endidx + 1)=='}') {
+                		//handleTemplate()
+                		pos = endidx + 2;
+                		break;
+                	}
+                	else
+                		endidx++;
+                }
+                pos = endidx;
+    	    	break;
 
     	    case OP_INDENT:
                 // count number of initial : characters 
@@ -7195,17 +7220,20 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		}
 	}
 	
-	static class WildcardFiles implements FileFilter
+	static class WildcardFiles implements FilenameFilter, FileFilter
 	{
 	   Pattern pattern;
-	 
+	   private static String wildcard = "";
+	   private static String inputFileDir = ".";
+	    
 	   WildcardFiles(String search)
 	   {
-		   search = search.replaceAll("\\.", "\\.");  
-		   search = search.replaceAll("?", "."); 
-		   search = search.replaceAll("*", ".*");
+		   String reform = search;
+		   //reform = reform.replaceAll("\\.", "\\.");  
+		   //reform = reform.replaceAll("\\?", "."); 
+		   reform = reform.replaceAll("\\*", ".*");
  
-		   pattern = Pattern.compile(search);
+		   pattern = Pattern.compile(reform);
 	
 //			File[] arrFile = new File(inputFileDir).listFiles(new FilenameFilter()
 //			{
@@ -7215,30 +7243,55 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //				}
 //			});	      
 	   }
-	 
-	   public boolean accept(File file)
+	   
+	   public static String getDirectory()
 	   {
-	      Matcher matcher = pattern.matcher(file.getName());
-	 
-	      return matcher.matches();
+		   return inputFileDir;
 	   }
 	   
-	   public static File[] listFiles(String inputfile) 
+	   private static void breakFile(String inputfile)
 	   {
-			String inputFileDir = ".";
 			wildcard = inputfile;
 			int lastIndex = 0;
 			if ((lastIndex = inputfile.lastIndexOf(File.separator)) > -1) {
 				inputFileDir = inputfile.substring(0, lastIndex);
 				wildcard = inputfile.substring(lastIndex + 1);
-			}
-			File[] arrFile = new File(inputFileDir).listFiles(new WildcardFiles(wildcard));
+			}		   
+	   }
+	   
+	   public static File[] listFiles(String inputfile) 
+	   {
+		   breakFile(inputfile);
+			File[] arrFile = new File(inputFileDir).listFiles((FileFilter)new WildcardFiles(wildcard));
 		    return arrFile;
 	   }
+	   
+	   public static String[] list(String inputfile) 
+	   {
+		   breakFile(inputfile);
+			String[] arrFile = new File(inputFileDir).list(new WildcardFiles(wildcard));
+		    return arrFile;
+	   }
+	   
+	   private boolean match(String name) 
+	   {
+		   Matcher matcher = pattern.matcher(name);
+		   return matcher.matches();		   
+	   }
+	   
+	   public boolean accept(File file)
+	   {
+		   return match(file.getName());
+	   }
+
+		@Override
+		public boolean accept(File dir, String name) {
+			return match(name);
+		}	   
 	}
 
 
-	public static void readArticles(String inputfile /* could be wildcard*/)
+	public static void readArticles(String inputfiles /* could be wildcard*/)
 	{
 		System.out.println("preloading article ids (this may take a while, expect approximately 7.6 million entries)...");
 
@@ -7251,13 +7304,23 @@ public class WikiHandler extends DefaultHandler implements Runnable
         long start=System.currentTimeMillis();
         
 
-        File[] arrFile = WildcardFiles.listFiles(inputfile);
+        String[] arrFile = WildcardFiles.list(inputfiles);
         
-        for (File onefile : arrFile) 
+        for (String onefile : arrFile) 
         {
 	        try
 	        {
-	        	stream=new CBZip2InputStream(new FileInputStream(onefile));
+	        	boolean zippedInput = false;
+	        	String inputfile = WildcardFiles.getDirectory() + File.separator + onefile;
+			    if (inputfile.endsWith("bz2")) 
+			    	zippedInput=true;
+			    FileInputStream fis=new FileInputStream(inputfile);
+		        if (zippedInput) {
+	    	        fis.skip(2);
+		        	stream=new CBZip2InputStream(fis);
+		        }
+		        else 
+		        	stream=new BufferedInputStream(fis);
 	        	reader=new BufferedReader(new InputStreamReader(stream));
 	
 	        	int cnt=0;
@@ -7296,7 +7359,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
 	}
 
-	public static void readRedirections(String inputfile)
+	public static void readRedirections(String inputfiles)
 	{
 		System.out.println("preloading redirections (this may take a while, expect approximately 3.2 million entries)...");
 
@@ -7308,42 +7371,57 @@ public class WikiHandler extends DefaultHandler implements Runnable
         
         long start=System.currentTimeMillis();
         
-        try
+        String[] arrFile = WildcardFiles.list(inputfiles);
+        
+        for (String onefile : arrFile) 
         {
-        	stream=new CBZip2InputStream(new FileInputStream(inputfile));
-        	reader=new BufferedReader(new InputStreamReader(stream));
-
-        	int cnt=0;
-        	
-        	while (true)
-        	{
-        		String line=reader.readLine();
-        		
-        		if (line==null)
-        		{
-        			break;
-        		}
-        		
-//        		System.out.println(line);
-
-        		String tokens[]=line.split("\t");
-        		
-        		if (tokens.length!=2) continue;
-        		
-        		redirections.put(tokens[0], tokens[1]);
-        		if (++cnt%100000==0)
-        		{
-        			long end=System.currentTimeMillis();
-        			
-        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+redirections.size()+" redirections found");
-        		}
-        	}
-        }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
-        	System.err.println(e);
-        	e.printStackTrace();
+	        try
+	        {
+	        	boolean zippedInput = false;
+	        	String inputfile = WildcardFiles.getDirectory() + File.separator + onefile;
+			    if (inputfile.endsWith("bz2")) 
+			    	zippedInput=true;
+			    FileInputStream fis=new FileInputStream(inputfile);
+		        if (zippedInput) {
+	    	        fis.skip(2);
+		        	stream=new CBZip2InputStream(fis);
+		        }
+		        else 
+		        	stream=new BufferedInputStream(fis);
+	        	reader=new BufferedReader(new InputStreamReader(stream));
+	
+	        	int cnt=0;
+	        	
+	        	while (true)
+	        	{
+	        		String line=reader.readLine();
+	        		
+	        		if (line==null)
+	        		{
+	        			break;
+	        		}
+	        		
+	//        		System.out.println(line);
+	
+	        		String tokens[]=line.split("\t");
+	        		
+	        		if (tokens.length!=2) continue;
+	        		
+	        		redirections.put(tokens[0], tokens[1]);
+	        		if (++cnt%100000==0)
+	        		{
+	        			long end=System.currentTimeMillis();
+	        			
+	        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+redirections.size()+" redirections found");
+	        		}
+	        	}
+	        }
+	        catch(Exception e)
+	        {
+	        	e.printStackTrace();
+	        	System.err.println(e);
+	        	e.printStackTrace();
+	        }
         }
 
 	}
@@ -7373,7 +7451,17 @@ public class WikiHandler extends DefaultHandler implements Runnable
         
         try
         {
-        	stream=new CBZip2InputStream(new FileInputStream(inputfile));
+        	boolean zippedInput = false;
+		    if (inputfile.endsWith("bz2")) 
+		    	zippedInput=true;
+		    FileInputStream fis=new FileInputStream(inputfile);
+	        if (zippedInput) {
+    	        fis.skip(2);
+	        	stream=new CBZip2InputStream(fis);
+	        }
+	        else 
+	        	stream=new BufferedInputStream(fis);
+        	//stream=new CBZip2InputStream(new FileInputStream(inputfile));
         	reader=new BufferedReader(new InputStreamReader(stream));
 
         	int cnt=0;

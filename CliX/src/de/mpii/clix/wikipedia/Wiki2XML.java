@@ -303,8 +303,9 @@ public class Wiki2XML {
 	    			stream.close();
 
 	    			String namespace = "";
-	    			if (handler.languageLinks.size() > 0)
-	    				handler.languageLinks.get(handler.languageLinks.size() - 1);
+	    			if (handler.languageLinks.size() > 0) {
+	    				namespace = handler.languageLinks.get(handler.languageLinks.size() - 1) + "-";
+	    			}
 	    			WikiHandler.dumpArticles(handler.outputDir + namespace + "articles.txt");          
 	    			WikiHandler.dumpRedirections(handler.outputDir + namespace + "redirections.txt");
 	    			
@@ -316,6 +317,8 @@ public class Wiki2XML {
             
 			System.out.println("Phase 1 - generate XML");
 			for(int i=0;i<inputfile.size();i++){
+			    if (inputfile.get(i).endsWith("bz2")) 
+			    	zippedInput=true;
 			    FileInputStream fis=new FileInputStream(inputfile.get(i));			
 		        InputStream stream=null;
 		        handler = new WikiHandler();
