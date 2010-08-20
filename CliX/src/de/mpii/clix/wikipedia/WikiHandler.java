@@ -7173,7 +7173,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				else if (ignored) 
 					type="IGN";
 				
-				System.out.println("["+Thread.currentThread().getId()+"-"+cnt+"]\t"+fillup(w.title,30)+ "(" + w.id + ")\t"+type+"\tparse:"+toSeconds(parse-start)+"\tstore:"+toSeconds(end-parse));
+				System.out.println("["+Thread.currentThread().getId()+"-"+cnt+"]\t"+fillup(w.title,30)+ "\t" + w.id + "\t"+type+"\tparse:"+toSeconds(parse-start)+"\tstore:"+toSeconds(end-parse));
 			}
 		}
 		catch(Exception e)
