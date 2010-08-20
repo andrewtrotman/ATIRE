@@ -4192,6 +4192,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
     private final static int OP_DOUBLELF=6;
     private final static int OP_INDENT=7;
     private final static int OP_TEMPLATE=8;
+    private final static int OP_REDO_BAKUP=9;
     
     private boolean haveParagraph=false;
     
@@ -4235,94 +4236,119 @@ public class WikiHandler extends DefaultHandler implements Runnable
             pos=0;    		
     	}
         
+	    int nextOp=OP_NOOP;
+	    int backupOp = OP_NOOP;
+	    int nextTable=0;
+	    int nextSection=0;
+	    int nextEmphasis=0;
+	    int nextLink=0;
+	    int nextWebLink=0;
+	    int nextUList=0;
+	    int nextNList=0;
+	    int nextDList=0;
+	    int nextIndent=0;
+	    int nextDLF=0;
+	    int nextTemplate=0;
+	    
+	    int backupidx = 0;
+	    int minidx=0;
     	while ((pos>-1)&&(pos<end))
     	{
-    	    int nextOp=OP_NOOP;
-    	    int minidx=Integer.MAX_VALUE;
-    	    // tables
-    	    
-    	    int nextTable=content.indexOf("{|", pos);
-    	    if ((nextTable>-1)&&(nextTable+1<end))
-    	    {
-    	        nextOp=OP_TABLE;
-    	        minidx=nextTable;
-    	    }
-    	    
-    	    // section headers
-    	    int nextSection=content.indexOf("\n==", pos);
-    	    if ((nextSection>-1)&&(nextSection+2<end)&&(nextSection+1<minidx))
-    	    {
-    	        minidx=nextSection+1;
-    	        nextOp=OP_SECTION;
-    	    }
-
-    	    // emphasis
-    	    int nextEmphasis=content.indexOf("''", pos);
-    	    if ((nextEmphasis>-1)&&(nextEmphasis+2<end)&&(nextEmphasis<minidx))
-    	    {
-    	        minidx=nextEmphasis;
-    	        nextOp=OP_EMPHASIS;
-    	    }
-    	    
-    	    // links
-            int nextLink=content.indexOf("[[", pos);
-            if ((nextLink>-1)&&(nextLink+2<end)&&(nextLink<minidx))
-            {            	
-                minidx=nextLink;
-                nextOp=OP_LINK;
-            }
-    	    // templates
-            int nextTemplate=content.indexOf("{{", pos);
-            if (content.indexOf("{{{", pos) != nextTemplate)
-	            if ((nextTemplate>-1)&&(nextTemplate+2<end)&&(nextTemplate<minidx))
+    	    if (backupOp == OP_REDO_BAKUP)
+    	    	backupOp = OP_NOOP;
+    	    else{
+    		    nextOp=OP_NOOP;
+    		    backupOp = OP_NOOP;   	
+    	    	
+        	    backupidx = Integer.MAX_VALUE;
+        	    minidx=Integer.MAX_VALUE;
+        	    // tables
+	    	    nextTable=content.indexOf("{|", pos);
+	    	    if ((nextTable>-1)&&(nextTable+1<end))
+	    	    {
+	    	        nextOp=OP_TABLE;
+	    	        minidx=nextTable;
+	    	    }
+	    	    
+	    	    // section headers
+	    	    nextSection=content.indexOf("\n==", pos);
+	    	    if ((nextSection>-1)&&(nextSection+2<end)&&(nextSection+1<minidx))
+	    	    {
+	    	        minidx=nextSection+1;
+	    	        nextOp=OP_SECTION;
+	    	    }
+	
+	    	    // emphasis
+	    	    nextEmphasis=content.indexOf("''", pos);
+	    	    if ((nextEmphasis>-1)&&(nextEmphasis+2<end)&&(nextEmphasis<minidx))
+	    	    {
+	    	        minidx=nextEmphasis;
+	    	        nextOp=OP_EMPHASIS;
+	    	    }
+	    	    
+	    	    // links
+	            nextLink=content.indexOf("[[", pos);
+	            if ((nextLink>-1)&&(nextLink+2<end)&&(nextLink<minidx))
 	            {            	
-	                minidx=nextTemplate;
-	                nextOp=OP_TEMPLATE;
+	                minidx=nextLink;
+	                nextOp=OP_LINK;
 	            }
-
-            // weblinks
-            int nextWebLink=content.indexOf("[", pos);
-            if ((nextWebLink>-1)&&(nextWebLink<end)&&(nextWebLink<minidx))
-            {
-                minidx=nextWebLink;
-                nextOp=OP_WEBLINK;
-            }
-
-            // lists
-            int nextUList=content.indexOf("\n*", pos);
-            if ((nextUList>-1)&&(nextUList+2<end)&&(nextUList+1<minidx))
-            {
-                minidx=nextUList+1;
-                nextOp=OP_LIST;
-            }
-
-            int nextNList=content.indexOf("\n#", pos);
-            if ((nextNList>-1)&&(nextNList+2<end)&&(nextNList+1<minidx))
-            {
-                minidx=nextNList+1;
-                nextOp=OP_LIST;
-            }
-
-            int nextDList=content.indexOf("\n;", pos);
-            if ((nextDList>-1)&&(nextDList+2<end)&&(nextDList+1<minidx))
-            {
-                minidx=nextDList+1;
-                nextOp=OP_LIST;
-            }
-
-            int nextIndent=content.indexOf("\n:", pos);
-            if ((nextIndent>-1)&&(nextIndent+2<end)&&(nextIndent+1<minidx))
-            {
-                minidx=nextIndent+1;
-                nextOp=OP_INDENT;
-            }
-
-            int nextDLF=content.indexOf("\n\n", pos);
-            if ((nextDLF>-1)&&(nextDLF+2<end)&&(nextDLF<minidx))
-            {
-                minidx=nextDLF;
-                nextOp=OP_DOUBLELF;
-            }
+	
+	            // weblinks
+	            nextWebLink=content.indexOf("[", pos);
+	            if ((nextWebLink>-1)&&(nextWebLink<end)&&(nextWebLink<minidx))
+	            {
+	                minidx=nextWebLink;
+	                nextOp=OP_WEBLINK;
+	            }
+	
+	            // lists
+	            nextUList=content.indexOf("\n*", pos);
+	            if ((nextUList>-1)&&(nextUList+2<end)&&(nextUList+1<minidx))
+	            {
+	                minidx=nextUList+1;
+	                nextOp=OP_LIST;
+	            }
+	
+	            nextNList=content.indexOf("\n#", pos);
+	            if ((nextNList>-1)&&(nextNList+2<end)&&(nextNList+1<minidx))
+	            {
+	                minidx=nextNList+1;
+	                nextOp=OP_LIST;
+	            }
+	
+	            nextDList=content.indexOf("\n;", pos);
+	            if ((nextDList>-1)&&(nextDList+2<end)&&(nextDList+1<minidx))
+	            {
+	                minidx=nextDList+1;
+	                nextOp=OP_LIST;
+	            }
+	
+	            nextIndent=content.indexOf("\n:", pos);
+	            if ((nextIndent>-1)&&(nextIndent+2<end)&&(nextIndent+1<minidx))
+	            {
+	                minidx=nextIndent+1;
+	                nextOp=OP_INDENT;
+	            }
+	
+	            nextDLF=content.indexOf("\n\n", pos);
+	            if ((nextDLF>-1)&&(nextDLF+2<end)&&(nextDLF<minidx))
+	            {
+	                minidx=nextDLF;
+	                nextOp=OP_DOUBLELF;
+	            }
+	            
+	    	    // templates, make it the last possible one
+	            nextTemplate=content.indexOf("{{", pos);
+	            if (content.indexOf("{{{", pos) != nextTemplate)
+		            if ((nextTemplate>-1)&&(nextTemplate+2<end)&&(nextTemplate<minidx))
+		            {            	
+		            	backupidx = minidx;
+		                minidx=nextTemplate;
+		                backupOp = nextOp;
+		                nextOp=OP_TEMPLATE;
+		            }
+    	    }
 
     	    if (minidx<Integer.MAX_VALUE) res.append(XML.XMLify2(content.substring(pos,minidx))); 
     	    
@@ -4434,13 +4460,24 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 {
                 	if (content.charAt(endidx)=='}' && content.charAt(endidx + 1)=='}') {
                 		//handleTemplate()
-                		pos = endidx + 2;
                 		break;
                 	}
                 	else
                 		endidx++;
                 }
-                pos = endidx;
+                if (endidx<end)
+               		pos = endidx + 2;
+                else {
+                	//pos = endidx;
+                	if (backupOp != OP_NOOP) 
+                	{
+                		minidx = backupidx;
+	                	nextOp = backupOp;
+	                	backupOp = OP_REDO_BAKUP;
+                	}
+                	else
+                		pos = endidx;
+                }
     	    	break;
 
     	    case OP_INDENT:
@@ -7136,7 +7173,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 				else if (ignored) 
 					type="IGN";
 				
-				System.out.println("["+Thread.currentThread().getId()+"-"+cnt+"]\t"+fillup(w.title,30)+"\t"+type+"\tparse:"+toSeconds(parse-start)+"\tstore:"+toSeconds(end-parse));
+				System.out.println("["+Thread.currentThread().getId()+"-"+cnt+"]\t"+fillup(w.title,30)+ "(" + w.id + ")\t"+type+"\tparse:"+toSeconds(parse-start)+"\tstore:"+toSeconds(end-parse));
 			}
 		}
 		catch(Exception e)
