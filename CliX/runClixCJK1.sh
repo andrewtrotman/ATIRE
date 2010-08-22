@@ -3,6 +3,10 @@
 CLIX_PATH=/home/monfee/workspace/CliX
 
 cp=
+arguments=
+with_arguments_remote=0
+with_arguments_allnew=0;
+with_arguments_extra=0;
 
 append_jars_to_cp() {
     # N.b.  This adds all the jars of a directory to $cp.
@@ -24,8 +28,29 @@ append_jars_to_cp $CLIX_PATH/lib
 
 arguments="-articlefile=/data/corpus/wikipedia/CJK/xml/*articles.txt -redirfile=/data/corpus/wikipedia/CJK/xml/*redirections.txt -outputdir=/data/corpus/wikipedia/CJK/xml /data/corpus/wikipedia/CJK/zhwiki-20091119-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
 
-if [ -n "$1" ]
-then
-  arguments=$1
-fi
+arguments_remote="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y"
+
+
+while getopts 'rne:' OPTION
+	do
+	  case $OPTION in
+	  r)	with_arguments_remote=1
+	  		arguments="$arguments_remote $arguments"
+			;;
+	  n)	with_arguments_allnew=1
+			arguments="$OPTARG"
+			;;
+	  e)	with_arguments_extra=1
+	  		arguments="$OPTARG $arguments"
+			;;			
+	  ?)	printf "Usage: %s: [-r] [-n] [-e]\n" $(basename $0) >&2
+			exit 2
+			;;
+	  esac
+
+
+#if [ -n "$1" ]
+#then
+#  arguments=$1
+#fi
 java -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.Wiki2XML $arguments
