@@ -286,6 +286,8 @@ public class Wiki2XML {
             if (collectRedirections)
             {
     			System.out.println("Phase 0 - collect redirections and categories");
+    			Map<String,String> redirections = Collections.synchronizedMap(new HashMap<String,String>());
+    			Map<String,String> articles = Collections.synchronizedMap(new HashMap<String,String>());
     			for(int i=0; i<inputfile.size();i++){
     			    if (inputfile.get(i).endsWith("bz2")) 
     			    	zippedInput=true;
@@ -308,15 +310,26 @@ public class Wiki2XML {
 	    			}
 	    			WikiHandler.dumpArticles(handler.outputDir + namespace + "articles.txt");          
 	    			WikiHandler.dumpRedirections(handler.outputDir + namespace + "redirections.txt");
-	    			
+	    			if (!phaseZeroOnly) {
+		    			articles.putAll(handler.articles);
+		    			redirections.putAll(handler.redirections);
+	    			}
+	    			handler.articles.clear();
+	    			handler.redirections.clear();
     			}
 
     			if (phaseZeroOnly)
     				System.exit(1);
+    			
+    			handler.articles = articles;
+    			handler.redirections = redirections;
+    			
+    			articles = null;
+    			redirections = null;
             }
             
 			System.out.println("Phase 1 - generate XML");
-			for(int i=0;i<inputfile.size();i++){
+			for(int i=0;i<inputfile.size();i++){				
 			    if (inputfile.get(i).endsWith("bz2")) 
 			    	zippedInput=true;
 			    FileInputStream fis=new FileInputStream(inputfile.get(i));			

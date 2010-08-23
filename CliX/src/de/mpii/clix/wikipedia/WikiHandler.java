@@ -4200,11 +4200,13 @@ public class WikiHandler extends DefaultHandler implements Runnable
     //  this method should have the same result as first computing s=content.substring(start,end)
     //  amd then calling it as handleContent(s,0,s.length(),res)
     
-    private void handleContent(String content, int pos, int end, StringBuffer res)
+    private void handleContent(String original_content, int pos, int end, StringBuffer res)
     {
     	// shortcut: if there's nothing to parse, don't parse.
-    	if (content.length()==0) return;
+    	if (original_content.length()==0) 
+    		return;
     	
+    	String content = original_content;
     	boolean haveBoldCache=haveBold;
     	boolean haveItalicsCache=haveItalics;
     	boolean italicsFirstCache=italicsFirst;
@@ -4229,11 +4231,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
         // we have to add a trailing linefeed to be able to match lists, indents, etc
   
-    	if ((pos<end)&&(content.charAt(pos)!='\n'))
+    	if ((pos < end) && (content.charAt(pos)!='\n'))
     	{
-            content="\n"+content.substring(pos);
-            end=end-pos+1;
-            pos=0;    		
+            content = "\n" + content.substring(pos);
+            end = end-pos+1;
+            pos = 0;    		
     	}
         
 	    int nextOp=OP_NOOP;
@@ -4266,6 +4268,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	    	    nextTable=content.indexOf("{|", pos);
 	    	    if ((nextTable>-1)&&(nextTable+1<end))
 	    	    {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	    	        nextOp=OP_TABLE;
 	    	        minidx=nextTable;
 	    	    }
@@ -4274,6 +4278,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	    	    nextSection=content.indexOf("\n==", pos);
 	    	    if ((nextSection>-1)&&(nextSection+2<end)&&(nextSection+1<minidx))
 	    	    {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	    	        minidx=nextSection+1;
 	    	        nextOp=OP_SECTION;
 	    	    }
@@ -4282,6 +4288,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	    	    nextEmphasis=content.indexOf("''", pos);
 	    	    if ((nextEmphasis>-1)&&(nextEmphasis+2<end)&&(nextEmphasis<minidx))
 	    	    {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	    	        minidx=nextEmphasis;
 	    	        nextOp=OP_EMPHASIS;
 	    	    }
@@ -4289,7 +4297,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	    	    // links
 	            nextLink=content.indexOf("[[", pos);
 	            if ((nextLink>-1)&&(nextLink+2<end)&&(nextLink<minidx))
-	            {            	
+	            {          
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextLink;
 	                nextOp=OP_LINK;
 	            }
@@ -4298,6 +4308,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextWebLink=content.indexOf("[", pos);
 	            if ((nextWebLink>-1)&&(nextWebLink<end)&&(nextWebLink<minidx))
 	            {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextWebLink;
 	                nextOp=OP_WEBLINK;
 	            }
@@ -4306,6 +4318,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextUList=content.indexOf("\n*", pos);
 	            if ((nextUList>-1)&&(nextUList+2<end)&&(nextUList+1<minidx))
 	            {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextUList+1;
 	                nextOp=OP_LIST;
 	            }
@@ -4313,6 +4327,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextNList=content.indexOf("\n#", pos);
 	            if ((nextNList>-1)&&(nextNList+2<end)&&(nextNList+1<minidx))
 	            {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextNList+1;
 	                nextOp=OP_LIST;
 	            }
@@ -4320,6 +4336,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextDList=content.indexOf("\n;", pos);
 	            if ((nextDList>-1)&&(nextDList+2<end)&&(nextDList+1<minidx))
 	            {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextDList+1;
 	                nextOp=OP_LIST;
 	            }
@@ -4327,6 +4345,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextIndent=content.indexOf("\n:", pos);
 	            if ((nextIndent>-1)&&(nextIndent+2<end)&&(nextIndent+1<minidx))
 	            {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextIndent+1;
 	                nextOp=OP_INDENT;
 	            }
@@ -4334,6 +4354,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextDLF=content.indexOf("\n\n", pos);
 	            if ((nextDLF>-1)&&(nextDLF+2<end)&&(nextDLF<minidx))
 	            {
+	            	backupidx = minidx;
+	                backupOp = nextOp;
 	                minidx=nextDLF;
 	                nextOp=OP_DOUBLELF;
 	            }
@@ -4342,268 +4364,282 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	            nextTemplate=content.indexOf("{{", pos);
 	            if (content.indexOf("{{{", pos) != nextTemplate)
 		            if ((nextTemplate>-1)&&(nextTemplate+2<end)&&(nextTemplate<minidx))
-		            {            	
+		            {      
 		            	backupidx = minidx;
-		                minidx=nextTemplate;
 		                backupOp = nextOp;
+		                minidx=nextTemplate;
 		                nextOp=OP_TEMPLATE;
 		            }
     	    }
 
     	    if (minidx<Integer.MAX_VALUE) res.append(XML.XMLify2(content.substring(pos,minidx))); 
     	    
-    	    switch(nextOp)
-    	    {
-    	    case OP_TABLE:
-    	        int endidx=nextTable+2;
-    	        int tablecnt=1;
-    	        
-    	        while ((endidx<end)&&(tablecnt>0))
-    	        {
-    	            if ((content.substring(endidx).startsWith("{|")))
-    	                tablecnt++;
-    	            else if ((content.substring(endidx).startsWith("|}")))
-    	                tablecnt--;
-    	            endidx++;
-    	        }
-    	        if (endidx>=end)
-    	        {
-    	            problem("broken table definition (unbalanced open and close tags), ignore.");
-    	            pos+=2;
-    	            continue;
-    	        }
-    	        handleTable(content,minidx+2,endidx,res);
-    	        pos=endidx+1;
-    	        break;
-    	    
-    	    case OP_SECTION:
-    	        // count number of initial equals 
-    	        int cnteq=0; int spos=minidx;
-    	        while ((spos<end)&&(content.charAt(spos)=='=')) {spos++; cnteq++;}
-    	        int initialcnteq=cnteq;
-    	        
-    	        while ((spos<end)&&(cnteq>0))
-    	        {
-    	            if (content.charAt(spos++)=='=') cnteq--;
-    	        }
-    	        if (cnteq>0)
-    	        	System.out.println("Huh?");
-    	        
-    	        endidx=spos-initialcnteq;
-    	        
-    	        handleHeader(content,minidx+initialcnteq,endidx,initialcnteq,res);
-    	        pos=spos; // one char after the last '='
-    	        break;
-    	    
-    	    case OP_EMPHASIS:
-                // count number of initial ' characters 
-                int cnttick=0; spos=minidx;
-                while ((spos<end)&&(content.charAt(spos)=='\'')) {spos++; cnttick++;}
-
-                handleEmphasis(cnttick,res);
-                pos=spos;
-    	        break;
-    	        
-    	    case OP_LINK:
-                endidx=nextLink+2;
-                int linkcnt=2;
-                
-                while ((endidx<end)&&(linkcnt>0))
-                {
-                	if ((content.charAt(endidx)=='['))//&&(!((endidx+1<end)&&(content.charAt(endidx-1)!='[')&&(content.charAt(endidx+1)!='h')&&(content.charAt(endidx+1)!='f')&&(content.charAt(endidx+1)!='['))))
-                    	linkcnt++;
-                	else if ((endidx==end-1)&&(content.charAt(endidx)=='['))
-                		linkcnt++; // will be broken anyway
-                    else if (content.charAt(endidx)==']')
-                    	linkcnt--;
-                    endidx++;
-                }
-                if (linkcnt>0)
-                {
-                    problem("broken wiki link (pos="+pos+"), ignore.");
-                    pos=minidx+2;
-                    continue;
-                }
-                handleLink(content,minidx+2,endidx-2,res);
-                pos=endidx;
-                break;
-
-    	    case OP_WEBLINK:
-                endidx=nextWebLink+1;
-                linkcnt=1;
-                
-                while ((endidx<end)&&(linkcnt>0))
-                {
-                	// workaround for dangling [ symbols that are not part of links (for example, in interval definitions)
-                	if ((content.charAt(endidx)=='[')&&(!((endidx+1<end)&&(content.charAt(endidx-1)!='[')&&(content.charAt(endidx+1)!='h')&&(content.charAt(endidx+1)!='f')&&(content.charAt(endidx+1)!='['))))
-                    	linkcnt++;
-                	else if ((endidx==end-1)&&(content.charAt(endidx)=='['))
-                		linkcnt++; // will be broken anyway
-                    else if (content.charAt(endidx)==']')
-                    	linkcnt--;
-                    endidx++;
-                }
-                if (linkcnt>0)
-                {
-                    problem("broken weblink, ignore.");
-                    res.append("[");
-                    pos=nextWebLink+1;
-                    continue;
-                }
-                handleWebLink(content,minidx+1,endidx-1,res);
-                pos=endidx;
-                break;
-                
-    	    case OP_TEMPLATE:
-    	    	endidx = nextTemplate + 1;
-                while ((endidx<end))
-                {
-                	if (content.charAt(endidx)=='}' && content.charAt(endidx + 1)=='}') {
-                		//handleTemplate()
-                		break;
-                	}
-                	else
-                		endidx++;
-                }
-                if (endidx<end)
-               		pos = endidx + 2;
-                else {
-                	//pos = endidx;
-                	if (backupOp != OP_NOOP) 
-                	{
-                		minidx = backupidx;
-	                	nextOp = backupOp;
-	                	backupOp = OP_REDO_BAKUP;
-                	}
-                	else
-                		pos = endidx;
-                }
-    	    	break;
-
-    	    case OP_INDENT:
-                // count number of initial : characters 
-                int coltick=0; spos=minidx; boolean haveList=false;
-                while (spos<end)
-                {
-                	char c=content.charAt(spos);
-                	if (c==':') coltick++;
-                	else if (c=='*')
-                	{
-                		coltick++; haveList=true; break;
-                	}
-                	else if (c=='#')
-                	{
-                		coltick++; haveList=true; break;
-                	}
-                	else if (c==';')
-                	{
-                		coltick++; haveList=true; break;
-                	}
-                	else break;
-                	spos++;
-                }
-
-                if (haveList==false)
-                {
-	                endidx=content.indexOf('\n', spos);
-	                if (endidx==-1)
+    	    try {
+	    	    switch(nextOp)
+	    	    {
+	    	    case OP_TABLE:
+	    	        int endidx=nextTable+2;
+	    	        int tablecnt=1;
+	    	        
+	    	        while ((endidx<end)&&(tablecnt>0))
+	    	        {
+	    	            if ((content.substring(endidx).startsWith("{|")))
+	    	                tablecnt++;
+	    	            else if ((content.substring(endidx).startsWith("|}")))
+	    	                tablecnt--;
+	    	            endidx++;
+	    	        }
+	    	        if (endidx>=end)
+	    	        {
+	    	            problem("broken table definition (unbalanced open and close tags), ignore.");
+	    	            pos+=2;
+	    	            continue;
+	    	        }
+	    	        handleTable(content,minidx+2,endidx,res);
+	    	        pos=endidx+1;
+	    	        break;
+	    	    
+	    	    case OP_SECTION:
+	    	        // count number of initial equals 
+	    	        int cnteq=0; int spos=minidx;
+	    	        while ((spos<end)&&(content.charAt(spos)=='=')) {spos++; cnteq++;}
+	    	        int initialcnteq=cnteq;
+	    	        
+	    	        while ((spos<end)&&(cnteq>0))
+	    	        {
+	    	            if (content.charAt(spos++)=='=') cnteq--;
+	    	        }
+	    	        if (cnteq>0)
+	    	        	System.out.println("Huh?");
+	    	        
+	    	        endidx=spos-initialcnteq;
+	    	        
+	    	        handleHeader(content,minidx+initialcnteq,endidx,initialcnteq,res);
+	    	        pos=spos; // one char after the last '='
+	    	        break;
+	    	    
+	    	    case OP_EMPHASIS:
+	                // count number of initial ' characters 
+	                int cnttick=0; spos=minidx;
+	                while ((spos<end)&&(content.charAt(spos)=='\'')) {spos++; cnttick++;}
+	
+	                handleEmphasis(cnttick,res);
+	                pos=spos;
+	    	        break;
+	    	        
+	    	    case OP_LINK:
+	                endidx=nextLink+2;
+	                int linkcnt=2;
+	                
+	                while ((endidx<end)&&(linkcnt>0))
 	                {
-	                    handleIndentation(content,coltick,spos,end,res);
-	                    pos=end;
-	                	break;
+	                	if ((content.charAt(endidx)=='['))//&&(!((endidx+1<end)&&(content.charAt(endidx-1)!='[')&&(content.charAt(endidx+1)!='h')&&(content.charAt(endidx+1)!='f')&&(content.charAt(endidx+1)!='['))))
+	                    	linkcnt++;
+	                	else if ((endidx==end-1)&&(content.charAt(endidx)=='['))
+	                		linkcnt++; // will be broken anyway
+	                    else if (content.charAt(endidx)==']')
+	                    	linkcnt--;
+	                    endidx++;
 	                }
-	                else if (endidx<end)
+	                if (linkcnt>0)
 	                {
-		                int linkopenidx=content.substring(spos, endidx).lastIndexOf("[[");
-		                int linkcloseidx=content.substring(spos, endidx).lastIndexOf("]]");
-		                
-		                if ((linkopenidx!=-1)&&(linkcloseidx==-1))
+	                    problem("broken wiki link (pos="+pos+"), ignore.");
+	                    pos=minidx+2;
+	                    continue;
+	                }
+	                handleLink(content,minidx+2,endidx-2,res);
+	                pos=endidx;
+	                break;
+	
+	    	    case OP_WEBLINK:
+	                endidx=nextWebLink+1;
+	                linkcnt=1;
+	                
+	                while ((endidx<end)&&(linkcnt>0))
+	                {
+	                	// workaround for dangling [ symbols that are not part of links (for example, in interval definitions)
+	                	if ((content.charAt(endidx)=='[')&&(!((endidx+1<end)&&(content.charAt(endidx-1)!='[')&&(content.charAt(endidx+1)!='h')&&(content.charAt(endidx+1)!='f')&&(content.charAt(endidx+1)!='['))))
+	                    	linkcnt++;
+	                	else if ((endidx==end-1)&&(content.charAt(endidx)=='['))
+	                		linkcnt++; // will be broken anyway
+	                    else if (content.charAt(endidx)==']')
+	                    	linkcnt--;
+	                    endidx++;
+	                }
+	                if (linkcnt>0)
+	                {
+	                    problem("broken weblink, ignore.");
+	                    res.append("[");
+	                    pos=nextWebLink+1;
+	                    continue;
+	                }
+	                handleWebLink(content,minidx+1,endidx-1,res);
+	                pos=endidx;
+	                break;
+	                
+	    	    case OP_TEMPLATE:
+	    	    	endidx = nextTemplate + 1;
+	                while ((endidx<end))
+	                {
+	                	if (content.charAt(endidx)=='}' && content.charAt(endidx + 1)=='}') {
+	                		//handleTemplate()
+	                		break;
+	                	}
+	                	else
+	                		endidx++;
+	                }
+	                if (endidx<end)
+	               		pos = endidx + 2;
+	                else {
+	                	//pos = endidx;
+	                	if (backupOp != OP_NOOP) 
+	                	{
+	                		minidx = backupidx;
+		                	nextOp = backupOp;
+		                	backupOp = OP_REDO_BAKUP;
+	                	}
+	                	else
+	                		pos = endidx;
+	                }
+	    	    	break;
+	
+	    	    case OP_INDENT:
+	                // count number of initial : characters 
+	                int coltick=0; spos=minidx; boolean haveList=false;
+	                while (spos<end)
+	                {
+	                	char c=content.charAt(spos);
+	                	if (c==':') coltick++;
+	                	else if (c=='*')
+	                	{
+	                		coltick++; haveList=true; break;
+	                	}
+	                	else if (c=='#')
+	                	{
+	                		coltick++; haveList=true; break;
+	                	}
+	                	else if (c==';')
+	                	{
+	                		coltick++; haveList=true; break;
+	                	}
+	                	else break;
+	                	spos++;
+	                }
+	
+	                if (haveList==false)
+	                {
+		                endidx=content.indexOf('\n', spos);
+		                if (endidx==-1)
 		                {
-		                	linkcloseidx=content.substring(endidx).indexOf("]]");
-		                	
-		                	if (linkcloseidx!=-1) endidx=content.indexOf('\n', endidx+linkcloseidx);
-		                	else endidx=-1;
-		                	
-		                	if ((endidx==-1)||(endidx>=end))
-		                	{
-			                    handleIndentation(content,coltick,spos,end,res);
-			                    pos=end;
-			                	break;		                		
-		                	}
+		                    handleIndentation(content,coltick,spos,end,res);
+		                    pos=end;
+		                	break;
 		                }
-		                
-	                    handleIndentation(content,coltick,spos,endidx+1,res);
-	                    pos=endidx+1;
-	                	break;
+		                else if (endidx<end)
+		                {
+			                int linkopenidx=content.substring(spos, endidx).lastIndexOf("[[");
+			                int linkcloseidx=content.substring(spos, endidx).lastIndexOf("]]");
+			                
+			                if ((linkopenidx!=-1)&&(linkcloseidx==-1))
+			                {
+			                	linkcloseidx=content.substring(endidx).indexOf("]]");
+			                	
+			                	if (linkcloseidx!=-1) endidx=content.indexOf('\n', endidx+linkcloseidx);
+			                	else endidx=-1;
+			                	
+			                	if ((endidx==-1)||(endidx>=end))
+			                	{
+				                    handleIndentation(content,coltick,spos,end,res);
+				                    pos=end;
+				                	break;		                		
+			                	}
+			                }
+			                
+		                    handleIndentation(content,coltick,spos,endidx+1,res);
+		                    pos=endidx+1;
+		                	break;
+		                }
+		                else
+		                {
+		                	problem("malformed indentation (no following linefeed), ignored.");
+		                	pos=spos;
+		                	break;
+		                }
 	                }
-	                else
-	                {
-	                	problem("malformed indentation (no following linefeed), ignored.");
-	                	pos=spos;
-	                	break;
-	                }
-                }
-                // else, we silently pass through to list handling
-                
-    	    case OP_LIST:
-    	    	endidx=minidx+1;
-    	    	while (endidx<end)
-    	    	{
-    	    		int idx=content.indexOf('\n', endidx);
-    	    		if (idx==-1)
-    	    		{
-    	    			// done
-    	    			endidx=end;
-    	    			break;
-    	    		}
-
-    	    		if (idx+1<end)
-    	    		{
-    	    			char c=content.charAt(idx+1);
-    	    			
-//    	    			String test=content.substring(idx+1,idx+10);
-//    	    			if (c=='\n')
-//    	    			{
-//    	    				endidx=idx+1; continue;
-//    	    			}
-    	    			if ((c!='*')&&(c!='#')&&(c!=':')&&(c!=';'))
-    	    			{
-    	    				endidx=idx;
-    	    				break;
-    	    			}
-    	    			endidx=idx+1;
-    	    		}
-    	    		else
-    	    		{
-    	    			endidx=end;
-    	    			break;
-    	    		}
-    	    	}
-    	    	
-    	    	handleList(content,minidx,endidx,res);
-    	    	pos=endidx; // we need the following \n for parsing
-    	    	break;
-    	    	
-    	    case OP_DOUBLELF:
-    	    	if ((haveBold)||(haveItalics)) fixOpenEmphasisTags(res);
-    	    	if (haveParagraph)
-    	    		closeTagLn(res,WikiConstants.paragraphTag);
-    	    	openTagLn(res,WikiConstants.paragraphTag);
-    	    	haveParagraph=true;
-    	    	pos=minidx+1; // we need the final \n in the next step to detect, for example, lists
-    	    	break;
-	        default:
-	            if (minidx==Integer.MAX_VALUE)
-	            {
-	                res.append(XML.XMLify2(content.substring(pos, end)));
-	                pos=-1;
-	            }
-	            else
-	            {
-	                pos=minidx+1;
-	            }
-                break;
+	                // else, we silently pass through to list handling
+	                
+	    	    case OP_LIST:
+	    	    	endidx=minidx+1;
+	    	    	while (endidx<end)
+	    	    	{
+	    	    		int idx=content.indexOf('\n', endidx);
+	    	    		if (idx==-1)
+	    	    		{
+	    	    			// done
+	    	    			endidx=end;
+	    	    			break;
+	    	    		}
+	
+	    	    		if (idx+1<end)
+	    	    		{
+	    	    			char c=content.charAt(idx+1);
+	    	    			
+	//    	    			String test=content.substring(idx+1,idx+10);
+	//    	    			if (c=='\n')
+	//    	    			{
+	//    	    				endidx=idx+1; continue;
+	//    	    			}
+	    	    			if ((c!='*')&&(c!='#')&&(c!=':')&&(c!=';'))
+	    	    			{
+	    	    				endidx=idx;
+	    	    				break;
+	    	    			}
+	    	    			endidx=idx+1;
+	    	    		}
+	    	    		else
+	    	    		{
+	    	    			endidx=end;
+	    	    			break;
+	    	    		}
+	    	    	}
+	    	    	
+	    	    	handleList(content,minidx,endidx,res);
+	    	    	pos=endidx; // we need the following \n for parsing
+	    	    	break;
+	    	    	
+	    	    case OP_DOUBLELF:
+	    	    	if ((haveBold)||(haveItalics)) fixOpenEmphasisTags(res);
+	    	    	if (haveParagraph)
+	    	    		closeTagLn(res,WikiConstants.paragraphTag);
+	    	    	openTagLn(res,WikiConstants.paragraphTag);
+	    	    	haveParagraph=true;
+	    	    	pos=minidx+1; // we need the final \n in the next step to detect, for example, lists
+	    	    	break;
+		        default:
+		            if (minidx==Integer.MAX_VALUE)
+		            {
+		                res.append(XML.XMLify2(content.substring(pos, end)));
+		                pos=-1;
+		            }
+		            else
+		            {
+		                pos=minidx+1;
+		            }
+	                break;
+	    	    }
     	    }
+	        catch (Exception ex) {
+	        	ex.printStackTrace();
+            	if (backupOp != OP_NOOP) 
+            	{
+            		minidx = backupidx;
+                	nextOp = backupOp;
+                	backupOp = OP_REDO_BAKUP;
+            	}
+            	else
+            		return;
+	        	continue;
+	        }
     	}
     	
     	if ((haveBold)||(haveItalics)) fixOpenEmphasisTags(res);
@@ -5633,7 +5669,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
     			char c=lines[i].charAt(cnt);
     			if ((c!='*')&&(c!='#')&&(c!=':')&&(c!=';'))
     				break;
-    			else cnt++;
+    			else 
+    				cnt++;
     		}
     		
     		String type;
@@ -5643,7 +5680,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
     		else if (lines[i].charAt(cnt-1)==':') type="indent";
     		else type="undef";
     		
-    		openTagLn(res,WikiConstants.listEntryTag,"type=\""+type+"\" level=\""+cnt+"\"");    		
+    		openTagLn(res,WikiConstants.listEntryTag,"type=\""+type+"\" level=\""+cnt+"\"");    	
+    		if (lines[i].startsWith(";=="))
+    			System.out.println("I got you.");
     		handleContent(lines[i],cnt,lines[i].length(),res);
     		closeTagLn(res,WikiConstants.listEntryTag);
     	}
