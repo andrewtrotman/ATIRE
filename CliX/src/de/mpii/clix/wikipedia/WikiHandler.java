@@ -47,6 +47,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	public static String outputDir=".";
 	    
     public static ArrayList<String> languageLinks = new ArrayList<String>();
+    
+    public static String currentLang = "";
 
 	public int currentFile = 0;
 	
@@ -720,7 +722,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	String currentAuthorID=null;
 	String currentAuthor=null;
 	
-	boolean isRedirect=true;
+	boolean isRedirect=false;
 	
 	public void startElement(String namespaceURI, String localName, String qualifiedName, Attributes arg3) throws SAXException
 	{
@@ -736,8 +738,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		elementStack.addFirst(el);
 		
 		if (elementStack.size() == 1) {
-			String lang = arg3.getValue("xml:lang");
-			languageLinks.add(lang);
+			currentLang = arg3.getValue("xml:lang");
+			if (!languageLinks.contains(currentLang))
+				languageLinks.add(currentLang);
 		}
 	}
 
@@ -1041,40 +1044,44 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if(Wiki2XML.subFolders != null && Wiki2XML.subFolders.size() != 0){
 			subFolder = Wiki2XML.subFolders.get(currentFile);
 		}
-		String lcname=owntitle.toLowerCase();
+		if (buggy)
+			dir = "buggy/";
+		else 
+		{
+			String lcname=owntitle.toLowerCase();
 //		if (!relative)
 //		{
-			if (lcname.startsWith("image:"))
-			{
-				filename=filename.substring(filename.indexOf(':') + 1);
-				dir="images/";
-			}
+//			if (lcname.startsWith("image:"))
+//			{
+//				filename=filename.substring(filename.indexOf(':') + 1);
+//				dir="images/";
+//			}
 //			if (lcname.startsWith("portal:"))
 //			{
 //				filename=filename.substring(filename.indexOf(':') + 1);
 //				dir="portals/";
 //			}
-			else if (lcname.startsWith("template:") || lcname.startsWith("模板:"))
+			if (lcname.startsWith("template:") || lcname.startsWith("模板:") || lcname.startsWith("テンプレート:") || lcname.startsWith("틀:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
 				dir="templates/";
 			}
-			else if (lcname.startsWith("wikipedia:"))
+			else if (lcname.startsWith("wikipedia:") || lcname.startsWith("维基百科:") || lcname.startsWith("プロジェクト:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
 				dir="wikipedia/";
 			}
-			else if (lcname.startsWith("category:") || lcname.startsWith("分类:"))
+			else if (lcname.startsWith("category:") || lcname.startsWith("分类:") || lcname.startsWith("カテゴリ:") || lcname.startsWith("분류:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
 				dir="categories/";
 			}
-			else if (lcname.startsWith("帮助:"))
+			else if (lcname.startsWith("帮助:") || lcname.startsWith("help:") || lcname.startsWith("ヘルプ:") || lcname.startsWith("도움말:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
 				dir="helps/";
 			}	
-			else if (lcname.startsWith("file:") || lcname.startsWith("文件:"))
+			else if (lcname.startsWith("image:") || lcname.startsWith("file:") || lcname.startsWith("文件:") || lcname.startsWith("档案:")  || lcname.startsWith("图像:") || lcname.startsWith("ファイル:")  || lcname.startsWith("画像:") || lcname.startsWith("파일:"))
 			{
 				filename=filename.substring(filename.indexOf(':') + 1);
 				dir="files/";
@@ -1083,8 +1090,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 			{
 				dir="pages/";
 			}
-			if (buggy)
-				dir +="buggy/";
+		}
+
 //		}
 //		else
 //		{
@@ -1093,8 +1100,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if (namespace != null && namespace.length() > 0)
 			dir = namespace + File.separator + dir;	
 		
-		if (relative)
+		if (relative) {
+			if (namespace != null && namespace.length() > 0)
+				dir = climbDirs + dir;
 			dir = climbDirs + climbDirs + dir;
+		}
 		else
 			dir = outputDir + dir;
 		
@@ -1177,7 +1187,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		
 		try {
 
-			filename = createFileName(filename, false, currentTitle, buggy, true, languageLinks.get(languageLinks.size() - 1));
+			filename = createFileName(filename, false, currentTitle, buggy, true, currentLang);
 
 			File outputFile = new File(filename);
 			FileOutputStream stream=new FileOutputStream(outputFile);
@@ -5412,6 +5422,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //              res.append(XML.XMLify2(text));
             }
         }else if(content.substring(start, end).indexOf(":") != -1){
+//        	if (currentTitle.equals("北京市"))
+//        		System.out.println("reaching article of 北京市");
         	int titlePos = content.indexOf(":", start);
         	String namespace = content.substring(start, titlePos);
         	
@@ -5420,6 +5432,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        	while(title.indexOf(":") != -1){      	
 	        		title = title.substring(title.indexOf(":") + 1);
 	        	}
+	        	
+//	        	if (title.equals("北京市") || namespace.equals("ko") || namespace.equals("ja"))
+//	        		System.out.println(namespace + ": 北京市");
 	        	/*
 	        	 * TODO:
 	        	 * the articles should contains all the articles that needs to be processed
@@ -5428,7 +5443,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		String link = articles.get(title);
 	        		
 	        		String url=makeWikiURL(link, title, namespace);
-	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\"");
+	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\"");
 	        		closeTag(res,WikiConstants.wikilinkTag);
 	        	}
         	}

@@ -142,7 +142,7 @@ public class Wiki2XML {
             }
             else if (arg.startsWith("-lang="))
             {
-            	String langs = arg.substring("-outputdir=".length());
+            	String langs = arg.substring("-lang=".length());
             	StringTokenizer st = new StringTokenizer(langs, "|");
             	while(st.hasMoreTokens()) {
             	    String lang = st.nextToken();
