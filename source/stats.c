@@ -9,6 +9,8 @@
 	#include <mach/mach_time.h>
 #else
     #include <sys/time.h>
+	#include <sys/times.h>
+	#include <sys/param.h> //need predefine HZ
 #endif
 
 #include <stdio.h>
@@ -33,6 +35,20 @@ ANT_stats::~ANT_stats()
 {
 }
 
+#ifdef PRINT_TIME_NO_CONVERSION
+long long ANT_stats::print_time(char *message, long long time_taken, char *end_message) {
+	char *units = "milliseconds";
+	unsigned long long milliseconds;
+
+	milliseconds = time_to_milliseconds(time_taken);
+
+	printf("%s", message);
+
+	printf("%lld %s%s\n", milliseconds, units, end_message);
+
+	return time_taken;
+}
+#else
 /*
 	ANT_STATS::PRINT_TIME()
 	-----------------------
@@ -70,6 +86,7 @@ printf("%03lld %s%s\n", milliseconds % 1000, units, end_message);
 
 return time_taken;
 }
+#endif
 
 /*
 	ANT_STATS::PRINT_ELAPSED_TIME()
@@ -161,5 +178,11 @@ void ANT_stats::print_operating_system_process_time(void)
 		printf(" User:");
 		print_filetime(&user);
 		}
+#else
+	struct tms tmsbuf;
+	if (times(&tmsbuf) > 0) {
+		printf("Kernel: %.3f seconds\n", (double)tmsbuf.tms_stime / HZ);
+		printf("  User: %.3f seconds\n", (double)tmsbuf.tms_utime / HZ);
+	}
 #endif
 }
