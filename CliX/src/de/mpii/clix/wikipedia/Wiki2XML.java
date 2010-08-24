@@ -168,9 +168,9 @@ public class Wiki2XML {
         }
         
         if (articleFile.length()==0) 
-        	WikiHandler.articles=Collections.synchronizedMap(new HashMap<String,String>());
+        	;//WikiHandler.articles=Collections.synchronizedMap(new HashMap<String,String>());
         if (redirectionsFile.length()==0) 
-        	WikiHandler.redirections=Collections.synchronizedMap(new HashMap<String,String>());
+        	;//WikiHandler.redirections=Collections.synchronizedMap(new HashMap<String,String>());
         else
         	collectRedirections=false;
         
@@ -304,28 +304,28 @@ public class Wiki2XML {
 	    			parser.parse(stream,handler);	    			
 	    			stream.close();
 
-	    			String namespace = "";
-	    			if (handler.languageLinks.size() > 0) {
-	    				namespace = handler.languageLinks.get(handler.languageLinks.size() - 1) + "-";
-	    			}
-	    			WikiHandler.dumpArticles(handler.outputDir + namespace + "articles.txt");          
-	    			WikiHandler.dumpRedirections(handler.outputDir + namespace + "redirections.txt");
-	    			if (!phaseZeroOnly) {
-		    			articles.putAll(handler.articles);
-		    			redirections.putAll(handler.redirections);
-	    			}
-	    			handler.articles.clear();
-	    			handler.redirections.clear();
+//	    			String namespace = "";
+//	    			if (handler.languageLinks.size() > 0) {
+//	    				namespace = handler.languageLinks.get(handler.languageLinks.size() - 1) + "-";
+//	    			}
+	    			WikiHandler.dumpArticles(handler.outputDir/* + namespace + "articles.txt"*/);          
+	    			WikiHandler.dumpRedirections(handler.outputDir/* + namespace + "redirections.txt"*/);
+//	    			if (!phaseZeroOnly) {
+//		    			articles.putAll(handler.articles);
+//		    			redirections.putAll(handler.redirections);
+//	    			}
+//	    			handler.articles.clear();
+//	    			handler.redirections.clear();
     			}
 
     			if (phaseZeroOnly)
     				System.exit(1);
     			
-    			handler.articles = articles;
-    			handler.redirections = redirections;
-    			
-    			articles = null;
-    			redirections = null;
+//    			handler.articles = articles;
+//    			handler.redirections = redirections;
+//    			
+//    			articles = null;
+//    			redirections = null;
             }
             
 			System.out.println("Phase 1 - generate XML");

@@ -109,8 +109,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	boolean debugTemplates=true;
 
 	// initalized by the caller (!)
-	static Map<String,String> redirections;
-	static Map<String,String> articles;
+	static Map<String, Map<String,String>> redirections = new HashMap<String, Map<String,String>>();
+	static Map<String, Map<String,String>> articles = new HashMap<String, Map<String,String>>();
 	
 	static public boolean haveLocalAnnotations=true;
 	
@@ -448,7 +448,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 			{
 				if (phase==0)
 				{
-					articles.put(currentTitle, currentID);
+					articles.get(currentLang).put(currentTitle, currentID);
 				}
 				else if ((phase==1)&&(ignoreAll==false)&&(buggyArticle==false)&&(articleCount%Wiki2XML.numFragments==Wiki2XML.myFragment))
 				{
@@ -739,6 +739,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		
 		if (elementStack.size() == 1) {
 			currentLang = arg3.getValue("xml:lang");
+			
+			if (articles.get(currentLang) == null)
+				articles.put(currentLang, Collections.synchronizedMap(new HashMap<String,String>()));
+			if (redirections.get(currentLang) == null)
+				redirections.put(currentLang, Collections.synchronizedMap(new HashMap<String,String>()));			
 			if (!languageLinks.contains(currentLang))
 				languageLinks.add(currentLang);
 		}
@@ -984,7 +989,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		title=title.trim();
 		if (redirections.containsKey(title))
 		{
-			String newtitle=redirections.get(title);
+			String newtitle=redirections.get(currentLang).get(title);
 			if (newtitle.length()>0) 
 				title=newtitle;
 //			System.out.println("replace link: ["+title+"] -> ["+redirections.get(title)+"]");
@@ -1611,7 +1616,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	    	        			token=tokenizer.nextToken();
 	    		        		// we have found the start for the link
 	    		        		String target=findRedirectionTarget(token,tokenizer);
-	    		        		redirections.put(title,target);
+	    		        		redirections.get(currentLang).put(title,target);
 	    		        		//System.out.println("redirect ["+currentTitle+"] to ["+target+"]");
 	    	        		}
 	    	        	}
@@ -5318,12 +5323,12 @@ public class WikiHandler extends DefaultHandler implements Runnable
                     i++;
                     if (i>20) 
                     	break;
-                    link=redirections.get(link);
+                    link=redirections.get(currentLang).get(link);
                 }
                 
                 boolean linkExists=((link.length()==0)||(articles.containsKey(link)));
                 
-                String url=makeWikiURL(useArticleIDs?articles.get(link):link, link, "");
+                String url=makeWikiURL(useArticleIDs?articles.get(currentLang).get(link):link, link, "");
 
                 if (anchor!=null)
                 {
@@ -5439,8 +5444,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        	 * TODO:
 	        	 * the articles should contains all the articles that needs to be processed
 	        	 */
-	        	if(articles.containsKey(title)){
-	        		String link = articles.get(title);
+	        	if(articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
+	        		String link = articles.get(namespace).get(title);
 	        		
 	        		String url=makeWikiURL(link, title, namespace);
 	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\"");
@@ -7265,49 +7270,63 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	
 	public static void dumpArticles(String fname)
 	{
-		try
-		{
-			File outputFile = new File(fname);
-			FileOutputStream stream=new FileOutputStream(outputFile);
-			
-			Writer out = new BufferedWriter(new OutputStreamWriter(stream,"UTF-8"));
-			
-			Iterator<Map.Entry<String, String>> it=articles.entrySet().iterator();
-			for (int i=0;i<articles.size();i++)
+		Iterator<Map.Entry<String, Map<String, String>>> o_it = articles.entrySet().iterator();
+		
+		while (o_it.hasNext()) {
+			Map.Entry<String, Map<String, String>> pair = o_it.next();
+					
+			try
 			{
-				Map.Entry<String,String> e=it.next();
-				out.write(e.getKey()+"\t"+e.getValue()+"\n");
+				File outputFile = new File(fname + pair.getKey() + "-articles.txt");
+				FileOutputStream stream=new FileOutputStream(outputFile);
+				
+				Writer out = new BufferedWriter(new OutputStreamWriter(stream,"UTF-8"));
+				
+				Iterator<Map.Entry<String, String>> it=pair.getValue().entrySet().iterator();
+				//for (int i=0;i<articles.size();i++)
+				while (it.hasNext())
+				{
+					Map.Entry<String,String> e=it.next();
+					out.write(e.getKey()+"\t"+e.getValue()+"\n");
+				}
+				out.close();
+				stream.close();
 			}
-			out.close();
-			stream.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println("cannot dump to "+fname+": "+e);
+			catch(Exception e)
+			{
+				System.out.println("cannot dump to "+fname+": "+e);
+			}
 		}
 	}
 	
 	public static void dumpRedirections(String fname)
 	{
-		try
-		{
-			File outputFile = new File(fname);
-			FileOutputStream stream=new FileOutputStream(outputFile);
+		Iterator<Map.Entry<String, Map<String, String>>> o_it = redirections.entrySet().iterator();
+		
+		while (o_it.hasNext()) {
+			Map.Entry<String, Map<String, String>> pair = o_it.next();
 			
-			Writer out = new BufferedWriter(new OutputStreamWriter(stream,"UTF-8"));
-			
-			Iterator<Map.Entry<String, String>> it=redirections.entrySet().iterator();
-			for (int i=0;i<redirections.size();i++)
+			try
 			{
-				Map.Entry<String,String> e=it.next();
-				out.write(e.getKey()+"\t"+e.getValue()+"\n");
+				File outputFile = new File(fname + pair.getKey() + "-redirections.txt");
+				FileOutputStream stream=new FileOutputStream(outputFile);
+				
+				Writer out = new BufferedWriter(new OutputStreamWriter(stream,"UTF-8"));
+				
+				Iterator<Map.Entry<String, String>> it=pair.getValue().entrySet().iterator();
+				//for (int i=0;i<redirections.size();i++)
+				while (it.hasNext())
+				{
+					Map.Entry<String,String> e=it.next();
+					out.write(e.getKey()+"\t"+e.getValue()+"\n");
+				}
+				out.close();
+				stream.close();
 			}
-			out.close();
-			stream.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println("cannot dump to "+fname+": "+e);
+			catch(Exception e)
+			{
+				System.out.println("cannot dump to "+fname+": "+e);
+			}
 		}
 	}
 	
@@ -7386,8 +7405,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	{
 		System.out.println("preloading article ids (this may take a while, expect approximately 7.6 million entries)...");
 
-		if (articles==null)
-			articles=Collections.synchronizedMap(new HashMap<String,String>());
+		//if (articles==null)
+		//	articles.put(currentLang, Collections.synchronizedMap(new HashMap<String,String>()));
 		
         InputStream stream=null;
         BufferedReader reader=null;
@@ -7396,9 +7415,19 @@ public class WikiHandler extends DefaultHandler implements Runnable
         
 
         String[] arrFile = WildcardFiles.list(inputfiles);
-        
+        String lang = null;
         for (String onefile : arrFile) 
         {
+        	StringTokenizer st = new StringTokenizer(onefile, "-");
+        	if (st.countTokens() > 1) 
+        		lang = st.nextToken();
+        	else {
+        		System.err.println("Incorrect articles filename, should be \"[en|zh|ja|ko|..]-articles.txt\"");
+        		System.exit(-1);
+        	}
+        	
+    		if (articles.get(lang) == null)
+    			articles.put(lang, Collections.synchronizedMap(new HashMap<String,String>()));
 	        try
 	        {
 	        	boolean zippedInput = false;
@@ -7430,8 +7459,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		String tokens[]=line.split("\t");
 	        		
 	        		if (tokens.length!=2) continue;
-	        		
-	        		articles.put(tokens[0], tokens[1]);
+	        			
+	        		articles.get(lang).put(tokens[0], tokens[1]);
 	        		if (++cnt%100000==0)
 	        		{
 	        			long end=System.currentTimeMillis();
@@ -7455,7 +7484,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		System.out.println("preloading redirections (this may take a while, expect approximately 3.2 million entries)...");
 
 		if (redirections==null)
-			redirections=Collections.synchronizedMap(new HashMap<String,String>());
+			redirections.put(currentLang, Collections.synchronizedMap(new HashMap<String,String>()));
+			//redirections=Collections.synchronizedMap(new HashMap<String,String>());
 		
         InputStream stream=null;
         BufferedReader reader=null;
@@ -7463,9 +7493,19 @@ public class WikiHandler extends DefaultHandler implements Runnable
         long start=System.currentTimeMillis();
         
         String[] arrFile = WildcardFiles.list(inputfiles);
-        
+        String lang = null;
         for (String onefile : arrFile) 
         {
+        	StringTokenizer st = new StringTokenizer(onefile, "-");
+        	if (st.countTokens() > 1) 
+        		lang = st.nextToken();
+        	else {
+        		System.err.println("Incorrect redirections filename, should be \"[en|zh|ja|ko|..]-redirections.txt\"");
+        		System.exit(-1);
+        	}
+        	
+    		if (redirections.get(lang) == null)
+    			redirections.put(lang, Collections.synchronizedMap(new HashMap<String,String>()));        	
 	        try
 	        {
 	        	boolean zippedInput = false;
@@ -7498,7 +7538,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		
 	        		if (tokens.length!=2) continue;
 	        		
-	        		redirections.put(tokens[0], tokens[1]);
+	        		redirections.get(lang).put(tokens[0], tokens[1]);
 	        		if (++cnt%100000==0)
 	        		{
 	        			long end=System.currentTimeMillis();
