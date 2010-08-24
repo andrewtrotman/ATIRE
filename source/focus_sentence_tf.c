@@ -3,7 +3,7 @@
 	-------------------
 */
 #include "focus_results_list.h"
-#include "focus_sentnece_tf.h"
+#include "focus_sentence_tf.h"
 #include "parser.h"
 
 /*

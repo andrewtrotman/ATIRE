@@ -18,7 +18,7 @@ private:
 	ANT_parser parser;
 
 public:
-	ANT_focus_sentnece_tf(ANT_focus_results_list *result_factory) : ANT_focus(result_factory) {}
+	ANT_focus_sentence_tf(ANT_focus_results_list *result_factory) : ANT_focus(result_factory) {}
 	virtual ~ANT_focus_sentence_tf() {}
 
 	virtual ANT_focus_result *focus(unsigned char *document, long *results_length, long long docid = 0, char *document_name = NULL, ANT_search_engine_accumulator *document_accumulator = NULL);

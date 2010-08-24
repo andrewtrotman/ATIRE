@@ -139,7 +139,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 					postings_list_size = 2 * leaf.postings_length;
 					postings_list = (unsigned char *)realloc(postings_list, postings_list_size);
 					}
-			search_engine.get_postings(&leaf, postings_list);
+			postings_list = search_engine.get_postings(&leaf, postings_list);
 			if (leaf.impacted_length > raw_list_size)
 				{
 				raw_list_size = 2 * leaf.impacted_length;

@@ -69,6 +69,18 @@ return 1;		// success
 }
 
 /*
+ * ANT_FILE_MEMORY::DIRECT_READ()
+ * -----------------------------
+ * get rid of extra memory copy
+ *
+ */
+long ANT_file_memory::direct_read(unsigned char **data, long long size) {
+	*data = buffer + file_position;
+	file_position += size;
+	return 1; // success
+}
+
+/*
 	ANT_FILE_MEMORY::SEEK()
 	-----------------------
 */

@@ -14,7 +14,7 @@
 class ANT_phonetic_soundex : public ANT_stem
 {
 protected:
-	size_t ANT_phonetic_soundex::soundex(char *dest, const char *what);
+	size_t soundex(char *dest, const char *what);
 
 public:
 	ANT_phonetic_soundex() {}

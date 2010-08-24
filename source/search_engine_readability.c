@@ -27,7 +27,7 @@ memory->realign();
 if (get_postings_details("~dalechall", &collection_details) == NULL)
 	exit(puts("This index is not annotated with readability data - terminating"));
 
-get_postings(&collection_details, postings_buffer);
+postings_buffer = get_postings(&collection_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
 hardest_document = 0;

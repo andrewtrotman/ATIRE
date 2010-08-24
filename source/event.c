@@ -9,6 +9,7 @@
 	#include <pthread.h>
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "event.h"
 #include "event_internals.h"

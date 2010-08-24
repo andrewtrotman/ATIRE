@@ -21,6 +21,7 @@
 #include "stemmer.h"
 #include "stemmer_factory.h"
 #include "compress_variable_byte.h"
+#include "pdebug.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -86,14 +87,23 @@ highest_df = eight_byte;
 */
 //printf("B-tree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
+#ifdef DIRECT_MEMORY_READ
+if (memory_model) {
+	block = NULL;
+} else {
+	block = (unsigned char *)memory->malloc((long)(end - term_header));
+}
+index->direct_read(&block, (long)(end - term_header));
+#else
 block = (unsigned char *)memory->malloc((long)(end - term_header));
 index->read(block, (long)(end - term_header));
+#endif
 
 /*
 	The first sizeof(int64_t) bytes of the header are the number of nodes in the root
 */
 btree_nodes = (long)(ANT_get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
-//printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
+dbg_printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
 block += sizeof(int64_t);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 
@@ -139,8 +149,17 @@ btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size)
 get_postings_details("~length", &collection_details);
 documents = collection_details.document_frequency;
 
+#ifdef DIRECT_MEMORY_READ
+if (memory_model) {
+	postings_buffer = NULL;
+} else {
+	postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
+	memory->realign();
+}
+#else
 postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
 memory->realign();
+#endif
 
 /*
 	Allocate space for decompression.
@@ -158,7 +177,7 @@ results_list = new (memory) ANT_search_engine_result(memory, documents);
 /*
 	decompress the document length vector
 */
-get_postings(&collection_details, postings_buffer);
+postings_buffer = get_postings(&collection_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 
 sum = 0;
@@ -181,7 +200,7 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	{
 	memory->realign();
 	document_offsets = (long long *)memory->malloc(collection_details.document_frequency * sizeof(*document_offsets));
-	get_postings(&collection_details, postings_buffer);
+	postings_buffer = get_postings(&collection_details, postings_buffer);
 	factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
 	document_longest_compressed = sum = 0;
 	for (current_length = 0; current_length < collection_details.document_frequency; current_length++)
@@ -442,7 +461,11 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		}
 #else
 	index->seek(term_details->postings_position_on_disk);
-	index->read(destination, term_details->postings_length);
+	#ifdef DIRECT_MEMORY_READ
+		index->direct_read(&destination, term_details->postings_length);
+	#else
+		index->read(destination, term_details->postings_length);
+	#endif
 #endif
 
 return destination;
@@ -501,7 +524,7 @@ if (term_details != NULL && term_details->document_frequency > 0)
 	now = stats->start_timer();
 
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
-	verify = get_postings(term_details, postings_buffer);
+	verify = postings_buffer = get_postings(term_details, postings_buffer);
 #else
 	/*
 		The maximum number of bytes we need to read is the worst case for compression * the cost of the
@@ -516,7 +539,7 @@ if (term_details != NULL && term_details->document_frequency > 0)
 			term_details->postings_length = bytes;
 		}
 
-	verify = get_postings(term_details, postings_buffer);
+	verify = postings_buffer = get_postings(term_details, postings_buffer);
 #endif
 	stats->add_posting_read_time(stats->stop_timer(now));
 	if (verify != NULL)
@@ -619,7 +642,7 @@ while (term != NULL)
 		load the postings from disk
 	*/
 	now = stats->start_timer();
-	verify = get_postings(&term_details, postings_buffer);
+	verify = postings_buffer = get_postings(&term_details, postings_buffer);
 	stats->add_posting_read_time(stats->stop_timer(now));
 	if (verify == NULL)
 		break;
@@ -812,7 +835,7 @@ if (verify == NULL)
 	Load the postings from disk
 */
 now = stats->start_timer();
-verify = get_postings(term_details, postings_buffer);
+verify = postings_buffer = get_postings(term_details, postings_buffer);
 stats->add_posting_read_time(stats->stop_timer(now));
 if (verify == NULL)
 	return NULL;

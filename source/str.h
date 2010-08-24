@@ -6,6 +6,7 @@
 #define STR_H_
 
 #include <string.h>
+#include <stddef.h>
 #include "ctypes.h"
 
 #ifdef __APPLE__
@@ -190,6 +191,8 @@ return out;
 	return string;
 	}
 
+#define strupr strupper
+
 	/*
 		STRUPPER()
 		----------
@@ -202,6 +205,19 @@ return out;
 		*ch = ANT_toupper(*ch);
 
 	return string;
+	}
+
+#define wcsupr wcstrupper
+
+	inline wchar_t *wcstrupper(wchar_t *s) {
+		wchar_t *p = s;
+
+		while (*p) {
+			*p = (wchar_t) ANT_toupper(*p);
+			p++;
+		}
+
+		return s;
 	}
 
 #endif

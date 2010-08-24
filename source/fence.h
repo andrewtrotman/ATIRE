@@ -23,7 +23,7 @@ static inline void ANT_write_fence(void)
 		_WriteBarrier();
 	#endif
 #elif defined (__GNUC__)
-	__sync_synchronize().
+	__sync_synchronize();
 #else
 	#error Unknown architecture - cannot insert memory barrier
 #endif

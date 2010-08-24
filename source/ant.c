@@ -95,6 +95,8 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 
 /*
 	Load the term details (document frequency, collection frequency, and so on)
+	(Load the secondary level dictionary structures and store them in the
+	 according term's term_details variable)
 */
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{

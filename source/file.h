@@ -43,6 +43,7 @@ public:
 	virtual long long tell(void) { return file_position; }
 	virtual void seek(long long offset_from_start_of_file);
 	virtual long long file_length(void);
+	virtual long direct_read(unsigned char **data, long long size) { return read(*data, size); }
 
 	long long get_bytes_read(void) { return bytes_read; }
 	long long get_bytes_written(void) { return bytes_written; }

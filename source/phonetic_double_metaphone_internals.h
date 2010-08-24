@@ -56,6 +56,7 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include "str.h"
 
 //Depending upon whether this build is unicode or not, use the appropriate CRT functions
 #ifdef _UNICODE
@@ -243,7 +244,7 @@ public:
 		::_tcscat(m_word, _TEXT("    "));
 
 		//Convert the word to uppercase, since double metaphone is not case sensitive
-		::_tcsupr(m_word);
+		::_tcsupy(m_word);
 
 		m_length = static_cast<int>(::_tcslen(word));
 
