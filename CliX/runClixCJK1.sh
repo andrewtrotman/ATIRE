@@ -47,7 +47,7 @@ while getopts 'rne:' OPTION
 			exit 2
 			;;
 	  esac
-
+done
 
 #if [ -n "$1" ]
 #then
