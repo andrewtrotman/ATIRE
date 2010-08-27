@@ -33,16 +33,31 @@ public class CJKTopicRecommender extends DefaultHandler
 	LinkedList<element> elementStack = new LinkedList<element>();;
 	private String currentLang;
 	private int articleCount;
+	private int enLinkCount = 0;
 	
 	public static final String ENGLISH_LINK_MARKUP_S = "[[en:";
 	
 	private static Map<String, CJKTopic> articles = Collections.synchronizedMap(new HashMap<String,CJKTopic>());
 	private static ArrayList<CJKTopic> cjk_topics = new ArrayList<CJKTopic>();
+	private static ArrayList<ArticleCounter> counter = new ArrayList<ArticleCounter>();
 	
 	private class element
 	{
 		String tag;
 		StringBuffer content;
+	}
+	
+	private class ArticleCounter 
+	{
+		public ArticleCounter(String lang, int total, int i) {
+			this.lang = lang;
+			this.total = total;
+			this.withEnLink = i;
+		}
+		
+		String lang = null;
+		int total = 0;
+		int withEnLink = 0;
 	}
 	
 	public class CJKTopicTitle {
@@ -80,13 +95,17 @@ public class CJKTopicRecommender extends DefaultHandler
 		tr.list();
 	}
 	
-	private void status()
-	{
+	private void count() {
+		counter.add(new ArticleCounter(currentLang, articleCount, enLinkCount));
+	}
+	
+	private void status() {
 		if (articleCount%10000==0)
-			System.err.println("\n[0] read "+articleCount+", " + articles.size()+" articles" + " redirections\n");
+			System.err.println("\n[0] read " + articleCount + ", " + articles.size() + " articles\n");
 	}
 	
 	private void resetCounter() {
+		enLinkCount = 0;
 		articleCount = 0;
 	}
 	
@@ -117,7 +136,7 @@ public class CJKTopicRecommender extends DefaultHandler
 		while (it.hasNext()) {
 			Entry<String, CJKTopic> pair = it.next();
 			
-			if (pair.getValue().titles.size() != 3)
+			if (pair.getValue().titles.size() == 3)
 				cjk_topics.add(pair.getValue());
 		}
 		//sort();
@@ -157,10 +176,13 @@ public class CJKTopicRecommender extends DefaultHandler
 		        else 
 		        	stream=new BufferedInputStream(fis);
 
-		        resetCounter();
 				parser.parse(stream, this);
 				
 				stream.close();
+				count();
+				status();
+		        resetCounter();
+		        parser = null;
 			}
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -270,6 +292,7 @@ public class CJKTopicRecommender extends DefaultHandler
 	        		//title = title.substring(title.indexOf(":") + 1);
 	        	}
 	        	
+	        	++enLinkCount;
 				CJKTopic topic = new CJKTopic();
 				topic.enTitle = title;
 				topic.size = content.length();

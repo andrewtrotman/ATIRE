@@ -41,7 +41,7 @@ while getopts 'rne:' OPTION
 			arguments="$OPTARG"
 			;;
 	  e)	with_arguments_extra=1
-	  		arguments="$OPTARG $arguments"
+	  		arguments="$arguments $OPTARG"
 			;;			
 	  ?)	printf "Usage: %s: [-r] [-n] [-e]\n" $(basename $0) >&2
 			exit 2
