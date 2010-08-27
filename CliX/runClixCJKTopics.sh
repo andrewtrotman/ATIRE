@@ -24,8 +24,28 @@ append_jars_to_cp $CLIX_PATH/lib
 
 arguments="/data/corpus/wikipedia/CJK/zhwiki-20091119-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
 
-if [ -n "$1" ]
-then
-  arguments=$1
-fi
-java  -Xms256m -Xmx1280m -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.CJKTopicRecommender $arguments > topics.txt
+
+while getopts ':r:n:e:' OPTION
+	do
+	  case $OPTION in
+	  r)	with_arguments_remote=1
+	  		arguments="$arguments_remote $arguments"
+			;;
+	  n)	with_arguments_allnew=1
+	  		#echo "$OPTARG"
+			arguments="$OPTARG"
+			;;
+	  e)	with_arguments_extra=1
+	  		arguments="$arguments $OPTARG"
+			;;			
+	  ?)	printf "Usage: %s: [-r] [-n] [-e]\n" $(basename $0) >&2
+			exit 2
+			;;
+	  esac
+done
+
+#if [ -n "$1" ]
+#then
+#echo "arguments:  $arguments"
+#fi
+java  -Xms256m -Xmx1280m -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.CJKTopicRecommender $arguments

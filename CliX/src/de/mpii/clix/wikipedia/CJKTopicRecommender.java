@@ -37,7 +37,7 @@ public class CJKTopicRecommender extends DefaultHandler
 	
 	public static final String ENGLISH_LINK_MARKUP_S = "[[en:";
 	
-	private static Map<String, CJKTopic> articles = Collections.synchronizedMap(new HashMap<String,CJKTopic>());
+	//private static Map<String, CJKTopic> articles = Collections.synchronizedMap(new HashMap<String,CJKTopic>());
 	private static ArrayList<CJKTopic> cjk_topics = new ArrayList<CJKTopic>();
 	private static ArrayList<ArticleCounter> counter = new ArrayList<ArticleCounter>();
 	
@@ -91,7 +91,7 @@ public class CJKTopicRecommender extends DefaultHandler
 	public static void main(String[] args) {
 		CJKTopicRecommender tr = new CJKTopicRecommender();
 		tr.processFiles(args);
-		tr.recommend();
+		//tr.recommend();
 		tr.list();
 	}
 	
@@ -101,7 +101,7 @@ public class CJKTopicRecommender extends DefaultHandler
 	
 	private void status() {
 		if (articleCount%10000==0)
-			System.err.println("\n[0] read " + articleCount + ", " + articles.size() + " articles\n");
+			System.err.println("\n[INFO] read " + articleCount + ", " + cjk_topics.size() + " articles\n");
 	}
 	
 	private void resetCounter() {
@@ -120,7 +120,15 @@ public class CJKTopicRecommender extends DefaultHandler
 //				System.out.print(topic.titles.get(i) + " ");
 //			}
 //		}
-		for (int i = 0; i < cjk_topics.size(); ++i) {
+		int i = 0;
+		for (i = 0; i < counter.size(); ++i) {
+			ArticleCounter ac = counter.get(i);
+//			if (i != 0)
+//				System.out.print(",");
+			System.out.println(ac.lang + "," + ac.total + "," + ac.withEnLink);
+		}
+		
+		for (i = 0; i < cjk_topics.size(); ++i) {
 			CJKTopic topic = cjk_topics.get(i);
 			System.out.print(topic.enTitle + ":");
 			for (int j = 0; j < topic.titles.size(); ++j) {
@@ -132,13 +140,13 @@ public class CJKTopicRecommender extends DefaultHandler
 	}
 
 	private void recommend() {
-		Iterator<Entry<String, CJKTopic>> it = articles.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<String, CJKTopic> pair = it.next();
-			
-			if (pair.getValue().titles.size() == 3)
-				cjk_topics.add(pair.getValue());
-		}
+//		Iterator<Entry<String, CJKTopic>> it = articles.entrySet().iterator();
+//		while (it.hasNext()) {
+//			Entry<String, CJKTopic> pair = it.next();
+//			
+//			if (pair.getValue().titles.size() == 3)
+//				cjk_topics.add(pair.getValue());
+//		}
 		//sort();
 		Collections.sort(cjk_topics, new Comparator<CJKTopic>() {
 
@@ -159,8 +167,6 @@ public class CJKTopicRecommender extends DefaultHandler
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 	    SAXParser parser;
 		try {
-			parser = factory.newSAXParser();
-
 		    //WikiHandler handler = new WikiHandler();
 		    boolean zippedInput = false;
 			for(int i=0;i<inputfile.length;i++){				
@@ -176,6 +182,7 @@ public class CJKTopicRecommender extends DefaultHandler
 		        else 
 		        	stream=new BufferedInputStream(fis);
 
+				parser = factory.newSAXParser();
 				parser.parse(stream, this);
 				
 				stream.close();
@@ -211,7 +218,7 @@ public class CJKTopicRecommender extends DefaultHandler
 	
 	public void characters(char[] text, int start, int length) throws SAXException
 	{		
-		element el=elementStack.getFirst();
+		element el = elementStack.getFirst();
 
 		if (el.content!=null) 
 			el.content.append(text,start,length);
@@ -297,7 +304,8 @@ public class CJKTopicRecommender extends DefaultHandler
 				topic.enTitle = title;
 				topic.size = content.length();
 				topic.titles.add(new CJKTopicTitle(currentTitle, currentID, currentLang));
-				articles.put(title, topic);
+				cjk_topics.add(topic);
+				//articles.put(title, topic);
 			}
 			else {
 				System.err.println("Incomplete link for " + currentTitle);
