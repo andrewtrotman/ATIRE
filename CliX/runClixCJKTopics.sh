@@ -48,4 +48,4 @@ done
 #then
 #echo "arguments:  $arguments"
 #fi
-java  -Xms256m -Xmx1280m -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.CJKTopicRecommender $arguments
+java  -Xms256m -Xmx3280m -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.CJKTopicRecommender $arguments

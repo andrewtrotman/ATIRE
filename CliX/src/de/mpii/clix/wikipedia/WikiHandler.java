@@ -1289,7 +1289,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	private void statusPhase0()
 	{
 		if (articleCount%10000==0)
-			System.out.println("\n[0] read "+articleCount+", "+articles.size()+" articles, "+redirections.size()+" redirections, "+abortedCount+" ignored\n");
+			System.out.println("\n[0] read "+articleCount+", "+ articles.get(currentLang).size() + " articles, "+redirections.get(currentLang).size()+" redirections, "+abortedCount+" ignored\n");
 	}
 
 	private void statusPhase1()

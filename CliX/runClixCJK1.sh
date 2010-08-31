@@ -31,7 +31,7 @@ arguments="-lang=zh|ja|ko -articlefile=/data/corpus/wikipedia/CJK/xml/*articles.
 arguments_remote="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y"
 
 
-while getopts 'rne:' OPTION
+while getopts 'r:n:e:' OPTION
 	do
 	  case $OPTION in
 	  r)	with_arguments_remote=1
