@@ -566,12 +566,12 @@ return current;
 */
 ANT_memory_index_hash_node **ANT_memory_index::write_node(ANT_file *file, ANT_memory_index_hash_node **start)
 {
-unsigned char zero = 0;
+uint8_t zero = 0;
 uint64_t eight_byte;
 uint32_t four_byte, string_pos;
 uint32_t terms_in_node, current_node_head_length;
 #ifdef TERM_LOCAL_MAX_IMPACT
-unsigned char one_byte;
+uint8_t one_byte;
 #endif
 ANT_memory_index_hash_node **current, **end;
 

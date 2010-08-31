@@ -803,12 +803,22 @@ if ((bits = get_decompressed_postings(name, &term_details)) == NULL)
 	answer = 0;
 else
 	{
+#ifdef SPECIAL_COMPRESSION
 	/*
 		The sequence we'll get back is a postings list so it will be [1,<high32>,0,1,<low32>,0]
 		from which we want to extract <high32> and <low32> the high and low 32 bits of the integer
 		so that we can then construct a 64 bit integer from it.
 	*/
-	answer = (((unsigned long long) bits[1]) << 32) | (unsigned long long)bits[4];
+	answer = (((unsigned long long)bits[1]) << 32) | (unsigned long long)bits[4];
+#else
+	/*
+		In the case where we don't have special compression we have shoved the value into a
+		postings list and then compressed the postings list.  The consequence is that the result
+		of decompression is *not* a valid postings list, but rather it *is* the number stored in
+		2*32 bit integers.
+	*/
+	answer = ((unsigned long long)bits[0] << 32) | (unsigned long long) bits[1];
+#endif
 	}
 
 return (long long)answer;
