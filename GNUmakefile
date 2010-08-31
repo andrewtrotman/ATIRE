@@ -18,7 +18,8 @@ USE_GPROF := 0
 USE_PDEBUG := 0
 
 # special compression for index file
-USE_SPECIAL_COMPRESSION := 0
+# better enabled by defualt
+USE_SPECIAL_COMPRESSION := 1
 
 # parallel compiling and linking
 USE_PARALLEL_INDEXING := 1
