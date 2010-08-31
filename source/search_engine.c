@@ -457,7 +457,11 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 	else
 		{
 		index->seek(term_details->postings_position_on_disk);
-		index->read(destination, term_details->postings_length);
+		#ifdef DIRECT_MEMORY_READ
+			index->direct_read(&destination, term_details->postings_length);
+		#else
+			index->read(destination, term_details->postings_length);
+		#endif
 		}
 #else
 	index->seek(term_details->postings_position_on_disk);
