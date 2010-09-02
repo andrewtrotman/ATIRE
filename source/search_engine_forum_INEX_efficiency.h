@@ -17,6 +17,12 @@ public:
 	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results);
 private:
 	static const char* const ID_PREFIX;
+	static const long long INEX2009_index_size_bytes;
+	static const long long INEX2009_indexing_time_sec;
+	static const long long INEX2010_index_size_bytes;
+	static const long long INEX2010_indexing_time_sec;
+	static const long long INEX2010_index_size_bytes_base;
+	static const long long INEX2010_indexing_time_sec_base;
 } ;
 
 

@@ -10,7 +10,12 @@
 
 
 const char* const ANT_search_engine_forum_INEX_efficiency::ID_PREFIX = "2009-Eff-";
-
+const long long ANT_search_engine_forum_INEX_efficiency::INEX2009_index_size_bytes = 1700305106;
+const long long ANT_search_engine_forum_INEX_efficiency::INEX2009_indexing_time_sec = 4560;
+const long long ANT_search_engine_forum_INEX_efficiency::INEX2010_index_size_bytes = 1962414606;
+const long long ANT_search_engine_forum_INEX_efficiency::INEX2010_indexing_time_sec = 1523;
+const long long ANT_search_engine_forum_INEX_efficiency::INEX2010_index_size_bytes_base = 1696382124;
+const long long ANT_search_engine_forum_INEX_efficiency::INEX2010_indexing_time_sec_base = 1235;
 /*
 	ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY::ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY()
 	----------------------------------------------------------------------------------
@@ -30,6 +35,8 @@ fprintf(file, " no_nodes = \"1\"");
 fprintf(file, " hardware_cost = \"3000NZD\"");
 fprintf(file, " hardware_year = \"2008\"");
 fprintf(file, " topk = \"%ld\"", result_list_length);
+fprintf(file, " index_size_bytes = \"%lld\"", ANT_search_engine_forum_INEX_efficiency::INEX2010_index_size_bytes); //hard-coded index size, need to do manual change
+fprintf(file, " indexing_time_sec = \"%lld\"", ANT_search_engine_forum_INEX_efficiency::INEX2010_indexing_time_sec); //hard-coded indexing time, need to do manual change
 fprintf(file, ">\n");
 fprintf(file, "<topic-fields");
 fprintf(file, " co_title = \"yes\"");
@@ -63,7 +70,8 @@ long long cpu_time_ms = stats->get_cpu_time_ms();
 long long io_time_ms = stats->get_io_time_ms();
 
 fprintf(file, "<topic");
-fprintf(file, " topic-id = \"%s%ld\"\n", ANT_search_engine_forum_INEX_efficiency::ID_PREFIX, topic_id);
+//fprintf(file, " topic-id = \"%s%ld\"\n", ANT_search_engine_forum_INEX_efficiency::ID_PREFIX, topic_id);
+fprintf(file, " topic-id = \"%ld\"\n", topic_id);
 fprintf(file, " total_time_ms = \"%lld\"\n", (cpu_time_ms + io_time_ms));
 fprintf(file, " cpu_time_ms = \"%lld\"\n", cpu_time_ms);
 fprintf(file, " io_time_ms = \"%lld\"\n", io_time_ms);
