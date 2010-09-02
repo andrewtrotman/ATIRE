@@ -47,6 +47,14 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 # to memcpy for read.
 USE_DIRECT_MEMORY_READ := 0
 
+# enable either TOP_K search or HEAP_K search, but not both
+USE_TOP_K_SEARCH := 1
+USE_HEAP_K_SEARCH := 0
+
+# if top_k or heap_k is enable, then partial decompression of postings list
+# is supported
+USE_PARTIAL_DCOMPRESSION := 0
+
 ###############################################################################
 # specified your own setting in a separate file to override the default
 #
@@ -82,7 +90,7 @@ endif
 
 # common flags
 LDFLAGS += -ldl
-CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -DTOP_K_SEARCH \
+CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER \
    	     -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
    	     -Wno-sign-compare -Wno-parentheses
 
@@ -130,6 +138,23 @@ endif
 
 ifeq ($(USE_DIRECT_MEMORY_READ), 1)
 	CFLAGS += -DDIRECT_MEMORY_READ
+endif
+
+ENABLED_TOP_K_SEARCH := no
+
+ifeq ($(USE_TOP_K_SEARCH), 1)
+	CFLAGS += -DTOP_K_SEARCH
+	ENABLED_TOP_K_SEARCH := yes
+else ifeq ($(USE_HEAP_K_SEARCH), 1)
+	CFLAGS += -DHEAP_K_SEARCH
+	ENABLED_TOP_K_SEARCH := yes
+endif
+
+# make sure either top_k or heap_k is enabled
+ifeq ($(ENABLED_TOP_K_SEARCH), yes)
+	ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)
+		CFLAGS += -DTOP_K_READ_AND_DECOMPRESSOR
+	endif
 endif
 
 ###############################################################################

@@ -295,7 +295,7 @@ stats_for_all_queries->add(stats);
 	ANT_SEARCH_ENGINE::INIT_ACCUMULATORS()
 	--------------------------------------
 */
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 void ANT_search_engine::init_accumulators(long long top_k)
 #else
 void ANT_search_engine::init_accumulators(void)
@@ -304,7 +304,7 @@ void ANT_search_engine::init_accumulators(void)
 long long now;
 
 now = stats->start_timer();
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 results_list->init_accumulators(top_k > documents ? documents : top_k);
 #else
 results_list->init_accumulators();
@@ -749,7 +749,7 @@ long long now, hits = 0;
 
 now = stats->start_timer();
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 end = results_list->accumulator_pointers + results_list->results_list_length;
 #else
 end = results_list->accumulator_pointers + documents;
@@ -761,7 +761,7 @@ for (current = results_list->accumulator_pointers; current < end; current++)
 	else
 		hits++;
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 results_list->results_list_length = hits;
 #endif
 
@@ -779,7 +779,7 @@ char **ANT_search_engine::generate_results_list(char **document_id_list, char **
 ANT_search_engine_accumulator **current, **end;
 char **into = sorted_id_list;
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
 #else
 end = results_list->accumulator_pointers + (documents < top_k ? documents : top_k);

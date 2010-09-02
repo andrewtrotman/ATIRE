@@ -78,7 +78,7 @@ search_engine->stats_initialise();		// if we are command-line then report query 
 did_query = FALSE;
 now = stats.start_timer();
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	search_engine->init_accumulators(params->sort_top_k);
 #else
 	search_engine->init_accumulators();
@@ -123,7 +123,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		search_engine->process_one_term(token, &term_string->term_details);
 	}
 /*
-	Sort the search terms on the collection frequency (we'd prefer max_impact, but cf will have to do).
+	Prepare an static array structure for sorting
 */
 term_list = new ANT_NEXI_term_ant *[terms_in_query];
 current_term = 0;
@@ -131,6 +131,9 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	term_list[current_term++] = term_string;
 
 #ifdef TERM_LOCAL_MAX_IMPACT
+/*
+ * Sort on local max impact
+ */
 qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_local_max_impact);
 #else
 /*

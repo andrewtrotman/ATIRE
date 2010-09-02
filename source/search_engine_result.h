@@ -9,6 +9,13 @@
 #include "pragma.h"
 #include "search_engine_accumulator.h"
 
+#ifdef HEAP_K_SEARCH
+#include "heap.h"
+#endif
+
+#include "pdebug.h"
+
+
 class ANT_memory;
 
 /*
@@ -26,15 +33,25 @@ public:			// remove this line later
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long documents;
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	long long top_k;
 	long long results_list_length;
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 #endif
 
+#ifdef HEAP_K_SEARCH
+private:
+	struct cmp_accumulator_pointers {
+		int operator() (ANT_search_engine_accumulator * a, ANT_search_engine_accumulator * b) {
+			return a->get_rsv() - b->get_rsv();
+		}
+	};
+	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
+#endif
+
 public:
 	ANT_search_engine_result(ANT_memory *memory, long long documents);
-	virtual ~ANT_search_engine_result() {}
+	virtual ~ANT_search_engine_result();
 
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new(size_t bytes, ANT_memory *allocator);
@@ -94,7 +111,7 @@ public:
 	template <class T> inline void add_rsv(long index, T score)
 		{
 		ANT_search_engine_accumulator::ANT_accumulator_t was;
-		ANT_search_engine_accumulator *which = accumulator + index; 
+		ANT_search_engine_accumulator *which = accumulator + index;
 
 //		if (index > documents)
 //			printf("docid %d too big\n", index);
@@ -113,14 +130,37 @@ public:
 		else
 			which->add_rsv(score);				// we're already in the top-k so just add.
 		}
+#elif defined HEAP_K_SEARCH
+	template <class T> inline void add_rsv(long index, T score) {
+		ANT_search_engine_accumulator *which = accumulator + index;
+		ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
+		ANT_search_engine_accumulator::ANT_accumulator_t new_val = which->add_rsv(score);
+
+		if (results_list_length < top_k) {
+			if (old_val == 0) {
+				accumulator_pointers[results_list_length++] = which;
+			}
+
+		} else {
+			if ((old_val <= min_in_top_k) && (new_val >= min_in_top_k)) {
+				if (min_in_top_k > accumulator_pointers[0]->get_rsv()) {
+					heapk->build_min_heap();
+				}
+				accumulator_pointers[0] = which;
+
+				heapk->build_min_heap();
+				min_in_top_k = accumulator_pointers[0]->get_rsv();
+			}
+		}
+	}
 #else
 	void add_rsv(size_t index, double score) { accumulator[index].add_rsv(score); }
 	void add_rsv(size_t index, long score) { accumulator[index].add_rsv(score); }
 #endif
 
 	long is_zero_rsv(size_t index) { return accumulator[index].is_zero_rsv(); }
-	
-#ifdef TOP_K_SEARCH
+
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	void init_accumulators(long long top_k);
 #else
 	void init_accumulators(void);

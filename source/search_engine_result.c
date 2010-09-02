@@ -14,6 +14,10 @@ ANT_search_engine_result::ANT_search_engine_result(ANT_memory *memory, long long
 {
 long long pointer;
 
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
+results_list_length = min_in_top_k = 0;
+#endif
+
 this->documents = documents;
 memory->realign();
 accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * documents);
@@ -21,6 +25,16 @@ memory->realign();
 accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*accumulator_pointers) * documents);
 for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
+
+#ifdef HEAP_K_SEARCH
+heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, top_k);
+#endif
+}
+
+ANT_search_engine_result::~ANT_search_engine_result() {
+#ifdef HEAP_K_SEARCH
+	delete heapk;
+#endif
 }
 
 /*
@@ -36,7 +50,7 @@ return allocator->malloc(count);
 	ANT_SEARCH_ENGINE_RESULT::INIT_ACCUMULATORS()
 	---------------------------------------------
 */
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 void ANT_search_engine_result::init_accumulators(long long top_k)
 #else
 void ANT_search_engine_result::init_accumulators(void)
@@ -44,7 +58,7 @@ void ANT_search_engine_result::init_accumulators(void)
 {
 memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	min_in_top_k = 0;
 	this->top_k = top_k;
 	results_list_length = 0;
@@ -58,7 +72,7 @@ memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 */
 long long ANT_search_engine_result::init_pointers(void)
 {
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	return results_list_length;
 #else
 	ANT_search_engine_accumulator **current, **back_current, *current_accumulator, *end_accumulator;

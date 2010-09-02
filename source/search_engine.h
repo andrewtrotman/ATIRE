@@ -82,7 +82,7 @@ public:
 	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *index_filename = "index.aspt");
 	virtual ~ANT_search_engine();
 
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	void init_accumulators(long long top_k);
 #else
 	void init_accumulators(void);

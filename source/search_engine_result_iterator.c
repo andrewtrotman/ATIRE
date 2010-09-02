@@ -14,7 +14,7 @@ long long ANT_search_engine_result_iterator::first(ANT_search_engine *engine, lo
 {
 search_engine = engine;
 result = engine->results_list;
-#ifdef TOP_K_SEARCH
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	results_list_length = result->results_list_length;
 #else
 	results_list_length = engine->document_count();
