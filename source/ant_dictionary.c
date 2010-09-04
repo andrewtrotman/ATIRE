@@ -5,12 +5,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "memory.h"
 #include "search_engine.h"
 #include "btree_iterator.h"
 #include "search_engine_btree_leaf.h"
 #include "phonetic_double_metaphone.h"
 #include "phonetic_soundex.h"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 #ifdef _MSC_VER
 	#include <windows.h>
 	wchar_t wide[10 * 1024];	// buffer for storing wide character strings before printing them

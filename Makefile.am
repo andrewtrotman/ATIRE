@@ -71,6 +71,7 @@ core_sources =  \
     $(SRCDIR)/str.c \
     $(SRCDIR)/stop_word.c \
     $(SRCDIR)/disk.c \
+    $(SRCDIR)/directory_iterator_csv.c \
 	$(SRCDIR)/directory_iterator_recursive.c \
 	$(SRCDIR)/directory_iterator.c	\
 	$(SRCDIR)/directory_iterator_tar.c	\
@@ -81,15 +82,16 @@ core_sources =  \
 	$(SRCDIR)/directory_iterator_warc.c \
 	$(SRCDIR)/directory_iterator_compressor.c \
     $(SRCDIR)/btree_iterator.c \
+    $(SRCDIR)/stem_otago.c \
+    $(SRCDIR)/stem_paice_husk.c \
+    $(SRCDIR)/stem_porter.c \
+    $(SRCDIR)/stem_lovins.c \
+    $(SRCDIR)/stem_s.c	\
     $(SRCDIR)/stemmer.c	\
-    $(SRCDIR)/porter.c \
-    $(SRCDIR)/lovins.c \
     $(SRCDIR)/stemmer_factory.c \
     $(SRCDIR)/stemmer_term_similarity.c \
     $(SRCDIR)/stemmer_term_similarity_threshold.c \
     $(SRCDIR)/stemmer_term_similarity_weighted.c \
-    $(SRCDIR)/paice_husk.c \
-    $(SRCDIR)/learned_wikipedia_stem.c \
     $(SRCDIR)/relevant_topic.c \
 	$(SRCDIR)/bitstream.c \
 	$(SRCDIR)/compress_elias_gamma.c \
@@ -175,6 +177,7 @@ core_noinst_headers = \
 	$(SRCDIR)/ctypes.h	\
 	$(SRCDIR)/critical_section.h \
 	$(SRCDIR)/directory_iterator.h	\
+	$(SRCDIR)/directory_iterator_csv.h \
 	$(SRCDIR)/directory_iterator_file.h	\
 	$(SRCDIR)/directory_iterator_tar.h	\
 	$(SRCDIR)/directory_iterator_pkzip.h \
@@ -196,7 +199,6 @@ core_noinst_headers = \
 	$(SRCDIR)/indexer_param_block.h	\
 	$(SRCDIR)/indexer_param_block_rank.h \
 	$(SRCDIR)/learned_wikipedia_stem.h	\
-	$(SRCDIR)/lovins.h	\
 	$(SRCDIR)/maths.h	\
 	$(SRCDIR)/mean_average_precision.h	\
 	$(SRCDIR)/memory.h	\
@@ -210,11 +212,9 @@ core_noinst_headers = \
 	$(SRCDIR)/NEXI_term.h \
 	$(SRCDIR)/NEXI_term_ant.h \
 	$(SRCDIR)/NEXI_term_iterator.h \
-	$(SRCDIR)/paice_husk.h	\
 	$(SRCDIR)/parser.h	\
 	$(SRCDIR)/parser_readability.h	\
 	$(SRCDIR)/universal_parser.h \
-	$(SRCDIR)/porter.h	\
 	$(SRCDIR)/postings_piece.h	\
 	$(SRCDIR)/relevant_document.h	\
 	$(SRCDIR)/relevant_topic.h	\
@@ -237,6 +237,11 @@ core_noinst_headers = \
 	$(SRCDIR)/stats_time.h	\
 	$(SRCDIR)/stats_search_engine.h	\
 	$(SRCDIR)/stats_memory_index.h \
+	$(SRCDIR)/stem_otago.h \
+	$(SRCDIR)/stem_porter.h	\
+	$(SRCDIR)/stem_paice_husk.h	\
+	$(SRCDIR)/stem_lovins.h	\
+	$(SRCDIR)/stem_s.h	\
 	$(SRCDIR)/stemmer_factory.h	\
 	$(SRCDIR)/stemmer.h	\
 	$(SRCDIR)/stemmer_lovins.h	\
@@ -286,6 +291,24 @@ core_noinst_headers = \
 	$(SRCDIR)/focus_hash_node.h \
 	$(SRCDIR)/focus_results_list.h
 	
+IGNORE_LIST = $(SRCDIR)/ant_ant.c \
+			  $(SRCDIR)/ant_api.c \
+			  $(SRCDIR)/ant_plugins.c \
+			  $(SRCDIR)/ant_dictionary.c \
+			  $(SRCDIR)/test_compression.c
+			  
+#ANT_PARAM_LIST = $(shell ls $(SRCIDR)/ant_param_*.c)
+#INDEX_PARAM_LIST = $(shell ls $(SRCDIR)/indexer_param_*.c)		  
+#
+#all_sources = $(shell ls $(SRCDIR)/*.c)
+#core_noinst_headers = $(shell ls $(SRCDIR)/*.h)
+#core_sources = $(filter-out $(IGNORE_LIST) $(ANT_PARAM_LIST) $(INDEX_PARAM_LIST), $(all_sources))
+	
+ANT_PARAM_LIST = $(SRCDIR)/ant_param_block.c
+INDEX_PARAM_LIST = $(SRCDIR)/indexer_param_block.c \
+				   $(SRCDIR)/indexer_param_block_rank.c \
+				   $(SRCDIR)/indexer_param_block_stem.c
+	
 library_headers = \
 	$(SRCDIR)/ant_api.h \
 	$(SRCDIR)/ant_params.h	
@@ -319,8 +342,10 @@ noinst_PROGRAMS = ant ant_ant index ant_dictionary \
 
 ant_SOURCES = \
 	$(SRCDIR)/ant.c \
-	$(SRCDIR)/indexer_param_block_rank.c \
-	$(SRCDIR)/ant_param_block.c
+	$(ANT_PARAM_LIST) \
+	$(INDEX_PARAM_LIST)
+#	$(SRCDIR)/indexer_param_block_rank.c \
+#	$(SRCDIR)/ant_param_block.c
 ant_LDADD = ${ANT_LIBS}
 #ant_LDFLAGS = -rdynamic
 ant_LDFLAGS = -static -export-dynamic
@@ -328,8 +353,10 @@ ant_DEPENDENCIES = libantcore.la
 
 ant_ant_SOURCES = \
 	$(SRCDIR)/ant_ant.c \
-	$(SRCDIR)/indexer_param_block_rank.c \
-	$(SRCDIR)/ant_param_block.c
+	$(ANT_PARAM_LIST) \
+	$(INDEX_PARAM_LIST)
+#	$(SRCDIR)/indexer_param_block_rank.c \
+#	$(SRCDIR)/ant_param_block.c
 ant_ant_LDADD = ${ANT_LIBS} -lant
 #ant_ant_LDFLAGS = -rdynamic
 ant_ant_LDFLAGS = -static -export-dynamic
@@ -337,9 +364,10 @@ ant_ant_DEPENDENCIES = libant.la
 
 index_SOURCES = \
 	$(SRCDIR)/index.c \
-	$(SRCDIR)/indexer_param_block.c \
-	$(SRCDIR)/indexer_param_block_rank.c \
-	$(SRCDIR)/ant_param_block.c
+	$(INDEX_PARAM_LIST)
+#	$(SRCDIR)/indexer_param_block.c \
+#	$(SRCDIR)/indexer_param_block_rank.c \
+#	$(SRCDIR)/ant_param_block.c
 index_LDADD = ${ANT_LIBS}
 #index_LDFLAGS = -rdynamic
 index_LDFLAGS = -static -export-dynamic

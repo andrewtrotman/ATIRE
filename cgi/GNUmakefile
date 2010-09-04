@@ -1,5 +1,6 @@
 CC := g++
-CFLAGS  := -O3
+#CFLAGS  := -O3
+CFLAGS  := -g
 
 SRCDIR = ../source
 OBJDIR = ../bin
@@ -15,12 +16,12 @@ COMMON_SOURCES := 				\
 COMMON_NOTDIR_SOURCES := $(notdir $(COMMON_SOURCES))
 COMMON_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(COMMON_NOTDIR_SOURCES)))
 
-all: ant_cgi ant_getdoc_cgi
+all: ant_cgi.exe ant_getdoc_cgi.exe
 
-ant_cgi: $(COMMON_OBJECTS) ant_cgi.o
+ant_cgi.exe: $(COMMON_OBJECTS) ant_cgi.o
 	$(CC) $(LDFLAGS) -o $@ $^
 	
-ant_getdoc_cgi: $(COMMON_OBJECTS) ant_getdoc_cgi.o
+ant_getdoc_cgi.exe: $(COMMON_OBJECTS) ant_getdoc_cgi.o
 	$(CC) $(LDFLAGS) -o $@ $^
 	
 #ant_cgi.o: ant_cgi.c $(COMMON_SOURCES)
@@ -34,7 +35,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 	
 clean :
-	\rm *.o ant_cgi ant_getdoc_cgi
+	\rm *.o ant_cgi.exe ant_getdoc_cgi.exe
 	
 test_common_objects:
 	@echo $(COMMON_OBJECTS)
