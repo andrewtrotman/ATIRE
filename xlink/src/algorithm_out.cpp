@@ -12,13 +12,17 @@ namespace QLINK
 
 algorithm_out::algorithm_out()
 {
-// TODO Auto-generated constructor stub
 
 }
 
 algorithm_out::~algorithm_out()
 {
-// TODO Auto-generated destructor stub
+
+}
+
+void algorithm_out::list_anchors()
+{
+
 }
 
 }

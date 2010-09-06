@@ -13,6 +13,7 @@
 
 using namespace QLINK;
 
+enum {RECOMMEND_ANCHOR, CREATE_RUN};
 
 void create_run(int argc, char **argv)
 {
@@ -20,6 +21,7 @@ void create_run(int argc, char **argv)
 
 	int index_argv_param = 1;
 	int next_argv_param = 0;
+	int cmd = CREATE_RUN;
 	for (; index_argv_param < argc; index_argv_param++) {
 		char *what = argv[index_argv_param];
 		if (strncmp(what, "-conf", 5) == 0) {
@@ -41,7 +43,14 @@ void create_run(int argc, char **argv)
 		run = new ltw_run(config_file);
 	else
 		run = new ltw_run("ltw.conf");
-	run->create();
+
+	switch (cmd) {
+		case RECOMMEND_ANCHOR:
+		case CREATE_RUN:
+		default:
+			run->create();
+			break;
+	}
 	delete run;
 }
 

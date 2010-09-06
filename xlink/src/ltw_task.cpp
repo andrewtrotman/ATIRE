@@ -107,7 +107,7 @@ void ltw_task::init()
 		break;
 	case LTW_NONE:
 	default:
-		//cerr << "No algorithm for gernerating incoming links specified" << endl;
+		cerr << "No algorithm for gernerating incoming links specified" << endl;
 		break;
 	}
 }

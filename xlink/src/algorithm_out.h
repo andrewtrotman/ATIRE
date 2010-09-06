@@ -21,6 +21,7 @@ namespace QLINK
 
 	public:
 		virtual void recommend_anchors(links* lx, char **term_list, const char *source) = 0;
+		void list_anchors();
 	};
 
 }

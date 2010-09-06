@@ -221,8 +221,8 @@ namespace QLINK
 						link * lnk = lx->push_link(NULL, offset, last_index_entry->second->term, last_index_entry->second->postings[0]->docid, 0.0, node);
 //					if (!lx->find(last_index_term->term))
 //						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
-					else
-						fprintf(stderr, "Duplicated");
+//					else
+//						fprintf(stderr, "Duplicated");
 					fprintf(stderr, "\n");
 					//lnk->require_cleanup();
 					//create_posting(last_index_entry->second, lnk);
