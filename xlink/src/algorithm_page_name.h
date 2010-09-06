@@ -8,7 +8,7 @@
 #ifndef ALGORITHM_PAGE_NAME_H_
 #define ALGORITHM_PAGE_NAME_H_
 
-#include "algorithm.h"
+#include "algorithm_out.h"
 #include "wikipedia.h"
 #include "ant_link_term.h"
 
@@ -19,7 +19,7 @@
 namespace QLINK
 {
 
-	class algorithm_page_name: virtual public QLINK::algorithm
+	class algorithm_page_name: virtual public QLINK::algorithm_out
 	{
 	public:
 		algorithm_page_name();
@@ -37,7 +37,7 @@ namespace QLINK
 	protected:
 		void process_terms(char **term_list, const char *source);
 		void process_terms(links *lx, char **term_list, const char *source);
-		void search_anchor_by_page_nam(links* lx, char **term_list, const char *source);
+		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
 
 		//wiki_entry_array *find_page(char *name);
 		//void create_posting(wiki_entry_array& wea, link* lnk);

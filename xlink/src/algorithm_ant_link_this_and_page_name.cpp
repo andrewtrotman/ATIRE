@@ -60,6 +60,11 @@ void algorithm_ant_link_this_and_page_name::merge_links()
 	links_->sort_links();
 }
 
+void algorithm_ant_link_this_and_page_name::recommend_anchors(links* lx, char **term_list, const char *source)
+{
+	algorithm_ant_link_this::recommend_anchors(k_links_, term_list, source);
+}
+
 void algorithm_ant_link_this_and_page_name::process_terms(char **term_list, const char *source)
 {
 	//algorithm_ant_link_this::process_terms(term_list, source);
@@ -71,7 +76,7 @@ void algorithm_ant_link_this_and_page_name::process_terms(char **term_list, cons
 	k_links_ = new links;
 	g_links_ = new links;
 
-	search_anchor_from_link_analysis(k_links_, term_list, source);
+	this->recommend_anchors(k_links_, term_list, source);
 	k_links_->sort_links();
 
 	algorithm_page_name::process_terms(g_links_, term_list, source);

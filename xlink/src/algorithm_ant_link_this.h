@@ -11,13 +11,13 @@
 /*
  *
  */
-#include "algorithm.h"
+#include "algorithm_out.h"
 #include "ant_link.h"
 #include <vector>
 
 namespace QLINK {
 
-	class algorithm_ant_link_this: virtual public algorithm
+	class algorithm_ant_link_this: virtual public algorithm_out
 	{
 	private:
 	//	#define MAX_LINKS_IN_FILE (1024 * 1024)
@@ -59,7 +59,7 @@ namespace QLINK {
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source);
-		void search_anchor_from_link_analysis(links* lx, char **term_list, const char *source);
+		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
 
 	public:
 		algorithm_ant_link_this(links *links_list);

@@ -134,7 +134,7 @@ namespace QLINK
 
 	void algorithm_page_name::process_terms(links *lx, char **term_list, const char *source)
 	{
-		search_anchor_by_page_nam(lx, term_list, source);
+		recommend_anchors(lx, term_list, source);
 		lx->sort_links_by_term();
 
 
@@ -145,7 +145,7 @@ namespace QLINK
 		process_terms(links_, term_list, source);
 	}
 
-	void algorithm_page_name::search_anchor_by_page_nam(links* lx, char **term_list, const char *source)
+	void algorithm_page_name::recommend_anchors(links* lx, char **term_list, const char *source)
 	{
 		char **first, **last;
 		char *where_to;

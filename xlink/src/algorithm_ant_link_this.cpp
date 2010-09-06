@@ -42,13 +42,14 @@ using namespace std;
 
 //char algorithm_ant_link_this::buffer_[1024 * 1024];
 
-algorithm_ant_link_this::algorithm_ant_link_this() : algorithm()
+algorithm_ant_link_this::algorithm_ant_link_this()
 {
 	init_variables();
 }
 
-algorithm_ant_link_this::algorithm_ant_link_this(links *links_list) : algorithm(links_list)
+algorithm_ant_link_this::algorithm_ant_link_this(links *links_list)
 {
+	set_links_container(links_list);
 	init_variables();
 }
 
@@ -460,12 +461,12 @@ void algorithm_ant_link_this::process_topic(ltw_topic *a_topic)
 
 void algorithm_ant_link_this::process_terms(char **term_list, const char *source)
 {
-	search_anchor_from_link_analysis(links_, term_list, source);
+	recommend_anchors(links_, term_list, source);
 	fprintf(stderr, "Total %d links found\n", links_->all_links_length());
 	links_->sort_links();
 }
 
-void algorithm_ant_link_this::search_anchor_from_link_analysis(links* lx, char **term_list, const char *source)
+void algorithm_ant_link_this::recommend_anchors(links* lx, char **term_list, const char *source)
 {
 	if (terms_in_index <= 0)
 		return;

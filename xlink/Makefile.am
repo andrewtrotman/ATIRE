@@ -27,6 +27,7 @@ ltw_headers = \
 	$(SRC_DIR)/algorithm_ltw_incoming_a2b_search_tn.h \
 	$(SRC_DIR)/algorithm_ltw_tang.h \
 	$(SRC_DIR)/algorithm_bep.h \
+	$(SRC_DIR)/algorithm_out.h \
 	$(SRC_DIR)/algorithm_ltara_base.h \
 	$(SRC_DIR)/cmdline_options.h \
 	$(SRC_DIR)/sys_file.h \
@@ -80,6 +81,7 @@ ltw_sources = \
 	$(SRC_DIR)/algorithm_ltw_incoming_search_tn.cpp \
 	$(SRC_DIR)/algorithm_ltw_incoming_a2b_search_tn.cpp \
 	$(SRC_DIR)/algorithm_bep.cpp \
+	$(SRC_DIR)/algorithm_out.cpp \
 	$(SRC_DIR)/algorithm_ltara_base.cpp \
 	$(SRC_DIR)/cmdline_options.cpp \
 	$(SRC_DIR)/ltw_task.cpp \
