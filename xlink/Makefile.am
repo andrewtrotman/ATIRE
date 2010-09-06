@@ -1,5 +1,5 @@
-#AM_CPPFLAGS = -std=c++0x  -pedantic -DREMOVE_ORPHAN_LINKS
-AM_CPPFLAGS = -std=c++0x  -pedantic -I $(srcdir)/include/stpl
+#AM_CPPFLAGS = -std=c++0x  -pedantic -DREMOVE_ORPHAN_LINKS -I $(srcdir)/include/stpl
+AM_CPPFLAGS = -std=c++0x  -pedantic 
 
 LTW_LIBS = -lant -lpthread
 
@@ -54,6 +54,9 @@ ltw_headers = \
 	$(SRC_DIR)/str.h \
 	$(SRC_DIR)/singleton.h \
 	$(SRC_DIR)/template_algo.h \
+	$(SRC_DIR)/google_translator.h \
+	$(SRC_DIR)/webpage_retriever.h \
+	$(SRC_DIR)/pattern_singleton.h \
 	$(SRC_DIR)/system_info.h
 
 noinst_HEADERS = $(ltw_headers)
@@ -103,6 +106,8 @@ ltw_sources = \
 	$(SRC_DIR)/proxy.cpp \
 	$(SRC_DIR)/porter.cpp \
 	$(SRC_DIR)/wikipedia.cpp \
+	$(SRC_DIR)/google_translator.cpp \
+	$(SRC_DIR)/webpage_retriever.cpp \
 	$(SRC_DIR)/ltw.cpp
 
 noinst_PROGRAMS = ltw collection_link_finder
