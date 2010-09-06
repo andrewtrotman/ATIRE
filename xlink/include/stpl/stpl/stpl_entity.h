@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <climits>
 
-#include "characters/stpl_character.h"
+#include "lang/stpl_character.h"
 
 using namespace std;
 

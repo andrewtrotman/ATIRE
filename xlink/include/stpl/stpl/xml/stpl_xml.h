@@ -20,7 +20,7 @@
 #ifndef STPL_XML_H_
 #define STPL_XML_H_
 
-//#include <fstream>
+#include <fstream>
 
 #include "stpl_xml_entity.h"
 #include "../stpl_doc.h"
@@ -31,13 +31,15 @@
 namespace stpl {
 	namespace XML {
 
-		template<	typename StringT = std::string,
-					typename IteratorT = typename StringT::iterator,
-					typename EntityT = BasicXmlEntity<StringT, IteratorT>,
-					typename RootElemT = Element<
-									typename EntityT::string_type,
-									typename EntityT::iterator
-									>  >
+		template<
+				typename StringT = std::string,
+				typename IteratorT = typename StringT::iterator,
+				typename EntityT = BasicXmlEntity<StringT, IteratorT>,
+				typename RootElemT = Element<
+								typename EntityT::string_type,
+								typename EntityT::iterator
+								>
+				>
 		class XDocument :  public Document<EntityT> {
 			private:
 				//typedef	typename EntityT::string_type StringT;
@@ -207,7 +209,7 @@ namespace stpl {
 					return tree_;
 				}
 
-				virtual void parse() {
+				virtual DocumentT& parse() {
 					Parser<GrammarT
 							, DocumentT
 							, EntityT
@@ -221,6 +223,7 @@ namespace stpl {
 							break;
 						}
 					}
+					return this->doc();
 				}
 
 				element_type* root() { return this->doc().root(); }

@@ -27,7 +27,7 @@
 
 #include "stpl_xml_basic.h"
 #include "../stpl_property.h"
-#include "../characters/stpl_character.h"
+#include "../lang/stpl_character.h"
 
 
 namespace stpl {
@@ -1117,12 +1117,14 @@ namespace stpl {
 					while (this->more()) {
 						entity_iterator it = this->next();
 
-						if ((*it)->type() == TEXT) {
-
+						if ((*it)->type() == TEXT || (*it)->type() == CDATA) {
 							if (sub_text || (nm.size() == 0)) {
 								if (text.length() > 0)
 									text.append("\n");
-								text.append((*it)->begin(), (*it)->end());
+								if ((*it)->type() == CDATA)
+									text.append((*it)->content().begin(), (*it)->content().end());
+								else
+									text.append((*it)->begin(), (*it)->end());
 							}
 						}
 						else if ((*it)->is_element() && all_text) {

@@ -43,6 +43,7 @@ namespace stpl {
 			protected:
 				XmlNodeType 		type_;
 				BasicXmlEntity*		parent_ptr_;	
+				StringBound<StringT, IteratorT> body_;
 					
 			private:
 				void init() {
@@ -53,10 +54,10 @@ namespace stpl {
 			public:
 				BasicXmlEntity() : StringBound<StringT, IteratorT>::StringBound() {
 				}
-				BasicXmlEntity(IteratorT it) : StringBound<StringT, IteratorT>::StringBound(it) {
+				BasicXmlEntity(IteratorT it) : StringBound<StringT, IteratorT>::StringBound(it), body_(it, it) {
 					init();
 				}
-				BasicXmlEntity(IteratorT begin, IteratorT end) : StringBound<StringT, IteratorT>::StringBound(begin, end) {
+				BasicXmlEntity(IteratorT begin, IteratorT end) : StringBound<StringT, IteratorT>::StringBound(begin, end), body_(begin, begin) {
 					init();
 				}
 				BasicXmlEntity(StringT content) : 
@@ -68,6 +69,10 @@ namespace stpl {
 				XmlNodeType type() { return type_; }		
 				void type(XmlNodeType type) { type_ = type; }
 				
+				virtual StringBound<StringT, IteratorT>& content() {
+					return body_;
+				}
+
 				static bool is_start_symbol(IteratorT it) {
 					if (*it == XML_KEY_OPEN)
 						return true;
@@ -145,15 +150,52 @@ namespace stpl {
 				bool					is_end_xml_keyword_;
 				bool					is_ended_xml_keyword_;
 				bool					contain_intsubset_;
-				StringBound<StringT, IteratorT> body_;
 				
-			
-			private:
-				void init() {
-					this->type_ = NONE;
-					is_ended_xml_keyword_ = false;  // <../>					
-					is_end_xml_keyword_ = false;	// </..>
-					contain_intsubset_ = false;
+			public:
+				XmlKeyword() : BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity() {
+					init();
+				}
+				XmlKeyword(IteratorT it) : BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity(it) {
+					init();
+				}
+				XmlKeyword(IteratorT begin, IteratorT end) : BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity(begin, end) {
+					init();
+				}
+				XmlKeyword(StringT content) :
+					BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity(content) {
+					init();
+				}
+				virtual ~XmlKeyword() {}
+
+				void set_end_xml_keyword(bool b) {
+					is_end_xml_keyword_ = b;
+				}
+
+				void set_ended_xml_keyword(bool b) {
+					is_ended_xml_keyword_ = b;
+				}
+
+				bool is_end_xml_keyword() {
+					return is_end_xml_keyword_;
+				}
+
+				bool is_ended_xml_keyword() {
+					return is_ended_xml_keyword_;
+				}
+
+				virtual void print(int level = 0) {
+					this->body_.print(level);
+				}
+
+				void clone(XmlKeyword* elem_k_ptr) {
+					if (this != elem_k_ptr) {
+						this->is_end_xml_keyword_ = elem_k_ptr->is_end_xml_keyword();
+						this->is_ended_xml_keyword_ = elem_k_ptr->is_ended_xml_keyword();
+						this->begin(elem_k_ptr->begin());
+						this->end(elem_k_ptr->end());
+						this->body_.begin(elem_k_ptr->content().begin());
+						this->body_.end(elem_k_ptr->content().end());
+					}
 				}
 				
 			protected:					
@@ -189,18 +231,20 @@ namespace stpl {
 
 							} else if (*next == '?') {	
 								this->type_ = INFO;
+								++next;
 							} else if (*next == '/') {
 								this->type_ = LABEL;
-								this->is_end_xml_keyword_ = true;							  	
+								this->is_end_xml_keyword_ = true;
+								++next;
 							} else if (isalnum(*next) /*TODO put the UTF code here*/
 								) {
 								this->type_ = LABEL;
-								--next;
+								//--next;
 							} 
 						}
 						//body_.begin(++it);	
 						this->begin(it);
-						body_.begin(++next);	
+						this->body_.begin(next++);
 						it = next;
 						ret = true;
 					}
@@ -282,68 +326,14 @@ namespace stpl {
 						this->ref().push_back(BasicXmlEntity<StringT, IteratorT>::XML_KEY_SLASH);
 					this->ref().push_back(BasicXmlEntity<StringT, IteratorT>::XML_KEY_CLOSE);					
 				}		
-				
-			public:
-				XmlKeyword() : BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity() {
-					init();
-				}
-				XmlKeyword(IteratorT it) : BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity(it), body_(it, it) {
-					init();
-				}
-				XmlKeyword(IteratorT begin, IteratorT end) : BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity(begin, end), body_(begin, begin) {
-					init();
-				}
-				XmlKeyword(StringT content) :
-					BasicXmlEntity<StringT, IteratorT>::BasicXmlEntity(content) {
-					init();
+
+			private:
+				void init() {
+					this->type_ = NONE;
+					is_ended_xml_keyword_ = false;  // <../>
+					is_end_xml_keyword_ = false;	// </..>
+					contain_intsubset_ = false;
 				}				
-				virtual ~XmlKeyword() {}
-				
-				virtual StringBound<StringT, IteratorT>& content() {
-					return body_;
-				}			
-				
-				void set_end_xml_keyword(bool b) {
-					is_end_xml_keyword_ = b;
-				}
-				
-				void set_ended_xml_keyword(bool b) {
-					is_ended_xml_keyword_ = b;
-				}
-				
-				bool is_end_xml_keyword() {
-					return is_end_xml_keyword_;
-				}
-				
-				bool is_ended_xml_keyword() {
-					return is_ended_xml_keyword_;
-				}
-				
-				/*
-				virtual bool match(IteratorT& begin, IteratorT& end) {
-					bool ret = StringBound<StringT, IteratorT>::match(begin, end);
-					if (ret) {
-							this->end(++end);
-					}
-					return ret;
-				}
-				*/
-								
-				virtual void print(int level = 0) {
-					body_.print(level);
-				}		
-						
-				void clone(XmlKeyword* elem_k_ptr) {
-					if (this != elem_k_ptr) {
-						this->is_end_xml_keyword_ = elem_k_ptr->is_end_xml_keyword();
-						this->is_ended_xml_keyword_ = elem_k_ptr->is_ended_xml_keyword();
-						this->begin(elem_k_ptr->begin());
-						this->end(elem_k_ptr->end());
-						this->body_.begin(elem_k_ptr->content().begin());
-						this->body_.end(elem_k_ptr->content().end());
-					}					
-				}						
-								
 		};		
 	}
 }

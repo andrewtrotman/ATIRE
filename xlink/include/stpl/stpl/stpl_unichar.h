@@ -23,8 +23,8 @@
 #define STPL_UNICHAR_H_
 
 #include "stpl_entity.h"
-#include "characters/stpl_unicode.h"
-#include "characters/stpl_chinese.h"
+#include "lang/stpl_unicode.h"
+#include "lang/stpl_chinese.h"
 
 namespace stpl {
 

@@ -73,13 +73,14 @@ namespace stpl {
 				if (own_doc_) delete doc_;
 			}
 
-			virtual void parse()
+			virtual DocumentT& parse()
 			{
 				//scanner_.init(doc_.begin(), doc_.end());
 				this->grammar_.reset();
 				while (this->grammar_.more()) {
 					 (*this->grammar_.next())->apply(&this->scanner_);
 				}
+				return doc();
 			}
 
 			virtual bool end()
@@ -88,6 +89,54 @@ namespace stpl {
 			}
 
 			DocumentT& doc() { return *doc_; }
+	};
+
+	template<
+				typename EntityT
+			>
+	class GeneralParser : public Parser<GeneralGrammar<Document<EntityT> > >
+	{
+	private:
+		typedef	typename EntityT::string_type 	StringT;
+		typedef typename EntityT::iterator		IteratorT;
+
+		typedef Parser<GeneralGrammar<Document<EntityT> > >		Parent;
+		typedef typename Parent::document_type 					DocumentT;
+
+	private:
+		bool first_time_;
+
+	public:
+		GeneralParser(IteratorT begin, IteratorT end) : Parent::Parser(begin, end)
+		{
+			init();
+		}
+
+		GeneralParser(DocumentT *doc) : Parent::Parser(doc)
+		{
+			init();
+		}
+
+		virtual ~GeneralParser()
+		{
+		}
+
+		EntityT *get_next_entity()
+		{
+			if (first_time_) {
+				this->doc().reset();
+				first_time_ = false;
+			}
+			if (this->doc().more())
+				return *(this->doc().next());
+			return NULL;
+		}
+
+	private:
+		void init()
+		{
+			first_time_ = true;
+		}
 	};
 }
 

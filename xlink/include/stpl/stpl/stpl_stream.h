@@ -37,7 +37,9 @@ namespace stpl {
 	 *
 	 */
 	template<
-			typename DocumentT = Document<StringBound<std::string, char */*unsigned long long*/> >
+			typename StringT = std::string,
+			typename IteratorT = char */*typename StringT::iterator*/,
+			typename DocumentT = Document<StringBound<StringT, IteratorT> >
 			>
 	class FileStream : public DocumentT {
 		private:

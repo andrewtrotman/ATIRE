@@ -22,8 +22,8 @@
 #define STPL_WORD_H_
 
 #include "stpl_entity.h"
-#include "characters/stpl_character.h"
-#include "characters/stpl_chinese.h"
+#include "lang/stpl_character.h"
+#include "lang/stpl_chinese.h"
 
 namespace stpl {
 	

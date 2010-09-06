@@ -23,8 +23,8 @@
 namespace stpl
 {
 	using namespace std;
-	template<typename DocumentT>
-	void FileStream<DocumentT>::cleanup() {
+	template<typename StringT, typename IteratorT, typename DocumentT>
+	void FileStream<StringT, IteratorT, DocumentT>::cleanup() {
 		if (memblock_)
 			delete[] memblock_;
 		if (file_.is_open())
@@ -32,12 +32,12 @@ namespace stpl
 		size_ = count_ = 0;
 	}
 
-	template<typename DocumentT>
-	void FileStream<DocumentT>::init() {
+	template<typename StringT, typename IteratorT, typename DocumentT>
+	void FileStream<StringT, IteratorT, DocumentT>::init() {
 	}
 
-	template<typename DocumentT>
-	void FileStream<DocumentT>::read(string filename)
+	template<typename StringT, typename IteratorT, typename DocumentT>
+	void FileStream<StringT, IteratorT, DocumentT>::read(string filename)
 	{
 		file_.open(filename.c_str(),  ios::in|ios::binary|ios::ate);
 		count_ = 0;
@@ -66,8 +66,8 @@ namespace stpl
 		else  throw std::runtime_error(filename + ": Unable to open file"); //cout << "Unable to open file" << endl;
 	}
 
-	template<typename DocumentT>
-	bool FileStream<DocumentT>::next_buffer() {
+	template<typename StringT, typename IteratorT, typename DocumentT>
+	bool FileStream<StringT, IteratorT, DocumentT>::next_buffer() {
 	    if (!file_.eof() && (size_ > buf_size_)) {
 	    	if ((size_ - count_) > buf_size_) {
 	    		file_.read (memblock_, buf_size_);
