@@ -111,9 +111,9 @@ if (directory_files == 0xFFFF)
 			file->seek(ANT_get_unsigned_long_long(z64_eocd_locate.offset_to_end_central_directory));
 			file->read((unsigned char *)&z64_eocdr, sizeof(z64_eocdr));
 			
-			directory_position = ANT_get_unsigned_long_long(eocdr.offset_to_central_directory);
-			directory_length = ANT_get_unsigned_long_long(eocdr.central_directory_size);
-			directory_files = ANT_get_unsigned_long_long(eocdr.total_entries_in_central_directory);
+			directory_position = ANT_get_unsigned_long_long(z64_eocdr.offset_to_central_directory);
+			directory_length = ANT_get_unsigned_long_long(z64_eocdr.central_directory_size);
+			directory_files = ANT_get_unsigned_long_long(z64_eocdr.total_entries_in_central_directory);
 			}
 		}
 	}
