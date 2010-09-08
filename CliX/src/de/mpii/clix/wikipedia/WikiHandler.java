@@ -5444,13 +5444,17 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        	 * TODO:
 	        	 * the articles should contains all the articles that needs to be processed
 	        	 */
-	        	if(articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
+	        	if (namespace.equals("en")){
+	        		openTag(res,WikiConstants.wikilinkTag, " xlink:type=\"none\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
+	        		closeTag(res,WikiConstants.wikilinkTag);       		
+	        	} else if (articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
 	        		String link = articles.get(namespace).get(title);
 	        		
 	        		String url=makeWikiURL(link, title, namespace);
-	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\"");
+	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
 	        		closeTag(res,WikiConstants.wikilinkTag);
 	        	}
+	        	
         	}
         }
     }
@@ -7465,7 +7469,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		{
 	        			long end=System.currentTimeMillis();
 	        			
-	        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+articles.size()+" articles found");
+	        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+articles.get(lang).size()+" articles found");
 	        		}
 	        	}
 	        }
@@ -7543,7 +7547,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		{
 	        			long end=System.currentTimeMillis();
 	        			
-	        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+redirections.size()+" redirections found");
+	        			System.out.println("["+cnt+"@"+(end-start)/1000.0+"] "+tokens[0]+" "+redirections.get(lang).size()+" redirections found");
 	        		}
 	        	}
 	        }

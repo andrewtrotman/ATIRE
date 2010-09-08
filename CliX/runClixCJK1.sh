@@ -26,7 +26,7 @@ append_jars_to_cp() {
 
 append_jars_to_cp $CLIX_PATH/lib
 
-arguments="-lang=zh|ja|ko -articlefile=/data/corpus/wikipedia/CJK/xml/*articles.txt -redirfile=/data/corpus/wikipedia/CJK/xml/*redirections.txt -outputdir=/data/corpus/wikipedia/CJK/xml /data/corpus/wikipedia/CJK/zhwiki-20091119-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
+arguments="-lang=zh|ja|ko|en -articlefile=/data/corpus/wikipedia/CJK/xml/*articles.txt -redirfile=/data/corpus/wikipedia/CJK/xml/*redirections.txt -outputdir=/data/corpus/wikipedia/CJK/xml /data/corpus/wikipedia/CJK/zhwiki-20091119-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
 
 arguments_remote="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y"
 
