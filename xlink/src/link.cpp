@@ -9,6 +9,7 @@
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
 #include "ant_link_parts.h"
+#include "application_out.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +43,8 @@ link::~link() {
 void link::print()
 {
 	print_header();
-	printf("%d", target_document);
+	//printf("%d", target_document);
+	aout << target_document;
 	print_footer();
 }
 
@@ -50,36 +52,44 @@ void link::print()
 void link::print_target(long anchor)
 {
 	print_header();
-	printf("%d", link_term->postings[anchor]->docid);
+	//printf("%d", link_term->postings[anchor]->docid);
+	aout << link_term->postings[anchor]->docid;
 	print_footer();
 }
 
 void link::print_anchor(long beps_to_print, bool id_or_name)
 {
+	char buf[255];
 	int count = 0;
-	printf("\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
+	sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
+	aout << buf;
 	for (int i = 0; i < link_term->postings.size(); i++) {
 		if (link_term->postings[i]->docid < 0 && id_or_name)
 			continue;
 
 		if (id_or_name)
-			printf("\t\t\t\t<tobep offset=\"%d\">%d</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->docid);
+			sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%d</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->docid);
 		else
-			printf("\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->desc);
+			sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->desc);
 		++count;
 		if (count >= beps_to_print)
 			break;
 	}
-	puts("\t\t\t</anchor>\n");
+	//puts("\t\t\t</anchor>\n");
+	aout << "\t\t\t</anchor>\n";
 }
 
 void link::print_bep(long beps_to_print)
 {
+	char buf[255];
 	if (!link_term) {
-		printf("\t\t\t<bep offset=\"%d\">\n", 0);
-		printf("\t\t\t\t<fromanchor offset=\"%d\" length=\"%d\" file=\"%d\">%s</fromanchor>\n",
+		sprintf(buf, "\t\t\t<bep offset=\"%d\">\n", 0);
+		aout << buf;
+		sprintf(buf, "\t\t\t\t<fromanchor offset=\"%d\" length=\"%d\" file=\"%d\">%s</fromanchor>\n",
 				offset, strlen(term), target_document, term);
-		puts("\t\t\t</bep>\n");
+		aout << buf;
+//		puts("\t\t\t</bep>\n");
+		aout << "\t\t\t</bep>\n";
 	}
 	else {
 		int count = 0;
@@ -87,10 +97,13 @@ void link::print_bep(long beps_to_print)
 			if (link_term->postings[i]->docid < 0)
 				continue;
 
-			printf("\t\t\t<bep offset=\"%d\">\n", link_term->postings[i]->offset);
-			printf("\t\t\t\t<fromanchor offset=\"%d\" length=\"%d\" file=\"%d\">%s</fromanchor>\n",
+			sprintf(buf, "\t\t\t<bep offset=\"%d\">\n", link_term->postings[i]->offset);
+			aout << buf;
+			sprintf(buf, "\t\t\t\t<fromanchor offset=\"%d\" length=\"%d\" file=\"%d\">%s</fromanchor>\n",
 					offset, strlen(term), target_document, term);
-			puts("\t\t\t</bep>\n");
+			aout << buf;
+			//puts("\t\t\t</bep>\n");
+			aout << "\t\t\t</bep>\n";
 			++count;
 			if (count >= beps_to_print)
 				break;

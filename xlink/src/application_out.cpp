@@ -15,6 +15,8 @@ using namespace std;
 namespace QLINK
 {
 
+application_out aout;
+
 application_out::application_out()
 {
 	out_ = &cout;
@@ -25,10 +27,12 @@ application_out::~application_out()
 
 }
 
-void application_out::operator << (const char *content)
-{
-	buf_ << content;
-}
+//void application_out::operator << (const char *content)
+//template< typename T >
+//void application_out::operator<<(T const &content)
+//{
+//	buf_ << content;
+//}
 
 void application_out::use_stdout(bool b)
 {

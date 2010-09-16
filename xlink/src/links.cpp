@@ -13,6 +13,7 @@
 #include "ant_link_posting.h"
 #include "corpus.h"
 #include "corpus_txt.h"
+#include "application_out.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -219,12 +220,15 @@ void links::print()
 
 void links::print_header()
 {
-	puts("	<link>\n");
+	//puts("	<link>\n");
+	aout << "	<link>\n";
+
 }
 
 void links::print_footer()
 {
-	puts("	</link>\n");
+	//puts("	</link>\n");
+	aout << "	</link>\n";
 }
 
 void links::sort_orphan()

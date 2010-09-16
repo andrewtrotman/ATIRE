@@ -9,6 +9,7 @@
 #define ALGORITHM_OUT_H_
 
 #include "algorithm.h"
+#include "application_out.h"
 
 namespace QLINK
 {
@@ -21,7 +22,7 @@ namespace QLINK
 
 	public:
 		virtual void recommend_anchors(links* lx, char **term_list, const char *source) = 0;
-		void list_anchors();
+		void list_anchors(application_out &anchors_list);
 	};
 
 }

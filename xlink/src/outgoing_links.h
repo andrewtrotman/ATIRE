@@ -42,8 +42,8 @@ namespace QLINK {
 		virtual void init();
 	};
 
-	inline void outgoing_links::print_link_tag_header() { printf("		<linkto>"); }
-	inline void outgoing_links::print_link_tag_footer() { printf("</linkto>\n"); }
+//	void outgoing_links::print_link_tag_header() { printf("		<linkto>"); }
+//	void outgoing_links::print_link_tag_footer() { printf("</linkto>\n"); }
 
 }
 

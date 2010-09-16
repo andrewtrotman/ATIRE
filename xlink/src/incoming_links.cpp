@@ -16,6 +16,7 @@
 #include "ant_link_parts.h"
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
+#include "application_out.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -68,12 +69,14 @@ void incoming_links::init() {
 
 void incoming_links::print_header()
 {
-	puts("	<incoming>");
+//	puts("	<incoming>");
+	aout << "	<incoming>";
 }
 
 void incoming_links::print_footer()
 {
-	puts("	</incoming>\n");
+//	puts("	</incoming>\n");
+	aout << "	</incoming>\n";
 }
 
 void incoming_links::print_links(long orphan_docid, const char *orphan_name, long links_to_print, long max_targets_per_anchor, long mode)
@@ -90,7 +93,8 @@ void incoming_links::print_links(long orphan_docid, const char *orphan_name, lon
 			continue;
 		}
 		if (links_printed > 0)
-			printf(", ");
+			aout << ", ";
+			//printf(", ");
 		//printf("%d", current_link->target_document);
 		current_link->print();
 		links_printed++;

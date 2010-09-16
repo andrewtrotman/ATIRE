@@ -144,6 +144,10 @@ void ltw_task::perform()
 			a_topic.print_header();
 
 			if (algor_out_) {
+				if (outgoings_) {
+					delete outgoings_;
+					outgoings_ = NULL;
+				}
 				outgoings_ = new outgoing_links(&a_topic);
 				outgoings_->set_bep_algorithm(algor_bep_);
 				algor_out_->set_links_container(outgoings_);
@@ -154,10 +158,12 @@ void ltw_task::perform()
 
 				// output
 				outgoings_->print();
-				delete outgoings_;
-				outgoings_ = NULL;
 			}
 			if (algor_in_) {
+				if (incomings_) {
+					delete incomings_;
+					incomings_ = NULL;
+				}
 				incomings_ = new incoming_links(&a_topic);
 				incomings_->set_bep_algorithm(algor_bep_);
 				algor_in_->set_links_container(incomings_);
@@ -167,8 +173,6 @@ void ltw_task::perform()
 
 				// output
 				incomings_->print();
-				delete incomings_;
-				incomings_ = NULL;
 			}
 			a_topic.print_footer();
 

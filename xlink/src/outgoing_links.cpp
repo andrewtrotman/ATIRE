@@ -15,6 +15,7 @@
 #include "corpus.h"
 #include "corpus_txt.h"
 #include "sys_file.h"
+#include "application_out.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -73,12 +74,26 @@ void outgoing_links::init() {
 
 void outgoing_links::print_header()
 {
-	puts("	<outgoing>");
+	//puts("	<outgoing>");
+	aout << "	<outgoing>";
 }
 
 void outgoing_links::print_footer()
 {
-	puts("	</outgoing>\n");
+//	puts("	</outgoing>\n");
+	aout << "	</outgoing>\n";
+}
+
+void outgoing_links::print_link_tag_header()
+{
+	//printf("		<linkto>");
+	aout << "		<linkto>";
+}
+
+void outgoing_links::print_link_tag_footer()
+{
+	aout << "</linkto>\n";
+	//printf("</linkto>\n");
 }
 
 void outgoing_links::print_links(long orphan_docid, const char *orphan_name, long links_to_print, long max_targets_per_anchor, long mode)
@@ -152,7 +167,8 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 						#else
 						if (links_already_printed.size() > 1)
 						#endif
-							printf(", ");
+							//printf(", ");
+							aout << ", ";
 						current_link->print_target(current_anchor);
 						anchors_printed++;
 						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
@@ -191,6 +207,7 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 {
 	long current = 0, links_printed = 0;
 	long result = 0;
+	char buf[255];
 
 	outgoing_link *current_link = NULL;
 
@@ -231,16 +248,19 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 			int ret = i - 1;
 			if (stop == -1 || (stop > -1 && (postings.size() - 1) > 0)) {
 				int count = 0;
-				printf("\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", current_link->offset, strlen(current_link->term), current_link->term);
+				sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", current_link->offset, strlen(current_link->term), current_link->term);
+				aout << buf;
 				for (i = 0; i < postings.size(); i++) {
 					if (i == stop)
 						continue;
-					printf("\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", postings[i]->offset, postings[i]->desc);
+					sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", postings[i]->offset, postings[i]->desc);
+					aout << buf;
 					++count;
 					if (count >= beps_to_print_)
 						break;
 				}
-				puts("\t\t\t</anchor>\n");
+				//puts("\t\t\t</anchor>\n");
+				aout << "\t\t\t</anchor>\n";
 			}
 		}
 		result++;

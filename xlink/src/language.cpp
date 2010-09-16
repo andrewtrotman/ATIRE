@@ -83,7 +83,7 @@ int language::string_compare(const void *a, const void *b)
 	int ret = strcmp(l, r);
 
 	if (ret == 0)
-		printf("I found it");
+		fprintf(stderr, "I found it");
 	return ret;
 }
 

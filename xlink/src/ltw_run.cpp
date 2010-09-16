@@ -11,6 +11,7 @@
 #include "corpus_txt.h"
 #include "corpus.h"
 #include "sys_file.h"
+#include "application_out.h"
 
 #include <string>
 
@@ -92,6 +93,8 @@ void ltw_run::print()
 
 void ltw_run::print_header()
 {
-	printf(header.c_str(), run_id.c_str(), task.c_str());
+	char buf[2550];
+	sprintf(buf, header.c_str(), run_id.c_str(), task.c_str());
+	aout << buf;
 }
 

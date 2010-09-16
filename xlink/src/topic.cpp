@@ -8,6 +8,7 @@
 #include "topic.h"
 #include "ant_link_parts.h"
 #include "sys_file.h"
+#include "application_out.h"
 
 #include <libgen.h>
 #include <stdio.h>
@@ -60,15 +61,18 @@ void topic::set_content(char *file)
 
 void topic::print_header()
 {
+	char buf[255];
 	if (id_ > 0)
-		printf(TOPIC_SIGNITURE_ID, id_, name_);
+		sprintf(buf, TOPIC_SIGNITURE_ID, id_, name_);
 	else
-		printf(TOPIC_SIGNITURE_ID_NAME, name_, name_);
+		sprintf(buf, TOPIC_SIGNITURE_ID_NAME, name_, name_);
 //	else
 //		fprintf(stderr, "Topic ID or ID_NAME error");
+	aout << buf;
 }
 
 void topic::print_footer()
 {
-	puts("	</topic>");
+	//puts("	</topic>");
+	aout << "	</topic>";
 }
