@@ -65,6 +65,7 @@ namespace QLINK {
 		void init();
 	};
 
+	typedef algorithm	algorithm_in;
 }
 
 #endif /* ALGORITHM_H_ */

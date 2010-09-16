@@ -57,6 +57,7 @@ ltw_headers = \
 	$(SRC_DIR)/google_translator.h \
 	$(SRC_DIR)/webpage_retriever.h \
 	$(SRC_DIR)/pattern_singleton.h \
+	$(SRC_DIR)/application_out.h \
 	$(SRC_DIR)/system_info.h
 
 noinst_HEADERS = $(ltw_headers)
@@ -108,6 +109,7 @@ ltw_sources = \
 	$(SRC_DIR)/wikipedia.cpp \
 	$(SRC_DIR)/google_translator.cpp \
 	$(SRC_DIR)/webpage_retriever.cpp \
+	$(SRC_DIR)/application_out.cpp \
 	$(SRC_DIR)/ltw.cpp
 
 noinst_PROGRAMS = ltw collection_link_finder

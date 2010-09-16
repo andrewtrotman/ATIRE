@@ -16,9 +16,11 @@
 #include <map>
 
 #include "ir_task.h"
+#include "algorithm.h"
 
 namespace QLINK {
-	class algorithm;
+	class algorithm_out;
+	//class algorithm_in;
 	class algorithm_bep;
 	class links;
 
@@ -39,45 +41,34 @@ namespace QLINK {
 							  LTW_A2B_INCOMING_SEARCH_TN = 4,
 							  LTW_ANT_AND_PAGE = 5,
 							  LTW_TEARA_BASE = 6,
-							  LTW_PAGE_NAME = 7
-
-							  //NUMBER_OF_LTW_ALGORITHMS
-							  };
-
-		typedef std::map<std::string, ltw_algorithm>	ltw_algorithm_map;
-		typedef std::map<std::string, ltw_task_type>	ltw_task_type_map;
-
+							  LTW_PAGE_NAME = 7};
+	    //NUMBER_OF_LTW_ALGORITHMS
+	    typedef std::map<std::string,ltw_algorithm> ltw_algorithm_map;
+	    typedef std::map<std::string,ltw_task_type> ltw_task_type_map;
 	public:
-		static ltw_algorithm_map	alorithm_names;
-		static ltw_task_type_map	task_names;
-		static int					topic_param_start;
-
+	    static ltw_algorithm_map alorithm_names;
+	    static ltw_task_type_map task_names;
+	    static int topic_param_start;
 	protected:
-		std::string 	name_;
-
-		algorithm		*algor_out_;
-		algorithm		*algor_in_;
-		algorithm_bep	*algor_bep_;
-
-		std::string		algor_out_name_;
-		std::string		algor_in_name_;
-
-		links			*outgoings_;
-		links			*incomings_;
-
+	    std::string name_;
+	    algorithm_out *algor_out_;
+	    algorithm_in *algor_in_;
+	    algorithm_bep *algor_bep_;
+	    std::string algor_out_name_;
+	    std::string algor_in_name_;
+	    links *outgoings_;
+	    links *incomings_;
 	public:
-		ltw_task(std::string &name, std::string& out_algor_name, std::string& in_algor_name);
-		virtual ~ltw_task();
-
-		virtual void init();
-		virtual void perform();
-		virtual void print_links();
-
-		bool is_f2f_task();
-		bool is_a2b_task();
-		void set_alorithm_bep(std::string name);
-
-		ltw_task_type get_task_type();
+	    ltw_task(std::string & name, std::string & out_algor_name, std::string & in_algor_name);
+	    virtual ~ltw_task();
+	    virtual void init();
+	    virtual void perform();
+	    virtual void print_links();
+	    bool is_f2f_task();
+	    bool is_a2b_task();
+	    void set_alorithm_bep(std::string name);
+	    ltw_task_type get_task_type();
+	    algorithm_out *get_algor_out() const { return algor_out_; }
 
 	private:
 		ltw_algorithm get_algorithm_outgoing_type();

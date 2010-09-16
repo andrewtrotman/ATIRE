@@ -9,11 +9,14 @@
 
 #include "ltw_run.h"
 #include "cmdline_options.h"
+#include "application_out.h"
 #include <string.h>
 
 using namespace QLINK;
 
 enum {RECOMMEND_ANCHOR, CREATE_RUN};
+
+application_out aout;
 
 void create_run(int argc, char **argv)
 {
@@ -46,6 +49,9 @@ void create_run(int argc, char **argv)
 
 	switch (cmd) {
 		case RECOMMEND_ANCHOR:
+
+			//run->get_task()->get_algor_out()->recommend_anchors()
+			break;
 		case CREATE_RUN:
 		default:
 			run->create();

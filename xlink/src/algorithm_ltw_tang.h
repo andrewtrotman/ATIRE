@@ -8,11 +8,11 @@
 #ifndef ALGORITHM_LTW_TANG_H_
 #define ALGORITHM_LTW_TANG_H_
 
-#include "algorithm.h"
+#include "algorithm_out.h"
 
 namespace QLINK {
 
-	class algorithm_ltw_tang: public algorithm
+	class algorithm_ltw_tang: public algorithm_out
 	{
 	public:
 		algorithm_ltw_tang(links *links_list);

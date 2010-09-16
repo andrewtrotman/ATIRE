@@ -81,7 +81,7 @@ void ltw_task::init()
 		//topic_param_start = algor_out_->init();
 		break;
 	case LTW_TANG:
-		algor_out_ = new algorithm_ltw_tang();
+		//algor_out_ = new algorithm_ltw_tang();
 		break;
 	case LTW_TEARA_BASE:
 		algor_out_ = new algorithm_ltara_base();
@@ -103,7 +103,7 @@ void ltw_task::init()
 		algor_in_ = new algorithm_ltw_incoming_search_tn();
 		break;
 	case LTW_TANG:
-		algor_in_ = new algorithm_ltw_tang();
+		algor_in_ = new algorithm();
 		break;
 	case LTW_NONE:
 	default:

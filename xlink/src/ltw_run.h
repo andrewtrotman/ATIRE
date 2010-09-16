@@ -26,6 +26,7 @@ namespace QLINK {
 
 		void create();
 		void print();
+		ltw_task *get_task() { return task_; }
 
 	protected:
 		void init();
