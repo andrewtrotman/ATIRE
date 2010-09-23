@@ -51,28 +51,43 @@ return source;
 */
 int main(int argc, char *argv[])
 {
-char *file, *start, *end, *from, *ch;
+char *file, *start, *end, *from, *ch, *pos;
 char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid;
-long lowercase_only, first_param;
+long lowercase_only, first_param, crosslink;
 ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 
 if (argc < 2)
-	exit(printf("Usage:%s [-lowercase] <filespec> ...\n", argv[0]));
+	exit(printf("Usage:%s [-crosslink] [-lowercase] <filespec> ...\n", argv[0]));
 
 first_param = 1;
 lowercase_only = FALSE;
-if (*argv[1] == '-')
+char *command;
+const char *default_namespace = "en";
+const char *crosslink_namespace = default_namespace;
+char buffer[1024 * 1024];
+char doctitle[1024 * 1024];
+
+for (param = 1; param < argc; param++)
 	{
-	if (strcmp(argv[1], "-lowercase") == 0)
+	if (*argv[param] == '-')
 		{
-		lowercase_only = TRUE;
-		first_param = 2;
+		command = argv[param] + 1;
+		if (strcmp(command, "crosslink") == 0)
+			{
+			crosslink = TRUE;
+			++first_param;
+			}
+		else if (strcmp(command, "lowercase") == 0)
+			{
+			lowercase_only = TRUE;
+			++first_param; // = 2;
+			}
+		else
+			exit(printf("Unknown parameter:%s\n", argv[1]));
 		}
-	else
-		exit(printf("Unknown parameter:%s\n", argv[1]));
 	}
 
 file_number = 1;
@@ -85,13 +100,37 @@ for (param = first_param; param < argc; param++)
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
+		get_doc_name(file, doctitle);
 		from = file;
 		while (from != NULL)
 			{
 			if (((start = strstr(from, "<collectionlink")) != NULL) || ((start = strstr(from, "<link")) != NULL))
 				if (((end = strstr(start, "</collectionlink>")) != NULL) || ((end = strstr(start, "</link>")) != NULL))
 					{
-					start = strstr(start, "xlink:href=");
+					memcpy(buffer, start, end - start);
+					buffer[end - start] = '\0';
+
+					if (crosslink)
+						{
+						if ((start = strstr(buffer, "xlink:label=\"")) != NULL)
+							{
+							start += strlen("xlink:label=\"");
+							if (strncasecmp(start, crosslink_namespace, 2) == 0)
+								if ((start = strstr(buffer, "xlink:title=\"")) != NULL)
+									{
+									start += strlen("xlink:title=\"");
+									pos = strchr(start, '"');
+									memcpy(anchor_text, start, pos - start);
+									anchor_text[pos - start] = '\0';
+									printf("%s:%s\n", anchor_text, doctitle);
+									}
+							}
+						from = end;
+						continue;
+						}
+
+
+					start = strstr(buffer, "xlink:href=");
 					if (start != NULL && start < end)
 						{
 						target_start = strchr(start, '"') + 1;

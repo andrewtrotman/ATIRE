@@ -262,6 +262,7 @@ file_list = handle_stack;
 		}
 	else // the wildcard will be after slash
 		{
+		strncpy(path_buffer, wildcard, last_slash_idx + 1);
 		if (last_char == slash)
 			strcpy(this->wildcard, "*");
 		else
@@ -272,7 +273,6 @@ file_list = handle_stack;
 			strncpy(this->wildcard, wildcard_start, wildcard_len);
 			this->wildcard[wildcard_len] = '\0';
 			}
-		strncpy(path_buffer, wildcard, last_slash_idx + 1);
 		}
 	if ((got = first(path_buffer, "")) == NULL)
 		return NULL;
