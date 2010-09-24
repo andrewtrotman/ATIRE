@@ -987,7 +987,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if (title==null) title="";
 		
 		title=title.trim();
-		if (redirections.containsKey(title))
+		if (redirections.get(currentLang).containsKey(title))
 		{
 			String newtitle=redirections.get(currentLang).get(title);
 			if (newtitle.length()>0) 
@@ -5318,7 +5318,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
                     link=Character.toString(Character.toUpperCase(link.charAt(0)));
 
                 int i=0;
-                while (redirections.containsKey(link))
+                while (redirections.get(currentLang).containsKey(link))
                 {
                     i++;
                     if (i>20) 
@@ -5326,7 +5326,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
                     link=redirections.get(currentLang).get(link);
                 }
                 
-                boolean linkExists=((link.length()==0)||(articles.containsKey(link)));
+                boolean linkExists=((link.length()==0)||(articles.get(currentLang).containsKey(link)));
                 
                 String url=makeWikiURL(useArticleIDs?articles.get(currentLang).get(link):link, link, "");
 

@@ -150,7 +150,8 @@ return FALSE;
 	else
 		strcpy(file_list->path, ".");
 
-	sprintf(path, "%s*", file_list->path);
+	//sprintf(path, "%s*", file_list->path); // that is the wildcard used for
+	sprintf(path, "%s%s", file_list->path, wildcard);
 	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
 	file_list->glob_index = 0;
 
