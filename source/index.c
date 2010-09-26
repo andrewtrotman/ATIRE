@@ -11,6 +11,7 @@
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_compressor.h"
+#include "directory_iterator_deflate.h"
 #include "directory_iterator_file.h"
 #include "directory_iterator_csv.h"
 #include "directory_iterator_object.h"
@@ -81,6 +82,7 @@ is_previous_token_chinese = FALSE;
 readability->set_document((unsigned char *)current_file->file);
 while ((token = readability->get_next_token()) != NULL)
 	{
+//	printf("%*.*s\n", token->string_length, token->string_length, token->start);
 	/*
 	 * a bit redudant, the code below.
 	 * I think the original code from revision 656 should be fine, except the chinese handling part
@@ -240,7 +242,11 @@ for (param = first_param; param < argc; param++)
 
 	now = stats.start_timer();
 	if (param_block.recursive == ANT_indexer_param_block::DIRECTORIES)
+		{
 		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);			// this dir and below
+		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
+			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
+		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
@@ -261,6 +267,13 @@ for (param = first_param; param < argc; param++)
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
+		}
+	else if (param_block.recursive == ANT_indexer_param_block::TRECWEB)
+		{
+		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
+		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
+			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
+		source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);

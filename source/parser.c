@@ -2,6 +2,7 @@
 	PARSER.C
 	--------
 */
+#include <string.h>
 #include "parser.h"
 #include "plugin_manager.h"
 
@@ -246,19 +247,28 @@ else											// everything else (that starts with a '<')
 			else if (*current == '?')					// <? ... ?> (XML Processing Instructions)
 				{
 				current++; // current has to move to next character before we do the comparison again
-				if (*current != '\0')
-					while (*current != '?' && *(current + 1) != '>' && *(current + 1) != '\0')
-						current++;
+				if ((here = ::strstr(current, "?>")) == NULL)					// XML <? ?>
+					if ((here = ::strchr(current, '>')) == NULL)				// HTML <? >
+						here = current + strlen(current);					// End of document
+				current = here;
 				}
-			else if (*current == '!')				// <! ... > (
+			else if (*current == '!')					// <! ... > (XML Comment)
 				{
-				if (*(current + 1) != '\0' && *(current + 2) != '\0')
+				if (*(current + 1) != '\0')
 					if (*(current + 1) == '-' && *(current + 2) == '-')		// <!-- /// --> (XML Comment)
-						while (*(current + 2) != '\0' && !((*current == '-') && (*(current + 1) == '-') && (*(current + 2) == '>')))
-							current++;
+						{
+						current += 2;
+						if ((here = ::strstr(current, "-->")) == NULL)		// XML <!-- -->
+							if ((here = ::strchr(current, '>')) == NULL)		// HTML <!-- >
+								here = current + strlen(current);					// End of document
+						current = here;
+						}
 					else								// nasty XML stuff like <![CDATA[<greeting>Hello, world!</greeting>]]>
-						while (*current != '>' && *current != '\0')
-							current++;
+						{
+						if ((here = strchr(current, '>')) == NULL)
+							here = current + strlen(current);
+						current = here;
+						}
 				}
 		return get_next_token();		// ditch and return the next character after where we are
 		}

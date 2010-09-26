@@ -20,6 +20,10 @@
 extern "C" int char_star_star_strcmp(const void *one, const void *two);
 extern "C" int char_star_star_star_strcmp(const void *one, const void *two);
 
+inline unsigned char *strstr(const unsigned char *string, const char *key) { return (unsigned char *)::strstr((char *)string, key); }
+inline unsigned char *strchr(const unsigned char *string, int key) { return (unsigned char *)::strchr((char *)string, key); }
+inline size_t strlen(unsigned char *string) { return ::strlen((char *)string); }
+
 /*
 	STRNEW()
 	--------
@@ -36,6 +40,7 @@ return strcpy(new char[strlen(str) + 1], str);
 inline char *strnnew(const char *str, long long len)
 {
 char *new_str;
+
 return (*((new_str = strncpy(new char [(size_t)(len + 1)], str, (size_t)len)) + len) = '\0'), new_str;
 }
 

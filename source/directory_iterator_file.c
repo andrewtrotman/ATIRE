@@ -8,13 +8,68 @@
 #include "directory_iterator_file.h"
 
 /*
+	ANT_DIRECTORY_ITERATOR_FILE::ANT_DIRECTORY_ITERATOR_FILE()
+	----------------------------------------------------------
+*/
+ANT_directory_iterator_file::ANT_directory_iterator_file(char *file, long get_file) : ANT_directory_iterator("", get_file) 
+{
+initialise();
+this->file = file;
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_FILE::ANT_DIRECTORY_ITERATOR_FILE()
+	----------------------------------------------------------
+*/
+ANT_directory_iterator_file::ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file) : ANT_directory_iterator("", get_file)
+{
+initialise();
+this->source = source;
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_FILE::INITIALISE()
+	-----------------------------------------
+*/
+void ANT_directory_iterator_file::initialise(void)
+{
+source = NULL;
+document_start = document_end = file = NULL;
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_FILE::GET_NEXT_FILE()
+	--------------------------------------------
+*/
+char *ANT_directory_iterator_file::get_next_file(void)
+{
+ANT_directory_iterator_object object, *success;
+
+if (source != NULL)
+	{
+	if (file == NULL)
+		success = source->first(&object);
+	else
+		success = source->next(&object);
+
+	if (success != NULL)
+		{
+		delete [] file;
+		file = object.file;
+		return document_end = document_start = file;
+		}
+	}
+
+return NULL;
+}
+
+/*
 	ANT_DIRECTORY_ITERATOR_FILE::FIRST()
 	------------------------------------
 */
 ANT_directory_iterator_object *ANT_directory_iterator_file::first(ANT_directory_iterator_object *object)
 {
 document_end = document_start = file;
-
 return next(object);
 }
 
@@ -27,7 +82,8 @@ ANT_directory_iterator_object *ANT_directory_iterator_file::next(ANT_directory_i
 char *document_id_start = NULL, *document_id_end = NULL;
 
 if (document_end == NULL)
-	return NULL;
+	if (get_next_file() == NULL)
+		return NULL;
 
 if ((document_start = strstr(document_end, "<DOC")) != NULL)
 	{
@@ -54,7 +110,11 @@ if ((document_start = strstr(document_end, "<DOC")) != NULL)
 		return object;
 		}
 	}
-return NULL;
+
+if (get_next_file() == NULL)
+	return NULL;
+else
+	return next(object);
 }
 
 /*

@@ -98,6 +98,17 @@ return ANT_powers_of_two_zero[power];
 }
 
 /*
+	ANT_POW2()
+	----------
+*/
+inline unsigned long ANT_pow2(long power)
+{
+extern unsigned long ANT_powers_of_two[];
+
+return ANT_powers_of_two[power];
+}
+
+/*
 	ANT_MAX()
 	---------
 	For ANT_MAX we violate the ANT coding rule that says no templates

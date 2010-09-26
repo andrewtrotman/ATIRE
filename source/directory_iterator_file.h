@@ -23,16 +23,22 @@ class ANT_directory_iterator_file : public ANT_directory_iterator
 protected:
 	char *file, *document_start, *document_end;
 	char filename[PATH_MAX];
+	ANT_directory_iterator *source;
 
 protected:
 	ANT_directory_iterator_object *read_entire_file(ANT_directory_iterator_object *object);
+	char *get_next_file(void);
+	void initialise(void);
 
 public:
-	ANT_directory_iterator_file(char *file, long get_file = 0) : ANT_directory_iterator("", get_file) { this->file = file; }
-	virtual ~ANT_directory_iterator_file() { delete [] file; }
+	ANT_directory_iterator_file(char *file, long get_file = 0);
+	ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file = 0);
+	virtual ~ANT_directory_iterator_file() { delete [] file; delete source; }
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 } ;
+
+
 
 #endif /* DIRECTORY_ITERATOR_FILE_H_ */

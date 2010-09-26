@@ -3,6 +3,11 @@
 #
 
 #
+#	DEBUG. Comment out the line below to compile in DEBUG mode
+#
+#DEBUG = 1
+
+#
 #	Which compiler are we using
 #
 COMPILER=MICROSOFT
@@ -84,14 +89,20 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 
 !IF "$(COMPILER)" == "MICROSOFT"
 CC = @cl /nologo
-#CFLAGS = -D_DEBUG   /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+!IF "$(DEBUG)" == "1"
+CFLAGS = -D_DEBUG   /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+!ELSE
 CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
+!ENDIF
 !ENDIF
 
 !IF "$(COMPILER)" == "INTEL"
 CC = @icl /nologo
-#CFLAGS = -D_DEBUG   /Od /W4 /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+!IF "$(DEBUG)" == "1"
+CFLAGS = -D_DEBUG   /Od /W4 /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+!ELSE
 CFLAGS  = -D_RELEASE /O3 /W4 /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 /QxHost /Qparallel /Qipo /Qip
+!ENDIF
 !ENDIF
 
 #
@@ -148,6 +159,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_preindex.obj 		\
 	$(OBJDIR)\directory_iterator_preindex_internals.obj \
 	$(OBJDIR)\directory_iterator_compressor.obj 	\
+	$(OBJDIR)\directory_iterator_deflate.obj 		\
 	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
 	$(OBJDIR)\directory_iterator_warc.obj			\
