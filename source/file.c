@@ -168,7 +168,16 @@ long ANT_file::write(unsigned char *data, long long size)
 unsigned char *from;
 long long block_size;
 
+/*
+	Keep track of the total number of bytes we've been asked to write to the file
+*/
+bytes_written += size;
+
+/*
+	Update the file pointer
+*/
 file_position += size;
+
 if (buffer_used + size < buffer_size)
 	{
 	/*
@@ -184,22 +193,17 @@ else
 		necessary to flush the buffers and then do the write
 	*/
 	from = data;
-	block_size = size <= buffer_size ? size : buffer_size;
 	do
 		{
 		flush();
-		memcpy(buffer, from,(size_t)block_size);
+		block_size = size <= buffer_size ? size : buffer_size;
+		memcpy(buffer, from, (size_t)block_size);
 		buffer_used += block_size;
 		from += block_size;
 		size -= block_size;
 		}
 	while (size > 0);
 	}
-
-/*
-	Keep track of the total number of bytes we've been asked to write to the file
-*/
-bytes_written += size;
 
 return 1;
 }
