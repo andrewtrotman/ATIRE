@@ -19,6 +19,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.spreada.utils.chinese.ZHConverter;
+
 import java.net.*;
 
 import de.mpii.clix.support.*;
@@ -5309,13 +5311,16 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 }
                 
                 String link=target;
-                
-                if (link.length()>1)
-                {
-                    link=Character.toUpperCase(link.charAt(0))+link.substring(1);
+                if (currentLang.equals("zh"))
+                	link = ZHConverter.convert(target, ZHConverter.SIMPLIFIED);
+                else if (currentLang.equals("en")){
+	                if (link.length()>1)
+	                {
+	                    link=Character.toUpperCase(link.charAt(0))+link.substring(1);
+	                }
+	                else if (link.length()==1)
+	                    link=Character.toString(Character.toUpperCase(link.charAt(0)));
                 }
-                else if (link.length()==1)
-                    link=Character.toString(Character.toUpperCase(link.charAt(0)));
 
                 int i=0;
                 while (redirections.get(currentLang).containsKey(link))
@@ -5323,7 +5328,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
                     i++;
                     if (i>20) 
                     	break;
-                    link=redirections.get(currentLang).get(link);
+                    if (currentLang.equals("zh"))
+                    	link = ZHConverter.convert(redirections.get(currentLang).get(link), ZHConverter.SIMPLIFIED);
+                    else
+                    	link=redirections.get(currentLang).get(link);
                 }
                 
                 boolean linkExists=((link.length()==0)||(articles.get(currentLang).containsKey(link)));
@@ -5449,7 +5457,6 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		closeTag(res,WikiConstants.wikilinkTag);       		
 	        	} else if (articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
 	        		String link = articles.get(namespace).get(title);
-	        		
 	        		String url=makeWikiURL(link, title, namespace);
 	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
 	        		closeTag(res,WikiConstants.wikilinkTag);
@@ -7464,7 +7471,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		
 	        		if (tokens.length!=2) continue;
 	        			
-	        		articles.get(lang).put(tokens[0], tokens[1]);
+	        		if (lang.equals("zh"))
+	        			articles.get(lang).put(ZHConverter.convert(tokens[0], ZHConverter.SIMPLIFIED), tokens[1]);
+	        		else
+	        			articles.get(lang).put(tokens[0], tokens[1]);
 	        		if (++cnt%100000==0)
 	        		{
 	        			long end=System.currentTimeMillis();
@@ -7542,7 +7552,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        		
 	        		if (tokens.length!=2) continue;
 	        		
-	        		redirections.get(lang).put(tokens[0], tokens[1]);
+	        		if (lang.equals("zh"))
+	        			redirections.get(lang).put(ZHConverter.convert(tokens[0], ZHConverter.SIMPLIFIED), tokens[1]);
+	        		else	        		
+	        			redirections.get(lang).put(tokens[0], tokens[1]);
 	        		if (++cnt%100000==0)
 	        		{
 	        			long end=System.currentTimeMillis();

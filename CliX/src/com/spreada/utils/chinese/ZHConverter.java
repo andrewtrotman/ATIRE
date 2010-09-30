@@ -137,9 +137,16 @@ public class ZHConverter {
 				outString.append(charMap.get(stackString.toString()));
 				stackString.setLength(0);
 			} else {
-				CharSequence sequence = stackString.subSequence(0, stackString.length()-1);
-				stackString.delete(0, stackString.length()-1);
-				flushStack(outString, new StringBuilder(sequence));
+				StringBuffer sequence = new StringBuffer(stackString.substring(0, stackString.length()-1));
+				while (sequence.length() > 1 && !charMap.containsKey(sequence.toString()))
+					sequence.deleteCharAt(sequence.length() - 1);
+				if (charMap.containsKey(sequence.toString()))
+					outString.append(charMap.get(sequence.toString()));
+				else
+					outString.append(sequence.toString());
+				stackString.delete(0, sequence.length());
+				if (!conflictingSets.contains(stackString.toString())) 
+					flushStack(outString, stackString);
 			}
 		}
 
