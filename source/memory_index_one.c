@@ -146,7 +146,7 @@ return add(string, docno, extra_term_frequency);
 */
 void ANT_memory_index_one::set_document_detail(ANT_string_pair *string, long long score, long mode)
 {
-ANT_memory_index_one_node *node = add(string, 0, score);
+ANT_memory_index_one_node *node = add(string, 0, (long)score);
 
 if (node != NULL)
 	{

@@ -8,6 +8,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifdef _MSC_VER
+	#define strncasecmp _strnicmp
+#endif
+
 #include "../source/disk.h"
 #include "../source/directory_iterator_recursive.h"
 #include "link_parts.h"
@@ -55,7 +59,7 @@ char *file, *start, *end, *from, *ch, *pos;
 char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid;
-long lowercase_only, first_param, crosslink;
+long lowercase_only, first_param, crosslink = FALSE;
 ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 

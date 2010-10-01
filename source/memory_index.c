@@ -217,9 +217,9 @@ if (node->string[0] == '~')
 else
 	{
 	if (node->final_node == NULL)
-		add_term(&node->string, docno, node->term_frequency);
+		add_term(&node->string, docno, (long)node->term_frequency);
 	else
-		node->final_node->add_posting(docno, node->term_frequency);
+		node->final_node->add_posting(docno, (long)node->term_frequency);
 	}
 
 /*

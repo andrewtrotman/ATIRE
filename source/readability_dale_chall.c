@@ -150,7 +150,7 @@ for (i = 1; i < number_of_words; i++)
 			}
 		else
 			{
-			term_frequency = prev->node->term_frequency;
+			term_frequency = (long)prev->node->term_frequency;
 			/*
 				if it's only occured as title-case then it's a name
 				cheap/fugly approximaion
@@ -175,7 +175,7 @@ while (wordlist_position < ANT_readability_dale_chall_wordlist_length &&
 
 if (comparison != 0)
 	{
-	term_frequency = prev->node->term_frequency;
+	term_frequency = (long)prev->node->term_frequency;
 	number_of_unfamiliar_words += istitle == term_frequency ? 1 : term_frequency;
 	}
 

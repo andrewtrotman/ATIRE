@@ -73,7 +73,11 @@ typedef char tchar;
 	#define _tcscpy	strcpy
 	#define	_tcscmp	strcmp
 	#define _tcscat strcat
-	#define _tcsupy strupr
+	#ifdef _MSC_VER
+		#define _tcsupy _strupr
+	#else
+		#define _tcsupy strupr
+	#endif
 	#define _tcsstr	strstr
 #endif //!_UNICODE
 
