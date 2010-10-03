@@ -106,7 +106,7 @@ puts("  I             INEX 2008 (XML) run format");
 puts("  i             INEX 2009 (TREC++) run format (documents only)");
 puts("  f             INEX 2009 (TREC++) run format (documents and passages)");
 puts("  b             INEX 2009 (TREC++) run format (best entry point)");
-puts("  e             INEX 2009 Efficiency (TREC++) run format");
+puts("  e             INEX 2009 Efficiency (XML) run format");
 puts("  t             TREC run format");
 puts("-o<filename>    Output filename for the run [default=ant.out]");
 puts("-i<id>          Forum participant id is <id> [default=unknown]");
