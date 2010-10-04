@@ -68,6 +68,7 @@ core_sources =  \
 	$(SRCDIR)/search_engine_forum_INEX_focus.c \
     $(SRCDIR)/search_engine_forum_TREC.c \
     $(SRCDIR)/search_engine_readability.c \
+    $(SRCDIR)/directory_iterator_deflate.c \
     $(SRCDIR)/str.c \
     $(SRCDIR)/stop_word.c \
     $(SRCDIR)/disk.c \
@@ -188,6 +189,7 @@ core_noinst_headers = \
 	$(SRCDIR)/directory_iterator_recursive.h	\
 	$(SRCDIR)/directory_iterator_warc.h \
 	$(SRCDIR)/directory_iterator_compressor.h \
+	$(SRCDIR)/directory_iterator_deflate.h \
 	$(SRCDIR)/disk_directory.h	\
 	$(SRCDIR)/disk.h	\
 	$(SRCDIR)/file.h	\
