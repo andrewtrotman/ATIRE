@@ -25,6 +25,12 @@
 	#define TRUE (!FALSE)
 #endif
 
+#ifdef INEX_ARCHIVE
+	#define COLLECTION_LINK_TAG_NAME "collectionlink"
+#else
+	#define COLLECTION_LINK_TAG_NAME "link"
+#endif
+
 char target[1024];
 char anchor_text[1024 * 1024];
 
@@ -108,8 +114,8 @@ for (param = first_param; param < argc; param++)
 		from = file;
 		while (from != NULL)
 			{
-			if (((start = strstr(from, "<collectionlink")) != NULL) || ((start = strstr(from, "<link")) != NULL))
-				if (((end = strstr(start, "</collectionlink>")) != NULL) || ((end = strstr(start, "</link>")) != NULL))
+			if (((start = strstr(from, "<"COLLECTION_LINK_TAG_NAME)) != NULL))
+				if (((end = strstr(start, "</"COLLECTION_LINK_TAG_NAME">")) != NULL))
 					{
 					memcpy(buffer, start, end - start);
 					buffer[end - start] = '\0';
