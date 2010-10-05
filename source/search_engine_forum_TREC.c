@@ -24,8 +24,9 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
 {
 long long which;
+ANT_search_engine_accumulator **accumulator_pointers = search_engine->results_list->accumulator_pointers;
 
 for (which = 0; which < hits; which++)
-	fprintf(file, "%ld Q0 %s %lld %lld %s\n", topic_id, docids[which], which + 1, (hits - which), run_id);
+	fprintf(file, "%ld Q0 %s %lld %f %s\n", topic_id, docids[which], which + 1, (double)accumulator_pointers[which]->get_rsv(), run_id);
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
