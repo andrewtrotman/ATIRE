@@ -257,6 +257,73 @@ public class WikiHandler extends DefaultHandler implements Runnable
     }
     // page-to-concept mapping
     
+    static HashSet<String> categoryNamespaces;
+    static
+    {
+    	categoryNamespaces = new HashSet<String>();
+    	categoryNamespaces.add("category");
+    	categoryNamespaces.add("分类");
+    	categoryNamespaces.add("カテゴリ");
+    	categoryNamespaces.add("분류");
+    }
+    
+    static HashSet<String> fileNamespaces;
+    static
+    {
+    	fileNamespaces = new HashSet<String>();
+    	fileNamespaces.add("파일");
+    	fileNamespaces.add("画像");
+    	fileNamespaces.add("ファイル");
+    	fileNamespaces.add("图像");
+    	fileNamespaces.add("档案");
+    	fileNamespaces.add("文件");
+    	fileNamespaces.add("file");
+    	fileNamespaces.add("image");
+    }
+    
+    static HashSet<String> wikipediaNamespaces;
+    static
+    {
+    	wikipediaNamespaces = new HashSet<String>();
+    	wikipediaNamespaces.add("wikipedia");
+    	wikipediaNamespaces.add("维基百科");
+    	wikipediaNamespaces.add("プロジェクト");
+    }
+    
+    static HashSet<String> templateNamespaces;
+    static
+    {
+    	templateNamespaces = new HashSet<String>();
+    	templateNamespaces.add("template");
+    	templateNamespaces.add("模板");
+    	templateNamespaces.add("テンプレート");
+    	templateNamespaces.add("틀");
+    }
+    
+    static HashSet<String> helpNamespaces;
+    static
+    {
+    	helpNamespaces = new HashSet<String>();
+    	helpNamespaces.add("help");
+    	helpNamespaces.add("帮助");
+    	helpNamespaces.add("ヘルプ");
+    	helpNamespaces.add("도움말");
+    }
+    
+    static HashSet<String> allNamespaces;
+    static
+    {
+    	allNamespaces = new HashSet<String>();
+    	allNamespaces.addAll(fileNamespaces);
+    	allNamespaces.addAll(categoryNamespaces);
+    	allNamespaces.addAll(helpNamespaces);
+    	allNamespaces.addAll(templateNamespaces);
+    	allNamespaces.addAll(wikipediaNamespaces);
+    	allNamespaces.add("m");
+    	allNamespaces.add("wikispecies");
+    	allNamespaces.add("commons");
+    }
+    
     HashMap<String,List<String>> concepts;
     
 //    net.didion.jwnl.dictionary.Dictionary dict;
@@ -358,8 +425,13 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //			// debug
 //			if ((phase==1) && currentID != null && currentID.equals("1010"))
 //				System.err.println("I got you!");
-			
-			if (el.tag.equals("text"))
+			if (el.tag.equals("namespace"))
+			{
+				String namespace = el.content.toString().toLowerCase();
+				if (!allNamespaces.contains(namespace))
+					allNamespaces.add(namespace);
+			} 
+			else if (el.tag.equals("text"))
 			{
 				// it does not make sense to convert these articles as they contain partial markup,
 				// invalid markup, or do not work for some other, unknown reason
@@ -5234,30 +5306,41 @@ public class WikiHandler extends DefaultHandler implements Runnable
     }
     
     private void handleLink(String content, int start, int end, StringBuffer res)
-    {
+    {	
+    	boolean colonStart = false;
+    	if (content.charAt(start)==':') { 
+    		colonStart = true;
+    		start++; // ignore any leading : (which is a shortcut for the current article namespace)
+    	}
+    	String link_content = content.substring(start, end);
+    	int titlePos = link_content.indexOf(':');
+    	String namespace = new String("");
+    	if (titlePos > 0)
+    		namespace = link_content.substring(0, titlePos).toLowerCase();
+    	
         //check if we're dealing with special namespaces
         
     	// such a link just adds a link to the category page, but does not add the page to the category.
-    	String lc_content = content.substring(start).toLowerCase();
+    	//String lc_content = namespace.toLowerCase();
     	int category_len = 0;
-    	if ((lc_content.startsWith("：category:") && (category_len = "：category:".length()) > 0) 
-    			|| (lc_content.startsWith("：模板:") && (category_len = "：模板:".length()) > 0))
+//    	(lc_content.startsWith("：category:") && (category_len = "：category:".length()) > 0) 
+//		|| (lc_content.startsWith("：模板:") && (category_len = "：模板:".length()) > 0)
+    	if (colonStart && categoryNamespaces.contains(namespace))
     	{
+    		category_len = namespace.length() + 2;
     		if (start + category_len < end) 
     			handleContent(content.substring(start + category_len, end), res);
     		return;
     	}
-    	
-    	if (content.charAt(start)==':') 
-    		start++; // ignore any leading : (which is a shortcut for the current article namespace)
-    	
-        if (lc_content.startsWith("image:") 
-        		|| lc_content.startsWith("文件:")
-        		|| lc_content.startsWith("档案:")
-        		|| lc_content.startsWith("图像:"))
+//    	lc_content.startsWith("image:") 
+//		|| lc_content.startsWith("文件:")
+//		|| lc_content.startsWith("档案:")
+//		|| lc_content.startsWith("图像:")
+//    	lc_content.startsWith("category:")
+//		|| lc_content.startsWith("模板:")
+        if (namespace.length() > 0 && fileNamespaces.contains(namespace))
             handleImageLink(content,start,end,res);
-        else if (lc_content.startsWith("category:")
-        		|| lc_content.startsWith("模板:"))
+        else if (namespace.length() > 0 && categoryNamespaces.contains(namespace))
             handleCategory(content,start,end,res);
         else if (((content.length()>=start+"portal:".length())&&(content.substring(start,start+"portal:".length()).toLowerCase().startsWith("portal:")))||(content.indexOf(':',start)==-1)||(content.indexOf(':', start)>=end))
         {
@@ -5434,17 +5517,17 @@ public class WikiHandler extends DefaultHandler implements Runnable
                 handleContent(text,res);
 //              res.append(XML.XMLify2(text));
             }
-        }else if(content.substring(start, end).indexOf(":") != -1){
+        }else if(namespace.length() > 0 && !allNamespaces.contains(namespace)/*content.substring(start, end).indexOf(":") != -1*/){
 //        	if (currentTitle.equals("北京市"))
 //        		System.out.println("reaching article of 北京市");
-        	int titlePos = content.indexOf(":", start);
-        	String namespace = content.substring(start, titlePos);
+        	//int titlePos = content.indexOf(":", start);
+        	//namespace = content.substring(start, titlePos);
         	
-        	if (languageLinks.contains(namespace)) {
-	        	String title = content.substring(titlePos + 1,end);
-	        	while(title.indexOf(":") != -1){      	
-	        		title = title.substring(title.indexOf(":") + 1);
-	        	}
+        	//if (languageLinks.contains(namespace)) {
+	        	String title = link_content.substring(titlePos + 1);
+//	        	while(title.indexOf(":") != -1){      	
+//	        		title = title.substring(title.indexOf(":") + 1);
+//	        	}
 	        	
 //	        	if (title.equals("北京市") || namespace.equals("ko") || namespace.equals("ja"))
 //	        		System.out.println(namespace + ": 北京市");
@@ -5452,17 +5535,18 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        	 * TODO:
 	        	 * the articles should contains all the articles that needs to be processed
 	        	 */
-	        	if (namespace.equals("en")){
-	        		openTag(res,WikiConstants.wikilinkTag, " xlink:type=\"none\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
-	        		closeTag(res,WikiConstants.wikilinkTag);       		
-	        	} else if (articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
+	        	if (articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
 	        		String link = articles.get(namespace).get(title);
 	        		String url=makeWikiURL(link, title, namespace);
 	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
 	        		closeTag(res,WikiConstants.wikilinkTag);
-	        	}
+	        	} //	        	if (namespace.equals("en")) 
+	        	else {
+	        		openTag(res,WikiConstants.wikilinkTag, " xlink:type=\"none\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
+	        		closeTag(res,WikiConstants.wikilinkTag);       		
+	        	} 
 	        	
-        	}
+        	//}
         }
     }
     
@@ -7405,7 +7489,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		   return match(file.getName());
 	   }
 
-		@Override
+		//@Override
 		public boolean accept(File dir, String name) {
 			return match(name);
 		}	   
