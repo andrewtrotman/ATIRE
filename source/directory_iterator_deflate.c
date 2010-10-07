@@ -4,6 +4,7 @@
 */
 #include <new>
 #include <stdio.h>
+#include <stdlib.h>
 #include "directory_iterator_deflate.h"
 #include "compress_text_deflate.h"
 
