@@ -132,7 +132,11 @@ for (param = first_param; param < argc; param++)
 									pos = strchr(start, '"');
 									memcpy(anchor_text, start, pos - start);
 									anchor_text[pos - start] = '\0';
-									printf("%s:%s\n", anchor_text, doctitle);
+									/*
+									 * Actually, depend on the language of corpus which we want to extract the crosslink from, the direction of link could be different.
+									 * I would like to use Chinese document to extract English link for now which mean we don't have the source document id.
+									 */
+									printf("0:%d:%s\n", current_docid, anchor_text);
 									}
 							}
 						from = end;

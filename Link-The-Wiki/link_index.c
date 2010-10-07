@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 {
 ANT_link_element *link_list;
 ANT_disk disk;
-long lines, current, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
+long lines, current, lines_output, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
 char *file, *ch, *last_string;
 long lowercase_only;
 
@@ -105,11 +105,11 @@ qsort(link_list, lines, sizeof(*link_list), ANT_link_element::compare);
 last_string = "\n";
 unique_terms = 0;
 for (current = 0; current < lines; current++)
-	{
-	if (strcmp(link_list[current].term, last_string) != 0)
+	if (strlen(link_list[current].term) > 0 && strcmp(link_list[current].term, last_string) != 0)
+		{
 		unique_terms++;
-	last_string = link_list[current].term;
-	}
+		last_string = link_list[current].term;
+		}
 printf("%d terms\n", unique_terms);
 
 last_string = "Z";
@@ -117,32 +117,36 @@ last_docid = -1;
 last_anchor_docid = -1;
 times = 0;
 anchor_times = 0;
+lines_output = 0;
 for (current = 0; current < lines; current++)
 	{
-	if (strcmp(link_list[current].term, last_string) != 0)
+	if (strlen(link_list[current].term) > 0)
 		{
-		if (current != 0)
-			printf("<%d,%d,%d>\n", last_docid, anchor_times, times);
-		printf("%s:", link_list[current].term);
-		last_docid = link_list[current].docid;
-		last_anchor_docid = link_list[current].anchor_docid;
-		times = 1;
-		anchor_times = 1;
-		}
-	else
-		if (last_docid == link_list[current].docid)
+		if (strcmp(link_list[current].term, last_string) != 0)
 			{
-			times++;
-			if (last_anchor_docid != link_list[current].anchor_docid)
-				anchor_times++;				// different source documents
-			}
-		else
-			{
-			printf("<%d,%d,%d>", last_docid, anchor_times, times);
+			if (lines_output > 0)
+				printf("<%d,%d,%d>\n", last_docid, anchor_times, times);
+			printf("%s:", link_list[current].term);
+			last_docid = link_list[current].docid;
+			last_anchor_docid = link_list[current].anchor_docid;
 			times = 1;
 			anchor_times = 1;
+			++lines_output;
 			}
-
+		else
+			if (last_docid == link_list[current].docid)
+				{
+				times++;
+				if (last_anchor_docid != link_list[current].anchor_docid)
+					anchor_times++;				// different source documents
+				}
+			else
+				{
+				printf("<%d,%d,%d>", last_docid, anchor_times, times);
+				times = 1;
+				anchor_times = 1;
+				}
+		}
 	last_string = link_list[current].term;
 	last_docid = link_list[current].docid;
 	last_anchor_docid = link_list[current].anchor_docid;
