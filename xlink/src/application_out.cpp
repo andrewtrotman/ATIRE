@@ -54,6 +54,6 @@ void application_out::printbuf(const char *content)
 
 void application_out::flush()
 {
-	*out_ << buf_;
+	*out_ << buf_.str();
 }
 }
