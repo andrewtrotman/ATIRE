@@ -55,6 +55,10 @@ USE_HEAP_K_SEARCH := 0
 # is supported
 USE_PARTIAL_DCOMPRESSION := 0
 
+# represent the static array in two dimensions, reduce accumulators
+# initialisation time
+USE_TWO_D_ACCUMULATORS := 1
+
 ###############################################################################
 # specified your own setting in a separate file to override the default
 #
@@ -155,6 +159,10 @@ ifeq ($(ENABLED_TOP_K_SEARCH), yes)
 	ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)
 		CFLAGS += -DTOP_K_READ_AND_DECOMPRESSOR
 	endif
+endif
+
+ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
+	CFLAGS += -DTWO_D_ACCUMULATORS
 endif
 
 ###############################################################################

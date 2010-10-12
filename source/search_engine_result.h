@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "pragma.h"
 #include "search_engine_accumulator.h"
+#include <string.h>
 
 #ifdef HEAP_K_SEARCH
 #include "heap.h"
@@ -49,6 +50,12 @@ private:
 	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
 #endif
 
+#ifdef TWO_D_ACCUMULATORS
+	unsigned char *init_flags;
+	unsigned long width, height;
+	unsigned short width_in_bits;
+#endif
+
 public:
 	ANT_search_engine_result(ANT_memory *memory, long long documents);
 	virtual ~ANT_search_engine_result();
@@ -56,6 +63,16 @@ public:
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new(size_t bytes, ANT_memory *allocator);
 	ANT_search_engine_accumulator &operator[](size_t index) { return accumulator[index]; }
+
+	inline void init_partial_accumulators(size_t index) {
+#ifdef TWO_D_ACCUMULATORS
+		unsigned long long row;
+		if (init_flags[row = (index >> width_in_bits)] == 0) {
+			init_flags[row] = 1;
+			memset(accumulator + (row * width), 0, width * sizeof(*accumulator));
+		}
+#endif
+	}
 
 #ifdef TOP_K_SEARCH
 
@@ -113,6 +130,8 @@ public:
 		ANT_search_engine_accumulator::ANT_accumulator_t was;
 		ANT_search_engine_accumulator *which = accumulator + index;
 
+		init_partial_accumulators(index);
+
 //		if (index > documents)
 //			printf("docid %d too big\n", index);
 
@@ -134,7 +153,10 @@ public:
 	template <class T> inline void add_rsv(long index, T score) {
 		ANT_search_engine_accumulator *which = accumulator + index;
 		ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
-		ANT_search_engine_accumulator::ANT_accumulator_t new_val = which->add_rsv(score);
+		ANT_search_engine_accumulator::ANT_accumulator_t new_val;
+
+		init_partial_accumulators(index);
+		new_val = which->add_rsv(score);
 
 		if (results_list_length < top_k) {
 			if (old_val == 0) {
@@ -154,8 +176,8 @@ public:
 		}
 	}
 #else
-	void add_rsv(size_t index, double score) { accumulator[index].add_rsv(score); }
-	void add_rsv(size_t index, long score) { accumulator[index].add_rsv(score); }
+	void add_rsv(size_t index, double score) {  init_partial_accumulators(index); accumulator[index].add_rsv(score); }
+	void add_rsv(size_t index, long score) {  init_partial_accumulators(index); accumulator[index].add_rsv(score); }
 #endif
 
 	long is_zero_rsv(size_t index) { return accumulator[index].is_zero_rsv(); }
