@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+
 using namespace QLINK;
 
 
@@ -63,6 +65,7 @@ void link::print_anchor(long beps_to_print, bool id_or_name)
 	int count = 0;
 	sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
 	aout << buf;
+	if (link_term->postings.size() > 0) {
 	for (int i = 0; i < link_term->postings.size(); i++) {
 		if (link_term->postings[i]->docid < 0 && id_or_name)
 			continue;
@@ -71,9 +74,16 @@ void link::print_anchor(long beps_to_print, bool id_or_name)
 			sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%d</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->docid);
 		else
 			sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->desc);
+
+		aout << buf;
 		++count;
 		if (count >= beps_to_print)
 			break;
+	}
+	}
+	else {
+		sprintf(buf, "\t\t\t\t<tobep offset=\"0\">%s</tobep>\n", target_document);	
+		aout << buf;
 	}
 	//puts("\t\t\t</anchor>\n");
 	aout << "\t\t\t</anchor>\n";

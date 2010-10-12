@@ -33,10 +33,12 @@ namespace QLINK
 		void reset();
 		void flush();
 
-		//void operator << (const char *content);
+//		template <typename T>
+//		application_out& operator << (T const &content);
 		template <typename T>
-		void operator << (T const &content) {
+		application_out& operator << (T const &content) {
 			buf_ << content;
+			return *this;
 		}
 	};
 

@@ -216,14 +216,14 @@ namespace QLINK
 					buffer[term_len] = '\0';
 					node = last_index_entry->second; //new ANT_link_term;
 					//node->term = strdup(last_index_entry->first.c_str());
-					fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
+					//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
 					if (!lx->find(last_index_entry->second->term))
 						link * lnk = lx->push_link(NULL, offset, last_index_entry->second->term, last_index_entry->second->postings[0]->docid, 0.0, node);
 //					if (!lx->find(last_index_term->term))
 //						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
 //					else
 //						fprintf(stderr, "Duplicated");
-					fprintf(stderr, "\n");
+					//fprintf(stderr, "\n");
 					//lnk->require_cleanup();
 					//create_posting(last_index_entry->second, lnk);
 				}

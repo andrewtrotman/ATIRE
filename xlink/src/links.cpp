@@ -338,10 +338,10 @@ void links::sort_links()
 		std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), link_compare()/*link::final_compare*/);
 
 		// after sorting
-		for (int i = 0; i < all_links_in_file_.size(); i++) {
-			link *link_ptr = all_links_in_file_[i];
-			fprintf (stderr, "#%d: %s, %f, %d\n", (i + 1), link_ptr->term, link_ptr->gamma, link_ptr->target_document);
-		}
+		//for (int i = 0; i < all_links_in_file_.size(); i++) {
+		//	link *link_ptr = all_links_in_file_[i];
+		//	fprintf (stderr, "#%d: %s, %f, %d\n", (i + 1), link_ptr->term, link_ptr->gamma, link_ptr->target_document);
+		//}
 	}
 }
 
@@ -350,10 +350,10 @@ void links::sort_links_by_term()
 	std::sort(all_links_in_file_.begin(), all_links_in_file_.end(), term_compare());
 
 	//debug
-	for (int i = 0; i < all_links_in_file_.size(); i++) {
-		link *link_ptr = all_links_in_file_[i];
-		fprintf (stderr, "#%d: %s, %f, %d\n", (i + 1), link_ptr->term, link_ptr->gamma, link_ptr->target_document);
-	}
+	//for (int i = 0; i < all_links_in_file_.size(); i++) {
+	//	link *link_ptr = all_links_in_file_[i];
+	//	fprintf (stderr, "#%d: %s, %f, %d\n", (i + 1), link_ptr->term, link_ptr->gamma, link_ptr->target_document);
+	//}
 }
 
 QLINK::link *links::find(const char *term)

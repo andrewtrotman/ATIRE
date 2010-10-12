@@ -29,9 +29,11 @@ application_out::~application_out()
 
 //void application_out::operator << (const char *content)
 //template< typename T >
-//void application_out::operator<<(T const &content)
+//application_out &application_out::operator << (T const &content)
 //{
+//	T *t = 0;
 //	buf_ << content;
+//	return *this;
 //}
 
 void application_out::use_stdout(bool b)

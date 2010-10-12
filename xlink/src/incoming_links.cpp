@@ -70,7 +70,7 @@ void incoming_links::init() {
 void incoming_links::print_header()
 {
 //	puts("	<incoming>");
-	aout << "	<incoming>";
+	aout << "	<incoming>\n";
 }
 
 void incoming_links::print_footer()
