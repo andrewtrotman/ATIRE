@@ -57,7 +57,7 @@ USE_PARTIAL_DCOMPRESSION := 0
 
 # represent the static array in two dimensions, reduce accumulators
 # initialisation time
-USE_TWO_D_ACCUMULATORS := 1
+USE_TWO_D_ACCUMULATORS := 0
 
 ###############################################################################
 # specified your own setting in a separate file to override the default
