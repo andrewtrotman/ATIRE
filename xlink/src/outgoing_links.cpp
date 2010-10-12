@@ -250,15 +250,20 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 				int count = 0;
 				sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", current_link->offset, strlen(current_link->term), current_link->term);
 				aout << buf;
-				for (i = 0; i < postings.size(); i++) {
-					if (i == stop)
-						continue;
-					sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", postings[i]->offset, postings[i]->desc);
-					aout << buf;
-					++count;
-					if (count >= beps_to_print_)
-						break;
+				if (postings.size() > 0)
+					for (i = 0; i < postings.size(); i++) {
+						if (i == stop)
+							continue;
+						sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", postings[i]->offset, postings[i]->desc);
+						aout << buf;
+						++count;
+						if (count >= beps_to_print_)
+							break;
+					}
+				else {
+					sprintf(buf, "\t\t\t\t<tobep offset=\"0\">%s</tobep>\n", current_link->target_document);
 				}
+
 				//puts("\t\t\t</anchor>\n");
 				aout << "\t\t\t</anchor>\n";
 			}
