@@ -7,7 +7,11 @@
 	#include <windows.h>
 #elif defined (__APPLE__)
 	#include <mach/mach_time.h>
+	#include <unistd.h>
+	#include <sys/time.h>
+	#include <sys/times.h>
 #else
+	#include <unistd.h>
     #include <sys/time.h>
 	#include <sys/times.h>
 	#include <sys/param.h> //need predefine HZ
@@ -180,9 +184,10 @@ void ANT_stats::print_operating_system_process_time(void)
 		}
 #else
 	struct tms tmsbuf;
+	long clock_speed = sysconf(_SC_CLK_TCK);
 	if (times(&tmsbuf) > 0) {
-		printf("Kernel: %.3f seconds\n", (double)tmsbuf.tms_stime / HZ);
-		printf("  User: %.3f seconds\n", (double)tmsbuf.tms_utime / HZ);
+		printf("Kernel: %.3f seconds\n", (double)tmsbuf.tms_stime / clock_speed);
+		printf("  User: %.3f seconds\n", (double)tmsbuf.tms_utime / clock_speed);
 	}
 #endif
 }
