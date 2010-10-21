@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 
 #include <gcj/cni.h>
 
@@ -79,22 +80,7 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 						<< " but the XML2TXT server is not ready!"
 						<< "using the text by striping tags instead" << endl;
 
-				text = new char[strlen(content) + 1];
-				strcpy(text, content);
-				text[strlen(content)] = '\0';
-				//string_clean(text, 0, 0);
-				jstring xml_content = JvNewStringUTF(text);
-				//::java::lang::String *the_text = crosslink::XML2TXT::getInstance().getText()
-				crosslink::XML2TXT *x2t = new crosslink::XML2TXT();
-				jstring jstr = x2t->getText(xml_content);
-				const jchar *chrs =  JvGetStringChars(jstr);
-		        jsize size = JvGetStringUTFLength(jstr);
-		        //char *the_text = new char[size+1];
-		        int i=0;
-		        for(; i<size; i++)
-		        	text[i] = chrs[i];
-		        text[i] = 0;
-
+				text = clean_tags(content);
 				//const char *the_text = (const char *)xml_text->getBytes();
 			}
 			if (!xml)
@@ -104,4 +90,28 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 			cerr << "Error: " << "no such file - " << xmlfile << endl;
 	}
 	return text;
+}
+
+char *xml2txt::clean_tags(char *content, long lowercase)
+{
+	char *text = new char[strlen(content) + 1];
+	strcpy(text, content);
+	text[strlen(content)] = '\0';
+	//string_clean(text, 0, 0);
+	jstring xml_content = JvNewStringUTF(text);
+	//::java::lang::String *the_text = crosslink::XML2TXT::getInstance().getText()
+	crosslink::XML2TXT *x2t = crosslink::XML2TXT().getInstance();
+	jstring jstr = x2t->getText(xml_content);
+	const jchar *chrs =  JvGetStringChars(jstr);
+    jsize size = JvGetStringUTFLength(jstr);
+    //char *the_text = new char[size+1];
+    int i=0;
+    for(; i<size; i++)
+    	text[i] = chrs[i];
+    text[i] = 0;
+
+    if (lowercase) {
+		std::transform(text, text + i,
+		text, ::tolower);
+    }
 }

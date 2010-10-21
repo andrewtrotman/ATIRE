@@ -46,6 +46,7 @@ void ltw_topic::xml_to_text()
 	if (!text_of_xml_) {
 		text_of_xml_ = new char[strlen(content_) + 1];
 		strcpy(text_of_xml_, content_);
-		string_clean(text_of_xml_, 0, 0);
+		//string_clean(text_of_xml_, 0, 0);
+		xml2txt::instance().clean_tags(text_of_xml_, 0);
 	}
 }

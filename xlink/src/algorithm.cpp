@@ -10,6 +10,7 @@
 #include "ant_link_parts.h"
 #include "algorithm_config.h"
 #include "cmdline_options.h"
+#include "xml2txt.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -98,7 +99,8 @@ void algorithm::process_topic_text()
 //	long long *all_links_in_file_length = links_->all_links_length_ptr();
 //	*all_links_in_file_length = 0;
 
-	string_clean(filecopy, lowercase_only);
+	//string_clean(filecopy, lowercase_only);
+	xml2txt::instance().clean_tags(filecopy, lowercase_only);
 //	if (lowercase_only)
 //		string_tolower(filecopy);
 

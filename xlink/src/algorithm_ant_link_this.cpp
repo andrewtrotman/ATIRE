@@ -246,7 +246,8 @@ while (pos != NULL)
 		pos = strchr(pos, '>');
 
 		copy = strndup(pos + 1, end - pos - 1);
-		string_clean(copy, lowercase_only);
+		//string_clean(copy, lowercase_only);
+		xml2txt::instance().clean_tags(copy, lowercase_only);
 
 //		links_in_orphan_[*links_in_orphan_length]->term = copy;
 //		links_in_orphan_[*links_in_orphan_length]->gamma = 0;
