@@ -7,6 +7,9 @@
 
 #include "ltw_task.h"
 #include "algorithm_bep.h"
+#include <gcj/cni.h>
+#include <java/lang/Throwable.h>
+#include <java/lang/String.h>
 
 using namespace QLINK;
 
@@ -14,6 +17,20 @@ ltw_task::ltw_algorithm_map ltw_task::alorithm_names;
 ltw_task::ltw_task_type_map ltw_task::task_names;
 
 algorithm_bep::bep_algorithm_map algorithm_bep::alorithm_names;
+
+extern "C" void initJava() {
+        try {
+                if (JvCreateJavaVM(NULL) < 0) {
+                        fputs("Error creating the JVM!\n", stderr);
+                        return;
+                }
+                JvAttachCurrentThread(NULL, NULL);
+                fputs("Java initialized...\n", stderr);
+        } catch (java::lang::Throwable *t) {
+        	fputs("Unhandled Java exception!\n", stderr);
+        }
+        return;
+}
 
 class proxy {
 public:
@@ -36,6 +53,8 @@ public:
 	   algorithm_bep::alorithm_names[""] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_MATCH"] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_GRAPH"] = algorithm_bep::BEP_GRAPH;
+
+	   initJava();
    }
 };
 // our one instance of the proxy

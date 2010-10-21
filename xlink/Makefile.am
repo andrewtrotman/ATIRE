@@ -1,7 +1,7 @@
 #AM_CPPFLAGS = -std=c++0x  -pedantic -DREMOVE_ORPHAN_LINKS -I $(srcdir)/include/stpl
-AM_CPPFLAGS = -std=c++0x  -pedantic 
+AM_CPPFLAGS = -std=c++0x  -pedantic -I $(srcdir)/include/
 
-LTW_LIBS = -lant -lpthread
+LTW_LIBS = -lant -lpthread -L$(srcdir) -lxml2txt -lgcj
 
 SRC_DIR = src
 TOOLS_DIR = tools

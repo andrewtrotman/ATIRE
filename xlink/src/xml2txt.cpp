@@ -6,6 +6,7 @@
  */
 
 #include "xml2txt.h"
+#include "XML2TXT.h"
 #include "corpus.h"
 #include "corpus_txt.h"
 #include "sys_file.h"
@@ -14,6 +15,8 @@
 #include <string.h>
 #include <stdexcept>
 #include <iostream>
+
+#include <gcj/cni.h>
 
 using namespace QLINK;
 using namespace std;
@@ -79,7 +82,20 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 				text = new char[strlen(content) + 1];
 				strcpy(text, content);
 				text[strlen(content)] = '\0';
-				string_clean(text, 0, 0);
+				//string_clean(text, 0, 0);
+				jstring xml_content = JvNewStringUTF(text);
+				//::java::lang::String *the_text = crosslink::XML2TXT::getInstance().getText()
+				crosslink::XML2TXT *x2t = new crosslink::XML2TXT();
+				jstring jstr = x2t->getText(xml_content);
+				const jchar *chrs =  JvGetStringChars(jstr);
+		        jsize size = JvGetStringUTFLength(jstr);
+		        //char *the_text = new char[size+1];
+		        int i=0;
+		        for(; i<size; i++)
+		        	text[i] = chrs[i];
+		        text[i] = 0;
+
+				//const char *the_text = (const char *)xml_text->getBytes();
 			}
 			if (!xml)
 				delete [] content;
