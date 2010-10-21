@@ -94,13 +94,13 @@ void algorithm::process_topic_text()
 	static const char *seperators = " ";
 	char *token;
 	char **term_list, **current/*, **first, **last*/;
-	char *filecopy = strdup(xml_);
+	char *filecopy = NULL; //strdup(xml_);
 
 //	long long *all_links_in_file_length = links_->all_links_length_ptr();
 //	*all_links_in_file_length = 0;
 
 	//string_clean(filecopy, lowercase_only);
-	xml2txt::instance().clean_tags(filecopy, lowercase_only);
+	filecopy = xml2txt::instance().clean_tags(xml_, lowercase_only);
 //	if (lowercase_only)
 //		string_tolower(filecopy);
 
@@ -114,5 +114,6 @@ void algorithm::process_topic_text()
 
 	// segmnet fault for delete term list
 	delete [] term_list;
-	free(filecopy);
+	delete [] filecopy;
+	//free(filecopy);
 }
