@@ -116,6 +116,7 @@ noinst_PROGRAMS = ltw collection_link_finder
 
 ltw_SOURCES = $(ltw_sources)
 ltw_LDADD = ${LTW_LIBS}
+ltw_CFLAGS = $(AM_CFLAGS) -DCROSSLINK
 #ltw_LDFLAGS = -static
 
 collection_link_finder_SOURCES = $(TOOLS_DIR)/collection_link_finder.cpp

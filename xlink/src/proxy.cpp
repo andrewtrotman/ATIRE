@@ -7,6 +7,7 @@
 
 #include "ltw_task.h"
 #include "algorithm_bep.h"
+#include "link_print.h"
 #include <gcj/cni.h>
 #include <java/lang/Throwable.h>
 #include <java/lang/String.h>
@@ -53,6 +54,12 @@ public:
 	   algorithm_bep::alorithm_names[""] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_MATCH"] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_GRAPH"] = algorithm_bep::BEP_GRAPH;
+
+#ifdef CROSSLINK
+	   link_print::target_format = "\t\t\t\t<tofile bep_offset=\"%d\" lang=”%s” title=”%s”>%d</tofile>\n";
+#else
+	   link_print::target_format = "\t\t\t\t<tobep offset=\"%d\">%d</tobep>\n";
+#endif
 
 	   initJava();
    }

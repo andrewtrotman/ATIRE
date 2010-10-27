@@ -29,6 +29,7 @@ namespace QLINK {
 		std::string								home_;
 		std::string								base_;
 		std::string								teara_home_;
+		std::string								lang_;
 
 	public:
 		corpus();
@@ -40,6 +41,7 @@ namespace QLINK {
 		void teara_home(std::string path) { teara_home_ = path; }
 		void load();
 		virtual void load_teara_map();
+		void lang(std::string what) { lang_ = what; }
 
 		virtual std::string id2doc(unsigned long id);
 		virtual std::string id2dir(unsigned long id);
@@ -50,6 +52,7 @@ namespace QLINK {
 		virtual std::string ext() { return ".xml"; }
 		virtual std::string wildcard() { return "*.[xX][mM][lL]"; }
 
+		std::string gettitle(unsigned long id);
 		static corpus& instance();
 
 	private:

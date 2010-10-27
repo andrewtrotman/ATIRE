@@ -18,6 +18,9 @@ namespace QLINK {
 	 *
 	 */
 	class link : public ANT_link {
+	public:
+		char 						target_lang[5];
+
 	private:
 		bool						to_clean_;
 

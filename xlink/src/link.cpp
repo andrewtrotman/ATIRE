@@ -6,6 +6,7 @@
  */
 
 #include "link.h"
+#include "link_print.h"
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
 #include "ant_link_parts.h"
@@ -71,9 +72,9 @@ void link::print_anchor(long beps_to_print, bool id_or_name)
 			continue;
 
 		if (id_or_name)
-			sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%d</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->docid);
+			sprintf(buf, link_print::target_format.c_str(), link_term->postings[i]->offset, link_term->postings[i]->docid);
 		else
-			sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", link_term->postings[i]->offset, link_term->postings[i]->desc);
+			sprintf(buf, link_print::target_format.c_str(), link_term->postings[i]->offset, link_term->postings[i]->desc);
 
 		aout << buf;
 		++count;
@@ -82,7 +83,7 @@ void link::print_anchor(long beps_to_print, bool id_or_name)
 	}
 	}
 	else {
-		sprintf(buf, "\t\t\t\t<tobep offset=\"0\">%s</tobep>\n", target_document);	
+		sprintf(buf, link_print::target_format.c_str(), 0, target_document);
 		aout << buf;
 	}
 	//puts("\t\t\t</anchor>\n");

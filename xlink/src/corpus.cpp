@@ -115,7 +115,11 @@ string corpus::id2docpath(unsigned long id)
 //	cmd.append(stm.str());
 //
 //	return system_call::instance().execute(cmd.c_str());
-	return home_ + id2dir(id) + ext();
+#ifdef CROSSLINK
+	return home_ + sys_file::SEPARATOR + lang_ + sys_file::SEPARATOR + "pages" + sys_file::SEPARATOR + id2dir(id) + ext();
+#else
+	return home_ + sys_file::SEPARATOR + "pages" + sys_file::SEPARATOR + id2dir(id) + ext();
+#endif
 }
 
 string corpus::name2docpath(const char *name)
@@ -147,4 +151,14 @@ string corpus::name2tearapath(const char *name)
 //			return iter->second;
 //	}
 	return ""; //name2docpath(teara_home_, name);
+}
+
+std::string corpus::gettitle(unsigned long id)
+{
+	string filename = id2docpath(id);
+	char *content = sys_file::read_entire_file(filename.c_str());
+	char title[1024 * 10];
+	get_doc_name(content, title);
+	delete [] content;
+	return title;
 }

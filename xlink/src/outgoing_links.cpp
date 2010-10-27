@@ -254,7 +254,11 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 					for (i = 0; i < postings.size(); i++) {
 						if (i == stop)
 							continue;
-						sprintf(buf, "\t\t\t\t<tobep offset=\"%d\">%s</tobep>\n", postings[i]->offset, postings[i]->desc);
+#ifdef CROSSLINK
+						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, postings[i]->desc);
+#else
+						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, postings[i]->desc);
+#endif
 						aout << buf;
 						++count;
 						if (count >= beps_to_print_)
@@ -262,7 +266,7 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 					}
 				else {
                                         cerr << "Debug" << endl;
-					sprintf(buf, "\t\t\t\t<tobep offset=\"0\">%s</tobep>\n", current_link->target_document);
+					sprintf(buf, link_print::target_format.c_str(), 0, current_link->target_document);
 					aout << buf;
 				}
 

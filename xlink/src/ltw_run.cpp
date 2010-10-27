@@ -45,6 +45,9 @@ void ltw_run::init()
 		corpus_txt::instance().load_teara_map();
 	}
 
+	string lang = get_config().get_value("target_lang");
+	corpus::instance().lang(lang.length() > 0 ? lang : "en");
+
 	string taskname = get_config().get_value("task");
 	string out_algor_name = get_config().get_algorithm_outgoing_name();
 	string in_algor_name = get_config().get_algorithm_incoming_name();
