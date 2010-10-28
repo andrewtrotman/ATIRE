@@ -48,18 +48,14 @@ public:
 	   ltw_task::task_names[""] = ltw_task::LTW_TASK_NONE;
 	   ltw_task::task_names["LTW_F2F"] = ltw_task::LTW_LTW_F2F;
 	   ltw_task::task_names["LTW_A2B"] = ltw_task::LTW_LTW_A2B;
+	   ltw_task::task_names["F2F"] = ltw_task::LTW_LTW_F2F;
+	   ltw_task::task_names["A2B"] = ltw_task::LTW_LTW_A2B;
 	   ltw_task::task_names["LTAra_A2B"] = ltw_task::LTW_LTAra_A2B;
 	   ltw_task::task_names["LTAraTW_A2B"] = ltw_task::LTW_LTAraTW_A2B;
 
 	   algorithm_bep::alorithm_names[""] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_MATCH"] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_GRAPH"] = algorithm_bep::BEP_GRAPH;
-
-#ifdef CROSSLINK
-	   link_print::target_format = "\t\t\t\t<tofile bep_offset=\"%d\" lang=”%s” title=”%s”>%d</tofile>\n";
-#else
-	   link_print::target_format = "\t\t\t\t<tobep offset=\"%d\">%d</tobep>\n";
-#endif
 
 	   initJava();
    }

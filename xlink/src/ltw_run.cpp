@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include <assert.h>
+
 using namespace std;
 using namespace QLINK;
 
@@ -47,6 +49,7 @@ void ltw_run::init()
 
 	string lang = get_config().get_value("target_lang");
 	corpus::instance().lang(lang.length() > 0 ? lang : "en");
+	assert(corpus::instance().lang().length() <= 4);
 
 	string taskname = get_config().get_value("task");
 	string out_algor_name = get_config().get_algorithm_outgoing_name();

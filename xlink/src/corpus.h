@@ -42,6 +42,7 @@ namespace QLINK {
 		void load();
 		virtual void load_teara_map();
 		void lang(std::string what) { lang_ = what; }
+		std::string& lang() { return lang_; }
 
 		virtual std::string id2doc(unsigned long id);
 		virtual std::string id2dir(unsigned long id);

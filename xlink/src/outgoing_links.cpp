@@ -7,6 +7,7 @@
 
 #include "outgoing_links.h"
 #include "outgoing_link.h"
+#include "link_print.h"
 #include "ltw_topic.h"
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
@@ -75,13 +76,13 @@ void outgoing_links::init() {
 void outgoing_links::print_header()
 {
 	//puts("	<outgoing>");
-	aout << "	<outgoing>";
+	aout << "	\t<outgoing>\n";
 }
 
 void outgoing_links::print_footer()
 {
 //	puts("	</outgoing>\n");
-	aout << "	</outgoing>\n";
+	aout << "	\t</outgoing>\n";
 }
 
 void outgoing_links::print_link_tag_header()
@@ -250,14 +251,19 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 				int count = 0;
 				sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", current_link->offset, strlen(current_link->term), current_link->term);
 				aout << buf;
+				unsigned id = 0;
+				string target_title;
 				if (postings.size() > 0)
 					for (i = 0; i < postings.size(); i++) {
 						if (i == stop)
 							continue;
+
+						id = atoi(postings[i]->desc);
 #ifdef CROSSLINK
-						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, postings[i]->desc);
+						target_title = corpus::instance().gettitle(id);
+						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, current_link->target_lang, target_title.c_str(), postings[i]->desc);
 #else
-						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, postings[i]->desc);
+						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, id);
 #endif
 						aout << buf;
 						++count;
@@ -266,7 +272,12 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 					}
 				else {
                                         cerr << "Debug" << endl;
+#ifdef CROSSLINK
+                    target_title = corpus::instance().gettitle(current_link->target_document);
+					sprintf(buf, link_print::target_format.c_str(), 0, current_link->target_lang, current_link->target_document, target_title.c_str());
+#else
 					sprintf(buf, link_print::target_format.c_str(), 0, current_link->target_document);
+#endif
 					aout << buf;
 				}
 

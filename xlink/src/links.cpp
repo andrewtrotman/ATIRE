@@ -250,6 +250,7 @@ QLINK::link *links::push_link(char *place_in_file, long offset, char *buffer, lo
 	current->target_document = docid;
 	current->link_term = node;
 
+	strcpy(current->target_lang, corpus::instance().lang().c_str());
 	//all_links_in_file_length++;
 	if ((all_links_in_file_.size()) >= MAX_LINKS_IN_FILE)
 		exit(printf("Too many links in this file (aborting)\n"));

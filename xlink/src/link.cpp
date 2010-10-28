@@ -11,6 +11,7 @@
 #include "ant_link_posting.h"
 #include "ant_link_parts.h"
 #include "application_out.h"
+#include "corpus.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -62,28 +63,36 @@ void link::print_target(long anchor)
 
 void link::print_anchor(long beps_to_print, bool id_or_name)
 {
-	char buf[255];
+	char buf[1024 * 10];
 	int count = 0;
 	sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
 	aout << buf;
+	const char *format = link_print::target_format.c_str();
 	if (link_term->postings.size() > 0) {
-	for (int i = 0; i < link_term->postings.size(); i++) {
-		if (link_term->postings[i]->docid < 0 && id_or_name)
-			continue;
+		for (int i = 0; i < link_term->postings.size(); i++) {
+			if (link_term->postings[i]->docid < 0 && id_or_name)
+				continue;
 
-		if (id_or_name)
-			sprintf(buf, link_print::target_format.c_str(), link_term->postings[i]->offset, link_term->postings[i]->docid);
-		else
-			sprintf(buf, link_print::target_format.c_str(), link_term->postings[i]->offset, link_term->postings[i]->desc);
+			unsigned long id = 0;
+			if (id_or_name)
+				id = link_term->postings[i]->docid;
+			else
+				id = atoi(link_term->postings[i]->desc);
 
-		aout << buf;
-		++count;
-		if (count >= beps_to_print)
-			break;
-	}
+#ifdef CROSSLINK
+			std::string target_title = corpus::instance().gettitle(id);
+			sprintf(buf, format, link_term->postings[i]->offset, target_lang, target_title.c_str(), id);
+#else
+			sprintf(buf, format, link_term->postings[i]->offset, id);
+#endif
+			aout << buf;
+			++count;
+			if (count >= beps_to_print)
+				break;
+		}
 	}
 	else {
-		sprintf(buf, link_print::target_format.c_str(), 0, target_document);
+		sprintf(buf, format, 0, target_document);
 		aout << buf;
 	}
 	//puts("\t\t\t</anchor>\n");
