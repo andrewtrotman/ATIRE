@@ -244,7 +244,7 @@ QLINK::link *links::push_link(char *place_in_file, long offset, char *buffer, lo
 
 	//current = all_links_in_file + all_links_in_file_length;
 	current->place_in_file = place_in_file;
-	current->offset = offset;
+	current->offset = offset - 1;
 	current->term = strdup(buffer);
 	current->gamma = gamma;
 	current->target_document = docid;
