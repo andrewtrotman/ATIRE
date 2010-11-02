@@ -240,6 +240,8 @@ if ((which_stemmer = get_variable("~stemmer")) != 0)
 	printf("This index was stemmed using %s, search terms will be stemmed\n", stemmer->name());
 	}
 
+is_quantized = get_variable("~quantized");
+
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
 }
 

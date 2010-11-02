@@ -680,29 +680,49 @@ if (params.ranking_function == ANT_ANT_param_block::READABLE)
 else
 	{
 	search_engine = new ANT_search_engine(&memory, params.file_or_memory);
-    /*    	if (params.stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
-		ranking_function = new ANT_ranking_function_similarity(search_engine, params.bm25_k1, params.bm25_b);
-        else*/
-    if (params.ranking_function == ANT_ANT_param_block::BM25)
-		ranking_function = new ANT_ranking_function_BM25(search_engine, params.bm25_k1, params.bm25_b);
-	else if (params.ranking_function == ANT_ANT_param_block::IMPACT)
-		ranking_function = new ANT_ranking_function_impact(search_engine);
-	else if (params.ranking_function == ANT_ANT_param_block::LMD)
-		ranking_function = new ANT_ranking_function_lmd(search_engine, params.lmd_u);
-	else if (params.ranking_function == ANT_ANT_param_block::LMJM)
-		ranking_function = new ANT_ranking_function_lmjm(search_engine, params.lmjm_l);
-	else if (params.ranking_function == ANT_ANT_param_block::BOSE_EINSTEIN)
-        ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
-	else if (params.ranking_function == ANT_ANT_param_block::DIVERGENCE)
-		ranking_function = new ANT_ranking_function_divergence(search_engine);
-	else if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
-		ranking_function = new ANT_ranking_function_term_count(search_engine);
-	else if (params.ranking_function == ANT_ANT_param_block::INNER_PRODUCT)
-		ranking_function = new ANT_ranking_function_inner_product(search_engine);
-	else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
+	if (search_engine->quantized())
 		{
-		boolean = TRUE;
-		ranking_function = new ANT_ranking_function_term_count(search_engine);
+		if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
+			ranking_function = new ANT_ranking_function_term_count(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
+			{
+			boolean = TRUE;
+			ranking_function = new ANT_ranking_function_term_count(search_engine);
+			}
+		else if (params.ranking_function == ANT_ANT_param_block::IMPACT)
+			ranking_function = new ANT_ranking_function_impact(search_engine);
+		else		// impact ordered
+			{
+			puts("The index is impact ordered - using impact ordering");
+			ranking_function = new ANT_ranking_function_impact(search_engine);
+			}
+		}
+	else
+		{
+	    /*    	if (params.stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
+			ranking_function = new ANT_ranking_function_similarity(search_engine, params.bm25_k1, params.bm25_b);
+	        else*/
+	    if (params.ranking_function == ANT_ANT_param_block::BM25)
+			ranking_function = new ANT_ranking_function_BM25(search_engine, params.bm25_k1, params.bm25_b);
+		else if (params.ranking_function == ANT_ANT_param_block::IMPACT)
+			ranking_function = new ANT_ranking_function_impact(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::LMD)
+			ranking_function = new ANT_ranking_function_lmd(search_engine, params.lmd_u);
+		else if (params.ranking_function == ANT_ANT_param_block::LMJM)
+			ranking_function = new ANT_ranking_function_lmjm(search_engine, params.lmjm_l);
+		else if (params.ranking_function == ANT_ANT_param_block::BOSE_EINSTEIN)
+	        ranking_function = new ANT_ranking_function_bose_einstein(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::DIVERGENCE)
+			ranking_function = new ANT_ranking_function_divergence(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
+			ranking_function = new ANT_ranking_function_term_count(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::INNER_PRODUCT)
+			ranking_function = new ANT_ranking_function_inner_product(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
+			{
+			boolean = TRUE;
+			ranking_function = new ANT_ranking_function_term_count(search_engine);
+			}
 		}
 	}
 //printf("Index contains %lld documents\n", search_engine->document_count());

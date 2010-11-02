@@ -70,6 +70,7 @@ protected:
 	long long stem_buffer_length_in_bytes;
 	long trim_postings_k;
 	long long collection_length_in_terms;
+	long is_quantized;					// true if the index is quantized, false if the index is TF values.
 
 public:
 	ANT_search_engine_result *results_list;
@@ -113,6 +114,9 @@ public:
 	long long boolean_results_list(long terms_in_query);
 
 	long long get_variable(char *name);
+
+	long quantized(void) { return is_quantized; }					// true if the index is quantized, false if the index is TF values.
+
 
 	/*
 		Methods related to the retrieval of documents from the document repository.
