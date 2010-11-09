@@ -4289,13 +4289,13 @@ public class WikiHandler extends DefaultHandler implements Runnable
     //  this method should have the same result as first computing s=content.substring(start,end)
     //  amd then calling it as handleContent(s,0,s.length(),res)
     
-    private void handleContent(String original_content, int pos, int end, StringBuffer res)
+    private void handleContent(String content, int pos, int end, StringBuffer res)
     {
     	// shortcut: if there's nothing to parse, don't parse.
-    	if (original_content.length()==0) 
+    	if (content.length()==0) 
     		return;
     	
-    	String content = original_content;
+    	String really_content = content.substring(pos, end);
     	boolean haveBoldCache=haveBold;
     	boolean haveItalicsCache=haveItalics;
     	boolean italicsFirstCache=italicsFirst;

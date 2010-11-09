@@ -43,6 +43,7 @@ public class Wiki2XML {
     public static int inputPos = 0;
     
     private static boolean phaseZeroOnly = false;
+    private static boolean runBzip2 = false;
 
 //	public static final String templateExpanderURI="http://infao5602:8088/wiki/index.php/Special:ExpandTemplates";
 //	public static final String templateExpanderURI="http://localhost:8088/wiki/index.php/Special:ExpandTemplates";
@@ -110,7 +111,10 @@ public class Wiki2XML {
             {
             	debugWikiMarkup=true;
             }
-
+            else if (arg.compareTo("-runBzip2")==0)
+            {
+            	runBzip2=true;
+            }
             else if (arg.startsWith("-annofile="))
             {
             	annofile=arg.substring("-annofile=".length());
@@ -346,6 +350,62 @@ public class Wiki2XML {
 				parser.parse(stream,handler);
 				
 				stream.close();
+				
+				if (runBzip2) {
+					while (!queue.isEmpty())
+						Thread.sleep(1000);
+
+				String Command = null;
+
+				String filename = inputfile.get(i);
+					int pos = inputfile.get(i).lastIndexOf(File.separator);
+					if (pos > -1)
+						filename = filename.substring(pos + File.separator.length());
+				String inputFile = WikiHandler.outputDir + File.separator + WikiHandler.currentLang + File.separator + "*";
+				String outputFile = WikiHandler.outputDir + File.separator + filename;
+				        if (System.getProperty("os.name").equals("Linux")) {
+//			                Command = new String[5];
+//			                Command[0] = "tar";
+//			                Command[1] = "cjvf" + outputFile + " " + inputFile;
+//			                Command[2] = ";";
+//			                Command[3] = "\rm";
+//			                Command[4] = inputFile;
+		                }
+				        else if (System.getProperty("os.name").equals("Solaris")) {
+				        	//tar cvf - ./mydir | bzip2 - >> mydir.tar.bz2
+//			                Command = new String[8];
+//			                Command[0] = "tar";
+//			                Command[1] = "cvf - " + inputFile;
+//			                Command[2] = "|";
+//			                Command[3] = "bzip2"; 
+//			                Command[4] = "- >> " + outputFile;	
+//			                Command[5] = ";";
+//			                Command[6] = "\rm";
+//			                Command[7] =  "-rf " + inputFile;	
+				        	//Command = new String[2];
+				        	//Command[0] = "tar";
+				        	Command = "tar cf - " + inputFile + " | " + "bzip2 " + "- >> " + outputFile + "; \\rm -rf " + inputFile;	
+		                }
+				        
+
+				        Process runCommand = Runtime.getRuntime().exec(Command);
+
+				        BufferedReader Resultset = new BufferedReader(
+				                        new InputStreamReader (
+				                        runCommand.getInputStream()));
+
+				        String line;
+				        while ((line = Resultset.readLine()) != null)
+				        	System.out.println(line);		
+				        
+				        Resultset = new BufferedReader(
+		                        new InputStreamReader (
+		                        runCommand.getErrorStream()));
+				        while ((line = Resultset.readLine()) != null)
+				        	System.out.println(line);
+				        
+//					}
+				}
 			}
 		}
 		catch(SAXParseException e)
