@@ -42,9 +42,19 @@ for (pointer = 0; pointer < documents; pointer++)
 #ifdef HEAP_K_SEARCH
 heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, top_k);
 #endif
+
+#ifdef ANDREW_HEAP_BITS
+	include_set = new ANT_bitstring();
+	include_set->set_length(documents);
+#endif
 }
 
-ANT_search_engine_result::~ANT_search_engine_result() {
+/*
+	ANT_SEARCH_ENGINE_RESULT::~ANT_SEARCH_ENGINE_RESULT()
+	-----------------------------------------------------
+*/
+ANT_search_engine_result::~ANT_search_engine_result()
+{
 #ifdef HEAP_K_SEARCH
 	delete heapk;
 #endif
@@ -79,8 +89,11 @@ memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 	min_in_top_k = 0;
 	this->top_k = top_k;
 	results_list_length = 0;
-#endif
 
+	#ifdef ANDREW_HEAP_BITS
+		include_set->zero();
+	#endif
+#endif
 }
 
 /*

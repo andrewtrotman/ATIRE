@@ -65,6 +65,15 @@ else
 }
 
 /*
+	STRRENEW()
+	----------
+*/
+inline unsigned char *strrenew(const unsigned char *str, long long old_length, long long new_length)
+{ 
+return (unsigned char *)strrenew((const char *)str, old_length, new_length);
+}
+
+/*
 	STRIP_END_PUNC()
 	----------------
 */
