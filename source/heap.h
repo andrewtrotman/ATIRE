@@ -27,6 +27,8 @@ public:
 	#define left_pos(i) ((i)*2+1)
 	#define right_pos(i) ((i)*2+2)
 
+	void set_size(long long size) { this->size = size; }
+
 	void max_heapify(long long pos);
 	void max_heapify(long long pos, long long hsize);
 	void build_max_heap(void);

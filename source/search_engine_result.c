@@ -5,6 +5,7 @@
 #include "search_engine_result.h"
 #include "memory.h"
 #include "maths.h"
+#include "pdebug.h"
 
 /*
 	ANT_SEARCH_ENGINE_RESULT::ANT_SEARCH_ENGINE_RESULT()
@@ -40,10 +41,7 @@ for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 
 #ifdef HEAP_K_SEARCH
-heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, top_k);
-#endif
-
-#ifdef ANDREW_HEAP_BITS
+	heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, top_k);
 	include_set = new ANT_bitstring();
 	include_set->set_length(documents);
 #endif
@@ -88,11 +86,9 @@ memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	min_in_top_k = 0;
 	this->top_k = top_k;
+	heapk->set_size(top_k);
 	results_list_length = 0;
-
-	#ifdef ANDREW_HEAP_BITS
-		include_set->zero();
-	#endif
+	include_set->zero();
 #endif
 }
 

@@ -30,10 +30,6 @@ friend class ANT_search_engine;
 friend class ANT_search_engine_result_iterator;
 
 private:
-#ifdef ANDREW_HEAP_BITS
-	ANT_bitstring *include_set;
-
-#endif
 public:			// remove this line later
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
@@ -49,10 +45,11 @@ public:			// remove this line later
 private:
 	struct cmp_accumulator_pointers {
 		int operator() (ANT_search_engine_accumulator * a, ANT_search_engine_accumulator * b) {
-			return a->get_rsv() - b->get_rsv();
+			return a->get_rsv() < b->get_rsv() ? -1 : a->get_rsv() == b->get_rsv() ? 0 : 1;
 		}
 	};
 	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
+	ANT_bitstring *include_set;
 #endif
 
 #ifdef TWO_D_ACCUMULATORS
@@ -155,8 +152,9 @@ public:
 			which->add_rsv(score);				// we're already in the top-k so just add.
 		}
 #elif defined HEAP_K_SEARCH
-	template <class T> inline void add_rsv(long index, T score)
-		{
+
+#ifdef ANDREW_HEAP_K
+	template <class T> inline void add_rsv(long index, T score) {
 		ANT_search_engine_accumulator *which = accumulator + index;
 		ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
 		ANT_search_engine_accumulator::ANT_accumulator_t new_val;
@@ -164,57 +162,65 @@ public:
 		init_partial_accumulators(index);
 		new_val = which->add_rsv(score);
 
-		if (results_list_length < top_k)
-			{
-			if (old_val == 0)
-				{
+		//printf("andrew_k\n");
+
+		if (results_list_length < top_k) {
+			if (old_val == 0) {
 				accumulator_pointers[results_list_length++] = which;
-#ifdef ANDREW_HEAP_BITS
 				include_set->unsafe_setbit(index);
-#endif
-				}
-			} 
-		else
-			{
-/////
-			heapk->build_min_heap();
-			min_in_top_k = accumulator_pointers[0]->get_rsv();
-////
-			if ((old_val <= min_in_top_k) && (new_val > min_in_top_k))
-				{
-#ifdef ANDREW_HEAP_BITS
-				if (!include_set->unsafe_getbit(index))
-					{
+			}
+			// build the heap when there are top k number of non-zero accumulators
+			if (results_list_length == top_k) {
+				heapk->build_min_heap();
+				min_in_top_k = accumulator_pointers[0]->get_rsv();
+			}
+		} else {
+			// if the accumulator was previously not in the heap and now the
+			// new rsv value is greater than the minimum in the heap, then
+			// added this accumulator into the heap by replacing it with the minimum
+			if ((old_val <= min_in_top_k) && (new_val > min_in_top_k)) {
+				if (!include_set->unsafe_getbit(index)) {
 					include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
 					accumulator_pointers[0] = which;
 					include_set->unsafe_setbit(index);
-					}
+				}
+				// only rebuild the heap if the min is changed
+				//if (min_in_top_k < accumulator_pointers[0]->get_rsv()) {
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
-
-for (long aspt_pos = 0; aspt_pos < top_k; aspt_pos++)
-	{
-	if (min_in_top_k > accumulator_pointers[aspt_pos]->get_rsv())
-		{
-		printf("min: %ld true_min[%ld]:%ld\n", (long)min_in_top_k, aspt_pos, (long)accumulator_pointers[aspt_pos]->get_rsv());
-		puts("BROKEN");
-		exit(0);
+			}
 		}
 	}
+#endif
 
-				
-#else
-				if (min_in_top_k > accumulator_pointers[0]->get_rsv())
+#ifdef FEI_HEAP_K
+	template <class T> inline void add_rsv(long index, T score) {
+		ANT_search_engine_accumulator *which = accumulator + index;
+		ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
+		ANT_search_engine_accumulator::ANT_accumulator_t new_val;
+
+		init_partial_accumulators(index);
+		new_val = which->add_rsv(score);
+		//printf("fei_k\n");
+		if (results_list_length < top_k) {
+			if (old_val == 0) {
+				accumulator_pointers[results_list_length++] = which;
+			}
+		} else {
+			if ((old_val <= min_in_top_k) && (new_val >= min_in_top_k)) {
+				if (min_in_top_k > accumulator_pointers[0]->get_rsv()) {
 					heapk->build_min_heap();
-
+				}
 				accumulator_pointers[0] = which;
 
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
-#endif
-				}
 			}
 		}
+	}
+#endif
+
+
 #else
 	void add_rsv(size_t index, double score) {  init_partial_accumulators(index); accumulator[index].add_rsv(score); }
 	void add_rsv(size_t index, long score) {  init_partial_accumulators(index); accumulator[index].add_rsv(score); }
