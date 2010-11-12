@@ -48,8 +48,8 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 USE_DIRECT_MEMORY_READ := 0
 
 # enable either TOP_K search or HEAP_K search, but not both
-USE_TOP_K_SEARCH := 0
-USE_HEAP_K_SEARCH := 1
+USE_TOP_K_SEARCH := 1
+USE_HEAP_K_SEARCH := 0
 
 # if HEAP_K_SEARCH is enabled, please specify which heap to use
 USE_ANDREW_HEAP := 1
