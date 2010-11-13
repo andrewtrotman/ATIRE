@@ -86,9 +86,11 @@ memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	min_in_top_k = 0;
 	this->top_k = top_k;
-	heapk->set_size(top_k);
 	results_list_length = 0;
-	include_set->zero();
+	#ifdef HEAP_K_SEARCH
+		heapk->set_size(top_k);
+		include_set->zero();
+	#endif
 #endif
 }
 
