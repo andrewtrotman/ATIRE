@@ -39,24 +39,26 @@ public:
 
 template <typename T, typename _Compare> void Heap<T, _Compare>::min_insert(T key) {
 	long long i = 0, lpos, rpos;
-	
+
 	// if key is less than the minimum in heap, then do nothing
-	//if (key <= array[0]) {
-	//	return;
-	//}
-	
+	if (compare(key, array[0]) < 0) {
+		return;
+	}
+
 	while (i < this->size) {
 		lpos = left_pos(i);
 		rpos = right_pos(i);
-		
-		// check array out of bound, it's also the stopping codition
+
+		// check array out of bound, it's also the stopping condition
 		if ((lpos > this->size) || (rpos > this->size)) {
 			break;
 		}
-		
-		if ((key < array[lpos]) && (key < array[rpos])) {
+
+		//if ((key < array[lpos]) && (key < array[rpos])) {
+		if ((compare(key, array[lpos]) < 0) && (compare(key, array[rpos]) < 0)) {
 			break;
-		} else if (array[lpos] < array[rpos]) {
+		//} else if (array[lpos] < array[rpos]) {
+		} else if (compare(array[lpos], array[rpos]) < 0) {
 			array[i] = array[lpos];
 			i = lpos;
 		} else {
@@ -64,7 +66,7 @@ template <typename T, typename _Compare> void Heap<T, _Compare>::min_insert(T ke
 			i = rpos;
 		}
 	}
-	
+
 	array[i] = key;
 }
 
