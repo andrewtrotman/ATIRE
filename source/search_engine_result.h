@@ -190,7 +190,7 @@ public:
 #endif
 					include_set->unsafe_setbit(index);
 				}
-#ifdef REBUID_HEAPK
+#ifdef REBUILD_HEAPK
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
 #endif
