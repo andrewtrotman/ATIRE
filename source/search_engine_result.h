@@ -181,11 +181,19 @@ public:
 			if ((old_val <= min_in_top_k) && (new_val > min_in_top_k)) {
 				if (!include_set->unsafe_getbit(index)) {
 					include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
+//#define REBUILD_HEAPK
+#ifdef REBUILD_HEAPK
 					accumulator_pointers[0] = which;
+#else
+					heapk->min_insert(which);
+					min_in_top_k = accumulator_pointers[0]->get_rsv();
+#endif
 					include_set->unsafe_setbit(index);
 				}
+#ifdef REBUID_HEAPK
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
+#endif
 			}
 		}
 	}
