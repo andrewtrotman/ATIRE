@@ -184,8 +184,6 @@ public:
 					accumulator_pointers[0] = which;
 					include_set->unsafe_setbit(index);
 				}
-				// only rebuild the heap if the min is changed
-				//if (min_in_top_k < accumulator_pointers[0]->get_rsv()) {
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
 			}

@@ -1,5 +1,3 @@
-
-
 #ifndef HEAP_H
 #define HEAP_H
 
@@ -19,13 +17,10 @@ private:
 
 public:
 	Heap(T &arry, long long size, const _Compare& __c = _Compare()) : array(&arry), size(size), compare(__c) {};
-//	inline long long parent_pos(long long i) { return (i-1)/2; }
-//	inline long long left_pos(long long i) { return i*2+1; }
-//	inline long long right_pos(long long i) { return i*2+2; }
 
-	#define parent_pos(i) (((i)-1)/2)
-	#define left_pos(i) ((i)*2+1)
-	#define right_pos(i) ((i)*2+2)
+	#define parent_pos(i) (((i)-1) >> 1)
+	#define left_pos(i) (((i) << 1) + 1)
+	#define right_pos(i) (((i) << 1) + 2)
 
 	void set_size(long long size) { this->size = size; }
 
@@ -39,7 +34,39 @@ public:
 	void min_heapify(long long pos, long long hsize);
 	void build_min_heap(void);
 	void min_heapsort(void);
+	void min_insert(T key);
 };
+
+template <typename T, typename _Compare> void Heap<T, _Compare>::min_insert(T key) {
+	long long i = 0, lpos, rpos;
+	
+	// if key is less than the minimum in heap, then do nothing
+	//if (key <= array[0]) {
+	//	return;
+	//}
+	
+	while (i < this->size) {
+		lpos = left_pos(i);
+		rpos = right_pos(i);
+		
+		// check array out of bound, it's also the stopping codition
+		if ((lpos > this->size) || (rpos > this->size)) {
+			break;
+		}
+		
+		if ((key < array[lpos]) && (key < array[rpos])) {
+			break;
+		} else if (array[lpos] < array[rpos]) {
+			array[i] = array[lpos];
+			i = lpos;
+		} else {
+			array[i] = array[rpos];
+			i = rpos;
+		}
+	}
+	
+	array[i] = key;
+}
 
 template <typename T, typename _Compare> void Heap<T, _Compare>::max_heapify(long long pos) {
 	long long left = left_pos(pos);
