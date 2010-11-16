@@ -180,15 +180,18 @@ public:
 			// added this accumulator into the heap by replacing it with the minimum
 			if ((old_val <= min_in_top_k) && (new_val > min_in_top_k)) {
 				if (!include_set->unsafe_getbit(index)) {
-					include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
 //#define REBUILD_HEAPK
 #ifdef REBUILD_HEAPK
+					include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
 					accumulator_pointers[0] = which;
-#else
-					heapk->min_insert(which);
-					min_in_top_k = accumulator_pointers[0]->get_rsv();
-#endif
 					include_set->unsafe_setbit(index);
+#else
+					if (heapk->min_insert(which)) {
+						include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
+						min_in_top_k = accumulator_pointers[0]->get_rsv();
+						include_set->unsafe_setbit(index);
+					}
+#endif
 				}
 #ifdef REBUILD_HEAPK
 				heapk->build_min_heap();
