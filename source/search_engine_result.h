@@ -161,10 +161,15 @@ public:
 
 		init_partial_accumulators(index);
 		new_val = which->add_rsv(score);
+		if (include_set->unsafe_getbit(index)) {
+			heapk->min_update(which);
+			//heapk->build_min_heap();
+		}
 
 		//printf("andrew_k\n");
 
 		if (results_list_length < top_k) {
+
 			if (old_val == 0) {
 				accumulator_pointers[results_list_length++] = which;
 				include_set->unsafe_setbit(index);
@@ -174,30 +179,39 @@ public:
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
 			}
+
 		} else {
-			// if the accumulator was previously not in the heap and now the
-			// new rsv value is greater than the minimum in the heap, then
-			// added this accumulator into the heap by replacing it with the minimum
-			if ((old_val <= min_in_top_k) && (new_val > min_in_top_k)) {
-				if (!include_set->unsafe_getbit(index)) {
-//#define REBUILD_HEAPK
-#ifdef REBUILD_HEAPK
-					include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
-					accumulator_pointers[0] = which;
-					include_set->unsafe_setbit(index);
-#else
-					if (heapk->min_insert(which)) {
-						include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
-						min_in_top_k = accumulator_pointers[0]->get_rsv();
-						include_set->unsafe_setbit(index);
-					}
-#endif
+
+			if ((new_val > accumulator_pointers[0]->get_rsv()) && (!include_set->unsafe_getbit(index))) {
+				include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
+				heapk->min_insert(which);
+				include_set->unsafe_setbit(index);
+			}// else if ((new_val > accumulator_pointers[0]->get_rsv()) && (include_set->unsafe_getbit(index))) {
+			//	heapk->build_min_heap();
+
+			//}
+
+			/*
+			if ((new_val > accumulator_pointers[0]->get_rsv()) && (!include_set->unsafe_getbit(index))) {
+				include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
+				printf("\n\n");
+				printf(" new_val: %d\n", new_val);
+				printf("before: ");
+				for (int i = 0; i < top_k; i++) {
+					printf("%u, ", accumulator_pointers[i]->get_rsv());
 				}
-#ifdef REBUILD_HEAPK
-				heapk->build_min_heap();
-				min_in_top_k = accumulator_pointers[0]->get_rsv();
-#endif
+				printf("\n");
+				heapk->min_insert(which);
+				printf(" after: ");
+				for (int i = 0; i < top_k; i++) {
+					printf("%u, ", accumulator_pointers[i]->get_rsv());
+				}
+				printf("\n");
+				//accumulator_pointers[0] = which;
+				//heapk->build_min_heap();
+				include_set->unsafe_setbit(index);
 			}
+			*/
 		}
 	}
 #endif

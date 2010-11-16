@@ -35,6 +35,7 @@ public:
 	void build_min_heap(void);
 	void min_heapsort(void);
 	int min_insert(T key);
+	void min_update(T key);
 };
 
 template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key) {
@@ -43,7 +44,7 @@ template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key
 	if (compare(key, array[0]) < 0) {
 		return 0;
 	}
-	
+
 	while (i < this->size) {
 		lpos = left_pos(i);
 		rpos = right_pos(i);
@@ -68,6 +69,39 @@ template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key
 
 	array[i] = key;
 	return 1;
+}
+
+template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(T key) {
+	long long i, lpos, rpos;
+
+	for (i = 0; i < this->size; i++) {
+		if (array[i] == key) {
+			break;
+		}
+	}
+
+	while (i < this->size) {
+		lpos = left_pos(i);
+		rpos = right_pos(i);
+
+		if ((lpos >= this->size) || (rpos >= this->size)) {
+			break;
+		}
+
+		if ((compare(key, array[lpos]) <= 0) && (compare(key, array[rpos]) <= 0)) {
+			break;
+		}
+
+		if (compare(array[lpos], array[rpos]) > 0) {
+			array[i] = array[rpos];
+			i = rpos;
+		} else {
+			array[i] = array[lpos];
+			i = lpos;
+		}
+	}
+
+	array[i] = key;
 }
 
 template <typename T, typename _Compare> void Heap<T, _Compare>::max_heapify(long long pos) {
