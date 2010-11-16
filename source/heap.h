@@ -34,23 +34,22 @@ public:
 	void min_heapify(long long pos, long long hsize);
 	void build_min_heap(void);
 	void min_heapsort(void);
-	void min_insert(T key);
+	int min_insert(T key);
 };
 
-template <typename T, typename _Compare> void Heap<T, _Compare>::min_insert(T key) {
+template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key) {
 	long long i = 0, lpos, rpos;
-
 	// if key is less than the minimum in heap, then do nothing
 	if (compare(key, array[0]) < 0) {
-		return;
+		return 0;
 	}
-
+	
 	while (i < this->size) {
 		lpos = left_pos(i);
 		rpos = right_pos(i);
 
 		// check array out of bound, it's also the stopping condition
-		if ((lpos > this->size) || (rpos > this->size)) {
+		if ((lpos >= this->size) || (rpos >= this->size)) {
 			break;
 		}
 
@@ -68,6 +67,7 @@ template <typename T, typename _Compare> void Heap<T, _Compare>::min_insert(T ke
 	}
 
 	array[i] = key;
+	return 1;
 }
 
 template <typename T, typename _Compare> void Heap<T, _Compare>::max_heapify(long long pos) {
