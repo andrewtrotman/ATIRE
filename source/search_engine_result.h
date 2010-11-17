@@ -50,6 +50,7 @@ private:
 	};
 	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
 	ANT_bitstring *include_set;
+	long *heap_positions;
 #endif
 
 #ifdef TWO_D_ACCUMULATORS
@@ -162,7 +163,10 @@ public:
 		init_partial_accumulators(index);
 		new_val = which->add_rsv(score);
 		if (include_set->unsafe_getbit(index)) {
-			heapk->min_update(which);
+			//heapk->min_update(which);
+
+			heapk->min_update(heap_positions, index, accumulator);
+
 			//heapk->build_min_heap();
 		}
 
@@ -178,13 +182,27 @@ public:
 			if (results_list_length == top_k) {
 				heapk->build_min_heap();
 				min_in_top_k = accumulator_pointers[0]->get_rsv();
+
+				for (long i = 0; i < top_k; i++) {
+					heap_positions[accumulator_pointers[i]-accumulator] = i;
+				}
 			}
 
 		} else {
 
 			if ((new_val > accumulator_pointers[0]->get_rsv()) && (!include_set->unsafe_getbit(index))) {
 				include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
-				heapk->min_insert(which);
+				printf("before: ");
+				for (int i = 0; i < top_k; i++) {
+					printf("%ld, ", heap_positions[i]);
+				}
+				printf("\n");
+				heapk->min_insert(which, heap_positions, accumulator);
+				printf(" after: ");
+				for (int i = 0; i < top_k; i++) {
+					printf("%ld, ", heap_positions[i]);
+				}
+				printf("\n");
 				include_set->unsafe_setbit(index);
 			}// else if ((new_val > accumulator_pointers[0]->get_rsv()) && (include_set->unsafe_getbit(index))) {
 			//	heapk->build_min_heap();

@@ -44,6 +44,7 @@ for (pointer = 0; pointer < documents; pointer++)
 	heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, top_k);
 	include_set = new ANT_bitstring();
 	include_set->set_length(documents);
+	heap_positions = (long *)memory->malloc(sizeof(*heap_positions) * documents);
 #endif
 }
 

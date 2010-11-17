@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include "primary_cmp.h"
+#include "search_engine_accumulator.h"
 
 template <typename T, typename _Compare = Primary_cmp<T> > class Heap {
 private:
@@ -34,11 +35,12 @@ public:
 	void min_heapify(long long pos, long long hsize);
 	void build_min_heap(void);
 	void min_heapsort(void);
-	int min_insert(T key);
-	void min_update(T key);
+	int min_insert(T key, long *positions, ANT_search_engine_accumulator *base);
+	//void min_update(T key);
+	void min_update(long *positions, long index, ANT_search_engine_accumulator *base);
 };
 
-template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key) {
+template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key, long *positions, ANT_search_engine_accumulator *base) {
 	long long i = 0, lpos, rpos;
 	// if key is less than the minimum in heap, then do nothing
 	if (compare(key, array[0]) < 0) {
@@ -59,26 +61,34 @@ template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key
 			break;
 		//} else if (array[lpos] < array[rpos]) {
 		} else if (compare(array[lpos], array[rpos]) < 0) {
+			positions[array[lpos]-base] = i;
 			array[i] = array[lpos];
 			i = lpos;
 		} else {
+			positions[array[rpos]-base] = i;
 			array[i] = array[rpos];
 			i = rpos;
 		}
 	}
 
+	positions[key-base] = i;
 	array[i] = key;
 	return 1;
 }
 
-template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(T key) {
+//template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(T key) {
+template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(long *positions, long index, ANT_search_engine_accumulator *base) {
 	long long i, lpos, rpos;
-
+	T key;
+/*
 	for (i = 0; i < this->size; i++) {
 		if (array[i] == key) {
 			break;
 		}
 	}
+*/
+	i = positions[index];
+	key = array[i];
 
 	while (i < this->size) {
 		lpos = left_pos(i);
@@ -93,14 +103,17 @@ template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(T ke
 		}
 
 		if (compare(array[lpos], array[rpos]) > 0) {
+			positions[array[rpos]-base] = i;
 			array[i] = array[rpos];
 			i = rpos;
 		} else {
+			positions[array[lpos]-base] = i;
 			array[i] = array[lpos];
 			i = lpos;
 		}
 	}
 
+	positions[key-base] = i;
 	array[i] = key;
 }
 
