@@ -26,6 +26,7 @@ ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
 ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
+ANT_HAS_MYSQL = $(FALSE)
 
 #
 #	Directories
@@ -35,6 +36,18 @@ OBJDIR = bin
 BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
+
+#
+#	If we have MySQL (for access to MySQL)  The MySQL is GPL so there's a possible conflict here.
+#
+!IF $(ANT_HAS_MYSQL) == $(TRUE)
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_MYSQL
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I \MySQL\server\include
+EXTRA_LIBS = $(EXTRA_LIBS) \mysql\server\lib\opt\libmysql.lib
+DIRECTORY_ITERATOR_MYSQL = $(OBJDIR)\directory_iterator_mysql.obj
+!ELSE
+DIRECTORY_ITERATOR_MYSQL = 
+!ENDIF
 
 #
 #	If we have ZLIB (for the GZIP compression scheme)
@@ -57,12 +70,20 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 #
 #	Now for GPL / BSD license conflicts.
 #
+
+#
+#	Lovins Stemmer
+#
 !IF $(ANT_HAS_LOVINS) == $(TRUE)
 STEM_LOVINS = $(OBJDIR)\stem_lovins.obj
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LOVINS
 !ELSE
 STEM_LOVINS = 
 !ENDIF
+
+#
+#	Paice Husk Stemmer
+#
 !IF $(ANT_HAS_PAICE_HUSK) == $(TRUE)
 STEM_PAICE_HUSK = $(OBJDIR)\stem_paice_husk.obj
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_PAICE_HUSK
@@ -170,6 +191,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_iterator_csv.obj			\
 	$(OBJDIR)\directory_iterator_recursive.obj		\
+	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\stemmer.obj							\
 	$(OBJDIR)\stemmer_term_similarity.obj			\
