@@ -73,9 +73,15 @@ puts("-------------");
 puts("-r              Recursive search for files in this and directories below this");
 puts("-rcsv           Each document is a single line of the given file");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
+#ifdef ANT_HAS_MYSQL
+puts("-rphpbb <username> <password> <database> <instance> MySQL phpBB instance");
+#endif
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
 puts("-rtrecweb       Recursive search for TREC formatted <DOC>...</DOC> formatted files");
 puts("-rtgz           Search in tar.gz files for indexable files");
+#ifdef ANT_HAS_MYSQL
+puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
+#endif
 puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
@@ -274,6 +280,12 @@ for (param = 1; param < argc; param++)
 			recursive = CSV;
 		else if (strcmp(command, "rwarcgz") == 0)
 			recursive = WARC_GZ;
+#ifdef ANT_HAS_MYSQL
+		else if (strcmp(command, "rphpbb") == 0)
+			recursive = PHPBB;
+		else if (strcmp(command, "rvbulletin") == 0)
+			recursive = VBULLETIN;
+#endif
 		else if (*command == 'S')
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)

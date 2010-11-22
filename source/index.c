@@ -17,6 +17,7 @@
 #include "directory_iterator_object.h"
 #include "directory_iterator_pkzip.h"
 #include "directory_iterator_preindex.h"
+#include "directory_iterator_mysql.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -268,6 +269,19 @@ for (param = first_param; param < argc; param++)
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
+#ifdef ANT_HAS_MYSQL
+	else if (param_block.recursive == ANT_indexer_param_block::VBULLETIN)
+		{
+		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], "select * from testtable", ANT_directory_iterator::READ_FILE);
+		param += 3;
+		}
+	else if (param_block.recursive == ANT_indexer_param_block::PHPBB)
+		{
+		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], "select * from testtable", ANT_directory_iterator::READ_FILE);
+		param += 3;
+		}
+#endif
+
 	else if (param_block.recursive == ANT_indexer_param_block::TRECWEB)
 		{
 		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);

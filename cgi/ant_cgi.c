@@ -17,7 +17,7 @@
 /*
 	PROCESS_RESULT()
 	----------------
-	1:34:id:data\142000.xml 420.000000 Symphonic black metal
+	1:34:data\142000.xml 420.000000 Symphonic black metal
 	<rank>:<ANTID>:<filename> <RSV> <NAME>
 */
 void process_result(char *result, char *query)
@@ -61,7 +61,7 @@ else
 */
 int main(void)
 {
-long hits, current;
+long hits, current, valid;
 ANT_channel_socket *socket;
 char *result, *ch, *query_string = getenv("QUERY_STRING");
 
@@ -78,9 +78,12 @@ query_string = strnew(query_string + 1);
 /*
 	Should really URL decode this string.
 */
+valid = 0;
 for (ch = query_string; *ch != '\0'; ch++)
 	if (!isalnum(*ch))
 		*ch = ' ';
+	else
+		valid++;
 
 /*
 	Output stuff
@@ -88,17 +91,25 @@ for (ch = query_string; *ch != '\0'; ch++)
 //puts("Pragma: no-cache");
 //puts("Cache-Control: no-cache");
 puts("Content-Type: text/html\n\n");
-
-socket = new ANT_channel_socket(8088, "localhost");
-socket->puts(query_string);
-
-if ((result = socket->gets()) == NULL)
+if (valid == 0)
+	result = "Invalid Query";
+else
 	{
-	puts("Communications Error");
-	return 0;
+	socket = new ANT_channel_socket(8088, "localhost");
+	socket->puts(query_string);
+
+	if ((result = socket->gets()) == NULL)
+		{
+		puts("Communications Error");
+		return 0;
+		}
 	}
 
-hits = atol(strpbrk(result, "1234567890"));
+hits = 0;
+if ((ch = strchr(result, '\'')) != NULL)
+	if ((ch = strchr(ch + 1, '\'')) != NULL)
+		hits = atol(strpbrk(ch + 1, "1234567890"));
+
 if (hits > RESULTS_PER_PAGE)
 	hits = RESULTS_PER_PAGE;
 

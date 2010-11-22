@@ -874,8 +874,12 @@ char *ANT_search_engine::get_document(char *destination, unsigned long *destinat
 {
 long long start, end;
 
-if (document_offsets == NULL)
+if (document_offsets == NULL || id >= document_count())
+	{
+	*destination = '\0';
+	*destination_length = 0;
 	return NULL;
+	}
 
 start = document_offsets[id];
 end = document_offsets[id + 1];

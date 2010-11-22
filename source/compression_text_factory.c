@@ -27,7 +27,7 @@ ANT_compression_text_factory::ANT_compression_text_factory()
 schemes_to_use = DEFLATE;
 
 scheme = new ANT_compression_text_factory_scheme[number_of_techniques = 3];
-scheme[0].scheme_id = 0;
+scheme[0].scheme_id = 1;
 scheme[0].scheme = new ANT_compress_text_none;
 scheme[0].name = "none";
 

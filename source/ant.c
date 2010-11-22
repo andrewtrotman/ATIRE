@@ -312,7 +312,6 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		if ((current_document_length = length_of_longest_document) != 0)
 			{
 			search_engine->get_document(document_buffer, &current_document_length, atoll(command + 5));
-
 #ifndef NEVER
 /*
 	Andrew's experimental code to test focusing
@@ -377,7 +376,10 @@ outchannel->write(focused_result->finish, current_document_length - (focused_res
 	*/
 	number_of_queries++;
 
+//printf("Query:\"%s\"", query);
 	average_precision = perform_query(outchannel, params, search_engine, ranking_function, query, &hits, topic_id, map, stemmer, boolean);
+//printf("->%ld\n", (long)hits);
+
 	sum_of_average_precisions += average_precision;		// zero if we're using a focused metric
 
 	/*
