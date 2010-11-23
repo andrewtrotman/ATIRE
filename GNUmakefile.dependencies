@@ -30,8 +30,8 @@ bin/compress_none.o: source/compress_none.h source/compress.h source/fundamental
 bin/compress_relative10.o: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/maths.h
 bin/compress_sigma.o: source/pragma.h source/compress_sigma.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_carryover12_internals.h source/maths.h source/compress_sigma_frequency.h
 bin/compress_simple9.o: source/compress_simple9.h source/compress.h source/fundamental_types.h source/maths.h
-bin/compress_text_bz2.o: source/compress_text_bz2.h source/compress_text.h
-bin/compress_text_deflate.o: source/compress_text_deflate.h source/compress_text.h source/compress_text_deflate_internals.h
+bin/compress_text_bz2.o: bzip/bzip2-1.0.5/bzlib.h source/compress_text_bz2.h source/compress_text.h
+bin/compress_text_deflate.o: source/compress_text_deflate.h source/compress_text.h source/compress_text_deflate_internals.h zlib/zlib-1.2.3/zlib.h zlib/zlib-1.2.3/zconf.h
 bin/compress_text_none.o: source/compress_text_none.h source/compress_text.h
 bin/compress_variable_byte.o: source/compress_variable_byte.h source/compress.h source/fundamental_types.h
 bin/compression_factory.o: source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compress_relative10.h source/compress_simple9.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compress_sigma.h source/compress_none.h source/stats.h
@@ -41,7 +41,7 @@ bin/ctypes.o: source/ctypes.h
 bin/directory_iterator.o: source/disk.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_internals.h
 bin/directory_iterator_compressor.o: source/directory_iterator_compressor.h source/directory_iterator.h source/directory_iterator_object.h source/producer_consumer.h source/semaphores.h source/critical_section.h source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/threads.h
 bin/directory_iterator_csv.o: source/pragma.h source/directory_iterator_csv.h source/directory_iterator_file.h source/directory_iterator.h source/directory_iterator_object.h source/ctypes.h
-bin/directory_iterator_deflate.o: source/directory_iterator_deflate.h source/directory_iterator.h source/directory_iterator_object.h source/compress_text_deflate.h source/compress_text.h
+bin/directory_iterator_deflate.o: source/directory_iterator_deflate.h source/directory_iterator.h source/directory_iterator_object.h source/compress_text_deflate.h source/compress_text.h zlib/zlib-1.2.3/zlib.h zlib/zlib-1.2.3/zconf.h
 bin/directory_iterator_file.o: source/pragma.h source/directory_iterator_file.h source/directory_iterator.h source/directory_iterator_object.h
 bin/directory_iterator_internals.o: source/directory_iterator_internals.h
 bin/directory_iterator_multiple.o: source/str.h source/ctypes.h source/producer_consumer.h source/semaphores.h source/critical_section.h source/directory_iterator_multiple.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_multiple_internals.h source/threads.h

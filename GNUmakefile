@@ -51,10 +51,6 @@ USE_DIRECT_MEMORY_READ := 0
 USE_TOP_K_SEARCH := 1
 USE_HEAP_K_SEARCH := 0
 
-# if HEAP_K_SEARCH is enabled, please specify which heap to use
-USE_ANDREW_HEAP := 1
-USE_FEI_HEAP := 0
-
 # if top_k or heap_k is enable, then partial decompression of postings list
 # is supported
 USE_PARTIAL_DCOMPRESSION := 0
@@ -149,7 +145,6 @@ ifeq ($(USE_DIRECT_MEMORY_READ), 1)
 endif
 
 ENABLED_TOP_K_SEARCH := no
-ENABLED_HEAP_K_SEARCH := no
 
 ifeq ($(USE_TOP_K_SEARCH), 1)
 	CFLAGS += -DTOP_K_SEARCH
@@ -157,17 +152,8 @@ ifeq ($(USE_TOP_K_SEARCH), 1)
 else ifeq ($(USE_HEAP_K_SEARCH), 1)
 	CFLAGS += -DHEAP_K_SEARCH
 	ENABLED_TOP_K_SEARCH := yes
-	ENABLED_HEAP_K_SEARCH := yes
 endif
 
-# which heap k to use
-ifeq ($(ENABLED_HEAP_K_SEARCH), yes)
-	ifeq ($(USE_ANDREW_HEAP), 1)
-		CFLAGS += -DANDREW_HEAP_K
-	else ifeq ($(USE_FEI_HEAP), 1)
-		CFLAGS += -DFEI_HEAP_K
-	endif
-endif
 
 # make sure either top_k or heap_k is enabled
 ifeq ($(ENABLED_TOP_K_SEARCH), yes)
