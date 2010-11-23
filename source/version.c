@@ -95,7 +95,18 @@ puts("");
 
 puts("LANGUAGE FEATURES");
 puts("-----------------");
-puts("UTF-8 parser            : Eric Tang");
+puts("UTF-8 parser            : Eric Tang, Andrew Trotman");
 puts("East Asian Segmentation : Eric Tang");
 puts("Dale Chall Readability  : Matt Crane");
+
+#if defined (ANT_HAS_MYSQL) || defined (ANT_HAS_XPDF)
+puts("PLUGINS");
+puts("-------");
+#ifdef ANT_HAS_MYSQL
+puts("MySQL Connection");
+#endif
+#ifdef ANT_HAS_XPDF
+puts("xpdf");
+#endif
+#endif
 }
