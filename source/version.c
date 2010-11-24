@@ -103,10 +103,10 @@ puts("Dale Chall Readability  : Matt Crane");
 puts("PLUGINS");
 puts("-------");
 #ifdef ANT_HAS_MYSQL
-puts("MySQL Connection");
+	puts("MySQL Connection        : http://www.mysql.com/");
 #endif
 #ifdef ANT_HAS_XPDF
-puts("xpdf");
+	puts("xpdf PDF Connection     : http://www.foolabs.com/xpdf/");
 #endif
 #endif
 }

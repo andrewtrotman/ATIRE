@@ -1,0 +1,89 @@
+#
+#	Makefile for xpdf
+#	by Andrew Trotman
+#
+CC = @cl /nologo
+CFLAGS = /DWIN32 /Igoo /Ifofi /I. /O2
+LIBPROG = @lib /nologo
+
+all : libxpdf.lib at_pdftotext.exe
+
+LIBS = goo\Goo.lib fofi\fofi.lib xpdf\xpdf.lib
+
+libxpdf.lib : $(LIBS)
+	$(LIBPROG) /out:libxpdf.lib $(LIBS)
+
+aconf.h : aconf-win32.h
+	copy aconf-win32.h aconf.h
+
+GooOBJ = goo\GHash.obj goo\GList.obj goo\GString.obj goo\gmem.obj goo\gmempp.obj goo\gfile.obj goo\parseargs.obj
+
+{goo\}.cc{goo\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+
+{goo\}.c{goo\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+
+goo\Goo.lib : $(GooOBJ) aconf.h
+	$(LIBPROG) /out:goo\Goo.lib $(GooOBJ)
+
+fofiOBJ = fofi\FoFiBase.obj fofi\FoFiEncodings.obj fofi\FoFiTrueType.obj fofi\FoFiType1.obj fofi\FoFiType1C.obj
+
+{fofi\}.cc{fofi\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+
+fofi\fofi.lib : $(fofiOBJ) aconf.h
+	$(LIBPROG) /out:fofi\fofi.lib $(fofiOBJ)
+
+xpdfOBJ = 	\
+	xpdf\Annot.obj	\
+	xpdf\Array.obj	\
+	xpdf\BuiltinFont.obj	\
+	xpdf\BuiltinFontTables.obj	\
+	xpdf\CMap.obj	\
+	xpdf\Catalog.obj	\
+	xpdf\CharCodeToUnicode.obj	\
+	xpdf\Decrypt.obj	\
+	xpdf\Dict.obj	\
+	xpdf\Error.obj	\
+	xpdf\FontEncodingTables.obj	\
+	xpdf\Function.obj	\
+	xpdf\Gfx.obj	\
+	xpdf\GfxFont.obj	\
+	xpdf\GfxState.obj	\
+	xpdf\GlobalParams.obj	\
+	xpdf\ImageOutputDev.obj	\
+	xpdf\JArithmeticDecoder.obj	\
+	xpdf\JBIG2Stream.obj	\
+	xpdf\JPXStream.obj	\
+	xpdf\Lexer.obj	\
+	xpdf\Link.obj	\
+	xpdf\NameToCharCode.obj	\
+	xpdf\Object.obj	\
+	xpdf\Outline.obj	\
+	xpdf\OutputDev.obj	\
+	xpdf\PDFDoc.obj	\
+	xpdf\PDFDocEncoding.obj	\
+	xpdf\PSOutputDev.obj	\
+	xpdf\PSTokenizer.obj	\
+	xpdf\Page.obj	\
+	xpdf\Parser.obj	\
+	xpdf\SecurityHandler.obj	\
+	xpdf\Stream.obj	\
+	xpdf\TextOutputDev.obj	\
+	xpdf\UnicodeMap.obj	\
+	xpdf\UnicodeTypeTable.obj	\
+	xpdf\XRef.obj
+
+{xpdf\}.cc{xpdf\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+
+
+xpdf\xpdf.lib : $(xpdfOBJ) aconf.h
+	$(LIBPROG)  /out:xpdf\xpdf.lib $(xpdfOBJ)
+	
+at_pdftotext.exe : xpdf\at_pdftotext.cc aconf.h libxpdf.lib
+	$(CC) $(CFLAGS) xpdf\at_pdftotext.cc libxpdf.lib  shell32.lib user32.lib gdi32.lib advapi32.lib
+
+clean :
+	del *.obj *.lib *.bak *.exe /s
