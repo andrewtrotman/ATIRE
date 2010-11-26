@@ -272,7 +272,7 @@ for (param = first_param; param < argc; param++)
 #ifdef ANT_HAS_MYSQL
 	else if (param_block.recursive == ANT_indexer_param_block::VBULLETIN)
 		{
-		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], "select * from testtable", ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], "select postid, username, title, pagetext from post", ANT_directory_iterator::READ_FILE);
 		param += 3;
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::PHPBB)
