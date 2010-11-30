@@ -1,10 +1,10 @@
+
 /*
 	BITSTRING_ITERATOR.H
 	--------------------
 */
-
-#ifndef __BITSTRING_ITERATOR_H__
-#define __BITSTRING_ITERATOR_H__
+#ifndef BITSTRING_ITERATOR_H_
+#define BITSTRING_ITERATOR_H_
 
 class ANT_bitstring;
 
@@ -25,4 +25,5 @@ public:
 } ;
 
 
-#endif __BITSTRING_ITERATOR_H__
+
+#endif /* BITSTRING_ITERATOR_H_ */

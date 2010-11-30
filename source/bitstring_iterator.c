@@ -1,3 +1,4 @@
+
 /*
 	BITSTRING_ITERATOR.C
 	--------------------
