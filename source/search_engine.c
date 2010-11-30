@@ -519,7 +519,7 @@ return verify;
 	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function)
+void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
 {
 void *verify;
 long long now, bytes_already_read;
@@ -577,7 +577,10 @@ if (term_details != NULL && term_details->document_frequency > 0)
 		stats->add_decompress_time(stats->stop_timer(now));
 
 		now = stats->start_timer();
-		ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
+		if (bitstring == NULL)		// it bitstring != NULL then we're boolean ranking hybrid
+			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
+		else
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
 		stats->add_rank_time(stats->stop_timer(now));
 		}
 
@@ -589,11 +592,11 @@ if (term_details != NULL && term_details->document_frequency > 0)
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function)
+void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
 {
 ANT_search_engine_btree_leaf term_details;
 
-process_one_term_detail(process_one_term(term, &term_details), ranking_function);
+process_one_term_detail(process_one_term(term, &term_details), ranking_function, bitstring);
 }
 
 /*

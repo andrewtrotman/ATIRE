@@ -99,6 +99,41 @@ while (current < end)
 }
 
 /*
+	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_BOOLEAN()
+	---------------------------------------------------
+	This is an exact copy of the relevance_rank_top_k() function except that it also flips the
+	sits in the documents_touched bitstring.
+*/
+void ANT_ranking_function_BM25::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+{
+const double k1 = this->k1;
+const double k1_plus_1 = k1 + 1.0;
+long docid;
+double top_row, tf, idf;
+ANT_compressable_integer *current, *end;
+
+idf = log((double)documents / (double)term_details->document_frequency);
+current = impact_ordering;
+end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+while (current < end)
+	{
+	end += 2;		// account for the impact_order and the terminator
+	tf = *current++;
+	top_row = tf * k1_plus_1;
+	docid = -1;
+	while (*current != 0)
+		{
+		docid += *current++;
+		accumulators->add_rsv(docid, idf * (top_row / (tf + document_prior_probability[docid])));
+		documents_touched->unsafe_setbit(docid);
+		}
+	current++;		// skip over the zero
+	}
+}
+
+
+
+/*
 	ANT_RANKING_FUNCTION_BM25::RANK()
 	---------------------------------
 */

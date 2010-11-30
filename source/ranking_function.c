@@ -11,6 +11,7 @@
 #include "search_engine_accumulator.h"
 #include "ranking_function.h"
 #include "stats_search_engine.h"
+#include "bitstring.h"
 
 /*
 	ANT_RANKING_FUNCTION::ANT_RANKING_FUNCTION()
@@ -133,6 +134,39 @@ for (bucket = 0; bucket < 0x100; bucket++)
 
 term_details->document_frequency = document_frequency;
 term_details->impacted_length = sum + 2 * buckets_used;
+}
+
+/*
+	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
+	----------------------------------------------
+*/
+void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+{
+long docid;
+ANT_compressable_integer *current, *end;
+
+/*
+	Set the bits in the bitstring (pass 1)
+*/
+current = impact_ordering;
+end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+while (current < end)
+	{
+	end += 2;		// account for the impact_order and the terminator
+	current++;		// skip over the TF value
+	docid = -1;
+	while (*current != 0)
+		{
+		docid += *current++;
+		documents_touched->unsafe_setbit(docid);
+		}
+	current++;		// skip over the zero
+	}
+
+/*
+	Now call the top-k based relevance ranking function (pass 2)
+*/
+relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point);
 }
 
 /*

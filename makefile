@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 0
+DEBUG = 1
 
 #
 #	Which compiler are we using
@@ -137,7 +137,10 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 #	Objects
 #
 PARTS = \
+	$(OBJDIR)\query_parse_tree.obj 					\
+	$(OBJDIR)\query_boolean.obj 					\
 	$(OBJDIR)\bitstring.obj 						\
+	$(OBJDIR)\bitstring_iterator.obj 				\
 	$(OBJDIR)\channel_file.obj						\
 	$(OBJDIR)\channel_socket.obj					\
 	$(OBJDIR)\parser.obj 							\
@@ -290,6 +293,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_tar.exe				\
 	$(BINDIR)\test_stop.exe				\
 	$(BINDIR)\textsplitter.exe			\
+	$(BINDIR)\test_boolean_parser.exe	\
 	$(BINDIR)\test_unicode_case_convert.exe
 
 #
@@ -302,6 +306,7 @@ all : $(PARTS) \
 bin\link_index_merge.exe : bin\link_index_merge.obj
 bin\make_case_conversion_table.exe : bin\make_case_conversion_table.obj
 bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
+bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
 
 #
 #	Default dependency rules

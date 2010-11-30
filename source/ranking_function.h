@@ -12,6 +12,7 @@
 class ANT_search_engine;
 class ANT_search_engine_btree_leaf;
 class ANT_stats_search_engine;
+class ANT_bitstring;
 
 #ifdef USE_FLOATED_TF
 typedef double ANT_weighted_tf;
@@ -61,6 +62,14 @@ public:
 	*/
 	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) = 0;
 	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency) = 0;
+
+	/*
+		You can override this function if you want fast boolean, otherwise it'll run through the postings list 
+		setting bits and then chain through to relevance_rank_top_k().  That is, default behaviour is to double
+		pass the postings list but this can be overridden to touch the postings list only once (see BM25 for
+		and example).
+	*/
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point);
 
 	/*
 		If you also override this function then you can rank directly from the tf array,

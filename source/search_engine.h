@@ -93,8 +93,8 @@ public:
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
-	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function);
-	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function);
+	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
+	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function);
 	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
