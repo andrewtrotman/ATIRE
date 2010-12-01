@@ -10,6 +10,7 @@
 #include "NEXI_term.h"
 
 class ANT_string_term;
+class ANT_query;
 
 /*
 	class ANT_NEXI
@@ -21,11 +22,13 @@ protected:
 	static const size_t MAX_NEXI_TERMS = 1024;
 
 private:
-	long successful_parse;
+	long error_code;
 	long segmentation;
 	ANT_string_pair token;
 	unsigned char *string, *at;
 	ANT_NEXI_term *pool;
+	long noisy_errors;
+	long first_error_pos;
 
 protected:
 	size_t pool_used;
@@ -36,7 +39,7 @@ private:
 	long ispart(unsigned char *from, long length, unsigned char *next);
 	ANT_string_pair *get_next_token(void);
 	void read_path(ANT_string_pair *path);
-	void parse_error(char *message);
+	void parse_error(long code, char *message);
 	ANT_NEXI_term *about(void);
 	long read_phrase(ANT_string_pair *string);
 	long read_phraseless_term(ANT_string_pair *term);
@@ -50,11 +53,15 @@ protected:
 	virtual ANT_NEXI_term *next_free_node() { return pool + pool_used; } 
 
 public:
-	ANT_NEXI(long make_memory = 1) { pool = make_memory ? new ANT_NEXI_term[MAX_NEXI_TERMS] : NULL; pool_used = 0; }
+	ANT_NEXI(long make_memory = 1) { pool = make_memory ? new ANT_NEXI_term[MAX_NEXI_TERMS] : NULL; pool_used = 0; noisy_errors = 0; first_error_pos = 0; }
 	virtual ~ANT_NEXI() { delete [] pool; }
+
 	ANT_NEXI_term *parse(char *expression);
-	long get_success_state(void) { return successful_parse; }
+	ANT_query *parse(ANT_query *into, char *expression);
+	long get_error_code(void) { return error_code; }
 	void set_segmentation(long to_segment) { segmentation = to_segment; }
+	void print_errors(void) { noisy_errors = 1; }
+	void silent_errors(void) { noisy_errors = 0; }
 } ;
 
 #endif  /* NEXI_H_ */

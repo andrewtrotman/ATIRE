@@ -6,6 +6,7 @@
 #include "ctypes.h"
 #include "parser.h"
 #include "NEXI_term.h"
+#include "query.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -27,7 +28,7 @@ answer = next_free_node();
 pool_used++;
 if (pool_used >= MAX_NEXI_TERMS)
 	{
-	parse_error("Out of ANT_NEXI_term nodes while parsing the query");
+	parse_error(ANT_query::ERROR_PREMATURE_END_OF_QUERY, "Out of ANT_NEXI_term nodes while parsing the query");
 	pool_used = MAX_NEXI_TERMS - 1;
 	}
 
@@ -226,10 +227,15 @@ path->string_length = token.start - path->start;
 	ANT_NEXI::PARSE_ERROR()
 	-----------------------
 */
-void ANT_NEXI::parse_error(char *message)
+void ANT_NEXI::parse_error(long code, char *message)
 {
-fprintf(stderr, "NEXI ERROR, column %ld: %s\n", (long)(at - string), message);
-successful_parse = FALSE;
+if (noisy_errors)
+	{
+	if (first_error_pos < 0)
+		first_error_pos = (long)(at - string);
+	fprintf(stderr, "NEXI ERROR, column %ld: %s\n", (long)(at - string), message);
+	}
+error_code = code;
 }
 
 /*
@@ -243,15 +249,15 @@ ANT_string_pair path, terms;
 
 get_next_token();
 if (token[0] != '(')
-	parse_error("Expected '('");
+	parse_error(ANT_query::ERROR_MISSING_OPEN_ROUND_BRACKET, "Expected '('");
 get_next_token();						// prime the read_path method with the first token in the path
 read_path(&path);
 if (token[0] != ',')
-	parse_error("Expected ','");
+	parse_error(ANT_query::ERROR_MISSING_COMMA, "Expected ','");
 get_next_token();			// prime read_CO
 answer = read_CO(&path, &terms);
 if (token[0] != ')')
-	parse_error("Expected ')'");
+	parse_error(ANT_query::ERROR_MISSING_CLOSE_ROUND_BRACKET, "Expected ')'");
 
 return answer;
 }
@@ -338,7 +344,7 @@ while (more);
 
 if (token[0] != '"')
 	{
-	parse_error("non-term found in phrase");
+	parse_error(ANT_query::ERROR_INVALID_PHRASE, "non-term found in phrase");
 	return FALSE;
 	}
 
@@ -370,13 +376,13 @@ do
 			{
 			weight = +1;
 			if (!read_term(&current))
-				parse_error("term expected");
+				parse_error(ANT_query::ERROR_MISSING_TERM, "term expected");
 			}
 		else if (token[0] == '-')		// negatively selected terms
 			{
 			weight = -1;
 			if (!read_term(&current))
-				parse_error("term expected");
+				parse_error(ANT_query::ERROR_MISSING_TERM, "term expected");
 			}
 		else if (!ANT_isalnum(token[0]))
 			more = FALSE;
@@ -410,7 +416,7 @@ do
 	{
 	read_path(&path);
 	if (path.string_length < 3 || strncmp(path.start, "//", 2) != 0)
-		parse_error("Path must start with a //");
+		parse_error(ANT_query::ERROR_MISSING_DOUBLE_SLASH, "Path must start with a //");
 	if (parent_path != NULL)
 		{
 		parent_path = duplicate_path_chain(parent_path, &end_of_path_chain);
@@ -431,7 +437,7 @@ do
 			else if (token[0] == '.')
 				got = numbers();
 			else
-				parse_error("Expected 'about()' clause or numeric expression");
+				parse_error(ANT_query::ERROR_MISSING_ABOUT_CLAUSE, "Expected 'about()' clause or numeric expression");
 
 			if (got != NULL)
 				{
@@ -447,11 +453,11 @@ do
 			}
 		while (token.true_strcmp("or") == 0 || token.true_strcmp("and") == 0 || token.true_strcmp("OR") == 0 || token.true_strcmp("AND") == 0);
 		if (token[0] != ']')
-			parse_error("Expected ']'");
+			parse_error(ANT_query::ERROR_MISSING_CLOSE_SQUARE_BRACKET, "Expected ']'");
 		get_next_token();		// primed for next iteration of target-element loop
 		}
 	else if (token[0] != '\0')
-		parse_error("Expected '['");
+		parse_error(ANT_query::ERROR_MISSING_OPEN_SQUARE_BRACKET, "Expected '['");
 	}
 while (token[0] != '\0');
 
@@ -464,10 +470,23 @@ return sentinal.next;
 */
 ANT_NEXI_term *ANT_NEXI::parse(char *expression)
 {
+ANT_query into;
+
+parse(&into, expression);
+
+return error_code == ANT_query::ERROR_NONE ? into.NEXI_query : NULL;
+}
+
+/*
+	ANT_NEXI::PARSE()
+	-----------------
+*/
+ANT_query *ANT_NEXI::parse(ANT_query *into, char *expression)
+{
 ANT_string_pair terms;
 ANT_NEXI_term *answer;
 
-successful_parse = TRUE;
+error_code = ANT_query::ERROR_NONE;
 at = string = (unsigned char *)expression;
 
 get_next_token();
@@ -478,10 +497,16 @@ else
 	answer = read_CO(NULL, &terms);
 
 if (token[0] != '\0')
-	parse_error("Unexpected end of query");
+	parse_error(ANT_query::ERROR_PREMATURE_END_OF_QUERY, "Unexpected end of query");
 
-return successful_parse ? answer : NULL;
+into->clear();
+into->set_query(answer);
+into->set_error(error_code);
+
+return into;
 }
+
+
 
 #ifdef NEVER
 	/*

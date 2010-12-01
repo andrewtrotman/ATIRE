@@ -1,0 +1,42 @@
+/*
+	QUERY.C
+	-------
+*/
+#include <stdio.h>
+#include "query.h"
+
+/*
+	ANT_QUERY::CLEAR()
+	------------------
+*/
+void ANT_query::clear(void)
+{
+type = BLANK;
+subtype = DISJUNCTIVE;
+NEXI_query = NULL;
+boolean_query = NULL;
+parse_error = ERROR_NONE;
+}
+
+/*
+	ANT_QUERY::SET_QUERY()
+	----------------------
+*/
+void ANT_query::set_query(ANT_NEXI_term *query)
+{
+clear();
+type = NEXI;
+subtype = DISJUNCTIVE;
+NEXI_query = query;
+}
+
+/*
+	ANT_QUERY::SET_QUERY()
+	----------------------
+*/
+void ANT_query::set_query(ANT_query_parse_tree *query)
+{
+clear();
+type = BOOLEAN;
+boolean_query = query;
+}

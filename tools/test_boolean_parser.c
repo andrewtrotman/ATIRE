@@ -13,7 +13,7 @@ static char query[1024];
 */
 int main(void)
 {
-ANT_query_parse_tree *tree;
+ANT_query *tree;
 ANT_query_boolean parser;
 
 printf("->");
@@ -21,7 +21,7 @@ while (fgets(query, sizeof(query), stdin) != NULL)
 	{
 	tree = parser.parse(query);
 	printf("[");
-	tree->text_render();
+	tree->boolean_query->text_render();
 	printf("] (error:%ld)\n->", parser.get_error());
 	}
 

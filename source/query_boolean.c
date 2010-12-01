@@ -7,18 +7,30 @@
 #include "string_pair.h"
 #include "query_boolean.h"
 #include "query_parse_tree.h"
+#include "query.h"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
 
 /*
 	ANT_QUERY_BOOLEAN::PARSE()
 	--------------------------
 */
-ANT_query_parse_tree *ANT_query_boolean::parse(char *query)
+ANT_query *ANT_query_boolean::parse(ANT_query *into, char *query, long default_operator)
 {
 ANT_string_pair primed;
 ANT_query_parse_tree *answer;
 
-default_operator = ANT_query_parse_tree::BOOLEAN_OR;
-error_code = ERROR_NONE;
+nodes_used = 0;
+query_is_disjunctive = TRUE;
+
+this->default_operator = default_operator;
+error_code = ANT_query::ERROR_NONE;
 this->next_character = this->query = query;
 
 token_peek.start = "";
@@ -28,9 +40,13 @@ get_token(&primed);		// prime the tokenizer;
 answer = parse();
 
 if (*next_character != '\0')
-	error_code = ERROR_PREMATURE_END_OF_QUERY;
+	error_code = ANT_query::ERROR_PREMATURE_END_OF_QUERY;
 
-return answer;;
+into->set_query(answer);
+into->set_error(error_code);
+into->set_subtype(query_is_disjunctive ? ANT_query::DISJUNCTIVE : ANT_query::CONJUNCTIVE);
+
+return answer == NULL ? NULL : into;
 }
 
 /*
@@ -109,7 +125,7 @@ ANT_query_parse_tree *left, *node;
 
 if (depth > MAX_DEPTH)
 	{
-	error_code = ERROR_NESTED_TOO_DEEP;
+	error_code = ANT_query::ERROR_NESTED_TOO_DEEP;
 	return NULL;
 	}
 
@@ -123,7 +139,11 @@ else if (got->string_length == 1 && *got->start == ')')
 	return NULL;
 else
 	{
-	left = new_node();
+	if ((left = new_node()) == NULL)
+		{
+		error_code = ANT_query::ERROR_NO_MEMORY;
+		return NULL;
+		}
 	left->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
 	left->term = token;			// shallow copy (it does *not* copy the string, it re-uses the pointer)
 	left->left = left->right = NULL;
@@ -141,7 +161,11 @@ while (1)
 		return left;
 		}
 
-	node = new_node();
+	if ((node = new_node()) == NULL)
+		{
+		error_code = ANT_query::ERROR_NO_MEMORY;
+		return NULL;
+		}
 	node->left = left;
 	node->right = NULL;
 	node->term = *got;			// shallow copy
@@ -155,14 +179,20 @@ while (1)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_AND;
+		query_is_disjunctive = FALSE;
 		}
 	else if (got->true_strcmp("not") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_NOT;
+		query_is_disjunctive = FALSE;
 		}
 	else
+		{
 		node->boolean_operator = default_operator;
+		if (default_operator != ANT_query_parse_tree::BOOLEAN_OR) 
+			query_is_disjunctive = FALSE;
+		}
 
 	/*
 		term on the right of the operator
@@ -170,7 +200,7 @@ while (1)
 	got = get_token(&token);
 	if (got == NULL)
 		{
-		error_code = ERROR_MISSING_RIGHT_IN_SUBEXPRESSION;
+		error_code = ANT_query::ERROR_MISSING_RIGHT_IN_SUBEXPRESSION;
 		return node;			// end of input stream;
 		}
 
@@ -180,7 +210,11 @@ while (1)
 		return node;
 	else
 		{
-		node->right = new_node();
+		if ((node->right = new_node()) == NULL)
+			{
+			error_code = ANT_query::ERROR_NO_MEMORY;
+			return NULL;
+			}
 		node->right->left = node->right->right = NULL;
 		node->right->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
 		node->right->term = *got;

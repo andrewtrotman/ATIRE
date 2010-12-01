@@ -26,7 +26,7 @@ ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
 ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
-ANT_HAS_MYSQL = $(TRUE)
+ANT_HAS_MYSQL = $(FALSE)
 
 #
 #	Directories
@@ -137,6 +137,7 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 #	Objects
 #
 PARTS = \
+	$(OBJDIR)\query.obj 							\
 	$(OBJDIR)\query_parse_tree.obj 					\
 	$(OBJDIR)\query_boolean.obj 					\
 	$(OBJDIR)\bitstring.obj 						\
@@ -268,10 +269,11 @@ PARTS = \
 ANT_TARGETS = \
 	$(BINDIR)\index.exe 				\
 	$(BINDIR)\ant.exe 					\
+	$(BINDIR)\atire.exe 				\
 	$(BINDIR)\ant_dictionary.exe
 
 OTHER_TARGETS = \
-	$(BINDIR)\make_case_conversion_table.exe 				\
+	$(BINDIR)\make_case_conversion_table.exe 		\
 	$(BINDIR)\filelist.exe 				\
 	$(BINDIR)\remove_head.exe 			\
 	$(BINDIR)\link_extract.exe 			\
