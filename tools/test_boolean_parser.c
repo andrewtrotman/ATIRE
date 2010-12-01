@@ -3,6 +3,7 @@
 	---------------------
 */
 #include <stdio.h>
+#include "../source/query.h"
 #include "../source/query_boolean.h"
 
 static char query[1024];
@@ -13,15 +14,15 @@ static char query[1024];
 */
 int main(void)
 {
-ANT_query *tree;
+ANT_query tree;
 ANT_query_boolean parser;
 
 printf("->");
 while (fgets(query, sizeof(query), stdin) != NULL)
 	{
-	tree = parser.parse(query);
+	parser.parse(&tree, query);
 	printf("[");
-	tree->boolean_query->text_render();
+	tree.boolean_query->text_render();
 	printf("] (error:%ld)\n->", parser.get_error());
 	}
 

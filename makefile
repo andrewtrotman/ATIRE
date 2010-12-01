@@ -137,6 +137,7 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 #	Objects
 #
 PARTS = \
+	$(OBJDIR)\atire_api.obj 							\
 	$(OBJDIR)\query.obj 							\
 	$(OBJDIR)\query_parse_tree.obj 					\
 	$(OBJDIR)\query_boolean.obj 					\

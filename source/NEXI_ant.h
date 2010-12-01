@@ -24,6 +24,7 @@ public:
 	ANT_NEXI_ant() : ANT_NEXI(0) { ant_pool = new ANT_NEXI_term_ant[MAX_NEXI_TERMS]; }
 	virtual ~ANT_NEXI_ant() { delete [] ant_pool; }
 
+	using ANT_NEXI::parse;
 	ANT_NEXI_term_ant *parse(char *expression) { return (ANT_NEXI_term_ant *)ANT_NEXI::parse(expression); }
 } ;
 
