@@ -182,14 +182,16 @@ IGNORE_LIST := $(SRCDIR)/ant_ant.c \
 ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST), $(ALL_SOURCES))
 
-INDEX_SOURCES := $(filter-out ant.c, $(notdir $(SOURCES)))
+INDEX_SOURCES := $(filter-out ant.c atire.c, $(notdir $(SOURCES)))
 INDEX_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
 
-ANT_SOURCES := $(filter-out index.c, $(notdir $(SOURCES)))
+ANT_SOURCES := $(filter-out index.c atire.c, $(notdir $(SOURCES)))
 ANT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 
+ATIRE_SOURCES := $(filter-out index.c ant.c, $(notdir $(SOURCES)))
+ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 
-all : $(BINDIR)/index $(BINDIR)/ant
+all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
 
 test_source:
 	@echo $(SOURCES)
@@ -207,6 +209,9 @@ $(BINDIR)/index : $(INDEX_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(BINDIR)/ant : $(ANT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	
+$(BINDIR)/atire : $(ANT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
