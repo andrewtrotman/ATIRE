@@ -16,6 +16,7 @@ subtype = DISJUNCTIVE;
 NEXI_query = NULL;
 boolean_query = NULL;
 parse_error = ERROR_NONE;
+terms_in_query = 0;
 }
 
 /*

@@ -43,6 +43,8 @@ public:
 	ANT_NEXI_term *NEXI_query;
 	ANT_query_parse_tree *boolean_query;
 	long parse_error;
+	long terms_in_query;				// leaf nodes (search terms) 0 = unknown
+
 
 public:
 	ANT_query() { clear(); }

@@ -385,54 +385,66 @@ return 0;
 }
 
 /*
+	ATIRE_API::STRING_PAIR_TO_TERM()
+	--------------------------------
+*/
+char *ATIRE_API::string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold)
+{
+long length, first_case;
+char *current;
+
+length = source->string_length < destination_length - 1 ? source->string_length : destination_length - 1;
+strncpy(destination, source->start, length);
+destination[length] = '\0';
+
+/*
+	Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms
+	but as the vocab is in lower case it is necessary to check then convert.
+*/
+if (case_fold)
+	{
+	first_case = ANT_islower(*destination);
+	for (current = destination; *current != '\0'; current++)
+		if (ANT_islower(*current) != first_case)
+			{
+			strlower(destination);
+			break;
+			}
+	}
+
+return destination;
+}
+
+/*
 	ATIRE_API::PROCESS_NEXI_QUERY()
 	-------------------------------
 */
-long ATIRE_API::process_NEXI_query(char *query)
+long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree)
 {
-ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
+ANT_NEXI_term_ant *term_string;
 ANT_NEXI_term_iterator term;
-long terms_in_query, token_length, first_case, current_term;
+ANT_NEXI_term_ant **term_list;
+long terms_in_query, current_term;
 long long old_static_prune = 0;
-char *current;
-
-/*
-	Parse the query and count the number of search terms
-*/
-parse_tree = NEXI_parser->parse(query);
-										terms_in_query = 0;
-for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
-	terms_in_query++;
 
 /*
 	Load the term details (document frequency, collection frequency, and so on)
 	(Load the secondary level dictionary structures and store them in the
-	according term's term_details variable)
+	according term's term_details variable).  Also count the number of terms
 */
+terms_in_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
+	terms_in_query++;
 	/*
 		Take the search term (as an ANT_string_pair) and convert into a string
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
-	token_length = term_string->get_term()->string_length < sizeof(token_buffer) - 1 ? term_string->get_term()->string_length : sizeof(token_buffer) - 1;
-	strncpy(token_buffer, term_string->get_term()->start, token_length);
-	token_buffer[token_length] = '\0';
-
-	/*
-		Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms
-		but as the vocab is in lower case it is necessary to check then convert.
-	*/
-	first_case = ANT_islower(*token_buffer);
-	for (current = token_buffer; *current != '\0'; current++)
-		if (ANT_islower(*current) != first_case)
-			{
-			strlower(token_buffer);
-			break;
-			}
+	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer));
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
 	}
+
 /*
 	Prepare an static array structure for sorting
 */
@@ -473,9 +485,7 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		{
-		token_length = term_string->get_term()->string_length < sizeof(token_buffer) - 1 ? term_string->get_term()->string_length : sizeof(token_buffer) - 1;
-		strncpy(token_buffer, term_string->get_term()->start, token_length);
-		token_buffer[token_length] = '\0';
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer));
 		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
 		}
 	}
@@ -492,24 +502,30 @@ return terms_in_query;
 }
 
 /*
+	ATIRE_API::PROCESS_NEXI_QUERY()
+	-------------------------------
+*/
+long ATIRE_API::process_NEXI_query(char *query)
+{
+return process_NEXI_query(NEXI_parser->parse(query));
+}
+
+/*
 	ATIRE_API::PROCESS_BOOLEAN_QUERY()
 	----------------------------------
 */
 ANT_bitstring *ATIRE_API::process_boolean_query(ANT_query_parse_tree *root, long *leaves)
 {
 ANT_bitstring *into, *left, *right;
-long token_length;
 
 left = right = NULL;
 if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	{
-	*leaves++;
+	(*leaves)++;
 	into = new ANT_bitstring;
 	into->set_length((long)documents_in_id_list);
-	
-	token_length = root->term.string_length < sizeof(token_buffer) - 1 ? root->term.string_length : sizeof(token_buffer) - 1;
-	strncpy(token_buffer, root->term.start, token_length);
-	token_buffer[token_length] = '\0';
+
+	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer));
 
 	search_engine->process_one_search_term(token_buffer, ranking_function, into);
 	return into;
@@ -543,9 +559,37 @@ switch (root->boolean_operator)
 	default:
 		break;
 	}
+
 delete right;
 
 return left;
+}
+
+/*
+	ATIRE_API::BOOLEAN_TO_NEXI()
+	----------------------------
+*/
+void ATIRE_API::boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves)
+{
+if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
+	{
+	if (*leaves > 0)
+		into[*leaves - 1].next = &into[*leaves];
+	into[*leaves].parent_path = NULL;
+	into[*leaves].next = NULL;
+	into[*leaves].sign = 0;
+	into[*leaves].path.start = NULL;
+	into[*leaves].path.string_length = 0;
+	into[*leaves].term = root->term;			// shallow copy
+	(*leaves)++;
+	}
+else
+	{
+	if (root->left != NULL)
+		boolean_to_NEXI(into, root->left, leaves);
+	if (root->right != NULL)
+		boolean_to_NEXI(into, root->right, leaves);
+	}
 }
 
 /*
@@ -554,22 +598,40 @@ return left;
 */
 long ATIRE_API::process_boolean_query(char *query)
 {
-struct cmp_accumulator_pointers
-	{
-	inline int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) { return a->get_rsv() < b->get_rsv() ? -1 : a->get_rsv() == b->get_rsv() ? 0 : 1; }
-	};
-
-long terms_in_query = 0;
+long answer, added, terms_in_query = 0;
 ANT_bitstring *valid_result_set = NULL;
-ANT_search_engine_accumulator *accumulator = search_engine->results_list->accumulator;
-ANT_search_engine_accumulator **accumulator_pointers = search_engine->results_list->accumulator_pointers;
+ANT_search_engine_accumulator *accumulator;
+ANT_NEXI_term_ant *into;
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
+	ANT_search_engine_accumulator **accumulator_pointers;
+	long next_relevant_document;
+	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator_cmp> *heapk;
+#endif
 
 /*
-	Parse the query and count the number of search terms
+	Parse the query and count the number of search terms.  If there's a parse error
+	then don't do the query
 */
 boolean_parser->parse(parsed_query, query);
 if (parsed_query->parse_error != ANT_query::ERROR_NONE)
 	return 0;
+
+/*
+	In the case of a purely disjunctive query (OR operators only) we can fall-back to the
+	top-k index pruning search engine.  This happens for single term queries too (because they
+	are, by definition, conjunctive too).  Now... we do this rather than passing the query
+	string directly to the NEXI code because it avoids boolean operators becoming search terms
+*/
+if (parsed_query->subtype == ANT_query::DISJUNCTIVE)
+	{
+	terms_in_query = 0;
+	into = new ANT_NEXI_term_ant[parsed_query->terms_in_query + 1];
+	boolean_to_NEXI(into, parsed_query->boolean_query, &terms_in_query);
+	answer = process_NEXI_query(into);
+	delete [] into;
+
+	return answer;
+	}
 
 /*
 	Recurse over the tree
@@ -579,12 +641,11 @@ valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	if (terms_in_query > 1)			// the heap is already correct if there's only one term in the query
 		{
+		accumulator = search_engine->results_list->accumulator;
+		accumulator_pointers = search_engine->results_list->accumulator_pointers;
 		ANT_bitstring_iterator iterator(valid_result_set);
-		long next_relevant_document, added;
-		Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
 
-		heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, sort_top_k);
-		heapk->set_size(sort_top_k);
+		heapk = search_engine->results_list->heapk;		// re-use the results list heap
 
 		added = 0;
 		for (next_relevant_document = iterator.first(); next_relevant_document >= 0; next_relevant_document = iterator.next())
@@ -604,17 +665,14 @@ valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_
 			added++;
 			}
 
-		delete heapk;
 		search_engine->results_list->results_list_length = added < sort_top_k ? added : sort_top_k;
 		}
 #else
-	long current;
-
-	for (current = 0; current < documents_in_id_list; current++)
+	for (added = 0; added < documents_in_id_list; added++)
 		{
-		if (accumulator[current].get_rsv() > 0)
-			if (!valid_result_set->unsafe_getbit(current))
-				accumulator[current].clear_rsv();
+		if (accumulator[added].get_rsv() > 0)
+			if (!valid_result_set->unsafe_getbit(added))
+				accumulator[added].clear_rsv();
 		}
 #endif
 

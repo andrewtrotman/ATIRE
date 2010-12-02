@@ -21,6 +21,7 @@ private:
 	static const long MAX_NODES = 1024;		// maximum number of nodes in the parse tree
 
 private:
+	long leaves;						// number of leaf nodes (search terms) in the query
 	long error_code;					// parse error code (TRUE or FALSE)
 	char *query, *next_character;		// the query and where we are in it.
 	ANT_string_pair token_peek;			// one token look-ahead (the lookahead token)

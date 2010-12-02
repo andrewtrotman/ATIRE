@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "pragma.h"
 #include "search_engine_accumulator.h"
+#include "search_engine_accumulator_cmp.h"
 #include "bitstring.h"
 #include <string.h>
 
@@ -42,12 +43,8 @@ public:			// remove this line later
 #endif
 
 #ifdef HEAP_K_SEARCH
-private:
-	struct cmp_accumulator_pointers
-		{
-		inline int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) { return a->get_rsv() < b->get_rsv() ? -1 : a->get_rsv() == b->get_rsv() ? 0 : 1; }
-		};
-	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
+//private:
+	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator_cmp> *heapk;
 	ANT_bitstring *include_set;
 #endif
 

@@ -26,6 +26,7 @@ ANT_query *ANT_query_boolean::parse(ANT_query *into, char *query, long default_o
 ANT_string_pair primed;
 ANT_query_parse_tree *answer;
 
+leaves = 0;
 nodes_used = 0;
 query_is_disjunctive = TRUE;
 
@@ -45,6 +46,7 @@ if (*next_character != '\0')
 into->set_query(answer);
 into->set_error(error_code);
 into->set_subtype(query_is_disjunctive ? ANT_query::DISJUNCTIVE : ANT_query::CONJUNCTIVE);
+into->terms_in_query = leaves;
 
 return answer == NULL ? NULL : into;
 }
@@ -147,6 +149,7 @@ else
 	left->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
 	left->term = token;			// shallow copy (it does *not* copy the string, it re-uses the pointer)
 	left->left = left->right = NULL;
+	leaves++;
 	}
 
 while (1)
@@ -170,24 +173,24 @@ while (1)
 	node->right = NULL;
 	node->term = *got;			// shallow copy
 
-	if (got->true_strcmp("or") == 0)
+	if (got->true_strcmp("or") == 0 || got->true_strcmp("OR") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_OR;
 		}
-	else if (got->true_strcmp("xor") == 0)
+	else if (got->true_strcmp("xor") == 0 || got->true_strcmp("XOR") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_XOR;
 		query_is_disjunctive = FALSE;
 		}
-	else if (got->true_strcmp("and") == 0)
+	else if (got->true_strcmp("and") == 0 || got->true_strcmp("AND") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_AND;
 		query_is_disjunctive = FALSE;
 		}
-	else if (got->true_strcmp("not") == 0)
+	else if (got->true_strcmp("not") == 0 || got->true_strcmp("NOT") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_NOT;
@@ -224,6 +227,7 @@ while (1)
 		node->right->left = node->right->right = NULL;
 		node->right->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
 		node->right->term = *got;
+		leaves++;
 		}
 
 	left = node;

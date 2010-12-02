@@ -8,6 +8,7 @@
 #include <limits.h>
 
 class ANT_NEXI_ant;
+class ANT_NEXI_term_ant;
 class ANT_search_engine;
 class ANT_stemmer;
 class ANT_query_boolean;
@@ -20,6 +21,8 @@ class ANT_search_engine_forum;
 class ANT_assessment_factory;
 class ANT_bitstring;
 class ANT_query_parse_tree;
+class ANT_string_pair;
+
 /*
 	class ATIRE_API
 	---------------
@@ -65,7 +68,10 @@ protected:
 	static char *max(char *a, char *b, char *c);
 	long process_NEXI_query(char *query);
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
+	void boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves);
+	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree);
 	long process_boolean_query(char *query);
+	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
 
 public:
 	ATIRE_API();

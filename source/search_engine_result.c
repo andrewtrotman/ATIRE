@@ -41,7 +41,7 @@ for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 
 #ifdef HEAP_K_SEARCH
-	heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, top_k);
+	heapk = new Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator_cmp>(*accumulator_pointers, top_k);
 	include_set = new ANT_bitstring();
 	include_set->set_length(documents);
 #endif
