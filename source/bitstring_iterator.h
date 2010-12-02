@@ -21,6 +21,7 @@ private:
 public:
 	ANT_bitstring_iterator(ANT_bitstring *string);
 	~ANT_bitstring_iterator();
+	long first(void) { return next(); }
 	long next(void);
 } ;
 

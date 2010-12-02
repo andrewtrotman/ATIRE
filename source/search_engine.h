@@ -68,7 +68,7 @@ protected:
 	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
 	long long stem_buffer_length_in_bytes;
-	long trim_postings_k;
+	long long trim_postings_k;
 	long long collection_length_in_terms;
 	long is_quantized;					// true if the index is quantized, false if the index is TF values.
 
@@ -106,7 +106,7 @@ public:
 	void stats_text_render(void);
 	void stats_all_text_render(void);
 	void stats_add(void);
-	void set_trim_postings_k(long what) { trim_postings_k = what; }
+	long long set_trim_postings_k(long long what) { long long old = trim_postings_k; trim_postings_k = what; return old; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);

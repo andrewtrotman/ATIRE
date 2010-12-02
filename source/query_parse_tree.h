@@ -14,7 +14,7 @@
 class ANT_query_parse_tree
 {
 public:
-	enum { LEAF_NODE, BOOLEAN_AND, BOOLEAN_OR, BOOLEAN_NOT };
+	enum { LEAF_NODE, BOOLEAN_AND, BOOLEAN_OR, BOOLEAN_NOT, BOOLEAN_XOR };
 
 public:
 	long boolean_operator;				// one of the enum above

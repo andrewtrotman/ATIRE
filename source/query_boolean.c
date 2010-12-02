@@ -175,6 +175,12 @@ while (1)
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_OR;
 		}
+	else if (got->true_strcmp("or") == 0)
+		{
+		get_token(&token);
+		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_XOR;
+		query_is_disjunctive = FALSE;
+		}
 	else if (got->true_strcmp("and") == 0)
 		{
 		get_token(&token);

@@ -140,8 +140,8 @@ long long ANT_search_engine_result::init_pointers(void)
 
 		An effective optimisation is to bucket sort into two buckets at the beginning,
 		one bucket is the zeros and the other bucket is the non-zeros.  This is essentially
-		the first particion of the quick-sort before the call to quick sort.  The advantage
-		is that we know in advance what the correct partition value is and that the secone
+		the first partition of the quick-sort before the call to quick-sort.  The advantage
+		is that we know in advance what the correct partition value is and that the second
 		partition (of all zeros) is now already sorted.  We also get (for free) the number
 		of documents we found.
 	*/

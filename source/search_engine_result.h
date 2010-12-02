@@ -43,11 +43,10 @@ public:			// remove this line later
 
 #ifdef HEAP_K_SEARCH
 private:
-	struct cmp_accumulator_pointers {
-		inline int operator() (ANT_search_engine_accumulator * a, ANT_search_engine_accumulator * b) {
-			return a->get_rsv() < b->get_rsv() ? -1 : a->get_rsv() == b->get_rsv() ? 0 : 1;
-		}
-	};
+	struct cmp_accumulator_pointers
+		{
+		inline int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) { return a->get_rsv() < b->get_rsv() ? -1 : a->get_rsv() == b->get_rsv() ? 0 : 1; }
+		};
 	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
 	ANT_bitstring *include_set;
 #endif
@@ -153,31 +152,33 @@ public:
 		}
 #elif defined HEAP_K_SEARCH
 
-	template <class T> inline void add_rsv(long index, T score) {
-		ANT_search_engine_accumulator *which = accumulator + index;
-		ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
-		ANT_search_engine_accumulator::ANT_accumulator_t new_val;
+	template <class T> inline void add_rsv(long index, T score)
+	{
+	ANT_search_engine_accumulator *which = accumulator + index;
+	ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
+	ANT_search_engine_accumulator::ANT_accumulator_t new_val;
 
-		init_partial_accumulators(index);
-		new_val = which->add_rsv(score);
+	init_partial_accumulators(index);
+	new_val = which->add_rsv(score);
 
 
-		if (results_list_length < top_k) {
-			if (old_val == 0) {
-				accumulator_pointers[results_list_length++] = which;
-				include_set->unsafe_setbit(index);
-			}
-			if (results_list_length == top_k) {
-				heapk->build_min_heap();
-			}
-		}
-		else if (include_set->unsafe_getbit(index)) {
-					heapk->min_update(which);
-		}
-		else if (new_val > accumulator_pointers[0]->get_rsv()) {
-			include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
-			heapk->min_insert(which);
+	if (results_list_length < top_k)
+		{
+		if (old_val == 0)
+			{
+			accumulator_pointers[results_list_length++] = which;
 			include_set->unsafe_setbit(index);
+			}
+		if (results_list_length == top_k)
+			heapk->build_min_heap();
+		}
+	else if (include_set->unsafe_getbit(index))
+		heapk->min_update(which);
+	else if (new_val > accumulator_pointers[0]->get_rsv())
+		{
+		include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
+		heapk->min_insert(which);
+		include_set->unsafe_setbit(index);
 		}
 	}
 

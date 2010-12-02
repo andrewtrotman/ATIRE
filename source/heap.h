@@ -1,3 +1,8 @@
+/*
+	HEAP.H
+	------
+*/
+
 #ifndef HEAP_H
 #define HEAP_H
 

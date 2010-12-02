@@ -18,7 +18,8 @@ class ANT_relevant_document;
 class ANT_mean_average_precision;
 class ANT_search_engine_forum;
 class ANT_assessment_factory;
-
+class ANT_bitstring;
+class ANT_query_parse_tree;
 /*
 	class ATIRE_API
 	---------------
@@ -26,9 +27,11 @@ class ANT_assessment_factory;
 class ATIRE_API
 {
 public:
-	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 };
+	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 } ;
+	enum { QUERY_NEXI, QUERY_BOOLEAN } ;
 
 private:
+	char token_buffer[1024];				// used to convert parsed string_pairs into C char * strings.
 	ANT_memory *memory;						// ATIRE memory allocation scheme
 
 	ANT_NEXI_ant *NEXI_parser;				// INEX CO / CAS queries
@@ -60,6 +63,9 @@ private:
 protected:
 	char **read_docid_list(long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
+	long process_NEXI_query(char *query);
+	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
+	long process_boolean_query(char *query);
 
 public:
 	ATIRE_API();
@@ -111,8 +117,9 @@ public:
 
 	/*
 		Given the query, do the seach, rank, and return the number of hits
+		query_type is either QUERY_NEXI or QUERY_BOOLEAN
 	*/
-	long long search(char *query, long long top_k = LLONG_MAX);
+	long long search(char *query, long long top_k = LLONG_MAX, long query_type = QUERY_NEXI);
 
 	/*
 		Turn the numeric internal IDs into a list of external string IDs (post search)

@@ -42,6 +42,11 @@ switch (boolean_operator)
 		printf(" OR ");
 		right->internal_text_render();
 		break;
+	case BOOLEAN_XOR:
+		left->internal_text_render();
+		printf(" XOR ");
+		right->internal_text_render();
+		break;
 	case BOOLEAN_NOT:
 		left->internal_text_render();
 		printf(" NOT ");

@@ -88,15 +88,15 @@ highest_df = eight_byte;
 //printf("B-tree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
 #ifdef DIRECT_MEMORY_READ
-if (memory_model) {
-	block = NULL;
-} else {
-	block = (unsigned char *)memory->malloc((long)(end - term_header));
-}
-index->direct_read(&block, (long)(end - term_header));
+	if (memory_model)
+		block = NULL;
+	else
+		block = (unsigned char *)memory->malloc((long)(end - term_header));
+
+	index->direct_read(&block, (long)(end - term_header));
 #else
-block = (unsigned char *)memory->malloc((long)(end - term_header));
-index->read(block, (long)(end - term_header));
+	block = (unsigned char *)memory->malloc((long)(end - term_header));
+	index->read(block, (long)(end - term_header));
 #endif
 
 /*
@@ -150,15 +150,16 @@ get_postings_details("~length", &collection_details);
 documents = collection_details.document_frequency;
 
 #ifdef DIRECT_MEMORY_READ
-if (memory_model) {
-	postings_buffer = NULL;
-} else {
+	if (memory_model)
+		postings_buffer = NULL;
+	else
+		{
+		postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
+		memory->realign();
+		}
+#else
 	postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
 	memory->realign();
-}
-#else
-postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
-memory->realign();
 #endif
 
 /*
@@ -307,9 +308,9 @@ long long now;
 
 now = stats->start_timer();
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-results_list->init_accumulators(top_k > documents ? documents : top_k);
+	results_list->init_accumulators(top_k > documents ? documents : top_k);
 #else
-results_list->init_accumulators();
+	results_list->init_accumulators();
 #endif
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
@@ -375,7 +376,7 @@ term_details->postings_position_on_disk = ANT_get_long_long(base + 8);
 term_details->impacted_length = ANT_get_long(base + 16);
 term_details->postings_length = ANT_get_long(base + 20);
 #ifdef TERM_LOCAL_MAX_IMPACT
-term_details->local_max_impact = ANT_get_short(base + 24);
+	term_details->local_max_impact = ANT_get_short(base + 24);
 #endif
 
 return term_details;
@@ -536,7 +537,7 @@ if (term_details != NULL && term_details->document_frequency > 0)
 		The maximum number of bytes we need to read is the worst case for compression * the cost of the
 		tf and 0 bytes (of which there are at most 510).  So we need 5 * df + 510 at worst (for 32 bit integers)
 	*/
-	long bytes;
+	long long bytes;
 
 	if (term_details->document_frequency > trim_postings_k)
 		{

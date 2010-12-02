@@ -7,7 +7,10 @@
 
 #include "memory.h"
 #include "disk.h"
+#include "bitstring.h"
+#include "bitstring_iterator.h"
 #include "stats_time.h"
+#include "heap.h"
 
 #include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
@@ -61,23 +64,28 @@ memory = new ANT_memory;
 
 NEXI_parser = new ANT_NEXI_ant;
 boolean_parser = new ANT_query_boolean;
+segmentation = FALSE;
 parsed_query = new ANT_query;
 
 search_engine = NULL;
 ranking_function = NULL;
 stemmer = NULL;
+query_type_is_all_terms = FALSE;
+hits = 0;
+sort_top_k = LLONG_MAX;
 
 document_list = NULL;
 filename_list = NULL;
 answer_list = NULL;
+documents_in_id_list = 0;
 mem1 = mem2 = NULL;
 
 assessment_factory = NULL;
 assessments = NULL;
+number_of_assessments = 0;
 map = NULL;
 forum_writer = NULL;
-
-query_type_is_all_terms = FALSE;
+forum_results_list_length = 1500;
 }
 
 /*
@@ -114,7 +122,7 @@ delete forum_writer;
 */
 char *ATIRE_API::version(long *version_number)
 {
-if (*version_number != NULL)
+if (version_number != NULL)
 	*version_number = ANT_version;
 return ANT_version_string;
 }
@@ -365,13 +373,9 @@ ANT_stemmer *new_stemmer;
 if (search_engine == NULL)
 	return 1;		// fail, we need a search engine object first.
 
-if (which_stemmer == ANT_ANT_param_block::NONE)
-	{
-	delete stemmer;
-	stemmer = NULL;
-	}
-
-if ((new_stemmer = ANT_stemmer_factory::get_stemmer(which_stemmer, search_engine, stemmer_similarity, threshold)) == NULL)
+if (which_stemmer == ANT_stemmer_factory::NONE)
+	new_stemmer = NULL;
+else if ((new_stemmer = ANT_stemmer_factory::get_stemmer(which_stemmer, search_engine, stemmer_similarity, threshold)) == NULL)
 	return 1;		// fail, invalid stemmer
 
 delete stemmer;
@@ -381,31 +385,22 @@ return 0;
 }
 
 /*
-	ATIRE_API::SEARCH()
-	-------------------
-	returns the number of documents found
+	ATIRE_API::PROCESS_NEXI_QUERY()
+	-------------------------------
 */
-long long ATIRE_API::search(char *query, long long top_k)
+long ATIRE_API::process_NEXI_query(char *query)
 {
-char token[1024];
 ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
 ANT_NEXI_term_iterator term;
 long terms_in_query, token_length, first_case, current_term;
+long long old_static_prune = 0;
 char *current;
-
-search_engine->stats_initialise();		// if we are command-line then report query by query stats
-
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	search_engine->init_accumulators(top_k);
-#else
-	search_engine->init_accumulators();
-#endif
 
 /*
 	Parse the query and count the number of search terms
 */
 parse_tree = NEXI_parser->parse(query);
-terms_in_query = 0;
+										terms_in_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	terms_in_query++;
 
@@ -420,23 +415,23 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		Take the search term (as an ANT_string_pair) and convert into a string
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
-	token_length = term_string->get_term()->string_length < sizeof(token) - 1 ? term_string->get_term()->string_length : sizeof(token) - 1;
-	strncpy(token, term_string->get_term()->start, token_length);
-	token[token_length] = '\0';
+	token_length = term_string->get_term()->string_length < sizeof(token_buffer) - 1 ? term_string->get_term()->string_length : sizeof(token_buffer) - 1;
+	strncpy(token_buffer, term_string->get_term()->start, token_length);
+	token_buffer[token_length] = '\0';
 
 	/*
 		Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms
 		but as the vocab is in lower case it is necessary to check then convert.
 	*/
-	first_case = ANT_islower(*token);
-	for (current = token; *current != '\0'; current++)
+	first_case = ANT_islower(*token_buffer);
+	for (current = token_buffer; *current != '\0'; current++)
 		if (ANT_islower(*current) != first_case)
 			{
-			strlower(token);
+			strlower(token_buffer);
 			break;
 			}
-	if (stemmer == NULL || !ANT_islower(*token))		// so we don't stem numbers or tag names
-		search_engine->process_one_term(token, &term_string->term_details);
+	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
+		search_engine->process_one_term(token_buffer, &term_string->term_details);
 	}
 /*
 	Prepare an static array structure for sorting
@@ -459,6 +454,16 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 #endif
 
 /*
+	If we only have one search term then we can static prune the postings list at top-k
+*/
+if (terms_in_query == 1)
+	{
+	old_static_prune = search_engine->set_trim_postings_k(sort_top_k);
+	if (old_static_prune < sort_top_k)		// then we were alreay prining at smaller than top_k!
+		search_engine->set_trim_postings_k(sort_top_k);
+	}
+
+/*
 	Process each search term - either stemmed or not.
 */
 for (current_term = 0; current_term < terms_in_query; current_term++)
@@ -468,14 +473,179 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		{
-		token_length = term_string->get_term()->string_length < sizeof(token) - 1 ? term_string->get_term()->string_length : sizeof(token) - 1;
-		strncpy(token, term_string->get_term()->start, token_length);
-		token[token_length] = '\0';
-		search_engine->process_one_stemmed_search_term(stemmer, token, ranking_function);
+		token_length = term_string->get_term()->string_length < sizeof(token_buffer) - 1 ? term_string->get_term()->string_length : sizeof(token_buffer) - 1;
+		strncpy(token_buffer, term_string->get_term()->start, token_length);
+		token_buffer[token_length] = '\0';
+		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
 		}
 	}
 
 delete [] term_list;
+
+/*
+	Restore the old static prune value
+*/
+if (terms_in_query == 1)
+	search_engine->set_trim_postings_k(old_static_prune);
+
+return terms_in_query;
+}
+
+/*
+	ATIRE_API::PROCESS_BOOLEAN_QUERY()
+	----------------------------------
+*/
+ANT_bitstring *ATIRE_API::process_boolean_query(ANT_query_parse_tree *root, long *leaves)
+{
+ANT_bitstring *into, *left, *right;
+long token_length;
+
+if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
+	{
+	*leaves++;
+	into = new ANT_bitstring;
+	into->set_length((long)documents_in_id_list);
+	
+	token_length = root->term.string_length < sizeof(token_buffer) - 1 ? root->term.string_length : sizeof(token_buffer) - 1;
+	strncpy(token_buffer, root->term.start, token_length);
+	token_buffer[token_length] = '\0';
+
+	search_engine->process_one_search_term(token_buffer, ranking_function, into);
+	return into;
+	}
+
+if (root->left != NULL)
+	left = process_boolean_query(root->left, leaves);
+if (root->right != NULL)
+	right = process_boolean_query(root->right, leaves);
+
+if (left == NULL)
+	return right;
+
+if (right == NULL)
+	return left;
+
+switch (root->boolean_operator)
+	{
+	case ANT_query_parse_tree::BOOLEAN_AND:
+		left->bit_and(left, right);
+		break;
+	case ANT_query_parse_tree::BOOLEAN_OR:
+		left->bit_or(left, right);
+		break;
+	case ANT_query_parse_tree::BOOLEAN_NOT:
+		left->bit_and_not(left, right);
+		break;
+	case ANT_query_parse_tree::BOOLEAN_XOR:
+		left->bit_xor(left, right);
+		break;
+	default:
+		break;
+	}
+delete right;
+
+return left;
+}
+
+/*
+	ATIRE_API::PROCESS_BOOLEAN_QUERY()
+	----------------------------------
+*/
+long ATIRE_API::process_boolean_query(char *query)
+{
+struct cmp_accumulator_pointers
+	{
+	inline int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) { return a->get_rsv() < b->get_rsv() ? -1 : a->get_rsv() == b->get_rsv() ? 0 : 1; }
+	};
+
+long terms_in_query = 0;
+ANT_bitstring *valid_result_set = NULL;
+ANT_search_engine_accumulator *accumulator = search_engine->results_list->accumulator;
+ANT_search_engine_accumulator **accumulator_pointers = search_engine->results_list->accumulator_pointers;
+
+/*
+	Parse the query and count the number of search terms
+*/
+boolean_parser->parse(parsed_query, query);
+if (parsed_query->parse_error != ANT_query::ERROR_NONE)
+	return 0;
+
+/*
+	Recurse over the tree
+*/
+valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_query);
+
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
+	ANT_bitstring_iterator iterator(valid_result_set);
+	long next_relevant_document, added;
+	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
+
+	heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, sort_top_k);
+	heapk->set_size(sort_top_k);
+	
+	added = 0;
+	for (next_relevant_document = iterator.first(); next_relevant_document > 0; next_relevant_document = iterator.next())
+		{
+		if (added < sort_top_k)						// just add to the heap
+			accumulator_pointers[added] = accumulator + next_relevant_document;
+		else if (added > sort_top_k)				// update the heap if this node belongs
+			{
+			if (accumulator[next_relevant_document].get_rsv() > accumulator_pointers[0]->get_rsv())
+				heapk->min_insert(accumulator + next_relevant_document);
+			}
+		else		// added == sort_top_k			// insert then sort the heap
+			{
+			accumulator_pointers[added] = accumulator + next_relevant_document;
+			heapk->build_min_heap();
+			}
+		added++;
+		}
+
+	delete heapk;
+#else
+		// later
+#endif
+
+/*
+	Clean up and finish
+*/
+delete valid_result_set;
+
+return terms_in_query;
+}
+
+
+/*
+	ATIRE_API::SEARCH()
+	-------------------
+	returns the number of documents found
+*/
+long long ATIRE_API::search(char *query, long long top_k, long query_type)
+{
+long terms_in_query;
+
+/*
+	Initialise
+*/
+sort_top_k = top_k;
+
+search_engine->stats_initialise();
+
+#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
+	search_engine->init_accumulators(top_k);
+#else
+	search_engine->init_accumulators();
+#endif
+
+/*
+	Parse and do the query
+*/
+if (query_type == QUERY_NEXI)
+	terms_in_query = process_NEXI_query(query);
+else if (query_type == QUERY_BOOLEAN)
+	terms_in_query = process_boolean_query(query);
+else
+	terms_in_query = 0;
 
 /*
 	Rank the results list
