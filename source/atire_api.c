@@ -2,6 +2,7 @@
 	ATIRE_API.C
 	-----------
 */
+#include <stdlib.h>
 #include "ant_param_block.h"			// FIX THIS
 #include "atire_api.h"
 
