@@ -38,7 +38,7 @@ static unsigned char bits_set_in[] = {
 
 /*
 	ANT_COUNT_BITS_IN()
-	--------------------
+	-------------------
 */
 long ANT_count_bits_in(unsigned char *ch, long bytes_long)
 {
@@ -72,7 +72,7 @@ delete [] bits;
 
 /*
 	ANT_BITSTRING::SET_LENGTH()
-	----------------------------
+	---------------------------
 */
 void ANT_bitstring::set_length(long len_in_bits)
 {
@@ -94,7 +94,7 @@ if (new_chunks_long != chunks_long)
 
 /*
 	ANT_BITSTRING::ZERO()
-	----------------------
+	---------------------
 */
 void ANT_bitstring::zero(void)
 {
@@ -103,7 +103,7 @@ memset(bits, 0, bytes_long);
 
 /*
 	ANT_BITSTRING::ONE()
-	---------------------
+	--------------------
 	Set all bits to 1 (and pad end with zeros)
 */
 void ANT_bitstring::one(void)
@@ -118,7 +118,7 @@ for (clearing = bits_long; clearing < last_bit; clearing++)
 
 /*
 	ANT_BITSTRING::OPERATION()
-	---------------------------
+	--------------------------
 */
 void ANT_bitstring::operation(int op, ANT_bitstring *a, ANT_bitstring *b, ANT_bitstring *c)
 {
@@ -150,7 +150,7 @@ else if (op == AND_NOT)
 
 /*
 	ANT_BITSTRING::INDEX()
-	-----------------------
+	----------------------
 */
 long ANT_bitstring::index(long which)
 {

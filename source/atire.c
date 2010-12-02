@@ -39,7 +39,7 @@ long long now, search_time;
 	Search
 */
 now = stats.start_timer();
-*matching_documents = atire.search(query, params->sort_top_k);
+*matching_documents = atire.search(query, params->sort_top_k, ATIRE_API::QUERY_BOOLEAN);
 search_time = stats.stop_timer(now);
 
 /*

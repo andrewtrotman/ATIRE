@@ -500,6 +500,7 @@ ANT_bitstring *ATIRE_API::process_boolean_query(ANT_query_parse_tree *root, long
 ANT_bitstring *into, *left, *right;
 long token_length;
 
+left = right = NULL;
 if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	{
 	*leaves++;
@@ -576,34 +577,45 @@ if (parsed_query->parse_error != ANT_query::ERROR_NONE)
 valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_query);
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	ANT_bitstring_iterator iterator(valid_result_set);
-	long next_relevant_document, added;
-	Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
-
-	heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, sort_top_k);
-	heapk->set_size(sort_top_k);
-	
-	added = 0;
-	for (next_relevant_document = iterator.first(); next_relevant_document > 0; next_relevant_document = iterator.next())
+	if (terms_in_query > 1)			// the heap is already correct if there's only one term in the query
 		{
-		if (added < sort_top_k)						// just add to the heap
-			accumulator_pointers[added] = accumulator + next_relevant_document;
-		else if (added > sort_top_k)				// update the heap if this node belongs
-			{
-			if (accumulator[next_relevant_document].get_rsv() > accumulator_pointers[0]->get_rsv())
-				heapk->min_insert(accumulator + next_relevant_document);
-			}
-		else		// added == sort_top_k			// insert then sort the heap
-			{
-			accumulator_pointers[added] = accumulator + next_relevant_document;
-			heapk->build_min_heap();
-			}
-		added++;
-		}
+		ANT_bitstring_iterator iterator(valid_result_set);
+		long next_relevant_document, added;
+		Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers> *heapk;
 
-	delete heapk;
+		heapk = new Heap<ANT_search_engine_accumulator *, cmp_accumulator_pointers>(*accumulator_pointers, sort_top_k);
+		heapk->set_size(sort_top_k);
+
+		added = 0;
+		for (next_relevant_document = iterator.first(); next_relevant_document >= 0; next_relevant_document = iterator.next())
+			{
+			if (added < sort_top_k)						// just add to the heap
+				accumulator_pointers[added] = accumulator + next_relevant_document;
+			else if (added > sort_top_k)				// update the heap if this node belongs
+				{
+				if (accumulator[next_relevant_document].get_rsv() > accumulator_pointers[0]->get_rsv())
+					heapk->min_insert(accumulator + next_relevant_document);
+				}
+			else		// added == sort_top_k			// insert then sort the heap
+				{
+				accumulator_pointers[added] = accumulator + next_relevant_document;
+				heapk->build_min_heap();
+				}
+			added++;
+			}
+
+		delete heapk;
+		search_engine->results_list->results_list_length = added < sort_top_k ? added : sort_top_k;
+		}
 #else
-		// later
+	long current;
+
+	for (current = 0; current < documents_in_id_list; current++)
+		{
+		if (accumulator[current].get_rsv() > 0)
+			if (!valid_result_set->unsafe_getbit(current))
+				accumulator[current].clear_rsv();
+		}
 #endif
 
 /*
