@@ -783,12 +783,66 @@ return average_precision;
 }
 
 /*
-	ATIRE_API::LOAD_DOCUMENT()
-	--------------------------
+	ATIRE_API::GET_RELEVANT_DOCUMENT_DETAILS()
+	------------------------------------------
 */
-char *ATIRE_API::load_document(char *buffer, unsigned long *length, long long id)
+long long ATIRE_API::get_relevant_document_details(long long result, long long *docid, double *relevance)
 {
-*buffer = '\0';
+if (result < hits)
+	{
+	*relevance = search_engine->results_list->accumulator_pointers[result]->get_rsv();
+	*docid = search_engine->results_list->accumulator_pointers[result] - search_engine->results_list->accumulator;
+	}
+else
+	{
+	*relevance = 0;
+	*docid = -1;
+	}
+
+return *docid;
+}
+
+/*
+	ATIRE_API::SET_TRIM_POSTINGS_K()
+	--------------------------------
+*/
+long long ATIRE_API::set_trim_postings_k(long long static_prune_point)
+{
+return search_engine->set_trim_postings_k(static_prune_point);
+}
+
+/*
+	ATIRE_API::GET_LONGEST_DOCUMENT_LENGTH()
+	----------------------------------------
+*/
+long ATIRE_API::get_longest_document_length(void)
+{
+return search_engine->get_longest_document_length();
+}
+
+/*
+	ATIRE_API::GET_DOCUMENT()
+	-------------------------
+*/
+char *ATIRE_API::get_document(char *buffer, unsigned long *length, long long id)
+{
 return search_engine->get_document(buffer, length, id);
 }
 
+/*
+	ATIRE_API::STATS_TEXT_RENDER()
+	------------------------------
+*/
+void ATIRE_API::stats_text_render(void)
+{
+search_engine->stats_text_render();
+}
+
+/*
+	ATIRE_API::STATS_ALL_TEXT_RENDER()
+	----------------------------------
+*/
+void ATIRE_API::stats_all_text_render(void)
+{
+search_engine->stats_all_text_render();
+}

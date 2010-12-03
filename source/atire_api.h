@@ -41,9 +41,7 @@ private:
 	ANT_query_boolean *boolean_parser;		// full boolean
 	long segmentation;						// Chinese segmentation algorithm
 	ANT_query *parsed_query;				// the parsed query
-public:						// FIX THIS
 	ANT_search_engine *search_engine;		// the search engine itself
-private:
 	ANT_ranking_function *ranking_function;	// the ranking function to use (default is the perameterless Divergence From Randomness)
 	ANT_stemmer *stemmer;					// stemming function to use
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
@@ -117,9 +115,9 @@ public:
 	long set_stemmer(long which_stemmer, long stemmer_similarity, double threshold);
 
 	/*
-		Load a document from the repository (if there is one)
+		Set the static pruning point.  At most sttic_prune_point postings will be read from disk and processedS
 	*/
-	char *load_document(char *buffer, unsigned long *length, long long id);
+	long long set_trim_postings_k(long long static_prune_point);
 
 	/*
 		Given the query, do the seach, rank, and return the number of hits
@@ -131,6 +129,11 @@ public:
 		Turn the numeric internal IDs into a list of external string IDs (post search)
 	*/
 	char **generate_results_list(void);
+
+	/*
+		Given a positing in the results list return the internal search engine docid and its relevance
+	*/
+	long long get_relevant_document_details(long long result, long long *docid, double *relevance);
 
 	/*
 		What is the average precision of the query we've just done?
@@ -146,6 +149,27 @@ public:
 		Write the results out in INEX or TREC format (as specified by set_form)
 	*/
 	void write_to_forum_file(long topic_id);
+
+	/*
+		Get the length of the longest document in the repository
+		useful so that you can allocate a buffer for get_document.
+	*/
+	long get_longest_document_length(void);
+
+	/*
+		Load a document from the repository (if there is one)
+	*/
+	char *get_document(char *buffer, unsigned long *length, long long id);
+
+	/*
+		Rendering of statistics to do with the last query
+	*/
+	void stats_text_render(void);
+
+	/*
+		Rendering of statistics to do with all queries so far since the search engine started
+	*/
+	void stats_all_text_render(void);
 } ;
 
 #endif /* ATIRE_API_H_ */

@@ -7,7 +7,6 @@
 #include "atire_api.h"
 #include "str.h"
 #include "maths.h"
-#include "search_engine.h"
 #include "ant_param_block.h"
 #include "stats_time.h"
 #include "channel_file.h"
@@ -57,7 +56,7 @@ if (params->stats & ANT_ANT_param_block::SHORT)
 	}
 
 if (params->stats & ANT_ANT_param_block::QUERY)
-	atire.search_engine->stats_text_render();
+	atire.stats_text_render();
 
 /*
 	Return average precision
@@ -86,7 +85,7 @@ ANT_stats_time post_processing_stats;
 char *command, *query;
 long topic_id, line, number_of_queries;
 long long hits, result, last_to_list;
-double average_precision, sum_of_average_precisions, mean_average_precision;
+double average_precision, sum_of_average_precisions, mean_average_precision, relevance;
 long length_of_longest_document;
 unsigned long current_document_length;
 long long docid;
@@ -104,7 +103,7 @@ else
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
-length_of_longest_document = atire.search_engine->get_longest_document_length();
+length_of_longest_document = atire.get_longest_document_length();
 
 document_buffer = new char [length_of_longest_document + 1];
 
@@ -129,7 +128,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
 			{
-			atire.load_document(document_buffer, &current_document_length, atoll(command + 5));
+			atire.get_document(document_buffer, &current_document_length, atoll(command + 5));
 			sprintf(print_buffer, "%lld", current_document_length);
 			outchannel->puts(print_buffer);
 			outchannel->write(document_buffer, current_document_length);
@@ -179,12 +178,12 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		answer_list = atire.generate_results_list();
 		for (result = 0; result < last_to_list; result++)
 			{
-			docid = atire.search_engine->results_list->accumulator_pointers[result] - atire.search_engine->results_list->accumulator;
+			docid = atire.get_relevant_document_details(result, &docid, &relevance);
 			if ((current_document_length = length_of_longest_document) == 0)
 				title_start = "";
 			else
 				{
-				atire.search_engine->get_document(document_buffer, &current_document_length, docid);
+				atire.get_document(document_buffer, &current_document_length, docid);
 				if ((title_start = strstr(document_buffer, "<title>")) == NULL)
 					if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
 						title_start = "";
@@ -204,7 +203,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 						}
 					}
 				}
-			sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, answer_list[result], (double)atire.search_engine->results_list->accumulator_pointers[result]->get_rsv(), title_start);
+			sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, answer_list[result], relevance, title_start);
 			outchannel->puts(print_buffer);
 			}
 		}
@@ -232,7 +231,7 @@ if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block:
 	Report the summary of the stats
 */
 if (params->stats & ANT_ANT_param_block::SUM)
-	atire.search_engine->stats_all_text_render();
+	atire.stats_all_text_render();
 
 /*
 	Clean up
@@ -273,7 +272,7 @@ if (params.assessments_filename != NULL)
 if (params.output_forum != ANT_ANT_param_block::NONE)
 	atire.set_forum(params.output_forum, params.output_filename, params.participant_id, params.run_name, params.results_list_length);
 
-atire.search_engine->set_trim_postings_k(params.trim_postings_k);
+atire.set_trim_postings_k(params.trim_postings_k);
 atire.set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
 
 atire.set_segmentation(params.segmentation);
