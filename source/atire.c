@@ -120,7 +120,10 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 	*/
 	strip_space_inplace(command);
 	if (strcmp(command, ".quit") == 0)
+		{
+		delete [] command;
 		break;
+		}
 	if (strncmp(command, ".get ", 5) == 0)
 		{
 		*document_buffer = '\0';

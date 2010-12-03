@@ -10,9 +10,9 @@
 #include "str.h"
 #include "fundamental_types.h"
 
-#define BITS_PER_WORD 32		// 32 bits to a word
+#define BITS_PER_WORD 64		// 64 bits to a word
 
-typedef uint32_t ANT_op;
+typedef uint64_t ANT_op;
 
 /*
 	How many bits are set in byte with value equal to index.
