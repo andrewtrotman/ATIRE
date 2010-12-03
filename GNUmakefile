@@ -48,8 +48,8 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 USE_DIRECT_MEMORY_READ := 0
 
 # enable either TOP_K search or HEAP_K search, but not both
-USE_TOP_K_SEARCH := 1
-USE_HEAP_K_SEARCH := 0
+USE_TOP_K_SEARCH := 0
+USE_HEAP_K_SEARCH := 1
 
 # if top_k or heap_k is enable, then partial decompression of postings list
 # is supported
@@ -76,7 +76,7 @@ USE_TWO_D_ACCUMULATORS := 0
 
 ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g
-	CFLAGS += -g
+	CFLAGS += -g -DDEBUG
 else
 	#LDFLAGS +=
 	CFLAGS += -O3
@@ -189,7 +189,7 @@ ANT_SOURCES := $(filter-out index.c atire.c, $(notdir $(SOURCES)))
 ANT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 
 ATIRE_SOURCES := $(filter-out index.c ant.c, $(notdir $(SOURCES)))
-ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
+ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
 all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
 
@@ -202,6 +202,9 @@ test_index:
 test_ant:
 	@echo $(ANT_OBJECTS)
 
+test_atire:
+	@echo $(ATIRE_OBJECTS)
+
 $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -211,12 +214,12 @@ $(BINDIR)/index : $(INDEX_OBJECTS)
 $(BINDIR)/ant : $(ANT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 	
-$(BINDIR)/atire : $(ANT_OBJECTS)
+$(BINDIR)/atire : $(ATIRE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
 clean :
-	\rm -f $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant
+	\rm -f $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
 
 depend :
 	makedepend -f- -Y -w1024 -pbin/ source/*.c -- $(CFLAGS) | sed -e "s/bin\/source/bin/" >| GNUmakefile.dependencies
