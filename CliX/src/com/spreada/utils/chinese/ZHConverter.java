@@ -12,7 +12,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-
+/*
+ * Modified from http://code.google.com/p/java-zhconverter/
+ * Original author: Edward.Y.K.Tse
+ * Modified by: Eric Tang
+ */
 public class ZHConverter {
 
 

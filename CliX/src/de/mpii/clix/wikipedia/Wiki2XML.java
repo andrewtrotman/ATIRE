@@ -352,60 +352,69 @@ public class Wiki2XML {
 				stream.close();
 				
 				if (runBzip2) {
-					while (!queue.isEmpty())
-						Thread.sleep(1000);
+                                    while (!queue.isEmpty())
+                                            Thread.sleep(1000);
 
-				String Command = null;
+                                    String filename = inputfile.get(i);
+                                    int pos = inputfile.get(i).lastIndexOf(File.separator);
+                                    if (pos > -1)
+                                            filename = filename.substring(pos + File.separator.length());
+                                    String inputFile = WikiHandler.outputDir + File.separator + WikiHandler.currentLang + File.separator;
+                                    String outputFile = WikiHandler.outputDir + File.separator + filename;
 
-				String filename = inputfile.get(i);
-					int pos = inputfile.get(i).lastIndexOf(File.separator);
-					if (pos > -1)
-						filename = filename.substring(pos + File.separator.length());
-				String inputFile = WikiHandler.outputDir + File.separator + WikiHandler.currentLang + File.separator + "*";
-				String outputFile = WikiHandler.outputDir + File.separator + filename;
-				        if (System.getProperty("os.name").equals("Linux")) {
-//			                Command = new String[5];
-//			                Command[0] = "tar";
-//			                Command[1] = "cjvf" + outputFile + " " + inputFile;
-//			                Command[2] = ";";
-//			                Command[3] = "\rm";
-//			                Command[4] = inputFile;
-		                }
-				        else if (System.getProperty("os.name").equals("Solaris")) {
-				        	//tar cvf - ./mydir | bzip2 - >> mydir.tar.bz2
-//			                Command = new String[8];
-//			                Command[0] = "tar";
-//			                Command[1] = "cvf - " + inputFile;
-//			                Command[2] = "|";
-//			                Command[3] = "bzip2"; 
-//			                Command[4] = "- >> " + outputFile;	
-//			                Command[5] = ";";
-//			                Command[6] = "\rm";
-//			                Command[7] =  "-rf " + inputFile;	
-				        	//Command = new String[2];
-				        	//Command[0] = "tar";
-				        	Command = "tar cf - " + inputFile + " | " + "bzip2 " + "- >> " + outputFile + "; \\rm -rf " + inputFile;	
-		                }
-				        
+                                    String Command10 = "/home/tangl3/workspace/CliX/execCliX.sh";
+                                    String Command11 = "";
 
-				        Process runCommand = Runtime.getRuntime().exec(Command);
+                                    //String Command12 = " | bzip2 - >> /home/tangl3/corpus/wikipedia/wuuwiki/xml/wuuwiki-20100207-pages-articles.xml.bz2";
+//                                    String targetFileName = "/home/tangl3/corpus/wikipedia/wuuwiki/xml/wuuwiki-20100207-pages-articles.xml.bz2";
+                                    String Command2 = "tar cjvf " + outputFile; //\\rm -rf /home/tangl3/corpus/wikipedia/wuuwiki/xml//wuu/*";
+                                    File fileHandlder = new File(inputFile);
+                    //		File[] subfiles = fileHandlder.listFiles();
 
-				        BufferedReader Resultset = new BufferedReader(
-				                        new InputStreamReader (
-				                        runCommand.getInputStream()));
+                    //		if (subfiles.length > 0) {
+                    //			for (File subfile : subfiles) {
+                    //                            Command2 += " " + subfile.getName();
+                    //                            Command11 += " " + subfile.getName();
+                    //                        }
 
-				        String line;
-				        while ((line = Resultset.readLine()) != null)
-				        	System.out.println(line);		
-				        
-				        Resultset = new BufferedReader(
-		                        new InputStreamReader (
-		                        runCommand.getErrorStream()));
-				        while ((line = Resultset.readLine()) != null)
-				        	System.out.println(line);
-				        
-//					}
-				}
+                                    Command2 += " " + fileHandlder.getAbsolutePath();
+                                    Command11 += " " + fileHandlder.getAbsolutePath();
+                                    Process runCommand;
+                                    try {
+                                        String osName = System.getProperty("os.name");
+                                        String Command = Command2;
+                                        if (osName.equalsIgnoreCase("Linux")) {
+                                                Command = Command2;
+                                                runCommand = Runtime.getRuntime().exec(Command, null, fileHandlder);
+                                        }
+                                        else if (osName.equalsIgnoreCase("Solaris") || osName.equalsIgnoreCase("SunOS")) {
+                                                runCommand = Runtime.getRuntime().exec(new String[] {Command10, Command11, outputFile}, null, fileHandlder); //Command = Command10 + Command11;
+                                        } else
+                                            runCommand = Runtime.getRuntime().exec(Command, null, fileHandlder);
+
+                                            //runCommand = Runtime.getRuntime().exec(new String[] {"bash", "-c \"cd /home/tangl3/corpus/wikipedia/wuuwiki/xml/wuu/; tar cjvf /home/tangl3/corpus/wikipedia/wuuwiki/xml/wuuwiki-20100207-pages-articles.xml.bz2 *\""}); // ; \\rm -rf /home/tangl3/corpus/wikipedia/wuuwiki/xml//wuu/*"});
+                                            //runCommand = Runtime.getRuntime().exec(Command, null, fileHandlder);
+
+                                        BufferedReader Resultset = new BufferedReader(
+                                                        new InputStreamReader (
+                                                        runCommand.getInputStream()));
+
+                                        String line;
+                                        while ((line = Resultset.readLine()) != null)
+                                                System.out.println(line);
+
+                                        Resultset = new BufferedReader(
+                                                new InputStreamReader (
+                                                runCommand.getErrorStream()));
+                                        while ((line = Resultset.readLine()) != null)
+                                                System.out.println(line);
+
+
+                                        } catch (IOException e) {
+                                                // TODO Auto-generated catch block
+                                                e.printStackTrace();
+                                        }
+                                    }
 			}
 		}
 		catch(SAXParseException e)

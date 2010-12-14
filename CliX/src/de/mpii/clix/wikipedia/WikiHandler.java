@@ -369,7 +369,10 @@ public class WikiHandler extends DefaultHandler implements Runnable
         try
         {
         	//URL u=new URL("file",null,"c:\\projects\\clix\\wordnet\\dict");
-        	URL u=new URL("file",null,"/usr/share/wordnet-3.0/dict");
+            String wordnetPath = "/usr/share/wordnet-3.0/";
+            if (!(new File(wordnetPath).exists()))
+                wordnetPath = "/home/tangl3/tools/wordnet-3.0/";
+        	URL u=new URL("file",null, wordnetPath + "dict");
         	dict = new edu.mit.jwi.Dictionary(u);
         	dict.open();
 //            JWNL.initialize(new FileInputStream("file_properties.xml"));
@@ -5881,6 +5884,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
     		{
     			endidx=bidx; type=0;
     		}
+                else
+                     bidx = content.length() - 1;
+                
     		// index of the next end of an empty tag
     		int fidx=content.indexOf("/>", idx);
     		if ((fidx!=-1)&&(fidx<endidx))
