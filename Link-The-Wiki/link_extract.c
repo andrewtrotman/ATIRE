@@ -61,7 +61,7 @@ return source;
 */
 int main(int argc, char *argv[])
 {
-char *file, *start, *end, *from, *ch, *pos;
+char *file, *start, *end, *from, *ch, *pos, *anchor_start;
 char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid;
@@ -85,9 +85,11 @@ for (param = 1; param < argc; param++)
 	if (*argv[param] == '-')
 		{
 		command = argv[param] + 1;
-		if (strcmp(command, "crosslink") == 0)
+		if (strncmp(command, "crosslink", 9) == 0)
 			{
 			crosslink = TRUE;
+			if (strlen(command) > 10 && command[9] == ':')
+				crosslink_namespace = command + 10;
 			++first_param;
 			}
 		else if (strcmp(command, "lowercase") == 0)
@@ -117,6 +119,9 @@ for (param = first_param; param < argc; param++)
 			if (((start = strstr(from, "<"COLLECTION_LINK_TAG_NAME)) != NULL))
 				if (((end = strstr(start, "</"COLLECTION_LINK_TAG_NAME">")) != NULL))
 					{
+					anchor_start = strchr(start + strlen(COLLECTION_LINK_TAG_NAME), '>');
+					++anchor_start;
+
 					memcpy(buffer, start, end - start);
 					buffer[end - start] = '\0';
 
@@ -126,18 +131,22 @@ for (param = first_param; param < argc; param++)
 							{
 							start += strlen("xlink:label=\"");
 							if (strncasecmp(start, crosslink_namespace, 2) == 0)
+								{
 								if ((start = strstr(buffer, "xlink:title=\"")) != NULL)
 									{
 									start += strlen("xlink:title=\"");
 									pos = strchr(start, '"');
-									memcpy(anchor_text, start, pos - start);
-									anchor_text[pos - start] = '\0';
-									/*
-									 * Actually, depend on the language of corpus which we want to extract the crosslink from, the direction of link could be different.
-									 * I would like to use Chinese document to extract English link for now which mean we don't have the source document id.
-									 */
-									printf("0:%d:%s\n", current_docid, anchor_text);
+									memcpy(target, start, pos - start);
+									target[pos - start] = '\0';
 									}
+
+								/*
+								 * Actually, depend on the language of corpus which we want to extract the crosslink from, the direction of link could be different.
+								 * I would like to use Chinese document to extract English link for now which mean we don't have the source document id.
+								 */
+								if (anchor_start != NULL && end == anchor_start) // the language link doesn't have an anchor
+									printf("0:%d:%s\n", current_docid, target);
+								}
 							}
 						from = end;
 						continue;

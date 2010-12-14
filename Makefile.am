@@ -141,7 +141,8 @@ core_sources =  \
 	$(SRCDIR)/focus.c \
 	$(SRCDIR)/focus_article.c \
 	$(SRCDIR)/focus_lowest_tag.c \
-	$(SRCDIR)/focus_results_list.c 
+	$(SRCDIR)/focus_results_list.c \
+	$(SRCDIR)/query.c
 				
 core_noinst_headers = \
 	$(SRCDIR)/ant_param_block.h	\
@@ -291,7 +292,8 @@ core_noinst_headers = \
 	$(SRCDIR)/focus_result.h \
 	$(SRCDIR)/focus_lowest_tag.h \
 	$(SRCDIR)/focus_hash_node.h \
-	$(SRCDIR)/focus_results_list.h
+	$(SRCDIR)/focus_results_list.h \
+	$(SRCDIR)/query.h
 	
 IGNORE_LIST = $(SRCDIR)/ant_ant.c \
 			  $(SRCDIR)/ant_api.c \
