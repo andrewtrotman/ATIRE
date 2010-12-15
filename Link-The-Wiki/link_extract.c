@@ -9,7 +9,7 @@
 #include <ctype.h>
 
 #ifdef _MSC_VER
-	#define strncasecmp _strnicmp
+	#define strcasecmp _stricmp
 #endif
 
 #include "../source/disk.h"
@@ -61,11 +61,12 @@ return source;
 */
 int main(int argc, char *argv[])
 {
-char *file, *start, *end, *from, *ch, *pos, *anchor_start;
+char *file, *start, *end, *from, *ch, *pos, *anchor_start, *buffer_start;
 char *target_start, *target_end, *target_dot;
 char *slash;
-long param, file_number, current_docid;
+long param, file_number, current_docid, source_docid, target_docid;
 long lowercase_only, first_param, crosslink = FALSE;
+long to_continue;
 ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 
@@ -77,8 +78,10 @@ lowercase_only = FALSE;
 char *command;
 const char *default_namespace = "en";
 const char *crosslink_namespace = default_namespace;
+char current_namespace[1024];
 char buffer[1024 * 1024];
 char doctitle[1024 * 1024];
+char link_title[1024 * 1024];
 
 for (param = 1; param < argc; param++)
 	{
@@ -124,39 +127,42 @@ for (param = first_param; param < argc; param++)
 
 					memcpy(buffer, start, end - start);
 					buffer[end - start] = '\0';
+					*current_namespace = '\0';
+					target_docid = -1;
+					to_continue = FALSE;
 
-					if (crosslink)
+					// crosslink link has to have this attribute
+					if ((buffer_start = strstr(buffer, "xlink:label=\"")) != NULL)
 						{
-						if ((start = strstr(buffer, "xlink:label=\"")) != NULL)
+						buffer_start += strlen("xlink:label=\"");
+						pos = strchr(buffer_start, '"');
+						strncpy(current_namespace, buffer_start, pos - buffer_start);
+						current_namespace[pos - buffer_start] = '\0';
+						if (strcasecmp(current_namespace, crosslink_namespace) == 0)
 							{
-							start += strlen("xlink:label=\"");
-							if (strncasecmp(start, crosslink_namespace, 2) == 0)
+							if ((buffer_start = strstr(buffer, "xlink:title=\"")) != NULL)
 								{
-								if ((start = strstr(buffer, "xlink:title=\"")) != NULL)
-									{
-									start += strlen("xlink:title=\"");
-									pos = strchr(start, '"');
-									memcpy(target, start, pos - start);
-									target[pos - start] = '\0';
-									}
-
-								/*
-								 * Actually, depend on the language of corpus which we want to extract the crosslink from, the direction of link could be different.
-								 * I would like to use Chinese document to extract English link for now which mean we don't have the source document id.
-								 */
-								if (anchor_start != NULL && end == anchor_start) // the language link doesn't have an anchor
-									printf("0:%d:%s\n", current_docid, target);
+								buffer_start += strlen("xlink:title=\"");
+								pos = strchr(buffer_start, '"');
+								memcpy(link_title, buffer_start, pos - buffer_start);
+								link_title[pos - buffer_start] = '\0';
+								to_continue = TRUE;
 								}
 							}
+						}
+					else
+						if (!crosslink)
+							to_continue = TRUE;
+
+					if (!to_continue) {
 						from = end;
 						continue;
-						}
+					}
 
-
-					start = strstr(buffer, "xlink:href=");
-					if (start != NULL && start < end)
+					buffer_start = strstr(buffer, "xlink:href=");
+					if (buffer_start != NULL/* && buffer_start < end*/)
 						{
-						target_start = strchr(start, '"') + 1;
+						target_start = strchr(buffer_start, '"') + 1;
 						target_end = strchr(target_start, '"');
 
 						/* skip / or \ */
@@ -169,19 +175,45 @@ for (param = first_param; param < argc; param++)
 						strncpy(target, target_start, target_end - target_start);
 						target[target_end - target_start] = '\0';
 
-						start = strchr(start, '>') + 1;
-						strncpy(anchor_text, start, end - start);
-						anchor_text[end - start] = '\0';
-						strip_space_inline(anchor_text);
-						for (ch = anchor_text; *ch != '\0'; ch++)
-							if (isspace(*ch))
-								*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
-
-						string_clean(anchor_text, lowercase_only);
-
 						if (*target >= '0' && *target <= '9') // make sure this is a valid link
-							printf("%d:%s:%s\n", current_docid, target, anchor_text);
+							target_docid = atol(target);
 						}
+
+//					start = strchr(start, '>') + 1;
+					strncpy(anchor_text, anchor_start, end - anchor_start);
+					anchor_text[end - anchor_start] = '\0';
+					strip_space_inline(anchor_text);
+					for (ch = anchor_text; *ch != '\0'; ch++)
+						if (isspace(*ch))
+							*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
+
+					string_clean(anchor_text, lowercase_only);
+
+					if (crosslink)
+						{
+						/*
+						 * Actually, depend on the language of corpus which we want to extract the crosslink from, the direction of link could be different.
+						 * I would like to use Chinese document to extract English link for now which mean we don't have the source document id.
+						 */
+							if (strlen(anchor_text) == 0) {// the language link doesn't have an anchor
+//								printf("0:%d:%s\n", current_docid, link_title);
+								strcpy(anchor_text, link_title);
+
+								if (strcasecmp(current_namespace, default_namespace) == 0)
+									source_docid = 0;
+								else
+									source_docid = target_docid;
+
+								target_docid = current_docid;
+							}
+							else
+								*anchor_text = '\0';
+						}
+					else
+						source_docid = current_docid;
+
+					if (target_docid > -1 && strlen(anchor_text) > 0)
+						printf("%d:%d:%s\n", source_docid, target_docid, anchor_text);
 
 					if (start != NULL && start < end)
 						start = end;		// for the next time around the loop
