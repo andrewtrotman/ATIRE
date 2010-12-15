@@ -123,7 +123,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		delete [] command;
 		break;
 		}
-	if (strncmp(command, ".get ", 5) == 0)
+	else if (strncmp(command, ".get ", 5) == 0)
 		{
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
@@ -132,12 +132,17 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			sprintf(print_buffer, "%lld", current_document_length);
 			outchannel->puts(print_buffer);
 			outchannel->write(document_buffer, current_document_length);
-
-			atire.best_terms(atoll(command + 5));		// this is a hack and should be removed
 			}
 		continue;
 		}
-	if (*command == '\0')
+	else if (strncmp(command, ".topterms ", 10) == 0)
+		{
+		*document_buffer = '\0';
+		if ((current_document_length = length_of_longest_document) != 0)
+			atire.best_terms(atoll(command + 10));		// this is a hack and should be removed
+		continue;
+		}
+	else if (*command == '\0')
 		continue;			// ignore blank lines
 
 	if (params->assessments_filename != NULL || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)

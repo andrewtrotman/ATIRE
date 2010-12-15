@@ -238,7 +238,7 @@ return sum;
 */
 void ANT_memory_index_one::top_terms_from_tree(ANT_memory_index_one_node *node)
 {
-if (node->string[0] != '~')
+if (ANT_isalpha(node->string[0]))
 	if (heap_terms < heap_size)
 		{
 		top_terms[heap_terms] = node;
