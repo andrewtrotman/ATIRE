@@ -34,7 +34,7 @@ this->documents = documents;
 #endif
 
 memory->realign();
-accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * (documents+padding));
+accumulator = (ANT_search_engine_accumulator *)memory->malloc(sizeof(*accumulator) * (documents + padding));
 memory->realign();
 accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*accumulator_pointers) * documents);
 for (pointer = 0; pointer < documents; pointer++)

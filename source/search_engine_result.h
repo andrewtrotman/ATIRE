@@ -130,9 +130,6 @@ public:
 
 		init_partial_accumulators(index);
 
-//		if (index > documents)
-//			printf("docid %d too big\n", index);
-
 		if ((was = which->get_rsv()) <= min_in_top_k)
 			{									// were' not in the top-k but we might end up there.
 			if (which->add_rsv(score) > min_in_top_k)
@@ -152,12 +149,12 @@ public:
 	template <class T> inline void add_rsv(long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
-	ANT_search_engine_accumulator::ANT_accumulator_t old_val = which->get_rsv();
+	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
 	ANT_search_engine_accumulator::ANT_accumulator_t new_val;
 
 	init_partial_accumulators(index);
+	old_val = which->get_rsv();
 	new_val = which->add_rsv(score);
-
 
 	if (results_list_length < top_k)
 		{

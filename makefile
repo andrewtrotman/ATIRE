@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 0
+DEBUG = 1
 
 #
 #	Which compiler are we using
@@ -99,6 +99,7 @@ FIXED = /link /fixed:no /opt:ref
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 
 MINUS_D = $(MINUS_D) -DSPECIAL_COMPRESSION=1
 #MINUS_D = $(MINUS_D) -DTOP_K_SEARCH
+MINUS_D = $(MINUS_D) -DTWO_D_ACCUMULATORS
 MINUS_D = $(MINUS_D) -DHEAP_K_SEARCH
 MINUS_D = $(MINUS_D) -DANDREW_HEAP_BITS
 MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
