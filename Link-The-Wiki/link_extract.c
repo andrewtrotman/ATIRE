@@ -61,12 +61,12 @@ return source;
 */
 int main(int argc, char *argv[])
 {
-char *file, *start, *end, *from, *ch, *pos, *anchor_start, *buffer_start;
+char *file, *start, *end, *from, *ch, *pos, *anchor_start, *buffer_start, *paragraph_start, *p_letter, *lt_letter/*<p>*/;
 char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid, source_docid, target_docid;
 long lowercase_only, first_param, crosslink = FALSE;
-long to_continue;
+long to_continue, language_link;
 ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 
@@ -75,6 +75,7 @@ if (argc < 2)
 
 first_param = 1;
 lowercase_only = FALSE;
+language_link = FALSE;
 char *command;
 const char *default_namespace = "en";
 const char *crosslink_namespace = default_namespace;
@@ -122,6 +123,23 @@ for (param = first_param; param < argc; param++)
 			if (((start = strstr(from, "<"COLLECTION_LINK_TAG_NAME)) != NULL))
 				if (((end = strstr(start, "</"COLLECTION_LINK_TAG_NAME">")) != NULL))
 					{
+					if (!language_link)
+						{
+						(paragraph_start = start)--;
+						if (isspace(*paragraph_start))
+							{
+							while (isspace(*paragraph_start))
+								--paragraph_start;
+
+							if (*paragraph_start == '>')
+								{
+								p_letter = --paragraph_start;
+								lt_letter = --paragraph_start;
+								if (*p_letter == 'p' && *lt_letter == '<')
+									language_link = TRUE;
+								}
+							}
+						}
 					anchor_start = strchr(start + strlen(COLLECTION_LINK_TAG_NAME), '>');
 					++anchor_start;
 
@@ -199,12 +217,17 @@ for (param = first_param; param < argc; param++)
 //								printf("0:%d:%s\n", current_docid, link_title);
 								strcpy(anchor_text, link_title);
 
-								if (strcasecmp(current_namespace, default_namespace) == 0)
+								if (language_link)
+									{
 									source_docid = 0;
+									target_docid = current_docid;
+									}
 								else
-									source_docid = target_docid;
-
-								target_docid = current_docid;
+									{
+									source_docid = current_docid;
+									if (target_docid < 0)
+										target_docid = 0;
+									}
 							}
 							else
 								*anchor_text = '\0';
