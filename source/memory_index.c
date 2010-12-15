@@ -639,7 +639,7 @@ void ANT_memory_index::open_index_file(char *filename)
 {
 char file_header[] = "ANT Search Engine Index File\n\0\0";
 
-if (index_file == NULL)
+if (index_file == NULL && filename != NULL)
 	{
 	index_file = new ANT_file;
 	index_file->open(filename, "w+b");
@@ -684,6 +684,12 @@ long long timer;
 ANT_string_pair squiggle_document_filenames_start("~documentfilenamesstart");
 ANT_string_pair squiggle_document_filenames_finish("~documentfilenamesfinish");
 long long pos;
+
+/*
+	Can't serialise if we're an in-memory index
+*/
+if (index_file == NULL)
+	return 0;
 
 compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
 decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
@@ -924,6 +930,9 @@ else
 void ANT_memory_index::add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long raw_length)
 {
 long long start, timer;
+
+if (index_file == NULL)
+	return;			// don't write documents if we're an in-memory indexer
 
 timer = stats->start_timer();
 

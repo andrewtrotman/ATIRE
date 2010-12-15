@@ -132,6 +132,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			sprintf(print_buffer, "%lld", current_document_length);
 			outchannel->puts(print_buffer);
 			outchannel->write(document_buffer, current_document_length);
+
+			atire.best_terms(atoll(command + 5));		// this is a hack and should be removed
 			}
 		continue;
 		}

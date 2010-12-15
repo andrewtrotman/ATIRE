@@ -2,7 +2,6 @@
 	HEAP.H
 	------
 */
-
 #ifndef HEAP_H
 #define HEAP_H
 
@@ -43,6 +42,7 @@ public:
 	void min_update(T key);
 };
 
+#ifdef BROKEN
 template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key) {
 	long long i = 0, lpos, rpos;
 	// if key is less than the minimum in heap, then do nothing
@@ -73,6 +73,54 @@ template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key
 	array[i] = key;
 	return 1;
 }
+#endif
+
+template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key)
+{
+long long i = 0, lpos, rpos;
+// if key is less than the minimum in heap, then do nothing
+if (compare(key, array[0]) < 0)
+	return 0;
+
+while (i < this->size)
+	{
+	lpos = left_pos(i);
+	rpos = right_pos(i);
+
+	// check array out of bound, it's also the stopping condition
+ 	if (lpos < this->size && rpos < this->size)
+		{
+	 	if (compare(key, array[lpos]) < 0 && compare(key, array[rpos]) < 0)
+			break;			// we're smaller then the left and the right so we're done
+		else if (compare(array[lpos], array[rpos]) < 0)
+			{
+			array[i] = array[lpos];
+			i = lpos;
+			} 
+		else
+			{
+			array[i] = array[rpos];
+			i = rpos;
+			}
+		}
+	else if (lpos < this->size)			// and rpos > this->size (because this is an else)
+		{
+		if (compare(key, array[lpos]) > 0)
+			{
+			array[i] = array[lpos];
+			i = lpos;
+			}
+		else
+			break;
+		}
+	else
+		break;			// both lpos and lpos exceed end of array
+	}
+
+array[i] = key;
+return 1;
+}
+
 
 template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(T key) {
 	long long i, lpos, rpos;
@@ -223,7 +271,7 @@ template <typename T, typename _Compare> void Heap<T, _Compare>::min_heapify(lon
 }
 
 template <typename T, typename _Compare> void Heap<T, _Compare>::build_min_heap() {
-	for (long long i = size/2-1; i >= 0; i--) {
+	for (long long i = size/2 - 1; i >= 0; i--) {
 		min_heapify(i);
 	}
 }

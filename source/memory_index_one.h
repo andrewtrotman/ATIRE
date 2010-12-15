@@ -6,11 +6,14 @@
 #define MEMORY_INDEX_ONE_H_
 
 #include "memory_indexer.h"
+#include "heap.h"	
 
 class ANT_memory;
 class ANT_memory_index_one_node;
 class ANT_string_pair;
 class ANT_memory_index;
+class ANT_search_engine;
+class ANT_search_engine_btree_leaf;
 
 /*
 	class ANT_MEMORY_INDEX_ONE
@@ -32,6 +35,21 @@ private:
 	ANT_memory *memory;
 	ANT_memory_index *final_index;
 	long hashed_squiggle_length;
+	long long document_length;
+
+	/*
+		This stuff is used in the KL-divergence code to decrease the chance of stack blow-out
+	*/
+	ANT_search_engine_btree_leaf *term_details;
+	char *token_as_string;
+
+	/*
+		This stuff is to do with computing good terms from documents
+	*/
+	ANT_memory_index_one_node **top_terms;
+	Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node> *heap;
+	long heap_terms;		// number of terms in the heap
+	long heap_size;			// maximum size of the heap
 
 private:
 	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string);
@@ -39,16 +57,22 @@ private:
 	long hash(ANT_string_pair *string);
 	ANT_memory_index_one_node *add(ANT_string_pair *string, long long docno, long extra_term_frequency);
 
+	double kl_node(ANT_memory_index_one_node *node, ANT_search_engine *document_collection);
+	void top_terms_from_tree(ANT_memory_index_one_node *node);
+
 public:
 	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index);
 	virtual ~ANT_memory_index_one();
 
 	void rewind(void);
 
-	virtual ANT_memory_indexer_node *add_term(ANT_string_pair *string, long long docno, long extra_term_frequency = 1);
-	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); } 
+	virtual ANT_memory_indexer_node *add_term(ANT_string_pair *string, long long docno = 1, long extra_term_frequency = 1);
+	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, document_length = length); } 
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
  	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+
+	double kl_divergence(ANT_search_engine *collection);
+	ANT_memory_index_one_node **top_n_divergent_terms(ANT_search_engine *collection, long terms_wanted, long *terms_found);
 } ;
 
 #endif /* MEMORY_INDEX_ONE_H_ */

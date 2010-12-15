@@ -170,6 +170,11 @@ public:
 		Rendering of statistics to do with all queries so far since the search engine started
 	*/
 	void stats_all_text_render(void);
+
+
+
+
+	void best_terms(long long doc_id);
 } ;
 
 #endif /* ATIRE_API_H_ */

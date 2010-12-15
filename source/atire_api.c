@@ -45,6 +45,11 @@
 #include "search_engine_forum_INEX_bep.h"
 #include "search_engine_forum_TREC.h"
 
+#include "parser.h"
+#include "memory_index.h"
+#include "memory_index_one.h"
+#include "memory_index_one_node.h"
+
 #include "version.h"
 
 #ifndef FALSE
@@ -846,3 +851,49 @@ void ATIRE_API::stats_all_text_render(void)
 {
 search_engine->stats_all_text_render();
 }
+
+/*
+	HACK
+	HACK
+	HACK
+	HACK
+*/
+void ATIRE_API::best_terms(long long docid)
+{
+unsigned char *document_buffer;
+unsigned long document_buffer_length;
+static ANT_memory_index indexer(NULL);
+static ANT_memory memory;
+static ANT_memory_index_one one(&memory, &indexer);
+static ANT_parser parser;
+static ANT_string_pair *token;
+static ANT_memory_index_one_node **top_terms;
+static char buffer[1024];
+long length_in_terms;
+long terms_to_get = 10;
+
+document_buffer_length = 1024 * 1024;
+document_buffer = new unsigned char [document_buffer_length];
+
+parser.set_document(document_buffer);
+get_document((char *)document_buffer, &document_buffer_length, docid);
+length_in_terms = 0;
+while ((token = parser.get_next_token()) != NULL)
+	{
+	one.add_term(token);
+	length_in_terms++;
+	}
+one.set_document_length(1, length_in_terms);
+
+top_terms = one.top_n_divergent_terms(search_engine, terms_to_get, &terms_to_get);
+
+puts("");
+for (long current = 0; current < terms_to_get; current++)
+	{
+	top_terms[current]->string.strcpy(buffer);
+	printf("%02d %0.4f %s\n", current, top_terms[current]->kl_score, buffer);
+	}
+
+delete [] document_buffer;	
+}
+
