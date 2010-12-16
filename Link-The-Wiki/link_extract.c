@@ -118,28 +118,12 @@ for (param = first_param; param < argc; param++)
 		current_docid = get_doc_id(file);
 		get_doc_name(file, doctitle);
 		from = file;
+		language_link = FALSE;
 		while (from != NULL)
 			{
 			if (((start = strstr(from, "<"COLLECTION_LINK_TAG_NAME)) != NULL))
 				if (((end = strstr(start, "</"COLLECTION_LINK_TAG_NAME">")) != NULL))
 					{
-					if (!language_link)
-						{
-						(paragraph_start = start)--;
-						if (isspace(*paragraph_start))
-							{
-							while (isspace(*paragraph_start))
-								--paragraph_start;
-
-							if (*paragraph_start == '>')
-								{
-								p_letter = --paragraph_start;
-								lt_letter = --paragraph_start;
-								if (*p_letter == 'p' && *lt_letter == '<')
-									language_link = TRUE;
-								}
-							}
-						}
 					anchor_start = strchr(start + strlen(COLLECTION_LINK_TAG_NAME), '>');
 					++anchor_start;
 
@@ -152,6 +136,25 @@ for (param = first_param; param < argc; param++)
 					// crosslink link has to have this attribute
 					if ((buffer_start = strstr(buffer, "xlink:label=\"")) != NULL)
 						{
+						// check if it is a language link
+						if (!language_link)
+							{
+							(paragraph_start = start)--;
+							if (isspace(*paragraph_start))
+								{
+								while (isspace(*paragraph_start))
+									--paragraph_start;
+
+								if (*paragraph_start == '>')
+									{
+									p_letter = --paragraph_start;
+									lt_letter = --paragraph_start;
+									if (*p_letter == 'p' && *lt_letter == '<')
+										language_link = TRUE;
+									}
+								}
+							}
+
 						buffer_start += strlen("xlink:label=\"");
 						pos = strchr(buffer_start, '"');
 						strncpy(current_namespace, buffer_start, pos - buffer_start);
