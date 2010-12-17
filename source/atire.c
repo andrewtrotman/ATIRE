@@ -135,13 +135,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			}
 		continue;
 		}
-	else if (strncmp(command, ".topterms ", 10) == 0)
+#ifdef NEVER
+	else if (strncmp(command, ".bestterms ", 11) == 0)
 		{
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
-			atire.best_terms(atoll(command + 10));		// this is a hack and should be removed
+			{
+			atire.get_document(document_buffer, &current_document_length, atoll(command + 11));
+			atire.best_terms(document_buffer, 10);		// top 10 terms
+			}
 		continue;
 		}
+	else if (strncmp(command, ".feedback ", 10) == 0)
+		{
+		atire.feedback(atol(command + 10));
+		continue;
+		}
+#endif
 	else if (*command == '\0')
 		continue;			// ignore blank lines
 

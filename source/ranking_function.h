@@ -60,8 +60,13 @@ public:
 	/*
 		You must override these functions if you're going to add a ranking function.
 	*/
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) = 0;
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
 	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency) = 0;
+
+	/*
+		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
+	*/
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
 
 	/*
 		You can override this function if you want fast boolean, otherwise it'll run through the postings list 
@@ -69,7 +74,12 @@ public:
 		pass the postings list but this can be overridden to touch the postings list only once (see BM25 for
 		and example).
 	*/
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point);
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+
+	/*
+		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
+	*/
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
 
 	/*
 		If you also override this function then you can rank directly from the tf array,
@@ -82,7 +92,7 @@ public:
 		postings list is generated from the tf array it is then (correctly) trimmed thus further reducing the
 		computational cost of the search.
 	*/
-	virtual void relevance_rank_tf(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point);
+	virtual void relevance_rank_tf(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar);
 
 	/*
 		Functions used for quantised impact ordering.  We need to compute the range of values that will be

@@ -140,7 +140,7 @@ term_details->impacted_length = sum + 2 * buckets_used;
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
 	----------------------------------------------
 */
-void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long docid;
 ANT_compressable_integer *current, *end;
@@ -166,21 +166,21 @@ while (current < end)
 /*
 	Now call the top-k based relevance ranking function (pass 2)
 */
-relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point);
+relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, prescalar, postscalar);
 }
 
 /*
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
 	-----------------------------------------
 */
-void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point)
+void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar)
 {
 long long now;
 now = stats->start_timer();
 tf_to_postings(term_details, decompress_buffer, tf_array);
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
-relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point);
+relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
 }
 
 /*

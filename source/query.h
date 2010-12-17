@@ -45,7 +45,6 @@ public:
 	long parse_error;
 	long terms_in_query;				// leaf nodes (search terms) 0 = unknown
 
-
 public:
 	ANT_query() { clear(); }
 	virtual ~ANT_query() {}

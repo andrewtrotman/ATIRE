@@ -11,6 +11,7 @@
 #include "memory_index_one_node.h"
 #include "memory_index.h"
 #include "memory_index_hash_node.h"
+#include "term_divergence.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -35,6 +36,7 @@ return ANT_memory_index::hash(string) % HASH_TABLE_SIZE;
 */
 ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index)
 {
+heap = NULL;
 hashed_squiggle_length = hash(&squiggle_length);
 this->memory = memory;
 this->final_index = index;
@@ -42,6 +44,7 @@ rewind();
 
 term_details = NULL;
 token_as_string = NULL;
+document_length = 0;
 }
 
 /*
@@ -50,6 +53,7 @@ token_as_string = NULL;
 */
 ANT_memory_index_one::~ANT_memory_index_one()
 {
+delete heap;
 delete memory;
 }
 
@@ -92,8 +96,8 @@ return node;
 }
 
 /*
-	ANT_FOCUS::FIND_ADD_NODE()
-	--------------------------
+	ANT_MEMORY_INDEX_ONE::FIND_ADD_NODE()
+	-------------------------------------
 */
 ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(ANT_memory_index_one_node *root, ANT_string_pair *string)
 {
@@ -109,6 +113,34 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 	else
 		if (root->right == NULL)
 			return root->right = new_hash_node(string);
+		else
+			root = root->right;
+	}
+
+return root;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::FIND_NODE()
+	---------------------------------
+*/
+ANT_memory_index_one_node *ANT_memory_index_one::find_node(ANT_memory_index_one_node *root, ANT_string_pair *string)
+{
+long cmp;
+
+if (root == NULL)
+	return NULL;
+
+while ((cmp = string->strcmp(&(root->string))) != 0)
+	{
+	if (cmp > 0)
+		if (root->left == NULL)
+			return NULL;
+		else
+			root = root->left;
+	else
+		if (root->right == NULL)
+			return NULL;
 		else
 			root = root->right;
 	}
@@ -164,9 +196,10 @@ if (node != NULL)
 	ANT_MEMORY_INDEX_ONE::KL_NODE()
 	-------------------------------
 */
-double ANT_memory_index_one::kl_node(ANT_memory_index_one_node *node, ANT_search_engine *document_collection)
+double ANT_memory_index_one::kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_search_engine *document_collection)
 {
-double left, right, center, px, qx;
+long long collection_frequency;
+double left, right, center;
 
 left = right = center = 0.0;
 
@@ -175,32 +208,60 @@ left = right = center = 0.0;
 */
 if (node->string[0] != '~')
 	{
-	/*
-		Calculate the Divergence for the current search term.  If the term is not in
-		the collection then the divergence is infinate - to get around this we fake
-		the existance of every term in the collection (with TF=1)
-	*/
-	px = (double)node->term_frequency / (double)document_length;
-
 	node->string.strcpy(token_as_string);
 	if ((document_collection->process_one_term(token_as_string, term_details)) == NULL)
-		qx = 1.0 / (double)document_collection->get_collection_length();
+		collection_frequency = 0;
 	else
-		qx = (double)term_details->collection_frequency / (double)document_collection->get_collection_length();
+		collection_frequency = term_details->collection_frequency;
 
-	node->kl_score = center = px * log (px / qx);
-
-//	node->kl_score =term_details->collection_frequency;
+	node->kl_score = center = divergence->divergence(node->term_frequency, document_length, collection_frequency, document_collection->get_collection_length());
 	}
 
 /*
 	Children
 */
 if  (node->left != NULL)
-	left = kl_node(node->left, document_collection);
+	left = kl_node(divergence, node->left, document_collection);
 
 if  (node->right != NULL)
-	right = kl_node(node->right, document_collection);
+	right = kl_node(divergence, node->right, document_collection);
+
+return left + right + center;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::KL_NODE()
+	-------------------------------
+*/
+double ANT_memory_index_one::kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_memory_index_one *document_collection)
+{
+long long collection_frequency;
+double left, right, center;
+ANT_memory_index_one_node *term_details;
+
+left = right = center = 0.0;
+
+/*
+	Current node
+*/
+if (node->string[0] != '~')
+	{
+	if ((term_details = document_collection->find_node(document_collection->hash_table[hash(&node->string)], &node->string)) == NULL)
+		collection_frequency = 0;
+	else
+		collection_frequency = term_details->term_frequency;
+
+	node->kl_score = center = divergence->divergence(node->term_frequency, document_length, collection_frequency, document_collection->document_length);
+	}
+
+/*
+	Children
+*/
+if  (node->left != NULL)
+	left = kl_node(divergence, node->left, document_collection);
+
+if  (node->right != NULL)
+	right = kl_node(divergence, node->right, document_collection);
 
 return left + right + center;
 }
@@ -208,10 +269,8 @@ return left + right + center;
 /*
 	ANT_MEMORY_INDEX_ONE::KL_DIVERGENCE()
 	-------------------------------------
-	sum(p(x) log (p(x) / q(x))
-	where p(x) is the probability in the document and q(x) is the probability in the collection
 */
-double ANT_memory_index_one::kl_divergence(ANT_search_engine *collection)
+double ANT_memory_index_one::kl_divergence(ANT_term_divergence *divergence, ANT_search_engine *collection)
 {
 long node;
 double sum = 0;
@@ -227,7 +286,23 @@ if (token_as_string == NULL)
 
 for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
 	if (hash_table[node] != NULL)
-		sum += kl_node(hash_table[node], collection);
+		sum += kl_node(divergence, hash_table[node], collection);
+
+return sum;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::KL_DIVERGENCE()
+	-------------------------------------
+*/
+double ANT_memory_index_one::kl_divergence(ANT_term_divergence *divergence, ANT_memory_index_one *collection)
+{
+long node;
+double sum = 0;
+
+for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
+	if (hash_table[node] != NULL)
+		sum += kl_node(divergence, hash_table[node], collection);
 
 return sum;
 }
@@ -275,35 +350,45 @@ return first->kl_score < second->kl_score ? 1 : first->kl_score == second->kl_sc
 }
 
 /*
-	ANT_MEMORY_INDEX_ONE::TOP_N_DIVERGENT_TERMS()
-	---------------------------------------------
+	ANT_MEMORY_INDEX_ONE::TOP_N_TERMS()
+	-----------------------------------
 */
-ANT_memory_index_one_node **ANT_memory_index_one::top_n_divergent_terms(ANT_search_engine *collection, long terms_wanted, long *terms_found)
+ANT_memory_index_one_node **ANT_memory_index_one::top_n_terms(long terms_wanted)
 {
 long node;
-double kl;
+long terms_found;
 
-top_terms = new ANT_memory_index_one_node *[terms_wanted];
-heap = new Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node>(*top_terms, terms_wanted);
+/*
+	Allocate memory for the answer set
+*/
+top_terms = new ANT_memory_index_one_node *[terms_wanted + 1];
+
+/*
+	Set up the heap
+*/
+if (heap == NULL)
+	heap = new Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node>(*top_terms, terms_wanted);
 heap_terms = 0;
 heap_size = terms_wanted;
 
 /*
-	Compute the term-by-term deviations
-*/
-kl = kl_divergence(collection);
-
-/*
-	Now walk the line
+	Walk the vocab
 */
 for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
 	if (hash_table[node] != NULL)
 		top_terms_from_tree(hash_table[node]);
 
-delete heap;
-*terms_found = heap_terms < terms_wanted ? heap_terms : terms_wanted;
+terms_found = heap_terms < heap_size ? heap_terms : heap_size;
 
-qsort(top_terms, *terms_found, sizeof(*top_terms), ANT_memory_index_one_node_cmp);
+/*
+	Sort the heap
+*/
+qsort(top_terms, terms_found, sizeof(*top_terms), ANT_memory_index_one_node_cmp);
+
+/*
+	NULL terminate the list
+*/
+top_terms[terms_found] = NULL;
 
 return top_terms;
 }

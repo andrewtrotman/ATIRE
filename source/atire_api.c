@@ -45,10 +45,8 @@
 #include "search_engine_forum_INEX_bep.h"
 #include "search_engine_forum_TREC.h"
 
-#include "parser.h"
-#include "memory_index.h"
-#include "memory_index_one.h"
-#include "memory_index_one_node.h"
+#include "relevance_feedback.h"
+#include "relevance_feedback_factory.h"
 
 #include "version.h"
 
@@ -76,6 +74,7 @@ parsed_query = new ANT_query;
 search_engine = NULL;
 ranking_function = NULL;
 stemmer = NULL;
+feedbacker = NULL;
 query_type_is_all_terms = FALSE;
 hits = 0;
 sort_top_k = LLONG_MAX;
@@ -108,11 +107,12 @@ delete parsed_query;
 
 delete search_engine;
 delete stemmer;
+delete feedbacker;
 delete ranking_function;
 
 delete [] document_list;
 delete [] filename_list;
-//	delete [] answer_list;		// do not free as allocated within the memory object
+//	delete [] answer_list;		// must not be freed as it is allocated within the memory object
 delete [] mem1;
 delete [] mem2;
 
@@ -391,6 +391,19 @@ return 0;
 }
 
 /*
+	ATIRE_API::SET_FEEDBACKER()
+	---------------------------
+*/
+long ATIRE_API::set_feedbacker(long feedback)
+{
+ANT_relevance_feedback_factory factory;
+
+feedbacker = factory.get_feedbacker(search_engine, feedback);
+
+return 0;		// success
+}
+
+/*
 	ATIRE_API::STRING_PAIR_TO_TERM()
 	--------------------------------
 */
@@ -608,6 +621,7 @@ long answer, added, terms_in_query = 0;
 ANT_bitstring *valid_result_set = NULL;
 ANT_search_engine_accumulator *accumulator;
 ANT_NEXI_term_ant *into;
+
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long next_relevant_document;
@@ -690,7 +704,6 @@ delete valid_result_set;
 return terms_in_query;
 }
 
-
 /*
 	ATIRE_API::SEARCH()
 	-------------------
@@ -716,9 +729,9 @@ search_engine->stats_initialise();
 /*
 	Parse and do the query
 */
-if (query_type == QUERY_NEXI)
+if (query_type & QUERY_NEXI)
 	terms_in_query = process_NEXI_query(query);
-else if (query_type == QUERY_BOOLEAN)
+else if (query_type & QUERY_BOOLEAN)
 	terms_in_query = process_boolean_query(query);
 else
 	terms_in_query = 0;
@@ -751,7 +764,6 @@ char **ATIRE_API::generate_results_list(void)
 search_engine->generate_results_list(filename_list, answer_list, hits);
 return answer_list;
 }
-
 
 /*
 	ATIRE_API::GET_WHOLE_DOCUMENT_PRECISION()
@@ -850,50 +862,5 @@ search_engine->stats_text_render();
 void ATIRE_API::stats_all_text_render(void)
 {
 search_engine->stats_all_text_render();
-}
-
-/*
-	HACK
-	HACK
-	HACK
-	HACK
-*/
-void ATIRE_API::best_terms(long long docid)
-{
-unsigned char *document_buffer;
-unsigned long document_buffer_length;
-static ANT_memory_index indexer(NULL);
-static ANT_memory memory;
-static ANT_memory_index_one one(&memory, &indexer);
-static ANT_parser parser;
-static ANT_string_pair *token;
-static ANT_memory_index_one_node **top_terms;
-static char buffer[1024];
-long length_in_terms;
-long terms_to_get = 10;
-
-document_buffer_length = 1024 * 1024;
-document_buffer = new unsigned char [document_buffer_length];
-
-parser.set_document(document_buffer);
-get_document((char *)document_buffer, &document_buffer_length, docid);
-length_in_terms = 0;
-while ((token = parser.get_next_token()) != NULL)
-	{
-	one.add_term(token);
-	length_in_terms++;
-	}
-one.set_document_length(1, length_in_terms);
-
-top_terms = one.top_n_divergent_terms(search_engine, terms_to_get, &terms_to_get);
-
-puts("");
-for (long current = 0; current < terms_to_get; current++)
-	{
-	top_terms[current]->string.strcpy(buffer);
-	printf("%02d %0.4f %s\n", current, top_terms[current]->kl_score, buffer);
-	}
-
-delete [] document_buffer;	
 }
 

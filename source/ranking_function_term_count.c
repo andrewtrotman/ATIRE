@@ -13,9 +13,9 @@
 	ANT_RANKING_FUNCTION_TERM_COUNT::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------------
 */
-void ANT_ranking_function_term_count::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_term_count::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid, tf;
+long docid;
 ANT_compressable_integer *current, *end;
 
 current = impact_ordering;
@@ -23,7 +23,7 @@ end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_p
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;		// do the conversion from integer to float only once.
+	current++;		// do the conversion from integer to float only once.
 	docid = -1;
 	while (*current != 0)
 		{

@@ -139,6 +139,10 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 #
 PARTS = \
 	$(OBJDIR)\atire_api.obj 							\
+	$(OBJDIR)\relevance_feedback.obj 							\
+	$(OBJDIR)\relevance_feedback_blind_kl.obj 							\
+	$(OBJDIR)\relevance_feedback_factory.obj 							\
+	$(OBJDIR)\term_divergence_kl.obj 							\
 	$(OBJDIR)\query.obj 							\
 	$(OBJDIR)\query_parse_tree.obj 					\
 	$(OBJDIR)\query_boolean.obj 					\

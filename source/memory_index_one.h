@@ -14,6 +14,7 @@ class ANT_string_pair;
 class ANT_memory_index;
 class ANT_search_engine;
 class ANT_search_engine_btree_leaf;
+class ANT_term_divergence;
 
 /*
 	class ANT_MEMORY_INDEX_ONE
@@ -53,11 +54,13 @@ private:
 
 private:
 	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string);
+	ANT_memory_index_one_node *find_node(ANT_memory_index_one_node *root, ANT_string_pair *string);
 	ANT_memory_index_one_node *find_add_node(ANT_memory_index_one_node *root, ANT_string_pair *string);
 	long hash(ANT_string_pair *string);
 	ANT_memory_index_one_node *add(ANT_string_pair *string, long long docno, long extra_term_frequency);
 
-	double kl_node(ANT_memory_index_one_node *node, ANT_search_engine *document_collection);
+	double kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_search_engine *document_collection);
+	double kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_memory_index_one *document_collection);
 	void top_terms_from_tree(ANT_memory_index_one_node *node);
 
 public:
@@ -71,8 +74,10 @@ public:
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
  	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 
-	double kl_divergence(ANT_search_engine *collection);
-	ANT_memory_index_one_node **top_n_divergent_terms(ANT_search_engine *collection, long terms_wanted, long *terms_found);
+	double kl_divergence(ANT_term_divergence *divergence, ANT_search_engine *collection);
+	double kl_divergence(ANT_term_divergence *divergence, ANT_memory_index_one *collection);
+	ANT_memory_index_one_node **top_n_terms(long terms_wanted);
+	long long get_document_length() { return document_length; }
 } ;
 
 #endif /* MEMORY_INDEX_ONE_H_ */

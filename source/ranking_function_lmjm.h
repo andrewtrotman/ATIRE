@@ -22,7 +22,7 @@ public:
 	ANT_ranking_function_lmjm(long long documents, ANT_compressable_integer *document_lengths, double lambda = ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA) : ANT_ranking_function(documents, document_lengths) { this->lambda = lambda; }
 	virtual ~ANT_ranking_function_lmjm() {}
 
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point);
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
 	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency);
 } ;
 

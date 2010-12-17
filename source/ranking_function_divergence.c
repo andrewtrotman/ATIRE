@@ -15,7 +15,7 @@
 	see G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on 
 	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
 */
-void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long docid;
 double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;
@@ -72,9 +72,9 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		tf_prime = tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[docid]);
+		tf_prime = prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[docid]);
 		rsv = tf_prime * inf_right * (F_plus_1 / ((double)term_details->document_frequency * (tf_prime + 1.0)));
-		accumulator->add_rsv(docid, rsv);
+		accumulator->add_rsv(docid, postscalar * rsv);
 		}
 	current++;		// skip over the zero
 	}

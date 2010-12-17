@@ -713,7 +713,7 @@ if (verify != NULL)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(results_list, &stemmed_term_details, stem_buffer, trim_postings_k);
+	ranking_function->relevance_rank_tf(results_list, &stemmed_term_details, stem_buffer, trim_postings_k, 1, 1);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 

@@ -16,8 +16,9 @@ ANT_search_engine_result::ANT_search_engine_result(ANT_memory *memory, long long
 long long pointer;
 unsigned long long padding = 0;
 
+results_list_length = 0;
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-results_list_length = min_in_top_k = 0;
+	min_in_top_k = 0;
 #endif
 
 this->documents = documents;
@@ -104,62 +105,56 @@ long long ANT_search_engine_result::init_pointers(void)
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	return results_list_length;
 #else
+	#ifdef TWO_D_ACCUMULATORS
+		unsigned long long current_accumulator, end_accumulator;
+		ANT_search_engine_accumulator **forward_pointer, **backward_pointer;
 
-#ifdef TWO_D_ACCUMULATORS
-	unsigned long long current_accumulator, end_accumulator;
-	ANT_search_engine_accumulator **forward_pointer, **backward_pointer;
+		forward_pointer = accumulator_pointers;
+		backward_pointer = accumulator_pointers + documents - 1;
 
-	forward_pointer = accumulator_pointers;
-	backward_pointer = accumulator_pointers + documents - 1;
-
-	for (unsigned long long row = 0; row < height; row++) {
-		if (init_flags[row] == 1) {
-			end_accumulator = ((row+1) * width) > documents ? documents : (row + 1) * width;
-			for (current_accumulator = row * width; current_accumulator < end_accumulator; current_accumulator++) {
-				if (accumulator[current_accumulator].is_zero_rsv()) {
-					*backward_pointer-- = &(accumulator[current_accumulator]);
-				} else {
-					*forward_pointer++ = &(accumulator[current_accumulator]);
+		for (unsigned long long row = 0; row < height; row++)
+			if (init_flags[row] == 1)
+				{
+				end_accumulator = ((row + 1) * width) > documents ? documents : (row + 1) * width;
+				for (current_accumulator = row * width; current_accumulator < end_accumulator; current_accumulator++) 
+					if (accumulator[current_accumulator].is_zero_rsv()) 
+						*backward_pointer-- = accumulator + current_accumulator;
+					else 
+						*forward_pointer++ = accumulator + current_accumulator;
 				}
-			}
-		}
-	}
 
-	return forward_pointer - accumulator_pointers;
+		return results_list_length = forward_pointer - accumulator_pointers;
+	#else
+		ANT_search_engine_accumulator **current, **back_current, *current_accumulator, *end_accumulator;
 
-#else
+		/*
+			On first observations it appears as though this array does not need to be
+			re-initialised because the accumulator_pointers array already has a pointer
+			to each accumulator, but they are left in a random order from the previous
+			sort - which is good news (right?). Actually, all the zeros are left at the
+			end which leads to a pathological case in quick-sort taking tens of seconds
+			on the INEX Wikipedia 2009 collection.
 
-	ANT_search_engine_accumulator **current, **back_current, *current_accumulator, *end_accumulator;
+			An effective optimisation is to bucket sort into two buckets at the beginning,
+			one bucket is the zeros and the other bucket is the non-zeros.  This is essentially
+			the first partition of the quick-sort before the call to quick-sort.  The advantage
+			is that we know in advance what the correct partition value is and that the second
+			partition (of all zeros) is now already sorted.  We also get (for free) the number
+			of documents we found.
+		*/
+		current = accumulator_pointers;
+		back_current = accumulator_pointers + documents - 1;
+		end_accumulator = accumulator + documents;
+		for (current_accumulator = accumulator; current_accumulator < end_accumulator; current_accumulator++)
+			if (current_accumulator->is_zero_rsv())
+				*back_current-- = current_accumulator;
+			else
+				*current++ = current_accumulator;
 
-	/*
-		On first observations it appears as though this array does not need to be
-		re-initialised because the accumulator_pointers array already has a pointer
-		to each accumulator, but they are left in a random order from the previous
-		sort - which is good news (right?). Actually, all the zeros are left at the
-		end which leads to a pathological case in quick-sort taking tens of seconds
-		on the INEX Wikipedia 2009 collection.
-
-		An effective optimisation is to bucket sort into two buckets at the beginning,
-		one bucket is the zeros and the other bucket is the non-zeros.  This is essentially
-		the first partition of the quick-sort before the call to quick-sort.  The advantage
-		is that we know in advance what the correct partition value is and that the second
-		partition (of all zeros) is now already sorted.  We also get (for free) the number
-		of documents we found.
-	*/
-	current = accumulator_pointers;
-	back_current = accumulator_pointers + documents - 1;
-	end_accumulator = accumulator + documents;
-	for (current_accumulator = accumulator; current_accumulator < end_accumulator; current_accumulator++)
-		if (current_accumulator->is_zero_rsv())
-			*back_current-- = current_accumulator;
-		else
-			*current++ = current_accumulator;
-
-	/*
-		Return the number of relevant documents.
-	*/
-	return current - accumulator_pointers;
-#endif
-
+		/*
+			Return the number of relevant documents.
+		*/
+		return results_list_length = current - accumulator_pointers;
+	#endif
 #endif
 }

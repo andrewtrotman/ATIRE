@@ -35,15 +35,14 @@ public:			// remove this line later
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long documents;
+	long long results_list_length;
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	long long top_k;
-	long long results_list_length;
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 #endif
 
 #ifdef HEAP_K_SEARCH
-//private:
 	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator_cmp> *heapk;
 	ANT_bitstring *include_set;
 #endif

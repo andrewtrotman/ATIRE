@@ -15,6 +15,8 @@ class ANT_query_boolean;
 class ANT_query;
 class ANT_ranking_function;
 class ANT_memory;
+class ANT_memory_index;
+class ANT_memory_index_one;
 class ANT_relevant_document;
 class ANT_mean_average_precision;
 class ANT_search_engine_forum;
@@ -22,6 +24,7 @@ class ANT_assessment_factory;
 class ANT_bitstring;
 class ANT_query_parse_tree;
 class ANT_string_pair;
+class ANT_relevance_feedback;
 
 /*
 	class ATIRE_API
@@ -31,7 +34,7 @@ class ATIRE_API
 {
 public:
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 } ;
-	enum { QUERY_NEXI, QUERY_BOOLEAN } ;
+	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_FEEDBACK = 4 } ;
 
 private:
 	char token_buffer[1024];				// used to convert parsed string_pairs into C char * strings.
@@ -44,6 +47,7 @@ private:
 	ANT_search_engine *search_engine;		// the search engine itself
 	ANT_ranking_function *ranking_function;	// the ranking function to use (default is the perameterless Divergence From Randomness)
 	ANT_stemmer *stemmer;					// stemming function to use
+	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
 	long long hits;							// how many documents were found at the last query
 	long long sort_top_k;					// ranking is only accurate to this position in the results list
@@ -70,6 +74,7 @@ protected:
 	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree);
 	long process_boolean_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
+	void add_to_index(ANT_memory_index_one *one, char *document);
 
 public:
 	ATIRE_API();
@@ -113,6 +118,11 @@ public:
 		Set the stemming function
 	*/
 	long set_stemmer(long which_stemmer, long stemmer_similarity, double threshold);
+
+	/*
+		Set the relevance feedback mechanism
+	*/
+	long set_feedbacker(long feedbacker);
 
 	/*
 		Set the static pruning point.  At most sttic_prune_point postings will be read from disk and processedS
@@ -170,11 +180,6 @@ public:
 		Rendering of statistics to do with all queries so far since the search engine started
 	*/
 	void stats_all_text_render(void);
-
-
-
-
-	void best_terms(long long doc_id);
 } ;
 
 #endif /* ATIRE_API_H_ */

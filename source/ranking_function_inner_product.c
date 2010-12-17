@@ -13,7 +13,7 @@
 	ANT_RANKING_FUNCTION_INNER_PRODUCT::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------------
 */
-void ANT_ranking_function_inner_product::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_inner_product::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long docid;
 double tf, idf;
@@ -42,7 +42,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator->add_rsv(docid, (tf * idf * idf) / 100.0);  // TF.IDF scores blow-out the integer accumulators and so we shift the decimal place back a bit
+		accumulator->add_rsv(docid, postscalar * (prescalar * tf * idf * idf) / 100.0);  // TF.IDF scores blow-out the integer accumulators and so we shift the decimal place back a bit
 		}
 	current++;		// skip over the zero
 	}

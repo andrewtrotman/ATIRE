@@ -28,7 +28,7 @@ public:
 	double kl_score;							// the KL divergence score for this term
 
 public:
-	ANT_memory_index_one_node() : ANT_memory_indexer_node () { left = right = NULL; }
+	ANT_memory_index_one_node() : ANT_memory_indexer_node(), left(NULL), right(NULL), mode(0), final_node(NULL), kl_score(0.0) {}
 
 	/*
 		This method is used for building the heap

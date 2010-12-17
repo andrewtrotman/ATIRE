@@ -30,7 +30,7 @@ this->document_readability = engine->document_readability;
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
-void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point)
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
@@ -45,7 +45,7 @@ while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
 	tf = *current++;
-	top_row = tf * k1_plus_1;
+	top_row = prescalar * tf * k1_plus_1;
 	docid = -1;
 	while (*current != 0)
 		{
@@ -61,7 +61,7 @@ while (current < end)
 		/*
 			Add the portion of BM25 for this query term
 		*/
-		accumulator->add_rsv(docid, mix * (idf * (top_row / (tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))))));
+		accumulator->add_rsv(docid, postscalar * mix * (idf * (top_row / (prescalar * tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))))));
 		}
 	current++;		// skip over the zero
 	}
