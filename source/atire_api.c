@@ -748,6 +748,15 @@ if (query_type_is_all_terms)
 	hits = search_engine->boolean_results_list(terms_in_query);
 
 /*
+	Blind relevance feedback
+*/
+if (feedbacker != NULL)
+	{
+	ANT_memory_index_one_node **additional_terms = feedbacker->feedback(search_engine->results_list, 10, 10);
+	delete [] additional_terms;
+	}
+
+/*
 	Add the time it took to search to the global stats for the search engine
 */
 search_engine->stats_add();

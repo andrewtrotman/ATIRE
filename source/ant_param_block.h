@@ -48,11 +48,14 @@ public:
 	long focussing_algorithm;			// focused retrieval relevance ranking algorithm
 	long focus_top_k;					// number of focussing accumulators
 
+	long feedbacker;					// relevance feedback algorithm to use
+
 private:
 	void export_format(char *forum);
 	void set_metric(char *which);
 	void set_stats(char *which);
 	void set_focused_ranker(char *which);
+	void set_feedbacker(char *which);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);

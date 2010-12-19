@@ -291,6 +291,7 @@ if (params.output_forum != ANT_ANT_param_block::NONE)
 
 atire.set_trim_postings_k(params.trim_postings_k);
 atire.set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
+atire.set_feedbacker(params.feedbacker);
 
 atire.set_segmentation(params.segmentation);
 ant(&params);

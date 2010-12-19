@@ -11,6 +11,7 @@
 #include "ant_param_block.h"
 #include "version.h"
 #include "stemmer_factory.h"
+#include "relevance_feedback_factory.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -44,6 +45,7 @@ segmentation = TRUE;
 trim_postings_k = LONG_MAX;
 file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
+feedbacker = NONE;
 }
 
 /*
@@ -74,6 +76,13 @@ puts("-people         Display credits");
 puts("");
 
 ANT_indexer_param_block_stem::help(TRUE);		// stemmers
+
+puts("RELEVANCE FEEDBACK");
+puts("------------------");
+puts("-b[-r]          blind relevance feedback");
+puts("  -             none [default]");
+puts("  r             Rocchio");
+puts("");
 
 puts("OPTIMISATIONS");
 puts("-------------");
@@ -164,6 +173,20 @@ do
 	which++;
 	}
 while (*which != '\0');
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::SET_FEEDBACKER()
+	-------------------------------------
+*/
+void ANT_ANT_param_block::set_feedbacker(char *which)
+{
+switch (*which)
+	{
+	case '-' : feedbacker = ANT_relevance_feedback_factory::NONE; break;
+	case 'r' : feedbacker = ANT_relevance_feedback_factory::BLIND_KL; break;
+	default : exit(printf("Unknown feedback algorithm: '%c'\n", *which)); break;
+	}
 }
 
 /*
@@ -312,6 +335,8 @@ for (param = 1; param < argc; param++)
 				assessments_filename = argv[++param];
 			else
 				assessments_filename = command + 1;
+		else if (*command == 'b')
+			set_feedbacker(command + 1);
 		else if (*command == 'q')
 			{
 			if (command[1] == ':')
