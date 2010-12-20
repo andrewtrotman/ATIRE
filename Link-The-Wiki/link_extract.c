@@ -119,6 +119,7 @@ for (param = first_param; param < argc; param++)
 		get_doc_name(file, doctitle);
 		from = file;
 		language_link = FALSE;
+
 		while (from != NULL)
 			{
 			if (((start = strstr(from, "<"COLLECTION_LINK_TAG_NAME)) != NULL))
@@ -140,34 +141,37 @@ for (param = first_param; param < argc; param++)
 						if (!language_link)
 							{
 							(paragraph_start = start)--;
-							if (isspace(*paragraph_start))
-								{
-								while (isspace(*paragraph_start))
-									--paragraph_start;
+//							if (isspace(*paragraph_start))
+							while (isspace(*paragraph_start))
+								--paragraph_start;
 
-								if (*paragraph_start == '>')
-									{
-									p_letter = --paragraph_start;
-									lt_letter = --paragraph_start;
-									if (*p_letter == 'p' && *lt_letter == '<')
-										language_link = TRUE;
-									}
+							if (*paragraph_start == '>')
+								{
+								p_letter = --paragraph_start;
+								lt_letter = --paragraph_start;
+								if (*p_letter == 'p' && *lt_letter == '<')
+									language_link = TRUE;
 								}
 							}
 
 						buffer_start += strlen("xlink:label=\"");
 						pos = strchr(buffer_start, '"');
-						strncpy(current_namespace, buffer_start, pos - buffer_start);
-						current_namespace[pos - buffer_start] = '\0';
-						if (strcasecmp(current_namespace, crosslink_namespace) == 0)
+						if (pos == NULL || (pos - buffer) >= 1024)
+							fprintf(stderr, "This file contain error link information: %d\n", current_docid);
+						else
 							{
-							if ((buffer_start = strstr(buffer, "xlink:title=\"")) != NULL)
+							strncpy(current_namespace, buffer_start, pos - buffer_start);
+							current_namespace[pos - buffer_start] = '\0';
+							if (strcasecmp(current_namespace, crosslink_namespace) == 0)
 								{
-								buffer_start += strlen("xlink:title=\"");
-								pos = strchr(buffer_start, '"');
-								memcpy(link_title, buffer_start, pos - buffer_start);
-								link_title[pos - buffer_start] = '\0';
-								to_continue = TRUE;
+								if ((buffer_start = strstr(buffer, "xlink:title=\"")) != NULL)
+									{
+									buffer_start += strlen("xlink:title=\"");
+									pos = strchr(buffer_start, '"');
+									memcpy(link_title, buffer_start, pos - buffer_start);
+									link_title[pos - buffer_start] = '\0';
+									to_continue = TRUE;
+									}
 								}
 							}
 						}

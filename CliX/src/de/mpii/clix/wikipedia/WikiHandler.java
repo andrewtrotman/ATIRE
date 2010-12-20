@@ -47,6 +47,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	public static int phase=0; // 0 - collect, 1 - generate
 	
 	public static String outputDir=".";
+	public static String outputOriginDir="mysql";
+	public static boolean keepOriginalWikiText = false;
 	    
     public static ArrayList<String> languageLinks = new ArrayList<String>();
     
@@ -55,6 +57,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	public int currentFile = 0;
 	
 	private String templateBaseURL="TemplateStore/"; // *relative* to outputDir
+	private final String relativePath = "../../../";
 		
 	private class element
 	{
@@ -537,6 +540,8 @@ public class WikiHandler extends DefaultHandler implements Runnable
 //						articleCount++; return;
 //					}
 					workitem w=new workitem(currentTitle,currentID, currentTimestamp,currentAuthor, currentAuthorID, currentContent,currentRevisionID,currentFile);
+					if (keepOriginalWikiText)
+						dumpPageContent(currentID, currentContent);
 					currentContent = "";
 					while (true)
 					{
@@ -1260,6 +1265,34 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
 		return new_filename;
 	}
+	
+	private void dumpPageContent(String filename,
+			String content) 
+	{
+		String relName = createFileName(filename, true, currentTitle, false, true, currentLang).substring(relativePath.length());
+		filename = outputDir + outputOriginDir + File.separator + relName;
+		checkAllDirs(filename);
+		
+		try {
+		File outputFile = new File(filename);
+		FileOutputStream stream=new FileOutputStream(outputFile);
+		
+		Writer out = new BufferedWriter(new OutputStreamWriter(stream,"UTF-8"));
+
+		//new ByteArrayInputStream(content.getBytes());
+
+		out.write(content);
+		out.flush();
+		out.close();
+		
+		stream.close();
+		}
+		catch (Exception e)
+		{
+			System.out.println(filename+":");
+			e.printStackTrace();
+		}
+	}
 
 	private boolean dumpXMLFile(
 			String filename,
@@ -1317,7 +1350,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	//	System.out.println("checkAllDirs("+filename+")");
 		int i=0;
 		int j;
-		while ((j=filename.substring(i).indexOf("/"))!=-1)
+		while ((j=filename.substring(i).indexOf(File.separator))!=-1)
 		{
 			checkDir(filename.substring(0,i+j));
 			i=i+j+1;
@@ -4522,16 +4555,26 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	    	    case OP_LINK:
 	                endidx=nextLink+2;
 	                int linkcnt=2;
-	                
-	                while ((endidx<end)&&(linkcnt>0))
+	                int bytecount = 0;
+
+	                while ((endidx<end)&&(linkcnt>0)) // bytecount to avoid endless link
 	                {
 	                	if ((content.charAt(endidx)=='['))//&&(!((endidx+1<end)&&(content.charAt(endidx-1)!='[')&&(content.charAt(endidx+1)!='h')&&(content.charAt(endidx+1)!='f')&&(content.charAt(endidx+1)!='['))))
 	                    	linkcnt++;
 	                	else if ((endidx==end-1)&&(content.charAt(endidx)=='['))
 	                		linkcnt++; // will be broken anyway
-	                    else if (content.charAt(endidx)==']')
-	                    	linkcnt--;
+	                    else if (content.charAt(endidx)==']') {
+	                    	if (content.charAt(++endidx)==']') {
+	                    		linkcnt -= 2;
+	                    		++endidx;
+	                    	}
+	                    	break;
+	                    }
 	                    endidx++;
+	                    ++bytecount;
+	                    
+	                    if (bytecount > 1024)
+	                    	throw new Exception("It probabbly not a link");
 	                }
 	                if (linkcnt>0)
 	                {

@@ -157,6 +157,10 @@ public class Wiki2XML {
             {
             	phaseZeroOnly = true;
             } 
+            else if (arg.startsWith("-keepOrigin"))
+            {
+            	WikiHandler.keepOriginalWikiText = true;
+            } 
             else
             {
                 // we need at least one more parameter
