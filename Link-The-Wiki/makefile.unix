@@ -13,23 +13,29 @@ all : link_extract link_extract_pass2 link_index link_index_merge link_this titl
 disk.o: ../source/disk.c
 	$(CC) $(CFLAGS) -c ../source/disk.c -o $@
 
-disk_internals.o : ../source/disk_internals.c
-	$(CC) $(CFLAGS) -c ../source/disk_internals.c -o $@
+directory_iterator.o : ../source/directory_iterator.c
+	$(CC) $(CFLAGS) -c ../source/directory_iterator.c -o $@
 
-link_extract: disk.o disk_internals.o link_extract.o
-	$(CC) $(CFLAGS) link_extract.o disk.o disk_internals.o -o $@
+directory_iterator_internals.o : ../source/directory_iterator_internals.c
+	$(CC) $(CFLAGS) -c ../source/directory_iterator_internals.c -o $@
 
-link_extract_pass2 : disk.o disk_internals.o link_extract_pass2.o
-	$(CC) $(CFLAGS) link_extract_pass2.o disk.o disk_internals.o -o $@
+directory_iterator_recursive.o : ../source/directory_iterator_recursive.c
+	$(CC) $(CFLAGS) -c ../source/directory_iterator_recursive.c -o $@
 
-link_index : disk.o disk_internals.o link_index.o
-	$(CC) $(CFLAGS) link_index.o disk.o disk_internals.o -o $@
+link_extract: disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o link_extract.o
+	$(CC) $(CFLAGS) link_extract.o disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o -o $@
+
+link_extract_pass2 : disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o link_extract_pass2.o
+	$(CC) $(CFLAGS) link_extract_pass2.o disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o -o $@
+
+link_index : disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o link_index.o
+	$(CC) $(CFLAGS) link_index.o disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o -o $@
 
 link_index_merge : link_index_merge.o
 	$(CC) $(CFLAGS) link_index_merge.o -o $@
 
-link_this : disk.o disk_internals.o link_this.o
-	$(CC) $(CFLAGS) link_this.o disk.o disk_internals.o -o $@
+link_this : disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o link_this.o
+	$(CC) $(CFLAGS) link_this.o disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o -o $@
 
-title_extract : disk.o disk_internals.o title_extract.o
-	$(CC) $(CFLAGS) title_extract.o disk.o disk_internals.o -o $@
+title_extract : disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o title_extract.o
+	$(CC) $(CFLAGS) title_extract.o disk.o directory_iterator.o directory_iterator_internals.o directory_iterator_recursive.o -o $@

@@ -9,9 +9,20 @@
 	#include <mach/mach_traps.h>
 	#include <mach/semaphore.h>
 	#include <mach/task.h>
+#elif defined (sun)
+       	#include <synch.h>
+	typedef sema_t sem_t;
+	#define sem_init(x, y, z)    sema_init(x, y, z, NULL)
+	#define sem_wait(s)    sema_wait(s)
+	#define sem_trywait(s) sema_trywait(s)
+	#define sem_post(s)    sema_post(s)
+	#define sem_destroy(s) sema_destroy(s)
+	#define sched_yield()  thr_yield()
 #else
 	#include <semaphore.h>
 #endif
+
+
 #include "semaphores.h"
 #include "semaphores_internals.h"
 

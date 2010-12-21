@@ -9,6 +9,7 @@
 #include <ctype.h>
 
 #include "../source/disk.h"
+#include "../source/directory_iterator_recursive.h"
 #include "link_parts.h"
 
 char doc_title[1024];

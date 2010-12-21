@@ -1,3 +1,4 @@
+OS = UNIX
 CC = g++
 #CC = icpc
 
@@ -92,6 +93,10 @@ ifeq ($(USE_GPROF), 1)
 	CFLAGS += -pg
 endif
 
+ifeq ($(OS), SUNOS)
+	LDFLAGS += -lsocket -lnsl
+endif
+
 # common flags
 LDFLAGS += -ldl
 CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER \
@@ -103,7 +108,11 @@ ifeq ($(USE_SPECIAL_COMPRESSION), 1)
 endif
 
 ifeq ($(USE_PARALLEL_INDEXING), 1)
+   ifeq ($(OS), SUNOS) 
+	LDFLAGS += -lpthread
+   else
 	LDFLAGS += -pthread
+   endif
 	CFLAGS += -DPARALLEL_INDEXING
 endif
 
@@ -191,7 +200,10 @@ ANT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 ATIRE_SOURCES := $(filter-out index.c ant.c, $(notdir $(SOURCES)))
 ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
-all : $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
+all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
+
+info:
+	@echo "OS:" $(OS)
 
 test_source:
 	@echo $(SOURCES)

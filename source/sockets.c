@@ -35,6 +35,11 @@
 	#endif
 #endif
 
+#ifdef __sun
+     #include <stropts.h>
+     #include <sys/conf.h>
+#endif
+
 #include "sockets.h"
 #include "sockets_internals.h"
 

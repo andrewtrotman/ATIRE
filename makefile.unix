@@ -9,8 +9,8 @@ BINDIR = bin
 
 # normal compiling and linking
 LDFLAGS = -ldl
-CFLAGS = -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER -DTOP_K_SEARCH \
-         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
+CFLAGS = -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER -DTOP_K_SEARCH \
+#CFLAGS = $CFLAGS -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 # parallel compiling and linking
 LDFLAGS += -pthread
@@ -47,7 +47,7 @@ ifeq ($(USE_BUILT_IN_BZLIB), 1)
 	EXTRA_OBJS += bzip/bzip2-1.0.5/libbz2.a
 endif
 
-CC = g++
+CC = cc
 #CC = icpc
 
 OBJECTS = \
