@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
 ANT_disk disk;
 char *file, *start, *end, *from;
 long param, file_number, current_docid;
+ANT_directory_iterator_object file_object;
+ANT_directory_iterator_object* file_object_tmp;
 
 if (argc < 2)
 	exit(printf("Usage:%s <filespec> ...\n", argv[0]));
@@ -50,7 +52,10 @@ if (argc < 2)
 file_number = 1;
 for (param = 1; param < argc; param++)
 	{
-	file = disk.read_entire_file(disk.get_first_filename(argv[param]));
+	ANT_directory_iterator_recursive disk(argv[param]);
+
+	disk.first(&file_object);
+	file = ANT_disk::read_entire_file(file_object.filename);
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
@@ -71,7 +76,10 @@ for (param = 1; param < argc; param++)
 		file_number++;
 
 		delete [] file;
-		file = disk.read_entire_file(disk.get_next_filename());
+		file_object_tmp = disk.next(&file_object);
+		if (!file_object_tmp)
+		    break;
+		file = ANT_disk::read_entire_file(file_object.filename);
 		}
 	}
 
