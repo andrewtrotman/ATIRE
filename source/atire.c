@@ -11,6 +11,7 @@
 #include "stats_time.h"
 #include "channel_file.h"
 #include "channel_socket.h"
+#include "relevance_feedback_factory.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -38,7 +39,7 @@ long long now, search_time;
 	Search
 */
 now = stats.start_timer();
-*matching_documents = atire.search(query, params->sort_top_k, ATIRE_API::QUERY_BOOLEAN);
+*matching_documents = atire.search(query, params->sort_top_k, ATIRE_API::QUERY_BOOLEAN | (params->feedbacker == ANT_relevance_feedback_factory::NONE ? 0 : ATIRE_API::QUERY_FEEDBACK));
 search_time = stats.stop_timer(now);
 
 /*

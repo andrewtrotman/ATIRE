@@ -47,6 +47,7 @@
 
 #include "relevance_feedback.h"
 #include "relevance_feedback_factory.h"
+#include "memory_index_one_node.h"
 
 #include "version.h"
 
@@ -753,6 +754,11 @@ if (query_type_is_all_terms)
 if (feedbacker != NULL)
 	{
 	ANT_memory_index_one_node **additional_terms = feedbacker->feedback(search_engine->results_list, 10, 10);
+
+	for (ANT_memory_index_one_node **current = additional_terms; *current != NULL; current++)
+		{
+		printf("%0.4f %*.*s\n", (*current)->kl_score, (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
+		}
 	delete [] additional_terms;
 	}
 
