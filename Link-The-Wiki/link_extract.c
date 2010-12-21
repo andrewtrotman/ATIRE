@@ -65,17 +65,19 @@ char *file, *start, *end, *from, *ch, *pos, *anchor_start, *buffer_start, *parag
 char *target_start, *target_end, *target_dot;
 char *slash;
 long param, file_number, current_docid, source_docid, target_docid;
-long lowercase_only, first_param, crosslink = FALSE;
+long lowercase_only, first_param, crosslink, append_source_title;
 long to_continue, language_link;
 ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 
 if (argc < 2)
-	exit(printf("Usage:%s [-crosslink] [-lowercase] <filespec> ...\n", argv[0]));
+	exit(printf("Usage:%s [-crosslink] [-crosslink-title] [-lowercase] <filespec> ...\n", argv[0]));
 
 first_param = 1;
 lowercase_only = FALSE;
 language_link = FALSE;
+crosslink = FALSE;
+append_source_title = FALSE;
 char *command;
 const char *default_namespace = "en";
 const char *crosslink_namespace = default_namespace;
@@ -95,6 +97,11 @@ for (param = 1; param < argc; param++)
 			if (strlen(command) > 10 && command[9] == ':')
 				crosslink_namespace = command + 10;
 			++first_param;
+			}
+		else if (strcmp(command, "append-source-title") == 0)
+			{
+			append_source_title = TRUE;
+			++first_param; // = 2;
 			}
 		else if (strcmp(command, "lowercase") == 0)
 			{
@@ -226,7 +233,14 @@ for (param = first_param; param < argc; param++)
 
 								if (language_link)
 									{
-									source_docid = 0;
+									if (append_source_title) {
+										strcat(anchor_text, "|");
+										strcat(anchor_text, doctitle);
+									}
+									if (target_docid > 0)
+										source_docid = target_docid;
+									else
+										source_docid = 0;
 									target_docid = current_docid;
 									}
 								else
