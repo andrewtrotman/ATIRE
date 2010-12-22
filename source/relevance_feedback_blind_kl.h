@@ -16,7 +16,7 @@ public:
 	ANT_relevance_feedback_blind_kl(ANT_search_engine *engine) : ANT_relevance_feedback(engine) {}
 	virtual ~ANT_relevance_feedback_blind_kl() {}
 
-	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted);
+	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted, long *terms_found);
 } ;
 
 #endif /* RELEVANCE_FEEDBACK_BLIND_KL_H_ */

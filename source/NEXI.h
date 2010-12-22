@@ -21,7 +21,7 @@ class ANT_NEXI
 protected:
 	static const size_t MAX_NEXI_TERMS = 1024;
 
-private:
+protected:
 	long error_code;
 	long segmentation;
 	ANT_string_pair token;
@@ -33,7 +33,7 @@ private:
 protected:
 	size_t pool_used;
 
-private:
+protected:
 	ANT_NEXI_term *get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *tag, ANT_string_pair *term, long weight);
 	ANT_NEXI_term *duplicate_path_chain(ANT_NEXI_term *start, ANT_NEXI_term **end_of_chain);
 	long ispart(unsigned char *from, long length, unsigned char *next);
@@ -57,7 +57,7 @@ public:
 	virtual ~ANT_NEXI() { delete [] pool; }
 
 	ANT_NEXI_term *parse(char *expression);
-	ANT_query *parse(ANT_query *into, char *expression);
+	virtual ANT_query *parse(ANT_query *into, char *expression) = 0;
 	long get_error_code(void) { return error_code; }
 	void set_segmentation(long to_segment) { segmentation = to_segment; }
 	void print_errors(void) { noisy_errors = 1; }

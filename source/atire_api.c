@@ -118,7 +118,7 @@ delete [] mem1;
 delete [] mem2;
 
 delete assessment_factory;
-delete [] assessments;
+//delete [] assessments;
 delete map;
 delete forum_writer;
 }
@@ -500,6 +500,10 @@ if (terms_in_query == 1)
 */
 for (current_term = 0; current_term < terms_in_query; current_term++)
 	{
+#ifdef NEVER
+	printf("%*.*s\n", term_list[current_term]->term.length(), term_list[current_term]->term.length(), term_list[current_term]->term.start);
+#endif
+
 	term_string = term_list[current_term];
 	if (stemmer == NULL || !ANT_islower(*term_string->get_term()->start))		// We don't stem numbers or tag names, of if there is no stemmer
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
@@ -596,6 +600,7 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	if (*leaves > 0)
 		into[*leaves - 1].next = &into[*leaves];
 	into[*leaves].parent_path = NULL;
+
 	into[*leaves].next = NULL;
 	into[*leaves].sign = 0;
 	into[*leaves].path.start = NULL;
@@ -621,7 +626,6 @@ long ATIRE_API::process_boolean_query(char *query)
 long answer, added, terms_in_query = 0;
 ANT_bitstring *valid_result_set = NULL;
 ANT_search_engine_accumulator *accumulator;
-ANT_NEXI_term_ant *into;
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	ANT_search_engine_accumulator **accumulator_pointers;
@@ -642,16 +646,25 @@ if (parsed_query->parse_error != ANT_query::ERROR_NONE)
 	top-k index pruning search engine.  This happens for single term queries too (because they
 	are, by definition, conjunctive too).  Now... we do this rather than passing the query
 	string directly to the NEXI code because it avoids boolean operators becoming search terms
+
+	In the case of relevance feedback we need the term list for a later disjunctive search
 */
-if (parsed_query->subtype == ANT_query::DISJUNCTIVE)
+if (parsed_query->subtype == ANT_query::DISJUNCTIVE || feedbacker != NULL)
 	{
 	terms_in_query = 0;
-	into = new ANT_NEXI_term_ant[parsed_query->terms_in_query + 1];
-	boolean_to_NEXI(into, parsed_query->boolean_query, &terms_in_query);
-	answer = process_NEXI_query(into);
-	delete [] into;
+	parsed_query->NEXI_query = new ANT_NEXI_term_ant[parsed_query->terms_in_query + 1];
+	boolean_to_NEXI(parsed_query->NEXI_query, parsed_query->boolean_query, &terms_in_query);
 
-	return answer;
+	if (parsed_query->subtype == ANT_query::DISJUNCTIVE)
+		{
+		answer = process_NEXI_query(parsed_query->NEXI_query);
+		if (feedbacker == NULL)
+			{
+			delete [] parsed_query->NEXI_query;
+			parsed_query->NEXI_query = NULL;
+			}
+		return answer;
+		}
 	}
 
 /*
@@ -706,6 +719,48 @@ return terms_in_query;
 }
 
 /*
+	ATIRE_API::QUERY_OBJECT_WITH_FEEDBACK_TO_NEXI_QUERY()
+	-----------------------------------------------------
+*/
+void ATIRE_API::query_object_with_feedback_to_NEXI_query(void)
+{
+ANT_NEXI_term_ant *new_query, *term;
+long current_term, current_feedback;
+
+new_query = new ANT_NEXI_term_ant [parsed_query->terms_in_query + parsed_query->feedback_terms_in_query];
+
+/*
+	Copy the initial query
+*/
+for (current_term = 0; current_term < parsed_query->terms_in_query; current_term++)
+	{
+	new_query[current_term] = parsed_query->NEXI_query[current_term];
+	new_query[current_term].next = new_query + current_term + 1;
+	}
+
+/*
+	Append the feedback terms
+*/
+for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_query; current_feedback++)
+	{
+	term = new_query + parsed_query->terms_in_query + current_feedback;
+	term->next = term + 1;
+	term->parent_path = NULL;
+	term->path.start = NULL;
+	term->sign = 0;
+	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	}
+parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
+new_query[parsed_query->terms_in_query - 1].next = NULL;
+
+
+if (parsed_query->type & QUERY_BOOLEAN)
+	delete [] parsed_query->NEXI_query;
+
+parsed_query->NEXI_query = new_query;
+}
+
+/*
 	ATIRE_API::SEARCH()
 	-------------------
 	returns the number of documents found
@@ -753,13 +808,37 @@ if (query_type_is_all_terms)
 */
 if (feedbacker != NULL)
 	{
-	ANT_memory_index_one_node **additional_terms = feedbacker->feedback(search_engine->results_list, 10, 10);
-
-	for (ANT_memory_index_one_node **current = additional_terms; *current != NULL; current++)
+	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, 10, 10, &parsed_query->feedback_terms_in_query);
+#ifdef NEVER
+	printf("FEEDBACK TERMS:");
+	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
+		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
+	puts("");
+#endif
+	if (parsed_query->feedback_terms_in_query != 0)
 		{
-		printf("%0.4f %*.*s\n", (*current)->kl_score, (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
+		/*
+			Initialise
+		*/
+		#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
+			search_engine->init_accumulators(top_k);
+		#else
+			search_engine->init_accumulators();
+		#endif
+
+		/*
+			Generate query, search, and clean up
+		*/
+		query_object_with_feedback_to_NEXI_query();
+		process_NEXI_query(parsed_query->NEXI_query);
+		delete [] parsed_query->feedback_terms;
+		delete [] parsed_query->NEXI_query;
+
+		/*
+			Rank
+		*/
+		search_engine->sort_results_list(top_k, &hits); // rank
 		}
-	delete [] additional_terms;
 	}
 
 /*

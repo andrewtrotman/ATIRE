@@ -40,6 +40,7 @@ long long now, search_time;
 */
 now = stats.start_timer();
 *matching_documents = atire.search(query, params->sort_top_k, ATIRE_API::QUERY_BOOLEAN | (params->feedbacker == ANT_relevance_feedback_factory::NONE ? 0 : ATIRE_API::QUERY_FEEDBACK));
+//*matching_documents = atire.search(query, params->sort_top_k, ATIRE_API::QUERY_NEXI);
 search_time = stats.stop_timer(now);
 
 /*
@@ -295,6 +296,21 @@ atire.set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_simi
 atire.set_feedbacker(params.feedbacker);
 
 atire.set_segmentation(params.segmentation);
+switch (params.ranking_function)
+	{
+	case ANT_indexer_param_block_rank::BM25:
+		atire.set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b);
+		break;
+	case ANT_indexer_param_block_rank::LMD:
+		atire.set_ranking_function(params.ranking_function, params.lmd_u, 0.0);
+		break;
+	case ANT_indexer_param_block_rank::LMJM:
+		atire.set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
+		break;
+	default:
+		atire.set_ranking_function(params.ranking_function, 0.0, 0.0);
+	}
+
 ant(&params);
 
 printf("Total elapsed time including startup and shutdown ");

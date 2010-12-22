@@ -5,9 +5,10 @@
 #ifndef QUERY_H_
 #define QUERY_H_
 
-class ANT_NEXI_term;
+class ANT_NEXI_term_ant;
 class ANT_query_boolean;
 class ANT_query_parse_tree;
+class ANT_memory_index_one_node;
 
 /*
 	class ANT_QUERY
@@ -40,16 +41,18 @@ public:
 	long type;							// NEXI or BOOLEAN
 	long subtype;						// DISJUNCTIVE or CONJUNCTIVE
 
-	ANT_NEXI_term *NEXI_query;
+	ANT_NEXI_term_ant *NEXI_query;
 	ANT_query_parse_tree *boolean_query;
+	ANT_memory_index_one_node **feedback_terms;
 	long parse_error;
 	long terms_in_query;				// leaf nodes (search terms) 0 = unknown
+	long feedback_terms_in_query;
 
 public:
 	ANT_query() { clear(); }
 	virtual ~ANT_query() {}
 
-	void set_query(ANT_NEXI_term *query);
+	void set_query(ANT_NEXI_term_ant *query);
 	void set_query(ANT_query_parse_tree *query);
 
 	void set_subtype(long to) { subtype = to; }

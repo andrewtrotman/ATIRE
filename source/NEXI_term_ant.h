@@ -16,6 +16,7 @@ class ANT_NEXI_term_ant : public ANT_NEXI_term
 {
 public:
 	ANT_search_engine_btree_leaf term_details;
+
 public:
 	static int cmp_collection_frequency(const void *a, const void *b);
 	static int cmp_document_frequency(const void *a, const void *b);

@@ -29,6 +29,11 @@ protected:
 
 protected:
 	/*
+		Allocate neceessary structures and set them ready for use (clean them up if already in use).
+	*/
+	void rewind(void);
+
+	/*
 		Add a single document to the in-memory index
 	*/
 	void add_to_index(char *document);
@@ -42,7 +47,7 @@ public:
 	ANT_relevance_feedback(ANT_search_engine *engine);
 	virtual ~ANT_relevance_feedback();
 
-	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted) = 0;
+	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted, long *terms_found) = 0;
 } ;
 
 #endif /* RELEVANCE_FEEDBACK_H_ */

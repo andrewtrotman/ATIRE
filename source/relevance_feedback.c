@@ -31,11 +31,28 @@ document_buffer = NULL;
 */
 ANT_relevance_feedback::~ANT_relevance_feedback()
 {
-delete memory;
+//delete memory;		// this is deleted when "one" is deleted
 delete indexer;
 delete one;
 delete parser;
 delete [] document_buffer;
+}
+
+/*
+	ANT_RELEVANCE_FEEDBACK::REWIND()
+	--------------------------------
+*/
+void ANT_relevance_feedback::rewind(void)
+{
+if (parser == NULL)
+	{
+	parser = new ANT_parser;
+	memory = new ANT_memory;
+	indexer = new ANT_memory_index(NULL);
+	one = new ANT_memory_index_one(memory, indexer);
+	}
+else
+	one->rewind();
 }
 
 /*
@@ -46,16 +63,6 @@ void ANT_relevance_feedback::add_to_index(char *document)
 {
 ANT_string_pair *token;
 long long length_in_terms;
-
-if (parser == NULL)
-	{
-	parser = new ANT_parser;
-	memory = new ANT_memory;
-	indexer = new ANT_memory_index(NULL);
-	one = new ANT_memory_index_one(memory, indexer);
-	}
-else
-	one->rewind();
 
 parser->set_document((unsigned char *)document);
 length_in_terms = one->get_document_length();
@@ -77,6 +84,8 @@ long long docid;
 long long current, top_n;
 double relevance;
 unsigned long current_document_length;
+
+rewind();
 
 if (document_buffer == NULL)
 	document_buffer = new char [search_engine->get_longest_document_length()];

@@ -11,19 +11,20 @@
 */
 void ANT_query::clear(void)
 {
+feedback_terms = NULL;
 type = BLANK;
 subtype = DISJUNCTIVE;
 NEXI_query = NULL;
 boolean_query = NULL;
 parse_error = ERROR_NONE;
-terms_in_query = 0;
+terms_in_query = feedback_terms_in_query = 0;
 }
 
 /*
 	ANT_QUERY::SET_QUERY()
 	----------------------
 */
-void ANT_query::set_query(ANT_NEXI_term *query)
+void ANT_query::set_query(ANT_NEXI_term_ant *query)
 {
 clear();
 type = NEXI;

@@ -74,7 +74,7 @@ protected:
 	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree);
 	long process_boolean_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
-	void add_to_index(ANT_memory_index_one *one, char *document);
+	void query_object_with_feedback_to_NEXI_query(void);
 
 public:
 	ATIRE_API();

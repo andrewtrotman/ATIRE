@@ -138,11 +138,11 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 #	Objects
 #
 PARTS = \
-	$(OBJDIR)\atire_api.obj 							\
-	$(OBJDIR)\relevance_feedback.obj 							\
-	$(OBJDIR)\relevance_feedback_blind_kl.obj 							\
-	$(OBJDIR)\relevance_feedback_factory.obj 							\
-	$(OBJDIR)\term_divergence_kl.obj 							\
+	$(OBJDIR)\atire_api.obj 						\
+	$(OBJDIR)\relevance_feedback.obj 				\
+	$(OBJDIR)\relevance_feedback_blind_kl.obj 		\
+	$(OBJDIR)\relevance_feedback_factory.obj 		\
+	$(OBJDIR)\term_divergence_kl.obj 				\
 	$(OBJDIR)\query.obj 							\
 	$(OBJDIR)\query_parse_tree.obj 					\
 	$(OBJDIR)\query_boolean.obj 					\
@@ -254,6 +254,7 @@ PARTS = \
 	$(OBJDIR)\instream_bz2.obj						\
 	$(OBJDIR)\instream_buffer.obj					\
 	$(OBJDIR)\nexi.obj								\
+	$(OBJDIR)\nexi_ant.obj							\
 	$(OBJDIR)\nexi_term_iterator.obj				\
 	$(OBJDIR)\nexi_term_ant.obj						\
 	$(OBJDIR)\nexi_term.obj							\

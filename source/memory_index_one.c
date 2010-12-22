@@ -36,7 +36,6 @@ return ANT_memory_index::hash(string) % HASH_TABLE_SIZE;
 */
 ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index)
 {
-heap = NULL;
 hashed_squiggle_length = hash(&squiggle_length);
 this->memory = memory;
 this->final_index = index;
@@ -44,7 +43,6 @@ rewind();
 
 term_details = NULL;
 token_as_string = NULL;
-document_length = 0;
 }
 
 /*
@@ -53,7 +51,6 @@ document_length = 0;
 */
 ANT_memory_index_one::~ANT_memory_index_one()
 {
-delete heap;
 delete memory;
 }
 
@@ -65,6 +62,7 @@ void ANT_memory_index_one::rewind(void)
 {
 memory->rewind();
 memset(hash_table, 0, sizeof(hash_table));
+document_length = 0;
 }
 
 /*
@@ -353,10 +351,9 @@ return first->kl_score < second->kl_score ? 1 : first->kl_score == second->kl_sc
 	ANT_MEMORY_INDEX_ONE::TOP_N_TERMS()
 	-----------------------------------
 */
-ANT_memory_index_one_node **ANT_memory_index_one::top_n_terms(long terms_wanted)
+ANT_memory_index_one_node **ANT_memory_index_one::top_n_terms(long terms_wanted, long *terms_found)
 {
 long node;
-long terms_found;
 
 /*
 	Allocate memory for the answer set
@@ -366,8 +363,7 @@ top_terms = new ANT_memory_index_one_node *[terms_wanted + 1];
 /*
 	Set up the heap
 */
-if (heap == NULL)
-	heap = new Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node>(*top_terms, terms_wanted);
+heap = new Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node>(*top_terms, terms_wanted);
 heap_terms = 0;
 heap_size = terms_wanted;
 
@@ -378,17 +374,18 @@ for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
 	if (hash_table[node] != NULL)
 		top_terms_from_tree(hash_table[node]);
 
-terms_found = heap_terms < heap_size ? heap_terms : heap_size;
+*terms_found = heap_terms < heap_size ? heap_terms : heap_size;
 
 /*
 	Sort the heap
 */
-qsort(top_terms, terms_found, sizeof(*top_terms), ANT_memory_index_one_node_cmp);
+qsort(top_terms, *terms_found, sizeof(*top_terms), ANT_memory_index_one_node_cmp);
 
 /*
 	NULL terminate the list
 */
-top_terms[terms_found] = NULL;
+top_terms[*terms_found] = NULL;
+delete heap;
 
 return top_terms;
 }
