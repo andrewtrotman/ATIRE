@@ -500,8 +500,10 @@ if (terms_in_query == 1)
 */
 for (current_term = 0; current_term < terms_in_query; current_term++)
 	{
-#ifdef NEVER
-	printf("%*.*s\n", term_list[current_term]->term.length(), term_list[current_term]->term.length(), term_list[current_term]->term.start);
+#ifndef NEVER
+	printf("%*.*s ", term_list[current_term]->term.length(), term_list[current_term]->term.length(), term_list[current_term]->term.start);
+	if (current_term == terms_in_query - 1)
+		puts("");
 #endif
 
 	term_string = term_list[current_term];
@@ -531,7 +533,7 @@ return terms_in_query;
 */
 long ATIRE_API::process_NEXI_query(char *query)
 {
-return process_NEXI_query(NEXI_parser->parse(query));
+return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
 }
 
 /*
@@ -767,8 +769,6 @@ parsed_query->NEXI_query = new_query;
 */
 long long ATIRE_API::search(char *query, long long top_k, long query_type)
 {
-long terms_in_query;
-
 /*
 	Initialise
 */
@@ -786,11 +786,11 @@ search_engine->stats_initialise();
 	Parse and do the query
 */
 if (query_type & QUERY_NEXI)
-	terms_in_query = process_NEXI_query(query);
+	parsed_query->terms_in_query = process_NEXI_query(query);
 else if (query_type & QUERY_BOOLEAN)
-	terms_in_query = process_boolean_query(query);
+	parsed_query->terms_in_query = process_boolean_query(query);
 else
-	terms_in_query = 0;
+	parsed_query->terms_in_query = 0;
 
 /*
 	Rank the results list
@@ -801,7 +801,7 @@ search_engine->sort_results_list(top_k, &hits); // rank
 	Conjunctive searching using the disjunctive search engine
 */
 if (query_type_is_all_terms)
-	hits = search_engine->boolean_results_list(terms_in_query);
+	hits = search_engine->boolean_results_list(parsed_query->terms_in_query);
 
 /*
 	Blind relevance feedback
@@ -809,8 +809,8 @@ if (query_type_is_all_terms)
 if (feedbacker != NULL)
 	{
 	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, 10, 10, &parsed_query->feedback_terms_in_query);
-#ifdef NEVER
-	printf("FEEDBACK TERMS:");
+#ifndef NEVER
+	printf("\nFEEDBACK TERMS:");
 	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
 		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
 	puts("");
@@ -957,4 +957,3 @@ void ATIRE_API::stats_all_text_render(void)
 {
 search_engine->stats_all_text_render();
 }
-

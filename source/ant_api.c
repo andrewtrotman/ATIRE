@@ -103,7 +103,7 @@ return &data->params;
 
 /*
 	ANT_PARAMS_INIT()
-	----------
+	-----------------
 */
 void ant_params_init(ANT *ant)
 {

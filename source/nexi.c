@@ -473,6 +473,7 @@ ANT_NEXI_term *ANT_NEXI::parse(char *expression)
 {
 ANT_query into;
 
+rewind();
 parse(&into, expression);
 
 return error_code == ANT_query::ERROR_NONE ? into.NEXI_query : NULL;

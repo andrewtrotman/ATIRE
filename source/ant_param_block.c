@@ -12,6 +12,7 @@
 #include "version.h"
 #include "stemmer_factory.h"
 #include "relevance_feedback_factory.h"
+#include "atire_api.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -46,6 +47,7 @@ trim_postings_k = LONG_MAX;
 file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
 feedbacker = NONE;
+query_type = ATIRE_API::QUERY_NEXI;
 }
 
 /*
@@ -77,11 +79,13 @@ puts("");
 
 ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
-puts("RELEVANCE FEEDBACK");
-puts("------------------");
-puts("-b[-r]          blind relevance feedback");
-puts("  -             none [default]");
-puts("  r             Rocchio");
+puts("QUERY TYPE");
+puts("----------");
+puts("-Q[nb][-r]      query type");
+puts("  n             NEXI [default]");
+puts("  b             Boolean");
+puts("  -             no relevance feedback [default]");
+puts("  r             Rocchio blind relevance feedback by analysing whole documents");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -181,12 +185,40 @@ while (*which != '\0');
 */
 void ANT_ANT_param_block::set_feedbacker(char *which)
 {
-switch (*which)
+query_type = 0;
+
+do
 	{
-	case '-' : feedbacker = ANT_relevance_feedback_factory::NONE; break;
-	case 'r' : feedbacker = ANT_relevance_feedback_factory::BLIND_KL; break;
-	default : exit(printf("Unknown feedback algorithm: '%c'\n", *which)); break;
+	switch (*which)
+		{
+		case 'n' :
+			if (query_type & ATIRE_API::QUERY_BOOLEAN)
+				exit(printf("Must be either NEXI or Boolean, not both"));
+			query_type |= ATIRE_API::QUERY_NEXI;
+			break;
+		case 'b' :
+			if (query_type & ATIRE_API::QUERY_NEXI)
+				exit(printf("Must be either NEXI or Boolean, not both"));
+			query_type |= ATIRE_API::QUERY_BOOLEAN;
+			break;
+		case '-' :
+			query_type &= ~ATIRE_API::QUERY_FEEDBACK;
+			feedbacker = ANT_relevance_feedback_factory::NONE;
+			break;
+		case 'r' :
+			query_type |= ATIRE_API::QUERY_FEEDBACK;
+			feedbacker = ANT_relevance_feedback_factory::BLIND_KL;
+			break;
+		default :
+			exit(printf("Unknown query type modifier: '%c'\n", *which));
+			break;
+		}
+	which++;
 	}
+while (*which != '\0');
+
+if ((query_type & (ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI)) == 0)
+	query_type |= ATIRE_API::QUERY_NEXI;
 }
 
 /*
@@ -335,7 +367,7 @@ for (param = 1; param < argc; param++)
 				assessments_filename = argv[++param];
 			else
 				assessments_filename = command + 1;
-		else if (*command == 'b')
+		else if (*command == 'Q')
 			set_feedbacker(command + 1);
 		else if (*command == 'q')
 			{

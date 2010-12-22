@@ -53,7 +53,8 @@ protected:
 	virtual ANT_NEXI_term *next_free_node() { return pool + pool_used; } 
 
 public:
-	ANT_NEXI(long make_memory = 1) { pool = make_memory ? new ANT_NEXI_term[MAX_NEXI_TERMS] : NULL; pool_used = 0; noisy_errors = 0; first_error_pos = 0; }
+	ANT_NEXI(long make_memory = 1) { pool = make_memory ? new ANT_NEXI_term[MAX_NEXI_TERMS] : NULL; noisy_errors = 0; rewind(); }
+	virtual void rewind(void) { pool_used = 0; first_error_pos = 0; }
 	virtual ~ANT_NEXI() { delete [] pool; }
 
 	ANT_NEXI_term *parse(char *expression);

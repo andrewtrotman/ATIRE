@@ -31,6 +31,7 @@ class ANT_search_engine
 friend class ANT_btree_iterator;
 friend class ANT_mean_average_precision;
 friend class ANT_search_engine_result_iterator;
+friend class ANT_relevance_feedback;
 
 private:
 	ANT_stats_search_engine *stats;

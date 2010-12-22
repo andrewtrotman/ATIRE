@@ -3,6 +3,7 @@
 	--------------------
 */
 #include <stdio.h>
+#include "ctypes.h"
 #include "relevance_feedback.h"
 #include "memory.h"
 #include "memory_index.h"
@@ -10,6 +11,7 @@
 #include "parser.h"
 #include "search_engine.h"
 #include "search_engine_result.h"
+#include "stem.h"
 
 /*
 	ANT_RELEVANCE_FEEDBACK::ANT_RELEVANCE_FEEDBACK()
@@ -61,16 +63,26 @@ else
 */
 void ANT_relevance_feedback::add_to_index(char *document)
 {
+char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
 ANT_string_pair *token;
 long long length_in_terms;
 
 parser->set_document((unsigned char *)document);
 length_in_terms = one->get_document_length();
 while ((token = parser->get_next_token()) != NULL)
-	{
-	one->add_term(token);
-	length_in_terms++;
-	}
+	if (ANT_isalpha(*token->start))
+		{
+		if (search_engine->stemmer == NULL || !ANT_islower(*token->start))
+			one->add_term(token);
+		else
+			{
+			token->strncpy(term, MAX_TERM_LENGTH);
+			search_engine->stemmer->stem(term, token_stem_internals);
+			ANT_string_pair token_stem(token_stem_internals);
+			one->add_term(&token_stem);
+			}
+		length_in_terms++;
+		}
 one->set_document_length(1, length_in_terms);		// reset the length
 }
 

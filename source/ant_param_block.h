@@ -48,6 +48,7 @@ public:
 	long focussing_algorithm;			// focused retrieval relevance ranking algorithm
 	long focus_top_k;					// number of focussing accumulators
 
+	long query_type;						// NEXI, Boolean, and optionally additionally with relevance feedback
 	long feedbacker;					// relevance feedback algorithm to use
 
 private:
