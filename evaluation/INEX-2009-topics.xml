@@ -1,0 +1,823 @@
+<?xml version="1.0"?>
+<!DOCTYPE inex-topic-file [
+<!ENTITY  lt      "lessthan">
+<!ENTITY  gt      "greaterthan">
+<!ENTITY  amp     "ampersand">
+<!ELEMENT inex-topic-file (topic+)>
+<!ELEMENT topic (title,castitle,phrasetitle,description,narrative)>
+<!ATTLIST topic id CDATA #REQUIRED>
+<!ATTLIST topic ct_no CDATA #REQUIRED>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT castitle (#PCDATA)>
+<!ELEMENT phrasetitle (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT narrative (#PCDATA)>
+]>
+<inex-topic-file>
+<topic id="2009001" ct_no="186">
+  <title>Nobel prize</title>
+  <castitle>//article[about(., Nobel prize)]</castitle>
+  <phrasetitle>"Nobel prize"</phrasetitle>
+  <description>information about Nobel prize</description>
+  <narrative>I need to prepare a presentation about the Nobel prize. Therefore, I want to collect information about it as much as possible. Information, the history of the Nobel prize or the stories of the award-winners for example, is in demand.  </narrative>
+</topic>
+<topic id="2009002" ct_no="187">
+  <title>best movie</title>
+  <castitle>//article[about(., best movie)]</castitle>
+  <phrasetitle>best movie</phrasetitle>
+  <description>information of classical movies</description>
+  <narrative>I spend most of my free time seeing movies. Recently, I want to retrospect some classical movies.   Therefore, I need information about the awarded movies or movies with good reputation.   Any information, such as the description or comments of the awarded movies on famous filmfests or movies with good fame, is in demand.</narrative>
+</topic>
+<topic id="2009003" ct_no="188">
+  <title>yoga exercise</title>
+  <castitle>//article[about(.,yoga exercise)]</castitle>
+  <phrasetitle>"yoga exercise"</phrasetitle>
+  <description>information about yoga lesson</description>
+  <narrative>Yoga is a good discipline for relaxing. 20 minutes yoga exercise can help people free body out of tension. I want to know some yoga methods for relaxing after long time work.  Thus, lessons of easy yoga which can be done in the office or at home are in demand.  Information on yoga history or different yoga denominations is not required.</narrative>
+</topic>
+<topic id="2009004" ct_no="189">
+  <title>mean average precision reciprocal rank references precision recall proceedings journal</title>
+  <castitle>//article[about(.//(sec|p),mean average precision reciprocal rank proceedings journal) and ( about(.//st,references) or about(.//st,see also) ) and about(.//image,precision recall)]</castitle>
+  <phrasetitle>"mean average precision"  "reciprocal rank"  "precision recall"  "recall precision" "see also"</phrasetitle>
+  <description>explain "mean average precision" and "reciprocal rank" with images  or plots.  Provide references in proceedings and journals</description>
+  <narrative>I am a student enrolled in an Information Retrieval subject.  I need to write about the "mean average precision" and "reciprocal rank" and identify the similarities and differences in what they measure. Relevant text will define how these quantities are computed and what they mean.  Discussion about the similarities and differences are relevant, as are discussions of the use of these quantities in evaluation.  Images showing examples are relevant as is the text explaining the images.  I want to find references to articles that are related so that I can extend the search beyond the Wikipedia.</narrative>
+</topic>
+<topic id="2009005" ct_no="190">
+  <title>chemists physicists scientists alchemists periodic table elements</title>
+  <castitle>//article[about(.,periodic table elements chemists physicists scientists alchemists)]//(person|chemist|alchemist|scientist|physicist)</castitle>
+  <phrasetitle> "periodic table"</phrasetitle>
+  <description>I'd like to learn about people, chemists, physicists and even alchemists, who studied elements and the periodic table</description>
+  <narrative>I am writing an essay on the discovery and development of the periodic table for a Chemistry class.  I'd like to learn about people, chemists, physicists and even alchemists, who studied elements and the periodic table.  I'm particularly interested in the names of the people so that I can follow up and research their work in more detail.  General information is also relevant - as long as it relates to the contribution of the people identified.</narrative>
+</topic>
+<topic id="2009006" ct_no="191">
+  <title>opera singer italian spanish -soprano</title>
+  <castitle>//(classical_music|opera|orchestra|performer|singer)[about(.,italian spanish opera singer -soprano)]</castitle>
+  <phrasetitle>"opera singer"</phrasetitle>
+  <description>I am interested in learning about male italian and spanish opera singers</description>
+  <narrative>I am writing a book about male Italian and Spanish opera singers.  Only male Italian and Spanish singers are relevant, and all of them are relevant.</narrative>
+</topic>
+<topic id="2009007" ct_no="192">
+  <title>financial and social man made catastrophes adversity misfortune -"natural disaster"</title>
+  <castitle>//article[about(.//(misfortune|catastrophe|adversity),financial and social -"natural disaster" catastrophes)]</castitle>
+  <phrasetitle>-"natural disaster" "financial misfortune" financial disaster" "financial catastrophe" "financial adversity" "social disaster" "social catastrophe"</phrasetitle>
+  <description>find examples of major financial and social disaters and catastrophies that are not of natural causes but man made</description>
+  <narrative>I am writing an article evaluating the cost of man made disasters.  I have a report on natural disasters like earthquakes, floods, tsunamis etc, so these are not of any interest in this query.  Here I am interested in man caused disasters like wars, stock exchange crashes (Synchronized Swimming?)</narrative>
+</topic>
+<topic id="2009008" ct_no="193">
+  <title>israeli director actor actress film festival</title>
+  <castitle>//article[about(.//(film_festival|movie|actor|actress),israeli director actor actress film festival)]</castitle>
+  <phrasetitle>"israeli director"  "israeli actor" "israeli  actress" "film festival"</phrasetitle>
+  <description>find information about Israeli actor, actresses and film directors and film festivals in which they appeared</description>
+  <narrative>I would like to learn about the presence of Israeli film makers on the international stage for pre-interview research.  Of particular interest are actors and directors.  Not interested in general information about these people but specifically about their international exposure.</narrative>
+</topic>
+<topic id="2009009" ct_no="194">
+  <title>election +victory australian labor party state council -federal</title>
+  <castitle>//(p|sec)[about(.//(political_party|politics),election +victory australian labor party state council -federal)]</castitle>
+  <phrasetitle>"election victory" "state election" "council election" "australian labor party"</phrasetitle>
+  <description>find informationabout election victories of the australian labor party in state and council elections -federal</description>
+  <narrative>I want to analyse Australian Labor Party victories in state and local elections.  Federal elections are of no interest.  Descriptions of the circumstances of the election are of interest.</narrative>
+</topic>
+<topic id="2009010" ct_no="195">
+  <title>applications bayesian networks bioinformatics</title>
+  <castitle>//*[about(.,applications bayesian networks bioinformatics)]</castitle>
+  <phrasetitle> "bayesian networks"</phrasetitle>
+  <description>Find information about applications of bayesian networks in the field of bioinformatics</description>
+  <narrative>For my personal use, because one of my main areas of research is focused on Bayesian networks, I would like to find any kind of information concerning the applications of Bayesian networks to the field of bioinformatics. I am aware that many recent research effort is being devoted to this topic but I do not know much about it, so that any piece of information truly devoted to it is relevant.    To be relevant, a document or a document part should speak about both Bayesian networks and bioinformatics. Documents devoted only to Bayesian networks or to bioinformatics are not relevant.</narrative>
+</topic>
+<topic id="2009011" ct_no="196">
+  <title>olive oil health benefit</title>
+  <castitle>//food[about(., olive oil) and about(., health benefit)]</castitle>
+  <phrasetitle>"olive oil" "health benefit"</phrasetitle>
+  <description>Find information about what sort of health benefit olive oil has.</description>
+  <narrative>I'm a health/beauty buff. I recently learned that olive oil is "good for you". What are the specific health/beauty benefits for consuming olive oil? Any article that mentions health benefits of olive oil is fine, EXCEPT those in which the claim is based on either unpopular/obscure or unscientific methods. So for example, if XXX diet recommends consuming olive oil then it's irrelevant. Note that since Mediterranean diet is not a weight-loss fat diet, but the traditional Mediterranean ways of eating, an article describing the health benefits of olive oil in this setting is relevant.     Anything outside of health benefit is irrelevant, how olive oil is produced, the different grades of olive oil etc.</narrative>
+</topic>
+<topic id="2009012" ct_no="197">
+  <title>vitiligo pigment disorder cause treatment</title>
+  <castitle>//article[about(., vitiligo) AND about(.//category, pigment disorder)]</castitle>
+  <phrasetitle>"treatment of vitiligo", "cause of "vitiligo" "pigment disorder"</phrasetitle>
+  <description>Find information on causes of vitiligo and treatment for it.</description>
+  <narrative>I have a relative suffering from vitiligo, a skin depigmentation disease which leaves white patches on the skin. I would like information on the causes, treatment, possible treatment centers (like known clinics or centers that have cured this skin disease). Also, information on known people who suffer from it and may have found a cure would be helpful. Any historical or medically-related information on this skin disease would be relevant. Associations or any group helping people with psychological and emotional problems incurred by vitilgo will be relevant.   However, fantasy or miracle-type cures are not releveant. Also, homonyms like albums and music groups bearing this name are definitely not relevant.</narrative>
+</topic>
+<topic id="2009013" ct_no="198">
+  <title>native american indian wars against colonial americans</title>
+  <castitle>//article[about(.//conflict, native american indian wars against colonial americans)]</castitle>
+  <phrasetitle>"native american" "american indian" "wars against colonial americans"</phrasetitle>
+  <description>Find information on the native american wars against colonial settlers and federal troops in North america</description>
+  <narrative>Recently, the Public Broadcasting Service aired a series of documentaries entitled "We shall remain" about the history of the native americans resistance to colonial occupation of their land, now known as the USA.This documentary was quite fascinating in that it shed a new light on the american indians, the protagonists and how they struggled to resist the colonial settlers and american expansionism. I would like to find articles that document the several wars fought from before the american revolution (1783) till the end of world war I (1917). For an article or passage to be relevant, it must include passages about these american indian wars. Articles on specific wars such as the Pequot wars or the Wounded knee massacre are relevant. Passages or articles about the forcible removal of indians to Indians reservations would also be relevant (e.g. Cherokee trail of tears). Articles about treaties signed between the native americans and the federal government are also relevant.  However articles about american indians in general documenting their tribes, beliefs or ways of life are not relevant if they do not include any passage about wars fought against the colonial settlers. Of no relevance also are articles about native american folkore or foods nor will be articles about wars involving the country India in Asia.</narrative>
+</topic>
+<topic id="2009014" ct_no="199">
+  <title>content based image retrieval</title>
+  <castitle>//*[about(., content based image retrieval)]</castitle>
+  <phrasetitle>"content based" "image retrieval" "content based image retrieval"</phrasetitle>
+  <description>image retrieval using the low level features</description>
+  <narrative>I'm currently writing a report about image retrieval, and I'm searching some informations about the image retrieval based on visual content. I want to know also some systems based on visual features. Description of visual indexing and processing will be very interesting. Giving some examples of systems using this technique is relevant. On the other hand, information about the semantic gap and the visual image retrieval problems are not relevant.</narrative>
+</topic>
+<topic id="2009015" ct_no="200">
+  <title>Voice over IP</title>
+  <castitle>//*[about(.//section, voice over ip)]</castitle>
+  <phrasetitle/>
+  <description>voice over internet protocol technology</description>
+  <narrative>I am currently preparing a course about voice over internet protocol. I am looking for information on this technology. More precisely I want to know its architecture and how it works. Information about only internet protocol without voice specification are not relevant. Information about softwares using Voice over Ip technique are not relevant.</narrative>
+</topic>
+<topic id="2009016" ct_no="201">
+  <title>cycle road skill race</title>
+  <castitle>//bicycle[about(., road bike race)]</castitle>
+  <phrasetitle>"road bike" "road race"</phrasetitle>
+  <description>Find information about how to improve my road cycling skills.</description>
+  <narrative>I recently took up road cycling, and I want to improve my cycling skills so that I can become a good racer. Any elements related to non-road cycles, such as BMX and mountain biking is irrelevant. An element about a famous road cyclist is also irrelevant. An element about equipment for training for road race is relevant.</narrative>
+</topic>
+<topic id="2009017" ct_no="202">
+  <title>rent buy home</title>
+  <castitle>//home[about(.,home purchase rental)]</castitle>
+  <phrasetitle/>
+  <description>Find information about if I should buy or rent home.</description>
+  <narrative>Many of my friends started owning a housing property, and since I have enough savings, I'm considering purchasing home sometimes soon. But I'm also a commitment-phobic, and I want to know all the important information to help me decide if I should indeed buy or just rent home. Any element discussing home buying is relevant, even if it does not compare against home renting. However, elements discussing purchasing or renting of a second home is irrelevant.</narrative>
+</topic>
+<topic id="2009018" ct_no="203">
+  <title>Dwyane Wade</title>
+  <castitle>//*[about(., Dwyane Wade)]</castitle>
+  <phrasetitle>"Dwyane Wade"</phrasetitle>
+  <description>Find information about the basketball  player Dwyane Wade from Miami Heats.</description>
+  <narrative>As a big fan of Dwyane Wade, I would like to know everything about him, no matter his NBA career experience, nor his personal life.   Articles mainly talking about other NBA players with only a little mention of Dwyane Wade for he is once a teammate or they are friends are irrelevant. Articles talking about other people with the same surname or full name are irrelevant.   Articles focuses on Dwyane Wade are relevant. Articles talking about some NBA events which Dwyane Wade have participated are also relevant.    </narrative>
+</topic>
+<topic id="2009019" ct_no="204">
+  <title>Latent semantic indexing</title>
+  <castitle>//*[about(., Latent semantic indexing)]</castitle>
+  <phrasetitle>"latent semantic indexing"</phrasetitle>
+  <description>Find information about the probabilistic retrieval model named latent semantic indexing.</description>
+  <narrative>As a student learning information retrieval, latent semantic indexing is a very important probabilistic retrieving model. I would like to get a comprehensive understanding of latent semantic indexing.  Obviously, articles talking about latent semantic indexing are relevant. In addition, articles explain the concept about latent semantic or the implications of latent semantic are also relevant.  Latent semantic is different from semantic. Articles talking about other semantic topics such as semantic web or semantic mapping are irrelevant. Articles talking about other retrieval models with only a little mention of latent semantic indexing without explaining it are irrelevant.</narrative>
+</topic>
+<topic id="2009020" ct_no="205">
+  <title>IBM computer</title>
+  <castitle>//article[about(.,IBM)]//sec[about(., computer)]</castitle>
+  <phrasetitle>"IBM computer"</phrasetitle>
+  <description>I want to find some information about IBM computer.</description>
+  <narrative>Personally, I like to use IBM's products very much, I would like to gain knowledge of IBM's computer products more deeply. If the article relates to IBM's computer products, talks about its models, functions and introductions, then it is considered relevant.</narrative>
+</topic>
+<topic id="2009021" ct_no="206">
+  <title>wonder girls</title>
+  <castitle>//article[about(.,"wonder girls")]</castitle>
+  <phrasetitle>"wonder girls"</phrasetitle>
+  <description>I want to find some information about the famous South Korean group "wonder girls".</description>
+  <narrative>"Wonder Girls" is a South Korean girl group. It is a very popular group with its famous songs, such as "tell me" and "nobody". If the article contains the introduction of the group or of its albums and songs, then I consider it relevant.</narrative>
+</topic>
+<topic id="2009022" ct_no="207">
+  <title>Szechwan dish food cuisine</title>
+  <castitle>//article[about(.,cuisine) or about(.,dish) or about(.,food)]//sec[about(.,Szechwan) or about(.,Sichuan)]</castitle>
+  <phrasetitle>"Szechwan dish" "Szechwan food" "Szechwan cuisine"</phrasetitle>
+  <description>I want to find some famous Szechwan dishes.</description>
+  <narrative>I am a Chinese, and I like the Szechwan dish very much. I want to find some famous Szechwan dishes, so the information about the dishes of Szechwan food is relevant. But the information about the chef, the restaurant or other dishes is irrelevant.</narrative>
+</topic>
+<topic id="2009023" ct_no="208">
+  <title>"plays of Shakespeare"+Macbeth</title>
+  <castitle>//article[about(.,"plays of Shakespeare") or about(., Macbeth)]//sec[about(., Macbeth)]</castitle>
+  <phrasetitle>"plays of Shakespeare" </phrasetitle>
+  <description>I want to find some famous plays of Shakespeare, especially the "Macbeth".</description>
+  <narrative>Shakespeare is very famous, my teacher always talks about Shakespeare's work. So, I want to know some famous plays of Shakespeare, especially "Macbeth" which is my teacher's favorite. Life, arts or styles about Shakespeare, information about other writer's plays and the films or famous actors of Shakespeare's plays are irrelevant. Information about the plays of Shakespeare, especially "Macbeth”, and roles or places in Shakespeare's plays are relevant.</narrative>
+</topic>
+<topic id="2009024" ct_no="209">
+  <title>cloud computing</title>
+  <castitle>//article[about(.,"cloud computing")]</castitle>
+  <phrasetitle>"cloud computing"</phrasetitle>
+  <description>I want to get some information about cloud computing.</description>
+  <narrative>Cloud computing is a new technology now. So I want to get some information about cloud computing. Knowledge, information, researcher, provider, software, system and platform using or about clouding computing are relevant.</narrative>
+</topic>
+<topic id="2009025" ct_no="210">
+  <title>scenic spot in Beijing</title>
+  <castitle>//article[about(.,scenic spot) and about(.,Beijing)]</castitle>
+  <phrasetitle>"scenic spot" </phrasetitle>
+  <description>I want to find some scenic spots in Beijing.</description>
+  <narrative>Beijing is the capital of China. This summer, I want to travel to Beijing, so I want to find some scenic spots in Beijing. Scenic spots in other cities are irrelevant.</narrative>
+</topic>
+<topic id="2009026" ct_no="211">
+  <title>generalife gardens</title>
+  <castitle>//*[about(.//site,generalife) and about(.//category,gardens)]</castitle>
+  <phrasetitle/>
+  <description>Find information about the gardens of Generalife</description>
+  <narrative>The world famous gardens of Generalife are located at Granada, Spain, near the Alhambra palace. I live in Granada, and I would like to know what kind of information about the Generalife exists in the web.  To be relevant a document or document part should contain some piece of information about the Generalife gardens. Documents about other famous gardens are not relevant. Document which only mention the word generalife without adding some information are not relevant. Document using the word generalife to refer to another thing (e.g. a song or a ship) are not relevant.</narrative>
+</topic>
+<topic id="2009027" ct_no="212">
+  <title>Zhang Yimou</title>
+  <castitle>//*[about(., Zhang Yimou)]</castitle>
+  <phrasetitle>"Zhang Yimou"</phrasetitle>
+  <description>Find information about the great film maker named Zhang Yimou.</description>
+  <narrative>After the 2008 Olympic Game in Beijing, the amazing opening ceremony gives people all over the world a comprehensive view of China's great history. At the same time, Zhang Yimou, as the director of the ceremony, who is widely known as one of the fifth generation movie directors of China, earned a legendary amount of fame. I become interested in his past experiences. So, I would like to find information about his background, his films and his great career experience.  Articles introducing Zhang Yimou, his films or awards he was once rewarded are all relevant.  Articles talking about other film directors, with only a mention of Zhang Yimou's name only for they are the same class of directors or they have once worked together, without any information about Zhang's life experiences, are irrelevant. Articles talking about those great actors or actresses once appeared in Zhang's films, focusing only on the personal life them, without any explanation of how he/she work together with Zhang, are irrelevant.</narrative>
+</topic>
+<topic id="2009028" ct_no="213">
+  <title>fastest speed bike scooter car motorcycle</title>
+  <castitle>//vehicles[about(., fastest speed)]</castitle>
+  <phrasetitle/>
+  <description>I want to know vehicles and its speed capacity.</description>
+  <narrative>I'm still hesitant to buy a car, and considering other modes of trasnportation. Cars may be able to give out the fastest speed, but in urban area, the speed limit is 40km/h. Thus, I'm wondering if other methods of transportation could reach the same speed as cars drive in the urban area.     An element describing a fastest speed for any vehicles in general term is relevant. If an element was on a max speed of a specific brand of a vehicle, such as Toyota Prius, then it is irrelevant. An element describing the traffic laws for the max speed of any vehicle (in general term) is also relevant.</narrative>
+</topic>
+<topic id="2009029" ct_no="214">
+  <title>personality type career famous</title>
+  <castitle>//personality[about(., career) or about(., type)]</castitle>
+  <phrasetitle>"personality type"</phrasetitle>
+  <description>Find information that describes different personality types and career suited for the types, with famous people as an example.</description>
+  <narrative>I'm interested in what kind of personality type I am, and which career I'm suited for. I'm also interested in roles models, i.e. famous people, in each type.    An element describing personality type and the famous people in the type as well as career suited for the type is relevant. An element describing a famous person's personality as in gregarious, easy-going, as opposed to personality type defined by an established source (INTJ etc.) and the person's career is irrevant.</narrative>
+</topic>
+<topic id="2009030" ct_no="215">
+
+  <title>popular dog cartoon character</title>
+  <castitle>//dog[about(., popular cartoon character)]</castitle>
+  <phrasetitle>"cartoon character"</phrasetitle>
+  <description>Find information about popular cartoon dog charactor.</description>
+  <narrative>I like Snoopy and I'd like to know if there's any other popular canine cartoon charactor. An element about the character itself is relevant. An element about the show, in which the charactor is one of the main charactor is relevant. However, if the charactor is one of the side charactor, then the element out the show is irrelevant. An element about the person who created the canine charactor is irrelevant.</narrative>
+</topic>
+<topic id="2009031" ct_no="216">
+  <title>sabre</title>
+  <castitle>//article[about(.,sabre) ]</castitle>
+  <phrasetitle/>
+  <description>Find information about sabre techniques and sabre fencers.</description>
+  <narrative>I am practicing sabre for one year, and I like to get more information about the sabre technique and the sabre fencers.     Relevant documents should contain information about the history of the sabre itself as a weapon, or information about the weaponj itsef,  or information about the rules and the practice of sabre. Concerning the sabre fencer, any fencer with the medals or titles won are also relevant for   me, as I like to have information abour the country that are successfull in this sport.</narrative>
+</topic>
+<topic id="2009032" ct_no="217">
+  <title>evidence theory dempster schafer</title>
+  <castitle>//article[ about(.,"evidence theory") or about(.,"dempster schafer") ]</castitle>
+  <phrasetitle>"evidence theory" "dempster schafer"</phrasetitle>
+  <description>Find information about Dempster Schafer theory of evidence.</description>
+  <narrative>I am interested on finding all the data on the Dempster Schafer theory of evidence.    Relevant information should describe the fundamentals of this theory, as well as new works that have been done on  this theory like the belief tranferrable model. Documents explaining links with the probability theory are also  relevant.</narrative>
+</topic>
+<topic id="2009033" ct_no="218">
+  <title>Al-Andalus taifa kingdoms</title>
+  <castitle>//*[about(.,Al-Andalus taifa kingdoms)]</castitle>
+  <phrasetitle>"taifa kingdoms" </phrasetitle>
+  <description>Find all the relevant material related to the taifa kingdoms in Al-Andalus</description>
+  <narrative>I like a lot the history of Spain in its middle ages, above all that related to the muslim period (from 8th to 15th centuries), so I enjoy a lot reading about this time. A significative moment during this domination is the Taifa kingdoms, where Al-Andalus was fragmented in lots of small regions ruled by a king. Then a document or a part of it is relevant if it deals with any of the aspects (territory, history, rulers, economy, wars, etc.) related to any of the Taifa kingdom across Al-Andalus. Documents or elements about taifa out of the context of Al-Andalus history are not relevant.</narrative>
+</topic>
+<topic id="2009034" ct_no="219">
+  <title>the evolution of the moon</title>
+  <castitle>//*[about(., the evolution of the moon)]</castitle>
+  <phrasetitle/>
+  <description>Find information about the origin and evolution of the moon.</description>
+  <narrative>Human exploration of the moon has found that there are a lot of mysterious phenomena, and now scientists haven't yet found a reasonable explanation. If we want to understand those mysterious phenomena, we need to first make clear the origin and evolution of the moon.  Articles talking about the origin and evolution of the moon are relevant. Articles introducing mysterious phenomena happened on the moon are relevant, too.  Articles introducing human exploration experiences of the moon or relevant organizations, instruments, events are irrelevant.</narrative>
+</topic>
+<topic id="2009035" ct_no="220">
+  <title>Bermuda Triangle</title>
+  <castitle>//*[about(., Bermuda Triangle)]</castitle>
+  <phrasetitle>"Bermuda Triangle"</phrasetitle>
+  <description>Find information about the Bermuda Triangle.</description>
+  <narrative>The Bermuda Triangle is a miracle, where many mysterious things have happened and still yet no reasonable explanation available. I would like to know everything about the Bermuda Triangle.  Articles introducing the Bermuda Triangle, mysterious things which happened in the Bermuda Triangle, scientific findings about the Bermuda Triangle, or even guesswork about the Bermuda Triangle are relevant.  Articles focusing on other topics with only a little mention of the phrase Bermuda Triangle without further discussing about it are irrelevant.</narrative>
+</topic>
+<topic id="2009036" ct_no="221">
+  <title>notting hill film actors</title>
+  <castitle>//*[about(.,notting hill actors) and about(.//category,film)]</castitle>
+  <phrasetitle>"notting hill" "film actors"</phrasetitle>
+  <description>Find information about the starring of "Notting hill" film</description>
+  <narrative>Notting hill is my fauvorite film and I would like to know who are the actors of the film and if it is possible all the information about them. For this reason, I consider relevant documents or relevant parts, all of them that have information about the film and the actors or only about the actors like biography, projects, ...</narrative>
+</topic>
+<topic id="2009037" ct_no="222">
+  <title>movies directed tarantino</title>
+  <castitle>//article[about(.//movie//director, tarantino) or (about(.//director, tarantino) and about(.,movie)) or about(., movies directed by tarantino)]</castitle>
+  <phrasetitle>"tarantino movie"</phrasetitle>
+  <description>Find information about movies directed by Quentin Tarantino</description>
+  <narrative>One day, I had a long debate while renting a tarantino's movie. A friend of mine was telling me that "From Dusk till Dawn" wasn't a Tarantino movie because he didn't directed it. So I want to know the movies he directed.   Relevant documents give explicitly the name of one or several movies he directed. Non relevant documents talk about movies he produced, played in, wrote the story, or aren't explicitly talking about its role (saying tarantino's pulp fiction for exemple, which in IMHO isn't explicit).</narrative>
+</topic>
+<topic id="2009038" ct_no="223">
+  <title>french colony africa independence</title>
+  <castitle>//*[about(., french colony africa independence)]</castitle>
+  <phrasetitle>"french colony"</phrasetitle>
+  <description>Find the year of independence of the former French colonies in Africa</description>
+  <narrative>I want to find out the year of independence of the former French colonies in Africa in the 20th century. I need the data for a presentation about actual political relationships of France and Africain countries, which were colonized by France.     General explanations about colonization as well as the independence of other European colonized states in Africa are not relevant.</narrative>
+</topic>
+<topic id="2009039" ct_no="224">
+  <title>roman architecture</title>
+  <castitle>//group[about(., roman architecture)]</castitle>
+  <phrasetitle>"roman architecture"</phrasetitle>
+  <description>Find information about roman architecture and roman buildings.</description>
+  <narrative>I am fascinated by architecture and i particularly like the roman architecture, since roman history has a lot to do with architecture and famous architects such as Michaelangelo, Raphael, Bernini worked on them I am very much interested in it.    I would like information about different roman buildings, what sort of architecture was used and how long it took to complete it. I would also like to know what sort of historic impact the architecture made over the due course of time.    To be relevant an result should discuss architectural monuments, or buildings that are related to roman architecture. Not relevant is information about other other architectures which do not belong to the roman history.</narrative>
+</topic>
+<topic id="2009040" ct_no="225">
+  <title>steam engine</title>
+  <castitle>//group[about(., steam engine)]</castitle>
+  <phrasetitle>"steam engine"</phrasetitle>
+  <description>Find information the steam engine and its various types and models.</description>
+  <narrative>Whenever we travel using mechanical means there is one thing in common which is the engine, since steam engine was the primitive engine to be used and it had an massive impact on humanity. I am interested to know more about the engine that kick started the industrial revolution.    I would like information about how it was built, who built it and what sort of devices it powered. I would also like to know what sort of impact steam engine made on industrial revolution.    To be relevant an result should discuss steam engines, or types of devices that use those engines.</narrative>
+</topic>
+<topic id="2009041" ct_no="226">
+  <title>The Scythians</title>
+  <castitle>//group[about(., scythians)]</castitle>
+  <phrasetitle>"the Scythians"</phrasetitle>
+  <description>Find information about the Scythians</description>
+  <narrative>The Scythians were horse riding nomadic tribes who lived in Iran. They are fascinating because scythian art was legendary  and not much is known about these tribes or why they died out. Most of the information about Scythians was passed down by the greek historian Herodotus  and from the exquisite goldwork found in Scythian tombs. To be relevant an article has to describe some aspect of the Scythian life or has to describe  some scythian king.</narrative>
+</topic>
+<topic id="2009042" ct_no="227">
+  <title>sun java</title>
+  <castitle>//article[about(.//language, java) or about(.,sun)]//sec[about(.//language, java)]</castitle>
+  <phrasetitle>"sun java"</phrasetitle>
+  <description>Find information about Sun Microsystem's Java language</description>
+  <narrative>Java is a popular programming language developed at Sun Microsystems. I am interested to know about this programming language, and also to learn programming with it.    To be relevant, a result should give information on history of Java &amp; on different versions of Java, and on different concepts in Java. Its good if I find tutorials for learning Java. Results related only to Sun Microsystems but not Java are considered non-relevant. Results showing details of training institutes for Java, and IT companies which provide Java solutions are also considered non-relevant. I like to find articles that discuss this programming language and various concepts &amp; versions of it.  </narrative>
+</topic>
+<topic id="2009043" ct_no="228">
+  <title>NASA missions</title>
+  <castitle>//group[about(.//missions, NASA)]</castitle>
+  <phrasetitle>"NASA missions"</phrasetitle>
+  <description>Find information about the missions conducted by NASA</description>
+  <narrative>I was wondering about all the missions conducted by NASA and wanted to get the details about them. I would love to get a list of all the missions, anyhow I would also be satisfied if I get some specific missions conducted by NASA.  </narrative>
+</topic>
+<topic id="2009044" ct_no="229">
+  <title>OpenGL Shading Language GLSL</title>
+  <castitle>//article[about(.,GLSL) or about(., "OpenGL Shading Language")]//sec[about(., GLSL OpenGL Shading)]</castitle>
+  <phrasetitle> "OpenGL Shading Language"</phrasetitle>
+  <description>Find information about GLSL-OpenGL Shading Language.</description>
+  <narrative>GLSL (OpenGL Shading Language), also known as GLslang, is a high level shading language based on the C programming language. It was created to give the developers more direct control of the graphics pipeline without having to use assembly language or hardware-specific languages.    I would like to know more about this topic as it is the base for the Particle Emission project I am working on. Historically, GLSL was preceded by various OpenGL extensions such as ARB_vertex_program and ARB_fragment_program and GLSL unifies vertex and fragment processing in a single instruction set. Hence I found this GLSL OpenGL shading language as a specialized term and when I used it as a query, in the top 100 elements I found 48 of them were relevant.       From my point of view I would like to get the collection of articles with description about GLSL or the History of GLSL and the details of the functions and coding methodologies used in it and any constructive information about the shading language.  If I find these elements then it would be relevant from my point of view.  </narrative>
+</topic>
+<topic id="2009045" ct_no="230">
+  <title>new age musician</title>
+  <castitle>//article[about(., musician)]//music_genre[about(., New Age)]</castitle>
+  <phrasetitle>"new age" </phrasetitle>
+  <description>Recently I start listening new age music very often. And it is really my type of music. Its abilities of being healing and meditating can calm me down from everything. So I decide to do a search on the New Age musicians and collect their best selling albu</description>
+  <narrative>In the xml source, it may contain not only a musician element, but also a music_genre element about New Age. Or in the body, it is explicitly said that this person is a musician, and have involvement in New Age music related activities. Other than that, those musicians may play the musical instruments that might be used in the New Age playing would not be considered.  </narrative>
+</topic>
+<topic id="2009046" ct_no="231">
+  <title>Penrose tiles tiling theory</title>
+  <castitle>//*[about(., Penrose tiles tiling theory)]</castitle>
+  <phrasetitle>"Penrose tiles" "Tiling theory"</phrasetitle>
+  <description>Find information about the tiling theory as proposed by Sir Roger Penrose.</description>
+  <narrative>Any information related to the history, properties, mathematical description and variations of the Penrose tiling theory, is to be considered as relevant. Relevant piece may also speak about the aperiodic tilings in general. Passages about examples of such tiling patterns in the nature or man-made architectures is also relevant.  Texts elaborating on tiles as a construction unit (e.g. roof tiles, floor tiles) or any tile based games are irrelevant.</narrative>
+</topic>
+<topic id="2009047" ct_no="232">
+  <title>"Kali's child" criticisms reviews Psychoanalysis of Ramakrishna's mysticism</title>
+  <castitle>//*[about(., "Kali's child" criticisms reviews Psychoanalysis of Ramakrishna's mysticism)]</castitle>
+  <phrasetitle>"Kali's child" "Psychoanalysis of Ramakrishna's mysticism"</phrasetitle>
+  <description>Find information about the book "Kali's child" or its criticisms and reviews. Also retrieve the psychoanalytic explanations of Ramakrishna's mysticism.</description>
+  <narrative>Any information related to the book and its author are relevant. Criticisms and reviews to the book and the view points of the critics are also relevant. Texts seeking scientific explanation to Ramakrishna's mystic behavior through psycho-analysis are also relevant.  Passages on Ramakrishna's life, his preachings and disciples are irrelevant. Also content on Hinduism in general or Goddess Kali in particular are irrelevant.</narrative>
+</topic>
+<topic id="2009048" ct_no="233">
+  <title>biometric technique</title>
+  <castitle>//article[about(., biometric technique)]</castitle>
+  <phrasetitle>"biometric technique"</phrasetitle>
+  <description>information about biometric techniques</description>
+  <narrative>Biometrics is the science and technology of measuring and analyzing biological data. I want to know more about the newest biometric techniques.  News, papers, or rudiments of biometric techniques are required.   Ads of biometric technique companies are of no use.</narrative>
+</topic>
+<topic id="2009049" ct_no="234">
+  <title>Chicago Symphony Orchestra</title>
+  <castitle>//article[about(., Chicago Symphony Orchestra)]</castitle>
+  <phrasetitle>"Chicago Symphony Orchestra"</phrasetitle>
+  <description>something about Chicago Symphony Orchestra</description>
+  <narrative>Chicago Symphony Orchestra (CSO) is going to hold a concert in my city this summer.  Therefore, I want to know more about CSO before listening to the concert.  Information such as the history of CSO or famous symphonies on its repertoire is in demand.  Calenders or lists of performers are not requried.</narrative>
+</topic>
+<topic id="2009050" ct_no="235">
+  <title>valentine's day</title>
+  <castitle>//article[about(., valentine's day)]</castitle>
+  <phrasetitle>"valentine's day"</phrasetitle>
+  <description>information about valentine's day</description>
+  <narrative>Nowadays, lovers in almost all countries will celebrate valentine's day.  I am preparing a paper about this holiday.    Information, such as different customs in different countries or interesting stories about the day is in demand.  Personal records or diaries are not required.</narrative>
+</topic>
+<topic id="2009051" ct_no="236">
+  <title>Rabindranath Tagore Bengali literature</title>
+  <castitle>//article[about(., Bengali literature)]//sec[about(., "Rabindranath Tagore")]</castitle>
+  <phrasetitle>"Rabindranath Tagore" "Bengali literature"</phrasetitle>
+  <description>Retrieve sections detailing Rabindranath Tagore's contribution to Bengali literature from the documents which discuss Bengali literature in general.</description>
+  <narrative>Ideally a relevant document should talk about the evolution of Bengali literature with a detailed section or paragraph on Tagore's work and his contribution towards the development of it. While the documents containing history and evolution of Bengali literature are of general interest, we are particularly looking for impact of works of Rabindranath Tagore. Any information regarding other members of the Tagore family are irrelevant here. Also texts about "Tagore song" singers are not relevant.</narrative>
+</topic>
+<topic id="2009052" ct_no="237">
+  <title>newspaper spain headquarter Madrid</title>
+  <castitle>//*[about(.//category, newspaper spain) and about(.,  headquarter madrid)]</castitle>
+  <phrasetitle/>
+  <description>List of news paper in Spain having their headquarter in Madrid</description>
+  <narrative>I want to know information about those Spanish newspapers having their headquarters in Madrid.</narrative>
+</topic>
+<topic id="2009053" ct_no="238">
+  <title>finland car industry manufacturer saab sisu</title>
+  <castitle>//article[about(.//categories, "finland industry manufacturer")]//*[about(.,"saab sisu car")]</castitle>
+  <phrasetitle>"car industry" "car manufacturer"</phrasetitle>
+  <description>Find elements that discuss Finnish car industry.</description>
+  <narrative>I am writing a paper about the history of Finnish car industry, a relevant element should cover some aspect of the issue, including the current state of the industry. I know that Sisu trucks as well as Saab have been manufactured in Finland.</narrative>
+</topic>
+<topic id="2009054" ct_no="239">
+  <title>tampere region tourist attractions</title>
+  <castitle>//*[about(., tampere region tourist attractions)]</castitle>
+  <phrasetitle>"tampere region" "tourist attraction"</phrasetitle>
+  <description>find information about tourist attractions in the Tampere region.</description>
+  <narrative>I'm planning a trip to Tampere, Finland and want information about the tourist attractions in the region.</narrative>
+</topic>
+<topic id="2009055" ct_no="240">
+  <title>european union expansion</title>
+  <castitle>//*[about(., european union expansion)]</castitle>
+  <phrasetitle>"european union"</phrasetitle>
+  <description>Find information about european union expansion</description>
+  <narrative>I'm looking for information about the European union expansion, i.e. the enlargement process, and the history of European Union.  Information about european institution, laws or cooperation are not relevant.</narrative>
+</topic>
+<topic id="2009056" ct_no="241">
+  <title>higher education around the world</title>
+  <castitle>//*[about(., higher education around the world)]</castitle>
+  <phrasetitle>"higher education"</phrasetitle>
+  <description>Find information about higher education around the world</description>
+  <narrative>A reform of the French higher education system is in progress, in order to make it competitive with others higher education systems all around the world. To really understand this reform and its effects, I'm looking for information about higher education systems (universities, colleges and schools)  all around the world.  I'm not looking for universities' or colleges' names but I'm interested in their organization: how many years of study are necessary, which degrees are issued, how to become a teacher,...</narrative>
+</topic>
+<topic id="2009057" ct_no="242">
+  <title>movie Slumdog Millionaire directed by Danny Boyle</title>
+  <castitle>//movie[about(.,"Slumdog Millionaire")]//director[about(.,"Danny Boyle")]</castitle>
+  <phrasetitle> "Slumdog Millionaire" "Danny Boyle" </phrasetitle>
+  <description>Retrieve information about the movie Slumdog Millionaire directed by Danny Boyle.</description>
+  <narrative>The relevant texts must contain information on : the movie, the awards it has got or about the casts and crew of the movie. The criticisms of the movie are relevant as well. The other movies directed by Danny Boyle are not relevant here. Information about the making of the movie and about the original novel and its author is also relevant. Passages or elements about other movies with the name "millionaire" as a part of them are irrelevant. Information about the game show "Who wants to be a millionaire" or any other related game shows is irrelevant.</narrative>
+</topic>
+<topic id="2009058" ct_no="243">
+  <title>Tiananmen Square protest 1989</title>
+  <castitle>//article[about(.,"Tiananmen Square")]//protest[about(.,"Tiananmen Square" protest 1989)]</castitle>
+  <phrasetitle>"Tiananmen Square" "protest 1989"</phrasetitle>
+  <description>Find information about Tiananmen Square in general and then in particular about protest that occurred over there in 1989.</description>
+  <narrative>Information on the history, features and events of Tiananmen Square are relevant. A detailed description of the 1989 "Tiananmen Square" protest is particularly relevant. A brief description of the previous protests that occurred over there is relevant. Too much details of other "Tiananmen Square" protests are not sought here. Documents about protests at other places of China or the rest of the world are absolutely irrelevant. Information regarding international reactions to the government crackdown and deaths are relevant. Information about attempts of the Chinese government to suppress the incident e.g. the ban on the Chinese Wikipedia is also relevant.</narrative>
+</topic>
+<topic id="2009059" ct_no="244">
+  <title>failure tolerance in distributed systems</title>
+  <castitle>//*[about(., failure tolerance in distributed systems)]</castitle>
+  <phrasetitle>"failure tolerance" "distributed systems"</phrasetitle>
+  <description>techniques of failure tolerance in distributed systems</description>
+  <narrative>I'm revising a paper to a colleague about failure tolerance techniques in distributed systems. I need some information about this domain to understand more the paper.  More precisely, I want to know how detect fails and how recover them in the software part of the framework thanks to a transparent level. Information about distributed systems as the domains of application or the system's description are not relevant. I need really specific information about failure tolerance techniques.  </narrative>
+</topic>
+<topic id="2009060" ct_no="245">
+  <title>hard disk technology</title>
+  <castitle>//article[ about(.,"hard disk") and about(., technology) ]</castitle>
+  <phrasetitle>"hard disk"</phrasetitle>
+  <description>Find information about the technology used in hard disk drives. This includes data on the magnetic technology, or optical technology.</description>
+  <narrative>Im am interested in finding  information about the technology used in hard disk drives.     Relevant information should include data on the magnetic technology, or optical technology, or on the wrting/reading technology used in such disks.    I am not interested in the sofware aspects, but only in the hardware technology, like perpendical recording for instance.  </narrative>
+</topic>
+<topic id="2009061" ct_no="246">
+  <title>france second world war normandy</title>
+  <castitle>//article[ about(.,france) and about(.," second world war") and about(.,normandy) ]</castitle>
+  <phrasetitle>"second world war"</phrasetitle>
+  <description>Find information about the military actions that took place in Normandy during the second world war.</description>
+  <narrative>I am interested in finding information about the military actions that took place in Normandy during the second world war.     Data on which army involved and how these armies are involved relevant. I am not interested in persons but in the forces involved.  I like to have data on the locations and facts that occured. For instance, information on the overlord operation is relevant.  </narrative>
+</topic>
+<topic id="2009062" ct_no="247">
+  <title>social network group selection</title>
+  <castitle>//*[about(., social network group selection)]</castitle>
+  <phrasetitle>"group selection in social network" "social network" "group selection"</phrasetitle>
+  <description>What are the criteria for selection of groups in a social network</description>
+  <narrative>The document should describe how a person selets a group to belong in a social network.   How a group can be detected (connections with known contact, geographical proximity, shared subjects or hobbies)</narrative>
+</topic>
+<topic id="2009063" ct_no="249">
+  <title>D-Day normandy invasion</title>
+  <castitle>//*[about(., D-Day normandy invasion)]</castitle>
+  <phrasetitle>"normandy invasion"</phrasetitle>
+  <description>How the Normans lived D-DAY</description>
+  <narrative>How the Normans lived D-DAY, the bombing and invasion of normandy ?   How many civils were hurt or died in this campaign ?</narrative>
+</topic>
+<topic id="2009064" ct_no="250">
+  <title>stock exhange insider trading crime</title>
+  <castitle>//article[about(.,"stock exchange") AND about(.//link, "insider trading")]//p[about(., "insider trading") AND about(., crime)]</castitle>
+  <phrasetitle>"stock exhange" "insider trading" </phrasetitle>
+  <description>I need information on insider trading cases which are considered criminal.</description>
+  <narrative>I am writing an article about white-collar criminality and collecting material about insider trading. Relevant documents would report allegations, trials or convictions of criminal insider trading. Persons and companies involved are important. Articles merely describing the phenomenon are not of interest.</narrative>
+</topic>
+<topic id="2009065" ct_no="251">
+  <title>sunflowers Vincent van Gogh</title>
+  <castitle>//(p|sec)[about(.,Vincent van Gogh)]//image[about(.,sunflowers)]</castitle>
+  <phrasetitle>"Vincent van Gogh"</phrasetitle>
+  <description>Find image of sunflowers painted by Vincent van Gogh</description>
+  <narrative>Being a Dutch post-impressionist artist, Vincent van Gogh has produced lots of paintings that are now very popular, well-known, and expensive. His painting style has influenced the development of art.     Among his paintings, I love the various paintings of sunflowers because of the vibrant colors that express emotions typically associated with the life of sunflowers. I would like to find relevant sunflower paintings as images in documents so that I can enjoy their simplistic beauty.     To be relevant the sunflower must be presented as an image and also painted by Vincent van Gogh. Sunflower images created by others are irrelevant.   </narrative>
+</topic>
+<topic id="2009066" ct_no="252">
+  <title>folk metal groups finland</title>
+  <castitle>//group[ about(.//music_genre, folk metal) and about(., finland) ]</castitle>
+  <phrasetitle>"folk metal" </phrasetitle>
+  <description>Find bands of folk metal coming from Finland</description>
+  <narrative>I am interested in Folk Metal, a substyle of Heavy Metal music. This style is mainly composed of two broad musical trends: those who make celtic-like music and those who make music inspired in the Vikings.    Because I am not interested in the first kind of Folk Metal bands, and I like two bands very much (Finntroll and Korpiklaani), which both are from Finland, I would like to get information about other Folk Metal band of the same country (thinking that their style should be similar).</narrative>
+</topic>
+<topic id="2009067" ct_no="253">
+  <title>probabilistic models in information retrieval</title>
+  <castitle>//(information|artifact)[about(., information retrieval)]//p[about(.,probabilistic models)]</castitle>
+  <phrasetitle>"probabilistic models" "information retrieval"</phrasetitle>
+  <description>Find information about probabilistic models applied for information retrieval</description>
+  <narrative>Probabilistic models have successfully been applied for computing the relevance of a document to a given query in information retrieval.    To have an overview of the state-of-the-art probabilistic models, I would like to know more background of various models and how they are defined. The expected information includes model description, categorization, and application in information retrieval tasks.     To be relevant a result should have clear description about the model such as the description or clear statement on how it differs from other models. Articles containing out-going links to probabilistic models or information retrieval only are not relevant.  </narrative>
+</topic>
+<topic id="2009068" ct_no="254">
+  <title>China great wall</title>
+  <castitle>//(p|village)[about(., China)] //p[about(.,great wall)]</castitle>
+  <phrasetitle>"Great Wall"</phrasetitle>
+  <description>Find information about the Great Wall in China</description>
+  <narrative>The Great Wall is the mightiest work of man and the only one that would be visible to the human eye from the moon according to the book of Richard Halliburton. It has been existed since the 8th century BC. Besides its historical value, it is also one of the hottest tourist spots in China that attracts people from all over the world.     For my own personal interest, I would like to learn more background about this great man-made work. I'm interested in its history, geographical location, its length, scenic view, notable area. I like to have detailed descriptions of these aspects in paragraphs and may copy them to my weblog.     To be relevant, the above mentioned information should be at least a sentence long in a paragraph. Events happened around the Great Wall such as battles are not relevant. A term-length description as a tourist spot is also irrelevant.   </narrative>
+</topic>
+<topic id="2009069" ct_no="255">
+  <title>Singer in Britain's Got Talent</title>
+  <castitle>//article[about(.//occupation,singer) and about(.//series,Britain's Got Talent)]</castitle>
+  <phrasetitle>"Britain's Got Talent"</phrasetitle>
+  <description>Find information about singers who rose to fame on the TV show Britain's Got Talent</description>
+  <narrative>The British television show "Britain's Got Talent" has drawn international attention recently. One important reason is due to the performance of a Scottish singer named Susan Boyle. Her unpolished appearance and incredible voice remind us again one truth: do not judge a book according to its appearance. Her video clips have more than 100 million time clicks on the internet within a couple of days.     For curiosity, I like to know who the talented people in the British TV show are, what background they have, and how they develop their singing career. I like to find out some useful lessons for my own goodness.     To be relevant, an article should contain detailed information of the winner in Britain's Got Talent. Her/His talent focuses on singing. Information about the show itself or other talents rather than singing is not relevant. Singer's name without additional background information is also considered irrelevant.   </narrative>
+</topic>
+<topic id="2009070" ct_no="256">
+  <title>health care reform plan</title>
+  <castitle>//article[about(.//category, health care reform plan)]</castitle>
+  <phrasetitle>"health care reform" "health care plan"</phrasetitle>
+  <description>Information on the dofferent types of health care plans available in industrialized countries compared to the situation in the United States.</description>
+  <narrative>Health care reform has become a big issue in th United States. The film Sicko by Micheal Moore documents the state of health care coverage in the United States. To understand the peculiarities of health care coverage system in the US, more comparative information on the types of health care coverage in place in other countries is need. Articles that detail different methods of funding health care systems   or that discuss merits of public health care coverage vs private or company provided health coverage are particularly relevant. Likewise relevant are articles discussing the merits of health care coverage put in place in other comparable countries (european countries, Canada, Australia, New Zealand, Japan). Articles that discuss health insurance in general without reference to the impact on health insurance coverage of people are not relevant. Also articles on health care that do not address health insurance policies are not relevant. Likewise articles that simply present the health insurance industry or the health industry without reference to coverage policies are also not relevant.</narrative>
+</topic>
+<topic id="2009071" ct_no="259">
+  <title>earthquake prediction</title>
+  <castitle>//article[about(., earthquake)]//p[about(., prediction)]</castitle>
+  <phrasetitle>"earthquake prediction"</phrasetitle>
+  <description>Find information about earthquake prediction</description>
+  <narrative>At 14:28:01.42 on May 12, 2008 a strong earthquake in 8.0 magnitudes happened in the southwestern province of Sichuan. It killed at least 68,000 people including lots of school children and left 4.8 million people homeless. Although an earthquake is an unavoidable natural disaster, the caused damage and the loss of life can be minimized if an accurate prediction can be made in advance.     Since Sichuan is my hometown, this disaster affects my own personal life and the life of my friends. I'm eager to collect and disseminate relevant information on earthquake prediction in short articles such as signs of early observation, techniques, equipments, and research methodologies. More specific description in paragraphs of long documents is also desirable.     To be relevant an element should present detailed description for earthquake prediction. The information on the result of the earthquake such as death toll, damage, location, and magnitude is irrelevant. All relevant information should be about the real-life earthquake  </narrative>
+</topic>
+<topic id="2009072" ct_no="260">
+  <title>+professor "information retrieval" "computer science"</title>
+  <castitle>//(person|scientist)[about(., professor)]//link[about(., information retrieval) or about(., computer science)]</castitle>
+  <phrasetitle>"information retrieval" "computer science"</phrasetitle>
+  <description>Find information about professors in either information retrieval or computer science</description>
+  <narrative>Information retrieval is a research branch of computer science. Being a professional of information technology, I would like to know the big names in this field as they lead the development of research and their contribution to this field should be appreciated.     To get familiar with them, the fast way is to have information on their biography, education roadmap, career development, research interest, and contributions.     To be relevant a result should provide biographical description, research interest, education or career development information. Important publications are also relevant. They must be professors in computer science or information retrieval only. Professors from other fields are irrelevant.   </narrative>
+</topic>
+<topic id="2009073" ct_no="261">
+  <title>web link network analysis</title>
+  <castitle>//*[about(., Web link network analysis)]</castitle>
+  <phrasetitle>"web link analysis" "link analysis" "network analysis"</phrasetitle>
+  <description>Find imformation about link analysis or network analysis</description>
+  <narrative>My research theme is network analysis. So, I want to learn and understand many   information of relevant network and link analysis. But this technology is used   in a wide range of fields such as social science, biology and much more. I need   information of field of information science especially link structure   analysis on Web. Therefore I do not want to need information with otherwise fields.</narrative>
+</topic>
+<topic id="2009074" ct_no="262">
+  <title>web ranking scoring algorithm</title>
+  <castitle>//article[about(.,web ranking scoring algorithm)]</castitle>
+  <phrasetitle>"web ranking" "scoring algorithm"</phrasetitle>
+  <description>Find imformation about ranking algorithm or scoring algorithm on Web</description>
+  <narrative>My research theme is information retrieval system. So, I want to learn and understand many information of relevant ranking or scoring algorithm in acutually used on Web. But, these algorithm vary depending on what to score or rank. We focus on ranking of Website, that mean we want to need document that is wrote about ranking algorithm especially implemented on Web search engine acutually or applied exiting idea. Therefore I do not want to need information do not relate that.</narrative>
+</topic>
+<topic id="2009075" ct_no="263">
+  <title>tourism in tunisia</title>
+  <castitle>//*[about(., tourism in tunisia)]</castitle>
+  <phrasetitle/>
+  <description>tourism in tunisia</description>
+  <narrative>I am looking for information about tourism in Tunisia. More precisely, I am  searching for the famous touristic places in Tunisia to visit them. It will be very nice if the retrieved information give some characteristics about the touristic places. Geographic information and statics about Tunisia are not relevant.</narrative>
+</topic>
+<topic id="2009076" ct_no="264">
+  <title>sociology and social issues and aspects in science fiction</title>
+  <castitle>//*[about(., science fiction) AND about(., sociology social issues aspects)]</castitle>
+  <phrasetitle>"social aspects" "social issues"  "science fiction"</phrasetitle>
+  <description>sociology and social issues in science fiction</description>
+  <narrative>I want to know how sociological aspects are worked out and discussed in science fiction literature or films.     Relevant articles explain which sociological aspects are dealt with in a science fiction novel, film, or by a science fiction author. If no specific novel, author or sub-genre is mentioned, but only science fiction as a whole, or no specific sociological or social aspects, I consider that (part of the) article irrelevant.</narrative>
+</topic>
+<topic id="2009077" ct_no="265">
+  <title>torrent client technology</title>
+  <castitle>//*[about(., torrent client technology)]</castitle>
+  <phrasetitle>"Torrent technology"</phrasetitle>
+  <description>I am seeking information on the Torrent's technology and how I can download torrent files.</description>
+  <narrative>I have no knowledge about torrent technology and I would like to have some general information such as how does it work. In addition, I want to know which program can download torrent files. I am not interested in torrent websites (e.g : torrents search engines).</narrative>
+</topic>
+<topic id="2009078" ct_no="266">
+  <title>supervised machine learning algorithm</title>
+  <castitle>//*[ about(.,supervised machine learning algorithm) ]</castitle>
+  <phrasetitle>"supervised machine learning algorithm" "machine learning"</phrasetitle>
+  <description>I am seeking information on supervised machine learning algorithms</description>
+  <narrative>I am interested in supervised machine learning but I want to know the main methods and their motivation. I am not seeking documents about their implementation.</narrative>
+</topic>
+<topic id="2009079" ct_no="267">
+  <title>dangerous paraben bisphenol-A</title>
+  <castitle>//*[about(., dangerous paraben bisphenol-A )]</castitle>
+  <phrasetitle/>
+  <description>I want to know more on what Paraben and Bisphenol-A are dangerous and where we find them.</description>
+  <narrative>I have no knowledge about Paraben and Bisphenol-A and I want to know why they are toxics. Every articles or document's parts of a stuff which contain these components are relevants.</narrative>
+</topic>
+<topic id="2009080" ct_no="268">
+  <title>international game show formats</title>
+  <castitle>//*[about(.//category, "game show" )]//*[about(., international) AND about(., "game show") and about(., format)]</castitle>
+  <phrasetitle>"game show" "show formats"</phrasetitle>
+  <description>I want to know about all the game show formats that have adaptations in different countries.</description>
+  <narrative>Any content describing game show formats with international adaptations are relevant. National game shows and articles about the players and producers are not interesting.  </narrative>
+</topic>
+<topic id="2009081" ct_no="269">
+  <title>Maya calendar</title>
+  <castitle>//*[about(.,maya calendar)]</castitle>
+  <phrasetitle>"Maya calendar"</phrasetitle>
+  <description>Find information about Maya calendar.</description>
+  <narrative>The Maya calendar is a system of distinct calendars used by the Maya civilization. In such difficult circumstances with undeveloped computing instrument, it is amazing for the Maya people work out so precise calendars.  Articles introducing how the Maya calendar work or the origin of Maya calendar are relevant.  </narrative>
+</topic>
+<topic id="2009082" ct_no="270">
+  <title>south african nature reserve</title>
+  <castitle>//*[about(., south african nature reserve)]</castitle>
+  <phrasetitle>"south african" "nature reserve"</phrasetitle>
+  <description>south african nature reserve</description>
+  <narrative>Relevant document are those describing a nature reserve that is located in South Africa. Documents describing nature reserve out of South Africa are not relevant. Documents talking about people(scientist for example) that were interested in nature reserve are not relevant.</narrative>
+</topic>
+<topic id="2009083" ct_no="271">
+  <title>therapeutic food</title>
+  <castitle>//*[about(., therapeutic food)]</castitle>
+  <phrasetitle>"therapeutic food"</phrasetitle>
+  <description>therapeutic food</description>
+  <narrative>Relevant documents are those defining what is a therapeutic food or giving example of therapeutic food and why they said are therapeutic...  Documents about other therapeutic goods( drugs for example) are not relevant.  </narrative>
+</topic>
+<topic id="2009084" ct_no="273">
+  <title>food allergy</title>
+  <castitle>//*[about(., food allergy)]</castitle>
+  <phrasetitle>"food allergy"</phrasetitle>
+  <description>any allergy caused by food</description>
+  <narrative>The documents about any allergy that is caused by food are relevant. The documents should describe the allergy manifestation, and the food that causes this allergy. The search task is about determining food that can bring allergic reactions.  Documents about allergy having another cause than food are not relevant.  Documents only about food intolerance are not relevant. Food intolerance is different from food allergy, it does not involve an actual allergy (allergic reactions are usually rapid while food intolerance signs can occur few days after).  Document about both food allergy and food intolerance are relevant if they respect the previous description.</narrative>
+</topic>
+<topic id="2009085" ct_no="274">
+  <title>operating system +mutual +exclusion</title>
+  <castitle>//article[about(., operating system)]//sec[about(.//p, mutual exclusion)]</castitle>
+  <phrasetitle>"operating system" +"mutual exclusion"</phrasetitle>
+  <description>Find information on mutual exclusion used for operating systems</description>
+  <narrative>There are several mutual exclusion techniques for operating systems.  However, detailed mechanisms of mutual exclusion are often written in  textbooks. In addition, not all techniques are picked up in textbooks,  such as recently developed ones.    For my OS course in my university, I would like to survey the mutual  exclusion techniques including recent ones which are not appeared in  textbooks for the lecture.  For this reason, explicit differences  among them and detailed explanation are important.  Some textbooks do  not explicitly explain, for example, the relationship between lock and  semaphore, while the lecturer must teach the difference.    First, I narrow the articles on operating systems, then again narrow  the sections with a paragraph on mutual exclusion.    The relevant elements should include detailed descriptions on mutual  exclusion techniques, such as how it works, why it is ensured, and  what is different from other ones.  Therefore, a list of techniques,  its history, and a list of references are regarded as irrelevant ones.  </narrative>
+</topic>
+<topic id="2009086" ct_no="275">
+  <title>airbus a380</title>
+  <castitle>//aircraft[about(., airbus)]//sec[about(.,a380)]</castitle>
+  <phrasetitle/>
+  <description>Find information on the A380 airplane made by Airbus</description>
+  <narrative>I travel abroad frequently and like to ride airplanes.  Recently,  Airbus launched A380 model which is the biggest airplanes ever built.  However, I have never seen nor ride A380.     For my personal curiosity, I would like to know the information on  Airbus A380 as much as possible, such as how the size is, how much the  weight is, how many people can be aboard, how far it can fly, and  which airline companies are in service with A380.  Therefore, the  relevant articles should include Airbus, and the relevant elements are  narrowed using specific airplane model name, A380.    The relevant elements should include fully descriptive information on  size, weight, flight distance, the number of passengers, airline  companies, etc.  A list of airplane models and references are not  regarded as relevant ones.  </narrative>
+</topic>
+<topic id="2009087" ct_no="276">
+  <title>history bordeaux</title>
+  <castitle>//article[ about(.,history) and about(.,bordeaux) ]</castitle>
+  <phrasetitle/>
+  <description>Find information about the history of the French city of Bordeaux.</description>
+  <narrative>I am interested in finding ion the history of the Bordeaux city.     I wish to get data on the known men and women that participated to the histiry of this city.     I am not interested in the Bordeaux wine and their history, but just on the city itself.  </narrative>
+</topic>
+<topic id="2009088" ct_no="277">
+  <title>"hatha yoga" deity asana</title>
+  <castitle>//sec[about(., "hatha yoga") or about(.,"hatha yoga" deity) or about(.,"hatha yoga" asana)]</castitle>
+  <phrasetitle>"hatha yoga"</phrasetitle>
+  <description>I need information about hatha yoga, and asanas and deities associated to it.</description>
+  <narrative>I have started to practise hatha yoga and I would like to read more about it. I am interested in the history of hatha yoga, and deities associated to it. Elements discussing classical texts of hatha yoga are of interest, as well as elements representing different asanas. Elements merely mentioning hatha yoga, concentrating on other yoga styles or lists are not relevant. Short elements are generally not interesting for my purpose.</narrative>
+</topic>
+<topic id="2009089" ct_no="278">
+  <title>world wide web history</title>
+  <castitle>//article[ about(.,"world wide web") and about(.,history) ]</castitle>
+  <phrasetitle>"world wide web" </phrasetitle>
+  <description>Find information about the history of the world wide web.</description>
+  <narrative>I am interested in finding on the history of the world wide web, especially at the early years.     Information about the initial works of Berners-Lee are relevant, as well as information about the  pioneers that were involved in the history of the web. Information on the web browsers are also relevant for me.  </narrative>
+</topic>
+<topic id="2009090" ct_no="279">
+  <title>Telephone history</title>
+  <castitle>//article[about(., Telephone history)]</castitle>
+  <phrasetitle/>
+  <description>find information about the history of the telephone</description>
+  <narrative>I am especially interested in the beginning of the invention, in the evolution in the first years.  Anything which is about a special phone company nowadays as well as â€œthe hottestâ€� telephones is not pertinent. The history of phone companies, if itâ€™s not linked with the invention of the telephone or the very first companies which supplied the lines or the equipment, is not interesting.</narrative>
+</topic>
+<topic id="2009091" ct_no="280">
+  <title>Himalaya trekking peak</title>
+  <castitle>//article[about(.,Himalaya trekking peak)]</castitle>
+  <phrasetitle/>
+  <description>Find information about trekking peaks in Himalaya</description>
+  <narrative>Find information about trekking peaks in Himalaya. I'd like to reach a high Himalayan summit, but I have no climbing experience. I don't know which summits are reachable without climbing experience. I expect to find information about coordinates, access map, route, trekking permit if needed, equipment needed, difficulties, etc.  I don't need information about climbing peaks.  Work-task: travel organization.</narrative>
+</topic>
+<topic id="2009092" ct_no="281">
+  <title>ski +waxing  -water -wave</title>
+  <castitle>//article[about(., ski waxing )]</castitle>
+  <phrasetitle>"ski waxing"</phrasetitle>
+  <description>I want information on ski waxing to help skis sliding.</description>
+  <narrative>I want information on ski waxing to help ski sliding.    I want information either on hardware stuff (what are   the different wax used) or on the technique itself.   I do not want information on water ski or water surfing.   I do not want information on other kind of waxing (eg brazelian waxing).</narrative>
+</topic>
+<topic id="2009093" ct_no="282">
+  <title>French revolution</title>
+  <castitle>//article[about(.,"French revolution")]//revolution[about(.,french revolution)]</castitle>
+  <phrasetitle>"French revolution"</phrasetitle>
+  <description>Find information about French revolution.</description>
+  <narrative>Information on any revolution in France is relevant. Details about the leaders/contributors to the revolutions are relevant. Texts on fictional works, movies and documentary films on the subject of these revolutions are relevant. Information about other revolutions is not relevant.</narrative>
+</topic>
+<topic id="2009094" ct_no="283">
+  <title>global warming human activity</title>
+  <castitle>//article[about(.,"global warming" "human activity")]</castitle>
+  <phrasetitle>"global warming" "human activity"</phrasetitle>
+  <description>Find information about the scientific controversy on how the global warming results from human activity</description>
+  <narrative>I am a citizen of the world. I'd like to build my opinion on one of the most important ecological  problem today: the global warming effect. I am pretty sure that the global warming effect will affect us and our mother earth in the near future. But I am not sure if it exists a scientific consensus about how the global warming results from human activity.  Thus I am searching for information from various sources about the scientific controversy on how the global warming results from human activity.  I expect to find some scientific facts on the topic, and I also would like to have an idea about the opinion of the scientists leaders, the main organizations (politics, ecologists, NGO, etc).  As it exists a huge quantity of information on these questions, relevant documents should be relatively synthetics (e.g. a biography on an individual scientist is relevant, only if the scientist is a well known leader or if there is a section dedicated to these questions).  </narrative>
+</topic>
+<topic id="2009095" ct_no="284">
+  <title>Weka software</title>
+  <castitle>//article[about(.,Weka software)]</castitle>
+  <phrasetitle/>
+  <description>I want information about the weka software</description>
+  <narrative>I am interested in data mining analysis. I heard of Weka software and I'd like information about it. Where it had been developed? Which analysis can be done with this software? I would find other software usable like Weka.</narrative>
+</topic>
+<topic id="2009096" ct_no="285">
+  <title>Eiffel</title>
+  <castitle>//article[about(.,Eiffel)]</castitle>
+  <phrasetitle/>
+  <description>I want information about the French engineer Eiffel and on its structures</description>
+  <narrative>I want information (text or pictures) about Gustave Eiffel, the French engineer and on the structures he has built. I am also interested in other works related to Eiffel or inspired by his buildings or bridges.  I am neither interested in the programming language Eiffel nor in the rock group.    </narrative>
+</topic>
+<topic id="2009097" ct_no="286">
+  <title>location  marcel duchamp work</title>
+  <castitle>//*[about(., location  marcel duchamp work)]</castitle>
+  <phrasetitle>"Marcel Duchamp"</phrasetitle>
+  <description>I want the current location of Marcel Duchamp work.</description>
+  <narrative>I want the current location of Marcel Duchamp work.   Ideally, I want a list of MD work and their current location.   If the location is publicly available is of importance.   I do not want a biblio of MD.   I am not interested in the image of MD's work.   If such a list does not exists, I am interested in the   paragraph where the information is available.  I don't want information such as "there is some work of MD in museum blabla", but information such   "the fountain is currently in museum blabla"  </narrative>
+</topic>
+<topic id="2009098" ct_no="287">
+  <title>Pandemic Death</title>
+  <castitle>//article[about(., Pandemic death)]</castitle>
+  <phrasetitle/>
+  <description>find information about all former pandemics their location and the number of people who died</description>
+  <narrative>I am interested in this subject since the â€œavian fluâ€� found itâ€™s way to Europe. I just wanted to know when and where it happened in the past and how big the radius of the victims was..   to be pertinent the text should contain information about one or several specifique mortal  pandemics with location and victims, etc. not pertinent is a simple explanation what a pandemic is, explanations about pre- pandemic diseases and protection plans or pandemic threats. If the text is about just one person (a biography for example) who died  because of a pandemic it is not pertinent.    </narrative>
+</topic>
+<topic id="2009099" ct_no="288">
+  <title>movie houdini</title>
+  <castitle>//article[about(.//movie, Houdini)]</castitle>
+  <phrasetitle/>
+  <description>find movies about houdini's life</description>
+  <narrative>I know there is an old movie about Houdini's life, with Tony Curtis, and I want to know if there are other movies.  Pertinent documents give some information about movies on Houdini's life, like name of the movie, and eventually year and actors who are playing Houdini. Non pertinent are movies in which Houdini is acting or movies in which characters call themselves Houdini in reference to the magician.</narrative>
+</topic>
+<topic id="2009100" ct_no="293">
+  <title>search algorithm with plural keywords</title>
+  <castitle>//*[about(., algorithm) and about(., search with plural keywords)]</castitle>
+  <phrasetitle>"search algorithm" "plural keywords"</phrasetitle>
+  <description>Find the search algorithm with plural keywords.</description>
+  <narrative>I am looking for the fastest search algorithm with plural keywords. The relevant article contains the fast search algorithm for text with plural keywords. The irrelevant one issues a search algorithm for another media or with a keyword.</narrative>
+</topic>
+<topic id="2009101" ct_no="294">
+  <title>alchemy in Asia including Japan China and India</title>
+  <castitle>//*[about(., alchemy) and (about(., Asia) or about(., Japan China India))]</castitle>
+  <phrasetitle>"alchemy in Asia" </phrasetitle>
+  <description>Find the descriptions about the history and cultural influence of the alchemy in Asia.</description>
+  <narrative>Recently, our leader saw the animation film named "Full Metal Alchemist" and now he is really enthusiastic about that. I'd like to know how the alchemy was studied and affected the culture in Asia. The relevant document should mention about the history and cultural impact of the alchemy in Asia. The document which only refers to the researcher or writer of the alchemy in Asia is irrelevant. The document on imaginary topic is also irrelevant.</narrative>
+</topic>
+<topic id="2009102" ct_no="296">
+  <title>historical ninja stars</title>
+  <castitle>//*[about(., historical ninja) or about(., legendary ninja)]//(p|sec|person)[about(., star) or about(., person) or about(., hero) or about(., character)]</castitle>
+  <phrasetitle>"ninja stars"</phrasetitle>
+  <description>Find the historical ninja stars.</description>
+  <narrative>I'd like to know ninja stars in Japan who are historical persons or legendary characters. The relevant article contains ninja charactors' names or nicknames in it. The irrelevant one issues neither names nor nicknames of ninja charactors. The article which only conatins ninja groups' names such as "Iga" and "Koga" is also irrelevant.</narrative>
+</topic>
+<topic id="2009103" ct_no="298">
+  <title>photograph world earliest</title>
+  <castitle>//*[about(., photograph world earliest)]</castitle>
+  <phrasetitle>"earliest photograph" </phrasetitle>
+  <description>Find the information about the world's earliest surviving photograph.</description>
+  <narrative>I'm interested in the history of photograph and I'd like to know about the world's oldest  photograph.  I'm interested in the history of photograph and I'd like to know about the world's oldest  photograph.  To be relevant, the retrieved document (or part of a document) should mention about the world's  oldest photograph. The document about the photographer who took the world's oldest photograph is  also relevant. Nevertheless, the document referring to the earliest photograph in some specific area  (e.g., earliest photograph taken in Japan) is irrelevant.</narrative>
+</topic>
+<topic id="2009104" ct_no="299">
+  <title>lunar mare formation mechanism</title>
+  <castitle>//*[about(., lunar mare) and about(., formation mechanism)]</castitle>
+  <phrasetitle>"lunar mare" "formation mechanism"</phrasetitle>
+  <description>Find the description about the formation mechanism of lunar mare.</description>
+  <narrative>I'd like to know why the lunar maria on the moon are formed: why such large vacant places appear and  have been remained on the surface, while on the other hand there exist large number of craters. To  be relevant, the retrieved document should mention about the formation mechanism of lunar mare. The  document referring to the distribution of the lunar maria is also relevant.</narrative>
+</topic>
+<topic id="2009105" ct_no="300">
+  <title>Musicians Jazz</title>
+  <castitle>//article[about(., musician)]//music_genre[about(., Jazz)]</castitle>
+  <phrasetitle>"Jazz musicians"</phrasetitle>
+  <description>I am looking for musicians who play Jazz</description>
+  <narrative>I love Jazz, so I would like to get everything about Jazz musicians.</narrative>
+</topic>
+<topic id="2009106" ct_no="302">
+  <title>+"amy macdonald" +love +song</title>
+  <castitle>//article[about(., +amy +macdonald)]//song[about(.,love)]</castitle>
+  <phrasetitle>"amy macdonald" "love song"</phrasetitle>
+  <description>I look for love songs of amy macDonald</description>
+  <narrative>Amy Macdonald is great. I want to know if she ever sang about love. If yes, I would like the names of all these songs. It does not have to be a name list, anything about these songs is good.</narrative>
+</topic>
+<topic id="2009107" ct_no="303">
+  <title>design science sustainability renewable energy synergy</title>
+  <castitle>//*[about(., design science) and about(., sustainability renewable energy) and about(., synergy)]</castitle>
+  <phrasetitle>"design science" "design science sustainability" "renewable energy"</phrasetitle>
+  <description>ideas in design and science about sustainability, making use of renewable energy sources and synergetic processes</description>
+  <narrative>I want to read about ideas in design and science about sustainability, making use of renewable energy sources and synergetic processes.     Documents describing problems that could benefit from sustainable solutions or the use of renewable energy sources without describing what these solutions could be are not relevant. Documents describing what renewable energy, sustainability and synergetic processes are, are good enough. If examples are given, that is even better.</narrative>
+</topic>
+<topic id="2009108" ct_no="304">
+  <title>sustainability indicators metrics</title>
+  <castitle>//(article|sec|p)[about(.,sustainability indicators metrics) ]</castitle>
+  <phrasetitle>"sustainability indicator" "sustainability metric"</phrasetitle>
+  <description>Details about specific indicators or metrics for measuring sustainability</description>
+  <narrative>I am working on a software project to provide IT support to assist organisations assess their sustainability goals and I would like to better understand specific indicators and metrics for measuring sustainability. I am not particularly interested in elements that are just links to other resources (inside or outside Wikipedia).</narrative>
+</topic>
+<topic id="2009109" ct_no="305">
+  <title>circus acts skills</title>
+  <castitle>//article[about(.//category,circus skills)]//*[about(., circus acts skills)]</castitle>
+  <phrasetitle>"circus act" "circus skills"</phrasetitle>
+  <description>What do specific circus acts and skills entail?</description>
+  <narrative>For a project I want to work on I need to develop an ontology of circus acts and skills. So I am interested in articles or parts of articles that describe specific circus acts or skills. I am not interested in articles about particular performers, circuses or circus schools unless they describe details of particular acts or skills.</narrative>
+</topic>
+<topic id="2009110" ct_no="306">
+  <title>paul is dead hoax theory</title>
+  <castitle>//article[about(., hoax)]//theory[about(., "Paul is dead")]</castitle>
+  <phrasetitle>+"paul is dead" </phrasetitle>
+  <description>I want to find out more about the hoax, that Paul McCartney died.</description>
+  <narrative>At some point in the past there was a mystery tale, saying that Paul McCartney is dead. As a Beatles fan I want to find out more details about this.</narrative>
+</topic>
+<topic id="2009111" ct_no="307">
+  <title>europe solar power facility</title>
+  <castitle>//article[about(., solar power)]//facility[about(., europe)]</castitle>
+  <phrasetitle>"solar power" "facility in Europe"</phrasetitle>
+  <description>I am looking for solar power facilities in Europe</description>
+  <narrative>I am writing an article about solar power facilities in Europe and I need information about these, like exact location, history and future plans.</narrative>
+</topic>
+<topic id="2009112" ct_no="308">
+  <title>rally car female OR woman driver</title>
+  <castitle>//article[about(., rally car)]//driver[about(., female OR woman)]</castitle>
+  <phrasetitle>"rally car" "female driver" "woman driver"</phrasetitle>
+  <description>I want to find out what cars the female rally drivers prefer.</description>
+  <narrative>I am working on a statistics about the rally cars and I need to know what cars the female drivers prefer. Any text that mentions what car the particular female driver has driven is relevant. Motorbikes or trucks as well as male drivers are not of interest.</narrative>
+</topic>
+<topic id="2009113" ct_no="309">
+  <title>Toy Story Buzz Lightyear 3D rendering Computer Generated Imagery</title>
+  <castitle>//*[about(.//movie, Toy Story Buzz Lightyear 3D rendering Computer Generated Imagery)]</castitle>
+  <phrasetitle>"Toy Story" "Buzz Lightyear" "3D rendering" "Computer Generated Imagery"</phrasetitle>
+  <description>Find information on the movie Toy Story.</description>
+  <narrative>To be relevant, a document/component must discuss some detail of the techniques or computer infrastructure used in the creation of the first entirely computer-animated feature-length movie, "Toy Story."</narrative>
+</topic>
+<topic id="2009114" ct_no="310">
+  <title>self-portrait</title>
+  <castitle>//painter//figure[about(.//caption, self-portrait)]</castitle>
+  <phrasetitle>"self portrait"</phrasetitle>
+  <description>Find self-portraits of painters.</description>
+  <narrative>I am studying how painters visually depict themselves in their work.  Relevant document components are images of works of art, in  combination with sufficient explanation (i.e., a reference to the  artist and the fact that the artist him/herself is depicted in the  work of art).  Also textual descriptions of these works, if  sufficiently detailed, can be relevant.  Document component discussing  the portrayal of artists in general are not relevant, as are artists  that figure in painters of other artists.  </narrative>
+</topic>
+<topic id="2009115" ct_no="311">
+  <title>virtual museums</title>
+  <castitle>//museum[about(., "virtual museums")]</castitle>
+  <phrasetitle>"virtual museum"</phrasetitle>
+  <description>I am looking for information on virtual museums.</description>
+  <narrative>Document components discussing virtual museums, their definition and characteristics, and similarities and differences with "physical" museums are relevant. Discussions of museums in general, physical museums, or web-sites of physical museums are non-relevant.</narrative>
+</topic>
+</inex-topic-file>
