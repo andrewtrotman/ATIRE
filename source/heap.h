@@ -42,39 +42,6 @@ public:
 	void min_update(T key);
 };
 
-#ifdef BROKEN
-template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key) {
-	long long i = 0, lpos, rpos;
-	// if key is less than the minimum in heap, then do nothing
-	if (compare(key, array[0]) < 0) {
-		return 0;
-	}
-
-	while (i < this->size) {
-		lpos = left_pos(i);
-		rpos = right_pos(i);
-
-		// check array out of bound, it's also the stopping condition
-		if ((lpos >= this->size) || (rpos >= this->size)) {
-			break;
-		}
-
-		if ((compare(key, array[lpos]) < 0) && (compare(key, array[rpos]) < 0)) {
-			break;
-		} else if (compare(array[lpos], array[rpos]) < 0) {
-			array[i] = array[lpos];
-			i = lpos;
-		} else {
-			array[i] = array[rpos];
-			i = rpos;
-		}
-	}
-
-	array[i] = key;
-	return 1;
-}
-#endif
-
 template <typename T, typename _Compare> int Heap<T, _Compare>::min_insert(T key)
 {
 long long i = 0, lpos, rpos;
@@ -90,13 +57,13 @@ while (i < this->size)
 	// check array out of bound, it's also the stopping condition
  	if (lpos < this->size && rpos < this->size)
 		{
-	 	if (compare(key, array[lpos]) < 0 && compare(key, array[rpos]) < 0)
+	 	if (compare(key, array[lpos]) <= 0 && compare(key, array[rpos]) <= 0)
 			break;			// we're smaller then the left and the right so we're done
 		else if (compare(array[lpos], array[rpos]) < 0)
 			{
 			array[i] = array[lpos];
 			i = lpos;
-			} 
+			}
 		else
 			{
 			array[i] = array[rpos];
@@ -134,21 +101,25 @@ template <typename T, typename _Compare> void Heap<T, _Compare>::min_update(T ke
 	while (i < this->size) {
 		lpos = left_pos(i);
 		rpos = right_pos(i);
-
-		if ((lpos >= this->size) || (rpos >= this->size)) {
-			break;
-		}
-
-		if ((compare(key, array[lpos]) <= 0) && (compare(key, array[rpos]) <= 0)) {
-			break;
-		}
-
-		if (compare(array[lpos], array[rpos]) > 0) {
-			array[i] = array[rpos];
-			i = rpos;
+		if ((lpos < this->size) && (rpos < this->size)) {
+			if ((compare(key, array[lpos]) <= 0) && (compare(key, array[rpos]) <= 0)) {
+				break;
+			} else if (compare(array[lpos], array[rpos]) > 0) {
+				array[i] = array[rpos];
+				i = rpos;
+			} else {
+				array[i] = array[lpos];
+				i = lpos;
+			}
+		} else if (lpos < this->size) {
+			if (compare(key, array[lpos]) > 0) {
+				array[i] = array[lpos];
+				i = lpos;
+			} else { // we know it's the last one, just exit the loop
+				break;
+			}
 		} else {
-			array[i] = array[lpos];
-			i = lpos;
+			break;
 		}
 	}
 
