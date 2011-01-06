@@ -22,7 +22,7 @@ append_jars_to_cp() {
 
 append_jars_to_cp $CLIX_PATH/lib
 
-arguments="/data/corpus/wikipedia/CJK/zhwiki-20091119-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
+arguments="/data/corpus/wikipedia/CJK/zhwiki-20100627-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
 
 
 while getopts ':r:n:e:' OPTION

@@ -161,6 +161,10 @@ public class Wiki2XML {
             {
             	WikiHandler.keepOriginalWikiText = true;
             } 
+            else if (arg.startsWith("-validateXml"))
+            {
+            	WikiHandler.validateAfterDump = true;
+            } 
             else
             {
                 // we need at least one more parameter

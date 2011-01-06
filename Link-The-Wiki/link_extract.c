@@ -71,7 +71,7 @@ ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 
 if (argc < 2)
-	exit(printf("Usage:%s [-crosslink] [-crosslink-title] [-lowercase] <filespec> ...\n", argv[0]));
+	exit(printf("Usage:%s [-crosslink] [-append-source-title] [-lowercase] <filespec> ...\n", argv[0]));
 
 first_param = 1;
 lowercase_only = FALSE;

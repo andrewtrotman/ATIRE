@@ -49,6 +49,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	public static String outputDir=".";
 	public static String outputOriginDir="mysql";
 	public static boolean keepOriginalWikiText = false;
+	public static boolean validateAfterDump = false;
 	    
     public static ArrayList<String> languageLinks = new ArrayList<String>();
     
@@ -1362,32 +1363,32 @@ public class WikiHandler extends DefaultHandler implements Runnable
 		if (createTags==false) return true;
 		
 		boolean result=true;
+		if (validateAfterDump)
+		try
+		{
+			StringReader reader=new StringReader(file);
+			
+			InputSource input = new InputSource(reader);
+			input.setSystemId(createFileName(useArticleIDs?currentID:currentTitle,false,null,false,false, currentLang));
+			
+			parser.parse(input,handler);
+			
+			reader.close();
+		}
+		catch(SAXParseException e)
+		{
+			e.printStackTrace();
+			System.out.println("SAXParse exception while testing XML: "+e.getMessage());				
+			result=false;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			problem("exception: "+e);
+			result=false;
+		}
+		
 		return result;
-//		try
-//		{
-//			StringReader reader=new StringReader(file);
-//			
-//			InputSource input = new InputSource(reader);
-//			input.setSystemId(createFileName(useArticleIDs?currentID:currentTitle,false,null,false,false));
-//			
-//			parser.parse(input,handler);
-//			
-//			reader.close();
-//		}
-//		catch(SAXParseException e)
-//		{
-//			e.printStackTrace();
-//			System.out.println("SAXParse exception while testing XML: "+e.getMessage());				
-//			result=false;
-//		}
-//		catch(Exception e)
-//		{
-//			e.printStackTrace();
-//			problem("exception: "+e);
-//			result=false;
-//		}
-//		
-//		return result;
 	}
 	
 	private void status()
@@ -5387,7 +5388,7 @@ public class WikiHandler extends DefaultHandler implements Runnable
         if (namespace.length() > 0 && fileNamespaces.contains(namespace))
             handleImageLink(content,start,end,res);
         else if (namespace.length() > 0 && categoryNamespaces.contains(namespace))
-            handleCategory(content,start,end,res);
+            handleCategory(content,start,end,res, namespace);
         else if (((content.length()>=start+"portal:".length())&&(content.substring(start,start+"portal:".length()).toLowerCase().startsWith("portal:")))||(content.indexOf(':',start)==-1)||(content.indexOf(':', start)>=end))
         {
             String target; // link target
@@ -5581,8 +5582,11 @@ public class WikiHandler extends DefaultHandler implements Runnable
 	        	 * TODO:
 	        	 * the articles should contains all the articles that needs to be processed
 	        	 */
-	        	if (articles.get(namespace) != null && articles.get(namespace).containsKey(title)){
-	        		String link = articles.get(namespace).get(title);
+	        	String key = title;
+	        	if (namespace.equals("zh"))
+	        		key = ZHConverter.convert(title, ZHConverter.SIMPLIFIED);
+	        	if (articles.get(namespace) != null && articles.get(namespace).containsKey(key)){
+	        		String link = articles.get(namespace).get(key);
 	        		String url=makeWikiURL(link, title, namespace);
 	        		openTag(res,WikiConstants.wikilinkTag," xlink:href=\""+url+"\" xlink:type=\"simple\" xlink:label=\"" + namespace + "\" xlink:title=\"" + title + "\"");
 	        		closeTag(res,WikiConstants.wikilinkTag);
@@ -5702,9 +5706,9 @@ public class WikiHandler extends DefaultHandler implements Runnable
 
     }
     
-    private void handleCategory(String content, int start, int end, StringBuffer res)
+    private void handleCategory(String content, int start, int end, StringBuffer res, String category)
     {
-    	start=start+"category:".length();
+    	start += category.length();
         String target; // link target
         int idx=content.indexOf('|',start);
         if ((idx==-1)||(idx>end))

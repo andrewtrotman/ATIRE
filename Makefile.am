@@ -125,6 +125,7 @@ core_sources =  \
 	$(SRCDIR)/ranking_function_inner_product.c \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
+	$(SRCDIR)/NEXI_ant.c \
 	$(SRCDIR)/NEXI_term.c \
 	$(SRCDIR)/NEXI_term_ant.c \
 	$(SRCDIR)/NEXI_term_iterator.c \
@@ -212,6 +213,7 @@ core_noinst_headers = \
 	$(SRCDIR)/memory_indexer_node.h	\
 	$(SRCDIR)/memory_indexer.h	\
 	$(SRCDIR)/NEXI.h	\
+	$(SRCDIR)/NEXI_ant.h \
 	$(SRCDIR)/NEXI_term.h \
 	$(SRCDIR)/NEXI_term_ant.h \
 	$(SRCDIR)/NEXI_term_iterator.h \

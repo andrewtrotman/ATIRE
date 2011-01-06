@@ -1,6 +1,15 @@
 #!/bin/bash
 
-CLIX_PATH=/home/monfee/workspace/CliX
+CLIX_PATH=.
+
+if [ -n $CORPUS_HOME ]
+then
+    corpus_home=$CORPUS_HOME
+else
+    corpus_home=/data/corpus
+fi
+
+echo "CORPUS HOME: $corpus_home"
 
 cp=
 arguments=
@@ -26,7 +35,7 @@ append_jars_to_cp() {
 
 append_jars_to_cp $CLIX_PATH/lib
 
-arguments="-lang=zh|ja|ko|en -articlefile=/data/corpus/wikipedia/CJK/xml/*articles.txt -redirfile=/data/corpus/wikipedia/CJK/xml/*redirections.txt -outputdir=/data/corpus/wikipedia/CJK/xml /data/corpus/wikipedia/CJK/zhwiki-20091119-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 /data/corpus/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
+arguments="-lang=zh|ja|ko|en -articlefile=${corpus_home}/wikipedia/CJK/xml/*articles*.txt -redirfile=${corpus_home}/wikipedia/CJK/xml/*redirections*.txt -outputdir=${corpus_home}/wikipedia/CJK/xml ${corpus_home}/wikipedia/CJK/zhwiki-20100627-pages-articles.xml.bz2 ${corpus_home}/wikipedia/CJK/jawiki-20100624-pages-articles.xml.bz2 ${corpus_home}/wikipedia/CJK/kowiki-20100628-pages-articles.xml.bz2"
 
 arguments_remote="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y"
 
@@ -53,4 +62,4 @@ done
 #then
 #  arguments=$1
 #fi
-java -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.Wiki2XML $arguments
+java -server -d64 -Xms1256m -Xmx16g -cp $cp:$CLIX_PATH/bin de.mpii.clix.wikipedia.Wiki2XML $arguments
