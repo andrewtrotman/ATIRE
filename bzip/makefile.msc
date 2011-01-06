@@ -11,7 +11,11 @@ CC=@cl
 LIB=@lib
 !ENDIF
 
-CFLAGS= -DWIN32 -Ox -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
+!IF "$(DEBUG)" == "1"
+CFLAGS= -DWIN32 /MTd /Od -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
+!ELSE
+CFLAGS= -DWIN32 /MT /Ox -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
+!ENDIF
 
 OBJS= blocksort.obj  \
       huffman.obj    \

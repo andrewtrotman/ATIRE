@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 1
+DEBUG = 0
 
 #
 #	Which compiler are we using
@@ -114,9 +114,9 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 !IF "$(COMPILER)" == "MICROSOFT"
 CC = @cl /nologo
 !IF "$(DEBUG)" == "1"
-CFLAGS = -D_DEBUG   /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
+CFLAGS = -D_DEBUG   /MTd /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
 !ELSE
-CFLAGS = -D_RELEASE /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
+CFLAGS = -D_RELEASE /MT /Ox /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL /Gy /fp:fast /MP8 
 !ENDIF
 !ENDIF
 
@@ -139,6 +139,7 @@ WINDOWS_LIBS = user32.lib advapi32.lib kernel32.lib shlwapi.lib ws2_32.lib
 #
 PARTS = \
 	$(OBJDIR)\atire_api.obj 						\
+	$(OBJDIR)\atire_api_remote.obj 					\
 	$(OBJDIR)\relevance_feedback.obj 				\
 	$(OBJDIR)\relevance_feedback_blind_kl.obj 		\
 	$(OBJDIR)\relevance_feedback_factory.obj 		\
@@ -280,6 +281,7 @@ ANT_TARGETS = \
 	$(BINDIR)\ant_dictionary.exe
 
 OTHER_TARGETS = \
+	$(BINDIR)\atire_client.exe			\
 	$(BINDIR)\make_case_conversion_table.exe 		\
 	$(BINDIR)\filelist.exe 				\
 	$(BINDIR)\remove_head.exe 			\
@@ -343,12 +345,12 @@ $(PARTS) : makefile $(EXTRA_LIBS)
 #
 bzip\bzip2-1.0.5\libbz2.lib :
 	@cd bzip\bzip2-1.0.5
-	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER)
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) $DEBUG=$(DEBUG)
 	@cd ..\..
 
 zlib\zlib-1.2.3\zlib.lib : 
 	@cd zlib\zlib-1.2.3
-	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER)
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) $DEBUG=$(DEBUG)
 	@cd ..\..
 
 #

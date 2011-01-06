@@ -41,7 +41,12 @@ RC = @rc
 # Changed for ANT by Andrew Trotman
 #
 #CFLAGS  = -nologo -MD -O2 $(LOC)
-CFLAGS  = -nologo -Ox $(LOC) /Zi /fp:fast /GL /Gy /MP8
+
+!IF "$(DEBUG)" == "1"
+CFLAGS  = -nologo /MTd /Od $(LOC) /Zi /fp:fast /GL /Gy /MP8
+!ELSE
+CFLAGS  = -nologo /Ox $(LOC) /Zi /fp:fast /GL /Gy /MP8
+!ENDIF
 
 ASFLAGS = -nologo -coff
 LDFLAGS = -nologo -release /LTCG

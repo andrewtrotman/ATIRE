@@ -40,10 +40,6 @@ long long now, search_time;
 */
 now = stats.start_timer();
 *matching_documents = atire.search(query, params->sort_top_k, params->query_type);
-if (*matching_documents == 0)
-	{
-	long x = 0;
-	}
 search_time = stats.stop_timer(now);
 
 /*
@@ -56,7 +52,7 @@ if (params->stats & ANT_ANT_param_block::SHORT)
 		sprintf(message, "Topic:%ld ", topic_id);
 		outchannel->puts(message);
 		}
-	sprintf(message, "Query '%s' found %lld documents in %lld ms", query, *matching_documents, stats.time_to_milliseconds(search_time));
+	sprintf(message, "<query>%s</query><hits>%lld</hits><time>%lld</time>", query, *matching_documents, stats.time_to_milliseconds(search_time));
 	outchannel->puts(message);
 	}
 
@@ -80,16 +76,35 @@ if (params->queries_filename == NULL && params->port == 0)		// coming from stdin
 }
 
 /*
+	BETWEEN()
+	---------
+*/
+char *between(char *source, char *open_tag, char *close_tag)
+{
+char *start,*finish;
+
+if ((start = strstr(source, open_tag)) == NULL)
+	return NULL;
+
+start += strlen(open_tag);
+
+if ((finish = strstr(start, close_tag)) == NULL)
+	return NULL;
+
+return strnnew(start, finish - start);
+}
+
+/*
 	ANT()
 	-----
 */
 double ant(ANT_ANT_param_block *params)
 {
-char *print_buffer, *ch;
+char *print_buffer, *ch, *pos;
 ANT_stats_time post_processing_stats;
 char *command, *query;
 long topic_id, line, number_of_queries;
-long long hits, result, last_to_list;
+long long hits, result, last_to_list, first_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision, relevance;
 long length_of_longest_document;
 unsigned long current_document_length;
@@ -118,6 +133,9 @@ number_of_queries = line = 0;
 prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
 	{
+	first_to_list = 0;
+	last_to_list = first_to_list + params->results_list_length;
+
 	line++;
 	/*
 		Parsing to get the topic number
@@ -138,29 +156,53 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->puts(print_buffer);
 			outchannel->write(document_buffer, current_document_length);
 			}
+		delete [] command;
 		continue;
 		}
-#ifdef NEVER
-	else if (strncmp(command, ".bestterms ", 11) == 0)
+	else if (strncmp(command, "<ATIREsearch>", 13) == 0)
+		{
+		topic_id = -1;
+		if ((query = between(command, "<query>", "</query>")) == NULL)
+			{
+			delete [] command;
+			continue;
+			}
+
+		if ((pos = strstr(command, "<top>")) != NULL)
+			first_to_list = atol(pos + 5)  - 1;
+		else
+			first_to_list = 0;
+
+		if ((pos = strstr(command, "<n>")) != NULL)
+			last_to_list = first_to_list + atol(pos + 3);
+		else
+			last_to_list = first_to_list + params->results_list_length;
+
+		delete [] command;
+		command = query;
+		}
+	else if (strncmp(command, "<ATIREgetdoc>", 13) == 0)
 		{
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
 			{
-			atire.get_document(document_buffer, &current_document_length, atoll(command + 11));
-			atire.best_terms(document_buffer, 10);		// top 10 terms
+			atire.get_document(document_buffer, &current_document_length, atoll(strstr(command, "<docid>") + 7));
+			outchannel->puts("<ATIREgetdoc>");
+			sprintf(print_buffer, "<length>%lld</length>", current_document_length);
+			outchannel->puts(print_buffer);
+			outchannel->write(document_buffer, current_document_length);
+			outchannel->puts("</ATIREgetdoc>");
 			}
+		delete [] command;
 		continue;
 		}
-	else if (strncmp(command, ".feedback ", 10) == 0)
-		{
-		atire.feedback(atol(command + 10));
-		continue;
-		}
-#endif
-	else if (*command == '\0')
-		continue;			// ignore blank lines
 
-	if (params->assessments_filename != NULL || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
+	else if (*command == '\0')
+		{
+		delete [] command;
+		continue;			// ignore blank lines
+		}
+	else if (params->assessments_filename != NULL || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
 		{
 		topic_id = atol(command);
 		if ((query = strchr(command, ' ')) == NULL)
@@ -172,6 +214,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		query = command;
 		}
 
+	outchannel->puts("<ATIREsearch>");
 	/*
 		Do the query and compute average precision
 	*/
@@ -188,8 +231,14 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 	/*
 		How many results to display on the screen.
 	*/
-	last_to_list = hits > params->results_list_length ? params->results_list_length : hits;
-
+	if (first_to_list > hits)
+		first_to_list = last_to_list = hits;
+	if (first_to_list < 0)
+		first_to_list = 0;
+	if (last_to_list > hits)
+		last_to_list = hits;
+	if (last_to_list < 0)
+		last_to_list = 0;
 	/*
 		Convert from a results list into a list of documents and then display (or write to the forum file)
 	*/
@@ -198,13 +247,16 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 	else
 		{
 		answer_list = atire.generate_results_list();
-		for (result = 0; result < last_to_list; result++)
+		for (result = first_to_list; result < last_to_list; result++)
 			{
 			docid = atire.get_relevant_document_details(result, &docid, &relevance);
 			if ((current_document_length = length_of_longest_document) == 0)
 				title_start = "";
 			else
 				{
+				/*
+					Get the title of the document (this is a bad hack and should be removed)
+				*/
 				atire.get_document(document_buffer, &current_document_length, docid);
 				if ((title_start = strstr(document_buffer, "<title>")) == NULL)
 					if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
@@ -225,11 +277,12 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 						}
 					}
 				}
-			sprintf(print_buffer, "%lld:%lld:%s %f %s", result + 1, docid, answer_list[result], relevance, title_start);
+			sprintf(print_buffer, "<rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title>", result + 1, docid, answer_list[result], relevance, title_start);
 			outchannel->puts(print_buffer);
 			}
 		}
 
+	outchannel->puts("</ATIREsearch>");
 	delete [] command;
 	}
 

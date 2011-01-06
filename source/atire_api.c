@@ -500,7 +500,7 @@ if (terms_in_query == 1)
 */
 for (current_term = 0; current_term < terms_in_query; current_term++)
 	{
-#ifndef NEVER
+#ifdef NEVER
 	printf("%*.*s ", term_list[current_term]->term.length(), term_list[current_term]->term.length(), term_list[current_term]->term.start);
 	if (current_term == terms_in_query - 1)
 		puts("");
@@ -809,7 +809,7 @@ if (query_type_is_all_terms)
 if (feedbacker != NULL)
 	{
 	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, 10, 10, &parsed_query->feedback_terms_in_query);
-#ifndef NEVER
+#ifdef NEVER
 	printf("\nFEEDBACK TERMS:");
 	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
 		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
