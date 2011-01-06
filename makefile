@@ -278,10 +278,10 @@ ANT_TARGETS = \
 	$(BINDIR)\index.exe 				\
 	$(BINDIR)\ant.exe 					\
 	$(BINDIR)\atire.exe 				\
+	$(BINDIR)\atire_client.exe			\
 	$(BINDIR)\ant_dictionary.exe
 
 OTHER_TARGETS = \
-	$(BINDIR)\atire_client.exe			\
 	$(BINDIR)\make_case_conversion_table.exe 		\
 	$(BINDIR)\filelist.exe 				\
 	$(BINDIR)\remove_head.exe 			\
