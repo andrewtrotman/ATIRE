@@ -62,12 +62,15 @@ delete memory;
 unsigned long long ANT_directory_iterator_pkzip::read_central_directory_header(void)
 {
 long long start_of_end;
-uint32_t signature;
+uint32_t signature = 0;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_end_of_central_directory_record eocdr;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_end_of_central_directory_record z64_eocdr;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_end_of_central_directory_locator z64_eocd_locate;
 
 start_of_end = file->file_length();
+if (start_of_end == 0)
+	exit(printf("ANT ZIP Reader cannot read file (file size if reported as 0)\n"));
+
 file->seek(start_of_end - sizeof(eocdr));
 file->read((unsigned char *)&eocdr, sizeof(eocdr));
 signature = ANT_get_unsigned_long(eocdr.signature);
