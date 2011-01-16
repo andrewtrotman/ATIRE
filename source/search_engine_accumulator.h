@@ -20,7 +20,7 @@ public:
 		using floating point arithmetic.  The effect on precision is in the 5th decimal place (negligible) and so can be ignored.
 		For higher accuracy at an execution cost set ANT_accumulator_t to a double (or float).
 	*/
-	typedef short ANT_accumulator_t;			// short or double
+	typedef ANT_ACCUMULATOR_T short ANT_accumulator_t;			// short or double (defined in the makefile)
 
 private:
 	ANT_accumulator_t rsv;
