@@ -16,11 +16,11 @@ class ANT_ranking_function;
 class ANT_indexer_param_block_rank : public ANT_ranking_function_factory
 {
 public:
-	enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256, INNER_PRODUCT = 512 };
+	enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256, INNER_PRODUCT = 512, KBTFIDF = 1024 };
 
 protected:
-	static const long long index_functions =  BM25 | IMPACT | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | INNER_PRODUCT;
-	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | ALL_TERMS | INNER_PRODUCT;
+	static const long long index_functions =  BM25 | IMPACT | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | INNER_PRODUCT | KBTFIDF;
+	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | ALL_TERMS | INNER_PRODUCT | KBTFIDF;
 
 public:
 	long ranking_function;				// what ranking function should we use?
@@ -28,6 +28,7 @@ public:
 	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
 	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
+	double kbtfidf_k, kbtfidf_b;		// the k and b paramters for KBTFIDF
 
 private:
 	const char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }

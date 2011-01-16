@@ -7,7 +7,8 @@
 
 #include "ranking_function.h"
 
-#define ANT_RANKING_FUNCTION_LMD_DEFAULT_U 500.0
+#define ANT_RANKING_FUNCTION_LMD_DEFAULT_U 6750.0
+
 /*
 	class ANT_RANKING_FUNCTION_LMD
 	------------------------------

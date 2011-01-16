@@ -18,6 +18,7 @@
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
 #include "ranking_function_inner_product.h"
+#include "ranking_function_kbtfidf.h"
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()
@@ -26,10 +27,14 @@
 ANT_indexer_param_block_rank::ANT_indexer_param_block_rank()
 {
 ranking_function = BM25;
-lmd_u = 6750.0;
-lmjm_l = 0.5;
-bm25_k1 = 0.9;
-bm25_b = 0.4;
+lmd_u = ANT_RANKING_FUNCTION_LMD_DEFAULT_U;
+lmjm_l = ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA;
+bm25_k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1;
+bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
+
+kbtfidf_k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K;
+kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
+
 }
 
 /*
@@ -117,6 +122,11 @@ else if (strcmp(which, "allterms") == 0)
 	ranking_function = ALL_TERMS;
 else if (strcmp(which, "tfidf") == 0)
 	ranking_function = INNER_PRODUCT;
+else if (strcmp(which, "kbtfidf") == 0)
+	{
+	ranking_function = KBTFIDF;
+	get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
+	}
 else
 	exit(printf("Unknown Ranking Function:'%s'\n", which));
 }
@@ -140,9 +150,9 @@ if (allowable & DIVERGENCE)
 if (allowable & IMPACT)
 	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
 if (allowable & LMD)
-	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u=6750] %s\n" , isdefault(LMD));
+	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u = 6750] %s\n" , isdefault(LMD));
 if (allowable & LMJM)
-	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l=0.1] %s\n", isdefault(LMJM));
+	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l = 0.5] %s\n", isdefault(LMJM));
 if (allowable & READABLE)
 	printf("   readable     The readability search engine (BM25 with Dale-Chall) %s\n", isdefault(READABLE));
 if (allowable & TERM_COUNT)
@@ -151,6 +161,8 @@ if (allowable & ALL_TERMS)
 	printf("   allterms     Relevant only if all query terms are present (Boolean AND) %s\n", isdefault(ALL_TERMS));
 if (allowable & INNER_PRODUCT)
 	printf("   tfidf        TF.IDF (vector space inner product) %s\n", isdefault(ALL_TERMS));
+if (allowable & KBTFIDF)
+	printf("   kbtfidf:<k>:<b> log(k * tf - b) * idf * idf (Shlomo's vector space) %s\n", isdefault(ALL_TERMS));
 
 puts("");
 }
@@ -177,6 +189,8 @@ switch (ranking_function)
 		return new ANT_ranking_function_term_count(documents, lengths);
 	case INNER_PRODUCT:
 		return new ANT_ranking_function_inner_product(documents, lengths);
+	case KBTFIDF:
+		return new ANT_ranking_function_kbtfidf(documents, lengths, kbtfidf_k, kbtfidf_b);
 	}
 return NULL;
 }
