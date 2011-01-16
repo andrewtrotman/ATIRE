@@ -251,6 +251,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_bm25.obj				\
 	$(OBJDIR)\ranking_function_term_count.obj		\
 	$(OBJDIR)\ranking_function_inner_product.obj	\
+	$(OBJDIR)\ranking_function_kbtfidf.obj			\
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
