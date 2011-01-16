@@ -25,7 +25,10 @@ ANT_directory_iterator_pkzip::ANT_directory_iterator_pkzip(char *filename, long 
 {
 memory = new ANT_memory(1024 * 1024);
 file = new ANT_file;
-file->open(filename, "rb");
+
+if (file->open(filename, "rb") == 0)
+	exit(printf("Cannot open file:%s\n", filename));
+
 read_central_directory_header();
 internals = new ANT_directory_iterator_pkzip_internals;
 
