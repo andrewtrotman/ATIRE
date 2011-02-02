@@ -48,6 +48,8 @@ private:
 	ANT_ranking_function *ranking_function;	// the ranking function to use (default is the perameterless Divergence From Randomness)
 	ANT_stemmer *stemmer;					// stemming function to use
 	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
+	long feedback_documents;				// documents to analyse in relevance feedback
+	long feedback_terms;					// terms (extracted from top documents) to use in relevance feedback
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
 	long long hits;							// how many documents were found at the last query
 	long long sort_top_k;					// ranking is only accurate to this position in the results list
@@ -122,7 +124,7 @@ public:
 	/*
 		Set the relevance feedback mechanism
 	*/
-	long set_feedbacker(long feedbacker);
+	long set_feedbacker(long feedbacker, long documents, long terms);
 
 	/*
 		Set the static pruning point.  At most sttic_prune_point postings will be read from disk and processedS

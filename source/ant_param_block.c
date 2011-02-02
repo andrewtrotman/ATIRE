@@ -48,6 +48,8 @@ file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
 feedbacker = NONE;
 query_type = ATIRE_API::QUERY_NEXI;
+feedback_documents = 10;
+feedback_terms = 10;
 }
 
 /*
@@ -85,7 +87,7 @@ puts("-Q[nb][-r]      query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  -             no relevance feedback [default]");
-puts("  r             Rocchio blind relevance feedback by analysing whole documents");
+puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d = 10 t = 10]");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -185,10 +187,14 @@ while (*which != '\0');
 */
 void ANT_ANT_param_block::set_feedbacker(char *which)
 {
+double first, second;
+long done;
+
 query_type = 0;
 
 do
 	{
+	done = FALSE;
 	switch (*which)
 		{
 		case 'n' :
@@ -208,6 +214,13 @@ do
 		case 'r' :
 			query_type |= ATIRE_API::QUERY_FEEDBACK;
 			feedbacker = ANT_relevance_feedback_factory::BLIND_KL;
+			first = second = -1;
+			get_two_parameters(which + 1, &first, &second);
+			if (first != -1)
+				feedback_documents = (long)first;
+			if (second != -1)
+				feedback_terms = (long)second;
+			done = TRUE;
 			break;
 		default :
 			exit(printf("Unknown query type modifier: '%c'\n", *which));
@@ -215,7 +228,7 @@ do
 		}
 	which++;
 	}
-while (*which != '\0');
+while (*which != '\0' && done == FALSE);
 
 if ((query_type & (ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI)) == 0)
 	query_type |= ATIRE_API::QUERY_NEXI;

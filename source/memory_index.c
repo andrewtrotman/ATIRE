@@ -26,7 +26,26 @@
 #include "btree_iterator.h"
 #include "pdebug.h"
 
+#include <windows.h>
+#undef max
+
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
+
+/*
+	PVOID ANT_INTERLOCKEDEXCHANGEPOINTER()
+	--------------------------------------
+*/
+inline PVOID ANT_InterlockedExchangePointer(PVOID volatile *Target, PVOID Value)
+{
+long long p_as_ll;
+
+p_as_ll = (long long)*Target;
+
+if ((p_as_ll & 0x03) != 0)
+	printf("Allignment Error : %p", *Target);
+
+return InterlockedExchangePointer(Target, Value);
+}
 
 ANT_string_pair ANT_memory_index::squiggle_document_offsets("~documentoffsets");
 ANT_string_pair ANT_memory_index::squiggle_document_longest("~documentlongest");
@@ -90,24 +109,25 @@ if (which_stats & STAT_COMPRESSION)
 ANT_memory_index_hash_node *ANT_memory_index::find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string)
 {
 long cmp;
+volatile ANT_memory_index_hash_node *finder = root;
 
-if (root == NULL)
+if (finder == NULL)
 	return NULL;
 
-while ((cmp = string->strcmp(&(root->string))) != 0)
+while ((cmp = string->strcmp((ANT_string_pair *)&(finder->string))) != 0)
 	{
 	if (cmp > 0)
-		if (root->left == NULL)
+		if (finder->left == NULL)
 			return NULL;
 		else
-			root = root->left;
+			finder = finder->left;
 	else
-		if (root->right == NULL)
+		if (finder->right == NULL)
 			return NULL;
 		else
-			root = root->right;
+			finder = finder->right;
 	}
-return root;
+return (ANT_memory_index_hash_node *)finder;
 }
 
 /*
@@ -122,12 +142,26 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
 	if (cmp > 0)
 		if (root->left == NULL)
+#ifdef _MSC_VER
+			{
+			ANT_InterlockedExchangePointer((PVOID *)&root->left, new_memory_index_hash_node(string));
+			return root->left;
+			}
+#else
 			return root->left = new_memory_index_hash_node(string);
+#endif
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
+			{
+#ifdef _MSC_VER
+			ANT_InterlockedExchangePointer((PVOID *)&root->right, new_memory_index_hash_node(string));
+			return root->right;
+#else
 			return root->right = new_memory_index_hash_node(string);
+#endif
+			}
 		else
 			root = root->right;
 	}
@@ -149,7 +183,12 @@ hash_value = hash(string);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
+#ifdef _MSC_VER
+	ANT_InterlockedExchangePointer((PVOID *)&hash_table[hash_value], new_memory_index_hash_node(string));
+	node = hash_table[hash_value];
+#else
 	node = hash_table[hash_value] = new_memory_index_hash_node(string);
+#endif
 	}
 else
 	node = find_add_node(hash_table[hash_value], string);
@@ -171,7 +210,12 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
+#ifdef _MSC_VER
+	ANT_InterlockedExchangePointer((PVOID *)&hash_table[hash_value], new_memory_index_hash_node(measure_name));
+	node = hash_table[hash_value];
+#else
 	node = hash_table[hash_value] = new_memory_index_hash_node(measure_name);
+#endif
 	}
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
@@ -195,7 +239,12 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
+#ifdef _MSC_VER
+	ANT_InterlockedExchangePointer((PVOID *)&hash_table[hash_value], new_memory_index_hash_node(measure_name));
+	node = hash_table[hash_value];
+#else
 	node = hash_table[hash_value] = new_memory_index_hash_node(measure_name);
+#endif
 	}
 else
 	node = find_add_node(hash_table[hash_value], measure_name);

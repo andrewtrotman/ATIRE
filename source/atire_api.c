@@ -76,6 +76,7 @@ search_engine = NULL;
 ranking_function = NULL;
 stemmer = NULL;
 feedbacker = NULL;
+feedback_documents = feedback_terms = 10;
 query_type_is_all_terms = FALSE;
 hits = 0;
 sort_top_k = LLONG_MAX;
@@ -395,11 +396,13 @@ return 0;
 	ATIRE_API::SET_FEEDBACKER()
 	---------------------------
 */
-long ATIRE_API::set_feedbacker(long feedback)
+long ATIRE_API::set_feedbacker(long feedback, long documents, long terms)
 {
 ANT_relevance_feedback_factory factory;
 
 feedbacker = factory.get_feedbacker(search_engine, feedback);
+feedback_documents = documents;
+feedback_terms = terms;
 
 return 0;		// success
 }
@@ -808,7 +811,8 @@ if (query_type_is_all_terms)
 */
 if (feedbacker != NULL)
 	{
-	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, 10, 10, &parsed_query->feedback_terms_in_query);
+//	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, 10, 10, &parsed_query->feedback_terms_in_query);
+	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
 #ifdef NEVER
 	printf("\nFEEDBACK TERMS:");
 	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)

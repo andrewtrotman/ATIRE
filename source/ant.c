@@ -668,6 +668,7 @@ document_list = read_docid_list(&documents_in_id_list, &filename_list, &mem1, &m
 if (params.assessments_filename != NULL)
 	{
 	ANT_assessment_factory factory(&memory, document_list, documents_in_id_list);
+//	ANT_assessment_factory factory(&memory, filename_list, documents_in_id_list);
 	assessments = factory.read(params.assessments_filename, &number_of_assessments);
 	map = new ANT_mean_average_precision(&memory, assessments, number_of_assessments);
 	}

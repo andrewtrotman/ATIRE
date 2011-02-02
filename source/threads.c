@@ -44,7 +44,7 @@ static long threads_started = 0;
 		got = pthread_create(&thread_id, &attr, (ANT_unix_thread_routine *)start, parameter);
 		err3 = pthread_attr_destroy(&attr);
 		if (got != 0 || err1 != 0 || err2 != 0 || err3 != 0)
-			exit(printf("Can't start thread (returned:%d) err1=%d err2=%d err3=%d (threads used:%d)\n", got, err1, err2, err3, threads_started));
+			exit(printf("Can't start thread (returned:%d) err1=%ld err2=%ld err3=%ld (threads used:%ld)\n", got, err1, err2, err3, threads_started));
 		threads_started++;
 	}
 	catch (...)
