@@ -252,4 +252,63 @@ return out;
 
 #endif
 
+
+/*
+	ANT_ATOL()
+	----------
+*/
+static inline long ANT_atol(char *string)
+{
+char *ch;
+long ans = 0, multiplier;
+
+if (*string == '-')
+	{
+	multiplier = -1;
+	string++;
+	}
+else if (*string == '+')
+	{
+	multiplier = 1;
+	string++;
+	}
+else
+	multiplier = 1;
+
+for (ch = string; *ch >= '0' && *ch <= '9'; ch++)
+	ans = ans * 10 + *ch - '0';
+
+return multiplier * ans;
+}
+
+/*
+	ANT_ATOI64()
+	------------
+*/
+static inline long long ANT_atoi64(char *string)
+{
+char *ch;
+long long ans = 0, multiplier;
+
+if (*string == '-')
+	{
+	multiplier = -1;
+	string++;
+	}
+else if (*string == '+')
+	{
+	multiplier = 1;
+	string++;
+	}
+else
+	multiplier = 1;
+
+for (ch = string; *ch >= '0' && *ch <= '9'; ch++)
+	ans = ans * 10 + *ch - '0';
+
+return multiplier * ans;
+}
+
+
+
 #endif  /* STR_H_ */
