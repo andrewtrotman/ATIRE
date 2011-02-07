@@ -96,18 +96,17 @@ for (current_file = disk->first(&file_object); current_file != NULL; current_fil
 							broken_link = true;
 						slash++;
 						}
-#ifndef NEVER
+#ifdef NEVER
 					if (broken_link)
 						printf("BROKEN: %s -> %s\n", current_file->filename, destination);
+					else
+						printf("%s -> %s\n", current_file->filename, destination);
 #endif
 					
 					if (!broken_link && *slash != '\0')
 						{
 						destination_id = ANT_atol(slash + 1);
-#ifndef NEVER
-						if (source_id == 2500)
-							printf("%ld -> %ld %s -> %s\n", source_id, destination_id, current_file->filename, destination);
-#endif
+//						printf("%ld -> %ld %s -> %s\n", source_id, destination_id, current_file->filename, destination);
 						outfile.write((unsigned char *)&source_id, sizeof(source_id));
 						outfile.write((unsigned char *)&destination_id, sizeof(destination_id));
 						}
