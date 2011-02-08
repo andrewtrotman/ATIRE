@@ -68,14 +68,12 @@ return total_links;
 	READ_LINK_GRAPH()
 	-----------------
 */
-long long read_link_graph(int argc, char *argv[], ANT_link *link_graph)
+void read_link_graph(int argc, char *argv[], ANT_link *link_graph)
 {
-long long total_links;
 long long current_file_size;
 long long param;
 unsigned char *into;
 
-total_links = 0;
 into = (unsigned char *)link_graph;
 for (param = 1; param < argc; param++)
 	{
@@ -85,39 +83,47 @@ for (param = 1; param < argc; param++)
 	into += current_file_size;
 	file.close();
 	}
-return total_links;
 }
 
 /*
 	WRITE_INDEGREE()
 	----------------
 */
-long write_indegree(ANT_link *link_graph, long long size)
+long write_indegree(char *outfilename, ANT_link *link_graph, long long size)
 {
+ANT_file outfile;
 ANT_link *current, *end;
-long last_source;
-long indegree;
+long last_source, indegree;
+long targets;
 
+outfile.open(outfilename, "wb");
 last_source = link_graph->destination;
 indegree = 1;
 end = link_graph + size;
+targets = 0;
 for (current = link_graph + 1; current < end; current++)
 	{
 	if (last_source != current->destination)
 		{
-		printf("%ld <- %ld times\n", last_source, indegree);
+		targets++;
+		outfile.write((unsigned char *)&last_source, sizeof(last_source));
+		outfile.write((unsigned char *)&indegree, sizeof(indegree));
+//		printf("%ld <- %ld times\n", last_source, indegree);
 		last_source = current->destination;
 		indegree = 1;
 		}
 	else
 		indegree++;
-	if (last_source == 3)
-		printf("%ld <- %ld\n", last_source, current->source);
-		
 	}
-printf("%ld <- %ld times\n", last_source, indegree);
 
-return size;
+targets++;
+outfile.write((unsigned char *)&last_source, sizeof(last_source));
+outfile.write((unsigned char *)&indegree, sizeof(indegree));
+//printf("%ld <- %ld times\n", last_source, indegree);
+
+outfile.close();
+
+return targets;
 }
 
 /*
@@ -129,16 +135,19 @@ int main(int argc, char *argv[])
 long long total_links, got;
 ANT_link *link_graph;
 
-total_links = count_links(argc, argv);
+if (argc < 3)
+	exit(printf("Usage:%s <outfile> <infile>...<infile>\n", argv[0]));
+
+total_links = count_links(argc - 1, argv + 1);
 link_graph = new ANT_link[(size_t)total_links];
 puts("Load link graph");
-got = read_link_graph(argc, argv, link_graph);
+read_link_graph(argc - 1, argv + 1, link_graph);
 puts("Sort link graph");
-qsort(link_graph, total_links, sizeof(*link_graph), ANT_link::cmp_on_target);
+qsort(link_graph, (size_t)total_links, sizeof(*link_graph), ANT_link::cmp_on_target);
+puts("write link graph");
+got = write_indegree(argv[1], link_graph, total_links);
 
-write_indegree(link_graph, total_links);
-
-printf("Links found:%lld links read%lld\n", total_links, got);
+printf("%lld links to %lld targets\n", total_links, got);
 return 0;
 }
 
