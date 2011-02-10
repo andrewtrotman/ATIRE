@@ -1,6 +1,6 @@
 /*
-	PDF.CPP
-	-------
+	PDF.C
+	-----
 	Original comes from http://www.codeproject.com/KB/cpp/ExtractPDFText.aspx
 	That code states "This code is free. Use it for any purpose".  There are,
 	of course, ANT modifications included here.

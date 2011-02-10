@@ -252,7 +252,6 @@ return out;
 
 #endif
 
-
 /*
 	ANT_ATOL()
 	----------
@@ -276,9 +275,24 @@ else
 	multiplier = 1;
 
 for (ch = string; *ch >= '0' && *ch <= '9'; ch++)
-	ans = ans * 10 + *ch - '0';
+	ans = ans * 10 + (*ch - '0');
 
 return multiplier * ans;
+}
+
+/*
+	ANT_ATOUL()
+	-----------
+*/
+static inline unsigned long ANT_atoul(char *string, size_t length)
+{
+char *ch;
+unsigned long ans = 0;
+
+for (ch = string; (ch - string < length) && (*ch >= '0' && *ch <= '9'); ch++)
+	ans = ans * 10 + (*ch - '0');
+
+return ans;
 }
 
 /*
@@ -304,7 +318,7 @@ else
 	multiplier = 1;
 
 for (ch = string; *ch >= '0' && *ch <= '9'; ch++)
-	ans = ans * 10 + *ch - '0';
+	ans = ans * 10 + (*ch - '0');
 
 return multiplier * ans;
 }

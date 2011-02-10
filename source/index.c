@@ -8,6 +8,7 @@
 #include "ranking_function_factory.h"
 #include "directory_iterator_tar.h"
 #include "directory_iterator_warc.h"
+#include "directory_iterator_warc_gz_recursive.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_compressor.h"
@@ -246,7 +247,7 @@ for (param = first_param; param < argc; param++)
 		{
 		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);			// this dir and below
 		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
-			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
+			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);			// recursive .gz files
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
@@ -269,6 +270,9 @@ for (param = first_param; param < argc; param++)
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
+	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_WARC_GZ)
+		source = new ANT_directory_iterator_warc_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE);
+
 #ifdef ANT_HAS_MYSQL
 	else if (param_block.recursive == ANT_indexer_param_block::VBULLETIN)
 		{

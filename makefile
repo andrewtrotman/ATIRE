@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 1
+DEBUG = 0
 
 #
 #	Which compiler are we using
@@ -199,6 +199,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_internals.obj 		\
 	$(OBJDIR)\directory_iterator_tar.obj			\
 	$(OBJDIR)\directory_iterator_warc.obj			\
+	$(OBJDIR)\directory_iterator_warc_gz_recursive.obj		\
 	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_iterator_csv.obj			\

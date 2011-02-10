@@ -48,12 +48,17 @@ return (hash1 << 16) + (hash2 << 8) + hash3;
 static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 {
 /*
-	This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer.
-	and encodes the length in the top 3 bits.  Any characters of the the A..
+	This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer
+	and encodes the length in the top 3 bits.  Numbers cause problems with this, especially increasing sequences
+	because they end up with the indexer's direct tree chain in the hash table reducing to a linked list!  Numbers
+	are now encoded as the sumber itself.
 */
 unsigned long ans;
 size_t len;
 const long base = 37;
+
+if (ANT_isdigit((*string)[0]))
+	return ANT_atoul(string->start, string->length()) % 0x1000000;
 
 ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
 

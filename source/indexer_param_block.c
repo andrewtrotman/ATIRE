@@ -83,6 +83,7 @@ puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
 #endif
 puts("-rwarcgz        Search in warc.gz files for indexable files");
+puts("-rrwarcgz       Search in subdirectories for warc.gz files and index them");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
 
@@ -280,6 +281,8 @@ for (param = 1; param < argc; param++)
 			recursive = CSV;
 		else if (strcmp(command, "rwarcgz") == 0)
 			recursive = WARC_GZ;
+		else if (strcmp(command, "rrwarcgz") == 0)
+			recursive = RECURSIVE_WARC_GZ;
 #ifdef ANT_HAS_MYSQL
 		else if (strcmp(command, "rphpbb") == 0)
 			recursive = PHPBB;
