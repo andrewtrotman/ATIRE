@@ -310,5 +310,34 @@ return multiplier * ans;
 }
 
 
+/*
+	MEMMEM()
+	--------
+*/
+char *memmem(char *mem, size_t mem_size, char *sub, size_t sub_size)
+{    
+char *ret = NULL;
+char *ptr = mem;
+
+while (ptr != NULL && ret == NULL)
+	if ((ptr = (char *)memchr(ptr, *sub, mem_size - (sub_size - 1) - (ptr - mem))) != NULL)
+		{
+		if (memcmp(ptr, sub, sub_size) == 0)
+			ret = ptr;
+		++ptr;
+		}
+
+return ret;
+}
+
+/*
+	MEMSTR()
+	--------
+*/
+char *memstr(char *buffer, char *string, size_t buffer_length)
+{
+return memmem(buffer, buffer_length, string, strlen(string));
+}
+
 
 #endif  /* STR_H_ */
