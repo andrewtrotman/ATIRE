@@ -289,7 +289,7 @@ static inline unsigned long ANT_atoul(char *string, size_t length)
 char *ch;
 unsigned long ans = 0;
 
-for (ch = string; (ch - string < length) && (*ch >= '0' && *ch <= '9'); ch++)
+for (ch = string; ((size_t)(ch - string) < length) && (*ch >= '0' && *ch <= '9'); ch++)
 	ans = ans * 10 + (*ch - '0');
 
 return ans;
@@ -328,7 +328,7 @@ return multiplier * ans;
 	MEMMEM()
 	--------
 */
-char *memmem(char *mem, size_t mem_size, char *sub, size_t sub_size)
+static inline char *memmem(char *mem, size_t mem_size, char *sub, size_t sub_size)
 {    
 char *ret = NULL;
 char *ptr = mem;
@@ -348,7 +348,7 @@ return ret;
 	MEMSTR()
 	--------
 */
-char *memstr(char *buffer, char *string, size_t buffer_length)
+static inline char *memstr(char *buffer, char *string, size_t buffer_length)
 {
 return memmem(buffer, buffer_length, string, strlen(string));
 }

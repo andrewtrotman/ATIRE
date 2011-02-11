@@ -23,6 +23,8 @@ protected:
 	ANT_directory_iterator *filename_provider;
 	ANT_directory_iterator_warc *dewarcer;
 	ANT_memory *memory;
+	ANT_directory_iterator_object *more_files;
+	long first_time;
 
 protected:
 	ANT_directory_iterator_warc *new_provider(char *filename);

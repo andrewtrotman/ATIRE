@@ -59,6 +59,7 @@ bin/directory_iterator_preindex_internals.obj: source/search_engine_accumulator.
 bin/directory_iterator_recursive.obj: source/disk.h source/directory_iterator_internals.h source/disk_directory.h source/directory_iterator_recursive.h source/directory_iterator.h source/directory_iterator_object.h
 bin/directory_iterator_tar.obj: source/pragma.h source/ctypes.h source/directory_iterator_tar.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_tar_file_header.h source/instream.h
 bin/directory_iterator_warc.obj: source/pragma.h source/ctypes.h source/directory_iterator_warc.h source/instream.h source/directory_iterator.h source/directory_iterator_object.h source/maths.h
+bin/directory_iterator_warc_gz_recursive.obj: source/directory_iterator_warc_gz_recursive.h source/directory_iterator.h source/directory_iterator_object.h source/memory.h source/instream_file.h source/instream.h source/instream_deflate.h source/instream_buffer.h source/directory_iterator_recursive.h source/disk.h source/directory_iterator_warc.h
 bin/disk.obj: source/disk.h source/file_internals.h
 bin/event.obj: source/event.h source/event_internals.h
 bin/file.obj: source/file.h source/fundamental_types.h source/file_internals.h

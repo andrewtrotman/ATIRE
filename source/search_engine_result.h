@@ -169,7 +169,7 @@ public:
 		heapk->min_update(which);
 	else if (new_val > accumulator_pointers[0]->get_rsv())
 		{
-		include_set->unsafe_unsetbit(accumulator_pointers[0] - accumulator);
+		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
 		heapk->min_insert(which);
 		include_set->unsafe_setbit(index);
 		}

@@ -24,7 +24,8 @@ ANT_directory_iterator_object filename;
 this->source = source;
 filename_provider = new ANT_directory_iterator_recursive(source, 0);
 
-filename_provider->first(&filename);
+more_files = filename_provider->first(&filename);
+first_time = true;
 
 file_stream = NULL;
 decompressor = NULL;
@@ -75,17 +76,29 @@ return dewarcer;
 */
 ANT_directory_iterator_object *ANT_directory_iterator_warc_gz_recursive::next(ANT_directory_iterator_object *object)
 {
-ANT_directory_iterator_object *got, *more_files;
+ANT_directory_iterator_object *got;
 
-do
+while (more_files != NULL)
 	{
-	if ((got = dewarcer->next(object)) != NULL)
-		return got;
+	if (first_time)
+		got = dewarcer->first(object);
+	else
+		got = dewarcer->next(object);
 
-	if ((more_files = filename_provider->next(object)) != NULL)
-		new_provider(object->filename);
+	first_time = false;
+
+	if (got == NULL)
+		{
+		if ((more_files = filename_provider->next(object)) != NULL)
+			{
+			new_provider(object->filename);
+			first_time = true;
+			}
+		}
+	else
+		return got;
+		
 	}
-while (more_files != NULL);
 
 return NULL;
 }
