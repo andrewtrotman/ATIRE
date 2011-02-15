@@ -8,6 +8,10 @@ extern "C" {
 #include "php.h"
 }
 
+#ifdef PHP_WIN32
+#include "zend_config.w32.h"
+#endif
+
 extern zend_module_entry atire_module_entry;
 #define phpext_atire_ptr &atire_module_entry;
 

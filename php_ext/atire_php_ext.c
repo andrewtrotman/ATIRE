@@ -110,11 +110,24 @@ PHP_METHOD(atire_api_remote, search)
 
 }
 
+PHP_METHOD(atire_api_remote, getConnectStr)
+{
+	char *res;
+	ATIRE_API_remote *atire = NULL;
+	atire_api_remote_object *obj =(atire_api_remote_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	atire = obj->atire;
+	if (atire != NULL)
+	{
+		RETURN_STRING(res = atire->getConnectStr(),1);
+	}
+}
+
 function_entry atire_api_remote_methods[] = {
     PHP_ME(atire_api_remote,  __construct,     NULL, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(atire_api_remote,  open,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  close,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  search,           NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(atire_api_remote,  getConnectStr,    NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -132,9 +145,8 @@ PHP_MINIT_FUNCTION(atire)
 }
 
 zend_module_entry atire_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
+
     STANDARD_MODULE_HEADER,
-#endif
     PHP_ATIRE_EXTNAME,
     NULL,                  /* Functions */
     PHP_MINIT(atire),
@@ -142,15 +154,11 @@ zend_module_entry atire_module_entry = {
     NULL,                  /* RINIT */
     NULL,                  /* RSHUTDOWN */
     NULL,                  /* MINFO */
-#if ZEND_MODULE_API_NO >= 20010901
     PHP_ATIRE_EXTVER,
-#endif
     STANDARD_MODULE_PROPERTIES
 };
-
-#ifdef COMPILE_DL_ATIRE
 
 extern "C" {
 ZEND_GET_MODULE(atire)
 }
-#endif
+
