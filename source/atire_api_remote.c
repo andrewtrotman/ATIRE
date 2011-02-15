@@ -8,7 +8,7 @@
 #include <sstream>
 #include "str.h"
 #include "sockets.h"
-#include "ATIRE_API_remote.h"
+#include "atire_api_remote.h"
 
 #ifndef FALSE
 	#define FALSE 0
