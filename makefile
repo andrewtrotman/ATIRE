@@ -27,6 +27,7 @@ ANT_HAS_BZLIB = $(TRUE)
 ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
 ANT_HAS_MYSQL = $(FALSE)
+ANT_HAS_PHP_EXT = $(TRUE)
 
 #
 #	Directories
@@ -36,6 +37,18 @@ OBJDIR = bin
 BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
+PHPDIR = php_ext
+LIBDIR = lib
+
+#
+#	Directory to PHP source for headers
+#
+PHPSRC = C:\Work\php53dev\vc9\x86\php-5.3.5
+
+#
+#	Directory to PHP install location for library
+#
+PHPAPP = "C:\Program Files\PHP"
 
 #
 #	If we have MySQL (for access to MySQL)  The MySQL is GPL so there's a possible conflict here.
@@ -91,6 +104,15 @@ EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_PAICE_HUSK
 STEM_PAICE_HUSK = 
 !ENDIF
 
+#
+#	PHP EXTENSION 
+#
+!IF $(ANT_HAS_PHP_EXT) == $(TRUE)
+PHP_EXT = $(lib)\atire.dll
+PHP_EXT_MINUS_D = -DANT_HAS_PHP_EXT -DWIN32 -DPHP_WIN32 -DZEND_WIN32 -DZTS=1 -DZEND_DEBUG=0 -D_USRDLL -D_WINDLL
+PHP_EXT_INCLUDES = -I $(PHPSRC) -I $(PHPSRC)\TSRM -I $(PHPSRC)\Zend -I $(PHPSRC)\main -I \$(SRCDIR)
+PHP_EXT_LIB = $(PHPAPP)\dev\php5ts.lib
+!ENDIF
 #
 #	Post configuration, so back to the hard work...
 #
@@ -272,7 +294,14 @@ PARTS = \
 	$(OBJDIR)\focus_article.obj						\
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
-	$(OBJDIR)\unicode_case.obj
+	$(OBJDIR)\unicode_case.obj						
+	
+PHP_EXT_OBJ	= \
+	$(OBJDIR)\atire_api_remote.obj			\
+	$(OBJDIR)\str.obj						\
+	$(OBJDIR)\sockets.obj					\
+	$(OBJDIR)\ctypes.obj					\
+	$(OBJDIR)\atire_php_ext.obj		
 
 #
 #	Targets
@@ -311,7 +340,8 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_stop.exe				\
 	$(BINDIR)\textsplitter.exe			\
 	$(BINDIR)\test_boolean_parser.exe	\
-	$(BINDIR)\test_unicode_case_convert.exe
+	$(BINDIR)\test_unicode_case_convert.exe			\
+	$(LIBIDR)\atire.dll
 
 #
 #	List of objects to build
@@ -319,6 +349,10 @@ OTHER_TARGETS = \
 all : $(PARTS) \
       $(ANT_TARGETS) \
       $(OTHER_TARGETS)
+      
+php_ext :\
+	$(PHP_EXT_OBJ)\
+	$(LIBDIR)\atire.dll
 
 bin\link_index_merge.exe : bin\link_index_merge.obj
 bin\make_case_conversion_table.exe : bin\make_case_conversion_table.obj
@@ -330,14 +364,23 @@ bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj
 #	Default dependency rules
 #
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
-	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+	$(CC) $(CFLAGS) /EHsc /c /Tp $< /Fo$@
+
+{$(PHPDIR)\}.c{$(OBJDIR)\}.obj:
+	@echo Compiling $@..
+	$(CC) $(PHP_EXT_MINUS_D) $(PHP_EXT_INCLUDES) /EHsc /W4 /Od /c /Tp $< /Fo$@
 
 {$(LTWDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 {$(TOOLDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
-
+	
+{$(OBJDIR)\}.obj{$(LIBDIR)\}.dll:
+	@echo Building $@..
+	$(CC) /LD $(PHP_EXT_OBJ) $(PHP_EXT_LIB) $(WINDOWS_LIBS) /Fe$@ /link /FORCE:MULTIPLE /LTCG
+	
+	
 {$(OBJDIR)\}.obj{$(BINDIR)\}.exe:
 	@echo Building $@...
 	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Fe$@  $(FIXED)

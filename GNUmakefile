@@ -6,6 +6,9 @@ CC = g++
 # The following options are the default compilation flags.
 ###############################################################################
 
+# use mysql database backend
+USE_MYSQL := 1
+
 # debugging or normal compiling and linking
 USE_GCC_DEBUG := 0
 
@@ -60,6 +63,10 @@ USE_PARTIAL_DCOMPRESSION := 0
 # initialisation time
 USE_TWO_D_ACCUMULATORS := 0
 
+# build a php extension for Atire
+#
+USE_PHP_EXTENSION := 1
+
 ###############################################################################
 # specified your own setting in a separate file to override the default
 #
@@ -74,6 +81,10 @@ USE_TWO_D_ACCUMULATORS := 0
 ###############################################################################
 # Please use above options to enable corresponding flags
 ###############################################################################
+ifeq ($(USE_MYSQL), 1)
+	CFLAGS += -DANT_HAS_MYSQL $(shell mysql_config --cflags)
+	LDFLAGS += $(shell mysql_config --libs)
+endif
 
 ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g
@@ -100,15 +111,15 @@ endif
 # common flags
 LDFLAGS += -ldl
 CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER \
-   	     -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
-   	     -Wno-sign-compare -Wno-parentheses
+					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
+					-Wno-sign-compare -Wno-parentheses
 
 ifeq ($(USE_SPECIAL_COMPRESSION), 1)
 	CFLAGS += -DSPECIAL_COMPRESSION
 endif
 
 ifeq ($(USE_PARALLEL_INDEXING), 1)
-   ifeq ($(OS), SUNOS) 
+   ifeq ($(OS), SUNOS)
 	LDFLAGS += -lpthread
    else
 	LDFLAGS += -pthread
@@ -175,12 +186,23 @@ ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
 	CFLAGS += -DTWO_D_ACCUMULATORS
 endif
 
+CFLAGS += -DANT_ACCUMULATOR_T=short
+
+ifeq ($(USE_PHP_EXTENSION), 1)
+	PHP_CFLAGS = -fPIC -
+	PHP_CFLAGS += $(shell php-config --includes)
+	PHP_LDFLAGS = -shared
+endif
+
+
 ###############################################################################
 # source files and compile commands
 ###############################################################################
 SRCDIR = source
-OBJDIR = bin
+OBJDIR = obj
 BINDIR = bin
+PHPDIR = php_ext
+LIBDIR = lib
 
 IGNORE_LIST := $(SRCDIR)/ant_ant.c \
 			  $(SRCDIR)/ant_api.c \
@@ -191,16 +213,24 @@ IGNORE_LIST := $(SRCDIR)/ant_ant.c \
 ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST), $(ALL_SOURCES))
 
-INDEX_SOURCES := $(filter-out ant.c atire.c, $(notdir $(SOURCES)))
+INDEX_SOURCES := $(filter-out ant.c atire.c atire_client.c, $(notdir $(SOURCES)))
 INDEX_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
 
-ANT_SOURCES := $(filter-out index.c atire.c, $(notdir $(SOURCES)))
+ANT_SOURCES := $(filter-out index.c atire.c atire_client.c, $(notdir $(SOURCES)))
 ANT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 
-ATIRE_SOURCES := $(filter-out index.c ant.c, $(notdir $(SOURCES)))
+ATIRE_CLIENT_SOURCES := $(filter-out index.c atire.c ant.c, $(notdir $(SOURCES)))
+ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SOURCES)))
+
+ATIRE_SOURCES := $(filter-out index.c ant.c atire_client.c, $(notdir $(SOURCES)))
 ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
-all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
+PHP_EXT_SOURCES := $(notdir $(shell ls $(PHPDIR)/*.c))
+PHP_EXT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
+
+all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client
+
+php_ext : $(LIBDIR)/atire.so
 
 info:
 	@echo "OS:" $(OS)
@@ -219,19 +249,28 @@ test_atire:
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+	
+$(OBJDIR)/%.o : $(PHPDIR)/%.c
+	$(CC) $(PHP_CFLAGS) -c $< -o $@
+
+$(LIBDIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
+	$(CC) $(PHP_LDFLAGS) -o $@ $^
 
 $(BINDIR)/index : $(INDEX_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
+$(BINDIR)/atire_client : $(ATIRE_CLIENT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+
 $(BINDIR)/ant : $(ANT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
-	
+
 $(BINDIR)/atire : $(ATIRE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
 clean :
-	\rm -f $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire
+	\rm -f $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client
 
 depend :
 	makedepend -f- -Y -w1024 -pbin/ source/*.c -- $(CFLAGS) | sed -e "s/bin\/source/bin/" >| GNUmakefile.dependencies
