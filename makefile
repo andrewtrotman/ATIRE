@@ -407,7 +407,7 @@ zlib\zlib-1.2.3\zlib.lib :
 #	Management
 #
 clean :
-	del *.obj *.exe *.ilk *.pdb *.suo *.lib /s
+	del *.obj *.exe *.ilk *.pdb *.suo *.lib *.dll /s
 
 depend:
 	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
