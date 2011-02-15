@@ -37,6 +37,13 @@ public:
 	long close(void);
 
 	/*
+	 * 	Testing method, return the connect_string.
+	 */
+
+	char *getConnectStr(void);
+
+
+	/*
 		Search and return page_length results starting from top_of_page in the results list
 		normally this would ne 10 results from position 1
 	*/

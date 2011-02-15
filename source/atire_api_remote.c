@@ -179,3 +179,13 @@ delete [] got;				// </ATIREgetdoc>
 
 return result;
 }
+
+/*
+	ATIRE_API_REMOTE::getConnectStr()
+	--------------------------------
+*/
+char *ATIRE_API_remote::getConnectStr()
+{
+return strnew(connect_string);
+}
+
