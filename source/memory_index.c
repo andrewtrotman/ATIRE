@@ -26,11 +26,14 @@
 #include "btree_iterator.h"
 #include "pdebug.h"
 
-#include <windows.h>
+#if _MSC_VER
+	#include <windows.h>
+#endif
 #undef max
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
+#ifdef _MSC_VER
 /*
 	PVOID ANT_INTERLOCKEDEXCHANGEPOINTER()
 	--------------------------------------
@@ -42,10 +45,11 @@ long long p_as_ll;
 p_as_ll = (long long)*Target;
 
 if ((p_as_ll & 0x03) != 0)
-	printf("Allignment Error : %p", *Target);
+	printf("Alignment Error : %p", *Target);
 
 return InterlockedExchangePointer(Target, Value);
 }
+#endif
 
 ANT_string_pair ANT_memory_index::squiggle_document_offsets("~documentoffsets");
 ANT_string_pair ANT_memory_index::squiggle_document_longest("~documentlongest");

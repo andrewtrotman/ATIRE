@@ -7,6 +7,10 @@
 
 #include <stddef.h>		// needed for size_t
 
+#ifndef ANT_ACCUMULATOR_T
+	typedef short ANT_ACCUMULATOR_T;
+#endif
+
 /*
 	class ANT_SEARCH_ENGINE_ACCUMULATOR
 	-----------------------------------
