@@ -25,11 +25,11 @@ this->documents = documents;
 
 #ifdef TWO_D_ACCUMULATORS
 	width_in_bits = 8;
-	width = ANT_pow2_zero(width_in_bits);
+	width = ANT_pow2_zero_64(width_in_bits);
 	height = (documents / width) + 1;
 	memory->realign();
 	init_flags = (unsigned char *)memory->malloc(sizeof(*init_flags) * height);
-	memset(init_flags, 0, sizeof(*init_flags) * height);
+	memset(init_flags, 0, (size_t)(sizeof(*init_flags) * height));
 	padding = (width * height) - documents;
 	dbg_printf("padding: %llu\n", (padding));
 #endif
@@ -80,7 +80,7 @@ void ANT_search_engine_result::init_accumulators(void)
 #endif
 {
 #ifdef TWO_D_ACCUMULATORS
-memset(init_flags, 0, sizeof(*init_flags) * height);
+memset(init_flags, 0, (size_t)(sizeof(*init_flags) * height));
 #else
 memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 #endif

@@ -14,21 +14,23 @@
 */
 void ANT_ranking_function_kbtfidf::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
+double tf, idf, score;
 long docid;
-double tf;
 ANT_compressable_integer *current, *end;
 
 current = impact_ordering;
 end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+idf = log((double)documents / (double)term_details->document_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;
+	tf = prescalar * *current++;
+	score = postscalar * (log(k * tf - b) * idf * idf) / 100.0;
 	docid = -1;
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator->add_rsv(docid, postscalar * rank(docid, document_lengths[docid], prescalar * tf, term_details->collection_frequency, term_details->document_frequency) / 100.0);
+		accumulator->add_rsv(docid, score);
 		}
 	current++;		// skip over the zero
 	}

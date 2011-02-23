@@ -32,6 +32,7 @@ while (current < end)
 		}
 	current++;
 	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
@@ -83,6 +84,7 @@ while (current < end)
 		}
 	current++;
 	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*

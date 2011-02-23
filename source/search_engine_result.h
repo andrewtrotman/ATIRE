@@ -13,7 +13,7 @@
 #include <string.h>
 
 #ifdef HEAP_K_SEARCH
-#include "heap.h"
+	#include "heap.h"
 #endif
 
 #include "pdebug.h"
@@ -49,8 +49,8 @@ public:			// remove this line later
 
 #ifdef TWO_D_ACCUMULATORS
 	unsigned char *init_flags;
-	unsigned long width, height;
-	unsigned short width_in_bits;
+	long long width, height;
+	long long width_in_bits;
 #endif
 
 public:
@@ -61,12 +61,14 @@ public:
 	void *operator new(size_t bytes, ANT_memory *allocator);
 	ANT_search_engine_accumulator &operator[](size_t index) { return accumulator[index]; }
 
-	inline void init_partial_accumulators(size_t index) {
+	inline void init_partial_accumulators(size_t index)
+	{
 #ifdef TWO_D_ACCUMULATORS
-		unsigned long long row;
-		if (init_flags[row = (index >> width_in_bits)] == 0) {
-			init_flags[row] = 1;
-			memset(accumulator + (row * width), 0, width * sizeof(*accumulator));
+	unsigned long long row;
+	if (init_flags[row = (index >> width_in_bits)] == 0)
+		{
+		init_flags[row] = 1;
+		memset(accumulator + (row * width), 0, (size_t)(width * sizeof(*accumulator)));
 		}
 #endif
 	}

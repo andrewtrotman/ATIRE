@@ -177,19 +177,19 @@ total_nodes = current_node - nodes;
 current_node->name = current_node->indegree = current_node->outdegree = -1;		// sentinal
 
 puts("Sort Nodes");
-qsort(nodes, total_nodes, sizeof(*nodes), ANT_link_node::cmp);
+qsort(nodes, (size_t)total_nodes, sizeof(*nodes), ANT_link_node::cmp);
 
 
 puts("Rebuild link graph (and compute indegree and outdegree)");
-new_graph = new ANT_link[total_links + 1];
+new_graph = new ANT_link[(size_t)(total_links + 1)];
 for (which_link = 0; which_link < total_links; which_link++)
 	{
-	got = (ANT_link_node *)bsearch(&graph[which_link].source, nodes, total_nodes, sizeof(*nodes), ANT_link_node::long_cmp);
+	got = (ANT_link_node *)bsearch(&graph[which_link].source, nodes, (size_t)total_nodes, sizeof(*nodes), ANT_link_node::long_cmp);
 	new_graph[which_link].source = got;
 	if (got != NULL)
 		got->outdegree++;
 
-	got = (ANT_link_node *)bsearch(&graph[which_link].destination, nodes, total_nodes, sizeof(*nodes), ANT_link_node::long_cmp);
+	got = (ANT_link_node *)bsearch(&graph[which_link].destination, nodes, (size_t)total_nodes, sizeof(*nodes), ANT_link_node::long_cmp);
 	new_graph[which_link].destination = got;
 	if (got != NULL)
 		got->indegree++;
@@ -239,8 +239,8 @@ number_of_nodes = 0;
 for (current_node = nodes; current_node->name >= 0; current_node++)
 	number_of_nodes++;
 
-source_pagerank = new double[number_of_nodes];
-destination_pagerank = new double[number_of_nodes];
+source_pagerank = new double[(size_t)number_of_nodes];
+destination_pagerank = new double[(size_t)number_of_nodes];
 
 for (which_node = 0; which_node < number_of_nodes; which_node++)
 	source_pagerank[which_node] = 1.0 / (double)number_of_nodes;
@@ -248,7 +248,7 @@ for (which_node = 0; which_node < number_of_nodes; which_node++)
 for (iteration = 0; iteration < iterations; iteration++)
 	{
 	puts("PageRank iteration");
-	memset(destination_pagerank, 0, sizeof(*destination_pagerank) * number_of_nodes);		// set to 0
+	memset(destination_pagerank, 0, (size_t)(sizeof(*destination_pagerank) * number_of_nodes));		// set to 0
 
 	for (current = graph; current->source != NULL || current->destination != NULL; current++)
 		if (current->source != NULL && current->source->outdegree != 0)
@@ -300,11 +300,11 @@ number_of_nodes = 0;
 for (current_node = nodes; current_node->name >= 0; current_node++)
 	number_of_nodes++;
 
-pointers = new double *[number_of_nodes];
+pointers = new double *[(size_t)number_of_nodes];
 for (which = 0; which < number_of_nodes; which++)
 	pointers[which] = pagerank + which;
 
-qsort(pointers, number_of_nodes, sizeof(*pointers), double_pointer_cmp);
+qsort(pointers, (size_t)number_of_nodes, sizeof(*pointers), double_pointer_cmp);
 
 return pointers;
 }
@@ -328,15 +328,15 @@ puts("Compute the size of the link graph");
 total_links = count_links(argc, argv);
 
 puts("Allocate memory for the link graph");
-link_graph = new ANT_link_name_pair[total_links + 1];
-nodes = new ANT_link_node[total_links + 1];				// this is the worst case
+link_graph = new ANT_link_name_pair[(size_t)(total_links + 1)];
+nodes = new ANT_link_node[(size_t)(total_links + 1)];				// this is the worst case
 
 puts("Load link graph");
 read_link_graph(argc, argv, link_graph);
 link_graph[total_links].source = link_graph[total_links].destination = -1;		// sentinal at the end
 
 puts("Sort link graph on indegree");
-qsort(link_graph, total_links, sizeof(*link_graph), ANT_link_name_pair::cmp_on_target);
+qsort(link_graph, (size_t)total_links, sizeof(*link_graph), ANT_link_name_pair::cmp_on_target);
 
 puts("Build the graph");
 link_graph_as_pointers = make_nodes(nodes, link_graph, total_links);

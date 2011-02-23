@@ -152,6 +152,7 @@ else
 	leaves++;
 	}
 
+#pragma ANT_PRAGMA_CONST_CONDITIONAL
 while (1)
 	{
 	got = peek_token();				// the boolean operator

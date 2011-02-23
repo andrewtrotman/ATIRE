@@ -98,6 +98,18 @@ return ANT_powers_of_two_zero[power];
 }
 
 /*
+	ANT_POW2_ZERO_64()
+	------------------
+	64 bit verison of ANT_pow2_zero()
+*/
+inline unsigned long long ANT_pow2_zero_64(long long power)
+{
+extern unsigned long long ANT_powers_of_two_long_long_zero[];
+
+return ANT_powers_of_two_long_long_zero[power];
+}
+
+/*
 	ANT_POW2()
 	----------
 */
@@ -107,6 +119,19 @@ extern unsigned long ANT_powers_of_two[];
 
 return ANT_powers_of_two[power];
 }
+
+/*
+	ANT_POW2_64()
+	-------------
+	64-bit verison of ANT_POW2()
+*/
+inline unsigned long long ANT_pow2_64(long long power)
+{
+extern unsigned long long ANT_powers_of_two_long_long[];
+
+return ANT_powers_of_two_long_long[power];
+}
+
 
 /*
 	ANT_MAX()

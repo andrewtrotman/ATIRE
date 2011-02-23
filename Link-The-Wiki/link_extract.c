@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 char *file, *start, *end, *from, *ch, *pos, *anchor_start, *buffer_start, *paragraph_start, *p_letter, *lt_letter/*<p>*/;
 char *target_start, *target_end, *target_dot;
 char *slash;
-long param, file_number, current_docid, source_docid, target_docid;
+long param, file_number, current_docid, source_docid = 0, target_docid;
 long lowercase_only, first_param, crosslink, append_source_title;
 long to_continue, language_link;
 ANT_directory_iterator_object file_object;

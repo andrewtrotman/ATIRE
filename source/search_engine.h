@@ -71,7 +71,7 @@ protected:
 	long long stem_buffer_length_in_bytes;
 	long long trim_postings_k;
 	long long collection_length_in_terms;
-	long is_quantized;					// true if the index is quantized, false if the index is TF values.
+	long long is_quantized;					// true if the index is quantized, false if the index is TF values.
 
 public:
 	ANT_search_engine_result *results_list;
@@ -116,7 +116,7 @@ public:
 
 	long long get_variable(char *name);
 
-	long quantized(void) { return is_quantized; }					// true if the index is quantized, false if the index is TF values.
+	long long quantized(void) { return is_quantized; }					// true if the index is quantized, false if the index is TF values.
 
 
 	/*
