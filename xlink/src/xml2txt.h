@@ -24,12 +24,13 @@ namespace QLINK {
 
 		static xml2txt& instance();
 		char *convert(char *xml);
-		char *gettext(long docid, char *xml = 0);
-		char *gettearatext(const char *name, char *xml = 0);
+
 		char *clean_tags(const char *xml, long lowercase = 0);
 
-	private:
 		char *gettext(const char *xmlfile, const char *txtfile, char *xml);
+		char *gettext(long docid, char *xml = 0);
+
+		char *gettearatext(const char *name, char *xml = 0);
 	};
 
 	inline xml2txt& xml2txt::instance() {

@@ -62,7 +62,7 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 {
 	char *content = xml, *text = NULL;
 
-	if (sys_file::exist(txtfile))
+	if (txtfile != NULL && sys_file::exist(txtfile))
 		text = sys_file::read_entire_file(txtfile);
 	else {
 		if (sys_file::exist(xmlfile)) {

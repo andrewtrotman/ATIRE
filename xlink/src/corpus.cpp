@@ -156,6 +156,11 @@ string corpus::name2tearapath(const char *name)
 std::string corpus::gettitle(unsigned long id)
 {
 	string filename = id2docpath(id);
+	return gettitle(filename);
+}
+
+std::string corpus::gettitle(std::string filename)
+{
 	char *content = sys_file::read_entire_file(filename.c_str());
 	char title[1024 * 10];
 	get_doc_name(content, title);

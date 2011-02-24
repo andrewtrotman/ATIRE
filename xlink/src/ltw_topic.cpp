@@ -38,8 +38,10 @@ void ltw_topic::xml_to_text()
 {
 	//text_of_xml_ = xml2txt::instance().convert(content_);
 	//text_of_xml_ = sys_file::read_entire_file(corpus_txt::instance().id2docpath(id_).c_str());
-	if (id_ > 0)
-		text_of_xml_ = xml2txt::instance().gettext(id_, content_);
+	if (id_ > 0) {
+		text_of_xml_ = xml2txt::instance().gettext(filename_, NULL, content_);
+		//text_of_xml_ = xml2txt::instance().gettext(id_, content_);
+	}
 	else
 		text_of_xml_ = xml2txt::instance().gettearatext(name_, content_);
 

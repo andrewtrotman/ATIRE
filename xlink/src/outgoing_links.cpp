@@ -260,7 +260,12 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 
 						id = atoi(postings[i]->desc);
 #ifdef CROSSLINK
-						target_title = corpus::instance().gettitle(id);
+						string filename = corpus::instance().id2docpath(id);
+						if (!sys_file::exist(filename.c_str())) {
+							cerr << "No target file found:" << filename << endl;
+							continue;
+						}
+						std::string target_title = corpus::instance().gettitle(filename);
 						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, current_link->target_lang, target_title.c_str(), postings[i]->desc);
 #else
 						sprintf(buf, link_print::target_format.c_str(), postings[i]->offset, id);
@@ -273,7 +278,12 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 				else {
                                         cerr << "Debug" << endl;
 #ifdef CROSSLINK
-                    target_title = corpus::instance().gettitle(current_link->target_document);
+					string filename = corpus::instance().id2docpath(current_link->target_document);
+					if (!sys_file::exist(filename.c_str())) {
+						cerr << "No target file found:" << filename << endl;
+						continue;
+					}
+                    target_title = corpus::instance().gettitle(filename);
 					sprintf(buf, link_print::target_format.c_str(), 0, current_link->target_lang, current_link->target_document, target_title.c_str());
 #else
 					sprintf(buf, link_print::target_format.c_str(), 0, current_link->target_document);

@@ -37,10 +37,13 @@ void run::init()
 
 	// set the corpus home
 	std::string home = get_config().get_value("CORPUS_HOME");
-	if (home.length() == 0)
-		home = ".";
-	home.append(sys_file::SEPARATOR);
-	corpus::instance().home(home);
+	if (home.length() > 0) {
+//		home = ".";
+		home.append(sys_file::SEPARATOR);
+		corpus::instance().home(home);
+	}
+	else
+		cerr << "No CORPUS HOME is given!" << endl;
 }
 
 void run::print_header()

@@ -54,6 +54,8 @@ namespace QLINK {
 		virtual std::string wildcard() { return "*.[xX][mM][lL]"; }
 
 		std::string gettitle(unsigned long id);
+		std::string gettitle(std::string filename);
+
 		static corpus& instance();
 
 	private:

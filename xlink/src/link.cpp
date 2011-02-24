@@ -11,14 +11,17 @@
 #include "ant_link_posting.h"
 #include "ant_link_parts.h"
 #include "application_out.h"
+#include "sys_file.h"
 #include "corpus.h"
 
 #include <stdlib.h>
 #include <string.h>
 
+#include <string>
 #include <iostream>
 
 using namespace QLINK;
+using namespace std;
 
 
 link::link() {
@@ -80,7 +83,12 @@ void link::print_anchor(long beps_to_print, bool id_or_name)
 				id = atoi(link_term->postings[i]->desc);
 
 #ifdef CROSSLINK
-			std::string target_title = corpus::instance().gettitle(id);
+			string filename = corpus::instance().id2docpath(id);
+			if (!sys_file::exist(filename.c_str())) {
+				cerr << "No target file found:" << filename << endl;
+				continue;
+			}
+			std::string target_title = corpus::instance().gettitle(filename);
 			sprintf(buf, format, link_term->postings[i]->offset, target_lang, target_title.c_str(), id);
 #else
 			sprintf(buf, format, link_term->postings[i]->offset, id);

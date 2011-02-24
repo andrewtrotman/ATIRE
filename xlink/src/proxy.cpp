@@ -49,6 +49,7 @@ public:
 	   ltw_task::task_names["LTW_F2F"] = ltw_task::LTW_LTW_F2F;
 	   ltw_task::task_names["LTW_A2B"] = ltw_task::LTW_LTW_A2B;
 	   ltw_task::task_names["F2F"] = ltw_task::LTW_LTW_F2F;
+	   ltw_task::task_names["A2F"] = ltw_task::LTW_LTW_A2B;
 	   ltw_task::task_names["A2B"] = ltw_task::LTW_LTW_A2B;
 	   ltw_task::task_names["LTAra_A2B"] = ltw_task::LTW_LTAra_A2B;
 	   ltw_task::task_names["LTAraTW_A2B"] = ltw_task::LTW_LTAraTW_A2B;
