@@ -34,6 +34,8 @@
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
 #include "ranking_function_inner_product.h"
+#include "ranking_function_kbtfidf.h"
+#include "ranking_function_dlh13.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -277,6 +279,8 @@ if (search_engine->quantized())
 		case ANT_ANT_param_block::BOSE_EINSTEIN:
 		case ANT_ANT_param_block::DIVERGENCE:
 		case ANT_ANT_param_block::INNER_PRODUCT:
+		case ANT_ANT_param_block::KBTFIDF:
+		case ANT_ANT_param_block::DLH13:
 			return 1;		// failure because we're a quantized ranking function and we don't have TF values in the index
 		}
 	}
@@ -285,6 +289,9 @@ switch (function)
 	{
 	case ANT_ANT_param_block::BM25:
 		new_function = new ANT_ranking_function_BM25(search_engine, p1, p2);
+		break;
+	case ANT_ANT_param_block::DLH13:
+		new_function = new ANT_ranking_function_DLH13(search_engine);
 		break;
 	case ANT_ANT_param_block::IMPACT:
 		new_function = new ANT_ranking_function_impact(search_engine);
@@ -310,6 +317,9 @@ switch (function)
 	case ANT_ANT_param_block::ALL_TERMS:
 		query_type_is_all_terms = TRUE;
 		new_function = new ANT_ranking_function_term_count(search_engine);
+		break;
+	case ANT_ANT_param_block::KBTFIDF:
+		new_function = new ANT_ranking_function_kbtfidf(search_engine, p1, p2);
 		break;
 	default: 
 		return 1;		// failure, invalid parameter

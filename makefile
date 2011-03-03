@@ -272,6 +272,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
+	$(OBJDIR)\ranking_function_dlh13.obj			\
 	$(OBJDIR)\ranking_function_term_count.obj		\
 	$(OBJDIR)\ranking_function_inner_product.obj	\
 	$(OBJDIR)\ranking_function_kbtfidf.obj			\

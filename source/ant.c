@@ -27,6 +27,8 @@
 #include "version.h"
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
+#include "ranking_function_dlh13.h"
+#include "ranking_function_kbtfidf.h"
 #include "ranking_function_similarity.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
@@ -721,6 +723,10 @@ else
 			ranking_function = new ANT_ranking_function_term_count(search_engine);
 		else if (params.ranking_function == ANT_ANT_param_block::INNER_PRODUCT)
 			ranking_function = new ANT_ranking_function_inner_product(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::KBTFIDF)
+			ranking_function = new ANT_ranking_function_kbtfidf(search_engine, params.kbtfidf_k, params.kbtfidf_b);
+		else if (params.ranking_function == ANT_ANT_param_block::DLH13)
+			ranking_function = new ANT_ranking_function_DLH13(search_engine);
 		else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
 			{
 			boolean = TRUE;

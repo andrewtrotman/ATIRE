@@ -10,6 +10,7 @@
 #include "indexer_param_block_rank.h"
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
+#include "ranking_function_dlh13.h"
 #include "ranking_function_similarity.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
@@ -34,7 +35,6 @@ bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
 
 kbtfidf_k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K;
 kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
-
 }
 
 /*
@@ -114,6 +114,8 @@ else if (strcmp(which, "divergence") == 0)
 	ranking_function = DIVERGENCE;
 else if (strcmp(which, "impact") == 0)
 	ranking_function = IMPACT;
+else if (strcmp(which, "DLH13") == 0)
+	ranking_function = DLH13;
 else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;
 else if (strcmp(which, "termcount") == 0)
@@ -147,6 +149,8 @@ if (allowable & BM25)
 	printf("   BM25:<k1>:<b>BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4, use 1.1:0.3 for INEX 2009] %s\n", isdefault(BM25));
 if (allowable & DIVERGENCE)
 	printf("   divergence   Divergence from randomness using I(ne)B2 %s\n", isdefault(DIVERGENCE));
+if (allowable & DLH13)
+	printf("   DLH13        Terrier (claims to be ivergence from randomness using DLH13, but isn't) %s\n", isdefault(DIVERGENCE));
 if (allowable & IMPACT)
 	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
 if (allowable & LMD)
@@ -177,6 +181,8 @@ switch (ranking_function)
 	{
 	case BM25:
 		return new ANT_ranking_function_BM25(documents, lengths, bm25_k1, bm25_b);
+	case DLH13:
+		return new ANT_ranking_function_DLH13(documents, lengths);
 	case LMD:
 		return new ANT_ranking_function_lmd(documents, lengths, lmd_u);
 	case LMJM:

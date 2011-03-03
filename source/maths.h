@@ -16,20 +16,13 @@
 	ANT_SIGN()
 	----------
 */
-inline int ANT_sign(char a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-inline int ANT_sign(short a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-inline int ANT_sign(int a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-inline int ANT_sign(long a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-inline int ANT_sign(long long a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-inline int ANT_sign(float a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-inline int ANT_sign(double a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
-
+template <class Type> int ANT_sign(Type a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
 
 /*
 	ANT_FLOOR_LOG2()
 	----------------
 */
-inline unsigned long ANT_floor_log2(unsigned long long x)
+static inline unsigned long ANT_floor_log2(unsigned long long x)
 {
 extern unsigned long ANT_floor_log2_byte[];
 unsigned long sum, mult = 0;
@@ -49,7 +42,7 @@ return sum;
 	ANT_CEILING_LOG2()
 	------------------
 */
-inline unsigned long ANT_ceiling_log2(unsigned long long x)
+static inline unsigned long ANT_ceiling_log2(unsigned long long x)
 {
 extern unsigned long ANT_ceiling_log2_byte[];
 unsigned long sum, mult = 0;
@@ -69,7 +62,7 @@ return sum;
 	ANT_LOG_TO_BASE()
 	-----------------
 */
-inline double ANT_log_to_base(double base, double value)
+static inline double ANT_log_to_base(double base, double value)
 {
 return log(value) / log(base);
 }
@@ -78,7 +71,7 @@ return log(value) / log(base);
 	ANT_LOG2()
 	----------
 */
-inline double ANT_log2(double value)
+static inline double ANT_log2(double value)
 {
 static double log2 = log(2.0);
 
@@ -90,7 +83,7 @@ return log(value) / log2;
 	---------------
 	return 2^power (except that 2^0=0)
 */
-inline unsigned long ANT_pow2_zero(long power)
+static inline unsigned long ANT_pow2_zero(long power)
 {
 extern unsigned long ANT_powers_of_two_zero[];
 
@@ -102,7 +95,7 @@ return ANT_powers_of_two_zero[power];
 	------------------
 	64 bit verison of ANT_pow2_zero()
 */
-inline unsigned long long ANT_pow2_zero_64(long long power)
+static inline unsigned long long ANT_pow2_zero_64(long long power)
 {
 extern unsigned long long ANT_powers_of_two_long_long_zero[];
 
@@ -113,7 +106,7 @@ return ANT_powers_of_two_long_long_zero[power];
 	ANT_POW2()
 	----------
 */
-inline unsigned long ANT_pow2(long power)
+static inline unsigned long ANT_pow2(long power)
 {
 extern unsigned long ANT_powers_of_two[];
 
@@ -125,7 +118,7 @@ return ANT_powers_of_two[power];
 	-------------
 	64-bit verison of ANT_POW2()
 */
-inline unsigned long long ANT_pow2_64(long long power)
+static inline unsigned long long ANT_pow2_64(long long power)
 {
 extern unsigned long long ANT_powers_of_two_long_long[];
 
@@ -155,9 +148,8 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 	atol() for long long integers
 */
 #ifdef _MSC_VER
-	inline long long atoll(const char *string) { return _atoi64(string); }
+	static inline long long atoll(const char *string) { return _atoi64(string); }
 #endif
-inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
+static inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
 
 #endif  /* MATHS_H_ */
-

@@ -363,6 +363,9 @@ switch (params.ranking_function)
 	case ANT_indexer_param_block_rank::LMJM:
 		atire.set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
 		break;
+	case ANT_indexer_param_block_rank::KBTFIDF:
+		atire.set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
+		break;
 	default:
 		atire.set_ranking_function(params.ranking_function, 0.0, 0.0);
 	}
