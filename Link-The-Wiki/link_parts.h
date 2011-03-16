@@ -17,7 +17,7 @@
 	STRING_CLEAN()
 	--------------
 */
-inline static char *string_clean(char *file, long lower_case_only)
+inline static char *string_clean(char *file, long lower_case_only, long keep_string_intact = 0, long trim = 1)
 {
 char *ch, *from, *to;
 
@@ -33,7 +33,7 @@ while (*ch != '\0')
 			*ch++ = ' ';
 		*ch++ = ' ';
 		}
-	else if (!isalnum(*ch))	// then remove it
+	else if (!keep_string_intact && !isalnum(*ch))	// then remove it
 		*ch++ = ' ';
 	else
 		{
@@ -50,21 +50,24 @@ while (*ch != '\0')
 /*
 	now remove multiple, head, and tail spaces.
 */
-from = to = file;
-while (isspace(*from))
-	from++;
-while (*from != '\0')
+if (trim)
 	{
-	while (isalnum(*from))
-		*to++ = *from++;
-	if (isspace(*from))
-		*to++ = *from++;
+	from = to = file;
 	while (isspace(*from))
 		from++;
+	while (*from != '\0')
+		{
+		while (isalnum(*from))
+			*to++ = *from++;
+		if (isspace(*from))
+			*to++ = *from++;
+		while (isspace(*from))
+			from++;
+		}
+	if (to > file && isspace(*(to - 1)))
+		to--;
+	*to = '\0';
 	}
-if (to > file && isspace(*(to - 1)))
-	to--;
-*to = '\0';
 
 return file;
 }

@@ -31,9 +31,6 @@
 	#define COLLECTION_LINK_TAG_NAME "link"
 #endif
 
-char target[1024];
-char anchor_text[1024 * 1024];
-
 /*
 	STRIP_SPACE_INLINE()
 	--------------------
@@ -67,17 +64,19 @@ char *slash;
 long param, file_number, current_docid, source_docid = 0, target_docid;
 long lowercase_only, first_param, crosslink, append_source_title;
 long to_continue, language_link;
+long keep_anchor_intact;
 ANT_directory_iterator_object file_object;
 ANT_directory_iterator_object* file_object_tmp;
 
 if (argc < 2)
-	exit(printf("Usage:%s [-crosslink] [-append-source-title] [-lowercase] <filespec> ...\n", argv[0]));
+	exit(printf("Usage:%s [-crosslink] [-append-source-title] [-keep-anchor-intact] [-lowercase] <filespec> ...\n", argv[0]));
 
 first_param = 1;
 lowercase_only = FALSE;
 language_link = FALSE;
 crosslink = FALSE;
 append_source_title = FALSE;
+keep_anchor_intact = FALSE;
 char *command;
 const char *default_namespace = "en";
 const char *crosslink_namespace = default_namespace;
@@ -85,6 +84,8 @@ char current_namespace[1024];
 char buffer[1024 * 1024];
 char doctitle[1024 * 1024];
 char link_title[1024 * 1024];
+char target[1024];
+char anchor_text[1024 * 1024];
 
 for (param = 1; param < argc; param++)
 	{
@@ -101,12 +102,17 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "append-source-title") == 0)
 			{
 			append_source_title = TRUE;
-			++first_param; // = 2;
+			++first_param;
 			}
 		else if (strcmp(command, "lowercase") == 0)
 			{
 			lowercase_only = TRUE;
-			++first_param; // = 2;
+			++first_param;
+			}
+		else if (strcmp(command, "keep-anchor-intact") == 0)
+			{
+			keep_anchor_intact = TRUE;
+			++first_param;
 			}
 		else
 			exit(printf("Unknown parameter:%s\n", argv[1]));
@@ -219,7 +225,7 @@ for (param = first_param; param < argc; param++)
 						if (isspace(*ch))
 							*ch = ' ';		// convert all spaces (tabs, cr, lf) into a space;
 
-					string_clean(anchor_text, lowercase_only);
+					string_clean(anchor_text, lowercase_only, keep_anchor_intact, FALSE); // no need to trim leading and trailing spaces because it has been done
 
 					if (crosslink)
 						{
