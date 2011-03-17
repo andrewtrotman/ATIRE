@@ -47,6 +47,7 @@ namespace QLINK {
 		virtual std::string id2doc(unsigned long id);
 		virtual std::string id2dir(unsigned long id);
 		virtual std::string id2docpath(unsigned long id);
+		virtual std::string id2docpath(unsigned long id, std::string lang);
 		virtual std::string name2docpath(const char *name);
 		virtual std::string name2docpath(const std::string& home, const char *name);
 		virtual std::string name2tearapath(const char *name);
@@ -55,6 +56,9 @@ namespace QLINK {
 
 		std::string gettitle(unsigned long id);
 		std::string gettitle(std::string filename);
+
+		bool exist(unsigned long id);
+		bool exist(unsigned long id, std::string lang);
 
 		static corpus& instance();
 

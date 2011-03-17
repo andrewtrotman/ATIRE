@@ -11,6 +11,7 @@
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
 #include "language.h"
+#include "corpus.h"
 
 #include <stdlib.h>
 
@@ -67,6 +68,8 @@ namespace QLINK
 				string::size_type pos = line.find_first_of(':');
 				if (pos != string::npos) {
 					unsigned long doc_id = atol(line.c_str());
+					if (!corpus::instance().exist(doc_id))
+						continue;
 					string wiki_title(line, ++pos);
 					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only);
 					//struct wiki_entry a_entry;

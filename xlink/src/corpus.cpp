@@ -19,6 +19,8 @@
 using namespace QLINK;
 using namespace std;
 
+#define CROSSLINK 1
+
 corpus::corpus() : doclist_("doclist.aspt")
 {
 	init();
@@ -104,7 +106,7 @@ string corpus::id2doc(unsigned long id)
 	return iter != doc_map_.end() ? iter->second : "";
 }
 
-string corpus::id2docpath(unsigned long id)
+string corpus::id2docpath(unsigned long id, std::string lang)
 {
 //	if (load_)
 //		return home_ + id2doc(id) + ".xml";
@@ -115,11 +117,16 @@ string corpus::id2docpath(unsigned long id)
 //	cmd.append(stm.str());
 //
 //	return system_call::instance().execute(cmd.c_str());
-#ifdef CROSSLINK
-	return home_ + sys_file::SEPARATOR + lang_ + sys_file::SEPARATOR + "pages" + sys_file::SEPARATOR + id2dir(id) + ext();
-#else
-	return home_ + sys_file::SEPARATOR + "pages" + sys_file::SEPARATOR + id2dir(id) + ext();
-#endif
+if (lang.length() > 0)
+	return home_ + sys_file::SEPARATOR + lang + sys_file::SEPARATOR + "pages" + sys_file::SEPARATOR + id2dir(id) + ext();
+
+return home_ + sys_file::SEPARATOR + "pages" + sys_file::SEPARATOR + id2dir(id) + ext();
+
+}
+
+string corpus::id2docpath(unsigned long id)
+{
+	return id2docpath(id, lang_);
 }
 
 string corpus::name2docpath(const char *name)
@@ -166,4 +173,15 @@ std::string corpus::gettitle(std::string filename)
 	get_doc_name(content, title);
 	delete [] content;
 	return title;
+}
+
+bool corpus::exist(unsigned long id)
+{
+	return exist(id, lang_);
+}
+
+bool corpus::exist(unsigned long id, std::string lang)
+{
+	string filepath = id2docpath(id, lang);
+	return sys_file::exist(filepath.c_str());
 }
