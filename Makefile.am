@@ -125,6 +125,7 @@ core_sources =  \
 	$(SRCDIR)/ranking_function_term_count.c \
 	$(SRCDIR)/ranking_function_inner_product.c \
 	$(SRCDIR)/ranking_function_kbtfidf.c	\
+	$(SRCDIR)/ranking_function_dlh13.c \
 	$(SRCDIR)/plugin_manager.c 	\
 	$(SRCDIR)/nexi.c \
 	$(SRCDIR)/NEXI_ant.c \
@@ -279,6 +280,7 @@ core_noinst_headers = \
 	$(SRCDIR)/ranking_function_term_count.h \
 	$(SRCDIR)/ranking_function_inner_product.h \
 	$(SRCDIR)/ranking_function_kbtfidf.h	\
+	$(SRCDIR)/ranking_function_dlh13.c \
 	$(SRCDIR)/instream_file.h	\
 	$(SRCDIR)/instream_deflate.h \
 	$(SRCDIR)/instream_bz2.h \

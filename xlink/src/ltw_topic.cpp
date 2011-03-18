@@ -10,6 +10,7 @@
 #include "corpus_txt.h"
 #include "sys_file.h"
 #include "ant_link_parts.h"
+#include "string_utils.h"
 
 #include <stdlib.h>
 
@@ -51,4 +52,11 @@ void ltw_topic::xml_to_text()
 		//string_clean(text_of_xml_, 0, 0);
 		text_of_xml_ = xml2txt::instance().clean_tags(content_, 0);
 	}
+
+	/*
+	 *
+	 *
+	 */
+	std::string text_file = number_to_string(id_) + ".txt";
+	sys_file::write(text_of_xml_, text_file.c_str());
 }

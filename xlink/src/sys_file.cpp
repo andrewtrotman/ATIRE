@@ -165,6 +165,13 @@ bool sys_file::exist(const char *name) {
 	return stat(&st, name) == 0;
 }
 
+size_t sys_file::size(const char *name)
+{
+	struct stat st;
+	stat(&st, name);
+	return st.st_size;
+}
+
 bool sys_file::isdir(const char *name) {
 	struct stat st;
 	if( stat(&st, name) == 0)
@@ -270,4 +277,22 @@ int sys_file::stat(struct stat *st, const char *name)
 //	if( () == -1 )
 //		throw std::runtime_error(std::string(name) + ": not exists!");
 	return ret;
+}
+
+int sys_file::create_directory(const char *name)
+{
+	return mkdir(name, 0777);
+}
+
+int sys_file::write(const char *content, const char *filename)
+{
+	FILE *p = NULL;
+	size_t len = 0;
+	p = fopen(filename, "w");
+	if (p == NULL) {
+		fprintf(stderr, "Error in opening a file..", filename);
+	}
+	len = strlen(content);
+	fwrite(content, len, 1, p);
+	fclose(p);
 }

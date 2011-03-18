@@ -300,7 +300,8 @@ if (one_term_count == two_term_count) {
 			cmp = ret > 0;
 	}
 	else
-		cmp = one->target_document < two->target_document;
+		cmp = strlen(one->term) > strlen(two->term);
+		//cmp = one->target_document < two->target_document;
 }
 else
 	cmp = one_term_count > two_term_count;

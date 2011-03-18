@@ -45,8 +45,12 @@ public:
 	static char **buffer_to_list(char *buffer, long long *lines);
 
 	static bool exist(const char *name);
+	static size_t size(const char *name);
 	static bool isdir(const char *name);
 	static int stat(struct stat *st, const char *name);
+	static int create_directory(const char *name);
+
+	static int write(const char *content, const char *filename);
 
 	char **list(char *dir, char **files_list, bool recursive = false);
 	virtual void list(const char *name);

@@ -164,8 +164,8 @@ namespace QLINK
 
 			// debug
 	//		cerr << *first << "$";
-	//		if (strncmp(*first, "gorseinon", 9) == 0)
-	//			cerr << " I caught you" << endl;
+			if (strcasecmp(*first, "Desperate") == 0)
+				cerr << " I caught you" << endl;
 
 			int terms_count = 0;
 			for (last = first; *last != NULL && terms_count < 13; last++) {

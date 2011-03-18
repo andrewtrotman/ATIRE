@@ -91,7 +91,7 @@ void algorithm::process_links(ltw_topic *a_topic, algorithm *bep_algor)
 void algorithm::process_topic_text()
 {
 
-	static const char *seperators = " ";
+	static const char *seperators = " \n\t\r";
 	char *token;
 	char **term_list, **current/*, **first, **last*/;
 	char *filecopy = NULL; //strdup(xml_);
