@@ -43,6 +43,9 @@ namespace QLINK {
 	};
 }
 
+long links::links_to_print_ = 0;
+long links::beps_to_print_ = 0;
+
 links::links() : topic_(NULL)
 {
 	init();
@@ -52,9 +55,15 @@ links::links(ltw_topic *a_topic) : topic_(a_topic)
 {
 	init();
 
-	if (topic_->get_ltw_task()->is_f2f_task()) {
-		links_to_print_ = 250;
+	if (links_to_print_ < 1) {
+		if (topic_->get_ltw_task()->is_f2f_task())
+			links_to_print_ = 250;
+		else {
+			links_to_print_ = 50;
+			beps_to_print_ = 5;
+		}
 	}
+
 }
 
 links::~links()
