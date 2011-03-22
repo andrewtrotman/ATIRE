@@ -49,6 +49,7 @@ namespace QLINK {
 	    static ltw_algorithm_map alorithm_names;
 	    static ltw_task_type_map task_names;
 	    static int topic_param_start;
+
 	protected:
 	    std::string name_;
 	    algorithm_out *algor_out_;
@@ -58,6 +59,10 @@ namespace QLINK {
 	    std::string algor_in_name_;
 	    links *outgoings_;
 	    links *incomings_;
+
+	    long links_to_print_;
+	    long beps_to_print_;
+
 	public:
 	    ltw_task(std::string & name, std::string & out_algor_name, std::string & in_algor_name);
 	    virtual ~ltw_task();
@@ -69,6 +74,12 @@ namespace QLINK {
 	    void set_alorithm_bep(std::string name);
 	    ltw_task_type get_task_type();
 	    algorithm_out *get_algor_out() const { return algor_out_; }
+
+		void set_links_to_print(long links_to_print) { links_to_print_ = links_to_print; }
+		long links_to_print() { return links_to_print_; }
+
+		void set_beps_to_print(long beps_to_print) { beps_to_print_ = beps_to_print; }
+		long beps_to_print() { return beps_to_print_; }
 
 	private:
 		ltw_algorithm get_algorithm_outgoing_type();

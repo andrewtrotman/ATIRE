@@ -150,6 +150,11 @@ void ltw_task::perform()
 				}
 				outgoings_ = new outgoing_links(&a_topic);
 				outgoings_->set_bep_algorithm(algor_bep_);
+				if (links_to_print_ > 0)
+					outgoings_->set_links_to_print(links_to_print_);
+				if (beps_to_print_ > 0)
+					outgoings_->set_beps_to_print(beps_to_print_);
+
 				algor_out_->set_links_container(outgoings_);
 				algor_out_->process_topic(&a_topic);
 				//if (algor_out_name_ != "LTW_ANT")
@@ -165,6 +170,11 @@ void ltw_task::perform()
 					incomings_ = NULL;
 				}
 				incomings_ = new incoming_links(&a_topic);
+				if (links_to_print_ > 0)
+					incomings_->set_links_to_print(links_to_print_);
+				if (beps_to_print_ > 0)
+					incomings_->set_beps_to_print(beps_to_print_);
+
 				incomings_->set_bep_algorithm(algor_bep_);
 				algor_in_->set_links_container(incomings_);
 				algor_in_->process_topic(&a_topic);

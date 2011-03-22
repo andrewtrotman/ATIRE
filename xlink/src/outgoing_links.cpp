@@ -65,7 +65,7 @@ void outgoing_links::init_links()
 void outgoing_links::init() {
 	type(OUTGOING_LINK_TYPE);
 
-	if (topic_->get_ltw_task()->is_a2b_task()) {
+	if (links_to_print_ <= 0 && topic_->get_ltw_task()->is_a2b_task()) {
 		links_to_print_ = 50;
 		beps_to_print_ = 5;
 	}

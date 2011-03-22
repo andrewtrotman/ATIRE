@@ -56,14 +56,6 @@ void ltw_run::init()
 	string in_algor_name = get_config().get_algorithm_incoming_name();
 	string::size_type pos = string::npos;
 
-	string links_to_print_str = get_config().get_value("anchors_number");
-	if (links_to_print_str.length() > 0)
-		links::set_links_to_print(atol(links_to_print_str.c_str()));
-
-	string beps_to_print_str = get_config().get_value("anchor_links_number");
-	if (beps_to_print_str.length() > 0)
-		links::set_beps_to_print(atol(beps_to_print_str.c_str()));
-
 //	if ((pos = taskname.find("F2F")) != string::npos)
 //		task_ = new task_f2f(taskname, out_algor_name, in_algor_name);
 //	else if ((pos = taskname.find("A2B")) != string::npos)
@@ -73,6 +65,14 @@ void ltw_run::init()
 	task_ = new ltw_task(taskname, out_algor_name, in_algor_name);
 
 	task_->set_alorithm_bep(get_config().get_value("algorithm_bep"));
+
+	string links_to_print_str = get_config().get_value("anchors_number");
+	if (links_to_print_str.length() > 0)
+		task_->set_links_to_print(atol(links_to_print_str.c_str()));
+
+	string beps_to_print_str = get_config().get_value("anchor_links_number");
+	if (beps_to_print_str.length() > 0)
+		task_->set_beps_to_print(atol(beps_to_print_str.c_str()));
 }
 
 std::string ltw_run::get_home(const char *name)

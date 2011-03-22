@@ -43,8 +43,8 @@ namespace QLINK {
 	};
 }
 
-long links::links_to_print_ = 0;
-long links::beps_to_print_ = 0;
+//long links::links_to_print_ = 0;
+//long links::beps_to_print_ = 0;
 
 links::links() : topic_(NULL)
 {

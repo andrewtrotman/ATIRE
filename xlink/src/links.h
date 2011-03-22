@@ -39,8 +39,8 @@ namespace QLINK {
 		ltw_topic					*topic_;
 		link_type					type_;
 
-		static long					links_to_print_;  // for f2f the number of links, for a2b the number of anchors to print
-		static long					beps_to_print_;	  // a2b only, up to # beps per anchor can be specified
+		long					links_to_print_;  // for f2f the number of links, for a2b the number of anchors to print
+		long					beps_to_print_;	  // a2b only, up to # beps per anchor can be specified
 
 		long 						mode_;            // mode for print year or not
 		//bool						to_clean_;
@@ -61,10 +61,10 @@ namespace QLINK {
 		long orphan_links_length() { return links_in_orphan_.size(); }
 		//long *orphan_links_length_ptr() { return &links_in_orphan_length; }
 
-		static void set_links_to_print(long links_to_print) { links_to_print_ = links_to_print; }
+		void set_links_to_print(long links_to_print) { links_to_print_ = links_to_print; }
 		long links_to_print() { return links_to_print_; }
 
-		static void set_beps_to_print(long beps_to_print) { beps_to_print_ = beps_to_print; }
+		void set_beps_to_print(long beps_to_print) { beps_to_print_ = beps_to_print; }
 		long beps_to_print() { return beps_to_print_; }
 
 		link *push_link(char *place_in_file, long offset, char *buffer, long docid, double gamma, ANT_link_term *node = 0);
