@@ -50,6 +50,7 @@ ltw_headers = \
 	$(SRC_DIR)/search_engine.h \
 	$(SRC_DIR)/search_engine_ant.h \
 	$(SRC_DIR)/wikipedia.h \
+	$(SRC_DIR)/wikipedia_page.h \
 	$(SRC_DIR)/string_utils.h \
 	$(SRC_DIR)/str.h \
 	$(SRC_DIR)/singleton.h \
@@ -108,6 +109,7 @@ ltw_sources = \
 	$(SRC_DIR)/proxy.cpp \
 	$(SRC_DIR)/porter.cpp \
 	$(SRC_DIR)/wikipedia.cpp \
+	$(SRC_DIR)/wikipedia_page.cpp \
 	$(SRC_DIR)/google_translator.cpp \
 	$(SRC_DIR)/webpage_retriever.cpp \
 	$(SRC_DIR)/application_out.cpp \

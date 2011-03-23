@@ -350,7 +350,7 @@ noinst_PROGRAMS = ant ant_ant index ant_dictionary \
 			ant_plugins filelist remove_head link_extract link_index \
 			link_this link_index_merge link_extract_pass2 link_length_correlate \
 			topic_tree_cas bindiff term_frequencies topic_tree INEXqrels_to_run \
-			foltbl_to_aspt zipf_graph
+			foltbl_to_aspt zipf_graph test_stop
 
 ant_SOURCES = \
 	$(SRCDIR)/ant.c \
@@ -445,6 +445,11 @@ zipf_graph_SOURCES = $(TOOLDIR)/zipf_graph.c
 zipf_graph_LDFLAGS = -rdynamic
 zipf_graph_LDADD = ${ANT_LIBS}
 zipf_graph_DEPENDENCIES = libantcore.la
+
+test_stop_SOURCES = $(TOOLDIR)/test_stop.c \
+				$(SRCDIR)/stop_word.c \
+				$(SRCDIR)/str.c
+test_stop_CFLAGS = $(AM_CFLAGS)
 
 #################################################################################
 #                               LINK-THE-WIKI
