@@ -2,7 +2,6 @@
 	VERSION.C
 	---------
 */
-
 #include <stdio.h>
 
 #if defined(_WIN64) || (__WORDSIZE == 64) || (defined(__APPLE__) && (_LP64 == 1))
@@ -81,14 +80,15 @@ puts("");
 
 puts("STEMMERS");
 puts("--------");
-#ifdef ANT_HAS_PAICE_HUSK
-	puts("Paice Husk              : Andrew Stark (http://www.scientificpsychic.com/paice/paice.c)");
-#endif
+puts("Double Metaphone        : Adam J. Nelson, Lawrence Phillips (http://www.apocryph.org/metaphone/)");
+puts("Krovetz                 : Lemur port of Bob Krovetz's original (http://lexicalresearch.com/)");
 #ifdef ANT_HAS_LOVINS
 	puts("Lovins                  : Linh Huynh, Eibe Frank (http://www.cs.waikato.ac.nz/~eibe/stemmers/index.html)");
 #endif
-puts("Double Metaphone        : Adam J. Nelson, Lawrence Phillips (http://www.apocryph.org/metaphone/)");
-puts("Otago                   : Vaughn Wood");
+puts("Otago (all versions)    : Vaughn Wood");
+#ifdef ANT_HAS_PAICE_HUSK
+	puts("Paice Husk              : Andrew Stark (http://www.scientificpsychic.com/paice/paice.c)");
+#endif
 puts("Porter                  : Andrew Trotman");
 puts("S-stripper              : Andrew Trotman");
 puts("");

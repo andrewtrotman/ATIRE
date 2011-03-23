@@ -6,8 +6,10 @@
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
 #include "stemmer_lovins.h"
+#include "stemmer_krovetz.h"
 #include "stemmer_paice_husk.h"
 #include "stemmer_otago.h"
+#include "stemmer_otago_v2.h"
 #include "stemmer_factory.h"
 #include "stemmer_term_similarity_weighted.h"
 #include "stemmer_term_similarity_threshold.h"
@@ -27,6 +29,8 @@ switch (which_stemmer)
 	case S_STRIPPER: 	stemmer = new ANT_stemmer(engine);				break;
 	case PORTER: 		stemmer = new ANT_stemmer_porter(engine);		break;
 	case OTAGO:			stemmer = new ANT_stemmer_otago(engine);		break;
+	case OTAGO_V2:		stemmer = new ANT_stemmer_otago_v2(engine);		break;
+	case KROVETZ:		stemmer = new ANT_stemmer_krovetz(engine);		break;
 #ifdef ANT_HAS_LOVINS
 	case LOVINS:		stemmer = new ANT_stemmer_lovins(engine);		break;
 #endif
@@ -62,6 +66,8 @@ switch (which_stemmer)
 	case S_STRIPPER: 	stemmer = new ANT_stem_s;				break;
 	case PORTER: 		stemmer = new ANT_stem_porter;			break;
 	case OTAGO:			stemmer = new ANT_stem_otago;			break;
+	case OTAGO_V2:		stemmer = new ANT_stem_otago_v2;		break;
+	case KROVETZ:		stemmer = new ANT_stem_krovetz;			break;
 #ifdef ANT_HAS_LOVINS
 	case LOVINS:		stemmer = new ANT_stem_lovins;			break;
 #endif

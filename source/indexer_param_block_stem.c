@@ -34,7 +34,7 @@ void ANT_indexer_param_block_stem::help(long has_cutoff)
 {
 puts("TERM EXPANSION");
 puts("--------------");
-printf("-t[-hlops]");
+printf("-t[-DhkloOpsS]");
 if (has_cutoff)
 	printf("[+-<th>] ");
 else
@@ -42,16 +42,18 @@ else
 printf("Term expansion, one of:\n");
 
 puts("  -             None [default]");
+puts("  D             Double Metaphone phonetics");
 #ifdef ANT_HAS_PAICE_HUSK
 puts("  h             Paice Husk stemming");
 #endif
+puts("  k             Krovetz stemming");
 #ifdef ANT_HAS_LOVINS
 puts("  l             Lovins stemming");
 #endif
 puts("  o             Otago stemming");
+puts("  O             Otago stemming v2");
 puts("  p             Porter stemming");
 puts("  s             S-Striping stemming");
-puts("  D             Double Metaphone phonetics");
 puts("  S             Soundex phonetics");
 if (has_cutoff)
 	{
@@ -78,11 +80,13 @@ switch (*which)
 #ifdef ANT_HAS_PAICE_HUSK
 	case 'h' : stemmer = ANT_stemmer_factory::PAICE_HUSK; break;
 #endif
+	case 'k' : stemmer = ANT_stemmer_factory::KROVETZ;    break;
 #ifdef ANT_HAS_LOVINS
 	case 'l' : stemmer = ANT_stemmer_factory::LOVINS;     break;
 #endif
 	case 'p' : stemmer = ANT_stemmer_factory::PORTER;     break;
 	case 'o' : stemmer = ANT_stemmer_factory::OTAGO;      break;
+	case 'O' : stemmer = ANT_stemmer_factory::OTAGO_V2;   break;
 	case 's' : stemmer = ANT_stemmer_factory::S_STRIPPER; break;
 	case 'D' : stemmer = ANT_stemmer_factory::DOUBLE_METAPHONE;       break;
 	case 'S' : stemmer = ANT_stemmer_factory::SOUNDEX; break;

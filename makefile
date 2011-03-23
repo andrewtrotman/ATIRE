@@ -233,10 +233,12 @@ PARTS = \
 	$(OBJDIR)\stemmer_term_similarity_threshold.obj	\
 	$(OBJDIR)\stemmer_term_similarity_weighted.obj	\
 	$(OBJDIR)\stem_porter.obj						\
+	$(OBJDIR)\stem_krovetz.obj						\
 	$(STEM_LOVINS)									\
 	$(STEM_PAICE_HUSK)								\
 	$(OBJDIR)\stemmer_factory.obj					\
 	$(OBJDIR)\stem_otago.obj						\
+	$(OBJDIR)\stem_otago_v2.obj						\
 	$(OBJDIR)\stem_s.obj							\
 	$(OBJDIR)\relevant_topic.obj					\
 	$(OBJDIR)\bitstream.obj							\
