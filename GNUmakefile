@@ -282,7 +282,7 @@ $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
 
 .PHONY : clean
 clean :
-	\rm -f $(OBJDIR)/*.o $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client
+	\rm -f $(OBJDIR)/*.o $(BINDIR)/*
 
 depend :
 	makedepend -f- -Y -w1024 -pbin/ source/*.c -- $(CFLAGS) | sed -e "s/bin\/source/bin/" >| GNUmakefile.dependencies
