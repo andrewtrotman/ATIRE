@@ -1,4 +1,4 @@
-OS = UNIX
+OS := $(shell uname)
 CC = g++
 #CC = icpc
 
