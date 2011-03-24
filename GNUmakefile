@@ -6,9 +6,6 @@ CC = g++
 # The following options are the default compilation flags.
 ###############################################################################
 
-# use mysql database backend
-USE_MYSQL := 1
-
 # debugging or normal compiling and linking
 USE_GCC_DEBUG := 0
 
@@ -63,9 +60,15 @@ USE_PARTIAL_DCOMPRESSION := 0
 # initialisation time
 USE_TWO_D_ACCUMULATORS := 0
 
+# what type to use for the accumulators
+CFLAGS += -DANT_ACCUMULATOR_T=short
+
+# use mysql database backend
+USE_MYSQL := 0
+
 # build a php extension for Atire
-#
-USE_PHP_EXTENSION := 1
+USE_PHP_EXTENSION := 0
+
 
 ###############################################################################
 # specified your own setting in a separate file to override the default
@@ -81,11 +84,6 @@ USE_PHP_EXTENSION := 1
 ###############################################################################
 # Please use above options to enable corresponding flags
 ###############################################################################
-ifeq ($(USE_MYSQL), 1)
-	CFLAGS += -DANT_HAS_MYSQL $(shell mysql_config --cflags)
-	LDFLAGS += $(shell mysql_config --libs)
-endif
-
 ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g
 	CFLAGS += -g -DDEBUG
@@ -186,7 +184,10 @@ ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
 	CFLAGS += -DTWO_D_ACCUMULATORS
 endif
 
-CFLAGS += -DANT_ACCUMULATOR_T=short
+ifeq ($(USE_MYSQL), 1)
+	CFLAGS += -DANT_HAS_MYSQL $(shell mysql_config --cflags)
+	LDFLAGS += $(shell mysql_config --libs)
+endif
 
 ifeq ($(USE_PHP_EXTENSION), 1)
 	PHP_CFLAGS = -fPIC -

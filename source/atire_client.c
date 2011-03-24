@@ -4,7 +4,7 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
-#include "ATIRE_API_remote.h"
+#include "atire_api_remote.h"
 
 /*
 	MAIN()
