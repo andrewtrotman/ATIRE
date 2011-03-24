@@ -208,28 +208,36 @@ LIBDIR = lib
 IGNORE_LIST := $(SRCDIR)/ant_ant.c \
 			  $(SRCDIR)/ant_api.c \
 			  $(SRCDIR)/ant_plugins.c \
-			  $(SRCDIR)/ant_dictionary.c \
 			  $(SRCDIR)/test_compression.c
 
-ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
-SOURCES := $(filter-out $(IGNORE_LIST), $(ALL_SOURCES))
+MAIN_FILES := $(SRCDIR)/ant.c \
+			  $(SRCDIR)/atire.c \
+			  $(SRCDIR)/index.c \
+			  $(SRCDIR)/ant_dictionary.c \
+			  $(SRCDIR)/atire_client.c \
 
-INDEX_SOURCES := $(filter-out ant.c atire.c atire_client.c, $(notdir $(SOURCES)))
+ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
+SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
+
+INDEX_SOURCES := index.c $(notdir $(SOURCES))
 INDEX_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
 
-ANT_SOURCES := $(filter-out index.c atire.c atire_client.c, $(notdir $(SOURCES)))
+ANT_SOURCES := ant.c $(notdir $(SOURCES))
 ANT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 
-ATIRE_CLIENT_SOURCES := $(filter-out index.c atire.c ant.c, $(notdir $(SOURCES)))
+ANT_DICT_SOURCES := ant_dictionary.c $(notdir $(SOURCES))
+ANT_DICT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_DICT_SOURCES)))
+
+ATIRE_CLIENT_SOURCES := atire_client.c $(notdir $(SOURCES))
 ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SOURCES)))
 
-ATIRE_SOURCES := $(filter-out index.c ant.c atire_client.c, $(notdir $(SOURCES)))
+ATIRE_SOURCES := atire.c $(notdir $(SOURCES))
 ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
 PHP_EXT_SOURCES := $(notdir $(shell ls $(PHPDIR)/*.c))
 PHP_EXT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 
-all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client
+all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/ant_dictionary
 
 php_ext : $(LIBDIR)/atire.so
 
@@ -267,6 +275,9 @@ $(BINDIR)/ant : $(ANT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(BINDIR)/atire : $(ATIRE_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	
+$(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
