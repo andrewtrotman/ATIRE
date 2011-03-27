@@ -1,4 +1,4 @@
-OS := $(shell uname)
+OS_TYPE := $(shell uname)
 CC = g++
 #CC = icpc
 
@@ -85,8 +85,12 @@ USE_PHP_EXTENSION := 0
 # Please use above options to enable corresponding flags
 ###############################################################################
 ifeq ($(USE_GCC_DEBUG), 1)
-	LDFLAGS += -g
-	CFLAGS += -g -DDEBUG
+	LDFLAGS += -g -ggdb
+	CFLAGS += -g -ggdb -DDEBUG
+	ifeq ($(OS_TYPE), Darwin)
+		LDFLAGS += -gstabs+
+		CFLAGS += -gstabs+
+	endif
 else
 	#LDFLAGS +=
 	CFLAGS += -O3
@@ -102,7 +106,7 @@ ifeq ($(USE_GPROF), 1)
 	CFLAGS += -pg
 endif
 
-ifeq ($(OS), SUNOS)
+ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lsocket -lnsl
 endif
 
@@ -117,7 +121,7 @@ ifeq ($(USE_SPECIAL_COMPRESSION), 1)
 endif
 
 ifeq ($(USE_PARALLEL_INDEXING), 1)
-   ifeq ($(OS), SUNOS)
+   ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lpthread
    else
 	LDFLAGS += -pthread
@@ -242,7 +246,7 @@ all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client 
 php_ext : $(LIBDIR)/atire.so
 
 info:
-	@echo "OS:" $(OS)
+	@echo "OS_TYPE:" $(OS_TYPE)
 
 test_source:
 	@echo $(SOURCES)
