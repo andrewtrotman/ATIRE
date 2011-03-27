@@ -88,8 +88,8 @@ ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g -ggdb
 	CFLAGS += -g -ggdb -DDEBUG
 	ifeq ($(OS_TYPE), Darwin)
-		LDFLAGS += -gstabs+
-		CFLAGS += -gstabs+
+		LDFLAGS += -gdwarf-2
+		CFLAGS += -gdwarf-2
 	endif
 else
 	#LDFLAGS +=
@@ -262,7 +262,7 @@ test_atire:
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
-	
+
 $(OBJDIR)/%.o : $(PHPDIR)/%.c
 	$(CC) $(PHP_CFLAGS) -c $< -o $@
 
@@ -280,7 +280,7 @@ $(BINDIR)/ant : $(ANT_OBJECTS)
 
 $(BINDIR)/atire : $(ATIRE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
-	
+
 $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
