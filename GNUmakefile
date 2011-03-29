@@ -194,11 +194,10 @@ ifeq ($(USE_MYSQL), 1)
 endif
 
 ifeq ($(USE_PHP_EXTENSION), 1)
-	PHP_CFLAGS = -fPIC -
-	PHP_CFLAGS += $(shell php-config --includes)
-	PHP_LDFLAGS = -shared
+        PHP_CFLAGS = -fPIC -DPIC
+        PHP_CFLAGS += $(shell php-config --includes)
+        PHP_LDFLAGS = -shared -export-dynamic -avoid-version -prefer-pic -module
 endif
-
 
 ###############################################################################
 # source files and compile commands
