@@ -12,13 +12,13 @@
 class ANT_search_engine_btree_leaf
 {
 public:
-	long long collection_frequency;
-	long document_frequency;
-	long long postings_position_on_disk;
-	long impacted_length;
-	long postings_length;
+	long long collection_frequency;				// number of times the term occurs in the collection
+	long document_frequency;					// number of documents containing the term
+	long long postings_position_on_disk;		// where on the disk is the postings list stored?
+	long impacted_length;						// length (in integers) of the postings list (including impact scores)
+	long postings_length;						// length (in bytes) of the postings list (on disk)
 #ifdef TERM_LOCAL_MAX_IMPACT
-	unsigned char local_max_impact;
+	unsigned char local_max_impact;				// the max impact score of this postings list
 #endif
 } ;
 

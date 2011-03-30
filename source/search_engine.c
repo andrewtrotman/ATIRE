@@ -604,7 +604,7 @@ process_one_term_detail(process_one_term(term, &term_details), ranking_function,
 	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
 	----------------------------------------------------
 */
-void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function)
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
 {
 void *verify;
 long long bytes_already_read;
@@ -713,7 +713,7 @@ if (verify != NULL)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(results_list, &stemmed_term_details, stem_buffer, trim_postings_k, 1, 1);
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, trim_postings_k, 1, 1);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 

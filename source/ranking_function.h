@@ -92,7 +92,7 @@ public:
 		postings list is generated from the tf array it is then (correctly) trimmed thus further reducing the
 		computational cost of the search.
 	*/
-	virtual void relevance_rank_tf(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar);
 
 	/*
 		Functions used for quantised impact ordering.  We need to compute the range of values that will be

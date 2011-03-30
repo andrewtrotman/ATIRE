@@ -30,6 +30,7 @@ class ANT_ranking_function_factory;
 class ANT_memory_index : public ANT_memory_indexer
 {
 friend class ANT_memory_index_one;
+friend class ANT_serch_engine_memory_index;
 
 public:
 	static const long HASH_TABLE_SIZE = 0x1000000;

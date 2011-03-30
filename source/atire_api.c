@@ -566,7 +566,11 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 
 	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer));
 
-	search_engine->process_one_search_term(token_buffer, ranking_function, into);
+	if (stemmer == NULL || !ANT_islower(*token_buffer))		// We don't stem numbers or tag names, or if there is no stemmer
+		search_engine->process_one_search_term(token_buffer, ranking_function, into);
+	else
+		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, into);
+
 	return into;
 	}
 

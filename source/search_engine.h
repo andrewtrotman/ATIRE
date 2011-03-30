@@ -79,6 +79,7 @@ public:
 private:
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 	void initialise(ANT_memory *memory);
+	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 
 public:
 	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *index_filename = "index.aspt");
@@ -89,14 +90,14 @@ public:
 #else
 	void init_accumulators(void);
 #endif
-	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
 	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
-	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function);
+	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
+
 	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
 	long long document_count(void) { return documents; }
@@ -113,11 +114,8 @@ public:
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
 
 	long long boolean_results_list(long terms_in_query);
-
 	long long get_variable(char *name);
-
 	long long quantized(void) { return is_quantized; }					// true if the index is quantized, false if the index is TF values.
-
 
 	/*
 		Methods related to the retrieval of documents from the document repository.

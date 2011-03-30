@@ -34,21 +34,21 @@
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
 #ifdef _MSC_VER
-/*
-	PVOID ANT_INTERLOCKEDEXCHANGEPOINTER()
-	--------------------------------------
-*/
-inline PVOID ANT_InterlockedExchangePointer(PVOID volatile *Target, PVOID Value)
-{
-long long p_as_ll;
+	/*
+		ANT_INTERLOCKEDEXCHANGEPOINTER()
+		--------------------------------
+	*/
+	inline PVOID ANT_InterlockedExchangePointer(PVOID volatile *Target, PVOID Value)
+	{
+	long long p_as_ll;
 
-p_as_ll = (long long)*Target;
+	p_as_ll = (long long)*Target;
 
-if ((p_as_ll & 0x03) != 0)
-	printf("Alignment Error : %p", *Target);
+	if ((p_as_ll & 0x03) != 0)
+		printf("Alignment Error : %p", *Target);
 
-return InterlockedExchangePointer(Target, Value);
-}
+	return InterlockedExchangePointer(Target, Value);
+	}
 #endif
 
 ANT_string_pair ANT_memory_index::squiggle_document_offsets("~documentoffsets");
@@ -367,10 +367,9 @@ for (bucket = 0; bucket < 0x100; bucket++)
 	if (bucket_size[bucket] != 0)
 		*pointer[bucket] = 0;
 
-
 /*
- * The first frequency or impact-value is the max local impact for the term
- */
+	The first frequency or impact-value is the max local impact for the term
+*/
 *max_local = ((unsigned char*)destination)[0];
 
 /*

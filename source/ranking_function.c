@@ -173,14 +173,17 @@ relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, pr
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
 	-----------------------------------------
 */
-void ANT_ranking_function::relevance_rank_tf(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function::relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar)
 {
 long long now;
 now = stats->start_timer();
 tf_to_postings(term_details, decompress_buffer, tf_array);
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
-relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
+if (bitstring == NULL)
+	relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
+else
+	relevance_rank_boolean(bitstring, accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
 }
 
 /*
