@@ -284,6 +284,11 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], "select * from testtable", ANT_directory_iterator::READ_FILE);
 		param += 3;
 		}
+	else if (param_block.recursive == ANT_indexer_param_block::MYSQL)
+		{
+		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], argv[param + 4], ANT_directory_iterator::READ_FILE);
+		param += 4;
+		}
 #endif
 
 	else if (param_block.recursive == ANT_indexer_param_block::TRECWEB)

@@ -75,6 +75,7 @@ puts("-rcsv           Each document is a single line of the given file");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 #ifdef ANT_HAS_MYSQL
 puts("-rphpbb <username> <password> <database> <instance> MySQL phpBB instance");
+puts("-rmysql <username> <password> <database> <instance> <query> MySQL query returning (docid, ...)");
 #endif
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
 puts("-rtrecweb       Recursive search for TREC formatted <DOC>...</DOC> formatted files");
@@ -286,6 +287,8 @@ for (param = 1; param < argc; param++)
 #ifdef ANT_HAS_MYSQL
 		else if (strcmp(command, "rphpbb") == 0)
 			recursive = PHPBB;
+		else if (strcmp(command, "rmysql") == 0)
+			recursive = MYSQL;
 		else if (strcmp(command, "rvbulletin") == 0)
 			recursive = VBULLETIN;
 #endif
