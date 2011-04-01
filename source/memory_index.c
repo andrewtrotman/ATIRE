@@ -477,14 +477,8 @@ if (root->string[0] == '~')			// these are "special" strings in the index (e.g. 
 	{
 	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
 	impacted_postings_length = root->document_frequency;
-#ifdef SPECIAL_COMPRESSION
-	if (root->document_frequency <= 2)
-		{
-		decompressed_postings_list[0] = impacted_postings[0];
-		if (root->document_frequency == 2)
-			decompressed_postings_list[1] = impacted_postings[1];
-		}
-#endif
+	decompressed_postings_list[0] = impacted_postings[0];
+	decompressed_postings_list[1] = impacted_postings[1];
 	}
 else
 	{
@@ -495,24 +489,27 @@ else
 		quantizer->quantize(maximum_collection_rsv, minimum_collection_rsv, root->collection_frequency, root->document_frequency, decompressed_postings_list, serialised_tfs);
 		stats->time_to_quantize += stats->stop_timer(timer);
 		}
-
-#ifdef SPECIAL_COMPRESSION
-	if (root->document_frequency > 2)
-		impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
-	else
-		impacted_postings_length = 0;
-#else
 	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
-#endif
 	}
+/*
+	At this point the impact ordered (not compressed) postings list is in impacted_postings
+	and the first 2 elements of decompressed_postings_list are the first 2 numbers (which are
+	then shoved in the vocab file to save space (and a seek)).  impacted_postings_length stores
+	the length of the impacted_postings array (in integers)
+*/
 
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency <= 2)
 		{
-		// store the first postings(4 bytes) in the higher order of the 8 bytes
-		// and store the first term frequency (4 bytes) in the lower order of the 8 bytes
+		/*
+			Store the first postings(4 bytes) in the higher order of the 8 bytes
+			and store the first term frequency (4 bytes) in the lower order of the 8 bytes
+		*/
 		root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
-		//use impacted_length and end_pos_on_disk to store the second postings and term frequency
+
+		/*
+			Use impacted_length and end_pos_on_disk to store the second postings and term frequency
+		*/
 		if (root->document_frequency == 2)
 			{
 			root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
