@@ -38,6 +38,8 @@ logo = TRUE;
 reporting_frequency = LLONG_MAX;
 ranking_function = IMPACT;
 document_compression_scheme = NONE;
+index_filename = "index.aspt";
+doclist_filename = "doclist.aspt";
 }
 
 /*
@@ -87,6 +89,8 @@ puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rrwarcgz       Search in subdirectories for warc.gz files and index them");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
+puts("-findex <fn>    Output filename for index");
+puts("-fdoclist <fn>  Output filename for doclist");
 
 puts("COMPRESSION");
 puts("-----------");
@@ -315,6 +319,14 @@ for (param = 1; param < argc; param++)
 			{
 			compression_scheme = 0;
 			compression(command + 1);
+			}
+		else if (strcmp(command, "findex") == 0)
+			{
+			index_filename = argv[++param];
+			}
+		else if (strcmp(command, "fdoclist") == 0)
+			{
+			doclist_filename = argv[++param];
 			}
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;

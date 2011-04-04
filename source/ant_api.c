@@ -205,7 +205,7 @@ char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
 if ((document_list_buffer = ANT_disk::read_entire_file((char *)doclist_filename)) == NULL)
-	exit(fprintf(stderr, "Cannot open document ID list file 'doclist.aspt'\n"));
+	exit(fprintf(stderr, "Cannot open document ID list file '%s'\n", doclist_filename));
 
 filename_list_buffer = strnew(document_list_buffer);
 *filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);

@@ -40,6 +40,9 @@ public:
 	long results_list_length;			// length of the results list as exported
 	long stats;							// which stats to display
 
+	char * index_filename;				// Filename of index to read
+	char * doclist_filename;			// Filename of doclist to read
+
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long file_or_memory;				// the index be loaded into memory at startup (TRUE / FALSE)
 

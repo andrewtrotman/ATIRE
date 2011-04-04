@@ -82,7 +82,7 @@ private:
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 
 public:
-	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *index_filename = "index.aspt");
+	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *filename = "index.aspt");
 	virtual ~ANT_search_engine();
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)

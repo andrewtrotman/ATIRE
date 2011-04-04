@@ -599,14 +599,14 @@ return thus_far;
 	READ_DOCID_LIST()
 	-----------------
 */
-char **read_docid_list(long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
+char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
 {
 char *document_list_buffer, *filename_list_buffer;
 char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
-if ((document_list_buffer = ANT_disk::read_entire_file("doclist.aspt")) == NULL)
-	exit(printf("Cannot open document ID list file 'doclist.aspt'\n"));
+if ((document_list_buffer = ANT_disk::read_entire_file(doclist_filename)) == NULL)
+	exit(printf("Cannot open document ID list file '%s'\n", doclist_filename));
 
 filename_list_buffer = strnew(document_list_buffer);
 *filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);
@@ -665,7 +665,7 @@ last_param = params.parse();
 if (params.logo)
 	puts(ANT_version_string);				// print the version string is we parsed the parameters OK
 
-document_list = read_docid_list(&documents_in_id_list, &filename_list, &mem1, &mem2);
+document_list = read_docid_list(params.doclist_filename, &documents_in_id_list, &filename_list, &mem1, &mem2);
 
 if (params.assessments_filename != NULL)
 	{
@@ -679,12 +679,12 @@ answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	{
-	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory, params.file_or_memory);
+	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory, params.file_or_memory, params.index_filename);
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
 	}
 else
 	{
-	search_engine = new ANT_search_engine(&memory, params.file_or_memory);
+	search_engine = new ANT_search_engine(&memory, params.file_or_memory, params.index_filename);
 	if (search_engine->quantized())
 		{
 		if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)

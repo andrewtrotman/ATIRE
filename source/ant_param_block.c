@@ -50,6 +50,8 @@ feedbacker = NONE;
 query_type = ATIRE_API::QUERY_NEXI;
 feedback_documents = 10;
 feedback_terms = 10;
+index_filename = "index.aspt";
+doclist_filename = "doclist.aspt";
 }
 
 /*
@@ -77,6 +79,8 @@ puts("-------");
 puts("-? -h -H        Display this help message");
 puts("-nologo         Suppress banner");
 puts("-people         Display credits");
+puts("-findex <fn>    Filename of index");
+puts("-fdoclist <fn>  Filename of doclist");
 puts("");
 
 ANT_indexer_param_block_stem::help(TRUE);		// stemmers
@@ -419,6 +423,14 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'R')
 			set_ranker(command + 1);
+		else if (strcmp(command, "findex") == 0)
+			{
+			index_filename = argv[++param];
+			}
+		else if (strcmp(command, "fdoclist") == 0)
+			{
+			doclist_filename = argv[++param];
+			}
 		else if (*command == 'f')
 			set_focused_ranker(command + 1);
 		else if (strcmp(command, "people") == 0)

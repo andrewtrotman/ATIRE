@@ -32,6 +32,8 @@ public:
 	long segmentation;					// need segmentation or not for east-asian languages, e.g. Chinese
 	unsigned long readability_measure; 	// readability measure to calculate
 	long document_compression_scheme;	// should we and how should we store the documents in the repository?
+	char *doclist_filename,
+		*index_filename;				// output filenames
 
 protected:
 	void document_compression(char *scheme);
