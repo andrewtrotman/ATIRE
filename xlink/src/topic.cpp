@@ -74,5 +74,5 @@ void topic::print_header()
 void topic::print_footer()
 {
 	//puts("	</topic>");
-	aout << "</topic>\n";
+	aout << "\t</topic>\n";
 }

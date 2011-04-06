@@ -85,6 +85,8 @@ core_sources =  \
 	$(SRCDIR)/directory_iterator_compressor.c \
     $(SRCDIR)/btree_iterator.c \
     $(SRCDIR)/stem_otago.c \
+    $(SRCDIR)/stem_otago_v2.c \
+    $(SRCDIR)/stem_krovetz.c \
     $(SRCDIR)/stem_paice_husk.c \
     $(SRCDIR)/stem_porter.c \
     $(SRCDIR)/stem_lovins.c \
@@ -247,6 +249,8 @@ core_noinst_headers = \
 	$(SRCDIR)/stats_search_engine.h	\
 	$(SRCDIR)/stats_memory_index.h \
 	$(SRCDIR)/stem_otago.h \
+	$(SRCDIR)/stem_otago_v2.h \
+    $(SRCDIR)/stem_krovetz.h \
 	$(SRCDIR)/stem_porter.h	\
 	$(SRCDIR)/stem_paice_husk.h	\
 	$(SRCDIR)/stem_lovins.h	\
