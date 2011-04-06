@@ -68,7 +68,7 @@ private:
 	long forum_results_list_length;			// maximum length of a results list for the evaluation form (INEX or TREC)
 
 protected:
-	char **read_docid_list(long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
+	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
 	long process_NEXI_query(char *query);
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
@@ -91,7 +91,7 @@ public:
 		Load all the necessary stuff for the search engine to start up
 		This assumes we are in same directory as the index
 	*/
-	long open(long type);		// see the enum above for possible types (ORed together)
+	long open(long type, char * index_filename = "index.aspt", char * doclist_filename = "doclist.aspt");		// see the enum above for possible types (ORed together)
 
 	/*
 		Load an assessment file (for INEX or TREC)

@@ -337,9 +337,9 @@ if (params.logo)
 	puts(atire.version());				// print the version string is we parsed the parameters OK
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
-	atire.open(ANT_ANT_param_block::READABLE | params.file_or_memory);
+	atire.open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
 else
-	atire.open(params.file_or_memory);
+	atire.open(params.file_or_memory, params.index_filename, params.doclist_filename);
 
 if (params.assessments_filename != NULL)
 	atire.load_assessments(params.assessments_filename);

@@ -26,7 +26,7 @@ private:
 	void initialise(ANT_memory *memory);
 
 public:
-	ANT_search_engine_readability(ANT_memory *memory, long memory_model, const char *index_filename = "index.aspt");
+	ANT_search_engine_readability(ANT_memory *memory, long memory_model, const char *filename = "index.aspt");
 	virtual ~ANT_search_engine_readability() {};
 };
 
