@@ -273,6 +273,15 @@ for (param = first_param + 1; param < argc; param++)
 					}
 				}
 			}
+		if (chinese)
+			{
+			current = term_list;
+			while (*current != NULL)
+				{
+				delete [] *current;
+				++current;
+				}
+			}
 		delete [] term_list;
 		delete [] file;
 
