@@ -193,6 +193,7 @@ PARTS = \
 	$(OBJDIR)\search_engine_accumulator.obj 		\
 	$(OBJDIR)\search_engine_result.obj 				\
 	$(OBJDIR)\search_engine_result_iterator.obj 	\
+	$(OBJDIR)\search_engine_memory_index.obj 		\
 	$(OBJDIR)\mean_average_precision.obj 			\
 	$(OBJDIR)\assessment.obj						\
 	$(OBJDIR)\assessment_ANT.obj					\

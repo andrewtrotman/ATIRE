@@ -30,7 +30,8 @@ class ANT_ranking_function_factory;
 class ANT_memory_index : public ANT_memory_indexer
 {
 friend class ANT_memory_index_one;
-friend class ANT_serch_engine_memory_index;
+//friend class ANT_serch_engine_memory_index;
+friend class ANT_search_engine_memory_index;
 
 public:
 	static const long HASH_TABLE_SIZE = 0x1000000;
@@ -90,6 +91,7 @@ private:
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df);
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
+	long long node_to_postings(ANT_memory_index_hash_node *root);
 	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);

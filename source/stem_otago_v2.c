@@ -4,6 +4,7 @@
 	Version 2 of the Otago stemmer learned by Vaughn Wood's Genetic Algorithm code.
 */
 #include <string.h>
+#include "pragma.h"
 #include "stem_otago_v2.h"
 
 #define TMP_BUFFER_SIZE 255
@@ -15,6 +16,8 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+#pragma ANT_PRAGMA_CONST_CONDITIONAL
 
 inline static int consonant_p(const char *s, int i) {
     switch (s[i]) {

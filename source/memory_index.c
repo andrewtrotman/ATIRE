@@ -451,25 +451,14 @@ else
 }
 
 /*
-	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
-	---------------------------------------
+	ANT_MEMORY_INDEX::NODE_TO_POSTINGS()
+	------------------------------------
+	This function puts the impact ordered (not compressed) postings in decompressed_postings_list
+	and returns the length of that list (in integers).
 */
-long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
+long long ANT_memory_index::node_to_postings(ANT_memory_index_hash_node *root)
 {
-long terms = 1;
-long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
-long long timer;
-
-stats->term_occurences += root->collection_frequency;
-
-if (root->right != NULL)
-	terms += serialise_all_nodes(file, root->right);
-
-//printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
-get_serialised_postings(root, &doc_size, &tf_size);
-
-stats->bytes_to_store_docids += doc_size;
-stats->bytes_to_store_tfs += tf_size;
+long long timer, impacted_postings_length;
 
 if (root->string[0] == '~')			// these are "special" strings in the index (e.g. document lengths)
 	{
@@ -489,13 +478,38 @@ else
 		}
 	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
 	}
+
+return impacted_postings_length;
+}
+
+/*
+	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
+	---------------------------------------
+*/
+long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
+{
+long terms = 1;
+long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
+
+stats->term_occurences += root->collection_frequency;
+
+if (root->right != NULL)
+	terms += serialise_all_nodes(file, root->right);
+
+//printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
+get_serialised_postings(root, &doc_size, &tf_size);
+
+stats->bytes_to_store_docids += doc_size;
+stats->bytes_to_store_tfs += tf_size;
+
+impacted_postings_length = node_to_postings(root);
+
 /*
 	At this point the impact ordered (not compressed) postings list is in impacted_postings
 	and the first 2 elements of decompressed_postings_list are the first 2 numbers (which are
 	then shoved in the vocab file to save space (and a seek)).  impacted_postings_length stores
 	the length of the impacted_postings array (in integers)
 */
-
 #ifdef SPECIAL_COMPRESSION
 	if (root->document_frequency <= 2)
 		{

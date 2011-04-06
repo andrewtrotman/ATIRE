@@ -48,9 +48,13 @@
 
   07/29/2005 (dmf) Rewritten to be threadsafe C++.
 */
-#include "stem_krovetz.h"
 #include <stdlib.h>
 #include <string.h>
+#include "stem_krovetz.h"
+#include "pragma.h"
+
+#pragma ANT_PRAGMA_CONST_CONDITIONAL
+
 
 #ifdef NEVER
 	#include <iostream>				// not for ANT
@@ -1318,8 +1322,8 @@ return (int)strlen(buffer)+1;
 */
 struct conflation_pair
 {
-const char* const variant;
-const char* const word;
+const char *variant;
+const char *word;
 };
 
 /*
