@@ -26,14 +26,12 @@
 #include "btree_iterator.h"
 #include "pdebug.h"
 
-#if _MSC_VER
-	#include <windows.h>
-#endif
-#undef max
-
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
-#ifdef _MSC_VER
+#if _MSC_VER
+	#include <windows.h>
+	#undef max
+
 	/*
 		ANT_INTERLOCKEDEXCHANGEPOINTER()
 		--------------------------------
