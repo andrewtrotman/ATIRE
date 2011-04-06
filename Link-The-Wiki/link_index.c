@@ -95,7 +95,7 @@ while (*ch != '\0')
 	if ((ch = strchr(ch, '\n')) == NULL)
 		break;
 	*ch = '\0';			// NULL terminate the string
-	string_clean(link_list[lines].term, lowercase_only);
+	string_clean(link_list[lines].term, lowercase_only, TRUE); // if the third parameter is not set to TRUE, for the language other than English this will make all the anchors gone
 
 	lines++;
 	ch++;

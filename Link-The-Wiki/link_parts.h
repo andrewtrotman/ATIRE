@@ -13,6 +13,28 @@
 #define ARTICLE_ID_SIGNITURE "<id>"
 #define ARTICLE_NAME_SIGNITURE "title"
 
+
+/*
+	STRIP_SPACE_INLINE()
+	--------------------
+*/
+char *strip_space_inline(char *source)
+{
+char *end, *start = source;
+
+while (isspace(*start))
+	start++;
+
+if (start > source)
+	memmove(source, start, strlen(start) + 1);		// copy the '\0'
+
+end = source + strlen(source) - 1;
+while ((end >= source) && (isspace(*end)))
+	*end-- = '\0';
+
+return source;
+}
+
 /*
 	STRING_CLEAN()
 	--------------
@@ -50,24 +72,27 @@ while (*ch != '\0')
 /*
 	now remove multiple, head, and tail spaces.
 */
+//if (trim)
+//	{
+//	from = to = file;
+//	while (isspace(*from))
+//		from++;
+//	while (*from != '\0')
+//		{
+//		while (isalnum(*from))
+//			*to++ = *from++;
+//		if (isspace(*from))
+//			*to++ = *from++;
+//		while (isspace(*from))
+//			from++;
+//		}
+//	if (to > file && isspace(*(to - 1)))
+//		to--;
+//	*to = '\0';
+//	}
+// use the new trimming function instead because the original one won't work for the non-alphabet characters
 if (trim)
-	{
-	from = to = file;
-	while (isspace(*from))
-		from++;
-	while (*from != '\0')
-		{
-		while (isalnum(*from))
-			*to++ = *from++;
-		if (isspace(*from))
-			*to++ = *from++;
-		while (isspace(*from))
-			from++;
-		}
-	if (to > file && isspace(*(to - 1)))
-		to--;
-	*to = '\0';
-	}
+	strip_space_inline(file);
 
 return file;
 }

@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include "../source/disk.h"
 #include "../source/directory_iterator_recursive.h"
+#include "../source/parser.h"
 #include "link_parts.h"
 
 #ifndef FALSE
@@ -18,7 +19,7 @@
 	#define TRUE (!FALSE)
 #endif
 
-static char buffer[1024 * 1024];
+//static char buffer[1024 * 1024];
 
 /*
 	class ANT_LINK_EXTRACT_TERM
@@ -59,6 +60,7 @@ FILE *fp;
 ANT_link_extract_term *all_terms, *term;
 long unique_terms;
 char *term_end;
+char buffer[1024 * 1024];
 
 if ((fp = fopen(filename, "rb")) == NULL)
 	exit(printf("Cannot index file:%s\n", filename));
@@ -135,24 +137,38 @@ char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
 long lowercase_only, first_param;
+long chinese, is_chinese_token, token_len;
+char *command;
 ANT_directory_iterator_object file_object;
 
+char buffer[1024 * 1024];
+
 if (argc < 3)
-	exit(printf("Usage:%s [-lowercase] <index> <file_to_link> ...\n", argv[0]));
+	exit(printf("Usage:%s [-chinese] [-lowercase] <index> <file_to_link> ...\n", argv[0]));
 
 first_param = 1;
 lowercase_only = FALSE;
-if (*argv[1] == '-')
-	{
-	if (strcmp(argv[1], "-lowercase") == 0)
-		{
-		lowercase_only = TRUE;
-		first_param = 2;
-		}
-	else
-		exit(printf("Unknown parameter:%s\n", argv[1]));
-	}
+chinese = FALSE;
 
+for (param = 1; param < argc; param++)
+	{
+	if (*argv[param] == '-')
+		{
+		command = argv[param] + 1;
+		if (strcmp(command, "lowercase") == 0)
+			{
+			lowercase_only = TRUE;
+			++first_param;
+			}
+		else if (strcmp(command, "chinese") == 0)
+			{
+			chinese = TRUE;
+			++first_param;
+			}
+		else
+			exit(printf("Unknown parameter:%s\n", argv[param]));
+		}
+	}
 
 link_index = read_index(argv[first_param], &terms_in_index);
 
@@ -171,11 +187,37 @@ for (param = first_param + 1; param < argc; param++)
 		{
 		current_docid = get_doc_id(file);
 //		printf("ID:%d\n", current_docid);
-		string_clean(file, lowercase_only);
+		string_clean(file, lowercase_only, TRUE);
 
 		current = term_list = new char *[strlen(file)];		// this is the worst case by far
-		for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
-			*current++ = token;
+		if (chinese)
+			{
+				where_to = file;
+				while (*where_to != '\0')
+					{
+					while (*where_to == ' ')
+						++where_to;
+
+					if ((*where_to & 0x80) &&ANT_parser::isutf8(where_to))
+						token_len = ANT_parser::utf8_bytes(where_to);
+					else
+						while (*where_to != '\0' && *where_to != ' ' &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
+							{
+							++token_len;
+							++where_to;
+							}
+
+					*current = token = new char[token_len + 1];
+					strncpy(*current, where_to, token_len);
+					token[token_len] = '\0';
+					++current;
+					where_to += token_len;
+					token_len = 0;
+					}
+			}
+		else
+			for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
+				*current++ = token;
 		*current = NULL;
 
 		for (first = term_list; *first != NULL; first++)
@@ -187,13 +229,28 @@ for (param = first_param + 1; param < argc; param++)
 					{
 					strcpy(buffer, *first);
 					where_to = buffer + strlen(buffer);
+					if (chinese)
+						{
+						if (ANT_parser::ischinese(*first))
+							is_chinese_token = TRUE;
+						else
+							is_chinese_token = FALSE;
+						}
 					}
 				else
 					{
-					*where_to++ = ' ';
+					if (chinese)
+						{
+						if (!is_chinese_token && !ANT_parser::ischinese(*last))
+							*where_to++ = ' ';
+						}
+					else
+						*where_to++ = ' ';
 					strcpy(where_to, *last);
 					where_to += strlen(*last);
 					}
+
+				*where_to = '\0';
 
 				index_term = find_term_in_list(buffer, link_index, terms_in_index);
 

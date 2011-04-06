@@ -531,7 +531,7 @@ while (pos != NULL)
 		pos = strchr(pos, '>');
 
 		copy = strnnew(pos + 1, end - pos - 1);
-		string_clean(copy, lowercase_only);
+		string_clean(copy, lowercase_only, TRUE);
 
 		links_in_orphan[links_in_orphan_length].term = copy;
 		links_in_orphan[links_in_orphan_length].gamma = 0;
@@ -676,7 +676,7 @@ for (param = index_argv_param + 1; param < argc; param++)
 		generate_collection_link_set(file);
 		add_or_subtract_orphan_links(SUBTRACT_ORPHAN_LINKS, link_index, terms_in_index);
 #endif
-		string_clean(file, lowercase_only);
+		string_clean(file, lowercase_only, TRUE);
 
 		current = term_list = new char *[strlen(file)];		// this is the worst case by far
 		for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
