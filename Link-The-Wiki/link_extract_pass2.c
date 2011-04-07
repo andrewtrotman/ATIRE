@@ -19,7 +19,10 @@
 	#define TRUE (!FALSE)
 #endif
 
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+
 //static char buffer[1024 * 1024];
+static long chinese;
 
 /*
 	class ANT_LINK_EXTRACT_TERM
@@ -92,7 +95,132 @@ void print_answer(ANT_link_extract_term *index, long terms_in_index)
 long current;
 
 for (current = 0; current < terms_in_index; current++)
+	{
 	printf("%d:%d:%s\n", index[current].docs_containing_term, index[current].total_occurences, index[current].term);
+	}
+}
+
+/*
+	CREATE_UTF8_TOKEN_LIST()
+	------------------------
+*/
+int create_utf8_token_list(char *s, char **term_list)
+{
+char *start, *token, *where_to = s;
+long token_len = 0, term_count;
+char **current = term_list;
+
+term_count = 0;
+while (*where_to != '\0')
+	{
+	while (*where_to == ' ')
+		++where_to;
+
+	start = where_to;
+	if ((*where_to & 0x80) &&ANT_parser::isutf8(where_to))
+		{
+		token_len = ANT_parser::utf8_bytes(where_to);
+		where_to += token_len;
+		}
+	else
+		while (*where_to != '\0' && *where_to != ' ' &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
+			{
+			++token_len;
+			++where_to;
+			}
+
+	*current = token = new char[token_len + 1];
+	strncpy(*current, start, token_len);
+	token[token_len] = '\0';
+	++current;
+	token_len = 0;
+	++term_count;
+	}
+
+*current = NULL;
+return term_count;
+}
+
+/*
+	FREE_UTF8_TOKEN_LIST()
+	----------------------
+*/
+void free_utf8_token_list(char **term_list)
+{
+char **current = term_list;
+while (*current != NULL)
+	{
+	delete [] *current;
+	++current;
+	}
+}
+
+/*
+	UTF8_TOKEN_COMPARE()
+	--------------------
+*/
+int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
+{
+int cmp, i, min_len;
+char **term_list_s1 = new char *[strlen(s1)];
+char **term_list_s2 = new char *[strlen(s2)];
+int token_count_s1, token_count_s2;
+token_count_s1 = create_utf8_token_list(s1, term_list_s1);
+token_count_s2 = create_utf8_token_list(s2, term_list_s2);
+
+int min_count = token_count_s1 > token_count_s2 ? token_count_s2 : token_count_s1;
+
+for (i = 0; i < min_count; ++i)
+	{
+	min_len = MIN(strlen(term_list_s1[i]), strlen(term_list_s2[i]));
+	if ((cmp = memcmp(term_list_s1[i], term_list_s2[i], min_len)) == 0)
+		{
+		if (strlen(term_list_s1[i]) == strlen(term_list_s2[i]))
+			continue;
+		else
+			{
+			cmp = strlen(term_list_s1[i]) < strlen(term_list_s2[i]) ? -1 : 1;
+			break;
+			}
+		}
+	else
+		break;
+	}
+
+if (cmp == 0)
+	{
+	if (is_substring != NULL && min_count == token_count_s1)
+		*is_substring = TRUE;
+	if (token_count_s1 != token_count_s2)
+		cmp = token_count_s1 < token_count_s2 ? -1 : 1;
+	}
+
+
+free_utf8_token_list(term_list_s1);
+free_utf8_token_list(term_list_s2);
+
+delete [] term_list_s1;
+delete [] term_list_s2;
+return cmp;
+}
+
+/*
+	STRING_COMPARE()
+	----------------
+*/
+int string_compare(char *s1, char *s2)
+{
+int min_len, cmp;
+if (chinese)
+	cmp = utf8_token_compare(s1, s2);
+else
+	{
+	min_len = strlen(s1) > strlen(s2) ? strlen(s2) : strlen(s1);
+	cmp = memcmp(s1, s2, min_len);
+	if (cmp == 0 && strlen(s1) != strlen(s2))
+		cmp = strlen(s1) < strlen(s2) ? -1 : 1;
+	}
+return cmp;
 }
 
 /*
@@ -108,13 +236,13 @@ high = list_length;
 while (low < high)
 	{
 	mid = (low + high) / 2;
-	if (strcmp(list[mid].term, value) < 0)
+	if (string_compare(list[mid].term, value) < 0)
 		low = mid + 1;
 	else
 		high = mid;
 	}
 
-if ((low < list_length) && (strcmp(value, list[low].term) == 0))
+if ((low < list_length) && (string_compare(value, list[low].term) == 0))
 	return &list[low];		// match
 else
 	{
@@ -137,7 +265,7 @@ char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
 long lowercase_only, first_param;
-long chinese, is_chinese_token, token_len;
+long is_utf8_token, token_len, cmp, is_substring;
 char *command;
 ANT_directory_iterator_object file_object;
 
@@ -191,43 +319,18 @@ for (param = first_param + 1; param < argc; param++)
 
 		current = term_list = new char *[strlen(file)];		// this is the worst case by far
 		if (chinese)
-			{
-				where_to = file;
-				while (*where_to != '\0')
-					{
-					while (*where_to == ' ')
-						++where_to;
-
-					start = where_to;
-					if ((*where_to & 0x80) &&ANT_parser::isutf8(where_to))
-						{
-						token_len = ANT_parser::utf8_bytes(where_to);
-						where_to += token_len;
-						}
-					else
-						{
-						while (*where_to != '\0' && *where_to != ' ' &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
-							{
-							++token_len;
-							++where_to;
-							}
-
-						}
-
-					*current = token = new char[token_len + 1];
-					strncpy(*current, start, token_len);
-					token[token_len] = '\0';
-					++current;
-					token_len = 0;
-					}
-			}
+			create_utf8_token_list(file, term_list);
 		else
+			{
 			for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
 				*current++ = token;
-		*current = NULL;
+			*current = NULL;
+			}
+
 
 		for (first = term_list; *first != NULL; first++)
 			{
+//			fprintf(stderr, "%s\n", *first);
 			where_to = buffer;
 
 			for (last = first; *last != NULL; last++)
@@ -238,17 +341,17 @@ for (param = first_param + 1; param < argc; param++)
 					where_to = buffer + strlen(buffer);
 					if (chinese)
 						{
-						if (ANT_parser::ischinese(*first))
-							is_chinese_token = TRUE;
+						if (ANT_parser::isutf8(*first))
+							is_utf8_token = TRUE;
 						else
-							is_chinese_token = FALSE;
+							is_utf8_token = FALSE;
 						}
 					}
 				else
 					{
 					if (chinese)
 						{
-						if (!is_chinese_token && !ANT_parser::ischinese(*last))
+						if (!is_utf8_token && !ANT_parser::ischinese(*last))
 							*where_to++ = ' ';
 						}
 					else
@@ -264,7 +367,15 @@ for (param = first_param + 1; param < argc; param++)
 				if (index_term == NULL)
 					break;		// we're after the last term in the list so can stop because we can't be a substring
 
-				if (strcmp(buffer, index_term->term) == 0)		// we're a term in the list
+				if (chinese)
+					{
+					is_substring = FALSE;
+					cmp = utf8_token_compare(buffer, index_term->term, &is_substring);
+					}
+				else
+					cmp = string_compare(buffer, index_term->term);
+
+				if (cmp == 0)		// we're a term in the list
 					{
 					index_term->total_occurences++;
 					if (index_term->last_docid != current_docid)
@@ -275,20 +386,17 @@ for (param = first_param + 1; param < argc; param++)
 					}
 				else
 					{
-					if (strncmp(buffer, index_term->term, strlen(buffer)) != 0)
+					if (chinese)
+						cmp = is_substring == TRUE ? 0 : 1;
+					else
+						cmp = memcmp(buffer, index_term->term, strlen(buffer));
+					if  (cmp != 0)
 						break;		// we're a not a substring so we can't find a longer term
 					}
 				}
 			}
 		if (chinese)
-			{
-			current = term_list;
-			while (*current != NULL)
-				{
-				delete [] *current;
-				++current;
-				}
-			}
+			free_utf8_token_list(term_list);
 		delete [] term_list;
 		delete [] file;
 
