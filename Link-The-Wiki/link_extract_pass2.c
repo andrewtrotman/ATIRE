@@ -211,7 +211,7 @@ return cmp;
 int string_compare(char *s1, char *s2)
 {
 int min_len, cmp;
-if (chinese)
+if (chinese && (strchr(s1, ' ') != NULL || strchr(s2, ' ') != NULL)) // we don't need token comparison for all, only those has space in it
 	cmp = utf8_token_compare(s1, s2);
 else
 	{
