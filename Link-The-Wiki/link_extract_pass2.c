@@ -132,7 +132,7 @@ else
 int main(int argc, char *argv[])
 {
 static char *seperators = " ";
-char *file, *token, *where_to, *filename;
+char *file, *token, *where_to, *filename, *start;
 char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
@@ -198,20 +198,26 @@ for (param = first_param + 1; param < argc; param++)
 					while (*where_to == ' ')
 						++where_to;
 
+					start = where_to;
 					if ((*where_to & 0x80) &&ANT_parser::isutf8(where_to))
+						{
 						token_len = ANT_parser::utf8_bytes(where_to);
+						where_to += token_len;
+						}
 					else
+						{
 						while (*where_to != '\0' && *where_to != ' ' &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
 							{
 							++token_len;
 							++where_to;
 							}
 
+						}
+
 					*current = token = new char[token_len + 1];
-					strncpy(*current, where_to, token_len);
+					strncpy(*current, start, token_len);
 					token[token_len] = '\0';
 					++current;
-					where_to += token_len;
 					token_len = 0;
 					}
 			}
@@ -223,6 +229,7 @@ for (param = first_param + 1; param < argc; param++)
 		for (first = term_list; *first != NULL; first++)
 			{
 			where_to = buffer;
+
 			for (last = first; *last != NULL; last++)
 				{
 				if (where_to == buffer)
