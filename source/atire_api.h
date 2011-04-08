@@ -138,6 +138,12 @@ public:
 	long long search(char *query, long long top_k = LLONG_MAX, long query_type = QUERY_NEXI);
 
 	/*
+		Call the re-ranker.  This takes the top few results and re-orders based on
+		analysis of the result set.
+	*/
+	void rerank(void);
+
+	/*
 		Turn the numeric internal IDs into a list of external string IDs (post search)
 	*/
 	char **generate_results_list(void);

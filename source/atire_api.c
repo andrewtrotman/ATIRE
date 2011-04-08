@@ -51,6 +51,12 @@
 #include "relevance_feedback_factory.h"
 #include "memory_index_one_node.h"
 
+#include "search_engine_memory_index.h"
+#include "index_document.h"
+#include "directory_iterator_object.h"
+#include "parser.h"
+#include "readability_factory.h"
+
 #include "version.h"
 
 #ifndef FALSE
@@ -141,6 +147,7 @@ return ANT_version_string;
 	ATIRE_API::MAX()
 	----------------
 */
+#undef max
 char *ATIRE_API::max(char *a, char *b, char *c)
 {
 char *thus_far;
@@ -825,7 +832,6 @@ if (query_type_is_all_terms)
 */
 if (feedbacker != NULL)
 	{
-//	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, 10, 10, &parsed_query->feedback_terms_in_query);
 	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
 #ifdef NEVER
 	printf("\nFEEDBACK TERMS:");
@@ -855,7 +861,7 @@ if (feedbacker != NULL)
 		/*
 			Rank
 		*/
-		search_engine->sort_results_list(top_k, &hits); // rank
+		search_engine->sort_results_list(top_k, &hits);
 		}
 	}
 
@@ -865,6 +871,62 @@ if (feedbacker != NULL)
 search_engine->stats_add();
 
 return hits;
+}
+
+/*
+	ATIRE_API::RERANK()
+	-------------------
+*/
+void ATIRE_API::rerank(void)
+{
+ANT_memory_index *indexer;
+ANT_search_engine_memory_index *in_memory_index;
+long long current, top_n;
+char *document_buffer;
+const long documents_to_examine = 50;		// load and parse and reindex this many documents;
+long long docid;
+unsigned long current_document_length;
+ANT_directory_iterator_object object;
+ANT_readability_factory *readability;
+ANT_parser *parser;
+ANT_memory *memory;
+
+parser = new ANT_parser(TRUE);
+readability = new ANT_readability_factory;
+readability->set_measure(ANT_readability_factory::NONE);
+readability->set_parser(parser);
+
+indexer = new ANT_memory_index(NULL);
+document_buffer = new char [get_longest_document_length()];
+
+top_n = documents_to_examine < search_engine->results_list->results_list_length ? documents_to_examine : search_engine->results_list->results_list_length;
+
+for (current = 0; current < top_n; current++)
+	{
+	docid = search_engine->results_list->accumulator_pointers[current] - search_engine->results_list->accumulator;
+	current_document_length = get_longest_document_length();
+	get_document(document_buffer, &current_document_length, docid);
+
+	/*
+		Now index the document.
+	*/
+	object.file = document_buffer;
+	index_document(indexer, NULL, TRUE, readability, current, &object);
+	}
+
+delete [] document_buffer;
+delete readability;
+delete parser;
+delete indexer;
+
+/*
+	turn the index into a search engine.
+*/
+memory = new ANT_memory;
+in_memory_index = new ANT_search_engine_memory_index(indexer, memory);
+delete in_memory_index;
+
+delete memory;
 }
 
 /*

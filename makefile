@@ -176,6 +176,7 @@ PARTS = \
 	$(OBJDIR)\channel_socket.obj					\
 	$(OBJDIR)\parser.obj 							\
 	$(OBJDIR)\parser_readability.obj				\
+	$(OBJDIR)\index_document.obj					\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
 	$(OBJDIR)\memory_indexer.obj 					\

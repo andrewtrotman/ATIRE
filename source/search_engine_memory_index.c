@@ -2,6 +2,7 @@
 	SEARCH_ENGINE_MEMORY_INDEX.C
 	----------------------------
 */
+#include "btree_iterator.h"
 #include "search_engine_memory_index.h"
 #include "search_engine_btree_leaf.h"
 #include "memory_index.h"
