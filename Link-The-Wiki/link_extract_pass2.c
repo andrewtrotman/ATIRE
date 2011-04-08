@@ -113,7 +113,7 @@ char **current = term_list;
 term_count = 0;
 while (*where_to != '\0')
 	{
-	while (*where_to == ' ')
+	while (isspace(*where_to))
 		++where_to;
 
 	start = where_to;
@@ -123,7 +123,7 @@ while (*where_to != '\0')
 		where_to += token_len;
 		}
 	else
-		while (*where_to != '\0' && *where_to != ' ' &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
+		while (*where_to != '\0' && !isspace(*where_to) &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
 			{
 			++token_len;
 			++where_to;
@@ -341,7 +341,7 @@ for (param = first_param + 1; param < argc; param++)
 					where_to = buffer + strlen(buffer);
 					if (chinese)
 						{
-						if (ANT_parser::isutf8(*first))
+						if ((*first[0] & 0x80) && ANT_parser::isutf8(*first))
 							is_utf8_token = TRUE;
 						else
 							is_utf8_token = FALSE;
@@ -349,18 +349,23 @@ for (param = first_param + 1; param < argc; param++)
 					}
 				else
 					{
-					if (chinese)
-						{
-						if (!is_utf8_token && !ANT_parser::ischinese(*last))
-							*where_to++ = ' ';
-						}
-					else
+					if (!chinese)
+//						{
+//						if (!is_utf8_token && !ANT_parser::ischinese(*last))
+//							*where_to++ = ' ';
+//						}
+//					else
 						*where_to++ = ' ';
 					strcpy(where_to, *last);
 					where_to += strlen(*last);
 					}
 
 				*where_to = '\0';
+
+//				for the possible debuging later
+//				static char di[] = {(char)0xe6, (char)0xa2, (char)0x85};
+//				if (strncmp(*last, "(Serranocirrhitus", strlen("(Serranocirrhitus")) == 0)
+//					fprintf(stderr, "I got you");
 
 				index_term = find_term_in_list(buffer, link_index, terms_in_index);
 
