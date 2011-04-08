@@ -25,12 +25,13 @@
 #define STEM_KROVETZ_H_
 
 #include <string.h>
-#include <hash_map>
-#include "stem.h"
-
-#if (defined(__GNUC__) && (((__GNUC__ == 3) && ( __GNUC_MINOR__ > 0)) || __GNUC__ >= 4))
-using namespace __gnu_cxx;
+#if (defined(__APPLE_CC__) || defined(__GNUC__))
+	#include <ext/hash_map>
+	using namespace __gnu_cxx;
+#else
+	#include <hash_map>
 #endif
+#include "stem.h"
 
 /*
 	class ANT_STEM_KROVETZ
