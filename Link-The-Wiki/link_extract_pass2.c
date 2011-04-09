@@ -156,51 +156,72 @@ while (*current != NULL)
 }
 
 /*
+ 	STRING_REMOVE_SPACE()
+	--------------------
+*/
+void string_remove_space(char *s)
+{
+char *last, *previous, *temp;
+long len, has_space;
+last = s + strlen(s);
+while (last != s)
+	{
+	previous = last - 1;
+	if (*previous == ' ')
+		{
+		has_space = TRUE;
+		while (*previous == ' ' && previous > s)
+			--previous;
+		if (previous != s)
+			++previous;
+		}
+	if (has_space)
+		{
+		len = strlen(last);
+		memmove(previous, last, len);
+		previous[len] = '\0';
+		}
+
+	last = previous;
+	has_space = FALSE;
+	}
+}
+
+/*
 	UTF8_TOKEN_COMPARE()
 	--------------------
 */
 int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
 {
 int cmp, i, min_len;
-char **term_list_s1 = new char *[strlen(s1)];
-char **term_list_s2 = new char *[strlen(s2)];
-int token_count_s1, token_count_s2;
-token_count_s1 = create_utf8_token_list(s1, term_list_s1);
-token_count_s2 = create_utf8_token_list(s2, term_list_s2);
+char *new_s1 = strdup(s1);
+char *new_s2 = strdup(s2);
 
-int min_count = token_count_s1 > token_count_s2 ? token_count_s2 : token_count_s1;
+if (strchr(new_s1, ' ') != NULL)
+	string_remove_space(new_s1);
 
-for (i = 0; i < min_count; ++i)
-	{
-	min_len = MIN(strlen(term_list_s1[i]), strlen(term_list_s2[i]));
-	if ((cmp = memcmp(term_list_s1[i], term_list_s2[i], min_len)) == 0)
-		{
-		if (strlen(term_list_s1[i]) == strlen(term_list_s2[i]))
-			continue;
-		else
-			{
-			cmp = strlen(term_list_s1[i]) < strlen(term_list_s2[i]) ? -1 : 1;
-			break;
-			}
-		}
-	else
-		break;
-	}
+if (strchr(new_s2, ' ') != NULL)
+	string_remove_space(new_s2);
+
+min_len = MIN(strlen(new_s1), strlen(new_s2));
+
+cmp = memcmp(new_s1, new_s2, min_len);
 
 if (cmp == 0)
 	{
-	if (is_substring != NULL && min_count == token_count_s1)
-		*is_substring = TRUE;
-	if (token_count_s1 != token_count_s2)
-		cmp = token_count_s1 < token_count_s2 ? -1 : 1;
+	if (strlen(new_s1) <= strlen(new_s2))
+		{
+		if (is_substring != NULL)
+			*is_substring = TRUE;
+		if (strlen(new_s1) < strlen(new_s2))
+			cmp = -1;
+		}
+	else
+		cmp = 1;
 	}
 
-
-free_utf8_token_list(term_list_s1);
-free_utf8_token_list(term_list_s2);
-
-delete [] term_list_s1;
-delete [] term_list_s2;
+free(new_s1);
+free(new_s2);
 return cmp;
 }
 
@@ -332,7 +353,8 @@ for (param = first_param + 1; param < argc; param++)
 			{
 //			fprintf(stderr, "%s\n", *first);
 			where_to = buffer;
-
+//			if (*first[0] == '"')
+//				fprintf(stderr, "I got you");
 			for (last = first; *last != NULL; last++)
 				{
 				if (where_to == buffer)
@@ -362,9 +384,12 @@ for (param = first_param + 1; param < argc; param++)
 
 				*where_to = '\0';
 
-//				for the possible debuging later
+//				for the possible debugging later
 //				static char di[] = {(char)0xe6, (char)0xa2, (char)0x85};
-//				if (strncmp(*last, "(Serranocirrhitus", strlen("(Serranocirrhitus")) == 0)
+//				static char xianjin[] = {(char)0xe3, (char)0x80, (char)0x8a, (char)0xe7, (char)0x8e, (char)0xb0};
+//				if (memcmp(buffer, xianjin, 6) == 0)
+//					fprintf(stderr, "I got you");
+//				if (strncmp(*last, "\"", 1)) == 0)
 //					fprintf(stderr, "I got you");
 
 				index_term = find_term_in_list(buffer, link_index, terms_in_index);
