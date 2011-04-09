@@ -49,6 +49,49 @@ return cmp;
 }
 
 /*
+	COMPARE_WITH_NO_SPACE()
+	-----------------------
+*/
+int compare_with_no_space(const void *a, const void *b)
+{
+ANT_link_element *one, *two;
+int cmp, min_len;
+
+one = (ANT_link_element *)a;
+two = (ANT_link_element *)b;
+
+char *new_one = strdup(one->term);
+char *new_two = strdup(two->term);
+
+if (strchr(new_one, ' ') != NULL)
+	string_remove_space(new_one);
+
+if (strchr(new_two, ' ') != NULL)
+	string_remove_space(new_two);
+
+min_len = MIN(strlen(new_one), strlen(new_two));
+
+cmp = memcmp(new_one, new_two, min_len);
+
+if (cmp == 0)
+	{
+	if (strlen(new_one) < strlen(new_two))
+		cmp = -1;
+	else if (strlen(new_one) > strlen(new_two))
+		cmp = 1;
+	}
+
+if (cmp == 0)				// first by term
+	if ((cmp = one->docid - two->docid) == 0)				// then by destination document ID
+		cmp = one->anchor_docid - two->anchor_docid;		// then by source document ID
+
+free(new_one);
+free(new_two);
+
+return cmp;
+}
+
+/*
 	MAIN()
 	------
 */
@@ -58,18 +101,25 @@ ANT_link_element *link_list;
 ANT_disk disk;
 long lines, current, lines_output, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
 char *file, *ch, *last_string;
-long lowercase_only;
+long lowercase_only, param, chinese, cmp;
+char *command;
 
-if (argc != 2 && argc != 3)
-	exit(printf("Usage:%s <infile> [-lowercase]\n", argv[0]));
+if (argc < 2)
+	exit(printf("Usage:%s <infile> [-chinese] [-lowercase]\n", argv[0]));
 
 lowercase_only = FALSE;
-if (argc == 3)
+for (param = 2; param < argc; param++)
 	{
-	if (strcmp(argv[2], "-lowercase") == 0)
-		lowercase_only = TRUE;
-	else
-		exit(printf("unknown parameter:%s\n", argv[2]));
+	if (*argv[param] == '-')
+		{
+		command = argv[param] + 1;
+		if (strcmp(command, "lowercase") == 0)
+			lowercase_only = TRUE;
+		else if (strcmp(command, "chinese") == 0)
+			chinese = TRUE;
+		else
+			exit(printf("Unknown parameter:%s\n", argv[param]));
+		}
 	}
 
 if ((file = disk.read_entire_file(argv[1])) == NULL)
@@ -95,21 +145,32 @@ while (*ch != '\0')
 	if ((ch = strchr(ch, '\n')) == NULL)
 		break;
 	*ch = '\0';			// NULL terminate the string
-	string_clean(link_list[lines].term, lowercase_only, TRUE); // if the third parameter is not set to TRUE, for the language other than English this will make all the anchors gone
+	string_clean(link_list[lines].term, lowercase_only, TRUE, TRUE); // if the third parameter is not set to TRUE, for the language other than English this will make all the anchors gone
 
 	lines++;
 	ch++;
 	}
-qsort(link_list, lines, sizeof(*link_list), ANT_link_element::compare);
+
+if (chinese)
+	qsort(link_list, lines, sizeof(*link_list), compare_with_no_space);
+else
+	qsort(link_list, lines, sizeof(*link_list), ANT_link_element::compare);
+
 
 last_string = "\n";
 unique_terms = 0;
 for (current = 0; current < lines; current++)
-	if (strlen(link_list[current].term) > 0 && strcmp(link_list[current].term, last_string) != 0)
+	{
+	if (chinese)
+		cmp = utf8_token_compare(link_list[current].term, last_string);
+	else
+		cmp = strcmp(link_list[current].term, last_string);
+	if (strlen(link_list[current].term) > 0 && cmp != 0)
 		{
 		unique_terms++;
 		last_string = link_list[current].term;
 		}
+	}
 printf("%d terms\n", unique_terms);
 
 last_string = "Z";
@@ -122,7 +183,11 @@ for (current = 0; current < lines; current++)
 	{
 	if (strlen(link_list[current].term) > 0)
 		{
-		if (strcmp(link_list[current].term, last_string) != 0)
+		if (chinese)
+			cmp = utf8_token_compare(link_list[current].term, last_string);
+		else
+			cmp = strcmp(link_list[current].term, last_string);
+		if (cmp != 0)
 			{
 			if (lines_output > 0)
 				printf("<%d,%d,%d>\n", last_docid, anchor_times, times);

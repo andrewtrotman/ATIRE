@@ -13,6 +13,14 @@
 #define ARTICLE_ID_SIGNITURE "<id>"
 #define ARTICLE_NAME_SIGNITURE "title"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 /*
 	STRIP_SPACE_INLINE()
@@ -167,5 +175,75 @@ for (; i < strlen(source); i++)
 return source;
 }
 
-#endif __LINK_PARTS_H__
+/*
+ 	STRING_REMOVE_SPACE()
+	--------------------
+*/
+void string_remove_space(char *s)
+{
+char *last, *previous, *temp;
+long len, has_space;
+has_space = FALSE;
+last = s + strlen(s);
+while (last != s)
+	{
+	previous = last - 1;
+	if (*previous == ' ')
+		{
+		has_space = TRUE;
+		while (*previous == ' ' && previous >= s)
+			--previous;
+		++previous;
+		}
+	if (has_space)
+		{
+		len = strlen(last);
+		memmove(previous, last, len);
+		previous[len] = '\0';
+		has_space = FALSE;
+		}
+
+	last = previous;
+	}
+}
+
+/*
+	UTF8_TOKEN_COMPARE()
+	--------------------
+*/
+int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
+{
+int cmp, i, min_len;
+char *new_s1 = strdup(s1);
+char *new_s2 = strdup(s2);
+
+if (strchr(new_s1, ' ') != NULL)
+	string_remove_space(new_s1);
+
+if (strchr(new_s2, ' ') != NULL)
+	string_remove_space(new_s2);
+
+min_len = MIN(strlen(new_s1), strlen(new_s2));
+
+cmp = memcmp(new_s1, new_s2, min_len);
+
+if (cmp == 0)
+	{
+	if (strlen(new_s1) <= strlen(new_s2))
+		{
+		if (is_substring != NULL)
+			*is_substring = TRUE;
+		if (strlen(new_s1) < strlen(new_s2))
+			cmp = -1;
+		}
+	else
+		cmp = 1;
+	}
+
+free(new_s1);
+free(new_s2);
+return cmp;
+}
+
+#endif // __LINK_PARTS_H__
 

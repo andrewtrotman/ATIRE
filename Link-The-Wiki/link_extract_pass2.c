@@ -19,8 +19,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-
 //static char buffer[1024 * 1024];
 static long chinese;
 
@@ -156,76 +154,6 @@ while (*current != NULL)
 }
 
 /*
- 	STRING_REMOVE_SPACE()
-	--------------------
-*/
-void string_remove_space(char *s)
-{
-char *last, *previous, *temp;
-long len, has_space;
-last = s + strlen(s);
-while (last != s)
-	{
-	previous = last - 1;
-	if (*previous == ' ')
-		{
-		has_space = TRUE;
-		while (*previous == ' ' && previous > s)
-			--previous;
-		if (previous != s)
-			++previous;
-		}
-	if (has_space)
-		{
-		len = strlen(last);
-		memmove(previous, last, len);
-		previous[len] = '\0';
-		}
-
-	last = previous;
-	has_space = FALSE;
-	}
-}
-
-/*
-	UTF8_TOKEN_COMPARE()
-	--------------------
-*/
-int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
-{
-int cmp, i, min_len;
-char *new_s1 = strdup(s1);
-char *new_s2 = strdup(s2);
-
-if (strchr(new_s1, ' ') != NULL)
-	string_remove_space(new_s1);
-
-if (strchr(new_s2, ' ') != NULL)
-	string_remove_space(new_s2);
-
-min_len = MIN(strlen(new_s1), strlen(new_s2));
-
-cmp = memcmp(new_s1, new_s2, min_len);
-
-if (cmp == 0)
-	{
-	if (strlen(new_s1) <= strlen(new_s2))
-		{
-		if (is_substring != NULL)
-			*is_substring = TRUE;
-		if (strlen(new_s1) < strlen(new_s2))
-			cmp = -1;
-		}
-	else
-		cmp = 1;
-	}
-
-free(new_s1);
-free(new_s2);
-return cmp;
-}
-
-/*
 	STRING_COMPARE()
 	----------------
 */
@@ -353,8 +281,8 @@ for (param = first_param + 1; param < argc; param++)
 			{
 //			fprintf(stderr, "%s\n", *first);
 			where_to = buffer;
-//			if (*first[0] == '"')
-//				fprintf(stderr, "I got you");
+			if (strcmp(*first, "400") == 0)
+				fprintf(stderr, "I got you");
 			for (last = first; *last != NULL; last++)
 				{
 				if (where_to == buffer)
