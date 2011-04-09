@@ -281,8 +281,6 @@ for (param = first_param + 1; param < argc; param++)
 			{
 //			fprintf(stderr, "%s\n", *first);
 			where_to = buffer;
-			if (strcmp(*first, "400") == 0)
-				fprintf(stderr, "I got you");
 			for (last = first; *last != NULL; last++)
 				{
 				if (where_to == buffer)
