@@ -294,7 +294,7 @@ long two_term_count = count_char(two->term, ' ') + 1;
 
 if (one_term_count == two_term_count) {
 	if (strlen(one->term) == strlen(two->term)) {
-		if ((ret = string_compare(one->term, two->term)) == 0)
+		if ((ret = strcmp(one->term, two->term)) == 0)
 			cmp = one->target_document > two->target_document;
 		else
 			cmp = ret > 0;

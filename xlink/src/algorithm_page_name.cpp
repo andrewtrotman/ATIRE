@@ -10,6 +10,7 @@
 #include "ant_link_parts.h"
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
+#include "link.h"
 #include "language.h"
 #include "corpus.h"
 #include "ltw_task.h"
@@ -34,11 +35,13 @@ namespace QLINK
 
 	algorithm_page_name::~algorithm_page_name()
 	{
-		page_map_t::iterator iter = names_map_.begin();
-		for (; iter != names_map_.end(); ++iter) {
-			if (iter->second)
-				delete iter->second;
-		}
+//		page_map_t::iterator iter = names_map_.begin();
+//		for (; iter != names_map_.end(); ++iter) {
+//			if (iter->second)
+//				delete iter->second;
+//		}
+		for (int i = 0; i < name_array_.size(); ++i)
+			delete name_array_[i];
 	}
 
 	void algorithm_page_name::init()
@@ -88,8 +91,8 @@ namespace QLINK
 					//a_entry.title = title_pair.first;
 					//a_entry.description = title_pair.second;
 
-					page_map_t::iterator iter = names_map_.find(title_pair.first);
-					if (iter == names_map_.end() || iter->second == NULL) {
+//					page_map_t::iterator iter = names_map_.find(title_pair.first);
+//					if (iter == names_map_.end() || iter->second == NULL) {
 						//wiki_entry_array wea;
 						ANT_link_term *term = new ANT_link_term;
 						term->term = strdup(title_pair.first.c_str());
@@ -98,23 +101,24 @@ namespace QLINK
 						term->collection_frequency = 9999;
 						string& name = title_pair.first;
 
-						if (iter != names_map_.end() && iter->second == NULL)
-							iter->second = term;
-						else
-							iter = names_map_.insert(make_pair(name, term)).first;
+//						if (iter != names_map_.end() && iter->second == NULL)
+//							iter->second = term;
+//						else
+//							iter = names_map_.insert(make_pair(name, term)).first;
 
-						string::size_type pos = name.find(' ');
-						if (pos != string::npos) {
-							string first_term(name, 0, pos);
-							page_map_t::iterator iner_iter = names_map_.find(first_term);
-							if (iner_iter == names_map_.end())
-								names_map_.insert(make_pair(first_term, (ANT_link_term *)NULL));
-	//						else
-	//							cerr << "found a match (" << iner_iter->first << ")" << endl;
-						}
+//						string::size_type pos = name.find(' ');
+//						if (pos != string::npos) {
+//							string first_term(name, 0, pos);
+//							page_map_t::iterator iner_iter = names_map_.find(first_term);
+//							if (iner_iter == names_map_.end())
+//								names_map_.insert(make_pair(first_term, (ANT_link_term *)NULL));
+//	//						else
+//	//							cerr << "found a match (" << iner_iter->first << ")" << endl;
+//						}
 						//result.second.push_back(a_entry);
-					}
-					iter->second->postings.push_back(a_entry);
+//					}
+//					iter->second->postings.push_back(a_entry);
+						name_array_.push_back(term);
 				}
 				else {
 					cerr << "Error in line : " << line << endl;
@@ -122,6 +126,7 @@ namespace QLINK
 
 			  //cout << line << endl;
 			}
+			std::sort(name_array_.begin(), name_array_.end(), ANT_link_term_compare());
 			myfile.close();
 		}
 
@@ -140,6 +145,32 @@ namespace QLINK
 		loaded_ = true;
 	}
 
+	ANT_link_term *algorithm_page_name::find_term_in_list(char *value)
+	{
+	long low, high, mid;
+
+	low = 0;
+	high = name_array_.size();
+	while (low < high)
+		{
+		mid = (low + high) / 2;
+		if (string_compare(name_array_[mid]->term, value, use_utf8_token_matching_) < 0)
+			low = mid + 1;
+		else
+			high = mid;
+		}
+
+	if ((low < name_array_.size()) && (string_compare(value, name_array_[low]->term, use_utf8_token_matching_) == 0))
+		return name_array_[low];		// match
+	else
+		{
+		if (low < name_array_.size())
+			return name_array_[low];		// not found in list but not after the last term in the list
+		else
+			return NULL;
+		}
+	}
+
 	void algorithm_page_name::process_terms(links *lx, char **term_list, const char *source)
 	{
 		recommend_anchors(lx, term_list, source);
@@ -155,95 +186,171 @@ namespace QLINK
 	{
 		char **first, **last;
 		char *where_to;
-		long offset = 0, term_len = 0;
+		long offset = 0, term_len = 0, is_substring, cmp;
 		char buffer[1024 * 1024];
-		page_map_t::iterator index_entry = names_map_.end();
-		page_map_t::iterator last_index_entry = index_entry;
-		ANT_link_term *node = NULL;
+//		page_map_t::iterator index_entry = names_map_.end();
+//		page_map_t::iterator last_index_entry = index_entry;
+		ANT_link_term *index_term = NULL;
 
-		for (first = term_list; *first != NULL; first++) {
+		for (first = term_list; *first != NULL; first++)
+			{
+//			fprintf(stderr, "%s\n", *first);
 			where_to = buffer;
-			last_index_entry = names_map_.end();
-
-			// debug
-	//		cerr << *first << "$";
-			if (strcasecmp(*first, "Desperate") == 0)
-				cerr << " I caught you" << endl;
-
-			int terms_count = 0;
-			for (last = first; *last != NULL && terms_count < 13; last++) {
-				terms_count++;
-
-				if (where_to == buffer) {
+			for (last = first; *last != NULL; last++)
+				{
+				if (where_to == buffer)
+					{
 					strcpy(buffer, *first);
 					where_to = buffer + strlen(buffer);
-
-					index_entry = names_map_.find(buffer);
-
-					if (index_entry == names_map_.end())
-						break;
-
-					if (index_entry->second != 0)
-						last_index_entry = index_entry;
-				}
-				else {
+					}
+				else
+					{
 					if (!use_utf8_token_matching_)
 						*where_to++ = ' ';
 					strcpy(where_to, *last);
 					where_to += strlen(*last);
-
-
-					// debug
-	//				if (strcmp(buffer, "gorseinon bus station") == 0)
-	//					cerr << " I caught you" << endl;
-
-					string what(buffer);
-					index_entry = names_map_.find(what);
-
-					if (index_entry == names_map_.end())
-						continue;									// we're after the last term in the list
-								// we're a term in the list, but might be a longer one so keep looking
-
-					last_index_entry = index_entry;
-				}
-	//			if (strncmp(buffer, index_term->term, strlen(buffer)) != 0)
-	//				break;									// we can't be a substring so we're done
-			}
-
-			if (last_index_entry != names_map_.end()) {
-				bool to_skip = false;
-				if (stopword_no_)
-					if (!strpbrk(last_index_entry->first.c_str(), "- "))
-						to_skip = language::isstopword(last_index_entry->first.c_str());
-
-				if (!to_skip) {
-					term_len = strlen(last_index_entry->second->term);
-					if (!use_utf8_token_matching_) {
-						offset = *first - source;
-						strncpy(buffer, offset + text_, term_len);
-						buffer[term_len] = '\0';
 					}
-					else
-						strcpy(buffer, last_index_entry->second->term);
 
-					node = last_index_entry->second; //new ANT_link_term;
-					//node->term = strdup(last_index_entry->first.c_str());
-					//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
-					if (!lx->find(buffer))
-						link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
-//					if (!lx->find(last_index_term->term))
-//						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
-//					else
-//						fprintf(stderr, "Duplicated");
-					//fprintf(stderr, "\n");
-					//lnk->require_cleanup();
-					//create_posting(last_index_entry->second, lnk);
+				*where_to = '\0';
+
+//				for the possible debugging later
+//				static char di[] = {(char)0xe6, (char)0xa2, (char)0x85};
+//				static char xianjin[] = {(char)0xe3, (char)0x80, (char)0x8a, (char)0xe7, (char)0x8e, (char)0xb0};
+//				if (memcmp(buffer, xianjin, 6) == 0)
+//					fprintf(stderr, "I got you");
+//				if (strncmp(*last, "\"", 1)) == 0)
+//					fprintf(stderr, "I got you");
+
+				index_term = find_term_in_list(buffer);
+
+				if (index_term == NULL)
+					break;		// we're after the last term in the list so can stop because we can't be a substring
+
+				if (use_utf8_token_matching_)
+					{
+					is_substring = FALSE;
+					cmp = utf8_token_compare(buffer, index_term->term, &is_substring);
+					}
+				else
+					cmp = string_compare(buffer, index_term->term);
+
+				if (cmp == 0)		// we're a term in the list
+					{
+					bool to_skip = false;
+					if (stopword_no_ && !strpbrk(index_term->term, "- "))
+						to_skip = language::isstopword(index_term->term);
+
+					if (!to_skip) {
+						term_len = strlen(index_term->term);
+						if (!use_utf8_token_matching_) {
+							offset = *first - source;
+							strncpy(buffer, offset + text_, term_len);
+							buffer[term_len] = '\0';
+						}
+						else
+							strcpy(buffer, index_term->term);
+						//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
+						if (!lx->find(buffer))
+							link * lnk = lx->push_link(NULL, offset, buffer, index_term->postings[0]->docid, 0.0, index_term);
+						}
+					}
+				else
+					{
+					if (use_utf8_token_matching_)
+						cmp = is_substring == TRUE ? 0 : 1;
+					else
+						cmp = memcmp(buffer, index_term->term, strlen(buffer));
+					if  (cmp != 0)
+						break;		// we're a not a substring so we can't find a longer term
+					}
 				}
 			}
-		}
+	}
+}
+
+//		for (first = term_list; *first != NULL; first++) {
+//			where_to = buffer;
+//			last_index_entry = names_map_.end();
+//
+//			// debug
+//	//		cerr << *first << "$";
+//			if (strcasecmp(*first, "Desperate") == 0)
+//				cerr << " I caught you" << endl;
+//
+//			int terms_count = 0;
+//			for (last = first; *last != NULL && terms_count < 13; last++) {
+//				terms_count++;
+//
+//				if (where_to == buffer) {
+//					strcpy(buffer, *first);
+//					where_to = buffer + strlen(buffer);
+//
+//					index_entry = names_map_.find(buffer);
+//
+//					if (index_entry == names_map_.end())
+//						break;
+//
+//					if (index_entry->second != 0)
+//						last_index_entry = index_entry;
+//				}
+//				else {
+//					if (!use_utf8_token_matching_)
+//						*where_to++ = ' ';
+//					strcpy(where_to, *last);
+//					where_to += strlen(*last);
+//
+//
+//					// debug
+//	//				if (strcmp(buffer, "gorseinon bus station") == 0)
+//	//					cerr << " I caught you" << endl;
+//
+//					string what(buffer);
+//					index_entry = names_map_.find(what);
+//
+//					if (index_entry == names_map_.end())
+//						continue;									// we're after the last term in the list
+//								// we're a term in the list, but might be a longer one so keep looking
+//
+//					last_index_entry = index_entry;
+//				}
+//	//			if (strncmp(buffer, index_term->term, strlen(buffer)) != 0)
+//	//				break;									// we can't be a substring so we're done
+//			}
+//
+//			if (last_index_entry != names_map_.end()) {
+//				bool to_skip = false;
+//				if (stopword_no_)
+//					if (!strpbrk(last_index_entry->first.c_str(), "- "))
+//						to_skip = language::isstopword(last_index_entry->first.c_str());
+//
+//				if (!to_skip) {
+//					term_len = strlen(last_index_entry->second->term);
+//					if (!use_utf8_token_matching_) {
+//						offset = *first - source;
+//						strncpy(buffer, offset + text_, term_len);
+//						buffer[term_len] = '\0';
+//					}
+//					else
+//						strcpy(buffer, last_index_entry->second->term);
+//
+//					node = last_index_entry->second; //new ANT_link_term;
+//					//node->term = strdup(last_index_entry->first.c_str());
+//					//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
+//					if (!lx->find(buffer))
+//						link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
+////					if (!lx->find(last_index_term->term))
+////						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
+////					else
+////						fprintf(stderr, "Duplicated");
+//					//fprintf(stderr, "\n");
+//					//lnk->require_cleanup();
+//					//create_posting(last_index_entry->second, lnk);
+//				}
+//			}
+//		}
 		// debug
 	//	cerr << endl;
-	}
+//	}
 
 	//wiki_entry_array *algorithm_page_name::find_page(char *name)
 	//{
@@ -266,4 +373,4 @@ namespace QLINK
 	//}
 
 
-}
+//}

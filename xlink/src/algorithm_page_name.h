@@ -22,17 +22,18 @@ namespace QLINK
 	class algorithm_page_name: virtual public QLINK::algorithm_out
 	{
 	public:
-		algorithm_page_name(ltw_task *task);
-		virtual ~algorithm_page_name();
-
-	public:
 		typedef	std::vector<wiki_entry>							wiki_entry_array;
 		//typedef std::map<std::string,  wiki_entry_array>		page_map_t;
 		typedef std::map<std::string,  ANT_link_term *>			page_map_t;
+		typedef std::vector<ANT_link_term *>					page_title_t;
 
 	protected:
 		page_map_t		names_map_;
+		page_title_t	name_array_;
 		bool			loaded_;
+
+	private:
+		void init();
 
 	protected:
 		void process_terms(char **term_list, const char *source);
@@ -43,8 +44,11 @@ namespace QLINK
 		//void create_posting(wiki_entry_array& wea, link* lnk);
 		void load_names();
 
-	private:
-		void init();
+	public:
+		algorithm_page_name(ltw_task *task);
+		virtual ~algorithm_page_name();
+
+		ANT_link_term *find_term_in_list(char *value);
 	};
 
 }

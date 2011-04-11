@@ -7,6 +7,7 @@
 
 #include "ant_link_term.h"
 #include "ant_link_posting.h"
+#include "ant_link_parts.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -66,4 +67,35 @@ bool ANT_link_term::operator==(const char *term)
 {
 	int cmp = strcmp(this->term, term);
 	return cmp == 0;
+}
+
+const bool ANT_link_term_compare::operator()(const ANT_link_term *one, const ANT_link_term *two) const
+{
+int cmp, min_len;
+
+char *new_one = strdup(one->term);
+char *new_two = strdup(two->term);
+
+if (strchr(new_one, ' ') != NULL)
+	string_remove_space(new_one);
+
+if (strchr(new_two, ' ') != NULL)
+	string_remove_space(new_two);
+
+min_len = MIN(strlen(new_one), strlen(new_two));
+
+cmp = memcmp(new_one, new_two, min_len);
+
+if (cmp == 0)
+	{
+	if (strlen(new_one) < strlen(new_two))
+		cmp = -1;
+	else if (strlen(new_one) > strlen(new_two))
+		cmp = 1;
+	}
+
+free(new_one);
+free(new_two);
+
+return cmp;
 }

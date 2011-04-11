@@ -586,5 +586,6 @@ else
 	}
 return cmp;
 }
+
 #endif /* __LINK_PARTS_H__ */
 

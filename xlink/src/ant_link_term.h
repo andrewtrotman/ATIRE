@@ -32,6 +32,10 @@ public:
 	bool operator==(const char *term);
 } ;
 
+class ANT_link_term_compare {
+public:
+	const bool operator()(const ANT_link_term *a, const ANT_link_term * b) const;
+};
 
 class term_part_equal {
 private:
