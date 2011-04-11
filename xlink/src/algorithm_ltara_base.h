@@ -21,8 +21,8 @@ namespace QLINK {
 		id_name_map_t							id_name_map_;
 
 	public:
-		algorithm_ltara_base(links *links_list);
-		algorithm_ltara_base();
+//		algorithm_ltara_base(links *links_list);
+		algorithm_ltara_base(ltw_task *task);
 		virtual ~algorithm_ltara_base();
 
 	private:

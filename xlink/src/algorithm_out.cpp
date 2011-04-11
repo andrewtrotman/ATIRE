@@ -11,7 +11,7 @@
 namespace QLINK
 {
 
-algorithm_out::algorithm_out()
+algorithm_out::algorithm_out(ltw_task *task) : algorithm(task)
 {
 
 }

@@ -62,8 +62,8 @@ namespace QLINK {
 		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
 
 	public:
-		algorithm_ant_link_this(links *links_list);
-		algorithm_ant_link_this();
+//		algorithm_ant_link_this(links *links_list);
+		algorithm_ant_link_this(ltw_task *task);
 		virtual ~algorithm_ant_link_this();
 
 		//int init_params();

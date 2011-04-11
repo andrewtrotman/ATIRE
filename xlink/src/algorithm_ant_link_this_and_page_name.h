@@ -21,8 +21,8 @@ namespace QLINK {
 		links			*g_links_;
 
 	public:
-		algorithm_ant_link_this_and_page_name(links *links_list);
-		algorithm_ant_link_this_and_page_name();
+//		algorithm_ant_link_this_and_page_name(links *links_list);
+		algorithm_ant_link_this_and_page_name(ltw_task *task);
 		virtual ~algorithm_ant_link_this_and_page_name();
 
 		void recommend_anchors(links* lx, char **term_list, const char *source);

@@ -12,6 +12,7 @@
 
 namespace QLINK {
 	class algorithm_config;
+	class ltw_task;
 
 	/*
 	 *
@@ -40,9 +41,11 @@ namespace QLINK {
 		long 					lowercase_only;					// are we in lowercase or mixed-case matching mode?
 		long					stopword_no_;
 
+		ltw_task				*ltw_task_;
+
 	public:
-		algorithm(links *links_list);
-		algorithm();
+		algorithm(ltw_task *task);
+		algorithm() {}
 		virtual ~algorithm();
 
 		virtual int init_params(int argc, char *argv[]);
@@ -57,6 +60,7 @@ namespace QLINK {
 
 		int topic_param_start() { return topic_param_start_; }
 		void set_links_container(links *container);
+		void set_task(ltw_task *task) { ltw_task_ = task; }
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}

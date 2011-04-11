@@ -21,7 +21,7 @@ namespace QLINK {
 //		algorithm_bep	*bep_algor_;
 
 	public:
-		algorithm_ltw_incoming_a2b_search_tn();
+		algorithm_ltw_incoming_a2b_search_tn(ltw_task *task);
 		virtual ~algorithm_ltw_incoming_a2b_search_tn();
 
 //		void process_topic(ltw_topic *a_topic);

@@ -41,6 +41,7 @@ namespace QLINK {
 
 	public:
 		algorithm_bep(std::string& name);
+		algorithm_bep(ltw_task *task);
 		virtual ~algorithm_bep();
 
 		long find_bep(ltw_topic *topic, const char *title);

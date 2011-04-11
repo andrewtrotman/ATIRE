@@ -17,7 +17,8 @@ namespace QLINK
 	class algorithm_out: public QLINK::algorithm
 	{
 	public:
-		algorithm_out();
+		algorithm_out(ltw_task *task);
+		algorithm_out() {}
 		virtual ~algorithm_out();
 
 	public:

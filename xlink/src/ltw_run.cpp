@@ -73,6 +73,9 @@ void ltw_run::init()
 	string beps_to_print_str = get_config().get_value("anchor_links_number");
 	if (beps_to_print_str.length() > 0)
 		task_->set_beps_to_print(atol(beps_to_print_str.c_str()));
+
+	lang = get_config().get_value("source_lang");
+	task_->set_source_lang(lang.length() > 0 ? lang : "en");
 }
 
 std::string ltw_run::get_home(const char *name)

@@ -12,6 +12,8 @@
 #include "ant_link_posting.h"
 #include "language.h"
 #include "corpus.h"
+#include "ltw_task.h"
+#include "string_utils.h"
 
 #include <stdlib.h>
 
@@ -25,7 +27,7 @@ using namespace std;
 namespace QLINK
 {
 
-	algorithm_page_name::algorithm_page_name()
+	algorithm_page_name::algorithm_page_name(ltw_task *task) : algorithm_out(task)
 	{
 		init();
 	}
@@ -64,13 +66,16 @@ namespace QLINK
 				getline (myfile, line);
 				if (line.length() == 0 || line.find("Portal:") != string::npos)
 					continue;
-
+//				cerr << "loading : " << line << endl;
 				string::size_type pos = line.find_first_of(':');
 				if (pos != string::npos) {
 					unsigned long doc_id = atol(line.c_str());
 					if (!corpus::instance().exist(doc_id))
 						continue;
 					string wiki_title(line, ++pos);
+					if (ltw_task_->get_source_lang() != "en")
+						find_and_replace(wiki_title, string(" "), string(""));
+
 					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only);
 					//struct wiki_entry a_entry;
 					ANT_link_posting *a_entry = new ANT_link_posting;
@@ -139,8 +144,6 @@ namespace QLINK
 	{
 		recommend_anchors(lx, term_list, source);
 		lx->sort_links_by_term();
-
-
 	}
 
 	void algorithm_page_name::process_terms(char **term_list, const char *source)
@@ -184,7 +187,8 @@ namespace QLINK
 						last_index_entry = index_entry;
 				}
 				else {
-					*where_to++ = ' ';
+					if (ltw_task_->get_source_lang() == "en")
+						*where_to++ = ' ';
 					strcpy(where_to, *last);
 					where_to += strlen(*last);
 

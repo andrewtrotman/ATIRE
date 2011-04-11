@@ -14,7 +14,7 @@
 using namespace QLINK;
 
 
-algorithm_ltw_incoming_search_tn::algorithm_ltw_incoming_search_tn()
+algorithm_ltw_incoming_search_tn::algorithm_ltw_incoming_search_tn(ltw_task *task) : algorithm(task)
 {
 	init_search_engine();
 }

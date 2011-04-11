@@ -19,7 +19,7 @@
 
 using namespace QLINK;
 
-algorithm_ltw_incoming_a2b_search_tn::algorithm_ltw_incoming_a2b_search_tn()
+algorithm_ltw_incoming_a2b_search_tn::algorithm_ltw_incoming_a2b_search_tn(ltw_task *task) : algorithm_ltw_incoming_search_tn(task)
 {
 	//bep_algor_ = new algorithm_bep();
 }

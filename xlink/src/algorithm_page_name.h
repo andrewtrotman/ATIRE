@@ -22,7 +22,7 @@ namespace QLINK
 	class algorithm_page_name: virtual public QLINK::algorithm_out
 	{
 	public:
-		algorithm_page_name();
+		algorithm_page_name(ltw_task *task);
 		virtual ~algorithm_page_name();
 
 	public:

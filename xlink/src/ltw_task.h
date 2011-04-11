@@ -63,6 +63,8 @@ namespace QLINK {
 	    long links_to_print_;
 	    long beps_to_print_;
 
+	    std::string source_lang_;
+
 	public:
 	    ltw_task(std::string & name, std::string & out_algor_name, std::string & in_algor_name);
 	    virtual ~ltw_task();
@@ -73,6 +75,7 @@ namespace QLINK {
 	    bool is_a2b_task();
 	    void set_alorithm_bep(std::string name);
 	    ltw_task_type get_task_type();
+
 	    algorithm_out *get_algor_out() const { return algor_out_; }
 
 		void set_links_to_print(long links_to_print) { links_to_print_ = links_to_print; }
@@ -80,6 +83,16 @@ namespace QLINK {
 
 		void set_beps_to_print(long beps_to_print) { beps_to_print_ = beps_to_print; }
 		long beps_to_print() { return beps_to_print_; }
+
+	    std::string get_source_lang() const
+	    {
+	        return source_lang_;
+	    }
+
+	    void set_source_lang(std::string source_lang_)
+	    {
+	        this->source_lang_ = source_lang_;
+	    }
 
 	private:
 		ltw_algorithm get_algorithm_outgoing_type();

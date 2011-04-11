@@ -17,13 +17,13 @@
 using namespace QLINK;
 using namespace std;
 
-algorithm_ltara_base::algorithm_ltara_base(links *links_list) :
-	algorithm_ant_link_this_and_page_name(links_list)
-{
-	init();
-}
+//algorithm_ltara_base::algorithm_ltara_base(links *links_list) :
+//	algorithm_ant_link_this_and_page_name(links_list)
+//{
+//	init();
+//}
 
-algorithm_ltara_base::algorithm_ltara_base()
+algorithm_ltara_base::algorithm_ltara_base(ltw_task *task) : algorithm_ant_link_this_and_page_name(task)
 {
 	init();
 }

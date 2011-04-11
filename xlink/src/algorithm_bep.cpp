@@ -19,12 +19,17 @@
 using namespace QLINK;
 using namespace std;
 
-algorithm_bep::algorithm_bep(std::string& name)
+algorithm_bep::algorithm_bep(std::string& name) : algorithm(NULL)
 {
 	algor_ind_ = alorithm_names[name];
 	source_ = NULL;
 	anchor_offset_ = 0;
 	strcpy(signature_, "");
+}
+
+algorithm_bep::algorithm_bep(ltw_task *task) : algorithm(task)
+{
+
 }
 
 algorithm_bep::~algorithm_bep()

@@ -26,7 +26,7 @@ namespace QLINK {
 		ANT *ant_;
 
 	public:
-		algorithm_ltw_incoming_search_tn();
+		algorithm_ltw_incoming_search_tn(ltw_task *task);
 		virtual ~algorithm_ltw_incoming_search_tn();
 
 		virtual void process_topic(ltw_topic *a_topic);

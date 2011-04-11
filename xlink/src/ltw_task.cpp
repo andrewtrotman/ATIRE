@@ -69,22 +69,22 @@ void ltw_task::init()
 
 	switch (get_algorithm_outgoing_type()) {
 	case LTW_ANT:
-		algor_out_ = new algorithm_ant_link_this();
+		algor_out_ = new algorithm_ant_link_this(this);
 		//topic_param_start = algor_out_->init();
 		break;
 	case LTW_PAGE_NAME:
-		algor_out_ = new algorithm_page_name();
+		algor_out_ = new algorithm_page_name(this);
 		//topic_param_start = algor_out_->init();
 		break;
 	case LTW_ANT_AND_PAGE:
-		algor_out_ = new algorithm_ant_link_this_and_page_name();
+		algor_out_ = new algorithm_ant_link_this_and_page_name(this);
 		//topic_param_start = algor_out_->init();
 		break;
 	case LTW_TANG:
 		//algor_out_ = new algorithm_ltw_tang();
 		break;
 	case LTW_TEARA_BASE:
-		algor_out_ = new algorithm_ltara_base();
+		algor_out_ = new algorithm_ltara_base(this);
 		break;
 	case LTW_NONE:
 	default:
@@ -97,13 +97,13 @@ void ltw_task::init()
 
 	switch (get_algorithm_incoming_type()) {
 	case LTW_A2B_INCOMING_SEARCH_TN:
-		algor_in_ = new algorithm_ltw_incoming_a2b_search_tn();
+		algor_in_ = new algorithm_ltw_incoming_a2b_search_tn(this);
 		break;
 	case LTW_INCOMING_SEARCH_TN:
-		algor_in_ = new algorithm_ltw_incoming_search_tn();
+		algor_in_ = new algorithm_ltw_incoming_search_tn(this);
 		break;
 	case LTW_TANG:
-		algor_in_ = new algorithm();
+		algor_in_ = new algorithm(this);
 		break;
 	case LTW_NONE:
 	default:

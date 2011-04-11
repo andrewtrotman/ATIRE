@@ -13,9 +13,21 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include "language.h"
+
 #define INEX_ARCHIVE_ARTICLE_ID_SIGNITURE "name id="
 #define ARTICLE_ID_SIGNITURE "id"
 #define ARTICLE_NAME_SIGNITURE "title"
+
+#ifndef FALSE
+	#define FALSE 0
+#endif
+
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 /*
 	STRING_CLEAN()
@@ -431,5 +443,148 @@ inline long find_phrase(const char *source, const char *phrase, long *offset/*ch
 	return first_length;
 }
 
+/*
+ 	STRING_REMOVE_SPACE()
+	--------------------
+*/
+inline void string_remove_space(char *s)
+{
+char *last, *previous, *temp;
+long len, has_space;
+has_space = FALSE;
+last = s + strlen(s);
+while (last != s)
+	{
+	previous = last - 1;
+	if (*previous == ' ')
+		{
+		has_space = TRUE;
+		while (*previous == ' ' && previous >= s)
+			--previous;
+		++previous;
+		}
+	if (has_space)
+		{
+		len = strlen(last);
+		memmove(previous, last, len);
+		previous[len] = '\0';
+		has_space = FALSE;
+		}
+
+	last = previous;
+	}
+}
+
+/*
+	UTF8_TOKEN_COMPARE()
+	--------------------
+*/
+inline int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
+{
+int cmp, i, min_len;
+char *new_s1 = strdup(s1);
+char *new_s2 = strdup(s2);
+
+if (strchr(new_s1, ' ') != NULL)
+	string_remove_space(new_s1);
+
+if (strchr(new_s2, ' ') != NULL)
+	string_remove_space(new_s2);
+
+min_len = MIN(strlen(new_s1), strlen(new_s2));
+
+cmp = memcmp(new_s1, new_s2, min_len);
+
+if (cmp == 0)
+	{
+	if (strlen(new_s1) <= strlen(new_s2))
+		{
+		if (is_substring != NULL)
+			*is_substring = TRUE;
+		if (strlen(new_s1) < strlen(new_s2))
+			cmp = -1;
+		}
+	else
+		cmp = 1;
+	}
+
+free(new_s1);
+free(new_s2);
+return cmp;
+}
+
+/*
+	CREATE_UTF8_TOKEN_LIST()
+	------------------------
+*/
+inline int create_utf8_token_list(char *s, char **term_list)
+{
+char *start, *token, *where_to = s;
+long token_len = 0, term_count;
+char **current = term_list;
+
+term_count = 0;
+while (*where_to != '\0')
+	{
+	while (isspace(*where_to))
+		++where_to;
+
+	start = where_to;
+	if ((*where_to & 0x80) &&language::isutf8(where_to))
+		{
+		token_len = language::utf8_bytes(where_to);
+		where_to += token_len;
+		}
+	else
+		while (*where_to != '\0' && !isspace(*where_to) &&  !((*where_to & 0x80) && language::isutf8(where_to)))
+			{
+			++token_len;
+			++where_to;
+			}
+
+	*current = token = new char[token_len + 1];
+	strncpy(*current, start, token_len);
+	token[token_len] = '\0';
+	++current;
+	token_len = 0;
+	++term_count;
+	}
+
+*current = NULL;
+return term_count;
+}
+
+/*
+	FREE_UTF8_TOKEN_LIST()
+	----------------------
+*/
+inline void free_utf8_token_list(char **term_list)
+{
+char **current = term_list;
+while (*current != NULL)
+	{
+	delete [] *current;
+	++current;
+	}
+}
+
+/*
+	STRING_COMPARE()
+	----------------
+*/
+inline int string_compare(char *s1, char *s2, long compare_without_space = 0)
+{
+int min_len, cmp;
+if (compare_without_space && (strchr(s1, ' ') != NULL || strchr(s2, ' ') != NULL)) // we don't need token comparison for all, only those has space in it
+	cmp = utf8_token_compare(s1, s2);
+else
+	{
+	min_len = strlen(s1) > strlen(s2) ? strlen(s2) : strlen(s1);
+	cmp = memcmp(s1, s2, min_len);
+	if (cmp == 0 && strlen(s1) != strlen(s2))
+		cmp = strlen(s1) < strlen(s2) ? -1 : 1;
+	}
+return cmp;
+}
 #endif /* __LINK_PARTS_H__ */
 

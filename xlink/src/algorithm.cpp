@@ -20,16 +20,16 @@
 using namespace QLINK;
 
 
-algorithm::algorithm(links *links_list)
+algorithm::algorithm(ltw_task *task) : ltw_task_(task)
 {
-	set_links_container(links_list);
+//	set_links_container(links_list);
 	init();
 }
 
-algorithm::algorithm()
-{
-	init();
-}
+//algorithm::algorithm()
+//{
+//	init();
+//}
 
 algorithm::~algorithm()
 {
@@ -105,14 +105,21 @@ void algorithm::process_topic_text()
 //		string_tolower(filecopy);
 
 	current = term_list = new char *[strlen(filecopy)];		// this is the worst case by far
-	for (token = strtok(filecopy, seperators); token != NULL; token = strtok(NULL, seperators))
-		*current++ = token;
-	*current = NULL;
+	if (ltw_task_->get_source_lang() != "en")
+		create_utf8_token_list(filecopy, term_list);
+	else
+		{
+		for (token = strtok(filecopy, seperators); token != NULL; token = strtok(NULL, seperators))
+			*current++ = token;
+		*current = NULL;
+		}
 	//string_to_list(filecopy, term_list);
 
 	process_terms(term_list, filecopy);
 
 	// segmnet fault for delete term list
+	if (ltw_task_->get_source_lang() != "en")
+		free_utf8_token_list(term_list);
 	delete [] term_list;
 	delete [] filecopy;
 	//free(filecopy);

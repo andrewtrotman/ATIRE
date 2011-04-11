@@ -42,16 +42,16 @@ using namespace std;
 
 //char algorithm_ant_link_this::buffer_[1024 * 1024];
 
-algorithm_ant_link_this::algorithm_ant_link_this()
+algorithm_ant_link_this::algorithm_ant_link_this(ltw_task *task) : algorithm_out(task)
 {
 	init_variables();
 }
 
-algorithm_ant_link_this::algorithm_ant_link_this(links *links_list)
-{
-	set_links_container(links_list);
-	init_variables();
-}
+//algorithm_ant_link_this::algorithm_ant_link_this(links *links_list)
+//{
+//	set_links_container(links_list);
+//	init_variables();
+//}
 
 algorithm_ant_link_this::~algorithm_ant_link_this()
 {
