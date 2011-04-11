@@ -43,6 +43,8 @@ namespace QLINK {
 
 		ltw_task				*ltw_task_;
 
+		bool 					use_utf8_token_matching_; // which means that matching without spaces, all the spaces in string will be removed
+
 	public:
 		algorithm(ltw_task *task);
 		algorithm() {}

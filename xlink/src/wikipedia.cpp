@@ -22,7 +22,7 @@ wikipedia::~wikipedia()
 {
 }
 
-std::pair<std::string, std::string> wikipedia::process_title(std::string& orig, bool lowercase)
+std::pair<std::string, std::string> wikipedia::process_title(std::string& orig, bool lowercase, bool english_only)
 {
 	std::string title("");
 	std::string desc("");
@@ -54,13 +54,13 @@ std::pair<std::string, std::string> wikipedia::process_title(std::string& orig, 
 			break;
 		}
 
-		if (!isalnum(*it))
+		if (english_only && !isalnum(*it))
 			*it = ' ';
 		title.push_back(lowercase ? tolower(*it) : *it);
 	}
 	string::size_type pos = title.find_last_not_of(" ");
 	title.erase(pos + 1);
 	trim_left(desc, " ");
-	trim_right(desc, "");
+	trim_right(desc, " ");
 	return make_pair(title, desc);
 }

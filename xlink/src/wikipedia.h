@@ -25,7 +25,7 @@ namespace QLINK {
 		wikipedia();
 		virtual ~wikipedia();
 
-		static std::pair<std::string, std::string> process_title(std::string& orig, bool lowercase);
+		static std::pair<std::string, std::string> process_title(std::string& orig, bool lowercase, bool english_only);
 	};
 
 }

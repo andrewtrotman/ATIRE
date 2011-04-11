@@ -73,10 +73,10 @@ namespace QLINK
 					if (!corpus::instance().exist(doc_id))
 						continue;
 					string wiki_title(line, ++pos);
-					if (use_utf8_token_matching_)
+					if (use_utf8_token_matching_ && strchr(wiki_title.c_str(), ' ') != NULL)
 						find_and_replace(wiki_title, string(" "), string(""));
 
-					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only);
+					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only, !use_utf8_token_matching_);
 					//struct wiki_entry a_entry;
 					ANT_link_posting *a_entry = new ANT_link_posting;
 					a_entry->docid = doc_id;

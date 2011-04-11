@@ -95,24 +95,37 @@ char *xml2txt::gettext(const char *xmlfile, const char *txtfile, char *xml)
 char *xml2txt::clean_tags(const char *content, long lowercase)
 {
 	char *text = new char[strlen(content) + 1];
-	*text = '\0';
+	memcpy(text, content, strlen(content));
+	text[strlen(content)] = '\0';
 	//strcpy(text, content);
 	//text[strlen(content)] = '\0';
 	//string_clean(text, 0, 0);
-	jstring xml_content = JvNewStringUTF(content);
-	//::java::lang::String *the_text = crosslink::XML2TXT::getInstance().getText()
-	crosslink::XML2TXT *x2t = crosslink::XML2TXT::getInstance();
-	jstring jstr = x2t->getText(xml_content);
-	const jchar *chrs =  JvGetStringChars(jstr);
-    jsize size = JvGetStringUTFLength(jstr);
-    //char *the_text = new char[size+1];
-    int i=0;
-    for(; i<size; i++)
-    	text[i] = chrs[i];
-    text[i] = 0;
+//	jstring xml_content = JvNewStringUTF(content);
+//	//::java::lang::String *the_text = crosslink::XML2TXT::getInstance().getText()
+//	crosslink::XML2TXT *x2t = crosslink::XML2TXT::getInstance();
+//	jstring jstr = x2t->getText(xml_content);
+//	const jchar *chrs =  JvGetStringChars(jstr);
+//    jsize size = JvGetStringUTFLength(jstr);
+//    //char *the_text = new char[size+1];
+//    int i=0;
+//    for(; i<size; i++)
+//    	text[i] = chrs[i];
+//    text[i] = '\0';
+
+	char *current = text;
+	while (*current != '\0')
+		{
+		if (*current == '<')			// then remove the XML tags
+			{
+			while (*current != '>')
+				*current++ = ' ';
+			*current = ' '; // replace >
+			}
+		++current;
+		}
 
     if (lowercase) {
-		std::transform(text, text + i,
+		std::transform(text, text + strlen(content),
 		text, ::tolower);
     }
     return text;

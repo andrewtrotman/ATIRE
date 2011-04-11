@@ -23,6 +23,7 @@ using namespace QLINK;
 algorithm::algorithm(ltw_task *task) : ltw_task_(task)
 {
 //	set_links_container(links_list);
+
 	init();
 }
 
@@ -44,6 +45,11 @@ void algorithm::init()
 	config_ = NULL;
 	lowercase_only = FALSE; // true by default
 	stopword_no_ = FALSE;
+
+	if (ltw_task_->get_source_lang() == "en")
+		use_utf8_token_matching_ = false;
+	else
+		use_utf8_token_matching_ = true;
 }
 
 int algorithm::init_params()
@@ -100,12 +106,12 @@ void algorithm::process_topic_text()
 //	*all_links_in_file_length = 0;
 
 	//string_clean(filecopy, lowercase_only);
-	filecopy = xml2txt::instance().clean_tags(xml_, lowercase_only);
+	filecopy = strdup(text_); //xml2txt::instance().clean_tags(xml_, lowercase_only);
 //	if (lowercase_only)
 //		string_tolower(filecopy);
 
 	current = term_list = new char *[strlen(filecopy)];		// this is the worst case by far
-	if (ltw_task_->get_source_lang() != "en")
+	if (use_utf8_token_matching_)
 		create_utf8_token_list(filecopy, term_list);
 	else
 		{
@@ -118,9 +124,10 @@ void algorithm::process_topic_text()
 	process_terms(term_list, filecopy);
 
 	// segmnet fault for delete term list
-	if (ltw_task_->get_source_lang() != "en")
+	if (use_utf8_token_matching_)
 		free_utf8_token_list(term_list);
 	delete [] term_list;
-	delete [] filecopy;
+//	delete [] filecopy;
+	free(filecopy);
 	//free(filecopy);
 }
