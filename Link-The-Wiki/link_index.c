@@ -101,13 +101,17 @@ ANT_link_element *link_list;
 ANT_disk disk;
 long lines, current, lines_output, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
 char *file, *ch, *last_string;
-long lowercase_only, param, chinese, cmp;
+long lowercase_only, param, chinese, pagename, cmp;
 char *command;
 
+/*
+ * [-pagename]: page name option, it produce only anchor and target document id table
+ */
 if (argc < 2)
-	exit(printf("Usage:%s <infile> [-chinese] [-lowercase]\n", argv[0]));
+	exit(printf("Usage:%s <infile> [-chinese] [-lowercase] [-pagename] \n", argv[0]));
 
 lowercase_only = FALSE;
+pagename = FALSE;
 for (param = 2; param < argc; param++)
 	{
 	if (*argv[param] == '-')
@@ -117,6 +121,8 @@ for (param = 2; param < argc; param++)
 			lowercase_only = TRUE;
 		else if (strcmp(command, "chinese") == 0)
 			chinese = TRUE;
+		else if (strcmp(command, "pagename") == 0)
+			pagename = TRUE;
 		else
 			exit(printf("Unknown parameter:%s\n", argv[param]));
 		}
@@ -171,7 +177,8 @@ for (current = 0; current < lines; current++)
 		last_string = link_list[current].term;
 		}
 	}
-printf("%d terms\n", unique_terms);
+if (!pagename)
+	printf("%d terms\n", unique_terms);
 
 last_string = "Z";
 last_docid = -1;
@@ -190,7 +197,12 @@ for (current = 0; current < lines; current++)
 		if (cmp != 0)
 			{
 			if (lines_output > 0)
-				printf("<%d,%d,%d>\n", last_docid, anchor_times, times);
+				{
+				if (pagename)
+					printf("%d\n", last_docid);
+				else
+					printf("<%d,%d,%d>\n", last_docid, anchor_times, times);
+				}
 			printf("%s:", link_list[current].term);
 			last_docid = link_list[current].docid;
 			last_anchor_docid = link_list[current].anchor_docid;
@@ -207,7 +219,10 @@ for (current = 0; current < lines; current++)
 				}
 			else
 				{
-				printf("<%d,%d,%d>", last_docid, anchor_times, times);
+				if (pagename)
+					printf("%d", last_docid);
+				else
+					printf("<%d,%d,%d>", last_docid, anchor_times, times);
 				times = 1;
 				anchor_times = 1;
 				}
@@ -216,7 +231,10 @@ for (current = 0; current < lines; current++)
 	last_docid = link_list[current].docid;
 	last_anchor_docid = link_list[current].anchor_docid;
 	}
-printf("<%d,%d,%d>", last_docid, anchor_times, times);
+if (pagename)
+	printf("%d", last_docid);
+else
+	printf("<%d,%d,%d>", last_docid, anchor_times, times);
 
 fprintf(stderr, "%s Completed\n", argv[0]);
 return 0;

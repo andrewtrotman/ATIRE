@@ -92,6 +92,8 @@ namespace QLINK
 					//a_entry.description = title_pair.second;
 
 //					page_map_t::iterator iter = names_map_.find(title_pair.first);
+					ANT_link_term *index_term = this->find_term_in_list(title_pair.first.c_str());
+					if (index_term == NULL) {
 //					if (iter == names_map_.end() || iter->second == NULL) {
 						//wiki_entry_array wea;
 						ANT_link_term *term = new ANT_link_term;
@@ -99,7 +101,7 @@ namespace QLINK
 						term->total_occurences = 0;
 						term->document_frequency = 9999;
 						term->collection_frequency = 9999;
-						string& name = title_pair.first;
+//						string& name = title_pair.first;
 
 //						if (iter != names_map_.end() && iter->second == NULL)
 //							iter->second = term;
@@ -116,9 +118,10 @@ namespace QLINK
 //	//							cerr << "found a match (" << iner_iter->first << ")" << endl;
 //						}
 						//result.second.push_back(a_entry);
-//					}
-//					iter->second->postings.push_back(a_entry);
 						name_array_.push_back(term);
+					}
+					else
+						iter->second->postings.push_back(a_entry);
 				}
 				else {
 					cerr << "Error in line : " << line << endl;
@@ -126,7 +129,7 @@ namespace QLINK
 
 			  //cout << line << endl;
 			}
-			std::sort(name_array_.begin(), name_array_.end(), ANT_link_term_compare());
+//			std::sort(name_array_.begin(), name_array_.end(), ANT_link_term_compare());
 			myfile.close();
 		}
 
