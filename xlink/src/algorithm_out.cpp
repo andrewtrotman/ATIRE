@@ -8,12 +8,17 @@
 #include "algorithm_out.h"
 #include "ant_link_term.h"
 
+#include "ltw_task.h"
+
 namespace QLINK
 {
 
 algorithm_out::algorithm_out(ltw_task *task) : algorithm(task)
 {
-
+	if (ltw_task_->get_source_lang() == "en")
+		use_utf8_token_matching_ = false;
+	else
+		use_utf8_token_matching_ = true;
 }
 
 algorithm_out::~algorithm_out()

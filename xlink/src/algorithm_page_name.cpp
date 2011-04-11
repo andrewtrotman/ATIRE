@@ -73,7 +73,7 @@ namespace QLINK
 					if (!corpus::instance().exist(doc_id))
 						continue;
 					string wiki_title(line, ++pos);
-					if (ltw_task_->get_source_lang() != "en")
+					if (use_utf8_token_matching_)
 						find_and_replace(wiki_title, string(" "), string(""));
 
 					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only);
@@ -187,7 +187,7 @@ namespace QLINK
 						last_index_entry = index_entry;
 				}
 				else {
-					if (ltw_task_->get_source_lang() == "en")
+					if (!use_utf8_token_matching_)
 						*where_to++ = ' ';
 					strcpy(where_to, *last);
 					where_to += strlen(*last);
@@ -217,15 +217,20 @@ namespace QLINK
 						to_skip = language::isstopword(last_index_entry->first.c_str());
 
 				if (!to_skip) {
-					offset = *first - source;
 					term_len = strlen(last_index_entry->second->term);
-					strncpy(buffer, offset + text_, term_len);
-					buffer[term_len] = '\0';
+					if (!use_utf8_token_matching_) {
+						offset = *first - source;
+						strncpy(buffer, offset + text_, term_len);
+						buffer[term_len] = '\0';
+					}
+					else
+						strcpy(buffer, last_index_entry->second->term);
+
 					node = last_index_entry->second; //new ANT_link_term;
 					//node->term = strdup(last_index_entry->first.c_str());
 					//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
-					if (!lx->find(last_index_entry->second->term))
-						link * lnk = lx->push_link(NULL, offset, last_index_entry->second->term, last_index_entry->second->postings[0]->docid, 0.0, node);
+					if (!lx->find(buffer))
+						link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
 //					if (!lx->find(last_index_term->term))
 //						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
 //					else

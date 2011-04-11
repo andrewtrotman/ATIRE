@@ -16,6 +16,9 @@ namespace QLINK
 
 	class algorithm_out: public QLINK::algorithm
 	{
+	protected:
+		bool use_utf8_token_matching_; // which means that matching without spaces, all the spaces in string will be removed
+
 	public:
 		algorithm_out(ltw_task *task);
 		algorithm_out() {}
