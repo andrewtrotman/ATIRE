@@ -270,8 +270,13 @@ namespace QLINK
 				}
 			}
 	}
-}
 
+
+	void algorithm_page_name::add_link(ANT_link_term *term)
+	{
+
+	}
+}
 //		for (first = term_list; *first != NULL; first++) {
 //			where_to = buffer;
 //			last_index_entry = names_map_.end();

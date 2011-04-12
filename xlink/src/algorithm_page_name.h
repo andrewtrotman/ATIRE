@@ -44,6 +44,8 @@ namespace QLINK
 		//void create_posting(wiki_entry_array& wea, link* lnk);
 		void load_names();
 
+		virtual void add_link(ANT_link_term *term);
+
 	public:
 		algorithm_page_name(ltw_task *task);
 		virtual ~algorithm_page_name();

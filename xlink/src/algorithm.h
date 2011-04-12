@@ -40,6 +40,7 @@ namespace QLINK {
 		const char 				*xml_;
 		long 					lowercase_only;					// are we in lowercase or mixed-case matching mode?
 		long					stopword_no_;
+		char					*source_;
 
 		ltw_task				*ltw_task_;
 

@@ -25,9 +25,9 @@ namespace QLINK {
 		algorithm_ant_link_this_and_page_name(ltw_task *task);
 		virtual ~algorithm_ant_link_this_and_page_name();
 
-		void recommend_anchors(links* lx, char **term_list, const char *source);
-
 	protected:
+		void recommend_anchors(links* lx, char **term_list, const char *source);
+		virtual void add_link(ANT_link_term *term) {}
 		void process_terms(char **term_list, const char *source);
 		void merge_links();
 

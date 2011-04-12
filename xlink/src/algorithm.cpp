@@ -107,6 +107,7 @@ void algorithm::process_topic_text()
 
 	//string_clean(filecopy, lowercase_only);
 	filecopy = strdup(text_); //xml2txt::instance().clean_tags(xml_, lowercase_only);
+	source_ = filecopy;
 //	if (lowercase_only)
 //		string_tolower(filecopy);
 

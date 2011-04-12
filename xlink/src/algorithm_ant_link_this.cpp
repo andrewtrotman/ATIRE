@@ -574,3 +574,58 @@ void algorithm_ant_link_this::recommend_anchors(links* lx, char **term_list, con
 	if (links_count <= 0)
 		fprintf(stderr, "added %d links\n", links_count);
 }
+
+void algorithm_ant_link_this::add_link(ANT_link_term *term)
+{
+	double gamma, numerator, denominator;
+	long /*terms_in_index, orphan_docid, */param, noom, index_argv_param;
+	long targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
+	const char *runname = "Unknown";
+
+	double proper_noun_boost = 0.0;
+	long num_of_processed_topic = 0;
+	long offset = 0;
+	char *place;
+
+	long term_len = 0;
+	long links_count = 0;
+	bool is_stopword = false;
+
+	noom = 0;
+	denominator = (double)term->document_frequency;
+#ifdef REMOVE_ORPHAN_LINKS
+	denominator--;
+	if (term->postings[noom]->docid == orphan_docid_)			// not alowed to use links that point to the orphan
+		noom = 1;
+#endif
+	numerator = (double)term->postings[noom]->doc_link_frequency;
+	gamma = numerator / denominator;
+	if (ispropper_noun(term->term))
+		gamma += proper_noun_boost;
+	place = current_term_;
+	offset = place - source_;
+	term_len = strlen(term->term);
+
+	fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)", term->term, term->postings[0]->docid, numerator, denominator);
+
+//			is_stopword = false;
+//			if (!strpbrk(term->term, "- "))
+//				is_stopword = language::isstopword(term->term);
+//
+//			if (!is_stopword) {
+		strncpy(buffer_, offset + text_, term_len);
+		buffer_[term_len] = '\0';
+//				if (strcmp(term->term, "the church of england") == 0)
+//					fputs("I got you", stderr);
+		//if (!lx->find(buffer_)) {
+			//lx->push_link(*first, offset, buffer_, term->postings[0]->docid, gamma, term);
+		if (!links_->find(term->term)) {
+			links_->push_link(current_term_, offset, term->term, term->postings[0]->docid, gamma, term);
+			// debug
+//					fprintf(stderr, "found a %s anchor\n", buffer__);
+			links_count++;
+		}
+//				else
+//					fprintf(stderr, "Duplicated");
+		fprintf(stderr, "\n");
+}
