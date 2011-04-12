@@ -23,7 +23,9 @@
 const char *PROMPT = "]";
 const long MAX_TITLE_LENGTH = 1024;
 
-ATIRE_API atire;
+ATIRE_API * atire;
+
+void ant_init(ANT_ANT_param_block & params);
 
 /*
 	PERFORM_QUERY()
@@ -39,7 +41,7 @@ long long now, search_time;
 	Search
 */
 now = stats.start_timer();
-*matching_documents = atire.search(query, params->sort_top_k, params->query_type);
+*matching_documents = atire->search(query, params->sort_top_k, params->query_type);
 search_time = stats.stop_timer(now);
 
 /*
@@ -57,12 +59,12 @@ if (params->stats & ANT_ANT_param_block::SHORT)
 	}
 
 if (params->stats & ANT_ANT_param_block::QUERY)
-	atire.stats_text_render();
+	atire->stats_text_render();
 
 /*
 	Return average precision
 */
-return atire.get_whole_document_precision(topic_id, params->metric, params->metric_n);
+return atire->get_whole_document_precision(topic_id, params->metric, params->metric_n);
 }
 
 /*
@@ -123,7 +125,7 @@ else
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
-length_of_longest_document = atire.get_longest_document_length();
+length_of_longest_document = atire->get_longest_document_length();
 
 document_buffer = new char [length_of_longest_document + 1];
 
@@ -141,7 +143,37 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		Parsing to get the topic number
 	*/
 	strip_space_inplace(command);
-	if (strcmp(command, ".quit") == 0)
+
+	if (strcmp(command, ".loadindex") == 0)
+		{
+		/* NOTE: Do not expose this command to untrusted users as it could almost certainly
+		 * cause arbitrary code execution by loading specially-crafted attacker-controlled indexes.
+		 */
+		char * fn;
+		delete [] command;
+
+		/* Load new index file */
+		fn = inchannel->gets();
+		strip_space_inplace(fn); /* gets() leaves the line terminator on the end, strip it */
+		params->set_doclist_filename(fn);
+		delete [] fn;
+
+		fn = inchannel->gets();
+		strip_space_inplace(fn);
+		params->set_index_filename(fn);
+		delete [] fn;
+
+		delete atire;
+		ant_init(*params);
+
+		delete [] document_buffer;
+
+		length_of_longest_document = atire->get_longest_document_length();
+		document_buffer = new char [length_of_longest_document + 1];
+
+		continue;
+		}
+	else if (strcmp(command, ".quit") == 0)
 		{
 		delete [] command;
 		break;
@@ -151,7 +183,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
 			{
-			atire.get_document(document_buffer, &current_document_length, atoll(command + 5));
+			atire->get_document(document_buffer, &current_document_length, atoll(command + 5));
 			sprintf(print_buffer, "%lld", current_document_length);
 			outchannel->puts(print_buffer);
 			outchannel->write(document_buffer, current_document_length);
@@ -186,7 +218,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		*document_buffer = '\0';
 		if ((current_document_length = length_of_longest_document) != 0)
 			{
-			atire.get_document(document_buffer, &current_document_length, atoll(strstr(command, "<docid>") + 7));
+			atire->get_document(document_buffer, &current_document_length, atoll(strstr(command, "<docid>") + 7));
 			outchannel->puts("<ATIREgetdoc>");
 			sprintf(print_buffer, "<length>%lld</length>", current_document_length);
 			outchannel->puts(print_buffer);
@@ -243,13 +275,13 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		Convert from a results list into a list of documents and then display (or write to the forum file)
 	*/
 	if (params->output_forum != ANT_ANT_param_block::NONE)
-		atire.write_to_forum_file(topic_id);
+		atire->write_to_forum_file(topic_id);
 	else
 		{
-		answer_list = atire.generate_results_list();
+		answer_list = atire->generate_results_list();
 		for (result = first_to_list; result < last_to_list; result++)
 			{
-			docid = atire.get_relevant_document_details(result, &docid, &relevance);
+			docid = atire->get_relevant_document_details(result, &docid, &relevance);
 			if ((current_document_length = length_of_longest_document) == 0)
 				title_start = "";
 			else
@@ -257,7 +289,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				/*
 					Get the title of the document (this is a bad hack and should be removed)
 				*/
-				atire.get_document(document_buffer, &current_document_length, docid);
+				atire->get_document(document_buffer, &current_document_length, docid);
 				if ((title_start = strstr(document_buffer, "<title>")) == NULL)
 					if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
 						title_start = "";
@@ -306,7 +338,7 @@ if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block:
 	Report the summary of the stats
 */
 if (params->stats & ANT_ANT_param_block::SUM)
-	atire.stats_all_text_render();
+	atire->stats_all_text_render();
 
 /*
 	Clean up
@@ -322,6 +354,47 @@ delete [] print_buffer;
 return mean_average_precision;
 }
 
+void ant_init(ANT_ANT_param_block & params) {
+	atire = new ATIRE_API();
+
+	if (params.logo)
+		puts(atire->version());				// print the version string is we parsed the parameters OK
+
+	if (params.ranking_function == ANT_ANT_param_block::READABLE)
+		atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
+	else
+		atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
+
+	if (params.assessments_filename != NULL)
+		atire->load_assessments(params.assessments_filename);
+
+	if (params.output_forum != ANT_ANT_param_block::NONE)
+		atire->set_forum(params.output_forum, params.output_filename, params.participant_id, params.run_name, params.results_list_length);
+
+	atire->set_trim_postings_k(params.trim_postings_k);
+	atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
+	atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
+
+	atire->set_segmentation(params.segmentation);
+	switch (params.ranking_function)
+		{
+		case ANT_indexer_param_block_rank::BM25:
+			atire->set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b);
+			break;
+		case ANT_indexer_param_block_rank::LMD:
+			atire->set_ranking_function(params.ranking_function, params.lmd_u, 0.0);
+			break;
+		case ANT_indexer_param_block_rank::LMJM:
+			atire->set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
+			break;
+		case ANT_indexer_param_block_rank::KBTFIDF:
+			atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
+			break;
+		default:
+			atire->set_ranking_function(params.ranking_function, 0.0, 0.0);
+		}
+}
+
 /*
 	MAIN()
 	------
@@ -333,44 +406,10 @@ ANT_ANT_param_block params(argc, argv);
 
 params.parse();
 
-if (params.logo)
-	puts(atire.version());				// print the version string is we parsed the parameters OK
-
-if (params.ranking_function == ANT_ANT_param_block::READABLE)
-	atire.open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
-else
-	atire.open(params.file_or_memory, params.index_filename, params.doclist_filename);
-
-if (params.assessments_filename != NULL)
-	atire.load_assessments(params.assessments_filename);
-
-if (params.output_forum != ANT_ANT_param_block::NONE)
-	atire.set_forum(params.output_forum, params.output_filename, params.participant_id, params.run_name, params.results_list_length);
-
-atire.set_trim_postings_k(params.trim_postings_k);
-atire.set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
-atire.set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
-
-atire.set_segmentation(params.segmentation);
-switch (params.ranking_function)
-	{
-	case ANT_indexer_param_block_rank::BM25:
-		atire.set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b);
-		break;
-	case ANT_indexer_param_block_rank::LMD:
-		atire.set_ranking_function(params.ranking_function, params.lmd_u, 0.0);
-		break;
-	case ANT_indexer_param_block_rank::LMJM:
-		atire.set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
-		break;
-	case ANT_indexer_param_block_rank::KBTFIDF:
-		atire.set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
-		break;
-	default:
-		atire.set_ranking_function(params.ranking_function, 0.0, 0.0);
-	}
-
+ant_init(params);
 ant(&params);
+
+delete atire;
 
 printf("Total elapsed time including startup and shutdown ");
 stats.print_elapsed_time();

@@ -21,6 +21,12 @@
 	#define TRUE (!FALSE)
 #endif
 
+ANT_ANT_param_block::~ANT_ANT_param_block()
+{
+	delete [] doclist_filename;
+	delete [] index_filename;
+}
+
 /*
 	ANT_ANT_PARAM_BLOCK::ANT_ANT_PARAM_BLOCK()
 	------------------------------------------
@@ -50,8 +56,8 @@ feedbacker = NONE;
 query_type = ATIRE_API::QUERY_NEXI;
 feedback_documents = 10;
 feedback_terms = 10;
-index_filename = "index.aspt";
-doclist_filename = "doclist.aspt";
+index_filename = strnew("index.aspt");
+doclist_filename = strnew("doclist.aspt");
 }
 
 /*
@@ -183,6 +189,26 @@ do
 	which++;
 	}
 while (*which != '\0');
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::SET_INDEX_FILENAME()
+	-------------------------------------
+*/
+void ANT_ANT_param_block::set_index_filename(char *filename)
+{
+	delete [] index_filename;
+	index_filename = strnew(filename);
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::SET_DOCLIST_FILENAME()
+	-------------------------------------
+*/
+void ANT_ANT_param_block::set_doclist_filename(char *filename)
+{
+	delete [] doclist_filename;
+	doclist_filename = strnew(filename);
 }
 
 /*
@@ -425,11 +451,13 @@ for (param = 1; param < argc; param++)
 			set_ranker(command + 1);
 		else if (strcmp(command, "findex") == 0)
 			{
-			index_filename = argv[++param];
+			delete [] index_filename;
+			index_filename = strnew(argv[++param]);
 			}
 		else if (strcmp(command, "fdoclist") == 0)
 			{
-			doclist_filename = argv[++param];
+			delete [] doclist_filename;
+			doclist_filename = strnew(argv[++param]);
 			}
 		else if (*command == 'f')
 			set_focused_ranker(command + 1);
