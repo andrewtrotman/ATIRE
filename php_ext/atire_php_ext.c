@@ -111,6 +111,29 @@ PHP_METHOD(atire_api_remote, search)
 
 }
 
+PHP_METHOD(atire_api_remote, load_index)
+{
+    char *doclist_filename, *index_filename;
+    long start, pagelength;
+    int doclist_filename_len, index_filename_len;
+
+    ATIRE_API_remote *atire = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &doclist_filename, &doclist_filename_len,
+    	&index_filename, &index_filename_len) == FAILURE) {
+    	RETURN_NULL();
+    }
+
+    atire_api_remote_object *obj =(atire_api_remote_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+    atire = obj->atire;
+    if (atire != NULL){
+        atire->load_index(doclist_filename, index_filename);
+        RETURN_BOOL(1);
+    }
+
+    RETURN_BOOL(0);
+}
+
 PHP_METHOD(atire_api_remote, getConnectStr)
 {
 	char *res;
@@ -128,6 +151,7 @@ function_entry atire_api_remote_methods[] = {
     PHP_ME(atire_api_remote,  open,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  close,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  search,           NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(atire_api_remote,  load_index,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  getConnectStr,    NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };

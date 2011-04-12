@@ -42,6 +42,10 @@ public:
 
 	char *getConnectStr(void);
 
+	/*
+		Load a new doclist and index by filename.
+	*/
+	virtual void load_index(char *doclist_filename, char *index_filename);
 
 	/*
 		Search and return page_length results starting from top_of_page in the results list

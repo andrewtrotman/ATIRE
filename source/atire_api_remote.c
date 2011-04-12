@@ -96,6 +96,20 @@ connect_string = NULL;
 return TRUE;
 }
 
+/*
+	ATIRE_API_REMOTE::LOAD_INDEX()
+	--------------------------
+*/
+void ATIRE_API_remote::load_index(char *doclist_filename, char *index_filename)
+{
+	std::stringstream buffer, result;
+
+	/*
+		Construct the command string and send it off
+	*/
+	buffer << ".loadindex\n" << doclist_filename << "\n" << index_filename << "\n";
+	socket->puts((char *)buffer.str().c_str());
+}
 
 /*
 	ATIRE_API_REMOTE::SEARCH()
