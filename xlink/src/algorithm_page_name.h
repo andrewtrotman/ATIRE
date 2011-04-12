@@ -48,7 +48,7 @@ namespace QLINK
 		algorithm_page_name(ltw_task *task);
 		virtual ~algorithm_page_name();
 
-		ANT_link_term *find_term_in_list(char *value);
+		ANT_link_term *find_term_in_list(const char *value);
 	};
 
 }

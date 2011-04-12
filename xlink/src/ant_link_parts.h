@@ -479,7 +479,7 @@ while (last != s)
 	UTF8_TOKEN_COMPARE()
 	--------------------
 */
-inline int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
+inline int utf8_token_compare(const char *s1, const char *s2, long *is_substring = NULL)
 {
 int cmp, i, min_len;
 char *new_s1 = strdup(s1);
@@ -572,7 +572,7 @@ while (*current != NULL)
 	STRING_COMPARE()
 	----------------
 */
-inline int string_compare(char *s1, char *s2, long compare_without_space = 0)
+inline int string_compare(const char *s1, const char *s2, long compare_without_space = 0)
 {
 int min_len, cmp;
 if (compare_without_space && (strchr(s1, ' ') != NULL || strchr(s2, ' ') != NULL)) // we don't need token comparison for all, only those has space in it

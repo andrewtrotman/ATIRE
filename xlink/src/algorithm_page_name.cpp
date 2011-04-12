@@ -118,10 +118,11 @@ namespace QLINK
 //	//							cerr << "found a match (" << iner_iter->first << ")" << endl;
 //						}
 						//result.second.push_back(a_entry);
+						term->postings.push_back(a_entry);
 						name_array_.push_back(term);
 					}
 					else
-						iter->second->postings.push_back(a_entry);
+						index_term->postings.push_back(a_entry);
 				}
 				else {
 					cerr << "Error in line : " << line << endl;
@@ -148,7 +149,7 @@ namespace QLINK
 		loaded_ = true;
 	}
 
-	ANT_link_term *algorithm_page_name::find_term_in_list(char *value)
+	ANT_link_term *algorithm_page_name::find_term_in_list(const char *value)
 	{
 	long low, high, mid;
 
