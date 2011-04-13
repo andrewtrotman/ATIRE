@@ -24,6 +24,12 @@ config::~config() {
 	name_.clear();
 }
 
+void config::load(const char *name)
+{
+	name_ = name;
+	load();
+}
+
 void config::load()
 {
 	// create a STPL parser for reading the property file

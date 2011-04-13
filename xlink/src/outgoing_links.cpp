@@ -170,7 +170,7 @@ void outgoing_links::print_links(long orphan_docid, const char *orphan_name, lon
 						#endif
 							//printf(", ");
 							aout << ", ";
-						current_link->print_target(current_anchor);
+						current_link->print_target(current_anchor, algorithm_);
 						anchors_printed++;
 //						fprintf(stderr, "%s -> %d (gamma = %f)\n", current_link->link_term->term, docid, current_link->gamma);
 					//}
@@ -233,7 +233,7 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 				}
 
 		if (topic_->get_ltw_task()->get_task_type() != ltw_task::LTW_LTAra_A2B) {
-			current_link->print_anchor(beps_to_print_);
+			current_link->print_anchor(beps_to_print_, algorithm_);
 			links_printed++;
 		}
 		else {

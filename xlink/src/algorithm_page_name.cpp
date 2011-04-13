@@ -195,14 +195,7 @@ namespace QLINK
 			to_skip = language::isstopword(index_term->term);
 
 		if (!to_skip) {
-			term_len = strlen(index_term->term);
-			if (!use_utf8_token_matching_) {
-				offset = current_term_ - source_;
-				strncpy(buffer, offset + text_, term_len);
-				buffer[term_len] = '\0';
-			}
-			else
-				strcpy(buffer, index_term->term);
+			assign_link_term(index_term);
 			//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
 			if (!links_->find(buffer))
 				link * lnk = links_->push_link(NULL, offset, buffer, index_term->postings[0]->docid, 0.0, index_term);

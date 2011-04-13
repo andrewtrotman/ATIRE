@@ -21,6 +21,7 @@
 #include "language.h"
 #include "template_algo.h"
 #include "template_comparor.h"
+#include "run_config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,9 +65,42 @@ algorithm_ant_link_this::~algorithm_ant_link_this()
 void algorithm_ant_link_this::init_variables()
 {
 	//link_index = NULL;
-
 	lowercase_only = FALSE;
+
+	string crosslink_table = run_config::instance().get_value("");
+	if (crosslink_table.length() > 0) {
+		crosslink_ = true;
+		load_crosslink_table(crosslink_table);
+	}
 }
+
+void algorithm_ant_link_this::load_crosslink_table(std::string& filename)
+{
+	ifstream myfile (filename.c_str());
+
+	if (myfile.is_open()) {
+		while (! myfile.eof()) {
+			string line;
+			getline (myfile, line);
+			string::size_type pos = line.find_first_of(':');
+			if (pos != string::npos) {
+				unsigned long doc_id = atol(line.c_str());
+//				if (!corpus::instance().exist(doc_id))
+//					continue;
+				unsigned long target_doc_id = atol(line.c_str() + pos + 1);
+				crosslink_table_[doc_id] = target_doc_id;
+				//crosslink_table_.insert(make_pair(doc_id, target_doc_id));
+			}
+		}
+		myfile.close();
+	}
+}
+
+bool algorithm_ant_link_this::is_valid_link(unsigned long id)
+{
+
+}
+
 /*
 	READ_INDEX()
 	------------
@@ -614,19 +648,20 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term)
 //				is_stopword = language::isstopword(term->term);
 //
 //			if (!is_stopword) {
-		strncpy(buffer_, offset + text_, term_len);
-		buffer_[term_len] = '\0';
+//		strncpy(buffer_, offset + text_, term_len);
+//		buffer_[term_len] = '\0';
 //				if (strcmp(term->term, "the church of england") == 0)
 //					fputs("I got you", stderr);
 		//if (!lx->find(buffer_)) {
 			//lx->push_link(*first, offset, buffer_, term->postings[0]->docid, gamma, term);
-		if (!links_->find(term->term)) {
-			links_->push_link(current_term_, offset, term->term, term->postings[0]->docid, gamma, term);
-			// debug
+	assign_link_term(term);
+	if (!links_->find(term->term)) {
+		links_->push_link(current_term_, offset, buffer_, term->postings[0]->docid, gamma, term);
+		// debug
 //					fprintf(stderr, "found a %s anchor\n", buffer__);
-			links_count++;
-		}
+		links_count++;
+	}
 //				else
 //					fprintf(stderr, "Duplicated");
-		fprintf(stderr, "\n");
+	fprintf(stderr, "\n");
 }

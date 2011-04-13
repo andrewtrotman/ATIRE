@@ -10,11 +10,13 @@
 
 #include <spec/property.h>
 
+#include "pattern_singleton.h"
+
 namespace QLINK {
 	/*
 	 *
 	 */
-	class config {
+	class config : public pattern_singleton<config> {
 	public:
 		typedef stpl::PropertiesFile::string_type	string_type;
 
@@ -23,10 +25,12 @@ namespace QLINK {
 		std::string				name_; // the full path name of the config file
 
 	public:
+		config() {};
 		config(const char *name);
 		virtual ~config();
 
 		void load();
+		void load(const char *name);
 		void show();
 		string_type	get_value(string_type name);
 	};

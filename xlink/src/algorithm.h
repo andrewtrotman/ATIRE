@@ -42,6 +42,9 @@ namespace QLINK {
 		long					stopword_no_;
 		char					*source_;
 		char		 			*current_term_;
+		char 					buffer_[1024 * 1024];
+
+		long 					orphan_docid_;
 
 		ltw_task				*ltw_task_;
 
@@ -65,6 +68,8 @@ namespace QLINK {
 		int topic_param_start() { return topic_param_start_; }
 		void set_links_container(links *container);
 		void set_task(ltw_task *task) { ltw_task_ = task; }
+
+		virtual bool is_valid_link(unsigned long id) { return true; }
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}

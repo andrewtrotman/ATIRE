@@ -13,6 +13,7 @@
 #include "ant_link.h"
 
 namespace QLINK {
+	class algorithm;
 
 	/*
 	 *
@@ -28,8 +29,8 @@ namespace QLINK {
 		link();
 		virtual ~link();
 
-		virtual void print_target(long anchor = 0);
-		virtual void print_anchor(long beps_to_print = 5, bool id_or_name = true);
+		virtual bool print_target(long anchor = 0, algorithm *algor = NULL);
+		virtual bool print_anchor(long beps_to_print = 5, bool id_or_name = true, algorithm *algor = NULL);
 		virtual void print_bep(long beps_to_print = 1);
 		virtual void print();
 		virtual void print_header() {}

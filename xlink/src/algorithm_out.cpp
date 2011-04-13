@@ -47,6 +47,7 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 	for (first = term_list; *first != NULL; first++)
 		{
 //			fprintf(stderr, "%s\n", *first);
+		current_term_ = *first;
 		where_to = buffer;
 		for (last = first; *last != NULL; last++)
 			{
@@ -104,6 +105,19 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 	// debug
 	if (links_->all_links_length() > 0)
 		fprintf(stderr, "added %d links\n", links_->all_links_length());
+}
+
+void algorithm_out::assign_link_term(ANT_link_term *index_term)
+{
+	long term_len, offset;
+	term_len = strlen(index_term->term);
+	if (!use_utf8_token_matching_) {
+		offset = current_term_ - source_;
+		strncpy(buffer_, offset + text_, term_len);
+		buffer_[term_len] = '\0';
+	}
+	else
+		strcpy(buffer_, index_term->term);
 }
 
 }

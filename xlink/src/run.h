@@ -19,7 +19,7 @@ namespace QLINK {
 	 */
 	class run {
 	private:
-		run_config		run_conf_;
+		run_config		*run_conf_;
 
 	public:
 		std::string		affiliation;
@@ -46,8 +46,8 @@ namespace QLINK {
 		virtual void create() = 0;
 		virtual void print() = 0;
 
-		const run_config& get_config() const { return run_conf_; }
-		run_config& get_config() { return run_conf_; }
+		const run_config& get_config() const { return *run_conf_; }
+		run_config& get_config() { return *run_conf_; }
 	};
 
 }

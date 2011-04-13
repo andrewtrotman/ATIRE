@@ -12,9 +12,11 @@
 
 using namespace QLINK;
 
-run::run(char *configfile) : run_conf_(configfile)
+run::run(char *configfile) /*: run_conf_(configfile)*/
 {
-	run_conf_.show();
+	run_conf_ = static_cast<run_config *>(&run_config::instance());
+	run_conf_->load(configfile);
+	run_conf_->show();
 	init();
 }
 

@@ -58,7 +58,7 @@ public:
 	   algorithm_bep::alorithm_names["BEP_MATCH"] = algorithm_bep::BEP_MATCH;
 	   algorithm_bep::alorithm_names["BEP_GRAPH"] = algorithm_bep::BEP_GRAPH;
 
-	   initJava();
+//	   initJava();
    }
 };
 // our one instance of the proxy

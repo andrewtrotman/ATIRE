@@ -19,6 +19,7 @@
 namespace QLINK {
 	class ltw_topic;
 	class algorithm_bep;
+	class algorithm;
 
 	class links
 	{
@@ -48,6 +49,7 @@ namespace QLINK {
 
 		//maker_t						*link_maker_;
 		algorithm_bep 				*bep_algor_;
+		algorithm					*algorithm_;
 
 	public:
 		links();
@@ -95,6 +97,7 @@ namespace QLINK {
 		link *find_orphan(const char *term);
 
 		void set_bep_algorithm(algorithm_bep *bep_algor) { bep_algor_ = bep_algor; }
+		void set_algorithm(algorithm *algor) { algorithm_ = algor; }
 		virtual void find_anchor() {}
 		//long find_bep(link *lnk);
 

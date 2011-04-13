@@ -14,6 +14,7 @@
 #include "algorithm_out.h"
 #include "ant_link.h"
 #include <vector>
+#include <map>
 
 namespace QLINK {
 
@@ -28,18 +29,20 @@ namespace QLINK {
 	//	long *links_in_orphan_length;
 
 		//std::vector<ANT_link_term *>	link_index_;
-		ANT_link_term *	link_index_;
+		ANT_link_term 	*link_index_;
 
-		char *runname;
-		double proper_noun_boost;
-		long targets_per_link;
-		long anchors_per_run;
-		long print_mode;
+		char 			*runname;
+		double 			proper_noun_boost;
+		long 			targets_per_link;
+		long 			anchors_per_run;
+		long 			print_mode;
+		bool 			crosslink_;
+
+		std::map<unsigned long, unsigned long>	crosslink_table_;
 
 	protected:
-		char buffer_[1024 * 1024];
 		char orphan_name_[2048];
-		long orphan_docid_;
+
 		long terms_in_index;
 
 	private:
@@ -57,6 +60,8 @@ namespace QLINK {
 		int init_params(int argc, char *argv[]);
 		void init_variables();
 
+		void load_crosslink_table(std::string& filename);
+
 	protected:
 		virtual void process_terms(char **term_list, const char *source);
 //		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
@@ -73,6 +78,8 @@ namespace QLINK {
 		virtual void process_topic_text();
 		virtual void process_topic(ltw_topic *a_topic);
 		//void find_anchor_and_beps();
+
+		virtual bool is_valid_link(unsigned long id);
 	};
 
 }
