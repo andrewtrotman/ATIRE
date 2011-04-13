@@ -41,6 +41,7 @@ namespace QLINK {
 		long 					lowercase_only;					// are we in lowercase or mixed-case matching mode?
 		long					stopword_no_;
 		char					*source_;
+		char		 			*current_term_;
 
 		ltw_task				*ltw_task_;
 

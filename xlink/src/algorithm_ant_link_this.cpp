@@ -166,16 +166,17 @@ while (fgets(buffer_, sizeof(buffer_), fp) != NULL)
 	FIND_TERM_IN_LIST()
 	-------------------
 */
-ANT_link_term *algorithm_ant_link_this::find_term_in_list(char *value, ANT_link_term *list, long list_length, long this_docid)
+ANT_link_term *algorithm_ant_link_this::find_term_in_list(const char *value/*, ANT_link_term *list, long list_length, long this_docid*/)
 {
+//	link_index_, terms_in_index, orphan_docid_
 long low, high, mid;
 
 low = 0;
-high = list_length;
+high = terms_in_index;
 while (low < high)
 	{
 	mid = (low + high) / 2;
-	if (strcmp(list[mid].term, value) < 0)
+	if (strcmp(link_index_[mid].term, value) < 0)
 		low = mid + 1;
 	else
 		high = mid;
@@ -185,27 +186,27 @@ while (low < high)
 /*
 	remove terms that are in the anchor list but have no postings because the only document used the anchor was this one.
 */
-while (low < list_length)
-	if (list[low].postings[0]->doc_link_frequency == 0)		// we've been deleted so this is a miss
+while (low < terms_in_index)
+	if (link_index_[low].postings[0]->doc_link_frequency == 0)		// we've been deleted so this is a miss
 		low++;
 	else
 		break;
 /*
 	remove terms that point to this document
 */
-while (low < list_length)
-	if (list[low].postings.size() == 1 && list[low].postings[0]->docid == this_docid)		// we point to this document so we delete it
+while (low < terms_in_index)
+	if (link_index_[low].postings.size() == 1 && link_index_[low].postings[0]->docid == orphan_docid_)		// we point to this document so we delete it
 		low++;
 	else
 		break;
 #endif
 
-if ((low < list_length) && (strcmp(value, list[low].term) == 0))
-	return &list[low];		// match
+if ((low < terms_in_index) && (strcmp(value, link_index_[low].term) == 0))
+	return &link_index_[low];		// match
 else
 	{
-	if (low < list_length)
-		return &list[low];		// not found in list but not after the last term in the list
+	if (low < terms_in_index)
+		return &link_index_[low];		// not found in list but not after the last term in the list
 	else
 		return NULL;
 	}
@@ -466,114 +467,114 @@ void algorithm_ant_link_this::process_terms(char **term_list, const char *source
 	links_->sort_links();
 }
 
-void algorithm_ant_link_this::recommend_anchors(links* lx, char **term_list, const char *source)
-{
-	if (terms_in_index <= 0)
-		return;
-
-	char *where_to;
-	char **first, **last;
-	ANT_link_term *index_term, *last_index_term;
-	double gamma, numerator, denominator;
-	long /*terms_in_index, orphan_docid, */param, noom, index_argv_param;
-	long targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
-	const char *runname = "Unknown";
-
-	double proper_noun_boost = 0.0;
-	long num_of_processed_topic = 0;
-	long offset = 0;
-	char *place;
-
-	long term_len = 0;
-	long links_count = 0;
-	bool is_stopword = false;
-
-	for (first = term_list; *first != NULL; first++)
-		{
-		where_to = buffer_;
-		last_index_term = NULL;
-
-		if (strcasecmp(buffer_, "railway station") == 0)
-			offset = 0;
-
-		for (last = first; *last != NULL; last++)
-			{
-			if (where_to == buffer_)
-				{
-				strcpy(buffer_, *first);
-				where_to = buffer_ + strlen(buffer_);
-				}
-			else
-				{
-				*where_to++ = ' ';
-				strcpy(where_to, *last);
-				where_to += strlen(*last);
-				}
-
-//			vector<ANT_link_term *>::iterator iter = std::find_if(link_index_.begin(), link_index_.end(), term_part_equal(buffer_));
-//			if (iter != link_index_.end())
-//				index_term = *iter;
-//			else
-//				break;
-			index_term = find_term_in_list(buffer_, link_index_, terms_in_index, orphan_docid_);
-
-			if (index_term == NULL)
-				break;									// we're after the last term in the list
-
-			if (strcmp(buffer_, index_term->term) == 0)
-				last_index_term = index_term;			// we're a term in the list, but might be a longer one so keep looking
-
-			if (strncmp(buffer_, index_term->term, strlen(buffer_)) != 0)
-				break;									// we can't be a substring so we're done
-			}
-
-		if (last_index_term != NULL) {
-			noom = 0;
-			denominator = (double)last_index_term->document_frequency;
-#ifdef REMOVE_ORPHAN_LINKS
-			denominator--;
-			if (last_index_term->postings[noom]->docid == orphan_docid_)			// not alowed to use links that point to the orphan
-				noom = 1;
-#endif
-			numerator = (double)last_index_term->postings[noom]->doc_link_frequency;
-			gamma = numerator / denominator;
-			if (ispropper_noun(last_index_term->term))
-				gamma += proper_noun_boost;
-			place = *first;
-			offset = place - source;
-			term_len = strlen(last_index_term->term);
-
-			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
-
-//			is_stopword = false;
-//			if (!strpbrk(last_index_term->term, "- "))
-//				is_stopword = language::isstopword(last_index_term->term);
+//void algorithm_ant_link_this::recommend_anchors(links* lx, char **term_list, const char *source)
+//{
+//	if (terms_in_index <= 0)
+//		return;
 //
-//			if (!is_stopword) {
-				strncpy(buffer_, offset + text_, term_len);
-				buffer_[term_len] = '\0';
-//				if (strcmp(last_index_term->term, "the church of england") == 0)
-//					fputs("I got you", stderr);
-				//if (!lx->find(buffer_)) {
-					//lx->push_link(*first, offset, buffer_, last_index_term->postings[0]->docid, gamma, last_index_term);
-				if (!lx->find(last_index_term->term)) {
-					lx->push_link(*first, offset, last_index_term->term, last_index_term->postings[0]->docid, gamma, last_index_term);
-					// debug
-//					fprintf(stderr, "found a %s anchor\n", buffer__);
-					links_count++;
-				}
-//				else
-//					fprintf(stderr, "Duplicated");
-				fprintf(stderr, "\n");
-
+//	char *where_to;
+//	char **first, **last;
+//	ANT_link_term *index_term, *last_index_term;
+//	double gamma, numerator, denominator;
+//	long /*terms_in_index, orphan_docid, */param, noom, index_argv_param;
+//	long targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
+//	const char *runname = "Unknown";
+//
+//	double proper_noun_boost = 0.0;
+//	long num_of_processed_topic = 0;
+//	long offset = 0;
+//	char *place;
+//
+//	long term_len = 0;
+//	long links_count = 0;
+//	bool is_stopword = false;
+//
+//	for (first = term_list; *first != NULL; first++)
+//		{
+//		where_to = buffer_;
+//		last_index_term = NULL;
+//
+//		if (strcasecmp(buffer_, "railway station") == 0)
+//			offset = 0;
+//
+//		for (last = first; *last != NULL; last++)
+//			{
+//			if (where_to == buffer_)
+//				{
+//				strcpy(buffer_, *first);
+//				where_to = buffer_ + strlen(buffer_);
+//				}
+//			else
+//				{
+//				*where_to++ = ' ';
+//				strcpy(where_to, *last);
+//				where_to += strlen(*last);
+//				}
+//
+////			vector<ANT_link_term *>::iterator iter = std::find_if(link_index_.begin(), link_index_.end(), term_part_equal(buffer_));
+////			if (iter != link_index_.end())
+////				index_term = *iter;
+////			else
+////				break;
+//			index_term = find_term_in_list(buffer_);
+//
+//			if (index_term == NULL)
+//				break;									// we're after the last term in the list
+//
+//			if (strcmp(buffer_, index_term->term) == 0)
+//				last_index_term = index_term;			// we're a term in the list, but might be a longer one so keep looking
+//
+//			if (strncmp(buffer_, index_term->term, strlen(buffer_)) != 0)
+//				break;									// we can't be a substring so we're done
 //			}
-
-		}
-	}
-	// debug
-	if (links_count <= 0)
-		fprintf(stderr, "added %d links\n", links_count);
-}
+//
+//		if (last_index_term != NULL) {
+//			noom = 0;
+//			denominator = (double)last_index_term->document_frequency;
+//#ifdef REMOVE_ORPHAN_LINKS
+//			denominator--;
+//			if (last_index_term->postings[noom]->docid == orphan_docid_)			// not alowed to use links that point to the orphan
+//				noom = 1;
+//#endif
+//			numerator = (double)last_index_term->postings[noom]->doc_link_frequency;
+//			gamma = numerator / denominator;
+//			if (ispropper_noun(last_index_term->term))
+//				gamma += proper_noun_boost;
+//			place = *first;
+//			offset = place - source;
+//			term_len = strlen(last_index_term->term);
+//
+//			fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)", last_index_term->term, last_index_term->postings[0]->docid, numerator, denominator);
+//
+////			is_stopword = false;
+////			if (!strpbrk(last_index_term->term, "- "))
+////				is_stopword = language::isstopword(last_index_term->term);
+////
+////			if (!is_stopword) {
+//				strncpy(buffer_, offset + text_, term_len);
+//				buffer_[term_len] = '\0';
+////				if (strcmp(last_index_term->term, "the church of england") == 0)
+////					fputs("I got you", stderr);
+//				//if (!lx->find(buffer_)) {
+//					//lx->push_link(*first, offset, buffer_, last_index_term->postings[0]->docid, gamma, last_index_term);
+//				if (!lx->find(last_index_term->term)) {
+//					lx->push_link(*first, offset, last_index_term->term, last_index_term->postings[0]->docid, gamma, last_index_term);
+//					// debug
+////					fprintf(stderr, "found a %s anchor\n", buffer__);
+//					links_count++;
+//				}
+////				else
+////					fprintf(stderr, "Duplicated");
+//				fprintf(stderr, "\n");
+//
+////			}
+//
+//		}
+//	}
+//	// debug
+//	if (links_count <= 0)
+//		fprintf(stderr, "added %d links\n", links_count);
+//}
 
 void algorithm_ant_link_this::add_link(ANT_link_term *term)
 {

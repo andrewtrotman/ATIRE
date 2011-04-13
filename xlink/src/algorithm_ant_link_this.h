@@ -35,7 +35,6 @@ namespace QLINK {
 		long targets_per_link;
 		long anchors_per_run;
 		long print_mode;
-		char *current_term_;
 
 	protected:
 		char buffer_[1024 * 1024];
@@ -60,8 +59,9 @@ namespace QLINK {
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source);
-		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
+//		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
 		virtual void add_link(ANT_link_term *term);
+		virtual ANT_link_term *find_term_in_list(const char *value);
 
 	public:
 //		algorithm_ant_link_this(links *links_list);

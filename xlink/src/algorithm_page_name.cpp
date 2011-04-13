@@ -186,95 +186,27 @@ namespace QLINK
 		process_terms(links_, term_list, source);
 	}
 
-	void algorithm_page_name::recommend_anchors(links* lx, char **term_list, const char *source)
+	void algorithm_page_name::add_link(ANT_link_term *index_term)
 	{
-		char **first, **last;
-		char *where_to;
-		long offset = 0, term_len = 0, is_substring, cmp;
+		bool to_skip = false;
+		long offset = 0, term_len = 0;
 		char buffer[1024 * 1024];
-//		page_map_t::iterator index_entry = names_map_.end();
-//		page_map_t::iterator last_index_entry = index_entry;
-		ANT_link_term *index_term = NULL;
+		if (stopword_no_ && !strpbrk(index_term->term, "- "))
+			to_skip = language::isstopword(index_term->term);
 
-		for (first = term_list; *first != NULL; first++)
-			{
-//			fprintf(stderr, "%s\n", *first);
-			where_to = buffer;
-			for (last = first; *last != NULL; last++)
-				{
-				if (where_to == buffer)
-					{
-					strcpy(buffer, *first);
-					where_to = buffer + strlen(buffer);
-					}
-				else
-					{
-					if (!use_utf8_token_matching_)
-						*where_to++ = ' ';
-					strcpy(where_to, *last);
-					where_to += strlen(*last);
-					}
-
-				*where_to = '\0';
-
-//				for the possible debugging later
-//				static char di[] = {(char)0xe6, (char)0xa2, (char)0x85};
-//				static char xianjin[] = {(char)0xe3, (char)0x80, (char)0x8a, (char)0xe7, (char)0x8e, (char)0xb0};
-//				if (memcmp(buffer, xianjin, 6) == 0)
-//					fprintf(stderr, "I got you");
-//				if (strncmp(*last, "\"", 1)) == 0)
-//					fprintf(stderr, "I got you");
-
-				index_term = find_term_in_list(buffer);
-
-				if (index_term == NULL)
-					break;		// we're after the last term in the list so can stop because we can't be a substring
-
-				if (use_utf8_token_matching_)
-					{
-					is_substring = FALSE;
-					cmp = utf8_token_compare(buffer, index_term->term, &is_substring);
-					}
-				else
-					cmp = string_compare(buffer, index_term->term);
-
-				if (cmp == 0)		// we're a term in the list
-					{
-					bool to_skip = false;
-					if (stopword_no_ && !strpbrk(index_term->term, "- "))
-						to_skip = language::isstopword(index_term->term);
-
-					if (!to_skip) {
-						term_len = strlen(index_term->term);
-						if (!use_utf8_token_matching_) {
-							offset = *first - source;
-							strncpy(buffer, offset + text_, term_len);
-							buffer[term_len] = '\0';
-						}
-						else
-							strcpy(buffer, index_term->term);
-						//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
-						if (!lx->find(buffer))
-							link * lnk = lx->push_link(NULL, offset, buffer, index_term->postings[0]->docid, 0.0, index_term);
-						}
-					}
-				else
-					{
-					if (use_utf8_token_matching_)
-						cmp = is_substring == TRUE ? 0 : 1;
-					else
-						cmp = memcmp(buffer, index_term->term, strlen(buffer));
-					if  (cmp != 0)
-						break;		// we're a not a substring so we can't find a longer term
-					}
-				}
+		if (!to_skip) {
+			term_len = strlen(index_term->term);
+			if (!use_utf8_token_matching_) {
+				offset = current_term_ - source_;
+				strncpy(buffer, offset + text_, term_len);
+				buffer[term_len] = '\0';
 			}
-	}
-
-
-	void algorithm_page_name::add_link(ANT_link_term *term)
-	{
-
+			else
+				strcpy(buffer, index_term->term);
+			//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
+			if (!links_->find(buffer))
+				link * lnk = links_->push_link(NULL, offset, buffer, index_term->postings[0]->docid, 0.0, index_term);
+			}
 	}
 }
 //		for (first = term_list; *first != NULL; first++) {

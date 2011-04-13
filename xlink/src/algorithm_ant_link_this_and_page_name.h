@@ -30,6 +30,7 @@ namespace QLINK {
 		virtual void add_link(ANT_link_term *term) {}
 		void process_terms(char **term_list, const char *source);
 		void merge_links();
+		virtual ANT_link_term *find_term_in_list(const char *value) {}
 
 	private:
 		void init();
