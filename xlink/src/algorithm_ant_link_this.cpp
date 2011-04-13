@@ -98,7 +98,8 @@ void algorithm_ant_link_this::load_crosslink_table(std::string& filename)
 
 bool algorithm_ant_link_this::has_crosslink(unsigned long id)
 {
-	return (crosslink_table_.find(id) != crosslink_table_.end());
+	map<unsigned long, unsigned long>::iterator it = crosslink_table_.find(id);
+	return (it != crosslink_table_.end() && corpus::instance().exist(it->second));
 }
 
 unsigned long algorithm_ant_link_this::get_crosslink(unsigned long id)
@@ -647,7 +648,9 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term)
 	offset = place - source_;
 	term_len = strlen(term->term);
 
-	fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)", term->term, term->postings[0]->docid, numerator, denominator);
+#ifdef DEBUG
+	fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", term->term, term->postings[0]->docid, numerator, denominator);
+#endif
 
 //			is_stopword = false;
 //			if (!strpbrk(term->term, "- "))
@@ -669,5 +672,5 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term)
 	}
 //				else
 //					fprintf(stderr, "Duplicated");
-	fprintf(stderr, "\n");
+//	fprintf(stderr, "\n");
 }
