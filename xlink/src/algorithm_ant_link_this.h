@@ -36,7 +36,6 @@ namespace QLINK {
 		long 			targets_per_link;
 		long 			anchors_per_run;
 		long 			print_mode;
-		bool 			crosslink_;
 
 		std::map<unsigned long, unsigned long>	crosslink_table_;
 
@@ -79,7 +78,8 @@ namespace QLINK {
 		virtual void process_topic(ltw_topic *a_topic);
 		//void find_anchor_and_beps();
 
-		virtual bool is_valid_link(unsigned long id);
+		virtual bool has_crosslink(unsigned long id);
+		unsigned long get_crosslink(unsigned long id);
 	};
 
 }

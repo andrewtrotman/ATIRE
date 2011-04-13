@@ -67,7 +67,7 @@ void algorithm_ant_link_this::init_variables()
 	//link_index = NULL;
 	lowercase_only = FALSE;
 
-	string crosslink_table = run_config::instance().get_value("");
+	string crosslink_table = run_config::instance().get_value("crosslink_table");
 	if (crosslink_table.length() > 0) {
 		crosslink_ = true;
 		load_crosslink_table(crosslink_table);
@@ -96,11 +96,17 @@ void algorithm_ant_link_this::load_crosslink_table(std::string& filename)
 	}
 }
 
-bool algorithm_ant_link_this::is_valid_link(unsigned long id)
+bool algorithm_ant_link_this::has_crosslink(unsigned long id)
 {
-
+	return (crosslink_table_.find(id) != crosslink_table_.end());
 }
 
+unsigned long algorithm_ant_link_this::get_crosslink(unsigned long id)
+{
+	if (has_crosslink(id))
+		return crosslink_table_[id];
+	return 0;
+}
 /*
 	READ_INDEX()
 	------------

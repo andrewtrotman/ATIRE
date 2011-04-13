@@ -61,7 +61,7 @@ bool link::print_target(long anchor, algorithm *algor)
 {
 	bool ret = true;
 	if (algor != NULL)
-		ret = algor->is_valid_link(link_term->postings[anchor]->docid);
+		ret = algor->has_crosslink(link_term->postings[anchor]->docid);
 
 	if (ret) {
 		print_header();
@@ -81,14 +81,16 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	if (algor != NULL) {
 		if (link_term->postings.size() > 0)
 			for (int i = 0; i < link_term->postings.size(); i++) {
-				if (algor->is_valid_link(link_term->postings[i]->docid)) {
+				if (algor->has_crosslink(link_term->postings[i]->docid)) {
 					ret = true;
 					break;
 				}
 			}
 		else
-			ret = algor->is_valid_link(target_document);
+			ret = algor->has_crosslink(target_document);
 	}
+	else
+		ret = true;
 	if (ret) {
 		sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
 		aout << buf;
@@ -105,6 +107,9 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 					id = atoi(link_term->postings[i]->desc);
 
 #ifdef CROSSLINK
+				id = algor->get_crosslink(id);
+				if (id == 0)
+					continue;
 				string filename = corpus::instance().id2docpath(id);
 				if (!sys_file::exist(filename.c_str())) {
 					cerr << "No target file found:" << filename << endl;

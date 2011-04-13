@@ -49,7 +49,7 @@ namespace QLINK {
 		ltw_task				*ltw_task_;
 
 		bool 					use_utf8_token_matching_; // which means that matching without spaces, all the spaces in string will be removed
-
+		bool 					crosslink_;
 	public:
 		algorithm(ltw_task *task);
 		algorithm() {}
@@ -69,7 +69,8 @@ namespace QLINK {
 		void set_links_container(links *container);
 		void set_task(ltw_task *task) { ltw_task_ = task; }
 
-		virtual bool is_valid_link(unsigned long id) { return true; }
+		virtual bool has_crosslink(unsigned long id) { return true; }
+		virtual unsigned long get_crosslink(unsigned long id) { return id; }
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}
