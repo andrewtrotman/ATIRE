@@ -91,7 +91,7 @@ long ANT_file::open(char *filename, char *mode)
 				break;
 			}
 
-	use_writelock = (access_mode & GENERIC_WRITE) !=0);
+	use_writelock = (access_mode & GENERIC_WRITE) !=0;
 
 	if ((internals->fp = CreateFile(filename, access_mode, use_writelock ? 0 : FILE_SHARE_READ,
 			NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
