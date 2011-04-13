@@ -95,7 +95,7 @@ if (first_param >= argc)
 last_report = 0;
 doc = 0;
 index = new ANT_memory_index(param_block.index_filename);
-id_list.open(param_block.doclist_filename, "wb");
+id_list.open(param_block.doclist_filename, "wbx");
 
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);

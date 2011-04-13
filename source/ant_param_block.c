@@ -85,6 +85,11 @@ puts("-------");
 puts("-? -h -H        Display this help message");
 puts("-nologo         Suppress banner");
 puts("-people         Display credits");
+puts("");
+
+puts("FILE HANDLING");
+puts("-------------");
+
 puts("-findex <fn>    Filename of index");
 puts("-fdoclist <fn>  Filename of doclist");
 puts("");

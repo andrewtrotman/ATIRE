@@ -18,6 +18,7 @@
 	#include <unistd.h>
 #endif
 #include <stdlib.h>
+#include <fcntl.h>
 
 /*
 	ANT_FILE::ANT_FILE()
@@ -67,6 +68,7 @@ long ANT_file::open(char *filename, char *mode)
 #ifdef _MSC_VER
 	DWORD access_mode, creation_mode;
 	char *ch;
+	int use_writelock;
 
 	access_mode = creation_mode = 0;
 	for (ch = mode; *ch != NULL; ch++)
@@ -88,11 +90,48 @@ long ANT_file::open(char *filename, char *mode)
 				access_mode |= GENERIC_READ | GENERIC_WRITE;
 				break;
 			}
-	if ((internals->fp = CreateFile(filename, access_mode, FILE_SHARE_READ, NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
+
+	use_writelock = (access_mode & GENERIC_WRITE) !=0);
+
+	if ((internals->fp = CreateFile(filename, access_mode, use_writelock ? 0 : FILE_SHARE_READ,
+			NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
 		return 0;
 #else
 	if ((internals->fp = fopen(filename, mode)) == NULL)
 		return 0;
+	else
+		{
+		struct flock lock;
+		char * ch;
+		int use_lock = 0;
+
+		lock.l_type = F_WRLCK;
+
+		for (ch = mode; *ch != 0; ch++)
+			switch (*ch)
+				{
+				case 'r':
+					lock.l_type = F_RDLCK;
+					break;
+				case 'w':
+					lock.l_type = F_WRLCK;
+					break;
+				case 'x':
+					use_lock = 1;
+					break;
+				}
+
+		if (use_lock)
+			{
+			lock.l_whence = SEEK_SET;
+			lock.l_len = 0;
+			lock.l_start = 0;
+
+			if (fcntl(fileno(internals->fp), F_SETLK, &lock)==-1)
+				return 0;
+
+			}
+		}
 #endif
 
 file_position = 0;

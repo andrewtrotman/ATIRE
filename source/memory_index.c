@@ -703,7 +703,12 @@ char file_header[] = "ANT Search Engine Index File\n\0\0";
 if (index_file == NULL && filename != NULL)
 	{
 	index_file = new ANT_file;
-	index_file->open(filename, "w+b");
+
+	if (index_file->open(filename, "w+bx")==0) {
+		fprintf(stderr, "Couldn't open index file for writing\n");
+		exit(-1);
+	}
+
 	index_file->setvbuff(DISK_BUFFER_SIZE);
 	stats->disk_buffer = DISK_BUFFER_SIZE;
 	index_file->write((unsigned char *)file_header, sizeof(file_header));

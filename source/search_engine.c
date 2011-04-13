@@ -57,7 +57,7 @@ if (memory_model)
 	index = new ANT_file_memory;
 else
 	index = new ANT_file;
-if (index->open((char *)index_filename, "rb") == 0)
+if (index->open((char *)index_filename, "rbx") == 0)
 	exit(printf("Cannot open index file:%s\n", index_filename));
 
 /*

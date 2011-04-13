@@ -5,7 +5,7 @@
 #ifndef BTREE_ITERATOR_H_
 #define BTREE_ITERATOR_H_
 
-#if defined(__APPLE__) || defined(linux)
+#ifndef _MSC_VER
 #include <stddef.h>
 #endif
 
