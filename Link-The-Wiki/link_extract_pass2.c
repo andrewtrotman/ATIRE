@@ -209,12 +209,12 @@ else
 int main(int argc, char *argv[])
 {
 static char *seperators = " ";
-char *file, *token, *where_to, *filename, *start;
+char *file, *token, *where_to, *filename;			// *start;
 char **term_list, **first, **last, **current;
 ANT_link_extract_term *link_index, *index_term;
 long terms_in_index, current_docid, param, file_number;
 long lowercase_only, first_param;
-long is_utf8_token, token_len, cmp, is_substring;
+long is_utf8_token, cmp, is_substring = FALSE;				// token_len
 char *command;
 ANT_directory_iterator_object file_object;
 

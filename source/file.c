@@ -65,10 +65,11 @@ return buffer == NULL ? 0 : 1;
 */
 long ANT_file::open(char *filename, char *mode)
 {
+long use_lock = FALSE;
+char *ch;
+
 #ifdef _MSC_VER
-	DWORD access_mode, creation_mode;
-	char *ch;
-	int use_writelock;
+	DWORD access_mode, creation_mode, lock_mode;
 
 	access_mode = creation_mode = 0;
 	for (ch = mode; *ch != NULL; ch++)
@@ -86,25 +87,25 @@ long ANT_file::open(char *filename, char *mode)
 				access_mode |= GENERIC_WRITE;
 				creation_mode = OPEN_ALWAYS;
 				break;
+			case 'x':
+				use_lock = TRUE;
+				break;
 			case '+':
 				access_mode |= GENERIC_READ | GENERIC_WRITE;
 				break;
 			}
 
-	use_writelock = (access_mode & GENERIC_WRITE) !=0;
+	lock_mode = use_lock ? access_mode == GENERIC_READ ? FILE_SHARE_READ : 0 : FILE_SHARE_READ;
 
-	if ((internals->fp = CreateFile(filename, access_mode, use_writelock ? 0 : FILE_SHARE_READ,
-			NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
+	if ((internals->fp = CreateFile(filename, access_mode, lock_mode, NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
 		return 0;
 #else
+	struct flock lock;
+
 	if ((internals->fp = fopen(filename, mode)) == NULL)
 		return 0;
 	else
 		{
-		struct flock lock;
-		char * ch;
-		int use_lock = 0;
-
 		lock.l_type = F_WRLCK;
 
 		for (ch = mode; *ch != 0; ch++)
@@ -114,10 +115,11 @@ long ANT_file::open(char *filename, char *mode)
 					lock.l_type = F_RDLCK;
 					break;
 				case 'w':
+				case 'a':
 					lock.l_type = F_WRLCK;
 					break;
 				case 'x':
-					use_lock = 1;
+					use_lock = TRUE;
 					break;
 				}
 
@@ -127,9 +129,8 @@ long ANT_file::open(char *filename, char *mode)
 			lock.l_len = 0;
 			lock.l_start = 0;
 
-			if (fcntl(fileno(internals->fp), F_SETLK, &lock)==-1)
+			if (fcntl(fileno(internals->fp), F_SETLK, &lock) == -1)
 				return 0;
-
 			}
 		}
 #endif

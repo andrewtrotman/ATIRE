@@ -23,7 +23,7 @@
 const char *PROMPT = "]";
 const long MAX_TITLE_LENGTH = 1024;
 
-ATIRE_API * atire;
+ATIRE_API *atire = NULL;
 
 void ant_init(ANT_ANT_param_block & params);
 
@@ -113,7 +113,7 @@ unsigned long current_document_length;
 long long docid;
 char *document_buffer, *title_start, *title_end;
 ANT_channel *inchannel, *outchannel;
-char **answer_list;
+char **answer_list, *filename;
 
 if (params->port == 0)
 	{
@@ -146,31 +146,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 
 	if (strcmp(command, ".loadindex") == 0)
 		{
-		/* NOTE: Do not expose this command to untrusted users as it could almost certainly
-		 * cause arbitrary code execution by loading specially-crafted attacker-controlled indexes.
-		 */
-		char * fn;
-		delete [] command;
+		/*
+			NOTE: Do not expose this command to untrusted users as it could almost certainly
+			cause arbitrary code execution by loading specially-crafted attacker-controlled indexes.
+		*/
+		params->set_doclist_filename(strip_space_inplace(filename = inchannel->gets()));
+		delete [] filename;
 
-		/* Load new index file */
-		fn = inchannel->gets();
-		strip_space_inplace(fn); /* gets() leaves the line terminator on the end, strip it */
-		params->set_doclist_filename(fn);
-		delete [] fn;
+		params->set_index_filename(strip_space_inplace(filename = inchannel->gets()));
+		delete [] filename;
 
-		fn = inchannel->gets();
-		strip_space_inplace(fn);
-		params->set_index_filename(fn);
-		delete [] fn;
-
-		delete atire;
 		ant_init(*params);
 
-		delete [] document_buffer;
-
 		length_of_longest_document = atire->get_longest_document_length();
+		delete [] document_buffer;
 		document_buffer = new char [length_of_longest_document + 1];
 
+		delete [] command;
 		continue;
 		}
 	else if (strcmp(command, ".quit") == 0)
@@ -225,6 +217,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write(document_buffer, current_document_length);
 			outchannel->puts("</ATIREgetdoc>");
 			}
+		delete [] command;
+		continue;
+		}
+	else if (strncmp(command, "<ATIREloadindex>", 16) == 0)
+		{
+		params->set_doclist_filename(filename = between(command, "<doclist>", "</doclist>"));
+		delete [] filename;
+
+		params->set_index_filename(filename = between(command, "<index>", "</index>"));
+		delete [] filename;
+
+		ant_init(*params);
+
+		length_of_longest_document = atire->get_longest_document_length();
+		delete [] document_buffer;
+		document_buffer = new char [length_of_longest_document + 1];
+
 		delete [] command;
 		continue;
 		}
@@ -354,45 +363,52 @@ delete [] print_buffer;
 return mean_average_precision;
 }
 
-void ant_init(ANT_ANT_param_block & params) {
-	atire = new ATIRE_API();
+/*
+	ANT_INIT()
+	----------
+*/
+void ant_init(ANT_ANT_param_block & params)
+{
 
-	if (params.logo)
-		puts(atire->version());				// print the version string is we parsed the parameters OK
+delete atire;
+atire = new ATIRE_API();
 
-	if (params.ranking_function == ANT_ANT_param_block::READABLE)
-		atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
-	else
-		atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
+if (params.logo)
+	puts(atire->version());				// print the version string is we parsed the parameters OK
 
-	if (params.assessments_filename != NULL)
-		atire->load_assessments(params.assessments_filename);
+if (params.ranking_function == ANT_ANT_param_block::READABLE)
+	atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
+else
+	atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
 
-	if (params.output_forum != ANT_ANT_param_block::NONE)
-		atire->set_forum(params.output_forum, params.output_filename, params.participant_id, params.run_name, params.results_list_length);
+if (params.assessments_filename != NULL)
+	atire->load_assessments(params.assessments_filename);
 
-	atire->set_trim_postings_k(params.trim_postings_k);
-	atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
-	atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
+if (params.output_forum != ANT_ANT_param_block::NONE)
+	atire->set_forum(params.output_forum, params.output_filename, params.participant_id, params.run_name, params.results_list_length);
 
-	atire->set_segmentation(params.segmentation);
-	switch (params.ranking_function)
-		{
-		case ANT_indexer_param_block_rank::BM25:
-			atire->set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b);
-			break;
-		case ANT_indexer_param_block_rank::LMD:
-			atire->set_ranking_function(params.ranking_function, params.lmd_u, 0.0);
-			break;
-		case ANT_indexer_param_block_rank::LMJM:
-			atire->set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
-			break;
-		case ANT_indexer_param_block_rank::KBTFIDF:
-			atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
-			break;
-		default:
-			atire->set_ranking_function(params.ranking_function, 0.0, 0.0);
-		}
+atire->set_trim_postings_k(params.trim_postings_k);
+atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
+atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
+
+atire->set_segmentation(params.segmentation);
+switch (params.ranking_function)
+	{
+	case ANT_indexer_param_block_rank::BM25:
+		atire->set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b);
+		break;
+	case ANT_indexer_param_block_rank::LMD:
+		atire->set_ranking_function(params.ranking_function, params.lmd_u, 0.0);
+		break;
+	case ANT_indexer_param_block_rank::LMJM:
+		atire->set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
+		break;
+	case ANT_indexer_param_block_rank::KBTFIDF:
+		atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
+		break;
+	default:
+		atire->set_ranking_function(params.ranking_function, 0.0, 0.0);
+	}
 }
 
 /*

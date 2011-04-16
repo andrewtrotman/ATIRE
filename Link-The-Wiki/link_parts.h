@@ -3,7 +3,6 @@
 	------------
 	Written (w) 2008 by Andrew Trotman, University of Otago
 */
-
 #ifndef __LINK_PARTS_H__
 #define __LINK_PARTS_H__
 
@@ -21,6 +20,8 @@
 #endif
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+
+#pragma warning(disable:4996)
 
 /*
 	STRIP_SPACE_INLINE()
@@ -49,7 +50,8 @@ return source;
 */
 inline static char *string_clean(char *file, long lower_case_only, long keep_string_intact = 0, long trim = 1)
 {
-char *ch, *from, *to;
+char *ch;
+//char *from, *to;
 
 /*
 	remove XML tags and remove all non-alnum (but keep case)
@@ -181,7 +183,8 @@ return source;
 */
 void string_remove_space(char *s)
 {
-char *last, *previous, *temp;
+char *last, *previous;
+//char *temp;
 long len, has_space;
 has_space = FALSE;
 last = s + strlen(s);
@@ -213,7 +216,7 @@ while (last != s)
 */
 int utf8_token_compare(char *s1, char *s2, long *is_substring = NULL)
 {
-int cmp, i, min_len;
+int cmp, min_len;
 char *new_s1 = strdup(s1);
 char *new_s2 = strdup(s2);
 

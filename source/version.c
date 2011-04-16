@@ -25,7 +25,7 @@
 #endif
 
 long ANT_version = 0x0003;		// version number in BCD
-char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2010 Andrew Trotman, University of Otago";
+char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2011 Andrew Trotman, University of Otago";
 
 
 /*

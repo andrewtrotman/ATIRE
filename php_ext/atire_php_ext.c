@@ -134,7 +134,7 @@ PHP_METHOD(atire_api_remote, load_index)
     RETURN_BOOL(0);
 }
 
-PHP_METHOD(atire_api_remote, getConnectStr)
+PHP_METHOD(atire_api_remote, get_connect_string)
 {
 	char *res;
 	ATIRE_API_remote *atire = NULL;
@@ -142,7 +142,7 @@ PHP_METHOD(atire_api_remote, getConnectStr)
 	atire = obj->atire;
 	if (atire != NULL)
 	{
-		RETURN_STRING(res = atire->getConnectStr(),1);
+		RETURN_STRING(res = atire->get_connect_string(),1);
 	}
 }
 
@@ -152,7 +152,7 @@ function_entry atire_api_remote_methods[] = {
     PHP_ME(atire_api_remote,  close,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  search,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  load_index,           NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(atire_api_remote,  getConnectStr,    NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(atire_api_remote,  get_connect_string,    NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

@@ -24,7 +24,6 @@ public:
 	ATIRE_API_remote(void);
 	virtual ~ATIRE_API_remote();
 
-
 	/*
 		Open a connetion to a remote server.
 		The connect_string is in the format blarg.com:port where the default port number is 8088
@@ -37,10 +36,9 @@ public:
 	long close(void);
 
 	/*
-	 * 	Testing method, return the connect_string.
-	 */
-
-	char *getConnectStr(void);
+		Testing method, return the connect_string.
+	*/
+	char *get_connect_string(void);
 
 	/*
 		Load a new doclist and index by filename.

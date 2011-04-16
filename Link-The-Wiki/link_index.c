@@ -101,7 +101,7 @@ ANT_link_element *link_list;
 ANT_disk disk;
 long lines, current, lines_output, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
 char *file, *ch, *last_string;
-long lowercase_only, param, chinese, pagename, cmp;
+long lowercase_only, param, chinese = FALSE, pagename, cmp;
 char *command;
 
 /*

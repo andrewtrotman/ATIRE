@@ -98,17 +98,17 @@ return TRUE;
 
 /*
 	ATIRE_API_REMOTE::LOAD_INDEX()
-	--------------------------
+	------------------------------
 */
 void ATIRE_API_remote::load_index(char *doclist_filename, char *index_filename)
 {
-	std::stringstream buffer, result;
+std::stringstream buffer, result;
 
-	/*
-		Construct the command string and send it off
-	*/
-	buffer << ".loadindex\n" << doclist_filename << "\n" << index_filename << "\n";
-	socket->puts((char *)buffer.str().c_str());
+/*
+	Construct the command string and send it off
+*/
+buffer << "<ATIREloadindex>" << "<doclist>" << doclist_filename << "</doclist><index>" << index_filename << "</index></ATIREloadindex>";
+socket->puts((char *)buffer.str().c_str());
 }
 
 /*
@@ -195,10 +195,10 @@ return result;
 }
 
 /*
-	ATIRE_API_REMOTE::getConnectStr()
-	--------------------------------
+	ATIRE_API_REMOTE::GET_CONNECT_STRING()
+	--------------------------------------
 */
-char *ATIRE_API_remote::getConnectStr()
+char *ATIRE_API_remote::get_connect_string()
 {
 return strnew(connect_string);
 }
