@@ -50,31 +50,21 @@ namespace QLINK {
 
 	std::string google_translator::get_translation(const char *content)
 	{
-		const char *start = content, *end;
-		static const char *TEXTAREA_TAG = "translatedText:";
+		const char *start, *end;
+		static const char *TEXTAREA_TAG = "translatedText";
 		string gtrans;
 
-		while ((start = strstr(start, TEXTAREA_TAG)) != NULL) {
+		start = strstr(content, TEXTAREA_TAG);
+		if (start != NULL) {
 			start += strlen(TEXTAREA_TAG);
-			if (!(end = strchr(start, '>')))
-				break;
+			start = strchr(start, ':');
 
-			stpl::GeneralParser<stpl::Property<string, const char *> > property_parser(start, end);
-			property_parser.parse();
-			stpl::Property<string, const char *> *property;
-			while ((property = property_parser.get_next_entity()) != NULL)
-				if (property->name() == "name") {
-					string value = property->value();
-					if (value == "utrans") {
-						const char *trans_start, *trans_end;
-						++end;
-						trans_start = end;
-						trans_end = strchr(trans_start, '<');
-						return string(trans_start, trans_end);
-					}
-				}
+			start = strchr(start, '"');
+			++start;
+			end =  strchr(start, '"');
+			gtrans = string(start, end);
 		}
-		return "";
+		return gtrans;
 	}
 
 //	std::string google_translator::get_translation(const char *content)

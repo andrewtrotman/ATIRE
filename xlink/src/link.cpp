@@ -16,6 +16,7 @@
 #include "algorithm.h"
 #include "search_engine_ant.h"
 #include "translation.h"
+#include "run_config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +36,7 @@ link::link() {
 	gamma = 0.0;
 	offset = 0;
 	target_document = -1;
-	fill_empty_anchor_with_ir_results_ = false;
+	fill_empty_anchor_with_ir_results_ = run_config::instance().get_value("fill_empty_anchor_with_ir_results").length() > 0;
 }
 
 link::~link() {
@@ -84,7 +85,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	int count = 0;
 
 	bool ret = false;
-	if (algor != NULL) {
+	if (!fill_empty_anchor_with_ir_results_ && algor != NULL) {
 		if (link_term->postings.size() > 0)
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (algor->has_crosslink(link_term->postings[i]->docid)) {
@@ -122,7 +123,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 					continue;
 				}
 				std::string target_title = corpus::instance().gettitle(filename);
-				sprintf(buf, format, link_term->postings[i]->offset, target_lang, target_title.c_str(), id);
+				sprintf(buf, format, 0, target_lang, target_title.c_str(), id);
 #else
 				sprintf(buf, format, link_term->postings[i]->offset, id);
 #endif
@@ -132,35 +133,32 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 					break;
 			}
 		}
-		else {
-			if (fill_empty_anchor_with_ir_results_) {
-				long long result = 0;
-				string lang_pair = string(source_lang) + "|" + string(target_lang);
-				string tran = translation::instance().translate(term, lang_pair.c_str());
-				const char **docids = search_engine_ant::instance().search(tran.c_str());
-				int hits = beps_to_print > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : beps_to_print;
 
-				long doc_id = -1;
-				for (int i = 0; i < hits; ++i) {
-					doc_id = result_to_id(docids[i]);
+		int how_many_left = beps_to_print - count;
+		if (fill_empty_anchor_with_ir_results_ && count == 0) {
+			long long result = 0;
+			string lang_pair = string(source_lang) + "|" + string(target_lang);
+			string tran = translation::instance().translate(term, lang_pair.c_str());
+			const char **docids = search_engine_ant::instance().search(tran.c_str());
+
+			int hits = how_many_left > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : how_many_left;
+
+			long doc_id = -1;
+			for (int i = 0; i < hits; ++i) {
+				doc_id = result_to_id(docids[i]);
 #ifdef CROSSLINK
-					if (doc_id < 1)
-						continue;
-					string filename = corpus::instance().id2docpath(doc_id);
-					if (!sys_file::exist(filename.c_str())) {
-						cerr << "No target file found:" << filename << endl;
-						continue;
-					}
-					std::string target_title = corpus::instance().gettitle(filename);
-					sprintf(buf, format, 0, target_lang, target_title.c_str(), doc_id);
-#else
-					sprintf(buf, format, link_term->postings[i]->offset, id);
-#endif
-					aout << buf;
+				if (doc_id < 1)
+					continue;
+				string filename = corpus::instance().id2docpath(doc_id);
+				if (!sys_file::exist(filename.c_str())) {
+					cerr << "No target file found:" << filename << endl;
+					continue;
 				}
-			}
-			else {
-				sprintf(buf, format, 0, target_document);
+				std::string target_title = corpus::instance().gettitle(filename);
+				sprintf(buf, format, 0, target_lang, target_title.c_str(), doc_id);
+#else
+				sprintf(buf, format, link_term->postings[i]->offset, id);
+#endif
 				aout << buf;
 			}
 		}
