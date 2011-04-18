@@ -114,6 +114,7 @@ core_sources =  \
 	$(SRCDIR)/compress_text_bz2.c \
 	$(SRCDIR)/compression_text_factory.c \
 	$(SRCDIR)/instream_buffer.c \
+	$(SRCDIR)/index_document.c \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_dale_chall.c \
 	$(SRCDIR)/version.c \
@@ -209,6 +210,7 @@ core_noinst_headers = \
 	$(SRCDIR)/instream_buffer.h \
 	$(SRCDIR)/indexer_param_block.h	\
 	$(SRCDIR)/indexer_param_block_rank.h \
+	$(SRCDIR)/index_document.h \
 	$(SRCDIR)/learned_wikipedia_stem.h	\
 	$(SRCDIR)/maths.h	\
 	$(SRCDIR)/mean_average_precision.h	\
