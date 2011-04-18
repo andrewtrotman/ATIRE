@@ -14,6 +14,7 @@
 #include "sys_file.h"
 #include "corpus.h"
 #include "algorithm.h"
+#include "search_engine_ant.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +34,7 @@ link::link() {
 	gamma = 0.0;
 	offset = 0;
 	target_document = -1;
+	fill_empty_anchor_with_ir_results_ = false;
 }
 
 link::~link() {
@@ -63,10 +65,13 @@ bool link::print_target(long anchor, algorithm *algor)
 	if (algor != NULL)
 		ret = algor->has_crosslink(link_term->postings[anchor]->docid);
 
-	if (ret) {
+	if (ret || fill_empty_anchor_with_ir_results_) {
 		print_header();
 		//printf("%d", link_term->postings[anchor]->docid);
-		aout << link_term->postings[anchor]->docid;
+		if (link_term->postings.size() > 0)
+			aout << link_term->postings[anchor]->docid;
+		else
+			;
 		print_footer();
 	}
 	return ret;
@@ -91,7 +96,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	}
 	else
 		ret = true;
-	if (ret) {
+	if (ret || fill_empty_anchor_with_ir_results_) {
 		sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
 		aout << buf;
 		const char *format = link_print::target_format.c_str();
@@ -127,8 +132,34 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			}
 		}
 		else {
-			sprintf(buf, format, 0, target_document);
-			aout << buf;
+			if (fill_empty_anchor_with_ir_results_) {
+				long long result = 0;
+				const char **docids = search_engine_ant::instance().search(term);
+				int hits = beps_to_print > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : beps_to_print;
+
+				long doc_id = -1;
+				for (int i = 0; i < hits; ++i) {
+					doc_id = result_to_id(docids[i]);
+#ifdef CROSSLINK
+					if (doc_id < 1)
+						continue;
+					string filename = corpus::instance().id2docpath(doc_id);
+					if (!sys_file::exist(filename.c_str())) {
+						cerr << "No target file found:" << filename << endl;
+						continue;
+					}
+					std::string target_title = corpus::instance().gettitle(filename);
+					sprintf(buf, format, 0, target_lang, target_title.c_str(), doc_id);
+#else
+					sprintf(buf, format, link_term->postings[i]->offset, id);
+#endif
+					aout << buf;
+				}
+			}
+			else {
+				sprintf(buf, format, 0, target_document);
+				aout << buf;
+			}
 		}
 		//puts("\t\t\t</anchor>\n");
 		aout << "\t\t\t</anchor>\n";

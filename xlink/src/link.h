@@ -24,6 +24,7 @@ namespace QLINK {
 
 	private:
 		bool						to_clean_;
+		bool						fill_empty_anchor_with_ir_results_;
 
 	public:
 		link();

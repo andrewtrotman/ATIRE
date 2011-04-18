@@ -18,6 +18,10 @@ namespace QLINK {
 		static const char *GOOGLE_TRANSLATE_URL_TEMPLATE;
 		static const char *LANGUAGE_PAIR_EN_CS;
 		static const char *LANGUAGE_PAIR_EN_CT;
+		static const char *CACHE_FOLDER;
+
+	private:
+		bool	cache_it_;
 
 	public:
 		google_translator();
