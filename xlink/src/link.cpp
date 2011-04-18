@@ -15,6 +15,7 @@
 #include "corpus.h"
 #include "algorithm.h"
 #include "search_engine_ant.h"
+#include "translation.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -134,7 +135,9 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 		else {
 			if (fill_empty_anchor_with_ir_results_) {
 				long long result = 0;
-				const char **docids = search_engine_ant::instance().search(term);
+				string lang_pair = string(source_lang) + "|" + string(target_lang);
+				string tran = translation::instance().translate(term, lang_pair.c_str());
+				const char **docids = search_engine_ant::instance().search(tran.c_str());
 				int hits = beps_to_print > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : beps_to_print;
 
 				long doc_id = -1;

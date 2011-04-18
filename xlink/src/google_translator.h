@@ -9,19 +9,16 @@
 #define GOOGLE_TRANSLATOR_H_
 
 #include <string>
+#include "pattern_singleton.h"
 
 namespace QLINK {
 
-	class google_translator
+	class google_translator : public pattern_singleton<google_translator>
 	{
 	public:
 		static const char *GOOGLE_TRANSLATE_URL_TEMPLATE;
 		static const char *LANGUAGE_PAIR_EN_CS;
 		static const char *LANGUAGE_PAIR_EN_CT;
-		static const char *CACHE_FOLDER;
-
-	private:
-		bool	cache_it_;
 
 	public:
 		google_translator();
@@ -34,6 +31,9 @@ namespace QLINK {
 
 		void append_text(std::string& url, const char *text);
 		void append_lp(std::string& url, const char *language_pair);
+
+		void add_lang_options(std::string& url, const char *language_pair);
+		void add_text_option(std::string& url, const char *text);
 	};
 
 }

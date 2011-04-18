@@ -56,6 +56,7 @@ ltw_headers = \
 	$(SRC_DIR)/singleton.h \
 	$(SRC_DIR)/template_algo.h \
 	$(SRC_DIR)/google_translator.h \
+	$(SRC_DIR)/translation.h \
 	$(SRC_DIR)/webpage_retriever.h \
 	$(SRC_DIR)/pattern_singleton.h \
 	$(SRC_DIR)/application_out.h \
@@ -110,6 +111,7 @@ ltw_sources = \
 	$(SRC_DIR)/porter.cpp \
 	$(SRC_DIR)/wikipedia.cpp \
 	$(SRC_DIR)/wikipedia_page.cpp \
+	$(SRC_DIR)/translation.cpp \
 	$(SRC_DIR)/google_translator.cpp \
 	$(SRC_DIR)/webpage_retriever.cpp \
 	$(SRC_DIR)/application_out.cpp \

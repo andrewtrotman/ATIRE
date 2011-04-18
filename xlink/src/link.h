@@ -20,6 +20,7 @@ namespace QLINK {
 	 */
 	class link : public ANT_link {
 	public:
+		char						source_lang[5];
 		char 						target_lang[5];
 
 	private:

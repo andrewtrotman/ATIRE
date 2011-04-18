@@ -14,11 +14,14 @@
 #include "corpus.h"
 #include "corpus_txt.h"
 #include "application_out.h"
+#include "run_config.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <algorithm>
+
+#include <string>
 
 using namespace QLINK;
 
@@ -259,6 +262,9 @@ QLINK::link *links::push_link(char *place_in_file, long offset, char *buffer, lo
 	current->target_document = docid;
 	current->link_term = node;
 
+	std::string lang = run_config::instance().get_value("source_lang");
+	if (lang.length() > 0)
+		strcpy(current->source_lang, lang.c_str());
 	strcpy(current->target_lang, corpus::instance().lang().c_str());
 	//all_links_in_file_length++;
 	if ((all_links_in_file_.size()) >= MAX_LINKS_IN_FILE)

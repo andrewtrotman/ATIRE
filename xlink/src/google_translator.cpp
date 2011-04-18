@@ -9,8 +9,6 @@
 #include "webpage_retriever.h"
 #include "string_utils.h"
 
-#include "run_config.h"
-
 #include <string.h>
 
 #include <stpl/stpl_parser.h>
@@ -23,12 +21,10 @@ namespace QLINK {
 	const char *google_translator::GOOGLE_TRANSLATE_URL_TEMPLATE = "https://www.googleapis.com/language/translate/v2?key=AIzaSyBxo3WlH-z_Gw0M_c_VQu_Ka7VHb7NtKrs";
 	const char *google_translator::LANGUAGE_PAIR_EN_CT = "en|zh-TW";
 	const char *google_translator::LANGUAGE_PAIR_EN_CS = "en|zh";
-	const char *google_translator::CACHE_FOLDER = ".gt_cache";
 
 	google_translator::google_translator()
 	{
-		if (run_config::instance().get_value("create_translation_cache").length() > 0)
-			cache_it_ = true;
+
 	}
 
 	google_translator::~google_translator()
@@ -39,10 +35,17 @@ namespace QLINK {
 	std::string google_translator::translate(const char *text, const char *language_pair)
 	{
 		string url(GOOGLE_TRANSLATE_URL_TEMPLATE);
-		append_lp(url, language_pair);
-		append_text(url, text);
+//		append_lp(url, language_pair);
+//		append_text(url, text);
+		add_text_option(url, text);
+		add_lang_options(url, language_pair);
 		const char *content = webpage_retriever::instance().retrieve(url.c_str());
-		return get_translation(content);
+
+		string result;
+
+		result = get_translation(content);
+
+		return result;
 	}
 
 	std::string google_translator::get_translation(const char *content)
@@ -127,5 +130,22 @@ namespace QLINK {
 	{
 		url.append("&langpair=");
 		url.append(language_pair);
+	}
+
+	void google_translator::add_lang_options(std::string& url,const char *language_pair)
+	{
+		const char *pos = strchr(language_pair, '|');
+		string source_lang(language_pair, pos);
+		string target_lang(pos + 1);
+		url.append("&source=");
+		url.append(source_lang);
+		url.append("&target=");
+		url.append(target_lang);
+	}
+
+	void google_translator::add_text_option(std::string& url, const char *text)
+	{
+		url.append("&q=");
+		url.append(text);
 	}
 }
