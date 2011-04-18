@@ -62,13 +62,16 @@ return buffer == NULL ? 0 : 1;
 /*
 	ANT_FILE::OPEN()
 	----------------
+
+	"Mode" supports the flags from fopen, and supports an additional flag "x"
+	which causes files opened for read to acquire a read lock (excluding other writers)
+	and files opened for write to acquire a write lock (excluding all other processes).
 */
 long ANT_file::open(char *filename, char *mode)
 {
-long use_lock = FALSE;
-char *ch;
-
+int use_lock = 0;
 #ifdef _MSC_VER
+	char *ch;
 	DWORD access_mode, creation_mode, lock_mode;
 
 	access_mode = creation_mode = 0;
@@ -100,16 +103,23 @@ char *ch;
 	if ((internals->fp = CreateFile(filename, access_mode, lock_mode, NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
 		return 0;
 #else
+	/*
+		We can't pass the lock character 'x' to fopen because it causes
+		undefined behaviour, get rid of it.
+	 */
+	char *mode_dest, *mode_source;
+	char *fixed_mode = new char[strlen(mode)+1];
 	struct flock lock;
 
-	if ((internals->fp = fopen(filename, mode)) == NULL)
-		return 0;
-	else
-		{
-		lock.l_type = F_WRLCK;
+	lock.l_type = F_WRLCK;
 
-		for (ch = mode; *ch != 0; ch++)
-			switch (*ch)
+	for (mode_dest = fixed_mode, mode_source = mode; *mode_source; mode_source++)
+		{
+		if (*mode_source=='x')
+			use_lock = 1;
+		else
+			{
+			switch (*mode_source)
 				{
 				case 'r':
 					lock.l_type = F_RDLCK;
@@ -118,20 +128,29 @@ char *ch;
 				case 'a':
 					lock.l_type = F_WRLCK;
 					break;
-				case 'x':
-					use_lock = TRUE;
-					break;
 				}
 
-		if (use_lock)
-			{
-			lock.l_whence = SEEK_SET;
-			lock.l_len = 0;
-			lock.l_start = 0;
-
-			if (fcntl(fileno(internals->fp), F_SETLK, &lock) == -1)
-				return 0;
+			*mode_dest = *mode_source;
+			mode_dest++;
 			}
+		}
+	*mode_dest = 0;
+
+	internals->fp = fopen(filename, fixed_mode);
+
+	delete [] fixed_mode;
+
+	if (internals->fp == NULL)
+		return 0;
+
+	if (use_lock)
+		{
+		lock.l_whence = SEEK_SET;
+		lock.l_len = 0;
+		lock.l_start = 0;
+
+		if (fcntl(fileno(internals->fp), F_SETLK, &lock) == -1)
+			return 0;
 		}
 #endif
 
