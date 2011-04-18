@@ -34,7 +34,25 @@
 	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
 	--------------------------------------
 */
-ANT_search_engine::ANT_search_engine(ANT_memory *memory, long memory_model, const char *filename)
+ANT_search_engine::ANT_search_engine(ANT_memory *memory, long memory_model)
+{
+trim_postings_k = LONG_MAX;
+stats = new ANT_stats_search_engine(memory);
+stats_for_all_queries = new ANT_stats_search_engine(memory);
+this->memory = memory;
+this->stemmer = NULL;
+
+if (memory_model)
+	index = new ANT_file_memory;
+else
+	index = new ANT_file;
+}
+
+/*
+	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
+	--------------------------------------
+*/
+int ANT_search_engine::open(const char *filename)
 {
 int32_t four_byte;
 int64_t eight_byte;
@@ -46,19 +64,10 @@ ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
 ANT_compressable_integer *value;
 
-index_filename = filename;
-trim_postings_k = LONG_MAX;
-stats = new ANT_stats_search_engine(memory);
-stats_for_all_queries = new ANT_stats_search_engine(memory);
-this->memory = memory;
-this->stemmer = NULL;
+if (index->open((char *)filename, "rbx") == 0)
+	return 0;
 
-if (memory_model)
-	index = new ANT_file_memory;
-else
-	index = new ANT_file;
-if (index->open((char *)index_filename, "rbx") == 0)
-	exit(printf("Cannot open index file:%s\n", index_filename));
+index_filename = filename;
 
 /*
 	At the end of the file is a "header" that provides various details:
@@ -244,6 +253,8 @@ if ((which_stemmer = get_variable("~stemmer")) != 0)
 is_quantized = get_variable("~quantized");
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
+
+return 1;
 }
 
 /*

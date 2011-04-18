@@ -265,12 +265,15 @@ data->answer_list = (char **)data->memory.malloc(sizeof(*data->answer_list) * da
 
 if (params->ranking_function == READABLE)
 	{
-	data->search_engine = data->readable_search_engine = new ANT_search_engine_readability(&data->memory, params->file_or_memory, params->index_filename);
+	data->search_engine = data->readable_search_engine = new ANT_search_engine_readability(&data->memory, params->file_or_memory);
+	data->search_engine->open(params->index_filename);
+
 	data->ranking_function = new ANT_ranking_function_readability(data->readable_search_engine);
 	}
 else
 	{
-	data->search_engine = new ANT_search_engine(&data->memory, params->file_or_memory, params->index_filename);
+	data->search_engine = new ANT_search_engine(&data->memory, params->file_or_memory);
+	data->search_engine->open(params->index_filename);
     /*    	if (params->stemmer_similarity == ANT_ANT_param_block::WEIGHTED)
 		ranking_function = new ANT_ranking_function_similarity(search_engine, params->bm25_k1, params->bm25_b);
         else*/

@@ -222,12 +222,16 @@ document_list = read_docid_list(doclist_filename, &documents_in_id_list, &filena
 answer_list = (char **)memory->malloc(sizeof(*answer_list) * documents_in_id_list);
 if (type & READABILITY_SEARCH_ENGINE)
 	{
-	search_engine = readable_search_engine = new ANT_search_engine_readability(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE, index_filename);
+	search_engine = readable_search_engine = new ANT_search_engine_readability(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE);
+	search_engine->open(index_filename);
+
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
 	}
 else
 	{
-	search_engine = new ANT_search_engine(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE, index_filename);
+	search_engine = new ANT_search_engine(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE);
+	search_engine->open(index_filename);
+
 	if (search_engine->quantized())
 		ranking_function = new ANT_ranking_function_impact(search_engine);
 	else

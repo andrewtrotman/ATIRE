@@ -36,7 +36,6 @@ friend class ANT_relevance_feedback;
 private:
 	ANT_stats_search_engine *stats;
 	ANT_stats_search_engine *stats_for_all_queries;
-	ANT_memory *memory;
 	ANT_file *index;
 	ANT_search_engine_btree_node *btree_root;
 	long btree_nodes;
@@ -63,6 +62,7 @@ private:
 protected:
 	ANT_compressable_integer *decompress_buffer;
 	ANT_compression_factory factory;
+	ANT_memory *memory;
 	long long documents;
 	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_weighted_tf *stem_buffer;
@@ -82,8 +82,10 @@ private:
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 
 public:
-	ANT_search_engine(ANT_memory *memory, long memory_model = 0, const char *filename = "index.aspt");
+	ANT_search_engine(ANT_memory *memory, long memory_model = 0);
 	virtual ~ANT_search_engine();
+
+	virtual int open(const char *filename = "index.aspt");
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	void init_accumulators(long long top_k);

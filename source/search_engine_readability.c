@@ -10,13 +10,21 @@
 #include "search_engine_accumulator.h"
 
 /*
-	ANT_SEARCH_ENGINE_READABILITY::ANT_SEARCH_ENGINE_READABILITY()
+	ANT_SEARCH_ENGINE_READABILITY::OPEN()
 	--------------------------------------------------------------
 */
-ANT_search_engine_readability::ANT_search_engine_readability(ANT_memory *memory, long memory_model, const char *filename) : ANT_search_engine(memory, memory_model, filename)
+int ANT_search_engine_readability::open(const char *filename)
 {
+
 long long current_readability;
 ANT_search_engine_btree_leaf collection_details;
+
+/* Call inherited */
+int result = ANT_search_engine::open(filename);
+
+if (result == 0) {
+	return 0;
+}
 
 document_readability = (long *)memory->malloc(documents * sizeof(*document_readability));
 memory->realign();

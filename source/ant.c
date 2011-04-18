@@ -679,12 +679,14 @@ answer_list = (char **)memory.malloc(sizeof(*answer_list) * documents_in_id_list
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	{
-	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory, params.file_or_memory, params.index_filename);
+	search_engine = readable_search_engine = new ANT_search_engine_readability(&memory, params.file_or_memory);
+	search_engine->open(params.index_filename);
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
 	}
 else
 	{
-	search_engine = new ANT_search_engine(&memory, params.file_or_memory, params.index_filename);
+	search_engine = new ANT_search_engine(&memory, params.file_or_memory);
+	search_engine->open(params.index_filename);
 	if (search_engine->quantized())
 		{
 		if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
