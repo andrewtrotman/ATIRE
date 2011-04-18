@@ -233,8 +233,8 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 				}
 
 		if (topic_->get_ltw_task()->get_task_type() != ltw_task::LTW_LTAra_A2B) {
-			current_link->print_anchor(beps_to_print_, true, algorithm_);
-			links_printed++;
+			if (current_link->print_anchor(beps_to_print_, true, algorithm_));
+				links_printed++;
 		}
 		else {
 			std::vector<ANT_link_posting *>& postings = current_link->link_term->postings;

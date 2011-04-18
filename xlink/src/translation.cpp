@@ -31,7 +31,7 @@ translation::translation()
 				getline (myfile, line);
 				string::size_type pos = line.find_first_of(':');
 				if (pos != string::npos) {
-					translations_[line.substr(0, pos)] = line.substr(pos);
+					translations_[line.substr(0, pos)] = line.substr(pos + 1);
 				}
 			}
 		}
