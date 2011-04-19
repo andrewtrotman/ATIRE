@@ -142,7 +142,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			const char **docids = search_engine_ant::instance().search(tran.c_str());
 
 			int hits = how_many_left > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : how_many_left;
-
+			ret = hits > 0;
 			long doc_id = -1;
 			for (int i = 0; i < hits; ++i) {
 				doc_id = result_to_id(docids[i]);
