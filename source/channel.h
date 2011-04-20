@@ -22,6 +22,7 @@ public:
 	virtual ~ANT_channel() {}
 
 	long write(char *source, long length) { return block_write(source, length); }
+	long write(char *source) { return block_write(source, strlen(source)); }
 	char *read(char *destination, long length) { return block_read(destination, length); }
 	char *gets(void) { return getsz('\n'); }
 	long puts(char *string)
