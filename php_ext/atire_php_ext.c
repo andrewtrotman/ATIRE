@@ -106,7 +106,11 @@ PHP_METHOD(atire_api_remote, search)
     atire = obj->atire;
     if (atire != NULL){
         res = atire->search(search_string,start,pagelength);
-        RETURN_STRING(res,1);
+
+    	char * php_managed_result = estrdup(res);
+    	delete [] res;
+
+        RETURN_STRING(php_managed_result, 0);
     }
 
 }
@@ -127,8 +131,29 @@ PHP_METHOD(atire_api_remote, load_index)
     atire_api_remote_object *obj =(atire_api_remote_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
     atire = obj->atire;
     if (atire != NULL){
-        atire->load_index(doclist_filename, index_filename);
-        RETURN_BOOL(1);
+        RETURN_BOOL(atire->load_index(doclist_filename, index_filename));
+    }
+
+    RETURN_BOOL(0);
+}
+
+PHP_METHOD(atire_api_remote, describe_index)
+{
+    ATIRE_API_remote *atire = NULL;
+
+    atire_api_remote_object *obj =(atire_api_remote_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+    atire = obj->atire;
+    if (atire != NULL){
+    	char * result = atire->describe_index();
+
+    	if (result==NULL)
+    	    RETURN_BOOL(0);
+
+    	/* PHP wants to manage the memory of the returned string */
+    	char * php_managed_result = estrdup(result);
+    	delete [] result;
+
+        RETURN_STRING(php_managed_result, 0);
     }
 
     RETURN_BOOL(0);
@@ -142,7 +167,12 @@ PHP_METHOD(atire_api_remote, get_connect_string)
 	atire = obj->atire;
 	if (atire != NULL)
 	{
-		RETURN_STRING(res = atire->get_connect_string(),1);
+		res = atire->get_connect_string();
+
+    	char * php_managed_result = estrdup(res);
+    	delete [] res;
+
+        RETURN_STRING(php_managed_result, 0);
 	}
 }
 
@@ -152,6 +182,7 @@ function_entry atire_api_remote_methods[] = {
     PHP_ME(atire_api_remote,  close,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  search,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  load_index,           NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(atire_api_remote,  describe_index,           NULL, ZEND_ACC_PUBLIC)
     PHP_ME(atire_api_remote,  get_connect_string,    NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };

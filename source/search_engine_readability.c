@@ -22,9 +22,11 @@ ANT_search_engine_btree_leaf collection_details;
 /* Call inherited */
 int result = ANT_search_engine::open(filename);
 
-if (result == 0) {
+if (result == 0) 
+	{
+	/* Load failed */
 	return 0;
-}
+	}
 
 document_readability = (long *)memory->malloc(documents * sizeof(*document_readability));
 memory->realign();
@@ -46,4 +48,6 @@ for (current_readability = 0; current_readability < collection_details.document_
 	if (document_readability[current_readability] > hardest_document)
 		hardest_document = document_readability[current_readability];
 	}
+
+return 1;
 }

@@ -25,7 +25,7 @@ const long MAX_TITLE_LENGTH = 1024;
 
 ATIRE_API *atire = NULL;
 
-void ant_init(ANT_ANT_param_block & params);
+ATIRE_API * ant_init(ANT_ANT_param_block & params);
 
 /*
 	PERFORM_QUERY()
@@ -156,13 +156,34 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		params->set_index_filename(strip_space_inplace(filename = inchannel->gets()));
 		delete [] filename;
 
-		ant_init(*params);
+		ATIRE_API * new_api = ant_init(*params);
 
-		length_of_longest_document = atire->get_longest_document_length();
-		delete [] document_buffer;
-		document_buffer = new char [length_of_longest_document + 1];
+		if (new_api) 
+			{
+			delete atire;
+			atire = new_api;
 
+			length_of_longest_document = atire->get_longest_document_length();
+			delete [] document_buffer;
+			document_buffer = new char [length_of_longest_document + 1];
+
+			outchannel->puts("Succeeded");
+			}
+		else
+			{
+			/* Leave global 'atire' unchanged */
+			outchannel->puts("Failed");
+			}
 		delete [] command;
+		continue;
+		}
+	else if (strcmp(command, ".describeindex") == 0)
+		{
+		delete [] command;
+
+		outchannel->puts(params->doclist_filename);
+		outchannel->puts(params->index_filename);
+
 		continue;
 		}
 	else if (strcmp(command, ".quit") == 0)
@@ -228,16 +249,45 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		params->set_index_filename(filename = between(command, "<index>", "</index>"));
 		delete [] filename;
 
-		ant_init(*params);
+		ATIRE_API * new_api = ant_init(*params);
 
-		length_of_longest_document = atire->get_longest_document_length();
-		delete [] document_buffer;
-		document_buffer = new char [length_of_longest_document + 1];
+		if (new_api) 
+			{
+			delete atire;
+			atire = new_api;
+
+			length_of_longest_document = atire->get_longest_document_length();
+			delete [] document_buffer;
+			document_buffer = new char [length_of_longest_document + 1];
+
+			outchannel->puts("<ATIREloadindex>1</ATIREloadindex>");
+			}
+		else 
+			{
+			/* Leave global 'atire' unchanged */
+			outchannel->puts("<ATIREloadindex>0</ATIREloadindex>");
+			}
 
 		delete [] command;
 		continue;
 		}
+	else if (strncmp(command, "<ATIREdescribeindex>", strlen("<ATIREdescribeindex>")) == 0)
+		{
+		delete [] command;
 
+		outchannel->puts("<ATIREdescribeindex>");
+
+		outchannel->write("<doclist filename=\"");
+		outchannel->write(params->doclist_filename);
+		outchannel->puts("\"/>");
+
+		outchannel->write("<index filename=\"");
+		outchannel->write(params->index_filename);
+		outchannel->puts("\"/>");
+		outchannel->puts("</ATIREdescribeindex>");
+
+		continue;
+		}
 	else if (*command == '\0')
 		{
 		delete [] command;
@@ -366,20 +416,35 @@ return mean_average_precision;
 /*
 	ANT_INIT()
 	----------
+
+	Create and return a new API and search engine using the given parameters.
+
+	If the search engine fails to load the index from disk (e.g. sharing violation),
+	return NULL.
 */
-void ant_init(ANT_ANT_param_block & params)
+ATIRE_API * ant_init(ANT_ANT_param_block & params)
 {
 
-delete atire;
-atire = new ATIRE_API();
+/* Instead of overwriting the global API, create a new one and return it.
+ * This way, if loading the index fails, we can still use the old one.
+ */
+ATIRE_API * atire = new ATIRE_API();
+int fail;
 
 if (params.logo)
 	puts(atire->version());				// print the version string is we parsed the parameters OK
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
-	atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
+	fail = atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
 else
-	atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
+	fail = atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
+
+if (fail) 
+	{
+	delete atire;
+
+	return NULL;
+	}
 
 if (params.assessments_filename != NULL)
 	atire->load_assessments(params.assessments_filename);
@@ -409,6 +474,8 @@ switch (params.ranking_function)
 	default:
 		atire->set_ranking_function(params.ranking_function, 0.0, 0.0);
 	}
+
+return atire;
 }
 
 /*
@@ -422,7 +489,13 @@ ANT_ANT_param_block params(argc, argv);
 
 params.parse();
 
-ant_init(params);
+atire = ant_init(params);
+
+if (!atire)
+	{
+	return -1;
+	}
+
 ant(&params);
 
 delete atire;

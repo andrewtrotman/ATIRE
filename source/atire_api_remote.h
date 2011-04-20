@@ -43,7 +43,12 @@ public:
 	/*
 		Load a new doclist and index by filename.
 	*/
-	virtual void load_index(char *doclist_filename, char *index_filename);
+	virtual int load_index(char *doclist_filename, char *index_filename);
+
+	/*
+		Return an XML document describing the index that is currently loaded (incl filenames).
+	*/
+	virtual char *describe_index();
 
 	/*
 		Search and return page_length results starting from top_of_page in the results list

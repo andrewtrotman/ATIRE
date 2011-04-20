@@ -100,15 +100,64 @@ return TRUE;
 	ATIRE_API_REMOTE::LOAD_INDEX()
 	------------------------------
 */
-void ATIRE_API_remote::load_index(char *doclist_filename, char *index_filename)
+int ATIRE_API_remote::load_index(char *doclist_filename, char *index_filename)
 {
-std::stringstream buffer, result;
+std::stringstream buffer;
 
 /*
 	Construct the command string and send it off
 */
-buffer << "<ATIREloadindex>" << "<doclist>" << doclist_filename << "</doclist><index>" << index_filename << "</index></ATIREloadindex>";
+buffer << "<ATIREloadindex>" << "<doclist>" << doclist_filename << "</doclist><index>" << index_filename << "</index></ATIREloadindex>\n";
 socket->puts((char *)buffer.str().c_str());
+
+char * result = socket->gets();
+
+if (!result)
+	return 0; /* Broken socket */
+
+int success = strcmp(result, "<ATIREloadindex>1</ATIREloadindex>\n");
+
+delete [] result;
+
+return success;
+}
+
+/*
+	ATIRE_API_REMOTE::DESCRIBE_INDEX()
+	--------------------------
+*/
+char *ATIRE_API_remote::describe_index()
+{
+std::stringstream result;
+char * got;
+
+socket->puts("<ATIREdescribeindex></ATIREdescribeindex>\n");
+
+/*
+	Build the result line by line
+*/
+got = NULL;
+do
+	{
+	delete [] got;
+
+	got = socket->gets();
+
+	if (!got) 
+		{
+		/* Broken socket */
+		return NULL;
+		}
+
+	result << got << '\n';
+	}
+while (strcmp(got, "</ATIREdescribeindex>") != 0);
+delete [] got;
+
+/*
+	Return the result
+*/
+return strnew(result.str().c_str());
 }
 
 /*

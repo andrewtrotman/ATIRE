@@ -164,6 +164,9 @@ return thus_far;
 /*
 	ATIRE_API::READ_DOCID_LIST()
 	----------------------------
+
+	Read the docid list from the given file and return it, or NULL if the file could
+	not be read.
 */
 char **ATIRE_API::read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
 {
@@ -172,7 +175,7 @@ char **id_list, **current;
 char *slish, *slash, *slosh, *start, *dot;
 
 if ((document_list_buffer = ANT_disk::read_entire_file(doclist_filename)) == NULL)
-	exit(printf("Cannot open document ID list file '%s'\n", doclist_filename));
+	return NULL;
 
 filename_list_buffer = strnew(document_list_buffer);
 *filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);
@@ -219,18 +222,23 @@ if (document_list != NULL)
 	return 1;		//we're already open;
 
 document_list = read_docid_list(doclist_filename, &documents_in_id_list, &filename_list, &mem1, &mem2);
+if (document_list == NULL)
+	return 1;		//document list could not be read
+
 answer_list = (char **)memory->malloc(sizeof(*answer_list) * documents_in_id_list);
 if (type & READABILITY_SEARCH_ENGINE)
 	{
 	search_engine = readable_search_engine = new ANT_search_engine_readability(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE);
-	search_engine->open(index_filename);
+	if (search_engine->open(index_filename)==0)
+		return 1; //fail
 
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
 	}
 else
 	{
 	search_engine = new ANT_search_engine(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE);
-	search_engine->open(index_filename);
+	if (search_engine->open(index_filename)==0)
+		return 1; //fail
 
 	if (search_engine->quantized())
 		ranking_function = new ANT_ranking_function_impact(search_engine);
