@@ -288,14 +288,12 @@ for (param = 1; param < argc; param++)
 			recursive = WARC_GZ;
 		else if (strcmp(command, "rrwarcgz") == 0)
 			recursive = RECURSIVE_WARC_GZ;
-#ifdef ANT_HAS_MYSQL
 		else if (strcmp(command, "rphpbb") == 0)
 			recursive = PHPBB;
 		else if (strcmp(command, "rmysql") == 0)
 			recursive = MYSQL;
 		else if (strcmp(command, "rvbulletin") == 0)
 			recursive = VBULLETIN;
-#endif
 		else if (*command == 'S')
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)

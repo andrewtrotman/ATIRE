@@ -186,6 +186,14 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], argv[param + 4], ANT_directory_iterator::READ_FILE);
 		param += 4;
 		}
+#else
+	else if (param_block.recursive == ANT_indexer_param_block::VBULLETIN
+			|| param_block.recursive == ANT_indexer_param_block::PHPBB
+			|| param_block.recursive == ANT_indexer_param_block::MYSQL)
+		{
+		fprintf(stderr, "You tried to index documents from MySQL but this indexer was not built with MySQL support\n");
+		exit(-1);
+		}
 #endif
 
 	else if (param_block.recursive == ANT_indexer_param_block::TRECWEB)
