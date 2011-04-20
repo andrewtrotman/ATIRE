@@ -522,13 +522,19 @@ int ANT_socket::block_write(const char *pbuffer, long size)
 {
 const char *from;
 long len, sent;
+int flags = 0;
+
+#ifndef _MSC_VER
+/* Don't receive SIGPIPE for sending to broken socket */
+flags = MSG_NOSIGNAL;
+#endif
 
 len = size;
 from = pbuffer;
 
 while (len != 0)
 	{
-	if ((sent = send(internals->sock, from, len, 0)) == SOCKET_ERROR)
+	if ((sent = send(internals->sock, from, len, flags)) == SOCKET_ERROR)
 		return -1;
 	len -= sent;
 	from += sent;
