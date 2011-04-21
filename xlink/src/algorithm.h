@@ -50,6 +50,9 @@ namespace QLINK {
 
 		bool 					use_utf8_token_matching_; // which means that matching without spaces, all the spaces in string will be removed
 		bool 					crosslink_;
+
+		char					**token_address_;
+		long					current_index_;
 	public:
 		algorithm(ltw_task *task);
 		algorithm() {}
@@ -77,6 +80,7 @@ namespace QLINK {
 
 	private:
 		void init();
+		void clear_token_address();
 	};
 
 	typedef algorithm	algorithm_in;

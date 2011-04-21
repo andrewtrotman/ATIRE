@@ -617,7 +617,7 @@ void algorithm_ant_link_this::process_terms(char **term_list, const char *source
 //		fprintf(stderr, "added %d links\n", links_count);
 //}
 
-void algorithm_ant_link_this::add_link(ANT_link_term *term)
+void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list)
 {
 	double gamma, numerator, denominator;
 	long /*terms_in_index, orphan_docid, */param, noom, index_argv_param;
@@ -644,9 +644,9 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term)
 	gamma = numerator / denominator;
 	if (ispropper_noun(term->term))
 		gamma += proper_noun_boost;
-	place = current_term_;
-	offset = place - source_;
-	term_len = strlen(term->term);
+//	place = current_term_;
+//	offset = place - source_;
+//	term_len = strlen(term->term);
 
 #ifdef DEBUG
 	fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", term->term, term->postings[0]->docid, numerator, denominator);
@@ -663,7 +663,7 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term)
 //					fputs("I got you", stderr);
 		//if (!lx->find(buffer_)) {
 			//lx->push_link(*first, offset, buffer_, term->postings[0]->docid, gamma, term);
-	assign_link_term(term);
+	offset = assign_link_term(term, term_list);
 	if (!links_->find(term->term)) {
 		links_->push_link(current_term_, offset, buffer_, term->postings[0]->docid, gamma, term);
 		// debug

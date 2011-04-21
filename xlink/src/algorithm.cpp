@@ -50,6 +50,8 @@ void algorithm::init()
 		use_utf8_token_matching_ = false;
 	else
 		use_utf8_token_matching_ = true;
+
+	token_address_ = NULL;
 }
 
 int algorithm::init_params()
@@ -69,6 +71,15 @@ int algorithm::init_params(int argc, char *argv[])
 			break;
 		}
 
+}
+
+void algorithm::clear_token_address()
+{
+
+	if (token_address_) {
+		delete [] token_address_;
+		token_address_ = NULL;
+	}
 }
 
 void algorithm::set_links_container(links *container)
@@ -103,6 +114,8 @@ void algorithm::process_topic_text()
 	char **term_list, **current/*, **first, **last*/;
 	char *filecopy = NULL; //strdup(xml_);
 
+	clear_token_address();
+
 //	long long *all_links_in_file_length = links_->all_links_length_ptr();
 //	*all_links_in_file_length = 0;
 
@@ -113,8 +126,10 @@ void algorithm::process_topic_text()
 //		string_tolower(filecopy);
 
 	current = term_list = new char *[strlen(filecopy)];		// this is the worst case by far
-	if (use_utf8_token_matching_)
-		create_utf8_token_list(filecopy, term_list);
+	if (use_utf8_token_matching_) {
+		token_address_ = new char *[strlen(filecopy)];
+		create_utf8_token_list(filecopy, term_list, token_address_);
+	}
 	else
 		{
 		for (token = strtok(filecopy, seperators); token != NULL; token = strtok(NULL, seperators))

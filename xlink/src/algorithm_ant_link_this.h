@@ -64,7 +64,7 @@ namespace QLINK {
 	protected:
 		virtual void process_terms(char **term_list, const char *source);
 //		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
-		virtual void add_link(ANT_link_term *term);
+		virtual void add_link(ANT_link_term *term, char **term_list);
 		virtual ANT_link_term *find_term_in_list(const char *value);
 
 	public:

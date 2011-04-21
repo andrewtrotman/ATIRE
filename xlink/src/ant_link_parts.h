@@ -517,7 +517,7 @@ return cmp;
 	CREATE_UTF8_TOKEN_LIST()
 	------------------------
 */
-inline int create_utf8_token_list(char *s, char **term_list)
+inline int create_utf8_token_list(char *s, char **term_list, char **token_address = NULL)
 {
 char *start, *token, *where_to = s;
 long token_len = 0, term_count;
@@ -545,6 +545,10 @@ while (*where_to != '\0')
 	*current = token = new char[token_len + 1];
 	strncpy(*current, start, token_len);
 	token[token_len] = '\0';
+
+	if (token_address)
+		token_address[term_count] = start;
+
 	++current;
 	token_len = 0;
 	++term_count;

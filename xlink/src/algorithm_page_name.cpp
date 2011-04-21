@@ -186,7 +186,7 @@ namespace QLINK
 		process_terms(links_, term_list, source);
 	}
 
-	void algorithm_page_name::add_link(ANT_link_term *index_term)
+	void algorithm_page_name::add_link(ANT_link_term *index_term, char **term_list)
 	{
 		bool to_skip = false;
 		long offset = 0, term_len = 0;
@@ -195,7 +195,7 @@ namespace QLINK
 			to_skip = language::isstopword(index_term->term);
 
 		if (!to_skip) {
-			assign_link_term(index_term);
+			offset = assign_link_term(index_term, term_list);
 			//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
 			if (!links_->find(buffer))
 				link * lnk = links_->push_link(NULL, offset, buffer, index_term->postings[0]->docid, 0.0, index_term);
