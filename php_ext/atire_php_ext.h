@@ -1,5 +1,5 @@
-#ifndef PHP_ATIRE_H
-#define PHP_ATIRE_H
+#ifndef ATIRE_PHP_EXT_H
+#define ATIRE_PHP_EXT_H
 
 #define PHP_ATIRE_EXTNAME  "atire"
 #define PHP_ATIRE_EXTVER   "0.1"
@@ -15,4 +15,4 @@ extern "C" {
 extern zend_module_entry atire_module_entry;
 #define phpext_atire_ptr &atire_module_entry;
 
-#endif /* PHP_ATIRE_H */
+#endif /* ATIRE_PHP_EXT_H */

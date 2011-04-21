@@ -1,4 +1,4 @@
-#include "php_atire.h"
+#include "atire_php_ext.h"
 
 #include "../source/atire_api_remote.h"
 
@@ -71,9 +71,9 @@ PHP_METHOD(atire_api_remote, open)
     atire_api_remote_object *obj =(atire_api_remote_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
     atire = obj->atire;
     if (atire != NULL){
-        atire->open(connect_string);
+        RETURN_BOOL(atire->open(connect_string));
     }
-    RETURN_TRUE;
+    RETURN_FALSE;
 }
 
 PHP_METHOD(atire_api_remote, close)
