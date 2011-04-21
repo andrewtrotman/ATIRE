@@ -19,7 +19,6 @@ ltw_headers = \
 	$(SRC_DIR)/config.h \
 	$(SRC_DIR)/run_config.h \
 	$(SRC_DIR)/algorithm_config.h \
-	$(SRC_DIR)/search_engine_loader.h \
 	$(SRC_DIR)/algorithm_ant_link_this.h \
 	$(SRC_DIR)/algorithm_page_name.h \
 	$(SRC_DIR)/algorithm_ant_link_this_and_page_name.h \
@@ -80,7 +79,6 @@ ltw_sources = \
 	$(SRC_DIR)/config.cpp \
 	$(SRC_DIR)/run_config.cpp \
 	$(SRC_DIR)/algorithm_config.cpp \
-	$(SRC_DIR)/search_engine_loader.cpp \
 	$(SRC_DIR)/algorithm_ant_link_this.cpp \
 	$(SRC_DIR)/algorithm_page_name.cpp \
 	$(SRC_DIR)/algorithm_ant_link_this_and_page_name.cpp \

@@ -17,6 +17,7 @@
 #include "corpus_txt.h"
 #include "sys_file.h"
 #include "application_out.h"
+#include "link_print.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -224,6 +225,11 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 			result++;		// in the case of empty term
 			continue;
 			}
+
+		if (link_print::is_number_or_chronological_link(current_link->link_term->term)) {
+			result++;		// in the case of a 4 digit number we ignore as we're probably a year
+			continue;
+		}
 
 		if (mode_ & MODE_NO_4_DIGIT_NUMBERS)
 			if ((strlen(current_link->link_term->term) == 4) && (atol(current_link->link_term->term) > 999))
