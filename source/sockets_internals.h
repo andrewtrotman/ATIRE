@@ -14,8 +14,10 @@ class ANT_socket_internals
 public:
 #ifdef _WIN32
 	static WSADATA *wsaData;
+#else
+	static long signal_setup;
 #endif
-	static int reference_count;
+	static long reference_count;
 	SOCKET sock, incoming_connection;
 } ;
 

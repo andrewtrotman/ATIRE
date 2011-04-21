@@ -19,6 +19,7 @@
 	#include <fcntl.h>
 	#include <netinet/in.h>
 	#include <netdb.h>
+	#include <signal.h>
 
 	#define INVALID_SOCKET (-1)
 	#define SOCKET_ERROR (-1)
@@ -58,9 +59,11 @@
 
 #ifdef _MSC_VER
 	WSADATA *ANT_socket_internals::wsaData = NULL;
+#else
+	long ANT_socket_internals::signal_setup = 0;
 #endif
 
-int ANT_socket_internals::reference_count = 0;
+long ANT_socket_internals::reference_count = 0;
 
 /*
 	ANT_SOCKET::ANT_SOCKET()
@@ -87,6 +90,12 @@ gets_result = NULL;
 				internals->wsaData = NULL;
 				WSACleanup();
 				}
+		}
+#else
+	if (!internals->signal_setup)
+		{
+		signal(SIGPIPE, SIG_IGN);
+		internals->signal_setup = 1;
 		}
 #endif
 
@@ -522,19 +531,13 @@ int ANT_socket::block_write(const char *pbuffer, long size)
 {
 const char *from;
 long len, sent;
-int flags = 0;
-
-#ifndef _MSC_VER
-/* Don't receive SIGPIPE for sending to broken socket */
-flags = MSG_NOSIGNAL;
-#endif
 
 len = size;
 from = pbuffer;
 
 while (len != 0)
 	{
-	if ((sent = send(internals->sock, from, len, flags)) == SOCKET_ERROR)
+	if ((sent = send(internals->sock, from, len, 0)) == SOCKET_ERROR)
 		return -1;
 	len -= sent;
 	from += sent;
