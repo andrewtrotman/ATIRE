@@ -27,7 +27,7 @@ namespace QLINK {
 	bool link_print::is_number_or_chronological_link(const char *term)
 	{
 		int type = NONE;
-		bool ret;
+		bool ret = false;
 		long number = atol(term);
 		const char *word = NULL;
 
