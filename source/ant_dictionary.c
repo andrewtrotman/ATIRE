@@ -75,6 +75,7 @@ unsigned char *postings_list = NULL;
 char *term, *first_term, *last_term;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
+search_engine.open();
 ANT_btree_iterator iterator(&search_engine);
 ANT_search_engine_btree_leaf leaf;
 ANT_compression_factory factory;
