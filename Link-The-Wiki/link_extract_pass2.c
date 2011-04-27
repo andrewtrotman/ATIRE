@@ -263,105 +263,94 @@ for (param = first_param + 1; param < argc; param++)
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
-		if (current_docid <= 0)
-			continue;
-//		printf("ID:%d\n", current_docid);
-		string_clean(file, lowercase_only, TRUE);
-
-		current = term_list = new char *[strlen(file)];		// this is the worst case by far
-		if (chinese)
-			create_utf8_token_list(file, term_list);
-		else
+		if (current_docid > 0)
 			{
-			for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
-				*current++ = token;
-			*current = NULL;
-			}
+//			printf("ID:%d\n", current_docid);
+			string_clean(file, lowercase_only, TRUE);
 
-
-		for (first = term_list; *first != NULL; first++)
-			{
-//			fprintf(stderr, "%s\n", *first);
-			where_to = buffer;
-			for (last = first; *last != NULL; last++)
+			current = term_list = new char *[strlen(file)];		// this is the worst case by far
+			if (chinese)
+				create_utf8_token_list(file, term_list);
+			else
 				{
-				if (where_to == buffer)
+				for (token = strtok(file, seperators); token != NULL; token = strtok(NULL, seperators))
+					*current++ = token;
+				*current = NULL;
+				}
+
+
+			for (first = term_list; *first != NULL; first++)
+				{
+//				fprintf(stderr, "%s\n", *first);
+				where_to = buffer;
+				for (last = first; *last != NULL; last++)
 					{
-					strcpy(buffer, *first);
-					where_to = buffer + strlen(buffer);
-					if (chinese)
+					if (where_to == buffer)
 						{
-						if ((*first[0] & 0x80) && ANT_parser::isutf8(*first))
-							is_utf8_token = TRUE;
-						else
-							is_utf8_token = FALSE;
+						strcpy(buffer, *first);
+						where_to = buffer + strlen(buffer);
+						if (chinese)
+							{
+							if ((*first[0] & 0x80) && ANT_parser::isutf8(*first))
+								is_utf8_token = TRUE;
+							else
+								is_utf8_token = FALSE;
+							}
 						}
-					}
-				else
-					{
-					if (!chinese)
-//						{
-//						if (!is_utf8_token && !ANT_parser::ischinese(*last))
-//							*where_to++ = ' ';
-//						}
-//					else
-						*where_to++ = ' ';
-					strcpy(where_to, *last);
-					where_to += strlen(*last);
-					}
-
-				*where_to = '\0';
-
-//				for the possible debugging later
-//				static char di[] = {(char)0xe6, (char)0xa2, (char)0x85};
-//				static char xianjin[] = {(char)0xe3, (char)0x80, (char)0x8a, (char)0xe7, (char)0x8e, (char)0xb0};
-//				if (memcmp(buffer, xianjin, 6) == 0)
-//					fprintf(stderr, "I got you");
-//				if (strncmp(*last, "\"", 1)) == 0)
-//					fprintf(stderr, "I got you");
-
-				index_term = find_term_in_list(buffer, link_index, terms_in_index);
-
-				if (index_term == NULL)
-					break;		// we're after the last term in the list so can stop because we can't be a substring
-
-				if (chinese)
-					{
-					is_substring = FALSE;
-					cmp = utf8_token_compare(buffer, index_term->term, &is_substring);
-					}
-				else
-					cmp = string_compare(buffer, index_term->term);
-
-				if (cmp == 0)		// we're a term in the list
-					{
-					index_term->total_occurences++;
-					if (index_term->last_docid != current_docid)
-						{
-						index_term->last_docid = current_docid;
-						index_term->docs_containing_term++;
-						}
-					}
-				else
-					{
-					if (chinese)
-						cmp = is_substring == TRUE ? 0 : 1;
 					else
-						cmp = memcmp(buffer, index_term->term, strlen(buffer));
-					if  (cmp != 0)
-						break;		// we're a not a substring so we can't find a longer term
+						{
+						if (!chinese)
+							*where_to++ = ' ';
+						strcpy(where_to, *last);
+						where_to += strlen(*last);
+						}
+
+					*where_to = '\0';
+
+					index_term = find_term_in_list(buffer, link_index, terms_in_index);
+
+					if (index_term == NULL)
+						break;		// we're after the last term in the list so can stop because we can't be a substring
+
+					if (chinese)
+						{
+						is_substring = FALSE;
+						cmp = utf8_token_compare(buffer, index_term->term, &is_substring);
+						}
+					else
+						cmp = string_compare(buffer, index_term->term);
+
+					if (cmp == 0)		// we're a term in the list
+						{
+						index_term->total_occurences++;
+						if (index_term->last_docid != current_docid)
+							{
+							index_term->last_docid = current_docid;
+							index_term->docs_containing_term++;
+							}
+						}
+					else
+						{
+						if (chinese)
+							cmp = is_substring == TRUE ? 0 : 1;
+						else
+							cmp = memcmp(buffer, index_term->term, strlen(buffer));
+						if  (cmp != 0)
+							break;		// we're a not a substring so we can't find a longer term
+						}
 					}
 				}
+			if (chinese)
+				free_utf8_token_list(term_list);
+			delete [] term_list;
+			delete [] file;
+
+			if (file_number % 1000 == 0)
+				fprintf(stderr, "Files processed:%d\n", file_number);
+			file_number++;
 			}
-		if (chinese)
-			free_utf8_token_list(term_list);
-		delete [] term_list;
-		delete [] file;
-
-		if (file_number % 1000 == 0)
-			fprintf(stderr, "Files processed:%d\n", file_number);
-		file_number++;
-
+		else
+			fprintf(stderr, "Error reading file %s\n", filename);
 		//filename = disk.get_next_filename();
 		if (disk.next(&file_object) == NULL)
 			file = filename = NULL;
