@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 {
 ANT_link_element *link_list;
 ANT_disk disk;
-long lines, current, lines_output, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
+long total_lines, lines, current, lines_output, last_docid, times, unique_terms, last_anchor_docid, anchor_times;
 char *file, *ch, *last_string;
 long lowercase_only, param, chinese = FALSE, pagename, cmp;
 char *command;
@@ -131,21 +131,29 @@ for (param = 2; param < argc; param++)
 if ((file = disk.read_entire_file(argv[1])) == NULL)
 	exit(printf("Cannot open file:%s\n", argv[1]));
 
-lines = 0;
+total_lines = 0;
 for (ch = file; *ch != '\0'; ch++)
 	if (*ch == '\n')
-		lines++;
+		total_lines++;
 	else if (*ch == '\r')
 		*ch = ' ';		// convert '\r' into ' '
 
-link_list = new ANT_link_element[lines];
+if (*(--ch) == '\n')
+	{
+	--total_lines;
+	*ch = '\0';
+	}
+
+link_list = new ANT_link_element[total_lines];
 
 lines = 0;
 ch  = file;
-while (*ch != '\0')
+while (*ch != '\0' && lines < total_lines)
 	{
 	link_list[lines].anchor_docid = atol(ch);
 	ch = strchr(ch, ':') + 1;
+	if (ch == NULL)
+		break;
 	link_list[lines].docid = atol(ch);
 	link_list[lines].term = strchr(ch, ':') + 1;
 	if ((ch = strchr(ch, '\n')) == NULL)
