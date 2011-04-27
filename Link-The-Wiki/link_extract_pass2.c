@@ -263,6 +263,8 @@ for (param = first_param + 1; param < argc; param++)
 	while (file != NULL)
 		{
 		current_docid = get_doc_id(file);
+		if (current_docid <= 0)
+			continue;
 //		printf("ID:%d\n", current_docid);
 		string_clean(file, lowercase_only, TRUE);
 

@@ -135,7 +135,11 @@ pos = strstr(file, INEX_ARCHIVE_ARTICLE_ID_SIGNITURE);
 if (pos == NULL)
 	pos = strstr(file, ARTICLE_ID_SIGNITURE);
 if (pos == NULL)
-	exit(printf("Cannot find DOC id <name id=...> or <id> in file\n"));
+	{
+	fprintf(stderr, "Cannot find DOC id <name id=...> or <id> in file\n");
+	return -1;
+	//exit(printf("Cannot find DOC id <name id=...> or <id> in file\n"));
+	}
 while (!isdigit(*pos))
 	pos++;
 
