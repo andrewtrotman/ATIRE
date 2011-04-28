@@ -3,12 +3,16 @@
 #
 
 CFI = -Ilzo-2.05\include -Ilzo-2.05 -Ilzo-2.05\src
-CFASM = -DLZO_USE_ASM
 BNAME = lzo2
 BLIB = lzo2.lib
-BDLL = lzo2.dll
-CC = cl -nologo -MT
-CF = -O2 -GF -W3 $(CFI) $(CFASM)
+CC = @cl -nologo
+!IF "$(DEBUG)" == "1"
+CC = $(CC) -MTd
+!ELSE
+CC = $(CC) -MT
+!ENDIF
+
+CF = -O2 -GF -W3 $(CFI)
 LF = $(BLIB)
 
 
@@ -83,7 +87,7 @@ LZO_OBJ = 		\
 
 
 lzo2.lib :  $(LZO_OBJ)
-	link -lib -nologo -out:$(BLIB) $(LZO_OBJ)
+	@link -lib -nologo -out:$(BLIB) $(LZO_OBJ)
 
 {lzo-2.05\src\}.c.obj:
 	$(CC) $(CFI) -c $<

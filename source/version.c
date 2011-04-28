@@ -76,6 +76,9 @@ puts("Golomb                  : Andrew Trotman");
 #ifdef ANT_HAS_BZLIB
 	puts("BZLIB                   : Julian Seward (http://www.bzip.org/)");
 #endif
+#ifdef ANT_HAS_LZO
+	puts("LZO                     : Markus F.X.J. Oberhumer (http://www.oberhumer.com/)");
+#endif
 puts("");
 
 puts("STEMMERS");

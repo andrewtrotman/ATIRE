@@ -24,6 +24,7 @@ TRUE = 1
 #
 ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
+ANT_HAS_LZO = $(TRUE)
 ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
 ANT_HAS_MYSQL = $(FALSE)
@@ -85,6 +86,15 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 #
 
 #
+#	LZO compression
+#
+!IF $(ANT_HAS_LZO) == $(TRUE)
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LZO
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I lzo\lzo-2.05\include
+EXTRA_LIBS = $(EXTRA_LIBS) lzo\lzo2.lib
+!ENDIF
+
+#
 #	Lovins Stemmer
 #
 !IF $(ANT_HAS_LOVINS) == $(TRUE)
@@ -113,6 +123,7 @@ PHP_EXT_MINUS_D = -DANT_HAS_PHP_EXT -DWIN32 -DPHP_WIN32 -DZEND_WIN32 -DZTS=1 -DZ
 PHP_EXT_INCLUDES = -I $(PHPSRC) -I $(PHPSRC)\TSRM -I $(PHPSRC)\Zend -I $(PHPSRC)\main -I \$(SRCDIR)
 PHP_EXT_LIB = $(PHPAPP)\dev\php5ts.lib
 !ENDIF
+
 #
 #	Post configuration, so back to the hard work...
 #
@@ -400,13 +411,18 @@ $(PARTS) : makefile $(EXTRA_LIBS)
 #
 bzip\bzip2-1.0.5\libbz2.lib :
 	@cd bzip\bzip2-1.0.5
-	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) $DEBUG=$(DEBUG)
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..\..
 
 zlib\zlib-1.2.3\zlib.lib : 
 	@cd zlib\zlib-1.2.3
-	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) $DEBUG=$(DEBUG)
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..\..
+
+lzo\lzo.lib :
+	@cd lzo
+	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
+	@cd ..
 
 #
 #	Management
