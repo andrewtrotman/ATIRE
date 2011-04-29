@@ -47,6 +47,8 @@ Freq::Freq() : sum_n_(UNISEG_settings::MAX_CHARS, 0), avg_n_(UNISEG_settings::MA
 	current_document_id_ = 0;
 
 	enc_ = UNISEG_encoding_factory::instance().get_encoding();
+
+	count_all_char_ = false;
 }
 
 Freq::~Freq() {
@@ -986,7 +988,8 @@ void Freq::count_doc(const char *doc, long len, bool clean, bool smoothit)
 			pre = next;
 			next += enc_->howmanybytes();
 			//temp_word_array.push_back(string_type(pre, next));
-			not_target_string.push_back(string_type(pre, next));
+			if (count_all_char_)
+				not_target_string.push_back(string_type(pre, next));
 			enc_->test_char(next);
 		}
 

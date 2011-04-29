@@ -190,15 +190,15 @@ namespace QLINK
 	{
 		bool to_skip = false;
 		long offset = 0, term_len = 0;
-		char buffer[1024 * 1024];
+//		char buffer[1024 * 1024];
 		if (stopword_no_ && !strpbrk(index_term->term, "- "))
 			to_skip = language::isstopword(index_term->term);
 
 		if (!to_skip) {
 			offset = assign_link_term(index_term, term_list);
 			//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
-			if (!links_->find(buffer))
-				link * lnk = links_->push_link(NULL, offset, buffer, index_term->postings[0]->docid, 0.0, index_term);
+			if (!links_->find(buffer_))
+				link * lnk = links_->push_link(NULL, offset, buffer_, index_term->postings[0]->docid, 0.0, index_term);
 			}
 	}
 }

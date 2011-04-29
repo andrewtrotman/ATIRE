@@ -10,6 +10,12 @@
 
 using namespace std;
 
+void usage(char *program)
+{
+	fprintf(stderr, "Usage: %s chinese_text\n", program);
+	exit(-1);
+}
+
 int main(int argc, char **argv)
 {
 	if (argc > 1) {
@@ -30,5 +36,7 @@ int main(int argc, char **argv)
 			cout << word << endl;
 			}
 	}
+	else
+		usage(argv[0]);
 	return 0;
 }

@@ -92,12 +92,12 @@ void Seger::init()
 
 	//FreqCounter counter(stream_, freq_);
 	//counter.count(UNISEG_settings::instance().max, 1);
-//	string_array ca;
-//	to_string_array(stream_, ca);
+	string_array ca;
+	to_string_array(stream_, ca);
 //	//tw_ptr_local_ = freq_->array_k(freq_->array_size())[0];
-//	tw_ptr_local_ = freq_->add(ca);
-	tw_ptr_local_ = freq_->find(stream_);
-	assert(tw_ptr_local_ != NULL);
+	tw_ptr_local_ = freq_->add(ca);
+//	tw_ptr_local_ = freq_->find(stream_);
+//	assert(tw_ptr_local_ != NULL);
 //	if (!tw_ptr_local_) {
 //		string_array ca;
 //		to_string_array(stream_, ca);

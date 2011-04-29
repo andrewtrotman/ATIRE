@@ -48,6 +48,8 @@ private:
 	std::vector<word_ptr_type>	doc_;
 	UNISEG_encoding 			*enc_;
 
+	bool						count_all_char_;
+
 public:
 	Freq();
 	virtual ~Freq();
