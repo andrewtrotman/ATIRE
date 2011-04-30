@@ -44,28 +44,25 @@ namespace QLINK {
 
 		long terms_in_index;
 
-	private:
+	protected:
 		void read_index(const char *filename, long *terms_in_collection);
 		//void push_link(char *place_in_file, char *buffer, long docid, double gamma, ANT_link_term *node);
 		//void deduplicate_links(void);
 		//void print_header(char *runname);
 		//void print_footer(void);
 		//void print_links(long orphan_docid, char *orphan_name, long links_to_print, long max_targets_per_anchor, long mode);
-		ANT_link_term *find_term_in_list(char *value, ANT_link_term *list, long list_length, long this_docid);
+//		ANT_link_term *find_term_in_list(char *value, ANT_link_term *list, long list_length, long this_docid);
 		void generate_collection_link_set(char *original_file);
 		void add_or_subtract_orphan_links(long add_or_subtract, ANT_link_term *link_index, long terms_in_index);
 		long ispropper_noun(char *phrase);
 		void usage(char *exename);
-		int init_params(int argc, char *argv[]);
 		void init_variables();
 
 		void load_crosslink_table(std::string& filename);
 
-	protected:
 		virtual void process_terms(char **term_list, const char *source);
 //		virtual void recommend_anchors(links* lx, char **term_list, const char *source);
 		virtual void add_link(ANT_link_term *term, char **term_list);
-		virtual ANT_link_term *find_term_in_list(const char *value);
 
 	public:
 //		algorithm_ant_link_this(links *links_list);
@@ -80,6 +77,9 @@ namespace QLINK {
 
 		virtual bool has_crosslink(unsigned long id);
 		unsigned long get_crosslink(unsigned long id);
+
+		virtual int init_params(int argc, char *argv[]);
+		virtual ANT_link_term *find_term_in_list(const char *value);
 	};
 
 }

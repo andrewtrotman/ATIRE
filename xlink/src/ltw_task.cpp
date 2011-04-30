@@ -7,6 +7,7 @@
 
 #include "ltw_task.h"
 #include "algorithm_ant_link_this.h"
+#include "algorithm_ant_crosslink_this.h"
 #include "algorithm_ant_link_this_and_page_name.h"
 #include "algorithm_ltw_tang.h"
 #include "algorithm_page_name.h"
@@ -70,6 +71,10 @@ void ltw_task::init()
 	switch (get_algorithm_outgoing_type()) {
 	case LTW_ANT:
 		algor_out_ = new algorithm_ant_link_this(this);
+		//topic_param_start = algor_out_->init();
+		break;
+	case LTW_ANT_CROSSLINK:
+		algor_out_ = new algorithm_ant_crosslink_this(this);
 		//topic_param_start = algor_out_->init();
 		break;
 	case LTW_PAGE_NAME:

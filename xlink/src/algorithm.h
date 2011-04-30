@@ -53,6 +53,9 @@ namespace QLINK {
 
 		char					**token_address_;
 		long					current_index_;
+
+		bool					translate_anchor_for_linking_;
+
 	public:
 		algorithm(ltw_task *task);
 		algorithm() {}

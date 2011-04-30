@@ -75,7 +75,11 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 //				if (strncmp(*last, "\"", 1)) == 0)
 //					fprintf(stderr, "I got you");
 
-			index_term = find_term_in_list(buffer);
+//			if (translate_anchor_for_linking_) {
+//
+//			}
+//			else
+				index_term = find_term_in_list(buffer);
 
 			if (index_term == NULL)
 				break;		// we're after the last term in the list so can stop because we can't be a substring

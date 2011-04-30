@@ -76,6 +76,9 @@ void ltw_run::init()
 
 	lang = get_config().get_value("source_lang");
 	task_->set_source_lang(lang.length() > 0 ? lang : "en");
+
+	lang = get_config().get_value("target_lang");
+	task_->set_target_lang(lang.length() > 0 ? lang : task_->get_source_lang());
 }
 
 std::string ltw_run::get_home(const char *name)
@@ -112,7 +115,7 @@ void ltw_run::print()
 void ltw_run::print_header()
 {
 	char buf[2550];
-	sprintf(buf, header.c_str(), run_id.c_str(), task.c_str());
+	sprintf(buf, header.c_str(), affiliation.c_str(), task.c_str());
 	aout << buf;
 }
 

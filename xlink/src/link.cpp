@@ -36,7 +36,10 @@ link::link() {
 	gamma = 0.0;
 	offset = 0;
 	target_document = -1;
-	fill_empty_anchor_with_ir_results_ = run_config::instance().get_value("fill_empty_anchor_with_ir_results").length() > 0;
+	if (run_config::instance().get_value("fill_anchor_with_ir_results").length() > 0)
+		fill_anchor_with_ir_results_ = atol(run_config::instance().get_value("fill_anchor_with_ir_results").c_str());
+	else
+		fill_anchor_with_ir_results_ = 0;
 }
 
 link::~link() {
@@ -67,7 +70,7 @@ bool link::print_target(long anchor, algorithm *algor)
 	if (algor != NULL)
 		ret = algor->has_crosslink(link_term->postings[anchor]->docid);
 
-	if (ret || fill_empty_anchor_with_ir_results_) {
+	if (ret || fill_anchor_with_ir_results_) {
 		print_header();
 		//printf("%d", link_term->postings[anchor]->docid);
 		if (link_term->postings.size() > 0)
@@ -85,7 +88,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	int count = 0;
 
 	bool ret = false;
-	if (!fill_empty_anchor_with_ir_results_ && algor != NULL) {
+	if (!fill_anchor_with_ir_results_ && algor != NULL) {
 		if (link_term->postings.size() > 0)
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (algor->has_crosslink(link_term->postings[i]->docid)) {
@@ -98,11 +101,11 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	}
 	else
 		ret = true;
-	if (ret || fill_empty_anchor_with_ir_results_) {
+	if (ret || fill_anchor_with_ir_results_) {
 		sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
 		aout << buf;
 		const char *format = link_print::target_format.c_str();
-		if (link_term->postings.size() > 0) {
+		if (fill_anchor_with_ir_results_ != 2 && link_term->postings.size() > 0) {
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (link_term->postings[i]->docid < 0 && id_or_name)
 					continue;
@@ -135,7 +138,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 		}
 
 		int how_many_left = beps_to_print - count;
-		if (fill_empty_anchor_with_ir_results_ && count == 0) {
+		if (fill_anchor_with_ir_results_ && count == 0) {
 			long long result = 0;
 			string lang_pair = string(source_lang) + "|" + string(target_lang);
 			string tran = translation::instance().translate(term, lang_pair.c_str());

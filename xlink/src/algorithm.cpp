@@ -11,6 +11,7 @@
 #include "algorithm_config.h"
 #include "cmdline_options.h"
 #include "xml2txt.h"
+#include "run_config.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -52,6 +53,8 @@ void algorithm::init()
 		use_utf8_token_matching_ = true;
 
 	token_address_ = NULL;
+
+	translate_anchor_for_linking_ = run_config::instance().get_value("translate_anchor_for_linking").length() > 0 && run_config::instance().get_value("translate_anchor_for_linking") != "false";
 }
 
 int algorithm::init_params()

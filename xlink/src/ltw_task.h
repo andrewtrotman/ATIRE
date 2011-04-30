@@ -41,7 +41,9 @@ namespace QLINK {
 							  LTW_A2B_INCOMING_SEARCH_TN = 4,
 							  LTW_ANT_AND_PAGE = 5,
 							  LTW_TEARA_BASE = 6,
-							  LTW_PAGE_NAME = 7};
+							  LTW_PAGE_NAME = 7,
+							  LTW_ANT_CROSSLINK = 8
+							};
 	    //NUMBER_OF_LTW_ALGORITHMS
 	    typedef std::map<std::string,ltw_algorithm> ltw_algorithm_map;
 	    typedef std::map<std::string,ltw_task_type> ltw_task_type_map;
@@ -64,6 +66,7 @@ namespace QLINK {
 	    long beps_to_print_;
 
 	    std::string source_lang_;
+	    std::string target_lang_;
 
 	public:
 	    ltw_task(std::string & name, std::string & out_algor_name, std::string & in_algor_name);
@@ -92,6 +95,16 @@ namespace QLINK {
 	    void set_source_lang(std::string source_lang_)
 	    {
 	        this->source_lang_ = source_lang_;
+	    }
+
+	    std::string get_target_lang() const
+	    {
+	        return target_lang_;
+	    }
+
+	    void set_target_lang(std::string target_lang_)
+	    {
+	        this->target_lang_ = target_lang_;
 	    }
 
 	private:

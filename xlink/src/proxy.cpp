@@ -44,6 +44,7 @@ public:
 	   ltw_task::alorithm_names["LTW_TANG"] = ltw_task::LTW_TANG;
 	   ltw_task::alorithm_names["LTW_INCOMING_SEARCH_TN"] = ltw_task::LTW_INCOMING_SEARCH_TN;
 	   ltw_task::alorithm_names["LTW_A2B_INCOMING_SEARCH_TN"] = ltw_task::LTW_A2B_INCOMING_SEARCH_TN;
+	   ltw_task::alorithm_names["LTW_ANT_CROSSLINK"] = ltw_task::LTW_ANT_CROSSLINK;
 
 	   ltw_task::task_names[""] = ltw_task::LTW_TASK_NONE;
 	   ltw_task::task_names["LTW_F2F"] = ltw_task::LTW_LTW_F2F;
