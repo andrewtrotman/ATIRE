@@ -23,7 +23,7 @@ using namespace std;
 //	init();
 //}
 
-algorithm_ltara_base::algorithm_ltara_base(ltw_task *task) : algorithm_ant_link_this_and_page_name(task)
+algorithm_ltara_base::algorithm_ltara_base(ltw_task *task) : algorithm_ant_link_this_and_page_name(task), algorithm_out(task)
 {
 	init();
 }

@@ -18,7 +18,7 @@ using namespace std;
 //	init();
 //}
 
-algorithm_ant_link_this_and_page_name::algorithm_ant_link_this_and_page_name(ltw_task *task) : algorithm_ant_link_this(task), algorithm_page_name(task)
+algorithm_ant_link_this_and_page_name::algorithm_ant_link_this_and_page_name(ltw_task *task) : algorithm_ant_link_this(task), algorithm_page_name(task), algorithm_out(task)
 {
 	init();
 }

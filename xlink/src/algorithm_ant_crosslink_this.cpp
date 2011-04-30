@@ -15,7 +15,7 @@
 namespace QLINK
 {
 
-algorithm_ant_crosslink_this::algorithm_ant_crosslink_this(ltw_task *task) : algorithm_ant_link_this(task), find_anchors_with_this_(task)
+algorithm_ant_crosslink_this::algorithm_ant_crosslink_this(ltw_task *task) : find_anchors_with_this_(task), algorithm_ant_link_this::algorithm_ant_link_this(task), algorithm_out(task)
 {
 
 }
@@ -27,23 +27,28 @@ algorithm_ant_crosslink_this::~algorithm_ant_crosslink_this()
 
 int algorithm_ant_crosslink_this::init_params(int argc, char *argv[])
 {
-int index_argv_param = find_anchors_with_this_.init_params(argc, argv);
+int index_argv_param = 0;
 char *index_file = NULL;
 
-for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
+find_anchors_with_this_.set_lowercase(TRUE);
+
+int next_argv_param = find_anchors_with_this_.init_params(argc, argv);;
+
+for (index_argv_param = 1; index_argv_param < argc; index_argv_param++)
 	{
 	if (strncmp(argv[index_argv_param], "-crossindex", 11) == 0)
 		{
-			int next_argv_param = index_argv_param;
+			next_argv_param = index_argv_param;
 			next_argv_param++;
 			if (*argv[next_argv_param] != '-')
-				index_file = argv[next_argv_param];
+				index_file = argv[next_argv_param++];
 
 			if (index_file != NULL)
 				read_index(index_file, &terms_in_index);
+			break;
 		}
 	}
-return index_argv_param + 1;
+return next_argv_param;
 }
 
 ANT_link_term *algorithm_ant_crosslink_this::find_term_in_list(const char *value)

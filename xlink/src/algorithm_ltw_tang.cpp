@@ -12,12 +12,7 @@ using namespace std;
 using namespace QLINK;
 
 
-algorithm_ltw_tang::algorithm_ltw_tang(links *links_list) /*: algorithm_out(links_list)*/
-{
-
-}
-
-algorithm_ltw_tang::algorithm_ltw_tang()
+algorithm_ltw_tang::algorithm_ltw_tang(ltw_task *task) : algorithm_out(task)
 {
 
 }

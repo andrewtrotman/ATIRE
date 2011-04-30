@@ -98,7 +98,7 @@ void ltw_task::init()
 	}
 
 	if (algor_out_)
-		algor_out_->init_params();
+		this->topic_param_start = algor_out_->init_params();
 
 	switch (get_algorithm_incoming_type()) {
 	case LTW_A2B_INCOMING_SEARCH_TN:

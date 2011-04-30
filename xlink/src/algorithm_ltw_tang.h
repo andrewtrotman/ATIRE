@@ -15,8 +15,7 @@ namespace QLINK {
 	class algorithm_ltw_tang: public algorithm_out
 	{
 	public:
-		algorithm_ltw_tang(links *links_list);
-		algorithm_ltw_tang();
+		algorithm_ltw_tang(ltw_task *task);
 		virtual ~algorithm_ltw_tang();
 
 		int init();

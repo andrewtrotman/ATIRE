@@ -58,7 +58,7 @@ namespace QLINK {
 
 	public:
 		algorithm(ltw_task *task);
-		algorithm() {}
+//		algorithm() {}
 		virtual ~algorithm();
 
 		virtual int init_params(int argc, char *argv[]);
@@ -77,6 +77,8 @@ namespace QLINK {
 
 		virtual bool has_crosslink(unsigned long id) { return true; }
 		virtual unsigned long get_crosslink(unsigned long id) { return id; }
+
+		void set_lowercase(long value) { lowercase_only = value; }
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}
