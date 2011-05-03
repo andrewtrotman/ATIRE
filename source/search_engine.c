@@ -41,6 +41,7 @@ stats = new ANT_stats_search_engine(memory);
 stats_for_all_queries = new ANT_stats_search_engine(memory);
 this->memory = memory;
 this->stemmer = NULL;
+results_list = NULL;
 
 if (memory_model)
 	index = new ANT_file_memory;
@@ -263,6 +264,12 @@ return 1;
 */
 ANT_search_engine::~ANT_search_engine()
 {
+/* This is allocated in the memory pool, but it won't call the destructor, we
+ * have to call the destructor ourselves:
+ */
+if (results_list)
+	results_list->~ANT_search_engine_result();
+
 index->close();
 delete index;
 delete stats;

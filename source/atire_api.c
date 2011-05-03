@@ -109,8 +109,6 @@ forum_results_list_length = 1500;
 */
 ATIRE_API::~ATIRE_API()
 {
-delete memory;
-
 delete NEXI_parser;
 delete boolean_parser;
 delete parsed_query;
@@ -130,6 +128,8 @@ delete assessment_factory;
 //delete [] assessments;
 delete map;
 delete forum_writer;
+
+delete memory;
 }
 
 /*
