@@ -215,6 +215,7 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 
 	result = 0;
 	links_printed = 0;
+	bool ret = false;
 
 	//print_link_tag_header();
 
@@ -239,7 +240,8 @@ void outgoing_links::print_anchors(long orphan_docid, const char *orphan_name)
 				}
 
 		if (topic_->get_ltw_task()->get_task_type() != ltw_task::LTW_LTAra_A2B) {
-			if (current_link->print_anchor(beps_to_print_, true, algorithm_));
+			ret = current_link->print_anchor(beps_to_print_, true, algorithm_);
+			if (ret)
 				links_printed++;
 		}
 		else {
