@@ -5,9 +5,9 @@
 CFI = -Ilzo-2.05\include -Ilzo-2.05 -Ilzo-2.05\src
 BNAME = lzo2
 BLIB = lzo2.lib
-CC = @cl -nologo
+CC = cl -nologo
 !IF "$(DEBUG)" == "1"
-CC = $(CC) -MTd
+CC = $(CC) -MTd -Zi
 !ELSE
 CC = $(CC) -MT
 !ENDIF
@@ -87,10 +87,10 @@ LZO_OBJ = 		\
 
 
 lzo2.lib :  $(LZO_OBJ)
-	@link -lib -nologo -out:$(BLIB) $(LZO_OBJ)
+	link -lib -nologo -out:$(BLIB) $(LZO_OBJ)
 
 {lzo-2.05\src\}.c.obj:
-	$(CC) $(CFI) -c $<
+	$(CC) $(CFI) -c /Tp $<
 
 clean :
 	del $(LZO_OBJ) lzo2.lib
