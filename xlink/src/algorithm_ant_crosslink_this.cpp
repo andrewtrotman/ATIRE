@@ -32,16 +32,13 @@ char *index_file = NULL;
 
 find_anchors_with_this_.set_lowercase(TRUE);
 
-int next_argv_param = find_anchors_with_this_.init_params(argc, argv);;
+int next_argv_param = find_anchors_with_this_.init_params(argc, argv);
 
 for (index_argv_param = 1; index_argv_param < argc; index_argv_param++)
 	{
 	if (strncmp(argv[index_argv_param], "-crossindex", 11) == 0)
 		{
-			next_argv_param = index_argv_param;
-			next_argv_param++;
-			if (*argv[next_argv_param] != '-')
-				index_file = argv[next_argv_param++];
+			index_file = strchr(argv[index_argv_param], ':') + 1;
 
 			if (index_file != NULL)
 				read_index(index_file, &terms_in_index);

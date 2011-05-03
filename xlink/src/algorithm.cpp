@@ -64,16 +64,50 @@ int algorithm::init_params()
 
 int algorithm::init_params(int argc, char *argv[])
 {
+	if (argc < 3)
+		usage(argv[0]);		// and exit
+
 	int index_argv_param = 0;
 
 	for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
 		if (strcmp(argv[index_argv_param], "-lowercase") == 0)
 			lowercase_only = TRUE;
+//		else if (strcmp(argv[index_argv_param], "-noyears") == 0)
+//			print_mode |= MODE_NO_4_DIGIT_NUMBERS;
+		else if (strncmp(argv[index_argv_param], "-runname:", 9) == 0)
+			runname = strchr(argv[index_argv_param], ':') + 1;
+//		else if (strncmp(argv[index_argv_param], "-propernounboost:", 17) == 0)
+//			proper_noun_boost = atof(strchr(argv[index_argv_param], ':') + 1);
+//		else if (strncmp(argv[index_argv_param], "-targets:", 8) == 0)
+//			{
+//			targets_per_link = atoi(strchr(argv[index_argv_param], ':') + 1);
+//			if (targets_per_link <= 0)
+//				usage(argv[0]);
+//			}
+//		else if (strncmp(argv[index_argv_param], "-anchors:", 8) == 0)
+//			{
+//			anchors_per_run = atoi(strchr(argv[index_argv_param], ':') + 1);
+//			if (anchors_per_run <= 0)
+//				usage(argv[0]);
+//			}
+		else if (strncmp(argv[index_argv_param], "-conf", 5) == 0)
+		{
+			config_ = new algorithm_config(strchr(argv[index_argv_param], ':') + 1);
+		}
 		else if (strcmp(argv[index_argv_param], "-stopword") == 0) {
 			stopword_no_ = TRUE;
-			break;
 		}
+	return index_argv_param;
+}
 
+
+/*
+	USAGE()
+	-------
+*/
+void algorithm::usage(char *exename)
+{
+exit(printf("Usage:%s [-lowercase] [-noyears] [-runname:name] [-anchors:<n>] [-targets:<n>] [-propernounboost:<n.n>] <index> <file_to_link> ...\n", exename));
 }
 
 void algorithm::clear_token_address()

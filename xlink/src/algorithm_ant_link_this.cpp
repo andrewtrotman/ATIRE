@@ -363,69 +363,27 @@ return TRUE;
 }
 
 /*
-	USAGE()
-	-------
-*/
-void algorithm_ant_link_this::usage(char *exename)
-{
-exit(printf("Usage:%s [-lowercase] [-noyears] [-runname:name] [-anchors:<n>] [-targets:<n>] [-propernounboost:<n.n>] <index> <file_to_link> ...\n", exename));
-}
-
-/*
 	MAIN()
 	------
 */
 int algorithm_ant_link_this::init_params(int argc, char *argv[])
 {
-targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
-proper_noun_boost = 0.0;
+//targets_per_link = 1, anchors_per_run = 250, print_mode = 0;
+//proper_noun_boost = 0.0;
 //long num_of_processed_topic = 0;
 
-if (argc < 3)
-	usage(argv[0]);		// and exit
-
 lowercase_only = FALSE;
-int index_argv_param = 0;
+int basic_index_argv_param = algorithm::init_params(argc, argv);
 char *index_file = NULL;
 
-for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
+for (int index_argv_param = 1; *argv[index_argv_param] == '-';)
 	{
-	if (strcmp(argv[index_argv_param], "-lowercase") == 0)
-		lowercase_only = TRUE;
-	else if (strcmp(argv[index_argv_param], "-noyears") == 0)
-		print_mode |= MODE_NO_4_DIGIT_NUMBERS;
-	else if (strncmp(argv[index_argv_param], "-runname:", 9) == 0)
-		runname = strchr(argv[index_argv_param], ':') + 1;
-	else if (strncmp(argv[index_argv_param], "-propernounboost:", 17) == 0)
-		proper_noun_boost = atof(strchr(argv[index_argv_param], ':') + 1);
-	else if (strncmp(argv[index_argv_param], "-targets:", 8) == 0)
+	if (strncmp(argv[index_argv_param], "-index", 6) == 0)
 		{
-		targets_per_link = atoi(strchr(argv[index_argv_param], ':') + 1);
-		if (targets_per_link <= 0)
-			usage(argv[0]);
+			index_file = strchr(argv[index_argv_param], ':') + 1;
+			break;
 		}
-	else if (strncmp(argv[index_argv_param], "-anchors:", 8) == 0)
-		{
-		anchors_per_run = atoi(strchr(argv[index_argv_param], ':') + 1);
-		if (anchors_per_run <= 0)
-			usage(argv[0]);
-		}
-	else if (strncmp(argv[index_argv_param], "-conf", 5) == 0)
-	{
-		int next_argv_param = index_argv_param;
-		next_argv_param++;
-		if (*argv[next_argv_param] != '-')
-			index_argv_param = next_argv_param;
-	}
-	else if (strncmp(argv[index_argv_param], "-index", 6) == 0)
-	{
-		int next_argv_param = index_argv_param;
-		next_argv_param++;
-		if (*argv[next_argv_param] != '-')
-			index_file = argv[next_argv_param];
-	}
-//	else
-//		usage(argv[0]);		// and exit
+	index_argv_param++;
 	}
 
 //if (!index_file) {
@@ -437,7 +395,7 @@ for (index_argv_param = 1; *argv[index_argv_param] == '-'; index_argv_param++)
 
 //print_header(runname);
 
-return index_argv_param + 1;
+return basic_index_argv_param;
 }
 
 void algorithm_ant_link_this::process_topic_text()

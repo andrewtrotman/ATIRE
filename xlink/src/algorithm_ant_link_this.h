@@ -31,11 +31,11 @@ namespace QLINK {
 		//std::vector<ANT_link_term *>	link_index_;
 		ANT_link_term 	*link_index_;
 
-		char 			*runname;
-		double 			proper_noun_boost;
-		long 			targets_per_link;
-		long 			anchors_per_run;
-		long 			print_mode;
+
+//		double 			proper_noun_boost;
+//		long 			targets_per_link;
+//		long 			anchors_per_run;
+//		long 			print_mode;
 
 		std::map<unsigned long, unsigned long>	crosslink_table_;
 

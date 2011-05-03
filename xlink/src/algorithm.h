@@ -56,6 +56,8 @@ namespace QLINK {
 
 		bool					translate_anchor_for_linking_;
 
+		char 					*runname;
+
 	public:
 		algorithm(ltw_task *task);
 //		algorithm() {}
@@ -83,6 +85,7 @@ namespace QLINK {
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}
+		void usage(char *exename);
 
 	private:
 		void init();
