@@ -49,7 +49,7 @@ namespace QLINK {
 		ltw_task				*ltw_task_;
 
 		bool 					use_utf8_token_matching_; // which means that matching without spaces, all the spaces in string will be removed
-		bool 					crosslink_;
+//		bool 					crosslink_;
 
 		char					**token_address_;
 		long					current_index_;
@@ -77,6 +77,7 @@ namespace QLINK {
 
 		virtual bool has_crosslink(unsigned long id) { return true; }
 		virtual unsigned long get_crosslink(unsigned long id) { return id; }
+		virtual long size_of_crosslink() { return 0; }
 
 		void set_lowercase(long value) { lowercase_only = value; }
 

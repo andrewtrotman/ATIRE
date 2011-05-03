@@ -155,6 +155,7 @@ void ltw_task::perform()
 				}
 				outgoings_ = new outgoing_links(&a_topic);
 				outgoings_->set_bep_algorithm(algor_bep_);
+
 				outgoings_->set_algorithm(algor_out_);
 				if (links_to_print_ > 0)
 					outgoings_->set_links_to_print(links_to_print_);

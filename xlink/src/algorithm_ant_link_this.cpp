@@ -69,7 +69,7 @@ void algorithm_ant_link_this::init_variables()
 
 	string crosslink_table = run_config::instance().get_value("crosslink_table");
 	if (crosslink_table.length() > 0) {
-		crosslink_ = true;
+//		crosslink_ = true;
 		load_crosslink_table(crosslink_table);
 	}
 }

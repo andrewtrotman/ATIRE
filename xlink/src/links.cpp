@@ -105,6 +105,7 @@ void links::init()
 	beps_to_print_ = 0;
 	mode_ = MODE_NO_4_DIGIT_NUMBERS;
 	bep_algor_ = NULL;
+	algorithm_ = NULL;
 	//this->init_links();
 }
 

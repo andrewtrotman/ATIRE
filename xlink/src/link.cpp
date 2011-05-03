@@ -86,9 +86,10 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 {
 	char buf[1024 * 10];
 	int count = 0;
+	bool anchor_printed = false;
 
 	bool ret = false;
-	if (!fill_anchor_with_ir_results_ && algor != NULL) {
+	if (!fill_anchor_with_ir_results_ && algor != NULL && algor->size_of_crosslink() > 0) {
 		if (link_term->postings.size() > 0)
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (algor->has_crosslink(link_term->postings[i]->docid)) {
@@ -102,10 +103,11 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	else
 		ret = true;
 	if (ret || fill_anchor_with_ir_results_) {
-		sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
-		aout << buf;
 		const char *format = link_print::target_format.c_str();
 		if (fill_anchor_with_ir_results_ != 2 && link_term->postings.size() > 0) {
+			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
+			aout << buf;
+			anchor_printed = true;
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (link_term->postings[i]->docid < 0 && id_or_name)
 					continue;
@@ -117,8 +119,9 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 					id = atoi(link_term->postings[i]->desc);
 
 #ifdef CROSSLINK
-				id = algor->get_crosslink(id);
-				if (id == 0)
+				if (algor != NULL && algor->size_of_crosslink() > 0)
+					id = algor->get_crosslink(id);
+				if (id <= 0)
 					continue;
 				string filename = corpus::instance().id2docpath(id);
 				if (!sys_file::exist(filename.c_str())) {
@@ -136,9 +139,11 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 					break;
 			}
 		}
+		else
+			ret = false;
 
 		int how_many_left = beps_to_print - count;
-		if (fill_anchor_with_ir_results_ && count == 0) {
+		if (fill_anchor_with_ir_results_ && how_many_left > 0) {
 			long long result = 0;
 			string lang_pair = string(source_lang) + "|" + string(target_lang);
 			string tran = translation::instance().translate(term, lang_pair.c_str());
@@ -147,6 +152,16 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			int hits = how_many_left > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : how_many_left;
 			ret = hits > 0;
 			long doc_id = -1;
+			if (hits > 0) {
+				if (!anchor_printed) {
+					sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
+					aout << buf;
+				}
+				ret = true;
+			}
+			else {
+				ret = anchor_printed;
+			}
 			for (int i = 0; i < hits; ++i) {
 				doc_id = result_to_id(docids[i]);
 #ifdef CROSSLINK
@@ -166,7 +181,8 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			}
 		}
 		//puts("\t\t\t</anchor>\n");
-		aout << "\t\t\t</anchor>\n";
+		if (anchor_printed)
+			aout << "\t\t\t</anchor>\n";
 	}
 	return ret;
 }

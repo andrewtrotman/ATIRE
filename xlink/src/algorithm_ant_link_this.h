@@ -80,6 +80,8 @@ namespace QLINK {
 
 		virtual int init_params(int argc, char *argv[]);
 		virtual ANT_link_term *find_term_in_list(const char *value);
+
+		virtual long size_of_crosslink() { return crosslink_table_.size(); }
 	};
 
 }
