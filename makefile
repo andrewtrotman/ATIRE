@@ -419,7 +419,7 @@ zlib\zlib-1.2.3\zlib.lib :
 	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..\..
 
-lzo\lzo.lib :
+lzo\lzo2.lib :
 	@cd lzo
 	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..
