@@ -104,9 +104,13 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 		ret = true;
 	if (ret || fill_anchor_with_ir_results_) {
 		const char *format = link_print::target_format.c_str();
-		if (fill_anchor_with_ir_results_ != 2 && link_term->postings.size() > 0) {
+		if (strcmp(term, "\"") == 0)
+			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, 1, " ");
+		else
 			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
-			aout << buf;
+		std::string anchor_tag(buf);
+		if (fill_anchor_with_ir_results_ != 2 && link_term->postings.size() > 0) {
+			aout << anchor_tag;
 			anchor_printed = true;
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (link_term->postings[i]->docid < 0 && id_or_name)
@@ -154,8 +158,8 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			long doc_id = -1;
 			if (hits > 0) {
 				if (!anchor_printed) {
-					sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
-					aout << buf;
+					aout << anchor_tag;
+					anchor_printed = true;
 				}
 				ret = true;
 			}
@@ -164,7 +168,6 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			}
 			for (int i = 0; i < hits; ++i) {
 				doc_id = result_to_id(docids[i]);
-#ifdef CROSSLINK
 				if (doc_id < 1)
 					continue;
 				string filename = corpus::instance().id2docpath(doc_id);
@@ -174,12 +177,11 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 				}
 				std::string target_title = corpus::instance().gettitle(filename);
 				sprintf(buf, format, 0, target_lang, target_title.c_str(), doc_id);
-#else
-				sprintf(buf, format, link_term->postings[i]->offset, id);
-#endif
 				aout << buf;
 			}
 		}
+		if (anchor_printed && how_many_left == beps_to_print)
+			cerr << "Something funny happened." << endl;
 		//puts("\t\t\t</anchor>\n");
 		if (anchor_printed)
 			aout << "\t\t\t</anchor>\n";

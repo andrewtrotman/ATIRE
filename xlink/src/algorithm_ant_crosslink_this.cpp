@@ -9,8 +9,14 @@
 #include "translation.h"
 #include "ltw_task.h"
 #include "ant_link_term.h"
+#include "ant_link_parts.h"
 
 #include <string.h>
+
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 namespace QLINK
 {
@@ -58,8 +64,12 @@ void algorithm_ant_crosslink_this::add_link(ANT_link_term *term, char **term_lis
 std::string result = translation::instance().translate(term->term, (std::string(ltw_task_->get_source_lang()) + "|" + std::string(ltw_task_->get_target_lang())).c_str());
 
 ANT_link_term *crossterm = NULL;
-if ((crossterm = algorithm_ant_link_this::find_term_in_list(result.c_str())) != NULL)
-	algorithm_ant_link_this::add_link(crossterm, term_list);
+if ((crossterm = algorithm_ant_link_this::find_term_in_list(result.c_str())) != NULL) {
+//	if (std::string(crossterm->term) == "Allow Me To Demonstrate")
+//		std::cerr << "Something funny happened." << std::endl;
+	if (string_compare(crossterm->term, result.c_str()) == 0)
+		algorithm_ant_link_this::add_link(crossterm, term_list);
+}
 }
 
 }

@@ -69,7 +69,7 @@ namespace QLINK
 				getline (myfile, line);
 				if (line.length() == 0 || line.find("Portal:") != string::npos)
 					continue;
-//				cerr << "loading : " << line << endl;
+				cerr << "loading : " << line << endl;
 				string::size_type pos = line.find_first_of(':');
 				if (pos != string::npos) {
 					unsigned long doc_id = atol(line.c_str());
@@ -128,10 +128,11 @@ namespace QLINK
 					cerr << "Error in line : " << line << endl;
 				}
 
-			  //cout << line << endl;
+//			  cout << line << endl;
 			}
 //			std::sort(name_array_.begin(), name_array_.end(), ANT_link_term_compare());
 			myfile.close();
+			cerr << "loaded " << name_array_.size() << " entries" << endl;
 		}
 
 		// debug
