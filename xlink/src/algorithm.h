@@ -58,6 +58,8 @@ namespace QLINK {
 
 		char 					*runname;
 
+		long					segmented_;
+
 	public:
 		algorithm(ltw_task *task);
 //		algorithm() {}

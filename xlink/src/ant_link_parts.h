@@ -517,10 +517,10 @@ return cmp;
 	CREATE_UTF8_TOKEN_LIST()
 	------------------------
 */
-inline int create_utf8_token_list(char *s, char **term_list, char **token_address = NULL)
+inline int create_utf8_token_list(char *s, char **term_list, long segmented = FALSE, char **token_address = NULL)
 {
 char *start, *token, *where_to = s;
-long token_len = 0, term_count;
+long token_len = 0, term_count, char_len;
 char **current = term_list;
 
 term_count = 0;
@@ -532,8 +532,18 @@ while (*where_to != '\0')
 	start = where_to;
 	if ((*where_to & 0x80) &&language::isutf8(where_to))
 		{
-		token_len = language::utf8_bytes(where_to);
-		where_to += token_len;
+		if (language::ischinese(where_to))
+			while ((*where_to & 0x80) &&language::ischinese(where_to)) {
+				char_len = language::utf8_bytes(where_to);
+				where_to += char_len;
+				token_len += char_len;
+				if (!segmented)
+					break;
+			}
+		else {
+			token_len = language::utf8_bytes(where_to);
+			where_to += token_len;
+		}
 		}
 	else
 		while (*where_to != '\0' && !isspace(*where_to) &&  !((*where_to & 0x80) && language::isutf8(where_to)))

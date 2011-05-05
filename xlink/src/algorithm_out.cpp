@@ -59,6 +59,9 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 				}
 			else
 				{
+				if (segmented_) // segmented text, so we only match the words
+					break;
+
 				if (!use_utf8_token_matching_)
 					*where_to++ = ' ';
 				strcpy(where_to, *last);

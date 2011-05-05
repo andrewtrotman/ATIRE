@@ -55,6 +55,10 @@ void algorithm::init()
 	token_address_ = NULL;
 
 	translate_anchor_for_linking_ = run_config::instance().get_value("translate_anchor_for_linking").length() > 0 && run_config::instance().get_value("translate_anchor_for_linking") != "false";
+	if (run_config::instance().get_value("segmented_chinese").length() > 0 && run_config::instance().get_value("segmented_chinese") != "false")
+		segmented_ = TRUE;
+	else
+		segmented_ = FALSE;
 }
 
 int algorithm::init_params()
@@ -165,7 +169,7 @@ void algorithm::process_topic_text()
 	current = term_list = new char *[strlen(filecopy)];		// this is the worst case by far
 	if (use_utf8_token_matching_) {
 		token_address_ = new char *[strlen(filecopy)];
-		create_utf8_token_list(filecopy, term_list, token_address_);
+		create_utf8_token_list(filecopy, term_list, segmented_, token_address_);
 	}
 	else
 		{
