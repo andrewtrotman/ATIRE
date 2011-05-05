@@ -90,7 +90,7 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 #
 !IF $(ANT_HAS_LZO) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LZO
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I lzo\lzo-2.05\include
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I lzo\lzo-2.05\include\lzo
 EXTRA_LIBS = $(EXTRA_LIBS) lzo\lzo2.lib
 !ENDIF
 
@@ -295,6 +295,7 @@ PARTS = \
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
 	$(OBJDIR)\instream_buffer.obj					\
+	$(OBJDIR)\instream_lzo.obj					\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_ant.obj							\
 	$(OBJDIR)\nexi_term_iterator.obj				\

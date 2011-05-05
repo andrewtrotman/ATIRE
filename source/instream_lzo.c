@@ -3,9 +3,11 @@
 	--------------
 */
 #include <string.h>
+#include "memory.h"
 #include "instream_lzo.h"
 #include "lzoconf.h"
 #include "lzo1x.h"
+#include "fundamental_types.h"
 
 #define ANT_COMPATIBLE_WITH_LZOP_VERSION 0x1030		/* the version of LZOP this code is compatible with */
 
@@ -50,7 +52,7 @@ ANT_instream_lzo::ANT_instream_lzo(ANT_memory *memory, ANT_instream *source) : A
 	and ANT is for text.  Besides, I doubt the effect is significant, and I doubt any user
 	would know how to use this lzop parameter.
 */
-long ANT_instream_lzo::unfilter(unsigned char *buffer, unsigned long length, unsigned long filter);
+long ANT_instream_lzo::unfilter(unsigned char *buffer, unsigned long length, unsigned long filter)
 {
 unsigned char byte;
 unsigned char bytes[16];
@@ -72,6 +74,7 @@ if (filter == 1)
 
 if (filter <= 16)
 	{
+	which = 0;
 	memset(bytes, 0, sizeof(bytes));			// this should be inlined by the compiler
 	for (current = 0; current < length; current++)
 		{
@@ -94,14 +97,13 @@ return FALSE;
 long ANT_instream_lzo::check_lzo_header(void)
 {
 #ifdef ANT_HAS_LZO
-	unsigned long verison;
-	unsigned long number_of_extra_bytes;
-	unsigned long current, number_of_exta_bytes;
+	static const unsigned char lzop_header[] = {0x89, 0x4c, 0x5a, 0x4f, 0x00, 0x0d, 0x0a, 0x1a, 0x0a};
+	unsigned long version, number_of_extra_bytes, current;
 	unsigned char one;
 	uint16_t two;
 	uint32_t four;
 	unsigned char nine[9];
-	unsigned char two_fifty_size[256];
+	unsigned char two_fifty_six[256];
 
 	/*
 		9 bytes LZO Header
@@ -110,13 +112,13 @@ long ANT_instream_lzo::check_lzo_header(void)
 	if (memcmp(nine, lzop_header, sizeof(lzop_header)) != 0)
 		return FALSE;
 
-	source->read(&two, sizeof(two));			// LZOP version number (2 bytes)
+	source->read((unsigned char *)&two, sizeof(two));			// LZOP version number (2 bytes)
 	version = shortize(&two);
-	source->read(&two, sizeof(two));			// LZO lib version number (2 bytes)
+	source->read((unsigned char *)&two, sizeof(two));			// LZO lib version number (2 bytes)
 
 	if (version >= 0x0940)
 		{
-		source->read(&two, sizeof(two));		// version needed to extract (2 bytes)
+		source->read((unsigned char *)&two, sizeof(two));		// version needed to extract (2 bytes)
 		if (shortize(&two) > ANT_COMPATIBLE_WITH_LZOP_VERSION)
 			return FALSE;
 		}
@@ -128,21 +130,21 @@ long ANT_instream_lzo::check_lzo_header(void)
 	if (version >= 0x0940)
 		source->read(&one, sizeof(one));		// compression level (1 byte)
 
-	source->read(four, sizeof(four));			// flags (4 bytes)
+	source->read((unsigned char *)&four, sizeof(four));			// flags (4 bytes)
 	flags = longize(&four);
 	if (flags & LZOP_MULTIPART)		// we do not support multipart archives (nor does lzop)
 		return FALSE;
 
 	if (flags & LZOP_FILTER)
 		{
-		source->read(&four, sizeof(four);		// filter (4 bytes)
+		source->read((unsigned char *)&four, sizeof(four));		// filter (4 bytes)
 		filter = longize(&four);
 		}
 
-	source->read(&four, sizeof(four);			// mode (4 bytes)
-	source->read(&four, sizeof(four);			// time (low) (4 bytes)
+	source->read((unsigned char *)&four, sizeof(four));			// mode (4 bytes)
+	source->read((unsigned char *)&four, sizeof(four));			// time (low) (4 bytes)
 	if (version >= 0x0940)
-		source->read(&four, sizeof(four);		// time (high) (4 bytes)
+		source->read((unsigned char *)&four, sizeof(four));		// time (high) (4 bytes)
 
 	/*
 		Now we get the name of the compressed file (as a Pascal string!)
@@ -150,7 +152,7 @@ long ANT_instream_lzo::check_lzo_header(void)
 	source->read(&one, sizeof(one));			// length, n (1 byte)
 	source->read(two_fifty_six, one);			// filename (n bytes)
 
-	source->read(&four, sizeof(four));			// header checksum (4 bytes)
+	source->read((unsigned char *)&four, sizeof(four));			// header checksum (4 bytes)
 
 	/*
 		Now we get an "extra field", but lzop doesn't use this so we're compatible
@@ -158,11 +160,11 @@ long ANT_instream_lzo::check_lzo_header(void)
 	*/
 	if (flags & LZOP_EXTRA_FIELD)
 		{
-		source->read(&four, sizeof(four));			// length (4 bytes)
-		number_of_extra_bytes = longize(buffer);
+		source->read((unsigned char *)&four, sizeof(four));			// length (4 bytes)
+		number_of_extra_bytes = longize(&four);
 		for (current = 0; current < number_of_extra_bytes; current++)
-			source->read(&four, sizeof(four));		// each byte (1 byte each)
-		source->read(&four, sizeof(four));			// checksum (4 bytes)
+			source->read(&one, sizeof(one));		// each byte (1 byte each)
+		source->read((unsigned char *)&four, sizeof(four));			// checksum (4 bytes)
 		}
 
 	return 0;
@@ -178,7 +180,8 @@ long long ANT_instream_lzo::decompress_next_block(void)
 {
 #ifdef ANT_HAS_LZO
 	uint32_t four;
-	long worst_case;
+	unsigned long worst_case;
+	lzo_uint used;
 
 	/*
 		At start of disk file? If so then read all the cack at the start
@@ -192,28 +195,28 @@ long long ANT_instream_lzo::decompress_next_block(void)
 	/*
 		Compressed and uncompressed size (in bytes)
 	*/
-	source->read(&four, sizeof(four));
+	source->read((unsigned char *)&four, sizeof(four));
 	uncompressed_size = longize(&four);
 	if (uncompressed_size == 0)
 		return 0;
-	source->read(&four, sizeof(four));
+	source->read((unsigned char *)&four, sizeof(four));
 	compressed_size = longize(&four);
 
 	/*
 		Uncompressed checksums
 	*/
 	if (flags & LZOP_ADLER32_D)
-		source->read(&four, sizeof(four));
+		source->read((unsigned char *)&four, sizeof(four));
 	if (flags & LZOP_CRC32_D)
-		source->read(&four, sizeof(four));
+		source->read((unsigned char *)&four, sizeof(four));
 
 	/*
 		Compressed checksums
 	*/
 	if (flags & LZOP_ADLER32_C)
-		source->read(&four, sizeof(four));
+		source->read((unsigned char *)&four, sizeof(four));
 	if (flags & LZOP_CRC32_C)
-		source->read(&four, sizeof(four));
+		source->read((unsigned char *)&four, sizeof(four));
 
 	/*
 		Allocate the buffer to store the compressed block.
@@ -228,11 +231,11 @@ long long ANT_instream_lzo::decompress_next_block(void)
 		return 0;					// this is a "split" (what ever that means) file and lzop doesn't support them
 
 	if (uncompressed_buffer == NULL)
-		uncompressed_buffer = memory->malloc(uncompressed_size);
-	if (compresed_buffer == NULL)
+		uncompressed_buffer = (unsigned char *)memory->malloc(uncompressed_size);
+	if (compressed_buffer == NULL)
 		{
 		worst_case = uncompressed_size + (uncompressed_size / 8) + 128 + 3;
-		compressed_buffer = memory->malloc(compressed_size > worst_case ? compressed_size : worst_case);
+		compressed_buffer = (unsigned char *)memory->malloc(compressed_size > worst_case ? compressed_size : worst_case);
 		}
 
 	/*
@@ -243,7 +246,8 @@ long long ANT_instream_lzo::decompress_next_block(void)
 	/*
 		Decompress
 	*/
-	if (lzo1x_decompress(compressed_buffer, compressed_size, uncompressed_buffer, &uncompressed_size, NULL) != LZO_E_OK)
+	used = uncompressed_size;
+	if (lzo1x_decompress(compressed_buffer, compressed_size, uncompressed_buffer, &used, NULL) != LZO_E_OK)
 		return 0;
 
 	/*
@@ -279,12 +283,12 @@ long long ANT_instream_lzo::read(unsigned char *data, long long size)
 			{
 			memcpy(into, current_uncompressed_position, (size_t)size);
 			current_uncompressed_position += (size_t)size;
-			uncompressed_size -= (size_t)size;
+			uncompressed_size -= (unsigned long)size;
 
 			return size;
 			}
 
-		memcpy(into, current_uncompressed_position, uncompresed_size);
+		memcpy(into, current_uncompressed_position, uncompressed_size);
 		into += uncompressed_size;
 		size -= uncompressed_size;
 		}

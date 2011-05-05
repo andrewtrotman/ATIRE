@@ -25,7 +25,12 @@ private:
 	unsigned long uncompressed_size;	// size of the uncompressed block
 
 protected:
+	long check_lzo_header(void);
 	long long decompress_next_block(void);
+	long unfilter(unsigned char *buffer, unsigned long length, unsigned long filter);
+
+	unsigned short shortize(unsigned short *source) { return ((unsigned short)source[0] << 8) | (unsigned short)source[1]; }
+	unsigned long longize(unsigned long *source) { return ((unsigned long)source[0] << 24) | ((unsigned long)source[1] << 16) + ((unsigned long)source[2] << 8) + (unsigned long)source[3]; }
 
 public:
 	ANT_instream_lzo(ANT_memory *memory, ANT_instream *source);
