@@ -167,7 +167,7 @@ long ANT_instream_lzo::check_lzo_header(void)
 		source->read((unsigned char *)&four, sizeof(four));			// checksum (4 bytes)
 		}
 
-	return 0;
+	return TRUE;
 #endif
 }
 
@@ -272,23 +272,27 @@ long long ANT_instream_lzo::read(unsigned char *data, long long size)
 {
 #ifdef ANT_HAS_LZO
 	unsigned char *into;
+	long long total;
 
 	if (size == 0)
 		return 0;
 
 	into = data;
+	total = 0;
 	do
 		{
 		if (size <= uncompressed_size)
 			{
+			total += size;
 			memcpy(into, current_uncompressed_position, (size_t)size);
 			current_uncompressed_position += (size_t)size;
 			uncompressed_size -= (unsigned long)size;
 
-			return size;
+			return total;
 			}
 
 		memcpy(into, current_uncompressed_position, uncompressed_size);
+		total += uncompressed_size;
 		into += uncompressed_size;
 		size -= uncompressed_size;
 		}

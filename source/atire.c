@@ -342,7 +342,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			{
 			answer_list = atire->generate_results_list();
 
-			outchannel->puts("<hits>");
+			if (first_to_list < last_to_list)
+				outchannel->puts("<hits>");
 			for (result = first_to_list; result < last_to_list; result++)
 				{
 				docid = atire->get_relevant_document_details(result, &docid, &relevance);
@@ -376,7 +377,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				sprintf(print_buffer, "<hit><rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title></hit>", result + 1, docid, answer_list[result], relevance, title_start);
 				outchannel->puts(print_buffer);
 				}
-			outchannel->puts("</hits>");
+			if (first_to_list < last_to_list)
+				outchannel->puts("</hits>");
 			}
 		outchannel->puts("</ATIREsearch>");
 		delete [] command;

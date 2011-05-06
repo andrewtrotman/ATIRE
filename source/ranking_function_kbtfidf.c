@@ -27,9 +27,13 @@ while (current < end)
 	tf = prescalar * *current++;
 	score = postscalar * (log(k * tf - b) * idf * idf) / 100.0;
 	docid = -1;
+
 	while (*current != 0)
 		{
 		docid += *current++;
+#ifdef NEVER
+		score = tf * log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
+#endif
 		accumulator->add_rsv(docid, score);
 		}
 	current++;		// skip over the zero

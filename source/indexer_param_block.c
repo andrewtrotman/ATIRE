@@ -70,27 +70,28 @@ puts("-nologo         Suppress banner");
 puts("-people         Display credits");
 puts("");
 
-puts("FILE HANDLING");
-puts("-------------");
+puts("INPUT FILE HANDLING");
+puts("-------------------");
 puts("-r              Recursive search for files in this and directories below this");
 puts("-rcsv           Each document is a single line of the given file");
-puts("-rtbz2          Search in tar.bz2 files for indexable files");
-#ifdef ANT_HAS_MYSQL
-puts("-rphpbb <username> <password> <database> <instance> MySQL phpBB instance");
 puts("-rmysql <username> <password> <database> <instance> <query> MySQL query returning (docid, ...)");
-#endif
+puts("-rphpbb <username> <password> <database> <instance> MySQL phpBB instance");
+puts("-rtbz2          Search in tar.bz2 files for indexable files");
+puts("-rtlzo          Search in tar.lzo files for indexable files");
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
 puts("-rtrecweb       Recursive search for TREC formatted <DOC>...</DOC> formatted files");
 puts("-rtgz           Search in tar.gz files for indexable files");
-#ifdef ANT_HAS_MYSQL
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
-#endif
 puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rrwarcgz       Search in subdirectories for warc.gz files and index them");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
+
+puts("OUPUT FILE HANDLING");
+puts("--------------------");
 puts("-findex <fn>    Output filename for index");
 puts("-fdoclist <fn>  Output filename for doclist");
+puts("");
 
 puts("COMPRESSION");
 puts("-----------");
@@ -278,6 +279,8 @@ for (param = 1; param < argc; param++)
 			recursive = TAR_BZ2;
 		else if (strcmp(command, "rzip") == 0)
 			recursive = PKZIP;
+		else if (strcmp(command, "rtlzo") == 0)
+			recursive = TAR_LZO;
 		else if (strcmp(command, "rtrec") == 0)
 			recursive = TREC;
 		else if (strcmp(command, "rtrecweb") == 0)

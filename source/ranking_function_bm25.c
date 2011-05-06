@@ -92,6 +92,13 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
+		/*
+			This code (which is commented out) is to alter the IDF score in BM25
+			to use Shlomo's W(t), where W(t) = log((tf/dl)/(cf/cl)).
+			At present it works worse that setting idf=1!
+
+				idf = log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
+		*/
 		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
 		}
 	current++;		// skip over the zero

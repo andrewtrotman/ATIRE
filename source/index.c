@@ -35,6 +35,7 @@
 #include "instream_deflate.h"
 #include "instream_bz2.h"
 #include "instream_buffer.h"
+#include "instream_lzo.h"
 #include "stem.h"
 #include "stemmer_factory.h"
 #include "btree_iterator.h"
@@ -157,6 +158,13 @@ for (param = first_param; param < argc; param++)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
+		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
+		}
+	else if (param_block.recursive == ANT_indexer_param_block::TAR_LZO)
+		{
+		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+		decompressor = new ANT_instream_lzo(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
