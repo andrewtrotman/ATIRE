@@ -74,6 +74,8 @@ public:
 
 	virtual void set_index_filename(char * filename);
 	virtual void set_doclist_filename(char * filename);
+	virtual char* swap_index_filename(char * filename);
+	virtual char* swap_doclist_filename(char * filename);
 
 	virtual void usage(void);
 	virtual void help(void);

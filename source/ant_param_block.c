@@ -217,6 +217,37 @@ void ANT_ANT_param_block::set_doclist_filename(char *filename)
 }
 
 /*
+	ANT_ANT_PARAM_BLOCK::SWAP_INDEX_FILENAME()
+	-------------------------------------
+
+	Set the index filename to point to the given string (allocated with new char[]), and return the pointer
+	to the old string (you're responsible for the memory management of the returned string, allocated
+	with new char[])
+*/
+char *ANT_ANT_param_block::swap_index_filename(char *filename)
+{
+	char *result = index_filename;
+
+	index_filename = filename;
+
+	return result;
+}
+
+/*
+	ANT_ANT_PARAM_BLOCK::SWAP_DOCLIST_FILENAME()
+	-------------------------------------
+*/
+char *ANT_ANT_param_block::swap_doclist_filename(char *filename)
+{
+	char *result = doclist_filename;
+
+	doclist_filename = filename;
+
+	return result;
+}
+
+
+/*
 	ANT_ANT_PARAM_BLOCK::SET_FEEDBACKER()
 	-------------------------------------
 */

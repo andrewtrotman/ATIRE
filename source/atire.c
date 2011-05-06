@@ -20,7 +20,7 @@
 	#define TRUE (!FALSE)
 #endif
 
-const char *PROMPT = "]";
+const char * const PROMPT = "]";
 const long MAX_TITLE_LENGTH = 1024;
 
 ATIRE_API *atire = NULL;
@@ -125,9 +125,17 @@ else
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
-length_of_longest_document = atire->get_longest_document_length();
+if (atire)
+	{
+	length_of_longest_document = atire->get_longest_document_length();
 
-document_buffer = new char [length_of_longest_document + 1];
+	document_buffer = new char [length_of_longest_document + 1];
+	}
+else
+	{
+	length_of_longest_document = 0;
+	document_buffer = NULL;
+	}
 
 sum_of_average_precisions = 0.0;
 number_of_queries = line = 0;
@@ -144,115 +152,32 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 	*/
 	strip_space_inplace(command);
 
-	if (strcmp(command, ".loadindex") == 0)
+	if (strcmp(command, ".loadindex") == 0 || strncmp(command, "<ATIREloadindex>", 16) == 0)
 		{
 		/*
 			NOTE: Do not expose this command to untrusted users as it could almost certainly
 			cause arbitrary code execution by loading specially-crafted attacker-controlled indexes.
 		*/
-		params->set_doclist_filename(strip_space_inplace(filename = inchannel->gets()));
-		delete [] filename;
+		char *oldindexfilename, *olddoclistfilename;
 
-		params->set_index_filename(strip_space_inplace(filename = inchannel->gets()));
-		delete [] filename;
+		if (strcmp(command, ".loadindex") == 0)
+			{
+			olddoclistfilename = params->swap_doclist_filename(strip_space_inplace(inchannel->gets()));
+			oldindexfilename = params->swap_index_filename(strip_space_inplace(inchannel->gets()));
+			}
+		else
+			{
+			olddoclistfilename = params->swap_doclist_filename(between(command, "<doclist>", "</doclist>"));
+			oldindexfilename = params->swap_index_filename(between(command, "<index>", "</index>"));
+			}
 
 		ATIRE_API * new_api = ant_init(*params);
 
 		if (new_api) 
 			{
-			delete atire;
-			atire = new_api;
+			delete [] olddoclistfilename;
+			delete [] oldindexfilename;
 
-			length_of_longest_document = atire->get_longest_document_length();
-			delete [] document_buffer;
-			document_buffer = new char [length_of_longest_document + 1];
-
-			outchannel->puts("Succeeded");
-			}
-		else
-			{
-			/* Leave global 'atire' unchanged */
-			outchannel->puts("Failed");
-			}
-		delete [] command;
-		continue;
-		}
-	else if (strcmp(command, ".describeindex") == 0)
-		{
-		delete [] command;
-
-		outchannel->puts(params->doclist_filename);
-		outchannel->puts(params->index_filename);
-
-		continue;
-		}
-	else if (strcmp(command, ".quit") == 0)
-		{
-		delete [] command;
-		break;
-		}
-	else if (strncmp(command, ".get ", 5) == 0)
-		{
-		*document_buffer = '\0';
-		if ((current_document_length = length_of_longest_document) != 0)
-			{
-			atire->get_document(document_buffer, &current_document_length, atoll(command + 5));
-			sprintf(print_buffer, "%lld", current_document_length);
-			outchannel->puts(print_buffer);
-			outchannel->write(document_buffer, current_document_length);
-			}
-		delete [] command;
-		continue;
-		}
-	else if (strncmp(command, "<ATIREsearch>", 13) == 0)
-		{
-		topic_id = -1;
-		if ((query = between(command, "<query>", "</query>")) == NULL)
-			{
-			delete [] command;
-			continue;
-			}
-
-		if ((pos = strstr(command, "<top>")) != NULL)
-			first_to_list = atol(pos + 5)  - 1;
-		else
-			first_to_list = 0;
-
-		if ((pos = strstr(command, "<n>")) != NULL)
-			last_to_list = first_to_list + atol(pos + 3);
-		else
-			last_to_list = first_to_list + params->results_list_length;
-
-		delete [] command;
-		command = query;
-		}
-	else if (strncmp(command, "<ATIREgetdoc>", 13) == 0)
-		{
-		*document_buffer = '\0';
-		if ((current_document_length = length_of_longest_document) != 0)
-			{
-			atire->get_document(document_buffer, &current_document_length, atoll(strstr(command, "<docid>") + 7));
-			outchannel->puts("<ATIREgetdoc>");
-			sprintf(print_buffer, "<length>%lld</length>", current_document_length);
-			outchannel->puts(print_buffer);
-			outchannel->write(document_buffer, current_document_length);
-			outchannel->puts("</ATIREgetdoc>");
-			}
-		delete [] command;
-		continue;
-		}
-	else if (strncmp(command, "<ATIREloadindex>", 16) == 0)
-		{
-		params->set_doclist_filename(filename = between(command, "<doclist>", "</doclist>"));
-		delete [] filename;
-
-		params->set_index_filename(filename = between(command, "<index>", "</index>"));
-		delete [] filename;
-
-		ATIRE_API * new_api = ant_init(*params);
-
-		if (new_api) 
-			{
 			delete atire;
 			atire = new_api;
 
@@ -262,123 +187,201 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 
 			outchannel->puts("<ATIREloadindex>1</ATIREloadindex>");
 			}
-		else 
+		else
 			{
 			/* Leave global 'atire' unchanged */
 			outchannel->puts("<ATIREloadindex>0</ATIREloadindex>");
-			}
 
+			/* Restore the filenames in params for later .describeindex queries to return, and delete the filenames
+			 * we tried to load */
+			delete [] params->swap_doclist_filename(olddoclistfilename);
+			delete [] params->swap_index_filename(oldindexfilename);
+			}
 		delete [] command;
 		continue;
 		}
-	else if (strncmp(command, "<ATIREdescribeindex>", strlen("<ATIREdescribeindex>")) == 0)
+	else if (strcmp(command, ".quit") == 0)
 		{
 		delete [] command;
-
-		outchannel->puts("<ATIREdescribeindex>");
-
-		outchannel->write("<doclist filename=\"");
-		outchannel->write(params->doclist_filename);
-		outchannel->puts("\"/>");
-
-		outchannel->write("<index filename=\"");
-		outchannel->write(params->index_filename);
-		outchannel->puts("\"/>");
-		outchannel->puts("</ATIREdescribeindex>");
-
-		continue;
+		break;
 		}
 	else if (*command == '\0')
 		{
 		delete [] command;
 		continue;			// ignore blank lines
 		}
-	else if (params->assessments_filename != NULL || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
-		{
-		topic_id = atol(command);
-		if ((query = strchr(command, ' ')) == NULL)
-			exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, command));
-		}
 	else
 		{
-		topic_id = -1;
-		query = command;
-		}
-
-	outchannel->puts("<ATIREsearch>");
-	/*
-		Do the query and compute average precision
-	*/
-	number_of_queries++;
-	average_precision = perform_query(topic_id, outchannel, params, query, &hits);
-	sum_of_average_precisions += average_precision;		// zero if we're using a focused metric
-
-	/*
-		Report the average precision for the query
-	*/
-	if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::SHORT)
-		printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
-
-	/*
-		How many results to display on the screen.
-	*/
-	if (first_to_list > hits)
-		first_to_list = last_to_list = hits;
-	if (first_to_list < 0)
-		first_to_list = 0;
-	if (last_to_list > hits)
-		last_to_list = hits;
-	if (last_to_list < 0)
-		last_to_list = 0;
-	/*
-		Convert from a results list into a list of documents and then display (or write to the forum file)
-	*/
-	if (params->output_forum != ANT_ANT_param_block::NONE)
-		atire->write_to_forum_file(topic_id);
-	else
-		{
-		answer_list = atire->generate_results_list();
-
-		outchannel->puts("<hits>");
-		for (result = first_to_list; result < last_to_list; result++)
+		/* Commands that require a working atire instance */
+		if (!atire)
 			{
-			docid = atire->get_relevant_document_details(result, &docid, &relevance);
-			if ((current_document_length = length_of_longest_document) == 0)
-				title_start = "";
-			else
+			outchannel->puts("<ATIREerror><description>No index loaded</description></ATIREerror>");
+			delete [] command;
+			continue;
+			}
+
+		if (strncmp(command, "<ATIREdescribeindex>", strlen("<ATIREdescribeindex>")) == 0)
+			{
+			delete [] command;
+
+			outchannel->puts("<ATIREdescribeindex>");
+
+			outchannel->write("<doclist filename=\"");
+			outchannel->write(params->doclist_filename);
+			outchannel->puts("\"/>");
+
+			outchannel->write("<index filename=\"");
+			outchannel->write(params->index_filename);
+			outchannel->puts("\"/>");
+			outchannel->puts("</ATIREdescribeindex>");
+
+			continue;
+			}
+		else if (strcmp(command, ".describeindex") == 0)
+			{
+			delete [] command;
+
+			outchannel->puts(params->doclist_filename);
+			outchannel->puts(params->index_filename);
+
+			continue;
+			}
+		else if (strncmp(command, ".get ", 5) == 0)
+			{
+			*document_buffer = '\0';
+			if ((current_document_length = length_of_longest_document) != 0)
 				{
-				/*
-					Get the title of the document (this is a bad hack and should be removed)
-				*/
-				atire->get_document(document_buffer, &current_document_length, docid);
-				if ((title_start = strstr(document_buffer, "<title>")) == NULL)
-					if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
-						title_start = "";
-				if (*title_start != '\0')
+				atire->get_document(document_buffer, &current_document_length, atoll(command + 5));
+				sprintf(print_buffer, "%lld", (long long) current_document_length);
+				outchannel->puts(print_buffer);
+				outchannel->write(document_buffer, current_document_length);
+				}
+			delete [] command;
+			continue;
+			}
+		else if (strncmp(command, "<ATIREsearch>", 13) == 0)
+			{
+			topic_id = -1;
+			if ((query = between(command, "<query>", "</query>")) == NULL)
+				{
+				delete [] command;
+				continue;
+				}
+
+			if ((pos = strstr(command, "<top>")) != NULL)
+				first_to_list = atol(pos + 5)  - 1;
+			else
+				first_to_list = 0;
+
+			if ((pos = strstr(command, "<n>")) != NULL)
+				last_to_list = first_to_list + atol(pos + 3);
+			else
+				last_to_list = first_to_list + params->results_list_length;
+
+			delete [] command;
+			command = query;
+			}
+		else if (strncmp(command, "<ATIREgetdoc>", 13) == 0)
+			{
+			*document_buffer = '\0';
+			if ((current_document_length = length_of_longest_document) != 0)
+				{
+				atire->get_document(document_buffer, &current_document_length, atoll(strstr(command, "<docid>") + 7));
+				outchannel->puts("<ATIREgetdoc>");
+				sprintf(print_buffer, "<length>%lld</length>", (long long) current_document_length);
+				outchannel->puts(print_buffer);
+				outchannel->write(document_buffer, current_document_length);
+				outchannel->puts("</ATIREgetdoc>");
+				}
+			delete [] command;
+			continue;
+			}
+		else if (params->assessments_filename != NULL || params->output_forum != ANT_ANT_param_block::NONE || params->queries_filename != NULL)
+			{
+			topic_id = atol(command);
+			if ((query = strchr(command, ' ')) == NULL)
+				exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, command));
+			}
+		else
+			{
+			topic_id = -1;
+			query = command;
+			}
+
+		outchannel->puts("<ATIREsearch>");
+		/*
+			Do the query and compute average precision
+		*/
+		number_of_queries++;
+		average_precision = perform_query(topic_id, outchannel, params, query, &hits);
+		sum_of_average_precisions += average_precision;		// zero if we're using a focused metric
+
+		/*
+			Report the average precision for the query
+		*/
+		if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::SHORT)
+			printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+
+		/*
+			How many results to display on the screen.
+		*/
+		if (first_to_list > hits)
+			first_to_list = last_to_list = hits;
+		if (first_to_list < 0)
+			first_to_list = 0;
+		if (last_to_list > hits)
+			last_to_list = hits;
+		if (last_to_list < 0)
+			last_to_list = 0;
+		/*
+			Convert from a results list into a list of documents and then display (or write to the forum file)
+		*/
+		if (params->output_forum != ANT_ANT_param_block::NONE)
+			atire->write_to_forum_file(topic_id);
+		else
+			{
+			answer_list = atire->generate_results_list();
+
+			outchannel->puts("<hits>");
+			for (result = first_to_list; result < last_to_list; result++)
+				{
+				docid = atire->get_relevant_document_details(result, &docid, &relevance);
+				if ((current_document_length = length_of_longest_document) == 0)
+					title_start = "";
+				else
 					{
-					title_start += 7;
-					if ((title_end = strstr(title_start, "</title>")) == NULL)
-						title_end = strstr(title_start, "</TITLE>");
-					if (title_end != NULL)
+					/*
+						Get the title of the document (this is a bad hack and should be removed)
+					*/
+					atire->get_document(document_buffer, &current_document_length, docid);
+					if ((title_start = strstr(document_buffer, "<title>")) == NULL)
+						if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
+							title_start = "";
+					if (*title_start != '\0')
 						{
-						if (title_end - title_start > MAX_TITLE_LENGTH)
-							title_end = title_start + MAX_TITLE_LENGTH;
-						*title_end = '\0';
-						for (ch = title_start; *ch != '\0'; ch++)
-							if (!ANT_isprint(*ch))
-								*ch = ' ';
+						title_start += 7;
+						if ((title_end = strstr(title_start, "</title>")) == NULL)
+							title_end = strstr(title_start, "</TITLE>");
+						if (title_end != NULL)
+							{
+							if (title_end - title_start > MAX_TITLE_LENGTH)
+								title_end = title_start + MAX_TITLE_LENGTH;
+							*title_end = '\0';
+							for (ch = title_start; *ch != '\0'; ch++)
+								if (!ANT_isprint(*ch))
+									*ch = ' ';
+							}
 						}
 					}
+				sprintf(print_buffer, "<hit><rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title></hit>", result + 1, docid, answer_list[result], relevance, title_start);
+				outchannel->puts(print_buffer);
 				}
-			sprintf(print_buffer, "<hit><rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title></hit>", result + 1, docid, answer_list[result], relevance, title_start);
-			outchannel->puts(print_buffer);
+			outchannel->puts("</hits>");
 			}
-		outchannel->puts("</hits>");
+		outchannel->puts("</ATIREsearch>");
+		delete [] command;
 		}
-	outchannel->puts("</ATIREsearch>");
-	delete [] command;
 	}
-
 /*
 	delete the document buffer
 */
@@ -492,11 +495,6 @@ ANT_ANT_param_block params(argc, argv);
 params.parse();
 
 atire = ant_init(params);
-
-if (!atire)
-	{
-	return -1;
-	}
 
 ant(&params);
 
