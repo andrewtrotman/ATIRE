@@ -298,7 +298,7 @@ long long ANT_instream_lzo::read(unsigned char *data, long long size)
 		}
 	while (decompress_next_block() != 0);
 
-	return -1;			// something has gone wrong (or EOF)
+	return total;			// something has gone wrong (or EOF)
 #else
 	return -1;
 #endif
