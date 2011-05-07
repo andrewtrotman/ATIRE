@@ -31,9 +31,16 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-#ifdef NEVER
-		score = tf * log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
-#endif
+		/*
+			This code is Shlomo's W(t) ranking function.
+
+			idf = log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
+			if (idf > 0)
+				{
+				score = tf * idf;
+				accumulator->add_rsv(docid, score);
+				}
+		*/
 		accumulator->add_rsv(docid, score);
 		}
 	current++;		// skip over the zero

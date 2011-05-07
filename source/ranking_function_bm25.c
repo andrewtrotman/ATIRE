@@ -98,6 +98,8 @@ while (current < end)
 			At present it works worse that setting idf=1!
 
 				idf = log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
+				if (idf > 0)
+					accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
 		*/
 		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
 		}
