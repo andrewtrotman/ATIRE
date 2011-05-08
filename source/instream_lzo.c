@@ -5,9 +5,11 @@
 #include <string.h>
 #include "memory.h"
 #include "instream_lzo.h"
-#include "lzoconf.h"
-#include "lzo1x.h"
 #include "fundamental_types.h"
+#ifdef ANT_HAS_LZO
+	#include "lzoconf.h"
+	#include "lzo1x.h"
+#endif
 
 #define ANT_COMPATIBLE_WITH_LZOP_VERSION 0x1030		/* the version of LZOP this code is compatible with */
 
@@ -168,7 +170,10 @@ long ANT_instream_lzo::check_lzo_header(void)
 		}
 
 	return TRUE;
+#else
+	return FALSE;
 #endif
+
 }
 
 /*
@@ -261,6 +266,8 @@ long long ANT_instream_lzo::decompress_next_block(void)
 	current_uncompressed_position = uncompressed_buffer;
 
 	return uncompressed_size;
+#else
+	return 0;
 #endif
 }
 
