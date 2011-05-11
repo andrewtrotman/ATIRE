@@ -705,7 +705,7 @@ if (index_file == NULL && filename != NULL)
 	index_file = new ANT_file;
 
 	if (index_file->open(filename, "w+bx")==0) {
-		fprintf(stderr, "Couldn't open index file for writing\n");
+		fprintf(stderr, "Couldn't open index file for writing \"%s\"\n", filename);
 		exit(-1);
 	}
 
