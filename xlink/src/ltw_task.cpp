@@ -163,12 +163,16 @@ void ltw_task::perform()
 					outgoings_->set_beps_to_print(beps_to_print_);
 
 				algor_out_->set_links_container(outgoings_);
+				algor_out_->set_stage(algorithm::FIND_ANCHOR);
+
 				algor_out_->process_topic(&a_topic);
-				//if (algor_out_name_ != "LTW_ANT")
+			//if (algor_out_name_ != "LTW_ANT")
 				//if (is_a2b_task())
+
 					outgoings_->find_anchor();
 
 				// output
+				algor_out_->set_stage(algorithm::PRINT_LINK);
 				outgoings_->print();
 			}
 			if (algor_in_) {

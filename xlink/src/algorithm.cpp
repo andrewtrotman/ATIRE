@@ -12,6 +12,7 @@
 #include "cmdline_options.h"
 #include "xml2txt.h"
 #include "run_config.h"
+#include "link.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -54,7 +55,17 @@ void algorithm::init()
 
 	token_address_ = NULL;
 
-	translate_anchor_for_linking_ = run_config::instance().get_value("translate_anchor_for_linking").length() > 0 && run_config::instance().get_value("translate_anchor_for_linking") != "false";
+	if (run_config::instance().get_value("translate_anchor_for_linking").length() > 0)
+		translate_anchor_for_linking_ =  atol(run_config::instance().get_value("translate_anchor_for_linking").c_str());
+	else
+		translate_anchor_for_linking_ =  0;
+	link::translate_anchor_for_linking = translate_anchor_for_linking_;
+
+	if (run_config::instance().get_value("fill_anchor_with_ir_results").length() > 0)
+		link::fill_anchor_with_ir_results = atol(run_config::instance().get_value("fill_anchor_with_ir_results").c_str());
+	else
+		link::fill_anchor_with_ir_results = 0;
+
 	if (run_config::instance().get_value("segmented_chinese").length() > 0 && run_config::instance().get_value("segmented_chinese") != "false")
 		segmented_ = TRUE;
 	else

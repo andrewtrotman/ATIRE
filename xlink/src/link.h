@@ -20,12 +20,15 @@ namespace QLINK {
 	 */
 	class link : public ANT_link {
 	public:
+		static long					fill_anchor_with_ir_results;
+		static long 				translate_anchor_for_linking;
+
+	public:
 		char						source_lang[5];
 		char 						target_lang[5];
 
 	private:
 		bool						to_clean_;
-		long						fill_anchor_with_ir_results_;
 
 	public:
 		link();

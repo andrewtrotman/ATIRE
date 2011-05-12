@@ -27,6 +27,8 @@
 using namespace QLINK;
 using namespace std;
 
+long link::fill_anchor_with_ir_results = 0;
+long link::translate_anchor_for_linking = 0;
 
 link::link() {
 	place_in_file = NULL;
@@ -36,10 +38,6 @@ link::link() {
 	gamma = 0.0;
 	offset = 0;
 	target_document = -1;
-	if (run_config::instance().get_value("fill_anchor_with_ir_results").length() > 0)
-		fill_anchor_with_ir_results_ = atol(run_config::instance().get_value("fill_anchor_with_ir_results").c_str());
-	else
-		fill_anchor_with_ir_results_ = 0;
 }
 
 link::~link() {
@@ -70,7 +68,7 @@ bool link::print_target(long anchor, algorithm *algor)
 	if (algor != NULL)
 		ret = algor->has_crosslink(link_term->postings[anchor]->docid);
 
-	if (ret || fill_anchor_with_ir_results_) {
+	if (ret || fill_anchor_with_ir_results) {
 		print_header();
 		//printf("%d", link_term->postings[anchor]->docid);
 		if (link_term->postings.size() > 0)
@@ -89,7 +87,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	bool anchor_printed = false;
 
 	bool ret = false;
-	if (!fill_anchor_with_ir_results_ && algor != NULL && algor->size_of_crosslink() > 0) {
+	if (!fill_anchor_with_ir_results && algor != NULL && algor->size_of_crosslink() > 0) {
 		if (link_term->postings.size() > 0)
 			for (int i = 0; i < link_term->postings.size(); i++) {
 				if (algor->has_crosslink(link_term->postings[i]->docid)) {
@@ -102,25 +100,41 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	}
 	else
 		ret = true;
-	if (ret || fill_anchor_with_ir_results_) {
+
+	string tran;
+	char *this_term = term;
+	long this_offset = offset;
+	ANT_link_term *this_link_term = link_term;
+
+	if (ret && translate_anchor_for_linking == 2) {
+		tran = translation::instance().translate(this_term, (std::string(source_lang) + "|" + std::string(target_lang)).c_str());
+
+		ANT_link_term *crossterm = NULL;
+		if ((crossterm = algor->find_term_in_list(tran.c_str())) != NULL && string_compare(crossterm->term, tran.c_str(), TRUE) == 0)
+			this_link_term = crossterm;
+		else
+			ret = false;
+	}
+
+	if (ret || fill_anchor_with_ir_results) {
 		const char *format = link_print::target_format.c_str();
 		if (strcmp(term, "\"") == 0)
-			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, 1, " ");
+			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, 1, " ");
 		else
-			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", offset, strlen(term), term);
+			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, strlen(this_term), this_term);
 		std::string anchor_tag(buf);
-		if (fill_anchor_with_ir_results_ != 2 && link_term->postings.size() > 0) {
+		if (fill_anchor_with_ir_results != 2 && this_link_term->postings.size() > 0) {
 			aout << anchor_tag;
 			anchor_printed = true;
-			for (int i = 0; i < link_term->postings.size(); i++) {
-				if (link_term->postings[i]->docid < 0 && id_or_name)
+			for (int i = 0; i < this_link_term->postings.size(); i++) {
+				if (this_link_term->postings[i]->docid < 0 && id_or_name)
 					continue;
 
 				unsigned long id = 0;
 				if (id_or_name)
-					id = link_term->postings[i]->docid;
+					id = this_link_term->postings[i]->docid;
 				else
-					id = atoi(link_term->postings[i]->desc);
+					id = atoi(this_link_term->postings[i]->desc);
 
 #ifdef CROSSLINK
 				if (algor != NULL && algor->size_of_crosslink() > 0)
@@ -135,7 +149,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 				std::string target_title = corpus::instance().gettitle(filename);
 				sprintf(buf, format, 0, target_lang, target_title.c_str(), id);
 #else
-				sprintf(buf, format, link_term->postings[i]->offset, id);
+				sprintf(buf, format, this_link_term->postings[i]->offset, id);
 #endif
 				aout << buf;
 				++count;
@@ -147,10 +161,10 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			ret = false;
 
 		int how_many_left = beps_to_print - count;
-		if (fill_anchor_with_ir_results_ && how_many_left > 0) {
+		if (fill_anchor_with_ir_results && how_many_left > 0) {
 			long long result = 0;
 			string lang_pair = string(source_lang) + "|" + string(target_lang);
-			string tran = translation::instance().translate(term, lang_pair.c_str());
+			tran = translation::instance().translate(term, lang_pair.c_str());
 			const char **docids = search_engine_ant::instance().search(tran.c_str());
 
 			int hits = how_many_left > search_engine_ant::instance().hits() ? search_engine_ant::instance().hits() : how_many_left;

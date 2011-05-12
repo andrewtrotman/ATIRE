@@ -20,6 +20,7 @@ namespace QLINK {
 	class algorithm {
 	public:
 		enum run_mode { WITH_CMDLINE_OPTIONS, SIMPLE };
+		enum { FIND_ANCHOR, PRINT_LINK };
 
 	protected:
 		run_mode 				mode_;
@@ -54,11 +55,12 @@ namespace QLINK {
 		char					**token_address_;
 		long					current_index_;
 
-		bool					translate_anchor_for_linking_;
+		long					translate_anchor_for_linking_;
 
 		char 					*runname;
 
 		long					segmented_;
+		long					stage_;
 
 	public:
 		algorithm(ltw_task *task);
@@ -84,6 +86,9 @@ namespace QLINK {
 		virtual long size_of_crosslink() { return 0; }
 
 		void set_lowercase(long value) { lowercase_only = value; }
+		virtual ANT_link_term *find_term_in_list(const char *value) {}
+
+		void set_stage(long stage) { stage_ = stage; }
 
 	protected:
 		virtual void process_terms(char **term_list, const char *source) {}

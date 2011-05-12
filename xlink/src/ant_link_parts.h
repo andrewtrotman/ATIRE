@@ -14,6 +14,7 @@
 #include <stdlib.h>
 
 #include "language.h"
+#include "string_utils.h"
 
 #define INEX_ARCHIVE_ARTICLE_ID_SIGNITURE "name id="
 #define ARTICLE_ID_SIGNITURE "id"
@@ -586,9 +587,26 @@ while (*current != NULL)
 	STRING_COMPARE()
 	----------------
 */
-inline int string_compare(const char *s1, const char *s2, long compare_without_space = 0)
+inline int string_compare(const char *first, const char *second, long lowercase_only = 0, long compare_without_space = 0)
 {
 int min_len, cmp;
+
+const char *s1 = first;
+const char *s2 = second;
+
+std::string first_str;
+std::string second_str;
+
+if (lowercase_only) {
+	first_str = first;
+	second_str = second;
+
+	std_tolower(first_str);
+	std_tolower(second_str);
+	s1 = first_str.c_str();
+	s2 = second_str.c_str();
+}
+
 if (compare_without_space && (strchr(s1, ' ') != NULL || strchr(s2, ' ') != NULL)) // we don't need token comparison for all, only those has space in it
 	cmp = utf8_token_compare(s1, s2);
 else

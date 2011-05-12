@@ -56,20 +56,31 @@ return next_argv_param;
 
 ANT_link_term *algorithm_ant_crosslink_this::find_term_in_list(const char *value)
 {
+	if (stage_ == PRINT_LINK && translate_anchor_for_linking_ == 2)
+		return algorithm_ant_link_this::find_term_in_list(value);
 	return find_anchors_with_this_.find_term_in_list(value);
 }
 
 void algorithm_ant_crosslink_this::add_link(ANT_link_term *term, char **term_list)
 {
-std::string result = translation::instance().translate(term->term, (std::string(ltw_task_->get_source_lang()) + "|" + std::string(ltw_task_->get_target_lang())).c_str());
+	switch (translate_anchor_for_linking_) {
+		case 2:
+			algorithm_ant_link_this::add_link(term, term_list);
+			break;
 
-ANT_link_term *crossterm = NULL;
-if ((crossterm = algorithm_ant_link_this::find_term_in_list(result.c_str())) != NULL) {
-//	if (std::string(crossterm->term) == "Allow Me To Demonstrate")
-//		std::cerr << "Something funny happened." << std::endl;
-	if (string_compare(crossterm->term, result.c_str()) == 0)
-		algorithm_ant_link_this::add_link(crossterm, term_list);
-}
+		case 1:
+			default:
+			std::string result = translation::instance().translate(term->term, (std::string(ltw_task_->get_source_lang()) + "|" + std::string(ltw_task_->get_target_lang())).c_str());
+
+			ANT_link_term *crossterm = NULL;
+			if ((crossterm = algorithm_ant_link_this::find_term_in_list(result.c_str())) != NULL) {
+			//	if (std::string(crossterm->term) == "Allow Me To Demonstrate")
+			//		std::cerr << "Something funny happened." << std::endl;
+				if (string_compare(crossterm->term, result.c_str(), TRUE) == 0)
+					algorithm_ant_link_this::add_link(crossterm, term_list);
+			}
+			break;
+	}
 }
 
 }

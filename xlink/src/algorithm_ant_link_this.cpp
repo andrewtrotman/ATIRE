@@ -452,34 +452,40 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list)
 	if (term->postings[noom]->docid == orphan_docid_)			// not alowed to use links that point to the orphan
 		noom = 1;
 #endif
-	numerator = (double)term->postings[noom]->doc_link_frequency;
-	gamma = numerator / denominator;
-	if (ispropper_noun(term->term))
-		gamma += proper_noun_boost;
-//	place = current_term_;
-//	offset = place - source_;
-//	term_len = strlen(term->term);
+	if (term->postings.size() > noom) {
+		numerator = (double)term->postings[noom]->doc_link_frequency;
+		gamma = numerator / denominator;
+		if (ispropper_noun(term->term))
+			gamma += proper_noun_boost;
+	//	place = current_term_;
+	//	offset = place - source_;
+	//	term_len = strlen(term->term);
 
-#ifdef DEBUG
-	fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", term->term, term->postings[0]->docid, numerator, denominator);
-#endif
+	#ifdef DEBUG
+		fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", term->term, term->postings[0]->docid, numerator, denominator);
+	#endif
 
-//			is_stopword = false;
-//			if (!strpbrk(term->term, "- "))
-//				is_stopword = language::isstopword(term->term);
-//
-//			if (!is_stopword) {
-//		strncpy(buffer_, offset + text_, term_len);
-//		buffer_[term_len] = '\0';
-//				if (strcmp(term->term, "the church of england") == 0)
-//					fputs("I got you", stderr);
-		//if (!lx->find(buffer_)) {
-			//lx->push_link(*first, offset, buffer_, term->postings[0]->docid, gamma, term);
-	offset = assign_link_term(term, term_list);
-	if (!links_->find(term->term)) {
-		links_->push_link(current_term_, offset, buffer_, term->postings[0]->docid, gamma, term);
-		// debug
-//					fprintf(stderr, "found a %s anchor\n", buffer__);
-		links_count++;
+	//			is_stopword = false;
+	//			if (!strpbrk(term->term, "- "))
+	//				is_stopword = language::isstopword(term->term);
+	//
+	//			if (!is_stopword) {
+	//		strncpy(buffer_, offset + text_, term_len);
+	//		buffer_[term_len] = '\0';
+	//				if (strcmp(term->term, "the church of england") == 0)
+	//					fputs("I got you", stderr);
+			//if (!lx->find(buffer_)) {
+				//lx->push_link(*first, offset, buffer_, term->postings[0]->docid, gamma, term);
+		offset = assign_link_term(term, term_list);
+		if (!links_->find(term->term)) {
+			links_->push_link(current_term_, offset, buffer_, term->postings[0]->docid, gamma, term);
+			// debug
+	//					fprintf(stderr, "found a %s anchor\n", buffer__);
+			links_count++;
+		}
 	}
+#ifdef DEBUG
+	else
+		fprintf(stderr, "%s has the same id (%d) with topic\n", term->term, term->postings[0]->docid);
+#endif
 }
