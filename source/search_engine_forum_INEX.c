@@ -4,8 +4,8 @@
 */
 #include "pragma.h"
 #include "search_engine_forum_INEX.h"
-#include "parser.h"
 #include "focus_result.h"
+#include "unicode.h"
 
 /*
 	ANT_SEARCH_ENGINE_FORUM_INEX::ANT_SEARCH_ENGINE_FORUM_INEX()
@@ -80,7 +80,7 @@ while (*current != '\0')
 		}
 	else
 		{
-		bytes = ANT_parser::utf8_bytes(current);
+		bytes = utf8_bytes(current);
 		offset++;
 
 		/*

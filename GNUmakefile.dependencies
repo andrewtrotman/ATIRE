@@ -152,3 +152,4 @@ bin/term_divergence_kl.o: source/term_divergence_kl.h source/term_divergence.h
 bin/test_compression.o: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compression_factory.h source/compression_factory_scheme.h source/compress_sigma.h
 bin/threads.o: source/threads.h
 bin/unicode_case.o: source/unicode_case.h source/unicode_pair.h
+bin/unicode.o: source/unicode.h source/unicode_case.h source/ctypes.h

@@ -175,13 +175,13 @@ if (*at != '\0')
 		Also skip the non-character, e.g. symbol and punctuation in other languages
 	*/
 	while (*at != '\0' && ((!(*at & 0x80) && !ANT_isalnum(*at)) || ((*at & 0x80) && !ANT_parser::ischinese(at) && !ANT_parser::iseuropean(at))))
-		at += ANT_parser::utf8_bytes(at);
+		at += utf8_bytes(at);
 
 	if (*at != '\0')
 		while (*(at + length_in_bytes) != '\0' && ispart(at, length_in_chars, at + length_in_bytes))
 			{
 			length_in_chars++;
-			length_in_bytes += ANT_parser::utf8_bytes(at + length_in_bytes);
+			length_in_bytes += utf8_bytes(at + length_in_bytes);
 			}
 	}
 

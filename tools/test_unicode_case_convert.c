@@ -4,7 +4,9 @@
 */
 #include <stdio.h>
 #include <ctype.h>
+#include <string>
 #include "../source/unicode_case.h"
+#include "../source/unicode.h"
 
 /*
 	MAIN()
@@ -18,6 +20,15 @@ for (ch = 0; ch < 66666; ch++)
 	{
 	upper_ch = ANT_UNICODE_toupper(ch);
 	lower_ch = ANT_UNICODE_tolower(ch);
+
+	char buf[100];
+
+	if (utf8_bytes(upper_ch)!=utf8_bytes(lower_ch))
+		{
+		buf[wide_to_utf8((unsigned char*)buf, 100, ch)]=0;
+
+		printf("[%lx %s: size diff L:%lx U:%lx]\n", ch, buf, lower_ch, upper_ch);
+		}
 
 	lower_upper_ch = ANT_UNICODE_tolower(upper_ch);
 	upper_lower_ch = ANT_UNICODE_toupper(lower_ch);

@@ -311,7 +311,8 @@ PARTS = \
 	$(OBJDIR)\focus_article.obj						\
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
-	$(OBJDIR)\unicode_case.obj						
+	$(OBJDIR)\unicode_case.obj						\
+	$(OBJDIR)\unicode.obj
 	
 PHP_EXT_OBJ	= \
 	$(OBJDIR)\atire_api_remote.obj			\

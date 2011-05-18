@@ -5,6 +5,7 @@
 #include <string.h>
 #include "parser.h"
 #include "plugin_manager.h"
+#include "unicode.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -129,13 +130,9 @@ if (ANT_isalpha(*current) || iseuropean(current))	// alphabetic strings (in the 
 	start = current;
 	do
 		{
-		tolower(current);		// this is ANT_parser::tolower()
-		current += utf8_bytes(current);
+		current = utf8_tolower(current);
 		while (ANT_isalpha(*current))
-			{
-			*current = ANT_tolower(*current);
-			current++;
-			}
+			current = utf8_tolower(current);
 		}
 	while (iseuropean(current));
 

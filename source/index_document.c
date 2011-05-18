@@ -9,6 +9,7 @@
 #include "readability_factory.h"
 #include "directory_iterator_object.h"
 #include "string_pair.h"
+#include "unicode.h"
 
 /*
 	INDEX_DOCUMENT()
@@ -74,7 +75,7 @@ while ((token = readability->get_next_token()) != NULL)
 			if ((segmentation & ANT_parser::DOUBLE_SEGMENTATION) == ANT_parser::DOUBLE_SEGMENTATION && token->string_length > 4) // (> 4) means more than one character
 				{
 				// move a character forward, try not to re-index the last single character in previous bigram
-				length_of_token = ANT_parser::utf8_bytes(token->start);
+				length_of_token = utf8_bytes(token->start);
 				if ((segmentation & ANT_parser::BIGRAM_SEGMENTATION) == ANT_parser::BIGRAM_SEGMENTATION && is_previous_token_chinese && previous_token_start != NULL && (token->start + length_of_token) == (previous_token_start + length_of_previous_token))
 					{
 					previous_token_start = token->start;
@@ -90,7 +91,7 @@ while ((token = readability->get_next_token()) != NULL)
 
 				while (token->string_length > 0)								// chinese
 					{
-					length_of_token = ANT_parser::utf8_bytes(token->start);
+					length_of_token = utf8_bytes(token->start);
 					ANT_string_pair next_character(token->start, length_of_token);
 					readability->handle_node(indexer->add_term(&next_character, doc));
 					token->start += length_of_token;

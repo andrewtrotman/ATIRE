@@ -7,6 +7,8 @@
 
 #include "string_pair.h"
 #include "ctypes.h"
+#include "unicode_case.h"
+#include "unicode.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -58,62 +60,15 @@ public:
 
 	virtual void segment(unsigned char *start, long length);
 
-	static int isutf8(unsigned char *here);
-	static int isutf8(char *here) { return isutf8((unsigned char *)here); }
-
 	static int ischinese(unsigned char *here);
 	static int ischinese(char *here) { return ischinese((unsigned char *)here); }
 
 	static int iseuropean(unsigned char *here);
 	static int iseuropean(char *here) { return iseuropean((unsigned char *)here); }
-	
-	static unsigned long utf8_to_wide(unsigned char *here);
-	static long utf8_bytes(unsigned char *here);
-	static long utf8_bytes(char *here) { return utf8_bytes((unsigned char *)here); }
-
-	static unsigned char *tolower(unsigned char *here);
 
 	void set_document(unsigned char *document);
 	virtual ANT_string_pair *get_next_token(void);
 } ;
-
-/*
-	ANT_PARSER::UTF8_TO_WIDE()
-	--------------------------
-	Convert a UTF8 sequence into a wide character
-*/
-inline unsigned long ANT_parser::utf8_to_wide(unsigned char *here)
-{
-if (*here < 0x80)				// 1-byte (ASCII) character
-	return *here;
-else if ((*here & 0xE0) == 0xC0)	// 2-byte sequence
-	return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
-else if ((*here & 0xF0) == 0xE0)	// 3-byte sequence
-	return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
-if ((*here & 0xF8) == 0xF0)	// 4-byte sequence
-	return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 1) & 0x3F);
-return 0;
-}
-
-/*
-	ANT_PARSER::ISUTF8()
-	--------------------
-	if it is valid uft8 bytes
-*/
-inline int ANT_parser::isutf8(unsigned char *here)
-{
-int number_of_bytes = utf8_bytes(here);
-int i = 1;
-
-for (; i < number_of_bytes; ++i)
-	{
-	++here;
-	char c = (*here) >> 6;
-	if (c != 2)
-		return FALSE;
-	}
-return TRUE;
-}
 
 /*
 	ANT_PARSER::ISCHINESE()
@@ -163,52 +118,6 @@ else
 		(european == 0x00DF)   // ß U+00DF LATIN SMALL LETTER SHARP S
 		);
 	}
-}
-
-/*
-	ANT_PARSER::TOLOWER()
-	---------------------
-	to convert both the ASCII and European(German) character to lowercase
-	this is a temporary solution
-*/
-inline unsigned char *ANT_parser::tolower(unsigned char *here)
-{
-long number_of_bytes = 1;
-
-if ((*here & 0x80) == 0)
-	*here = ANT_tolower(*here);
-else if (iseuropean(here))
-	{
-	number_of_bytes = utf8_bytes(here);
-	if (strncmp((char *)here, "Ä", number_of_bytes) == 0)
-		strncpy((char *)here, "ä", number_of_bytes);
-	else if (strncmp((char *)here, "Ö", number_of_bytes) == 0)
-		strncpy((char *)here, "ö", number_of_bytes);
-	else if (strncmp((char *)here, "Ü", number_of_bytes) == 0)
-		strncpy((char *)here, "ü", number_of_bytes);
-//		else if (strncmp((char *)here, "ẞ", number_of_bytes) == 0)
-//			strncpy((char *)here, "ß", number_of_bytes);
-	}
-return here;
-}
-
-/*
-	ANT_PARSER::UTF8_BYTES()
-	------------------------
-	How many bytes does the UTF8 character take?
-*/
-inline long ANT_parser::utf8_bytes(unsigned char *here)
-{
-if (*here < 0x80)				// 1-byte (ASCII) character
-	return 1;
-else if ((*here & 0xE0) == 0xC0)		// 2-byte sequence
-	return 2;
-else if ((*here & 0xF0) == 0xE0)		// 3-byte sequence
-	return 3;
-else if ((*here & 0xF8) == 0xF0)		// 4-byte sequence
-	return 4;
-else
-	return 1;		// dunno so make it 1
 }
 
 #endif  /* PARSER_H_ */

@@ -11,6 +11,7 @@
 #include "../source/directory_iterator_recursive.h"
 #include "../source/parser.h"
 #include "link_parts.h"
+#include "../source/unicode.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -115,13 +116,13 @@ while (*where_to != '\0')
 		++where_to;
 
 	start = where_to;
-	if ((*where_to & 0x80) &&ANT_parser::isutf8(where_to))
+	if ((*where_to & 0x80) &&isutf8(where_to))
 		{
-		token_len = ANT_parser::utf8_bytes(where_to);
+		token_len = utf8_bytes(where_to);
 		where_to += token_len;
 		}
 	else
-		while (*where_to != '\0' && !isspace(*where_to) &&  !((*where_to & 0x80) && ANT_parser::isutf8(where_to)))
+		while (*where_to != '\0' && !isspace(*where_to) &&  !((*where_to & 0x80) && isutf8(where_to)))
 			{
 			++token_len;
 			++where_to;
@@ -291,7 +292,7 @@ for (param = first_param + 1; param < argc; param++)
 						where_to = buffer + strlen(buffer);
 						if (chinese)
 							{
-							if ((*first[0] & 0x80) && ANT_parser::isutf8(*first))
+							if ((*first[0] & 0x80) && isutf8(*first))
 								is_utf8_token = TRUE;
 							else
 								is_utf8_token = FALSE;
