@@ -181,7 +181,7 @@ inline void UNISEG_encoding_utf8::codepoint_to_utf8(char *buf, long cp)
 	else if (cp < 0x800/*(*here & 0xE0) == 0xC0*/)	{ // 2-byte sequence
 		//return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
 		buf[0] = 0xC0 | (cp >> 6);
-		buf[1] = 0xC0 | (cp & 0x3F);
+		buf[1] = 0x80 | (cp & 0x3F);
 		buf[2] = '\0';
 	}
 	else if (cp < 0x10000/*(*here & 0xF0) == 0xE0*/)	 { // 3-byte sequence
