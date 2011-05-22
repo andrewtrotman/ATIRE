@@ -1,6 +1,12 @@
 /*
 	RANKING_FUNCTION_LMJM.C
 	-----------------------
+	Language Models with Jelinek-Mercer smoothing
+
+	Probably the best reference is:
+	C. Zhai, J. Lafferty (2004) A Study of Smoothing Methods for Language Models Applied to Information Retrieval, ACM Transactions on Information Systems, 22(2):17-214
+	which is based on:
+	C. Zhai, J. Lafferty (2001) A study of smoothing methods for language models applied to Ad Hoc information retrieval, Proceedings of SIGIR 2001, pp. 334-342
 */
 #include <math.h>
 #include "pragma.h"

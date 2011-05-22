@@ -1,6 +1,10 @@
 /*
 	RANKING_FUNCTION_DIVERGENCE.C
 	-----------------------------
+	Divergence from Randomness I(ne)B2
+
+	see G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on 
+	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
 */
 #include "pragma.h"
 #include "maths.h"
@@ -12,8 +16,6 @@
 /*
 	ANT_RANKING_FUNCTION_DIVERGENCE::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------------
-	see G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on 
-	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
 */
 void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {

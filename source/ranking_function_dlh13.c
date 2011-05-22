@@ -1,6 +1,8 @@
 /*
 	RANKING_FUNCTION_DLH13.C
 	------------------------
+	See:
+	C. Macdonald, I. Ounis (2006) Voting for candidates: adapting data fusion techniques for an expert search task. In Proceedings of CIKM 2006. pp.387-396
 */
 #ifdef _MSC_VER
 	/*
@@ -18,8 +20,6 @@
 /*
 	ANT_RANKING_FUNCTION_DLH13::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
-	See:
-		C. Macdonald, I. Ounis (2006) Voting for candidates: adapting data fusion techniques for an expert search task. In Proceedings of CIKM 2006. pp.387-396
 */
 void ANT_ranking_function_DLH13::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
