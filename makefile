@@ -311,7 +311,7 @@ PARTS = \
 	$(OBJDIR)\focus_article.obj						\
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
-	$(OBJDIR)\unicode_case.obj						\
+	$(OBJDIR)\unicode_tables.obj						\
 	$(OBJDIR)\unicode.obj
 	
 PHP_EXT_OBJ	= \
@@ -335,7 +335,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\link_extract_inex_wikipedia.exe \
 	$(BINDIR)\link_compute_inlink.exe \
 	$(BINDIR)\link_analyse_inex_wikipedia.exe \
-	$(BINDIR)\make_case_conversion_table.exe 		\
+	$(BINDIR)\make_unicode_tables.exe 		\
 	$(BINDIR)\filelist.exe 				\
 	$(BINDIR)\remove_head.exe 			\
 	$(BINDIR)\link_extract.exe 			\
@@ -373,7 +373,7 @@ php_ext :\
 	$(LIBDIR)\atire.dll
 
 bin\link_index_merge.exe : bin\link_index_merge.obj
-bin\make_case_conversion_table.exe : bin\make_case_conversion_table.obj
+bin\make_unicode_tables.exe : bin\make_unicode_tables.obj
 bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
 bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
 bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj

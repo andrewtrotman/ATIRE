@@ -113,7 +113,7 @@ unsigned long current_document_length;
 long long docid;
 char *document_buffer, *title_start, *title_end;
 ANT_channel *inchannel, *outchannel;
-char **answer_list, *filename;
+char **answer_list;
 
 if (params->port == 0)
 	{

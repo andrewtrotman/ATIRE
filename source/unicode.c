@@ -4,6 +4,7 @@
 */
 
 #include "unicode.h"
+#include "unicode_tables.h"
 
 /*
 	UTF8_TOLOWER()
@@ -39,5 +40,40 @@ else
 		}
 
 	return here + number_of_bytes;
+	}
+}
+
+/*
+	ANT_UNICODE_DECOMPOSE_MARKSTRIP_LOWERCASE_TOUTF8()
+	---------------------
+	Decompose the given Unicode character into its constituent parts (e.g. separate
+	characters into their base form + a combining mark character), then throw away
+	the combining marks and convert the character to lowercase.
+
+	Writes the result as a UTF-8 string into the buffer buf with length buflen.
+
+	Returns number of characters written to buf if successful, 0 otherwise
+	(e.g. buflen too small).
+*/
+unsigned int ANT_UNICODE_decompose_markstrip_lowercase_toutf8(long character, char * buf, unsigned long buflen)
+{
+const char * decomposition = ANT_UNICODE_search_decomposition(character);
+
+if (!decomposition)
+	{
+	/* This character decomposes to itself and so doesn't have an entry in
+	 * the decomposition table. Convert it manually. */
+	return wide_to_utf8(buf, buflen, ANT_UNICODE_tolower(character));
+	}
+else
+	{
+	unsigned int len = strlen(decomposition);
+
+	if (len > buflen)
+		return 0;
+
+	memcpy(buf, decomposition, len * sizeof(*decomposition));
+
+	return len;
 	}
 }

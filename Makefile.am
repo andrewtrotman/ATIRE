@@ -40,7 +40,7 @@ core_sources =  \
     $(SRCDIR)/hash_table.c \
     $(SRCDIR)/postings_piece.c \
     $(SRCDIR)/ctypes.c \
-    $(SRCDIR)/unicode_case.c \
+    $(SRCDIR)/unicode_tables.c \
     $(SRCDIR)/file.c \
     $(SRCDIR)/file_internals.c \
     $(SRCDIR)/file_memory.c	\
@@ -298,7 +298,7 @@ core_noinst_headers = \
 	$(SRCDIR)/plugin.h \
 	$(SRCDIR)/plugin_manager.h \
 	$(SRCDIR)/unicode_pair.h \
-	$(SRCDIR)/unicode_case.h \
+	$(SRCDIR)/unicode_tables.h \
 	$(SRCDIR)/channel.h \
 	$(SRCDIR)/channel_file.h \
 	$(SRCDIR)/channel_socket.h \

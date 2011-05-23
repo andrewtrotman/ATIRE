@@ -155,8 +155,8 @@ bin/str.obj: source/str.h source/ctypes.h
 bin/term_divergence_kl.obj: source/term_divergence_kl.h source/term_divergence.h
 bin/test_compression.obj: source/compress_relative10.h source/compress_simple9.h source/compress.h source/fundamental_types.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compression_factory.h source/compression_factory_scheme.h source/compress_sigma.h
 bin/threads.obj: source/threads.h
-bin/unicode_case.obj: source/unicode_case.h source/unicode_pair.h
-bin/unicode.obj: source/unicode.h source/unicode_case.h source/ctypes.h
+bin/unicode_tables.obj: source/unicode_tables.h source/unicode_pair.h
+bin/unicode.obj: source/unicode.h source/unicode_tables.h source/ctypes.h
 bin/INEXqrels_to_run.obj: source/disk.h
 bin/ant_unzip.obj: source/directory_iterator_pkzip.h source/directory_iterator.h source/directory_iterator_object.h
 bin/filelist.obj: source/directory_iterator_recursive.h source/disk.h source/directory_iterator.h source/directory_iterator_object.h
@@ -173,7 +173,7 @@ bin/term_frequencies.obj: source/disk.h
 bin/test_boolean_parser.obj: source/query.h source/query_boolean.h source/string_pair.h source/pragma.h source/memory.h source/str.h source/ctypes.h source/query_parse_tree.h
 bin/test_stop.obj: source/stop_word.h
 bin/test_tar.obj: source/directory_iterator_warc.h source/instream.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_tar.h source/directory_iterator_tar_file_header.h source/instream_deflate.h source/instream_bz2.h source/instream_file.h source/memory.h
-bin/test_unicode_case_convert.obj: source/unicode_case.h
+bin/test_unicode_tables_convert.obj: source/unicode_tables.h
 bin/textsplitter.obj: source/directory_iterator.h source/directory_iterator_object.h source/ctypes.h source/disk.h
 bin/topic_tree.obj: source/str.h source/ctypes.h source/disk.h source/stop_word.h source/stem_porter.h source/btree_iterator.h source/stem.h
 bin/topic_tree_cas.obj: source/str.h source/ctypes.h source/disk.h

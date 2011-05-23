@@ -10,7 +10,7 @@
 #include <string.h>
 #include <cassert>
 #include "ctypes.h"
-#include "unicode_case.h"
+#include "unicode_tables.h"
 
 #ifdef _MSC_VER
 	#define inline __forceinline
@@ -26,6 +26,8 @@
 
 unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *) utf8_tolower((unsigned char *) here); }
+
+unsigned int ANT_UNICODE_decompose_markstrip_lowercase_toutf8(long character, char * buf, unsigned long buflen);
 
 /*
 	UTF8_BYTES()
@@ -107,6 +109,9 @@ inline int wide_to_utf8(unsigned char * buf, unsigned int buflen, unsigned long 
 		}
 
 	return numbytes;
+}
+inline int wide_to_utf8(char * buf, unsigned int buflen, unsigned long c) {
+	return wide_to_utf8((unsigned char *) buf, buflen, c);
 }
 
 /*

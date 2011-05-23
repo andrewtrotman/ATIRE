@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string>
-#include "../source/unicode_case.h"
+#include "../source/unicode_tables.h"
 #include "../source/unicode.h"
 
 /*

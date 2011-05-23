@@ -1,10 +1,10 @@
 /*
-	UNICODE_CASE.H
+	UNICODE_TABLES.H
 	--------------
 	Routines to do case conversion in uncode
 */
-#ifndef UNICODE_CASE_H_
-#define UNICODE_CASE_H_
+#ifndef UNICODE_TABLES_H_
+#define UNICODE_TABLES_H_
 
 /*
 	Convert to upper case or lower case.  Note that the case conversion is not one-to-one.  For example,
@@ -16,5 +16,6 @@
 */
 long ANT_UNICODE_tolower(long character);
 long ANT_UNICODE_toupper(long character);
+const char* ANT_UNICODE_search_decomposition(long character);
 
-#endif /* UNICODE_CASE_H_ */
+#endif /* UNICODE_TABLES_H_ */

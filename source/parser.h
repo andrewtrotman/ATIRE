@@ -7,7 +7,7 @@
 
 #include "string_pair.h"
 #include "ctypes.h"
-#include "unicode_case.h"
+#include "unicode_tables.h"
 #include "unicode.h"
 
 #ifndef FALSE
