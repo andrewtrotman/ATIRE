@@ -64,6 +64,8 @@ ANT_string_pair *ANT_parser::get_next_token(void)
 unsigned char *start, *here;
 long word_count = 0, pre_length_of_token = 0;
 long character_bytes;
+ANT_UNICODE_chartype chartype;
+long is_chinese = 0;
 
 if (segmentation != NULL)
 	{
@@ -103,13 +105,22 @@ if (segmentation != NULL)
 for (;;)
 	{
 	if (ANT_ispuncheadchar(*current))
+		{
+		chartype = CT_PUNCTUATION;
 		break;
+		}
 	else if (*current & 0x80) //it is a unicode character
 		{
 		if (ischinese(current))
+			{
+			chartype = CT_LETTER;
+			is_chinese = 1;
 			break;
-		else if (iseuropean(current))
+			}
+		else if ((chartype = utf8_chartype(utf8_to_wide(current)))==CT_LETTER)
+			{
 			break;
+			}
 		/*
 			We have a nasty case here (in ClueWeb09) that the last character of the file is a badly formed utf-8 character
 			and so we have to check each character to see if we're at EOF yet
@@ -125,24 +136,22 @@ for (;;)
 /*
 	Now we look at the first character as it defines how parse the next token
 */
-if (ANT_isalpha(*current) || iseuropean(current))	// alphabetic strings (in the ASCII CodePage) or European speical characters
+
+if (chartype == CT_LETTER && !is_chinese)
 	{
 	start = current;
-	do
-		{
+
+	current = utf8_tolower(current);
+	while (utf8_chartype(utf8_to_wide(current))==CT_LETTER)
 		current = utf8_tolower(current);
-		while (ANT_isalpha(*current))
-			current = utf8_tolower(current);
-		}
-	while (iseuropean(current));
 
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (ANT_isdigit(*current))				// numbers (in the ASCII CodePage)
+else if (chartype == CT_NUMBER)
 	{
 	start = current++;
-	while (ANT_isdigit(*current))
+	while (utf8_chartype(utf8_to_wide(current))==CT_NUMBER)
 		current++;
 
 	current_token.start = (char *)start;
@@ -150,51 +159,45 @@ else if (ANT_isdigit(*current))				// numbers (in the ASCII CodePage)
 	}
 else if (*current == '\0')						// end of string
 	return NULL;
-else if (ANT_ispunct(*current) && *current != '<')
+else if (chartype == CT_PUNCTUATION && *current != '<')
 	{
 	start = current++;
-	while (ANT_ispunct(*current) && *current != '<')		// this catches the case of punction before a tag "blah.</b>"
+	while (utf8_chartype(utf8_to_wide(current)) == CT_PUNCTUATION && *current != '<')		// this catches the case of punction before a tag "blah.</b>"
 		current++;
 
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (*current & 0x80)		// UTF-8 character
+else if (is_chinese)
 	{
-	if (ischinese(current))		// Chinese CodePage
+	word_count = 1;
+	start = current;
+	current += utf8_bytes(current);		// move on to the next character
+
+	if (should_segment)
 		{
-		word_count = 1;
-		start = current;
-		current += utf8_bytes(current);		// move on to the next character
-
-		if (should_segment)
+		while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
 			{
-			while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
-				{
-				pre_length_of_token = utf8_bytes(current);
-				current += pre_length_of_token;
-				++word_count;
-				if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && word_count >= 2)
-					break;
-				}
-
-			if ((should_segment & ONFLY_SEGMENTATION) == ONFLY_SEGMENTATION)
-				{
-				segment(start, (long)(current - start));
-				return get_next_token();
-				}
+			pre_length_of_token = utf8_bytes(current);
+			current += pre_length_of_token;
+			++word_count;
+			if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && word_count >= 2)
+				break;
 			}
 
-		current_token.start = (char *)start;
-		current_token.string_length = current - start;
-
-		// post-processing, for bigram indexing, needs move backward
-		if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && ischinese(current))
-			current -= pre_length_of_token;
+		if ((should_segment & ONFLY_SEGMENTATION) == ONFLY_SEGMENTATION)
+			{
+			segment(start, (long)(current - start));
+			return get_next_token();
+			}
 		}
-	/*
-		There is no else clause because if the high bit is set we already know it must be Chinese
-	*/
+
+	current_token.start = (char *)start;
+	current_token.string_length = current - start;
+
+	// post-processing, for bigram indexing, needs move backward
+	if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && ischinese(current))
+		current -= pre_length_of_token;
 	}
 else											// everything else (that starts with a '<')
 	{
