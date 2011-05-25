@@ -106,18 +106,5 @@ ANT_UNICODE_chartype utf8_chartype(unsigned long character)
 		return CT_OTHER;
 		}
 
-	ANT_UNICODE_chartype type = ANT_UNICODE_search_chartype(character);
-
-	//Alphas aren't in that table, so check for those
-	if (type == CT_OTHER)
-		{
-		/*
-		 * This is ugly as shit. Abusing lowercase/uppercase tables to decide if it
-		 * is alpha. Only works for European-ish languages.
-		 */
-		if (character != ANT_UNICODE_toupper(character) || character != ANT_UNICODE_tolower(character))
-			return CT_LETTER;
-		}
-
-	return type;
+	return ANT_UNICODE_search_chartype(character);
 }
