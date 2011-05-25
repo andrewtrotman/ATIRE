@@ -14,7 +14,7 @@
 #include "../source/unicode_pair.h"
 #include "../source/disk.h"
 
-enum { LOWER, UPPER, DECOMPOSITION };
+enum { LOWER, UPPER, DECOMPOSITION, CHARTYPE };
 
 #define NUM_UNICODE_CHARS 0x110000
 
@@ -98,14 +98,20 @@ void reduce_decompositions() {
 					memcpy(decompositions[i], buf, (buf_pos - buf) * sizeof(decompositions[0]));
 					decompositions[buf_pos-buf] = 0;
 					}
+				for (unsigned long * p = decompositions[i]; p && *p; p++)
+					if (lowercase[*p])
+						{
+						made_change = 1;
+						*p=lowercase[*p];
+						}
 				}
 			fprintf(stderr, "Reduced decomposition table recursively.\n");
 		} while (made_any_change);
+}
 
-	for (int i=0; i<NUM_UNICODE_CHARS; i++)
-		for (unsigned long * p = decompositions[i]; p && *p; p++)
-			if (lowercase[*p])
-				*p=lowercase[*p];
+void print_usage(char * argv[])
+{
+exit(printf("Usage:%s <-lower | -upper | -decomposition | -chartype> <UnicodeData.txt>\n", argv[0]));
 }
 
 /*
@@ -121,12 +127,12 @@ long long number_of_lines;
 long field, mode, times;
 unsigned long upper_character, lower_character, character, destination_character;
 int state;
-ANT_UNICODE_chartype chartype;
+enum ANT_UNICODE_chartype chartype;
 char utf8_buf[100];
 char *utf8_buf_ptr;
 
 if (argc != 3)
-	exit(printf("Usage:%s <-lower | -upper | -decomposition> <UnicodeData.txt>\n", argv[0]));
+	print_usage(argv);
 
 if (strcmp(argv[1], "-lower") == 0)
 	mode = LOWER;
@@ -134,8 +140,10 @@ else if (strcmp(argv[1], "-upper") == 0)
 	mode = UPPER;
 else if (strcmp(argv[1], "-decomposition") == 0)
 	mode = DECOMPOSITION;
+else if (strcmp(argv[1], "-chartype") == 0)
+	mode = CHARTYPE;
 else
-	exit(printf("Usage:%s <-lower | -upper | -decomposition> <UnicodeData.txt>\n", argv[0]));
+	print_usage(argv);
 
 if ((file = ANT_disk::read_entire_file(argv[2])) == NULL)
 	exit(printf("Cannot open input file:%s\n", argv[2]));
@@ -230,16 +238,6 @@ for (current = lines; *current != NULL; current++)
 		}
 	pos = end + 1;
 
-	if (decomposed_pos>decomposition)
-		{
-		//This character decomposes to something other than itself. Store that decomposition into the list.
-		decompositions[character] = new unsigned long[decomposed_pos - decomposition + 1];
-		memcpy(decompositions[character], decomposition, sizeof(decomposition[0] * (decomposed_pos - decomposition)));
-
-		//Null-terminate
-		decompositions[decomposed_pos - decomposition] = 0;
-		}
-
 	for (field = 0; field < 7; field++)
 		pos = strchr(pos, ';') + 1;
 
@@ -250,6 +248,25 @@ for (current = lines; *current != NULL; current++)
 
 	lowercase[character] = lower_character;
 	uppercase[character] = upper_character;
+
+	if (decomposed_pos > decomposition)
+		{
+		//This character decomposes to something other than itself. Store that decomposition into the list.
+		decompositions[character] = new unsigned long[decomposed_pos - decomposition + 1];
+		memcpy(decompositions[character], decomposition, sizeof(decomposition[0] * (decomposed_pos - decomposition)));
+
+		//Null-terminate
+		decompositions[decomposed_pos - decomposition] = 0;
+		}
+	else if (lower_character)
+		{
+		/* Does this character have a lowercase variant? We won't be decomposing it but we at least want an
+		 * entry in the table for lowercasing
+		 */
+		decompositions[character] = new unsigned long[2];
+		decompositions[character][0] = lower_character;
+		decompositions[character][1] = 0;
+		}
 	}
 
 reduce_decompositions();
@@ -265,8 +282,13 @@ switch (mode)
 	case DECOMPOSITION:
 		printf("ANT_UNICODE_decomposition ANT_UNICODE_decomposition[] = {\n");
 		break;
+	case CHARTYPE:
+		printf("ANT_UNICODE_char_chartype ANT_UNICODE_char_chartype[] = {\n");
+		break;
 	}
 
+
+// Now print tables
 times = 0;
 for (current = lines; *current != NULL; current++)
 	{
@@ -288,7 +310,7 @@ for (current = lines; *current != NULL; current++)
 			if (times != 0)
 				{
 				printf(", ");
-				if (times % 16 == 0) {}
+				if (times % 16 == 0)
 					printf("\n");
 				}
 			printf("{%ld, %ld}", character, destination_character);
@@ -332,8 +354,33 @@ for (current = lines; *current != NULL; current++)
 			wide_ptr++;
 			}
 		*utf8_buf_ptr = 0;
-		printf("{%d, \"%s\"}", character, utf8_buf);
+		printf("{%ld, \"%s\"}", character, utf8_buf);
 		times++;
+		}
+	else if (mode == CHARTYPE)
+		{
+		chartype = (ANT_UNICODE_chartype) chartypes[character];
+
+		switch (chartype)
+			{
+			case CT_PUNCTUATION:
+			case CT_SEPARATOR:
+			case CT_NUMBER:
+			case CT_LETTER:
+				if (times != 0)
+					{
+					printf(", ");
+					if (times % 16 == 0)
+						printf("\n");
+					}
+
+				printf("{%ld, %s}", character, ANT_UNICODE_chartype_string[(int) chartype]);
+
+				times++;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 printf("\n};\n");

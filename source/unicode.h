@@ -16,16 +16,27 @@
 	#define inline __forceinline
 #endif
 
-#ifndef FALSE
-	#define FALSE 0
-#endif
+#define LAST_ASCII_CHAR 0x7F
 
-#ifndef TRUE
-	#define TRUE (!FALSE)
-#endif
+
+extern const char * ANT_UNICODE_chartype_string[7];
+
+struct ANT_UNICODE_char_chartype
+{
+	long character;
+	ANT_UNICODE_chartype type;
+};
+
+struct ANT_UNICODE_decomposition
+{
+	long source;
+	char const * target;
+};
 
 unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *) utf8_tolower((unsigned char *) here); }
+
+ANT_UNICODE_chartype utf8_chartype(unsigned long character);
 
 unsigned int ANT_UNICODE_decompose_markstrip_lowercase_toutf8(long character, char * buf, unsigned long buflen);
 
@@ -147,9 +158,9 @@ for (; i < number_of_bytes; ++i)
 	++here;
 	char c = (*here) >> 6;
 	if (c != 2)
-		return FALSE;
+		return 0;
 	}
-return TRUE;
+return 1;
 }
 inline int isutf8(char *here) {
 	return isutf8((unsigned char *) here);

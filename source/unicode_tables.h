@@ -6,6 +6,10 @@
 #ifndef UNICODE_TABLES_H_
 #define UNICODE_TABLES_H_
 
+enum ANT_UNICODE_chartype {
+	CT_INVALID, CT_LETTER, CT_NUMBER, CT_PUNCTUATION, CT_SEPARATOR, CT_OTHER, CT_MARK
+};
+
 /*
 	Convert to upper case or lower case.  Note that the case conversion is not one-to-one.  For example,
 	character 212B -> 00E5 -> 00C5.  This is because :
@@ -16,6 +20,8 @@
 */
 long ANT_UNICODE_tolower(long character);
 long ANT_UNICODE_toupper(long character);
+
 const char* ANT_UNICODE_search_decomposition(long character);
+ANT_UNICODE_chartype ANT_UNICODE_search_chartype(long character);
 
 #endif /* UNICODE_TABLES_H_ */

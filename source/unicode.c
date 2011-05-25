@@ -6,6 +6,8 @@
 #include "unicode.h"
 #include "unicode_tables.h"
 
+const char * ANT_UNICODE_chartype_string[] = {"CT_INVALID", "CT_LETTER", "CT_NUMBER", "CT_PUNCTUATION", "CT_SEPARATOR", "CT_OTHER", "CT_MARK"};
+
 /*
 	UTF8_TOLOWER()
 	---------------------
@@ -76,4 +78,46 @@ else
 
 	return len;
 	}
+}
+
+/*
+	UTF8_CHARTYPE()
+	---------------------
+	Classify the given Unicode character.
+
+	Doesn't properly classify most alphas (returns CT_OTHER) for those.
+*/
+ANT_UNICODE_chartype utf8_chartype(unsigned long character)
+{
+	//Use ASCII table if possible
+	if (character <= LAST_ASCII_CHAR)
+		{
+		int c = (int) character;
+
+		if (ANT_isalpha(c))
+			return CT_LETTER;
+		if (ANT_isdigit(c))
+			return CT_NUMBER;
+		if (ANT_ispunct(c))
+			return CT_PUNCTUATION;
+		if (ANT_isspace(c))
+			return CT_SEPARATOR;
+
+		return CT_OTHER;
+		}
+
+	ANT_UNICODE_chartype type = ANT_UNICODE_search_chartype(character);
+
+	//Alphas aren't in that table, so check for those
+	if (type == CT_OTHER)
+		{
+		/*
+		 * This is ugly as shit. Abusing lowercase/uppercase tables to decide if it
+		 * is alpha. Only works for European-ish languages.
+		 */
+		if (character != ANT_UNICODE_toupper(character) || character != ANT_UNICODE_tolower(character))
+			return CT_LETTER;
+		}
+
+	return type;
 }
