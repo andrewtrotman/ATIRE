@@ -63,7 +63,6 @@ ANT_string_pair *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
 long word_count = 0, pre_length_of_token = 0;
-long character_bytes;
 ANT_UNICODE_chartype chartype;
 long is_chinese = 0;
 
@@ -103,35 +102,26 @@ if (segmentation != NULL)
 	We skip over non-indexable characters before the start of the first token
 */
 for (;;)
-	{
-	if (ANT_ispuncheadchar(*current))
+	if (ischinese(current))
 		{
-		chartype = CT_PUNCTUATION;
+		chartype = CT_LETTER;
+		is_chinese = 1;
 		break;
 		}
-	else if (*current & 0x80) //it is a unicode character
-		{
-		if (ischinese(current))
-			{
-			chartype = CT_LETTER;
-			is_chinese = 1;
-			break;
-			}
-		else if ((chartype = utf8_chartype(utf8_to_wide(current)))==CT_LETTER)
-			{
-			break;
-			}
-		/*
-			We have a nasty case here (in ClueWeb09) that the last character of the file is a badly formed utf-8 character
-			and so we have to check each character to see if we're at EOF yet
-		*/
-		for (character_bytes = utf8_bytes(current); character_bytes > 0; character_bytes--)
-			if (*current++ == '\0')
-				return NULL;
-		}
 	else
+		{
+		unsigned long character = utf8_to_wide(current);
+
+		if (character==0)
+			return NULL;
+
+		chartype = utf8_chartype(character);
+
+		if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION)
+			break;
+
 		current++;
-	}
+		}
 
 /*
 	Now we look at the first character as it defines how parse the next token
@@ -157,8 +147,6 @@ else if (chartype == CT_NUMBER)
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (*current == '\0')						// end of string
-	return NULL;
 else if (chartype == CT_PUNCTUATION && *current != '<')
 	{
 	start = current++;

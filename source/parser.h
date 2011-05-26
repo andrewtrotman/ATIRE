@@ -6,6 +6,7 @@
 #define PARSER_H_
 
 #include "string_pair.h"
+#include "parser_token.h"
 #include "ctypes.h"
 #include "unicode_tables.h"
 #include "unicode.h"
@@ -40,7 +41,7 @@ public:
 protected:
 	unsigned char *document;
 	unsigned char *current;
-	ANT_string_pair current_token;
+	ANT_parser_token current_token;
 	unsigned char *segmentation;
 	long should_segment;
 
