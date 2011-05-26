@@ -132,15 +132,30 @@ inline int wide_to_utf8(char * buf, unsigned int buflen, unsigned long c) {
 */
 inline unsigned long utf8_to_wide(unsigned char *here)
 {
-if (*here < 0x80)				// 1-byte (ASCII) character
-	return *here;
-else if ((*here & 0xE0) == 0xC0)	// 2-byte sequence
-	return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
-else if ((*here & 0xF0) == 0xE0)	// 3-byte sequence
-	return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
-if ((*here & 0xF8) == 0xF0)	// 4-byte sequence
-	return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 1) & 0x3F);
-return 0;
+int numchars = utf8_bytes(here);
+
+switch (numchars)
+	{
+	case 1:
+		return *here;
+	case 2:
+		if (here[0])
+			return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
+		else
+			return 0;
+	case 3:
+		if (here[0] && here[1])
+			return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
+		else
+			return 0;
+	case 4:
+		if (here[0] && here[1] && here[2])
+			return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 1) & 0x3F);
+		else
+			return 0;
+	default:
+		return 0;
+	}
 }
 
 /*
