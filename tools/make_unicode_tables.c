@@ -186,6 +186,7 @@ for (current = lines; *current != NULL; current++)
 				chartype = CT_NUMBER;
 				break;
 			case 'P':
+			case 'S':
 				chartype = CT_PUNCTUATION;
 				break;
 			case 'Z':
