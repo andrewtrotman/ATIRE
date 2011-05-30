@@ -61,6 +61,7 @@ public:
 
 	virtual void segment(unsigned char *start, long length);
 
+	static int ischinese(unsigned long character);
 	static int ischinese(unsigned char *here);
 	static int ischinese(char *here) { return ischinese((unsigned char *)here); }
 
@@ -68,8 +69,22 @@ public:
 	static int iseuropean(char *here) { return iseuropean((unsigned char *)here); }
 
 	void set_document(unsigned char *document);
-	virtual ANT_string_pair *get_next_token(void);
+	virtual ANT_parser_token *get_next_token(void);
 } ;
+
+/*
+	ANT_PARSER::ISCHINESE()
+	-----------------------
+	Is the given character from the Chinese CodePoint?
+*/
+inline int ANT_parser::ischinese(unsigned long character)
+{
+return ((character >= 0x04e00 && character <= 0x09fff)		// CJK Unified Ideographs
+	 || (character >= 0x03400 && character <= 0x04dbf)		// CJK Unified Ideographs Extension A
+	 || (character >= 0x20000 && character <= 0x2a6df)		// CJK Unified Ideographs Extension B
+	 || (character >= 0x0f900 && character <= 0x0faff)		// CJK Compatibility Ideographs
+	 || (character >= 0x2f800 && character <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
+}
 
 /*
 	ANT_PARSER::ISCHINESE()
@@ -78,20 +93,7 @@ public:
 */
 inline int ANT_parser::ischinese(unsigned char *here)
 {
-unsigned long chinese;
-
-if (!isutf8(here)/*(*here & 0x80) == 0*/)
-	return FALSE;
-else
-	{
-	chinese = utf8_to_wide(here);
-
-	return ((chinese >= 0x04e00 && chinese <= 0x09fff)		// CJK Unified Ideographs
-		 || (chinese >= 0x03400 && chinese <= 0x04dbf)		// CJK Unified Ideographs Extension A
-		 || (chinese >= 0x20000 && chinese <= 0x2a6df)		// CJK Unified Ideographs Extension B
-		 || (chinese >= 0x0f900 && chinese <= 0x0faff)		// CJK Compatibility Ideographs
-		 || (chinese >= 0x2f800 && chinese <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
-	}
+return ischinese(utf8_to_wide(here));
 }
 
 /*

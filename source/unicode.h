@@ -33,12 +33,17 @@ struct ANT_UNICODE_decomposition
 	char const * target;
 };
 
+
+int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src);
 unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *) utf8_tolower((unsigned char *) here); }
 
 ANT_UNICODE_chartype utf8_chartype(unsigned long character);
 
-unsigned int ANT_UNICODE_decompose_markstrip_lowercase_toutf8(long character, char * buf, unsigned long buflen);
+unsigned int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character);
+inline unsigned int ANT_UNICODE_normalize_lowercase_toutf8(char ** buf, size_t * buflen, unsigned long character) {
+	return ANT_UNICODE_normalize_lowercase_toutf8((unsigned char **) buf, buflen, character);
+}
 
 /*
 	UTF8_BYTES()
@@ -62,7 +67,7 @@ inline long utf8_bytes(unsigned long c)
 	------------------------
 	How many bytes does the UTF8 character take?
 */
-inline long utf8_bytes(unsigned char *here)
+inline unsigned long utf8_bytes(unsigned char *here)
 {
 if (*here < 0x80)				// 1-byte (ASCII) character
 	return 1;
@@ -76,7 +81,7 @@ else
 	return 1;		// dunno so make it 1
 }
 
-inline long utf8_bytes(char *here) { return utf8_bytes((unsigned char *)here); }
+inline unsigned long utf8_bytes(char *here) { return utf8_bytes((unsigned char *)here); }
 
 /*
 	WIDE_TO_UTF8()
@@ -89,7 +94,7 @@ inline long utf8_bytes(char *here) { return utf8_bytes((unsigned char *)here); }
 
 	Returns the number of characters written to buf.
 */
-inline int wide_to_utf8(unsigned char * buf, unsigned int buflen, unsigned long c) {
+inline int wide_to_utf8(unsigned char * buf, size_t buflen, unsigned long c) {
 	unsigned int numbytes = utf8_bytes(c);
 
 	if (buflen < numbytes)
@@ -121,14 +126,16 @@ inline int wide_to_utf8(unsigned char * buf, unsigned int buflen, unsigned long 
 
 	return numbytes;
 }
-inline int wide_to_utf8(char * buf, unsigned int buflen, unsigned long c) {
+inline int wide_to_utf8(char * buf, size_t buflen, unsigned long c) {
 	return wide_to_utf8((unsigned char *) buf, buflen, c);
 }
 
 /*
 	UTF8_TO_WIDE()
 	--------------------------
-	Convert a UTF8 sequence into a wide character
+	Convert a UTF8 sequence into a wide character.
+
+	If the source buffer before the UTF-8 character is completed, zero is returned instead.
 */
 inline unsigned long utf8_to_wide(unsigned char *here)
 {

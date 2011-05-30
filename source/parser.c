@@ -59,12 +59,18 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 	ANT_PARSER::GET_NEXT_TOKEN()
 	----------------------------
 */
-ANT_string_pair *ANT_parser::get_next_token(void)
+ANT_parser_token *ANT_parser::get_next_token(void)
 {
 unsigned char *start, *here;
 long word_count = 0, pre_length_of_token = 0;
+unsigned long character;
 ANT_UNICODE_chartype chartype;
 long is_chinese = 0;
+size_t bufferlen;
+char * bufferpos;
+
+// Most return paths will not offer a normalized form.
+current_token.normalized.string_length = 0;
 
 if (segmentation != NULL)
 	{
@@ -102,7 +108,13 @@ if (segmentation != NULL)
 	We skip over non-indexable characters before the start of the first token
 */
 for (;;)
-	if (ischinese(current))
+	{
+	character = utf8_to_wide(current);
+
+	if (character==0)
+		return NULL;
+
+	if (ischinese(character))
 		{
 		chartype = CT_LETTER;
 		is_chinese = 1;
@@ -110,11 +122,6 @@ for (;;)
 		}
 	else
 		{
-		unsigned long character = utf8_to_wide(current);
-
-		if (character==0)
-			return NULL;
-
 		chartype = utf8_chartype(character);
 
 		if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION)
@@ -122,6 +129,7 @@ for (;;)
 
 		current++;
 		}
+	}
 
 /*
 	Now we look at the first character as it defines how parse the next token
@@ -131,10 +139,21 @@ if (chartype == CT_LETTER && !is_chinese)
 	{
 	start = current;
 
-	current = utf8_tolower(current);
-	while (utf8_chartype(utf8_to_wide(current))==CT_LETTER)
-		current = utf8_tolower(current);
+	//normalize the word into this buffer
+	bufferpos = &current_token.normalized_buf[0];
+	bufferlen = sizeof(current_token.normalized_buf);
 
+	ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+	current += utf8_bytes(current);
+
+	while (character = utf8_to_wide(current), utf8_chartype(character)==CT_LETTER)
+		{
+		ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+		current += utf8_bytes(current);
+		}
+
+	current_token.type = TT_WORD;
+	current_token.normalized.string_length = bufferpos - current_token.normalized_buf;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
@@ -144,6 +163,7 @@ else if (chartype == CT_NUMBER)
 	while (utf8_chartype(utf8_to_wide(current))==CT_NUMBER)
 		current++;
 
+	current_token.type = TT_NUMBER;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
@@ -153,6 +173,7 @@ else if (chartype == CT_PUNCTUATION && *current != '<')
 	while (utf8_chartype(utf8_to_wide(current)) == CT_PUNCTUATION && *current != '<')		// this catches the case of punction before a tag "blah.</b>"
 		current++;
 
+	current_token.type = TT_PUNCTUATION;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
@@ -180,6 +201,7 @@ else if (is_chinese)
 			}
 		}
 
+	current_token.type = TT_WORD;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 
@@ -197,6 +219,7 @@ else											// everything else (that starts with a '<')
 			*current = ANT_toupper(*current);
 			current++;
 			}
+		current_token.type = TT_TAG_OPEN;
 		current_token.start = (char *)start;
 		current_token.string_length = current - start;
 
@@ -228,6 +251,7 @@ else											// everything else (that starts with a '<')
 					New rules as of 11 Feb 2010, We return close tags as well as open tags
 					because we need these for result focusing.
 				*/
+				current_token.type = TT_TAG_CLOSE;
 				current_token.start = (char *)start;
 				current_token.string_length = current - start;
 				return &current_token;

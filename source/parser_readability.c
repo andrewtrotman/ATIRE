@@ -8,7 +8,7 @@
 	ANT_PARSER_READABILITY::GET_NEXT_TOKEN()
 	----------------------------------------
 */
-ANT_string_pair *ANT_parser_readability::get_next_token(void)
+ANT_parser_token *ANT_parser_readability::get_next_token(void)
 {
 unsigned char *start;
 
@@ -21,6 +21,7 @@ if (issentenceend(*current))
 	while (issentenceend(*current))
 		current++;
 	
+	current_token.type = TT_PUNCTUATION;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
@@ -32,6 +33,7 @@ else if (ANT_isalpha(*current))
 	while (issentenceend(*current))
 		current++;
 	
+	current_token.type = TT_WORD;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
@@ -43,6 +45,7 @@ else if (ANT_isdigit(*current))
 	while (issentenceend(*current))
 		current++;
 	
+	current_token.type = TT_NUMBER;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
@@ -59,6 +62,7 @@ else											// everything else (that starts with a '<')
 			current++;
 			}
 
+		current_token.type = TT_TAG_OPEN;
 		current_token.start = (char *)start;
 		current_token.string_length = current - start;
 

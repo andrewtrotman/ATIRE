@@ -31,7 +31,7 @@ public:
 	ANT_readability_factory();
 	virtual ~ANT_readability_factory();
 	
-	ANT_string_pair *get_next_token(void);
+	ANT_parser_token *get_next_token(void);
 	void handle_node(ANT_memory_indexer_node *node);
 	void index(ANT_memory_indexer *index);
 	

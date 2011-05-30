@@ -11,6 +11,80 @@ const char * ANT_UNICODE_chartype_string[] = {"CT_INVALID", "CT_LETTER", "CT_NUM
 /*
 	UTF8_TOLOWER()
 	---------------------
+	Convert a Unicode character to lowercase in a new buffer. Pass a pointer to
+	the pointer to dest so it can be incremented to advance past the character converted,
+	and a pointer to destlen so it can be reduced.
+
+	If destlen is too small, this will silently truncate the string.
+
+	Returns true if the character was modified.
+
+	The result is not null-terminated.
+*/
+int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned long origchar)
+{
+	unsigned long lowerchar = ANT_UNICODE_tolower(origchar);
+
+	int num_dest_bytes = wide_to_utf8(*dest, *destlen, lowerchar);
+	*destlen -= num_dest_bytes;
+	*dest += num_dest_bytes;
+
+	/* num_dest_bytes is zero if the destination buffer was too small */
+	return (origchar != lowerchar) && num_dest_bytes;
+}
+
+/*
+	UTF8_TOLOWER()
+	---------------------
+	Convert a UTF-8 character to lowercase in a new buffer. Pass pointers to
+	the pointers to dest and src so they can be incremented to advance past
+	the character converted, and to destlen so it can be reduced.
+
+	If destlen is too small, this will silently truncate the destination string.
+
+	Returns true if the character was modified.
+
+	The result is not null-terminated.
+*/
+int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src)
+{
+int success;
+
+if ((**src & 0x80) == 0) //ASCII
+	{
+	unsigned char origchar = **src;
+	unsigned char lowerchar = ANT_tolower(origchar);
+
+	*src++;
+	if (*destlen)
+		{
+		**dest = lowerchar;
+		*dest++;
+		*destlen--;
+		success = 1;
+		}
+	else
+		success = 0;
+
+	/* Did this actually result in the character changing? */
+	return success && lowerchar != origchar;
+	}
+else
+	{
+	unsigned long num_src_bytes = utf8_bytes(*src);
+	unsigned long origchar = utf8_to_wide(*src);
+
+	success = utf8_tolower(dest, destlen, origchar);
+
+	*src += num_src_bytes;
+
+	return success;
+	}
+}
+
+/*
+	UTF8_TOLOWER()
+	---------------------
 	To convert both ASCII and UTF-8 characters to lowercase in-place.
 
 	Returns a pointer to the character after the one processed.
@@ -46,37 +120,47 @@ else
 }
 
 /*
-	ANT_UNICODE_DECOMPOSE_MARKSTRIP_LOWERCASE_TOUTF8()
+	ANT_UNICODE_normalize_lowercase_toutf8()
 	---------------------
 	Decompose the given Unicode character into its constituent parts (e.g. separate
 	characters into their base form + a combining mark character), then throw away
 	the combining marks and convert the character to lowercase.
 
-	Writes the result as a UTF-8 string into the buffer buf with length buflen.
+	Writes the result as a UTF-8 string into the buffer buf with length buflen. The
+	string is not null-terminated.
 
 	Returns number of characters written to buf if successful, 0 otherwise
 	(e.g. buflen too small).
 */
-unsigned int ANT_UNICODE_decompose_markstrip_lowercase_toutf8(long character, char * buf, unsigned long buflen)
+unsigned int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character)
 {
+size_t num_dest_chars;
 const char * decomposition = ANT_UNICODE_search_decomposition(character);
 
 if (!decomposition)
 	{
 	/* This character decomposes to itself and so doesn't have an entry in
 	 * the decomposition table. Convert it manually. */
-	return wide_to_utf8(buf, buflen, ANT_UNICODE_tolower(character));
+	num_dest_chars = wide_to_utf8(*buf, *buflen, ANT_UNICODE_tolower(character));
+
+	*buflen -= num_dest_chars;
+	*buf += num_dest_chars;
+
+	return num_dest_chars;
 	}
 else
 	{
-	unsigned int len = strlen(decomposition);
+	num_dest_chars = strlen(decomposition);
 
-	if (len > buflen)
+	if (num_dest_chars > *buflen)
 		return 0;
 
-	memcpy(buf, decomposition, len * sizeof(*decomposition));
+	memcpy(*buf, decomposition, num_dest_chars * sizeof(*decomposition));
 
-	return len;
+	*buflen -= num_dest_chars;
+	*buf += num_dest_chars;
+
+	return num_dest_chars;
 	}
 }
 
@@ -84,8 +168,6 @@ else
 	UTF8_CHARTYPE()
 	---------------------
 	Classify the given Unicode character.
-
-	Doesn't properly classify most alphas (returns CT_OTHER) for those.
 */
 ANT_UNICODE_chartype utf8_chartype(unsigned long character)
 {

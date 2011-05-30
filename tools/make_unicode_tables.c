@@ -143,7 +143,10 @@ else if (strcmp(argv[1], "-decomposition") == 0)
 else if (strcmp(argv[1], "-chartype") == 0)
 	mode = CHARTYPE;
 else
+	{
+	mode = LOWER; //Silence uninitialized warning from dumb compilers
 	print_usage(argv);
+	}
 
 if ((file = ANT_disk::read_entire_file(argv[2])) == NULL)
 	exit(printf("Cannot open input file:%s\n", argv[2]));

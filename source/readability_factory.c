@@ -40,10 +40,10 @@ delete [] measure;
 	READABILITY_FACTORY::GET_NEXT_TOKEN()
 	-------------------------------------
 */
-ANT_string_pair *ANT_readability_factory::get_next_token()
+ANT_parser_token *ANT_readability_factory::get_next_token()
 {
 long which;
-ANT_string_pair *token = parser->get_next_token();
+ANT_parser_token *token = parser->get_next_token();
 
 if (measures_to_use == 0)
 	return token;
@@ -84,10 +84,7 @@ if (*token->start == '<')
 while (ANT_parser_readability::issentenceend(token->start[token->length() - 1]))
 	token->string_length--;
 
-/*
-	And finally, lowercase the whole thing
-*/
-return token->strlower();
+return token;
 }
 
 /*
