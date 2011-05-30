@@ -152,14 +152,14 @@ else
 			return TRUE;
 		else
 			return FALSE;
+	else if (ANT_parser::ischinese(from_character))
+		return ANT_parser::ischinese(next_character);		// This can only happen if we later segment, it can never happen without segmentation
 	else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
 		if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER
 				|| *next == '-' || *next == '\'')
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::ischinese(from_character))
-		return ANT_parser::ischinese(next_character);		// This can only happen if we later segment, it can never happen without segmentation
 	else if (unicode_chartype(from_character) == CT_NUMBER || unicode_chartype(from_character) == CT_LETTER)
 		if (unicode_chartype(next_character) == CT_NUMBER || unicode_chartype(next_character) == CT_LETTER)
 			return TRUE;
