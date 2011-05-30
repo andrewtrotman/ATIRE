@@ -81,7 +81,7 @@ namespace QLINK
 					if (use_utf8_token_matching_ && strchr(wiki_title.c_str(), ' ') != NULL)
 						find_and_replace(wiki_title, string(" "), string(""));
 
-					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only, !use_utf8_token_matching_);
+					std::pair<std::string, std::string> title_pair = wikipedia::process_title(wiki_title, lowercase_only/*, !use_utf8_token_matching_*/);
 					//struct wiki_entry a_entry;
 					ANT_link_posting *a_entry = new ANT_link_posting;
 					a_entry->docid = doc_id;
@@ -199,8 +199,8 @@ namespace QLINK
 		bool to_skip = false;
 		long offset = 0, term_len = 0;
 
-		if (strcmp("Trinidad and Tobago", index_term->term) == 0)
-			cerr << " I caught you" << endl;
+//		if (strncmp("Zhu", index_term->term, 3) == 0)
+//			cerr << " I caught you" << endl;
 
 //		char buffer[1024 * 1024];
 		if (stopword_no_ && !strpbrk(index_term->term, "- "))

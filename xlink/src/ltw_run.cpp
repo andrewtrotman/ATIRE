@@ -114,8 +114,9 @@ void ltw_run::print()
 
 void ltw_run::print_header()
 {
-	char buf[2550];
-	sprintf(buf, header.c_str(), affiliation.c_str(), task.c_str());
-	aout << buf;
+	char *local_buf = new char[1024 * 1024]; // = {""};
+	sprintf(local_buf, header.c_str(), affiliation.c_str(), task.c_str(), task_->get_target_lang().c_str(), task_->get_source_lang().c_str());
+	aout << local_buf;
+	delete [] local_buf;
 }
 

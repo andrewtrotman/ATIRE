@@ -79,7 +79,7 @@ int algorithm::init_params()
 
 int algorithm::init_params(int argc, char *argv[])
 {
-	if (argc < 3)
+	if (argc < 2)
 		usage(argv[0]);		// and exit
 
 	int index_argv_param = 0;

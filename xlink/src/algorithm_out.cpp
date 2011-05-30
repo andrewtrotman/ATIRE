@@ -11,6 +11,10 @@
 
 #include "ltw_task.h"
 
+#include <iostream>
+
+using namespace std;
+
 namespace QLINK
 {
 
@@ -118,7 +122,11 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 long algorithm_out::assign_link_term(ANT_link_term *index_term, char **term_list)
 {
 	long term_len, offset, index;
+
+	if (strcmp("Zhu Xi", index_term->term) == 0)
+		cerr << " I caught you" << endl;
 	term_len = strlen(index_term->term);
+
 	if (!use_utf8_token_matching_) {
 		offset = current_term_ - source_;
 		strncpy(buffer_, offset + text_, term_len);
@@ -129,6 +137,9 @@ long algorithm_out::assign_link_term(ANT_link_term *index_term, char **term_list
 		offset = token_address_[index] - source_;
 		strcpy(buffer_, index_term->term);
 	}
+
+	if (offset == 4809)
+		cerr << " I caught you" << endl;
 	return offset;
 }
 
