@@ -184,6 +184,11 @@ for (current = 0; current < lines; current++)
 		unique_terms++;
 		last_string = link_list[current].term;
 		}
+//#ifdef DEBUG
+//	else
+//		fprintf(stderr, "%s is not an unique term!\n", link_list[current].term);
+//#endif
+
 	}
 if (!pagename)
 	printf("%d terms\n", unique_terms);
@@ -228,7 +233,7 @@ for (current = 0; current < lines; current++)
 			else
 				{
 				if (pagename)
-					printf("%d", last_docid);
+					printf("%d\n%s:", last_docid, last_string);
 				else
 					printf("<%d,%d,%d>", last_docid, anchor_times, times);
 				times = 1;
@@ -240,7 +245,7 @@ for (current = 0; current < lines; current++)
 	last_anchor_docid = link_list[current].anchor_docid;
 	}
 if (pagename)
-	printf("%d", last_docid);
+	printf("%d\n", last_docid);
 else
 	printf("<%d,%d,%d>", last_docid, anchor_times, times);
 

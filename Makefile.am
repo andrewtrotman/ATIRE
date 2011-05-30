@@ -114,6 +114,7 @@ core_sources =  \
 	$(SRCDIR)/compress_text_bz2.c \
 	$(SRCDIR)/compression_text_factory.c \
 	$(SRCDIR)/instream_buffer.c \
+	$(SRCDIR)/instream_lzo.c \
 	$(SRCDIR)/index_document.c \
 	$(SRCDIR)/readability_factory.c \
 	$(SRCDIR)/readability_dale_chall.c \
@@ -292,6 +293,7 @@ core_noinst_headers = \
 	$(SRCDIR)/instream_file.h	\
 	$(SRCDIR)/instream_deflate.h \
 	$(SRCDIR)/instream_bz2.h \
+	$(SRCDIR)/instream_lzo.h \
 	$(SRCDIR)/instream.h \
 	$(SRCDIR)/event.h \
 	$(SRCDIR)/event_internals.h \

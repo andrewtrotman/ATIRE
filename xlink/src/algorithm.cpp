@@ -48,7 +48,7 @@ void algorithm::init()
 	lowercase_only = FALSE; // true by default
 	stopword_no_ = FALSE;
 
-	if (ltw_task_->get_source_lang() == "en")
+	if (ltw_task_->get_source_lang().length() == 0 || ltw_task_->get_source_lang() == "en")
 		use_utf8_token_matching_ = false;
 	else
 		use_utf8_token_matching_ = true;

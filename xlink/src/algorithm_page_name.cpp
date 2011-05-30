@@ -62,14 +62,16 @@ namespace QLINK
 			return;
 
 		ifstream myfile (filename.c_str());
-
+		int count = 0;
 		if (myfile.is_open()) {
 			while (! myfile.eof()) {
 				string line;
 				getline (myfile, line);
 				if (line.length() == 0 || line.find("Portal:") != string::npos)
 					continue;
+#ifdef DEBUG
 				cerr << "loading : " << line << endl;
+#endif
 				string::size_type pos = line.find_first_of(':');
 				if (pos != string::npos) {
 					unsigned long doc_id = atol(line.c_str());
@@ -93,9 +95,12 @@ namespace QLINK
 
 //					page_map_t::iterator iter = names_map_.find(title_pair.first);
 					ANT_link_term *index_term = this->find_term_in_list(title_pair.first.c_str());
-					if (index_term == NULL) {
+					if (index_term == NULL || string_compare(index_term->term, title_pair.first.c_str()) != 0) {
 //					if (iter == names_map_.end() || iter->second == NULL) {
 						//wiki_entry_array wea;
+						if (index_term != NULL)
+							cerr << title_pair.first << " is a unique term to " << index_term->term << endl;
+
 						ANT_link_term *term = new ANT_link_term;
 						term->term = strdup(title_pair.first.c_str());
 						term->total_occurences = 0;
@@ -120,9 +125,11 @@ namespace QLINK
 						//result.second.push_back(a_entry);
 						term->postings.push_back(a_entry);
 						name_array_.push_back(term);
+						++count;
 					}
-					else
+					else {
 						index_term->postings.push_back(a_entry);
+					}
 				}
 				else {
 					cerr << "Error in line : " << line << endl;
@@ -132,7 +139,7 @@ namespace QLINK
 			}
 //			std::sort(name_array_.begin(), name_array_.end(), ANT_link_term_compare());
 			myfile.close();
-			cerr << "loaded " << name_array_.size() << " entries" << endl;
+			cerr << "loaded " << name_array_.size() << " entries, " << count << " recored" << endl;
 		}
 
 		// debug
@@ -191,6 +198,10 @@ namespace QLINK
 	{
 		bool to_skip = false;
 		long offset = 0, term_len = 0;
+
+		if (strcmp("Trinidad and Tobago", index_term->term) == 0)
+			cerr << " I caught you" << endl;
+
 //		char buffer[1024 * 1024];
 		if (stopword_no_ && !strpbrk(index_term->term, "- "))
 			to_skip = language::isstopword(index_term->term);
