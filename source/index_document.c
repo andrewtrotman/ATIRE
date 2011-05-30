@@ -113,6 +113,7 @@ while ((token = readability->get_next_token()) != NULL)
 			//no-op
 			break;
 		default:
+			;
 		}
 	}
 
