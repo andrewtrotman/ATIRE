@@ -18,9 +18,6 @@
 
 #define LAST_ASCII_CHAR 0x7F
 
-
-extern const char * ANT_UNICODE_chartype_string[7];
-
 struct ANT_UNICODE_char_chartype
 {
 	long character;
@@ -33,12 +30,17 @@ struct ANT_UNICODE_decomposition
 	char const * target;
 };
 
+enum ANT_UNICODE_xml_char_class {
+	XMLCC_NAME_START = 1,
+	XMLCC_NAME = 2,
+};
 
 int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src);
 unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *) utf8_tolower((unsigned char *) here); }
 
-ANT_UNICODE_chartype utf8_chartype(unsigned long character);
+ANT_UNICODE_chartype unicode_chartype(unsigned long character);
+int unicode_xml_class(unsigned long character);
 
 unsigned int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character);
 inline unsigned int ANT_UNICODE_normalize_lowercase_toutf8(char ** buf, size_t * buflen, unsigned long character) {
@@ -163,6 +165,11 @@ switch (numchars)
 	default:
 		return 0;
 	}
+}
+
+inline unsigned long utf8_to_wide(char *here)
+{
+return utf8_to_wide((unsigned char *) here);
 }
 
 /*

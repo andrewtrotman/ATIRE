@@ -122,7 +122,7 @@ for (;;)
 		}
 	else
 		{
-		chartype = utf8_chartype(character);
+		chartype = unicode_chartype(character);
 
 		if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION)
 			break;
@@ -146,7 +146,7 @@ if (chartype == CT_LETTER && !is_chinese)
 	ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
 	current += utf8_bytes(current);
 
-	while (character = utf8_to_wide(current), utf8_chartype(character)==CT_LETTER)
+	while (character = utf8_to_wide(current), unicode_chartype(character)==CT_LETTER)
 		{
 		ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
 		current += utf8_bytes(current);
@@ -160,7 +160,7 @@ if (chartype == CT_LETTER && !is_chinese)
 else if (chartype == CT_NUMBER)
 	{
 	start = current++;
-	while (utf8_chartype(utf8_to_wide(current))==CT_NUMBER)
+	while (unicode_chartype(utf8_to_wide(current))==CT_NUMBER)
 		current++;
 
 	current_token.type = TT_NUMBER;
@@ -170,7 +170,7 @@ else if (chartype == CT_NUMBER)
 else if (chartype == CT_PUNCTUATION && *current != '<')
 	{
 	start = current++;
-	while (utf8_chartype(utf8_to_wide(current)) == CT_PUNCTUATION && *current != '<')		// this catches the case of punction before a tag "blah.</b>"
+	while (unicode_chartype(utf8_to_wide(current)) == CT_PUNCTUATION && *current != '<')		// this catches the case of punction before a tag "blah.</b>"
 		current++;
 
 	current_token.type = TT_PUNCTUATION;

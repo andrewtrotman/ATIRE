@@ -79,6 +79,8 @@ return sentinal.next;
 */
 long ANT_NEXI::ispart(unsigned char *from, long length, unsigned char *next)
 {
+unsigned long from_character, next_character;
+
 if (length == 0)
 	return TRUE;				/* all tokens must be at least one char in length */
 else if (length == 1)
@@ -91,21 +93,7 @@ else if (length == 1)
 	else if (*from == ')')
 		return FALSE;
 	else if (*from == '-')
-		if (ANT_isdigit(*next))
-			return TRUE;
-		else
-			return FALSE;
-	else if (ANT_isXMLnamestartchar(*from) || ANT_parser::iseuropean(from))
-		if (ANT_isXMLnamechar(*next) || ANT_parser::iseuropean(next))
-			return TRUE;
-		else if (*next == '-')		// hyphenated words
-			return TRUE;
-		else if (*next == '\'')		// apostrophies (don't tell me)
-			return TRUE;
-		else
-			return FALSE;
-	else if (ANT_isdigit(*from))
-		if (ANT_isdigit(*next))
+		if (unicode_chartype(utf8_to_wide(next)) == CT_NUMBER)
 			return TRUE;
 		else
 			return FALSE;
@@ -114,45 +102,69 @@ else if (length == 1)
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::ischinese(from))
-		{
-		/*
-			If we want to generate one Chinese string for later segmentaton then
-			we want to do the following line:
-
-				return ANT_parser::ischinese(next);					// this string will later need to be segmented
-
-			otherwise Chinese words can be at best one character in length so return FALSE
-
-			by default, we segment the whole Chinese string into single characters,
-			if segmentation is set to false, we won't do anything. This could happen when we segment the string manually
-			either in the console, the query file or segmented query passed by other programs
-		*/
-		if (segmentation)
-			return FALSE;
-		return ANT_parser::ischinese(next);
-		}
 	else
-		return FALSE;
+		{
+		from_character = utf8_to_wide(from);
+		next_character = utf8_to_wide(next);
+
+		if (ANT_parser::ischinese(from_character))
+			{
+			/*
+				If we want to generate one Chinese string for later segmentaton then
+				we want to do the following line:
+
+					return ANT_parser::ischinese(next);					// this string will later need to be segmented
+
+				otherwise Chinese words can be at best one character in length so return FALSE
+
+				by default, we segment the whole Chinese string into single characters,
+				if segmentation is set to false, we won't do anything. This could happen when we segment the string manually
+				either in the console, the query file or segmented query passed by other programs
+			*/
+			if (segmentation)
+				return FALSE;
+			return ANT_parser::ischinese(next_character);
+			}
+		else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
+			if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER)
+				return TRUE;
+			else if (*next == '-')		// hyphenated words
+				return TRUE;
+			else if (*next == '\'')		// apostrophies (don't tell me)
+				return TRUE;
+			else
+				return FALSE;
+		else if (unicode_chartype(from_character) == CT_NUMBER)
+			if (unicode_chartype(next_character) == CT_NUMBER)
+				return TRUE;
+			else
+				return FALSE;
+		else
+			return FALSE;
+		}
 else
 	{
+	from_character = utf8_to_wide(from);
+	next_character = utf8_to_wide(next);
+
 	if (*from == '-')
-		if (ANT_isdigit(*next))
+		if (unicode_chartype(next_character) == CT_NUMBER)
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_isXMLnamestartchar(*from) ||ANT_parser::iseuropean(from))
-		if (ANT_isXMLnamechar(*next) || *next == '-' || *next == '\''||ANT_parser::iseuropean(next))
+	else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
+		if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER
+				|| *next == '-' || *next == '\'')
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_isalnum(*from) || ANT_parser::iseuropean(from))
-		if (ANT_isalnum(*next) || ANT_parser::iseuropean(next))
+	else if (ANT_parser::ischinese(from_character))
+		return ANT_parser::ischinese(next_character);		// This can only happen if we later segment, it can never happen without segmentation
+	else if (unicode_chartype(from_character) == CT_NUMBER || unicode_chartype(from_character) == CT_LETTER)
+		if (unicode_chartype(next_character) == CT_NUMBER || unicode_chartype(next_character) == CT_LETTER)
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::ischinese(from))
-		return ANT_parser::ischinese(next);		// This can only happen if we later segment, it can never happen without segmentation
 	else
 		return FALSE;
 	}
@@ -174,7 +186,7 @@ if (*at != '\0')
 		Using the multi-language parser, skip over all characters that are not alphabetic or numeric.
 		Also skip the non-character, e.g. symbol and punctuation in other languages
 	*/
-	while (*at != '\0' && ((!(*at & 0x80) && !ANT_isalnum(*at)) || ((*at & 0x80) && !ANT_parser::ischinese(at) && !ANT_parser::iseuropean(at))))
+	while (*at != '\0' && unicode_chartype(utf8_to_wide(at)) != CT_NUMBER && unicode_chartype(utf8_to_wide(at)) != CT_LETTER)
 		at += utf8_bytes(at);
 
 	if (*at != '\0')
@@ -300,10 +312,18 @@ return answer;
 */
 long ANT_NEXI::read_term(ANT_string_pair *term)
 {
+unsigned long character;
+
 *term = *get_next_token();
-if (ANT_isXMLnamestartchar(token[0]))
+
+character = utf8_to_wide(token.start);
+
+if ((unicode_xml_class(character) & XMLCC_NAME_START)==XMLCC_NAME_START)
 	return TRUE;
-if (ANT_isalnum(token[0]))
+
+ANT_UNICODE_chartype chartype = unicode_chartype(character);
+
+if (chartype == CT_LETTER || chartype == CT_NUMBER)
 	return TRUE;
 if (token[0] == '-' && token.string_length > 1)
 	return TRUE;
@@ -319,11 +339,20 @@ return FALSE;
 */
 long ANT_NEXI::read_phraseless_term(ANT_string_pair *term)
 {
+unsigned long character;
+
 *term = *get_next_token();
-if (ANT_isXMLnamestartchar(token[0]))
+
+character = utf8_to_wide(token.start);
+
+if ((unicode_xml_class(character) & XMLCC_NAME_START)==XMLCC_NAME_START)
 	return TRUE;
-if (ANT_isalnum(token[0]))
+
+ANT_UNICODE_chartype chartype = unicode_chartype(character);
+
+if (chartype == CT_LETTER || chartype == CT_NUMBER)
 	return TRUE;
+
 if (token[0] == '-' && token.string_length > 1)
 	return TRUE;
 return FALSE;

@@ -6,7 +6,49 @@
 #include "unicode.h"
 #include "unicode_tables.h"
 
-const char * ANT_UNICODE_chartype_string[] = {"CT_INVALID", "CT_LETTER", "CT_NUMBER", "CT_PUNCTUATION", "CT_SEPARATOR", "CT_OTHER", "CT_MARK"};
+/*
+	UNICODE_XML_CLASS()
+	---------------------
+	Classify the given Unicode character according to the XML spec,
+	returning a set of the classes it belongs to.
+*/
+int unicode_xml_class(unsigned long character)
+{
+//Use ANT classification tables if possible
+if (character<=LAST_ASCII_CHAR)
+	{
+	if (ANT_isXMLnamestartchar(character))
+		return XMLCC_NAME_START | XMLCC_NAME;
+	if (ANT_isXMLnamechar(character))
+		return XMLCC_NAME;
+	return 0;
+	}
+
+//Definition from XML-spec is here http://www.w3.org/TR/xml/#NT-NameStartChar
+
+//Is it a name-start character? (name chars are a superset of this)
+if (character>=0xC0 && character<=0xD6 ||
+	character>=0xD8 && character<=0xF6 ||
+	character>=0xF8 && character<=0x2FF ||
+	character>=0x370 && character<=0x37D ||
+	character>=0x37F && character<=0x1FFF ||
+	character>=0x200C && character<=0x200D ||
+	character>=0x2070 && character<=0x218F ||
+	character>=0x2C00 && character<=0x2FEF ||
+	character>=0x3001 && character<=0xD7FF ||
+	character>=0xF900 && character<=0xFDCF ||
+	character>=0xFDF0 && character<=0xFFFD ||
+	character>=0x10000 && character<=0xEFFFF)
+	return XMLCC_NAME_START | XMLCC_NAME;
+
+//Just a name char?
+if (character==0xB7 ||
+	character>=0x0300 && character<=0x036F ||
+	character>=0x203F && character<=0x2040)
+	return XMLCC_NAME;
+
+return 0;
+}
 
 /*
 	UTF8_TOLOWER()
@@ -165,11 +207,11 @@ else
 }
 
 /*
-	UTF8_CHARTYPE()
+	UNICODE_CHARTYPE()
 	---------------------
 	Classify the given Unicode character.
 */
-ANT_UNICODE_chartype utf8_chartype(unsigned long character)
+ANT_UNICODE_chartype unicode_chartype(unsigned long character)
 {
 	//Use ASCII table if possible
 	if (character <= LAST_ASCII_CHAR)
