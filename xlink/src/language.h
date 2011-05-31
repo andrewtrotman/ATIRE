@@ -46,9 +46,6 @@ public:
 	static int ischinese(const unsigned char *here);
 	static int ischinese(const char *here) { return ischinese((const unsigned char *)here); }
 
-	static int iseuropean(const unsigned char *here);
-	static int iseuropean(const char *here) { return iseuropean((const unsigned char *)here); }
-
 	static unsigned long utf8_to_wide(const unsigned char *here);
 	static long utf8_bytes(const unsigned char *here);
 	static long utf8_bytes(const char *here) { return utf8_bytes((const unsigned char *)here); }
@@ -124,33 +121,6 @@ else
 		|| (chinese >=0x20000 && chinese <= 0x2a6df)		// CJK Unified Ideographs Extension B
 		|| (chinese >=0xf900 && chinese <= 0xfaff)		// CJK Compatibility Ideographs
 		|| (chinese >=0x2f800 && chinese <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
-	}
-}
-
-/*
-	ANT_PARSER::ISEUROPEAN()
-	-----------------------
-	Is the given character from the European(German) CodePoint?
-*/
-inline int language::iseuropean(const unsigned char *here)
-{
-unsigned long european;
-
-if ((*here & 0x80) == 0)
-	return FALSE;
-else
-	{
-	european = utf8_to_wide(here);
-
-	return ((european == 0x00C4)|| // Ä U+00C4 Latin capital letter A with diaeresis
-		(european == 0x00D6)|| // Ö U+00D6 Latin capital letter O with diaeresis
-		(european == 0x00DC)|| // Ü U+00DC Latin capital letter U with diaeresis
-		//(european == 0x1E9E)|| // ẞ U+1E9E LATIN CAPITAL LETTER SHARP S
-		(european == 0x00E4)|| // ä U+00E4 Latin small letter a with diaeresis
-		(european == 0x00F6)|| // ö U+00F6 Latin small letter o with diaeresis
-		(european == 0x00FC)|| // ü U+00FC Latin small letter u with diaeresis
-		(european == 0x00DF)   // ß U+00DF LATIN SMALL LETTER SHARP S
-		);
 	}
 }
 
