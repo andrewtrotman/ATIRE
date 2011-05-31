@@ -391,6 +391,7 @@ ANT_NEXI_term *ANT_NEXI::read_CO(ANT_string_pair *path, ANT_string_pair *terms)
 ANT_string_pair current;
 long weight, more = TRUE;
 ANT_NEXI_term root, *node;
+unsigned long character;
 
 root.next = NULL;
 node = &root;		// root acts as a sentinal
@@ -414,11 +415,22 @@ do
 			if (!read_term(&current))
 				parse_error(ANT_query::ERROR_MISSING_TERM, "term expected");
 			}
-		else if (!ANT_isalnum(token[0]))
+		else
+			{
+			character = utf8_to_wide(token.start);
+
+			if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER)
+				more = FALSE;
+			}
+		}
+	else
+		{
+		character = utf8_to_wide(token.start);
+
+		if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER &&
+				token[0] != '-' && !ANT_parser::ischinese(character))
 			more = FALSE;
 		}
-	else if (!ANT_isalnum(token[0]) && token[0] != '-' && !ANT_parser::ischinese(token.start) && !ANT_parser::iseuropean(token.start))
-		more = FALSE;
 	if (more)
 		{
 		node = get_NEXI_term(node, path, &current, weight);
