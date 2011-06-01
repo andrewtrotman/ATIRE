@@ -177,13 +177,28 @@ else
 unsigned int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character)
 {
 size_t num_dest_chars;
-const char * decomposition = ANT_UNICODE_search_decomposition(character);
+const char * decomposition;
+
+if (!*buflen)
+	return 0;
+
+if (character <= LAST_ASCII_CHAR)
+	{
+	**buf = ANT_tolower((unsigned char) character);
+	
+	*buf++;
+	*buflen--;
+
+	/* Wrote 1 character: */
+	return sizeof(**buf);
+	}
+
+decomposition = ANT_UNICODE_search_decomposition(character);
 
 if (!decomposition)
 	{
-	/* This character decomposes to itself and so doesn't have an entry in
-	 * the decomposition table. Convert it manually. */
-	num_dest_chars = wide_to_utf8(*buf, *buflen, ANT_UNICODE_tolower(character));
+	/* This character decomposes to itself. */
+	num_dest_chars = wide_to_utf8(*buf, *buflen, character);
 
 	*buflen -= num_dest_chars;
 	*buf += num_dest_chars;
