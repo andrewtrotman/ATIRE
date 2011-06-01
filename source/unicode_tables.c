@@ -6,7 +6,7 @@
 #include "unicode.h"
 #include "unicode_pair.h"
 
-const char * ANT_UNICODE_chartype_string[] = {"CT_INVALID", "CT_LETTER", "CT_NUMBER", "CT_PUNCTUATION", "CT_SEPARATOR", "CT_OTHER", "CT_MARK"};
+const char * ANT_UNICODE_chartype_string[] = {"CT_LETTER", "CT_NUMBER", "CT_PUNCTUATION", "CT_SEPARATOR", "CT_OTHER", "CT_MARK"};
 
 /*
 	ANT_UNICODE_LOWER
