@@ -139,7 +139,7 @@ inline int wide_to_utf8(char * buf, size_t buflen, unsigned long c) {
 
 	If the source buffer before the UTF-8 character is completed, zero is returned instead.
 */
-inline unsigned long utf8_to_wide(unsigned char *here)
+inline unsigned long utf8_to_wide_safe(unsigned char *here)
 {
 int numchars = utf8_bytes(here);
 
@@ -157,14 +157,38 @@ switch (numchars)
 			return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
 		else
 			return 0;
-	case 4:
+	default:
 		if (here[0] && here[1] && here[2])
-			return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 1) & 0x3F);
+			return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 3) & 0x3F);
 		else
 			return 0;
-	default:
-		return 0;
 	}
+}
+
+/**
+ * Compared to the _safe version, this version Can read up to 3 bytes past the
+ * null-terminator of the string at here.
+ */
+inline unsigned long utf8_to_wide_unsafe(unsigned char *here)
+{
+int numchars = utf8_bytes(here);
+
+switch (numchars)
+	{
+	case 1:
+		return *here;
+	case 2:
+		return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
+	case 3:
+		return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
+	default:
+		return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 3) & 0x3F);
+	}
+}
+
+inline unsigned long utf8_to_wide(unsigned char *here)
+{
+	return utf8_to_wide_safe(here);
 }
 
 inline unsigned long utf8_to_wide(char *here)
