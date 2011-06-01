@@ -30,7 +30,7 @@ printf("(");
 switch (boolean_operator)
 	{
 	case LEAF_NODE:
-		printf("%*.*s", term.string_length, term.string_length, term.start);
+		printf("%*.*s", (int)term.string_length, (int)term.string_length, term.start);
 		break;
 	case BOOLEAN_AND:
 		left->internal_text_render();
