@@ -92,6 +92,7 @@ void algorithm_ant_link_this::load_crosslink_table(std::string& filename)
 				//crosslink_table_.insert(make_pair(doc_id, target_doc_id));
 			}
 		}
+		cerr << "Loaded " << crosslink_table_.size() << " entries from the crosslink table pointing to" << corpus::instance().lang() << " corpus." << endl;
 		myfile.close();
 	}
 }
@@ -99,7 +100,7 @@ void algorithm_ant_link_this::load_crosslink_table(std::string& filename)
 bool algorithm_ant_link_this::has_crosslink(unsigned long id)
 {
 	map<unsigned long, unsigned long>::iterator it = crosslink_table_.find(id);
-	return (it != crosslink_table_.end() && corpus::instance().exist(it->second));
+	return it != crosslink_table_.end() && corpus::instance().exist(it->second);
 }
 
 unsigned long algorithm_ant_link_this::get_crosslink(unsigned long id)

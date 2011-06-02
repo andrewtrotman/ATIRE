@@ -15,7 +15,7 @@ namespace QLINK {
 
 	struct wiki_entry{
 		long 			id;
-		//std::string 	title;
+		std::string 	title;
 		std::string		description;
 	};
 

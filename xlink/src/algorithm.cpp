@@ -48,11 +48,6 @@ void algorithm::init()
 	lowercase_only = FALSE; // true by default
 	stopword_no_ = FALSE;
 
-	if (ltw_task_->get_source_lang().length() == 0 || ltw_task_->get_source_lang() == "en")
-		use_utf8_token_matching_ = false;
-	else
-		use_utf8_token_matching_ = true;
-
 	token_address_ = NULL;
 
 	if (run_config::instance().get_value("translate_anchor_for_linking").length() > 0)
@@ -149,6 +144,12 @@ void algorithm::process_topic(ltw_topic *a_topic)
 	orphan_docid_ = a_topic->get_id();
 	text_ = a_topic->get_text();
 	xml_ = a_topic->get_content();
+
+	if (ltw_task_->get_source_lang().length() == 0 || ltw_task_->get_source_lang() == "en")
+		use_utf8_token_matching_ = false;
+	else
+		use_utf8_token_matching_ = true;
+
 	process_topic_text();
 }
 

@@ -79,6 +79,8 @@ void ltw_run::init()
 
 	lang = get_config().get_value("target_lang");
 	task_->set_target_lang(lang.length() > 0 ? lang : task_->get_source_lang());
+
+
 }
 
 std::string ltw_run::get_home(const char *name)
