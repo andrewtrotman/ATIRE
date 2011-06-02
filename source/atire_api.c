@@ -442,12 +442,9 @@ return 0;		// success
 */
 char *ATIRE_API::string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold)
 {
-long length, first_case;
-char *current;
-
-length = source->string_length < destination_length - 1 ? source->string_length : destination_length - 1;
-strncpy(destination, source->start, length);
-destination[length] = '\0';
+long length;
+char *current, *dest_current;
+size_t dest_remain;
 
 /*
 	Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms
@@ -455,14 +452,50 @@ destination[length] = '\0';
 */
 if (case_fold)
 	{
-	first_case = ANT_islower(*destination);
-	for (current = destination; *current != '\0'; current++)
-		if (ANT_islower(*current) != first_case)
+	int has_non_upper = 0;
+
+	/* Does this term have characters which are not uppercase? If so, it's not a tag name. */
+	current = source->start;
+	while (current < source->start + source->string_length)
+		{
+		if (!utf8_isupper(utf8_to_wide(current)))
 			{
-			strlower(destination);
+			has_non_upper = 1;
 			break;
 			}
+
+		current += utf8_bytes(current);
+		}
+
+	if (has_non_upper)
+		{
+		/* This is a term, not a tag name. Normalize. */
+
+		current = source->start;
+		dest_current = destination;
+		dest_remain = destination_length - 1; /* Leave room for null terminator */
+		while (current < source->start + source->string_length)
+			{
+			unsigned long character = utf8_to_wide(current);
+
+			current += utf8_bytes(current);
+
+			if (!ANT_UNICODE_normalize_lowercase_toutf8(&dest_current, &dest_remain, character))
+				break; //Ran out of room in destination
+			}
+
+		*dest_current = '\0';
+
+		return destination;
+		}
+
+	/* Otherwise we can just copy it, fall through to use as-is.. */
 	}
+
+/* We can just do a straight copy in */
+length = source->string_length < destination_length - 1 ? source->string_length : destination_length - 1;
+strncpy(destination, source->start, length);
+destination[length] = '\0';
 
 return destination;
 }
@@ -492,7 +525,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		Take the search term (as an ANT_string_pair) and convert into a string
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
-	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer));
+	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), 1);
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
 	}
@@ -543,7 +576,7 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		{
-		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer));
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), 1);
 		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
 		}
 	}
@@ -583,7 +616,7 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	into = new ANT_bitstring;
 	into->set_length((long)documents_in_id_list);
 
-	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer));
+	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), 1);
 
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// We don't stem numbers or tag names, or if there is no stemmer
 		search_engine->process_one_search_term(token_buffer, ranking_function, into);

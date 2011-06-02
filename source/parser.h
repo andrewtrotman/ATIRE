@@ -78,10 +78,10 @@ inline int ANT_parser::ischinese(unsigned long character)
 {
 return
 	character >= 0x03400 &&
-	((character >= 0x04e00 && character <= 0x09fff)			// CJK Unified Ideographs
-	 || (character <= 0x04dbf)								// CJK Unified Ideographs Extension A
-	 || (character >= 0x20000 && character <= 0x2a6df)		// CJK Unified Ideographs Extension B
+	 ((character <= 0x04dbf)								// CJK Unified Ideographs Extension A
+	 || (character >= 0x04e00 && character <= 0x09fff)		// CJK Unified Ideographs
 	 || (character >= 0x0f900 && character <= 0x0faff)		// CJK Compatibility Ideographs
+	 || (character >= 0x20000 && character <= 0x2a6df)		// CJK Unified Ideographs Extension B
 	 || (character >= 0x2f800 && character <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
 }
 

@@ -162,7 +162,17 @@ else
 }
 
 /*
-	ANT_UNICODE_normalize_lowercase_toutf8()
+	UTF8_ISUPPER()
+	--------------
+	Check if this character is uppercase by checking if it has a lowercase variant.
+*/
+int utf8_isupper(unsigned long character)
+{
+	return ANT_UNICODE_tolower(character) != character;
+}
+
+/*
+	ANT_UNICODE_NORMALIZE_LOWERCASE_TOUTF8()
 	---------------------
 	Decompose the given Unicode character into its constituent parts (e.g. separate
 	characters into their base form + a combining mark character), then throw away
@@ -171,10 +181,12 @@ else
 	Writes the result as a UTF-8 string into the buffer buf with length buflen. The
 	string is not null-terminated.
 
-	Returns number of characters written to buf if successful, 0 otherwise
-	(e.g. buflen too small).
+	Updates buf to point past the characters written, and reduces buflen by the number
+	of bytes written.
+
+	Returns true if successful, 0 otherwise	(e.g. buflen too small).
 */
-unsigned int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character)
+int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character)
 {
 size_t num_dest_chars;
 const char * decomposition;
@@ -186,11 +198,10 @@ if (character <= LAST_ASCII_CHAR)
 	{
 	**buf = ANT_tolower((unsigned char) character);
 	
-	*buf++;
-	*buflen--;
+	*buf = *buf + 1;
+	*buflen = *buflen - 1;
 
-	/* Wrote 1 character: */
-	return sizeof(**buf);
+	return 1;
 	}
 
 decomposition = ANT_UNICODE_search_decomposition(character);
@@ -200,10 +211,10 @@ if (!decomposition)
 	/* This character decomposes to itself. */
 	num_dest_chars = wide_to_utf8(*buf, *buflen, character);
 
-	*buflen -= num_dest_chars;
-	*buf += num_dest_chars;
+	*buf = *buf + num_dest_chars;
+	*buflen = *buflen - num_dest_chars;
 
-	return num_dest_chars;
+	return num_dest_chars; //Zero if wide_to_utf8 ran out of room
 	}
 else
 	{
@@ -214,10 +225,10 @@ else
 
 	memcpy(*buf, decomposition, num_dest_chars * sizeof(*decomposition));
 
-	*buflen -= num_dest_chars;
-	*buf += num_dest_chars;
+	*buf = *buf + num_dest_chars;
+	*buflen = *buflen - num_dest_chars;
 
-	return num_dest_chars;
+	return 1;
 	}
 }
 
