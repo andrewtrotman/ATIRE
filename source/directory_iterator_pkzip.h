@@ -36,6 +36,7 @@ private:
 private:
 	void read_and_forget(unsigned long long bytes);
 	unsigned long long read_central_directory_header(void);
+	void read_central_directory(void);
 
 public:
 	ANT_directory_iterator_pkzip(char *filename, long get_file = 0);

@@ -142,6 +142,68 @@ file->read(buffer, bytes % sizeof(buffer));
 }
 
 /*
+	ANT_DIRECTORY_ITERATOR_PKZIP::READ_CENTRAL_DIRECTORY()
+	------------------------------------------------------
+*/
+void ANT_directory_iterator_pkzip::read_central_directory(void)
+{
+ANT_directory_iterator_pkzip_internals::ANT_ZIP_central_directory_file_header file_header;
+ANT_directory_iterator_pkzip_internals::ANT_ZIP_extra_field_header extras;
+ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_extended_information_extra_field *extra_field;
+unsigned long long current;
+uint32_t signature;
+uint64_t compressed_size, uncompressed_size;
+uint16_t length, flags, id, size, got;
+
+file->seek(directory_position);
+
+for (current = 0; current < directory_files; current++)
+	{
+	file->read((unsigned char *)&file_header, sizeof(file_header));
+	signature = ANT_get_unsigned_long(file_header.signature);
+	if (signature != 0x02014b50)
+		{
+		exit(printf("ANT ZIP Reader found a broken signature (%lx) when expecting a file-header signature (%lx)\n", signature, (long)0x02014b50));
+		return;
+		}
+	flags = ANT_get_unsigned_short(file_header.general_purpose_bit_flag);
+	if (flags & 0x08)
+		exit(printf("ANT ZIP Reader cannot decompress ZIPped streams\n"));
+
+	compressed_size = ANT_get_unsigned_long(file_header.compressed_size);
+	uncompressed_size = ANT_get_unsigned_long(file_header.uncompressed_size);
+	length = ANT_get_unsigned_short(file_header.file_name_length);
+	file->read(buffer, length);
+
+//	printf("Found:%*.*s  ", length, length, buffer);
+
+	length = ANT_get_unsigned_short(file_header.extra_field_length);
+	got = 0;
+	while (got < length)
+		{
+		got += sizeof(extras);
+		file->read((unsigned char *)&extras, sizeof(extras));
+
+		id = ANT_get_unsigned_short(extras.id);
+		size = ANT_get_unsigned_short(extras.size);
+		got += size;
+		file->read(buffer, size);
+		if (id == 0x0001)			// ZIP64 extended information extra field
+			{
+			extra_field = (ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_extended_information_extra_field *)buffer;
+			compressed_size = ANT_get_unsigned_long_long(extra_field->compressed_size);
+			uncompressed_size = ANT_get_unsigned_long_long(extra_field->uncompressed_size);
+			}
+		}
+
+//	printf("(%lld -> %lld)\n", compressed_size, uncompressed_size);
+
+	length = ANT_get_unsigned_short(file_header.file_comment_length);
+	read_and_forget(length);
+	}
+}
+
+/*
 	ANT_DIRECTORY_ITERATOR_PKZIP::FIRST()
 	-------------------------------------
 */
@@ -149,6 +211,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_pkzip::first(ANT_directory
 {
 files_read = 0;
 read_central_directory_header();
+read_central_directory();
 file->seek(0);
 
 return next(object);
@@ -195,7 +258,7 @@ method = ANT_get_unsigned_short(lfh.compression_method);
 flags = ANT_get_unsigned_short(lfh.general_purpose_bit_flag);
 version = ANT_get_unsigned_short(lfh.version_needed_to_extract);
 
-if (flags & 0x04)
+if (flags & 0x08)
 	exit(printf("ANT ZIP Reader cannot decompress ZIPped streams\n"));
 
 extradata_length = ANT_get_unsigned_short(lfh.extra_field_length);

@@ -17,6 +17,59 @@ class ANT_directory_iterator_pkzip_internals
 {
 public: 
 	/*
+		class ANT_ZIP_CENTRAL_DIRECTORY_FILE_HEADER
+		-------------------------------------------
+	*/
+	class ANT_ZIP_central_directory_file_header
+	{
+	public:
+		unsigned char signature[4];		// 0x02014b50
+		unsigned char version_made_by[2];
+		unsigned char version_needed_to_extract[2];
+		unsigned char general_purpose_bit_flag[2];
+		unsigned char compression_method[2];
+		unsigned char last_mod_file_time[2];
+		unsigned char last_mod_file_date[2];
+		unsigned char crc_32[4];
+		unsigned char compressed_size[4];
+		unsigned char uncompressed_size[4];
+		unsigned char file_name_length[2];
+		unsigned char extra_field_length[2];
+		unsigned char file_comment_length[2];
+		unsigned char disk_number_start[2];
+		unsigned char internal_file_attributes[2];
+		unsigned char external_file_attributes[4];
+		unsigned char relative_offset_of_local_header[4];
+//		file name (variable size)
+//		extra field (variable size)
+//		file comment (variable size)
+	};
+
+	/*
+		class ANT_ZIP_EXTRA_FIELD_HEADER
+		--------------------------------
+	*/
+	class ANT_ZIP_extra_field_header
+	{
+	public:
+		unsigned char id[2];
+		unsigned char size[2];
+	};
+
+	/*
+		class ANT_ZIP_ZIP64_EXTENDED_INFORMATION_EXTRA_FIELD
+		----------------------------------------------------
+	*/
+	class ANT_ZIP_zip64_extended_information_extra_field
+	{
+	public:
+		unsigned char uncompressed_size[8];
+		unsigned char compressed_size[8];
+		unsigned char relative_header_offset[8];
+		unsigned char disk_start_number[4];
+	};
+
+	/*
 		class ANT_ZIP_END_OF_CENTRAL_DIRECTORY_RECORD
 		---------------------------------------------
 	*/
