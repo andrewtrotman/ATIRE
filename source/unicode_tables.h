@@ -9,7 +9,8 @@
 extern const char * ANT_UNICODE_chartype_string[7];
 
 enum ANT_UNICODE_chartype {
-	CT_LETTER, CT_NUMBER, CT_PUNCTUATION, CT_SEPARATOR, CT_OTHER, CT_MARK
+	CT_LETTER=0, CT_NUMBER=1, CT_PUNCTUATION=2, CT_SEPARATOR=3, CT_OTHER=4, CT_MARK=5,
+	CT_CHINESE=128
 };
 
 /*
@@ -24,6 +25,6 @@ long ANT_UNICODE_tolower(long character);
 long ANT_UNICODE_toupper(long character);
 
 const char* ANT_UNICODE_search_decomposition(long character);
-ANT_UNICODE_chartype ANT_UNICODE_search_chartype(long character);
+unsigned char ANT_UNICODE_search_chartype(long character);
 
 #endif /* UNICODE_TABLES_H_ */

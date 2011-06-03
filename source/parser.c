@@ -64,8 +64,7 @@ ANT_parser_token *ANT_parser::get_next_token(void)
 unsigned char *start, *here;
 long word_count = 0, pre_length_of_token = 0;
 unsigned long character;
-ANT_UNICODE_chartype chartype;
-long is_chinese = 0;
+unsigned char chartype;
 size_t bufferlen;
 char * bufferpos;
 
@@ -114,28 +113,19 @@ for (;;)
 	if (character==0)
 		return NULL;
 
-	if (ischinese(character))
-		{
-		chartype = CT_LETTER;
-		is_chinese = 1;
+	chartype = unicode_chartype_set(character);
+
+	if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION || (chartype & CT_CHINESE))
 		break;
-		}
-	else
-		{
-		chartype = unicode_chartype(character);
 
-		if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION)
-			break;
-
-		current++;
-		}
+	current++;
 	}
 
 /*
 	Now we look at the first character as it defines how parse the next token
 */
 
-if (chartype == CT_LETTER && !is_chinese)
+if (chartype == CT_LETTER)
 	{
 	start = current;
 	current += utf8_bytes(character);
@@ -181,7 +171,7 @@ else if (chartype == CT_PUNCTUATION && *current != '<')
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (is_chinese)
+else if (chartype & CT_CHINESE)
 	{
 	word_count = 1;
 	start = current;

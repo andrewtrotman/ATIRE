@@ -107,7 +107,7 @@ else if (length == 1)
 		from_character = utf8_to_wide(from);
 		next_character = utf8_to_wide(next);
 
-		if (ANT_parser::ischinese(from_character))
+		if (ischinese(from_character))
 			{
 			/*
 				If we want to generate one Chinese string for later segmentaton then
@@ -123,7 +123,7 @@ else if (length == 1)
 			*/
 			if (segmentation)
 				return FALSE;
-			return ANT_parser::ischinese(next_character);
+			return ischinese(next_character);
 			}
 		else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
 			if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER)
@@ -152,8 +152,8 @@ else
 			return TRUE;
 		else
 			return FALSE;
-	else if (ANT_parser::ischinese(from_character))
-		return ANT_parser::ischinese(next_character);		// This can only happen if we later segment, it can never happen without segmentation
+	else if (ischinese(from_character))
+		return ischinese(next_character);		// This can only happen if we later segment, it can never happen without segmentation
 	else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
 		if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER
 				|| *next == '-' || *next == '\'')
@@ -428,7 +428,7 @@ do
 		character = utf8_to_wide(token.start);
 
 		if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER &&
-				token[0] != '-' && !ANT_parser::ischinese(character))
+				token[0] != '-' && !ischinese(character))
 			more = FALSE;
 		}
 	if (more)

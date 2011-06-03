@@ -51,7 +51,7 @@ while ((token = readability->get_next_token()) != NULL)
 		case TT_WORD:
 			terms_in_document++;
 
-			if (ANT_parser::ischinese(token->start))
+			if (ischinese(token->start))
 				{
 				readability->handle_node(indexer->add_term(token, doc));
 				

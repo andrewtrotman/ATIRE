@@ -101,8 +101,8 @@ if ((**src & 0x80) == 0) //ASCII
 	if (*destlen)
 		{
 		**dest = lowerchar;
-		*dest++;
-		*destlen--;
+		(*dest)++;
+		(*destlen)--;
 		success = 1;
 		}
 	else
@@ -174,7 +174,7 @@ int utf8_isupper(unsigned long character)
 /*
 	ANT_UNICODE_NORMALIZE_LOWERCASE_TOUTF8()
 	---------------------
-	Decompose the given Unicode character into its constituent parts (e.g. separate
+	Decompose the given Unicode character into its constituent parts (i.e. separate
 	characters into their base form + a combining mark character), then throw away
 	the combining marks and convert the character to lowercase.
 
@@ -233,6 +233,34 @@ else
 }
 
 /*
+	UNICODE_CHARTYPE_SET()
+	---------------------
+	Classify the given Unicode character, including flags like CT_CHINESE
+	for characters which are also Chinese.
+*/
+unsigned char unicode_chartype_set(unsigned long character)
+{
+	//Use ASCII table if possible
+	if (character <= LAST_ASCII_CHAR)
+		{
+		int c = (int) character;
+
+		if (ANT_isalpha(c))
+			return CT_LETTER;
+		if (ANT_isdigit(c))
+			return CT_NUMBER;
+		if (ANT_ispunct(c))
+			return CT_PUNCTUATION;
+		if (ANT_isspace(c))
+			return CT_SEPARATOR;
+
+		return CT_OTHER;
+		}
+
+	return ANT_UNICODE_search_chartype(character);
+}
+
+/*
 	UNICODE_CHARTYPE()
 	---------------------
 	Classify the given Unicode character.
@@ -256,5 +284,6 @@ ANT_UNICODE_chartype unicode_chartype(unsigned long character)
 		return CT_OTHER;
 		}
 
-	return ANT_UNICODE_search_chartype(character);
+	//Caller not interested in flags, strip them out so we get a nice pure enum
+	return (ANT_UNICODE_chartype) (ANT_UNICODE_search_chartype(character) & !CT_CHINESE);
 }

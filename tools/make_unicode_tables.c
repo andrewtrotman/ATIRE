@@ -287,7 +287,7 @@ switch (mode)
 		printf("ANT_UNICODE_decomposition ANT_UNICODE_decomposition[] = {\n");
 		break;
 	case CHARTYPE:
-		printf("ANT_UNICODE_char_chartype ANT_UNICODE_char_chartype[] = {\n");
+		printf("unsigned char ANT_UNICODE_char_chartype[] = {\n");
 		break;
 	}
 
@@ -378,11 +378,25 @@ for (current = lines; *current != NULL; current++)
 						printf("\n");
 					}
 
-				printf("{%ld, %s}", character, ANT_UNICODE_chartype_string[(int) chartype]);
+				printf("{%ld, (unsigned char)(%s%s)}", character, ANT_UNICODE_chartype_string[(int) chartype],
+						ischinese(character) ? " | CT_CHINESE" : "");
 
 				times++;
 				break;
 			default:
+				if (ischinese(character))
+					{
+					if (times != 0)
+						{
+						printf(", ");
+						if (times % 16 == 0)
+							printf("\n");
+						}
+
+					printf("{%ld, (unsigned char) (CT_OTHER | CT_CHINESE)}", character);
+
+					times++;
+					}
 				break;
 			}
 		}

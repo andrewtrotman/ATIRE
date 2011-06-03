@@ -61,39 +61,9 @@ public:
 
 	virtual void segment(unsigned char *start, long length);
 
-	static int ischinese(unsigned long character);
-	static int ischinese(unsigned char *here);
-	static int ischinese(char *here) { return ischinese((unsigned char *)here); }
-
 	void set_document(unsigned char *document);
 	virtual ANT_parser_token *get_next_token(void);
 } ;
-
-/*
-	ANT_PARSER::ISCHINESE()
-	-----------------------
-	Is the given character from the Chinese CodePoint?
-*/
-inline int ANT_parser::ischinese(unsigned long character)
-{
-return
-	character >= 0x03400 &&
-	 ((character <= 0x04dbf)								// CJK Unified Ideographs Extension A
-	 || (character >= 0x04e00 && character <= 0x09fff)		// CJK Unified Ideographs
-	 || (character >= 0x0f900 && character <= 0x0faff)		// CJK Compatibility Ideographs
-	 || (character >= 0x20000 && character <= 0x2a6df)		// CJK Unified Ideographs Extension B
-	 || (character >= 0x2f800 && character <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
-}
-
-/*
-	ANT_PARSER::ISCHINESE()
-	-----------------------
-	Is the given character from the Chinese CodePoint?
-*/
-inline int ANT_parser::ischinese(unsigned char *here)
-{
-return ischinese(utf8_to_wide(here));
-}
 
 #endif  /* PARSER_H_ */
 

@@ -21,7 +21,7 @@
 struct ANT_UNICODE_char_chartype
 {
 	long character;
-	ANT_UNICODE_chartype type;
+	unsigned char type;
 };
 
 struct ANT_UNICODE_decomposition
@@ -35,6 +35,10 @@ enum ANT_UNICODE_xml_char_class {
 	XMLCC_NAME = 2,
 };
 
+int ischinese(unsigned long character);
+int ischinese(unsigned char *here);
+inline int ischinese(char *here) { return ischinese((unsigned char *)here); }
+
 int utf8_isupper(unsigned long character);
 
 int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src);
@@ -42,6 +46,7 @@ unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *) utf8_tolower((unsigned char *) here); }
 
 ANT_UNICODE_chartype unicode_chartype(unsigned long character);
+unsigned char unicode_chartype_set(unsigned long character);
 int unicode_xml_class(unsigned long character);
 
 int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character);
@@ -168,7 +173,7 @@ switch (numchars)
 }
 
 /**
- * Compared to the _safe version, this version Can read up to 3 bytes past the
+ * Compared to the _safe version, this version can read up to 3 bytes past the
  * null-terminator of the string at here.
  */
 inline unsigned long utf8_to_wide_unsafe(unsigned char *here)
@@ -219,6 +224,32 @@ return 1;
 }
 inline int isutf8(char *here) {
 	return isutf8((unsigned char *) here);
+}
+
+/*
+	ISCHINESE()
+	-----------------------
+	Is the given character from the Chinese CodePoint?
+*/
+inline int ischinese(unsigned long character)
+{
+return
+	character >= 0x03400 &&
+	 ((character <= 0x04dbf)								// CJK Unified Ideographs Extension A
+	 || (character >= 0x04e00 && character <= 0x09fff)		// CJK Unified Ideographs
+	 || (character >= 0x0f900 && character <= 0x0faff)		// CJK Compatibility Ideographs
+	 || (character >= 0x20000 && character <= 0x2a6df)		// CJK Unified Ideographs Extension B
+	 || (character >= 0x2f800 && character <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
+}
+
+/*
+	ISCHINESE()
+	-----------------------
+	Is the given character from the Chinese CodePoint?
+*/
+inline int ischinese(unsigned char *here)
+{
+return ischinese(utf8_to_wide(here));
 }
 
 #endif /* UNICODE_H_ */
