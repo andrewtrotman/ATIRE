@@ -105,6 +105,9 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	char *this_term = term;
 	long this_offset = offset;
 	ANT_link_term *this_link_term = link_term;
+	int how_many_left = beps_to_print;
+
+	stringstream stringbuffer;
 
 	if (ret && translate_anchor_for_linking == 2) {
 		tran = translation::instance().translate(this_term, (std::string(source_lang) + "|" + std::string(target_lang)).c_str());
@@ -123,8 +126,8 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 		else
 			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, strlen(this_term), this_term);
 		std::string anchor_tag(buf);
-		if (fill_anchor_with_ir_results != 2 && this_link_term->postings.size() > 0) {
-			aout << anchor_tag;
+		if (fill_anchor_with_ir_results && fill_anchor_with_ir_results != 2/* && this_link_term->postings.size() > 0*/) {
+			stringbuffer << anchor_tag;
 			anchor_printed = true;
 			for (int i = 0; i < this_link_term->postings.size(); i++) {
 				if (this_link_term->postings[i]->docid < 0 && id_or_name)
@@ -151,7 +154,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 #else
 				sprintf(buf, format, this_link_term->postings[i]->offset, id);
 #endif
-				aout << buf;
+				stringbuffer << buf;
 				++count;
 				if (count >= beps_to_print)
 					break;
@@ -160,7 +163,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 		else
 			ret = false;
 
-		int how_many_left = beps_to_print - count;
+		how_many_left = beps_to_print - count;
 		if (fill_anchor_with_ir_results && how_many_left > 0) {
 			long long result = 0;
 			string lang_pair = string(source_lang) + "|" + string(target_lang);
@@ -172,7 +175,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			long doc_id = -1;
 			if (hits > 0) {
 				if (!anchor_printed) {
-					aout << anchor_tag;
+					stringbuffer << anchor_tag;
 					anchor_printed = true;
 				}
 				ret = true;
@@ -191,15 +194,20 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 				}
 				std::string target_title = corpus::instance().gettitle(filename);
 				sprintf(buf, format, 0, target_lang, target_title.c_str(), doc_id);
-				aout << buf;
+				stringbuffer << buf;
 			}
 		}
-		if (anchor_printed && how_many_left == beps_to_print)
-			cerr << "Something funny happened." << endl;
 		//puts("\t\t\t</anchor>\n");
 		if (anchor_printed)
-			aout << "\t\t\t</anchor>\n";
+			stringbuffer << "\t\t\t</anchor>\n";
 	}
+	if (how_many_left == beps_to_print) {
+		cerr << "Something funny happened." << endl;
+		ret = false;
+	}
+
+	if (ret)
+		aout << stringbuffer.str();
 	return ret;
 }
 
