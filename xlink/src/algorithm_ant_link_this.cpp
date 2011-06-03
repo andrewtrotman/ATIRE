@@ -60,18 +60,25 @@ algorithm_ant_link_this::~algorithm_ant_link_this()
 //		delete link_index_[i];
 //	}
 	delete [] link_index_;
+	if (topic_with_links_) {
+		delete topic_with_links_;
+		topic_with_links_ = NULL;
+	}
 }
 
 void algorithm_ant_link_this::init_variables()
 {
 	//link_index = NULL;
 	lowercase_only = FALSE;
+	topic_with_links_ = NULL;
 
 	string crosslink_table = run_config::instance().get_value("crosslink_table");
 	if (crosslink_table.length() > 0) {
 //		crosslink_ = true;
 		load_crosslink_table(crosslink_table);
 	}
+
+	topic_with_links_path_ = run_config::instance().get_value("topic_with_links_path");
 }
 
 void algorithm_ant_link_this::load_crosslink_table(std::string& filename)
@@ -414,9 +421,22 @@ void algorithm_ant_link_this::process_topic(ltw_topic *a_topic)
 	orphan_docid_ = get_doc_id(xml);
 	get_doc_name(xml, orphan_name_);
 
+    char *links_file = xml;
+    string filepath;
 
+	if (topic_with_links_path_.length() > 0) {
+		stringstream topic_with_links_file;
+		topic_with_links_file << topic_with_links_path_ << sys_file::SEPARATOR << a_topic->get_id() << ".xml";
+		filepath = topic_with_links_file.str();
+		if (sys_file::exist(filepath.c_str())) {
+			topic_with_links_ = new ltw_topic(filepath.c_str());
+			links_file = topic_with_links_->get_content();
+		}
+		else
+			cerr << "No file for advising the original links is found: " << filepath << endl;
+	}
 #ifdef REMOVE_ORPHAN_LINKS
-	generate_collection_link_set(xml);
+	generate_collection_link_set(links_file);
 	add_or_subtract_orphan_links(SUBTRACT_ORPHAN_LINKS, link_index_, terms_in_index);
 #endif
 

@@ -13,6 +13,7 @@
  */
 #include "algorithm_out.h"
 #include "ant_link.h"
+#include "ltw_topic.h"
 #include <vector>
 #include <map>
 
@@ -29,7 +30,7 @@ namespace QLINK {
 	//	long *links_in_orphan_length;
 
 		//std::vector<ANT_link_term *>	link_index_;
-		ANT_link_term 	*link_index_;
+		ANT_link_term 							*link_index_;
 
 
 //		double 			proper_noun_boost;
@@ -38,6 +39,8 @@ namespace QLINK {
 //		long 			print_mode;
 
 		std::map<unsigned long, unsigned long>	crosslink_table_;
+		std::string								topic_with_links_path_;
+		ltw_topic								*topic_with_links_;
 
 	protected:
 		char orphan_name_[2048];

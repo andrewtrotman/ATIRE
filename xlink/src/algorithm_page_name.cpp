@@ -62,6 +62,7 @@ namespace QLINK
 			return;
 
 		ifstream myfile (filename.c_str());
+		cerr << "loading file " << filename << endl;
 		int count = 0;
 		if (myfile.is_open()) {
 			while (! myfile.eof()) {
@@ -98,8 +99,8 @@ namespace QLINK
 					if (index_term == NULL || string_compare(index_term->term, title_pair.first.c_str()) != 0) {
 //					if (iter == names_map_.end() || iter->second == NULL) {
 						//wiki_entry_array wea;
-						if (index_term != NULL)
-							cerr << title_pair.first << " is a unique term to " << index_term->term << endl;
+//						if (index_term != NULL)
+//							cerr << title_pair.first << " is a unique term to " << index_term->term << endl;
 
 						ANT_link_term *term = new ANT_link_term;
 						term->term = strdup(title_pair.first.c_str());

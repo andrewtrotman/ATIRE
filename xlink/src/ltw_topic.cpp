@@ -58,5 +58,5 @@ void ltw_topic::xml_to_text()
 	 *
 	 */
 	std::string text_file = number_to_string(id_) + ".txt";
-	sys_file::write(text_of_xml_, text_file.c_str());
+//	sys_file::write(text_of_xml_, text_file.c_str());
 }
