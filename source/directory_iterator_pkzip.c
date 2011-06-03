@@ -3,6 +3,7 @@
 	--------------------------
 */
 #include <stdio.h>
+#include <new>
 
 #ifdef ANT_HAS_ZLIB
 	#include "zlib.h"
@@ -23,6 +24,8 @@
 */
 ANT_directory_iterator_pkzip::ANT_directory_iterator_pkzip(char *filename, long get_file) : ANT_directory_iterator(filename, get_file)
 {
+directory = NULL;
+zip_stream = FALSE;
 memory = new ANT_memory(1024 * 1024);
 file = new ANT_file;
 
@@ -152,10 +155,13 @@ ANT_directory_iterator_pkzip_internals::ANT_ZIP_extra_field_header extras;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_extended_information_extra_field *extra_field;
 unsigned long long current;
 uint32_t signature;
-uint64_t compressed_size, uncompressed_size;
+uint64_t compressed_size, uncompressed_size, offset;
 uint16_t length, flags, id, size, got;
 
 file->seek(directory_position);
+
+if ((directory = new (std::nothrow) ANT_directory_iterator_pkzip_internals::ANT_ZIP_file_stats[(size_t)directory_length]) == NULL)
+	exit(printf("ANT ZIP Reader Cannot allocate room for the central directory (%lld files)\n", directory_length));
 
 for (current = 0; current < directory_files; current++)
 	{
@@ -167,16 +173,36 @@ for (current = 0; current < directory_files; current++)
 		return;
 		}
 	flags = ANT_get_unsigned_short(file_header.general_purpose_bit_flag);
-	if (flags & 0x08)
-		exit(printf("ANT ZIP Reader cannot decompress ZIPped streams\n"));
 
+	/*
+		Check the ZIP stream bit.  If its set then the contents of the directory must be read into memory
+		because the archive doesn't have compressed and uncompressed sizes stored in the local_file_header.
+		To get the compressed and uncompressed files its necessary to read them from the central directory.
+	*/
+	if (flags & 0x08)
+		zip_stream = TRUE;
+
+	/*
+		We're a zip-stream and so we need to keep track of the file details
+	*/
 	compressed_size = ANT_get_unsigned_long(file_header.compressed_size);
 	uncompressed_size = ANT_get_unsigned_long(file_header.uncompressed_size);
+	offset = ANT_get_unsigned_long(file_header.relative_offset_of_local_header);
+
+	/*
+		File name
+	*/
 	length = ANT_get_unsigned_short(file_header.file_name_length);
+#ifdef NEVER
 	file->read(buffer, length);
+	printf("Found:%*.*s  ", length, length, buffer);
+#else
+	read_and_forget(length);
+#endif
 
-//	printf("Found:%*.*s  ", length, length, buffer);
-
+	/*
+		Extra Field
+	*/
 	length = ANT_get_unsigned_short(file_header.extra_field_length);
 	got = 0;
 	while (got < length)
@@ -187,19 +213,34 @@ for (current = 0; current < directory_files; current++)
 		id = ANT_get_unsigned_short(extras.id);
 		size = ANT_get_unsigned_short(extras.size);
 		got += size;
-		file->read(buffer, size);
-		if (id == 0x0001)			// ZIP64 extended information extra field
+		if (size >= sizeof(buffer))
+			read_and_forget(size);			// the extra field is too large so forget it
+		else
 			{
-			extra_field = (ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_extended_information_extra_field *)buffer;
-			compressed_size = ANT_get_unsigned_long_long(extra_field->compressed_size);
-			uncompressed_size = ANT_get_unsigned_long_long(extra_field->uncompressed_size);
+			file->read(buffer, size);
+			if (id == 0x0001)			// ZIP64 extended information extra field
+				{
+				extra_field = (ANT_directory_iterator_pkzip_internals::ANT_ZIP_zip64_extended_information_extra_field *)buffer;
+				if (compressed_size == 0xFFFFFFFF)
+					compressed_size = ANT_get_unsigned_long_long(extra_field->compressed_size);
+				if (uncompressed_size == 0xFFFFFFFF)
+					uncompressed_size = ANT_get_unsigned_long_long(extra_field->uncompressed_size);
+				if (offset == 0xFFFFFFFF)
+					offset = ANT_get_unsigned_long_long(extra_field->relative_header_offset);
+				}
 			}
 		}
 
-//	printf("(%lld -> %lld)\n", compressed_size, uncompressed_size);
-
+	/*
+		File comment
+	*/
+	//	printf("(%lld -> %lld)\n", compressed_size, uncompressed_size);
 	length = ANT_get_unsigned_short(file_header.file_comment_length);
 	read_and_forget(length);
+
+	directory[current].location = offset;
+	directory[current].compressed_size = compressed_size;
+	directory[current].uncompressed_size = uncompressed_size;
 	}
 }
 
@@ -212,7 +253,10 @@ ANT_directory_iterator_object *ANT_directory_iterator_pkzip::first(ANT_directory
 files_read = 0;
 read_central_directory_header();
 read_central_directory();
-file->seek(0);
+file->seek(directory[0].location);			// seek to the start of the first file
+
+//if (zip_stream)
+//	exit(printf("ANT ZIP Reader cannot decompress ZIPped streams\n"));
 
 return next(object);
 }
@@ -223,7 +267,25 @@ return next(object);
 */
 ANT_directory_iterator_object *ANT_directory_iterator_pkzip::next(ANT_directory_iterator_object *object)
 {
+ANT_directory_iterator_object *got;
+
+do
+	got = next_file(object);
+while (got != NULL && got->length == 0);
+
+return got;
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_PKZIP::NEXT_FILE()
+	-----------------------------------------
+*/
+ANT_directory_iterator_object *ANT_directory_iterator_pkzip::next_file(ANT_directory_iterator_object *object)
+{
+unsigned long long disk_file_location;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_local_file_header lfh;
+ANT_directory_iterator_pkzip_internals::ANT_ZIP_data_descriptor data_descriptor;
+unsigned char signature_bytes[4];
 uint16_t filename_length, extradata_length, method, flags, version;
 uint32_t compressed_data_length, raw_data_length, signature;
 unsigned char *compressed_data;
@@ -233,6 +295,8 @@ unsigned char *compressed_data;
 
 if (files_read >= directory_files)
 	return NULL;
+
+disk_file_location = file->tell();
 
 file->read((unsigned char *)&lfh, sizeof(lfh));
 signature = ANT_get_unsigned_long(lfh.signature);
@@ -252,79 +316,102 @@ if (filename_length > PATH_MAX)
 file->read((unsigned char *)object->filename, filename_length);
 object->filename[filename_length] = '\0';
 
-compressed_data_length = ANT_get_unsigned_long(lfh.compressed_size);
-raw_data_length = ANT_get_unsigned_long(lfh.uncompressed_size);
+if (zip_stream)
+	{
+	if (directory[files_read].location != disk_file_location)
+		exit(printf("ANT ZIP Reader file in archive in unexpected location"));
+
+	compressed_data_length = (uint32_t)directory[files_read].compressed_size;
+	raw_data_length = (uint32_t)directory[files_read].uncompressed_size;
+	}
+else
+	{
+	compressed_data_length = ANT_get_unsigned_long(lfh.compressed_size);
+	raw_data_length = ANT_get_unsigned_long(lfh.uncompressed_size);
+	}
+
 method = ANT_get_unsigned_short(lfh.compression_method);
 flags = ANT_get_unsigned_short(lfh.general_purpose_bit_flag);
 version = ANT_get_unsigned_short(lfh.version_needed_to_extract);
-
-if (flags & 0x08)
-	exit(printf("ANT ZIP Reader cannot decompress ZIPped streams\n"));
 
 extradata_length = ANT_get_unsigned_short(lfh.extra_field_length);
 read_and_forget(extradata_length);
 
 files_read++;
 
-/*
-	If the length of the source file is zero then skip it.
-*/
-if (raw_data_length == 0)
-	return next(object);
-
 //printf("%*.*s (%u bytes -> %u bytes (using:%d, v:%d))\n", filename_length, filename_length, object->filename, compressed_data_length, raw_data_length, method, version);
 
 /*
-	Now load and decompress the file
+	If the length of the source file is zero then skip it.
 */
-if ((compressed_data = new (std::nothrow) unsigned char [compressed_data_length + 1]) == NULL)
-	exit(printf("ANT ZIP Reader cannot allocate %lu bytes for the compressed file\n", compressed_data_length));
-
-file->read(compressed_data, compressed_data_length);
-
-if (method == PKZIP_METHOD_STORED)
+if (raw_data_length > 0)
 	{
-	if (get_file)
+	/*
+		Now load and decompress the file
+	*/
+	if ((compressed_data = new (std::nothrow) unsigned char [compressed_data_length + 1]) == NULL)
+		exit(printf("ANT ZIP Reader cannot allocate %lu bytes for the compressed file\n", compressed_data_length));
+
+	file->read(compressed_data, compressed_data_length);
+
+	if (method == PKZIP_METHOD_STORED)
 		{
-		object->file = (char *)compressed_data;
-		compressed_data = NULL;
+		if (get_file)
+			{
+			object->file = (char *)compressed_data;
+			compressed_data = NULL;
+			}
 		}
-	}
-else if (method == PKZIP_METHOD_DEFLATE)
-	{
-#ifdef ANT_HAS_ZLIB
-	object->file = new char [raw_data_length + 1];
+	else if (method == PKZIP_METHOD_DEFLATE)
+		{
+	#ifdef ANT_HAS_ZLIB
+		object->file = new char [raw_data_length + 1];
 
-	internals->stream.avail_in = compressed_data_length;
-	internals->stream.next_in = (Bytef *)compressed_data;
-	internals->stream.avail_out = raw_data_length;
-	internals->stream.next_out = (Bytef *)object->file;
+		internals->stream.avail_in = compressed_data_length;
+		internals->stream.next_in = (Bytef *)compressed_data;
+		internals->stream.avail_out = raw_data_length;
+		internals->stream.next_out = (Bytef *)object->file;
 
-	if (inflateReset(&internals->stream) != Z_OK)
-		exit(printf("Cannot reset the DEFLATE decompressor\n"));
-	if (inflate(&internals->stream, Z_SYNC_FLUSH) != Z_STREAM_END)
-		exit(printf("Cannot INFLATE document:%s\n", object->filename));
-#else
-	exit(printf("You are trying to decompress a zip file but ZLIB is not included in this build"));
-#endif
-	}
-else if (method == PKZIP_METHOD_BZ2)
-	{
-#ifdef ANT_HAS_BZLIB
-	object->file = new char [raw_data_length + 1];
-	raw_data_length_for_bz2 = raw_data_length;
-	if (BZ2_bzBuffToBuffDecompress(object->file, &raw_data_length_for_bz2, (char *)compressed_data, compressed_data_length, 0, 0) != BZ_OK)
-		exit(printf("Cannot BZ2 Decompress document:%s\n", object->filename));
-#else
-	exit(printf("You are trying to decompress a zip file but BZLIB is not included in this build"));
-#endif
-	}
-else
-	exit(printf("You are trying to decompress a zip file but ANT does not have a suitable decompressor\n"));
+		if (inflateReset(&internals->stream) != Z_OK)
+			exit(printf("Cannot reset the DEFLATE decompressor\n"));
+		if (inflate(&internals->stream, Z_SYNC_FLUSH) != Z_STREAM_END)
+			exit(printf("Cannot INFLATE document:%s\n", object->filename));
+	#else
+		exit(printf("You are trying to decompress a zip file but ZLIB is not included in this build"));
+	#endif
+		}
+	else if (method == PKZIP_METHOD_BZ2)
+		{
+	#ifdef ANT_HAS_BZLIB
+		object->file = new char [raw_data_length + 1];
+		raw_data_length_for_bz2 = raw_data_length;
+		if (BZ2_bzBuffToBuffDecompress(object->file, &raw_data_length_for_bz2, (char *)compressed_data, compressed_data_length, 0, 0) != BZ_OK)
+			exit(printf("Cannot BZ2 Decompress document:%s\n", object->filename));
+	#else
+		exit(printf("You are trying to decompress a zip file but BZLIB is not included in this build"));
+	#endif
+		}
+	else
+		exit(printf("You are trying to decompress a zip file but ANT does not have a suitable decompressor\n"));
 
-object->file[raw_data_length] = '\0';
+	object->file[raw_data_length] = '\0';
+	delete [] compressed_data;
+	}
+
 object->length = raw_data_length;
-delete [] compressed_data;
+
+/*
+	Finally, we expect a ZIP Data Descriptor if we're in a zip stream
+*/
+if (zip_stream && raw_data_length > 0)
+	{
+	file->read(signature_bytes, sizeof(signature_bytes));
+	signature = ANT_get_unsigned_long(signature_bytes);
+	if (signature == 0x08074b50)
+		file->read((unsigned char *)&data_descriptor, sizeof(data_descriptor));
+	else
+		read_and_forget(sizeof(data_descriptor) - sizeof(signature_bytes));
+	}
 
 return object;
 }

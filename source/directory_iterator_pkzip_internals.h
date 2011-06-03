@@ -139,6 +139,31 @@ public:
 		unsigned char offset_to_central_directory[8];
 		/* then there is the zip64 extensible data sector */
 	} ;
+
+	/*
+		class ANT_ZIP_DATA_DESCRIPTOR
+		-----------------------------
+	*/
+	class ANT_ZIP_data_descriptor
+	{
+	public:
+		unsigned char crc_32[4];
+		unsigned char compressed_size[4];
+		unsigned char uncompressed_size[4];
+	} ;
+
+	/*
+		class ANT_ZIP_FILE_STATS
+		------------------------
+	*/
+	class ANT_ZIP_file_stats
+	{
+	public:
+		unsigned long long location;				// file offset from start of file (ftell() position)
+		unsigned long long compressed_size;			// bytes on disk
+		unsigned long long uncompressed_size;		// bytes once decompressed
+	} ;
+
 public:
 #ifdef ANT_HAS_ZLIB
 	z_stream stream;
