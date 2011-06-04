@@ -25,7 +25,7 @@
 ANT_directory_iterator_pkzip::ANT_directory_iterator_pkzip(char *filename, long get_file) : ANT_directory_iterator(filename, get_file)
 {
 directory = NULL;
-zip_stream = FALSE;
+zip_stream = false;
 memory = new ANT_memory(1024 * 1024);
 file = new ANT_file;
 
@@ -169,7 +169,7 @@ for (current = 0; current < directory_files; current++)
 	signature = ANT_get_unsigned_long(file_header.signature);
 	if (signature != 0x02014b50)
 		{
-		exit(printf("ANT ZIP Reader found a broken signature (%lx) when expecting a file-header signature (%lx)\n", signature, (long)0x02014b50));
+		exit(printf("ANT ZIP Reader found a broken signature (%lx) when expecting a file-header signature (%lx)\n", (unsigned long)signature, (unsigned long)0x02014b50));
 		return;
 		}
 	flags = ANT_get_unsigned_short(file_header.general_purpose_bit_flag);
@@ -180,7 +180,7 @@ for (current = 0; current < directory_files; current++)
 		To get the compressed and uncompressed files its necessary to read them from the central directory.
 	*/
 	if (flags & 0x08)
-		zip_stream = TRUE;
+		zip_stream = true;
 
 	/*
 		We're a zip-stream and so we need to keep track of the file details
@@ -307,7 +307,7 @@ if (signature == 0x02014b50)
 	return NULL;		// we've found the central directory header (I'm not sure why we found it before we ran out of files though)
 	}
 if (signature != 0x04034b50)
-	exit(printf("ANT ZIP Reader found a broken signature (%lx) when expecting a local-file-header signature (%lx)\n", signature, (long)0x04034b50));
+	exit(printf("ANT ZIP Reader found a broken signature (%lx) when expecting a local-file-header signature (%lx)\n", (unsigned long)signature, (unsigned long)0x04034b50));
 if ((filename_length = ANT_get_unsigned_short(lfh.file_name_length)) == 0)
 	exit(printf("ANT ZIP Reader Cannot decompress files that don't have names\n"));
 if (filename_length > PATH_MAX)
@@ -350,7 +350,7 @@ if (raw_data_length > 0)
 		Now load and decompress the file
 	*/
 	if ((compressed_data = new (std::nothrow) unsigned char [compressed_data_length + 1]) == NULL)
-		exit(printf("ANT ZIP Reader cannot allocate %lu bytes for the compressed file\n", compressed_data_length));
+		exit(printf("ANT ZIP Reader cannot allocate %lu bytes for the compressed file\n", (unsigned long)compressed_data_length));
 
 	file->read(compressed_data, compressed_data_length);
 
