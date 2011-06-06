@@ -102,10 +102,13 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 
 			if (cmp == 0)		// we're a term in the list
 				{
-					if (!links_->find(buffer)) {
-						offset = assign_link_term(buffer, term_list);
-						add_link(index_term, term_list, offset);
-					}
+				if (strcmp("過年", buffer) == 0)
+					cerr << " I caught you" << endl;
+
+				if (!links_->find(buffer)) {
+					offset = assign_link_term(buffer, term_list);
+					add_link(index_term, term_list, offset);
+				}
 				}
 			else
 				{
@@ -127,10 +130,6 @@ long algorithm_out::assign_link_term(char *buffer, char **term_list)
 {
 	long term_len, offset, index;
 
-	if (strcmp("過年", buffer) == 0)
-		cerr << " I caught you" << endl;
-
-
 	if (!use_utf8_token_matching_) {
 		offset = current_term_ - source_;
 	}
@@ -143,7 +142,7 @@ long algorithm_out::assign_link_term(char *buffer, char **term_list)
 	strncpy(buffer_, offset + current_topic_->get_content(), term_len);
 
 	if (memcmp(buffer_, buffer, term_len) != 0) {
-		term_len = current_topic_->get_term_len(offset, buffer/*, ltw_task_->is_cjk_lang()*/);
+		term_len = current_topic_->get_term_len(offset, buffer, ltw_task_->is_cjk_lang());
 		strncpy(buffer_, offset + current_topic_->get_content(), term_len);
 	}
 
