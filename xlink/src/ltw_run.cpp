@@ -76,6 +76,10 @@ void ltw_run::init()
 
 	lang = get_config().get_value("source_lang");
 	task_->set_source_lang(lang.length() > 0 ? lang : "en");
+	if (lang == "zh" || lang == "ko" || lang == "ja")
+		task_->is_cjk_lang(true);
+	else
+		task_->is_cjk_lang(false);
 
 	lang = get_config().get_value("target_lang");
 	task_->set_target_lang(lang.length() > 0 ? lang : task_->get_source_lang());

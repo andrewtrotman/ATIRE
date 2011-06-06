@@ -450,7 +450,7 @@ void algorithm_ant_link_this::process_terms(char **term_list, const char *source
 	links_->sort_links();
 }
 
-void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list)
+void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list, long offset)
 {
 	double gamma, numerator, denominator;
 	long /*terms_in_index, orphan_docid, */param, noom, index_argv_param;
@@ -459,7 +459,6 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list)
 
 	double proper_noun_boost = 0.0;
 	long num_of_processed_topic = 0;
-	long offset = 0;
 	char *place;
 
 	long term_len = 0;
@@ -497,13 +496,13 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list)
 	//					fputs("I got you", stderr);
 			//if (!lx->find(buffer_)) {
 				//lx->push_link(*first, offset, buffer_, term->postings[0]->docid, gamma, term);
-		offset = assign_link_term(term, term_list);
-		if (!links_->find(term->term)) {
+//		offset = assign_link_term(term, term_list);
+//		if (!links_->find(term->term)) {
 			links_->push_link(current_term_, offset, buffer_, term->postings[0]->docid, gamma, term);
 			// debug
 	//					fprintf(stderr, "found a %s anchor\n", buffer__);
 			links_count++;
-		}
+//		}
 	}
 #ifdef DEBUG
 	else

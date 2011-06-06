@@ -195,129 +195,20 @@ namespace QLINK
 		process_terms(links_, term_list, source);
 	}
 
-	void algorithm_page_name::add_link(ANT_link_term *index_term, char **term_list)
+	void algorithm_page_name::add_link(ANT_link_term *index_term, char **term_list, long offset)
 	{
 		bool to_skip = false;
-		long offset = 0, term_len = 0;
-
-//		if (strncmp("Zhu", index_term->term, 3) == 0)
-//			cerr << " I caught you" << endl;
+		long term_len = 0;
 
 //		char buffer[1024 * 1024];
 		if (stopword_no_ && !strpbrk(index_term->term, "- "))
 			to_skip = language::isstopword(index_term->term);
 
 		if (!to_skip) {
-			offset = assign_link_term(index_term, term_list);
+//			offset = assign_link_term(index_term, term_list);
 			//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
-			if (!links_->find(buffer_))
+//			if (!links_->find(buffer_))
 				link * lnk = links_->push_link(NULL, offset, buffer_, index_term->postings[0]->docid, 0.0, index_term);
 			}
 	}
 }
-//		for (first = term_list; *first != NULL; first++) {
-//			where_to = buffer;
-//			last_index_entry = names_map_.end();
-//
-//			// debug
-//	//		cerr << *first << "$";
-//			if (strcasecmp(*first, "Desperate") == 0)
-//				cerr << " I caught you" << endl;
-//
-//			int terms_count = 0;
-//			for (last = first; *last != NULL && terms_count < 13; last++) {
-//				terms_count++;
-//
-//				if (where_to == buffer) {
-//					strcpy(buffer, *first);
-//					where_to = buffer + strlen(buffer);
-//
-//					index_entry = names_map_.find(buffer);
-//
-//					if (index_entry == names_map_.end())
-//						break;
-//
-//					if (index_entry->second != 0)
-//						last_index_entry = index_entry;
-//				}
-//				else {
-//					if (!use_utf8_token_matching_)
-//						*where_to++ = ' ';
-//					strcpy(where_to, *last);
-//					where_to += strlen(*last);
-//
-//
-//					// debug
-//	//				if (strcmp(buffer, "gorseinon bus station") == 0)
-//	//					cerr << " I caught you" << endl;
-//
-//					string what(buffer);
-//					index_entry = names_map_.find(what);
-//
-//					if (index_entry == names_map_.end())
-//						continue;									// we're after the last term in the list
-//								// we're a term in the list, but might be a longer one so keep looking
-//
-//					last_index_entry = index_entry;
-//				}
-//	//			if (strncmp(buffer, index_term->term, strlen(buffer)) != 0)
-//	//				break;									// we can't be a substring so we're done
-//			}
-//
-//			if (last_index_entry != names_map_.end()) {
-//				bool to_skip = false;
-//				if (stopword_no_)
-//					if (!strpbrk(last_index_entry->first.c_str(), "- "))
-//						to_skip = language::isstopword(last_index_entry->first.c_str());
-//
-//				if (!to_skip) {
-//					term_len = strlen(last_index_entry->second->term);
-//					if (!use_utf8_token_matching_) {
-//						offset = *first - source;
-//						strncpy(buffer, offset + text_, term_len);
-//						buffer[term_len] = '\0';
-//					}
-//					else
-//						strcpy(buffer, last_index_entry->second->term);
-//
-//					node = last_index_entry->second; //new ANT_link_term;
-//					//node->term = strdup(last_index_entry->first.c_str());
-//					//fprintf(stderr, "%s -> %d ", last_index_entry->second->term, last_index_entry->second->postings[0]->docid);
-//					if (!lx->find(buffer))
-//						link * lnk = lx->push_link(NULL, offset, buffer, last_index_entry->second->postings[0]->docid, 0.0, node);
-////					if (!lx->find(last_index_term->term))
-////						link * lnk = lx->push_link(NULL, offset, last_index_term->term, last_index_entry->second->postings[0]->docid, 0.0, node);
-////					else
-////						fprintf(stderr, "Duplicated");
-//					//fprintf(stderr, "\n");
-//					//lnk->require_cleanup();
-//					//create_posting(last_index_entry->second, lnk);
-//				}
-//			}
-//		}
-		// debug
-	//	cerr << endl;
-//	}
-
-	//wiki_entry_array *algorithm_page_name::find_page(char *name)
-	//{
-	//	std::map<std::string, wiki_entry_array>::iterator iter = names_map_.find(name);
-	//	return iter == names_map_.end() ? NULL : &(iter->second);
-	//}
-
-	//void algorithm_page_name::create_posting(wiki_entry_array& wea, link* lnk)
-	//{
-	//	//lnk->link_term->postings_length = wea.size();
-	//
-	//	lnk->link_term->total_occurences = 0;
-	//	lnk->link_term->document_frequency = 9999;
-	//	lnk->link_term->collection_frequency = 9999;
-	//
-	//	for (int i = 0; i < wea.size(); i++) {
-	//		lnk->link_term->postings.push_back(new ANT_link_posting); //[wea.size()];
-	//		lnk->link_term->postings[i]->docid = wea[i].id;
-	//	}
-	//}
-
-
-//}

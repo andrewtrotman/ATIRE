@@ -141,6 +141,7 @@ void algorithm::set_links_container(links *container)
 
 void algorithm::process_topic(ltw_topic *a_topic)
 {
+	current_topic_ = a_topic;
 	orphan_docid_ = a_topic->get_id();
 	text_ = a_topic->get_text();
 	xml_ = a_topic->get_content();

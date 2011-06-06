@@ -29,6 +29,8 @@ namespace QLINK {
 
 		char *get_text();
 		void xml_to_text();
+
+		long get_term_len(long offset, char *term);
 	};
 
 }

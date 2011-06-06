@@ -126,7 +126,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 		else
 			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, strlen(this_term), this_term);
 		std::string anchor_tag(buf);
-		if (fill_anchor_with_ir_results && fill_anchor_with_ir_results != 2/* && this_link_term->postings.size() > 0*/) {
+		if ((fill_anchor_with_ir_results && fill_anchor_with_ir_results != 2) || (!fill_anchor_with_ir_results && this_link_term->postings.size() > 0)) {
 			stringbuffer << anchor_tag;
 			anchor_printed = true;
 			for (int i = 0; i < this_link_term->postings.size(); i++) {
@@ -202,7 +202,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			stringbuffer << "\t\t\t</anchor>\n";
 	}
 	if (how_many_left == beps_to_print) {
-		cerr << "Something funny happened." << endl;
+		cerr << "Something funny happened for anchor \"" << term << "\" with " << this_link_term->postings.size() << "links."<< endl;
 		ret = false;
 	}
 

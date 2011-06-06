@@ -20,7 +20,7 @@ private:
 
 protected:
 	virtual ANT_link_term *find_term_in_list(const char *value);
-	virtual void add_link(ANT_link_term *term, char **term_list);
+	virtual void add_link(ANT_link_term *term, char **term_list, long offset);
 
 public:
 	algorithm_ant_crosslink_this(ltw_task *task);

@@ -61,11 +61,11 @@ ANT_link_term *algorithm_ant_crosslink_this::find_term_in_list(const char *value
 	return find_anchors_with_this_.find_term_in_list(value);
 }
 
-void algorithm_ant_crosslink_this::add_link(ANT_link_term *term, char **term_list)
+void algorithm_ant_crosslink_this::add_link(ANT_link_term *term, char **term_list, long offset)
 {
 	switch (translate_anchor_for_linking_) {
 		case 2:
-			algorithm_ant_link_this::add_link(term, term_list);
+			algorithm_ant_link_this::add_link(term, term_list, offset);
 			break;
 
 		case 1:
@@ -77,7 +77,7 @@ void algorithm_ant_crosslink_this::add_link(ANT_link_term *term, char **term_lis
 			//	if (std::string(crossterm->term) == "Allow Me To Demonstrate")
 			//		std::cerr << "Something funny happened." << std::endl;
 				if (string_compare(crossterm->term, result.c_str(), TRUE) == 0)
-					algorithm_ant_link_this::add_link(crossterm, term_list);
+					algorithm_ant_link_this::add_link(crossterm, term_list, offset);
 			}
 			break;
 	}

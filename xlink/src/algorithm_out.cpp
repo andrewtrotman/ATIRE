@@ -8,6 +8,7 @@
 #include "algorithm_out.h"
 #include "ant_link_term.h"
 #include "ant_link_parts.h"
+#include "ltw_topic.h"
 
 #include "ltw_task.h"
 
@@ -42,7 +43,7 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 {
 	char **first, **last;
 	char *where_to;
-	long is_substring, cmp;
+	long is_substring, cmp, offset;
 	char buffer[1024 * 1024];
 //		page_map_t::iterator index_entry = names_map_.end();
 //		page_map_t::iterator last_index_entry = index_entry;
@@ -101,7 +102,10 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 
 			if (cmp == 0)		// we're a term in the list
 				{
-					add_link(index_term, term_list);
+					if (!links_->find(buffer)) {
+						offset = assign_link_term(buffer, term_list);
+						add_link(index_term, term_list, offset);
+					}
 				}
 			else
 				{
@@ -119,26 +123,33 @@ void algorithm_out::recommend_anchors(links* lx, char **term_list, const char *s
 		fprintf(stderr, "added %d links\n", links_->all_links_length());
 }
 
-long algorithm_out::assign_link_term(ANT_link_term *index_term, char **term_list)
+long algorithm_out::assign_link_term(char *buffer, char **term_list)
 {
 	long term_len, offset, index;
 
-	if (strcmp("Zhu Xi", index_term->term) == 0)
+	if (strcmp("過年", buffer) == 0)
 		cerr << " I caught you" << endl;
-	term_len = strlen(index_term->term);
+
 
 	if (!use_utf8_token_matching_) {
 		offset = current_term_ - source_;
-		strncpy(buffer_, offset + text_, term_len);
-		buffer_[term_len] = '\0';
 	}
 	else {
 		index = current_index_;
 		offset = token_address_[index] - source_;
-		strcpy(buffer_, index_term->term);
+//		strcpy(buffer_, index_term->term);
+	}
+	term_len = strlen(buffer);
+	strncpy(buffer_, offset + current_topic_->get_content(), term_len);
+
+	if (memcmp(buffer_, buffer, term_len) != 0) {
+		term_len = current_topic_->get_term_len(offset, buffer/*, ltw_task_->is_cjk_lang()*/);
+		strncpy(buffer_, offset + current_topic_->get_content(), term_len);
 	}
 
-	if (offset == 4809)
+	buffer_[term_len] = '\0';
+
+	if (offset == 3443)
 		cerr << " I caught you" << endl;
 	return offset;
 }

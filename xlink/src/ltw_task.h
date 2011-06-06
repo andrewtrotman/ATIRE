@@ -68,6 +68,8 @@ namespace QLINK {
 	    std::string source_lang_;
 	    std::string target_lang_;
 
+	    bool is_cjk_lang_;
+
 	public:
 	    ltw_task(std::string & name, std::string & out_algor_name, std::string & in_algor_name);
 	    virtual ~ltw_task();
@@ -106,6 +108,9 @@ namespace QLINK {
 	    {
 	        this->target_lang_ = target_lang_;
 	    }
+
+	    bool is_cjk_lang() { return is_cjk_lang_; }
+	    void is_cjk_lang(bool value) { is_cjk_lang_ = value; }
 
 	private:
 		ltw_algorithm get_algorithm_outgoing_type();

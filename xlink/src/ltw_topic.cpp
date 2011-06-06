@@ -60,3 +60,50 @@ void ltw_topic::xml_to_text()
 	std::string text_file = number_to_string(id_) + ".txt";
 //	sys_file::write(text_of_xml_, text_file.c_str());
 }
+
+long QLINK::ltw_topic::get_term_len(long  offset, char *term/*, bool is_cjk_lang*/)
+{
+	char *start, *end, *where_to = term;
+	long term_len = 0, char_len;
+	long target_term_len = strlen(term);
+
+	char buffer[1024];
+
+	end = start = content_ + offset;
+
+	while (*where_to != '\0') {
+		char_len = language::utf8_bytes(where_to);
+//		strncpy(buffer, start, char_len);
+
+		end += char_len;
+
+		if (*where_to == ' ') {
+			while (*where_to == ' ')
+				++where_to;
+			while (*end == ' ')
+				++end;
+		}
+		else {
+			if (isspace(*end)) {
+//				if (is_cjk_lang) {
+					end = start;
+					break;
+//				}
+			}
+		}
+		if (*end == '<') {
+			while (*end != '\0' && *end != '>')
+				++end;
+			if (*end != '\0')
+				++end;
+		}
+
+		where_to += char_len;
+//		if (term_len >= target_term_len)
+//			break;
+	}
+	term_len =  end - start;
+	return term_len;
+}
+
+

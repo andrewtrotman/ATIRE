@@ -28,14 +28,6 @@ namespace QLINK {
 
 		links					*links_;
 
-		/*
-		 * pointers for the convenient access members of links
-		 */
-//		ANT_link *all_links_in_file; //[MAX_LINKS_IN_FILE];
-//		long long *all_links_in_file_length;
-//
-//		ANT_link *links_in_orphan; //[MAX_LINKS_IN_FILE];
-//		long *links_in_orphan_length;
 		algorithm_config		*config_;
 		const char 				*text_;
 		const char 				*xml_;
@@ -50,7 +42,6 @@ namespace QLINK {
 		ltw_task				*ltw_task_;
 
 		bool 					use_utf8_token_matching_; // which means that matching without spaces, all the spaces in string will be removed
-//		bool 					crosslink_;
 
 		char					**token_address_;
 		long					current_index_;
@@ -61,6 +52,8 @@ namespace QLINK {
 
 		long					segmented_;
 		long					stage_;
+
+		ltw_topic 				*current_topic_;
 
 	public:
 		algorithm(ltw_task *task);
