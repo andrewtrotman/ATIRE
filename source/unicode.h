@@ -17,6 +17,7 @@
 #endif
 
 #define LAST_ASCII_CHAR 0x7F
+#define SPECIAL_TERM_CHAR 0x80
 
 struct ANT_UNICODE_char_chartype
 {

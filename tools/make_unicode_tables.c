@@ -275,6 +275,9 @@ for (current = lines; *current != NULL; current++)
 
 reduce_decompositions();
 
+//We will treat this character as the beginning of a term
+chartypes[SPECIAL_TERM_CHAR] = CT_LETTER;
+
 switch (mode)
 	{
 	case UPPER:

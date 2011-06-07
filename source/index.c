@@ -39,6 +39,7 @@
 #include "stem.h"
 #include "stemmer_factory.h"
 #include "btree_iterator.h"
+#include "unicode.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -186,7 +187,15 @@ for (param = first_param; param < argc; param++)
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::PHPBB)
 		{
-		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3], "select * from testtable", ANT_directory_iterator::READ_FILE);
+		//We replace special term markers in user text (0x80) with the euro symbol (encoded as E2 82 AC in UTF-8)
+		assert(SPECIAL_TERM_CHAR == 0x80);
+
+		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
+				"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\x80', '\xE2\x82\xAC'), "
+					"IF(post_approved=0, '\x80""u', '\x80""a), CONCAT('\x80poster', poster_id) "
+				"FROM phpbb_posts "
+				"",
+				ANT_directory_iterator::READ_FILE);
 		param += 3;
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::MYSQL)
