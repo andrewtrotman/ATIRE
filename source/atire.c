@@ -171,31 +171,45 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			oldindexfilename = params->swap_index_filename(between(command, "<index>", "</index>"));
 			}
 
-		ATIRE_API * new_api = ant_init(*params);
-
-		if (new_api) 
+		if (strlen(params->doclist_filename)==0 && strlen(params->index_filename)==0)
 			{
+			/* This is a request to unload the index */
+			delete atire;
+			atire = NULL;
+
 			delete [] olddoclistfilename;
 			delete [] oldindexfilename;
-
-			delete atire;
-			atire = new_api;
-
-			length_of_longest_document = atire->get_longest_document_length();
-			delete [] document_buffer;
-			document_buffer = new char [length_of_longest_document + 1];
 
 			outchannel->puts("<ATIREloadindex>1</ATIREloadindex>");
 			}
 		else
 			{
-			/* Leave global 'atire' unchanged */
-			outchannel->puts("<ATIREloadindex>0</ATIREloadindex>");
+			ATIRE_API * new_api = ant_init(*params);
 
-			/* Restore the filenames in params for later .describeindex queries to return, and delete the filenames
-			 * we tried to load */
-			delete [] params->swap_doclist_filename(olddoclistfilename);
-			delete [] params->swap_index_filename(oldindexfilename);
+			if (new_api)
+				{
+				delete [] olddoclistfilename;
+				delete [] oldindexfilename;
+
+				delete atire;
+				atire = new_api;
+
+				length_of_longest_document = atire->get_longest_document_length();
+				delete [] document_buffer;
+				document_buffer = new char [length_of_longest_document + 1];
+
+				outchannel->puts("<ATIREloadindex>1</ATIREloadindex>");
+				}
+			else
+				{
+				/* Leave global 'atire' unchanged */
+				outchannel->puts("<ATIREloadindex>0</ATIREloadindex>");
+
+				/* Restore the filenames in params for later .describeindex queries to return, and delete the filenames
+				 * we tried to load */
+				delete [] params->swap_doclist_filename(olddoclistfilename);
+				delete [] params->swap_index_filename(oldindexfilename);
+				}
 			}
 		delete [] command;
 		continue;
