@@ -151,7 +151,7 @@ do
 
 	result << got << '\n';
 	}
-while (strcmp(got, "</ATIREdescribeindex>") != 0);
+while (strcmp(got, "</ATIREdescribeindex>") != 0 && strcmp(got, "</ATIREerror>") != 0);
 delete [] got;
 
 /*
@@ -252,6 +252,6 @@ return result;
 */
 char *ATIRE_API_remote::get_connect_string()
 {
-return strnew(connect_string);
+return connect_string ? strnew(connect_string) : NULL;
 }
 

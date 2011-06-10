@@ -110,13 +110,15 @@ PHP_METHOD(atire_api_remote, search)
     if (atire != NULL){
         res = atire->search(search_string,start,pagelength);
 
-        if (!res)
+        if (res)
+        	{
+			char * php_managed_result = estrdup(res);
+			delete [] res;
+
+			RETURN_STRING(php_managed_result, 0);
+        	}
+        else
         	RETURN_NULL();
-
-    	char * php_managed_result = estrdup(res);
-    	delete [] res;
-
-        RETURN_STRING(php_managed_result, 0);
     }
 
     RETURN_NULL();
@@ -154,14 +156,16 @@ PHP_METHOD(atire_api_remote, describe_index)
     if (atire != NULL){
     	char * result = atire->describe_index();
 
-    	if (result==NULL)
-    	    RETURN_BOOL(0);
+    	if (result)
+    		{
+			/* PHP wants to manage the memory of the returned string */
+			char * php_managed_result = estrdup(result);
+			delete [] result;
 
-    	/* PHP wants to manage the memory of the returned string */
-    	char * php_managed_result = estrdup(result);
-    	delete [] result;
-
-        RETURN_STRING(php_managed_result, 0);
+			RETURN_STRING(php_managed_result, 0);
+    		}
+    	else
+       	    RETURN_BOOL(0);
     }
 
     RETURN_BOOL(0);
@@ -177,11 +181,18 @@ PHP_METHOD(atire_api_remote, get_connect_string)
 	{
 		res = atire->get_connect_string();
 
-    	char * php_managed_result = estrdup(res);
-    	delete [] res;
+		if (res)
+			{
+			char * php_managed_result = estrdup(res);
+			delete [] res;
 
-        RETURN_STRING(php_managed_result, 0);
+			RETURN_STRING(php_managed_result, 0);
+			}
+		else
+			RETURN_NULL();
 	}
+
+	RETURN_NULL();
 }
 
 function_entry atire_api_remote_methods[] = {

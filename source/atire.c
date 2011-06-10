@@ -229,7 +229,9 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		/* Commands that require a working atire instance */
 		if (!atire)
 			{
-			outchannel->puts("<ATIREerror><description>No index loaded</description></ATIREerror>");
+			outchannel->puts("<ATIREerror>");
+			outchannel->puts("<description>No index loaded</description>");
+			outchannel->puts("</ATIREerror>");
 			delete [] command;
 			continue;
 			}
