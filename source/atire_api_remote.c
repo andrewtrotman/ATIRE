@@ -193,8 +193,11 @@ do
 	delete [] got;
 	result << (got = socket->gets()) << '\n';
 	}
-while (strcmp(got, "</ATIREsearch>") != 0);
+while (got && strcmp(got, "</ATIREsearch>") != 0);
 delete [] got;
+
+if (!got)
+	return NULL;
 
 /*
 	Return the result

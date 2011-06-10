@@ -107,11 +107,16 @@ PHP_METHOD(atire_api_remote, search)
     if (atire != NULL){
         res = atire->search(search_string,start,pagelength);
 
+        if (!res)
+        	RETURN_NULL();
+
     	char * php_managed_result = estrdup(res);
     	delete [] res;
 
         RETURN_STRING(php_managed_result, 0);
     }
+
+    RETURN_NULL();
 
 }
 
