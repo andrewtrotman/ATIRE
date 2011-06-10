@@ -192,9 +192,8 @@ for (param = first_param; param < argc; param++)
 
 		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
 				"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\x80', '\xE2\x82\xAC'), "
-					"IF(post_approved=0, '\x80""u', '\x80""a), CONCAT('\x80poster', poster_id) "
-				"FROM phpbb_posts "
-				"",
+					"IF(post_approved=0, '\x80""u', '\x80""a'), CONCAT('\x80poster-', poster_id), CONCAT('\x80""forum-', forum_id) "
+				"FROM phpbb_posts ",
 				ANT_directory_iterator::READ_FILE);
 		param += 3;
 		}

@@ -170,15 +170,15 @@ std::stringstream buffer, result;
 char *clean_query, *current, *got;
 
 /*
-	clean the query string by removing all non-alphanumerics
+	Strip out < characters to avoid the XML being broken
 */
 clean_query = strnew(query);
 for (current = clean_query; *current != '\0'; current++)
-	if (!ANT_isalnum(*current))
+	if (*current == '<')
 		*current = ' ';
 
 /*
-	Construct the command string, clean up, and send it off
+	Construct the command string and send it off
 */
 buffer << "<ATIREsearch><query>" << clean_query << "</query>" << "<top>" << top_of_page << "</top><n>" << page_length << "</n></ATIREsearch>\n";
 delete [] clean_query;

@@ -139,6 +139,8 @@ else if (length == 1)
 				return TRUE;
 			else
 				return FALSE;
+		else if (from_character == SPECIAL_TERM_CHAR)
+			return ANT_isalnum(next_character) || next_character == ':' || next_character == '-';
 		else
 			return FALSE;
 		}

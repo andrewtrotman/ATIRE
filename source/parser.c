@@ -115,7 +115,7 @@ for (;;)
 
 	chartype = unicode_chartype_set(character);
 
-	if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION || (chartype & CT_CHINESE))
+	if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION || (chartype & CT_CHINESE) || (chartype==CT_OTHER && character == SPECIAL_TERM_CHAR))
 		break;
 
 	current++;
@@ -168,6 +168,20 @@ else if (chartype == CT_PUNCTUATION && *current != '<')
 		current += utf8_bytes(current);
 
 	current_token.type = TT_PUNCTUATION;
+	current_token.start = (char *)start;
+	current_token.string_length = current - start;
+	}
+else if (chartype == CT_OTHER && character == SPECIAL_TERM_CHAR)
+	{
+	/* Special term which begins with the 0x80 marker and ends after the first non-alnum or non -: */
+	start = current;
+
+	do {
+		current += sizeof(*current);
+	}
+	while (ANT_isalnum(*current) || *current == '-' || *current == ':');
+
+	current_token.type = TT_WORD;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
