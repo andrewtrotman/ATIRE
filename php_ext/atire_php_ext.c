@@ -15,6 +15,9 @@ void atire_api_remote_free_storage(void *object TSRMLS_DC)
 {
     atire_api_remote_object *obj = (atire_api_remote_object *)object;
 
+    if (obj->atire)
+    	obj->atire->close();
+
     zend_hash_destroy(obj->std.properties);
     FREE_HASHTABLE(obj->std.properties);
     delete obj->atire;
