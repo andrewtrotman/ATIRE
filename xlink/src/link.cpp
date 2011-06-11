@@ -86,6 +86,9 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	int count = 0;
 	bool anchor_printed = false;
 
+	if (strcmp(term, "哺乳动物") == 0)
+		cerr << "I got you " << endl;
+
 	bool ret = false;
 	if (!fill_anchor_with_ir_results && algor != NULL && algor->size_of_crosslink() > 0) {
 		if (link_term->postings.size() > 0)
@@ -122,7 +125,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	if (ret || fill_anchor_with_ir_results) {
 		const char *format = link_print::target_format.c_str();
 		if (strcmp(term, "\"") == 0)
-			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, 1, " ");
+			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, 1, "&quot;");
 		else
 			sprintf(buf, "\t\t\t<anchor offset=\"%d\" length=\"%d\" name=\"%s\">\n", this_offset, strlen(this_term), this_term);
 		std::string anchor_tag(buf);
@@ -195,6 +198,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 				std::string target_title = corpus::instance().gettitle(filename);
 				sprintf(buf, format, 0, target_lang, target_title.c_str(), doc_id);
 				stringbuffer << buf;
+				--how_many_left;
 			}
 		}
 		//puts("\t\t\t</anchor>\n");
