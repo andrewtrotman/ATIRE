@@ -187,12 +187,14 @@ for (param = first_param; param < argc; param++)
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::PHPBB)
 		{
-		//We replace special term markers in user text (0x80) with the euro symbol (encoded as E2 82 AC in UTF-8)
+		/* We replace special term markers in user text (Unicode character 80, which encodes to C2 80 in UTF-8)
+		 * with the euro symbol (encoded as E2 82 AC in UTF-8)
+		 */
 		assert(SPECIAL_TERM_CHAR == 0x80);
 
 		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
-				"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\x80', '\xE2\x82\xAC'), "
-					"IF(post_approved=0, '\x80""u', '\x80""a'), CONCAT('\x80poster-', poster_id), CONCAT('\x80""forum-', forum_id) "
+				"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\xC2\x80', '\xE2\x82\xAC'), "
+					"IF(post_approved=0, '\xC2\x80""u', '\xC2\x80""a'), CONCAT('\xC2\x80poster-', poster_id), CONCAT('\xC2\x80""forum-', forum_id) "
 				"FROM phpbb_posts ",
 				ANT_directory_iterator::READ_FILE);
 		param += 3;

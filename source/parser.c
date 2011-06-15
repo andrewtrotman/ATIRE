@@ -176,10 +176,11 @@ else if (chartype == CT_OTHER && character == SPECIAL_TERM_CHAR)
 	/* Special term which begins with the 0x80 marker and ends after the first non-alnum or non -: */
 	start = current;
 
-	do {
+	//The term marker is multi-byte, but the following characters will be single byte
+	current += utf8_bytes(current);
+
+	while (ANT_isalnum(*current) || *current == '-' || *current == ':')
 		current += sizeof(*current);
-	}
-	while (ANT_isalnum(*current) || *current == '-' || *current == ':');
 
 	current_token.type = TT_WORD;
 	current_token.start = (char *)start;
