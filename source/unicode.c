@@ -285,5 +285,5 @@ ANT_UNICODE_chartype unicode_chartype(unsigned long character)
 		}
 
 	//Caller not interested in flags, strip them out so we get a nice pure enum
-	return (ANT_UNICODE_chartype) (ANT_UNICODE_search_chartype(character) & !CT_CHINESE);
+	return (ANT_UNICODE_chartype) (ANT_UNICODE_search_chartype(character) & ~CT_CHINESE);
 }
