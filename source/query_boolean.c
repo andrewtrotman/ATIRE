@@ -8,6 +8,7 @@
 #include "query_boolean.h"
 #include "query_parse_tree.h"
 #include "query.h"
+#include "unicode.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -57,6 +58,9 @@ return answer == NULL ? NULL : into;
 */
 ANT_string_pair *ANT_query_boolean::make_token(ANT_string_pair *token)
 {
+unsigned long character;
+ANT_UNICODE_chartype chartype;
+
 token->start = NULL;
 
 if (*next_character == '\0')
@@ -65,24 +69,36 @@ if (*next_character == '\0')
 /*
 	remove leading whitespace
 */
-while (!(ANT_isalnum(*next_character) || *next_character == '(' || *next_character == ')' || *next_character == '\0'))
-	next_character++;
+while ((character = utf8_to_wide(next_character)),
+		(chartype = unicode_chartype(character)),
+		!(chartype == CT_LETTER || chartype == CT_NUMBER || *next_character == '('
+				|| *next_character == ')' || *next_character == '\0' || character == SPECIAL_TERM_CHAR))
+	next_character += utf8_bytes(next_character);
 
 if (*next_character == '\0')
 	return NULL;
 
 token->start = next_character;
 
-if (ANT_isalpha(*next_character))				// text tokens
+if (chartype == CT_LETTER)				// text tokens
 	do
-		next_character++;
-	while (ANT_isalpha(*next_character));
-else if (ANT_isdigit(*next_character))			// numbers
+		next_character += utf8_bytes(next_character);
+	while (unicode_chartype(utf8_to_wide(next_character)) == CT_LETTER);
+else if (chartype == CT_NUMBER)			// numbers
 	do
-		next_character++;
-	while (ANT_isdigit(*next_character));
+		next_character += utf8_bytes(next_character);
+	while (unicode_chartype(utf8_to_wide(next_character)) == CT_NUMBER);
+else if (character == SPECIAL_TERM_CHAR)
+	do
+		{
+		next_character += utf8_bytes(next_character);
+
+		character = utf8_to_wide(next_character);
+		chartype = unicode_chartype(character);
+		}
+	while (chartype == CT_NUMBER || chartype == CT_LETTER || character == '-' || character == ':');
 else											// we have a special character (such as a bracket)
-	next_character++;
+	next_character += utf8_bytes(next_character);
 
 token->string_length = next_character - token->start;
 
