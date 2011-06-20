@@ -192,12 +192,30 @@ for (param = first_param; param < argc; param++)
 		 */
 		assert(SPECIAL_TERM_CHAR == 0x80);
 
-		source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
-				"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\xC2\x80', '\xE2\x82\xAC'), "
-					"IF(post_approved=0, '\xC2\x80""u', '\xC2\x80""a'), CONCAT('\xC2\x80poster-', poster_id), CONCAT('\xC2\x80""forum-', forum_id) "
-				"FROM phpbb_posts ",
-				ANT_directory_iterator::READ_FILE);
-		param += 3;
+		if (strcmp(argv[param+4], "topics")==0)
+			source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
+					"SELECT t.topic_id, CONCAT('\xC2\x80""forum-', t.forum_id), IF(t.topic_approved=0, '\xC2\x80""u', '\xC2\x80""a'), "
+						"GROUP_CONCAT("
+							"REPLACE(CONCAT_WS(' ', p.post_subject, p.post_text), '\xC2\x80', '\xE2\x82\xAC'), "
+							"CONCAT('\xC2\x80poster-', p.poster_id) "
+							"SEPARATOR ' '"
+						") "
+					"FROM phpbb_topics t "
+					"INNER JOIN phpbb_posts p ON t.topic_id = p.topic_id "
+					"WHERE p.post_approved = 1 "
+					"GROUP BY t.topic_id "
+					"ORDER BY t.topic_id ASC ",
+					ANT_directory_iterator::READ_FILE);
+		else
+			source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
+					"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\xC2\x80', '\xE2\x82\xAC'), "
+						"IF(post_approved=0, '\xC2\x80""u', '\xC2\x80""a'), CONCAT('\xC2\x80poster-', poster_id), "
+						"CONCAT('\xC2\x80""forum-', forum_id), CONCAT('\xC2\x80""topic-', topic_id) "
+					"FROM phpbb_posts "
+					"ORDER BY post_id ASC ",
+					ANT_directory_iterator::READ_FILE);
+
+		param += 4;
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::MYSQL)
 		{
