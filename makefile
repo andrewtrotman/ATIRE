@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 0
+DEBUG = 1
 
 #
 #	Which compiler are we using
@@ -295,7 +295,7 @@ PARTS = \
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
 	$(OBJDIR)\instream_buffer.obj					\
-	$(OBJDIR)\instream_lzo.obj					\
+	$(OBJDIR)\instream_lzo.obj						\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_ant.obj							\
 	$(OBJDIR)\nexi_term_iterator.obj				\
@@ -311,8 +311,12 @@ PARTS = \
 	$(OBJDIR)\focus_article.obj						\
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
-	$(OBJDIR)\unicode_tables.obj						\
-	$(OBJDIR)\unicode.obj
+	$(OBJDIR)\unicode_tables.obj					\
+	$(OBJDIR)\unicode.obj							\
+	$(OBJDIR)\atire_broker_param_block.obj			\
+	$(OBJDIR)\atire_broke_engine.obj				\
+	$(OBJDIR)\atire_broke.obj
+	
 	
 PHP_EXT_OBJ	= \
 	$(OBJDIR)\atire_api_remote.obj			\
@@ -326,10 +330,11 @@ PHP_EXT_OBJ	= \
 #
 ANT_TARGETS = \
 	$(BINDIR)\index.exe 				\
-	$(BINDIR)\ant.exe 					\
 	$(BINDIR)\atire.exe 				\
+	$(BINDIR)\atire_broker.exe 			\
 	$(BINDIR)\atire_client.exe			\
-	$(BINDIR)\ant_dictionary.exe
+	$(BINDIR)\ant_dictionary.exe		\
+	$(BINDIR)\ant.exe
 
 OTHER_TARGETS = \
 	$(BINDIR)\link_extract_inex_wikipedia.exe \

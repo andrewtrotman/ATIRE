@@ -20,7 +20,7 @@
 	#define TRUE (!FALSE)
 #endif
 
-const char * const PROMPT = "]";
+const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
 
 ATIRE_API *atire = NULL;
@@ -105,7 +105,8 @@ double ant(ANT_ANT_param_block *params)
 char *print_buffer, *ch, *pos;
 ANT_stats_time post_processing_stats;
 char *command, *query;
-long topic_id, line, number_of_queries;
+long topic_id, number_of_queries;
+long long line;
 long long hits, result, last_to_list, first_to_list;
 double average_precision, sum_of_average_precisions, mean_average_precision, relevance;
 long length_of_longest_document;
@@ -125,10 +126,9 @@ else
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
-if (atire)
+if (atire != NULL)
 	{
 	length_of_longest_document = atire->get_longest_document_length();
-
 	document_buffer = new char [length_of_longest_document + 1];
 	}
 else
@@ -138,7 +138,8 @@ else
 	}
 
 sum_of_average_precisions = 0.0;
-number_of_queries = line = 0;
+number_of_queries = 0;
+line = 0;
 
 prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
@@ -171,7 +172,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			oldindexfilename = params->swap_index_filename(between(command, "<index>", "</index>"));
 			}
 
-		if (strlen(params->doclist_filename)==0 && strlen(params->index_filename)==0)
+		if (strlen(params->doclist_filename) == 0 && strlen(params->index_filename) == 0)
 			{
 			/* This is a request to unload the index */
 			delete atire;
@@ -227,7 +228,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 	else
 		{
 		/* Commands that require a working atire instance */
-		if (!atire)
+		if (atire == NULL)
 			{
 			outchannel->puts("<ATIREerror>");
 			outchannel->puts("<description>No index loaded</description>");
@@ -236,7 +237,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			continue;
 			}
 
-		if (strncmp(command, "<ATIREdescribeindex>", strlen("<ATIREdescribeindex>")) == 0)
+		if (strncmp(command, "<ATIREdescribeindex>", 18) == 0)
 			{
 			delete [] command;
 
@@ -316,7 +317,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			{
 			topic_id = atol(command);
 			if ((query = strchr(command, ' ')) == NULL)
-				exit(printf("Line %ld: Can't process query as badly formed:'%s'\n", line, command));
+				exit(printf("Line %lld: Can't process query as badly formed:'%s'\n", line, command));
 			}
 		else
 			{

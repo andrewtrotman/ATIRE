@@ -21,12 +21,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-ANT_ANT_param_block::~ANT_ANT_param_block()
-{
-	delete [] doclist_filename;
-	delete [] index_filename;
-}
-
 /*
 	ANT_ANT_PARAM_BLOCK::ANT_ANT_PARAM_BLOCK()
 	------------------------------------------
@@ -61,6 +55,16 @@ doclist_filename = strnew("doclist.aspt");
 }
 
 /*
+	ANT_ANT_PARAM_BLOCK::~ANT_ANT_PARAM_BLOCK()
+	-------------------------------------------
+*/
+ANT_ANT_param_block::~ANT_ANT_param_block()
+{
+delete [] doclist_filename;
+delete [] index_filename;
+}
+
+/*
 	ANT_ANT_PARAM_BLOCK::USAGE()
 	----------------------------
 */
@@ -89,9 +93,11 @@ puts("");
 
 puts("FILE HANDLING");
 puts("-------------");
-
 puts("-findex <fn>    Filename of index");
 puts("-fdoclist <fn>  Filename of doclist");
+puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
+puts("-q<filename>    Queries are in file <filename> (format: ANT)");
+puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=8088]");
 puts("");
 
 ANT_indexer_param_block_stem::help(TRUE);		// stemmers
@@ -125,7 +131,6 @@ puts("  S@<n>         Documents, Set-based success (1=found at least 1 relevant 
 puts("  RankEff       Documents, Mean Rank Effectiveness (acount for unassessed documents)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
-puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=8088]");
 puts("");
 
 puts("TREC / INEX SPECIFIC");
@@ -198,27 +203,27 @@ while (*which != '\0');
 
 /*
 	ANT_ANT_PARAM_BLOCK::SET_INDEX_FILENAME()
-	-------------------------------------
+	-----------------------------------------
 */
 void ANT_ANT_param_block::set_index_filename(char *filename)
 {
-	delete [] index_filename;
-	index_filename = strnew(filename);
+delete [] index_filename;
+index_filename = strnew(filename);
 }
 
 /*
 	ANT_ANT_PARAM_BLOCK::SET_DOCLIST_FILENAME()
-	-------------------------------------
+	-------------------------------------------
 */
 void ANT_ANT_param_block::set_doclist_filename(char *filename)
 {
-	delete [] doclist_filename;
-	doclist_filename = strnew(filename);
+delete [] doclist_filename;
+doclist_filename = strnew(filename);
 }
 
 /*
 	ANT_ANT_PARAM_BLOCK::SWAP_INDEX_FILENAME()
-	-------------------------------------
+	------------------------------------------
 
 	Set the index filename to point to the given string (allocated with new char[]), and return the pointer
 	to the old string (you're responsible for the memory management of the returned string, allocated
@@ -226,26 +231,23 @@ void ANT_ANT_param_block::set_doclist_filename(char *filename)
 */
 char *ANT_ANT_param_block::swap_index_filename(char *filename)
 {
-	char *result = index_filename;
+char *result = index_filename;
 
-	index_filename = filename;
-
-	return result;
+index_filename = filename;
+return result;
 }
 
 /*
 	ANT_ANT_PARAM_BLOCK::SWAP_DOCLIST_FILENAME()
-	-------------------------------------
+	--------------------------------------------
 */
 char *ANT_ANT_param_block::swap_doclist_filename(char *filename)
 {
-	char *result = doclist_filename;
+char *result = doclist_filename;
 
-	doclist_filename = filename;
-
-	return result;
+doclist_filename = filename;
+return result;
 }
-
 
 /*
 	ANT_ANT_PARAM_BLOCK::SET_FEEDBACKER()

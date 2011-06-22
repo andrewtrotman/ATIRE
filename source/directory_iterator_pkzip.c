@@ -255,9 +255,6 @@ read_central_directory_header();
 read_central_directory();
 file->seek(directory[0].location);			// seek to the start of the first file
 
-//if (zip_stream)
-//	exit(printf("ANT ZIP Reader cannot decompress ZIPped streams\n"));
-
 return next(object);
 }
 

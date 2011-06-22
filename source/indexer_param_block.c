@@ -268,7 +268,7 @@ char *command;
 
 for (param = 1; param < argc; param++)
 	{
-	if (*argv[param] == '-'/* || *argv[param] == '/'*/)		// command line switch
+	if (*argv[param] == '-')		// command line switch
 		{
 		command = argv[param] + 1;
 		if (strcmp(command, "r") == 0)
