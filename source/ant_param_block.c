@@ -13,6 +13,7 @@
 #include "stemmer_factory.h"
 #include "relevance_feedback_factory.h"
 #include "atire_api.h"
+#include "search_engine_accumulator.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -52,6 +53,7 @@ feedback_documents = 10;
 feedback_terms = 10;
 index_filename = strnew("index.aspt");
 doclist_filename = strnew("doclist.aspt");
+accumulator_sort = ANT_search_engine_accumulator::SORT_RSV;
 }
 
 /*
@@ -173,6 +175,14 @@ puts("  p             Mean precision scores (if computed)");
 puts("  q             Query by query statistics");
 puts("  Q             Sum of query by query statistics for this run");
 puts("  s             Short reporting (hits, average precision, etc) [default]");
+puts("");
+
+puts("ORDERING");
+puts("--------");
+puts("-O<order>       Order the result set using");
+puts("  rsv           RSV [default]");
+puts("  idasc         Document index ascending");
+puts("  iddesc        Document index descending");
 
 exit(0);
 }
@@ -473,6 +483,20 @@ for (param = 1; param < argc; param++)
 			if (*(command + 1) != '\0')
 				output_filename = command + 1;
 			}
+		else if (*command == 'O')
+			if (strcmp(command + 1, "rsv") == 0)
+				accumulator_sort = ANT_search_engine_accumulator::SORT_RSV;
+			else if (strcmp(command + 1, "idasc") == 0)
+				{
+				accumulator_sort = ANT_search_engine_accumulator::SORT_ID_ASC;
+				ranking_function = NOOP;
+				}
+			else if (strcmp(command + 1, "iddesc") == 0)
+				{
+				accumulator_sort = ANT_search_engine_accumulator::SORT_ID_DESC;
+				ranking_function = NOOP;
+				}
+			else exit(printf("Unknown sorting algorithm: '%s'\n", command+1));
 		else if (*command == 'l')
 			results_list_length = atol(command + 1);
 		else if (*command == 's')

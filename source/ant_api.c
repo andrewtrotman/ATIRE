@@ -36,6 +36,7 @@
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
 #include "ranking_function_inner_product.h"
+#include "ranking_function_noop.h"
 #include "parser.h"
 #include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
@@ -291,6 +292,8 @@ else
 	    data->ranking_function = new ANT_ranking_function_divergence(data->search_engine);
 	else if (params->ranking_function == TERM_COUNT)
 		data->ranking_function = new ANT_ranking_function_term_count(data->search_engine);
+	else if (params->ranking_function == RANK_NOOP)
+		data->ranking_function = new ANT_ranking_function_noop(data->search_engine);
 	else if (params->ranking_function == ALL_TERMS)
 		{
 		//boolean = TRUE;

@@ -742,7 +742,7 @@ stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_rea
 	ANT_SEARCH_ENGINE::SORT_RESULTS_LIST()
 	--------------------------------------
 */
-ANT_search_engine_accumulator **ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits)
+ANT_search_engine_accumulator **ANT_search_engine::sort_results_list(long long accurate_rank_point, long long *hits, int sort_order)
 {
 long long now;
 
@@ -756,7 +756,7 @@ stats->add_count_relevant_documents(stats->stop_timer(now));
 now = stats->start_timer();
 
 //qsort(accumulator_pointers, documents, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::compare_pointer);
-ANT_search_engine_accumulator::top_k_sort(results_list->accumulator_pointers, *hits, accurate_rank_point);
+ANT_search_engine_accumulator::top_k_sort(results_list->accumulator_pointers, *hits, accurate_rank_point, sort_order);
 stats->add_sort_time(stats->stop_timer(now));
 
 return results_list->accumulator_pointers;

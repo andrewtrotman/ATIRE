@@ -53,6 +53,7 @@ private:
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
 	long long hits;							// how many documents were found at the last query
 	long long sort_top_k;					// ranking is only accurate to this position in the results list
+	long accumulator_sort;					// order to sort accumulators in
 
 	char **document_list;					// list (in order) of the external IDs of the documents in the collection
 	char **filename_list;					// the same list, but assuming filenames (parsed for INEX)
@@ -125,6 +126,11 @@ public:
 		Set the relevance feedback mechanism
 	*/
 	long set_feedbacker(long feedbacker, long documents, long terms);
+
+	/*
+	    Change the method used to sort accumulators
+	*/
+	void set_accumulator_sort(long sort);
 
 	/*
 		Set the static pruning point.  At most sttic_prune_point postings will be read from disk and processedS

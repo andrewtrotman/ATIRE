@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 1
+DEBUG = 0
 
 #
 #	Which compiler are we using
@@ -284,6 +284,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_readability.obj		\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
+	$(OBJDIR)\ranking_function_noop.obj				\
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\

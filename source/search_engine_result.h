@@ -147,6 +147,18 @@ public:
 		}
 #elif defined HEAP_K_SEARCH
 
+	inline void add_document(long index)
+	{
+	ANT_search_engine_accumulator *which = accumulator + index;
+
+	if (!include_set->unsafe_getbit(index) && results_list_length < top_k)
+		{
+		accumulator_pointers[results_list_length++] = which;
+		include_set->unsafe_setbit(index);
+		which->add_rsv((long)1);
+		}
+	}
+
 	template <class T> inline void add_rsv(long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;

@@ -20,6 +20,7 @@
 #include "ranking_function_term_count.h"
 #include "ranking_function_inner_product.h"
 #include "ranking_function_kbtfidf.h"
+#include "ranking_function_noop.h"
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()

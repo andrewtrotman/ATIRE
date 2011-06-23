@@ -61,6 +61,8 @@ public:
 	long feedback_documents;			// documents to analyse for feedback terms
 	long feedback_terms;				// terms to add to the query in relevance feedback
 
+	long accumulator_sort;				// the method to be used to sort accumulators
+
 private:
 	void export_format(char *forum);
 	void set_metric(char *which);

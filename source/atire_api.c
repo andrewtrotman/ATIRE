@@ -36,6 +36,7 @@
 #include "ranking_function_inner_product.h"
 #include "ranking_function_kbtfidf.h"
 #include "ranking_function_dlh13.h"
+#include "ranking_function_noop.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -56,6 +57,8 @@
 #include "directory_iterator_object.h"
 #include "parser.h"
 #include "readability_factory.h"
+
+#include "search_engine_accumulator.h"
 
 #include "version.h"
 
@@ -101,6 +104,8 @@ number_of_assessments = 0;
 map = NULL;
 forum_writer = NULL;
 forum_results_list_length = 1500;
+
+accumulator_sort = ANT_search_engine_accumulator::SORT_RSV;
 }
 
 /*
@@ -330,6 +335,9 @@ switch (function)
 	case ANT_ANT_param_block::TERM_COUNT:
 		new_function = new ANT_ranking_function_term_count(search_engine);
 		break;
+	case ANT_ANT_param_block::NOOP:
+		new_function = new ANT_ranking_function_noop(search_engine);
+		break;
 	case ANT_ANT_param_block::INNER_PRODUCT:
 		new_function = new ANT_ranking_function_inner_product(search_engine);
 		break;
@@ -348,6 +356,11 @@ delete ranking_function;
 ranking_function = new_function;
 
 return 0;		// success
+}
+
+void ATIRE_API::set_accumulator_sort(long order)
+{
+accumulator_sort = order;
 }
 
 /*
@@ -666,6 +679,9 @@ return left;
 */
 void ATIRE_API::boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves)
 {
+if (root == NULL)
+	return;
+
 if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	{
 	if (*leaves > 0)
@@ -864,7 +880,7 @@ else
 /*
 	Rank the results list
 */
-search_engine->sort_results_list(top_k, &hits); // rank
+search_engine->sort_results_list(top_k, &hits, accumulator_sort); // rank
 
 /*
 	Conjunctive searching using the disjunctive search engine
@@ -906,7 +922,7 @@ if (feedbacker != NULL)
 		/*
 			Rank
 		*/
-		search_engine->sort_results_list(top_k, &hits);
+		search_engine->sort_results_list(top_k, &hits, accumulator_sort);
 		}
 	}
 
