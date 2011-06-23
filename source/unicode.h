@@ -41,6 +41,7 @@ int ischinese(unsigned char *here);
 inline int ischinese(char *here) { return ischinese((unsigned char *)here); }
 
 int utf8_isupper(unsigned long character);
+int utf8_isupper(long character);
 
 int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src);
 unsigned char *utf8_tolower(unsigned char *here);

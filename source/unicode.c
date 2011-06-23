@@ -168,6 +168,11 @@ else
 */
 int utf8_isupper(unsigned long character)
 {
+	return (unsigned long) ANT_UNICODE_tolower(character) != character;
+}
+
+int utf8_isupper(long character)
+{
 	return ANT_UNICODE_tolower(character) != character;
 }
 
