@@ -20,6 +20,8 @@
 	typedef long int32_t;
 	typedef unsigned long uint32_t;
 
+	#define UINT32_MAX  0xffffffff
+
 	typedef long long int64_t;
 	typedef unsigned long long uint64_t;
 #else

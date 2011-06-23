@@ -19,7 +19,7 @@ public:
 
 	virtual long load_index(char *new_index, char *new_doclist, char **old_index, char **old_doclist) = 0;
 	virtual long describe_index(char **old_index, char **old_doclist) = 0;
-	virtual long search(char *query, long long top_of_page, long long page_length) = 0;
+	virtual char *search(char *query, long long top_of_page, long long page_length) = 0;
 } ;
 
 #endif /* ATIRE_ENGINE_H_ */

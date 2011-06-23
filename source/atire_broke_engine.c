@@ -32,8 +32,7 @@ delete server;
 	ATIRE_BROKE_ENGINE::SEARCH()
 	----------------------------
 */
-long ATIRE_broke_engine::search(char *query, long long top_of_page, long long page_length)
+char *ATIRE_broke_engine::search(char *query, long long top_of_page, long long page_length)
 {
-server->search(query, top_of_page, page_length);
-return 1;
+return server->search(query, top_of_page, page_length);
 }

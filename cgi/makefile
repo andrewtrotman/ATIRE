@@ -7,15 +7,16 @@ LIBS = WS2_32.lib 					\
 	../bin/channel_socket.obj 	\
 	../bin/sockets.obj			\
 	../bin/disk.obj				\
+	../bin/atire_api_remote.obj	\
 	../bin/file_internals.obj	
 
 
 
 ant_cgi.exe : ant_cgi.c
-	cl -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_cgi.c $(LIBS)
+	cl /MTd -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_cgi.c $(LIBS)
 
 ant_getdoc_cgi.exe : ant_getdoc_cgi.c
-	cl -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_getdoc_cgi.c $(LIBS)
+	cl /MTd -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_getdoc_cgi.c $(LIBS)
 
 
 

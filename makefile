@@ -316,6 +316,7 @@ PARTS = \
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\atire_broker_param_block.obj			\
 	$(OBJDIR)\atire_broke_engine.obj				\
+	$(OBJDIR)\atire_engine_result_set.obj			\
 	$(OBJDIR)\atire_broke.obj
 	
 	

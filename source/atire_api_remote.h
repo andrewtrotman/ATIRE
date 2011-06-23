@@ -52,9 +52,9 @@ public:
 
 	/*
 		Search and return page_length results starting from top_of_page in the results list
-		normally this would ne 10 results from position 1
+		normally this would be 10 results from position 1
 	*/
-	virtual char *search(char *query, long top_of_page, long page_length);
+	virtual char *search(char *query, long long top_of_page, long long page_length);
 
 	/*
 		Given the ATIRE internal id of a document, retrieve that document (if it is in the repository)

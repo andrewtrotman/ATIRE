@@ -8,6 +8,7 @@
 #include "channel_socket.h"
 #include "atire_broker_param_block.h"
 #include "atire_broke.h"
+#include "version.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -56,8 +57,7 @@ void broker(ATIRE_engine *engine, ATIRE_broker_param_block *params)
 ANT_channel *inchannel, *outchannel;
 long long line;
 long success;
-char *pos;
-char *command, *query;
+char *pos, *command, *query, *hits;
 char *new_index, *old_index, *new_doclist, *old_doclist;
 long long first_to_list, page_size;
 
@@ -115,7 +115,12 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			query = between(command, "<query>", "</query>");
 			first_to_list = (pos = strstr(command, "<top>")) == NULL ? 1 : ANT_atoi64(pos + 5);
 			page_size = (pos = strstr(command, "<n>")) == NULL ? params->results_list_length : ANT_atoi64(pos + 3);
-			engine->search(query, first_to_list, page_size);
+			hits = engine->search(query, first_to_list, page_size);
+
+			outchannel->puts(hits);
+//printf("[%s]", hits);
+
+			delete [] hits;
 			delete [] query;
 			}
 		else if (strncmp(command, "<ATIREgetdoc>", 13) == 0)
@@ -140,6 +145,10 @@ ATIRE_broker_param_block params(argc, argv);
 ATIRE_engine *engine;
 
 params.parse();
+
+if (params.logo)
+	puts(ANT_version_string);
+
 engine = new ATIRE_broke(&params);
 broker(engine, &params);
 

@@ -164,7 +164,7 @@ return strnew(result.str().c_str());
 	ATIRE_API_REMOTE::SEARCH()
 	--------------------------
 */
-char *ATIRE_API_remote::search(char *query, long top_of_page, long page_length)
+char *ATIRE_API_remote::search(char *query, long long top_of_page, long long page_length)
 {
 std::stringstream buffer, result;
 char *clean_query, *current, *got;

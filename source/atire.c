@@ -446,14 +446,14 @@ return mean_average_precision;
 	If the search engine fails to load the index from disk (e.g. sharing violation),
 	return NULL.
 */
-ATIRE_API * ant_init(ANT_ANT_param_block & params)
+ATIRE_API *ant_init(ANT_ANT_param_block & params)
 {
 
 /* Instead of overwriting the global API, create a new one and return it.
  * This way, if loading the index fails, we can still use the old one.
  */
-ATIRE_API * atire = new ATIRE_API();
-int fail;
+ATIRE_API *atire = new ATIRE_API();
+long fail;
 
 if (params.logo)
 	puts(atire->version());				// print the version string is we parsed the parameters OK
