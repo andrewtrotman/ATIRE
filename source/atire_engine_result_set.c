@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>
+#include <stdlib.h>
 #include "atire_engine_result_set.h"
 #include "atire_engine_result.h"
 #include "str.h"

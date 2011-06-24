@@ -112,7 +112,7 @@ endif
 
 # common flags
 LDFLAGS += -ldl
-CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER \
+CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 
@@ -218,6 +218,7 @@ MAIN_FILES := $(SRCDIR)/ant.c \
 			  $(SRCDIR)/index.c \
 			  $(SRCDIR)/ant_dictionary.c \
 			  $(SRCDIR)/atire_client.c \
+			  $(SRCDIR)/atire_broker.c \
 
 ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
@@ -237,10 +238,13 @@ ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SO
 ATIRE_SOURCES := atire.c $(notdir $(SOURCES))
 ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
+ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
+ATIRE_BROKER_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
+
 PHP_EXT_SOURCES := $(notdir $(shell ls $(PHPDIR)/*.c))
 PHP_EXT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 
-all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/ant_dictionary
+all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
 
 php_ext : $(LIBDIR)/atire.so
 
@@ -278,6 +282,9 @@ $(BINDIR)/ant : $(ANT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(BINDIR)/atire : $(ATIRE_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+
+$(BINDIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)

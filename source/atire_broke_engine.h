@@ -21,7 +21,7 @@ public:
 	ATIRE_broke_engine(char *connect_string);
 	virtual ~ATIRE_broke_engine();
 
-	virtual char *ATIRE_broke_engine::search(char *query, long long top_of_page, long long length);
+	virtual char *search(char *query, long long top_of_page, long long length);
 } ;
 
 

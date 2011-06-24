@@ -13,6 +13,7 @@
 #include "atire_engine_result_set.h"
 #include "fundamental_types.h"
 #include "stats.h"
+#include "stdint.h"
 
 #ifndef FALSE
 	#define FALSE 0
