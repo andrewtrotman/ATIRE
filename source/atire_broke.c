@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <new>
 #include "str.h"
 #include "atire_broke.h"
@@ -13,7 +14,6 @@
 #include "atire_engine_result_set.h"
 #include "fundamental_types.h"
 #include "stats.h"
-#include "stdint.h"
 
 #ifndef FALSE
 	#define FALSE 0
