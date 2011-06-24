@@ -463,7 +463,10 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'q')
 			{
 			if (command[1] == ':')
+				{
 				port = (unsigned short)(isdigit(command[2]) ? atol(command + 2) : 8088);
+printf("Server started on port:%lld\n", (long long)port);
+				}
 			else
 				{
 				if (*(command + 1) == '\0' && param < argc - 1) 

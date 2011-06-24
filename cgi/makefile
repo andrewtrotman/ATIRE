@@ -13,10 +13,10 @@ LIBS = WS2_32.lib 					\
 
 
 ant_cgi.exe : ant_cgi.c
-	cl /MTd -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_cgi.c $(LIBS)
+	cl /MT -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_cgi.c $(LIBS)
 
 ant_getdoc_cgi.exe : ant_getdoc_cgi.c
-	cl /MTd -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_getdoc_cgi.c $(LIBS)
+	cl /MT -D_CRT_SECURE_NO_WARNINGS /W3 /Zi /Tp ant_getdoc_cgi.c $(LIBS)
 
 
 
