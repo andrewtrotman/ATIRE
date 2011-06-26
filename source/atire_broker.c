@@ -115,10 +115,10 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			query = between(command, "<query>", "</query>");
 			first_to_list = (pos = strstr(command, "<top>")) == NULL ? 1 : ANT_atoi64(pos + 5);
 			page_size = (pos = strstr(command, "<n>")) == NULL ? params->results_list_length : ANT_atoi64(pos + 3);
-			hits = engine->search(query, first_to_list, page_size);
-
-			outchannel->puts(hits);
-//printf("[%s]", hits);
+			if ((hits = engine->search(query, first_to_list, page_size)) == NULL)
+				outchannel->puts("<ATIREerror>\nFailed to recieve any response from any server\n</ATIREerror>");
+			else
+				outchannel->puts(hits);
 
 			delete [] hits;
 			delete [] query;

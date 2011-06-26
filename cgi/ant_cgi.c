@@ -102,7 +102,7 @@ else
 	socket.open("localhost:8088");
 	result = socket.search(query_string, 1,10);
 
-	if (result == NULL)
+	if (result == NULL || strstr(result, "<ATIREerror>") != NULL)
 		{
 		puts("Communications Error");
 		return 0;

@@ -3,7 +3,7 @@
 	-----------
 */
 #include <stdlib.h>
-#include "ant_param_block.h"			// FIX THIS
+#include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
 #include "atire_api.h"
 
 #include "memory.h"
@@ -1061,6 +1061,15 @@ return *docid;
 long long ATIRE_API::set_trim_postings_k(long long static_prune_point)
 {
 return search_engine->set_trim_postings_k(static_prune_point);
+}
+
+/*
+	ATIRE_API::GET_DOCUMENT_COUNT()
+	-------------------------------
+*/
+long long ATIRE_API::get_document_count(void)
+{
+return search_engine->document_count();
 }
 
 /*

@@ -40,6 +40,8 @@ delete [] connect_string;
 /*
 	ATIRE_API_REMOTE::OPEN()
 	------------------------
+	returns TRUE on success
+	         FALSE on fail
 */
 long ATIRE_API_remote::open(char *connect_string)
 {
@@ -99,24 +101,27 @@ return TRUE;
 /*
 	ATIRE_API_REMOTE::LOAD_INDEX()
 	------------------------------
+	returns 0 on network failure
+	        1 on success
+           -1 on failure
 */
-int ATIRE_API_remote::load_index(char *doclist_filename, char *index_filename)
+long ATIRE_API_remote::load_index(char *doclist_filename, char *index_filename)
 {
+long success;
+char *result;
 std::stringstream buffer;
 
 /*
 	Construct the command string and send it off
 */
 buffer << "<ATIREloadindex>" << "<doclist>" << doclist_filename << "</doclist><index>" << index_filename << "</index></ATIREloadindex>\n";
-socket->puts((char *)buffer.str().c_str());
-
-char * result = socket->gets();
-
-if (!result)
+if (socket->puts((char *)buffer.str().c_str()) <= 0)
 	return 0; /* Broken socket */
 
-int success = strcmp(result, "<ATIREloadindex>1</ATIREloadindex>\n");
+if ((result = socket->gets()) == NULL)
+	return 0; /* Broken socket */
 
+success = strcmp(result, "<ATIREloadindex>1</ATIREloadindex>\n") == 0 ? 1 : -1;
 delete [] result;
 
 return success;
@@ -124,14 +129,15 @@ return success;
 
 /*
 	ATIRE_API_REMOTE::DESCRIBE_INDEX()
-	--------------------------
+	----------------------------------
 */
 char *ATIRE_API_remote::describe_index()
 {
 std::stringstream result;
 char * got;
 
-socket->puts("<ATIREdescribeindex></ATIREdescribeindex>\n");
+if (socket->puts("<ATIREdescribeindex></ATIREdescribeindex>\n") <= 0)
+	return NULL;		/* Broken socket */
 
 /*
 	Build the result line by line
@@ -141,13 +147,8 @@ do
 	{
 	delete [] got;
 
-	got = socket->gets();
-
-	if (!got) 
-		{
-		/* Broken socket */
-		return NULL;
-		}
+	if ((got = socket->gets()) == NULL)
+		return NULL;		/* Broken socket */
 
 	result << got << '\n';
 	}
@@ -167,22 +168,14 @@ return strnew(result.str().c_str());
 char *ATIRE_API_remote::search(char *query, long long top_of_page, long long page_length)
 {
 std::stringstream buffer, result;
-char *clean_query, *current, *got;
-
-/*
-	Strip out < characters to avoid the XML being broken
-*/
-clean_query = strnew(query);
-for (current = clean_query; *current != '\0'; current++)
-	if (*current == '<')
-		*current = ' ';
+char *got;
 
 /*
 	Construct the command string and send it off
 */
-buffer << "<ATIREsearch><query>" << clean_query << "</query>" << "<top>" << top_of_page << "</top><n>" << page_length << "</n></ATIREsearch>\n";
-delete [] clean_query;
-socket->puts((char *)buffer.str().c_str());
+buffer << "<ATIREsearch><query>" << query << "</query>" << "<top>" << top_of_page << "</top><n>" << page_length << "</n></ATIREsearch>\n";
+if (socket->puts((char *)buffer.str().c_str()) <= 0)
+	return NULL;
 
 /*
 	Build the result line by line
@@ -191,13 +184,12 @@ got = NULL;
 do
 	{
 	delete [] got;
-	result << (got = socket->gets()) << '\n';
+	if ((got = socket->gets()) == NULL)
+		return NULL;		// socket failure
+	result << got << '\n';
 	}
-while (got && strcmp(got, "</ATIREsearch>") != 0);
+while (strcmp(got, "</ATIREsearch>") != 0 && strcmp(got, "</ATIREerror>") != 0);
 delete [] got;
-
-if (!got)
-	return NULL;
 
 /*
 	Return the result
@@ -219,18 +211,21 @@ long size;
 	Send the request
 */
 buffer << "<ATIREgetdoc><docid>" << docid << "</docid></ATIREgetdoc>\n";
-socket->puts((char *)buffer.str().c_str());
+if (socket->puts((char *)buffer.str().c_str()) <= 0)
+	return NULL;
 
 /*
 	Get the length of the document
 */
-got = socket->gets();
+if ((got = socket->gets()) == NULL)
+	return NULL;		// socket error
 delete [] got;				// <ATIREgetdoc>
 
 size = -1;
 do
 	{
-	got = socket->gets();
+	if ((got = socket->gets()) == NULL)
+		return NULL;		// socket error
 	if (strncmp(got, "<length>", 8) == 0)
 		size = atol(got + 8);
 	delete [] got;
@@ -238,10 +233,16 @@ do
 while (size < 0);
 
 result = new char [size];
-socket->block_read(result, size);
-
-got = socket->gets();
-delete [] got;				// </ATIREgetdoc>
+if (socket->block_read(result, size) == NULL)
+	{
+	delete [] result;
+	result = NULL;
+	}
+else
+	{
+	got = socket->gets();
+	delete [] got;				// </ATIREgetdoc>
+	}
 
 return result;
 }
@@ -252,6 +253,6 @@ return result;
 */
 char *ATIRE_API_remote::get_connect_string()
 {
-return connect_string ? strnew(connect_string) : NULL;
+return connect_string == NULL ? NULL : strnew(connect_string);
 }
 

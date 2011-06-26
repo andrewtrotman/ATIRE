@@ -5,14 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <new>
+#include "fundamental_types.h"
 #include "str.h"
 #include "atire_broke.h"
 #include "atire_broke_engine.h"
 #include "atire_broker_param_block.h"
 #include "atire_engine_result_set.h"
-#include "fundamental_types.h"
 #include "stats.h"
 
 #ifndef FALSE
@@ -33,9 +32,11 @@ long long current;
 search_engine = NULL;
 if (params->number_of_servers > 0)
 	{
-	search_engine = new ATIRE_broke_engine *[(size_t)(params->number_of_servers + 1)];
+	if ((search_engine = new (std::nothrow) ATIRE_broke_engine *[(size_t)(params->number_of_servers + 1)]) == NULL)
+		exit(printf("Out of memory initialising the broker array\n"));
 	for (current = 0; current < params->number_of_servers; current++)
-		search_engine[current] = new ATIRE_broke_engine(params->servers[current]);
+		if ((search_engine[current] = new (std::nothrow) ATIRE_broke_engine(params->servers[current])) == NULL)
+			exit(printf("Out of memory initialising each broker\n"));
 	search_engine[current] = NULL;
 	}
 
@@ -100,6 +101,7 @@ char *one_answer, *numhits;
 if (search_engine == NULL || search_engine[0] == NULL)
 	return NULL;
 
+
 /*
 	Only connected to one instance so my answer is that instance's answer
 */
@@ -115,10 +117,19 @@ hits = 0;
 results_list->rewind();
 for (engine = search_engine; *engine != NULL; engine++)
 	{
-	one_answer = (*engine)->search(query, 1, first + page_length);
-	if ((numhits = strstr(one_answer, "<numhits>")) != NULL)
-		hits += ANT_atoi64(numhits + 9);
-	results_list->add(one_answer, ((long long)UINT32_MAX) * current++);
+	if ((one_answer = (*engine)->search(query, 1, first + page_length)) != NULL)
+		{
+		/*
+			In the case of a failure by a search engine we'll get a NULL returned by the search request
+			and consequently the result will be dropped from the final score (by this code not running)
+			In the case of a failure by a broker we'll get an <ATIREerror> without a <numhits> which hence the brackets
+		*/
+		if ((numhits = strstr(one_answer, "<numhits>")) != NULL)
+			{
+			hits += ANT_atoi64(numhits + 9);
+			results_list->add(one_answer, ((long long)UINT32_MAX) * current++);
+			}
+		}
 	}
 time_taken = stats.time_to_milliseconds(stats.stop_timer(timer));
 

@@ -165,7 +165,7 @@ public:
 	double get_whole_document_precision(long query_id, long metric, long metric_n);
 
 	/*
-		Configre TREC or INEX output format
+		Configure TREC or INEX output format
 	*/
 	long set_forum(long type, char *output_filename, char *participant_id, char *run_name, long forum_results_list_length);
 
@@ -173,6 +173,12 @@ public:
 		Write the results out in INEX or TREC format (as specified by set_form)
 	*/
 	void write_to_forum_file(long topic_id);
+
+
+	/*
+		Return the number of documents in the database
+	*/
+	long long get_document_count(void);
 
 	/*
 		Get the length of the longest document in the repository

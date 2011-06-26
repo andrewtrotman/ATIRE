@@ -43,7 +43,7 @@ public:
 	/*
 		Load a new doclist and index by filename.
 	*/
-	virtual int load_index(char *doclist_filename, char *index_filename);
+	virtual long load_index(char *doclist_filename, char *index_filename);
 
 	/*
 		Return an XML document describing the index that is currently loaded (incl filenames).

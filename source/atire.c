@@ -250,6 +250,9 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write("<index filename=\"");
 			outchannel->write(params->index_filename);
 			outchannel->puts("\"/>");
+			outchannel->write("<docnum>");
+			outchannel->write(atire->get_document_count());
+			outchannel->write("</docnum>");
 			outchannel->puts("</ATIREdescribeindex>");
 
 			continue;
