@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include "pragma.h"
 #include "search_engine_accumulator.h"
-#include "search_engine_accumulator_cmp.h"
 #include "bitstring.h"
 #include <string.h>
 
@@ -43,7 +42,7 @@ public:			// remove this line later
 #endif
 
 #ifdef HEAP_K_SEARCH
-	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator_cmp> *heapk;
+	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
 	ANT_bitstring *include_set;
 #endif
 
@@ -147,15 +146,32 @@ public:
 		}
 #elif defined HEAP_K_SEARCH
 
-	inline void add_document(long index)
+	template <class T> inline void set_rsv(long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
+	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
 
-	if (!include_set->unsafe_getbit(index) && results_list_length < top_k)
+	init_partial_accumulators(index);
+	old_val = which->get_rsv();
+	which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t) score);
+
+	if (results_list_length < top_k)
 		{
-		accumulator_pointers[results_list_length++] = which;
+		if (old_val == 0)
+			{
+			accumulator_pointers[results_list_length++] = which;
+			include_set->unsafe_setbit(index);
+			}
+		if (results_list_length == top_k)
+			heapk->build_min_heap();
+		}
+	else if (include_set->unsafe_getbit(index))
+		heapk->min_update(which);
+	else if (score > accumulator_pointers[0]->get_rsv())
+		{
+		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
+		heapk->min_insert(which);
 		include_set->unsafe_setbit(index);
-		which->add_rsv((long)1);
 		}
 	}
 

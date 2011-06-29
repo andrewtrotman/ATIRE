@@ -20,7 +20,7 @@
 #include "ranking_function_term_count.h"
 #include "ranking_function_inner_product.h"
 #include "ranking_function_kbtfidf.h"
-#include "ranking_function_noop.h"
+#include "ranking_function_docid.h"
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()
@@ -125,6 +125,16 @@ else if (strcmp(which, "allterms") == 0)
 	ranking_function = ALL_TERMS;
 else if (strcmp(which, "tfidf") == 0)
 	ranking_function = INNER_PRODUCT;
+else if (strcmp(which, "docida") == 0)
+	{
+	ranking_function = DOCID;
+	ascending = 1;
+	}
+else if (strcmp(which, "docidd") == 0)
+	{
+	ranking_function = DOCID;
+	ascending = 0;
+	}
 else if (strcmp(which, "kbtfidf") == 0)
 	{
 	ranking_function = KBTFIDF;
@@ -168,6 +178,8 @@ if (allowable & INNER_PRODUCT)
 	printf("   tfidf        TF.IDF (vector space inner product) %s\n", isdefault(ALL_TERMS));
 if (allowable & KBTFIDF)
 	printf("   kbtfidf:<k>:<b> log(k * tf - b) * idf * idf (Shlomo's vector space) %s\n", isdefault(ALL_TERMS));
+if (allowable & DOCID)
+	printf("   docid<a|d>   Sort by document index (ascending or descending) %s\n", isdefault(DOCID));
 
 puts("");
 }
@@ -198,6 +210,8 @@ switch (ranking_function)
 		return new ANT_ranking_function_inner_product(documents, lengths);
 	case KBTFIDF:
 		return new ANT_ranking_function_kbtfidf(documents, lengths, kbtfidf_k, kbtfidf_b);
+	case DOCID:
+		return new ANT_ranking_function_docid(documents, lengths, ascending);
 	}
 return NULL;
 }

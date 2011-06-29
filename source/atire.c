@@ -483,8 +483,6 @@ atire->set_trim_postings_k(params.trim_postings_k);
 atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
 atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
 
-atire->set_accumulator_sort(params.accumulator_sort);
-
 atire->set_segmentation(params.segmentation);
 switch (params.ranking_function)
 	{
@@ -499,6 +497,9 @@ switch (params.ranking_function)
 		break;
 	case ANT_indexer_param_block_rank::KBTFIDF:
 		atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
+		break;
+	case ANT_indexer_param_block_rank::DOCID:
+		atire->set_ranking_function(params.ranking_function, params.ascending, 0);
 		break;
 	default:
 		atire->set_ranking_function(params.ranking_function, 0.0, 0.0);

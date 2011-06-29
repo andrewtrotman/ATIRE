@@ -101,7 +101,7 @@ public:
 	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 
-	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits, int sort_order = ANT_search_engine_accumulator::SORT_RSV);
+	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
 	long long document_count(void) { return documents; }
 	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }

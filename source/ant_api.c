@@ -293,7 +293,7 @@ else
 	else if (params->ranking_function == TERM_COUNT)
 		data->ranking_function = new ANT_ranking_function_term_count(data->search_engine);
 	else if (params->ranking_function == RANK_NOOP)
-		data->ranking_function = new ANT_ranking_function_noop(data->search_engine);
+		data->ranking_function = new ANT_ranking_function_docid(data->search_engine);
 	else if (params->ranking_function == ALL_TERMS)
 		{
 		//boolean = TRUE;

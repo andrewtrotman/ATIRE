@@ -36,7 +36,7 @@
 #include "ranking_function_inner_product.h"
 #include "ranking_function_kbtfidf.h"
 #include "ranking_function_dlh13.h"
-#include "ranking_function_noop.h"
+#include "ranking_function_docid.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -104,8 +104,6 @@ number_of_assessments = 0;
 map = NULL;
 forum_writer = NULL;
 forum_results_list_length = 1500;
-
-accumulator_sort = ANT_search_engine_accumulator::SORT_RSV;
 }
 
 /*
@@ -335,8 +333,8 @@ switch (function)
 	case ANT_ANT_param_block::TERM_COUNT:
 		new_function = new ANT_ranking_function_term_count(search_engine);
 		break;
-	case ANT_ANT_param_block::NOOP:
-		new_function = new ANT_ranking_function_noop(search_engine);
+	case ANT_ANT_param_block::DOCID:
+		new_function = new ANT_ranking_function_docid(search_engine, (int) p1);
 		break;
 	case ANT_ANT_param_block::INNER_PRODUCT:
 		new_function = new ANT_ranking_function_inner_product(search_engine);
@@ -356,11 +354,6 @@ delete ranking_function;
 ranking_function = new_function;
 
 return 0;		// success
-}
-
-void ATIRE_API::set_accumulator_sort(long order)
-{
-accumulator_sort = order;
 }
 
 /*
@@ -717,7 +710,7 @@ ANT_search_engine_accumulator *accumulator;
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long next_relevant_document;
-	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator_cmp> *heapk;
+	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
 #endif
 
 /*
@@ -880,7 +873,7 @@ else
 /*
 	Rank the results list
 */
-search_engine->sort_results_list(top_k, &hits, accumulator_sort); // rank
+search_engine->sort_results_list(top_k, &hits); // rank
 
 /*
 	Conjunctive searching using the disjunctive search engine
@@ -922,7 +915,7 @@ if (feedbacker != NULL)
 		/*
 			Rank
 		*/
-		search_engine->sort_results_list(top_k, &hits, accumulator_sort);
+		search_engine->sort_results_list(top_k, &hits);
 		}
 	}
 

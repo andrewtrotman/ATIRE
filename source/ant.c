@@ -37,7 +37,7 @@
 #include "ranking_function_readability.h"
 #include "ranking_function_term_count.h"
 #include "ranking_function_inner_product.h"
-#include "ranking_function_noop.h"
+#include "ranking_function_docid.h"
 #include "parser.h"
 #include "NEXI_ant.h"
 #include "NEXI_term_iterator.h"
@@ -692,8 +692,8 @@ else
 		{
 		if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
 			ranking_function = new ANT_ranking_function_term_count(search_engine);
-		else if (params.ranking_function == ANT_ANT_param_block::NOOP)
-			ranking_function = new ANT_ranking_function_noop(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::DOCID)
+			ranking_function = new ANT_ranking_function_docid(search_engine, params.ascending);
 		else if (params.ranking_function == ANT_ANT_param_block::ALL_TERMS)
 			{
 			boolean = TRUE;
@@ -726,8 +726,8 @@ else
 			ranking_function = new ANT_ranking_function_divergence(search_engine);
 		else if (params.ranking_function == ANT_ANT_param_block::TERM_COUNT)
 			ranking_function = new ANT_ranking_function_term_count(search_engine);
-		else if (params.ranking_function == ANT_ANT_param_block::NOOP)
-			ranking_function = new ANT_ranking_function_noop(search_engine);
+		else if (params.ranking_function == ANT_ANT_param_block::DOCID)
+			ranking_function = new ANT_ranking_function_docid(search_engine, params.ascending);
 		else if (params.ranking_function == ANT_ANT_param_block::INNER_PRODUCT)
 			ranking_function = new ANT_ranking_function_inner_product(search_engine);
 		else if (params.ranking_function == ANT_ANT_param_block::KBTFIDF)
