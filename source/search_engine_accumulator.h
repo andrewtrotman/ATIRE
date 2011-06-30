@@ -11,6 +11,11 @@
 	typedef short ANT_ACCUMULATOR_T;
 #endif
 
+#ifdef min
+	/* Windows defines the min function, we don't want that. */
+#undef min
+#endif
+
 /*
 	class ANT_SEARCH_ENGINE_ACCUMULATOR
 	-----------------------------------
