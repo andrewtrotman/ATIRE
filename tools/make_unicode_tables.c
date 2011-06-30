@@ -114,6 +114,11 @@ void print_usage(char * argv[])
 exit(printf("Usage:%s <-lower | -upper | -decomposition | -chartype> <UnicodeData.txt>\n", argv[0]));
 }
 
+int max(int a, int b)
+{
+return a > b ? a : b;
+}
+
 /*
 	MAIN()
 	------
@@ -130,6 +135,7 @@ int state;
 enum ANT_UNICODE_chartype chartype;
 char utf8_buf[100];
 char *utf8_buf_ptr;
+int longest_decomposition = 0;
 
 if (argc != 3)
 	print_usage(argv);
@@ -358,6 +364,9 @@ for (current = lines; *current != NULL; current++)
 			wide_ptr++;
 			}
 		*utf8_buf_ptr = 0;
+
+		longest_decomposition = max(longest_decomposition, utf8_buf_ptr - utf8_buf);
+
 		printf("{%ld, \"%s\"}", character, utf8_buf);
 		times++;
 		}
@@ -403,6 +412,10 @@ for (current = lines; *current != NULL; current++)
 	}
 printf("\n};\n");
 
+if (mode == DECOMPOSITION)
+{
+	fprintf(stderr, "#define LONGEST_UTF8_DECOMPOSITION %d\n", longest_decomposition);
+}
 
 return 0;
 }
