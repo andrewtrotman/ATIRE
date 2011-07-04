@@ -129,6 +129,7 @@ for (param = 1; param < argc; param++)
 					servers[current - param - 1] = argv[current];
 				servers[current - param - 1] = NULL;
 				}
+			param = current;
 			}
 		else
 			usage();

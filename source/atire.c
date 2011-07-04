@@ -25,7 +25,7 @@ const long MAX_TITLE_LENGTH = 1024;
 
 ATIRE_API *atire = NULL;
 
-ATIRE_API * ant_init(ANT_ANT_param_block & params);
+ATIRE_API *ant_init(ANT_ANT_param_block & params);
 
 /*
 	PERFORM_QUERY()

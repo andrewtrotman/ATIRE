@@ -156,8 +156,6 @@ qsort(results, (size_t)hits, sizeof(*results), cmp);
 /*
 	ATIRE_ENGINE_RESULT_SET::SERIALISE()
 	------------------------------------
-<ATIREsearch>
-<query>trotman</query><numhits>12</numhits><time>0</time>
 */
 char *ATIRE_engine_result_set::serialise(char *query, long long overall_hits, long long time_taken, long long first, long long page_length)
 {
@@ -191,6 +189,37 @@ if (first < hits)
 	result << "</hits>\n";
 	}
 result << "</ATIREsearch>";
+
+return strnew(result.str().c_str());
+}
+
+/*
+	ATIRE_ENGINE_RESULT_SET::SERIALISE_TREC()
+	-----------------------------------------
+*/
+char *ATIRE_engine_result_set::serialise_TREC(long long topic_id, char *run_name, long long first, long long page_length)
+{
+long long current, from, to;
+std::stringstream result;
+
+result << std::fixed << std::setprecision(2);
+
+if (first < hits)
+	{
+	sort();
+
+	from = first - 1;
+	to = from + page_length < hits ? from + page_length : hits;
+	for (current = from; current < to; current++)
+		{
+		result << topic_id << " ";
+		result << "Q0" << " ";
+		result << results[current].name << " ";
+		result << current + 1 << " ";
+		result << results[current].rsv << " ";
+		result << run_name << std::endl;
+		}
+	}
 
 return strnew(result.str().c_str());
 }

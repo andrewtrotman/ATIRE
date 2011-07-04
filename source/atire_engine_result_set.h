@@ -31,6 +31,7 @@ public:
 	virtual void rewind(void);
 	virtual long long add(char *serialised_version, long long docid_base = 0);
 	virtual char *serialise(char *query, long long hits, long long time_taken, long long first, long long page_length);
+	virtual char *serialise_TREC(long long topic_id, char *run_name, long long first, long long page_length);
 } ;
 
 
