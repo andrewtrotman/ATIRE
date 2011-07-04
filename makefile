@@ -315,6 +315,7 @@ PARTS = \
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\unicode.obj							\
+	$(OBJDIR)\atire_client_param_block.obj			\
 	$(OBJDIR)\atire_broker_param_block.obj			\
 	$(OBJDIR)\atire_broke_engine.obj				\
 	$(OBJDIR)\atire_engine_result_set.obj			\
