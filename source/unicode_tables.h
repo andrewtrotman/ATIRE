@@ -13,6 +13,8 @@ enum ANT_UNICODE_chartype {
 	CT_CHINESE=128
 };
 
+#define UTF8_LONGEST_DECOMPOSITION_LEN 4
+
 /*
 	Convert to upper case or lower case.  Note that the case conversion is not one-to-one.  For example,
 	character 212B -> 00E5 -> 00C5.  This is because :

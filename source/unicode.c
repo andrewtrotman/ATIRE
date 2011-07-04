@@ -88,7 +88,7 @@ int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned long origchar
 
 	The result is not null-terminated.
 */
-int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src)
+int utf8_tolower(unsigned char ** dest, size_t * destlen, const unsigned char **src)
 {
 int success;
 
@@ -97,7 +97,7 @@ if ((**src & 0x80) == 0) //ASCII
 	unsigned char origchar = **src;
 	unsigned char lowerchar = ANT_tolower(origchar);
 
-	*src++;
+	(*src)++;
 	if (*destlen)
 		{
 		**dest = lowerchar;

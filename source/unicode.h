@@ -37,13 +37,13 @@ enum ANT_UNICODE_xml_char_class {
 };
 
 int ischinese(unsigned long character);
-int ischinese(unsigned char *here);
-inline int ischinese(char *here) { return ischinese((unsigned char *)here); }
+int ischinese(const unsigned char *here);
+inline int ischinese(const char *here) { return ischinese((const unsigned char *)here); }
 
 int utf8_isupper(unsigned long character);
 int utf8_isupper(long character);
 
-int utf8_tolower(unsigned char ** dest, size_t * destlen, unsigned char **src);
+int utf8_tolower(unsigned char ** dest, size_t * destlen, const unsigned char **src);
 unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *) utf8_tolower((unsigned char *) here); }
 
@@ -78,7 +78,7 @@ inline long utf8_bytes(unsigned long c)
 	------------------------
 	How many bytes does the UTF8 character take?
 */
-inline unsigned long utf8_bytes(unsigned char *here)
+inline unsigned long utf8_bytes(const unsigned char *here)
 {
 if (*here < 0x80)				// 1-byte (ASCII) character
 	return 1;
@@ -92,7 +92,7 @@ else
 	return 1;		// dunno so make it 1
 }
 
-inline unsigned long utf8_bytes(char *here) { return utf8_bytes((unsigned char *)here); }
+inline unsigned long utf8_bytes(const char *here) { return utf8_bytes((unsigned char *)here); }
 
 /*
 	WIDE_TO_UTF8()
@@ -148,7 +148,7 @@ inline int wide_to_utf8(char * buf, size_t buflen, unsigned long c) {
 
 	If the source buffer before the UTF-8 character is completed, zero is returned instead.
 */
-inline unsigned long utf8_to_wide_safe(unsigned char *here)
+inline unsigned long utf8_to_wide_safe(const unsigned char *here)
 {
 int numchars = utf8_bytes(here);
 
@@ -178,7 +178,7 @@ switch (numchars)
  * Compared to the _safe version, this version can read up to 3 bytes past the
  * null-terminator of the string at here.
  */
-inline unsigned long utf8_to_wide_unsafe(unsigned char *here)
+inline unsigned long utf8_to_wide_unsafe(const unsigned char *here)
 {
 int numchars = utf8_bytes(here);
 
@@ -195,12 +195,12 @@ switch (numchars)
 	}
 }
 
-inline unsigned long utf8_to_wide(unsigned char *here)
+inline unsigned long utf8_to_wide(const unsigned char *here)
 {
 	return utf8_to_wide_safe(here);
 }
 
-inline unsigned long utf8_to_wide(char *here)
+inline unsigned long utf8_to_wide(const char *here)
 {
 return utf8_to_wide((unsigned char *) here);
 }
@@ -210,7 +210,7 @@ return utf8_to_wide((unsigned char *) here);
 	--------------------
 	if it is valid uft8 bytes
 */
-inline int isutf8(unsigned char *here)
+inline int isutf8(const unsigned char *here)
 {
 int number_of_bytes = utf8_bytes(here);
 int i = 1;
@@ -224,7 +224,7 @@ for (; i < number_of_bytes; ++i)
 	}
 return 1;
 }
-inline int isutf8(char *here) {
+inline int isutf8(const char *here) {
 	return isutf8((unsigned char *) here);
 }
 
@@ -249,7 +249,7 @@ return
 	-----------------------
 	Is the given character from the Chinese CodePoint?
 */
-inline int ischinese(unsigned char *here)
+inline int ischinese(const unsigned char *here)
 {
 return ischinese(utf8_to_wide(here));
 }
