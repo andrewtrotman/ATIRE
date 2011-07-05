@@ -52,6 +52,8 @@ ATIRE_engine_result_set answers;
 char *reply, *TREC;
 long long retry;
 
+//printf("Topic:%lld query:%s\n", topic_id, query);
+
 retry = 0;
 do
 	{
