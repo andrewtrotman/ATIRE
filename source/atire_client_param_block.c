@@ -28,6 +28,7 @@ static char *default_output_filename = "ant.out";
 */
 ATIRE_client_param_block::ATIRE_client_param_block(long argc, char *argv[]) : ATIRE_engine_param_block(argc, argv)
 {
+connect_string = "localhost:8088";
 queries_filename = NULL;
 results_list_length = -1;
 
