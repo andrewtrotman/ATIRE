@@ -16,6 +16,12 @@
 	#define TRUE (!FALSE)
 #endif
 
+static char *default_output_filename = "ant.out";
+
+#ifdef _MSC_VER
+	#define unlink _unlink
+#endif
+
 /*
 	ATIRE_CLIENT_PARAM_BLOCK()
 	--------------------------
@@ -24,6 +30,10 @@ ATIRE_client_param_block::ATIRE_client_param_block(long argc, char *argv[]) : AT
 {
 queries_filename = NULL;
 results_list_length = -1;
+
+output_forum = NONE;
+output_filename = default_output_filename;
+run_name = "unknown";
 }
 
 /*
@@ -66,8 +76,60 @@ puts("");
 puts("OUTPUT");
 puts("-------");
 puts("-l<n>           Length of the results list [default=1500 for batch, default=10 for interactive)]");
+puts("-o<filename>    Output filename for the run (destructive) [default=ant.out]");
+puts("");
+
+puts("TREC SPECIFIC");
+puts("-------------");
+puts("-e[-t]          Export a run file for use in an Evaluation Forum");
+puts("   -            Don't generate a run file [default]");
+puts("   t            TREC run format");
+puts("-E[forum]       Use defaults for the given forum");
+puts("  tw11<name>    TREC web track 2011 (-et -l10000 -n<name> -o<name>");
+puts("-n<name>        Run is named <name> [default=unknown]");
 
 exit(0);
+}
+
+/*
+	ATIRE_CLIENT_PARAM_BLOCK::EXPORT_FORMAT()
+	-----------------------------------------
+*/
+void ATIRE_client_param_block::export_format(char *forum)
+{
+do
+	{
+	switch (*forum)
+		{
+		case '-' : output_forum = NONE;   break;
+		case 't' : output_forum = TREC;   break;
+		default  : exit(printf("Unknown export format: '%c'\n", *forum)); break;
+		}
+	forum++;
+	}
+while (*forum != '\0');
+}
+
+/*
+	ATIRE_CLIENT_PARAM_BLOCK::EXPORT_FORMAT_DEFAULTS()
+	--------------------------------------------------
+*/
+void ATIRE_client_param_block::export_format_defaults(char *forum)
+{
+if (strncmp(forum, "tw11", 4) == 0)
+	{
+	results_list_length = 10000;
+	output_forum = TREC;
+	output_filename = run_name = forum + 4;
+
+	strip_space_inplace(output_filename);
+	if (*output_filename == '\0')
+		output_filename = run_name = default_output_filename;
+
+	unlink(output_filename);
+	}
+else
+	exit(printf("Unknown forum: '%s'\n", forum));
 }
 
 /*
@@ -90,14 +152,28 @@ for (param = 1; param < argc; param++)
 			help();
 		else if (strcmp(command, "H") == 0)
 			help();
-		else if (*command == 'l')
-			results_list_length = ANT_atoi64(command + 1);
 		else if (strcmp(command, "nologo") == 0)
 			logo = FALSE;
 		else if (strcmp(command, "people") == 0)
 			{
 			ANT_credits();
 			exit(0);
+			}
+		else if (*command == 'e')
+			export_format(command + 1);
+		else if (*command == 'E')
+			export_format_defaults(command + 1);
+		else if (*command == 'l')
+			results_list_length = ANT_atoi64(command + 1);
+		else if (*command == 'n')
+			run_name = command + 1;
+		else if (*command == 'o')
+			{
+			if (*(command + 1) != '\0')
+				{
+				output_filename = command + 1;
+				unlink(output_filename);
+				}
 			}
 		else if (*command == 'q')
 			{

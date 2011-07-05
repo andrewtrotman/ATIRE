@@ -10,6 +10,7 @@
 #include "channel_file.h"
 #include "channel_socket.h"
 #include "atire_engine_result_set.h"
+#include "atire_client_param_block.h"
 #include "version.h"
 
 const long long MAX_RETRIES = 10;
@@ -20,9 +21,10 @@ const long MAX_TITLE_LENGTH = 1024;
 	PROMPT()
 	--------
 */
-void prompt(void)
+void prompt(ATIRE_client_param_block *params)
 {
-printf(PROMPT);
+if (params->output_forum == ATIRE_client_param_block::NONE)
+	printf(PROMPT);
 }
 
 /*
@@ -44,7 +46,7 @@ return true;
 	PERFORM_QUERY()
 	---------------
 */
-char *perform_query(ANT_channel *outchannel, ATIRE_API_remote *server, long long topic_id, char *query, long long top_of_page, long long page_length)
+char *perform_query(ANT_channel *outchannel, ATIRE_client_param_block *params, ATIRE_API_remote *server, long long topic_id, char *query, long long top_of_page, long long page_length)
 {
 ATIRE_engine_result_set answers;
 char *reply, *TREC;
@@ -71,8 +73,8 @@ else if (retry > 0)
 if (reply != NULL)
 	{
 	answers.add(reply);
-	TREC = answers.serialise_TREC(topic_id, "run", top_of_page, page_length);
-	outchannel->puts(TREC);
+	TREC = answers.serialise_TREC(topic_id, params->run_name, top_of_page, page_length);
+	outchannel->write(TREC);
 	
 	delete [] reply;
 	delete [] TREC;
@@ -89,66 +91,101 @@ int main(int argc, char *argv[])
 {
 ANT_channel *inchannel, *outchannel;
 ATIRE_API_remote server;
+ATIRE_client_param_block params(argc, argv);
 long long line, topic_id;
 char *command, *query;
 
-puts(ANT_version_string);
 /*
-	Check the parameters (who are we going to connect to?)
+	Parse the parameters
 */
-if (argc != 2)
-	exit(printf("Usage: %s <server:port>\n", argv[0]));
+params.parse();
+
+/*
+	Print the welcome message
+*/
+if (params.logo)
+	puts(ANT_version_string);
 
 /*
 	read from stdin and write to stdout
 */
-inchannel = new ANT_channel_file(NULL);
-outchannel = new ANT_channel_file();
+inchannel = new ANT_channel_file(params.queries_filename);
+outchannel = new ANT_channel_file(params.output_forum == ATIRE_client_param_block::NONE ? NULL : params.output_filename);
 
 /*
 	Connect to the server (or broker tree)
 */
-if (!open_connection_to_server(&server, argv[1]))
-	exit(printf("Cannot connect to:%s\n", argv[1]));
+if (!open_connection_to_server(&server, params.connect_string))
+	exit(printf("Cannot connect to:%s\n", params.connect_string));
 
 /*
 	Now do the searches
 */
 line = 0;
-prompt();
-for (command = inchannel->gets(); command != NULL; prompt(), command = inchannel->gets())
+prompt(&params);
+for (command = inchannel->gets(); command != NULL; prompt(&params), command = inchannel->gets())
 	{
+	/*
+		inc line number and remove spaces from the beginning and end of the input line
+	*/
 	line++;
+	strip_space_inplace(command);
 
 	/*
-		Parsing to get the topic number
+		commands start with a dot (.)
 	*/
-	strip_space_inplace(command);
 	if (strcmp(command, ".quit") == 0)
 		{
-		delete [] command;
+		delete [] command;			// quit the program
 		break;
 		}
 	else if (*command == '\0')
 		delete [] command;			// ignore blank lines
 	else
 		{
-		topic_id = -1;				// check for a TREC (or INEX) topic ID
-		if (!ANT_isdigit(*command))
+		/*
+			we're a query
+		*/
+		topic_id = -1;
+		query = NULL;
+
+		/*
+			does the query start with a topic number?
+		*/
+		if (params.output_forum == ATIRE_client_param_block::NONE)
 			query = command;
 		else
 			{
-			topic_id = atol(command);
-			if ((query = strchr(command, ' ')) == NULL)
+			/*
+				seperate the topic id from the query
+			*/
+			if (ANT_isdigit(*command))
+				{
+				topic_id = atol(command);
+				query = strpbrk(command, " :");
+				}
+			/*
+				Do we have an error? (no topic id or no query)
+			*/
+			if (topic_id < 0 || query == NULL)
 				{
 				printf("Line %lld: Skipping badly formed query:'%s'\n", line, command);
 				continue;
 				}
 			}
-		perform_query(outchannel, &server, topic_id, query, 1, 10);
+		/*
+			Now do the query and then clean up
+		*/
+		perform_query(outchannel, &params, &server, topic_id, query, 1, params.results_list_length);
 		delete [] command;
 		}
 	}
+
+/*
+	finished
+*/
+delete inchannel;
+delete outchannel;
 
 return 0;
 }

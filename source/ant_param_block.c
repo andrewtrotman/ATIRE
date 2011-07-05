@@ -307,7 +307,7 @@ if ((query_type & (ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI)) == 0)
 /*
 	ANT_ANT_PARAM_BLOCK::EXPORT_FORMAT()
 	------------------------------------
-		focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
+	focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
 */
 void ANT_ANT_param_block::export_format(char *forum)
 {
