@@ -116,6 +116,8 @@ public:
 	*/
 	long set_ranking_function(long function, double p1, double p2);
 
+	long set_ranking_function(long function, const char * filename);
+
 	/*
 		Set the stemming function
 	*/

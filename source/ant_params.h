@@ -14,7 +14,7 @@
 enum { MAP, MAgP, MAgPf, RANKEFF, P_AT_N, SUCCESS_AT_N, MAiP } ;									// metrics
 enum { /* NONE = 0, */ INEX = 1, TREC, INEX_EFFICIENCY, INEX_FOCUS, INEX_BEP } ;	// evaluation forum
 enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4 };						// statistics to print (bitstring)
-enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256};		// ranking function
+enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256, DOCID = 512};		// ranking function
 enum { THRESHOLD = 1, WEIGHTED = 2 }; 									// Use FALSE as 0
 enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1};							// read the index from disk or load at startup
 enum { /* NONE = 0, */ ARTICLE = 1, RANGE };										// focused retrieval method

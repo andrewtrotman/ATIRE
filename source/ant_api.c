@@ -292,7 +292,7 @@ else
 	    data->ranking_function = new ANT_ranking_function_divergence(data->search_engine);
 	else if (params->ranking_function == TERM_COUNT)
 		data->ranking_function = new ANT_ranking_function_term_count(data->search_engine);
-	else if (params->ranking_function == RANK_NOOP)
+	else if (params->ranking_function == DOCID)
 		data->ranking_function = new ANT_ranking_function_docid(data->search_engine);
 	else if (params->ranking_function == ALL_TERMS)
 		{

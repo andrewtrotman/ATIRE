@@ -37,6 +37,7 @@
 #include "ranking_function_kbtfidf.h"
 #include "ranking_function_dlh13.h"
 #include "ranking_function_docid.h"
+#include "ranking_function_pregen.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -278,6 +279,32 @@ NEXI_parser->set_segmentation(segmentation);
 NEXI_parser->parse(parsed_query, query);
 
 return parsed_query->parse_error;
+}
+
+/*
+	ATIRE_API::SET_RANKING_FUNCTION()
+	---------------------------------
+	returns:
+		0 on success
+		1 on failure
+*/
+long ATIRE_API::set_ranking_function(long function, const char * filename)
+{
+ANT_ranking_function *new_function;
+
+switch (function)
+	{
+	case ANT_ANT_param_block::PREGEN:
+		new_function = new ANT_ranking_function_pregen(search_engine, filename);
+		break;
+	default:
+		return 1;		// failure, invalid parameter
+	}
+
+delete ranking_function;
+ranking_function = new_function;
+
+return 0;		// success
 }
 
 /*

@@ -16,11 +16,11 @@ class ANT_ranking_function;
 class ANT_indexer_param_block_rank : public ANT_ranking_function_factory
 {
 public:
-	enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256, INNER_PRODUCT = 512, KBTFIDF = 1024, DLH13 = 2048, DOCID = 4096};
+	enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256, INNER_PRODUCT = 512, KBTFIDF = 1024, DLH13 = 2048, DOCID = 4096, PREGEN = 8192};
 
 protected:
 	static const long long index_functions =  BM25 | IMPACT | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | INNER_PRODUCT | KBTFIDF | DLH13 | DOCID;
-	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | ALL_TERMS | INNER_PRODUCT | KBTFIDF | DLH13 | DOCID;
+	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | ALL_TERMS | INNER_PRODUCT | KBTFIDF | DLH13 | DOCID | PREGEN;
 
 public:
 	long ranking_function;				// what ranking function should we use?
@@ -31,7 +31,7 @@ public:
 	double kbtfidf_k, kbtfidf_b;		// the k and b paramters for KBTFIDF
 
 	int ascending;						// ascending/descending switch for docid ranking
-
+	char *field_name;					// field to rank on for pregens
 private:
 	const char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
 

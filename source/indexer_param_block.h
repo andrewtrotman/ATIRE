@@ -7,6 +7,9 @@
 
 #include "indexer_param_block_rank.h"
 #include "indexer_param_block_stem.h"
+#include "pregen.h"
+
+#define MAX_PREGENS 100
 
 /*
 	class ANT_INDEXER_PARAM_BLOCK
@@ -17,6 +20,11 @@ class ANT_indexer_param_block : public ANT_indexer_param_block_rank, public ANT_
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
 	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, TAR_LZO, PKZIP, TREC, WARC_GZ, RECURSIVE_WARC_GZ, CSV, TRECWEB, VBULLETIN, PHPBB, MYSQL };
+
+	struct pregen_field_spec {
+		char *field_name;
+		pregen_field_type type;
+	};
 
 private:
 	int argc;
@@ -34,6 +42,9 @@ public:
 	long document_compression_scheme;	// should we and how should we store the documents in the repository?
 	char *doclist_filename,
 		*index_filename;				// output filenames
+
+	pregen_field_spec pregens[MAX_PREGENS];	// fields to use in generating pregens
+	int num_pregen_fields;
 
 protected:
 	void document_compression(char *scheme);

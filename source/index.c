@@ -48,6 +48,13 @@
 	#define TRUE (!FALSE)
 #endif
 
+#ifdef _MSC_VER
+	#include <windows.h>
+	#define PATH_MAX MAX_PATH
+#else
+	#include <limits.h>
+#endif
+
 /*
 	REPORT()
 	--------
@@ -81,6 +88,8 @@ ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 ANT_directory_iterator_multiple *parallel_disk;
 ANT_stem *stemmer = NULL;
+ANT_pregen *pregen = NULL;
+char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
 
 if (argc < 2)
@@ -121,6 +130,37 @@ if (param_block.stemmer != 0)
 readability = new ANT_readability_factory;
 readability->set_measure(param_block.readability_measure);
 readability->set_parser(parser);
+
+if (param_block.num_pregen_fields)
+	{
+	unsigned int pregen_prefix_len = strlen(param_block.index_filename) + 1;
+	pregen = new ANT_pregen();
+
+	if (pregen_prefix_len < PATH_MAX)
+		{
+		strcpy(pregen_filename, param_block.index_filename);
+
+		pregen_filename[pregen_prefix_len - 1] = '.';
+
+		for (int i = 0; i < param_block.num_pregen_fields; i++)
+			{
+			ANT_indexer_param_block::pregen_field_spec & spec = param_block.pregens[i];
+
+			if (pregen_prefix_len + strlen(spec.field_name) > PATH_MAX)
+				fprintf(stderr, "Pathname too long to for pregen field '%s'\n", spec.field_name);
+			else
+				{
+				strcpy(pregen_filename + pregen_prefix_len, spec.field_name);
+				pregen->add_field(pregen_filename, spec.field_name, spec.type);
+				}
+			}
+		}
+	else
+		{
+		fprintf(stderr, "Index pathname too long to derive pregen filenames\n");
+		//And we'll just keep going...
+		}
+	}
 
 #ifdef PARALLEL_INDEXING
 	parallel_disk = new ANT_directory_iterator_multiple;
@@ -208,10 +248,12 @@ for (param = first_param; param < argc; param++)
 					ANT_directory_iterator::READ_FILE);
 		else
 			source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
-					"SELECT post_id, REPLACE(CONCAT_WS(' ', post_subject, post_text), '\xC2\x80', '\xE2\x82\xAC'), "
+					"SELECT CONCAT('<post_id>', post_id, '</post_id><post_time>', post_time, '</post_time>'), "
+						"REPLACE(CONCAT_WS(' ', post_subject, post_text), '\xC2\x80', '\xE2\x82\xAC'), "
 						"IF(post_approved=0, '\xC2\x80""u', '\xC2\x80""a'), CONCAT('\xC2\x80poster-', poster_id), "
 						"CONCAT('\xC2\x80""forum-', forum_id), CONCAT('\xC2\x80""topic-', topic_id) "
 					"FROM phpbb_posts "
+					"INNER JOIN phpbb_forums USING (forum_id) "
 					"ORDER BY post_id ASC ",
 					ANT_directory_iterator::READ_FILE);
 
@@ -317,6 +359,8 @@ for (param = first_param; param < argc; param++)
 			}
 		else
 			{
+			pregen->process_document(doc - 1, current_file->filename);
+
 			/*
 				Store the document in the repository.
 			*/
@@ -352,6 +396,9 @@ if (doc == 0)
 else
 	{
 	id_list.close();
+	if (pregen)
+		pregen->close();
+
 	now = stats.start_timer();
 	index->serialise(&param_block);
 	stats.add_disk_output_time(stats.stop_timer(now));
@@ -364,6 +411,7 @@ delete readability;
 delete file_stream;
 delete decompressor;
 delete instream_buffer;
+delete pregen;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{

@@ -285,7 +285,8 @@ PARTS = \
 	$(OBJDIR)\ranking_function_readability.obj		\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
-	$(OBJDIR)\ranking_function_docid.obj				\
+	$(OBJDIR)\ranking_function_docid.obj			\
+	$(OBJDIR)\ranking_function_pregen.obj			\
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
@@ -314,6 +315,7 @@ PARTS = \
 	$(OBJDIR)\focus_lowest_tag.obj					\
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_tables.obj					\
+	$(OBJDIR)\pregen.obj							\
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\atire_client_param_block.obj			\
 	$(OBJDIR)\atire_broker_param_block.obj			\

@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include <sstream>
 #include "atire_api.h"
 #include "str.h"
 #include "maths.h"
@@ -12,6 +13,7 @@
 #include "channel_file.h"
 #include "channel_socket.h"
 #include "relevance_feedback_factory.h"
+#include "ranking_function_pregen.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -457,6 +459,7 @@ ATIRE_API *ant_init(ANT_ANT_param_block & params)
  */
 ATIRE_API *atire = new ATIRE_API();
 long fail;
+std::stringstream buffer;
 
 if (params.logo)
 	puts(atire->version());				// print the version string is we parsed the parameters OK
@@ -500,6 +503,11 @@ switch (params.ranking_function)
 		break;
 	case ANT_indexer_param_block_rank::DOCID:
 		atire->set_ranking_function(params.ranking_function, params.ascending, 0);
+		break;
+	case ANT_indexer_param_block_rank::PREGEN:
+		buffer << params.index_filename << "." << params.field_name;
+
+		atire->set_ranking_function(params.ranking_function, buffer.str().c_str());
 		break;
 	default:
 		atire->set_ranking_function(params.ranking_function, 0.0, 0.0);

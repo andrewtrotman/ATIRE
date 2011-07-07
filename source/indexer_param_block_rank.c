@@ -36,6 +36,9 @@ bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
 
 kbtfidf_k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K;
 kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
+
+ascending = 1;
+field_name = NULL;
 }
 
 /*
@@ -135,6 +138,11 @@ else if (strcmp(which, "docidd") == 0)
 	ranking_function = DOCID;
 	ascending = 0;
 	}
+else if (strncmp(which, "pregen:", strlen("pregen:")) == 0)
+	{
+	ranking_function = PREGEN;
+	field_name = which + strlen("pregen:");
+	}
 else if (strcmp(which, "kbtfidf") == 0)
 	{
 	ranking_function = KBTFIDF;
@@ -180,6 +188,8 @@ if (allowable & KBTFIDF)
 	printf("   kbtfidf:<k>:<b> log(k * tf - b) * idf * idf (Shlomo's vector space) %s\n", isdefault(ALL_TERMS));
 if (allowable & DOCID)
 	printf("   docid<a|d>   Sort by document index (ascending or descending) %s\n", isdefault(DOCID));
+if (allowable & PREGEN)
+	printf("   pregen:<name>Pregenerated ranking, with field of given name %s\n", isdefault(PREGEN));
 
 puts("");
 }
