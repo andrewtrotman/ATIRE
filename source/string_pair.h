@@ -38,7 +38,7 @@ public:
 	char *strncpy(char *dest, size_t length) { *(::strncpy(dest, start, string_length < length ? string_length : length) + (string_length < length ? string_length : length)) = '\0'; return dest; }
 	int strcmp(ANT_string_pair *with) { return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1; }
 
-	int true_strcmp(char *string);
+	int true_strcmp(const char *string);
 	int true_strcmp(ANT_string_pair *with);
 	int true_strncmp(ANT_string_pair *with, size_t length);
 
@@ -71,7 +71,7 @@ else
 	ANT_STRING_PAIR::TRUE_STRCMP()
 	------------------------------
 */
-inline int ANT_string_pair::true_strcmp(char *with)
+inline int ANT_string_pair::true_strcmp(const char *with)
 {
 int cmp;
 size_t len;
