@@ -1,6 +1,6 @@
 
 /*
-	RANKING_FUNCTION_NOOP.H
+	RANKING_FUNCTION_DOCID.H
 	-----------------------------
 */
 #ifndef RANKING_FUNCTION_DOCID_H_
