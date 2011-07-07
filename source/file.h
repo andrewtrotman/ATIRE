@@ -33,10 +33,10 @@ public:
 	virtual ~ANT_file();
 
 	virtual long setvbuff(long size);
-	virtual long open(char *filename, char *mode);
+	virtual long open(const char *filename, char *mode);
 	virtual long close(void);
 	virtual long write(unsigned char *data, long long size);
-	virtual long long puts(char *string);
+	virtual long long puts(const char *string);
 	virtual long read(unsigned char *data, long long size);
 	long read(int64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(int32_t *data) { return read((unsigned char *)data, sizeof(*data)); }

@@ -67,7 +67,7 @@ return buffer == NULL ? 0 : 1;
 	which causes files opened for read to acquire a read lock (excluding other writers)
 	and files opened for write to acquire a write lock (excluding all other processes).
 */
-long ANT_file::open(char *filename, char *mode)
+long ANT_file::open(const char *filename, char *mode)
 {
 int use_lock = 0;
 #ifdef _MSC_VER
@@ -208,7 +208,7 @@ if (buffer_used > 0)
 	ANT_FILE::PUTS()
 	----------------
 */
-long long ANT_file::puts(char *string)
+long long ANT_file::puts(const char *string)
 {
 long long len;
 
