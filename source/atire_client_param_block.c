@@ -5,6 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+	#define unlink _unlink
+#else
+	#include <unistd.h>
+#endif
+
 #include "version.h"
 #include "str.h"
 #include "atire_client_param_block.h"
@@ -17,10 +24,6 @@
 #endif
 
 static char *default_output_filename = "ant.out";
-
-#ifdef _MSC_VER
-	#define unlink _unlink
-#endif
 
 /*
 	ATIRE_CLIENT_PARAM_BLOCK()
