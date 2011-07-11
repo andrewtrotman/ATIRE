@@ -45,7 +45,7 @@ field_name = NULL;
 	ANT_INDEXER_PARAM_BLOCK_RANK::GET_TWO_PARAMETERS()
 	--------------------------------------------------
 */
-void ANT_indexer_param_block_rank::get_two_parameters(char *from, double *first, double *second)
+int ANT_indexer_param_block_rank::get_two_parameters(char *from, double *first, double *second)
 {
 char *ch;
 
@@ -56,7 +56,7 @@ for (ch = from; *ch != '\0'; ch++)
 		break;
 		}
 	else
-		puts("Command line parse error");
+		return 0;
 
 if (*ch != '\0')
 	for (ch++; *ch != '\0'; ch++)
@@ -66,8 +66,9 @@ if (*ch != '\0')
 			break;
 			}
 		else if (!(isdigit(*ch) || *ch == '.'))
-			puts("Command line parse error");
+			return 0;
 
+return 1;
 //printf("[%s][%f][%f]\n", from, *first, *second);
 }
 
@@ -75,7 +76,7 @@ if (*ch != '\0')
 	ANT_INDEXER_PARAM_BLOCK_RANK::GET_ONE_PARAMETER()
 	-------------------------------------------------
 */
-void ANT_indexer_param_block_rank::get_one_parameter(char *from, double *into)
+int ANT_indexer_param_block_rank::get_one_parameter(char *from, double *into)
 {
 char *ch;
 
@@ -86,7 +87,9 @@ for (ch = from; *ch != '\0'; ch++)
 		break;
 		}
 	else
-		puts("Command line parse error");
+		return 0;
+
+return 1;
 
 //printf("[%s][%f]\n", from, *into);
 }
@@ -94,23 +97,28 @@ for (ch = from; *ch != '\0'; ch++)
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::SET_RANKER()
 	------------------------------------------
+
+	Parse the string to determine which ranking function (and parameters) to use.
+
+	Returns non-zero on success, 0 on failure (e.g. no such ranking function or bad parameters).
+	Failure leaves the parsed information in an undefined state.
 */
-void ANT_indexer_param_block_rank::set_ranker(char *which)
+int ANT_indexer_param_block_rank::set_ranker(char *which)
 {
 if (strncmp(which, "BM25", 4) == 0)
 	{
 	ranking_function = BM25;
-	get_two_parameters(which + 4, &bm25_k1, &bm25_b);
+	return get_two_parameters(which + 4, &bm25_k1, &bm25_b);
 	}
 else if (strncmp(which, "lmd", 3) == 0)
 	{
 	ranking_function = LMD;
-	get_one_parameter(which + 3, &lmd_u);
+	return get_one_parameter(which + 3, &lmd_u);
 	}
 else if (strncmp(which, "lmjm", 4) == 0)
 	{
 	ranking_function = LMJM;
-	get_one_parameter(which + 4, &lmjm_l);
+	return get_one_parameter(which + 4, &lmjm_l);
 	}
 else if (strcmp(which, "be") == 0)
 	ranking_function = BOSE_EINSTEIN;
@@ -146,10 +154,12 @@ else if (strncmp(which, "pregen:", strlen("pregen:")) == 0)
 else if (strcmp(which, "kbtfidf") == 0)
 	{
 	ranking_function = KBTFIDF;
-	get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
+	return get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
 	}
 else
-	exit(printf("Unknown Ranking Function:'%s'\n", which));
+	return 0; //Unknown Ranking Function
+
+return 1;
 }
 
 /*

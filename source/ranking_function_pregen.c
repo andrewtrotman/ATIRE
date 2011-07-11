@@ -39,6 +39,17 @@ while (current < end)
 }
 
 /*
+	ANT_RANKING_FUNCTION_PREGEN::LOAD_PREGEN()
+	------------------------------------------
+
+	Load a pregen from the given file, returning true if successful.
+*/
+int ANT_ranking_function_pregen::load_pregen(const char *filename)
+{
+return pregen.read(filename);
+}
+
+/*
 	ANT_RANKING_FUNCTION_PREGEN::RANK()
 	---------------------------------------
 */

@@ -28,6 +28,7 @@ const long MAX_TITLE_LENGTH = 1024;
 ATIRE_API *atire = NULL;
 
 ATIRE_API *ant_init(ANT_ANT_param_block & params);
+int ant_init_ranking(ATIRE_API * atire, ANT_ANT_param_block & base, ANT_indexer_param_block_rank & params);
 
 /*
 	PERFORM_QUERY()
@@ -106,10 +107,12 @@ double ant(ANT_ANT_param_block *params)
 {
 char *print_buffer, *ch, *pos;
 ANT_stats_time post_processing_stats;
-char *command, *query;
+char *command, *query, *ranker;
 long topic_id, number_of_queries;
 long long line;
 long long hits, result, last_to_list, first_to_list;
+ANT_indexer_param_block_rank params_rank;
+int custom_ranking;
 double average_precision, sum_of_average_precisions, mean_average_precision, relevance;
 long length_of_longest_document;
 unsigned long current_document_length;
@@ -142,10 +145,19 @@ else
 sum_of_average_precisions = 0.0;
 number_of_queries = 0;
 line = 0;
+custom_ranking = 0;
 
 prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
 	{
+
+	if (custom_ranking)
+		{
+		/* Revert to default ranking function for next query */
+		ant_init_ranking(atire, *params, *params); //Just assume that it worked.
+		custom_ranking = 0;
+		}
+
 	first_to_list = 0;
 	last_to_list = first_to_list + params->results_list_length;
 
@@ -300,6 +312,25 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			else
 				last_to_list = first_to_list + params->results_list_length;
 
+			if ((ranker = between(command, "<ranking>", "</ranking>")) != NULL)
+				{
+				if (params_rank.set_ranker(ranker) && ant_init_ranking(atire, *params, params_rank))
+					custom_ranking = 1;
+				else
+					{
+					outchannel->puts("<ATIREsearch>");
+					outchannel->puts("<error>Bad ranking function</error>");
+					outchannel->puts("</ATIREsearch>");
+					delete [] query;
+					delete [] ranker;
+					delete [] command;
+
+					continue;
+					}
+
+				delete [] ranker;
+				}
+
 			delete [] command;
 			command = query;
 			}
@@ -443,6 +474,41 @@ return mean_average_precision;
 }
 
 /*
+	ANT_INIT_RANKING()
+	------------------
+
+	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank, where
+	"base" is the rest of the search-engine config (allowing you to easily switch between different rankers
+	on the same base config).
+
+	Return true if successful. On failure, the API is not altered.
+*/
+int ant_init_ranking(ATIRE_API * atire, ANT_ANT_param_block & base, ANT_indexer_param_block_rank & params) {
+std::stringstream buffer;
+
+switch (params.ranking_function)
+	{
+	case ANT_indexer_param_block_rank::BM25:
+		return atire->set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b) == 0;
+	case ANT_indexer_param_block_rank::LMD:
+		return atire->set_ranking_function(params.ranking_function, params.lmd_u, 0.0) == 0;
+	case ANT_indexer_param_block_rank::LMJM:
+		return atire->set_ranking_function(params.ranking_function, params.lmjm_l, 0.0) == 0;
+	case ANT_indexer_param_block_rank::KBTFIDF:
+		return atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b) == 0;
+	case ANT_indexer_param_block_rank::DOCID:
+		return atire->set_ranking_function(params.ranking_function, params.ascending, 0) == 0;
+	case ANT_indexer_param_block_rank::PREGEN:
+		buffer << base.index_filename << "." << params.field_name;
+
+		return atire->set_ranking_function(params.ranking_function, buffer.str().c_str()) == 0;
+
+	default:
+		return atire->set_ranking_function(params.ranking_function, 0.0, 0.0) == 0;
+	}
+}
+
+/*
 	ANT_INIT()
 	----------
 
@@ -459,7 +525,6 @@ ATIRE_API *ant_init(ANT_ANT_param_block & params)
  */
 ATIRE_API *atire = new ATIRE_API();
 long fail;
-std::stringstream buffer;
 
 if (params.logo)
 	puts(atire->version());				// print the version string is we parsed the parameters OK
@@ -487,31 +552,8 @@ atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_sim
 atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
 
 atire->set_segmentation(params.segmentation);
-switch (params.ranking_function)
-	{
-	case ANT_indexer_param_block_rank::BM25:
-		atire->set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b);
-		break;
-	case ANT_indexer_param_block_rank::LMD:
-		atire->set_ranking_function(params.ranking_function, params.lmd_u, 0.0);
-		break;
-	case ANT_indexer_param_block_rank::LMJM:
-		atire->set_ranking_function(params.ranking_function, params.lmjm_l, 0.0);
-		break;
-	case ANT_indexer_param_block_rank::KBTFIDF:
-		atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b);
-		break;
-	case ANT_indexer_param_block_rank::DOCID:
-		atire->set_ranking_function(params.ranking_function, params.ascending, 0);
-		break;
-	case ANT_indexer_param_block_rank::PREGEN:
-		buffer << params.index_filename << "." << params.field_name;
 
-		atire->set_ranking_function(params.ranking_function, buffer.str().c_str());
-		break;
-	default:
-		atire->set_ranking_function(params.ranking_function, 0.0, 0.0);
-	}
+ant_init_ranking(atire, params, params); //Error value ignored...
 
 return atire;
 }

@@ -209,17 +209,13 @@ for (int i = 0; i < field_count; i++)
 	fields[i]->close_write();
 }
 
-ANT_pregen_field::ANT_pregen_field(const char *filename)
-{
-read(filename);
-}
-
 ANT_pregen_field::ANT_pregen_field(pregen_field_type type, const char *name)
 {
-this->type = type;
 this->field_name = strnew(name);
 scores = NULL;
 doc_count = 0;
+
+this->type = type;
 }
 
 void ANT_pregen_field::add_score(pregen_t score, long long count)

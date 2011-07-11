@@ -45,7 +45,6 @@ public:
 	void close_write();
 
 	ANT_pregen_field() : field_name(NULL), scores(NULL) {};
-	ANT_pregen_field(const char * filename);
 	ANT_pregen_field(pregen_field_type type, const char * name);
 
 	~ANT_pregen_field();

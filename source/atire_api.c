@@ -287,6 +287,8 @@ return parsed_query->parse_error;
 	returns:
 		0 on success
 		1 on failure
+
+	On failure, the API is left unchanged.
 */
 long ATIRE_API::set_ranking_function(long function, const char * filename)
 {
@@ -295,7 +297,13 @@ ANT_ranking_function *new_function;
 switch (function)
 	{
 	case ANT_ANT_param_block::PREGEN:
-		new_function = new ANT_ranking_function_pregen(search_engine, filename);
+		new_function = new ANT_ranking_function_pregen(search_engine);
+
+		if (!((ANT_ranking_function_pregen*)new_function)->load_pregen(filename))
+			{
+			delete new_function;
+			return 1;
+			}
 		break;
 	default:
 		return 1;		// failure, invalid parameter
@@ -313,6 +321,8 @@ return 0;		// success
 	returns:
 		0 on success
 		1 on failure
+
+	On failure, the API is left unchanged.
 */
 long ATIRE_API::set_ranking_function(long function, double p1, double p2)
 {

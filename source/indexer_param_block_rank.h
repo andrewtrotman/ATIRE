@@ -36,16 +36,17 @@ private:
 	const char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
 
 protected:
-	ANT_indexer_param_block_rank();
-	virtual ~ANT_indexer_param_block_rank() {}
+	virtual int get_two_parameters(char *from, double *first, double *second);
+	virtual int get_one_parameter(char *from, double *into);
 
-	virtual void get_two_parameters(char *from, double *first, double *second);
-	virtual void get_one_parameter(char *from, double *into);
-
-	virtual void set_ranker(char *which);
 	virtual void help(char *title, char switch_char, long long allowable);
 
 	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths);
+public:
+	ANT_indexer_param_block_rank();
+	virtual ~ANT_indexer_param_block_rank() {}
+
+	virtual int set_ranker(char *which);
 } ;
 
 #endif /* INDEXER_PARAM_BLOCK_RANK_H_ */

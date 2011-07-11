@@ -457,7 +457,7 @@ for (param = 1; param < argc; param++)
 			if (command[1] == ':')
 				{
 				port = (unsigned short)(isdigit(command[2]) ? atol(command + 2) : 8088);
-printf("Server started on port:%lld\n", (long long)port);
+				printf("Server started on port:%lld\n", (long long)port);
 				}
 			else
 				{
@@ -491,7 +491,10 @@ printf("Server started on port:%lld\n", (long long)port);
 				segmentation = TRUE;
 			}
 		else if (*command == 'R')
-			set_ranker(command + 1);
+			{
+			if (!set_ranker(command + 1))
+				exit(printf("Bad ranking function or ranking parameters '%s'\n", command + 1));
+			}
 		else if (strcmp(command, "findex") == 0)
 			{
 			delete [] index_filename;

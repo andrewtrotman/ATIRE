@@ -372,7 +372,10 @@ for (param = 1; param < argc; param++)
 			stats(command + 1);
 			}
 		else if (*command == 'Q')
-			set_ranker(command + 1);
+			{
+			if (!set_ranker(command + 1))
+				exit(printf("Bad ranking function or ranking parameters '%s'\n", command + 1));
+			}
 		else if (*command == 't')
 			term_expansion(command + 1, FALSE);
 		else if (strcmp(command, "nologo") == 0)
