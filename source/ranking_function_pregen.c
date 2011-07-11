@@ -32,7 +32,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator->set_rsv(docid, pregen.scores[docid]);
+		accumulator->set_rsv(docid, ascending ? std::numeric_limits<ANT_search_engine_accumulator::ANT_accumulator_t>::max() - pregen.scores[docid] : pregen.scores[docid]);
 		}
 	current++;
 	}

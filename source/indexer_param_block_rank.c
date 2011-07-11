@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
+#include "str.h"
 #include "indexer_param_block_rank.h"
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
@@ -21,6 +22,15 @@
 #include "ranking_function_inner_product.h"
 #include "ranking_function_kbtfidf.h"
 #include "ranking_function_docid.h"
+
+/*
+	ANT_INDEXER_PARAM_BLOCK_RANK::!ANT_INDEXER_PARAM_BLOCK_RANK()
+	------------------------------------------------------------_
+*/
+ANT_indexer_param_block_rank::~ANT_indexer_param_block_rank()
+{
+delete [] field_name;
+}
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::ANT_INDEXER_PARAM_BLOCK_RANK()
@@ -105,6 +115,8 @@ return 1;
 */
 int ANT_indexer_param_block_rank::set_ranker(char *which)
 {
+char * separator;
+
 if (strncmp(which, "BM25", 4) == 0)
 	{
 	ranking_function = BM25;
@@ -149,7 +161,18 @@ else if (strcmp(which, "docidd") == 0)
 else if (strncmp(which, "pregen:", strlen("pregen:")) == 0)
 	{
 	ranking_function = PREGEN;
-	field_name = which + strlen("pregen:");
+	delete [] field_name;
+
+	field_name = strnew(which + strlen("pregen:"));
+
+	separator = strchr(field_name, ':');
+	if (separator)
+		{
+		ascending = *(separator + 1) == 'a';
+		*separator = '\0';
+		}
+	else
+		ascending = 0;
 	}
 else if (strcmp(which, "kbtfidf") == 0)
 	{
@@ -199,7 +222,7 @@ if (allowable & KBTFIDF)
 if (allowable & DOCID)
 	printf("   docid<a|d>   Sort by document index (ascending or descending) %s\n", isdefault(DOCID));
 if (allowable & PREGEN)
-	printf("   pregen:<name>Pregenerated ranking, with field of given name %s\n", isdefault(PREGEN));
+	printf("   pregen:<name>[:a] Pregenerated ranking, with field of given name, optionally ascending %s\n", isdefault(PREGEN));
 
 puts("");
 }

@@ -17,9 +17,10 @@ class ANT_ranking_function_pregen : public ANT_ranking_function
 {
 private:
 	ANT_pregen_field pregen;
+	int ascending;
 public:
-	ANT_ranking_function_pregen(ANT_search_engine *engine) : ANT_ranking_function(engine) {};
-	ANT_ranking_function_pregen(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
+	ANT_ranking_function_pregen(ANT_search_engine *engine, int ascending) : ANT_ranking_function(engine), ascending(ascending) {};
+	ANT_ranking_function_pregen(long long documents, ANT_compressable_integer *document_lengths, int ascending) : ANT_ranking_function(documents, document_lengths), ascending(ascending) {}
 	virtual ~ANT_ranking_function_pregen() {}
 
 	virtual int load_pregen(const char *filename);

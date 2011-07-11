@@ -501,7 +501,7 @@ switch (params.ranking_function)
 	case ANT_indexer_param_block_rank::PREGEN:
 		buffer << base.index_filename << "." << params.field_name;
 
-		return atire->set_ranking_function(params.ranking_function, buffer.str().c_str()) == 0;
+		return atire->set_ranking_function(params.ranking_function, buffer.str().c_str(), params.ascending) == 0;
 
 	default:
 		return atire->set_ranking_function(params.ranking_function, 0.0, 0.0) == 0;

@@ -44,7 +44,7 @@ protected:
 	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths);
 public:
 	ANT_indexer_param_block_rank();
-	virtual ~ANT_indexer_param_block_rank() {}
+	virtual ~ANT_indexer_param_block_rank();
 
 	virtual int set_ranker(char *which);
 } ;

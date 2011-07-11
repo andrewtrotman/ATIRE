@@ -290,14 +290,14 @@ return parsed_query->parse_error;
 
 	On failure, the API is left unchanged.
 */
-long ATIRE_API::set_ranking_function(long function, const char * filename)
+long ATIRE_API::set_ranking_function(long function, const char * filename, double p1)
 {
 ANT_ranking_function *new_function;
 
 switch (function)
 	{
 	case ANT_ANT_param_block::PREGEN:
-		new_function = new ANT_ranking_function_pregen(search_engine);
+		new_function = new ANT_ranking_function_pregen(search_engine, (int) p1);
 
 		if (!((ANT_ranking_function_pregen*)new_function)->load_pregen(filename))
 			{
