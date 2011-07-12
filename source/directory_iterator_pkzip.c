@@ -55,6 +55,8 @@ file->close();
 	inflateEnd(&internals->stream);
 #endif
 
+delete [] directory;
+
 delete internals;
 
 delete file;
@@ -310,6 +312,7 @@ if ((filename_length = ANT_get_unsigned_short(lfh.file_name_length)) == 0)
 if (filename_length > PATH_MAX)
 	exit(printf("ANT ZIP Reader Filename is %d characters long (which exceeds the Operating system limit of:%d\n", filename_length, PATH_MAX));
 	
+object->filename = new char[filename_length + 1];
 file->read((unsigned char *)object->filename, filename_length);
 object->filename[filename_length] = '\0';
 
