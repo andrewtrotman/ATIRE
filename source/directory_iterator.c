@@ -6,6 +6,7 @@
 #include "directory_iterator.h"
 #include "directory_iterator_internals.h"
 #include <string.h>
+#include "str.h"
 
 /*
 	ANT_DIRECTORY_ITERATOR::ANT_DIRECTORY_ITERATOR()
@@ -34,8 +35,9 @@ delete internals;
 	ANT_DIRECTORY_ITERATOR::CONSTRUCT_FULL_PATH()
 	---------------------------------------------
 */
-inline char *ANT_directory_iterator::construct_full_path(char *destination, char *filename)
+inline char *ANT_directory_iterator::construct_full_path(char *filename)
 {
+char * destination = new char[strlen(internals->pathname) + strlen(filename) + 1];
 strcpy(destination, internals->pathname);
 strcat(destination, filename);
 
@@ -85,9 +87,9 @@ if (colon > max)
 *max = '\0';
 
 #ifdef _MSC_VER
-	construct_full_path(object->filename, internals->file_data.cFileName);
+	object->filename = construct_full_path(internals->file_data.cFileName);
 #else
-	strcpy(object->filename, internals->matching_files.gl_pathv[internals->glob_index++]);
+	object->filename = strnew(internals->matching_files.gl_pathv[internals->glob_index++]);
 #endif
 if (get_file)
 	object->file = ANT_disk::read_entire_file(object->filename, &object->length);
@@ -115,7 +117,7 @@ ANT_directory_iterator_object *ANT_directory_iterator::next(ANT_directory_iterat
 			}
 	while (internals->file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 
-	construct_full_path(object->filename, internals->file_data.cFileName);
+	object->filename = construct_full_path(internals->file_data.cFileName);
 #else
 	if (internals->glob_index == internals->matching_files.gl_pathc)
 		{
@@ -123,7 +125,7 @@ ANT_directory_iterator_object *ANT_directory_iterator::next(ANT_directory_iterat
 		return NULL;
 		}
 
-	strcpy(object->filename, internals->matching_files.gl_pathv[internals->glob_index++]);
+	object->filename = strnew(internals->matching_files.gl_pathv[internals->glob_index++]);
 #endif
 
 if (get_file)

@@ -70,7 +70,7 @@ ANT_directory_iterator_object object;
 while (source->next(&object) != NULL)
 	work_one(&object, internals);
 
-object.filename[0] = '\0';
+object.filename = NULL;
 store->add(&object);
 }
 
@@ -110,7 +110,7 @@ else
 	/*
 		We're at EOF on the first document
 	*/
-	object->filename[0] = '\0';
+	object->filename = NULL;
 	store->add(object);
 	}
 
@@ -143,7 +143,7 @@ mutex.enter();
 		do
 			{
 			store->remove(object);
-			if (*object->filename != '\0')
+			if (object->filename != NULL)
 				break;
 			else
 				if (--threads <= 0)

@@ -10,6 +10,7 @@
 	#include <fnmatch.h>
 #endif
 #include <stdio.h>
+#include "str.h"
 #include "disk.h"
 #include "directory_iterator_internals.h"
 #include "disk_directory.h"
@@ -277,7 +278,8 @@ file_list = handle_stack;
 		}
 	if ((got = first(path_buffer, "")) == NULL)
 		return NULL;
-	sprintf(object->filename, "%s", got);
+
+	object->filename = strnew(got);
 
 	if (get_file)
 		object->file = ANT_disk::read_entire_file(object->filename, &object->length);
@@ -309,7 +311,7 @@ char *got;
 #else
 	if ((got = next_match_wildcard()) == NULL)
 		return NULL;
-	sprintf(object->filename, "%s", got);
+	object->filename = strnew(got);
 #endif
 
 if (get_file)

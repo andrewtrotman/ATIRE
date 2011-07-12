@@ -7,6 +7,7 @@
 #include <string.h>
 #include <new>
 #include "pragma.h"
+#include "str.h"
 #include "ctypes.h"
 #include "directory_iterator_warc.h"
 #include "maths.h"
@@ -75,7 +76,7 @@ if ((filename = find_string("WARC-TREC-ID", 12)) == NULL)
 while (ANT_isspace(*filename))
 	filename++;
 
-strcpy(object->filename, (char *)filename);
+object->filename = strnew((char *)filename);
 
 /*
 	Get and store the document length

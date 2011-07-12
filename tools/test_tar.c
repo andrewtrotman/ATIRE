@@ -39,5 +39,6 @@ for (current = tarball.first(&file_object); current != NULL; current = tarball.n
 	{
 	puts(current->filename);
 	delete [] current->file;
+	delete [] current->filename;
 	}
 }

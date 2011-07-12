@@ -66,13 +66,7 @@ if ((row = mysql_fetch_row(result)) == NULL)
 
 field_length = mysql_fetch_lengths(result);
 
-if (field_length[0] < sizeof(object->filename))
-	strcpy(object->filename, row[0]);
-else
-	{
-	strncpy(object->filename, row[0], sizeof(object->filename));
-	object->filename[sizeof(object->filename) - 1] = '\0';
-	}
+object->filename = strnew(row[0]);
 
 if (get_file)
 	{

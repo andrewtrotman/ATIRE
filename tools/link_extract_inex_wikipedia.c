@@ -123,6 +123,7 @@ for (current_file = disk->first(&file_object); current_file != NULL; current_fil
 			}
 		}
 	delete [] current_file->file;
+	delete [] current_file->filename;
 	}
 fprintf(stderr, "Done:%ld\n", documents_processed);
 }

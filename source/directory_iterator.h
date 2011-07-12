@@ -24,7 +24,7 @@ protected:
 	long get_file;
 
 private:
-	char *construct_full_path(char *destination, char *filename);
+	char *construct_full_path(char *filename);
 
 public:
 	ANT_directory_iterator(char *wildcard = "", long get_file = 0);

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <new>
+#include "str.h"
 #include "pragma.h"
 #include "ctypes.h"
 #include "directory_iterator_tar.h"
@@ -17,9 +18,12 @@
 void ANT_directory_iterator_tar::filename(ANT_directory_iterator_object *object)
 {
 if (header.filename_prefix[0] != '\0')
+	{
+	object->filename = new char[strlen(header.filename_prefix) + 1 + strlen(header.filename) + 1];
 	sprintf(object->filename, "%s/%s", header.filename_prefix, header.filename);
+	}
 else
-	strcpy(object->filename, header.filename);
+	object->filename = strnew(header.filename);
 }
 
 /*

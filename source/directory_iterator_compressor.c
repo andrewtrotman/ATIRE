@@ -73,7 +73,7 @@ my_compressor = compressor->replicate();
 while (source->next(&object) != NULL)
 	work_one(my_compressor, &object);
 
-object.filename[0] = '\0';
+object.filename = NULL;
 store->add(&object);
 }
 
@@ -110,7 +110,7 @@ else
 	/*
 		We're at EOF on the first document
 	*/
-	object->filename[0] = '\0';
+	object->filename = NULL;
 	store->add(object);
 	}
 
@@ -138,7 +138,7 @@ mutex.enter();
 		do
 			{
 			store->remove(object);
-			if (*object->filename != '\0')
+			if (object->filename != NULL)
 				break;
 			else
 				if (--threads <= 0)

@@ -89,7 +89,7 @@ for (got = my->iterator->first(&my->file_object); got != NULL; got = my->iterato
 	The obvious way to do this is to shove an empty element into the list
 	and to count them at the consumer's end
 */
-my->file_object.filename[0] = '\0';
+my->file_object.filename = NULL;
 producer->add(&my->file_object);
 
 /*
@@ -165,7 +165,7 @@ mutex.enter();
 		do
 			{
 			producer->remove(object);
-			if (*object->filename != '\0')
+			if (object->filename != NULL)
 				break;
 			else
 				if (--active_threads <= 0)

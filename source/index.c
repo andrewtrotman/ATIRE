@@ -373,6 +373,7 @@ for (param = first_param; param < argc; param++)
 			id_list.puts(strip_space_inplace(current_file->filename));
 			}
 		delete [] current_file->file;
+		delete [] current_file->filename;
 
 		/*
 			Get the next file

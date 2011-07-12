@@ -5,6 +5,7 @@
 #include <new>
 #include <string.h>
 #include "pragma.h"
+#include "str.h"
 #include "directory_iterator_file.h"
 
 /*
@@ -103,8 +104,7 @@ if ((document_start = strstr(document_end, "<DOC")) != NULL)
 	if (document_id_end != NULL && (document_end = strstr(document_id_end, "</DOC>")) != NULL)
 		{
 		document_end += 6;
-		strncpy(object->filename, document_id_start, document_id_end - document_id_start);
-		object->filename[document_id_end - document_id_start] = '\0';
+		object->filename = strnnew(document_id_start, document_id_end - document_id_start);
 		if (get_file)
 			read_entire_file(object);
 		return object;
