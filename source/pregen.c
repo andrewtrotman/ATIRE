@@ -82,6 +82,9 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 	field.string_length -= utf8_bytes(field.start);
 	}
 
+//"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
+result = (result << bits_remain);
+
 return result;
 }
 
