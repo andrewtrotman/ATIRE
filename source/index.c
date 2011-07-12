@@ -359,7 +359,8 @@ for (param = first_param; param < argc; param++)
 			}
 		else
 			{
-			pregen->process_document(doc - 1, current_file->filename);
+			if (pregen)
+				pregen->process_document(doc - 1, current_file->filename);
 
 			/*
 				Store the document in the repository.
