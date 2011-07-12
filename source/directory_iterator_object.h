@@ -24,7 +24,7 @@ class ANT_memory_index_one;
 class ANT_directory_iterator_object
 {
 public:
-	char filename[PATH_MAX];		// name of the file
+	char *filename;					// name of the file
 	char *file;						// contents of the file
 	long long length;				// length of the file
 	char *compressed;				// the file compressed
