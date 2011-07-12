@@ -1,3 +1,4 @@
+#include <limits>
 #include <limits.h>
 #include <string.h>
 #include <cassert>
@@ -54,7 +55,9 @@ unsigned char * buffer_pos;
 unsigned int buffer_remain;
 
 unsigned char encoded;
-unsigned int bits_remain = sizeof(result) * CHAR_BIT;
+/* How many bits we can still fit in the result? If accumulator is signed, don't use the sign bit (we don't want
+ * negative RSVs) */
+unsigned int bits_remain = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
 
 while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && bits_remain >= BITS_PER_ENCODED_CHAR)
 	{
