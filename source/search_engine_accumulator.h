@@ -35,10 +35,7 @@ public:
 	{
 		int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) const
 		{
-			ANT_search_engine_accumulator::ANT_accumulator_t diff;
-
-			diff = a->rsv - b->rsv;
-			return diff < 0 ? 1 : diff > 0 ? -1 : (a < b ? 1 : a > b ? -1 : 0);
+			return a->rsv < b->rsv ? 1 : a->rsv > b->rsv ? -1 : (a < b ? 1 : a > b ? -1 : 0);
 		}
 	};
 
