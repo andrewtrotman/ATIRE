@@ -29,7 +29,7 @@ return (pregen_t) atol(field.start);
 pregen_t ANT_pregen::generate_strtrunc(ANT_string_pair field)
 {
 pregen_t result = 0;
-unsigned int bytes = min(field.length(), sizeof(result));
+size_t bytes = min(field.length(), sizeof(result));
 
 /* Work correctly on both little and big-endian systems (don't just cast string to integer) */
 for (unsigned int i = 0; i < bytes; i++)
@@ -45,7 +45,6 @@ return result;
 pregen_t ANT_pregen::generate_recentdate(ANT_string_pair field)
 {
 long long date = atol(field.start);
-time_t now;
 
 //Don't need to do any fancy conversion
 if (sizeof(pregen_t) >= 4)
@@ -131,7 +130,7 @@ unsigned long character;
 
 unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
 unsigned char * buffer_pos;
-unsigned int buffer_remain;
+size_t buffer_remain;
 
 unsigned char encoded;
 /* How many bits we can still fit in the result? If accumulator is signed, don't use the sign bit (we don't want
@@ -368,7 +367,7 @@ if (!file.open(filename, "wbx"))
 header.doc_count = 0; //We will fill that in later
 header.version = PREGEN_FILE_VERSION;
 header.field_type = type;
-header.field_name_length = strlen(field_name);
+header.field_name_length = (uint32_t) strlen(field_name);
 
 file.write((unsigned char *)&header, sizeof(header));
 

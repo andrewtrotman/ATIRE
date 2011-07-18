@@ -219,7 +219,7 @@ if (!decomposition)
 	*buf = *buf + num_dest_chars;
 	*buflen = *buflen - num_dest_chars;
 
-	return num_dest_chars; //Zero if wide_to_utf8 ran out of room
+	return num_dest_chars > 0; //Zero if wide_to_utf8 ran out of room
 	}
 else
 	{

@@ -133,7 +133,7 @@ readability->set_parser(parser);
 
 if (param_block.num_pregen_fields)
 	{
-	unsigned int pregen_prefix_len = strlen(param_block.index_filename) + 1;
+	size_t pregen_prefix_len = strlen(param_block.index_filename) + 1;
 	pregen = new ANT_pregen();
 
 	if (pregen_prefix_len < PATH_MAX)
