@@ -11,7 +11,7 @@
 #define MAX_PREGEN_FIELDS 128
 #define PREGEN_FILE_VERSION 1
 
-enum pregen_field_type { INTEGER, STRTRUNC, STREXACT, ASCIIDIGEST };
+enum pregen_field_type { INTEGER, STRTRUNC, STREXACT, ASCIIDIGEST, BASE36, RECENTDATE };
 
 typedef ANT_search_engine_accumulator::ANT_accumulator_t pregen_t;
 
@@ -53,17 +53,19 @@ public:
 class ANT_pregen
 {
 private:
-	ANT_pregen_field *fields[MAX_PREGEN_FIELDS];
-	int field_count;
-
 	void process_field(long long docindex, ANT_pregen_field & field, ANT_string_pair & content);
 
 	static pregen_t generate_integer(ANT_string_pair field);
 	static pregen_t generate_strtrunc(ANT_string_pair field);
 	static pregen_t generate_asciidigest(ANT_string_pair field);
+	static pregen_t generate_base36(ANT_string_pair field);
+	static pregen_t generate_recentdate(ANT_string_pair field);
 	static pregen_t generate(pregen_field_type type, ANT_string_pair field);
 
 public:
+	ANT_pregen_field *fields[MAX_PREGEN_FIELDS];
+	int field_count;
+
 	ANT_pregen();
 	virtual ~ANT_pregen();
 

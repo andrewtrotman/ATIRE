@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <string.h>
 #include <cassert>
+#include <time.h>
 
 #include "pregen.h"
 #include "unicode.h"
@@ -37,6 +38,84 @@ for (unsigned int i = 0; i < bytes; i++)
 return result;
 }
 
+/*
+ * For severely constrained accumulator sizes, compress UNIX timestamps to give higher accuracy
+ * for recent dates than old ones.
+ */
+pregen_t ANT_pregen::generate_recentdate(ANT_string_pair field)
+{
+long long date = atol(field.start);
+time_t now;
+
+//Don't need to do any fancy conversion
+if (sizeof(pregen_t) >= 4)
+	return (pregen_t) date;
+
+return 0;
+}
+
+/**
+ * Compute an integer from the given UTF-8 string for sorting. After decomposition, only
+ * the characters a-z,0-9 are kept, and combined as base-36 digits in the resulting integer.
+ */
+pregen_t ANT_pregen::generate_base36(ANT_string_pair field)
+{
+pregen_t result = 0;
+
+unsigned long character;
+
+unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
+unsigned char * buffer_pos;
+size_t buffer_remain;
+unsigned char encoded;
+
+/* How many letters can we fit in the result? If accumulator is signed, don't use the sign bit (we don't want
+ * negative RSVs) */
+const unsigned int dest_bits = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
+const double LOG_BASE_2_OF_36 = 5.1699250014423123629074778878956;
+unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_36);
+
+while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain > 0)
+	{
+	buffer_pos = buffer;
+	buffer_remain = sizeof(buffer);
+
+	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
+
+	/* Write as much of that UTF-8 normalization as we can fit into the result */
+	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain > 0;
+			i++)
+		{
+		if (buffer[i] >= '0' && buffer[i] <= '9')
+			{
+			/* Digits sort first*/
+			encoded = buffer[i] - '0';
+			}
+		else if (buffer[i] >= 'a' && buffer[i] <= 'z')
+			{
+			/* Letters last */
+			encoded = buffer[i] - 'a' + 10;
+			}
+		else continue; //Other characters dropped
+
+		dest_chars_remain--;
+		result = result * 36 + encoded;
+		}
+
+	field.start += utf8_bytes(field.start);
+	field.string_length -= utf8_bytes(field.start);
+	}
+
+//"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
+while (dest_chars_remain)
+	{
+	result *= 36;
+	dest_chars_remain--;
+	}
+
+return result;
+}
+
 /**
  * Compute an integer from the given UTF-8 string which, when sorted, will generate a
  * similar ordering as a full sort on English titles would. Takes a prefix of the given
@@ -68,7 +147,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 
 	/* Write as much of that UTF-8 normalization as we can fit into the result */
 	for (int i = 0; i < (buffer_pos - buffer) && bits_remain >= BITS_PER_ENCODED_CHAR;
-			i++, bits_remain -= BITS_PER_ENCODED_CHAR)
+			i++)
 		{
 		if (buffer[i] >= '0' && buffer[i] <= '9')
 			encoded = 1 + ((buffer[i] - '0') >> 1); //Numbers sort second, but they will have to double-up to fit into 5 encodings
@@ -79,6 +158,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 		else continue; //Unicode codepoints are dropped altogether
 
 		result = (result << BITS_PER_ENCODED_CHAR) | encoded;
+		bits_remain -= BITS_PER_ENCODED_CHAR;
 		}
 
 	field.start += utf8_bytes(field.start);
@@ -101,6 +181,8 @@ switch (type)
 		return generate_strtrunc(field);
 	case ASCIIDIGEST:
 		return generate_asciidigest(field);
+	case BASE36:
+		return generate_base36(field);
 	default:
 		return 0;
 	}

@@ -406,8 +406,14 @@ if (doc == 0)
 else
 	{
 	id_list.close();
+
 	if (pregen)
+		{
+		for (int i = 0; i < pregen->field_count; i++)
+			if (pregen->fields[i]->doc_count == 0)
+				fprintf(stderr, "Warning: Pregen field %s found in no documents\n", pregen->fields[i]->field_name);
 		pregen->close();
+		}
 
 	now = stats.start_timer();
 	index->serialise(&param_block);

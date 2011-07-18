@@ -98,6 +98,8 @@ puts("   integer      Unsigned integer");
 puts("   strexact     Rank by ordering on complete strings (cannot rank results from merged indexes)");
 puts("   strtrunc     Rank by a simple prefix of the given string (binary safe)");
 puts("   asciidigest  Rank by compact ASCII conversion of the prefix of the given string");
+puts("   base36       Rank by base-36 conversion of alphanumerics");
+puts("   recentdate   Rank by recently-biased UNIX timestamps");
 puts("");
 
 puts("COMPRESSION");
@@ -354,6 +356,8 @@ for (param = 1; param < argc; param++)
 				pregens[num_pregen_fields].type = STRTRUNC;
 			else if (strcmp(field_type, "asciidigest") == 0)
 				pregens[num_pregen_fields].type = ASCIIDIGEST;
+			else if (strcmp(field_type, "base36") == 0)
+				pregens[num_pregen_fields].type = BASE36;
 			else
 				exit(printf("Unknown pregen field type '%s'\n", field_type));
 
