@@ -37,8 +37,6 @@ long ANT_file_memory::open(const char *filename, char *mode)
 {
 long result = 0;
 
-puts("file_memory");
-
 file_position = 0;
 if (ANT_file::open(filename, mode) != 0)
 	{
