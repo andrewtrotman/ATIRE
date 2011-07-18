@@ -57,26 +57,21 @@ field_name = NULL;
 */
 int ANT_indexer_param_block_rank::get_two_parameters(char *from, double *first, double *second)
 {
-char *ch;
+char *ch = from;
 
-for (ch = from; *ch != '\0'; ch++)
+if (*ch == ':')
+	*first = atof(ch + 1);
+else
+	return 0;
+
+for (ch++; *ch != '\0'; ch++)
 	if (*ch == ':')
 		{
-		*first = atof(ch + 1);
+		*second = atof(ch + 1);
 		break;
 		}
-	else
+	else if (!(isdigit(*ch) || *ch == '.'))
 		return 0;
-
-if (*ch != '\0')
-	for (ch++; *ch != '\0'; ch++)
-		if (*ch == ':')
-			{
-			*second = atof(ch + 1);
-			break;
-			}
-		else if (!(isdigit(*ch) || *ch == '.'))
-			return 0;
 
 return 1;
 //printf("[%s][%f][%f]\n", from, *first, *second);
@@ -88,18 +83,13 @@ return 1;
 */
 int ANT_indexer_param_block_rank::get_one_parameter(char *from, double *into)
 {
-char *ch;
-
-for (ch = from; *ch != '\0'; ch++)
-	if (*ch == ':')
-		{
-		*into = atof(ch + 1);
-		break;
-		}
-	else
-		return 0;
-
-return 1;
+if (*from == ':')
+	{
+	*into = atof(from + 1);
+	return 1;
+	}
+else
+	return 0;
 
 //printf("[%s][%f]\n", from, *into);
 }
