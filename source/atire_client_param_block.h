@@ -14,16 +14,18 @@
 class ATIRE_client_param_block : public ATIRE_engine_param_block
 {
 public:
-	enum { NONE, TREC } ;			// evaluation forum
+	enum { NONE, TREC, INEX_SNIPPET } ;			// evaluation forum
 
 public:
 	char *connect_string;			// address:port of server we're connecting to
 	char *queries_filename;			// name of the file that has the list of queries in it
 	long long results_list_length;	// number of results to return to the client
 
-	long long output_forum;			// TREC or NONE
+	long long output_forum;			// NONE, TREC, or INEX_SNIPPET
 	char *output_filename;			// name of the results (run) file
 	char *run_name;					// name of the run
+	char *group_name;				// name of the INEX group name
+	char *run_description;			// INEX run description
 
 protected:
 	virtual void usage(void);

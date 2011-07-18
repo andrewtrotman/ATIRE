@@ -12,6 +12,8 @@
 #include "atire_engine_result_set.h"
 #include "atire_client_param_block.h"
 #include "version.h"
+#include "atire_engine_result_set_export_TREC.h"
+#include "atire_engine_result_set_export_INEX_snippet.h"
 
 const long long MAX_RETRIES = 10;
 const char * const PROMPT = "]";		// tribute to Apple
@@ -23,7 +25,7 @@ const long MAX_TITLE_LENGTH = 1024;
 */
 void prompt(ATIRE_client_param_block *params)
 {
-if (params->output_forum == ATIRE_client_param_block::NONE)
+if (params->output_forum == ATIRE_client_param_block::NONE && params->queries_filename == NULL)
 	printf(PROMPT);
 }
 
@@ -46,11 +48,11 @@ return true;
 	PERFORM_QUERY()
 	---------------
 */
-char *perform_query(ANT_channel *outchannel, ATIRE_client_param_block *params, ATIRE_API_remote *server, long long topic_id, char *query, long long top_of_page, long long page_length)
+char *perform_query(ATIRE_engine_result_set_export *run, ANT_channel *outchannel, ATIRE_API_remote *server, long long topic_id, char *query, long long top_of_page, long long page_length)
 {
 ATIRE_engine_result_set answers;
-char *reply, *TREC;
-long long retry;
+char *reply, *TREC, *time_string;
+long long retry, time;
 
 //printf("Topic:%lld query:%s\n", topic_id, query);
 
@@ -75,11 +77,18 @@ else if (retry > 0)
 if (reply != NULL)
 	{
 	answers.add(reply);
-	TREC = answers.serialise_TREC(topic_id, params->run_name, top_of_page, page_length);
-	outchannel->write(TREC);
-	
+	if (run == NULL)
+		{
+		time_string = strstr(reply, "<time>");
+		time = time_string == NULL ? 0 : ANT_atoi64(time_string + 6);
+		TREC = answers.serialise(query, answers.hits, time, top_of_page, page_length);
+		outchannel->puts(TREC);
+		delete [] TREC;
+		}
+	else
+		run->include(topic_id, &answers, top_of_page, page_length);
+
 	delete [] reply;
-	delete [] TREC;
 	}
 
 return reply;
@@ -94,6 +103,7 @@ int main(int argc, char *argv[])
 ANT_channel *inchannel, *outchannel;
 ATIRE_API_remote server;
 ATIRE_client_param_block params(argc, argv);
+ATIRE_engine_result_set_export *run;
 long long line, topic_id;
 char *command, *query;
 
@@ -114,6 +124,20 @@ if (params.logo)
 inchannel = new ANT_channel_file(params.queries_filename);
 outchannel = new ANT_channel_file(params.output_forum == ATIRE_client_param_block::NONE ? NULL : params.output_filename);
 
+/*
+	Are we creating a run for an evaluation forum?
+*/
+if (params.output_forum == ATIRE_client_param_block::NONE)
+	run = NULL;
+else if (params.output_forum == ATIRE_client_param_block::TREC)
+	run = new ATIRE_engine_result_set_export_TREC(params.run_name);
+else if (params.output_forum == ATIRE_client_param_block::INEX_SNIPPET)
+	run = new ATIRE_engine_result_set_export_INEX_snippet(params.group_name, params.run_name, params.run_description);
+else
+	run = NULL;
+
+if (run != NULL)
+	run->preamble();
 /*
 	Connect to the server (or broker tree)
 */
@@ -178,9 +202,15 @@ for (command = inchannel->gets(); command != NULL; prompt(&params), command = in
 		/*
 			Now do the query and then clean up
 		*/
-		perform_query(outchannel, &params, &server, topic_id, query, 1, params.results_list_length);
+		perform_query(run, outchannel, &server, topic_id, query, 1, params.results_list_length);
 		delete [] command;
 		}
+	}
+
+if (run != NULL)
+	{
+	run->postamble();
+	outchannel->puts(run->serialise());
 	}
 
 /*
@@ -188,6 +218,7 @@ for (command = inchannel->gets(); command != NULL; prompt(&params), command = in
 */
 delete inchannel;
 delete outchannel;
+delete run;
 
 return 0;
 }

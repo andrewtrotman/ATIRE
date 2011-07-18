@@ -37,7 +37,9 @@ results_list_length = -1;
 
 output_forum = NONE;
 output_filename = default_output_filename;
-run_name = "unknown";
+run_name = "Unknown";
+group_name = "Unknown";
+run_description = "Unknown";
 }
 
 /*
@@ -85,13 +87,16 @@ puts("");
 
 puts("TREC SPECIFIC");
 puts("-------------");
-puts("-e[-t]          Export a run file for use in an Evaluation Forum");
+puts("-e[-ts]         Export a run file for use in an Evaluation Forum");
 puts("   -            Don't generate a run file [default]");
 puts("   t            TREC run format");
+puts("   s            INEX snippet retrieval 2011");
 puts("-E[forum]       Use defaults for the given forum");
 puts("  tw11<name>    TREC web track 2011 (-et -l10000 -n<name> -o<name>");
+puts("  is11<name>    INEX snippet track 2011 (-es -l500 -n<name> -o<name> -i<name> -d<name>");
 puts("-n<name>        Run is named <name> [default=unknown]");
-
+puts("-i<id>          Forum participant id is <id> [default=unknown]");
+puts("-d<description> Run description is <description> [default=unknown]");
 exit(0);
 }
 
@@ -107,6 +112,7 @@ do
 		{
 		case '-' : output_forum = NONE;   break;
 		case 't' : output_forum = TREC;   break;
+		case 's' : output_forum = INEX_SNIPPET;   break;
 		default  : exit(printf("Unknown export format: '%c'\n", *forum)); break;
 		}
 	forum++;
@@ -129,6 +135,18 @@ if (strncmp(forum, "tw11", 4) == 0)
 	strip_space_inplace(output_filename);
 	if (*output_filename == '\0')
 		output_filename = run_name = default_output_filename;
+
+	unlink(output_filename);
+	}
+else if (strncmp(forum, "is11", 4) == 0)
+	{
+	results_list_length = 500;
+	output_forum = INEX_SNIPPET;
+	group_name = run_description = output_filename = run_name = forum + 4;
+
+	strip_space_inplace(output_filename);
+	if (*output_filename == '\0')
+		group_name = run_description = output_filename = run_name = default_output_filename;
 
 	unlink(output_filename);
 	}
@@ -163,10 +181,14 @@ for (param = 1; param < argc; param++)
 			ANT_credits();
 			exit(0);
 			}
+		else if (*command == 'd')
+			run_description = command + 1;
 		else if (*command == 'e')
 			export_format(command + 1);
 		else if (*command == 'E')
 			export_format_defaults(command + 1);
+		else if (*command == 'i')
+			group_name = command + 1;
 		else if (*command == 'l')
 			results_list_length = ANT_atoi64(command + 1);
 		else if (*command == 'n')

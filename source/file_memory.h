@@ -23,7 +23,7 @@ public:
 
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 	virtual long setvbuff(long size) { return 1; }
-	virtual long open(char *filename, char *mode);
+	virtual long open(const char *filename, char *mode);
 	virtual long close(void) { return 1; }
 	virtual long long file_length(void) { return length_of_file; }
 	virtual long write(unsigned char *data, long long size);

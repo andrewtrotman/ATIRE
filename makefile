@@ -321,9 +321,10 @@ PARTS = \
 	$(OBJDIR)\atire_broker_param_block.obj			\
 	$(OBJDIR)\atire_broke_engine.obj				\
 	$(OBJDIR)\atire_engine_result_set.obj			\
+	$(OBJDIR)\atire_engine_result_set_export_TREC.obj	\
+	$(OBJDIR)\atire_engine_result_set_export_INEX_snippet.obj	\
 	$(OBJDIR)\atire_broke.obj
-	
-	
+
 PHP_EXT_OBJ	= \
 	$(OBJDIR)\atire_api_remote.obj			\
 	$(OBJDIR)\str.obj						\

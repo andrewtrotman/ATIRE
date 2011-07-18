@@ -33,9 +33,11 @@ exit(printf("Cannot write to an in-memory file\n"));
 	ANT_FILE_MEMORY::OPEN()
 	-----------------------
 */
-long ANT_file_memory::open(char *filename, char *mode)
+long ANT_file_memory::open(const char *filename, char *mode)
 {
 long result = 0;
+
+puts("file_memory");
 
 file_position = 0;
 if (ANT_file::open(filename, mode) != 0)
