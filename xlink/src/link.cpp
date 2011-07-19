@@ -206,7 +206,7 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 			stringbuffer << "\t\t\t</anchor>\n";
 	}
 	if (how_many_left == beps_to_print) {
-		cerr << "Something funny happened for anchor \"" << term << "\" with " << this_link_term->postings.size() << "links."<< endl;
+		cerr << "Something funny happened for anchor \"" << term << "\" with " << this_link_term->postings.size() << " links."<< endl;
 		ret = false;
 	}
 

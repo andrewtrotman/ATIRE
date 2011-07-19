@@ -24,7 +24,14 @@ namespace QLINK {
 	const char link_print::CHINESE_DATE[] = {(char)0xe6, (char)0x97, (char)0xa5, 0x0}; //日
 	const char link_print::CHINESE_DECADE[] = {(char)0xe5, (char)0xb9, (char)0xb4, (char)0xe4, (char)0xbb, (char)0xa3, 0x0}; //niandai 年代
 
-	bool link_print::is_number_or_chronological_link(const char *term)
+	const char link_print::ENGLISH_YEAR[] = "year";
+	const char link_print::ENGLISH_CENTURY[] = "century";
+	const char link_print::ENGLISH_MONTH[] = "month"; // month
+	const char *link_print::ENGLISH_DAY[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", 0x0}; // week day, monday, tuesday
+//	const char link_print::ENGLISH_DATE[] = {(char)0xe6, (char)0x97, (char)0xa5, 0x0}; //日
+//	const char link_print::ENGLISH_DECADE[] = {(char)0xe5, (char)0xb9, (char)0xb4, (char)0xe4, (char)0xbb, (char)0xa3, 0x0}; //niandai 年代
+
+	bool link_print::is_number_or_chronological_link(const char *term, const char *lang)
 	{
 		int type = NONE;
 		bool ret = false;
@@ -40,20 +47,25 @@ namespace QLINK {
 				word = term + number_str.length();
 
 			if (word) {
-				if (number > 999 && number < 3000 && memcmp(word, CHINESE_YEAR, strlen(CHINESE_YEAR)) == 0) {
-					type = YEAR;
+				if (strcmp(lang, "zh") == 0) {
+					if (number > 999 && number < 3000 && memcmp(word, CHINESE_YEAR, strlen(CHINESE_YEAR)) == 0) {
+						type = YEAR;
+					}
+					else if (number < 13 && memcmp(word, CHINESE_MONTH, strlen(CHINESE_MONTH)) == 0) {
+						type = MONTH;
+					}
+					else if (number < 32 && memcmp(word, CHINESE_DATE, strlen(CHINESE_DATE)) == 0) {
+						type = DATE;
+					}
+					else if (number < 100 && memcmp(word, CHINESE_DECADE, strlen(CHINESE_DECADE)) == 0) {
+						type = DECADE;
+					}
+					else if (number < 31 && memcmp(word, CHINESE_CENTURY, strlen(CHINESE_CENTURY)) == 0) {
+						type = CENTURY;
+					}
 				}
-				else if (number < 13 && memcmp(word, CHINESE_MONTH, strlen(CHINESE_MONTH)) == 0) {
-					type = MONTH;
-				}
-				else if (number < 32 && memcmp(word, CHINESE_DATE, strlen(CHINESE_DATE)) == 0) {
-					type = DATE;
-				}
-				else if (number < 100 && memcmp(word, CHINESE_DECADE, strlen(CHINESE_DECADE)) == 0) {
-					type = DECADE;
-				}
-				else if (number < 31 && memcmp(word, CHINESE_CENTURY, strlen(CHINESE_CENTURY)) == 0) {
-					type = CENTURY;
+				else if (strcmp(lang, "en") == 0) {
+
 				}
 			}
 		}

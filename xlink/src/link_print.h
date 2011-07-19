@@ -24,7 +24,14 @@ namespace QLINK {
 		static const char CHINESE_DATE[];
 		static const char CHINESE_DECADE[];
 
-		static bool is_number_or_chronological_link(const char *term);
+		static const char ENGLISH_YEAR[];
+		static const char ENGLISH_CENTURY[];
+		static const char ENGLISH_MONTH[];
+		static const char *ENGLISH_DAY[];
+		static const char ENGLISH_DATE[];
+		static const char ENGLISH_DECADE[];
+
+		static bool is_number_or_chronological_link(const char *term, const char *lang);
 	};
 }
 #endif /* LINK_PRINT_H_ */
