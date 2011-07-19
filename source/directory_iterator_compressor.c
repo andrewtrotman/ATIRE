@@ -36,6 +36,8 @@ store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
 ANT_directory_iterator_compressor::~ANT_directory_iterator_compressor()
 {
 delete store;
+delete source;
+delete compressor;
 }
 
 /*
@@ -74,7 +76,9 @@ while (source->next(&object) != NULL)
 	work_one(my_compressor, &object);
 
 object.filename = NULL;
-store->add(&object);
+store->add(&object); 
+
+delete my_compressor;
 }
 
 /*
