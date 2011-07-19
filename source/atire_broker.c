@@ -56,6 +56,7 @@ void broker(ATIRE_engine *engine, ATIRE_broker_param_block *params)
 {
 ANT_channel *inchannel, *outchannel;
 long long line;
+long long documents;
 long success;
 char *pos, *command, *query, *hits;
 char *new_index, *old_index, *new_doclist, *old_doclist;
@@ -98,7 +99,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			}
 		else if (strncmp(command, "<ATIREdescribeindex>", 18) == 0)
 			{
-			engine->describe_index(&old_index, &old_doclist);
+			engine->describe_index(&old_index, &old_doclist, &documents);
 			outchannel->puts("<ATIREdescribeindex>");
 
 			outchannel->write("<doclist filename=\"");
@@ -108,6 +109,9 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write("<index filename=\"");
 			outchannel->write(old_index);
 			outchannel->puts("\"/>");
+			outchannel->write("<docnum>");
+			outchannel->write(documents);
+			outchannel->puts("</docnum>");
 			outchannel->puts("</ATIREdescribeindex>");
 			}
 		else if (strncmp(command, "<ATIREsearch>", 13) == 0)

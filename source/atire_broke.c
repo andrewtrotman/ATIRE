@@ -36,12 +36,20 @@ if (params->number_of_servers > 0)
 		exit(printf("Out of memory initialising the broker array\n"));
 	for (current = 0; current < params->number_of_servers; current++)
 		if ((search_engine[current] = new (std::nothrow) ATIRE_broke_engine(params->servers[current])) == NULL)
-			exit(printf("Out of memory initialising each broker\n"));
+			exit(printf("Out of memory initialising each server\n"));
 	search_engine[current] = NULL;
 	}
 
 if ((results_list = new (std::nothrow) ATIRE_engine_result_set) == NULL)
 	exit(printf("Out of memory initialising the broker\n"));
+
+/*
+	long long documents;
+	char *unwanted;
+
+	describe_index(&unwanted, &unwanted, &documents);
+	printf("Total Document Count:%lld\n", documents);
+*/
 }
 
 /*
@@ -75,11 +83,40 @@ return FALSE;			// always fail;
 	ATIRE_BROKE::DESCRIBE_INDEX()
 	-----------------------------
 */
-long ATIRE_broke::describe_index(char **old_index, char **old_doclist)
+long ATIRE_broke::describe_index(char **old_index, char **old_doclist, long long *documents)
 {
+ATIRE_broke_engine **engine;
+long long individual_document_count;
+long status = TRUE;
+char *got, *count;
+
+*documents = 0;
 *old_index = "Broker";
 *old_doclist = "Broker";
-return TRUE;
+
+/*
+	Not connected to anything
+*/
+if (search_engine == NULL || search_engine[0] == NULL)
+	return TRUE;
+
+/*
+	Find the document count
+*/
+for (engine = search_engine; *engine != NULL; engine++)
+	{
+	if (((got = (*engine)->describe_index()) != NULL) && ((count = strstr(got, "<docnum>")) != NULL))
+		{
+		individual_document_count = ANT_atoi64(count + 8);
+		*documents += individual_document_count;
+		}
+	else
+		status = FALSE;
+
+	delete [] got;
+	}
+
+return status;
 }
 
 /*
@@ -90,7 +127,7 @@ char *ATIRE_broke::search(char *query, long long first, long long page_length)
 {
 ANT_stats stats;
 ATIRE_broke_engine **engine;
-long long current, timer, hits, time_taken;
+long long current, timer, hits, time_taken, virtual_document_id;
 char *one_answer, *numhits;
 
 //printf("BROKE:search(\"%s\", %lld, %lld)\n", query, first, page_length);
@@ -100,7 +137,6 @@ char *one_answer, *numhits;
 */
 if (search_engine == NULL || search_engine[0] == NULL)
 	return NULL;
-
 
 /*
 	Only connected to one instance so my answer is that instance's answer
@@ -115,6 +151,7 @@ timer = stats.start_timer();
 current = 0;
 hits = 0;
 results_list->rewind();
+virtual_document_id = 0;
 for (engine = search_engine; *engine != NULL; engine++)
 	{
 	if ((one_answer = (*engine)->search(query, 1, first + page_length)) != NULL)
@@ -127,9 +164,10 @@ for (engine = search_engine; *engine != NULL; engine++)
 		if ((numhits = strstr(one_answer, "<numhits>")) != NULL)
 			{
 			hits += ANT_atoi64(numhits + 9);
-			results_list->add(one_answer, ((long long)UINT32_MAX) * current++);
+			results_list->add(one_answer, virtual_document_id);
 			}
 		}
+	virtual_document_id += (*engine)->get_document_count();
 	}
 time_taken = stats.time_to_milliseconds(stats.stop_timer(timer));
 

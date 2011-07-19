@@ -22,15 +22,21 @@ protected:
 private:
 	char *connect_string;
 	ATIRE_API_remote *server;
+	long retries;
+	long long documents;
 
 protected:
 	long open_connection_to_server(long voice = NOISEY);
+	long retry(void);
 
 public:
 	ATIRE_broke_engine(char *connect_string);
 	virtual ~ATIRE_broke_engine();
 
+	virtual char *describe_index(void);
 	virtual char *search(char *query, long long top_of_page, long long length);
+
+	virtual long long get_document_count(void) { return documents; }
 } ;
 
 

@@ -266,7 +266,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->puts("\"/>");
 			outchannel->write("<docnum>");
 			outchannel->write(atire->get_document_count());
-			outchannel->write("</docnum>");
+			outchannel->puts("</docnum>");
 			outchannel->puts("</ATIREdescribeindex>");
 
 			continue;
@@ -277,7 +277,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 
 			outchannel->puts(params->doclist_filename);
 			outchannel->puts(params->index_filename);
-
+			outchannel->write(atire->get_document_count());
+			outchannel->puts("");
 			continue;
 			}
 		else if (strncmp(command, ".get ", 5) == 0)
