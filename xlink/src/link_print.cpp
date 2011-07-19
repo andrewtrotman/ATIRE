@@ -27,24 +27,38 @@ namespace QLINK {
 	const char link_print::ENGLISH_YEAR[] = "year";
 	const char link_print::ENGLISH_CENTURY[] = "century";
 	const char link_print::ENGLISH_MONTH[] = "month"; // month
-	const char *link_print::ENGLISH_DAY[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", 0x0}; // week day, monday, tuesday
+//	const char *link_print::ENGLISH_DAY[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", 0x0}; // week day, monday, tuesday
+//	const char *link_print::ENGLISH_MONTH[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	const char *link_print::ENGLISH_DAY_MONTH[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", 0x0};
+	std::set<const char*, ltstr> link_print::ENGLISH_DAY_MONTH_SET(ENGLISH_DAY_MONTH, ENGLISH_DAY_MONTH + 20);
 //	const char link_print::ENGLISH_DATE[] = {(char)0xe6, (char)0x97, (char)0xa5, 0x0}; //日
 //	const char link_print::ENGLISH_DECADE[] = {(char)0xe5, (char)0xb9, (char)0xb4, (char)0xe4, (char)0xbb, (char)0xa3, 0x0}; //niandai 年代
+
+//	struct link_print_proxy
+//	{
+//	public:
+//		link_print_proxy() {
+//			link_print::ENGLISH_DAY_MONTH_SET =
+//		}
+//	};
+//
+//	link_print_proxy link_print_instance;
 
 	bool link_print::is_number_or_chronological_link(const char *term, const char *lang)
 	{
 		int type = NONE;
 		bool ret = false;
 		long number = atol(term);
-		const char *word = NULL;
-
+		char *word = strdup(term);
+		char *temp;
+		bool has_space = false;
 		std::string number_str = number_to_string(number);
 
 		if (number > 0) {
 			if (number_str.length() == strlen(term))
 				type = NUMBER;
 			else
-				word = term + number_str.length();
+				word += number_str.length();
 
 			if (word) {
 				if (strcmp(lang, "zh") == 0) {
@@ -65,7 +79,62 @@ namespace QLINK {
 					}
 				}
 				else if (strcmp(lang, "en") == 0) {
+					if (isspace(*word)) {
+						has_space = true;
+						while (isspace(*word))
+							++word;
+					}
 
+
+					if (!has_space) {
+						if (number > 999 && number < 3000) {
+							type = YEAR;
+							if (strcasecmp(word, "s") == 0)
+								type = DECADE;
+
+						}
+						else if (number < 32 && (strncasecmp(word, "st", 2) == 0 || strncasecmp(word, "nd", 2) == 0 || strncasecmp(word, "th", 2) == 0)) {
+							type = DATE;
+						}
+						else if (number < 32 && link_print::ENGLISH_DAY_MONTH_SET.find(word) != link_print::ENGLISH_DAY_MONTH_SET.end())
+							type = DATE;
+					}
+
+//					else if (number < 31 && memcmp(word, ENGLISH_CENTURY, strlen(ENGLISH_CENTURY)) == 0) {
+//						type = CENTURY;
+//					}
+
+
+				}
+			}
+		}
+		else {
+			if (strcmp(lang, "en") == 0) {
+				temp = word;
+				while (isalpha(*temp))
+					++temp;
+
+				if (isspace(*temp)) {
+					has_space = true;
+					*temp = '\0';
+					++temp;
+					while (isspace(*temp))
+						(++temp);
+				}
+				number = atol(temp);
+
+				if (link_print::ENGLISH_DAY_MONTH_SET.find(word) != link_print::ENGLISH_DAY_MONTH_SET.end()) {
+					if (!has_space)
+						type = DAY_or_MONTH;
+					else {
+						if (number > 0) {
+							if ((number < 32 && (*word == '\0' || *word == ' ')) || (number < 32 && (strncasecmp(word, "st", 2) == 0 || strncasecmp(word, "nd", 2) == 0 || strncasecmp(word, "th", 2) == 0))) {
+								type = DATE;
+							}
+							else
+								type = NONE;
+						}
+					}
 				}
 			}
 		}
@@ -77,12 +146,14 @@ namespace QLINK {
 			case DAY:
 			case CENTURY:
 			case DATE:
+			case DAY_or_MONTH:
 				ret = true;
 				break;
 			default:
 				break;
 		}
 
+		free(word);
 		return ret;
 	}
 }
