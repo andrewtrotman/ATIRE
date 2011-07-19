@@ -5,7 +5,7 @@
 #ifndef ATIRE_ENGINE_RESULT_SET_EXPORT_TREC_H_
 #define ATIRE_ENGINE_RESULT_SET_EXPORT_TREC_H_
 
-#include "ATIRE_engine_result_set_export.h"
+#include "atire_engine_result_set_export.h"
 
 /*
 	class ATIRE_ENGINE_RESULT_SET_EXPORT_TREC
