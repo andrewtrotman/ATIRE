@@ -5,6 +5,7 @@
 #include "atire_engine_result.h"
 #include "atire_engine_result_set.h"
 #include "atire_engine_result_set_export_INEX_snippet.h"
+#include "maths.h"
 
 /*
 	ATIRE_ENGINE_RESULT_SET_EXPORT_INEX_SNIPPET::ATIRE_ENGINE_RESULT_SET_EXPORT_INEX_SNIPPET()
@@ -45,6 +46,7 @@ result << "<description>" << description << "</description>" << std::endl;
 void ATIRE_engine_result_set_export_INEX_snippet::include(long long topic_id, ATIRE_engine_result_set *results_list, long long first, long long page_length)
 {
 long long current, from, to;
+char *slish, *slash, *slosh, *start, *dot;
 
 if (first < results_list->hits)
 	{
@@ -55,8 +57,34 @@ if (first < results_list->hits)
 	to = from + page_length < results_list->hits ? from + page_length : results_list->hits;
 	for (current = from; current < to; current++)
 		{
-		result << "   <snippet doc-id=" << '"' << results_list->results[current].name << '"';
-		result << " rsv=" << '"' << results_list->results[current].rsv << '"' << '>';
+		result << "   <snippet";
+		result << " rsv=" << '"' << results_list->results[current].rsv << '"';
+		result << " doc-id=" << '"' ;
+		/*
+			INEX uses the filename of the document as its unique ID.  The problem with this is that the
+			filename includes slashes and a .xml extension.  These must be removed from the docid before
+			being written to the output file
+		*/
+		slish = results_list->results[current].name;
+		slash = strrchr(slish, '/') + 1;
+		slosh = strrchr(slish, '\\') + 1;
+		start = ANT_max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
+		dot = strchr(start, '.');
+
+		if (dot == NULL)
+			result << start;
+		else
+			{
+			*dot = '\0';
+			result << start;
+			*dot = '.';
+			}
+
+		/*
+			Now back to what we were doing
+		*/
+		result << '"' << '>';
+		result << results_list->results[current].title;
 		result << "</snippet>" << std::endl;
 		}
 	result << "</topic>" << std::endl;
