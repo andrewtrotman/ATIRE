@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
 {
 ANT_stem *meta = NULL;
 ANT_compressable_integer *raw, max = 0;
-long postings_list_size = 100 * 1024 * 1024;
-long raw_list_size = 100 * 1024 * 1024;
+long long postings_list_size = 100 * 1024 * 1024;
+long long raw_list_size = 100 * 1024 * 1024;
 unsigned char *postings_list = NULL;
 char *term, *first_term, *last_term;
 ANT_memory memory;
@@ -109,8 +109,8 @@ for (param = 1; param < argc; param++)
 		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<sounded>] [-u<nicodeWideChars>] [-p<rintPostings>]\n", argv[0]));
 	}
 
-postings_list = (unsigned char *)malloc(postings_list_size);
-raw = (ANT_compressable_integer *)malloc(raw_list_size);
+postings_list = (unsigned char *)malloc((size_t)postings_list_size);
+raw = (ANT_compressable_integer *)malloc((size_t)raw_list_size);
 for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 	{
 	iterator.get_postings_details(&leaf);
@@ -147,13 +147,13 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				if (leaf.postings_length > postings_list_size)
 					{
 					postings_list_size = 2 * leaf.postings_length;
-					postings_list = (unsigned char *)realloc(postings_list, postings_list_size);
+					postings_list = (unsigned char *)realloc(postings_list, (size_t)postings_list_size);
 					}
 			postings_list = search_engine.get_postings(&leaf, postings_list);
 			if (leaf.impacted_length > raw_list_size)
 				{
 				raw_list_size = 2 * leaf.impacted_length;
-				raw = (ANT_compressable_integer *)realloc(raw, raw_list_size);
+				raw = (ANT_compressable_integer *)realloc(raw, (size_t)raw_list_size);
 				}
 			factory.decompress(raw, postings_list, leaf.impacted_length);
 			max = process((ANT_compressable_integer *)raw, leaf.document_frequency, print_postings);

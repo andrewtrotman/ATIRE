@@ -470,8 +470,8 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
 		*into++ = term_details->postings_position_on_disk >> 32;
 		*into++ = 0;
-		*into++ = term_details->postings_length;
-		*into++ = term_details->impacted_length;
+		*into++ = (ANT_compressable_integer)term_details->postings_length;
+		*into++ = (ANT_compressable_integer)term_details->impacted_length;
 		*into++ = 0;
 		term_details->impacted_length = term_details->document_frequency == 1 ? 3 : 6;
 		}

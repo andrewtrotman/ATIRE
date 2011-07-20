@@ -71,7 +71,7 @@ if (++retries > MAX_RETRIES)
 	return -1;
 	}
 printf("The connection to %s has been lost... reconnecting... ", connect_string);
-if (got = open_connection_to_server(QUIET))
+if ((got = open_connection_to_server(QUIET)) != 0)
 	printf("success\n");
 else
 	printf("failed to reconnect\n");

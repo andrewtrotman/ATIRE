@@ -28,11 +28,11 @@ bin/atire_broke.obj: source/fundamental_types.h source/str.h source/ctypes.h sou
 bin/atire_broke_engine.obj: source/str.h source/ctypes.h source/atire_broke_engine.h source/atire_api_remote.h source/sockets.h
 bin/atire_broker.obj: source/str.h source/ctypes.h source/channel_file.h source/channel.h source/channel_socket.h source/sockets.h source/atire_broker_param_block.h source/atire_engine_param_block.h source/atire_broke.h source/atire_engine.h source/version.h
 bin/atire_broker_param_block.obj: source/version.h source/str.h source/ctypes.h source/atire_broker_param_block.h source/atire_engine_param_block.h
-bin/atire_client.obj: source/str.h source/ctypes.h source/atire_api_remote.h source/sockets.h source/channel_file.h source/channel.h source/channel_socket.h source/atire_engine_result_set.h source/atire_client_param_block.h source/atire_engine_param_block.h source/version.h source/atire_engine_result_set_export_TREC.h source/ATIRE_engine_result_set_export.h source/atire_engine_result_set_export_INEX_snippet.h
+bin/atire_client.obj: source/str.h source/ctypes.h source/atire_api_remote.h source/sockets.h source/channel_file.h source/channel.h source/channel_socket.h source/atire_engine_result_set.h source/atire_client_param_block.h source/atire_engine_param_block.h source/version.h source/atire_engine_result_set_export_TREC.h source/atire_engine_result_set_export.h source/atire_engine_result_set_export_INEX_snippet.h
 bin/atire_client_param_block.obj: source/version.h source/str.h source/ctypes.h source/atire_client_param_block.h source/atire_engine_param_block.h
 bin/atire_engine_result_set.obj: source/atire_engine_result_set.h source/atire_engine_result.h source/str.h source/ctypes.h
-bin/atire_engine_result_set_export_INEX_snippet.obj: source/atire_engine_result.h source/atire_engine_result_set.h source/atire_engine_result_set_export_INEX_snippet.h source/ATIRE_engine_result_set_export.h source/str.h source/ctypes.h
-bin/atire_engine_result_set_export_TREC.obj: source/atire_engine_result.h source/atire_engine_result_set.h source/atire_engine_result_set_export_TREC.h source/ATIRE_engine_result_set_export.h source/str.h source/ctypes.h
+bin/atire_engine_result_set_export_INEX_snippet.obj: source/atire_engine_result.h source/atire_engine_result_set.h source/atire_engine_result_set_export_INEX_snippet.h source/atire_engine_result_set_export.h source/str.h source/ctypes.h source/maths.h
+bin/atire_engine_result_set_export_TREC.obj: source/atire_engine_result.h source/atire_engine_result_set.h source/atire_engine_result_set_export_TREC.h source/atire_engine_result_set_export.h source/str.h source/ctypes.h
 bin/barrier.obj: source/barrier.h source/critical_section.h source/event.h
 bin/bitstream.obj: source/bitstream.h source/fundamental_types.h
 bin/bitstring.obj: source/bitstring.h source/str.h source/ctypes.h source/fundamental_types.h
