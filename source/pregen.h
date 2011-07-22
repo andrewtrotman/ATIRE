@@ -50,6 +50,9 @@ public:
 	~ANT_pregen_field();
 };
 
+/**
+ * Generates pregens for a number of different fields on a document collection simultaneously.
+ */
 class ANT_pregen
 {
 private:

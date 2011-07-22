@@ -32,21 +32,10 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator->set_rsv(docid, ascending ? std::numeric_limits<ANT_search_engine_accumulator::ANT_accumulator_t>::max() - pregen.scores[docid] : pregen.scores[docid]);
+		accumulator->set_rsv(docid, ascending ? std::numeric_limits<ANT_search_engine_accumulator::ANT_accumulator_t>::max() - pregen->scores[docid] : pregen->scores[docid]);
 		}
 	current++;
 	}
-}
-
-/*
-	ANT_RANKING_FUNCTION_PREGEN::LOAD_PREGEN()
-	------------------------------------------
-
-	Load a pregen from the given file, returning true if successful.
-*/
-int ANT_ranking_function_pregen::load_pregen(const char *filename)
-{
-return pregen.read(filename);
 }
 
 /*

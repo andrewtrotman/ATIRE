@@ -53,6 +53,7 @@ feedback_documents = 10;
 feedback_terms = 10;
 index_filename = strnew("index.aspt");
 doclist_filename = strnew("doclist.aspt");
+pregen_count = 0;
 }
 
 /*
@@ -63,6 +64,9 @@ ANT_ANT_param_block::~ANT_ANT_param_block()
 {
 delete [] doclist_filename;
 delete [] index_filename;
+
+for (int i = 0; i < pregen_count; i++)
+	delete [] pregen_names[i];
 }
 
 /*
@@ -154,6 +158,11 @@ puts("SEGMENTATION");
 puts("------------");
 puts("-S[n]           East-Asian language word segmentation, query is segmented into characters by default");
 puts("  n             No segmentation, search with the input terms separated by space");
+puts("");
+
+puts("PREGENS");
+puts("-------");
+puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking functions
@@ -507,6 +516,11 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'f')
 			set_focused_ranker(command + 1);
+		else if (strcmp(command, "pregen") == 0)
+			{
+			pregen_names[pregen_count] = strnew(argv[++param]);
+			pregen_count++;
+			}
 		else if (strcmp(command, "people") == 0)
 			{
 			ANT_credits();

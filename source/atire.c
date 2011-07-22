@@ -28,7 +28,7 @@ const long MAX_TITLE_LENGTH = 1024;
 ATIRE_API *atire = NULL;
 
 ATIRE_API *ant_init(ANT_ANT_param_block & params);
-int ant_init_ranking(ATIRE_API * atire, ANT_ANT_param_block & base, ANT_indexer_param_block_rank & params);
+int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params);
 
 /*
 	PERFORM_QUERY()
@@ -154,7 +154,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 	if (custom_ranking)
 		{
 		/* Revert to default ranking function for next query */
-		ant_init_ranking(atire, *params, *params); //Just assume that it worked.
+		ant_init_ranking(atire, *params); //Just assume that it worked.
 		custom_ranking = 0;
 		}
 
@@ -315,7 +315,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 
 			if ((ranker = between(command, "<ranking>", "</ranking>")) != NULL)
 				{
-				if (params_rank.set_ranker(ranker) && ant_init_ranking(atire, *params, params_rank))
+				if (params_rank.set_ranker(ranker) && ant_init_ranking(atire, params_rank))
 					custom_ranking = 1;
 				else
 					{
@@ -478,15 +478,11 @@ return mean_average_precision;
 	ANT_INIT_RANKING()
 	------------------
 
-	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank, where
-	"base" is the rest of the search-engine config (allowing you to easily switch between different rankers
-	on the same base config).
+	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank
 
 	Return true if successful. On failure, the API is not altered.
 */
-int ant_init_ranking(ATIRE_API * atire, ANT_ANT_param_block & base, ANT_indexer_param_block_rank & params) {
-std::stringstream buffer;
-
+int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params) {
 switch (params.ranking_function)
 	{
 	case ANT_indexer_param_block_rank::BM25:
@@ -500,9 +496,7 @@ switch (params.ranking_function)
 	case ANT_indexer_param_block_rank::DOCID:
 		return atire->set_ranking_function(params.ranking_function, params.ascending, 0) == 0;
 	case ANT_indexer_param_block_rank::PREGEN:
-		buffer << base.index_filename << "." << params.field_name;
-
-		return atire->set_ranking_function(params.ranking_function, buffer.str().c_str(), params.ascending) == 0;
+		return atire->set_ranking_function_pregen(params.field_name, params.ascending) == 0;
 
 	default:
 		return atire->set_ranking_function(params.ranking_function, 0.0, 0.0) == 0;
@@ -542,6 +536,18 @@ if (fail)
 	return NULL;
 	}
 
+/* Load in all the pregens */
+for (int i = 0 ; i < params.pregen_count; i++)
+	{
+	//Derive the pregen's filename from the index filename and pregen fieldname
+	std::stringstream buffer;
+
+	buffer << params.index_filename << "." << params.pregen_names[i];
+
+	if (!atire->load_pregen(buffer.str().c_str()))
+		fprintf(stderr, "Failed to load pregen %s, ignoring...\n", params.pregen_names[i]);
+	}
+
 if (params.assessments_filename != NULL)
 	atire->load_assessments(params.assessments_filename);
 
@@ -554,7 +560,7 @@ atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedb
 
 atire->set_segmentation(params.segmentation);
 
-ant_init_ranking(atire, params, params); //Error value ignored...
+ant_init_ranking(atire, params); //Error value ignored...
 
 return atire;
 }

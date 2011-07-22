@@ -105,6 +105,9 @@ number_of_assessments = 0;
 map = NULL;
 forum_writer = NULL;
 forum_results_list_length = 1500;
+
+pregens = NULL;
+pregen_count = 0;
 }
 
 /*
@@ -132,6 +135,8 @@ delete assessment_factory;
 //delete [] assessments;
 delete map;
 delete forum_writer;
+
+delete [] pregens;
 
 delete memory;
 }
@@ -254,6 +259,27 @@ return 0;		// success
 }
 
 /*
+	ATIRE_API::LOAD_PREGEN()
+	------------------------
+
+	Load a pregen with the given filename. Return non-zero on success.
+*/
+long ATIRE_API::load_pregen(const char *pregen_filename)
+{
+if (pregens == NULL)
+	pregens = new ANT_pregen_field[MAX_PREGEN_COUNT];
+
+if (pregens[pregen_count].read(pregen_filename))
+	{
+	pregen_count++;
+
+	return 1;
+	}
+
+return 0;
+}
+
+/*
 	ATIRE_API::LOAD_ASSESSMENTS()
 	-----------------------------
 */
@@ -282,37 +308,27 @@ return parsed_query->parse_error;
 }
 
 /*
-	ATIRE_API::SET_RANKING_FUNCTION()
-	---------------------------------
+	ATIRE_API::SET_RANKING_FUNCTION_PREGEN()
+	---------------------------------------
+	Set the ranking function to use the specified pregenerated ranking from those
+	which have been preloaded with load_pregen().
+
 	returns:
 		0 on success
-		1 on failure
+		1 on failure - Pregen with that field name wasn't there to be found
 
 	On failure, the API is left unchanged.
 */
-long ATIRE_API::set_ranking_function(long function, const char * filename, double p1)
+long ATIRE_API::set_ranking_function_pregen(const char * fieldname, double p1)
 {
-ANT_ranking_function *new_function;
-
-switch (function)
-	{
-	case ANT_ANT_param_block::PREGEN:
-		new_function = new ANT_ranking_function_pregen(search_engine, (int) p1);
-
-		if (!((ANT_ranking_function_pregen*)new_function)->load_pregen(filename))
-			{
-			delete new_function;
-			return 1;
-			}
-		break;
-	default:
-		return 1;		// failure, invalid parameter
-	}
-
-delete ranking_function;
-ranking_function = new_function;
-
-return 0;		// success
+for (int i = 0; i < pregen_count; i++)
+	if (strcmp(pregens[i].field_name, fieldname) == 0)
+		{
+		delete ranking_function;
+		ranking_function = new ANT_ranking_function_pregen(search_engine, &pregens[i], (int) p1);
+		return 0;		// success
+		}
+return 1;
 }
 
 /*

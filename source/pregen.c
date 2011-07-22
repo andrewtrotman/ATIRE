@@ -325,6 +325,14 @@ file.write((unsigned char *)&header.doc_count, sizeof(header.doc_count));
 file.close();
 }
 
+/*
+	ANT_PREGEN_FIELD::READ()
+	------------------------
+
+	Read a pregen from the given file, return non-zero iff successful.
+
+	On failure, the fields are left in a half-updated (but destructible) state.
+*/
 int ANT_pregen_field::read(const char *filename)
 {
 struct file_header header;

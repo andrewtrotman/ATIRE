@@ -25,6 +25,7 @@ class ANT_bitstring;
 class ANT_query_parse_tree;
 class ANT_string_pair;
 class ANT_relevance_feedback;
+class ANT_pregen_field;
 
 /*
 	class ATIRE_API
@@ -67,6 +68,9 @@ private:
 	ANT_search_engine_forum *forum_writer;	// the object that writes the results list in the INEX or TREC format
 	long forum_results_list_length;			// maximum length of a results list for the evaluation form (INEX or TREC)
 
+	ANT_pregen_field *pregens;				// pre-loaded pregens
+	long pregen_count;						// number of pregens which have been loaded
+
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
@@ -99,6 +103,11 @@ public:
 	long load_assessments(char *assessments_filename);
 
 	/*
+	    Load a pregenerated ranking
+	 */
+	long load_pregen(const char *pregen_filename);
+
+	/*
 		Set the chinese segmentation algorithm
 	*/
 	void set_segmentation(long segmentation) { this->segmentation = segmentation; }
@@ -116,7 +125,7 @@ public:
 	*/
 	long set_ranking_function(long function, double p1, double p2);
 
-	long set_ranking_function(long function, const char * filename, double p1);
+	long set_ranking_function_pregen(const char * fieldname, double p1);
 
 	/*
 		Set the stemming function

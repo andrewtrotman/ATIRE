@@ -411,7 +411,7 @@ else
 		{
 		for (int i = 0; i < pregen->field_count; i++)
 			if (pregen->fields[i]->doc_count == 0)
-				fprintf(stderr, "Warning: Pregen field %s found in no documents\n", pregen->fields[i]->field_name);
+				fprintf(stderr, "Warning: Pregen field '%s' not found in any documents\n", pregen->fields[i]->field_name);
 		pregen->close();
 		}
 

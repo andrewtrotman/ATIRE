@@ -8,6 +8,8 @@
 #include "indexer_param_block_rank.h"
 #include "indexer_param_block_stem.h"
 
+#define MAX_PREGEN_COUNT 128
+
 /*
 	class ANT_ANT_PARAM_BLOCK
 	-------------------------
@@ -45,8 +47,11 @@ public:
 										// owns the memory for these strings and calls delete [] on
 										// them:
 
-	char * index_filename;				// Filename of index to read
-	char * doclist_filename;			// Filename of doclist to read
+	char *index_filename;				// Filename of index to read
+	char *doclist_filename;				// Filename of doclist to read
+
+	char *pregen_names[MAX_PREGEN_COUNT];// pregens to load
+	int pregen_count;					// count of entries in list
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long file_or_memory;				// the index be loaded into memory at startup (TRUE / FALSE)
