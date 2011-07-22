@@ -95,20 +95,20 @@ PHP_METHOD(atire_api_remote, close)
 
 PHP_METHOD(atire_api_remote, search)
 {
-    char *search_string, *res;
+    char *search_string, *res, *ranker;
     long start, pagelength;
-    int len;
+    int len, ranker_len;
 
     ATIRE_API_remote *atire = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &search_string, &len, &start, &pagelength) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slls", &search_string, &len, &start, &pagelength, &ranker, &ranker_len) == FAILURE) {
     	RETURN_NULL();
     }
 
     atire_api_remote_object *obj =(atire_api_remote_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
     atire = obj->atire;
     if (atire != NULL){
-        res = atire->search(search_string,start,pagelength);
+        res = atire->search(search_string, start, pagelength, ranker);
 
         if (res)
         	{

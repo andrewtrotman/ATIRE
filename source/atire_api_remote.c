@@ -165,7 +165,7 @@ return strnew(result.str().c_str());
 	ATIRE_API_REMOTE::SEARCH()
 	--------------------------
 */
-char *ATIRE_API_remote::search(char *query, long long top_of_page, long long page_length)
+char *ATIRE_API_remote::search(char *query, long long top_of_page, long long page_length, char *ranker)
 {
 std::stringstream buffer, result;
 char *got;
@@ -173,7 +173,22 @@ char *got;
 /*
 	Construct the command string and send it off
 */
-buffer << "<ATIREsearch><query>" << query << "</query>" << "<top>" << top_of_page << "</top><n>" << page_length << "</n></ATIREsearch>\n";
+
+/* Newlines are toxic to atire (parser requires command to be on one line), so strip them
+ * out here.
+ */
+for (char * c = query; *c; ++c)
+	if (*c == '\n')
+		*c = ' ';
+
+buffer << "<ATIREsearch><query>" << query << "</query>"
+		<< "<top>" << top_of_page << "</top><n>" << page_length << "</n>";
+
+if (ranker)
+	buffer << "<ranking>" << ranker << "</ranking>";
+
+buffer << "</ATIREsearch>\n";
+
 if (socket->puts((char *)buffer.str().c_str()) <= 0)
 	return NULL;
 
