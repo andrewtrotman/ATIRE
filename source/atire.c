@@ -267,6 +267,12 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write("<docnum>");
 			outchannel->write(atire->get_document_count());
 			outchannel->puts("</docnum>");
+			outchannel->write("<termnum>");
+			outchannel->write(atire->get_term_count());
+			outchannel->puts("</termnum>");
+			outchannel->write("<longestdoc>");
+			outchannel->write(atire->get_longest_document_length());
+			outchannel->puts("</longestdoc>");
 			outchannel->puts("</ATIREdescribeindex>");
 
 			continue;
@@ -345,6 +351,12 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				sprintf(print_buffer, "<length>%lld</length>", (long long) current_document_length);
 				outchannel->puts(print_buffer);
 				outchannel->write(document_buffer, current_document_length);
+				outchannel->puts("</ATIREgetdoc>");
+				}
+			else
+				{
+				outchannel->puts("<ATIREgetdoc>");
+				outchannel->puts("<length>0</length>");
 				outchannel->puts("</ATIREgetdoc>");
 				}
 			delete [] command;

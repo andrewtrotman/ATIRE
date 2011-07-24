@@ -15,12 +15,12 @@
 void ANT_ranking_function_kbtfidf::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 double tf, idf, score;
-long docid;
+long long docid;
 ANT_compressable_integer *current, *end;
 
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
-idf = log((double)documents / (double)term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
+idf = log((double)documents / (double)term_details->global_document_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator

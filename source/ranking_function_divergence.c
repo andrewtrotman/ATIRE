@@ -19,7 +19,7 @@
 */
 void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid;
+long long docid;
 double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;
 ANT_compressable_integer *current, *end;
 
@@ -59,9 +59,9 @@ ANT_compressable_integer *current, *end;
 		ttf is the number of occurences of the term in the document
 */
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 
-F = (double)term_details->collection_frequency;
+F = (double)term_details->global_collection_frequency;
 F_plus_1 = F + 1.0;
 ne = documents * (1.0 - pow((documents - 1.0) / documents, F));
 inf_right = ANT_log2(((double)documents + 1.0) / (ne + 0.5));
@@ -74,8 +74,8 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		tf_prime = prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[docid]);
-		rsv = tf_prime * inf_right * (F_plus_1 / ((double)term_details->document_frequency * (tf_prime + 1.0)));
+		tf_prime = prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[(size_t)docid]);
+		rsv = tf_prime * inf_right * (F_plus_1 / ((double)term_details->global_document_frequency * (tf_prime + 1.0)));
 		accumulator->add_rsv(docid, postscalar * rsv);
 		}
 	current++;		// skip over the zero

@@ -23,7 +23,7 @@
 */
 void ANT_ranking_function_DLH13::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid;
+long long docid;
 double tf, cf, score;
 ANT_compressable_integer *current, *end;
 
@@ -46,8 +46,8 @@ ANT_compressable_integer *current, *end;
 */
 
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
-cf = (double)term_details->collection_frequency;
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
+cf = (double)term_details->global_collection_frequency;
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -58,10 +58,9 @@ while (current < end)
 		docid += *current++;
 
 // this is DLH13:
-		score = (1.0 / (tf + 0.5)) * (ANT_log2(((tf * mean_document_length) / document_lengths[docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[docid]))));
-
+//		score = (1.0 / (tf + 0.5)) * (ANT_log2(((tf * mean_document_length) / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[(size_t)docid]))));
 // this is what Terrier actually uses:
-		score = 1.0 * (tf * ANT_log2((tf * mean_document_length / document_lengths[docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[docid])))) / (tf + 0.5);
+		score = 1.0 * (tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[(size_t)docid])))) / (tf + 0.5);
 
 // In both cases you get negative numbers and so we add a bit (this is a hack)
 		score += 10.0;
@@ -84,7 +83,7 @@ tf = (double)term_frequency;
 cf = (double)collection_frequency;
 
 // this is DLH13:
-score = (1.0 / (tf + 0.5)) * (ANT_log2(((tf * mean_document_length) / document_lengths[docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[docid]))));
+//score = (1.0 / (tf + 0.5)) * (ANT_log2(((tf * mean_document_length) / document_lengths[docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[docid]))));
 // this is what Terrier actually uses:
 score = 1.0 * (tf * ANT_log2((tf * mean_document_length / document_lengths[docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[docid])))) / (tf + 0.5);
 // In both cases you get negative numbers and so we add a bit (this is a hack)

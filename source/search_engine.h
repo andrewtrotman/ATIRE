@@ -104,6 +104,7 @@ public:
 	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
 	long long document_count(void) { return documents; }
+	long long term_count(void) { return collection_length_in_terms; }
 	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
 	ANT_compressable_integer *get_decompress_buffer(void) { return decompress_buffer; }
 	ANT_stats_search_engine *get_stats(void) { return stats; }

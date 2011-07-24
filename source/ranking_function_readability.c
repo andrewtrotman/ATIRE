@@ -34,13 +34,13 @@ void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_re
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
-long docid;
+long long docid;
 double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
-idf = log((double)(documents) / (double)term_details->document_frequency);
+idf = log((double)(documents) / (double)term_details->global_document_frequency);
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);		// allow early termination
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);		// allow early termination
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -56,12 +56,12 @@ while (current < end)
 			We also only want to only consider the readability once per document.
 		*/
 		if (accumulator->is_zero_rsv(docid))
-			accumulator->add_rsv(docid, (1.0 - mix) * (cutoff - (document_readability[docid] / 1000.0)));
+			accumulator->add_rsv(docid, (1.0 - mix) * (cutoff - (document_readability[(size_t)docid] / 1000.0)));
 		
 		/*
 			Add the portion of BM25 for this query term
 		*/
-		accumulator->add_rsv(docid, postscalar * mix * (idf * (top_row / (prescalar * tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length))))));
+		accumulator->add_rsv(docid, postscalar * mix * (idf * (top_row / (prescalar * tf + k1 * (one_minus_b + b * (document_lengths[(size_t)docid] / mean_document_length))))));
 		}
 	current++;		// skip over the zero
 	}

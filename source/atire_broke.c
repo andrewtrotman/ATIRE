@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <new>
+#include "pragma.h"
 #include "fundamental_types.h"
 #include "str.h"
 #include "atire_broke.h"
@@ -25,7 +26,7 @@
 	ATIRE_BROKE::ATIRE_BROKE()
 	--------------------------
 */
-ATIRE_broke::ATIRE_broke(ATIRE_broker_param_block *params) : ATIRE_engine(params)
+ATIRE_broke::ATIRE_broke(ATIRE_broker_param_block *params) : ATIRE_engine()
 {
 long long current;
 
@@ -42,14 +43,6 @@ if (params->number_of_servers > 0)
 
 if ((results_list = new (std::nothrow) ATIRE_engine_result_set) == NULL)
 	exit(printf("Out of memory initialising the broker\n"));
-
-/*
-	long long documents;
-	char *unwanted;
-
-	describe_index(&unwanted, &unwanted, &documents);
-	printf("Total Document Count:%lld\n", documents);
-*/
 }
 
 /*
@@ -76,21 +69,25 @@ long ATIRE_broke::load_index(char *new_index, char *new_doclist, char **old_inde
 {
 *old_index = NULL;
 *old_doclist = NULL;
+
 return FALSE;			// always fail;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
 	ATIRE_BROKE::DESCRIBE_INDEX()
 	-----------------------------
 */
-long ATIRE_broke::describe_index(char **old_index, char **old_doclist, long long *documents)
+long ATIRE_broke::describe_index(char **old_index, char **old_doclist, long long *documents, long long *terms, long long *length_of_longest_document)
 {
 ATIRE_broke_engine **engine;
-long long individual_document_count;
+long long individual;
 long status = TRUE;
 char *got, *count;
 
 *documents = 0;
+*terms = 0;
+*length_of_longest_document = 0;
 *old_index = "Broker";
 *old_doclist = "Broker";
 
@@ -101,14 +98,39 @@ if (search_engine == NULL || search_engine[0] == NULL)
 	return TRUE;
 
 /*
-	Find the document count
+	Ask each search engine in turn
 */
 for (engine = search_engine; *engine != NULL; engine++)
 	{
-	if (((got = (*engine)->describe_index()) != NULL) && ((count = strstr(got, "<docnum>")) != NULL))
+	if ((got = (*engine)->describe_index()) != NULL)
 		{
-		individual_document_count = ANT_atoi64(count + 8);
-		*documents += individual_document_count;
+		if ((count = strstr(got, "<docnum>")) != NULL)
+			{
+			/*
+				How many documents in the instance
+			*/
+			individual = ANT_atoi64(count + 8);
+			*documents += individual;
+			}
+		else if ((count = strstr(got, "<termnum>")) != NULL)
+			{
+			/*
+				Length of the instance in (non-unique) terms, the term count
+			*/
+			individual = ANT_atoi64(count + 9);
+			*terms += individual;
+			}
+		else if ((count = strstr(got, "<longestdoc>")) != NULL)
+			{
+			/*
+				The length of the longest document in the collection so that we can allocate a buffer
+			*/
+			individual = ANT_atoi64(count + 12);
+			if (*length_of_longest_document > individual)
+				*length_of_longest_document = individual;
+			}
+		else
+			status = FALSE;
 		}
 	else
 		status = FALSE;
@@ -129,8 +151,6 @@ ANT_stats stats;
 ATIRE_broke_engine **engine;
 long long current, timer, hits, time_taken, virtual_document_id;
 char *one_answer, *numhits;
-
-//printf("BROKE:search(\"%s\", %lld, %lld)\n", query, first, page_length);
 
 /*
 	Not connected to anything
@@ -172,5 +192,40 @@ for (engine = search_engine; *engine != NULL; engine++)
 time_taken = stats.time_to_milliseconds(stats.stop_timer(timer));
 
 return results_list->serialise(query, hits, time_taken, first, page_length);
+}
+
+/*
+	ATIRE_BROKE::GET_DOCUMENT()
+	---------------------------
+*/
+char *ATIRE_broke::get_document(char *document_buffer, long long *current_document_length, long long id)
+{
+ATIRE_broke_engine **engine;
+long long top, base;
+
+/*
+	Not connected to anything
+*/
+if (search_engine == NULL || search_engine[0] == NULL)
+	{
+	*document_buffer = '\0';
+	*current_document_length = 0;
+	return NULL;
+	}
+
+/*
+	Perform a linear search to find out which instance the document is in
+	then go and get the document
+*/
+base = top = 0;
+for (engine = search_engine; *engine != NULL; engine++)
+	{
+	top += (*engine)->get_document_count();
+	if (top > id)
+		(*engine)->get_document(document_buffer, current_document_length, id - base);
+	base = top;
+	}
+
+return *document_buffer == '\0' ? NULL : document_buffer;
 }
 

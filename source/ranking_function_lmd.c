@@ -22,7 +22,7 @@
 */
 void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid;
+long long docid;
 double tf, idf, n;
 double left_hand_side, rsv;
 ANT_compressable_integer *current, *end;
@@ -38,8 +38,8 @@ ANT_compressable_integer *current, *end;
 */
 n = 3.0;						// this is a hack and should be the length of the query
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
-idf = ((double)collection_length_in_terms / (double)term_details->collection_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
+idf = ((double)collection_length_in_terms / (double)term_details->global_collection_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -49,7 +49,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[docid] / u));
+		rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
 		accumulator->add_rsv(docid, postscalar * rsv);
 		}
 	current++;		// skip over the zero

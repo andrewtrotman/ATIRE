@@ -59,7 +59,7 @@ public:
 	/*
 		Given the ATIRE internal id of a document, retrieve that document (if it is in the repository)
 	*/
-	virtual char *get_document(long long docid);
+	virtual char *get_document(long long docid, long long *length);
 } ;
 
 #endif /* ATIRE_API_REMOTE_H_ */

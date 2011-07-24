@@ -210,7 +210,7 @@ if (node->string[0] != '~')
 	if ((document_collection->process_one_term(token_as_string, term_details)) == NULL)
 		collection_frequency = 0;
 	else
-		collection_frequency = term_details->collection_frequency;
+		collection_frequency = term_details->global_collection_frequency;
 
 	node->kl_score = center = divergence->divergence(node->term_frequency, document_length, collection_frequency, document_collection->get_collection_length());
 	}

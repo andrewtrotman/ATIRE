@@ -59,8 +59,8 @@ index_node = index->find_node(index->hash_table[hash_of_term], &term_as_pair);
 if (index_node == NULL)
 	return NULL;
 
-term_details->collection_frequency = index_node->collection_frequency;
-term_details->document_frequency = (long)index_node->document_frequency;
+term_details->global_collection_frequency = term_details->local_collection_frequency = index_node->collection_frequency;
+term_details->global_document_frequency = term_details->local_document_frequency = index_node->document_frequency;
 term_details->postings_position_on_disk = (long long)index_node;		// this is a dreadful hack, it assumes a pointer will fit in a 64-bit pointer and actually points to the index_node not the postings
 /*
 	We fake the next three because we just don't know.

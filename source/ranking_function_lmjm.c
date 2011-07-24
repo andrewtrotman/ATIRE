@@ -22,7 +22,7 @@
 */
 void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid;
+long long docid;
 double tf, rsv;
 double one_minus_lambda, idf;
 ANT_compressable_integer *current, *end;
@@ -33,9 +33,9 @@ ANT_compressable_integer *current, *end;
                    lambda     len(d)    cf(t)
 */
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 one_minus_lambda = (1.0 - lambda) / lambda;
-idf = (double)collection_length_in_terms / (double)term_details->collection_frequency;
+idf = (double)collection_length_in_terms / (double)term_details->global_collection_frequency;
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -44,7 +44,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		rsv = postscalar * log(1 + one_minus_lambda * (prescalar * tf / (double)document_lengths[docid]) * idf);
+		rsv = postscalar * log(1 + one_minus_lambda * (prescalar * tf / (double)document_lengths[(size_t)docid]) * idf);
 		accumulator->add_rsv(docid, rsv);
 		}
 	current++;		// skip over the zero

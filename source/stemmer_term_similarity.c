@@ -36,10 +36,10 @@ delete [] buffer;
 }
 
 /*
-ANT_STEMMER_TERM_SIMILARITY::GET_POSTING_DETAILS()
---------------------------------------------------
-Necessary, in order to get the right value, as this wraps up the real object, which has
-access to this.
+	ANT_STEMMER_TERM_SIMILARITY::GET_POSTING_DETAILS()
+	--------------------------------------------------
+	Necessary, in order to get the right value, as this wraps up the real object, which has
+	access to this.
 */
 ANT_search_engine_btree_leaf *ANT_stemmer_term_similarity::get_postings_details(ANT_search_engine_btree_leaf *term_details) 
 {
@@ -47,14 +47,14 @@ return base_stemmer->get_postings_details(term_details);
 }
 
 /*
-ANT_STEMMER_TERM_SIMILARITY::FILL_BUFFER_WITH_POSTINGS()
---------------------------------------------------------
-I want to compare TF values, so I need this to fill a long * buffer with 
-values for terms.
+	ANT_STEMMER_TERM_SIMILARITY::FILL_BUFFER_WITH_POSTINGS()
+	--------------------------------------------------------
+	I want to compare TF values, so I need this to fill a long * buffer with 
+	values for terms.
 
-Returns |tf| * |tf| since I need this for base_term, but can't have it, as I'm doing random access.
+	Returns |tf| * |tf| since I need this for base_term, but can't have it, as I'm doing random access.
 */
-long long ANT_stemmer_term_similarity::fill_buffer_with_postings(char *term, long *buffer, long *document_frequency)
+long long ANT_stemmer_term_similarity::fill_buffer_with_postings(char *term, long *buffer, long long *document_frequency)
 {
 ANT_search_engine_btree_leaf term_details;
 ANT_compressable_integer *current_document, *end;
@@ -66,29 +66,29 @@ ANT_compressable_integer term_frequency;
 memset(buffer, 0, (size_t)(sizeof (*buffer) * search_engine->document_count()));
 
 if ((current_document = search_engine->get_decompressed_postings(term, &term_details)) == NULL)
-return 0;
-*document_frequency = term_details.document_frequency;
+	return 0;
+*document_frequency = term_details.local_document_frequency;
 end = current_document + term_details.impacted_length;
 while (current_document < end)
-{
-term_frequency = *current_document++;
-document = -1;
-while (*current_document != 0)
-    {
-    document += *current_document++;
-    buffer[document] = term_frequency;
-    tf_length_squared += term_frequency * term_frequency;
-    }
-current_document++;
-}
+	{
+	term_frequency = *current_document++;
+	document = -1;
+	while (*current_document != 0)
+	    {
+	    document += *current_document++;
+	    buffer[document] = term_frequency;
+	    tf_length_squared += term_frequency * term_frequency;
+	    }
+	current_document++;
+	}
 
 return tf_length_squared;
 }
 
 /*
-ANT_STEMMER_TERM_SIMILARITY::BUFFER_SIMILARITY()
-------------------------------------------------
-Calculates how similar the two buffers are.
+	ANT_STEMMER_TERM_SIMILARITY::BUFFER_SIMILARITY()
+	------------------------------------------------
+	Calculates how similar the two buffers are.
 */
 double ANT_stemmer_term_similarity::buffer_similarity(char *b) 
 {
@@ -96,54 +96,54 @@ ANT_search_engine_btree_leaf term_details;
 ANT_compressable_integer *current_document, *end;
 double length_b = 0, similarity = 0;
 double idf_a, idf_b, mean;
-long document;
+long long document;
 ANT_compressable_integer *document_lengths;
 ANT_compressable_integer term_frequency;
 
 if (buffer_length_squared == 0)
-return 0.0;
+	return 0.0;
 
 if ((current_document = search_engine->get_decompressed_postings(b, &term_details)) == NULL)
-return 0.0;
+	return 0.0;
 
 end = current_document + term_details.impacted_length;
 /* 
-             A . B 
-cos theta = -------
-            |A| |B|
+	             A . B 
+	cos theta = -------
+	            |A| |B|
 
-where A and B are tf.idf scores.
-we can open up the expressions and multiply by 
+	where A and B are tf.idf scores.
+	we can open up the expressions and multiply by 
 
-idf_a * idf_b  OR idf_a ^ 2 OR idf_b ^ 2
+	idf_a * idf_b  OR idf_a ^ 2 OR idf_b ^ 2
 
-at the end.
+	at the end.
 
 
-TF*IDF;
-TF = term_count / |document|
-             
-IDF = log(|collection| / doc_count)
+	TF*IDF;
+	TF = term_count / |document|
+	             
+	IDF = log(|collection| / doc_count)
 */
 
 document_lengths = search_engine->get_document_lengths(&mean);
 
 while (current_document < end)
-{
-term_frequency = *current_document++;
-document = -1;
-while (*current_document != 0)
-    {
-    document += *current_document++;
-    length_b += term_frequency * term_frequency;
-    if (buffer[document]) 
-        similarity += ((double)buffer[document] / (double)document_lengths[document]) * ((double)term_frequency / (double)document_lengths[document]);
-    }
-current_document++;
-}
+	{
+	term_frequency = *current_document++;
+	document = -1;
+	while (*current_document != 0)
+	    {
+	    document += *current_document++;
+	    length_b += term_frequency * term_frequency;
+	    if (buffer[(size_t)document]) 
+	        similarity += ((double)buffer[(size_t)document] / (double)document_lengths[(size_t)document]) * ((double)term_frequency / (double)document_lengths[(size_t)document]);
+	    }
+	current_document++;
+	}
 
 idf_a = log((double)search_engine->document_count() / (double)document_frequency);
-idf_b = log((double)search_engine->document_count() / (double)term_details.document_frequency);
+idf_b = log((double)search_engine->document_count() / (double)term_details.local_document_frequency);
 
 similarity *= idf_a * idf_b;
 
@@ -170,7 +170,7 @@ return similarity;
 */
 double ANT_stemmer_term_similarity::term_similarity(char *term1, char *term2)
 {
-long df;
+long long df;
 
 if (strcmp(term1, term) != 0)
 	{
@@ -192,7 +192,7 @@ return base_stemmer->next();
 
 /*
 	ANT_STEMMER_TERM_SIMILARITY::FIRST()
-	----------------------------------------------
+	------------------------------------
 */
 char *ANT_stemmer_term_similarity::first(char *term)
 {

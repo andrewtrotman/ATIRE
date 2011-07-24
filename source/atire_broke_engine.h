@@ -35,6 +35,7 @@ public:
 
 	virtual char *describe_index(void);
 	virtual char *search(char *query, long long top_of_page, long long length);
+	virtual char *get_document(char *document_buffer, long long *current_document_length, long long id);
 
 	virtual long long get_document_count(void) { return documents; }
 } ;

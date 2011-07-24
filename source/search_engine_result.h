@@ -60,10 +60,11 @@ public:
 	void *operator new(size_t bytes, ANT_memory *allocator);
 	ANT_search_engine_accumulator &operator[](size_t index) { return accumulator[index]; }
 
-	inline void init_partial_accumulators(size_t index)
+	inline void init_partial_accumulators(long long index)
 	{
 #ifdef TWO_D_ACCUMULATORS
 	unsigned long long row;
+
 	if (init_flags[row = (index >> width_in_bits)] == 0)
 		{
 		init_flags[row] = 1;
@@ -123,7 +124,7 @@ public:
 				min_in_top_k = accumulator_pointers[current]->get_rsv();
 		}
 
-	template <class T> inline void add_rsv(long index, T score)
+	template <class T> inline void add_rsv(long long index, T score)
 		{
 		ANT_search_engine_accumulator::ANT_accumulator_t was;
 		ANT_search_engine_accumulator *which = accumulator + index;
@@ -146,7 +147,7 @@ public:
 		}
 #elif defined HEAP_K_SEARCH
 
-	template <class T> inline void set_rsv(long index, T score)
+	template <class T> inline void set_rsv(long long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
 	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
@@ -175,7 +176,7 @@ public:
 		}
 	}
 
-	template <class T> inline void add_rsv(long index, T score)
+	template <class T> inline void add_rsv(long long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
 	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
@@ -206,11 +207,11 @@ public:
 	}
 
 #else
-	void add_rsv(size_t index, double score) {  init_partial_accumulators(index); accumulator[index].add_rsv(score); }
-	void add_rsv(size_t index, long score) {  init_partial_accumulators(index); accumulator[index].add_rsv(score); }
+	void add_rsv(long long index, double score) {  init_partial_accumulators(index); accumulator[(size_t)index].add_rsv(score); }
+	void add_rsv(long long index, long score) {  init_partial_accumulators(index); accumulator[(size_t)index].add_rsv(score); }
 #endif
 
-	long is_zero_rsv(size_t index) { return accumulator[index].is_zero_rsv(); }
+	long is_zero_rsv(long long index) { return accumulator[(size_t)index].is_zero_rsv(); }
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	void init_accumulators(long long top_k);

@@ -20,7 +20,7 @@
 */
 void ANT_ranking_function_bose_einstein::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid;
+long long docid;
 double tf, rsv, left, right, tf_prime;
 ANT_compressable_integer *current, *end;
 
@@ -41,10 +41,10 @@ ANT_compressable_integer *current, *end;
 
 */
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 
-left = log(1.0 + (double)term_details->collection_frequency / (double)documents);
-right = log(1.0 + (double)documents / (double)term_details->collection_frequency);
+left = log(1.0 + (double)term_details->global_collection_frequency / (double)documents);
+right = log(1.0 + (double)documents / (double)term_details->global_collection_frequency);
 
 while (current < end)
 	{
@@ -54,7 +54,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		tf_prime = prescalar * tf * log(1.0 + mean_document_length / (double)document_lengths[docid]);
+		tf_prime = prescalar * tf * log(1.0 + mean_document_length / (double)document_lengths[(size_t)docid]);
 		rsv = (left + tf_prime * right) / (tf_prime + 1.0);
 
 		accumulator->add_rsv(docid, postscalar * rsv);
@@ -62,80 +62,6 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
-
-#ifdef NEVER
-	/*
-		ANT_RANKING_FUNCTION_BOSE_EINSTEIN::GET_MAX_MIN()
-		-------------------------------------------------
-	*/
-	void ANT_ranking_function_bose_einstein::get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
-	{
-	long docid;
-	double tf, rsv, left, right, tf_prime;
-	unsigned char *current_tf, *end;
-	ANT_compressable_integer *current_docid;
-
-	left = log(1.0 + (double)collection_frequency / documents);
-	right = log(1.0 + documents / (double)collection_frequency);
-
-	current_tf = term_frequencies;
-	current_docid = document_ids;
-	end = term_frequencies + document_frequency;
-
-	docid = -1;
-	while (current_tf < end)
-		{
-		tf = *current_tf;
-		docid += *current_docid;
-
-		tf_prime = tf * log(1.0 + mean_document_length / (double)document_lengths[docid]);
-		rsv = (left + tf_prime * right) / (tf_prime + 1.0);
-
-		if (rsv > *maximum)
-			*maximum = rsv;
-		if (rsv < *minimum)
-			*minimum = rsv;
-
-		current_tf++;
-		current_docid++;
-		}
-	}
-
-	/*
-		ANT_RANKING_FUNCTION_BOSE_EINSTEIN::QUANTIZE()
-		----------------------------------------------
-	*/
-	void ANT_ranking_function_bose_einstein::quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
-	{
-	long docid;
-	double tf, rsv, left, right, tf_prime, range;
-	unsigned char *current_tf, *end;
-	ANT_compressable_integer *current_docid;
-
-	range = maximum - minimum;
-	left = log(1.0 + (double)collection_frequency / documents);
-	right = log(1.0 + documents / (double)collection_frequency);
-
-	current_tf = term_frequencies;
-	current_docid = document_ids;
-	end = term_frequencies + document_frequency;
-
-	docid = -1;
-	while (current_tf < end)
-		{
-		tf = *current_tf;
-		docid += *current_docid;
-
-		tf_prime = tf * log(1.0 + mean_document_length / (double)document_lengths[docid]);
-		rsv = (left + tf_prime * right) / (tf_prime + 1.0);
-
-		*current_tf = (unsigned char)(((rsv - minimum) / range) * 0xFE) + 1;			// change the tf value into an impact value
-
-		current_tf++;
-		current_docid++;
-		}
-	}
-#endif
 
 /*
 	ANT_RANKING_FUNCTION_BOSE_EINSTEIN::RANK()

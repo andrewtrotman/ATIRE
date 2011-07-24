@@ -181,9 +181,14 @@ public:
 
 
 	/*
-		Return the number of documents in the database
+		Return the number of documents in the index (for idf computation)
 	*/
 	long long get_document_count(void);
+
+	/*
+		Return the number of terms in the index (for icf computation)
+	*/
+	long long ATIRE_API::get_term_count(void);
 
 	/*
 		Get the length of the longest document in the repository

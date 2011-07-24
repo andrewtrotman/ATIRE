@@ -32,10 +32,10 @@ int check_postings = 1;
 	PROCESS()
 	---------
 */
-long process(ANT_compressable_integer *impact_ordering, size_t document_frequency, long verbose)
+long long process(ANT_compressable_integer *impact_ordering, long long document_frequency, long verbose)
 {
 ANT_compressable_integer tf;
-long docid, max;
+long long docid, max;
 ANT_compressable_integer *current, *end;
 
 max = 0;
@@ -51,7 +51,7 @@ while (current < end)
 		{
 		docid += *current++;
 		if (verbose)
-			printf("<%lld,%lld>", (long long)docid, (long long)tf);
+			printf("<%lld,%lld>", docid, (long long)tf);
 		}
 	if (docid > max)
 		max = docid;
@@ -68,7 +68,8 @@ return max;
 int main(int argc, char *argv[])
 {
 ANT_stem *meta = NULL;
-ANT_compressable_integer *raw, max = 0;
+ANT_compressable_integer *raw;
+long long max = 0;
 long long postings_list_size = 100 * 1024 * 1024;
 long long raw_list_size = 100 * 1024 * 1024;
 unsigned char *postings_list = NULL;
@@ -140,10 +141,10 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 #else
 		printf("%s ", term);
 #endif
-		printf("%lld %d", leaf.collection_frequency, leaf.document_frequency);
+		printf("%lld %d", leaf.local_collection_frequency, leaf.local_document_frequency);
 		if (check_postings && *term != '~')		// ~length and others aren't encoded in the usual way
 			{
-			if (leaf.document_frequency > 2)
+			if (leaf.local_document_frequency > 2)
 				if (leaf.postings_length > postings_list_size)
 					{
 					postings_list_size = 2 * leaf.postings_length;
@@ -156,7 +157,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				raw = (ANT_compressable_integer *)realloc(raw, (size_t)raw_list_size);
 				}
 			factory.decompress(raw, postings_list, leaf.impacted_length);
-			max = process((ANT_compressable_integer *)raw, leaf.document_frequency, print_postings);
+			max = process((ANT_compressable_integer *)raw, leaf.local_document_frequency, print_postings);
 
 			if (max > search_engine.document_count())
 				printf(" Largest Docno:%lld MAX IS TOO LARGE!", (long long)max);

@@ -49,7 +49,7 @@ void ANT_ranking_function_similarity::relevance_rank_top_k(ANT_search_engine_res
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
-long docid;
+long long docid;
 double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
@@ -60,7 +60,7 @@ ANT_compressable_integer *current, *end;
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
-idf = log((double)documents / (double)term_details->document_frequency);
+idf = log((double)documents / (double)term_details->global_document_frequency);
 
 /*
 	               tf(td) * (k1 + 1)
@@ -85,7 +85,7 @@ idf = log((double)documents / (double)term_details->document_frequency);
 	measured in postings and early terminate after we have processed that "batch" of postings.
 */
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -99,7 +99,7 @@ while (current < end)
 			This version uses the document prior probabilities computed in the constructor
 			which takes more memory
 		*/
-		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
+		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
 		}
 	current++;		// skip over the zero
 	}
@@ -118,14 +118,14 @@ const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
 double tf, idf, top_row;
 ANT_weighted_tf *current, *end;
-long docid;
+long long docid;
 
 compute_term_details(term_details, tf_array);	// get document_frequency;
 
-idf = log((double)(documents) / (double)term_details->document_frequency);
+idf = log((double)(documents) / (double)term_details->global_document_frequency);
 
 current = tf_array;
-end = tf_array + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = tf_array + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 
 for (current = tf_array; current < end; current++)
 	if (*current != 0)
@@ -134,7 +134,7 @@ for (current = tf_array; current < end; current++)
 		docid = current - tf_array;
 		top_row = prescalar * tf * k1_plus_1;
 
-		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + k1 * (one_minus_b + b * (document_lengths[docid] / mean_document_length)))));
+		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + k1 * (one_minus_b + b * (document_lengths[(size_t)docid] / mean_document_length)))));
 		}
 
 relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);

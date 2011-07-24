@@ -22,10 +22,10 @@ protected:
 
 	long *buffer;
 	char term[MAX_TERM_LENGTH];
-	long document_frequency;
+	long long document_frequency;
 
 protected:
-	long long fill_buffer_with_postings(char *term, long *buffer, long *document_frequency);
+	long long fill_buffer_with_postings(char *term, long *buffer, long long *document_frequency);
 	double buffer_similarity(char *b);
 
 public:

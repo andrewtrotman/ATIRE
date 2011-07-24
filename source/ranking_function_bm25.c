@@ -46,7 +46,7 @@ void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *a
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
-long docid;
+long long docid;
 double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
@@ -57,7 +57,7 @@ ANT_compressable_integer *current, *end;
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
-idf = log((double)documents / (double)term_details->document_frequency);
+idf = log((double)documents / (double)term_details->global_document_frequency);
 
 /*
 	               tf(td) * (k1 + 1)
@@ -82,7 +82,7 @@ idf = log((double)documents / (double)term_details->document_frequency);
 	measured in postings and early terminate after we have processed that "batch" of postings.
 */
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -92,16 +92,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		/*
-			This code (which is commented out) is to alter the IDF score in BM25
-			to use Shlomo's W(t), where W(t) = log((tf/dl)/(cf/cl)).
-			At present it works worse that setting idf=1!
-
-				idf = log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
-				if (idf > 0)
-					accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
-		*/
-		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
+		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
 		}
 	current++;		// skip over the zero
 	}
@@ -117,13 +108,13 @@ void ANT_ranking_function_BM25::relevance_rank_boolean(ANT_bitstring *documents_
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
-long docid;
+long long docid;
 double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
-idf = log((double)documents / (double)term_details->document_frequency);
+idf = log((double)documents / (double)term_details->global_document_frequency);
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
@@ -133,7 +124,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulators->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[docid])));
+		accumulators->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
 		documents_touched->unsafe_setbit(docid);
 		}
 	current++;		// skip over the zero

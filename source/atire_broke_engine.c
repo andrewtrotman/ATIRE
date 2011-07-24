@@ -114,3 +114,19 @@ while (got == NULL);
 
 return got;
 }
+
+/*
+	ATIRE_BROKE_ENGINE::GET_DOCUMENT()
+	----------------------------------
+*/
+char *ATIRE_broke_engine::get_document(char *document_buffer, long long *current_document_length, long long id)
+{
+char *document;
+
+*document_buffer = '\0';
+document = server->get_document(id, current_document_length);
+memcpy(document_buffer, document, (size_t)*current_document_length);
+delete [] document;
+
+return *document_buffer == '\0' ? NULL : document_buffer;
+}

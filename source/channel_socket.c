@@ -68,9 +68,9 @@ connect();
 	---------------------------------
 	returns the number of bytes written or -ve on errror
 */
-long ANT_channel_socket::block_write(char *data, long length)
+long long ANT_channel_socket::block_write(char *data, long long length)
 {
-long answer;
+long long answer;
 
 do
 	if ((answer = socket->block_write(data, length)) < length)
@@ -84,7 +84,7 @@ return answer;
 	ANT_CHANNEL_SOCKET::BLOCK_READ()
 	--------------------------------
 */
-char *ANT_channel_socket::block_read(char *into, long length)
+char *ANT_channel_socket::block_read(char *into, long long length)
 {
 char *answer;
 

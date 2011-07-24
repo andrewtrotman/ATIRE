@@ -57,23 +57,23 @@ if (filename != NULL && infile == stdin)
 	ANT_CHANNEL_FILE::BLOCK_WRITE()
 	-------------------------------
 */
-long ANT_channel_file::block_write(char *source, long length)
+long long ANT_channel_file::block_write(char *source, long long length)
 {
 connect();
-return fwrite(source, length, 1, outfile);
+return fwrite(source, (size_t)length, 1, outfile);
 }
 
 /*
 	ANT_CHANNEL_FILE::BLOCK_READ()
 	------------------------------
 */
-char *ANT_channel_file::block_read(char *into, long length)
+char *ANT_channel_file::block_read(char *into, long long length)
 {
 connect();
 if (feof(infile))
 	return NULL;
 
-return fread(into, length, 1, infile) == 1 ? into : NULL;
+return fread(into, (size_t)length, 1, infile) == 1 ? into : NULL;
 
 }
 

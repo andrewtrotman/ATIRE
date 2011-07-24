@@ -26,8 +26,9 @@ public:
 	virtual ~ATIRE_broke();
 
 	virtual long load_index(char *new_index, char *new_doclist, char **old_index, char **old_doclist);
-	virtual long describe_index(char **old_index, char **old_doclist, long long *documents);
+	virtual long describe_index(char **old_index, char **old_doclist, long long *documents, long long *terms, long long *length_of_longest_document);
 	virtual char *search(char *query, long long top_of_page, long long page_length);
+	virtual char *get_document(char *document_buffer, long long *current_document_length, long long id);
 } ;
 
 

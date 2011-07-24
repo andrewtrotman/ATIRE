@@ -216,12 +216,13 @@ return strnew(result.str().c_str());
 	ATIRE_API_REMOTE::GET_DOCUMENT()
 	--------------------------------
 */
-char *ATIRE_API_remote::get_document(long long docid)
+char *ATIRE_API_remote::get_document(long long docid, long long *length)
 {
 std::stringstream buffer;
 char *got, *result;
 long size;
 
+*length = 0;
 /*
 	Send the request
 */
@@ -259,6 +260,7 @@ else
 	delete [] got;				// </ATIREgetdoc>
 	}
 
+*length = size;
 return result;
 }
 

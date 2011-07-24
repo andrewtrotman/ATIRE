@@ -22,8 +22,8 @@ private:
 	void connect(void);
 
 protected:
-	virtual long block_write(char *source, long length);
-	virtual char *block_read(char *into, long length);
+	virtual long long block_write(char *source, long long length);
+	virtual char *block_read(char *into, long long length);
 	virtual char *getsz(char terminator = '\0');
 
 public:

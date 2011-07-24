@@ -157,7 +157,7 @@ btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size)
 	Allocate the accumulators array, the docid array, and the term_frequency array
 */
 get_postings_details("~length", &collection_details);
-documents = collection_details.document_frequency;
+documents = collection_details.local_document_frequency;
 
 #ifdef DIRECT_MEMORY_READ
 	if (memory_model)
@@ -189,7 +189,7 @@ results_list = new (memory) ANT_search_engine_result(memory, documents);
 	decompress the document length vector
 */
 postings_buffer = get_postings(&collection_details, postings_buffer);
-factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
+factory.decompress(decompress_buffer, postings_buffer, collection_details.local_document_frequency);
 
 sum = 0;
 for (current_length = 0; current_length < documents; current_length++)
@@ -210,11 +210,11 @@ document_longest_raw_length = 0;
 if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	{
 	memory->realign();
-	document_offsets = (long long *)memory->malloc(collection_details.document_frequency * sizeof(*document_offsets));
+	document_offsets = (long long *)memory->malloc(collection_details.local_document_frequency * sizeof(*document_offsets));
 	postings_buffer = get_postings(&collection_details, postings_buffer);
-	factory.decompress(decompress_buffer, postings_buffer, collection_details.document_frequency);
+	factory.decompress(decompress_buffer, postings_buffer, collection_details.local_document_frequency);
 	document_longest_compressed = sum = 0;
-	for (current_length = 0; current_length < collection_details.document_frequency; current_length++)
+	for (current_length = 0; current_length < collection_details.local_document_frequency; current_length++)
 		{
 		if (decompress_buffer[current_length] > document_longest_compressed)
 			document_longest_compressed = decompress_buffer[current_length];
@@ -388,8 +388,10 @@ unsigned char *base;
 // length of a leaf node (sum of cf, df, etc. sizes)
 leaf_size = ANT_btree_iterator::LEAF_SIZE;
 base = leaf + leaf_size * term_in_leaf + sizeof(int32_t);		// sizeof(int32_t) is for the number of terms in the node
-term_details->collection_frequency = ANT_get_long(base);
-term_details->document_frequency = ANT_get_long(base + 4);
+term_details->local_collection_frequency = ANT_get_long(base);
+term_details->global_collection_frequency = term_details->local_collection_frequency;
+term_details->local_document_frequency = ANT_get_long(base + 4);
+term_details->global_document_frequency = term_details->local_document_frequency;
 term_details->postings_position_on_disk = ANT_get_long_long(base + 8);
 term_details->impacted_length = ANT_get_long(base + 16);
 term_details->postings_length = ANT_get_long(base + 20);
@@ -460,7 +462,7 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 {
 #ifdef SPECIAL_COMPRESSION
 	ANT_compressable_integer *into;
-	if (term_details->document_frequency <= 2)
+	if (term_details->local_document_frequency <= 2)
 		{
 		/*
 			We're about to generate the impact-ordering here and so we interlace TF, DOC-ID and 0s
@@ -473,7 +475,7 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		*into++ = (ANT_compressable_integer)term_details->postings_length;
 		*into++ = (ANT_compressable_integer)term_details->impacted_length;
 		*into++ = 0;
-		term_details->impacted_length = term_details->document_frequency == 1 ? 3 : 6;
+		term_details->impacted_length = term_details->local_document_frequency == 1 ? 3 : 6;
 		}
 	else
 		{
@@ -525,8 +527,10 @@ if (verify == NULL)
 	/*
 		The term was not found so set the collection frequency and document frequency to 0
 	*/
-	term_details->collection_frequency = 0;
-	term_details->document_frequency = 0;
+	term_details->local_collection_frequency = 0;
+	term_details->global_collection_frequency = 0;
+	term_details->local_document_frequency = 0;
+	term_details->global_document_frequency = 0;
 	}
 
 stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
@@ -543,7 +547,7 @@ void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *te
 void *verify;
 long long now, bytes_already_read;
 
-if (term_details != NULL && term_details->document_frequency > 0)
+if (term_details != NULL && term_details->local_document_frequency > 0)
 	{
 	bytes_already_read = index->get_bytes_read();
 	now = stats->start_timer();
@@ -557,7 +561,7 @@ if (term_details != NULL && term_details->document_frequency > 0)
 	*/
 	long long bytes;
 
-	if (term_details->document_frequency > trim_postings_k)
+	if (term_details->local_document_frequency > trim_postings_k)
 		{
 		bytes = 510 + 5 * trim_postings_k;
 		if (term_details->postings_length > bytes)
@@ -581,7 +585,7 @@ if (term_details != NULL && term_details->document_frequency > 0)
 		*/
 		long long end;
 
-		if (term_details->document_frequency <= trim_postings_k)
+		if (term_details->local_document_frequency <= trim_postings_k)
 			end = term_details->impacted_length;
 		else
 			{
@@ -686,7 +690,7 @@ while (term != NULL)
 		Add to the collecton frequency, the process the postings list
 	*/
 	now = stats->start_timer();
-	collection_frequency += term_details.collection_frequency;
+	collection_frequency += term_details.local_collection_frequency;
 
 	current_document = decompress_buffer;
 	end = decompress_buffer + term_details.impacted_length;
@@ -730,7 +734,7 @@ while (term != NULL)
 if (verify != NULL)
 	{
 	now = stats->start_timer();
-	stemmed_term_details.collection_frequency = collection_frequency;
+	stemmed_term_details.local_collection_frequency = collection_frequency;
 	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, trim_postings_k, 1, 1);
 	stats->add_rank_time(stats->stop_timer(now));
 	}

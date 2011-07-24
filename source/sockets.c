@@ -309,7 +309,7 @@ FD_SET which, err;
 struct timeval timeout = {0, 0};
 unsigned long stuff = 0;
 int bytes_recvd = 0, read = 0, select_val = 0, ioctl_result = 0;
-long old_buffer_size;
+long long old_buffer_size;
 
 if (internals->sock != INVALID_SOCKET)
 	{
@@ -386,7 +386,7 @@ if (buffer_start == 0)
 	return 0;
 
 if (buffer_size - buffer_start != 0)
-	memmove(buffer, buffer + buffer_start, buffer_size - buffer_start);
+	memmove(buffer, buffer + buffer_start, (size_t)(buffer_size - buffer_start));
 buffer_size -= buffer_start;
 buffer_start = 0;
 return 0;
@@ -399,7 +399,7 @@ return 0;
 char *ANT_socket::getsz(char termination)
 {
 char *from, *copy;
-int done;
+long long done;
 int found = FALSE;
 
 rebase_cache();
@@ -443,7 +443,7 @@ while (1);
 char *ANT_socket::poll_getsz(char termination)
 {
 char *from, *copy;
-int old_base, diff;
+long long old_base, diff;
 
 old_base = buffer_start;
 rebase_cache();
@@ -482,7 +482,7 @@ return NULL;
 	ANT_SOCKET::BLOCK_READ()
 	------------------------
 */
-char *ANT_socket::block_read(char *into, int len)
+char *ANT_socket::block_read(char *into, long long len)
 {
 rebase_cache();
 
@@ -491,7 +491,7 @@ while (buffer_size < len)
 		return 0;
 
 if (len != 0)
-	memcpy(into, buffer, len);
+	memcpy(into, buffer, (size_t)len);
 buffer_start = len;
 
 return into;
@@ -527,10 +527,10 @@ return ans == NULL ? 0 : mem;
 	ANT_SOCKET::BLOCK_WRITE()
 	-------------------------
 */
-int ANT_socket::block_write(const char *pbuffer, long size)
+long long ANT_socket::block_write(const char *pbuffer, long long size)
 {
 const char *from;
-long len, sent;
+long long len, sent;
 
 len = size;
 from = pbuffer;
@@ -550,7 +550,7 @@ return size;
 	ANT_SOCKET::PUTS()
 	------------------
 */
-int ANT_socket::puts(char *pbuffer)
+long long ANT_socket::puts(char *pbuffer)
 {
 return block_write(pbuffer, strlen(pbuffer));
 }
@@ -559,7 +559,7 @@ return block_write(pbuffer, strlen(pbuffer));
 	ANT_SOCKET::PUTCH()
 	-------------------
 */
-int ANT_socket::putch(char ch)
+long long ANT_socket::putch(char ch)
 {
 return block_write(&ch, 1);
 }
@@ -568,7 +568,7 @@ return block_write(&ch, 1);
 	ANT_SOCKET::PUTSZ()
 	-------------------
 */
-int ANT_socket::putsz(char *string)
+long long ANT_socket::putsz(char *string)
 {
 return block_write(string, strlen(string) + 1);		// include the zero terminatin char.
 }
@@ -577,7 +577,7 @@ return block_write(string, strlen(string) + 1);		// include the zero terminatin 
 	ANT_SOCKET::PUTL()
 	------------------
 */
-int ANT_socket::putl(long what)
+long long ANT_socket::putl(long what)
 {
 unsigned int ans;
 

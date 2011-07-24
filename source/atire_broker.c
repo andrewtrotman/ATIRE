@@ -55,13 +55,18 @@ return strnnew(start, finish - start);
 void broker(ATIRE_engine *engine, ATIRE_broker_param_block *params)
 {
 ANT_channel *inchannel, *outchannel;
-long long line;
-long long documents;
+long long line, documents, terms, length_of_longest_document, current_document_length;
 long success;
 char *pos, *command, *query, *hits;
 char *new_index, *old_index, *new_doclist, *old_doclist;
 long long first_to_list, page_size;
+char *document_buffer;
+long long length_of_document_buffer;
+long broker_knows_total_number_of_documents;
 
+/*
+	Initialise I/O
+*/
 if (params->port == 0)
 	{
 	inchannel = new ANT_channel_file(params->queries_filename);		// stdin
@@ -70,9 +75,22 @@ if (params->port == 0)
 else
 	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
 
-line = 0;
-prompt(params);
+/*
+	Initilise the document buffer (used to read documents from the search engines)
+*/
+broker_knows_total_number_of_documents = false;
+document_buffer = NULL;
+length_of_document_buffer = length_of_longest_document = 0;
 
+/*
+	Initialise the instruction counter (nunmber of requests we're been asked to perform
+*/
+line = 0;
+
+/*
+	And now we can be a broker
+*/
+prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
 	{
 	strip_space_inplace(command);
@@ -81,7 +99,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		{
 		if (strncmp(command, "<ATIREloadindex>", 16) == 0)
 			{
-			outchannel->puts("<ATIREloadindex>0</ATIREloadindex>");		// fail
+			*outchannel << "<ATIREloadindex>0</ATIREloadindex>" << ANT_channel::endl;		// fail
 			new_doclist = between(command, "<doclist>", "</doclist>");
 			new_index = between(command, "<index>", "</index>");
 			if (new_index == NULL || new_doclist == NULL)
@@ -92,27 +110,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				delete [] old_index;
 				delete [] old_doclist;
 				if (success)
-					outchannel->puts("<ATIREloadindex>1</ATIREloadindex>");
+					*outchannel << "<ATIREloadindex>1</ATIREloadindex>" << ANT_channel::endl;
 				else
-					outchannel->puts("<ATIREloadindex>0</ATIREloadindex>");
+					*outchannel << "<ATIREloadindex>0</ATIREloadindex>" << ANT_channel::endl;
 				}
 			}
 		else if (strncmp(command, "<ATIREdescribeindex>", 18) == 0)
 			{
-			engine->describe_index(&old_index, &old_doclist, &documents);
-			outchannel->puts("<ATIREdescribeindex>");
+			broker_knows_total_number_of_documents = true;
+			engine->describe_index(&old_index, &old_doclist, &documents, &terms, &length_of_longest_document);
 
-			outchannel->write("<doclist filename=\"");
-			outchannel->write(old_doclist);
-			outchannel->puts("\"/>");
-
-			outchannel->write("<index filename=\"");
-			outchannel->write(old_index);
-			outchannel->puts("\"/>");
-			outchannel->write("<docnum>");
-			outchannel->write(documents);
-			outchannel->puts("</docnum>");
-			outchannel->puts("</ATIREdescribeindex>");
+			*outchannel << "<ATIREdescribeindex>" << ANT_channel::endl;
+			*outchannel << "<doclist filename=\"" << old_doclist << "\"/>" << ANT_channel::endl;
+			*outchannel << "<index filename=\"" << old_index << "\"/>" << ANT_channel::endl;
+			*outchannel << "<docnum>" << documents <<  "</docnum>" << ANT_channel::endl;
+			*outchannel << "<termnum>" << terms << "</termnum>" << ANT_channel::endl;
+			*outchannel << "<longestdoc>" << length_of_longest_document << "</longestdoc>" << ANT_channel::endl;
+			*outchannel << "</ATIREdescribeindex>" << ANT_channel::endl;
 			}
 		else if (strncmp(command, "<ATIREsearch>", 13) == 0)
 			{
@@ -120,15 +134,45 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			first_to_list = (pos = strstr(command, "<top>")) == NULL ? 1 : ANT_atoi64(pos + 5);
 			page_size = (pos = strstr(command, "<n>")) == NULL ? params->results_list_length : ANT_atoi64(pos + 3);
 			if ((hits = engine->search(query, first_to_list, page_size)) == NULL)
-				outchannel->puts("<ATIREerror>\nFailed to recieve any response from any server\n</ATIREerror>");
+				*outchannel << "<ATIREerror>\nFailed to recieve any response from any server\n</ATIREerror>" << ANT_channel::endl;
 			else
-				outchannel->puts(hits);
+				*outchannel << hits << ANT_channel::endl;
 
 			delete [] hits;
 			delete [] query;
 			}
 		else if (strncmp(command, "<ATIREgetdoc>", 13) == 0)
 			{
+			/*
+				Check to see that we know the length of the longest document in the collection
+			*/
+			if (!broker_knows_total_number_of_documents)
+				engine->describe_index(&old_index, &old_doclist, &documents, &terms, &length_of_longest_document);
+
+			/*
+				Make sure we've allocates space enough to hold it
+			*/
+			if (length_of_longest_document >= length_of_document_buffer)
+				{
+				length_of_document_buffer = length_of_longest_document + 1;		// +1 for the '\0'
+				delete [] document_buffer;
+				document_buffer = new char [(size_t)length_of_document_buffer];
+				}
+			/*
+				Now go get the document
+			*/
+			*document_buffer = '\0';
+			current_document_length = 0;
+			if ((current_document_length = length_of_longest_document) != 0)
+				engine->get_document(document_buffer, &current_document_length, ANT_atoi64(strstr(command, "<docid>") + 7));
+
+			/*
+				And send it down the line to the client
+			*/
+			*outchannel << "<ATIREgetdoc>" << ANT_channel::endl;
+			*outchannel << "<length>" << current_document_length << "</length>"  << ANT_channel::endl;
+			outchannel->write(document_buffer, current_document_length);
+			*outchannel << "</ATIREgetdoc>" << ANT_channel::endl;
 			}
 		}
 	delete [] command;

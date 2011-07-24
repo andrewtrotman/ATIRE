@@ -1119,6 +1119,15 @@ return search_engine->document_count();
 }
 
 /*
+	LONG ATIRE_API::GET_TERM_COUNT()
+	--------------------------------
+*/
+long long ATIRE_API::get_term_count(void)
+{
+return search_engine->term_count();
+}
+
+/*
 	ATIRE_API::GET_LONGEST_DOCUMENT_LENGTH()
 	----------------------------------------
 */

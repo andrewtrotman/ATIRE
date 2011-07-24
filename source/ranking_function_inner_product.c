@@ -15,7 +15,7 @@
 */
 void ANT_ranking_function_inner_product::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-long docid;
+long long docid;
 double tf, idf;
 ANT_compressable_integer *current, *end;
 
@@ -25,7 +25,7 @@ ANT_compressable_integer *current, *end;
 	          n
 */
 
-idf = log((double)documents / (double)term_details->document_frequency);
+idf = log((double)documents / (double)term_details->global_document_frequency);
 
 /*
 	rsv = (tf_in_d * IDF) * (tf_in_q * IDF)
@@ -33,7 +33,7 @@ idf = log((double)documents / (double)term_details->document_frequency);
 	where tf_in_d is the tf in the document and tf_in_q is 1 and so we get tf * IDF * IDF
 */
 current = impact_ordering;
-end = impact_ordering + (term_details->document_frequency >= trim_point ? trim_point : term_details->document_frequency);
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
