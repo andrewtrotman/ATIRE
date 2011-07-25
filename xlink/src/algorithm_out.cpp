@@ -148,8 +148,8 @@ long algorithm_out::assign_link_term(char *buffer, char **term_list)
 
 	buffer_[term_len] = '\0';
 
-	if (offset == 3443)
-		cerr << " I caught you" << endl;
+//	if (offset == 3443)
+//		cerr << " I caught you" << endl;
 	return offset;
 }
 

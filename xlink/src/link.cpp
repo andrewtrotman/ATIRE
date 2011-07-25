@@ -86,8 +86,8 @@ bool link::print_anchor(long beps_to_print, bool id_or_name, algorithm *algor)
 	int count = 0;
 	bool anchor_printed = false;
 
-	if (strcmp(term, "哺乳动物") == 0)
-		cerr << "I got you " << endl;
+//	if (strcmp(term, "哺乳动物") == 0)
+//		cerr << "I got you " << endl;
 
 	bool ret = false;
 	if (!fill_anchor_with_ir_results && algor != NULL && algor->size_of_crosslink() > 0) {

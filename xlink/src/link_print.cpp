@@ -9,6 +9,9 @@
 #include "string_utils.h"
 
 #include <string>
+#include <iostream>
+
+using namespace std;
 
 namespace QLINK {
 #ifdef CROSSLINK
@@ -29,7 +32,7 @@ namespace QLINK {
 	const char link_print::ENGLISH_MONTH[] = "month"; // month
 //	const char *link_print::ENGLISH_DAY[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", 0x0}; // week day, monday, tuesday
 //	const char *link_print::ENGLISH_MONTH[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-	const char *link_print::ENGLISH_DAY_MONTH[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", 0x0};
+	const char *link_print::ENGLISH_DAY_MONTH[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", ""};
 	std::set<const char*, ltstr> link_print::ENGLISH_DAY_MONTH_SET(ENGLISH_DAY_MONTH, ENGLISH_DAY_MONTH + 20);
 //	const char link_print::ENGLISH_DATE[] = {(char)0xe6, (char)0x97, (char)0xa5, 0x0}; //日
 //	const char link_print::ENGLISH_DECADE[] = {(char)0xe5, (char)0xb9, (char)0xb4, (char)0xe4, (char)0xbb, (char)0xa3, 0x0}; //niandai 年代
@@ -49,7 +52,8 @@ namespace QLINK {
 		int type = NONE;
 		bool ret = false;
 		long number = atol(term);
-		char *word = strdup(term);
+		char *word, *term_copy;
+		word = term_copy = strdup(term);
 		char *temp;
 		bool has_space = false;
 		std::string number_str = number_to_string(number);
@@ -79,12 +83,14 @@ namespace QLINK {
 					}
 				}
 				else if (strcmp(lang, "en") == 0) {
+					if (strncasecmp(word, "st", 2) == 0 || strncasecmp(word, "nd", 2) == 0 || strncasecmp(word, "rd", 2) == 0 || strncasecmp(word, "th", 2) == 0)
+						word +=2;
+
 					if (isspace(*word)) {
 						has_space = true;
 						while (isspace(*word))
 							++word;
 					}
-
 
 					if (!has_space) {
 						if (number > 999 && number < 3000) {
@@ -93,11 +99,17 @@ namespace QLINK {
 								type = DECADE;
 
 						}
-						else if (number < 32 && (strncasecmp(word, "st", 2) == 0 || strncasecmp(word, "nd", 2) == 0 || strncasecmp(word, "th", 2) == 0)) {
+						else if (number < 32) {
 							type = DATE;
 						}
-						else if (number < 32 && link_print::ENGLISH_DAY_MONTH_SET.find(word) != link_print::ENGLISH_DAY_MONTH_SET.end())
-							type = DATE;
+					}
+					else {
+						if (number > 0) {
+							if (number < 32 && link_print::ENGLISH_DAY_MONTH_SET.find(word) != link_print::ENGLISH_DAY_MONTH_SET.end())
+								type = DATE;
+							else if (number < 31 && strcasecmp(word, ENGLISH_CENTURY) == 0)
+								type = CENTURY;
+						}
 					}
 
 //					else if (number < 31 && memcmp(word, ENGLISH_CENTURY, strlen(ENGLISH_CENTURY)) == 0) {
@@ -153,7 +165,11 @@ namespace QLINK {
 				break;
 		}
 
-		free(word);
+		free(term_copy);
+
+		if (ret)
+			cerr << "[INFO - Chronological Link]: " << term << endl;
+
 		return ret;
 	}
 }

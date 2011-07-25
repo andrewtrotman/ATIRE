@@ -482,7 +482,7 @@ void algorithm_ant_link_this::add_link(ANT_link_term *term, char **term_list, lo
 	//	term_len = strlen(term->term);
 
 	#ifdef DEBUG
-		fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", term->term, term->postings[0]->docid, numerator, denominator);
+//		fprintf(stderr, "%s -> %d (gamma = %2.2f / %2.2f)\n", term->term, term->postings[0]->docid, numerator, denominator);
 	#endif
 
 	//			is_stopword = false;

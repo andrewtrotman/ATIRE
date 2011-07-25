@@ -50,6 +50,7 @@ namespace QLINK {
 		static bool term_compare(const link *a, const link *b);
 
 		const char * get_target_lang() const { return target_lang; };
+		const char * get_source_lang() const { return source_lang; };
 
 		bool operator==(const link& rhs);
 		bool operator==(const char *term);
