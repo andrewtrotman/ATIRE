@@ -6,6 +6,7 @@
 #define HASH_TABLE_H_
 
 #include "string_pair.h"
+#include "fundamental_types.h"
 
 extern unsigned char ANT_hash_table[];
 extern unsigned char ANT_header_hash_encode[];
@@ -40,6 +41,49 @@ hash2 = string->length() <= 1 ? 0 : ANT_random_hash_8(string->string() + 1, stri
 hash3 = string->length() <= 2 ? 0 : ANT_random_hash_8(string->string() + 2, string->length() - 2, (unsigned char)((string->length() - 2) & 0xFF));
 return (hash1 << 16) + (hash2 << 8) + hash3;
 }
+
+/*
+	ANT_RANDOM_HASH_64()
+	-------------------
+*/
+static inline uint64_t ANT_random_hash_64(char *string, size_t length)
+{
+unsigned char *ch, *seed, *end;
+uint64_t result;
+
+result = 0;		// this will initialise all eight bytes
+seed = (unsigned char *)&result;	// now take a pointer to the array of eight bytes so that we can address each individually
+ch = (unsigned char *)string;
+end = ch + length;
+
+next_eight_bytes:
+	if (ch >= end)
+		return result;
+	seed[0] = ANT_hash_table[seed[0] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[1] = ANT_hash_table[seed[1] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[2] = ANT_hash_table[seed[2] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[3] = ANT_hash_table[seed[3] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[4] = ANT_hash_table[seed[4] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[5] = ANT_hash_table[seed[5] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[6] = ANT_hash_table[seed[6] ^ *ch++];
+	if (ch >= end)
+		return result;
+	seed[7] = ANT_hash_table[seed[7] ^ *ch++];
+goto next_eight_bytes;
+}
+
 
 /*
 	ANT_MEMORY_INDEX::ANT_HEADER_HASH_24()

@@ -6,6 +6,7 @@
 #define STRING_PAIR_H_
 
 #include <stdio.h>
+#include "string_pair_constant.h"
 #include "pragma.h"
 #include "memory.h"
 #include "str.h"
@@ -14,24 +15,23 @@
 	class ANT_STRING_PAIR
 	---------------------
 */
-class ANT_string_pair
+class ANT_string_pair : public ANT_string_pair_constant
 {
 public:
-	char *start;
-	size_t string_length;
+	ANT_string_pair()                                 { }
+	ANT_string_pair(char *name)                       { start = name; string_length = ::strlen(name); }
+	ANT_string_pair(char *source, long len)           { start = source; string_length = len; }
+	ANT_string_pair(ANT_string_pair_constant *source) { start = source->start; string_length = source->string_length; }
 
-public:
-	ANT_string_pair() {}
-	ANT_string_pair(char *name) { start = name; string_length = ::strlen(name); }
-	ANT_string_pair(char *source, long len) : start(source), string_length(len) {}
+	ANT_string_pair &operator=(ANT_string_pair_constant &source) { start = source.start; string_length = source.string_length; return *this; }
 
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new (size_t count, ANT_memory *memory) { return memory->malloc(count); }
-	void *operator new (size_t count) { return new char [count]; }
-	unsigned char operator[](long pos) { return (unsigned char)start[pos]; }
+	void *operator new (size_t count)                     { return new char [count]; }
+	unsigned char operator[](long pos)                    { return (unsigned char)start[pos]; }
 
 	size_t length(void) { return string_length; }
-	char *string(void) { return start; }
+	char *string(void)  { return start; }
 
 	char *str(void) { return strnnew(start, string_length); }
 	char *strcpy(char *dest) { *(::strncpy(dest, start, string_length) + string_length) = '\0'; return dest; }

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "index_document.h"
+#include "index_document_topsig.h"
 #include "ranking_function_factory.h"
 #include "directory_iterator_tar.h"
 #include "directory_iterator_warc.h"
@@ -312,7 +313,14 @@ for (param = first_param; param < argc; param++)
 		}
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
+
+//		#define TOPSIG 1
+//		#ifdef TOPSIG
+//	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document_topsig, index, 8, ANT_directory_iterator::READ_FILE);
+//		#else
 	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 8, ANT_directory_iterator::READ_FILE);
+//		#endif
+	
 	#endif
 
 	files_that_match = 0;

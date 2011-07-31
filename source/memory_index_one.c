@@ -63,6 +63,7 @@ void ANT_memory_index_one::rewind(void)
 memory->rewind();
 memset(hash_table, 0, sizeof(hash_table));
 document_length = 0;
+nodes_used = 0;
 }
 
 /*
@@ -72,7 +73,7 @@ document_length = 0;
 ANT_memory_index_one_node *ANT_memory_index_one::new_hash_node(ANT_string_pair *pair)
 {
 long hash_value;
-ANT_memory_index_hash_node *root;
+ANT_memory_index_hash_node *root = NULL;
 ANT_memory_index_one_node *node;
 
 node = new (memory) ANT_memory_index_one_node;
@@ -83,12 +84,18 @@ pair->strcpy(node->string.start);
 node->string.string_length = pair->string_length;
 node->term_frequency = 0;
 
-hash_value = final_index->hash(pair);
-root = final_index->hash_table[hash_value];
+if (final_index != NULL)
+	{
+	hash_value = final_index->hash(pair);
+	root = final_index->hash_table[hash_value];
+	}
+
 if (root == NULL)
 	node->final_node = NULL;
 else
 	node->final_node = final_index->find_node(root, pair);
+
+nodes_used++;
 
 return node;
 }
@@ -188,6 +195,54 @@ if (node != NULL)
 	node->term_frequency = score;
 	node->mode = mode;
 	}
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::ADD_TERM_TO_TABLE()
+	-----------------------------------------
+*/
+void ANT_memory_index_one::add_term_to_table(ANT_memory_indexer_node **table, ANT_memory_index_one_node *node, long *term_id)
+{
+/*
+	Add the term at the current node
+*/
+if (node->string[0] != '~')
+	{
+	if (node->final_node == NULL)
+		table[*term_id] = node;
+	else
+		table[*term_id] = node->final_node;
+	(*term_id)++;
+	}
+
+/*
+	Now check the left and the right subtrees for hash collisions
+*/
+if  (node->left != NULL)
+	add_term_to_table(table, node->left, term_id);
+
+if  (node->right != NULL)
+	add_term_to_table(table, node->right, term_id);
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::GET_TERM_LIST()
+	-------------------------------------
+*/
+ANT_memory_indexer_node **ANT_memory_index_one::get_term_list(void)
+{
+ANT_memory_indexer_node **node_table;
+long node, term_id;
+
+node_table = new ANT_memory_indexer_node *[nodes_used + 1];
+
+for (term_id = node = 0; node < HASH_TABLE_SIZE; node++)
+	if (hash_table[node] != NULL)
+		add_term_to_table(node_table, hash_table[node], &term_id);
+
+node_table[term_id] = NULL;
+
+return node_table;
 }
 
 /*

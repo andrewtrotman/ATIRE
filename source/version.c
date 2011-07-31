@@ -48,9 +48,11 @@ puts("Andrew Trotman");
 puts("Shlomo Geva");
 puts("");
 
-puts("SORTING ALGORITHMS");
-puts("------------------");
+puts("STANDARD ALGORITHMS");
+puts("-------------------");
+puts("heap  (heap-k addapted) : Fei Jia");
 puts("qsort (top-k addapted)  : J.L. Bentley, M.D. McIlroy");
+puts("Mersenne Twister        : Takuji Nishimura, Makoto Matsumoto");
 puts("");
 
 puts("FILE MANIPULATION");
@@ -58,6 +60,7 @@ puts("-----------------");
 puts("Windows                 : Andrew Trotman");
 puts("MacOS                   : Vaughn Wood");
 puts("Linux                   : Vaughn Wood");
+puts("Pregen Creation         : Nick Sherlock");
 puts("");
 
 puts("COMPRESSION");
@@ -98,9 +101,10 @@ puts("");
 
 puts("LANGUAGE FEATURES");
 puts("-----------------");
-puts("UTF-8 parser            : Eric Tang, Andrew Trotman");
+puts("UTF-8 parser            : Eric Tang, Andrew Trotman, Nick Sherlock");
 puts("East Asian Segmentation : Eric Tang");
 puts("Dale Chall Readability  : Matt Crane");
+puts("");
 
 #if defined (ANT_HAS_MYSQL) || defined (ANT_HAS_XPDF)
 puts("PLUGINS");
@@ -111,5 +115,8 @@ puts("-------");
 #ifdef ANT_HAS_XPDF
 	puts("xpdf PDF Connection     : http://www.foolabs.com/xpdf/");
 #endif
+puts("");
 #endif
+
+puts("None of whome endorse this product!");
 }

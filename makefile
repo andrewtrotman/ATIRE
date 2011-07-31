@@ -189,18 +189,21 @@ PARTS = \
 	$(OBJDIR)\parser.obj 							\
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\index_document.obj					\
+	$(OBJDIR)\index_document_topsig.obj				\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
 	$(OBJDIR)\memory_indexer.obj 					\
 	$(OBJDIR)\memory_index_one.obj 					\
 	$(OBJDIR)\stats_memory_index.obj				\
 	$(OBJDIR)\hash_table.obj						\
+	$(OBJDIR)\mersenne_twister.obj						\
 	$(OBJDIR)\postings_piece.obj					\
 	$(OBJDIR)\ctypes.obj 							\
 	$(OBJDIR)\file.obj								\
 	$(OBJDIR)\file_memory.obj						\
 	$(OBJDIR)\file_internals.obj					\
 	$(OBJDIR)\maths.obj 							\
+	$(OBJDIR)\numbers.obj 							\
 	$(OBJDIR)\memory.obj 							\
 	$(OBJDIR)\search_engine.obj 					\
 	$(OBJDIR)\search_engine_accumulator.obj 		\

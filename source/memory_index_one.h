@@ -37,6 +37,7 @@ private:
 	ANT_memory_index *final_index;
 	long hashed_squiggle_length;
 	long long document_length;
+	long nodes_used;					// the number of unique terms in the index
 
 	/*
 		This stuff is used in the KL-divergence code to decrease the chance of stack blow-out
@@ -63,8 +64,10 @@ private:
 	double kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_memory_index_one *document_collection);
 	void top_terms_from_tree(ANT_memory_index_one_node *node);
 
+	void add_term_to_table(ANT_memory_indexer_node **table, ANT_memory_index_one_node *node, long *term_id);
+
 public:
-	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index);
+	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index = NULL);
 	virtual ~ANT_memory_index_one();
 
 	void rewind(void);
@@ -73,6 +76,8 @@ public:
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, document_length = length); } 
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
  	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+
+	ANT_memory_indexer_node **get_term_list(void);
 
 	double kl_divergence(ANT_term_divergence *divergence, ANT_search_engine *collection);
 	double kl_divergence(ANT_term_divergence *divergence, ANT_memory_index_one *collection);
