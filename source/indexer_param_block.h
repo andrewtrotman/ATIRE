@@ -20,6 +20,7 @@ class ANT_indexer_param_block : public ANT_indexer_param_block_rank, public ANT_
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
 	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, TAR_LZO, PKZIP, TREC, WARC_GZ, RECURSIVE_WARC_GZ, CSV, TRECWEB, VBULLETIN, PHPBB, MYSQL };
+	enum { INVERTED_FILE, TOPSIG } ;		// inverted file or TopSig file
 
 	struct pregen_field_spec {
 		char *field_name;
@@ -40,13 +41,19 @@ public:
 	long segmentation;					// need segmentation or not for east-asian languages, e.g. Chinese
 	unsigned long readability_measure; 	// readability measure to calculate
 	long document_compression_scheme;	// should we and how should we store the documents in the repository?
-	char *doclist_filename,
-		*index_filename;				// output filenames
+	char *doclist_filename;				// name of file containing the internal docid to external docid translations
+	char *index_filename;				// name of index file
 
 	pregen_field_spec pregens[MAX_PREGENS];	// fields to use in generating pregens
-	int num_pregen_fields;
+	long num_pregen_fields;					// number of pregen fields
+
+	long inversion_type;				// is the index a "standard" inverted file or a TopSig file?
+	long topsig_width;					// with of the TopSig signature
+	long topsig_density;				// density of the set bits in the TopSig index
+	char *topsig_global_stats;			// file containing the cf parameters (from ANT_dictionary)
 
 protected:
+	void topsig(char *params);
 	void document_compression(char *scheme);
 	void compression(char *schemes);
 	void readability(char *measures);

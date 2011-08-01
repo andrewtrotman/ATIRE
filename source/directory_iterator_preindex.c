@@ -10,6 +10,7 @@
 #include "threads.h"
 #include "memory.h"
 #include "memory_index_one.h"
+#include "index_document.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -23,7 +24,7 @@
 	ANT_DIRECTORY_ITERATOR_PREINDEX::ANT_DIRECTORY_ITERATOR_PREINDEX()
 	------------------------------------------------------------------
 */
-ANT_directory_iterator_preindex::ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document index_document_method, ANT_memory_index *final_index, long threads, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_preindex::ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document *index_document_method, ANT_memory_index *final_index, long threads, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->threads = threads;
 this->source = source;
@@ -53,7 +54,7 @@ void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *ob
 long terms;
 
 object->index = new ANT_memory_index_one(new ANT_memory(1024 * 1024), final_index);
-terms = (*index_document)(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object);
+terms = index_document->index_document(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object);
 object->terms = terms;
 
 store->add(object);

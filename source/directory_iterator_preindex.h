@@ -16,8 +16,7 @@ class ANT_directory_iterator_preindex_internals;
 class ANT_directory_iterator_object;
 class ANT_stem;
 class ANT_readability_factory;
-
-typedef long (*ANT_index_document)(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file);
+class ANT_index_document;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_PREINDEX
@@ -32,7 +31,7 @@ private:
 	long threads;
 	ANT_critical_section mutex;
 	ANT_memory_index *final_index;
-	ANT_index_document index_document;
+	ANT_index_document *index_document;
 	ANT_indexer_param_block *param_block;
 
 private:
@@ -41,7 +40,7 @@ private:
 	static void *bootstrap(void *param);
 
 public:
-	ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document index_document_method, ANT_memory_index *final_index, long threads, long get_file);
+	ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document *index_document_method, ANT_memory_index *final_index, long threads, long get_file);
 	~ANT_directory_iterator_preindex();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);

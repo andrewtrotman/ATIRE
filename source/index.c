@@ -92,6 +92,7 @@ ANT_stem *stemmer = NULL;
 ANT_pregen *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
+ANT_index_document *document_indexer;
 
 if (argc < 2)
 	param_block.usage();
@@ -116,6 +117,11 @@ if (param_block.readability_measure == ANT_readability_factory::NONE)
 	parser = new ANT_parser(param_block.segmentation);
 else
 	parser = new ANT_parser_readability();
+
+if (param_block.inversion_type == ANT_indexer_param_block::TOPSIG)
+	document_indexer = new ANT_index_document_topsig;
+else
+	document_indexer = new ANT_index_document;
 
 if (param_block.stemmer != 0)
 	{
@@ -314,13 +320,8 @@ for (param = first_param; param < argc; param++)
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
 
-//		#define TOPSIG 1
-//		#ifdef TOPSIG
-//	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document_topsig, index, 8, ANT_directory_iterator::READ_FILE);
-//		#else
-	disk = new ANT_directory_iterator_preindex(disk, &param_block, index_document, index, 8, ANT_directory_iterator::READ_FILE);
-//		#endif
-	
+		disk = new ANT_directory_iterator_preindex(disk, &param_block, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
+
 	#endif
 
 	files_that_match = 0;
@@ -362,7 +363,7 @@ for (param = first_param; param < argc; param++)
 		delete current_file->index;
 		terms_in_document = current_file->terms;
 #else
-		terms_in_document = index_document(index, stemmer, param_block.segmentation, readability, doc, current_file);
+		terms_in_document = document_indexer->index_document(index, stemmer, param_block.segmentation, readability, doc, current_file);
 #endif
 		stats.add_indexing_time(stats.stop_timer(now));
 

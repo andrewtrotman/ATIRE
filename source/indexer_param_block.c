@@ -41,6 +41,11 @@ document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
 num_pregen_fields = 0;
+
+inversion_type = INVERTED_FILE;
+topsig_width = 4096;
+topsig_density = 12;		// 12% of bits are +ve and 12% are -ve in each terms
+topsig_global_stats = NULL;
 }
 
 /*
@@ -127,7 +132,7 @@ puts("");
 
 puts("SEGMENTATION");
 puts("------------");
-puts("-S[odb]        East-Asian word segmentation, Chinese segment is the text separated by non-Chinese");
+puts("-S[odb]         East-Asian word segmentation, Chinese segment is the text separated by non-Chinese");
 puts("   o            Use a segmentation module to segment string on fly");
 puts("   d            Double(dual) segmentation, with words and single characters");
 puts("   b            Segmentation using bigram");
@@ -156,7 +161,32 @@ puts("   s            Summary statistics");
 puts("   t            Timings");
 puts("");
 
+puts("INDEX FILE TYPE");
+puts("---------------");
+puts("-Topsig:<w>:<d>:<f> Generate a TopSig index of width <w>bits density <d>% and globalstats <f>");
+puts("-Inverted       Generate an inverted file [default]"); 
+puts("");
+
 exit(0);
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK::TOPSIG()
+	---------------------------------
+*/
+void ANT_indexer_param_block::topsig(char *params)
+{
+char *colon;
+
+inversion_type = TOPSIG;
+topsig_width = atol(params);
+if ((colon = strchr(params, ':')) != NULL)
+	{
+	colon++;
+	topsig_density = atol(colon);
+	if ((colon = strchr(colon, ':')) != NULL)
+		topsig_global_stats = colon + 1;
+	}
 }
 
 /*
@@ -331,13 +361,11 @@ for (param = 1; param < argc; param++)
 			compression(command + 1);
 			}
 		else if (strcmp(command, "findex") == 0)
-			{
 			index_filename = argv[++param];
-			}
 		else if (strcmp(command, "fdoclist") == 0)
-			{
 			doclist_filename = argv[++param];
-			}
+		else if (strcmp(command, "Inverted") == 0)
+			inversion_type = INVERTED_FILE;
 		else if (strcmp(command, "pregen") == 0)
 			{
 			char * field_type;
@@ -375,6 +403,8 @@ for (param = 1; param < argc; param++)
 			statistics = 0;
 			stats(command + 1);
 			}
+		else if (strstr(command, "Topsig") == 0)
+			topsig(command + 7);
 		else if (*command == 'Q')
 			{
 			if (!set_ranker(command + 1))

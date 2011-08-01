@@ -13,10 +13,10 @@
 #include "unicode.h"
 
 /*
-	INDEX_DOCUMENT()
-	----------------
+	ANT_INDEX_DOCUMENT::INDEX_DOCUMENT()
+	------------------------------------
 */
-long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
+long ANT_index_document::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
 char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
 ANT_parser_token *token;

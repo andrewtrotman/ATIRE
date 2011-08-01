@@ -13,12 +13,13 @@
 #include "directory_iterator_object.h"
 #include "mersenne_twister.h"
 #include "numbers.h"
+#include "index_document_topsig.h"
 
 /*
-	INDEX_DOCUMENT_TOPSIG()
-	-----------------------
+	ANT_INDEX_DOCUMENT_TOPSIG::INDEX_DOCUMENT_TOPSIG()
+	--------------------------------------------------
 */
-long index_document_topsig(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
+long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
 static const long width = 4096;
 static const long density = 12;
@@ -41,7 +42,7 @@ memset(document_vector, 0, sizeof(*document_vector) * width);
 	Index the document so as to get term counts
 */
 document_indexer = new ANT_memory_index_one(new ANT_memory(1024 * 1024));
-length = index_document(document_indexer, stemmer, segmentation, readability, doc, current_file);
+length = ANT_index_document::index_document(document_indexer, stemmer, segmentation, readability, doc, current_file);
 
 /*
 	Get the list of terms and the term counts

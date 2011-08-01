@@ -108,6 +108,7 @@ forum_results_list_length = 1500;
 
 pregens = NULL;
 pregen_count = 0;
+document_indexer = new ANT_index_document;
 }
 
 /*
@@ -139,6 +140,7 @@ delete forum_writer;
 delete [] pregens;
 
 delete memory;
+delete document_indexer;
 }
 
 /*
@@ -1018,7 +1020,7 @@ for (current = 0; current < top_n; current++)
 		Now index the document.
 	*/
 	object.file = document_buffer;
-	index_document(indexer, NULL, TRUE, readability, current, &object);
+	document_indexer->index_document(indexer, NULL, TRUE, readability, current, &object);
 	}
 
 delete [] document_buffer;

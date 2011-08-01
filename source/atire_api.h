@@ -26,6 +26,7 @@ class ANT_query_parse_tree;
 class ANT_string_pair;
 class ANT_relevance_feedback;
 class ANT_pregen_field;
+class ANT_index_document;
 
 /*
 	class ATIRE_API
@@ -70,6 +71,8 @@ private:
 
 	ANT_pregen_field *pregens;				// pre-loaded pregens
 	long pregen_count;						// number of pregens which have been loaded
+
+	ANT_index_document *document_indexer;	// the file inverter
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
