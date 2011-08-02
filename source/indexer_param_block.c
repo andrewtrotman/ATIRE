@@ -44,7 +44,7 @@ num_pregen_fields = 0;
 
 inversion_type = INVERTED_FILE;
 topsig_width = 4096;
-topsig_density = 12;		// 12% of bits are +ve and 12% are -ve in each terms
+topsig_density = 12.0;		// 12% of bits are +ve and 12% are -ve in each terms
 topsig_global_stats = NULL;
 }
 
@@ -183,7 +183,7 @@ topsig_width = atol(params);
 if ((colon = strchr(params, ':')) != NULL)
 	{
 	colon++;
-	topsig_density = atol(colon);
+	topsig_density = atof(colon);
 	if ((colon = strchr(colon, ':')) != NULL)
 		topsig_global_stats = colon + 1;
 	}

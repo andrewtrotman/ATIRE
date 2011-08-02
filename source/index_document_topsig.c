@@ -5,26 +5,69 @@
 	As the paper has not yet appeared in print a full reference canot be given
 */
 #include "hash_table.h"
-#include "index_document.h"
+#include "disk.h"
 #include "memory_index.h"
 #include "memory_index_one.h"
 #include "stem.h"
-#include "readability_factory.h"
-#include "directory_iterator_object.h"
 #include "mersenne_twister.h"
 #include "numbers.h"
 #include "index_document_topsig.h"
 
 /*
-	ANT_INDEX_DOCUMENT_TOPSIG::INDEX_DOCUMENT_TOPSIG()
-	--------------------------------------------------
+	ANT_INDEX_DOCUMENT_TOPSIG::ANT_INDEX_DOCUMENT_TOPSIG()
+	------------------------------------------------------
+*/
+ANT_index_document_topsig::ANT_index_document_topsig(long width, double density, char *global_stats_file)
+{
+long long unique_terms;
+long cf, file_read_error = true;
+char *file, **line, **current, *space;
+
+this->width = width;
+this->density = density;
+this->stats_file = global_stats_file;
+global_stats = new ANT_memory_index(NULL);
+
+
+if ((file = ANT_disk::read_entire_file(global_stats_file)) != NULL)
+	if ((line = ANT_disk::buffer_to_list(file, &unique_terms)) != NULL)
+		{
+		file_read_error = false;
+		for (current = line; *current != NULL; current++)
+			if (**current != '~')
+				{
+				if ((space = strchr(*current, ' ')) != NULL)
+					{
+					cf = atol(space);
+					*space = '\0';
+					printf("Found:[%s]:%ld\n", *current, cf);
+					}
+				}
+			else
+				puts(*current);
+		}
+
+if (file_read_error)
+	puts("Warning: TopSig cannot fread the frequencies file, defaulting to cf/l = 1");
+}
+
+/*
+	ANT_INDEX_DOCUMENT_TOPSIG::~ANT_INDEX_DOCUMENT_TOPSIG()
+	-------------------------------------------------------
+*/
+ANT_index_document_topsig::~ANT_index_document_topsig()
+{
+delete global_stats;
+}
+
+/*
+	ANT_INDEX_DOCUMENT_TOPSIG::INDEX_DOCUMENT()
+	-------------------------------------------
 */
 long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
-static const long width = 4096;
-static const long density = 12;
-static const long long negative_threshold = width / density;
-static const long long positive_threshold = negative_threshold + (width / density);
+unsigned long long negative_threshold = (long long)(width * (density / 100.0));
+unsigned long long positive_threshold = negative_threshold + negative_threshold;
 ANT_memory_indexer_node **term_list, **current;
 ANT_memory_index_one *document_indexer;
 long length, bit;

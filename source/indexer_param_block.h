@@ -49,7 +49,7 @@ public:
 
 	long inversion_type;				// is the index a "standard" inverted file or a TopSig file?
 	long topsig_width;					// with of the TopSig signature
-	long topsig_density;				// density of the set bits in the TopSig index
+	double topsig_density;				// density of the set bits in the TopSig index
 	char *topsig_global_stats;			// file containing the cf parameters (from ANT_dictionary)
 
 protected:
