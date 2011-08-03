@@ -191,7 +191,7 @@ public:
 	/*
 		Return the number of terms in the index (for icf computation)
 	*/
-	long long ATIRE_API::get_term_count(void);
+	long long get_term_count(void);
 
 	/*
 		Get the length of the longest document in the repository
