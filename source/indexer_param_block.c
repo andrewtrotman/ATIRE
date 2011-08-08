@@ -403,7 +403,7 @@ for (param = 1; param < argc; param++)
 			statistics = 0;
 			stats(command + 1);
 			}
-		else if (strstr(command, "Topsig") == 0)
+		else if (strstr(command, "Topsig") != NULL)
 			topsig(command + 7);
 		else if (*command == 'Q')
 			{

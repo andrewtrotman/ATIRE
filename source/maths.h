@@ -152,4 +152,17 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 #endif
 static inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
 
+
+/*
+	ANT_RAND()
+	----------
+	random number generator converted from Microsoft's C Run Time Library code
+*/
+#define ANT_RAND_MAX 32768
+
+inline int ANT_rand(int *seed)
+{
+return ((*seed = *seed * 214013L + 2531011L) >> 16) & 0x7FFF;
+}
+
 #endif  /* MATHS_H_ */

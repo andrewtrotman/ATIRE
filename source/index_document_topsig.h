@@ -6,6 +6,7 @@
 #define INDEX_DOCUMENT_TOPSIG_H_
 
 #include "index_document.h"
+#include "index_document_global_stats.h"
 
 class ANT_memory_index;
 
@@ -16,11 +17,23 @@ class ANT_memory_index;
 class ANT_index_document_topsig : public ANT_index_document
 {
 private:
+	static const long HASH_TABLE_SIZE = 0x1000000;
+
+private:
 	long width;				// with of the signature (in bits)
 	double density;			// number of +ve values in the signature as a percent value (0..100) (also the percent of -ve too, i.e. density * 2 = +ve + -ve)
 	char *stats_file;		// name of the file that contains the cf statistics.  This file can be generated using ant_dictionary
 
-	ANT_memory_index *global_stats;		// used to store the global stats once read from disk
+	ANT_index_document_global_stats *hash_table[HASH_TABLE_SIZE];		// hold the global collection frequency counts
+	long long collection_length_in_terms;								// as is says
+
+private:
+	long hash(ANT_string_pair *string);
+
+protected:
+	ANT_index_document_global_stats *find_node(ANT_index_document_global_stats *root, ANT_string_pair *string);
+	ANT_index_document_global_stats *find_add_node(ANT_index_document_global_stats *root, ANT_string_pair *string);
+	ANT_index_document_global_stats *add(char *string, long long collection_frequency);
 
 public:
 	ANT_index_document_topsig(long width, double density, char *global_stats_file);

@@ -1,5 +1,5 @@
 #
-#	Windows makefile for ANT and the ANT tools
+#	Windows makefile for ATIRE and the ATIRE tools
 #
 
 #
