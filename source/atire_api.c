@@ -269,7 +269,7 @@ return 0;		// success
 long ATIRE_API::load_pregen(const char *pregen_filename)
 {
 if (pregens == NULL)
-	pregens = new ANT_pregen_field[MAX_PREGEN_COUNT];
+	pregens = new ANT_pregen[MAX_PREGEN_COUNT];
 
 if (pregens[pregen_count].read(pregen_filename))
 	{

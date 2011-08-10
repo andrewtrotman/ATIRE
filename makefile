@@ -279,6 +279,7 @@ PARTS = \
 	$(OBJDIR)\plugin_manager.obj					\
 	$(OBJDIR)\indexer_param_block_rank.obj			\
 	$(OBJDIR)\indexer_param_block_stem.obj			\
+	$(OBJDIR)\indexer_param_block_pregen.obj		\
 	$(OBJDIR)\indexer_param_block.obj				\
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\

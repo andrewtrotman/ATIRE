@@ -40,7 +40,6 @@ ranking_function = IMPACT;
 document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
-num_pregen_fields = 0;
 
 inversion_type = INVERTED_FILE;
 topsig_width = 4096;
@@ -98,14 +97,7 @@ puts("--------------------");
 puts("-findex <fn>    Output filename for index");
 puts("-fdoclist <fn>  Output filename for doclist");
 puts("");
-puts("-pregen <field> <type>  Create a pregenerated ranking from docid field of type:");
-puts("   integer      Unsigned integer");
-puts("   strexact     Rank by ordering on complete strings (cannot rank results from merged indexes)");
-puts("   strtrunc     Rank by a simple prefix of the given string (binary safe)");
-puts("   asciidigest  Rank by compact ASCII conversion of the prefix of the given string");
-puts("   base36       Rank by base-36 conversion of alphanumerics");
-puts("   recentdate   Rank by recently-biased UNIX timestamps");
-puts("");
+ANT_indexer_param_block_pregen::help();
 
 puts("COMPRESSION");
 puts("-----------");
@@ -368,28 +360,16 @@ for (param = 1; param < argc; param++)
 			inversion_type = INVERTED_FILE;
 		else if (strcmp(command, "pregen") == 0)
 			{
-			char * field_type;
+			char *field_type, *field_name;
 
 			if (param + 2 >= argc)
 				exit(printf("Not enough arguments after '-pregen', expected two arguments.\n"));
 
-			pregens[num_pregen_fields].field_name = argv[++param];
+			field_name = argv[++param];
 			field_type = argv[++param];
 
-			if (strcmp(field_type, "integer") == 0)
-				pregens[num_pregen_fields].type = INTEGER;
-			else if (strcmp(field_type, "strexact") == 0)
-				pregens[num_pregen_fields].type = STREXACT;
-			else if (strcmp(field_type, "strtrunc") == 0)
-				pregens[num_pregen_fields].type = STRTRUNC;
-			else if (strcmp(field_type, "asciidigest") == 0)
-				pregens[num_pregen_fields].type = ASCIIDIGEST;
-			else if (strcmp(field_type, "base36") == 0)
-				pregens[num_pregen_fields].type = BASE36;
-			else
+			if (!add_pregen_field(field_name, field_type))
 				exit(printf("Unknown pregen field type '%s'\n", field_type));
-
-			num_pregen_fields++;
 			}
 		else if (strcmp(command, "vc") == 0)
 			compression_validation = TRUE;

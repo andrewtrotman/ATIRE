@@ -89,7 +89,7 @@ ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 ANT_directory_iterator_multiple *parallel_disk;
 ANT_stem *stemmer = NULL;
-ANT_pregen *pregen = NULL;
+ANT_pregens_writer *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
 ANT_index_document *document_indexer;
@@ -141,7 +141,7 @@ readability->set_parser(parser);
 if (param_block.num_pregen_fields)
 	{
 	size_t pregen_prefix_len = strlen(param_block.index_filename) + 1;
-	pregen = new ANT_pregen();
+	pregen = new ANT_pregens_writer();
 
 	if (pregen_prefix_len < PATH_MAX)
 		{

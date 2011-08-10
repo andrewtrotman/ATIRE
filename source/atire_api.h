@@ -25,7 +25,7 @@ class ANT_bitstring;
 class ANT_query_parse_tree;
 class ANT_string_pair;
 class ANT_relevance_feedback;
-class ANT_pregen_field;
+class ANT_pregen;
 class ANT_index_document;
 
 /*
@@ -69,7 +69,7 @@ private:
 	ANT_search_engine_forum *forum_writer;	// the object that writes the results list in the INEX or TREC format
 	long forum_results_list_length;			// maximum length of a results list for the evaluation form (INEX or TREC)
 
-	ANT_pregen_field *pregens;				// pre-loaded pregens
+	ANT_pregen *pregens;					// pre-loaded pregens
 	long pregen_count;						// number of pregens which have been loaded
 
 	ANT_index_document *document_indexer;	// the file inverter
