@@ -244,6 +244,9 @@ ATIRE_BROKER_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_BROKER_SO
 PHP_EXT_SOURCES := $(notdir $(shell ls $(PHPDIR)/*.c))
 PHP_EXT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 
+PREGEN_PREC_SOURCES := pregen_precision_measurement.c $(notdir $(SOURCES))
+PREGEN_PREC_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PREGEN_PREC_SOURCES)))
+
 all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
 
 php_ext : $(LIBDIR)/atire.so
@@ -269,6 +272,9 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.c
 $(OBJDIR)/%.o : $(PHPDIR)/%.c
 	$(CC) $(PHP_CFLAGS) -c $< -o $@
 
+$(OBJDIR)/%.o : tools/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(LIBDIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
 	$(CC) $(PHP_LDFLAGS) -o $@ $^
 
@@ -288,6 +294,9 @@ $(BINDIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	
+$(BINDIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
