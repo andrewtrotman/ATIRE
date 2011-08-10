@@ -16,7 +16,7 @@ enum ANT_UNICODE_chartype {
 /* A UTF codepoint could decompose into this many Unicode characters through Unicode
  * decomposition, at most.
  */
-#define LONGEST_UTF8_DECOMPOSITION 30
+#define UTF8_LONGEST_DECOMPOSITION_LEN 30
 
 /*
 	Convert to upper case or lower case.  Note that the case conversion is not one-to-one.  For example,
