@@ -51,7 +51,7 @@ else
 		{
 		//This character decomposes to itself
 		**buf = c;
-		*buf++;
+		(*buf)++;
 		return 0;
 		}
 	else
@@ -93,17 +93,19 @@ void reduce_decompositions() {
 					{
 					made_any_change = 1;
 					delete [] decompositions[i];
-					decompositions[i] = new unsigned long[buf_pos - buf +1];
+					decompositions[i] = new unsigned long[buf_pos - buf + 1];
 
 					memcpy(decompositions[i], buf, (buf_pos - buf) * sizeof(decompositions[0]));
-					decompositions[buf_pos-buf] = 0;
+					decompositions[i][buf_pos - buf] = 0;
 					}
+
 				for (unsigned long * p = decompositions[i]; p && *p; p++)
 					if (lowercase[*p])
 						{
 						made_change = 1;
 						*p=lowercase[*p];
 						}
+
 				}
 			fprintf(stderr, "Reduced decomposition table recursively.\n");
 		} while (made_any_change);
@@ -235,11 +237,11 @@ for (current = lines; *current != NULL; current++)
 					state = 2;
 					}
 				break;
-			case 1:
+			case 1: //State skip over informative <tag>
 				if (*pos == '>')
 					state = 0;
 				break;
-			case 2:
+			case 2: //State skip over rest of parsed number
 				if (!isalnum(*pos))
 					state = 0;
 				break;
@@ -263,7 +265,7 @@ for (current = lines; *current != NULL; current++)
 		{
 		//This character decomposes to something other than itself. Store that decomposition into the list.
 		decompositions[character] = new unsigned long[decomposed_pos - decomposition + 1];
-		memcpy(decompositions[character], decomposition, sizeof(decomposition[0] * (decomposed_pos - decomposition)));
+		memcpy(decompositions[character], decomposition, sizeof(decomposition[0]) * (decomposed_pos - decomposition));
 
 		//Null-terminate
 		decompositions[decomposed_pos - decomposition] = 0;
