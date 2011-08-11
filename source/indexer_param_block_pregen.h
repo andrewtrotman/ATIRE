@@ -27,7 +27,7 @@ public:
 	long num_pregen_fields;					// number of pregen fields
 
 protected:
-	virtual void help();
+	virtual void help(void);
 
 public:
 	ANT_indexer_param_block_pregen();

@@ -55,7 +55,7 @@ return 1;
 	ANT_INDEXER_PARAM_BLOCK_PREGEN::HELP()
 	--------------------------------------
 */
-void ANT_indexer_param_block_pregen::help()
+void ANT_indexer_param_block_pregen::help(void)
 {
 puts("-pregen <field> <type>  Create a pregenerated ranking from docid field of type:");
 puts("   integer      Unsigned integer");
