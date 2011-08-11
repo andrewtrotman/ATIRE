@@ -7,6 +7,7 @@
 
 #include "indexer_param_block_rank.h"
 #include "indexer_param_block_stem.h"
+#include "indexer_param_block_topsig.h"
 
 #define MAX_PREGEN_COUNT 128
 
@@ -14,7 +15,7 @@
 	class ANT_ANT_PARAM_BLOCK
 	-------------------------
 */
-class ANT_ANT_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem
+class ANT_ANT_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem, public ANT_indexer_param_block_topsig
 {
 public:
 	enum { MAP, MAgP, MAgPf, RANKEFF, P_AT_N, SUCCESS_AT_N, MAiP } ;					// metrics
@@ -42,11 +43,10 @@ public:
 	long results_list_length;			// length of the results list as exported
 	long stats;							// which stats to display
 
-										// Because these are expected to be replaced several
-										// times during the lifetime of this class, this class
-										// owns the memory for these strings and calls delete [] on
-										// them:
-
+	/*
+		Because these are expected to be replaced several times during the lifetime of this class, 
+		this class owns the memory for these strings and calls delete [] on them:
+	*/
 	char *index_filename;				// Filename of index to read
 	char *doclist_filename;				// Filename of doclist to read
 

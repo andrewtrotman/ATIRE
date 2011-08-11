@@ -86,8 +86,7 @@ void init_genrand64(unsigned long long seed)
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-void init_by_array64(unsigned long long init_key[],
-		     unsigned long long key_length)
+void init_by_array64(unsigned long long init_key[], unsigned long long key_length)
 {
     unsigned long long i, j, k;
     init_genrand64(19650218ULL);
@@ -148,47 +147,27 @@ unsigned long long genrand64_int64(void)
     return x;
 }
 
-/* generates a random number on [0, 2^63-1]-interval */
-long long genrand64_int63(void)
-{
-    return (long long)(genrand64_int64() >> 1);
-}
-
-/* generates a random number on [0,1]-real-interval */
-double genrand64_real1(void)
-{
-    return (genrand64_int64() >> 11) * (1.0/9007199254740991.0);
-}
-
-/* generates a random number on [0,1)-real-interval */
-double genrand64_real2(void)
-{
-    return (genrand64_int64() >> 11) * (1.0/9007199254740992.0);
-}
-
-/* generates a random number on (0,1)-real-interval */
-double genrand64_real3(void)
-{
-    return ((genrand64_int64() >> 12) + 0.5) * (1.0/4503599627370496.0);
-}
-
+#ifdef NEVER
 /*
 int main(void)
 {
-    int i;
-    unsigned long long init[4]={0x12345ULL, 0x23456ULL, 0x34567ULL, 0x45678ULL}, length=4;
-    init_by_array64(init, length);
-    printf("1000 outputs of genrand64_int64()\n");
-    for (i=0; i<1000; i++) {
-      printf("%20llu ", genrand64_int64());
-      if (i%5==4) printf("\n");
-    }
-    printf("\n1000 outputs of genrand64_real2()\n");
-    for (i=0; i<1000; i++) {
-      printf("%10.8f ", genrand64_real2());
-      if (i%5==4) printf("\n");
-    }
-    return 0;
-	
+int i;
+unsigned long long init[4]={0x12345ULL, 0x23456ULL, 0x34567ULL, 0x45678ULL}, length=4;
+
+init_by_array64(init, length);
+printf("1000 outputs of genrand64_int64()\n");
+for (i=0; i<1000; i++)
+	{
+	printf("%20llu ", genrand64_int64());
+	if (i%5==4) printf("\n");
+	}
+printf("\n1000 outputs of genrand64_real2()\n");
+for (i=0; i<1000; i++)
+	{
+	printf("%10.8f ", genrand64_real2());
+	if (i%5==4) printf("\n");
+	}
+return 0;
 }
 */
+#endif

@@ -109,9 +109,10 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nb][-r]      query type");
+puts("-Q[nbt][-r]     query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
+puts("  t:<w>:<d>:<f> TopSig index of width <w> bits density <d>% and globalstats <f>");
 puts("  -             no relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d = 10 t = 10]");
 puts("");
@@ -291,6 +292,9 @@ do
 			feedbacker = ANT_relevance_feedback_factory::NONE;
 			break;
 		case 'r' :
+			if (query_type == ATIRE_API::QUERY_TOPSIG)
+				exit(printf("Cannot do Rocchio with Topsig"));
+
 			query_type |= ATIRE_API::QUERY_FEEDBACK;
 			feedbacker = ANT_relevance_feedback_factory::BLIND_KL;
 			first = second = -1;
@@ -299,6 +303,11 @@ do
 				feedback_documents = (long)first;
 			if (second != -1)
 				feedback_terms = (long)second;
+			done = TRUE;
+			break;
+		case 't':
+			topsig(which + 1);
+			query_type = ATIRE_API::QUERY_TOPSIG;
 			done = TRUE;
 			break;
 		default :

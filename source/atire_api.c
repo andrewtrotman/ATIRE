@@ -3,6 +3,7 @@
 	-----------
 */
 #include <stdlib.h>
+#include "maths.h"
 #include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
 #include "atire_api.h"
 
@@ -55,6 +56,7 @@
 
 #include "search_engine_memory_index.h"
 #include "index_document.h"
+#include "index_document_topsig.h"
 #include "directory_iterator_object.h"
 #include "parser.h"
 #include "readability_factory.h"
@@ -109,6 +111,8 @@ forum_results_list_length = 1500;
 pregens = NULL;
 pregen_count = 0;
 document_indexer = new ANT_index_document;
+
+topsig_globalstats = NULL;
 }
 
 /*
@@ -141,6 +145,8 @@ delete [] pregens;
 
 delete memory;
 delete document_indexer;
+
+delete topsig_globalstats;
 }
 
 /*
@@ -152,24 +158,6 @@ char *ATIRE_API::version(long *version_number)
 if (version_number != NULL)
 	*version_number = ANT_version;
 return ANT_version_string;
-}
-
-/*
-	ATIRE_API::MAX()
-	----------------
-*/
-#undef max
-char *ATIRE_API::max(char *a, char *b, char *c)
-{
-char *thus_far;
-
-thus_far = a;
-if (b > thus_far)
-	thus_far = b;
-if (c > thus_far)
-	thus_far = c;
-
-return thus_far;
 }
 
 /*
@@ -201,7 +189,7 @@ for (current = id_list; *current != NULL; current++)
 	slish = *current;
 	slash = strrchr(*current, '/');
 	slosh = strrchr(*current, '\\');
-	start = max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
+	start = ANT_max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
 	if (*start != '\0')		// avoid blank lines at the end of the file
 		{
 		if ((dot = strchr(start, '.')) != NULL)
@@ -282,6 +270,15 @@ return 0;
 }
 
 /*
+	ATIRE_API::LOAD_TOPSIG()
+	------------------------
+*/
+long ATIRE_API::load_topsig(long width, double density, char *global_stats_file)
+{
+topsig_globalstats = new ANT_index_document_topsig(width, density, global_stats_file);
+}
+
+/*
 	ATIRE_API::LOAD_ASSESSMENTS()
 	-----------------------------
 */
@@ -323,13 +320,17 @@ return parsed_query->parse_error;
 */
 long ATIRE_API::set_ranking_function_pregen(const char * fieldname, double p1)
 {
-for (int i = 0; i < pregen_count; i++)
-	if (strcmp(pregens[i].field_name, fieldname) == 0)
+long current;
+
+for (current = 0; current < pregen_count; current++)
+	if (strcmp(pregens[current].field_name, fieldname) == 0)
 		{
 		delete ranking_function;
-		ranking_function = new ANT_ranking_function_pregen(search_engine, &pregens[i], (int) p1);
+		ranking_function = new ANT_ranking_function_pregen(search_engine, &pregens[current], (long)p1);
+
 		return 0;		// success
 		}
+
 return 1;
 }
 
@@ -503,7 +504,8 @@ return 0;		// success
 */
 char *ATIRE_API::string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold)
 {
-long length;
+unsigned long character;
+long length, has_non_upper = false;
 char *current, *dest_current;
 size_t dest_remain;
 
@@ -513,15 +515,15 @@ size_t dest_remain;
 */
 if (case_fold)
 	{
-	int has_non_upper = 0;
-
-	/* Does this term have characters which are not uppercase? If so, it's not a tag name. */
+	/*
+		Does this term have characters which are not uppercase? If so, it's not a tag name
+	*/
 	current = source->start;
 	while (current < source->start + source->string_length)
 		{
 		if (!utf8_isupper(utf8_to_wide(current)))
 			{
-			has_non_upper = 1;
+			has_non_upper = true;
 			break;
 			}
 
@@ -530,14 +532,15 @@ if (case_fold)
 
 	if (has_non_upper)
 		{
-		/* This is a term, not a tag name. Normalize. */
-
+		/*
+			This is a term, not a tag name. Normalize
+		*/
 		current = source->start;
 		dest_current = destination;
 		dest_remain = destination_length - 1; /* Leave room for null terminator */
 		while (current < source->start + source->string_length)
 			{
-			unsigned long character = utf8_to_wide(current);
+			character = utf8_to_wide(current);
 
 			current += utf8_bytes(current);
 
@@ -550,10 +553,14 @@ if (case_fold)
 		return destination;
 		}
 
-	/* Otherwise we can just copy it, fall through to use as-is.. */
+	/*
+		Otherwise we can just copy it, fall through to use as-is.
+	*/
 	}
 
-/* We can just do a straight copy in */
+/*
+	We can just do a straight copy in
+*/
 length = source->string_length < destination_length - 1 ? source->string_length : destination_length - 1;
 strncpy(destination, source->start, length);
 destination[length] = '\0';
@@ -658,6 +665,56 @@ return terms_in_query;
 	-------------------------------
 */
 long ATIRE_API::process_NEXI_query(char *query)
+{
+return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
+}
+
+/*
+	ATIRE_API::PROCESS_TOPSIG_QUERY()
+	---------------------------------
+*/
+long ATIRE_API::process_topsig_query(ANT_NEXI_term_ant *parse_tree)
+{
+#ifdef NEVER
+
+	ANT_NEXI_term_ant *term_string;
+	ANT_NEXI_term_iterator term;
+	long terms_in_query, current_term;
+	long long old_static_prune = 0;
+
+	terms_in_query = 0;
+	for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+		{
+		terms_in_query++;
+		topsig->globalstats
+		/*
+			Take the search term (as an ANT_string_pair) and convert into a string
+			If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
+		*/
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), 1);
+		}
+
+	/*
+		Process each search term - either stemmed or not.
+	*/
+	for (current_term = 0; current_term < terms_in_query; current_term++)
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+
+	return terms_in_query;
+
+#else
+
+	return 0;
+
+#endif
+}
+
+
+/*
+	ATIRE_API::PROCESS_TOPSIG_QUERY()
+	---------------------------------
+*/
+long ATIRE_API::process_topsig_query(char *query)
 {
 return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
 }
@@ -922,6 +979,8 @@ if (query_type & QUERY_NEXI)
 	parsed_query->terms_in_query = process_NEXI_query(query);
 else if (query_type & QUERY_BOOLEAN)
 	parsed_query->terms_in_query = process_boolean_query(query);
+else if (query_type & QUERY_TOPSIG)
+	parsed_query->terms_in_query = process_topsig_query(query);
 else
 	parsed_query->terms_in_query = 0;
 

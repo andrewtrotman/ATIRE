@@ -8,18 +8,18 @@
 #include "indexer_param_block_rank.h"
 #include "indexer_param_block_stem.h"
 #include "indexer_param_block_pregen.h"
+#include "indexer_param_block_topsig.h"
 #include "pregen.h"
 
 /*
 	class ANT_INDEXER_PARAM_BLOCK
 	-----------------------------
 */
-class ANT_indexer_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem, public ANT_indexer_param_block_pregen
+class ANT_indexer_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem, public ANT_indexer_param_block_pregen, public ANT_indexer_param_block_topsig
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
 	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, TAR_LZO, PKZIP, TREC, WARC_GZ, RECURSIVE_WARC_GZ, CSV, TRECWEB, VBULLETIN, PHPBB, MYSQL };
-	enum { INVERTED_FILE, TOPSIG } ;		// inverted file or TopSig file
 
 private:
 	int argc;
@@ -38,13 +38,7 @@ public:
 	char *doclist_filename;				// name of file containing the internal docid to external docid translations
 	char *index_filename;				// name of index file
 
-	long inversion_type;				// is the index a "standard" inverted file or a TopSig file?
-	long topsig_width;					// with of the TopSig signature
-	double topsig_density;				// density of the set bits in the TopSig index
-	char *topsig_global_stats;			// file containing the cf parameters (from ANT_dictionary)
-
 protected:
-	void topsig(char *params);
 	void document_compression(char *scheme);
 	void compression(char *schemes);
 	void readability(char *measures);

@@ -27,6 +27,7 @@ class ANT_string_pair;
 class ANT_relevance_feedback;
 class ANT_pregen;
 class ANT_index_document;
+class ANT_index_document_topsig;
 
 /*
 	class ATIRE_API
@@ -36,7 +37,7 @@ class ATIRE_API
 {
 public:
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 } ;
-	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_FEEDBACK = 4 } ;
+	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8 } ;
 
 private:
 	char token_buffer[1024];				// used to convert parsed string_pairs into C char * strings.
@@ -74,14 +75,18 @@ private:
 
 	ANT_index_document *document_indexer;	// the file inverter
 
+	ANT_index_document_topsig *topsig_globalstats;	// term statistics if topsig is being used
+
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
 	long process_NEXI_query(char *query);
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
+	long process_topsig_query(ANT_NEXI_term_ant *parse_tree);
 	void boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves);
 	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree);
 	long process_boolean_query(char *query);
+	long process_topsig_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
 	void query_object_with_feedback_to_NEXI_query(void);
 
@@ -109,6 +114,11 @@ public:
 	    Load a pregenerated ranking
 	 */
 	long load_pregen(const char *pregen_filename);
+
+	/*
+		Load TopSig globalstats file
+	*/
+	long load_topsig(long width, double density, char *global_stats_file);
 
 	/*
 		Set the chinese segmentation algorithm
