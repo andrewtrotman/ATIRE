@@ -16,10 +16,11 @@
 class ANT_indexer_param_block_pregen
 {
 public:
-	struct pregen_field_spec {
-		char *field_name;
-		pregen_field_type type;
-	};
+	struct pregen_field_spec
+	{
+	char *field_name;
+	pregen_field_type type;
+	} ;
 
 public:
 	pregen_field_spec pregens[MAX_PREGENS];	// fields to use in generating pregens
@@ -27,6 +28,7 @@ public:
 
 protected:
 	virtual void help();
+
 public:
 	ANT_indexer_param_block_pregen();
 	virtual ~ANT_indexer_param_block_pregen();
