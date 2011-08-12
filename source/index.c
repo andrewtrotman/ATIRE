@@ -241,7 +241,7 @@ for (param = first_param; param < argc; param++)
 
 		if (strcmp(argv[param+4], "topics")==0)
 			source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
-					"SELECT CONCAT('<id>', t.topic_id, '</id><last_post_time>', topic_last_post_time, '</last_post_time><title>', "
+					"SELECT topic_id, CONCAT('<id>', t.topic_id, '</id><last_post_time>', topic_last_post_time, '</last_post_time><title>', "
 							"REPLACE(topic_title, '\xC2\x80', '\xE2\x82\xAC'), '</title><author>', t.topic_first_poster_name, '</author><forum>',"
 							"forum_name ,'</forum>'), "
 						"CONCAT('\xC2\x80""forum-', t.forum_id), IF(t.topic_approved=0, '\xC2\x80""u', '\xC2\x80""a'), "
@@ -253,13 +253,13 @@ for (param = first_param; param < argc; param++)
 					"FROM phpbb_topics t "
 					"INNER JOIN phpbb_posts p ON t.topic_id = p.topic_id "
 					"INNER JOIN phpbb_forums f ON t.forum_id = f.forum_id "
-					"WHERE p.post_approved = 1 "
+					"WHERE p.post_approved = 1 AND t.topic_id > $start "
 					"GROUP BY t.topic_id "
 					"ORDER BY t.topic_id ASC ",
 					ANT_directory_iterator::READ_FILE);
 		else
 			source = new ANT_directory_iterator_mysql(argv[param + 2], argv[param], argv[param + 1], argv[param + 3],
-					"SELECT CONCAT('<id>', post_id, '</id><time>', post_time, '</time><subject>', REPLACE(post_subject, '\xC2\x80', '\xE2\x82\xAC'), "
+					"SELECT post_id, CONCAT('<id>', post_id, '</id><time>', post_time, '</time><subject>', REPLACE(post_subject, '\xC2\x80', '\xE2\x82\xAC'), "
 							"'</subject><title>', REPLACE(topic_title, '\xC2\x80', '\xE2\x82\xAC'), '</title><author>', u.username, '</author><forum>',"
 							"forum_name ,'</forum>'), "
 						"REPLACE(CONCAT_WS(' ', post_subject, post_text), '\xC2\x80', '\xE2\x82\xAC'), "
@@ -269,8 +269,11 @@ for (param = first_param; param < argc; param++)
 					"INNER JOIN phpbb_forums f USING (forum_id) "
 					"INNER JOIN phpbb_topics t USING (topic_id) "
 					"INNER JOIN phpbb_users u ON p.poster_id = u.user_id "
+					"WHERE p.post_id > $start "
 					"ORDER BY post_id ASC ",
 					ANT_directory_iterator::READ_FILE);
+
+		static_cast<ANT_directory_iterator_mysql*>(source)->set_paging_mode(FETCH_RANGE_START_LIMIT);
 
 		param += 4;
 		}
