@@ -57,6 +57,7 @@
 #include "search_engine_memory_index.h"
 #include "index_document.h"
 #include "index_document_topsig.h"
+#include "index_document_topsig_signature.h"
 #include "directory_iterator_object.h"
 #include "parser.h"
 #include "readability_factory.h"
@@ -113,6 +114,7 @@ pregen_count = 0;
 document_indexer = new ANT_index_document;
 
 topsig_globalstats = NULL;
+topsig_signature = NULL;
 }
 
 /*
@@ -147,6 +149,7 @@ delete memory;
 delete document_indexer;
 
 delete topsig_globalstats;
+delete topsig_signature;
 }
 
 /*
@@ -275,7 +278,11 @@ return 0;
 */
 long ATIRE_API::load_topsig(long width, double density, char *global_stats_file)
 {
+delete topsig_globalstats;
+delete topsig_signature;
+
 topsig_globalstats = new ANT_index_document_topsig(width, density, global_stats_file);
+topsig_signature = new ANT_index_document_topsig_signature(width, density);
 }
 
 /*
@@ -541,7 +548,6 @@ if (case_fold)
 		while (current < source->start + source->string_length)
 			{
 			character = utf8_to_wide(current);
-
 			current += utf8_bytes(current);
 
 			if (!ANT_UNICODE_normalize_lowercase_toutf8(&dest_current, &dest_remain, character))
@@ -593,7 +599,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		Take the search term (as an ANT_string_pair) and convert into a string
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
-	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), 1);
+	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
 	}
@@ -644,7 +650,7 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		{
-		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), 1);
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
 		}
 	}
@@ -676,12 +682,11 @@ return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
 long ATIRE_API::process_topsig_query(ANT_NEXI_term_ant *parse_tree)
 {
 #ifdef NEVER
-
 	ANT_NEXI_term_ant *term_string;
 	ANT_NEXI_term_iterator term;
 	long terms_in_query, current_term;
-	long long old_static_prune = 0;
 
+	topsig_signature->rewind();
 	terms_in_query = 0;
 	for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 		{
@@ -691,7 +696,8 @@ long ATIRE_API::process_topsig_query(ANT_NEXI_term_ant *parse_tree)
 			Take the search term (as an ANT_string_pair) and convert into a string
 			If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 		*/
-		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), 1);
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+		topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
 		}
 
 	/*
@@ -701,11 +707,8 @@ long ATIRE_API::process_topsig_query(ANT_NEXI_term_ant *parse_tree)
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 
 	return terms_in_query;
-
 #else
-
-	return 0;
-
+	return 1;
 #endif
 }
 
@@ -734,7 +737,7 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	into = new ANT_bitstring;
 	into->set_length((long)documents_in_id_list);
 
-	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), 1);
+	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), true);
 
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// We don't stem numbers or tag names, or if there is no stemmer
 		search_engine->process_one_search_term(token_buffer, ranking_function, into);

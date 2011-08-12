@@ -9,6 +9,8 @@
 #include "index_document_global_stats.h"
 
 class ANT_memory_index;
+class ANT_index_document_topsig_signature;
+class ANT_memory_index_one;
 
 /*
 	class ANT_INDEX_DOCUMENT_TOPSIG
@@ -16,6 +18,7 @@ class ANT_memory_index;
 */
 class ANT_index_document_topsig : public ANT_index_document
 {
+friend class ANT_index_document_topsig_signature;
 private:
 	static const long HASH_TABLE_SIZE = 0x1000000;
 
@@ -27,6 +30,9 @@ private:
 	ANT_index_document_global_stats *hash_table[HASH_TABLE_SIZE];		// hold the global collection frequency counts
 	long long collection_length_in_terms;								// as is says
 
+	ANT_memory_index_one *document_indexer;					// the object that generates the initial ANT index
+	ANT_index_document_topsig_signature *signature;			// the current signature we're working on
+
 private:
 	long hash(ANT_string_pair *string);
 
@@ -34,6 +40,7 @@ protected:
 	ANT_index_document_global_stats *find_node(ANT_index_document_global_stats *root, ANT_string_pair *string);
 	ANT_index_document_global_stats *find_add_node(ANT_index_document_global_stats *root, ANT_string_pair *string);
 	ANT_index_document_global_stats *add(char *string, long long collection_frequency);
+	ANT_index_document_global_stats *find(ANT_string_pair *string);
 
 public:
 	ANT_index_document_topsig(long width, double density, char *global_stats_file);

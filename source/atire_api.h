@@ -28,6 +28,7 @@ class ANT_relevance_feedback;
 class ANT_pregen;
 class ANT_index_document;
 class ANT_index_document_topsig;
+class ANT_index_document_topsig_signature;
 
 /*
 	class ATIRE_API
@@ -75,7 +76,8 @@ private:
 
 	ANT_index_document *document_indexer;	// the file inverter
 
-	ANT_index_document_topsig *topsig_globalstats;	// term statistics if topsig is being used
+	ANT_index_document_topsig *topsig_globalstats;				// term statistics if topsig is being used
+	ANT_index_document_topsig_signature *topsig_signature;		// thw query signature
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
