@@ -190,6 +190,7 @@ PARTS = \
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\index_document.obj					\
 	$(OBJDIR)\index_document_topsig.obj				\
+	$(OBJDIR)\index_document_topsig_signature.obj				\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
 	$(OBJDIR)\memory_indexer.obj 					\
