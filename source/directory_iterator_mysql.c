@@ -194,7 +194,10 @@ switch (mode)
 		docname_col = 0;
 	}
 
-object->filename = strnew(row[docname_col]);
+if (docname_col >= fields - 1 && row[docname_col])
+	object->filename = strnew(row[docname_col]);
+else
+	object->filename = strnew("");
 
 if (get_file)
 	{
