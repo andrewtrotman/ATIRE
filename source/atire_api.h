@@ -77,7 +77,9 @@ private:
 	ANT_index_document *document_indexer;	// the file inverter
 
 	ANT_index_document_topsig *topsig_globalstats;				// term statistics if topsig is being used
-	ANT_index_document_topsig_signature *topsig_signature;		// thw query signature
+	ANT_index_document_topsig_signature *topsig_signature;		// the query signature
+	ANT_ranking_function *topsig_positive_ranking_function;		// the ranking function to use for +ve values in the query vector
+	ANT_ranking_function *topsig_negative_ranking_function;		// the ranking function to use for -ve values in the query vector
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);

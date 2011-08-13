@@ -115,6 +115,8 @@ document_indexer = new ANT_index_document;
 
 topsig_globalstats = NULL;
 topsig_signature = NULL;
+topsig_positive_ranking_function = NULL;
+topsig_negative_ranking_function = NULL;
 }
 
 /*
@@ -150,6 +152,8 @@ delete document_indexer;
 
 delete topsig_globalstats;
 delete topsig_signature;
+delete topsig_positive_ranking_function;
+delete topsig_negative_ranking_function;
 }
 
 /*
@@ -701,17 +705,22 @@ long ATIRE_API::process_topsig_query(ANT_NEXI_term_ant *parse_tree)
 		}
 
 	/*
-		Process each search term - either stemmed or not.
+		Walk through the signature looking for +ve and -ve values as these are the
+		dimenstions that are used in the query's signature.
 	*/
-	for (current_term = 0; current_term < terms_in_query; current_term++)
-		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+	vector = signature->get_vector();
+	for (bit = 0; bit < width; bit++)
+		if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
+			if (vector[bit] > 0)
+				process_one_search_term(as_string.string(), topsig_positive_ranking_function);
+			else
+				process_one_search_term(as_string.string(), topsig_negative_ranking_function);
 
 	return terms_in_query;
 #else
 	return 1;
 #endif
 }
-
 
 /*
 	ATIRE_API::PROCESS_TOPSIG_QUERY()
