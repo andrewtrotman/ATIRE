@@ -4,6 +4,7 @@
 */
 #include <stdlib.h>
 #include "maths.h"
+#include "numbers.h"
 #include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
 #include "atire_api.h"
 
@@ -39,6 +40,8 @@
 #include "ranking_function_dlh13.h"
 #include "ranking_function_docid.h"
 #include "ranking_function_pregen.h"
+#include "ranking_function_topsig_positive.h"
+#include "ranking_function_topsig_negative.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -113,6 +116,7 @@ pregens = NULL;
 pregen_count = 0;
 document_indexer = new ANT_index_document;
 
+topsig_width = 0;
 topsig_globalstats = NULL;
 topsig_signature = NULL;
 topsig_positive_ranking_function = NULL;
@@ -243,7 +247,7 @@ if (type & READABILITY_SEARCH_ENGINE)
 else
 	{
 	search_engine = new ANT_search_engine(memory, type & INDEX_IN_MEMORY ? INDEX_IN_MEMORY : INDEX_IN_FILE);
-	if (search_engine->open(index_filename)==0)
+	if (search_engine->open(index_filename) == 0)
 		return 1; //fail
 
 	if (search_engine->quantized())
@@ -285,8 +289,15 @@ long ATIRE_API::load_topsig(long width, double density, char *global_stats_file)
 delete topsig_globalstats;
 delete topsig_signature;
 
+topsig_width = width;
 topsig_globalstats = new ANT_index_document_topsig(width, density, global_stats_file);
 topsig_signature = new ANT_index_document_topsig_signature(width, density);
+
+if (topsig_positive_ranking_function == NULL)
+	topsig_positive_ranking_function = new ANT_ranking_function_topsig_positive(search_engine);
+
+if (topsig_negative_ranking_function == NULL)
+	topsig_negative_ranking_function = new ANT_ranking_function_topsig_negative(search_engine);
 }
 
 /*
@@ -685,41 +696,38 @@ return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
 */
 long ATIRE_API::process_topsig_query(ANT_NEXI_term_ant *parse_tree)
 {
-#ifdef NEVER
-	ANT_NEXI_term_ant *term_string;
-	ANT_NEXI_term_iterator term;
-	long terms_in_query, current_term;
+ANT_string_pair as_string;
+ANT_NEXI_term_ant *term_string;
+ANT_NEXI_term_iterator term;
+long terms_in_query, bit;
+double *vector;
 
-	topsig_signature->rewind();
-	terms_in_query = 0;
-	for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
-		{
-		terms_in_query++;
-		topsig->globalstats
-		/*
-			Take the search term (as an ANT_string_pair) and convert into a string
-			If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
-		*/
-		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-		topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
-		}
-
+topsig_signature->rewind();
+terms_in_query = 0;
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	{
+	terms_in_query++;
 	/*
-		Walk through the signature looking for +ve and -ve values as these are the
-		dimenstions that are used in the query's signature.
+		Take the search term (as an ANT_string_pair) and convert into a string
+		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
-	vector = signature->get_vector();
-	for (bit = 0; bit < width; bit++)
-		if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
-			if (vector[bit] > 0)
-				process_one_search_term(as_string.string(), topsig_positive_ranking_function);
-			else
-				process_one_search_term(as_string.string(), topsig_negative_ranking_function);
+	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
+	}
 
-	return terms_in_query;
-#else
-	return 1;
-#endif
+/*
+	Walk through the signature looking for +ve and -ve values as these are the
+	dimenstions that are used in the query's signature.
+*/
+vector = topsig_signature->get_vector();
+for (bit = 0; bit < topsig_width; bit++)
+	if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
+		if (vector[bit] > 0)
+			search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
+		else
+			search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
+
+return terms_in_query;
 }
 
 /*

@@ -190,14 +190,14 @@ PARTS = \
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\index_document.obj					\
 	$(OBJDIR)\index_document_topsig.obj				\
-	$(OBJDIR)\index_document_topsig_signature.obj				\
+	$(OBJDIR)\index_document_topsig_signature.obj	\
 	$(OBJDIR)\memory_index_hash_node.obj			\
 	$(OBJDIR)\memory_index.obj 						\
 	$(OBJDIR)\memory_indexer.obj 					\
 	$(OBJDIR)\memory_index_one.obj 					\
 	$(OBJDIR)\stats_memory_index.obj				\
 	$(OBJDIR)\hash_table.obj						\
-	$(OBJDIR)\mersenne_twister.obj						\
+	$(OBJDIR)\mersenne_twister.obj					\
 	$(OBJDIR)\postings_piece.obj					\
 	$(OBJDIR)\ctypes.obj 							\
 	$(OBJDIR)\file.obj								\
@@ -233,7 +233,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator.obj 				\
 	$(OBJDIR)\directory_iterator_multiple.obj 		\
 	$(OBJDIR)\directory_iterator_preindex.obj 		\
-	$(OBJDIR)\directory_iterator_preindex_internals.obj \
+	$(OBJDIR)\directory_iterator_preindex_internals.obj 	\
 	$(OBJDIR)\directory_iterator_compressor.obj 	\
 	$(OBJDIR)\directory_iterator_deflate.obj 		\
 	$(OBJDIR)\directory_iterator_internals.obj 		\
@@ -300,6 +300,8 @@ PARTS = \
 	$(OBJDIR)\ranking_function_term_count.obj		\
 	$(OBJDIR)\ranking_function_inner_product.obj	\
 	$(OBJDIR)\ranking_function_kbtfidf.obj			\
+	$(OBJDIR)\ranking_function_topsig_positive.obj	\
+	$(OBJDIR)\ranking_function_topsig_negative.obj	\
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
@@ -327,7 +329,7 @@ PARTS = \
 	$(OBJDIR)\atire_broker_param_block.obj			\
 	$(OBJDIR)\atire_broke_engine.obj				\
 	$(OBJDIR)\atire_engine_result_set.obj			\
-	$(OBJDIR)\atire_engine_result_set_export_TREC.obj	\
+	$(OBJDIR)\atire_engine_result_set_export_TREC.obj		\
 	$(OBJDIR)\atire_engine_result_set_export_INEX_snippet.obj	\
 	$(OBJDIR)\atire_broke.obj
 

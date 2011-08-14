@@ -76,6 +76,7 @@ private:
 
 	ANT_index_document *document_indexer;	// the file inverter
 
+	long topsig_width;											// width of the bitstring (dimensions to the vector)
 	ANT_index_document_topsig *topsig_globalstats;				// term statistics if topsig is being used
 	ANT_index_document_topsig_signature *topsig_signature;		// the query signature
 	ANT_ranking_function *topsig_positive_ranking_function;		// the ranking function to use for +ve values in the query vector
