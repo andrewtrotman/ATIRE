@@ -10,6 +10,7 @@
 #include "maths.h"
 #include "mersenne_twister.h"
 
+#define ANT_TOPSIG_USES_TWISTER 1
 
 /*
 	ANT_INDEX_DOCUMENT_TOPSIG_SIGNATURE::ANT_INDEX_DOCUMENT_TOPSIG_SIGNATURE()
@@ -72,6 +73,9 @@ unsigned long long hash, sign, cf;
 long bit;
 double term_weight;
 
+if (ANT_isdigit(*term->string()))
+	return 0.0;
+
 hash = ANT_random_hash_64(term->string(), term->length());
 #ifdef ANT_TOPSIG_USES_TWISTER
 	init_genrand64(hash);
@@ -83,7 +87,7 @@ if ((collection_stats = globalstats->find(term)) == NULL)
 else
 	cf = collection_stats->collection_frequency;
 /*
-	Term weight is log(TF.ICF) but use 1/CL if cf=0 (so that we can use estimated of cf from a differnt collection)
+	Term weight is log(TF.ICF) but use TF/CL if cf=0 (so that we can use estimated of cf from a different collection)
 */
 term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
 
@@ -95,7 +99,7 @@ for (bit = 0; bit < width; bit++)
 		sign = ANT_rand(&seed);
 	#endif
 	if (sign < negative_threshold)
-		vector[bit] += -term_weight;
+		vector[bit] -= term_weight;
 	else if (sign < positive_threshold)
 		vector[bit] += term_weight;
 	}

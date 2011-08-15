@@ -306,7 +306,7 @@ do
 			done = TRUE;
 			break;
 		case 't':
-			topsig(which + 1);
+			topsig(*(which + 1) == '\0' ? which + 1 : which + 2);
 			query_type = ATIRE_API::QUERY_TOPSIG;
 			done = TRUE;
 			break;
@@ -318,7 +318,7 @@ do
 	}
 while (*which != '\0' && done == FALSE);
 
-if ((query_type & (ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI)) == 0)
+if ((query_type & (ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI | ATIRE_API::QUERY_TOPSIG)) == 0)
 	query_type |= ATIRE_API::QUERY_NEXI;
 }
 

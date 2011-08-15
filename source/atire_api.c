@@ -283,6 +283,7 @@ return 0;
 /*
 	ATIRE_API::LOAD_TOPSIG()
 	------------------------
+	returns true on succcess and false of failure
 */
 long ATIRE_API::load_topsig(long width, double density, char *global_stats_file)
 {
@@ -298,6 +299,8 @@ if (topsig_positive_ranking_function == NULL)
 
 if (topsig_negative_ranking_function == NULL)
 	topsig_negative_ranking_function = new ANT_ranking_function_topsig_negative(search_engine);
+
+return true;
 }
 
 /*
@@ -620,7 +623,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	}
 
 /*
-	Prepare an static array structure for sorting
+	Prepare an array structure for sorting
 */
 term_list = new ANT_NEXI_term_ant *[terms_in_query];
 current_term = 0;
@@ -713,19 +716,42 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
+#ifndef NEVER
+	printf("CL:%lld\n", (long long)search_engine->get_collection_length());
+#endif
+//	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, 84708464);
 	}
 
 /*
 	Walk through the signature looking for +ve and -ve values as these are the
 	dimenstions that are used in the query's signature.
 */
+search_engine->set_trim_postings_k(200000);			// REMOVE THIS LINE
 vector = topsig_signature->get_vector();
 for (bit = 0; bit < topsig_width; bit++)
+	{
+#ifdef NEVER
+/*
+	if (bit == 0)
+		printf("QRY:");
+
+	if (vector[bit] == 0)
+		printf(" ");
+	else if (vector[bit] > 0)
+		printf("1");
+	else
+		printf("0");
+
+	if (bit == topsig_width - 1)
+		printf("\n");
+*/
+#endif
 	if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
 		if (vector[bit] > 0)
 			search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
 		else
 			search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
+	}
 
 return terms_in_query;
 }
@@ -736,7 +762,7 @@ return terms_in_query;
 */
 long ATIRE_API::process_topsig_query(char *query)
 {
-return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
+return process_topsig_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
 }
 
 /*
@@ -891,7 +917,11 @@ valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_
 		accumulator_pointers = search_engine->results_list->accumulator_pointers;
 		ANT_bitstring_iterator iterator(valid_result_set);
 
+#ifdef HEAP_K_SEARCH
 		heapk = search_engine->results_list->heapk;		// re-use the results list heap
+#else
+		heapk = new Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare>(*accumulator_pointers, sort_top_k);
+#endif
 
 		added = 0;
 		for (next_relevant_document = iterator.first(); next_relevant_document >= 0; next_relevant_document = iterator.next())
@@ -912,6 +942,10 @@ valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_
 			}
 
 		search_engine->results_list->results_list_length = added < sort_top_k ? added : sort_top_k;
+#ifdef HEAP_K_SEARCH
+#else
+	delete heapk;
+#endif
 		}
 #else
 	for (added = 0; added < documents_in_id_list; added++)

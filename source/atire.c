@@ -518,7 +518,6 @@ switch (params.ranking_function)
 /*
 	ANT_INIT()
 	----------
-
 	Create and return a new API and search engine using the given parameters.
 
 	If the search engine fails to load the index from disk (e.g. sharing violation),
@@ -526,10 +525,10 @@ switch (params.ranking_function)
 */
 ATIRE_API *ant_init(ANT_ANT_param_block & params)
 {
-
-/* Instead of overwriting the global API, create a new one and return it.
- * This way, if loading the index fails, we can still use the old one.
- */
+/*
+	Instead of overwriting the global API, create a new one and return it.
+	This way, if loading the index fails, we can still use the old one.
+*/
 ATIRE_API *atire = new ATIRE_API();
 long fail;
 
@@ -540,6 +539,10 @@ if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	fail = atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
 else
 	fail = atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
+
+if (params.inversion_type == ANT_indexer_param_block_topsig::TOPSIG)
+	atire->load_topsig(params.topsig_width, params.topsig_density, params.topsig_global_stats);
+
 
 if (fail) 
 	{

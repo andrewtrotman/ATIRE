@@ -26,12 +26,10 @@ private:
 	long width;				// with of the signature (in bits)
 	double density;			// number of +ve values in the signature as a percent value (0..100) (also the percent of -ve too, i.e. density * 2 = +ve + -ve)
 	char *stats_file;		// name of the file that contains the cf statistics.  This file can be generated using ant_dictionary
+	char *term_source;		// the contents of the stats file (read at startup and deleted on shutdown)
 
 	ANT_index_document_global_stats *hash_table[HASH_TABLE_SIZE];		// hold the global collection frequency counts
 	long long collection_length_in_terms;								// as is says
-
-	ANT_memory_index_one *document_indexer;					// the object that generates the initial ANT index
-	ANT_index_document_topsig_signature *signature;			// the current signature we're working on
 
 private:
 	long hash(ANT_string_pair *string);

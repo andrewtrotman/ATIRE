@@ -30,7 +30,7 @@ ANT_index_document_topsig::ANT_index_document_topsig(long width, double density,
 {
 long long unique_terms;
 long file_read_error = true;
-char *file, **line, **current, *space;
+char *file, **current, *space, **line = NULL;
 long long cf, uniq_terms;
 
 this->width = width;
@@ -65,8 +65,8 @@ printf("Topsig:Found %lld unique terms in collection of length %lld tokens\n", u
 if (file_read_error)
 	puts("Warning: TopSig cannot fread the frequencies file, defaulting to cf/l = 1");
 
-signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density);
-document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
+term_source = file;
+delete [] line;
 }
 
 /*
@@ -75,8 +75,7 @@ document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 *
 */
 ANT_index_document_topsig::~ANT_index_document_topsig()
 {
-delete signature;
-delete document_indexer;
+delete [] term_source;
 }
 
 /*
@@ -177,12 +176,14 @@ ANT_memory_indexer_node **term_list, **current;
 long length, bit;
 double *vector;
 ANT_string_pair as_string;
+ANT_memory_index_one *document_indexer;					// the object that generates the initial ANT index
+ANT_index_document_topsig_signature *signature;			// the current signature we're working on
 
 /*
 	allocate all the necessary memory
 */
-signature->rewind();
-document_indexer->rewind();
+signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density);
+document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
 
 /*
 	First pass index and get the list of terms and term counts
@@ -201,6 +202,14 @@ for (current = term_list; *current != NULL; current++)
 */
 vector = signature->get_vector();
 for (bit = 0; bit < width; bit++)
+	{
+#ifdef NEVER
+	if (bit == 0)
+		printf("DOC:");
+	printf("%c", vector[bit] >= 0 ? '1' : '0');
+	if (bit == (width - 1))
+		printf("\n");
+#endif
 	if (vector[bit] >= 0)		// positive values and 0 get encoded as a 1, all other values as 0
 		{
 		if (ANT_atosp(&as_string, bit) != NULL)
@@ -208,6 +217,7 @@ for (bit = 0; bit < width; bit++)
 		else
 			exit(printf("TopSig does not support bitstrings as long as %ld bits\n", bit));
 		}
+	}
 /*
 	Set the document's length in terms (needed for tie breaks on equal hamming distance and for search engie initialisation)
 */
@@ -217,6 +227,8 @@ indexer->set_document_length(doc, length);
   clean up and return the length of the document
 */
 delete [] term_list;
+delete document_indexer;
+delete signature;
 
 return length;
 }
