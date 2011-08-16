@@ -726,7 +726,6 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	Walk through the signature looking for +ve and -ve values as these are the
 	dimenstions that are used in the query's signature.
 */
-search_engine->set_trim_postings_k(200000);			// REMOVE THIS LINE
 vector = topsig_signature->get_vector();
 for (bit = 0; bit < topsig_width; bit++)
 	{

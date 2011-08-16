@@ -167,7 +167,7 @@ public:
 			heapk->build_min_heap();
 		}
 	else if (include_set->unsafe_getbit(index))
-		heapk->min_update(which);
+			heapk->min_update(which);
 	else if (score > accumulator_pointers[0]->get_rsv())
 		{
 		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
