@@ -22,6 +22,20 @@ enum ANT_mysql_paging_mode
 	FETCH_RANGE_START_LIMIT /* Fetch in pages by modifying a variable $start in the WHERE clause to seek on row id numbers, and adding a LIMIT clause. Best option! Requires first column selected to be numeric primary key. */
 };
 
+/* phpBB posts query
+
+"SELECT post_id, '<DOC><DOCNO><id>', post_id, '</id><time>', post_time, '</time><subject>', post_subject,
+			'</subject><title>', topic_title, '</title><author>', u.username, '</author><forum>',
+			forum_name ,'</forum></DOCNO>',
+		post_subject, ' ', post_text,
+		'</DOC>'
+FROM phpbb_posts p
+LEFT JOIN phpbb_forums f USING (forum_id)
+LEFT JOIN phpbb_topics t USING (topic_id)
+LEFT JOIN phpbb_users u ON p.poster_id = u.user_id
+WHERE p.post_id > \$start
+ORDER BY post_id ASC" */
+
 MYSQL the_connection, *connection;
 ANT_string_pair query, query_mod;
 MYSQL_RES *result;
@@ -105,7 +119,10 @@ switch (mode)
 		page_remain = MYSQL_FETCH_PAGESIZE;
 
 		if (!query_limit())
+			{
+			fprintf(stderr, "%s\n", mysql_error(connection));
 			return EXIT_FAILURE;
+			}
 
 		docname_col = 0;
 	break;
@@ -134,7 +151,10 @@ switch (mode)
 		page_remain = MYSQL_FETCH_PAGESIZE;
 
 		if (!query_range_start_limit())
+			{
+			fprintf(stderr, "%s\n", mysql_error(connection));
 			return EXIT_FAILURE;
+			}
 
 		docname_col = 1;
 	break;
@@ -198,9 +218,9 @@ while (1)
 
 	field_length = mysql_fetch_lengths(result);
 
-	for (long current = 0; current < fields; current++)
+	for (long current = docname_col; current < fields; current++)
 		if (row[current] != NULL)
-			printf("%.*s ", (int) field_length[current], row[current]);
+			printf("%.*s", (int) field_length[current], row[current]);
 	printf("\n");
 
 	rows_dumped++;

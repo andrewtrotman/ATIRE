@@ -247,6 +247,9 @@ PHP_EXT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 PREGEN_PREC_SOURCES := pregen_precision_measurement.c $(notdir $(SOURCES))
 PREGEN_PREC_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PREGEN_PREC_SOURCES)))
 
+MYSQL_XML_DUMP_SOURCES := mysql_xml_dump.c $(notdir $(SOURCES))
+MYSQL_XML_DUMP_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(MYSQL_XML_DUMP_SOURCES)))
+
 all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
 
 php_ext : $(LIBDIR)/atire.so
@@ -297,6 +300,9 @@ $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 	
 $(BINDIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+
+$(BINDIR)/mysql_xml_dump : $(MYSQL_XML_DUMP_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
 
 .PHONY : clean
