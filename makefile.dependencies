@@ -187,6 +187,7 @@ bin/link_analyse_inex_wikipedia.obj: source/disk.h source/file.h source/fundamen
 bin/link_compute_inlink.obj: source/disk.h source/file.h source/fundamental_types.h
 bin/link_extract_inex_wikipedia.obj: source/str.h source/ctypes.h source/file.h source/fundamental_types.h source/memory.h source/instream_file.h source/instream.h source/instream_bz2.h source/instream_buffer.h source/directory_iterator_tar.h source/directory_iterator.h source/directory_iterator_object.h source/directory_iterator_tar_file_header.h source/directory_iterator_multiple.h source/producer_consumer.h source/semaphores.h source/critical_section.h source/directory_iterator_object.h
 bin/make_unicode_tables.obj: source/unicode.h source/ctypes.h source/unicode_tables.h source/unicode_pair.h source/disk.h
+bin/mysql_xml_dump.obj: source/str.h source/ctypes.h source/string_pair.h source/string_pair_constant.h source/pragma.h source/memory.h source/str.h
 bin/phone.obj: source/phonetic_double_metaphone.h source/phonetic_double_metaphone_internals.h source/str.h source/ctypes.h source/stem.h
 bin/pregen_precision_measurement.obj: source/str.h source/ctypes.h source/file.h source/fundamental_types.h source/disk.h source/pregen.h source/file.h source/search_engine_accumulator.h source/string_pair.h source/string_pair_constant.h source/pragma.h source/memory.h source/str.h source/search_engine_accumulator.h source/indexer_param_block_pregen.h source/pregen.h
 bin/producer_consumer.obj: source/critical_section.h source/semaphores.h source/threads.h

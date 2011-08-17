@@ -152,17 +152,20 @@ template <class Type> Type ANT_min(Type first, Type second, Type third) { return
 #endif
 static inline long long atoll(const unsigned char *string) { return atoll((const char *)string); }
 
-
 /*
-	ANT_RAND()
-	----------
-	random number generator converted from Microsoft's C Run Time Library code
+	ANT_RAND_XORSHIFT64()
+	---------------------
+	64-bit xor-shift random number generator according to:
+	Marsaglia, G., (2003), Xorshift RNGs, Journal of Statistical Software 8(14):1-6
 */
 #define ANT_RAND_MAX 32768
-
-inline int ANT_rand(int *seed)
+inline unsigned long long ANT_rand_xorshift64(unsigned long long *seed)
 {
-return ((*seed = *seed * 214013L + 2531011L) >> 16) & 0x7FFF;
+//static unsigned long long seed = 88172645463325252LL;
+
+*seed ^= (*seed << 13);
+*seed ^= (*seed >> 7);
+return (*seed ^= (*seed << 17));
 }
 
 #endif  /* MATHS_H_ */

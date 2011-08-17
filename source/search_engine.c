@@ -326,7 +326,7 @@ long long now;
 
 now = stats->start_timer();
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	results_list->init_accumulators(top_k > documents ? documents : top_k);
+	results_list->init_accumulators(top_k > documents ? documents + 1 : top_k);		// we add 1 here to prevent the unfortunate repeated re-organisation of the heap when there are number-of-documents in it
 #else
 	results_list->init_accumulators();
 #endif

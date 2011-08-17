@@ -218,6 +218,7 @@ for (bit = 0; bit < width; bit++)
 			exit(printf("TopSig does not support bitstrings as long as %ld bits\n", bit));
 		}
 	}
+
 /*
 	Set the document's length in terms (needed for tie breaks on equal hamming distance and for search engie initialisation)
 */

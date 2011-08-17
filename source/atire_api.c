@@ -716,10 +716,6 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
-#ifndef NEVER
-	printf("CL:%lld\n", (long long)search_engine->get_collection_length());
-#endif
-//	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, 84708464);
 	}
 
 /*
@@ -729,8 +725,8 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 vector = topsig_signature->get_vector();
 for (bit = 0; bit < topsig_width; bit++)
 	{
-#ifdef NEVER
-/*
+#ifndef NEVER
+
 	if (bit == 0)
 		printf("QRY:");
 
@@ -743,7 +739,7 @@ for (bit = 0; bit < topsig_width; bit++)
 
 	if (bit == topsig_width - 1)
 		printf("\n");
-*/
+
 #endif
 	if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
 		if (vector[bit] > 0)
