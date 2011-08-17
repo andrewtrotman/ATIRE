@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sstream>
+#include <string>
 
 #include "../source/str.h"
 #include "../source/string_pair.h"
@@ -66,6 +68,22 @@ if ((result = mysql_store_result(connection)) == NULL)
 return 1;
 }
 
+FILE * open_output_file(std::string prefix, int index)
+{
+std::stringstream filename_buf;
+
+filename_buf << prefix << "." << index << ".xml";
+
+FILE * output = fopen(filename_buf.str().c_str(), "wb");
+
+if (!output)
+	{
+	fprintf(stderr, "Couldn't open output file %s\n", filename_buf.str().c_str());
+	exit(EXIT_FAILURE);
+	}
+
+return output;
+}
 
 int main(int argc, char * argv[])
 {
@@ -78,16 +96,24 @@ long long rows_dumped = 0;
 long long next_page_start = 0;
 ANT_mysql_paging_mode mode;
 
-if (argc < 6)
+FILE * output;
+int output_index = 0;
+std::string output_prefix;
+
+if (argc < 7)
 	{
-	fprintf(stderr, "Usage: <username> <password> <hostname> <database> <query>\n");
+	fprintf(stderr, "Usage: <username> <password> <hostname> <database> <filename_prefix> <query>\n");
 	exit(EXIT_FAILURE);
 	}
+
+output_prefix = argv[5];
+
+output = open_output_file(output_prefix, output_index);
 
 connection = mysql_init(&the_connection);
 mysql_real_connect(connection, argv[3], argv[1], argv[2], argv[4], 0, NULL, CLIENT_COMPRESS);
 
-query.start = strnew(argv[5]);
+query.start = strnew(argv[6]);
 query.string_length = strlen(query.start);
 
 query_mod.start = NULL;
@@ -174,6 +200,7 @@ while (1)
 		/* If there could have been another row, but there wasn't, we're at the end of the dataset */
 		if (mode == FETCH_ALL || page_remain > 0)
 			{
+			fclose(output);
 			fprintf(stderr, "Successfully dumped %lld rows.\n", rows_dumped);
 			return EXIT_SUCCESS;
 			}
@@ -220,9 +247,18 @@ while (1)
 
 	for (long current = docname_col; current < fields; current++)
 		if (row[current] != NULL)
-			printf("%.*s", (int) field_length[current], row[current]);
-	printf("\n");
+			fprintf(output, "%.*s", (int) field_length[current], row[current]);
+	fprintf(output, "\n");
 
 	rows_dumped++;
+
+	if (rows_dumped % (1024*1024) == 0)
+		{
+		fclose(output);
+
+		output_index++;
+
+		output = open_output_file(output_prefix, output_index);
+		}
 	}
 }
