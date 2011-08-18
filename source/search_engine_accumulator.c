@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "search_engine_accumulator.h"
 
-ANT_search_engine_accumulator::compare ANT_search_engine_accumulator::cmp;
+ANT_search_engine_accumulator::compare_rev ANT_search_engine_accumulator::cmp;
 
 /*
 	ANT_SEARCH_ENGINE_ACCUMULATOR::MED3()

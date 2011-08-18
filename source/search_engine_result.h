@@ -151,6 +151,7 @@ public:
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
 	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
+	ANT_search_engine_accumulator::compare cmp;
 
 	init_partial_accumulators(index);
 	old_val = which->get_rsv();
@@ -168,7 +169,7 @@ public:
 		}
 	else if (include_set->unsafe_getbit(index))
 			heapk->min_update(which);
-	else if (score > accumulator_pointers[0]->get_rsv())
+	else if (cmp(which, accumulator_pointers[0]) > 0)
 		{
 		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
 		heapk->min_insert(which);
@@ -181,6 +182,7 @@ public:
 	ANT_search_engine_accumulator *which = accumulator + index;
 	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
 	ANT_search_engine_accumulator::ANT_accumulator_t new_val;
+	ANT_search_engine_accumulator::compare cmp;
 
 	init_partial_accumulators(index);
 	old_val = which->get_rsv();
@@ -198,7 +200,7 @@ public:
 		}
 	else if (include_set->unsafe_getbit(index))
 		heapk->min_update(which);
-	else if (new_val > accumulator_pointers[0]->get_rsv())
+	else if (cmp(which, accumulator_pointers[0]) > 0)
 		{
 		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
 		heapk->min_insert(which);

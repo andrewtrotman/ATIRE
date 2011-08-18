@@ -31,7 +31,7 @@ public:
 	*/
 	typedef ANT_ACCUMULATOR_T ANT_accumulator_t;				// short or double (defined in the makefile)
 
-	struct compare
+	struct compare_rev
 	{
 		int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) const
 		{
@@ -39,10 +39,18 @@ public:
 		}
 	};
 
+	struct compare
+	{
+		int operator() (ANT_search_engine_accumulator *a, ANT_search_engine_accumulator *b) const
+		{
+			return a->rsv > b->rsv ? 1 : a->rsv < b->rsv ? -1 : (a > b ? 1 : a < b ? -1 : 0);
+		}
+	};
+
 private:
 	ANT_accumulator_t rsv;
 
-	static struct compare cmp;
+	static struct compare_rev cmp;
 
 	static inline void swap(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b) { register ANT_search_engine_accumulator *tmp; tmp = *a; *a = *b; *b = tmp; }
 
