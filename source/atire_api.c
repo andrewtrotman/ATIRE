@@ -715,7 +715,10 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+
 	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
+
+	printf("CL:%lld NOTE: this is wrong and code is needed to fix it.\n", (long long)search_engine->get_collection_length());
 	}
 
 /*
@@ -725,7 +728,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 vector = topsig_signature->get_vector();
 for (bit = 0; bit < topsig_width; bit++)
 	{
-#ifndef NEVER
+#ifdef NEVER
 
 	if (bit == 0)
 		printf("QRY:");

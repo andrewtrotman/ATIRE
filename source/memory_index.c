@@ -300,6 +300,7 @@ for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
 		add_indexed_document_node(index->hash_table[node], docno);
 
 largest_docno = docno;
+stats->documents = docno;
 }
 
 /*

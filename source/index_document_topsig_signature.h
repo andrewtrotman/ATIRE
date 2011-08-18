@@ -18,8 +18,6 @@ public:
 	double *vector;
 	long width;
 	double density;
-	unsigned long long negative_threshold;
-	unsigned long long positive_threshold;
 
 public:
 	ANT_index_document_topsig_signature(long width, double density);
