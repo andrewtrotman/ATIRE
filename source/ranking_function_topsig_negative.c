@@ -38,7 +38,10 @@ while (current < end)
 		docid += *current++;
 		while (start < docid)
 			{
-			accumulator->add_rsv(start, (long)1);
+			if (accumulator->is_zero_rsv(docid))
+				accumulator->add_rsv(start, (long)1 + document_prior_probability[start]);
+			else
+				accumulator->add_rsv(start, (long)1);
 			start++;
 			}
 		start = docid + 1;

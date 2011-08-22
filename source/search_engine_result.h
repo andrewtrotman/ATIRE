@@ -58,7 +58,6 @@ public:
 
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new(size_t bytes, ANT_memory *allocator);
-	ANT_search_engine_accumulator &operator[](size_t index) { return accumulator[index]; }
 
 	inline void init_partial_accumulators(long long index)
 	{
@@ -71,6 +70,12 @@ public:
 		memset(accumulator + (row * width), 0, (size_t)(width * sizeof(*accumulator)));
 		}
 #endif
+	}
+
+	inline ANT_search_engine_accumulator &operator[](size_t index)
+	{
+	init_partial_accumulators(index);
+	return accumulator[index];
 	}
 
 #ifdef TOP_K_SEARCH
@@ -213,7 +218,17 @@ public:
 	void add_rsv(long long index, long score) {  init_partial_accumulators(index); accumulator[(size_t)index].add_rsv(score); }
 #endif
 
-	long is_zero_rsv(long long index) { return accumulator[(size_t)index].is_zero_rsv(); }
+	long is_zero_rsv(long long index)
+		{
+#ifdef TWO_D_ACCUMULATORS
+		if (init_flags[index >> width_in_bits] == 0)
+			return 0 == 0;
+		else
+			return accumulator[(size_t)index].is_zero_rsv();
+#else
+		return accumulator[(size_t)index].is_zero_rsv();
+#endif
+		}
 
 #if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 	void init_accumulators(long long top_k);

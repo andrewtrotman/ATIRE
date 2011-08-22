@@ -295,10 +295,10 @@ topsig_globalstats = new ANT_index_document_topsig(width, density, global_stats_
 topsig_signature = new ANT_index_document_topsig_signature(width, density);
 
 if (topsig_positive_ranking_function == NULL)
-	topsig_positive_ranking_function = new ANT_ranking_function_topsig_positive(search_engine);
+	topsig_positive_ranking_function = new ANT_ranking_function_topsig_positive(search_engine, width);
 
 if (topsig_negative_ranking_function == NULL)
-	topsig_negative_ranking_function = new ANT_ranking_function_topsig_negative(search_engine);
+	topsig_negative_ranking_function = new ANT_ranking_function_topsig_negative(search_engine, width);
 
 return true;
 }
@@ -715,10 +715,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-
-	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, search_engine->get_collection_length());
-
-	printf("CL:%lld NOTE: this is wrong and code is needed to fix it.\n", (long long)search_engine->get_collection_length());
+	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, topsig_globalstats->get_collection_length());
 	}
 
 /*
