@@ -68,6 +68,8 @@ long num_positive;
 
 if (ANT_isdigit(*term->string()))
 	return 0.0;
+if (ANT_isupper(*term->string()))
+	return 0.0;
 
 num_positive = (long)(width * (density / 200.0));
 
