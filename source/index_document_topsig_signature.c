@@ -2,8 +2,10 @@
 	INDEX_DOCUMENT_TOPSIG_SIGNATURE.C
 	---------------------------------
 */
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <new>
 #include "hash_table.h"
-#include "new"
 #include "index_document_topsig_signature.h"
 #include "index_document_topsig.h"
 #include "string_pair.h"
@@ -80,6 +82,9 @@ else
 	Term weight is log(TF.ICF) but use TF/CL if cf=0 (so that we can use estimated of cf from a different collection)
 */
 term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+
+if (term_weight < M_E)
+	return 0.0;
 
 for (bit = 0; bit < num_positive; bit++)
 	{
