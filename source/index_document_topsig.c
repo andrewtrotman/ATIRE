@@ -196,8 +196,13 @@ term_list = document_indexer->get_term_list();
 /*
 	Now walk the term list generating the signatures
 */
+length = 0;
 for (current = term_list; *current != NULL; current++)
+	{
 	seed = signature->add_term(this, &((*current)->string), (*current)->term_frequency, length, collection_length_in_terms);
+	if (seed != 0)
+		length++;
+	}
 
 /*
 	Walk the bit string converting +ve and 0 into 1s (i.e. postings in a postings list)

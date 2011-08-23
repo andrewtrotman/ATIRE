@@ -64,34 +64,51 @@ unsigned long long sign, cf, seed;
 double term_weight;
 long bit, num_positive;
 
+/*
+	Hash the term to seed the random number generator
+*/
 seed = ANT_random_hash_64(term->string(), term->length());
 
+/*
+	Check that we should index the term (no numbers, and no XML tags).
+	If we ditch the word then return the hash (because we might need the seed later)
+*/
 if (ANT_isdigit(*term->string()))
 	return seed;
 if (ANT_isupper(*term->string()))
 	return seed;
 
 /*
-	Term weight is log(TF.ICF) but use TF/CL if cf=0 (so that we can use estimated of cf from a different collection)
+	Look up the collection frequency of the term.  It might not be there because
+	the term list might have come from a different collection not containing this
+	term.  In that case default to cf=tf
 */
-term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
-
-#ifdef NEVER
-/*
-	Stop word removal
-*/
-if (term_weight < M_E)
-	return seed;
-#endif
-
-
-num_positive = (long)(width * (density / 200.0));
-
 if ((collection_stats = globalstats->find(term)) == NULL)
 	cf = term_frequency;			// use the term frequency as an estimate of collection frequency if the term is not in the global stats
 else
 	cf = collection_stats->collection_frequency;
 
+/*
+	the term's weight is log(TF.ICF)
+*/
+term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+
+//printf("%*.*s: (%lld/%lld)*(%lld/%lld)=%f\n", term->length(), term->length(), term->string(), (long long)term_frequency, (long long)document_length, (long long)collection_length_in_terms, (long long)cf, term_weight);
+
+/*
+	Stop word removal
+*/
+if (term_weight < M_E)
+	return seed;
+
+/*
+	how many random +ve and -ve numbers do we need?
+*/
+num_positive = (long)(width * (density / 200.0));			// divide by 200 because num_positive = 1/2 num_random, and its a percent
+
+/*
+	add the term's random vector to the document's random vector
+*/
 for (bit = 0; bit < num_positive; bit++)
 	{
 	sign = ANT_rand_xorshift64(&seed) % width;
@@ -101,5 +118,8 @@ for (bit = 0; bit < num_positive; bit++)
 	vector[(size_t)sign] -= term_weight;
 	}
 
+/*
+	return the next seed for the random number generator
+*/
 return seed;
 }

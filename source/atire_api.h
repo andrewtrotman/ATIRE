@@ -6,6 +6,7 @@
 #define ATIRE_API_H_
 
 #include <limits.h>
+#include "btree_iterator.h"
 
 class ANT_NEXI_ant;
 class ANT_NEXI_term_ant;
@@ -41,7 +42,8 @@ public:
 	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8 } ;
 
 private:
-	char token_buffer[1024];				// used to convert parsed string_pairs into C char * strings.
+	char token_buffer[MAX_TERM_LENGTH];			// used to convert parsed string_pairs into C char * strings.
+	char stemmed_token_buffer[MAX_TERM_LENGTH];	// used (in TopSig) to get a stemmed verson of the search term.
 	ANT_memory *memory;						// ATIRE memory allocation scheme
 
 	ANT_NEXI_ant *NEXI_parser;				// INEX CO / CAS queries

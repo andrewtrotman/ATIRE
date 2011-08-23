@@ -715,7 +715,14 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-	topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, topsig_globalstats->get_collection_length());
+
+	if (search_engine->get_stemmer() != NULL)
+		{
+		search_engine->get_stemmer()->stem(token_buffer, stemmed_token_buffer);
+		topsig_signature->add_term(topsig_globalstats, stemmed_token_buffer, 1, 1, topsig_globalstats->get_collection_length());
+		}
+	else
+		topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, topsig_globalstats->get_collection_length());
 	}
 
 /*
@@ -723,40 +730,19 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	dimenstions that are used in the query's signature.
 */
 vector = topsig_signature->get_vector();
+int set = 0;
 for (bit = 0; bit < topsig_width; bit++)
 	{
-#ifdef NEVER
-
-	if (bit == 0)
-		printf("QRY:");
-
-	if (vector[bit] == 0)
-		printf(" ");
-	else if (vector[bit] > 0)
-		printf("1");
-	else
-		printf("0");
-
-	if (bit == topsig_width - 1)
-		printf("\n");
-
-#endif
- 
 	if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
+		{
+		set++;
 		if (vector[bit] > 0)
 			search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
 		else
 			search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
-  
-/*
-	ANT_atosp(&as_string, bit);
-
-	if (vector[bit] > 0)
-		search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
-	else if (vector[bit] < 0)
-		search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
-*/
+		}
 	}
+printf("%d of %lld bits set in query\n", set, (long long)topsig_width);
 
 return terms_in_query;
 }

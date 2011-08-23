@@ -121,6 +121,7 @@ public:
 	long long get_variable(char *name);
 	long long quantized(void) { return is_quantized; }					// true if the index is quantized, false if the index is TF values.
 
+	ANT_stem *get_stemmer(void) { return stemmer; }
 	/*
 		Methods related to the retrieval of documents from the document repository.
 	*/
