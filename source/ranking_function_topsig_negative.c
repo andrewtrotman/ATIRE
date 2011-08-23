@@ -36,9 +36,11 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
+//printf("[%lld]", docid);
 		while (start < docid)
 			{
-			if (accumulator->is_zero_rsv(docid))
+//printf("(%lld)", start);
+			if (accumulator->is_zero_rsv(start))
 				accumulator->add_rsv(start, (long)1 + document_prior_probability[start]);
 			else
 				accumulator->add_rsv(start, (long)1);
@@ -54,7 +56,11 @@ while (current < end)
 */
 while (start < documents_as_integer)
 	{
-	accumulator->add_rsv(start, (long)1);
+//printf("(%lld)", start);
+	if (accumulator->is_zero_rsv(start))
+		accumulator->add_rsv(start, (long)1 + document_prior_probability[start]);
+	else
+		accumulator->add_rsv(start, (long)1);
 	start++;
 	}
 

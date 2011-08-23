@@ -10,6 +10,7 @@
 #include "memory_index_one.h"
 #include "stem.h"
 #include "numbers.h"
+#include "maths.h"
 #include "index_document_topsig.h"
 #include "index_document_topsig_signature.h"
 
@@ -172,8 +173,10 @@ return answer;
 */
 long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
+unsigned long long seed;
 ANT_memory_indexer_node **term_list, **current;
 long length, bit;
+long set, unset, zero;
 double *vector;
 ANT_string_pair as_string;
 ANT_memory_index_one *document_indexer;					// the object that generates the initial ANT index
@@ -195,11 +198,12 @@ term_list = document_indexer->get_term_list();
 	Now walk the term list generating the signatures
 */
 for (current = term_list; *current != NULL; current++)
-	signature->add_term(this, &((*current)->string), (*current)->term_frequency, length, collection_length_in_terms);
+	seed = signature->add_term(this, &((*current)->string), (*current)->term_frequency, length, collection_length_in_terms);
 
 /*
 	Walk the bit string converting +ve and 0 into 1s (i.e. postings in a postings list)
 */
+zero = unset = set = 0;
 vector = signature->get_vector();
 for (bit = 0; bit < width; bit++)
 	{
@@ -210,14 +214,25 @@ for (bit = 0; bit < width; bit++)
 	if (bit == (width - 1))
 		printf("\n");
 #endif
-	if (vector[bit] >= 0)		// positive values and 0 get encoded as a 1, all other values as 0
+	if (vector[bit] > 0)		// positive values and get encoded as a 1
 		{
-		if (ANT_atosp(&as_string, bit) != NULL)
-			indexer->add_term(&as_string, doc);
-		else
-			exit(printf("TopSig does not support bitstrings as long as %ld bits\n", bit));
+		ANT_atosp(&as_string, bit);
+		indexer->add_term(&as_string, doc);
+		set++;
 		}
+	else if (vector[bit] == 0)	// zero values are encoded (systematically) randomly as 0 or 1
+		{
+		zero++;
+		if (ANT_rand_xorshift64(&seed) & 1)
+			{
+			ANT_atosp(&as_string, bit);
+			indexer->add_term(&as_string, doc);
+			}
+		}
+	else
+		unset++;
 	}
+//printf("set:%d zero:%d unset:%d (sum:%d)\n", set, zero, unset, set + zero + unset);
 
 /*
 	Set the document's length in terms (needed for tie breaks on equal hamming distance and for search engie initialisation)

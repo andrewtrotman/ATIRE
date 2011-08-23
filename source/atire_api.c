@@ -741,11 +741,21 @@ for (bit = 0; bit < topsig_width; bit++)
 		printf("\n");
 
 #endif
+ 
 	if (vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
 		if (vector[bit] > 0)
 			search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
 		else
 			search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
+  
+/*
+	ANT_atosp(&as_string, bit);
+
+	if (vector[bit] > 0)
+		search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
+	else if (vector[bit] < 0)
+		search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
+*/
 	}
 
 return terms_in_query;
