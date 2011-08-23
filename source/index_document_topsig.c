@@ -176,7 +176,6 @@ long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_
 unsigned long long seed;
 ANT_memory_indexer_node **term_list, **current;
 long length, bit;
-long set, unset, zero;
 double *vector;
 ANT_string_pair as_string;
 ANT_memory_index_one *document_indexer;					// the object that generates the initial ANT index
@@ -203,36 +202,23 @@ for (current = term_list; *current != NULL; current++)
 /*
 	Walk the bit string converting +ve and 0 into 1s (i.e. postings in a postings list)
 */
-zero = unset = set = 0;
 vector = signature->get_vector();
 for (bit = 0; bit < width; bit++)
 	{
-#ifdef NEVER
-	if (bit == 0)
-		printf("DOC:");
-	printf("%c", vector[bit] >= 0 ? '1' : '0');
-	if (bit == (width - 1))
-		printf("\n");
-#endif
 	if (vector[bit] > 0)		// positive values and get encoded as a 1
 		{
 		ANT_atosp(&as_string, bit);
 		indexer->add_term(&as_string, doc);
-		set++;
 		}
 	else if (vector[bit] == 0)	// zero values are encoded (systematically) randomly as 0 or 1
 		{
-		zero++;
 		if (ANT_rand_xorshift64(&seed) & 1)
 			{
 			ANT_atosp(&as_string, bit);
 			indexer->add_term(&as_string, doc);
 			}
 		}
-	else
-		unset++;
 	}
-//printf("set:%d zero:%d unset:%d (sum:%d)\n", set, zero, unset, set + zero + unset);
 
 /*
 	Set the document's length in terms (needed for tie breaks on equal hamming distance and for search engie initialisation)

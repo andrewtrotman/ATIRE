@@ -11,9 +11,6 @@
 #include "string_pair.h"
 #include "maths.h"
 
-//#define TOPSIG_DEBUG 1
-
-
 /*
 	ANT_INDEX_DOCUMENT_TOPSIG_SIGNATURE::ANT_INDEX_DOCUMENT_TOPSIG_SIGNATURE()
 	--------------------------------------------------------------------------
@@ -69,14 +66,24 @@ long bit, num_positive;
 
 seed = ANT_random_hash_64(term->string(), term->length());
 
-#ifdef TOPSIG_DEBUG
-//	printf("hash(%*.*s)=%llu ", term->length(), term->length(), term->string(), seed);
-#endif
-
 if (ANT_isdigit(*term->string()))
 	return seed;
 if (ANT_isupper(*term->string()))
 	return seed;
+
+/*
+	Term weight is log(TF.ICF) but use TF/CL if cf=0 (so that we can use estimated of cf from a different collection)
+*/
+term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+
+#ifdef NEVER
+/*
+	Stop word removal
+*/
+if (term_weight < M_E)
+	return seed;
+#endif
+
 
 num_positive = (long)(width * (density / 200.0));
 
@@ -85,32 +92,13 @@ if ((collection_stats = globalstats->find(term)) == NULL)
 else
 	cf = collection_stats->collection_frequency;
 
-/*
-	Term weight is log(TF.ICF) but use TF/CL if cf=0 (so that we can use estimated of cf from a different collection)
-*/
-term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
-
-/*
-	Stop word removal
-*/
-if (term_weight < M_E)
-	return seed;
-
 for (bit = 0; bit < num_positive; bit++)
 	{
 	sign = ANT_rand_xorshift64(&seed) % width;
 	vector[(size_t)sign] += term_weight;
-#ifdef TOPSIG_DEBUG
-	printf("(+%d)\n", (size_t)sign);
-#endif
 
 	sign = ANT_rand_xorshift64(&seed) % width;
 	vector[(size_t)sign] -= term_weight;
-#ifdef TOPSIG_DEBUG
-	printf("(-%d)\n", (size_t)sign);
-	if (bit == num_positive-1)
-		puts("");
-#endif
 	}
 
 return seed;
