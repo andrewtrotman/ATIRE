@@ -54,6 +54,7 @@ field_name = NULL;
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::GET_TWO_PARAMETERS()
 	--------------------------------------------------
+	returns the number of parameters correctly parsed
 */
 int ANT_indexer_param_block_rank::get_two_parameters(char *from, double *first, double *second)
 {
@@ -71,9 +72,9 @@ for (ch++; *ch != '\0'; ch++)
 		break;
 		}
 	else if (!(isdigit(*ch) || *ch == '.'))
-		return 0;
+		return 1;
 
-return 1;
+return 2;
 //printf("[%s][%f][%f]\n", from, *first, *second);
 }
 
@@ -110,7 +111,8 @@ char * separator;
 if (strncmp(which, "BM25", 4) == 0)
 	{
 	ranking_function = BM25;
-	return get_two_parameters(which + 4, &bm25_k1, &bm25_b);
+	get_two_parameters(which + 4, &bm25_k1, &bm25_b);
+//	printf("K1=%f B=%f\n", bm25_k1, bm25_b);
 	}
 else if (strncmp(which, "lmd", 3) == 0)
 	{
@@ -167,7 +169,7 @@ else if (strncmp(which, "pregen:", strlen("pregen:")) == 0)
 else if (strcmp(which, "kbtfidf") == 0)
 	{
 	ranking_function = KBTFIDF;
-	return get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
+	get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
 	}
 else
 	return 0; //Unknown Ranking Function
