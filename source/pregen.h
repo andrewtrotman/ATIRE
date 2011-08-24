@@ -128,6 +128,7 @@ public:
 class ANT_pregen_writer_exact_strings : public ANT_pregen_writer
 {
 private:
+	ANT_memory memory;
 	std::pair<long long, char *> *exact_strings;
 
 	uint32_t doc_capacity;
@@ -136,7 +137,7 @@ private:
 	void add_exact_string(char *str);
 public:
 	ANT_pregen_writer_exact_strings(const char * name);
-	ANT_pregen_writer_exact_strings() : ANT_pregen_writer() {};
+	ANT_pregen_writer_exact_strings() : ANT_pregen_writer(), memory(100*1024*1024) {};
 	virtual ~ANT_pregen_writer_exact_strings();
 
 	virtual void print_strings();
@@ -159,9 +160,10 @@ public:
 	ANT_pregens_writer();
 	virtual ~ANT_pregens_writer();
 
-	int add_field(const char * filename, const char * field_name, pregen_field_type type);
+	int add_field(const char *filename, const char *field_name, pregen_field_type type);
 
-	void process_document(long long doc_index, char * doc_name);
+	void process_document(long long doc_index, char *doc_name);
+	void process_document(long long doc_index, ANT_string_pair doc_name);
 
 	void close();
 };

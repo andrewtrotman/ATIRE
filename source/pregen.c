@@ -248,6 +248,16 @@ else
 add_score(generate(type, content));
 }
 
+void ANT_pregens_writer::process_document(long long doc_index, ANT_string_pair doc_name)
+{
+//TODO version which doesn't cause copying...
+char *dup = doc_name.str();
+
+process_document(doc_index, dup);
+
+delete [] dup;
+}
+
 void ANT_pregens_writer::process_document(long long doc_index, char *doc_name)
 {
 char * pos = doc_name;
@@ -468,7 +478,7 @@ exact_integers[doc_count].second = i;
 doc_count++;
 }
 
-ANT_pregen_writer_exact_strings::ANT_pregen_writer_exact_strings(const char *name) : ANT_pregen_writer(STREXACT, name)
+ANT_pregen_writer_exact_strings::ANT_pregen_writer_exact_strings(const char *name) : ANT_pregen_writer(STREXACT, name), memory(100*1024*1024)
 {
 doc_capacity = 1024;
 exact_strings = new std::pair<long long, char*>[doc_capacity];
@@ -482,8 +492,6 @@ exact_integers = new std::pair<long long,long long>[doc_capacity];
 
 ANT_pregen_writer_exact_strings::~ANT_pregen_writer_exact_strings()
 {
-for (int i = 0; i < doc_count; i++)
-	delete [] exact_strings[i].second;
 delete [] exact_strings;
 }
 
@@ -574,6 +582,7 @@ unsigned char *buffer;
 unsigned char * buffer_pos;
 size_t buffer_remain;
 unsigned long long character;
+char * string;
 
 /* It's possible that previous documents didn't contain this field, so be prepared to zero-pad. */
 skip_docs = docindex - doc_count;
@@ -591,7 +600,7 @@ while (skip_docs > 0)
 /* Allocate enough room for worst-case result (actually pretty damn pessimistic) */
 buffer_remain = content.string_length * UTF8_LONGEST_DECOMPOSITION_LEN + 1;
 buffer = new unsigned char[buffer_remain];
-buffer_remain = buffer_remain - 1; //leave room for null terminator
+buffer_remain--; //leave room for null terminator
 
 buffer_pos = buffer;
 
@@ -604,7 +613,11 @@ while (content.string_length > 0 && (character = utf8_to_wide(content.start)) !=
 	}
 *buffer_pos = '\0';
 
-add_exact_string(strnew((char*)buffer));
+//Make a copy of that processed string in our memory pool
+string = (char*)memory.malloc(buffer_pos - buffer + 1);
+memcpy(string, buffer, buffer_pos - buffer + 1);
+
+add_exact_string(string);
 
 delete[] buffer;
 }
