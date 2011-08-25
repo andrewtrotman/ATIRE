@@ -73,9 +73,7 @@ seed = ANT_random_hash_64(term->string(), term->length());
 	Check that we should index the term (no numbers, and no XML tags).
 	If we ditch the word then return the hash (because we might need the seed later)
 */
-if (ANT_isdigit(*term->string()))
-	return seed;
-if (ANT_isupper(*term->string()))
+if (!ANT_islower(*term->string()))
 	return seed;
 
 /*
@@ -92,9 +90,13 @@ else
 	the term's weight is log(TF.ICF)
 */
 #ifdef TOPSIG_PAPER
-term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+	term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
 #else
-term_weight = (double)term_frequency * log(1.0 + ((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+	if (cf <= 1)
+		return seed;
+
+	term_weight = (double)term_frequency * log(1.0 + ((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+	term_weight *= (double)term_frequency;
 #endif
 
 //printf("%*.*s: (%lld/%lld)*(%lld/%lld)=%f\n", term->length(), term->length(), term->string(), (long long)term_frequency, (long long)document_length, (long long)collection_length_in_terms, (long long)cf, term_weight);
@@ -129,3 +131,4 @@ for (bit = 0; bit < num_positive; bit++)
 */
 return seed;
 }
+

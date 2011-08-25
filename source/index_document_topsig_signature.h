@@ -26,6 +26,7 @@ public:
 	void rewind(void);
 	unsigned long long add_term(ANT_index_document_topsig *globalstats, ANT_string_pair *term, long long term_frequency, long long document_length, long long collection_length_in_term);
 	unsigned long long add_term(ANT_index_document_topsig *globalstats, char *term, long long term_frequency, long long document_length, long long collection_length_in_term);
+
 	double *get_vector(void) { return vector; }
 } ;
 
