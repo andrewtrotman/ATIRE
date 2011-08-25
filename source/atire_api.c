@@ -985,11 +985,22 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->parent_path = NULL;
 	term->path.start = NULL;
 	term->sign = 0;
-	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	term->term = parsed_query->feedback_terms[current_feedback]->string.strlower();
 	}
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
 new_query[parsed_query->terms_in_query - 1].next = NULL;
 
+#ifndef NEVER
+	/*
+		This code prints out the expanded query
+	*/
+	{
+	long which;
+	for (which = 0; new_query[which].next != NULL; which++)
+		printf("%*.*s ", new_query[which].term.length(), new_query[which].term.length(), new_query[which].term.string());
+	printf("%*.*s\n", new_query[which].term.length(), new_query[which].term.length(), new_query[which].term.string());
+	}
+#endif
 
 if (parsed_query->type & QUERY_BOOLEAN)
 	delete [] parsed_query->NEXI_query;

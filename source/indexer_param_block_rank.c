@@ -250,3 +250,4 @@ switch (ranking_function)
 	}
 return NULL;
 }
+
