@@ -76,6 +76,7 @@ index_file = NULL;
 open_index_file(filename);
 document_filenames = NULL;
 document_filenames_used = document_filenames_chunk_size;
+static_prune_point = -1;
 }
 
 /*
@@ -310,7 +311,7 @@ stats->documents = docno;
 long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
 {
 ANT_compressable_integer sum, bucket_size[0x100], bucket_prev_docid[0x100];
-ANT_compressable_integer *pointer[0x100], *current_docid, doc;
+ANT_compressable_integer *pointer[0x100], *current_docid, doc, *zero_point;
 unsigned char *current, *end;
 long bucket, buckets_used;
 
@@ -334,15 +335,18 @@ for (current = term_frequency; current < end; current++)
 /*
 	Compute the location of the pointers for each bucket
 */
+zero_point = NULL;
 buckets_used = sum = 0;
 for (bucket = 0xFF; bucket >= 0; bucket--)
 	{
 	pointer[bucket] = destination + sum + 2 * buckets_used;
-	sum += bucket_size[bucket];
 	if (bucket_size[bucket] != 0)
 		{
 		*pointer[bucket]++ = bucket;
 		buckets_used++;
+		if (sum < static_prune_point && (sum + bucket_size[bucket]) >= static_prune_point)
+			zero_point = pointer[bucket] + (static_prune_point - sum);
+		sum += bucket_size[bucket];
 		}
 	}
 
@@ -369,7 +373,16 @@ for (bucket = 0; bucket < 0x100; bucket++)
 /*
 	The first frequency or impact-value is the max local impact for the term
 */
-*max_local = ((unsigned char*)destination)[0];
+*max_local = (unsigned char)destination[0];
+
+/*
+	Should we static print the postings list?
+*/
+if (zero_point != NULL)
+	{
+	*zero_point = 0;
+	return zero_point - destination + 1;		// +1 to include the zero_point
+	}
 
 /*
 	Return the length of the impact ordered list

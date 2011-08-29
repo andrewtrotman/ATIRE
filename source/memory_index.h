@@ -54,6 +54,8 @@ private:
 	unsigned char *compressed_postings_list;
 	long long compressed_postings_list_length;
 
+	long long static_prune_point;					// this is the maximum number of postings allowed in an impact (or tf) ordered postings list
+
 	ANT_file *index_file;
 
 	/*
