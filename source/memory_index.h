@@ -38,6 +38,7 @@ public:
 
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
+	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2 };
 
 private:
 	long hashed_squiggle_length;
@@ -55,6 +56,7 @@ private:
 	long long compressed_postings_list_length;
 
 	long long static_prune_point;					// this is the maximum number of postings allowed in an impact (or tf) ordered postings list
+	long stop_word_removal_mode;					// remove cf-singletons or df-singletons (etc.)
 
 	ANT_file *index_file;
 
@@ -104,6 +106,8 @@ private:
 
 	void add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 
+	long should_prune(ANT_memory_index_hash_node *term);
+
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
@@ -129,6 +133,7 @@ public:
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
+	virtual void set_term_culling(long mode) {stop_word_removal_mode = mode; }
 } ;
 
 /*

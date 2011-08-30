@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "memory_index.h"
 #include "maths.h"
 #include "indexer_param_block.h"
 #include "compression_text_factory.h"
@@ -42,6 +43,7 @@ document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
 static_prune_point = LLONG_MAX;
+stop_word_removal = ANT_memory_index::NONE;
 }
 
 /*
@@ -154,6 +156,11 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
+puts("-k[-lL]         Term culling");
+puts("   -            All terms remain in the indes [default]");
+puts("   l            Remove low frequency terms (where collection frequency == 1)");
+puts("   L            Remove low frequency terms (where document frequency == 1)");
+puts("");
 
 exit(0);
 }
@@ -265,6 +272,24 @@ for (stat = stat_list; *stat != '\0'; stat++)
 }
 
 /*
+	ANT_INDEXER_PARAM_BLOCK::TERM_REMOVAL()
+	---------------------------------------
+*/
+void ANT_indexer_param_block::term_removal(char *mode_list)
+{
+char *which;
+
+for (which = mode_list; *which != '\0'; which++)
+	switch (*which)
+		{
+		case '-': stop_word_removal = ANT_memory_index::NONE; break;
+		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
+		case 'L': stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS | ANT_memory_index::PRUNE_CF_SINGLETONS; break;
+		default : exit(printf("Unknown term cull parameter: '%c'\n", *which)); break;
+		}
+}
+
+/*
 	ANT_INDEXER_PARAM_BLOCK::PARSE()
 	--------------------------------
 */
@@ -312,6 +337,8 @@ for (param = 1; param < argc; param++)
 			help();
 		else if (strcmp(command, "H") == 0)
 			help();
+		else if (*command == 'k')
+			term_removal(command + 1);
 		else if (*command == 'K')
 			{
 			if ((static_prune_point = atoll(command + 1)) <= 0)

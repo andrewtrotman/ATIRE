@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "maths.h"
 #include "memory.h"
 #include "search_engine.h"
 #include "btree_iterator.h"
@@ -77,6 +78,7 @@ char *term, *first_term, *last_term;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
 search_engine.open();
+long long global_trim = search_engine.get_global_trim_postings_k();
 ANT_btree_iterator iterator(&search_engine);
 ANT_search_engine_btree_leaf leaf;
 ANT_compression_factory factory;
@@ -107,7 +109,7 @@ for (param = 1; param < argc; param++)
 	else if (strcmp(argv[param], "-p") == 0)
 		print_postings = TRUE;
 	else
-		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<sounded>] [-u<nicodeWideChars>] [-p<rintPostings>]\n", argv[0]));
+		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>]\n", argv[0]));
 	}
 
 postings_list = (unsigned char *)malloc((size_t)postings_list_size);
@@ -157,7 +159,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				raw = (ANT_compressable_integer *)realloc(raw, (size_t)raw_list_size);
 				}
 			factory.decompress(raw, postings_list, leaf.impacted_length);
-			max = process((ANT_compressable_integer *)raw, leaf.local_document_frequency, print_postings);
+			max = process((ANT_compressable_integer *)raw, ANT_min(leaf.local_document_frequency, global_trim), print_postings);
 
 			if (max > search_engine.document_count())
 				printf(" Largest Docno:%lld MAX IS TOO LARGE!", (long long)max);

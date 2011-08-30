@@ -508,55 +508,82 @@ return impacted_postings_length;
 }
 
 /*
+	ANT_MEMORY_INDEX::SHOULD_PRUNE()
+	--------------------------------
+*/
+inline long ANT_memory_index::should_prune(ANT_memory_index_hash_node *term)
+{
+if (term->collection_frequency == 1 && (stop_word_removal_mode & PRUNE_CF_SINGLETONS) != 0)
+	return true;
+else if (term->document_frequency == 1 && (stop_word_removal_mode & PRUNE_DF_SINGLETONS) != 0)
+	return true;
+else
+	return false;
+}
+
+/*
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */
 long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
-long terms = 1;
+long terms = 0;
 long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
-
-stats->term_occurences += root->collection_frequency;
 
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
 
-//printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
-get_serialised_postings(root, &doc_size, &tf_size);
+if (!should_prune(root))
+	{
+	terms += 1;
 
-stats->bytes_to_store_docids += doc_size;
-stats->bytes_to_store_tfs += tf_size;
+	stats->term_occurences += root->collection_frequency;
+	//printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
+	get_serialised_postings(root, &doc_size, &tf_size);
 
-impacted_postings_length = node_to_postings(root);
+	stats->bytes_to_store_docids += doc_size;
+	stats->bytes_to_store_tfs += tf_size;
 
-/*
-	At this point the impact ordered (not compressed) postings list is in impacted_postings
-	and the first 2 elements of decompressed_postings_list are the first 2 numbers (which are
-	then shoved in the vocab file to save space (and a seek)).  impacted_postings_length stores
-	the length of the impacted_postings array (in integers)
-*/
-#ifdef SPECIAL_COMPRESSION
-	if (root->document_frequency <= 2)
-		{
-		/*
-			Store the first postings(4 bytes) in the higher order of the 8 bytes
-			and store the first term frequency (4 bytes) in the lower order of the 8 bytes
-		*/
-		root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
+	impacted_postings_length = node_to_postings(root);
 
-		/*
-			Use impacted_length and end_pos_on_disk to store the second postings and term frequency
-		*/
-		if (root->document_frequency == 2)
+	/*
+		At this point the impact ordered (not compressed) postings list is in impacted_postings
+		and the first 2 elements of decompressed_postings_list are the first 2 numbers (which are
+		then shoved in the vocab file to save space (and a seek)).  impacted_postings_length stores
+		the length of the impacted_postings array (in integers)
+	*/
+	#ifdef SPECIAL_COMPRESSION
+		if (root->document_frequency <= 2)
 			{
-			root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
-			root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk;		// because root->docids_pos_on_disk is subtracted later
+			/*
+				Store the first postings(4 bytes) in the higher order of the 8 bytes
+				and store the first term frequency (4 bytes) in the lower order of the 8 bytes
+			*/
+			root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
+
+			/*
+				Use impacted_length and end_pos_on_disk to store the second postings and term frequency
+			*/
+			if (root->document_frequency == 2)
+				{
+				root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
+				root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk;		// because root->docids_pos_on_disk is subtracted later
+				}
+			else
+				root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
 			}
 		else
-			root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
-		}
-	else
-		{
+			{
+			len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+
+			current_disk_position = file->tell();
+			file->write(compressed_postings_list, len);
+
+			root->in_disk.docids_pos_on_disk = current_disk_position;
+			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+			root->in_disk.end_pos_on_disk = file->tell();
+			}
+	#else
 		len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
 		current_disk_position = file->tell();
@@ -565,17 +592,8 @@ impacted_postings_length = node_to_postings(root);
 		root->in_disk.docids_pos_on_disk = current_disk_position;
 		root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 		root->in_disk.end_pos_on_disk = file->tell();
-		}
-#else
-	len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
-
-	current_disk_position = file->tell();
-	file->write(compressed_postings_list, len);
-
-	root->in_disk.docids_pos_on_disk = current_disk_position;
-	root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-	root->in_disk.end_pos_on_disk = file->tell();
-#endif
+	#endif
+	}
 
 if (root->left != NULL)
 	terms += serialise_all_nodes(file, root->left);
@@ -598,29 +616,40 @@ if (root->right != NULL)
 	terms = generate_term_list(root->right, into, where, length_of_longest_term, highest_df);
 
 /*
-	Deal with the current node
+	Only include this term if its not stopped somehow
 */
-into[where + terms] = root;
+if (!should_prune(root))
+	{
+	/*
+		Deal with the current node
+	*/
+	into[where + terms] = root;
 
-/*
-	Compute the string length of the longest string
-*/
-if ((term_length = (long)root->string.length()) > *length_of_longest_term)
-	*length_of_longest_term = term_length;
+	/*
+		Compute the string length of the longest string
+	*/
+	if ((term_length = (long)root->string.length()) > *length_of_longest_term)
+		*length_of_longest_term = term_length;
 
-/*
-	Compute the highest DF value
-*/
-if (root->document_frequency > *highest_df)
-	*highest_df = root->document_frequency;
+	/*
+		Compute the highest DF value
+	*/
+	if (root->document_frequency > *highest_df)
+		*highest_df = root->document_frequency;
+
+	/*
+		And yes, we were a term
+	*/
+	terms++;
+	}
 
 /*
 	Recurse left
 */
 if (root->left != NULL)
-	terms += generate_term_list(root->left, into, where + terms + 1, length_of_longest_term, highest_df);
+	terms += generate_term_list(root->left, into, where + terms, length_of_longest_term, highest_df);
 
-return terms + 1;
+return terms;
 }
 
 /*

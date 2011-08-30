@@ -38,7 +38,7 @@ printf("-t[-DhkloOpsS]");
 if (has_cutoff)
 	printf("[+-<th>] ");
 else
-	printf("    ");
+	printf("  ");
 printf("Term expansion, one of:\n");
 
 puts("  -             None [default]");

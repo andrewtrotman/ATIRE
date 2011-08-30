@@ -38,6 +38,7 @@ public:
 	char *doclist_filename;				// name of file containing the internal docid to external docid translations
 	char *index_filename;				// name of index file
 	long long static_prune_point;		// maximum length of a postings list measured in document IDs
+	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
 
 protected:
 	void document_compression(char *scheme);
@@ -45,6 +46,7 @@ protected:
 	void readability(char *measures);
 	void stats(char *stat_list);
 	void segment(char *segment_flag);
+	void term_removal(char *list);
 
 public:
 	ANT_indexer_param_block(int argc, char *argv[]);
