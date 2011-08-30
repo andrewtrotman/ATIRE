@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "maths.h"
 #include "indexer_param_block.h"
 #include "compression_text_factory.h"
 #include "compression_factory.h"
@@ -40,6 +41,7 @@ ranking_function = IMPACT;
 document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
+static_prune_point = LLONG_MAX;
 }
 
 /*
@@ -135,6 +137,7 @@ puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
 ANT_indexer_param_block_stem::help(FALSE);
+ANT_indexer_param_block_topsig::help();
 
 puts("REPORTING");
 puts("---------");
@@ -148,7 +151,9 @@ puts("   s            Summary statistics");
 puts("   t            Timings");
 puts("");
 
-ANT_indexer_param_block_topsig::help();
+puts("OPTIMISATIONS");
+puts("-------------");
+puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
 
 exit(0);
 }
@@ -307,6 +312,11 @@ for (param = 1; param < argc; param++)
 			help();
 		else if (strcmp(command, "H") == 0)
 			help();
+		else if (*command == 'K')
+			{
+			if ((static_prune_point = atoll(command + 1)) <= 0)
+				static_prune_point = LLONG_MAX;
+			}
 		else if (*command == 'N')
 			{
 			reporting_frequency = atol(command + 1);

@@ -112,11 +112,13 @@ public:
 	ANT_memory_index(char *filename);
 	virtual ~ANT_memory_index();
 
+	void set_variable(char *measure_name, long long score);
 	void set_variable(ANT_string_pair *measure_name, long long score);
 
 	void text_render(long what);
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
+
 	void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
 	long serialise(ANT_ranking_function_factory *factory);
 
@@ -126,8 +128,8 @@ public:
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+	virtual void set_static_pruning(long long k) { static_prune_point = k; }
 } ;
-
 
 /*
 	ANT_MEMORY_INDEX::NEW_MEMORY_INDEX_HASH_NODE()

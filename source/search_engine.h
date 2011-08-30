@@ -70,7 +70,8 @@ protected:
 	ANT_compressable_integer *document_lengths;
 	double mean_document_length;
 	long long stem_buffer_length_in_bytes;
-	long long trim_postings_k;
+	long long trim_postings_k;				// the query-based static pruning point (as set in the query)
+	long long global_trim_postings_k;		// the index-based static pruning point (as set by the indexer)
 	long long collection_length_in_terms;
 	long long is_quantized;					// true if the index is quantized, false if the index is TF values.
 

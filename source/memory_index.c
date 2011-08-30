@@ -233,6 +233,17 @@ node->add_posting(score);
 	ANT_MEMORY_INDEX::SET_VARIABLE()
 	--------------------------------
 */
+void ANT_memory_index::set_variable(char *measure_name, long long score)
+{
+ANT_string_pair squiggle(measure_name);
+
+set_variable(&squiggle, score);
+}
+
+/*
+	ANT_MEMORY_INDEX::SET_VARIABLE()
+	--------------------------------
+*/
 void ANT_memory_index::set_variable(ANT_string_pair *measure_name, long long score)
 {
 long hash_value;
@@ -761,8 +772,6 @@ ANT_memory_index_hash_node *node;
 double max_rsv_for_node, min_rsv_for_node;
 long long doc_size, tf_size;
 long long timer;
-ANT_string_pair squiggle_document_filenames_start("~documentfilenamesstart");
-ANT_string_pair squiggle_document_filenames_finish("~documentfilenamesfinish");
 long long pos;
 
 /*
@@ -793,11 +802,17 @@ if (find_node(hash_table[hash(&squiggle_document_offsets)], &squiggle_document_o
 if (document_filenames != NULL)
 	{
 	pos = index_file->tell();
-	set_variable(&squiggle_document_filenames_start, pos);
+	set_variable("~documentfilenamesstart", pos);
 	serialise_filenames(document_filenames);
 	pos = index_file->tell();
-	set_variable(&squiggle_document_filenames_finish, pos);
+	set_variable("~documentfilenamesfinish", pos);
 	}
+
+/*
+	if the index is static pruned
+*/
+if (static_prune_point < largest_docno)
+	set_variable("~trimpoint", static_prune_point);
 
 /*
 	If we want to quantize the ranking scores for impact ordering in the index then
@@ -824,8 +839,7 @@ if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths)) 
 	/*
 		Store (in the index) the fact that we're a quantized index
 	*/
-	ANT_string_pair squiggle_quantized("~quantized");
-	set_variable(&squiggle_quantized, 1);
+	set_variable("~quantized", 1);
 
 	/*
 		Now compute the maximum impact score across the collection

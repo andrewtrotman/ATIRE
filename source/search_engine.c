@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <limits.h>
+#include "maths.h"
 #include "ctypes.h"
 #include "search_engine.h"
 #include "file_memory.h"
@@ -36,7 +36,7 @@
 */
 ANT_search_engine::ANT_search_engine(ANT_memory *memory, long memory_model)
 {
-trim_postings_k = LONG_MAX;
+trim_postings_k = global_trim_postings_k = LONG_MAX;
 stats = new ANT_stats_search_engine(memory);
 stats_for_all_queries = new ANT_stats_search_engine(memory);
 this->memory = memory;
@@ -252,6 +252,8 @@ if ((which_stemmer = get_variable("~stemmer")) != 0)
 	}
 
 is_quantized = get_variable("~quantized");
+if ((global_trim_postings_k = get_variable("~trimpoint")) == 0)
+	global_trim_postings_k = LONG_MAX;									// trim at 0 means no trimming
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
 
@@ -546,9 +548,11 @@ void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *te
 {
 void *verify;
 long long now, bytes_already_read;
+long long trim_postings_k;
 
 if (term_details != NULL && term_details->local_document_frequency > 0)
 	{
+	trim_postings_k = ANT_min(this->trim_postings_k, this->global_trim_postings_k);
 	bytes_already_read = index->get_bytes_read();
 	now = stats->start_timer();
 
@@ -735,7 +739,7 @@ if (verify != NULL)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, trim_postings_k, 1, 1);
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), 1, 1);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 

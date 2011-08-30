@@ -37,6 +37,7 @@ public:
 	long document_compression_scheme;	// should we and how should we store the documents in the repository?
 	char *doclist_filename;				// name of file containing the internal docid to external docid translations
 	char *index_filename;				// name of index file
+	long long static_prune_point;		// maximum length of a postings list measured in document IDs
 
 protected:
 	void document_compression(char *scheme);
