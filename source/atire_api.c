@@ -985,7 +985,7 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->parent_path = NULL;
 	term->path.start = NULL;
 	term->sign = 0;
-	term->term = parsed_query->feedback_terms[current_feedback]->string.strlower();
+	term->term = parsed_query->feedback_terms[current_feedback]->string;
 	}
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
 new_query[parsed_query->terms_in_query - 1].next = NULL;

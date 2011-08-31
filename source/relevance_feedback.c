@@ -64,12 +64,15 @@ else
 void ANT_relevance_feedback::add_to_index(char *document)
 {
 char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
-ANT_string_pair *token;
+//ANT_string_pair *token;
+ANT_parser_token *token;
 long long length_in_terms;
 
 parser->set_document((unsigned char *)document);
 length_in_terms = one->get_document_length();
 while ((token = parser->get_next_token()) != NULL)
+	{
+	/*
 	if (ANT_isalpha(*token->start))
 		{
 		if (search_engine->stemmer == NULL || !ANT_islower(*token->start))
@@ -83,6 +86,21 @@ while ((token = parser->get_next_token()) != NULL)
 			}
 		length_in_terms++;
 		}
+	*/
+	if (token->type == TT_WORD)
+		{
+		if (search_engine->stemmer == NULL || token->string_length < 3)
+			one->add_term(token->normalized_pair());
+		else
+			{
+			token->normalized_pair()->strncpy(term, MAX_TERM_LENGTH);
+			search_engine->stemmer->stem(term, token_stem_internals);
+			ANT_string_pair token_stem(token_stem_internals);
+			one->add_term(&token_stem);
+			}
+		length_in_terms++;
+		}
+	}
 one->set_document_length(1, length_in_terms);		// reset the length
 }
 
