@@ -121,9 +121,9 @@ else
 	parser = new ANT_parser_readability();
 
 if (param_block.inversion_type == ANT_indexer_param_block::TOPSIG)
-	document_indexer = new ANT_index_document_topsig(param_block.topsig_width, param_block.topsig_density, param_block.topsig_global_stats);
+	document_indexer = new ANT_index_document_topsig(param_block.stop_word_removal, param_block.topsig_width, param_block.topsig_density, param_block.topsig_global_stats);
 else
-	document_indexer = new ANT_index_document();
+	document_indexer = new ANT_index_document(param_block.stop_word_removal);
 
 if (param_block.stemmer != 0)
 	{

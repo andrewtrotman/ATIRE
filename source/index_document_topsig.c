@@ -27,12 +27,12 @@ return ANT_hash_24(string);
 	ANT_INDEX_DOCUMENT_TOPSIG::ANT_INDEX_DOCUMENT_TOPSIG()
 	------------------------------------------------------
 */
-ANT_index_document_topsig::ANT_index_document_topsig(long width, double density, char *global_stats_file)
+ANT_index_document_topsig::ANT_index_document_topsig(long stop_mode, long width, double density, char *global_stats_file) : ANT_index_document(stop_mode)
 {
 long long unique_terms;
 long file_read_error = true;
 char *file, **current, *space, **line = NULL;
-long long cf, uniq_terms;
+long long cf, df, uniq_terms;
 
 this->width = width;
 this->density = density;
@@ -51,10 +51,18 @@ if ((file = ANT_disk::read_entire_file(global_stats_file)) != NULL)
 				while (!ANT_isdigit(*space) && *space != '\0')
 					space++;
 				cf = ANT_atoi64(space);
-//				printf("Found:[%s]:%lld\n", *current, cf);
+
+				while (ANT_isdigit(*space) && *space != '\0')
+					space++;
+				while (!ANT_isdigit(*space) && *space != '\0')
+					space++;
+				df = ANT_atoi64(space);
+
+//				printf("Found:[%s]:%lld %lld\n", *current, cf, df);
+
 				if (**current != '~')
 					{
-					add(*current, cf);
+					add(*current, cf, df);
 					uniq_terms++;
 					collection_length_in_terms += cf;
 					}
@@ -151,7 +159,7 @@ return root;
 	ANT_INDEX_DOCUMENT_TOPSIG::ADD()
 	--------------------------------
 */
-ANT_index_document_global_stats *ANT_index_document_topsig::add(char *string, long long collection_frequency)
+ANT_index_document_global_stats *ANT_index_document_topsig::add(char *string, long long collection_frequency, long long document_frequency)
 {
 ANT_index_document_global_stats *answer;
 ANT_string_pair string_as_pair(string);
@@ -163,6 +171,7 @@ else
 	answer = find_add_node(hash_table[hash_value], &string_as_pair);
 
 answer->collection_frequency = collection_frequency;
+answer->document_frequency = document_frequency;
 
 return answer;
 }
@@ -184,7 +193,7 @@ ANT_index_document_topsig_signature *signature;			// the current signature we're
 /*
 	allocate all the necessary memory
 */
-signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density);
+signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density, stopword_mode);
 document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
 
 /*

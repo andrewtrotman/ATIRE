@@ -17,6 +17,7 @@ public:
 	ANT_index_document_global_stats *left, *right;
 	ANT_string_pair term;
 	long long collection_frequency;
+	long long document_frequency;
 
 public:
 	ANT_index_document_global_stats(ANT_string_pair *string)	{ left = right = 0; term.start = string->start; term.string_length = string->string_length; collection_frequency = 1; }

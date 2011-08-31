@@ -97,23 +97,29 @@ while ((token = readability->get_next_token()) != NULL)
 					token->normalized_pair()->strncpy(term, MAX_TERM_LENGTH);
 					stemmer->stem(term, token_stem_internals);
 					ANT_string_pair token_stem(token_stem_internals);
-					readability->handle_node(indexer->add_term(&token_stem, doc));			// indexable the stem of the term
+					readability->handle_node(indexer->add_term(&token_stem, doc));				// indexable the stem of the term
 					}
 				}
 			break;
 		case TT_NUMBER:
+			if ((stopword_mode & ANT_memory_index::PRUNE_NUMBERS) != 0)
+				break;
 			terms_in_document++;
 			readability->handle_node(indexer->add_term(token->normalized_pair(), doc));			// indexable term
 			break;
 		case TT_TAG_OPEN:
-			readability->handle_node(indexer->add_term(token, doc));			// open tag
+			if ((stopword_mode & ANT_memory_index::PRUNE_TAGS) == 0)
+				readability->handle_node(indexer->add_term(token, doc));						// open tag
 			break;
 		case TT_TAG_CLOSE:
+			//no-op
+			break;
 		case TT_PUNCTUATION:
 			//no-op
 			break;
 		default:
-			;
+			//no-op
+			break;
 		}
 	}
 

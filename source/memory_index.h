@@ -38,7 +38,7 @@ public:
 
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
-	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2 };
+	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8 };
 
 private:
 	long hashed_squiggle_length;

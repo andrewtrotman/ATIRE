@@ -291,7 +291,7 @@ delete topsig_globalstats;
 delete topsig_signature;
 
 topsig_width = width;
-topsig_globalstats = new ANT_index_document_topsig(width, density, global_stats_file);
+topsig_globalstats = new ANT_index_document_topsig(ANT_memory_index::NONE, width, density, global_stats_file);
 topsig_signature = new ANT_index_document_topsig_signature(width, density);
 
 if (topsig_positive_ranking_function == NULL)

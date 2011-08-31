@@ -15,12 +15,13 @@ class ANT_string_pair;
 class ANT_index_document_topsig_signature
 {
 public:
-	double *vector;
-	long width;
-	double density;
+	double *vector;						// the vector (it is of width dimensions)
+	long width;							// width of the singature in bits (the vector in dimensions)
+	double density;						// % of bits to set per term
+	long stopword_mode;					// should we stop when cf==1, etc
 
 public:
-	ANT_index_document_topsig_signature(long width, double density);
+	ANT_index_document_topsig_signature(long width, double density, long stopword_mode = 0);
 	~ANT_index_document_topsig_signature();
 
 	void rewind(void);

@@ -5,6 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <new>
+#include "memory_index.h"
 #include "hash_table.h"
 #include "index_document_topsig_signature.h"
 #include "index_document_topsig.h"
@@ -15,10 +16,11 @@
 	ANT_INDEX_DOCUMENT_TOPSIG_SIGNATURE::ANT_INDEX_DOCUMENT_TOPSIG_SIGNATURE()
 	--------------------------------------------------------------------------
 */
-ANT_index_document_topsig_signature::ANT_index_document_topsig_signature(long width, double density)
+ANT_index_document_topsig_signature::ANT_index_document_topsig_signature(long width, double density, long stopword_mode)
 {
 this->width = width;
 this->density = density;
+this->stopword_mode = stopword_mode;
 
 vector = new (std::nothrow) double[width];
 rewind();
@@ -60,7 +62,7 @@ return add_term(globalstats, &pair, term_frequency, document_length, collection_
 unsigned long long ANT_index_document_topsig_signature::add_term(ANT_index_document_topsig *globalstats, ANT_string_pair *term, long long term_frequency, long long document_length, long long collection_length_in_terms)
 {
 ANT_index_document_global_stats *collection_stats;
-unsigned long long sign, cf, seed;
+unsigned long long sign, cf, df, seed;
 double term_weight;
 long bit, num_positive;
 
@@ -70,36 +72,35 @@ long bit, num_positive;
 seed = ANT_random_hash_64(term->string(), term->length());
 
 /*
-	Check that we should index the term (no numbers, and no XML tags).
-	If we ditch the word then return the hash (because we might need the seed later)
-*/
-if (!ANT_islower(*term->string()))
-	return seed;
-
-/*
 	Look up the collection frequency of the term.  It might not be there because
 	the term list might have come from a different collection not containing this
 	term.  In that case default to cf=tf
 */
 if ((collection_stats = globalstats->find(term)) == NULL)
-	cf = term_frequency;			// use the term frequency as an estimate of collection frequency if the term is not in the global stats
+	cf = df = term_frequency;			// use the term frequency as an estimate of collection frequency if the term is not in the global stats
 else
+	{
 	cf = collection_stats->collection_frequency;
+	df = collection_stats->document_frequency;
+	}
 
 /*
-	the term's weight is log(TF.ICF)
+	We now (optionally) prune terms with cf==1 or df==1
 */
-#ifdef TOPSIG_PAPER
+if (cf == 1 && (stopword_mode & ANT_memory_index::PRUNE_CF_SINGLETONS) != 0)
+	return seed;
+else if (df == 1 && (stopword_mode & ANT_memory_index::PRUNE_DF_SINGLETONS) != 0)
+	return seed;
+
+/*
+	In the TopSig paper the weight is reported as:log(TF.ICF), for which the source code is:
+
 	term_weight = log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
-#else
-	if (cf <= 1)
-		return seed;
 
-	term_weight = (double)term_frequency * log(1.0 + ((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
-	term_weight *= (double)term_frequency;
-#endif
-
-//printf("%*.*s: (%lld/%lld)*(%lld/%lld)=%f\n", term->length(), term->length(), term->string(), (long long)term_frequency, (long long)document_length, (long long)collection_length_in_terms, (long long)cf, term_weight);
+	However this does not work at all well.  Tim's code uses: (tf*tf) * log(TF.ICF)
+	I suspect Shlomo's code does something slightly different but I've never seen that code
+*/
+term_weight = (double)term_frequency * (double)term_frequency * log(1.0 + ((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
 
 #ifndef NEVER
 /*

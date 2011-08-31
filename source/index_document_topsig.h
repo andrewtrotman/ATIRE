@@ -37,11 +37,11 @@ private:
 protected:
 	ANT_index_document_global_stats *find_node(ANT_index_document_global_stats *root, ANT_string_pair *string);
 	ANT_index_document_global_stats *find_add_node(ANT_index_document_global_stats *root, ANT_string_pair *string);
-	ANT_index_document_global_stats *add(char *string, long long collection_frequency);
+	ANT_index_document_global_stats *add(char *string, long long collection_frequency, long long document_frequency);
 	ANT_index_document_global_stats *find(ANT_string_pair *string);
 
 public:
-	ANT_index_document_topsig(long width, double density, char *global_stats_file);
+	ANT_index_document_topsig(long stop_mode, long width, double density, char *global_stats_file);
 	virtual ~ANT_index_document_topsig();
 	
 	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file);

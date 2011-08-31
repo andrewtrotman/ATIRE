@@ -16,7 +16,12 @@ class ANT_directory_iterator_object;
 */
 class ANT_index_document
 {
+protected:
+	long stopword_mode;
+
 public:
+	ANT_index_document(long stop_mode = 0) { stopword_mode = stop_mode; }
+
 	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file);
 } ;
 

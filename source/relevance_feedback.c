@@ -64,7 +64,6 @@ else
 void ANT_relevance_feedback::add_to_index(char *document)
 {
 char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
-//ANT_string_pair *token;
 ANT_parser_token *token;
 long long length_in_terms;
 
@@ -72,21 +71,6 @@ parser->set_document((unsigned char *)document);
 length_in_terms = one->get_document_length();
 while ((token = parser->get_next_token()) != NULL)
 	{
-	/*
-	if (ANT_isalpha(*token->start))
-		{
-		if (search_engine->stemmer == NULL || !ANT_islower(*token->start))
-			one->add_term(token);
-		else
-			{
-			token->strncpy(term, MAX_TERM_LENGTH);
-			search_engine->stemmer->stem(term, token_stem_internals);
-			ANT_string_pair token_stem(token_stem_internals);
-			one->add_term(&token_stem);
-			}
-		length_in_terms++;
-		}
-	*/
 	if (token->type == TT_WORD)
 		{
 		if (search_engine->stemmer == NULL || token->string_length < 3)
@@ -127,8 +111,7 @@ for (current = 0; current < top_n; current++)
 	docid = search_engine->results_list->accumulator_pointers[current] - search_engine->results_list->accumulator;
 
 	current_document_length = search_engine->get_longest_document_length();
-	search_engine->get_document(document_buffer, &current_document_length, docid);
-
-	add_to_index(document_buffer);
+	if (search_engine->get_document(document_buffer, &current_document_length, docid) != NULL)
+		add_to_index(document_buffer);
 	}
 }

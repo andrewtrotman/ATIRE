@@ -156,10 +156,12 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
-puts("-k[-lL]         Term culling");
+puts("-k[-lL0t]       Term culling");
 puts("   -            All terms remain in the indes [default]");
+puts("   0            Do not index numbers");
 puts("   l            Remove low frequency terms (where collection frequency == 1)");
 puts("   L            Remove low frequency terms (where document frequency == 1)");
+puts("   t            Do not index XML tag names");
 puts("");
 
 exit(0);
@@ -283,6 +285,8 @@ for (which = mode_list; *which != '\0'; which++)
 	switch (*which)
 		{
 		case '-': stop_word_removal = ANT_memory_index::NONE; break;
+		case '0': stop_word_removal |= ANT_memory_index::PRUNE_NUMBERS; break;
+		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
 		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 'L': stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS | ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		default : exit(printf("Unknown term cull parameter: '%c'\n", *which)); break;
