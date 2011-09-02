@@ -18,7 +18,9 @@
 ANT_directory_iterator_mysql::ANT_directory_iterator_mysql(char *server, char *username, char *password, char *database, char *query, long get_file) : ANT_directory_iterator("", get_file)
 {
 connection = mysql_init(&the_connection);
-mysql_real_connect(connection, server, username, password, database, 0, NULL, CLIENT_COMPRESS);
+
+if (!mysql_real_connect(connection, server, username, password, database, 0, NULL, CLIENT_COMPRESS))
+	 fprintf(stderr, "MySQL failed to connect: %s\n", mysql_error(connection));
 
 this->query.start = strnew(query);
 this->query.string_length = strlen(query);
