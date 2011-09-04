@@ -39,6 +39,7 @@ public:
 	char *index_filename;				// name of index file
 	long long static_prune_point;		// maximum length of a postings list measured in document IDs
 	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
+	double stop_word_df_threshold;		// if df/N is greater than this and (stop_word_removal & PRUNE_DF_FREQUENTS) != 0 then stop the word
 
 protected:
 	void document_compression(char *scheme);

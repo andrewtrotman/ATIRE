@@ -38,7 +38,7 @@ public:
 
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
-	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8 };
+	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8, PRUNE_DF_FREQUENTS = 16 };
 
 private:
 	long hashed_squiggle_length;
@@ -57,6 +57,7 @@ private:
 
 	long long static_prune_point;					// this is the maximum number of postings allowed in an impact (or tf) ordered postings list
 	long stop_word_removal_mode;					// remove cf-singletons or df-singletons (etc.)
+	double stop_word_max_proportion;				// remove words that have a dl/N >= this value
 
 	ANT_file *index_file;
 
@@ -133,7 +134,7 @@ public:
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; } 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
-	virtual void set_term_culling(long mode) {stop_word_removal_mode = mode; }
+	virtual void set_term_culling(long mode, double max_df) {stop_word_removal_mode = mode; stop_word_max_proportion = max_df; }
 } ;
 
 /*

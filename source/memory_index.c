@@ -77,6 +77,7 @@ open_index_file(filename);
 document_filenames = NULL;
 document_filenames_used = document_filenames_chunk_size;
 static_prune_point = -1;
+stop_word_max_proportion = 1.1;			// initialising with anything greater than 1.0 will do
 }
 
 /*
@@ -513,9 +514,13 @@ return impacted_postings_length;
 */
 inline long ANT_memory_index::should_prune(ANT_memory_index_hash_node *term)
 {
-if (term->collection_frequency == 1 && (stop_word_removal_mode & PRUNE_CF_SINGLETONS) != 0)
+if (stop_word_removal_mode == NONE)
+	return false;
+else if (term->collection_frequency == 1 && (stop_word_removal_mode & PRUNE_CF_SINGLETONS) != 0)
 	return true;
 else if (term->document_frequency == 1 && (stop_word_removal_mode & PRUNE_DF_SINGLETONS) != 0)
+	return true;
+else if (((double)term->document_frequency / (double)largest_docno) >= stop_word_max_proportion && (stop_word_removal_mode & PRUNE_DF_FREQUENTS) != 0)
 	return true;
 else
 	return false;

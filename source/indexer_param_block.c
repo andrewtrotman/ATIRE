@@ -44,6 +44,7 @@ index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
 static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
+stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
 }
 
 /*
@@ -156,11 +157,12 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
-puts("-k[-lL0t]       Term culling");
+puts("-k[-lL0t][s<n>] Term culling");
 puts("   -            All terms remain in the indes [default]");
 puts("   0            Do not index numbers");
-puts("   l            Remove low frequency terms (where collection frequency == 1)");
-puts("   L            Remove low frequency terms (where document frequency == 1)");
+puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
+puts("   L            Remove (stop) low frequency terms (where document frequency == 1)");
+puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
 puts("   t            Do not index XML tag names");
 puts("");
 
@@ -286,9 +288,19 @@ for (which = mode_list; *which != '\0'; which++)
 		{
 		case '-': stop_word_removal = ANT_memory_index::NONE; break;
 		case '0': stop_word_removal |= ANT_memory_index::PRUNE_NUMBERS; break;
-		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
 		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 'L': stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS | ANT_memory_index::PRUNE_CF_SINGLETONS; break;
+		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
+		case 's': 
+			stop_word_removal |= ANT_memory_index::PRUNE_DF_FREQUENTS;
+			stop_word_df_threshold = atof(which + 1);
+			if (stop_word_df_threshold >= 100 || stop_word_df_threshold <= 0)
+				exit(printf("stopiing parameter must be 0 < n%% < 100 (%f was given)", stop_word_df_threshold));
+			stop_word_df_threshold /= 100.0;
+
+			while (*(which + 1) == '.' || isdigit(*(which + 1)))
+				which++;
+			break;
 		default : exit(printf("Unknown term cull parameter: '%c'\n", *which)); break;
 		}
 }
