@@ -15,7 +15,7 @@ public:
 	ANT_stop_word() {};
 	virtual ~ANT_stop_word() {};
 
-	virtual long isstop(const char *term);
+	static long isstop(const char *term);
 } ;
 
 

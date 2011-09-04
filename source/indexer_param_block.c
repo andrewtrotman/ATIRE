@@ -163,6 +163,7 @@ puts("   0            Do not index numbers");
 puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
 puts("   L            Remove (stop) low frequency terms (where document frequency == 1)");
 puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
+puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
 puts("   t            Do not index XML tag names");
 puts("");
 
@@ -288,9 +289,10 @@ for (which = mode_list; *which != '\0'; which++)
 		{
 		case '-': stop_word_removal = ANT_memory_index::NONE; break;
 		case '0': stop_word_removal |= ANT_memory_index::PRUNE_NUMBERS; break;
-		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 'L': stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS | ANT_memory_index::PRUNE_CF_SINGLETONS; break;
+		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
+		case 'S': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
 		case 's': 
 			stop_word_removal |= ANT_memory_index::PRUNE_DF_FREQUENTS;
 			stop_word_df_threshold = atof(which + 1);

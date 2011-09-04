@@ -24,6 +24,7 @@
 #include "compression_factory.h"
 #include "maths.h"
 #include "btree_iterator.h"
+#include "stop_word.h"
 #include "pdebug.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
@@ -516,11 +517,15 @@ inline long ANT_memory_index::should_prune(ANT_memory_index_hash_node *term)
 {
 if (stop_word_removal_mode == NONE)
 	return false;
-else if (term->collection_frequency == 1 && (stop_word_removal_mode & PRUNE_CF_SINGLETONS) != 0)
+else if (term->string[0] == '~')
+	return false;
+else if (stop_word_removal_mode & PRUNE_CF_SINGLETONS && term->collection_frequency == 1)
 	return true;
-else if (term->document_frequency == 1 && (stop_word_removal_mode & PRUNE_DF_SINGLETONS) != 0)
+else if (stop_word_removal_mode & PRUNE_DF_SINGLETONS && term->document_frequency == 1)
 	return true;
-else if (((double)term->document_frequency / (double)largest_docno) >= stop_word_max_proportion && (stop_word_removal_mode & PRUNE_DF_FREQUENTS) != 0)
+else if (stop_word_removal_mode & PRUNE_DF_FREQUENTS && (double)term->document_frequency / (double)largest_docno >= stop_word_max_proportion)
+	return true;
+else if (stop_word_removal_mode & PRUNE_NCBI_STOPLIST && ANT_stop_word::isstop(term->string.string()))
 	return true;
 else
 	return false;
