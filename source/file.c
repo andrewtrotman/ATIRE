@@ -100,7 +100,7 @@ int use_lock = 0;
 
 	lock_mode = use_lock ? access_mode == GENERIC_READ ? FILE_SHARE_READ : 0 : FILE_SHARE_READ;
 
-	if ((internals->fp = CreateFile(filename, access_mode, lock_mode, NULL, creation_mode, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL)) == INVALID_HANDLE_VALUE)
+	if ((internals->fp = CreateFile(filename, access_mode, lock_mode, NULL, creation_mode, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
 		return 0;
 #else
 	/*

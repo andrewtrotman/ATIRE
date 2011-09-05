@@ -6,7 +6,7 @@
 #define FENCE_H_
 
 #ifdef _MSC_VER
-	#include <intrin.h>
+	#include <windows.h>
 #endif
 /*
 	ANT_WRITE_FENCE()
@@ -20,7 +20,11 @@ static inline void ANT_write_fence(void)
 	#ifdef __INTEL_COMPILER
 		_mm_mfence();				// there is no write_barrier on the Intel compiler
 	#else
-		_WriteBarrier();
+		#ifdef NEVER
+			_WriteBarrier();		// Visual Studio 2008 states that this should be used but the 2010 docs state that is was wrong.
+		#else
+			MemoryBarrier();
+		#endif
 	#endif
 #elif defined (__GNUC__)
 	#if (__GUNC__) >= 4
