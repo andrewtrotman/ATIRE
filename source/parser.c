@@ -20,7 +20,7 @@
 */
 ANT_parser::ANT_parser(long should_segment)
 {
-set_document(NULL);
+set_document((char *)NULL);
 this->should_segment = should_segment;
 
 segmentation = NULL;

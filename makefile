@@ -325,11 +325,12 @@ PARTS = \
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\pregen.obj							\
 	$(OBJDIR)\unicode.obj							\
+	$(OBJDIR)\snippet_beginning.obj					\
 	$(OBJDIR)\atire_client_param_block.obj			\
 	$(OBJDIR)\atire_broker_param_block.obj			\
 	$(OBJDIR)\atire_broke_engine.obj				\
 	$(OBJDIR)\atire_engine_result_set.obj			\
-	$(OBJDIR)\atire_engine_result_set_export_TREC.obj		\
+	$(OBJDIR)\atire_engine_result_set_export_TREC.obj			\
 	$(OBJDIR)\atire_engine_result_set_export_INEX_snippet.obj	\
 	$(OBJDIR)\atire_broke.obj
 
@@ -352,10 +353,10 @@ ANT_TARGETS = \
 	$(BINDIR)\ant.exe
 
 OTHER_TARGETS = \
-	$(BINDIR)\link_extract_inex_wikipedia.exe \
-	$(BINDIR)\link_compute_inlink.exe \
-	$(BINDIR)\link_analyse_inex_wikipedia.exe \
-	$(BINDIR)\make_unicode_tables.exe 		\
+	$(BINDIR)\link_extract_inex_wikipedia.exe 	\
+	$(BINDIR)\link_compute_inlink.exe 			\
+	$(BINDIR)\link_analyse_inex_wikipedia.exe 	\
+	$(BINDIR)\make_unicode_tables.exe 			\
 	$(BINDIR)\filelist.exe 				\
 	$(BINDIR)\remove_head.exe 			\
 	$(BINDIR)\link_extract.exe 			\

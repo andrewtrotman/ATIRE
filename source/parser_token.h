@@ -23,26 +23,11 @@ class ANT_parser_token : public ANT_string_pair
 public:
 	ANT_string_pair normalized;
 	char normalized_buf[MAX_TERM_LENGTH];
-
-	ANT_parser_token() {
-		normalized.start = normalized_buf;
-	}
-
 	ANT_parser_token_type type;
 
-	/*
-		ANT_PARSER_TOKEN::NORMALIZED_PAIR()
-		-----------------------
-		Get a string pair which contains the normalized form of this token, or the original form
-		if there is no normalized form.
-	*/
-	ANT_string_pair* normalized_pair(void)
-	{
-		if (normalized.length())
-			return &normalized;
-		else
-			return this;
-	}
+public:
+	ANT_parser_token() { normalized.start = normalized_buf; }
+	ANT_string_pair* normalized_pair(void) { return normalized.length() ? &normalized : this; } 	// Get a string pair which contains the normalized form of this token, or the original form if there is no normalized form.
 };
 
 #endif
