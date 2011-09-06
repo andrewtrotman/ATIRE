@@ -5,12 +5,16 @@
 #ifndef SNIPPET_BEGINNING_H_
 #define SNIPPET_BEGINNING_H_
 
+
+#include "snippet.h"
+
 class ANT_parser;
+
 /*
 	class ANT_SNIPPET_BEGINNING
 	---------------------------
 */
-class ANT_snippet_beginning
+class ANT_snippet_beginning : public ANT_snippet
 {
 private:
 	ANT_parser *parser;

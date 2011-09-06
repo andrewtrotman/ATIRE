@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sstream>
+#include <new>
 #include "atire_api.h"
 #include "str.h"
 #include "maths.h"
@@ -14,16 +15,12 @@
 #include "channel_socket.h"
 #include "relevance_feedback_factory.h"
 #include "ranking_function_pregen.h"
-
-#ifndef FALSE
-	#define FALSE 0
-#endif
-#ifndef TRUE
-	#define TRUE (!FALSE)
-#endif
+#include "snippet.h"
+#include "snippet_beginning.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
+const size_t MAX_SNIPPET_LENGTH = 1024;		// the length of the snippet buffer
 
 ATIRE_API *atire = NULL;
 
@@ -120,6 +117,8 @@ long long docid;
 char *document_buffer, *title_start, *title_end;
 ANT_channel *inchannel, *outchannel;
 char **answer_list;
+char *snippet;
+ANT_snippet *snippet_generator;
 
 if (params->port == 0)
 	{
@@ -146,11 +145,13 @@ sum_of_average_precisions = 0.0;
 number_of_queries = 0;
 line = 0;
 custom_ranking = 0;
+snippet = new (std::nothrow) char [MAX_SNIPPET_LENGTH];
+*snippet = '\0';
+snippet_generator = new (std::nothrow) ANT_snippet_beginning(300);			// the INEX max snippet length is 300 characters
 
 prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
 	{
-
 	if (custom_ranking)
 		{
 		/* Revert to default ranking function for next query */
@@ -397,8 +398,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			first_to_list = 0;
 		if (last_to_list > hits)
 			last_to_list = hits;
-		if (last_to_list < 0)
-			last_to_list = 0;
+		if (last_to_list < first_to_list)
+			last_to_list = first_to_list;
 		/*
 			Convert from a results list into a list of documents and then display (or write to the forum file)
 		*/
@@ -439,9 +440,24 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 									*ch = ' ';
 							}
 						}
+					/*
+						Generate the snippet
+					*/
+					snippet_generator->get_snippet(snippet, document_buffer);
 					}
-				sprintf(print_buffer, "<hit><rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title></hit>", result + 1, docid, answer_list[result], relevance, title_start);
-				outchannel->puts(print_buffer);
+				*outchannel << "<hit>";
+				*outchannel << "<rank>" << result + 1 << "</rank>";
+				*outchannel << "<id>" << docid << "</id>";
+				*outchannel << "<name>" << answer_list[result] << "</name>";
+				sprintf(print_buffer, "%0.2f", relevance);
+				*outchannel << "<rsv>" << print_buffer << "</rsv>";
+				*outchannel << "<title>" << title_start << "</title>";
+				if (*snippet != '\0')
+					*outchannel << "<snippet>" << snippet << "</snippet>";
+				*outchannel << "</hit>" << ANT_channel::endl;
+
+//				sprintf(print_buffer, "<hit><rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title></hit>", result + 1, docid, answer_list[result], relevance, title_start);
+//				outchannel->puts(print_buffer);
 				}
 			if (first_to_list < last_to_list)
 				outchannel->puts("</hits>");
