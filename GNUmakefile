@@ -58,7 +58,7 @@ USE_PARTIAL_DCOMPRESSION := 0
 
 # represent the static array in two dimensions, reduce accumulators
 # initialisation time
-USE_TWO_D_ACCUMULATORS := 0
+USE_TWO_D_ACCUMULATORS := 1
 
 # what type to use for the accumulators
 CFLAGS += -DANT_ACCUMULATOR_T=short
@@ -126,7 +126,7 @@ ifeq ($(USE_PARALLEL_INDEXING), 1)
    else
 	LDFLAGS += -pthread
    endif
-	CFLAGS += -DPARALLEL_INDEXING
+	CFLAGS += -DPARALLEL_INDEXING -DPARALLEL_INDEXING_DOCUMENTS
 endif
 
 ifeq ($(USE_SYSTEM_ZLIB), 1)
