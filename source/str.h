@@ -15,6 +15,9 @@
 
 #ifdef _MSC_VER
 	inline char *strlower(char *a) { return _strlwr(a); }
+	inline int strnicmp (const char *s1, const char *s2, size_t n) { return ::_strnicmp (s1, s2, n); }
+#else
+	inline int strnicmp (const char *s1, const char *s2, size_t n) { return ::strncasecmp (s1, s2, n); }
 #endif
 
 extern "C" int char_star_star_strcmp(const void *one, const void *two);

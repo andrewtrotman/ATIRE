@@ -2,6 +2,7 @@
 	SNIPPET_BEGINNING.C
 	-------------------
 */
+#include "ctypes.h"
 #include "parser.h"
 #include "snippet_beginning.h"
 
@@ -30,17 +31,18 @@ delete parser;
 */
 char *ANT_snippet_beginning::get_snippet(char *snippet, char *document)
 {
-char *into;
+char *into, *start;
 ANT_parser_token *token;
-unsigned long length_in_bytes;
+unsigned long length_in_bytes, substring_length;
 long found_title;
 
 /*
-	initialise
+	Initialise
 */
-length_in_bytes = 0;
+length_in_bytes = substring_length = 0;
 into = snippet;
 found_title = false;
+start = NULL;
 
 /*
 	Initialise the parser
@@ -48,47 +50,78 @@ found_title = false;
 parser->set_document(document);
 
 /*
-	Now for every token that a word or number, add it to the snippet
-	this drops punctuation and tags
+	copy all non-XML-tag content from the stat of the document until we fill the snippet.
 */
 while ((token = parser->get_next_token()) != NULL)
-	if (token->type == TT_TAG_CLOSE)
+	{
+	/*
+		First find the end of the title tag
+	*/
+	if (!found_title)
 		{
-		if (strncmp(token->string(), "title", 5) == 0)
+		if (token->type == TT_TAG_CLOSE && strnicmp(token->string() + 1, "DOCNO", 4) == 0)
 			found_title = true;
 		}
-	else if (found_title)
-		if (token->type == TT_WORD || token->type == TT_NUMBER)
+	else
+		{
+		if (token->type == TT_TAG_OPEN || token->type == TT_TAG_CLOSE)
 			{
 			/*
-				make sure it fits (including the '\0') then copy the token
+				Cut out XML tags by copying the remaining content
 			*/
-			if (length_in_bytes + token->length() >= maximum_snippet_length)
-				break;
-			memcpy(into, token->string(), token->length());
-			into += token->length();
-
-			/*
-				add a space on the end (which gets replaced with a '\0' on termination)
-			*/
-			*into++ = ' ';
-
-			/*
-				update the length of the string
-			*/
-			length_in_bytes += token->length() + 1;
+			if (start != NULL)
+				{
+				strncpy(into, start, substring_length);
+				into += substring_length;
+				*into++ = ' ';
+				length_in_bytes += substring_length + 1;			// +1 to include the space
+				}
+			substring_length = 0;
+			start = NULL;
 			}
+		else if (token->type == TT_WORD || token->type == TT_NUMBER)
+			{
+			/*
+				Include text and numbers
+			*/
+			if (start == NULL)
+				start = token->string();
+	
+			if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
+				break;
+
+			substring_length = token->string() + token->length() - start;
+			}
+		}
+	}
 
 /*
-	NULL terminate the string by replacing the final ' ' with '\0' (if there was one)
+	Tack the final content on the end
 */
-if (length_in_bytes != 0)
-	length_in_bytes--;
-snippet[length_in_bytes] = '\0';
+if (start != NULL)
+	{
+	strncpy(into, start, substring_length);
+	into += substring_length;
+	}
+
+*into = '\0';
+
+/*
+	Remove CR/LF as the just screw up the look of the snippet
+*/
+start = into = snippet;
+while (*start != '\0')
+	{
+	*into = *start++;
+	if (ANT_isspace(*into))
+		*into = ' ';				// replace all white space with ' ' (remove CF/LF)
+	if (!(ANT_isspace(*into) && ANT_isspace(*start)))		// skip over multiple spaces
+		into++;
+	}
+*into = '\0';
 
 /*
 	return the snippet
 */
-
 return snippet;
 }
