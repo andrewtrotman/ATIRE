@@ -1,16 +1,16 @@
 /*
-	SNIPPET_BEGINNING.C
-	-------------------
+	SNIPPET_TAG.C
+	-------------
 */
 #include "ctypes.h"
 #include "parser.h"
-#include "snippet_beginning.h"
+#include "snippet_tag.h"
 
 /*
-	ANT_SNIPPET_BEGINNING::ANT_SNIPPET_BEGINNING()
-	----------------------------------------------
+	ANT_SNIPPET_TAG::ANT_SNIPPET_TAG()
+	----------------------------------
 */
-ANT_snippet_beginning::ANT_snippet_beginning(unsigned long max_length, char *tag)
+ANT_snippet_tag::ANT_snippet_tag(unsigned long max_length, char *tag)
 {
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
@@ -19,20 +19,20 @@ tag_length = strlen(tag);
 }
 
 /*
-	ANT_SNIPPET_BEGINNING::~ANT_SNIPPET_BEGINNING()
-	-----------------------------------------------
+	ANT_SNIPPET_TAG::~ANT_SNIPPET_TAG()
+	-----------------------------------
 */
-ANT_snippet_beginning::~ANT_snippet_beginning()
+ANT_snippet_tag::~ANT_snippet_tag()
 {
 delete parser;
 delete [] tag;
 }
 
 /*
-	ANT_SNIPPET_BEGINNING::GET_SNIPPET()
-	------------------------------------
+	ANT_SNIPPET_TAG::GET_SNIPPET()
+	------------------------------
 */
-char *ANT_snippet_beginning::get_snippet(char *snippet, char *document)
+char *ANT_snippet_tag::get_snippet(char *snippet, char *document)
 {
 char *into, *start;
 ANT_parser_token *token;
@@ -62,13 +62,15 @@ while ((token = parser->get_next_token()) != NULL)
 	*/
 	if (!found_title)
 		{
-		if (token->type == TT_TAG_CLOSE && tag_length == token->length() - 1 && strnicmp(token->string() + 1, tag, tag_length) == 0)
+		if (token->type == TT_TAG_OPEN && tag_length == token->length() && strnicmp(token->string(), tag, tag_length) == 0)
 			found_title = true;
 		}
 	else
 		{
 		if (token->type == TT_TAG_OPEN || token->type == TT_TAG_CLOSE)
 			{
+			if (token->type == TT_TAG_CLOSE && tag_length == token->length() - 1 && strnicmp(token->string() + 1, tag, tag_length) == 0)  // we'e at the close tag
+				break;
 			/*
 				Cut out XML tags by copying the remaining content
 			*/

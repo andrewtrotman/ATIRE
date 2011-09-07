@@ -61,6 +61,10 @@ public:
 	long focussing_algorithm;			// focused retrieval relevance ranking algorithm
 	long focus_top_k;					// number of focussing accumulators
 
+	long snippet_algorithm;				// how to generate snippets
+	char *snippet_tag;					// if they require an XML tag then use this one
+	long snippet_length;				// snippets should be this long (in characters)
+
 	long query_type;					// NEXI, Boolean, and optionally additionally with relevance feedback
 	long feedbacker;					// relevance feedback algorithm to use
 	long feedback_documents;			// documents to analyse for feedback terms

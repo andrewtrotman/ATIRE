@@ -14,6 +14,7 @@
 #include "relevance_feedback_factory.h"
 #include "atire_api.h"
 #include "search_engine_accumulator.h"
+#include "snippet_factory.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -54,6 +55,9 @@ feedback_terms = 10;
 index_filename = strnew("index.aspt");
 doclist_filename = strnew("doclist.aspt");
 pregen_count = 0;
+snippet_algorithm = NONE;
+snippet_tag = "title";
+snippet_length = 300;		// this is the INEX 2011 maximum snippet length
 }
 
 /*
@@ -161,18 +165,22 @@ puts("-S[n]           East-Asian language word segmentation, query is segmented 
 puts("  n             No segmentation, search with the input terms separated by space");
 puts("");
 
-puts("PREGENS");
-puts("-------");
+puts("PREGENERATED RANK ORDERS");
+puts("------------------------");
 puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking functions
 
-puts("FOCUSED RETRIEVAL");
-puts("-----------------");
-puts("-f[ar]          Focus the results list");
-puts("  a             ARTICLE: Article retrieval [default]");
-puts("  r             RANGE: Start tag before the first occurence to end tag after last");
+puts("FOCUSED AND SNIPPET RETRIEVAL");
+puts("-----------------------------");
+puts("-f[a][-tf<tag>][s<n>]Focus the results list");
+puts("  a             Article retrieval [default]");
+//puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
+puts("  -             No snippets [default]");
+puts("  t<tag>        Snippet is the contents of tag <tag> [default=title]");
+puts("  f<tag>        Snippet is the text immediately following <tag> [default=title]");
+puts("  s<n>          Maximum length of snippet is <n> characters [default=300]");
 puts("");
 
 puts("REPORTING");
@@ -277,21 +285,21 @@ do
 	done = FALSE;
 	switch (*which)
 		{
-		case 'n' :
+		case 'n':
 			if (query_type & ATIRE_API::QUERY_BOOLEAN)
 				exit(printf("Must be either NEXI or Boolean, not both"));
 			query_type |= ATIRE_API::QUERY_NEXI;
 			break;
-		case 'b' :
+		case 'b':
 			if (query_type & ATIRE_API::QUERY_NEXI)
 				exit(printf("Must be either NEXI or Boolean, not both"));
 			query_type |= ATIRE_API::QUERY_BOOLEAN;
 			break;
-		case '-' :
+		case '-':
 			query_type &= ~ATIRE_API::QUERY_FEEDBACK;
 			feedbacker = ANT_relevance_feedback_factory::NONE;
 			break;
-		case 'r' :
+		case 'r':
 			if (query_type == ATIRE_API::QUERY_TOPSIG)
 				exit(printf("Cannot do Rocchio with Topsig"));
 
@@ -310,7 +318,7 @@ do
 			query_type = ATIRE_API::QUERY_TOPSIG;
 			done = TRUE;
 			break;
-		default :
+		default:
 			exit(printf("Unknown query type modifier: '%c'\n", *which));
 			break;
 		}
@@ -333,13 +341,13 @@ do
 	{
 	switch (*forum)
 		{
-		case '-' : output_forum = NONE;   break;
-		case 'I' : output_forum = INEX;   break;
-		case 'e' : output_forum = INEX_EFFICIENCY; break;
-		case 'i' : output_forum = TREC;   break;			// in 2009 INEX moved to the TREC format with extra stuff on the end of each line
-		case 'b' : output_forum = INEX_BEP;   break;		// the INEX 2009 format with best entry points
-		case 't' : output_forum = TREC;   break;
-		case 'f' : 											// the INEX 2009 format with focused results included
+		case '-': output_forum = NONE;   break;
+		case 'I': output_forum = INEX;   break;
+		case 'e': output_forum = INEX_EFFICIENCY; break;
+		case 'i': output_forum = TREC;   break;			// in 2009 INEX moved to the TREC format with extra stuff on the end of each line
+		case 'b': output_forum = INEX_BEP;   break;		// the INEX 2009 format with best entry points
+		case 't': output_forum = TREC;   break;
+		case 'f': 											// the INEX 2009 format with focused results included
 			output_forum = INEX_FOCUS;
 			if (focussing_algorithm == NONE)
 				focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
@@ -409,15 +417,35 @@ else
 */
 void ANT_ANT_param_block::set_focused_ranker(char *which)
 {
-if (*(which + 1) != '\0')
-	exit(printf("Only one focusing algorithm is permitted\n"));
+long got;
 
 switch (*which)
 	{
-	case '-' : focussing_algorithm = NONE; break;
-	case 'a' : focussing_algorithm = ARTICLE; break;
-	case 'r' : focussing_algorithm = RANGE; break;
-	default : exit(printf("Unknown focusing algorithm: '%c'\n", *which)); break;
+	case '-': 
+		focussing_algorithm = NONE;
+		snippet_algorithm = NONE;
+		break;
+	case 'a': 
+		focussing_algorithm = ARTICLE;
+		break;
+//	case 'r': focussing_algorithm = RANGE; break;
+	case 't':
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
+		if (*(which + 1) != '\0')
+			snippet_tag = which + 1;
+		break;
+	case 'f': 
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEGINNING;
+		if (*(which + 1) != '\0')
+			snippet_tag = which + 1;
+		break;
+	case 's':
+		if ((got = atol(which + 1)) > 0)
+			snippet_length = got;
+		break;
+	default:
+		exit(printf("Unknown focusing algorithm: '%c'\n", *which));
+		break;
 	}
 }
 

@@ -325,6 +325,8 @@ PARTS = \
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\pregen.obj							\
 	$(OBJDIR)\unicode.obj							\
+	$(OBJDIR)\snippet_factory.obj					\
+	$(OBJDIR)\snippet_tag.obj						\
 	$(OBJDIR)\snippet_beginning.obj					\
 	$(OBJDIR)\atire_client_param_block.obj			\
 	$(OBJDIR)\atire_broker_param_block.obj			\

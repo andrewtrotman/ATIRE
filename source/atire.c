@@ -16,11 +16,10 @@
 #include "relevance_feedback_factory.h"
 #include "ranking_function_pregen.h"
 #include "snippet.h"
-#include "snippet_beginning.h"
+#include "snippet_factory.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
-const size_t MAX_SNIPPET_LENGTH = 1024;		// the length of the snippet buffer
 
 ATIRE_API *atire = NULL;
 
@@ -118,7 +117,7 @@ char *document_buffer, *title_start, *title_end;
 ANT_channel *inchannel, *outchannel;
 char **answer_list;
 char *snippet;
-ANT_snippet *snippet_generator;
+ANT_snippet *snippet_generator = NULL;
 
 if (params->port == 0)
 	{
@@ -145,9 +144,18 @@ sum_of_average_precisions = 0.0;
 number_of_queries = 0;
 line = 0;
 custom_ranking = 0;
-snippet = new (std::nothrow) char [MAX_SNIPPET_LENGTH];
-*snippet = '\0';
-snippet_generator = new (std::nothrow) ANT_snippet_beginning(300);			// the INEX max snippet length is 300 characters
+
+if (params->snippet_algorithm == ANT_ANT_param_block::NONE)
+	{
+	snippet_generator = NULL;
+	snippet = NULL;
+	}
+else
+	{
+	snippet = new (std::nothrow) char [params->snippet_length + 1];
+	*snippet = '\0';
+	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, params->snippet_tag);
+	}
 
 prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
@@ -443,7 +451,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 					/*
 						Generate the snippet
 					*/
-					snippet_generator->get_snippet(snippet, document_buffer);
+					if (snippet_generator != NULL)
+						snippet_generator->get_snippet(snippet, document_buffer);
 					}
 				*outchannel << "<hit>";
 				*outchannel << "<rank>" << result + 1 << "</rank>";
@@ -452,7 +461,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				sprintf(print_buffer, "%0.2f", relevance);
 				*outchannel << "<rsv>" << print_buffer << "</rsv>";
 				*outchannel << "<title>" << title_start << "</title>";
-				if (*snippet != '\0')
+				if (snippet != NULL && *snippet != '\0')
 					*outchannel << "<snippet>" << snippet << "</snippet>";
 				*outchannel << "</hit>" << ANT_channel::endl;
 

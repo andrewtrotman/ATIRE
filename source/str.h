@@ -15,7 +15,7 @@
 
 #ifdef _MSC_VER
 	inline char *strlower(char *a) { return _strlwr(a); }
-	inline int strnicmp (const char *s1, const char *s2, size_t n) { return ::_strnicmp (s1, s2, n); }
+	#define strnicmp _strnicmp
 #else
 	inline int strnicmp (const char *s1, const char *s2, size_t n) { return ::strncasecmp (s1, s2, n); }
 #endif
@@ -113,6 +113,30 @@ while ((end >= source) && (ANT_isspace(*end)))
 
 return source;
 }
+
+/*
+	STRIP_DUPLICATE_SPACE_INLINE()
+	------------------------------
+*/
+inline char *strip_duplicate_space_inline(char *source)
+{
+char *start, *into;
+
+start = into = source;
+while (*start != '\0')
+	{
+	*into = *start++;
+	if (ANT_isspace(*into))
+		*into = ' ';				// replace all white space with ' ' (remove CF/LF)
+	if (!(ANT_isspace(*into) && ANT_isspace(*start)))		// skip over multiple spaces
+		into++;
+	}
+*into = '\0';
+
+return source;
+}
+
+
 
 /*
 	STRREV()
