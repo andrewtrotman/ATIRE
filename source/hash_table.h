@@ -84,6 +84,35 @@ next_eight_bytes:
 goto next_eight_bytes;
 }
 
+/*
+	ANT_RANDOM_HASH_24()
+	--------------------
+*/
+static inline uint32_t ANT_random_hash_24(char *string, size_t length)
+{
+unsigned char *ch, *seed, *end;
+uint32_t result;
+
+result = 0;		// this will initialise all four bytes
+seed = (unsigned char *)&result;	// now take a pointer to the array of four bytes so that we can address each individually
+ch = (unsigned char *)string;
+end = ch + length;
+
+while (ch < end)
+	{
+	seed[0] = ANT_hash_table[seed[0] ^ *ch++];
+	if (ch >= end)
+		break;
+	seed[1] = ANT_hash_table[seed[1] ^ *ch++];
+	if (ch >= end)
+		break;
+	seed[2] = ANT_hash_table[seed[2] ^ *ch++];
+	}
+
+seed[3] = seed[0];
+
+return result & 0xFFFFFF;
+}
 
 /*
 	ANT_MEMORY_INDEX::ANT_HEADER_HASH_24()
@@ -103,6 +132,9 @@ const long base = 37;
 
 if (ANT_isdigit((*string)[0]))
 	return ANT_atoul(string->start, string->length()) % 0x1000000;
+
+if (((*string)[0] & 0x80) != 0)
+	return ANT_random_hash_24(string->string(), string->length());
 
 ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
 
