@@ -26,7 +26,7 @@ public:
 	ANT_snippet_beginning(unsigned long max_length, char *tag);
 	virtual ~ANT_snippet_beginning();
 
-	virtual char *get_snippet(char *snippet, char *document);
+	virtual char *get_snippet(char *snippet, char *document, char *query);
 } ;
 
 #endif /* SNIPPET_BEGINNING_H_ */

@@ -33,7 +33,6 @@ int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params);
 double perform_query(long topic_id, ANT_channel *outchannel, ANT_ANT_param_block *params, char *query, long long *matching_documents)
 {
 ANT_stats_time stats;
-char message[1024];
 long long now, search_time;
 
 /*
@@ -49,12 +48,8 @@ search_time = stats.stop_timer(now);
 if (params->stats & ANT_ANT_param_block::SHORT)
 	{
 	if (topic_id >= 0)
-		{
-		sprintf(message, "Topic:%ld ", topic_id);
-		outchannel->puts(message);
-		}
-	sprintf(message, "<query>%s</query><numhits>%lld</numhits><time>%lld</time>", query, *matching_documents, stats.time_to_milliseconds(search_time));
-	outchannel->puts(message);
+		*outchannel << "Topic: " << topic_id << ANT_channel::endl;
+	*outchannel << "<query>" << query << "</query>" << "<numhits>" << *matching_documents << "</numhits>" << "<time>" << stats.time_to_milliseconds(search_time) << "</time>" << ANT_channel::endl;
 	}
 
 if (params->stats & ANT_ANT_param_block::QUERY)
@@ -154,7 +149,7 @@ else
 	{
 	snippet = new (std::nothrow) char [params->snippet_length + 1];
 	*snippet = '\0';
-	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, params->snippet_tag);
+	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, params->snippet_tag, atire->get_longest_document_length());
 	}
 
 prompt(params);
@@ -452,7 +447,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 						Generate the snippet
 					*/
 					if (snippet_generator != NULL)
-						snippet_generator->get_snippet(snippet, document_buffer);
+						snippet_generator->get_snippet(snippet, document_buffer, query);
 					}
 				*outchannel << "<hit>";
 				*outchannel << "<rank>" << result + 1 << "</rank>";
@@ -514,12 +509,11 @@ return mean_average_precision;
 /*
 	ANT_INIT_RANKING()
 	------------------
-
 	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank
-
 	Return true if successful. On failure, the API is not altered.
 */
-int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params) {
+int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params)
+{
 switch (params.ranking_function)
 	{
 	case ANT_indexer_param_block_rank::BM25:
@@ -534,7 +528,6 @@ switch (params.ranking_function)
 		return atire->set_ranking_function(params.ranking_function, params.ascending, 0) == 0;
 	case ANT_indexer_param_block_rank::PREGEN:
 		return atire->set_ranking_function_pregen(params.field_name, params.ascending) == 0;
-
 	default:
 		return atire->set_ranking_function(params.ranking_function, 0.0, 0.0) == 0;
 	}

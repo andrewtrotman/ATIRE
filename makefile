@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 0
+DEBUG = 1
 
 #
 #	Which compiler are we using
@@ -326,6 +326,7 @@ PARTS = \
 	$(OBJDIR)\pregen.obj							\
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\snippet_factory.obj					\
+	$(OBJDIR)\snippet_tf.obj						\
 	$(OBJDIR)\snippet_tag.obj						\
 	$(OBJDIR)\snippet_beginning.obj					\
 	$(OBJDIR)\atire_client_param_block.obj			\

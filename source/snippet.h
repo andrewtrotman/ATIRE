@@ -15,7 +15,7 @@ public:
 	ANT_snippet() {}
 	virtual ~ANT_snippet() {}
 
-	virtual char *get_snippet(char *snippet, char *document) = 0;
+	virtual char *get_snippet(char *snippet, char *document, char *query) = 0;
 } ;
 
 

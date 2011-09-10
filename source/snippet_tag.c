@@ -32,7 +32,7 @@ delete [] tag;
 	ANT_SNIPPET_TAG::GET_SNIPPET()
 	------------------------------
 */
-char *ANT_snippet_tag::get_snippet(char *snippet, char *document)
+char *ANT_snippet_tag::get_snippet(char *snippet, char *document, char *query)
 {
 char *into, *start;
 ANT_parser_token *token;
