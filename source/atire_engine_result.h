@@ -17,6 +17,7 @@ public:
 	char *name;
 	double rsv;
 	char *title;
+	char *snippet;
 } ;
 
 #endif /* ATIRE_ENGINE_RESULT_H_ */

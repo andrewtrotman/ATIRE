@@ -4,8 +4,8 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <sstream>
+#include "ctypes.h"
 #include "str.h"
 #include "sockets.h"
 #include "atire_api_remote.h"
@@ -174,12 +174,12 @@ char *got;
 	Construct the command string and send it off
 */
 
-/* Newlines are toxic to atire (parser requires command to be on one line), so strip them
- * out here.
- */
-for (char * c = query; *c; ++c)
-	if (*c == '\n')
-		*c = ' ';
+/*
+	Newlines are toxic to atire (parser requires command to be on one line), so strip them out here.
+*/
+for (got = query; *got != '\0'; got++)
+	if (ANT_isspace(*got))
+		*got = ' ';
 
 buffer << "<ATIREsearch><query>" << query << "</query>"
 		<< "<top>" << top_of_page << "</top><n>" << page_length << "</n>";

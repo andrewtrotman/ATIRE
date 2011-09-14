@@ -62,7 +62,7 @@ long long ATIRE_engine_result_set::add(char *source, long long docid_base)
 long long found = 0;
 char *pos;
 char *rank, *id, *name, *rsv, *title, *end;
-char *name_end, *title_end;
+char *name_end, *title_end, *snippet, *snippet_end;
 
 for (pos = strstr(source, "<hit>"); pos != NULL; pos = strstr(end, "<hit>"))
 	{
@@ -87,16 +87,35 @@ for (pos = strstr(source, "<hit>"); pos != NULL; pos = strstr(end, "<hit>"))
 		break;
 	rsv += 5;
 
+	/*
+		Title and snippet are optional (but must either exist or not for each result)
+	*/
 	if ((title = strstr(rsv, "<title>")) == NULL)
-		break;
-	title += 7;
-	if ((title_end = strstr(title, "</title>")) == NULL)
+		title_end = NULL;
+	else
+		title_end = strstr(title += 7, "</title>");
+
+	if ((snippet = strstr(rsv, "<snippet>")) == NULL)
+		snippet_end = NULL;
+	else
+		snippet_end = strstr(snippet += 9, "</snippet>");
+
+	if (rank > end || id > end || name > end || name_end > end || rsv > end)
 		break;
 
-	if (rank > end || id > end || name > end || name_end > end || rsv > end || title > end || title_end > end)
-		break;
+	*name_end = '\0';
 
-	*name_end = *title_end = '\0';
+	if (title != NULL)
+		if	(title > end || title_end > end)
+			title = NULL;
+		else
+			*title_end = '\0';
+
+	if (snippet != NULL)
+		if (snippet > end || snippet_end > end)
+			snippet = NULL;
+		else
+			*snippet_end = '\0';
 
 	if (hits + 1 > length_of_results)
 		extend(length_of_results * expansion_factor);
@@ -106,6 +125,7 @@ for (pos = strstr(source, "<hit>"); pos != NULL; pos = strstr(end, "<hit>"))
 	results[hits].name = name;
 	results[hits].rsv = atof(rsv);
 	results[hits].title = title;
+	results[hits].snippet = snippet;
 
 	found++;
 	hits++;
@@ -183,7 +203,10 @@ if (first < hits)
 		result << "<id>" << results[current].id << "</id>";
 		result << "<name>" << results[current].name << "</name>";
 		result << "<rsv>" << results[current].rsv << "</rsv>";
-		result << "<title>" << results[current].title << "</title>";
+		if (results[current].title != NULL)
+			result << "<title>" << results[current].title << "</title>";
+		if (results[current].snippet != NULL)
+			result << "<snippet>" << results[current].snippet << "</snippet>";
 		result << "</hit>\n";
 		}
 	result << "</hits>\n";
