@@ -5,7 +5,7 @@
 #define AC_HEADER
 
 #include <stdio.h>
-#include <stdint.h>
+#include "fundamental_types.h"
 #include <limits>
 #include <limits.h>
 #include <cassert>

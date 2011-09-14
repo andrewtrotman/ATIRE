@@ -12,16 +12,7 @@ int main(int argc, char**argv)
 ANT_arithmetic_model acm1(NUM_SYMBOLS, NULL, 0);
 ANT_arithmetic_encoder<accumulator_t> ace1(&acm1);
 int sym, i;
-FILE *input;
 char c;
-
-input = fopen("input", "rb");
-
-if (!input)
-	{
-	fprintf(stderr,"Error\n");
-	return 0;
-	}
 
 const char * encode_me = argc > 1 ? argv[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
