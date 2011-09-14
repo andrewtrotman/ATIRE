@@ -32,7 +32,14 @@ delete parser;
 */
 char *ANT_snippet_tf::get_snippet(char *snippet, char *document, char *query)
 {
+long query_length, found;
+ANT_NEXI_term_ant **term_list;
 ANT_parser_token *token;
+
+/*
+	get a list of all the search terms out of the query
+*/
+term_list = generate_term_list(query, &query_length);
 
 /*
 	Initialise the parser
@@ -42,10 +49,11 @@ parser->set_document(document);
 /*
 	remove all XML tags
 */
+found = 0;
 while ((token = parser->get_next_token()) != NULL)
 	if (token->type == TT_WORD || token->type == TT_NUMBER)
-		{
-		}
+		if (bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term) != NULL)
+			found++;
 
 *snippet = '\0';
 

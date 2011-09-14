@@ -81,10 +81,15 @@ if (first < results_list->hits)
 			}
 
 		/*
-			Now back to what we were doing
+			Now back to what we were doing: use the snippet if there is one, else use the title if there is one, or resort to nothing!
 		*/
 		result << '"' << '>';
-		result << results_list->results[current].title;
+		if (results_list->results[current].snippet != NULL)
+			result << results_list->results[current].snippet;
+		else if (results_list->results[current].title != NULL)
+			result << results_list->results[current].title;
+		else 
+			result << "";
 		result << "</snippet>" << std::endl;
 		}
 	result << "</topic>" << std::endl;

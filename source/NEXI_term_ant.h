@@ -21,8 +21,8 @@ public:
 	 
 public:
 	static int cmp_collection_frequency(const void *a, const void *b);
-	static int cmp_document_frequency(const void *a, const void *b);
 	static int cmp_local_max_impact(const void *a, const void *b);
+	static int cmp_term(const void *a, const void *b);
 } ;
 
 #endif /* NEXI_TERM_ANT_H_ */
