@@ -50,7 +50,7 @@ sprintf((char*)query_mod.start, "%s LIMIT %lld,%lld", query.start, (long long) p
 
 mysql_query(connection, (char*)query_mod.start);
 
-if ((result = mysql_store_result(connection)) == NULL)
+if ((result = mysql_use_result(connection)) == NULL)
 	return 0;
 
 return 1;
@@ -62,7 +62,7 @@ sprintf((char*)query_mod.start, "%s%lld%s LIMIT %lld", (char*)query.start, (long
 
 mysql_query(connection, (char*)query_mod.start);
 
-if ((result = mysql_store_result(connection)) == NULL)
+if ((result = mysql_use_result(connection)) == NULL)
 	return 0;
 
 return 1;
@@ -128,7 +128,7 @@ switch (mode)
 
 		mysql_query(connection, (char*)query.start);
 
-		if ((result = mysql_store_result(connection)) == NULL)
+		if ((result = mysql_use_result(connection)) == NULL)
 			return EXIT_FAILURE;
 
 		docname_col = 0;
