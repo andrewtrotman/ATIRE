@@ -5,11 +5,12 @@
 
 #define NUM_SYMBOLS (26 + 10 + 1)
 
-int main(void)
+typedef uint32_t accumulator_t;
+
+int main(int argc, char**argv)
 {
-ac_encoder ace1;
-ac_decoder acd1;
-ac_model acm1;
+ANT_arithmetic_model acm1(NUM_SYMBOLS, NULL, 0);
+ANT_arithmetic_encoder<accumulator_t> ace1(&acm1);
 int sym, i;
 FILE *input;
 char c;
@@ -22,14 +23,13 @@ if (!input)
 	return 0;
 	}
 
-ac_encoder_init(&ace1);
-ac_model_init(&acm1, NUM_SYMBOLS, NULL, 0);
-
-const char * encode_me = "ABC";
+const char * encode_me = argc > 1 ? argv[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 while ((c = *encode_me))
 	{
 	int symbol;
+
+	encode_me++;
 
 	if (c == ' ')
 		symbol = 0;
@@ -39,27 +39,26 @@ while ((c = *encode_me))
 		symbol = c - 'a' + 1 + 10;
 	else if (c >= 'A' && c <= 'Z')
 		symbol = c - 'A' + 1 + 10;
-	else continue;
+	else
+		continue;
 
-	ac_encode_symbol(&ace1, &acm1, symbol);
-
-	encode_me++;
+	ace1.encode_symbol(symbol);
 	}
 
+accumulator_t encoded = ace1.done();
+printf("Encoded as %d-bit integer: %lu\n", sizeof(encoded) * CHAR_BIT, encoded);
 
-ac_encoder_done(&ace1);
-ac_model_done(&acm1);
+ANT_arithmetic_decoder<accumulator_t> acd1(&acm1, encoded);
 
-printf("bits for encoder 1: %d\n", (int) ac_encoder_bits(&ace1));
+printf("Decoded: ");
 
-printf("%lu\n", ace1.buffer);
-
-ac_decoder_init(&acd1, ace1.buffer);
-ac_model_init(&acm1, NUM_SYMBOLS, NULL, 0);
-
-while (acd1.bits_to_go)
+/* We don't know how many symbols we encoded, since we don't store it and there's
+ * no terminating symbol. That's fine, we're just decoding for debugging. We'll decode
+ * a "reasonable" number of symbols instead.
+ */
+for (int i = 0 ; i < sizeof(encoded) * CHAR_BIT; i++)
 	{
-	sym = ac_decode_symbol(&acd1, &acm1);
+	sym = acd1.decode_symbol();
 	if (sym==0)
 		printf(" ");
 	else if (sym >= 1 && sym <= 10)
@@ -68,8 +67,7 @@ while (acd1.bits_to_go)
 		printf("%c", sym - 1 - 10 + 'a');
 	}
 
-ac_decoder_done(&acd1);
-ac_model_done(&acm1);
+printf("\n");
 
 return 0;
 }
