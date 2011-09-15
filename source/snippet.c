@@ -17,7 +17,7 @@ int ANT_snippet::cmp_term(const void *a, const void *b)
 ANT_parser_token *one = (ANT_parser_token *)a;
 ANT_NEXI_term_ant **two = (ANT_NEXI_term_ant **)b;
 
-return one->true_strcmp(&((*two)->term));
+return one->normalized.true_strcmp(&((*two)->term));
 }
 
 /*
@@ -26,7 +26,6 @@ return one->true_strcmp(&((*two)->term));
 */
 ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_query_out)
 {
-ANT_NEXI_ant NEXI_parser;
 long terms_in_query, current_term;
 ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
 ANT_NEXI_term_iterator term;

@@ -55,7 +55,7 @@ ATIRE_broke_engine **current;
 
 if (search_engine != NULL)
 	for (current = search_engine; *current != NULL; current++)
-		delete current;
+		delete *current;
 
 delete [] search_engine;
 delete results_list;

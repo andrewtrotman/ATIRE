@@ -495,9 +495,10 @@ if (params->stats & ANT_ANT_param_block::SUM)
 /*
 	Clean up
 */
-delete inchannel;
-if (inchannel != outchannel)
+if (outchannel != inchannel)
 	delete outchannel;
+delete inchannel;
+
 delete [] print_buffer;
 
 /*

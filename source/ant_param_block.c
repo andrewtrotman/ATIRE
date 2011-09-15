@@ -180,6 +180,7 @@ puts("  a             Article retrieval [default]");
 puts("  -             No snippets [default]");
 puts("  t<tag>        Snippet is the contents of tag <tag> [default=title]");
 puts("  f<tag>        Snippet is the text immediately following <tag> [default=title]");
+puts("  c             Snippet is this passage with the highest term count");
 puts("  s<n>          Maximum length of snippet is <n> characters [default=300]");
 puts("");
 
@@ -429,6 +430,9 @@ switch (*which)
 		focussing_algorithm = ARTICLE;
 		break;
 //	case 'r': focussing_algorithm = RANGE; break;
+	case 'c': 
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_TF;
+		break;
 	case 't':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
 		if (*(which + 1) != '\0')

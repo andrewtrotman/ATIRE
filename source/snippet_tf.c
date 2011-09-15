@@ -47,7 +47,7 @@ term_list = generate_term_list(query, &query_length);
 parser->set_document(document);
 
 /*
-	remove all XML tags
+	Remove all XML tags
 */
 found = 0;
 while ((token = parser->get_next_token()) != NULL)
