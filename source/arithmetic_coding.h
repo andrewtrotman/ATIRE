@@ -1,5 +1,5 @@
 /* Derived from http://www.cipr.rpi.edu/~wheeler/ac/. Modified to encode/decode to a fixed-sized
- * integer instead of a file, and translate to C++. */
+ * integer instead of a file, and translate to C++ */
 
 #ifndef AC_HEADER
 #define AC_HEADER
@@ -9,6 +9,9 @@
 #include <limits>
 #include <limits.h>
 #include <cassert>
+
+#undef max
+#undef min
 
 class ANT_arithmetic_coding
 {
@@ -115,7 +118,7 @@ private:
 		return 0;
 		}
 
-	t = (buffer & (1 << (sizeof(buffer) * CHAR_BIT - 1))) != 0 ? 1 : 0;
+	t = (buffer & ((T) 1 << (sizeof(buffer) * CHAR_BIT - 1))) != 0 ? 1 : 0;
 	buffer <<= 1;
 	bits_to_go--;
 
@@ -125,7 +128,7 @@ private:
 public:
 	ANT_arithmetic_decoder(ANT_arithmetic_model *acm, T buffer)
 	{
-	this->buffer = buffer;
+	this->buffer = std::numeric_limits<T>::max() - buffer;
 	this->acm = acm;
 
 	bits_to_go = sizeof(buffer) * CHAR_BIT;
@@ -236,17 +239,16 @@ public:
 
 	T done()
 	{
+	while (bits_to_go)
+		encode_symbol(0);
+
 	fbits++;
 	if (low < First_qtr)
 		bit_plus_follow(0);
 	else
 		bit_plus_follow(1);
 
-	//Pad "right side" of encoded buffer with zero bits
-	while (bits_to_go)
-		output_bit(0);
-
-	return buffer;
+	return std::numeric_limits<T>::max() - buffer;
 	}
 
 	/*
@@ -288,7 +290,7 @@ public:
 	if (acm->adapt)
 		acm->update(sym);
 
-	return bits_to_go;
+	return bits_to_go > 0;
 	}
 };
 

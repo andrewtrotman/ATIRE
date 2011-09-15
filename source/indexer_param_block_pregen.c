@@ -42,6 +42,10 @@ else if (strcmp(field_type, "asciidigest") == 0)
 	pregens[num_pregen_fields].type = ASCIIDIGEST;
 else if (strcmp(field_type, "base36") == 0)
 	pregens[num_pregen_fields].type = BASE36;
+else if (strcmp(field_type, "base37") == 0)
+	pregens[num_pregen_fields].type = BASE37;
+else if (strcmp(field_type, "base37arith") == 0)
+	pregens[num_pregen_fields].type = BASE37_ARITHMETIC;
 else
 	return 0;
 
@@ -64,6 +68,8 @@ puts("   strexact     Rank by ordering on complete strings (cannot rank results 
 puts("   strtrunc     Rank by a simple prefix of the given string (binary safe)");
 puts("   asciidigest  Rank by compact ASCII conversion of the prefix of the given string");
 puts("   base36       Rank by base-36 conversion of alphanumerics");
+puts("   base37       Rank by base-37 conversion of alphanumerics and spaces");
+puts("   base37arith  Rank by arithmetic encoding of alphanumerics and spaces with English model");
 puts("   recentdate   Rank by recently-biased UNIX timestamps");
 puts("");
 }

@@ -9,11 +9,12 @@
 #include "search_engine_accumulator.h"
 #include "string_pair.h"
 #include "str.h"
+#include "arithmetic_coding.h"
 
 #define MAX_PREGEN_FIELDS 128
 #define PREGEN_FILE_VERSION 1
 
-enum pregen_field_type { INTEGER, STRTRUNC, ASCIIDIGEST, BASE36, RECENTDATE, INTEGEREXACT, STREXACT };
+enum pregen_field_type { INTEGER, STRTRUNC, ASCIIDIGEST, BASE36, BASE37, RECENTDATE, INTEGEREXACT, STREXACT, BASE37_ARITHMETIC };
 
 typedef ANT_search_engine_accumulator::ANT_accumulator_t pregen_t;
 
@@ -75,19 +76,27 @@ public:
 class ANT_pregen_writer_normal : public ANT_pregen_writer
 {
 private:
+	ANT_arithmetic_model *base37_english_model;
+
 	static pregen_t generate_integer(ANT_string_pair field);
 	static pregen_t generate_strtrunc(ANT_string_pair field);
 	static pregen_t generate_asciidigest(ANT_string_pair field);
 	static pregen_t generate_base36(ANT_string_pair field);
+	static pregen_t generate_base37(ANT_string_pair field);
+	pregen_t generate_base37_arithmetic(ANT_string_pair field);
 	static pregen_t generate_recentdate(ANT_string_pair field);
 
-	static pregen_t generate(pregen_field_type type, ANT_string_pair field);
+	pregen_t generate(pregen_field_type type, ANT_string_pair field);
 
 	void add_score(pregen_t score, long long count = 1);
+
 public:
-	ANT_pregen_writer_normal(pregen_field_type type, const char * name) : ANT_pregen_writer(type, name) {};
-	ANT_pregen_writer_normal() : ANT_pregen_writer() {};
-	virtual ~ANT_pregen_writer_normal() {};
+	ANT_pregen_writer_normal(pregen_field_type type, const char * name) : ANT_pregen_writer(type, name), base37_english_model(NULL) {};
+	ANT_pregen_writer_normal() : ANT_pregen_writer(), base37_english_model(NULL) {};
+	virtual ~ANT_pregen_writer_normal()
+	{
+	delete base37_english_model;
+	};
 
 	virtual void add_field(long long docindex, ANT_string_pair & content);
 
