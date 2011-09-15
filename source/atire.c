@@ -149,7 +149,7 @@ else
 	{
 	snippet = new (std::nothrow) char [params->snippet_length + 1];
 	*snippet = '\0';
-	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, params->snippet_tag, atire->get_longest_document_length());
+	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag);
 	}
 
 prompt(params);

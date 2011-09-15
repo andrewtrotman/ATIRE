@@ -10,7 +10,7 @@
 	ANT_SNIPPET_TF::ANT_SNIPPET_TF()
 	--------------------------------
 */
-ANT_snippet_tf::ANT_snippet_tf(unsigned long max_length, long length_of_longest_document)
+ANT_snippet_tf::ANT_snippet_tf(unsigned long max_length, long length_of_longest_document) : ANT_snippet(length_of_longest_document)
 {
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
@@ -53,7 +53,7 @@ found = 0;
 while ((token = parser->get_next_token()) != NULL)
 	if (token->type == TT_WORD || token->type == TT_NUMBER)
 		if (bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term) != NULL)
-			found++;
+			keyword_hit[found++] = token->string();
 
 *snippet = '\0';
 

@@ -2,11 +2,33 @@
 	SNIPPET.C
 	---------
 */
+#include <stdio.h>
 #include "snippet.h"
 #include "parser_token.h"
 #include "NEXI_term_ant.h"
 #include "NEXI_term_iterator.h"
 #include "NEXI_ant.h"
+
+
+
+/*
+	ANT_SNIPPET::ANT_SNIPPET()
+	--------------------------
+*/
+ANT_snippet::ANT_snippet(long length_of_longest_document)
+{
+keyword_hit = new char * [(length_of_longest_document + 1) / 2]; // worst case is that every second character is a word
+}
+
+/*
+	ANT_SNIPPET::~ANT_SNIPPET()
+	---------------------------
+*/
+ANT_snippet::~ANT_snippet()
+{
+delete [] keyword_hit;
+}
+
 
 /*
 	ANT_SNIPPET::CMP_TERM()

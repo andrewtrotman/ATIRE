@@ -10,7 +10,7 @@
 	ANT_SNIPPET_BEGINNING::ANT_SNIPPET_BEGINNING()
 	----------------------------------------------
 */
-ANT_snippet_beginning::ANT_snippet_beginning(unsigned long max_length, char *tag)
+ANT_snippet_beginning::ANT_snippet_beginning(unsigned long max_length, long length_of_longest_document, char *tag) : ANT_snippet(length_of_longest_document)
 {
 parser = new ANT_parser();
 maximum_snippet_length = max_length;

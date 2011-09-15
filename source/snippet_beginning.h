@@ -20,10 +20,10 @@ private:
 	ANT_parser *parser;							// the parser, used to classify tokens in the document
 	unsigned long maximum_snippet_length;		// in bytes
 	char *tag;									// ignore all text up-to the end of this tag
-	long tag_length;							// this is the length of this->tag
+	size_t tag_length;							// this is the length of this->tag
 
 public:
-	ANT_snippet_beginning(unsigned long max_length, char *tag);
+	ANT_snippet_beginning(unsigned long max_length, long length_of_longest_document, char *tag);
 	virtual ~ANT_snippet_beginning();
 
 	virtual char *get_snippet(char *snippet, char *document, char *query);

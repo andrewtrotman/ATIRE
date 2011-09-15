@@ -10,7 +10,7 @@
 	ANT_SNIPPET_TAG::ANT_SNIPPET_TAG()
 	----------------------------------
 */
-ANT_snippet_tag::ANT_snippet_tag(unsigned long max_length, char *tag)
+ANT_snippet_tag::ANT_snippet_tag(unsigned long max_length, long length_of_longest_document, char *tag) : ANT_snippet(length_of_longest_document)
 {
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
@@ -36,13 +36,14 @@ char *ANT_snippet_tag::get_snippet(char *snippet, char *document, char *query)
 {
 char *into, *start;
 ANT_parser_token *token;
-unsigned long length_in_bytes, substring_length;
+size_t substring_length, length_in_bytes;
 long found_title;
 
 /*
 	Initialise
 */
-length_in_bytes = substring_length = 0;
+length_in_bytes = 0;
+substring_length = 0;
 into = snippet;
 found_title = false;
 start = NULL;

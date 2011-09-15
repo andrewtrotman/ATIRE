@@ -20,7 +20,7 @@ public:
 	ANT_snippet_factory() {}
 	virtual ~ANT_snippet_factory() {}
 
-	static ANT_snippet *get_snippet_maker(long type, long length_of_snippet, char *tag, long length_of_longest_document);
+	static ANT_snippet *get_snippet_maker(long type, long length_of_snippet, long length_of_longest_document, char *tag);
 } ;
 
 #endif /* SNIPPET_FACTORY_H_ */
