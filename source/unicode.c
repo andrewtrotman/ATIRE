@@ -191,7 +191,7 @@ int utf8_isupper(long character)
 
 	Returns true if successful, 0 otherwise	(e.g. buflen too small).
 */
-int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character)
+int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char **buf, size_t *buflen, uint32_t character)
 {
 size_t num_dest_chars;
 const char * decomposition;

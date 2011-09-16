@@ -29,89 +29,102 @@
 #include "../source/search_engine_accumulator.h"
 #include "../source/indexer_param_block_pregen.h"
 
-
 #ifdef _MSC_VER
-char *map_entire_file(const char *filename, long long *filesize)
-{
-HANDLE mapping;
-HANDLE fp;
-char *result;
+	char *map_entire_file(const char *filename, long long *filesize)
+	{
+	HANDLE mapping;
+	HANDLE fp;
+	char *result;
 
-fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-if (fp == INVALID_HANDLE_VALUE)
-	return NULL;
+	fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 
-mapping = CreateFileMapping(fp, NULL, PAGE_READONLY, 0, 0, NULL);
+	if (fp == INVALID_HANDLE_VALUE)
+		return NULL;
 
-if (mapping == NULL)
-	return NULL;
+	mapping = CreateFileMapping(fp, NULL, PAGE_READONLY, 0, 0, NULL);
 
-result = (char*) MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
+	if (mapping == NULL)
+		return NULL;
 
-return result;
-}
+	result = (char*) MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
 
+	return result;
+	}
 #else
-char *map_entire_file(const char *filename, long long *filesize)
-{
-int fd = open(filename, O_RDONLY, (mode_t)0600);
-struct stat buffer;
-char *result;
+	char *map_entire_file(const char *filename, long long *filesize)
+	{
+	int fd = open(filename, O_RDONLY, (mode_t)0600);
+	struct stat buffer;
+	char *result;
 
-if (fd == -1)
-	return NULL;
+	if (fd == -1)
+		return NULL;
 
-fstat(fd, &buffer);
+	fstat(fd, &buffer);
 
-result =(char*) mmap (0, buffer.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	result = (char*) mmap (0, buffer.st_size, PROT_READ, MAP_SHARED, fd, 0);
 
-if (result==MAP_FAILED)
-	return NULL;
+	if (result==MAP_FAILED)
+		return NULL;
 
-return result;
-}
+	return result;
+	}
 #endif
 
-char *pregen_type_to_str(pregen_field_type type) {
-	switch (type)
-		{
-		case INTEGER:
-			return "integer";
-		case STRTRUNC:
-			return "strtrunc";
-		case ASCIIDIGEST:
-			return "asciidigest";
-		case BASE36:
-			return "base36";
-		case RECENTDATE:
-			return "recentdate";
-		case INTEGEREXACT:
-			return "integerexact";
-		case STREXACT:
-			return "strexact";
-		default:
-			return "Unknown";
-		};
+char *pregen_type_to_str(pregen_field_type type)
+{
+switch (type)
+	{
+	case INTEGER:
+		return "integer";
+	case STRTRUNC:
+		return "strtrunc";
+	case ASCII_5BIT:
+		return "asciidigest";
+	case BASE36:
+		return "base36";
+	case RECENTDATE:
+		return "recentdate";
+	case INTEGEREXACT:
+		return "integerexact";
+	case STREXACT:
+		return "strexact";
+	case BASE37:
+		return "base37";
+	case BASE37_ARITHMETIC:
+		return "base37arith";
+	case ASCII_PRINTABLES:
+		return "asciiprintables";
+	case ASCII_PRINTABLES_ARITHMETIC:
+		return "asciiprintablesarith";
+	default:
+		return "Unknown";
+	}
 }
 
 bool compare_rsv_greater(const std::pair<long long, long long>& a, const std::pair<long long, long long>& b)
 {
 //Tiebreak on docids
-return a.second > b.second ? true :
-		a.second == b.second ? (a.first < b.first) : false;
+return a.second > b.second ? true : a.second == b.second ? (a.first < b.first) : false;
 }
 
-void compare(ANT_pregen & f1, ANT_pregen & f2)
+unsigned long long absll(signed long long a)
 {
-int print_rsvs = 0, print_ranks = 1, print_diffs = 0;
+return a >= 0 ? a : -a;
+}
 
-printf("Comparing with: %s\n", pregen_type_to_str(f2.type));
+void compare(ANT_pregen & f1, ANT_pregen & f2, int bits)
+{
+int print_rsvs = 0, print_ranks = 0, print_diffs = 0;
 
 assert(f1.doc_count == f2.doc_count);
+assert(bits <= sizeof(pregen_t) * CHAR_BIT);
+
+printf("Comparing with: %s truncated to %d bits\n", pregen_type_to_str(f2.type), bits);
 
 /* Pregens give a score to each document, but we want to compare document ranks in the ordering */
 
-std::pair<long long, pregen_t> *docs1 = new std::pair<long long, pregen_t>[f1.doc_count], *docs2 = new std::pair<long long, pregen_t>[f2.doc_count];
+std::pair<long long, pregen_t> *docs1 =	new std::pair<long long, pregen_t>[f1.doc_count], *docs2 = new std::pair<long long, pregen_t>[f2.doc_count];
 long long *ranks1 = new long long[f1.doc_count], *ranks2 = new long long[f2.doc_count];
 
 if (print_rsvs)
@@ -126,9 +139,14 @@ for (long long i = 0; i < f1.doc_count; i++)
 	docs1[i].first = i;
 	docs1[i].second = f1.scores[i];
 	docs2[i].first = i;
-	docs2[i].second = f2.scores[i];
+
+	/* If we need to mask off the lower bits of the pregen to get the desired number
+	 * of bits, do that now.
+	 */
+	docs2[i].second = f2.scores[i] & ~(((pregen_t) 1 << (sizeof(pregen_t) * CHAR_BIT - bits)) - 1);
+
 	if (print_rsvs)
-		printf("%5lld %4lld %4lld\n", i, docs1[i].second, docs2[i].second);
+		printf("%5lld %4llu %4llu\n", i, docs1[i].second, docs2[i].second);
 	}
 
 if (print_ranks)
@@ -162,7 +180,7 @@ unsigned long long sum_of_diffs = 0;
 
 for (long long i = 0; i < f1.doc_count; i++)
 	{
-	long long diff = abs((signed long long) ranks1[i] - (signed long long) ranks2[i]);
+	long long diff = absll((signed long long) ranks1[i] - (signed long long) ranks2[i]);
 
 	sum_of_diffs += diff;
 
@@ -170,14 +188,16 @@ for (long long i = 0; i < f1.doc_count; i++)
 		printf("%5lld %5lld %5lld %5lld\n", i, ranks1[i], ranks2[i], diff);
 	}
 
-printf("Sum of diffs: %lld\n", sum_of_diffs);
+printf("Sum of rank diffs: %lld\n", sum_of_diffs);
+printf("Average rank diff: %lld\n", sum_of_diffs / f1.doc_count);
+printf("Average rank diff as percentage of doccount: %.3f%%\n", ((double) sum_of_diffs / f1.doc_count / f1.doc_count * 100));
 
 printf("\n");
 
-delete [] docs1;
-delete [] docs2;
-delete [] ranks1;
-delete [] ranks2;
+delete[] docs1;
+delete[] docs2;
+delete[] ranks1;
+delete[] ranks2;
 }
 
 int file_exists(const char *filename)
@@ -255,7 +275,6 @@ else
 	cur = doclist;
 	while (*cur)
 		{
-		/* TODO This is not actually UTF-8 safe. Consider using nulls to terminate lines in doclist */
 		char * docnameend = strchr(cur, '\n');
 
 		if (!docnameend)
@@ -267,8 +286,23 @@ else
 		docindex++;
 		}
 
+	/* Do we have a list of exact strings per-document to display for this pregen? */
+	/*for (int i = 0; i < num_pregens; i++)
+	 if (dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i]))
+	 {
+	 ANT_pregen_writer_exact_strings* p = dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i]);
+	 exact_strings = new char*[p->doc_count];
+
+	 for (int j = 0; j < p->doc_count; j++)
+	 {
+	 exact_strings[j] = strdup(p->exact_strings[j].second);
+	 if (strlen(exact_strings[j])>20)
+	 exact_strings[j][20] = 0;
+	 }
+	 }
+	 */
 	pregen_writer.close();
-}
+	}
 
 /* Pregens are written to a file, so read the pregens that we just wrote back into memory */
 ANT_pregen *pregens = new ANT_pregen[num_pregens];
@@ -285,7 +319,7 @@ fprintf(stderr, "Comparing pregens...\n");
  */
 int *compared = new int[num_pregens]; //Values are true if we've compared against this pregen already
 
-memset((void *)compared, 0, sizeof(compared[0])*num_pregens);
+memset((void *) compared, 0, sizeof(compared[0]) * num_pregens);
 
 for (int i = 0; i < num_pregens; i++)
 	if (!compared[i])
@@ -294,14 +328,15 @@ for (int i = 0; i < num_pregens; i++)
 
 		/* Do we have a list of exact strings per-document to display for this pregen? */
 		/*if (dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i]))
-			{
-			dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i])->print_strings();
-			}*/
+		 {
+		 dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i])->print_strings();
+		 }*/
 
 		for (int j = i + 1; j < num_pregens; j++)
-			if (strcmp(pregens[i].field_name, pregens[j].field_name)==0)
+			if (strcmp(pregens[i].field_name, pregens[j].field_name) == 0)
 				{
-				compare(pregens[i], pregens[j]);
+				for (int bits = 16; bits >= 4; bits--)
+					compare(pregens[i], pregens[j], bits);
 
 				compared[j] = 1;
 				}

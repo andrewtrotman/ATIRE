@@ -5,10 +5,9 @@
 #include <time.h>
 #include <algorithm>
 #include <string.h>
+#include <cmath>
 
 #include "pregen.h"
-#include "unicode.h"
-#include "unicode_tables.h"
 #include "arithmetic_coding.h"
 #include "str.h"
 
@@ -41,7 +40,11 @@ size_t bytes = min(field.length(), sizeof(result));
 
 /* Work correctly on both little and big-endian systems (don't just cast string to integer) */
 for (unsigned int i = 0; i < bytes; i++)
-	result = (result << 8) | field[i];
+	result = (result << CHAR_BIT) | field[i];
+
+/* Left-align the result */
+if (bytes < sizeof(result))
+	result = result << (CHAR_BIT * (sizeof(result) - bytes));
 
 return result;
 }
@@ -62,25 +65,29 @@ return 0; //TODO implement me
 }
 
 /**
- * Compute an integer from the given UTF-8 string for sorting. After decomposition, only
- * the characters a-z,0-9 are kept, and combined as base-36 digits in the resulting integer.
+ * Generalized encoding of a UTF-8 string using a character encoding function
+ * provided as type parameter T, e.g. ANT_encode_char_base36. The string is
+ * first Unicode-normalized and lowercased, then encoded using the given function.
+ *
+ * T must have a static method num_symbols(), and a method encode(unsigned char), which
+ * takes a character to encode and returns a value in the range [0..num_symbols()).
  */
-pregen_t ANT_pregen_writer_normal::generate_base36(ANT_string_pair field)
+template <typename T>
+pregen_t ANT_pregen_writer_normal::generate_radix(ANT_string_pair field)
 {
 pregen_t result = 0;
 
-unsigned long character;
+uint32_t character;
 
 unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
-unsigned char * buffer_pos;
+unsigned char *buffer_pos;
 size_t buffer_remain;
-unsigned char encoded;
 
 /* How many letters can we fit in the result? If accumulator is signed, don't use the sign bit (we don't want
  * negative RSVs) */
 const unsigned int dest_bits = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
-const double LOG_BASE_2_OF_36 = 5.1699250014423123629074778878956;
-unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_36);
+const double LOG_BASE_2_OF_RADIX = log((double)T::num_symbols()) / log((double)2);
+unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_RADIX);
 
 while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain > 0)
 	{
@@ -90,23 +97,15 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
 
 	/* Write as much of that UTF-8 normalization as we can fit into the result */
-	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain > 0;
-			i++)
+	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain > 0; i++)
 		{
-		if (buffer[i] >= '0' && buffer[i] <= '9')
-			{
-			/* Digits sort first*/
-			encoded = buffer[i] - '0';
-			}
-		else if (buffer[i] >= 'a' && buffer[i] <= 'z')
-			{
-			/* Letters last */
-			encoded = buffer[i] - 'a' + 10;
-			}
-		else continue; //Other characters dropped
+		unsigned char encoded = T::encode(buffer[i]);
 
-		dest_chars_remain--;
-		result = result * 36 + encoded;
+		if (encoded != CHAR_ENCODE_FAIL)
+			{
+			dest_chars_remain--;
+			result = result * T::num_symbols() + encoded;
+			}
 		}
 
 	field.start += utf8_bytes(field.start);
@@ -116,207 +115,57 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 //"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
 while (dest_chars_remain)
 	{
-	result *= 36;
+	result *= T::num_symbols();
 	dest_chars_remain--;
 	}
+
+if (result == 0) /*Strings of all zero symbols become zero, which we don't want as an RSV. Avoid. */
+	return 1;
+else
+	return result;
 
 return result;
 }
 
-/**
- * Compute an integer from the given UTF-8 string for sorting. After decomposition, only
- * the characters a-z,0-9, plus space, are kept, and combined as base-37 digits in the resulting integer.
- */
-pregen_t ANT_pregen_writer_normal::generate_base37(ANT_string_pair field)
+template <typename T>
+pregen_t ANT_pregen_writer_normal::generate_arithmetic(ANT_string_pair field, ANT_arithmetic_model *model)
 {
-pregen_t result = 0;
-
-unsigned long character;
+uint32_t character;
 
 unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
-unsigned char * buffer_pos;
+unsigned char *buffer_pos;
 size_t buffer_remain;
-unsigned char encoded;
-
-/* How many letters can we fit in the result? If accumulator is signed, don't use the sign bit (we don't want
- * negative RSVs) */
-const unsigned int dest_bits = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
-const double LOG_BASE_2_OF_37 = 5.2094533656289497818578041776132;
-unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_37);
-
-while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain > 0)
-	{
-	buffer_pos = buffer;
-	buffer_remain = sizeof(buffer);
-
-	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
-
-	/* Write as much of that UTF-8 normalization as we can fit into the result */
-	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain > 0;
-			i++)
-		{
-		if (buffer[i] == ' ')
-			{
-			encoded = 0;
-			}
-		if (buffer[i] >= '0' && buffer[i] <= '9')
-			{
-			encoded = buffer[i] - '0' + 1;
-			}
-		else if (buffer[i] >= 'a' && buffer[i] <= 'z')
-			{
-			/* Letters last */
-			encoded = buffer[i] - 'a' + 1 + 10;
-			}
-		else continue; //Other characters dropped
-
-		dest_chars_remain--;
-		result = result * 37 + encoded;
-		}
-
-	field.start += utf8_bytes(field.start);
-	field.string_length -= utf8_bytes(field.start);
-	}
-
-//"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
-while (dest_chars_remain)
-	{
-	result *= 37;
-	dest_chars_remain--;
-	}
-
-return result;
-}
-
-/**
- * Compute an integer from the given UTF-8 string for sorting. After decomposition, only
- * the characters a-z,0-9, plus space, are kept, and combined as base-37 digits in the resulting integer.
- */
-pregen_t ANT_pregen_writer_normal::generate_base37_arithmetic(ANT_string_pair field)
-{
-unsigned long character;
-
-const int NUM_SYMBOLS = 26 + 10 + 1;
-unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
-unsigned char * buffer_pos;
-size_t buffer_remain;
-unsigned char symbol;
 pregen_t result;
 
-if (base37_english_model == NULL)
-	{
-	static int symbol_frequencies[]= {
-			1317, 11, 33, 11, 13, 3, 3, 1, 3, 5, 6, 719,
-			92, 378, 337, 827, 143, 214, 261, 458, 15, 61, 351, 219,
-			510, 591, 330, 8, 593, 451, 585, 138, 68, 221, 26, 158, 6
-		};
-
-	base37_english_model = new ANT_arithmetic_model(NUM_SYMBOLS, symbol_frequencies, 0);
-	}
-
-ANT_arithmetic_encoder<pregen_t> encoder(base37_english_model);
+ANT_arithmetic_encoder<pregen_t> encoder(model);
 
 while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0)
 	{
 	buffer_pos = buffer;
 	buffer_remain = sizeof(buffer);
 
-	if (character == ' ')
-		{
-		if (!encoder.encode_symbol(0))
-			break;
-		}
-	else
-		{
-		ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
-
-		/* Write as much of that UTF-8 normalization as we can fit into the result */
-		for (int i = 0; i < (buffer_pos - buffer); i++)
-			{
-			if (buffer[i] >= '0' && buffer[i] <= '9')
-				{
-				symbol = buffer[i] - '0' + 1;
-				}
-			else if (buffer[i] >= 'a' && buffer[i] <= 'z')
-				{
-				/* Letters last */
-				symbol = buffer[i] - 'a' + 1 + 10;
-				}
-			else continue; //Other characters dropped
-
-			printf("%c", buffer[i]);
-
-			if (!encoder.encode_symbol(symbol))
-				break; //Ran out of room in the encoded result, so stop encoding
-			}
-		}
-	field.start += utf8_bytes(field.start);
-	field.string_length -= utf8_bytes(field.start);
-	}
-
-printf("\n");
-
-result = encoder.done();
-
-if (result == 0) /*Strings of all spaces become zero, which we don't want as an RSV. Avoid. */
-	return 1;
-else
-	return result;
-}
-
-/**
- * Compute an integer from the given UTF-8 string which, when sorted, will generate a
- * similar ordering as a full sort on English titles would. Takes a prefix of the given
- * string and crams as many ASCII characters as it can into the result at 5 bits each.
- */
-pregen_t ANT_pregen_writer_normal::generate_asciidigest(ANT_string_pair field)
-{
-pregen_t result = 0;
-
-const int BITS_PER_ENCODED_CHAR = 5;
-
-unsigned long character;
-
-unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
-unsigned char * buffer_pos;
-size_t buffer_remain;
-
-unsigned char encoded;
-/* How many bits we can still fit in the result? If accumulator is signed, don't use the sign bit (we don't want
- * negative RSVs) */
-unsigned int bits_remain = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
-
-while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && bits_remain >= BITS_PER_ENCODED_CHAR)
-	{
-	buffer_pos = buffer;
-	buffer_remain = sizeof(buffer);
-
 	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
 
 	/* Write as much of that UTF-8 normalization as we can fit into the result */
-	for (int i = 0; i < (buffer_pos - buffer) && bits_remain >= BITS_PER_ENCODED_CHAR;
-			i++)
+	for (int i = 0; i < (buffer_pos - buffer); i++)
 		{
-		if (buffer[i] >= '0' && buffer[i] <= '9')
-			encoded = 1 + ((buffer[i] - '0') >> 1); //Numbers sort second, but they will have to double-up to fit into 5 encodings
-		else if (buffer[i] >= 'a' && buffer[i] <= 'z')
-			encoded = buffer[i] - 'a' + 5; //Letters sort last
-		else if (buffer[i] <= LAST_ASCII_CHAR)
-			encoded = 0; //Punctuation sorts first
-		else continue; //Unicode codepoints are dropped altogether
+		unsigned char symbol = ANT_encode_char_base37_edges::encode(buffer[i]);
 
-		result = (result << BITS_PER_ENCODED_CHAR) | encoded;
-		bits_remain -= BITS_PER_ENCODED_CHAR;
+		if (symbol != CHAR_ENCODE_FAIL)
+			if (!encoder.encode_symbol(symbol))
+				goto break_outer; //Ran out of room in the encoded result, so stop encoding
 		}
-
 	field.start += utf8_bytes(field.start);
 	field.string_length -= utf8_bytes(field.start);
 	}
 
-//"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
-result = (result << bits_remain);
+break_outer:
+result = encoder.done();
 
-return result;
+if (result == 0) /*Strings of all zero symbols become zero, which we don't want as an RSV. Avoid. */
+	return 1;
+else
+	return result;
 }
 
 pregen_t ANT_pregen_writer_normal::generate(pregen_field_type type, ANT_string_pair field)
@@ -327,15 +176,20 @@ switch (type)
 		return generate_integer(field);
 	case STRTRUNC:
 		return generate_strtrunc(field);
-	case ASCIIDIGEST:
-		return generate_asciidigest(field);
+	case ASCII_5BIT:
+		return generate_radix<ANT_encode_char_5bit>(field);
 	case BASE36:
-		return generate_base36(field);
+		return generate_radix<ANT_encode_char_base36>(field);
 	case BASE37:
-		return generate_base37(field);
+		return generate_radix<ANT_encode_char_base37>(field);
+	case ASCII_PRINTABLES:
+		return generate_radix<ANT_encode_char_printable_ascii>(field);
 	case BASE37_ARITHMETIC:
-		return generate_base37_arithmetic(field);
+		return generate_arithmetic<ANT_encode_char_base37_edges>(field, arithmetic_model);
+	case ASCII_PRINTABLES_ARITHMETIC:
+		return generate_arithmetic<ANT_encode_char_printable_ascii>(field, arithmetic_model);
 	default:
+		assert(0);
 		return 0;
 	}
 }
@@ -727,7 +581,7 @@ long long skip_docs;
 unsigned char *buffer;
 unsigned char * buffer_pos;
 size_t buffer_remain;
-unsigned long long character;
+uint32_t character;
 char * string;
 
 /* It's possible that previous documents didn't contain this field, so be prepared to zero-pad. */

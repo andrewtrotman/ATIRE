@@ -10,6 +10,7 @@
 #include <string.h>
 #include <cassert>
 #include "ctypes.h"
+#include "fundamental_types.h"
 #include "unicode_tables.h"
 
 #ifdef _MSC_VER
@@ -51,9 +52,10 @@ ANT_UNICODE_chartype unicode_chartype(unsigned long character);
 unsigned char unicode_chartype_set(unsigned long character);
 int unicode_xml_class(unsigned long character);
 
-int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char ** buf, size_t * buflen, unsigned long character);
-inline int ANT_UNICODE_normalize_lowercase_toutf8(char ** buf, size_t * buflen, unsigned long character) {
-	return ANT_UNICODE_normalize_lowercase_toutf8((unsigned char **) buf, buflen, character);
+int ANT_UNICODE_normalize_lowercase_toutf8(unsigned char **buf, size_t *buflen, uint32_t character);
+inline int ANT_UNICODE_normalize_lowercase_toutf8(char **buf, size_t *buflen, uint32_t character)
+{
+return ANT_UNICODE_normalize_lowercase_toutf8((unsigned char **) buf, buflen, character);
 }
 
 /*
