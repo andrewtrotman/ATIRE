@@ -384,6 +384,8 @@ OTHER_TARGETS = \
 	$(BINDIR)\textsplitter.exe			\
 	$(BINDIR)\test_boolean_parser.exe	\
 	$(BINDIR)\test_unicode_case_convert.exe			\
+	$(BINDIR)\pregen_precision_measurement.exe		\
+	$(BINDIR)\arithmetic_encoding_model_gen.exe		\
 	$(LIBIDR)\atire.dll
 
 #
@@ -402,6 +404,8 @@ bin\make_unicode_tables.exe : bin\make_unicode_tables.obj
 bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
 bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
 bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj
+bin\pregen_precision_measurement.exe : bin\pregen_precision_measurement.obj
+bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj
 
 #
 #	Default dependency rules
