@@ -121,8 +121,6 @@ while (dest_chars_remain)
 
 if (result == 0) /*Strings of all zero symbols become zero, which we don't want as an RSV. Avoid. */
 	return 1;
-else
-	return result;
 
 return result;
 }
@@ -149,7 +147,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0)
 	/* Write as much of that UTF-8 normalization as we can fit into the result */
 	for (int i = 0; i < (buffer_pos - buffer); i++)
 		{
-		unsigned char symbol = ANT_encode_char_base37_edges::encode(buffer[i]);
+		unsigned char symbol = T::encode(buffer[i]);
 
 		if (symbol != CHAR_ENCODE_FAIL)
 			if (!encoder.encode_symbol(symbol))
@@ -164,11 +162,11 @@ result = encoder.done();
 
 if (result == 0) /*Strings of all zero symbols become zero, which we don't want as an RSV. Avoid. */
 	return 1;
-else
-	return result;
+
+return result;
 }
 
-pregen_t ANT_pregen_writer_normal::generate(pregen_field_type type, ANT_string_pair field)
+pregen_t ANT_pregen_writer_normal::generate(ANT_string_pair field)
 {
 switch (type)
 	{
@@ -245,7 +243,7 @@ if (skip_docs > 0)
 else
 	assert (skip_docs == 0); //docindex should never go backwards. We don't support that.
 
-add_score(generate(type, content));
+add_score(generate(content));
 }
 
 void ANT_pregens_writer::process_document(long long doc_index, ANT_string_pair doc_name)

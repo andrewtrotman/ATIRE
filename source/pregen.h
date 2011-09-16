@@ -237,7 +237,7 @@ private:
 	static pregen_t generate_strtrunc(ANT_string_pair field);
 	static pregen_t generate_recentdate(ANT_string_pair field);
 
-	pregen_t generate(pregen_field_type type, ANT_string_pair field);
+	pregen_t generate(ANT_string_pair field);
 
 	void add_score(pregen_t score, long long count = 1);
 
