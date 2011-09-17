@@ -3,12 +3,15 @@
 	---------
 */
 #include "str.h"
+#include "maths.h"
+#include <limits>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _MSC_VER
 	#include <winsock2.h>
+	#undef max
 #else
 	#include <errno.h>
 	#include <unistd.h>
@@ -530,14 +533,16 @@ return ans == NULL ? 0 : mem;
 long long ANT_socket::block_write(const char *pbuffer, long long size)
 {
 const char *from;
-long long len, sent;
+unsigned long long len, sent;
+size_t should_send;
 
 len = size;
 from = pbuffer;
 
 while (len != 0)
 	{
-	if ((sent = send(internals->sock, from, len, 0)) == SOCKET_ERROR)
+	should_send = (size_t)ANT_min(len, (unsigned long long)std::numeric_limits<std::size_t>::max());
+	if ((sent = send(internals->sock, from, should_send, 0)) == SOCKET_ERROR)
 		return -1;
 	len -= sent;
 	from += sent;

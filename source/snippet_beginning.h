@@ -17,8 +17,6 @@ class ANT_parser;
 class ANT_snippet_beginning : public ANT_snippet
 {
 private:
-	ANT_parser *parser;							// the parser, used to classify tokens in the document
-	unsigned long maximum_snippet_length;		// in bytes
 	char *tag;									// ignore all text up-to the end of this tag
 	size_t tag_length;							// this is the length of this->tag
 
