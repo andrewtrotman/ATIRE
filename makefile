@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 0
+DEBUG = 1
 
 #
 #	Which compiler are we using
@@ -25,6 +25,7 @@ TRUE = 1
 ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
 ANT_HAS_LZO = $(TRUE)
+ANT_HAS_SNAPPYLIB = $(TRUE)
 ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
 ANT_HAS_MYSQL = $(FALSE)
@@ -80,6 +81,17 @@ EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_BZLIB
 EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I bzip\bzip2-1.0.5
 EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 !ENDIF
+
+#
+# If we have SNAPPYLIB (Google's snappy compression library)
+#
+!IF $(ANT_HAS_SNAPPYLIB) == $(TRUE)
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_SNAPPYLIB
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I snappy\snappy-1.0.4
+EXTRA_LIBS = $(EXTRA_LIBS) snappy\snappy.lib
+!ENDIF
+
+
 
 #
 #	Now for GPL / BSD license conflicts.
@@ -271,6 +283,7 @@ PARTS = \
 	$(OBJDIR)\compress_sigma.obj					\
 	$(OBJDIR)\compression_factory.obj				\
 	$(OBJDIR)\compress_text_none.obj				\
+	$(OBJDIR)\compress_text_snappy.obj				\
 	$(OBJDIR)\compress_text_bz2.obj					\
 	$(OBJDIR)\compress_text_deflate.obj				\
 	$(OBJDIR)\compression_text_factory.obj			\
@@ -452,6 +465,11 @@ zlib\zlib-1.2.3\zlib.lib :
 
 lzo\lzo2.lib :
 	@cd lzo
+	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
+	@cd ..
+
+snappy\snappy.lib :
+	@cd snappy
 	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..
 
