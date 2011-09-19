@@ -87,7 +87,7 @@ EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
 #
 !IF $(ANT_HAS_SNAPPYLIB) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_SNAPPYLIB
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I snappy\snappy-1.0.4
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I snappy\snappy-1.0.4 -I snappy
 EXTRA_LIBS = $(EXTRA_LIBS) snappy\snappy.lib
 !ENDIF
 

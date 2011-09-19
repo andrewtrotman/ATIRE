@@ -54,7 +54,7 @@ unsigned long size;
 	one byte at the beginning saying which scheme it should use to decompress.  So, we need
 	to add 2 to the length we allocate and 1 the the length we compress.
 */
-object->compressed = new (std::nothrow) char [size = (size_t)(object->length + 2)];		// +1 because we might have to store the file "raw" and need the first byte to say so
+object->compressed = new (std::nothrow) char [size = compressor->space_needed_to_compress(object->length + 1)];		// +1 to include the '\0'
 if (compressor->compress(object->compressed, &size, object->file, (unsigned long)(object->length + 1)) == NULL)
 	exit(printf("Cannot compress document (name:%s)\n", object->filename));
 object->compressed_length = size;

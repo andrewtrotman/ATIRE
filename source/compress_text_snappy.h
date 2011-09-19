@@ -15,6 +15,7 @@ public:
 
 	virtual char *compress(char *destination, unsigned long *destination_length, char *source, unsigned long source_length);
 	virtual char *decompress(char *destination, unsigned long *destination_length, char *source, unsigned long source_length);
+	virtual unsigned long space_needed_to_compress(unsigned long source_length);
 } ;
 
 #endif /* COMPRESS_TEXT_SNAPPY_H_ */

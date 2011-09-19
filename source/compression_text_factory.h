@@ -14,12 +14,13 @@
 class ANT_compression_text_factory : public ANT_compress_text
 {
 public:
-	enum {RAW = 1, DEFLATE = 2, BZ2 = 4, SNAPPY = 8} ;
+	enum {RAW, DEFLATE, BZ2, SNAPPY, TERMINAL};		// TERMINAL is a sentinal and must not be used
 
 private:
-	long number_of_techniques;
-	ANT_compression_text_factory_scheme *scheme;
-	unsigned long schemes_to_use;
+	ANT_compression_text_factory_scheme *scheme;			// array of all possible schemes
+	long number_of_techniques;								// the number of schemes we know about
+	unsigned char scheme_to_use;							// the ID of the scheme to use (from the enum)
+	ANT_compress_text *current_scheme;						// a pointer to the scheme we are currently using
 	
 public:
 	ANT_compression_text_factory();
@@ -28,7 +29,9 @@ public:
 	virtual char *compress(char *destination, unsigned long *destination_length, char *source, unsigned long source_length);
 	virtual char *decompress(char *destination, unsigned long *destination_length, char *source, unsigned long source_length);
 
-	void set_scheme(unsigned long scheme) { schemes_to_use = scheme; }
+	virtual unsigned long space_needed_to_compress(unsigned long source_length);
+
+	void set_scheme(unsigned long scheme);
 	ANT_compression_text_factory *replicate(void);
 } ;
 

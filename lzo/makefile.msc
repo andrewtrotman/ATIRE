@@ -2,6 +2,8 @@
 # Makefile for LZO for ANT
 #
 
+.SILENT:
+
 CFI = -Ilzo-2.05\include -Ilzo-2.05 -Ilzo-2.05\src
 BNAME = lzo2
 BLIB = lzo2.lib
@@ -87,10 +89,10 @@ LZO_OBJ = 		\
 
 
 lzo2.lib :  $(LZO_OBJ)
-	@link -lib -nologo -out:$(BLIB) $(LZO_OBJ)
+	link -lib -nologo -out:$(BLIB) $(LZO_OBJ)
 
 {lzo-2.05\src\}.c.obj:
-	@$(CC) $(CFI) -c /Tp $<
+	$(CC) $(CFI) -c /Tp $<
 
 clean :
 	del $(LZO_OBJ) lzo2.lib
