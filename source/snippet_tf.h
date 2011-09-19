@@ -16,8 +16,6 @@ class ANT_parser;
 class ANT_snippet_tf : public ANT_snippet
 {
 private:
-	ANT_parser *parser;							// the parser, used to classify tokens in the document
-	unsigned long maximum_snippet_length;		// the length of the snippet (in bytes)
 	long length_of_longest_document;			// the length of the longest document in the collection (in bytes)
 
 public:
