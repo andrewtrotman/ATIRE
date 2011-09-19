@@ -33,7 +33,7 @@ return value > std::numeric_limits<pregen_t>::max() ? std::numeric_limits<pregen
 		(pregen_t) value;
 }
 
-pregen_t ANT_pregen_writer_normal::generate_strtrunc(ANT_string_pair field)
+pregen_t ANT_pregen_writer_normal::generate_bintrunc(ANT_string_pair field)
 {
 pregen_t result = 0;
 size_t bytes = min(field.length(), sizeof(result));
@@ -64,6 +64,59 @@ if (sizeof(pregen_t) >= 4)
 return 0; //TODO implement me
 }
 
+template <typename T>
+pregen_t ANT_pregen_writer_normal::generate_sliding_radix(ANT_string_pair field)
+{
+pregen_t result = 0;
+/*
+uint32_t character;
+
+unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
+unsigned char *buffer_pos;
+size_t buffer_remain;
+
+ How many letters can we fit in the result? If accumulator is signed, don't use the sign bit (we don't want
+ * negative RSVs)
+const unsigned int dest_bits = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
+
+unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_RADIX);
+
+while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain > 0)
+	{
+	buffer_pos = buffer;
+	buffer_remain = sizeof(buffer);
+
+	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
+
+	 Write as much of that UTF-8 normalization as we can fit into the result
+	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain > 0; i++)
+		{
+		unsigned char encoded = T::encode(buffer[i]);
+
+		if (encoded != CHAR_ENCODE_FAIL)
+			{
+			dest_chars_remain--;
+			result = result * T::num_symbols() + encoded;
+			}
+		}
+
+	field.start += utf8_bytes(field.start);
+	field.string_length -= utf8_bytes(field.start);
+	}
+
+//"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
+while (dest_chars_remain)
+	{
+	result *= T::num_symbols();
+	dest_chars_remain--;
+	}
+
+if (result == 0) Strings of all zero symbols become zero, which we don't want as an RSV. Avoid.
+	return 1;*/
+
+return result;
+}
+
 /**
  * Generalized encoding of a UTF-8 string using a character encoding function
  * provided as type parameter T, e.g. ANT_encode_char_base36. The string is
@@ -86,7 +139,7 @@ size_t buffer_remain;
 /* How many letters can we fit in the result? If accumulator is signed, don't use the sign bit (we don't want
  * negative RSVs) */
 const unsigned int dest_bits = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
-const double LOG_BASE_2_OF_RADIX = log((double)T::num_symbols()) / log((double)2);
+const double LOG_BASE_2_OF_RADIX = log((double)T::num_symbols()) / log((double)2); //TODO make me a compile-time constant
 unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_RADIX);
 
 while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain > 0)
@@ -104,7 +157,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 		if (encoded != CHAR_ENCODE_FAIL)
 			{
 			dest_chars_remain--;
-			result = result * T::num_symbols() + encoded;
+			result = (pregen_t) (result * T::num_symbols() + encoded);
 			}
 		}
 
@@ -115,7 +168,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 //"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
 while (dest_chars_remain)
 	{
-	result *= T::num_symbols();
+	result = (pregen_t) (result * T::num_symbols());
 	dest_chars_remain--;
 	}
 
@@ -173,17 +226,21 @@ switch (type)
 	case INTEGER:
 		return generate_integer(field);
 	case STRTRUNC:
-		return generate_strtrunc(field);
+		return generate_radix<ANT_encode_char_8bit>(field);
+	case BINTRUNC:
+		return generate_bintrunc(field);
 	case ASCII_5BIT:
 		return generate_radix<ANT_encode_char_5bit>(field);
 	case BASE36:
 		return generate_radix<ANT_encode_char_base36>(field);
 	case BASE37:
 		return generate_radix<ANT_encode_char_base37>(field);
+	case BASE40:
+		return generate_radix<ANT_encode_char_base40>(field);
 	case ASCII_PRINTABLES:
 		return generate_radix<ANT_encode_char_printable_ascii>(field);
 	case BASE37_ARITHMETIC:
-		return generate_arithmetic<ANT_encode_char_base37_edges>(field, arithmetic_model);
+		return generate_arithmetic<ANT_encode_char_base37>(field, arithmetic_model);
 	case ASCII_PRINTABLES_ARITHMETIC:
 		return generate_arithmetic<ANT_encode_char_printable_ascii>(field, arithmetic_model);
 	default:
@@ -561,8 +618,8 @@ outvalues = new pregen_t[doc_count];
 
 /* Each document's RSV is its position in the ranking (also add 1 to avoid generating a
  * zero RSV) */
-for (int i = 0; i < doc_count; i++)
-	outvalues[exact_integers[i].first] = i + 1;
+for (unsigned int i = 0; i < doc_count; i++)
+	outvalues[exact_integers[i].first] = (pregen_t) (i + 1);
 
 file.write((unsigned char *)outvalues, doc_count * sizeof(*outvalues));
 
@@ -658,10 +715,10 @@ outvalues = new pregen_t[doc_count];
  * zero RSV) */
 pregen_t out = 1;
 
-for (int i = 0; i < doc_count; i++)
+for (unsigned int i = 0; i < doc_count; i++)
 	{
 	/* Don't increase RSV if this string is the same as the previous (search engine will tiebreak) */
-	if (i>0 && strcmp(exact_strings[i].second, exact_strings[i-1].second)!=0)
+	if (i > 0 && strcmp(exact_strings[i].second, exact_strings[i-1].second)!=0)
 		out++;
 
 	outvalues[exact_strings[i].first] = out;

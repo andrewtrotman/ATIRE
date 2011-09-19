@@ -36,6 +36,8 @@
 	HANDLE fp;
 	char *result;
 
+	(void) filesize; //TODO fill this parameter
+
 	fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 
 	if (fp == INVALID_HANDLE_VALUE)
@@ -56,6 +58,8 @@
 	int fd = open(filename, O_RDONLY, (mode_t)0600);
 	struct stat buffer;
 	char *result;
+
+	(void) filesize; //TODO fill this parameter
 
 	if (fd == -1)
 		return NULL;
@@ -79,8 +83,10 @@ switch (type)
 		return "integer";
 	case STRTRUNC:
 		return "strtrunc";
+	case BINTRUNC:
+		return "bintrunc";
 	case ASCII_5BIT:
-		return "asciidigest";
+		return "5bit";
 	case BASE36:
 		return "base36";
 	case RECENTDATE:
@@ -93,6 +99,8 @@ switch (type)
 		return "base37";
 	case BASE37_ARITHMETIC:
 		return "base37arith";
+	case BASE40:
+		return "base40";
 	case ASCII_PRINTABLES:
 		return "asciiprintables";
 	case ASCII_PRINTABLES_ARITHMETIC:
@@ -102,7 +110,7 @@ switch (type)
 	}
 }
 
-bool compare_rsv_greater(const std::pair<long long, long long>& a, const std::pair<long long, long long>& b)
+bool compare_rsv_greater(const std::pair<long long, pregen_t>& a, const std::pair<long long, pregen_t>& b)
 {
 //Tiebreak on docids
 return a.second > b.second ? true : a.second == b.second ? (a.first < b.first) : false;
@@ -119,8 +127,6 @@ int print_rsvs = 0, print_ranks = 0, print_diffs = 0;
 
 assert(f1.doc_count == f2.doc_count);
 assert(bits <= sizeof(pregen_t) * CHAR_BIT);
-
-printf("Comparing with: %s truncated to %d bits\n", pregen_type_to_str(f2.type), bits);
 
 /* Pregens give a score to each document, but we want to compare document ranks in the ordering */
 
@@ -188,11 +194,7 @@ for (long long i = 0; i < f1.doc_count; i++)
 		printf("%5lld %5lld %5lld %5lld\n", i, ranks1[i], ranks2[i], diff);
 	}
 
-printf("Sum of rank diffs: %lld\n", sum_of_diffs);
-printf("Average rank diff: %lld\n", sum_of_diffs / f1.doc_count);
-printf("Average rank diff as percentage of doccount: %.3f%%\n", ((double) sum_of_diffs / f1.doc_count / f1.doc_count * 100));
-
-printf("\n");
+printf("%d, %llu, %llu, %.4f%%\n", bits, sum_of_diffs, sum_of_diffs / f1.doc_count, (double) sum_of_diffs / f1.doc_count / f1.doc_count * 100);
 
 delete[] docs1;
 delete[] docs2;
@@ -335,8 +337,13 @@ for (int i = 0; i < num_pregens; i++)
 		for (int j = i + 1; j < num_pregens; j++)
 			if (strcmp(pregens[i].field_name, pregens[j].field_name) == 0)
 				{
-				for (int bits = 16; bits >= 4; bits--)
+				printf("Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
+				printf("Sum of rank diffs, average, percentage\n");
+
+				for (int bits = 64; bits >= 64; bits-=1)
+					{
 					compare(pregens[i], pregens[j], bits);
+					}
 
 				compared[j] = 1;
 				}
