@@ -14,7 +14,7 @@
 class ANT_compression_text_factory : public ANT_compress_text
 {
 public:
-	enum {RAW = 1, DEFLATE = 2, BZ2 = 4} ;
+	enum {RAW = 1, DEFLATE = 2, BZ2 = 4, SNAPPY = 8} ;
 
 private:
 	long number_of_techniques;

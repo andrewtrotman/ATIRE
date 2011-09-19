@@ -7,6 +7,7 @@
 #include "compression_text_factory_scheme.h"
 #include "compress_text_deflate.h"
 #include "compress_text_bz2.h"
+#include "compress_text_snappy.h"
 #include "compress_text_none.h"
 
 #ifndef FALSE
@@ -38,6 +39,10 @@ scheme[1].name = "deflate";
 scheme[2].scheme_id = 4;
 scheme[2].scheme = new ANT_compress_text_bz2;
 scheme[2].name = "BZ2";
+
+scheme[2].scheme_id = 8;
+scheme[2].scheme = new ANT_compress_text_snappy;
+scheme[2].name = "Snappy";
 }
 
 /*

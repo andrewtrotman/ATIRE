@@ -119,6 +119,7 @@ puts("-C[-bnz]        Store documents in the repository compressed with one of:"
 puts("   -            don't create the repositorty [default]");
 puts("   b            bz2");
 puts("   n            not-compressed");
+puts("   s            Snappy");
 puts("   z            zip (deflate)");
 puts("");
 
@@ -181,6 +182,7 @@ switch (*scheme)
 	case '-': document_compression_scheme = NONE; break;
 	case 'b': document_compression_scheme = ANT_compression_text_factory::BZ2; break;
 	case 'n': document_compression_scheme = ANT_compression_text_factory::RAW; break;
+	case 's': document_compression_scheme = ANT_compression_text_factory::SNAPPY; break;
 	case 'z': document_compression_scheme = ANT_compression_text_factory::DEFLATE; break;
 	default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
 	}
