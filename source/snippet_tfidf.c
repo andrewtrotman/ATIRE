@@ -37,7 +37,7 @@ term_list = generate_term_list(query, &query_length);
 	set the term weights
 */
 for (current_keyword = term_list; *current_keyword != NULL; current_keyword++)
-	(*current_keyword)->tf_weight = (*current_keyword)->rsv_weight = 1;
+	(*current_keyword)->tf_weight = (*current_keyword)->rsv_weight = 1;				// should call search_engine->process_one_term() to get the document frequency
 
 /*
 	Initialise the parser
