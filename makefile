@@ -340,7 +340,7 @@ PARTS = \
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\snippet.obj					\
 	$(OBJDIR)\snippet_factory.obj					\
-	$(OBJDIR)\snippet_tf.obj						\
+	$(OBJDIR)\snippet_tfidf.obj						\
 	$(OBJDIR)\snippet_tag.obj						\
 	$(OBJDIR)\snippet_beginning.obj					\
 	$(OBJDIR)\atire_client_param_block.obj			\

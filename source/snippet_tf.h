@@ -5,24 +5,17 @@
 #ifndef SNIPPET_TF_H_
 #define SNIPPET_TF_H_
 
-#include "snippet.h"
-
-class ANT_parser;
+#include "snippet_tfidf.h"
 
 /*
 	class ANT_SNIPPET_TF
 	--------------------
 */
-class ANT_snippet_tf : public ANT_snippet
+class ANT_snippet_tf : public ANT_snippet_tfidf
 {
-private:
-	long length_of_longest_document;			// the length of the longest document in the collection (in bytes)
-
 public:
-	ANT_snippet_tf(unsigned long max_length, long length_of_longest_document);
+	ANT_snippet_tf(unsigned long max_length, long length_of_longest_document) : ANT_snippet_tfidf(max_length, length_of_longest_document, NULL) {}
 	virtual ~ANT_snippet_tf() {}
-
-	virtual char *get_snippet(char *snippet, char *document, char *query);
 } ;
 
 #endif /* SNIPPET_TF_H_ */

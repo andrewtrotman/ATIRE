@@ -18,7 +18,8 @@ class ANT_parser;
 class ANT_snippet
 {
 protected:
-	unsigned long maximum_snippet_length;		// length of the snippet in bytes
+	long length_of_longest_document;			// length of the longest document in the colletion (in bytes)
+	unsigned long maximum_snippet_length;		// length of the snippet (in bytes)
 	ANT_parser *parser;							// parser used to parse documents
 	ANT_NEXI_ant NEXI_parser;					// parser used to parse queries
 	ANT_snippet_keyword *keyword_hit;			// list long enough to hold a pointer to each keyword in the document

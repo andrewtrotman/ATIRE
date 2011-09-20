@@ -19,6 +19,7 @@ ANT_snippet::ANT_snippet(unsigned long max_length, long length_of_longest_docume
 keyword_hit = new ANT_snippet_keyword[(length_of_longest_document + 1) / 2 + 1]; // worst case is that every second character is a word (+1 for NULL termination)
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
+this->length_of_longest_document = length_of_longest_document;
 }
 
 /*
@@ -73,10 +74,10 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	if (term_string->term.string() != NULL)
 		term_list[current_term++] = term_string;
 
+term_list[current_term++] = NULL;
 /*
 	sort
 */
-
 qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_term);
 
 /*
@@ -93,7 +94,7 @@ return term_list;
 char *ANT_snippet::next_n_characters_after(char *snippet, long maximum_snippet_length, char *starting_point)
 {
 ANT_parser_token *token;
-long substring_length, length_in_bytes;
+size_t substring_length, length_in_bytes;
 char *into, *start;
 
 /*

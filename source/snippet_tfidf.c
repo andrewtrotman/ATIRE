@@ -4,26 +4,26 @@
 */
 #include "ctypes.h"
 #include "parser.h"
-#include "snippet_tf.h"
+#include "snippet_tfidf.h"
 
 /*
-	ANT_SNIPPET_TF::ANT_SNIPPET_TF()
-	--------------------------------
+	ANT_SNIPPET_TFIDF::ANT_SNIPPET_TFIDF()
+	--------------------------------------
 */
-ANT_snippet_tf::ANT_snippet_tf(unsigned long max_length, long length_of_longest_document) : ANT_snippet(max_length, length_of_longest_document)
+ANT_snippet_tfidf::ANT_snippet_tfidf(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine) : ANT_snippet(max_length, length_of_longest_document)
 {
-this->length_of_longest_document = length_of_longest_document;
+this->engine = engine;
 }
 
 /*
-	ANT_SNIPPET_TF::GET_SNIPPET()
-	-----------------------------
+	ANT_SNIPPET_TFIDF::GET_SNIPPET()
+	--------------------------------
 */
-char *ANT_snippet_tf::get_snippet(char *snippet, char *document, char *query)
+char *ANT_snippet_tfidf::get_snippet(char *snippet, char *document, char *query)
 {
 long query_length, found;
 double best_score, score;
-ANT_NEXI_term_ant **term_list;
+ANT_NEXI_term_ant **term_list, **current_keyword;
 ANT_parser_token *token;
 ANT_snippet_keyword *window_start, *window_end, *current, *window;
 size_t padding;
@@ -32,6 +32,12 @@ size_t padding;
 	get a list of all the search terms out of the query
 */
 term_list = generate_term_list(query, &query_length);
+
+/*
+	set the term weights
+*/
+for (current_keyword = term_list; *current_keyword != NULL; current_keyword++)
+	(*current_keyword)->tf_weight = (*current_keyword)->rsv_weight = 1;
 
 /*
 	Initialise the parser
@@ -45,10 +51,10 @@ parser->set_document(document);
 found = 0;
 while ((token = parser->get_next_token()) != NULL)
 	if (token->type == TT_WORD || token->type == TT_NUMBER)
-		if (bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term) != NULL)
+		if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term)) != NULL)
 			{
 			keyword_hit[found].keyword = *token;
-			keyword_hit[found].score = 1;
+			keyword_hit[found].score = (*current_keyword)->tf_weight;
 			found++;
 			}
 keyword_hit[found].score = 0;
@@ -75,7 +81,7 @@ for (current = keyword_hit; current->score != 0; current++)
 /*
 	how much content should be placed at the beginning of the snippet in order to center on the center of the keywords
 */
-padding = (maximum_snippet_length - (window_end->keyword.string() - window_start->keyword.string())) / 2;
+padding = (maximum_snippet_length - (window_end->keyword.string() + window_end->keyword.length() - window_start->keyword.string())) / 2;
 
 /*
 	Now generate the snippet and clean it up
