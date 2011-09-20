@@ -4,19 +4,18 @@
 SNAPPY_LIB = snappy.lib
 SNAPPY_DIR = snappy-1.0.4
 
+ALL_FLAGS = /nologo -DWIN32 /Zi /fp:fast /GL /Gy /MP8 /wd4530
+
 !IF "$(DEBUG)" == "1"
-CFLAGS= -DWIN32 /MTd /Od -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8 /I.
+CFLAGS= /MTd /Od $(ALL_FLAGS)
 !ELSE
-CFLAGS= -DWIN32 /MT /Ox -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8 /I.
+CFLAGS= /MT /Ox $(ALL_FLAGS)
 !ENDIF
 
 OBJS =	\
 	$(SNAPPY_DIR)\snappy-sinksource.obj 		\
 	$(SNAPPY_DIR)\snappy.obj 					\
-	$(SNAPPY_DIR)\snappy-stubs-internal.obj 	\
-#	$(SNAPPY_DIR)\snappy-test.obj 				\
-#	$(SNAPPY_DIR)\snappy_unittest.obj 			\
-#	$(SNAPPY_DIR)\snappy-c.obj
+	$(SNAPPY_DIR)\snappy-stubs-internal.obj
 
 
 
@@ -24,7 +23,7 @@ OBJS =	\
 	$(CC) $(CFLAGS) -nologo -DHAVE_WINDOWS_H -DWIN32 /c $*.cc -Fo$@
 
 snappy.lib : $(OBJS)
-	link -lib -nologo -out:$(SNAPPY_LIB) $(OBJS)
+	lib /LTCG /NOLOGO /OUT:$(SNAPPY_LIB) $(OBJS)
 	
 
 clean :
