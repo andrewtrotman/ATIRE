@@ -7,6 +7,7 @@
 #include <string.h>
 #include <cmath>
 
+#include "maths.h"
 #include "pregen.h"
 #include "arithmetic_coding.h"
 #include "str.h"
@@ -96,7 +97,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 		if (encoded != CHAR_ENCODE_FAIL)
 			{
 			dest_chars_remain--;
-			result = result * T::num_symbols() + encoded;
+			result = result * T::num_symbols + encoded;
 			}
 		}
 
@@ -107,7 +108,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 //"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
 while (dest_chars_remain)
 	{
-	result *= T::num_symbols();
+	result *= T::num_symbols;
 	dest_chars_remain--;
 	}
 
@@ -122,8 +123,8 @@ return result;
  * provided as type parameter T, e.g. ANT_encode_char_base36. The string is
  * first Unicode-normalized and lowercased, then encoded using the given function.
  *
- * T must have a static method num_symbols(), and a method encode(unsigned char), which
- * takes a character to encode and returns a value in the range [0..num_symbols()).
+ * T must have a static method num_symbols, and a method encode(unsigned char), which
+ * takes a character to encode and returns a value in the range [0..num_symbols).
  */
 template <typename T>
 pregen_t ANT_pregen_writer_normal::generate_radix(ANT_string_pair field)
@@ -136,13 +137,11 @@ unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
 unsigned char *buffer_pos;
 size_t buffer_remain;
 
-/* How many letters can we fit in the result? If accumulator is signed, don't use the sign bit (we don't want
- * negative RSVs) */
-const unsigned int dest_bits = sizeof(result) * CHAR_BIT - (std::numeric_limits<pregen_t>::is_signed ? 1 : 0);
-const double LOG_BASE_2_OF_RADIX = log((double)T::num_symbols()) / log((double)2); //TODO make me a compile-time constant
-unsigned int dest_chars_remain = (int) (dest_bits / LOG_BASE_2_OF_RADIX);
+int dest_chars_remain = ANT_compiletime_int_floor_log_to_base<pregen_t, T::num_symbols>::value;
+const int final_digit_radix = ANT_compiletime_int_floor_log_to_base_remainder<pregen_t, T::num_symbols,
+		ANT_compiletime_int_floor_log_to_base_has_remainder<pregen_t, T::num_symbols>::value>::value;
 
-while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain > 0)
+while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain >= 0)
 	{
 	buffer_pos = buffer;
 	buffer_remain = sizeof(buffer);
@@ -150,14 +149,21 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
 
 	/* Write as much of that UTF-8 normalization as we can fit into the result */
-	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain > 0; i++)
+	for (int i = 0; i < (buffer_pos - buffer) && dest_chars_remain >= 0; i++)
 		{
 		unsigned char encoded = T::encode(buffer[i]);
 
 		if (encoded != CHAR_ENCODE_FAIL)
 			{
+			if (dest_chars_remain == 0)
+				{
+				//Final digit isn't the full radix, scale down
+				result = (pregen_t) (result * final_digit_radix + (encoded * (final_digit_radix - 1)) / (T::num_symbols - 1));
+				}
+			else
+				result = (pregen_t) (result * T::num_symbols + encoded);
+
 			dest_chars_remain--;
-			result = (pregen_t) (result * T::num_symbols() + encoded);
 			}
 		}
 
@@ -166,10 +172,15 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 	}
 
 //"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
-while (dest_chars_remain)
+if (dest_chars_remain >= 0)
 	{
-	result = (pregen_t) (result * T::num_symbols());
-	dest_chars_remain--;
+	while (dest_chars_remain > 0)
+		{
+		result = (pregen_t) (result * T::num_symbols);
+		dest_chars_remain--;
+		}
+	//Final digit isn't the full radix, scale down
+	result = (pregen_t) (result * final_digit_radix);
 	}
 
 if (result == 0) /*Strings of all zero symbols become zero, which we don't want as an RSV. Avoid. */
@@ -533,8 +544,15 @@ exact_integers[doc_count].second = i;
 doc_count++;
 }
 
+bool exact_str_less(const std::pair<long long, char*>& a, const std::pair<long long, char*>& b)
+{
+//TODO Unicode comparison function
+return strcmp(a.second, b.second) < 0;
+}
+
 ANT_pregen_writer_exact_strings::ANT_pregen_writer_exact_strings(const char *name) : ANT_pregen_writer(STREXACT, name), memory(100*1024*1024)
 {
+compare = exact_str_less;
 doc_capacity = 1024;
 exact_strings = new std::pair<long long, char*>[doc_capacity];
 }
@@ -577,15 +595,6 @@ add_exact_integer(atol(content.start));
 bool exact_int_less(const std::pair<long long, long long>& a, const std::pair<long long, long long>& b)
 {
 return a.second < b.second;
-}
-
-bool exact_str_less(const std::pair<long long, char*>& a, const std::pair<long long, char*>& b)
-{
-//TODO Unicode comparison function
-int strresult = strcmp(a.second, b.second);
-
-//Break ties on docid
-return strresult < 0 || (strresult == 0 && a.first > b.first);
 }
 
 int ANT_pregen_writer_exact_integers::open_write(const char *filename)
@@ -691,6 +700,11 @@ for (long long i = 0; i < doc_count; i++)
 	printf("%6ld %s\n", (long) exact_strings[i].first, exact_strings[i].second);
 }
 
+void ANT_pregen_writer_exact_strings::set_comparison_function(comparison_function compare)
+{
+this->compare = compare;
+}
+
 void ANT_pregen_writer_exact_strings::close_write()
 {
 struct pregen_file_header header;
@@ -707,7 +721,7 @@ file.write((unsigned char *)&header, sizeof(header));
 
 file.write((unsigned char *)field_name, header.field_name_length * sizeof(*field_name));
 
-std::sort(&exact_strings[0], &exact_strings[doc_count], exact_str_less);
+std::sort(&exact_strings[0], &exact_strings[doc_count], compare);
 
 outvalues = new pregen_t[doc_count];
 
@@ -718,7 +732,7 @@ pregen_t out = 1;
 for (unsigned int i = 0; i < doc_count; i++)
 	{
 	/* Don't increase RSV if this string is the same as the previous (search engine will tiebreak) */
-	if (i > 0 && strcmp(exact_strings[i].second, exact_strings[i-1].second)!=0)
+	if (i > 0 && compare(exact_strings[i-1], exact_strings[i]) != 0)
 		out++;
 
 	outvalues[exact_strings[i].first] = out;

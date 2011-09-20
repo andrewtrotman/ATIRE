@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <limits.h>
+#include <limits>
 
 /*
 	ANT_SIGN()
@@ -231,7 +232,7 @@ struct ANT_compiletime_pow<base, 0>
 template <typename T>
 struct ANT_compiletime_int_max
 {
-	static const T value = (T) (std::numeric_limits<T>::is_signed ? ~(1ULL << (sizeof(T) * CHAR_BIT - 1)) : ~0ULL);
+	static const T value = (T) (std::numeric_limits<T>::is_signed ? ~ (T) (1ULL << (sizeof(T) * CHAR_BIT - 1)) : ~0ULL);
 };
 
 /* How many 'base' digits would fit into an integer of type T? This is required in addition to ANT_compiletime_floor_log_to_base,
@@ -275,7 +276,7 @@ struct ANT_compiletime_int_floor_log_to_base_remainder
 template <typename T, int base>
 struct ANT_compiletime_int_floor_log_to_base_remainder<T, base, 0>
 {
-	enum { value = 0 } ;
+	enum { value = 1 } ;
 };
 
 #endif  /* MATHS_H_ */

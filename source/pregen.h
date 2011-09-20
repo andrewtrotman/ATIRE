@@ -36,10 +36,7 @@ struct pregen_file_header
 class ANT_encode_char_base36
 {
 public:
-	static unsigned int num_symbols()
-	{
-	return 36;
-	}
+	static const unsigned int num_symbols = 36;
 
 	static unsigned char encode(unsigned char c)
 	{
@@ -62,10 +59,7 @@ public:
 class ANT_encode_char_base37
 {
 public:
-	static unsigned int num_symbols()
-	{
-	return 37;
-	}
+	static const unsigned int num_symbols = 37;
 
 	static unsigned char encode(unsigned char c)
 	{
@@ -91,10 +85,7 @@ public:
 class ANT_encode_char_base40
 {
 public:
-	static unsigned int num_symbols()
-	{
-	return 40;
-	}
+	static const unsigned int num_symbols = 40;
 
 	static unsigned char encode(unsigned char c)
 	{
@@ -126,10 +117,7 @@ public:
 class ANT_encode_char_printable_ascii
 {
 public:
-	static unsigned int num_symbols()
-	{
-	return 70;
-	}
+	static const unsigned int num_symbols = 70;
 
 	static unsigned char encode(unsigned char c)
 	{
@@ -158,10 +146,7 @@ public:
 class ANT_encode_char_5bit
 {
 public:
-	static unsigned int num_symbols()
-	{
-	return 32;
-	}
+	static const unsigned int num_symbols = 32;
 
 	static unsigned char encode(unsigned char c)
 	{
@@ -175,7 +160,7 @@ public:
 		return 0; //Punctuation sorts first
 
 	//We'll sort Unicode along with Z
-	return (unsigned char) (num_symbols() - 1);
+	return (unsigned char) (num_symbols - 1);
 	}
 };
 
@@ -185,10 +170,7 @@ public:
 class ANT_encode_char_8bit
 {
 public:
-	static unsigned int num_symbols()
-	{
-	return 256;
-	}
+	static const unsigned int num_symbols = 256;
 
 	static unsigned char encode(unsigned char c)
 	{
@@ -258,7 +240,6 @@ private:
 
 	static pregen_t generate_integer(ANT_string_pair field);
 	static pregen_t generate_bintrunc(ANT_string_pair field);
-	static pregen_t generate_base37(ANT_string_pair field);
 	static pregen_t generate_recentdate(ANT_string_pair field);
 
 	pregen_t generate(ANT_string_pair field);
@@ -292,7 +273,7 @@ public:
 			510, 591, 330, 8, 593, 451, 585, 138, 68, 221, 26, 158, 6
 			};
 
-		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_base37::num_symbols(), symbol_frequencies, 0);
+		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_base37::num_symbols, symbol_frequencies, 0);
 		}
 	else if (type == ASCII_PRINTABLES_ARITHMETIC)
 		{
@@ -308,7 +289,7 @@ public:
 			15 /* Unicode */
 			};
 
-		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_printable_ascii::num_symbols(), symbol_frequencies, 0);
+		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_printable_ascii::num_symbols, symbol_frequencies, 0);
 		}
 	else
 		arithmetic_model = NULL;
@@ -352,9 +333,13 @@ public:
  */
 class ANT_pregen_writer_exact_strings : public ANT_pregen_writer
 {
+public:
+	typedef bool (*comparison_function)(const std::pair<long long, char*>& a, const std::pair<long long, char*>& b);
 private:
 	ANT_memory memory;
 	std::pair<long long, char *> *exact_strings;
+
+	comparison_function compare;
 
 	uint32_t doc_capacity;
 
@@ -362,11 +347,10 @@ private:
 	void add_exact_string(char *str);
 public:
 	ANT_pregen_writer_exact_strings(const char * name);
-	ANT_pregen_writer_exact_strings() : ANT_pregen_writer(), memory(100*1024*1024) {};
 	virtual ~ANT_pregen_writer_exact_strings();
 
 	virtual void print_strings();
-
+	virtual void set_comparison_function(comparison_function compare);
 	virtual void add_field(long long docindex, ANT_string_pair & content);
 
 	virtual int open_write(const char * filename);

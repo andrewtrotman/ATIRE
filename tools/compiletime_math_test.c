@@ -94,5 +94,9 @@ assert((ANT_compiletime_int_floor_log_to_base<int16_t, 33>::value == 2));
 assert((ANT_compiletime_int_floor_log_to_base<int16_t, 181>::value == 2));
 assert((ANT_compiletime_int_floor_log_to_base<int16_t, 182>::value == 1));
 
+assert((ANT_compiletime_int_floor_log_to_base_remainder<uint64_t, 256, ANT_compiletime_int_floor_log_to_base_has_remainder<uint64_t, 256>::value>::value == 1));
+
+printf("Tests pass\n");
+
 return 0;
 }
