@@ -11,6 +11,7 @@
 #endif
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
 
 /*
 	ANT_SIGN()
@@ -167,5 +168,85 @@ inline unsigned long long ANT_rand_xorshift64(unsigned long long *seed)
 *seed ^= (*seed >> 7);
 return (*seed ^= (*seed << 17));
 }
+
+
+/* Code for computing logs of arbitrary bases at compile-time. This allows logs to be computed as part of constant
+ * expressions. */
+
+template <unsigned long long n, unsigned int base>
+struct ANT_compiletime_floor_log_to_base
+{
+    enum { value = n < base ? 0 : 1 + ANT_compiletime_floor_log_to_base<n / base, base>::value };
+};
+
+template <unsigned int base>
+struct ANT_compiletime_floor_log_to_base<0, base>
+{
+    enum { value = 0 };
+};
+
+template <int n>
+struct ANT_compiletime_ispowerof2
+{
+	enum { value = !(n & (n-1)) };
+};
+
+template <unsigned long long n>
+struct ANT_compiletime_floor_log2
+{
+	enum { value = 1 + ANT_compiletime_floor_log2<(n >> 1)>::value };
+};
+
+template<>
+struct ANT_compiletime_floor_log2<0>
+{
+	enum { value = 0 };
+};
+
+template<>
+struct ANT_compiletime_floor_log2<1>
+{
+	enum { value = 0 };
+};
+
+template <unsigned int base, unsigned int exponent>
+struct ANT_compiletime_pow
+{
+	static const unsigned long long value = base * ANT_compiletime_pow<base, exponent - 1>::value;
+};
+
+template<unsigned int base>
+struct ANT_compiletime_pow<base, 1>
+{
+	static const unsigned long long value = base;
+};
+
+template<unsigned int base>
+struct ANT_compiletime_pow<base, 0>
+{
+	static const unsigned long long value = 1;
+};
+
+// This structure needed because numeric_limits<T>::max() is unavailable at compile-time:
+template <typename T>
+struct ANT_compiletime_int_max
+{
+	static const unsigned long long value = (T) ((T) ~0ULL < 0 ? ~(1ULL << (sizeof(T) * CHAR_BIT - 1)) : ~0ULL);
+};
+
+/* How many 'base' digits would fit into an integer of type T? This is required in addition to ANT_compiletime_floor_log_to_base,
+ * because we need to be able to compute it precisely for the largest supported integral type, too.
+ */
+template <typename T, int base>
+struct ANT_compiletime_int_floor_log_to_base
+{
+	/* Avoid creating the value 1 << sizeof(T) * CHAR_BIT, which can't fit in T. The only case where this is important
+	 * is when 'base' is a power of two (and so can fit an integer number of times into T), otherwise we can take the
+	 * log of 1 << sizeof(T) * CHAR_BIT - 1 instead.
+	 */
+	enum { value = (ANT_compiletime_ispowerof2<base>::value
+			? (sizeof(T) * CHAR_BIT - (std::numeric_limits<T>::is_signed ? 1 : 0)) / ANT_compiletime_floor_log2<base>::value
+			: ANT_compiletime_floor_log_to_base<ANT_compiletime_int_max<T>::value, base>::value) };
+};
 
 #endif  /* MATHS_H_ */
