@@ -231,7 +231,7 @@ struct ANT_compiletime_pow<base, 0>
 template <typename T>
 struct ANT_compiletime_int_max
 {
-	static const unsigned long long value = (T) ((T) ~0ULL < 0 ? ~(1ULL << (sizeof(T) * CHAR_BIT - 1)) : ~0ULL);
+	static const T value = (T) (std::numeric_limits<T>::is_signed ? ~(1ULL << (sizeof(T) * CHAR_BIT - 1)) : ~0ULL);
 };
 
 /* How many 'base' digits would fit into an integer of type T? This is required in addition to ANT_compiletime_floor_log_to_base,
@@ -241,12 +241,41 @@ template <typename T, int base>
 struct ANT_compiletime_int_floor_log_to_base
 {
 	/* Avoid creating the value 1 << sizeof(T) * CHAR_BIT, which can't fit in T. The only case where this is important
-	 * is when 'base' is a power of two (and so can fit an integer number of times into T), otherwise we can take the
+	 * is when 'base' is a power of two (and so could fit an integer number of times into T), otherwise we can take the
 	 * log of 1 << sizeof(T) * CHAR_BIT - 1 instead.
 	 */
 	enum { value = (ANT_compiletime_ispowerof2<base>::value
 			? (sizeof(T) * CHAR_BIT - (std::numeric_limits<T>::is_signed ? 1 : 0)) / ANT_compiletime_floor_log2<base>::value
 			: ANT_compiletime_floor_log_to_base<ANT_compiletime_int_max<T>::value, base>::value) };
+};
+
+/*
+ * Is there a remainder when computing the log of the integer type T (i.e. 2^(num_bits_in_T)) to the given base?
+ */
+template <typename T, int base>
+struct ANT_compiletime_int_floor_log_to_base_has_remainder
+{
+	/* The only way to avoid a remainder is to have base be a power of two where the number of bits required to
+	 * represent it fits exactly into T
+	 */
+	enum { value = (ANT_compiletime_ispowerof2<base>::value
+			? ((sizeof(T) * CHAR_BIT - (std::numeric_limits<T>::is_signed ? 1 : 0)) % ANT_compiletime_floor_log2<base>::value) != 0
+			: 1) };
+};
+
+/*
+ * Computes 2^(num_bits_in_T) / pow(base, floor(log_base(2^(num_bits_in_T), base))))
+ */
+template <typename T, int base, int has_remainder>
+struct ANT_compiletime_int_floor_log_to_base_remainder
+{
+	enum { value = ANT_compiletime_int_max<T>::value / ANT_compiletime_pow<base, ANT_compiletime_int_floor_log_to_base<T, base>::value>::value };
+};
+
+template <typename T, int base>
+struct ANT_compiletime_int_floor_log_to_base_remainder<T, base, 0>
+{
+	enum { value = 0 } ;
 };
 
 #endif  /* MATHS_H_ */
