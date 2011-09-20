@@ -16,14 +16,6 @@ this->length_of_longest_document = length_of_longest_document;
 }
 
 /*
-	ANT_SNIPPET_TF::~ANT_SNIPPET_TF()
-	---------------------------------
-*/
-ANT_snippet_tf::~ANT_snippet_tf()
-{
-}
-
-/*
 	ANT_SNIPPET_TF::GET_SNIPPET()
 	-----------------------------
 */
@@ -32,7 +24,8 @@ char *ANT_snippet_tf::get_snippet(char *snippet, char *document, char *query)
 long query_length, found, best_score, score;
 ANT_NEXI_term_ant **term_list;
 ANT_parser_token *token;
-char *window_start, **current, **window;
+char *window_start, *window_end, **current, **window;
+unsigned long padding;
 
 /*
 	get a list of all the search terms out of the query
@@ -63,20 +56,27 @@ window_start = *keyword_hit;
 for (current = keyword_hit; *current != NULL; current++)
 	{
 	score = 0;
-	for (window = current; *window - *current < maximum_snippet_length; window++)
-		score ++;
+	for (window = current; *window != NULL && *window - *current < maximum_snippet_length; window++)
+		score++;
+
 	if (score > best_score)
 		{
 		window_start = *current;
+		window_end = window == current ? *current : *(window - 1);		// the previous one (if there was one)
 		best_score = score;
 		}
 	}
 
 /*
+	how much content should be placed at the beginning of the snippet in order to center on the center of the keywords
+*/
+padding = (maximum_snippet_length - (window_end - window_start)) / 2;
+
+/*
 	Now generate the snippet and clean it up
 */
-parser->set_document(window_start);
-next_n_characters_after(snippet, maximum_snippet_length);
+parser->set_document(document);
+next_n_characters_after(snippet, maximum_snippet_length, window_start - padding);
 strip_duplicate_space_inline(snippet);
 
 /*

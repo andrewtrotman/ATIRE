@@ -20,7 +20,7 @@ private:
 
 public:
 	ANT_snippet_tf(unsigned long max_length, long length_of_longest_document);
-	virtual ~ANT_snippet_tf();
+	virtual ~ANT_snippet_tf() {}
 
 	virtual char *get_snippet(char *snippet, char *document, char *query);
 } ;

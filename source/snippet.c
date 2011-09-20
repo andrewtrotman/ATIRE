@@ -16,7 +16,7 @@
 */
 ANT_snippet::ANT_snippet(unsigned long max_length, long length_of_longest_document)
 {
-keyword_hit = new char * [(length_of_longest_document + 1) / 2]; // worst case is that every second character is a word
+keyword_hit = new char * [(length_of_longest_document + 1) / 2 + 1]; // worst case is that every second character is a word (+1 for NULL termination)
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
 }
@@ -90,7 +90,7 @@ return term_list;
 	ANT_SNIPPET::NEXT_N_CHARACTERS_AFTER()
 	--------------------------------------
 */
-char *ANT_snippet::next_n_characters_after(char *snippet, long maximum_snippet_length)
+char *ANT_snippet::next_n_characters_after(char *snippet, long maximum_snippet_length, char *starting_point)
 {
 ANT_parser_token *token;
 long substring_length, length_in_bytes;
@@ -108,36 +108,37 @@ length_in_bytes = 0;
 	Parse looking for non XML stuff
 */
 while ((token = parser->get_next_token()) != NULL)
-	{
-	if (token->type == TT_TAG_OPEN || token->type == TT_TAG_CLOSE)
+	if (token->string() >= starting_point)
 		{
-		/*
-			Cut out XML tags by copying the remaining content
-		*/
-		if (start != NULL)
+		if (token->type == TT_TAG_OPEN || token->type == TT_TAG_CLOSE)
 			{
-			strncpy(into, start, substring_length);
-			into += substring_length;
-			*into++ = ' ';
-			length_in_bytes += substring_length + 1;			// +1 to include the space
+			/*
+				Cut out XML tags by copying the remaining content
+			*/
+			if (start != NULL)
+				{
+				strncpy(into, start, substring_length);
+				into += substring_length;
+				*into++ = ' ';
+				length_in_bytes += substring_length + 1;			// +1 to include the space
+				}
+			substring_length = 0;
+			start = NULL;
 			}
-		substring_length = 0;
-		start = NULL;
-		}
-	else if (token->type == TT_WORD || token->type == TT_NUMBER)
-		{
-		/*
-			Include text and numbers
-		*/
-		if (start == NULL)
-			start = token->string();
+		else if (token->type == TT_WORD || token->type == TT_NUMBER)
+			{
+			/*
+				Include text and numbers
+			*/
+			if (start == NULL)
+				start = token->string();
 
-		if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
-			break;
+			if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
+				break;
 
-		substring_length = token->string() + token->length() - start;
+			substring_length = token->string() + token->length() - start;
+			}
 		}
-	}
 
 /*
 	Tack the final content on the end
