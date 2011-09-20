@@ -21,11 +21,12 @@ this->length_of_longest_document = length_of_longest_document;
 */
 char *ANT_snippet_tf::get_snippet(char *snippet, char *document, char *query)
 {
-long query_length, found, best_score, score;
+long query_length, found;
+double best_score, score;
 ANT_NEXI_term_ant **term_list;
 ANT_parser_token *token;
-char *window_start, *window_end, **current, **window;
-unsigned long padding;
+ANT_snippet_keyword *window_start, *window_end, *current, *window;
+size_t padding;
 
 /*
 	get a list of all the search terms out of the query
@@ -45,24 +46,28 @@ found = 0;
 while ((token = parser->get_next_token()) != NULL)
 	if (token->type == TT_WORD || token->type == TT_NUMBER)
 		if (bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term) != NULL)
-			keyword_hit[found++] = token->string();
-keyword_hit[found] = NULL;
+			{
+			keyword_hit[found].keyword = *token;
+			keyword_hit[found].score = 1;
+			found++;
+			}
+keyword_hit[found].score = 0;
 
 /*
 	Find the start of the window that contains the most occurrences of the search terms
 */
 best_score = 0;
-window_start = *keyword_hit;
-for (current = keyword_hit; *current != NULL; current++)
+window_start = window_end = keyword_hit;
+for (current = keyword_hit; current->score != 0; current++)
 	{
 	score = 0;
-	for (window = current; *window != NULL && *window - *current < maximum_snippet_length; window++)
-		score++;
+	for (window = current; window->score != 0 && (window->keyword.string() + window->keyword.length()) - current->keyword.string() < maximum_snippet_length; window++)
+		score += window->score;
 
 	if (score > best_score)
 		{
-		window_start = *current;
-		window_end = window == current ? *current : *(window - 1);		// the previous one (if there was one)
+		window_start = current;
+		window_end = window == current ? current : window - 1;		// the previous one (if there was one)
 		best_score = score;
 		}
 	}
@@ -70,13 +75,13 @@ for (current = keyword_hit; *current != NULL; current++)
 /*
 	how much content should be placed at the beginning of the snippet in order to center on the center of the keywords
 */
-padding = (maximum_snippet_length - (window_end - window_start)) / 2;
+padding = (maximum_snippet_length - (window_end->keyword.string() - window_start->keyword.string())) / 2;
 
 /*
 	Now generate the snippet and clean it up
 */
 parser->set_document(document);
-next_n_characters_after(snippet, maximum_snippet_length, window_start - padding);
+next_n_characters_after(snippet, maximum_snippet_length, window_start->keyword.string() - padding);
 strip_duplicate_space_inline(snippet);
 
 /*

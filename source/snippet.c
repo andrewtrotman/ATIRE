@@ -16,7 +16,7 @@
 */
 ANT_snippet::ANT_snippet(unsigned long max_length, long length_of_longest_document)
 {
-keyword_hit = new char * [(length_of_longest_document + 1) / 2 + 1]; // worst case is that every second character is a word (+1 for NULL termination)
+keyword_hit = new ANT_snippet_keyword[(length_of_longest_document + 1) / 2 + 1]; // worst case is that every second character is a word (+1 for NULL termination)
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
 }

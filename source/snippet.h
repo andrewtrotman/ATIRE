@@ -6,6 +6,7 @@
 #define SNIPPET_H_
 
 #include "NEXI_ant.h"
+#include "snippet_keyword.h"
 
 class ANT_NEXI_term_ant;
 class ANT_parser;
@@ -20,7 +21,7 @@ protected:
 	unsigned long maximum_snippet_length;		// length of the snippet in bytes
 	ANT_parser *parser;							// parser used to parse documents
 	ANT_NEXI_ant NEXI_parser;					// parser used to parse queries
-	char **keyword_hit;							// list long enough to hold a pointer to each keyword in the document
+	ANT_snippet_keyword *keyword_hit;			// list long enough to hold a pointer to each keyword in the document
 
 protected:
 	ANT_NEXI_term_ant **generate_term_list(char *query, long *terms_in_query);
