@@ -87,7 +87,7 @@ else
 	exit(-1);
 	}
 
-ANT_arithmetic_model model(model_type == MODEL_BASE37 ? ANT_encode_char_base37::num_symbols() : ANT_encode_char_printable_ascii::num_symbols(), NULL, 0);
+ANT_arithmetic_model model(model_type == MODEL_BASE37 ? ANT_encode_char_base37::num_symbols : ANT_encode_char_printable_ascii::num_symbols, NULL, 0);
 
 //Read document names from the .doclist file
 char *doclist = map_entire_file(doclist_filename, NULL);
