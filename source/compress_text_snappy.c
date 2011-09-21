@@ -15,7 +15,11 @@
 */
 unsigned long ANT_compress_text_snappy::space_needed_to_compress(unsigned long source_length)
 {
-return (unsigned long)snappy::MaxCompressedLength((unsigned long)source_length);
+#ifdef ANT_HAS_SNAPPYLIB
+
+	return (unsigned long)snappy::MaxCompressedLength((unsigned long)source_length);
+
+#endif
 }
 
 /*
