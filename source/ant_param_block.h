@@ -63,7 +63,11 @@ public:
 
 	long snippet_algorithm;				// how to generate snippets
 	char *snippet_tag;					// if they require an XML tag then use this one
-	long snippet_length;				// snippets should be this long (in characters)
+	long snippet_length;				// snippets should be no longer than this (in characters)
+
+	long title_algorithm;				// should we construct a title or not (this is a snippet algorithm)
+	char *title_tag;					// use the contents of this element as the title of the document
+	long title_length;					// titles should be no longer than this (in characters)
 
 	long query_type;					// NEXI, Boolean, and optionally additionally with relevance feedback
 	long feedbacker;					// relevance feedback algorithm to use

@@ -58,6 +58,9 @@ pregen_count = 0;
 snippet_algorithm = NONE;
 snippet_tag = "title";
 snippet_length = 300;		// this is the INEX 2011 maximum snippet length
+title_tag = "title";
+title_algorithm = NONE;
+title_length = 300;
 }
 
 /*
@@ -174,14 +177,16 @@ ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// rankin
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
-puts("-f[a][-tf<tag>][s<n>]Focus the results list");
+puts("-f[a][c][-ftT<tag>][nN<n>]Focus the results list");
 puts("  a             Article retrieval [default]");
 //puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
-puts("  t<tag>        Snippet is the contents of tag <tag> [default=title]");
-puts("  f<tag>        Snippet is the text immediately following <tag> [default=title]");
 puts("  c             Snippet is this passage with the highest term count");
-puts("  s<n>          Maximum length of snippet is <n> characters [default=300]");
+puts("  t<tag>        Snippet is the contents of the first occuernce of the <tag> element [default=title]");
+puts("  f<tag>        Snippet is the text immediately following the first <tag> element [default=title]");
+puts("  n<n>          Snippet maximum length is <n> characters [default=300]");
+puts("  T<tag>        Title is the contents of the first occuernce of the <tag> element [default=title]");
+puts("  N<n>          Title maximum length is <n> characters [default=300]");
 puts("");
 
 puts("REPORTING");
@@ -425,6 +430,7 @@ switch (*which)
 	case '-': 
 		focussing_algorithm = NONE;
 		snippet_algorithm = NONE;
+		title_algorithm = NONE;
 		break;
 	case 'a': 
 		focussing_algorithm = ARTICLE;
@@ -433,19 +439,28 @@ switch (*which)
 	case 'c': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TF;
 		break;
-	case 't':
-		snippet_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
-		if (*(which + 1) != '\0')
-			snippet_tag = which + 1;
-		break;
 	case 'f': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEGINNING;
 		if (*(which + 1) != '\0')
 			snippet_tag = which + 1;
 		break;
-	case 's':
+	case 'n':
 		if ((got = atol(which + 1)) > 0)
 			snippet_length = got;
+		break;
+	case 'N':
+		if ((got = atol(which + 1)) > 0)
+			title_length = got;
+		break;
+	case 't':
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
+		if (*(which + 1) != '\0')
+			snippet_tag = which + 1;
+		break;
+	case 'T':
+		title_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
+		if (*(which + 1) != '\0')
+			title_tag = which + 1;
 		break;
 	default:
 		exit(printf("Unknown focusing algorithm: '%c'\n", *which));

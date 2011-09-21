@@ -96,7 +96,7 @@ return strnnew(start, finish - start);
 */
 double ant(ANT_ANT_param_block *params)
 {
-char *print_buffer, *ch, *pos;
+char *print_buffer, *pos;
 ANT_stats_time post_processing_stats;
 char *command, *query, *ranker;
 long topic_id, number_of_queries;
@@ -108,11 +108,12 @@ double average_precision, sum_of_average_precisions, mean_average_precision, rel
 long length_of_longest_document;
 unsigned long current_document_length;
 long long docid;
-char *document_buffer, *title_start, *title_end;
+char *document_buffer;
 ANT_channel *inchannel, *outchannel;
 char **answer_list;
-char *snippet;
+char *snippet, *title;
 ANT_snippet *snippet_generator = NULL;
+ANT_snippet *title_generator = NULL;
 
 if (params->port == 0)
 	{
@@ -150,6 +151,18 @@ else
 	snippet = new (std::nothrow) char [params->snippet_length + 1];
 	*snippet = '\0';
 	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag);
+	}
+
+if (params->title_algorithm == ANT_ANT_param_block::NONE)
+	{
+	title = NULL;
+	title_generator = NULL;
+	}
+else
+	{
+	title = new (std::nothrow) char [params->title_length + 1];
+	*title = '\0';
+	title_generator = ANT_snippet_factory::get_snippet_maker(params->title_algorithm, params->title_length, atire->get_longest_document_length(), params->title_tag);
 	}
 
 prompt(params);
@@ -297,8 +310,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			if ((current_document_length = length_of_longest_document) != 0)
 				{
 				atire->get_document(document_buffer, &current_document_length, atoll(command + 5));
-				sprintf(print_buffer, "%lld", (long long) current_document_length);
-				outchannel->puts(print_buffer);
+				*outchannel << current_document_length << ANT_channel::endl;
 				outchannel->write(document_buffer, current_document_length);
 				}
 			delete [] command;
@@ -352,8 +364,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				{
 				atire->get_document(document_buffer, &current_document_length, atoll(strstr(command, "<docid>") + 7));
 				outchannel->puts("<ATIREgetdoc>");
-				sprintf(print_buffer, "<length>%lld</length>", (long long) current_document_length);
-				outchannel->puts(print_buffer);
+				*outchannel << "<length>" << current_document_length << "</length>" << ANT_channel::endl;
 				outchannel->write(document_buffer, current_document_length);
 				outchannel->puts("</ATIREgetdoc>");
 				}
@@ -417,32 +428,20 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			for (result = first_to_list; result < last_to_list; result++)
 				{
 				docid = atire->get_relevant_document_details(result, &docid, &relevance);
-				if ((current_document_length = length_of_longest_document) == 0)
-					title_start = "";
-				else
+				if ((current_document_length = length_of_longest_document) != 0)
 					{
 					/*
-						Get the title of the document (this is a bad hack and should be removed)
+						Load the document if we need a snippet or a title
 					*/
-					atire->get_document(document_buffer, &current_document_length, docid);
-					if ((title_start = strstr(document_buffer, "<title>")) == NULL)
-						if ((title_start = strstr(document_buffer, "<TITLE>")) == NULL)
-							title_start = "";
-					if (*title_start != '\0')
-						{
-						title_start += 7;
-						if ((title_end = strstr(title_start, "</title>")) == NULL)
-							title_end = strstr(title_start, "</TITLE>");
-						if (title_end != NULL)
-							{
-							if (title_end - title_start > MAX_TITLE_LENGTH)
-								title_end = title_start + MAX_TITLE_LENGTH;
-							*title_end = '\0';
-							for (ch = title_start; *ch != '\0'; ch++)
-								if (!ANT_isprint(*ch))
-									*ch = ' ';
-							}
-						}
+					if (title_generator != NULL || snippet_generator != NULL)
+						atire->get_document(document_buffer, &current_document_length, docid);
+
+					/*
+						Generate the title
+					*/
+					if (title_generator != NULL)
+						title_generator->get_snippet(title, document_buffer, query);
+
 					/*
 						Generate the snippet
 					*/
@@ -455,13 +454,11 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				*outchannel << "<name>" << answer_list[result] << "</name>";
 				sprintf(print_buffer, "%0.2f", relevance);
 				*outchannel << "<rsv>" << print_buffer << "</rsv>";
-				*outchannel << "<title>" << title_start << "</title>";
+				if (title != NULL && *title != '\0')
+					*outchannel << "<title>" << title << "</title>";
 				if (snippet != NULL && *snippet != '\0')
 					*outchannel << "<snippet>" << snippet << "</snippet>";
 				*outchannel << "</hit>" << ANT_channel::endl;
-
-//				sprintf(print_buffer, "<hit><rank>%lld</rank><id>%lld</id><name>%s</name><rsv>%0.2f</rsv><title>%s</title></hit>", result + 1, docid, answer_list[result], relevance, title_start);
-//				outchannel->puts(print_buffer);
 				}
 			if (first_to_list < last_to_list)
 				outchannel->puts("</hits>");
