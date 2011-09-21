@@ -14,7 +14,7 @@
 	ANT_SNIPPET_FACTORY::GET_SNIPPET_MAKER()
 	----------------------------------------
 */
-ANT_snippet *ANT_snippet_factory::get_snippet_maker(long type, long length_of_snippet, long length_of_longest_document, char *tag)
+ANT_snippet *ANT_snippet_factory::get_snippet_maker(long type, long length_of_snippet, long length_of_longest_document, char *tag, ANT_stem *stemmer)
 {
 ANT_snippet *answer = NULL;
 
@@ -27,7 +27,10 @@ switch (type)
 		answer = new (std::nothrow) ANT_snippet_beginning(length_of_snippet, length_of_longest_document, tag);
 		break;
 	case SNIPPET_TF:
-		answer = new (std::nothrow) ANT_snippet_tf(length_of_snippet, length_of_longest_document);
+		answer = new (std::nothrow) ANT_snippet_tf(length_of_snippet, length_of_longest_document, stemmer);
+		break;
+	case SNIPPET_TFIDF:
+		answer = new (std::nothrow) ANT_snippet_tf(length_of_snippet, length_of_longest_document, stemmer);
 		break;
 	default:
 		exit(printf("Unknown snippet algorithm, so cannot create a snippet generator\n"));

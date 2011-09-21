@@ -188,8 +188,7 @@ if (*at != '\0')
 		Using the multi-language parser, skip over all characters that are not alphabetic or numeric.
 		Also skip the non-character, e.g. symbol and punctuation in other languages
 	*/
-	while (*at != '\0' && unicode_chartype(utf8_to_wide(at)) != CT_NUMBER && unicode_chartype(utf8_to_wide(at)) != CT_LETTER
-			&& utf8_to_wide(at) != SPECIAL_TERM_CHAR)
+	while (*at != '\0' && unicode_chartype(utf8_to_wide(at)) != CT_NUMBER && unicode_chartype(utf8_to_wide(at)) != CT_LETTER && utf8_to_wide(at) != SPECIAL_TERM_CHAR)
 		at += utf8_bytes(at);
 
 	if (*at != '\0')

@@ -112,6 +112,8 @@ public:
 	*/
 	long open(long type, char * index_filename = "index.aspt", char * doclist_filename = "doclist.aspt");		// see the enum above for possible types (ORed together)
 
+	ANT_search_engine *get_search_engine(void) { return search_engine; }
+
 	/*
 		Load an assessment file (for INEX or TREC)
 	*/
@@ -197,7 +199,6 @@ public:
 		Write the results out in INEX or TREC format (as specified by set_form)
 	*/
 	void write_to_forum_file(long topic_id);
-
 
 	/*
 		Return the number of documents in the index (for idf computation)

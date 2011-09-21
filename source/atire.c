@@ -17,6 +17,7 @@
 #include "ranking_function_pregen.h"
 #include "snippet.h"
 #include "snippet_factory.h"
+#include "stemmer_factory.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
@@ -114,6 +115,7 @@ char **answer_list;
 char *snippet, *title;
 ANT_snippet *snippet_generator = NULL;
 ANT_snippet *title_generator = NULL;
+ANT_stem *snippet_stemmer;
 
 if (params->port == 0)
 	{
@@ -145,12 +147,19 @@ if (params->snippet_algorithm == ANT_ANT_param_block::NONE)
 	{
 	snippet_generator = NULL;
 	snippet = NULL;
+	snippet_stemmer = NULL;
 	}
 else
 	{
 	snippet = new (std::nothrow) char [params->snippet_length + 1];
 	*snippet = '\0';
-	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag);
+	if (params->snippet_stemmer == NULL)
+		snippet_stemmer = NULL;
+	else
+		if ((snippet_stemmer = ANT_stemmer_factory::get_core_stemmer(params->snippet_stemmer)) == NULL)
+			exit(printf("unvalid snippet stemmer requested somehow\n"));
+
+	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag, snippet_stemmer);
 	}
 
 if (params->title_algorithm == ANT_ANT_param_block::NONE)

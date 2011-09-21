@@ -4,7 +4,7 @@
 SNAPPY_LIB = snappy.lib
 SNAPPY_DIR = snappy-1.0.4
 
-ALL_FLAGS = /nologo -DWIN32 /Zi /fp:fast /GL /Gy /MP8 /wd4530
+ALL_FLAGS = /nologo -DWIN32 /Zi /fp:fast /GL /Gy /MP8 /wd4530 /I.
 
 !IF "$(DEBUG)" == "1"
 CFLAGS= /MTd /Od $(ALL_FLAGS)

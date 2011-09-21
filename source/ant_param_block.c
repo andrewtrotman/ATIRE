@@ -58,6 +58,7 @@ pregen_count = 0;
 snippet_algorithm = NONE;
 snippet_tag = "title";
 snippet_length = 300;		// this is the INEX 2011 maximum snippet length
+snippet_stemmer = NONE;
 title_tag = "title";
 title_algorithm = NONE;
 title_length = 300;
@@ -177,14 +178,15 @@ ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// rankin
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
-puts("-f[a][c][-ftT<tag>][nN<n>]Focus the results list");
+puts("-f[a][c][s<stemmer>][-ftT<tag>][nN<n>]Focus the results list");
 puts("  a             Article retrieval [default]");
 //puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
-puts("  c             Snippet is this passage with the highest term count");
+puts("  c             Snippet is the passage with the highest term count");
 puts("  t<tag>        Snippet is the contents of the first occuernce of the <tag> element [default=title]");
 puts("  f<tag>        Snippet is the text immediately following the first <tag> element [default=title]");
 puts("  n<n>          Snippet maximum length is <n> characters [default=300]");
+puts("  S<stemmer>    Use stemming in snippet generation <stemmer> is a valid TERM EXPANSION algorithm (e.g. -Sp)");
 puts("  T<tag>        Title is the contents of the first occuernce of the <tag> element [default=title]");
 puts("  N<n>          Title maximum length is <n> characters [default=300]");
 puts("");
@@ -452,6 +454,14 @@ switch (*which)
 		if ((got = atol(which + 1)) > 0)
 			title_length = got;
 		break;
+	case 'S':
+		{
+		ANT_indexer_param_block_stem snip_stem;
+
+		snip_stem.term_expansion(which + 1, false);
+		this->snippet_stemmer = snip_stem.stemmer;
+		break;
+		}
 	case 't':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
 		if (*(which + 1) != '\0')

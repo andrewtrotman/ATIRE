@@ -1,18 +1,31 @@
 /*
-	SNIPPET_TF.C
-	------------
+	SNIPPET_TFIDF.C
+	---------------
 */
 #include "ctypes.h"
 #include "parser.h"
 #include "snippet_tfidf.h"
+#include "search_engine.h"
+#include "stem.h"
 
 /*
 	ANT_SNIPPET_TFIDF::ANT_SNIPPET_TFIDF()
 	--------------------------------------
 */
-ANT_snippet_tfidf::ANT_snippet_tfidf(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine) : ANT_snippet(max_length, length_of_longest_document)
+ANT_snippet_tfidf::ANT_snippet_tfidf(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer) : ANT_snippet(max_length, length_of_longest_document)
 {
 this->engine = engine;
+
+/*
+	Use the search engine's stemmer if there was one
+	otherwise use the one specified by the user
+	otherwise no stemming
+*/
+this->stemmer = engine == NULL ? NULL : engine->get_stemmer();
+if (this->stemmer == NULL)
+	this->stemmer = stemmer;
+
+*unstemmed_term = *stemmed_term = '\0';
 }
 
 /*
@@ -21,7 +34,7 @@ this->engine = engine;
 */
 char *ANT_snippet_tfidf::get_snippet(char *snippet, char *document, char *query)
 {
-long query_length, found;
+long query_length, found, hit;
 double best_score, score;
 ANT_NEXI_term_ant **term_list, **current_keyword;
 ANT_parser_token *token;
@@ -31,7 +44,7 @@ size_t padding;
 /*
 	get a list of all the search terms out of the query
 */
-term_list = generate_term_list(query, &query_length);
+term_list = generate_term_list(query, &query_length, stemmer);
 
 /*
 	set the term weights
@@ -51,12 +64,28 @@ parser->set_document(document);
 found = 0;
 while ((token = parser->get_next_token()) != NULL)
 	if (token->type == TT_WORD || token->type == TT_NUMBER)
-		if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term)) != NULL)
+		{
+		hit = false;
+		if (stemmer == NULL || token->type == TT_NUMBER)
+			{
+			if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term)) != NULL)
+				hit = true;
+			}
+		else
+			{
+			token->normalized_pair()->strncpy(unstemmed_term, MAX_TERM_LENGTH);
+			stemmer->stem(unstemmed_term, stemmed_term);
+			if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(stemmed_term, term_list, query_length, sizeof(*term_list), cmp_char_term)) != NULL)
+				hit = true;
+			}
+
+		if (hit)
 			{
 			keyword_hit[found].keyword = *token;
 			keyword_hit[found].score = (*current_keyword)->tf_weight;
 			found++;
 			}
+		}
 keyword_hit[found].score = 0;
 
 /*

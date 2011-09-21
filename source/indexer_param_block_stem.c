@@ -32,9 +32,21 @@ stemmer_similarity_threshold = 0.0;
 */
 void ANT_indexer_param_block_stem::help(long has_cutoff)
 {
+char paice_husk[2], lovins[2];
+
+paice_husk[0] = paice_husk[1] = lovins[0] = lovins[1] = '\0';
+
+#ifdef ANT_HAS_PAICE_HUSK
+	paice_husk[0] = 'h';
+#endif
+#ifdef ANT_HAS_LOVINS
+	lovins[0] = 'l';
+#endif
+
 puts("TERM EXPANSION");
 puts("--------------");
-printf("-t[-DhkloOpsS]");
+printf("-t[-D%sk%soOpsS]", paice_husk, lovins);
+
 if (has_cutoff)
 	printf("[+-<th>] ");
 else
@@ -98,19 +110,19 @@ if (!has_cutoff)
 
 if (*(which + 1) == '+')
 #ifdef USE_FLOATED_TF
-    {
-    stemmer_similarity = ANT_stemmer_factory::WEIGHTED_SIMILARITY;
-    if (*(which + 2) != '\0')
-        stemmer_similarity_threshold = strtod(which + 2, NULL);
-    else 
-        stemmer_similarity_threshold = 1.0;
-    }
+	{
+	stemmer_similarity = ANT_stemmer_factory::WEIGHTED_SIMILARITY;
+	if (*(which + 2) != '\0')
+		stemmer_similarity_threshold = strtod(which + 2, NULL);
+	else 
+		stemmer_similarity_threshold = 1.0;
+	}
 #else
 	exit(printf("Not compilied with floating point tf, option unsupported.\n"));
 #endif
 else if (*(which + 1) == '-')
-    {
-    stemmer_similarity = ANT_stemmer_factory::THRESHOLD_SIMILARITY;
-    stemmer_similarity_threshold = strtod(which + 2, NULL);
-    }
+	{
+	stemmer_similarity = ANT_stemmer_factory::THRESHOLD_SIMILARITY;
+	stemmer_similarity_threshold = strtod(which + 2, NULL);
+	}
 }

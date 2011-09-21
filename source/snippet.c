@@ -32,7 +32,6 @@ delete [] keyword_hit;
 delete parser;
 }
 
-
 /*
 	ANT_SNIPPET::CMP_TERM()
 	-----------------------
@@ -46,10 +45,23 @@ return one->normalized.true_strcmp(&((*two)->term));
 }
 
 /*
+	ANT_SNIPPET::CMP_CHAR_TERM()
+	----------------------------
+*/
+int ANT_snippet::cmp_char_term(const void *a, const void *b)
+{
+char *one = (char *)a;
+ANT_NEXI_term_ant **two = (ANT_NEXI_term_ant **)b;
+
+return - (*two)->term.true_strcmp(one);
+}
+
+
+/*
 	ANT_SNIPPET::GENERATE_TERM_LIST()
 	---------------------------------
 */
-ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_query_out)
+ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_query_out, ANT_stem *stemmer)
 {
 long terms_in_query, current_term;
 ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
@@ -66,15 +78,15 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		terms_in_query++;
 
 /*
-	Bung them into an array
+	Bung them into a NULL terminated array
 */
 term_list = new ANT_NEXI_term_ant *[terms_in_query];
 current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	if (term_string->term.string() != NULL)
 		term_list[current_term++] = term_string;
-
 term_list[current_term++] = NULL;
+
 /*
 	sort
 */
