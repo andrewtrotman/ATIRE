@@ -27,6 +27,7 @@ protected:
 	ANT_snippet_keyword *keyword_hit;			// list long enough to hold a pointer to each keyword in the document
 	char unstemmed_term[MAX_TERM_LENGTH];		// if we're going to stem them we need temporary storage so that we can call the stemmer... this is it.
 	char stemmed_term[MAX_TERM_LENGTH];			// the stemmed term (output from the stemmer)
+	char query_buffer[MAX_TERM_LENGTH];			// this is used as a buffer to store the query terms in the case where they are stemmed.  It avoids trashing the original query string
 
 protected:
 	ANT_NEXI_term_ant **generate_term_list(char *query, long *terms_in_query, ANT_stem *stemmer);

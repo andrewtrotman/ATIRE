@@ -9,6 +9,7 @@
 #include "NEXI_term_ant.h"
 #include "NEXI_term_iterator.h"
 #include "NEXI_ant.h"
+#include "stem.h"
 
 /*
 	ANT_SNIPPET::ANT_SNIPPET()
@@ -66,6 +67,8 @@ ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_
 long terms_in_query, current_term;
 ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
 ANT_NEXI_term_iterator term;
+char *into = query_buffer;
+size_t stem_length;
 
 parse_tree = NEXI_parser.parse(query);
 
@@ -84,7 +87,23 @@ term_list = new ANT_NEXI_term_ant *[terms_in_query];
 current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	if (term_string->term.string() != NULL)
+		{
+		if (stemmer != NULL)
+			{
+			stemmer->stem(term_string->term.string(), stemmed_term);
+			stem_length = strlen(stemmed_term);
+			if (into + stem_length >= query_buffer + sizeof(query_buffer))
+				break;
+			else
+				{
+				strcpy(into, stemmed_term);
+				term_string->term.start = into;
+				term_string->term.string_length = stem_length;
+				into += stem_length + 1;
+				}
+			}
 		term_list[current_term++] = term_string;
+		}
 term_list[current_term++] = NULL;
 
 /*
