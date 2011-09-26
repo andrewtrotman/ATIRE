@@ -183,6 +183,7 @@ puts("  a             Article retrieval [default]");
 //puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
 puts("  c             Snippet is the passage with the highest term count");
+puts("  C             Snippet is the passage with the tf.icf score");
 puts("  t<tag>        Snippet is the contents of the first occuernce of the <tag> element [default=title]");
 puts("  f<tag>        Snippet is the text immediately following the first <tag> element [default=title]");
 puts("  n<n>          Snippet maximum length is <n> characters [default=300]");
@@ -440,6 +441,9 @@ switch (*which)
 //	case 'r': focussing_algorithm = RANGE; break;
 	case 'c': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TF;
+		break;
+	case 'C': 
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_TFIDF;
 		break;
 	case 'f': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEGINNING;

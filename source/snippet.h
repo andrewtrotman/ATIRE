@@ -12,6 +12,7 @@
 class ANT_NEXI_term_ant;
 class ANT_parser;
 class ANT_stem;
+class ANT_search_engine;
 
 /*
 	class ANT_SNIPPET
@@ -30,7 +31,7 @@ protected:
 	char query_buffer[MAX_TERM_LENGTH];			// this is used as a buffer to store the query terms in the case where they are stemmed.  It avoids trashing the original query string
 
 protected:
-	ANT_NEXI_term_ant **generate_term_list(char *query, long *terms_in_query, ANT_stem *stemmer);
+	ANT_NEXI_term_ant **generate_term_list(char *query, long *terms_in_query, ANT_stem *stemmer, ANT_search_engine *engine = NULL);
 	char *next_n_characters_after(char *snippet, long maximum_snippet_length, char *starting_point = NULL);
 	static int cmp_term(const void *a, const void *b);		// a is a (ANT_parser_token *) and b is a (ANT_NEXI_term_ant **)
 	static int cmp_char_term(const void *a, const void *b);		// a is a (char *) and b is a (ANT_NEXI_term_ant **)

@@ -7,6 +7,7 @@
 
 class ANT_snippet;
 class ANT_stem;
+class ANT_search_engine;
 
 /*
 	class ANT_SNIPPET_FACTORY
@@ -21,7 +22,7 @@ public:
 	ANT_snippet_factory() {}
 	virtual ~ANT_snippet_factory() {}
 
-	static ANT_snippet *get_snippet_maker(long type, long length_of_snippet, long length_of_longest_document, char *tag, ANT_stem *stemmer = NULL);
+	static ANT_snippet *get_snippet_maker(long type, long length_of_snippet, long length_of_longest_document, char *tag, ANT_stem *stemmer = NULL, ANT_search_engine *engine = NULL);
 } ;
 
 #endif /* SNIPPET_FACTORY_H_ */

@@ -159,7 +159,7 @@ else
 		if ((snippet_stemmer = ANT_stemmer_factory::get_core_stemmer(params->snippet_stemmer)) == NULL)
 			exit(printf("unvalid snippet stemmer requested somehow\n"));
 
-	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag, snippet_stemmer);
+	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag, snippet_stemmer, atire->get_search_engine());
 	}
 
 if (params->title_algorithm == ANT_ANT_param_block::NONE)

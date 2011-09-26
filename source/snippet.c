@@ -10,6 +10,7 @@
 #include "NEXI_term_iterator.h"
 #include "NEXI_ant.h"
 #include "stem.h"
+#include "search_engine.h"
 
 /*
 	ANT_SNIPPET::ANT_SNIPPET()
@@ -62,15 +63,19 @@ return - (*two)->term.true_strcmp(one);
 	ANT_SNIPPET::GENERATE_TERM_LIST()
 	---------------------------------
 */
-ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_query_out, ANT_stem *stemmer)
+ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_query_out, ANT_stem *stemmer, ANT_search_engine *engine)
 {
 long terms_in_query, current_term;
 ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
 ANT_NEXI_term_iterator term;
 char *into = query_buffer;
 size_t stem_length;
+ANT_search_engine_btree_leaf details;
 
-parse_tree = NEXI_parser.parse(query);
+/*
+	Initialise the parser with the query string
+*/
+parse_tree = NEXI_parser.parse(query);		// needs fixing for boolean queries
 
 /*
 	Count the number of terms in the query
@@ -100,6 +105,13 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 				term_string->term.start = into;
 				term_string->term.string_length = stem_length;
 				into += stem_length + 1;
+				/*
+					Compute the collection frequency scores
+				*/
+				if (engine == NULL)
+					term_string->tf_weight = 1;
+				else
+					term_string->tf_weight = engine->get_collection_frequency(term_string->term.string(), stemmer, &details)->global_collection_frequency;
 				}
 			}
 		term_list[current_term++] = term_string;

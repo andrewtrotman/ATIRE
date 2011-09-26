@@ -19,6 +19,7 @@
 #include "stats_search_engine.h"
 #include "ranking_function_bm25.h"
 #include "stemmer.h"
+#include "stemmer_stem.h"
 #include "stemmer_factory.h"
 #include "compress_variable_byte.h"
 #include "pdebug.h"
@@ -541,6 +542,49 @@ return verify;
 }
 
 /*
+	ANT_SEARCH_ENGINE::GET_COLLECTION_FREQUENCY()
+	---------------------------------------------
+*/
+ANT_search_engine_btree_leaf *ANT_search_engine::get_collection_frequency(char *base_term, ANT_stem *stem_maker, ANT_search_engine_btree_leaf *stemmed_term_details)
+{
+char *term;
+ANT_search_engine_btree_leaf term_details;
+ANT_stemmer_stem stemmer(this, stem_maker);
+long long collection_frequency = 0;
+
+/*
+	If the index is stemmed then there is no work to do.
+*/
+if (this->stemmer != NULL || stem_maker == NULL)
+	return process_one_term(base_term, stemmed_term_details);
+
+if (!ANT_islower(base_term[0]) || base_term[1] == '\0' || base_term[2] == '\0')
+	return process_one_term(base_term, stemmed_term_details);			// don't stem as either not a stemmable word or else too short
+
+/*
+	Find the first term that matches the stem
+*/
+term = stemmer.first(base_term);
+
+while (term != NULL)
+	{
+	stemmer.get_postings_details(&term_details);
+	collection_frequency += term_details.local_collection_frequency;
+	term = stemmer.next();
+	}
+
+/*
+	Produce the result
+*/
+stemmed_term_details->local_collection_frequency = collection_frequency;
+stemmed_term_details->global_collection_frequency = collection_frequency;
+stemmed_term_details->local_document_frequency = 0;
+stemmed_term_details->global_document_frequency = 0;
+
+return stemmed_term_details;
+}
+
+/*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
 	--------------------------------------------
 */
@@ -614,6 +658,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 	}
 }
+
 
 /*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()

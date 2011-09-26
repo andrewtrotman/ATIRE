@@ -44,7 +44,7 @@ size_t padding;
 /*
 	get a list of all the search terms out of the query
 */
-term_list = generate_term_list(query, &query_length, stemmer);
+term_list = generate_term_list(query, &query_length, stemmer, engine);
 
 /*
 	set the term weights
