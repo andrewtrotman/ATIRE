@@ -30,7 +30,7 @@ switch (type)
 		answer = new (std::nothrow) ANT_snippet_tf(length_of_snippet, length_of_longest_document, stemmer);
 		break;
 	case SNIPPET_TFICF:
-		answer = new (std::nothrow) ANT_snippet_tfidf(length_of_snippet, length_of_longest_document, engine, stemmer);
+		answer = new (std::nothrow) ANT_snippet_tficf(length_of_snippet, length_of_longest_document, engine, stemmer);
 		break;
 	default:
 		exit(printf("Unknown snippet algorithm, so cannot create a snippet generator\n"));

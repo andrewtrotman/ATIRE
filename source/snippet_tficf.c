@@ -1,18 +1,18 @@
 /*
-	SNIPPET_TFIDF.C
+	SNIPPET_TFICF.C
 	---------------
 */
 #include "ctypes.h"
 #include "parser.h"
-#include "snippet_tfidf.h"
+#include "snippet_tficf.h"
 #include "search_engine.h"
 #include "stem.h"
 
 /*
-	ANT_SNIPPET_TFIDF::ANT_SNIPPET_TFIDF()
+	ANT_SNIPPET_TFICF::ANT_SNIPPET_TFICF()
 	--------------------------------------
 */
-ANT_snippet_tfidf::ANT_snippet_tfidf(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer) : ANT_snippet(max_length, length_of_longest_document)
+ANT_snippet_tficf::ANT_snippet_tficf(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer) : ANT_snippet(max_length, length_of_longest_document)
 {
 this->engine = engine;
 
@@ -29,10 +29,10 @@ if (this->stemmer == NULL)
 }
 
 /*
-	ANT_SNIPPET_TFIDF::GET_SNIPPET()
+	ANT_SNIPPET_TFICF::GET_SNIPPET()
 	--------------------------------
 */
-char *ANT_snippet_tfidf::get_snippet(char *snippet, char *document, char *query)
+char *ANT_snippet_tficf::get_snippet(char *snippet, char *document, char *query)
 {
 long query_length, found, hit;
 double best_score, score;
