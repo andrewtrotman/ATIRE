@@ -178,7 +178,7 @@ ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// rankin
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
-puts("-f[a][c][s<stemmer>][-ftT<tag>][nN<n>]Focus the results list");
+puts("-f[a][cC][s<stemmer>][-ftT<tag>][nN<n>]Focus the results list");
 puts("  a             Article retrieval [default]");
 //puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
@@ -443,7 +443,7 @@ switch (*which)
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TF;
 		break;
 	case 'C': 
-		snippet_algorithm = ANT_snippet_factory::SNIPPET_TFIDF;
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_TFICF;
 		break;
 	case 'f': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEGINNING;

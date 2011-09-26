@@ -50,7 +50,10 @@ term_list = generate_term_list(query, &query_length, stemmer, engine);
 	set the term weights
 */
 for (current_keyword = term_list; *current_keyword != NULL; current_keyword++)
-	(*current_keyword)->tf_weight = (*current_keyword)->rsv_weight = 1;				// should call search_engine->process_one_term() to get the document frequency
+	if (engine == NULL)
+		(*current_keyword)->tf_weight = (*current_keyword)->rsv_weight = 1;
+	else
+		(*current_keyword)->tf_weight = (*current_keyword)->rsv_weight = log(engine->get_collection_length() / (*current_keyword)->tf_weight);
 
 /*
 	Initialise the parser
@@ -107,6 +110,7 @@ for (current = keyword_hit; current->score != 0; current++)
 		}
 	}
 
+///printf("\bSNIPPET BEST SCORE:%f\n", best_score);
 /*
 	how much content should be placed at the beginning of the snippet in order to center on the center of the keywords
 */

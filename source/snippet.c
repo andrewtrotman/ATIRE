@@ -58,7 +58,6 @@ ANT_NEXI_term_ant **two = (ANT_NEXI_term_ant **)b;
 return - (*two)->term.true_strcmp(one);
 }
 
-
 /*
 	ANT_SNIPPET::GENERATE_TERM_LIST()
 	---------------------------------
@@ -93,25 +92,34 @@ current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	if (term_string->term.string() != NULL)
 		{
+		/*
+			Compute the CF value
+		*/
+		strncpy(unstemmed_term, term_string->term.string(), term_string->term.length());
+		unstemmed_term[term_string->term.length()] = '\0';
+		if (engine == NULL)
+			term_string->tf_weight = 1;
+		else
+			term_string->tf_weight = engine->get_collection_frequency(unstemmed_term, stemmer, &details)->global_collection_frequency;
+
+		/*
+			Now compute the term itself (i.e. the stem if there is one)
+		*/
 		if (stemmer != NULL)
 			{
-			stemmer->stem(term_string->term.string(), stemmed_term);
+			stemmer->stem(unstemmed_term, stemmed_term);
 			stem_length = strlen(stemmed_term);
 			if (into + stem_length >= query_buffer + sizeof(query_buffer))
 				break;
 			else
 				{
+				/*
+					Now put the stemmed term into the list
+				*/
 				strcpy(into, stemmed_term);
 				term_string->term.start = into;
 				term_string->term.string_length = stem_length;
 				into += stem_length + 1;
-				/*
-					Compute the collection frequency scores
-				*/
-				if (engine == NULL)
-					term_string->tf_weight = 1;
-				else
-					term_string->tf_weight = engine->get_collection_frequency(term_string->term.string(), stemmer, &details)->global_collection_frequency;
 				}
 			}
 		term_list[current_term++] = term_string;

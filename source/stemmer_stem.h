@@ -19,7 +19,7 @@ private:
 
 public:
 	ANT_stemmer_stem(ANT_search_engine *search_engine, ANT_stem *stemmer) : ANT_stemmer(search_engine) { this->stemmer = stemmer; }
-	virtual size_t stem(const char *term, char *destination) { return stem((char *)term, destination); }
+	virtual size_t stem(const char *term, char *destination) { return stemmer->stem((char *)term, destination); }
 } ;
 
 #endif /* STEMMER_STEM_H_ */
