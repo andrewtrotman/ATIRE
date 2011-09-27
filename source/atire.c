@@ -112,10 +112,10 @@ long long docid;
 char *document_buffer;
 ANT_channel *inchannel, *outchannel;
 char **answer_list;
-char *snippet, *title;
+char *snippet = NULL, *title = NULL;
 ANT_snippet *snippet_generator = NULL;
 ANT_snippet *title_generator = NULL;
-ANT_stem *snippet_stemmer;
+ANT_stem *snippet_stemmer = NULL;
 
 if (params->port == 0)
 	{
@@ -143,13 +143,7 @@ number_of_queries = 0;
 line = 0;
 custom_ranking = 0;
 
-if (params->snippet_algorithm == ANT_ANT_param_block::NONE)
-	{
-	snippet_generator = NULL;
-	snippet = NULL;
-	snippet_stemmer = NULL;
-	}
-else
+if (params->snippet_algorithm != ANT_ANT_param_block::NONE)
 	{
 	snippet = new (std::nothrow) char [params->snippet_length + 1];
 	*snippet = '\0';
@@ -162,12 +156,7 @@ else
 	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag, atire->get_search_engine(), snippet_stemmer);
 	}
 
-if (params->title_algorithm == ANT_ANT_param_block::NONE)
-	{
-	title = NULL;
-	title_generator = NULL;
-	}
-else
+if (params->title_algorithm != ANT_ANT_param_block::NONE)
 	{
 	title = new (std::nothrow) char [params->title_length + 1];
 	*title = '\0';
@@ -512,6 +501,11 @@ if (outchannel != inchannel)
 delete inchannel;
 
 delete [] print_buffer;
+delete [] snippet;
+delete [] title;
+delete snippet_generator;
+delete title_generator;
+delete snippet_stemmer;
 
 /*
 	And finally report MAP

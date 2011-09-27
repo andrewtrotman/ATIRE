@@ -603,12 +603,14 @@ ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant **term_list;
 long terms_in_query, current_term;
 long long old_static_prune = 0;
+long can_sort;
 
 /*
 	Load the term details (document frequency, collection frequency, and so on)
 	(Load the secondary level dictionary structures and store them in the
 	according term's term_details variable).  Also count the number of terms
 */
+can_sort = false;
 terms_in_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
@@ -619,7 +621,10 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
+		{
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
+		can_sort = true;
+		}
 	}
 
 /*
@@ -634,12 +639,14 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	/*
 		Sort on local max impact
 	*/
-	qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_local_max_impact);
+	if (can_sort)
+		qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_local_max_impact);
 #else
 	/*
 		Sort on collection frequency works better than document_frequency when tested on the TREC Wall Street Collection
 	*/
-	qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
+	if (can_sort)
+		qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
 #endif
 
 /*

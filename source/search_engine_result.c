@@ -42,6 +42,7 @@ for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 
 #ifdef HEAP_K_SEARCH
+	top_k = 10;			// this is given a true value later and the heap is then resized - but in the mean time give it a default of 10
 	heapk = new Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare>(*accumulator_pointers, top_k);
 	include_set = new ANT_bitstring();
 	include_set->set_length(documents);
