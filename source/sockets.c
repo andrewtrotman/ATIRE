@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cstddef>
 
 #ifdef _MSC_VER
 	#include <winsock2.h>

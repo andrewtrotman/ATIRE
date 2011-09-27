@@ -2,6 +2,8 @@
 	COMPRESS_TEXT_SNAPPY.C
 	----------------------
 */
+#include <cstddef>
+
 #ifdef ANT_HAS_SNAPPYLIB
 	#include "../snappy/snappy-1.0.4/snappy.h"
 #endif

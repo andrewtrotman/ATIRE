@@ -98,7 +98,7 @@ public:
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
-	virtual ANT_search_engine_btree_leaf *ANT_search_engine::get_collection_frequency(char *base_term, ANT_stem *stem_maker, ANT_search_engine_btree_leaf *stemmed_term_details);
+	virtual ANT_search_engine_btree_leaf *get_collection_frequency(char *base_term, ANT_stem *stem_maker, ANT_search_engine_btree_leaf *stemmed_term_details);
 	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
