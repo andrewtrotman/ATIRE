@@ -66,6 +66,8 @@ int main(int argc, char**argv)
 {
 char *doclist_filename, *doclist_field, *model_name;
 enum { MODEL_BASE37, MODEL_PRINTABLES} model_type;
+unsigned long long total_field_length = 0, documents_with_field = 0,
+		unicode_bytes = 0;
 
 if (argc < 4)
 	{
@@ -156,10 +158,16 @@ while (*current_document)
 						{
 						if (tag_name.true_strcmp(doclist_field) == 0)
 							{
+							total_field_length += tag_body.length();
+							documents_with_field++;
+
 							for (int i = 0; i < tag_body.length(); i++)
 								{
 								char c = tag_body[i];
 								unsigned char symbol;
+
+								if ((c & 0x80) != 0)
+									unicode_bytes++;
 
 								switch (model_type)
 									{
@@ -203,6 +211,9 @@ for (int i = 0; i < model.nsym; i++)
 		printf("\n");
 	}
 printf("\n");
+
+printf("Total chars examined: %llu, of which %llu are Unicode bytes\n", total_field_length, unicode_bytes);
+printf("Average field length of %llu documents which contain the field '%s' is %llu\n", documents_with_field, doclist_field, total_field_length / documents_with_field);
 
 return 0;
 }
