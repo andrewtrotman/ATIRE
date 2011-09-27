@@ -21,10 +21,11 @@ private:
 	size_t tag_length;							// this is the length of this->tag
 
 public:
-	ANT_snippet_beginning(unsigned long max_length, long length_of_longest_document, char *tag);
+	ANT_snippet_beginning(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer, char *tag);
 	virtual ~ANT_snippet_beginning();
 
-	virtual char *get_snippet(char *snippet, char *document, char *query);
+	virtual char *get_snippet(char *snippet, char *document);
+	virtual ANT_NEXI_term_ant **parse_query(char *query) { return NULL; }
 } ;
 
 #endif /* SNIPPET_BEGINNING_H_ */

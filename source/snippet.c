@@ -16,12 +16,19 @@
 	ANT_SNIPPET::ANT_SNIPPET()
 	--------------------------
 */
-ANT_snippet::ANT_snippet(unsigned long max_length, long length_of_longest_document)
+ANT_snippet::ANT_snippet(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer)
 {
 keyword_hit = new ANT_snippet_keyword[(length_of_longest_document + 1) / 2 + 1]; // worst case is that every second character is a word (+1 for NULL termination)
+term_list = NULL;
 parser = new ANT_parser();
 maximum_snippet_length = max_length;
 this->length_of_longest_document = length_of_longest_document;
+
+this->engine = engine;
+if ((this->stemmer = engine == NULL ? NULL : engine->get_stemmer()) == NULL)
+	this->stemmer = stemmer;
+
+*query_buffer = *unstemmed_term = *stemmed_term = '\0';
 }
 
 /*
@@ -30,6 +37,7 @@ this->length_of_longest_document = length_of_longest_document;
 */
 ANT_snippet::~ANT_snippet()
 {
+delete [] term_list;
 delete [] keyword_hit;
 delete parser;
 }
@@ -59,13 +67,13 @@ return - (*two)->term.true_strcmp(one);
 }
 
 /*
-	ANT_SNIPPET::GENERATE_TERM_LIST()
-	---------------------------------
+	ANT_SNIPPET::PARSE_QUERY()
+	--------------------------
 */
-ANT_NEXI_term_ant **ANT_snippet::generate_term_list(char *query, long *terms_in_query_out, ANT_stem *stemmer, ANT_search_engine *engine)
+ANT_NEXI_term_ant **ANT_snippet::parse_query(char *query)
 {
-long terms_in_query, current_term;
-ANT_NEXI_term_ant *parse_tree, *term_string, **term_list;
+long current_term;
+ANT_NEXI_term_ant *parse_tree, *term_string;
 ANT_NEXI_term_iterator term;
 char *into = query_buffer;
 size_t stem_length;
@@ -87,7 +95,10 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 /*
 	Bung them into a NULL terminated array
 */
-term_list = new ANT_NEXI_term_ant *[terms_in_query];
+if (term_list != NULL)
+	delete [] term_list;
+term_list = new ANT_NEXI_term_ant *[terms_in_query + 1];		// +1 because the list is NULL terminated
+
 current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	if (term_string->term.string() != NULL)
@@ -134,7 +145,6 @@ qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_term
 /*
 	return
 */
-*terms_in_query_out = terms_in_query;
 return term_list;
 }
 

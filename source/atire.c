@@ -159,7 +159,7 @@ else
 		if ((snippet_stemmer = ANT_stemmer_factory::get_core_stemmer(params->snippet_stemmer)) == NULL)
 			exit(printf("unvalid snippet stemmer requested somehow\n"));
 
-	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag, snippet_stemmer, atire->get_search_engine());
+	snippet_generator = ANT_snippet_factory::get_snippet_maker(params->snippet_algorithm, params->snippet_length, atire->get_longest_document_length(), params->snippet_tag, atire->get_search_engine(), snippet_stemmer);
 	}
 
 if (params->title_algorithm == ANT_ANT_param_block::NONE)
@@ -434,6 +434,12 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 
 			if (first_to_list < last_to_list)
 				outchannel->puts("<hits>");
+
+			/*
+				We're going to generate snippets to parse the query for that purpose
+			*/
+			if (snippet_generator != NULL)
+				snippet_generator->parse_query(query);
 			for (result = first_to_list; result < last_to_list; result++)
 				{
 				docid = atire->get_relevant_document_details(result, &docid, &relevance);
@@ -449,13 +455,13 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 						Generate the title
 					*/
 					if (title_generator != NULL)
-						title_generator->get_snippet(title, document_buffer, query);
+						title_generator->get_snippet(title, document_buffer);
 
 					/*
 						Generate the snippet
 					*/
 					if (snippet_generator != NULL)
-						snippet_generator->get_snippet(snippet, document_buffer, query);
+						snippet_generator->get_snippet(snippet, document_buffer);
 					}
 				*outchannel << "<hit>";
 				*outchannel << "<rank>" << result + 1 << "</rank>";

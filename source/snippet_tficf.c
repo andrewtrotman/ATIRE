@@ -9,42 +9,17 @@
 #include "stem.h"
 
 /*
-	ANT_SNIPPET_TFICF::ANT_SNIPPET_TFICF()
-	--------------------------------------
-*/
-ANT_snippet_tficf::ANT_snippet_tficf(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer) : ANT_snippet(max_length, length_of_longest_document)
-{
-this->engine = engine;
-
-/*
-	Use the search engine's stemmer if there was one
-	otherwise use the one specified by the user
-	otherwise no stemming
-*/
-this->stemmer = engine == NULL ? NULL : engine->get_stemmer();
-if (this->stemmer == NULL)
-	this->stemmer = stemmer;
-
-*unstemmed_term = *stemmed_term = '\0';
-}
-
-/*
 	ANT_SNIPPET_TFICF::GET_SNIPPET()
 	--------------------------------
 */
-char *ANT_snippet_tficf::get_snippet(char *snippet, char *document, char *query)
+char *ANT_snippet_tficf::get_snippet(char *snippet, char *document)
 {
-long query_length, found, hit;
+long found, hit;
 double best_score, score;
-ANT_NEXI_term_ant **term_list, **current_keyword;
+ANT_NEXI_term_ant **current_keyword;
 ANT_parser_token *token;
 ANT_snippet_keyword *window_start, *window_end, *current, *window;
 size_t padding;
-
-/*
-	get a list of all the search terms out of the query
-*/
-term_list = generate_term_list(query, &query_length, stemmer, engine);
 
 /*
 	set the term weights
@@ -71,14 +46,14 @@ while ((token = parser->get_next_token()) != NULL)
 		hit = false;
 		if (stemmer == NULL || token->type == TT_NUMBER)
 			{
-			if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(token, term_list, query_length, sizeof(*term_list), cmp_term)) != NULL)
+			if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(token, term_list, terms_in_query, sizeof(*term_list), cmp_term)) != NULL)
 				hit = true;
 			}
 		else
 			{
 			token->normalized_pair()->strncpy(unstemmed_term, MAX_TERM_LENGTH);
 			stemmer->stem(unstemmed_term, stemmed_term);
-			if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(stemmed_term, term_list, query_length, sizeof(*term_list), cmp_char_term)) != NULL)
+			if ((current_keyword = (ANT_NEXI_term_ant **)bsearch(stemmed_term, term_list, terms_in_query, sizeof(*term_list), cmp_char_term)) != NULL)
 				hit = true;
 			}
 
@@ -110,7 +85,7 @@ for (current = keyword_hit; current->score != 0; current++)
 		}
 	}
 
-///printf("\bSNIPPET BEST SCORE:%f\n", best_score);
+//printf("\nSNIPPET BEST SCORE:%f\n", best_score);
 /*
 	how much content should be placed at the beginning of the snippet in order to center on the center of the keywords
 */

@@ -29,18 +29,22 @@ protected:
 	char unstemmed_term[MAX_TERM_LENGTH];		// if we're going to stem them we need temporary storage so that we can call the stemmer... this is it.
 	char stemmed_term[MAX_TERM_LENGTH];			// the stemmed term (output from the stemmer)
 	char query_buffer[MAX_TERM_LENGTH];			// this is used as a buffer to store the query terms in the case where they are stemmed.  It avoids trashing the original query string
+	ANT_NEXI_term_ant **term_list;				// the most recently parsed query (once parsed)
+	long terms_in_query;						// the number of terms in the most recently parsed query
+	ANT_stem *stemmer;							// the stemming algorithm
+	ANT_search_engine *engine;					// the search engine used to resolve stems
 
 protected:
-	ANT_NEXI_term_ant **generate_term_list(char *query, long *terms_in_query, ANT_stem *stemmer, ANT_search_engine *engine = NULL);
 	char *next_n_characters_after(char *snippet, long maximum_snippet_length, char *starting_point = NULL);
 	static int cmp_term(const void *a, const void *b);		// a is a (ANT_parser_token *) and b is a (ANT_NEXI_term_ant **)
 	static int cmp_char_term(const void *a, const void *b);		// a is a (char *) and b is a (ANT_NEXI_term_ant **)
 
 public:
-	ANT_snippet(unsigned long max_snippet_length, long length_of_longest_document);
+	ANT_snippet(unsigned long max_snippet_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer);
 	virtual ~ANT_snippet();
 
-	virtual char *get_snippet(char *snippet, char *document, char *query) = 0;
+	virtual ANT_NEXI_term_ant **parse_query(char *query);
+	virtual char *get_snippet(char *snippet, char *document) = 0;
 } ;
 
 #endif /* SNIPPET_H_ */

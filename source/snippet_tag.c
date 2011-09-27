@@ -10,7 +10,7 @@
 	ANT_SNIPPET_TAG::ANT_SNIPPET_TAG()
 	----------------------------------
 */
-ANT_snippet_tag::ANT_snippet_tag(unsigned long max_length, long length_of_longest_document, char *tag) : ANT_snippet(max_length, length_of_longest_document)
+ANT_snippet_tag::ANT_snippet_tag(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer, char *tag) : ANT_snippet(max_length, length_of_longest_document, engine, stemmer)
 {
 this->tag = strnew(tag);
 tag_length = strlen(tag);
@@ -29,7 +29,7 @@ delete [] tag;
 	ANT_SNIPPET_TAG::GET_SNIPPET()
 	------------------------------
 */
-char *ANT_snippet_tag::get_snippet(char *snippet, char *document, char *query)
+char *ANT_snippet_tag::get_snippet(char *snippet, char *document)
 {
 char *into, *start;
 ANT_parser_token *token;
