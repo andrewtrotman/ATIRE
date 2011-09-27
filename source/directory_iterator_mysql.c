@@ -22,6 +22,12 @@ connection = mysql_init(&the_connection);
 if (!mysql_real_connect(connection, server, username, password, database, 0, NULL, CLIENT_COMPRESS))
 	 fprintf(stderr, "MySQL failed to connect: %s\n", mysql_error(connection));
 
+/*
+	We want utf-8 encoded text from MySQL (not some 1-byte Windows encoding that
+	replaces most characters with ?)
+ */
+mysql_query(connection, "SET NAMES 'utf8'");
+
 this->query.start = strnew(query);
 this->query.string_length = strlen(query);
 
@@ -52,7 +58,7 @@ sprintf((char*)query_mod.start, "%s LIMIT %lld,%lld", query.start, (long long) t
 //printf("Query: %s\n", query_mod.start);
 mysql_query(connection, (char*)query_mod.start);
 
-if ((result = mysql_store_result(connection)) == NULL)
+if ((result = mysql_use_result(connection)) == NULL)
 	return 0;
 
 fields = mysql_num_fields(result);
@@ -70,7 +76,7 @@ sprintf((char*)query_mod.start, "%s%lld%s LIMIT %lld", (char*)query.start, (long
 //printf("Query: %s\n", query_mod.start);
 mysql_query(connection, (char*)query_mod.start);
 
-if ((result = mysql_store_result(connection)) == NULL)
+if ((result = mysql_use_result(connection)) == NULL)
 	return 0;
 
 fields = mysql_num_fields(result);
@@ -91,7 +97,7 @@ switch (mode)
 
 		page_remain = 0;
 
-		if ((result = mysql_store_result(connection)) == NULL)
+		if ((result = mysql_use_result(connection)) == NULL)
 			return NULL;
 
 		fields = mysql_num_fields(result);
@@ -148,7 +154,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_mysql::next(ANT_directory_
 MYSQL_ROW row;
 unsigned long *field_length, total_length;
 long current;
-char *into;
+char *into, *pos;
 int docname_col;
 
 while ((row = mysql_fetch_row(result)) == NULL)
@@ -197,7 +203,16 @@ switch (mode)
 	}
 
 if (docname_col < fields && row[docname_col])
+	{
 	object->filename = strnew(row[docname_col]);
+
+	/* Document names must not contain newlines, since doclist files are separated by
+	 * newlines.
+	 */
+	for (pos = object->filename; *pos != 0; ++pos)
+		if (*pos == '\n')
+			*pos = ' ';
+	}
 else
 	object->filename = strnew("");
 
@@ -207,7 +222,8 @@ if (get_file)
 	for(current = docname_col + 1; current < fields; current++)
 		total_length += field_length[current] + 1;
 
-	into = object->file = new char [object->length = total_length += 1];
+	object->length = total_length + 1;
+	into = object->file = new char [object->length];
 
 	for(current = docname_col + 1; current < fields; current++)
 		{
