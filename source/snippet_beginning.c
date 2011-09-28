@@ -28,6 +28,7 @@ delete [] tag;
 /*
 	ANT_SNIPPET_BEGINNING::GET_SNIPPET()
 	------------------------------------
+	The snippet is the start of the document
 */
 char *ANT_snippet_beginning::get_snippet(char *snippet, char *document)
 {
@@ -39,7 +40,7 @@ ANT_parser_token *token;
 parser->set_document(document);
 
 /*
-	copy all non-XML-tag content from the stat of the document until we fill the snippet.
+	copy all non-XML-tag content from the start of the document until we fill the snippet.
 */
 while ((token = parser->get_next_token()) != NULL)
 	{

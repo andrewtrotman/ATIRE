@@ -28,6 +28,7 @@ delete [] tag;
 /*
 	ANT_SNIPPET_TAG::GET_SNIPPET()
 	------------------------------
+	The snippet starts at the contents of the first occurrence of the given tag
 */
 char *ANT_snippet_tag::get_snippet(char *snippet, char *document)
 {

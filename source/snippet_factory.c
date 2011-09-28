@@ -9,6 +9,7 @@
 #include "snippet_beginning.h"
 #include "snippet_tag.h"
 #include "snippet_tf.h"
+#include "snippet_best_tag_tf.h"
 
 /*
 	ANT_SNIPPET_FACTORY::GET_SNIPPET_MAKER()
@@ -31,6 +32,12 @@ switch (type)
 		break;
 	case SNIPPET_TFICF:
 		answer = new (std::nothrow) ANT_snippet_tficf(length_of_snippet, length_of_longest_document, engine, stemmer);
+		break;
+	case SNIPPET_BEST_TFICF_TAG:
+		answer = new (std::nothrow) ANT_snippet_best_tag(length_of_snippet, length_of_longest_document, engine, stemmer, tag);
+		break;
+	case SNIPPET_BEST_TF_TAG:
+		answer = new (std::nothrow) ANT_snippet_best_tag_tf(length_of_snippet, length_of_longest_document, engine, stemmer, tag);
 		break;
 	default:
 		exit(printf("Unknown snippet algorithm, so cannot create a snippet generator\n"));

@@ -16,7 +16,7 @@ class ANT_search_engine;
 class ANT_snippet_factory
 {
 public:
-	enum { SNIPPET_TITLE = 1, SNIPPET_BEGINNING, SNIPPET_TF, SNIPPET_TFICF };
+	enum { SNIPPET_TITLE = 1, SNIPPET_BEGINNING, SNIPPET_TF, SNIPPET_TFICF, SNIPPET_BEST_TFICF_TAG, SNIPPET_BEST_TF_TAG };
 
 public:
 	ANT_snippet_factory() {}

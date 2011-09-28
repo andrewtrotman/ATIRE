@@ -178,10 +178,12 @@ ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// rankin
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
-puts("-f[a][cC][s<stemmer>][-ftT<tag>][nN<n>]Focus the results list");
+puts("-f[a][cC][s<stemmer>][-fbBtT<tag>][nN<n>]Focus the results list");
 puts("  a             Article retrieval [default]");
 //puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
+puts("  b<tag>        Snippet is the <tag> element with the highest term count");
+puts("  B<tag>        Snippet is the <tag> element with the tf.icf score");
 puts("  c             Snippet is the passage with the highest term count");
 puts("  C             Snippet is the passage with the tf.icf score");
 puts("  t<tag>        Snippet is the contents of the first occuernce of the <tag> element [default=title]");
@@ -439,6 +441,16 @@ switch (*which)
 		focussing_algorithm = ARTICLE;
 		break;
 //	case 'r': focussing_algorithm = RANGE; break;
+	case 'b': 
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEST_TF_TAG;
+		if (*(which + 1) != '\0')
+			snippet_tag = which + 1;
+		break;
+	case 'B': 
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEST_TFICF_TAG;
+		if (*(which + 1) != '\0')
+			snippet_tag = which + 1;
+		break;
 	case 'c': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TF;
 		break;

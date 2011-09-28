@@ -11,6 +11,9 @@
 /*
 	ANT_SNIPPET_TFICF::GET_SNIPPET()
 	--------------------------------
+	Move a fixed size'd sliding window over the document and choose the best. Now, there can be
+	several best windows so it centres the hit terms in the middle of the window.  The score of
+	a window is either given by tf.icf or tf (depending on the sublcass)
 */
 char *ANT_snippet_tficf::get_snippet(char *snippet, char *document)
 {
