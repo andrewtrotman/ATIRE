@@ -193,6 +193,14 @@ while ((token = parser->get_next_token()) != NULL)
 						*into++ = *from;
 						length_in_bytes++;
 						}
+				/*
+					Put a space between tags even if there isn't one in the text
+				*/
+				if (into < end_of_snippet)
+					{
+					*into++ = ' ';
+					length_in_bytes++;
+					}
 				}
 			substring_length = 0;
 			start = NULL;
