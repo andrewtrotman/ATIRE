@@ -103,8 +103,9 @@ while ((token = parser->get_next_token()) != NULL)
 /*
 	Now generate the snippet and clean it up
 */
-parser->set_document(document);
-next_n_characters_after(snippet, maximum_snippet_length, best_start);
+XML_to_text(document_text, best_start);
+parser->set_document(document_text);
+next_n_characters_after(snippet, maximum_snippet_length);
 strip_duplicate_space_inline(snippet);
 
 /*

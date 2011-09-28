@@ -28,10 +28,13 @@ delete [] tag;
 /*
 	ANT_SNIPPET_BEGINNING::GET_SNIPPET()
 	------------------------------------
-	The snippet is the start of the document
+	Find the end of the first instance of the given element and then generate the snippet as the text from that point on.
+	This allows you to say , for example, "the snppet starts after the <title> tag"
+	
 */
 char *ANT_snippet_beginning::get_snippet(char *snippet, char *document)
 {
+char *from;
 ANT_parser_token *token;
 
 /*
@@ -49,6 +52,9 @@ while ((token = parser->get_next_token()) != NULL)
 	*/
 	if (token->type == TT_TAG_CLOSE && tag_length == token->length() - 1 && strnicmp(token->string() + 1, tag, tag_length) == 0)
 		{
+		from = strchr(token->string() + token->length(), '>');
+		XML_to_text(document_text, from);
+		parser->set_document(document_text);
 		next_n_characters_after(snippet, maximum_snippet_length);
 		break;
 		}

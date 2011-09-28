@@ -36,7 +36,8 @@ for (current_keyword = term_list; *current_keyword != NULL; current_keyword++)
 /*
 	Initialise the parser
 */
-parser->set_document(document);
+XML_to_text(document_text, document);
+parser->set_document(document_text);
 
 /*
 	Parse the document looking for occurences of search terms
@@ -97,7 +98,7 @@ padding = (maximum_snippet_length - (window_end->keyword.string() + window_end->
 /*
 	Now generate the snippet and clean it up
 */
-parser->set_document(document);
+parser->set_document(document_text);
 next_n_characters_after(snippet, maximum_snippet_length, window_start->keyword.string() - padding);
 strip_duplicate_space_inline(snippet);
 

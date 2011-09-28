@@ -29,6 +29,8 @@ if ((this->stemmer = engine == NULL ? NULL : engine->get_stemmer()) == NULL)
 	this->stemmer = stemmer;
 
 *query_buffer = *unstemmed_term = *stemmed_term = '\0';
+
+document_text = new char [length_of_longest_document + 1];
 }
 
 /*
@@ -40,6 +42,7 @@ ANT_snippet::~ANT_snippet()
 delete [] term_list;
 delete [] keyword_hit;
 delete parser;
+delete [] document_text;
 }
 
 /*
@@ -247,4 +250,34 @@ if (start != NULL)
 *into = '\0';
 
 return snippet;
+}
+
+
+/*
+	ANT_SNIPPET::XML_TO_TEXT()
+	--------------------------
+	By destination need be no longer than source as worst case is no change
+*/
+char *ANT_snippet::XML_to_text(char *destination, char *source)
+{
+char *from, *into;
+long in_tag;
+
+from = source;
+into = destination;
+in_tag = false;
+for (from = source; *from != '\0'; from++)
+	{
+	if (!in_tag && *from == '<')
+		in_tag = true;
+
+	if (!in_tag)
+		*into++ = *from;
+
+	if (in_tag && *from == '>')
+		in_tag = false;
+	}
+
+*into = '\0';
+return destination;
 }

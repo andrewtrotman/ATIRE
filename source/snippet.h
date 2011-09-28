@@ -29,6 +29,7 @@ protected:
 	char unstemmed_term[MAX_TERM_LENGTH];		// if we're going to stem them we need temporary storage so that we can call the stemmer... this is it.
 	char stemmed_term[MAX_TERM_LENGTH];			// the stemmed term (output from the stemmer)
 	char query_buffer[MAX_TERM_LENGTH];			// this is used as a buffer to store the query terms in the case where they are stemmed.  It avoids trashing the original query string
+	char *document_text;						// a buffer large enough to hold the document's text once the XML tags have been removed.
 	ANT_NEXI_term_ant **term_list;				// the most recently parsed query (once parsed)
 	long terms_in_query;						// the number of terms in the most recently parsed query
 	ANT_stem *stemmer;							// the stemming algorithm
@@ -36,6 +37,7 @@ protected:
 
 protected:
 	char *next_n_characters_after(char *snippet, long maximum_snippet_length, char *starting_point = NULL);
+	char *XML_to_text(char *destination, char *source);
 	static int cmp_term(const void *a, const void *b);		// a is a (ANT_parser_token *) and b is a (ANT_NEXI_term_ant **)
 	static int cmp_char_term(const void *a, const void *b);		// a is a (char *) and b is a (ANT_NEXI_term_ant **)
 

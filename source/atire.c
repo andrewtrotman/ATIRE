@@ -18,6 +18,7 @@
 #include "snippet.h"
 #include "snippet_factory.h"
 #include "stemmer_factory.h"
+#include "stem.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;

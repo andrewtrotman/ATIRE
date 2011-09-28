@@ -32,17 +32,14 @@ delete [] tag;
 */
 char *ANT_snippet_tag::get_snippet(char *snippet, char *document)
 {
-char *into, *start;
+char *start, *copy;
 ANT_parser_token *token;
-size_t substring_length, length_in_bytes;
 long found_title;
+size_t content_length;
 
 /*
 	Initialise
 */
-length_in_bytes = 0;
-substring_length = 0;
-into = snippet;
 found_title = false;
 start = NULL;
 
@@ -62,53 +59,37 @@ while ((token = parser->get_next_token()) != NULL)
 	if (!found_title)
 		{
 		if (token->type == TT_TAG_OPEN && tag_length == token->length() && strnicmp(token->string(), tag, tag_length) == 0)
+			{
+			start = strchr(token->string() + token->length(), '>');
 			found_title = true;
+			}
 		}
 	else
-		{
-		if (token->type == TT_TAG_OPEN || token->type == TT_TAG_CLOSE)
-			{
-			if (token->type == TT_TAG_CLOSE && tag_length == token->length() - 1 && strnicmp(token->string() + 1, tag, tag_length) == 0)  // we'e at the close tag
-				break;
-			/*
-				Cut out XML tags by copying the remaining content
-			*/
-			if (start != NULL)
-				{
-				strncpy(into, start, substring_length);
-				into += substring_length;
-				*into++ = ' ';
-				length_in_bytes += substring_length + 1;			// +1 to include the space
-				}
-			substring_length = 0;
-			start = NULL;
-			}
-		else if (token->type == TT_WORD || token->type == TT_NUMBER)
-			{
-			/*
-				Include text and numbers
-			*/
-			if (start == NULL)
-				start = token->string();
-	
-			if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
-				break;
-
-			substring_length = token->string() + token->length() - start;
-			}
-		}
+		if (token->type == TT_TAG_CLOSE && tag_length == token->length() - 1 && strnicmp(token->string() + 1, tag, tag_length) == 0)
+			break;
 	}
 
 /*
-	Tack the final content on the end
+	If the given tag didn't exist in the document the use the start of the document
 */
-if (start != NULL)
-	{
-	strncpy(into, start, substring_length);
-	into += substring_length;
-	}
+if (start == NULL)
+	start = document;
 
-*into = '\0';
+/*
+	Cut the element out of the document and convert it into text
+*/
+content_length = token->string() - start;
+copy = new char [content_length + 1];
+strncpy(copy, start, content_length);
+copy[content_length] = '\0';
+XML_to_text(document_text, copy);
+delete [] copy;
+
+/*
+	Now generate the snippet
+*/
+parser->set_document(document_text);
+next_n_characters_after(snippet, maximum_snippet_length);
 
 /*
 	Remove duplicaate whitespace and return
