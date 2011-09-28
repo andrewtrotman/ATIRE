@@ -66,7 +66,7 @@ long word_count = 0, pre_length_of_token = 0;
 unsigned long character;
 unsigned char chartype;
 size_t bufferlen;
-char * bufferpos;
+char *bufferpos;
 
 // Most return paths will not offer a normalized form.
 current_token.normalized.string_length = 0;
@@ -110,12 +110,12 @@ for (;;)
 	{
 	character = utf8_to_wide(current);
 
-	if (character==0)
+	if (character == 0)
 		return NULL;
 
 	chartype = unicode_chartype_set(character);
 
-	if (chartype==CT_LETTER || chartype==CT_NUMBER || chartype==CT_PUNCTUATION || (chartype & CT_CHINESE) || (chartype==CT_OTHER && character == SPECIAL_TERM_CHAR))
+	if (chartype == CT_LETTER || chartype == CT_NUMBER || chartype == CT_PUNCTUATION || (chartype & CT_CHINESE) || (chartype==CT_OTHER && character == SPECIAL_TERM_CHAR))
 		break;
 
 	current++;

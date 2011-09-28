@@ -156,11 +156,12 @@ char *ANT_snippet::next_n_characters_after(char *snippet, long maximum_snippet_l
 {
 ANT_parser_token *token;
 size_t substring_length, length_in_bytes;
-char *into, *start;
+char *into, *start, *end_of_snippet, *from;
 
 /*
 	Initialise
 */
+end_of_snippet = snippet + maximum_snippet_length - 1;
 into = snippet;
 substring_length = 0;
 start = NULL;
@@ -181,24 +182,48 @@ while ((token = parser->get_next_token()) != NULL)
 				{
 				strncpy(into, start, substring_length);
 				into += substring_length;
-				*into++ = ' ';
-				length_in_bytes += substring_length + 1;			// +1 to include the space
+				length_in_bytes += substring_length;
+
+				/*
+					Append any punctuation that is after the last term but before the open / close tag
+				*/
+				for (from = start + substring_length; *from != '<'; from++)
+					if (into < end_of_snippet)
+						{
+						*into++ = *from;
+						length_in_bytes++;
+						}
 				}
 			substring_length = 0;
 			start = NULL;
 			}
-		else if (token->type == TT_WORD || token->type == TT_NUMBER)
+		else
 			{
 			/*
-				Include text and numbers
+				in the case of punctuation we might be at the end of a tag so skip over it looking for true punctuation
 			*/
-			if (start == NULL)
-				start = token->string();
+			if (token->type == TT_PUNCTUATION)
+				while (token->string_length > 0 && (token->start[0] == '<' || token->start[0] == '>'))
+					{
+					token->start++;
+					token->string_length--;
+					}
+			/*
+				if we've got some punctuation of some text of a number then include it
+			*/
+			if (token->length() > 0)
+				{
+				/*
+					Include text and numbers
+				*/
+				if (start == NULL)
+					start = token->string();
 
-			if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
-				break;
+				if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
+					break;
 
-			substring_length = token->string() + token->length() - start;
+				substring_length = token->string() + token->length() - start;
+				}
 			}
 		}
 
