@@ -341,6 +341,7 @@ PARTS = \
 	$(OBJDIR)\snippet.obj					\
 	$(OBJDIR)\snippet_factory.obj					\
 	$(OBJDIR)\snippet_tficf.obj						\
+	$(OBJDIR)\snippet_best_tag.obj					\
 	$(OBJDIR)\snippet_tag.obj						\
 	$(OBJDIR)\snippet_beginning.obj					\
 	$(OBJDIR)\atire_client_param_block.obj			\
