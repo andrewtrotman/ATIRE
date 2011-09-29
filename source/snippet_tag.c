@@ -33,7 +33,7 @@ delete [] tag;
 char *ANT_snippet_tag::get_snippet(char *snippet, char *document)
 {
 char *start, *copy;
-ANT_parser_token *token;
+ANT_parser_token *token, sentinal;
 long found_title;
 size_t content_length;
 
@@ -74,6 +74,11 @@ while ((token = parser->get_next_token()) != NULL)
 */
 if (start == NULL)
 	start = document;
+if (token == NULL)
+	{
+	token = &sentinal;
+	sentinal.start = document + strlen(document);
+	}
 
 /*
 	Cut the element out of the document and convert it into text
