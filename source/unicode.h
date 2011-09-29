@@ -148,7 +148,7 @@ inline int wide_to_utf8(char * buf, size_t buflen, unsigned long c) {
 	--------------------------
 	Convert a UTF8 sequence into a wide character.
 
-	If the source buffer before the UTF-8 character is completed, zero is returned instead.
+	If the source buffer ends before the UTF-8 character is completed, zero is returned instead.
 */
 inline unsigned long utf8_to_wide_safe(const unsigned char *here)
 {
@@ -159,17 +159,15 @@ switch (numchars)
 	case 1:
 		return *here;
 	case 2:
-		if (here[0])
-			return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
-		else
-			return 0;
+		//here[0] is known to be non-zero (since utf8_bytes(here) returned >1), so it can't be the terminator
+		return ((*here & 0x1F) << 6) | (*(here + 1) & 0x3F);
 	case 3:
-		if (here[0] && here[1])
+		if (here[1])
 			return ((*here & 0x0F) << 12) | ((*(here + 1) & 0x3F) << 6) | (*(here + 2) & 0x3F);
 		else
 			return 0;
 	default:
-		if (here[0] && here[1] && here[2])
+		if (here[1] && here[2])
 			return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 3) & 0x3F);
 		else
 			return 0;

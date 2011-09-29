@@ -149,7 +149,8 @@ MINUS_D = $(MINUS_D) -DTWO_D_ACCUMULATORS
 MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
-MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T=short
+MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="unsigned short"
+MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 
 #MINUS_D = $(MINUS_D) -DPURIFY
 
@@ -399,6 +400,8 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_boolean_parser.exe	\
 	$(BINDIR)\test_unicode_case_convert.exe			\
 	$(BINDIR)\pregen_precision_measurement.exe		\
+	$(BINDIR)\pregen_examine.exe					\
+	$(BINDIR)\pregen_test.exe					\
 	$(BINDIR)\arithmetic_encoding_model_gen.exe		\
 	$(LIBIDR)\atire.dll
 
@@ -419,6 +422,8 @@ bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
 bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
 bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj
 bin\pregen_precision_measurement.exe : bin\pregen_precision_measurement.obj
+bin\pregen_examine.exe : bin\pregen_examine.obj
+bin\pregen_test.exe : bin\pregen_test.obj
 bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj
 
 #

@@ -61,7 +61,8 @@ USE_PARTIAL_DCOMPRESSION := 0
 USE_TWO_D_ACCUMULATORS := 1
 
 # what type to use for the accumulators
-CFLAGS += -DANT_ACCUMULATOR_T=short
+CFLAGS += -DANT_ACCUMULATOR_T="unsigned short"
+CFLAGS += -DANT_PREGEN_T="unsigned long long"
 
 # use mysql database backend
 USE_MYSQL := 0

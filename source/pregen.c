@@ -22,6 +22,43 @@ template<typename T> T max (T a, T b)
 return a > b ? a : b;
 }
 
+const char *pregen_type_to_str(pregen_field_type type)
+{
+switch (type)
+	{
+	case INTEGER:
+		return "integer";
+	case STRTRUNC:
+		return "strtrunc";
+	case BINTRUNC:
+		return "bintrunc";
+	case BASE32:
+		return "base32";
+	case BASE36:
+		return "base36";
+	case RECENTDATE:
+		return "recentdate";
+	case INTEGEREXACT:
+		return "integerexact";
+	case STREXACT:
+		return "strexact";
+	case STREXACT_RESTRICTED:
+		return "strextractrestricted";
+	case BASE37:
+		return "base37";
+	case BASE37_ARITHMETIC:
+		return "base37arith";
+	case BASE40:
+		return "base40";
+	case ASCII_PRINTABLES:
+		return "asciiprintables";
+	case ASCII_PRINTABLES_ARITHMETIC:
+		return "asciiprintablesarith";
+	default:
+		return "Unknown";
+	}
+}
+
 pregen_t ANT_pregen_writer_normal::generate_integer(ANT_string_pair field)
 {
 /* atol can happily wander off the end of the field. It'll be stopped by the null-termination
@@ -101,8 +138,8 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 			}
 		}
 
-	field.start += utf8_bytes(field.start);
 	field.string_length -= utf8_bytes(field.start);
+	field.start += utf8_bytes(field.start);
 	}
 
 //"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
@@ -132,14 +169,18 @@ pregen_t ANT_pregen_writer_normal::generate_radix(ANT_string_pair field)
 pregen_t result = 0;
 
 uint32_t character;
-
+int prev_char_was_space;
 unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
 unsigned char *buffer_pos;
+unsigned char encoded_space = T::encode(' ');
 size_t buffer_remain;
 
 int dest_chars_remain = ANT_compiletime_int_floor_log_to_base<pregen_t, T::num_symbols>::value;
+
 const int final_digit_radix = ANT_compiletime_int_floor_log_to_base_remainder<pregen_t, T::num_symbols,
 		ANT_compiletime_int_floor_log_to_base_has_remainder<pregen_t, T::num_symbols>::value>::value;
+
+prev_char_was_space = 1; //Leading spaces are not significant
 
 while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 && dest_chars_remain >= 0)
 	{
@@ -155,6 +196,15 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 
 		if (encoded != CHAR_ENCODE_FAIL)
 			{
+			if (encoded == encoded_space)
+				if (prev_char_was_space)
+					continue; //Strip multiple spaces in a row
+				else
+					prev_char_was_space = 1;
+			else
+				prev_char_was_space = 0;
+
+
 			if (dest_chars_remain == 0)
 				{
 				//Final digit isn't the full radix, scale down
@@ -167,8 +217,8 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0 &
 			}
 		}
 
-	field.start += utf8_bytes(field.start);
 	field.string_length -= utf8_bytes(field.start);
+	field.start += utf8_bytes(field.start);
 	}
 
 //"left justify" the resulting bits so that longer strings aren't always larger than shorter ones
@@ -196,10 +246,14 @@ uint32_t character;
 
 unsigned char buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
 unsigned char *buffer_pos;
+unsigned char encoded_space = T::encode(' ');
+int prev_char_was_space;
 size_t buffer_remain;
 pregen_t result;
 
 ANT_arithmetic_encoder<pregen_t> encoder(model);
+
+prev_char_was_space = 1; //Leading whitespace is not significant
 
 while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0)
 	{
@@ -214,11 +268,21 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0)
 		unsigned char symbol = T::encode(buffer[i]);
 
 		if (symbol != CHAR_ENCODE_FAIL)
+			{
+			if (symbol == encoded_space)
+				if (prev_char_was_space)
+					continue; //Strip multiple spaces in a row
+				else
+					prev_char_was_space = 1;
+			else
+				prev_char_was_space = 0;
+
 			if (!encoder.encode_symbol(symbol))
 				goto break_outer; //Ran out of room in the encoded result, so stop encoding
+			}
 		}
-	field.start += utf8_bytes(field.start);
 	field.string_length -= utf8_bytes(field.start);
+	field.start += utf8_bytes(field.start);
 	}
 
 break_outer:
@@ -240,8 +304,8 @@ switch (type)
 		return generate_radix<ANT_encode_char_8bit>(field);
 	case BINTRUNC:
 		return generate_bintrunc(field);
-	case ASCII_5BIT:
-		return generate_radix<ANT_encode_char_5bit>(field);
+	case BASE32:
+		return generate_radix<ANT_encode_char_base32>(field);
 	case BASE36:
 		return generate_radix<ANT_encode_char_base36>(field);
 	case BASE37:
@@ -278,7 +342,10 @@ ANT_pregen_writer * field;
 switch (type)
 	{
 	case STREXACT:
-		field = new ANT_pregen_writer_exact_strings(field_name);
+		field = new ANT_pregen_writer_exact_strings(field_name, 0);
+		break;
+	case STREXACT_RESTRICTED:
+		field = new ANT_pregen_writer_exact_strings(field_name, 1);
 		break;
 	case INTEGEREXACT:
 		field = new ANT_pregen_writer_exact_integers(field_name);
@@ -307,7 +374,7 @@ long long skip_docs;
 skip_docs = docindex - doc_count;
 
 if (skip_docs > 0)
-	add_score(0, skip_docs);
+	add_score(1, skip_docs);
 else
 	assert (skip_docs == 0); //docindex should never go backwards. We don't support that.
 
@@ -449,6 +516,9 @@ if (!file.read((unsigned char *) &header, sizeof(header)))
 if (header.version != PREGEN_FILE_VERSION)
 	return 0;
 
+if (header.pregen_t_size != sizeof(pregen_t))
+	return 0;
+
 doc_count = header.doc_count;
 type = (pregen_field_type) header.field_type;
 
@@ -477,6 +547,7 @@ if (!file.open(filename, "wbx"))
 
 header.doc_count = 0; //We will fill that in later
 header.version = PREGEN_FILE_VERSION;
+header.pregen_t_size = sizeof(pregen_t);
 header.field_type = type;
 header.field_name_length = (uint32_t) strlen(field_name);
 
@@ -497,7 +568,7 @@ ANT_pregen::~ANT_pregen()
 delete [] scores;
 }
 
-void ANT_pregen_writer_exact_strings::add_exact_string(char *str)
+void ANT_pregen_writer_exact_strings::add_exact_string(ANT_string_pair str)
 {
 ensure_storage();
 
@@ -512,7 +583,7 @@ if (doc_count >= doc_capacity)
 	{
 	doc_capacity = doc_capacity * 2 + 1;
 
-	std::pair<long long, char *>* new_strings = new std::pair<long long, char *>[doc_capacity];
+	std::pair<long long, ANT_string_pair>* new_strings = new std::pair<long long, ANT_string_pair>[doc_capacity];
 	memcpy(new_strings, exact_strings, sizeof(exact_strings[0]) * doc_count);
 
 	delete [] exact_strings;
@@ -544,17 +615,23 @@ exact_integers[doc_count].second = i;
 doc_count++;
 }
 
-bool exact_str_less(const std::pair<long long, char*>& a, const std::pair<long long, char*>& b)
+bool exact_str_less(const std::pair<long long, ANT_string_pair>& a, const std::pair<long long, ANT_string_pair>& b)
 {
-//TODO Unicode comparison function
-return strcmp(a.second, b.second) < 0;
+//Perform an ordering the same as strcmp (NOT what ANT_string_pair's compare performs)
+int result = memcmp(a.second.start, b.second.start, min(a.second.string_length, b.second.string_length));
+
+if (result < 0)
+	return true;
+if (result > 0)
+	return false;
+return a.second.string_length < b.second.string_length;
 }
 
-ANT_pregen_writer_exact_strings::ANT_pregen_writer_exact_strings(const char *name) : ANT_pregen_writer(STREXACT, name), memory(100*1024*1024)
+ANT_pregen_writer_exact_strings::ANT_pregen_writer_exact_strings(const char *name, int restricted) : ANT_pregen_writer(restricted ? STREXACT_RESTRICTED : STREXACT, name), memory(100*1024*1024)
 {
-compare = exact_str_less;
+this->restricted = restricted;
 doc_capacity = 1024;
-exact_strings = new std::pair<long long, char*>[doc_capacity];
+exact_strings = new std::pair<long long, ANT_string_pair>[doc_capacity];
 }
 
 ANT_pregen_writer_exact_integers::ANT_pregen_writer_exact_integers(const char *name) : ANT_pregen_writer(INTEGEREXACT, name)
@@ -565,6 +642,10 @@ exact_integers = new std::pair<long long,long long>[doc_capacity];
 
 ANT_pregen_writer_exact_strings::~ANT_pregen_writer_exact_strings()
 {
+/*
+	The strings themselves are allocated with our memory pool, so they will all be
+	destroyed automatically.
+ */
 delete [] exact_strings;
 }
 
@@ -614,6 +695,7 @@ pregen_t *outvalues;
  * to define the RSV of each document */
 header.doc_count = doc_count;
 header.version = PREGEN_FILE_VERSION;
+header.pregen_t_size = sizeof(pregen_t);
 header.field_type = type;
 header.field_name_length = (uint32_t) strlen(field_name);
 
@@ -642,11 +724,12 @@ void ANT_pregen_writer_exact_strings::add_field(long long  docindex, ANT_string_
 ANT_string_pair content = _content; //we want a copy we can modify
 long long skip_docs;
 
-unsigned char *buffer;
-unsigned char * buffer_pos;
-size_t buffer_remain;
+ANT_string_pair result;
+unsigned char char_decomposition_buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
+unsigned char *encoded_string_buffer, *encoded_string_pos;
+const unsigned char encoded_space = restricted ? ANT_encode_char_base37::encode(' ') : ' ';
 uint32_t character;
-char * string;
+int prev_char_was_space = 0;
 
 /* It's possible that previous documents didn't contain this field, so be prepared to zero-pad. */
 skip_docs = docindex - doc_count;
@@ -655,35 +738,64 @@ assert(skip_docs >= 0);
 
 while (skip_docs > 0)
 	{
-	add_exact_string(strnew(""));
+	result.start = NULL;
+	result.string_length = 0;
+
+	add_exact_string(result);
 	skip_docs--;
 	}
 
+/* Allocate enough room for worst-case result (actually pretty damn pessimistic) */
+encoded_string_buffer = new unsigned char[content.string_length * UTF8_LONGEST_DECOMPOSITION_LEN];
+encoded_string_pos = encoded_string_buffer;
+
 /* Apply UTF-8 decomposition/normalization to the string (for case folding, etc) */
 
-/* Allocate enough room for worst-case result (actually pretty damn pessimistic) */
-buffer_remain = content.string_length * UTF8_LONGEST_DECOMPOSITION_LEN + 1;
-buffer = new unsigned char[buffer_remain];
-buffer_remain--; //leave room for null terminator
+//Leading spaces are not significant
+prev_char_was_space = 1;
 
-buffer_pos = buffer;
-
-while (content.string_length > 0 && (character = utf8_to_wide(content.start)) != 0 && buffer_remain > 0)
+while (content.string_length > 0 && (character = utf8_to_wide(content.start)) != 0)
 	{
-	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_remain, character);
+	unsigned char * char_buffer_pos = char_decomposition_buffer;
+	size_t char_buffer_remain = sizeof(char_decomposition_buffer);
 
-	content.start += utf8_bytes(character);
-	content.string_length -= utf8_bytes(character);
+	assert(ANT_UNICODE_normalize_lowercase_toutf8(&char_buffer_pos, &char_buffer_remain, character));
+
+	for (int i = 0; i < (char_buffer_pos - char_decomposition_buffer); i++)
+		{
+		/*
+			Apply provided character encoding, so we can filter out the characters that we don't
+			care about the ordering of.
+		 */
+		unsigned char encoded = restricted ? ANT_encode_char_base37::encode(char_decomposition_buffer[i]) : char_decomposition_buffer[i];
+		
+		if (encoded != CHAR_ENCODE_FAIL)
+			{
+			if (encoded == encoded_space)
+				if (prev_char_was_space)
+					continue; //Strip multiple spaces in a row
+				else
+					prev_char_was_space = 1;
+			else
+				prev_char_was_space = 0;
+
+			*encoded_string_pos = encoded;
+			encoded_string_pos++;
+			}
+		}
+	
+	content.string_length -= utf8_bytes(content.start);
+	content.start += utf8_bytes(content.start);
 	}
-*buffer_pos = '\0';
 
 //Make a copy of that processed string in our memory pool
-string = (char*)memory.malloc(buffer_pos - buffer + 1);
-memcpy(string, buffer, buffer_pos - buffer + 1);
+result.string_length = encoded_string_pos - encoded_string_buffer;
+result.start = (char *) malloc(result.string_length);
+memcpy(result.start, encoded_string_buffer, result.string_length);
 
-add_exact_string(string);
+add_exact_string(result);
 
-delete[] buffer;
+delete[] encoded_string_buffer;
 }
 
 int ANT_pregen_writer_exact_strings::open_write(const char *filename)
@@ -700,11 +812,6 @@ for (long long i = 0; i < doc_count; i++)
 	printf("%6ld %s\n", (long) exact_strings[i].first, exact_strings[i].second);
 }
 
-void ANT_pregen_writer_exact_strings::set_comparison_function(comparison_function compare)
-{
-this->compare = compare;
-}
-
 void ANT_pregen_writer_exact_strings::close_write()
 {
 struct pregen_file_header header;
@@ -714,6 +821,7 @@ pregen_t *outvalues;
  * to define the RSV of each document */
 header.doc_count = doc_count;
 header.version = PREGEN_FILE_VERSION;
+header.pregen_t_size = sizeof(pregen_t);
 header.field_type = type;
 header.field_name_length = (uint32_t) strlen(field_name);
 
@@ -721,7 +829,7 @@ file.write((unsigned char *)&header, sizeof(header));
 
 file.write((unsigned char *)field_name, header.field_name_length * sizeof(*field_name));
 
-std::sort(&exact_strings[0], &exact_strings[doc_count], compare);
+std::sort(&exact_strings[0], &exact_strings[doc_count], exact_str_less);
 
 outvalues = new pregen_t[doc_count];
 
@@ -732,7 +840,7 @@ pregen_t out = 1;
 for (unsigned int i = 0; i < doc_count; i++)
 	{
 	/* Don't increase RSV if this string is the same as the previous (search engine will tiebreak) */
-	if (i > 0 && compare(exact_strings[i-1], exact_strings[i]) != 0)
+	if (i > 0 && exact_str_less(exact_strings[i-1], exact_strings[i]) != 0)
 		out++;
 
 	outvalues[exact_strings[i].first] = out;

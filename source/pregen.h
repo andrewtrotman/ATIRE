@@ -14,22 +14,22 @@
 #include "unicode_tables.h"
 
 #define MAX_PREGEN_FIELDS 128
-#define PREGEN_FILE_VERSION 1
+#define PREGEN_FILE_VERSION 2
 
 #define CHAR_ENCODE_FAIL 255
 
-enum pregen_field_type { INTEGER, BINTRUNC, STRTRUNC, ASCII_5BIT, BASE36, BASE37, BASE40, RECENTDATE, INTEGEREXACT, STREXACT, BASE37_ARITHMETIC, ASCII_PRINTABLES, ASCII_PRINTABLES_ARITHMETIC};
+enum pregen_field_type { INTEGER, BINTRUNC, STRTRUNC, BASE32, BASE36, BASE37, BASE40, RECENTDATE, INTEGEREXACT, STREXACT, STREXACT_RESTRICTED, BASE37_ARITHMETIC, ASCII_PRINTABLES, ASCII_PRINTABLES_ARITHMETIC};
 
-typedef ANT_search_engine_accumulator::ANT_accumulator_t pregen_t;
+typedef ANT_PREGEN_T pregen_t;
 
 struct pregen_file_header
 {
 	uint32_t version;
 	uint32_t doc_count;
+	uint32_t pregen_t_size;
 	uint32_t field_type;
 	uint32_t field_name_length;
 };
-
 
 /* Encode a character as a base-36 digit (0-9, a-z), or 255 if there is no
  * mapping for this character */
@@ -143,7 +143,7 @@ public:
  * Encode ASCII alphanumerics into an 5-bit number, with all punctuation merged to one point,
  * and digits doubling up. All letters are distinct codepoints.
  */
-class ANT_encode_char_5bit
+class ANT_encode_char_base32
 {
 public:
 	static const unsigned int num_symbols = 32;
@@ -231,12 +231,7 @@ private:
 	ANT_arithmetic_model *arithmetic_model;
 
 	template <typename T>
-	static pregen_t generate_radix(ANT_string_pair field);
-	template <typename T>
 	static pregen_t generate_sliding_radix(ANT_string_pair field);
-
-	template <typename T>
-	static pregen_t generate_arithmetic(ANT_string_pair field, ANT_arithmetic_model *model);
 
 	static pregen_t generate_integer(ANT_string_pair field);
 	static pregen_t generate_bintrunc(ANT_string_pair field);
@@ -247,6 +242,12 @@ private:
 	void add_score(pregen_t score, long long count = 1);
 
 public:
+	template <typename T>
+	static pregen_t generate_radix(ANT_string_pair field);
+
+	template <typename T>
+	static pregen_t generate_arithmetic(ANT_string_pair field, ANT_arithmetic_model *model);
+
 	ANT_pregen_writer_normal(pregen_field_type type, const char * name) : ANT_pregen_writer(type, name)
 	{
 	init_models();
@@ -333,24 +334,21 @@ public:
  */
 class ANT_pregen_writer_exact_strings : public ANT_pregen_writer
 {
-public:
-	typedef bool (*comparison_function)(const std::pair<long long, char*>& a, const std::pair<long long, char*>& b);
 private:
-	ANT_memory memory;
-	std::pair<long long, char *> *exact_strings;
+	int restricted; //If we're comparing based on a restricted character set (e.g. throw away punctuation)
 
-	comparison_function compare;
+	ANT_memory memory;
+	std::pair<long long, ANT_string_pair> *exact_strings;
 
 	uint32_t doc_capacity;
 
 	void ensure_storage();
-	void add_exact_string(char *str);
+	void add_exact_string(ANT_string_pair string);
 public:
-	ANT_pregen_writer_exact_strings(const char * name);
+	ANT_pregen_writer_exact_strings(const char * name, int restricted);
 	virtual ~ANT_pregen_writer_exact_strings();
 
 	virtual void print_strings();
-	virtual void set_comparison_function(comparison_function compare);
 	virtual void add_field(long long docindex, ANT_string_pair & content);
 
 	virtual int open_write(const char * filename);
@@ -376,5 +374,7 @@ public:
 
 	void close();
 };
+
+const char *pregen_type_to_str(pregen_field_type type);
 
 #endif
