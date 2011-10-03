@@ -34,6 +34,8 @@ switch (type)
 		return "bintrunc";
 	case BASE32:
 		return "base32";
+	case BASE32_ARITHMETIC:
+		return "base32arith";
 	case BASE36:
 		return "base36";
 	case RECENTDATE:
@@ -314,6 +316,8 @@ switch (type)
 		return generate_radix<ANT_encode_char_base40>(field);
 	case ASCII_PRINTABLES:
 		return generate_radix<ANT_encode_char_printable_ascii>(field);
+	case BASE32_ARITHMETIC:
+		return generate_arithmetic<ANT_encode_char_base32>(field, arithmetic_model);
 	case BASE37_ARITHMETIC:
 		return generate_arithmetic<ANT_encode_char_base37>(field, arithmetic_model);
 	case ASCII_PRINTABLES_ARITHMETIC:

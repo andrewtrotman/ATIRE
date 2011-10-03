@@ -18,7 +18,7 @@
 
 #define CHAR_ENCODE_FAIL 255
 
-enum pregen_field_type { INTEGER, BINTRUNC, STRTRUNC, BASE32, BASE36, BASE37, BASE40, RECENTDATE, INTEGEREXACT, STREXACT, STREXACT_RESTRICTED, BASE37_ARITHMETIC, ASCII_PRINTABLES, ASCII_PRINTABLES_ARITHMETIC};
+enum pregen_field_type { INTEGER, BINTRUNC, STRTRUNC, BASE32, BASE32_ARITHMETIC, BASE36, BASE37, BASE40, RECENTDATE, INTEGEREXACT, STREXACT, STREXACT_RESTRICTED, BASE37_ARITHMETIC, ASCII_PRINTABLES, ASCII_PRINTABLES_ARITHMETIC};
 
 typedef ANT_PREGEN_T pregen_t;
 
@@ -293,9 +293,9 @@ public:
 		{
 		static int symbol_frequencies[] =
 			{
-			1317, 11, 33, 11, 13, 3, 3, 1, 3, 5, 6, 719,
-			92, 378, 337, 827, 143, 214, 261, 458, 15, 61, 351, 219,
-			510, 591, 330, 8, 593, 451, 585, 138, 68, 221, 26, 158, 6
+			1433, 21, 50, 39, 11, 8, 5, 1, 6, 5, 4, 688, 98, 363, 250, 922,
+			140, 200, 265, 462, 14, 70, 342, 226, 579, 557, 334, 16, 636, 474, 574, 181,
+			74, 184, 23, 117, 20
 			};
 
 		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_base37::num_symbols, symbol_frequencies, 0);
@@ -315,6 +315,19 @@ public:
 			};
 
 		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_printable_ascii::num_symbols, symbol_frequencies, 0);
+		}
+	else if (type == BASE32_ARITHMETIC)
+		{
+		static int symbol_frequencies[] =
+			{
+			1724, /* Space */
+			78, 58, 16, 6, 10, /* Merged digits 0-9 */
+			827, 115, 443, 302, 1110, 163, 244, 314, 557, 17,
+			85, 411, 274, 702, 670, 411, 18, 760, 567, 689, 213,
+			88, 223, 26, 139, 25
+			};
+
+		arithmetic_model = new ANT_arithmetic_model(ANT_encode_char_base32::num_symbols, symbol_frequencies, 0);
 		}
 	else
 		arithmetic_model = NULL;

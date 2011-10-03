@@ -44,6 +44,8 @@ else if (strcmp(field_type, "bintrunc") == 0)
 	pregens[num_pregen_fields].type = BINTRUNC;
 else if (strcmp(field_type, "base32") == 0)
 	pregens[num_pregen_fields].type = BASE32;
+else if (strcmp(field_type, "base32arith") == 0)
+	pregens[num_pregen_fields].type = BASE32_ARITHMETIC;
 else if (strcmp(field_type, "base36") == 0)
 	pregens[num_pregen_fields].type = BASE36;
 else if (strcmp(field_type, "base37") == 0)
@@ -77,7 +79,8 @@ puts("   intexact     Rank by sorting complete integers");
 puts("   strexact     Rank by sorting complete strings (cannot rank results from merged indexes)");
 puts("   bintrunc     Prefix of the given string (binary safe)");
 puts("   strtrunc     Prefix of a lowercase, accentless version of the string");
-puts("   base32       Alphanumerics with limited numeric sort precision");
+puts("   base32       Alphanumerics and spaces, limited precision for digits");
+puts("   base32arith  Alphanumerics and spaces, limited precision for digits, English model");
 puts("   base36       Alphanumerics");
 puts("   base37       Alphanumerics and spaces");
 puts("   base37arith  Alphanumerics and spaces with English probability model");
