@@ -65,13 +65,14 @@
 int main(int argc, char**argv)
 {
 char *doclist_filename, *doclist_field, *model_name;
-enum { MODEL_BASE37, MODEL_PRINTABLES} model_type;
+enum { MODEL_BASE32, MODEL_BASE37, MODEL_PRINTABLES} model_type;
+int num_symbols;
 unsigned long long total_field_length = 0, documents_with_field = 0,
 		unicode_bytes = 0;
 
 if (argc < 4)
 	{
-	fprintf(stderr, "Usage: %s <doclistfile> <field> <model>\n(model is one of base37 or printables)\n", argv[0]);
+	fprintf(stderr, "Usage: %s <doclistfile> <field> <model>\n(model is one of base32, base37 or printables)\n", argv[0]);
 	exit(-1);
 	}
 
@@ -79,7 +80,9 @@ doclist_filename = argv[1];
 doclist_field = argv[2];
 model_name = argv[3];
 
-if (strcmp(model_name, "base37") == 0)
+if (strcmp(model_name, "base32") == 0)
+	model_type = MODEL_BASE32;
+else if (strcmp(model_name, "base37") == 0)
 	model_type = MODEL_BASE37;
 else if (strcmp(model_name, "printables") == 0)
 	model_type = MODEL_PRINTABLES;
@@ -89,7 +92,22 @@ else
 	exit(-1);
 	}
 
-ANT_arithmetic_model model(model_type == MODEL_BASE37 ? ANT_encode_char_base37::num_symbols : ANT_encode_char_printable_ascii::num_symbols, NULL, 0);
+switch (model_type)
+	{
+	case MODEL_BASE37:
+		num_symbols = ANT_encode_char_base37::num_symbols;
+		break;
+	case MODEL_BASE32:
+		num_symbols = ANT_encode_char_base32::num_symbols;
+		break;
+	case MODEL_PRINTABLES:
+		num_symbols = ANT_encode_char_printable_ascii::num_symbols;
+		break;
+	default:
+		return -1;
+	}
+
+ANT_arithmetic_model model(num_symbols, NULL, 0);
 
 //Read document names from the .doclist file
 char *doclist = map_entire_file(doclist_filename, NULL);
@@ -169,20 +187,23 @@ while (*current_document)
 								if ((c & 0x80) != 0)
 									unicode_bytes++;
 
+								/* Lowercase text before encoding */
+								if (c >= 'A' && c <= 'Z')
+									c += ('a' - 'A');
+
 								switch (model_type)
 									{
+									case MODEL_BASE32:
+										symbol = ANT_encode_char_base32::encode(c);
+									break;
 									case MODEL_BASE37:
 										symbol = ANT_encode_char_base37::encode(c);
 										break;
 									case MODEL_PRINTABLES:
-										/* Lowercase text before encoding */
-										if (c >= 'A' && c <= 'Z')
-											c += ('a' - 'A');
-
 										symbol = ANT_encode_char_printable_ascii::encode(c);
 										break;
 									default:
-										assert(0);
+										return -1;
 									}
 
 								if (symbol != CHAR_ENCODE_FAIL)
