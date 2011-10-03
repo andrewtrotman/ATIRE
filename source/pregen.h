@@ -143,7 +143,7 @@ public:
  * Encode ASCII alphanumerics into an 5-bit number, with all punctuation merged to one point,
  * and digits doubling up. All letters are distinct codepoints.
  */
-class ANT_encode_char_base32
+class ANT_encode_char_base32_edges
 {
 public:
 	static const unsigned int num_symbols = 32;
@@ -161,6 +161,30 @@ public:
 
 	//We'll sort Unicode along with Z
 	return (unsigned char) (num_symbols - 1);
+	}
+};
+
+/*
+ * Encode ASCII alphanumerics into an 5-bit number, with all punctuation merged to one point,
+ * and digits doubling up. All letters are distinct codepoints.
+ */
+class ANT_encode_char_base32
+{
+public:
+	static const unsigned int num_symbols = 32;
+
+	static unsigned char encode(unsigned char c)
+	{
+	if (c == ' ')
+		return 0;
+
+	if (c >= '0' && c <= '9')
+		return 1 + ((c - '0') >> 1); //Numbers sort second, but they will have to double-up to fit into 5 encodings
+
+	if (c >= 'a' && c <= 'z')
+		return c - 'a' + 6; //Letters sort last
+
+	return CHAR_ENCODE_FAIL;
 	}
 };
 
@@ -348,7 +372,6 @@ public:
 	ANT_pregen_writer_exact_strings(const char * name, int restricted);
 	virtual ~ANT_pregen_writer_exact_strings();
 
-	virtual void print_strings();
 	virtual void add_field(long long docindex, ANT_string_pair & content);
 
 	virtual int open_write(const char * filename);

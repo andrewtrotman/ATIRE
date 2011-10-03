@@ -397,7 +397,7 @@ char * pos = doc_name;
 enum { IDLE, INSIDE_TAG, INSIDE_OPEN_TAG, INSIDE_CLOSE_TAG} state = IDLE;
 
 int tag_depth = 0;
-ANT_string_pair tag_name, tag_body, close_tag_name;
+ANT_string_pair tag_name(NULL, 0), tag_body, close_tag_name;
 
 /* Parse document name and find matching top-level XML fields to use */
 while (*pos)
@@ -804,12 +804,6 @@ if (!file.open(filename, "wbx"))
 	return 0;
 
 return 1;
-}
-
-void ANT_pregen_writer_exact_strings::print_strings()
-{
-for (long long i = 0; i < doc_count; i++)
-	printf("%6ld %s\n", (long) exact_strings[i].first, exact_strings[i].second);
 }
 
 void ANT_pregen_writer_exact_strings::close_write()

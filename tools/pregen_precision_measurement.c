@@ -6,6 +6,7 @@
 #include <sstream>
 #include <utility>
 #include <algorithm>
+#include <cmath>
 
 #ifdef _MSC_VER
 
@@ -28,6 +29,7 @@
 #include "../source/pregen.h"
 #include "../source/search_engine_accumulator.h"
 #include "../source/indexer_param_block_pregen.h"
+#include "../source/pregen_kendall_tau.h"
 
 #ifdef _MSC_VER
 	char *map_entire_file(const char *filename, long long *filesize)
@@ -166,6 +168,29 @@ delete[] docs1;
 delete[] docs2;
 delete[] ranks1;
 delete[] ranks2;
+}
+
+void compare_kendall_tau(ANT_pregen & f1, ANT_pregen & f2, int bits)
+{
+assert(f1.doc_count == f2.doc_count);
+assert(bits <= sizeof(pregen_t) * CHAR_BIT);
+
+std::pair<pregen_t, pregen_t> *docs = new std::pair<pregen_t, pregen_t>[f1.doc_count];
+
+//Make an array of  docid -> (score1, score2)
+for (long long i = 0; i < f1.doc_count; i++)
+	{
+	docs[i].first = f1.scores[i];
+
+	/* If we need to mask off the lower bits of the pregen to get the desired number
+	 * of bits, do that now.
+	 */
+	docs[i].second = f2.scores[i] & ~(((pregen_t) 1 << (sizeof(pregen_t) * CHAR_BIT - bits)) - 1);
+	}
+
+printf("%d, %.12f\n", bits, kendall_tau(docs, f1.doc_count));
+
+delete[] docs;
 }
 
 void compare_conflation(ANT_pregen & f1, ANT_pregen & f2, int bits)
@@ -314,19 +339,8 @@ if (file)
 return 0;
 }
 
-void test(){
-	ANT_string_pair test("river packs WOLF RP (accepting! New)");
-	ANT_string_pair test2("");
-	ANT_string_pair test3("=)");
-
-	printf("%llu\n", ANT_pregen_writer_normal::generate_radix<ANT_encode_char_base37>(test));
-	printf("%llu\n", ANT_pregen_writer_normal::generate_radix<ANT_encode_char_base37>(test2));
-	printf("%llu\n", ANT_pregen_writer_normal::generate_radix<ANT_encode_char_base37>(test3));
-}
-
 int main(int argc, char ** argv)
 {
-	test();
 ANT_indexer_param_block_pregen pregen_params;
 
 int num_pregens = (argc - 2) / 2;
@@ -439,12 +453,6 @@ for (int i = 0; i < num_pregens; i++)
 		{
 		printf("Pregen on field: %s, method: %s\n", pregens[i].field_name, pregen_type_to_str(pregens[i].type));
 
-		/* Do we have a list of exact strings per-document to display for this pregen? */
-		/*if (dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i]))
-		 {
-		 dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i])->print_strings();
-		 }*/
-
 		for (int j = i + 1; j < num_pregens; j++)
 			if (strcmp(pregens[i].field_name, pregens[j].field_name) == 0)
 				{
@@ -452,9 +460,9 @@ for (int i = 0; i < num_pregens; i++)
 				printf("Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
 				printf("Sum of rank diffs, average, percentage\n");
 
-				for (int bits = 64; bits >= 64; bits-=1)
+				for (int bits = 64; bits >= 4; bits-=1)
 					{
-					compare_conflation(pregens[i], pregens[j], bits);
+					compare_kendall_tau(pregens[i], pregens[j], bits);
 					}
 
 				compared[j] = 1;

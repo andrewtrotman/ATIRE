@@ -39,6 +39,7 @@ OBJDIR = bin
 BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
+TESTDIR = tests
 PHPDIR = php_ext
 LIBDIR = lib
 
@@ -338,6 +339,7 @@ PARTS = \
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\pregen.obj							\
+	$(OBJDIR)\pregen_kendall_tau.obj				\
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\snippet.obj					\
 	$(OBJDIR)\snippet_factory.obj					\
@@ -401,7 +403,8 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_unicode_case_convert.exe			\
 	$(BINDIR)\pregen_precision_measurement.exe		\
 	$(BINDIR)\pregen_examine.exe					\
-	$(BINDIR)\pregen_test.exe					\
+	$(BINDIR)\test_pregen.exe						\
+	$(BINDIR)\test_kendall_tau.exe					\
 	$(BINDIR)\arithmetic_encoding_model_gen.exe		\
 	$(LIBIDR)\atire.dll
 
@@ -421,9 +424,10 @@ bin\make_unicode_tables.exe : bin\make_unicode_tables.obj
 bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
 bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
 bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj
-bin\pregen_precision_measurement.exe : bin\pregen_precision_measurement.obj
+bin\pregen_precision_measurement.exe : bin\pregen_precision_measurement.obj bin\pregen_kendall_tau.obj
 bin\pregen_examine.exe : bin\pregen_examine.obj
-bin\pregen_test.exe : bin\pregen_test.obj
+bin\test_pregen.exe : bin\test_pregen.obj
+bin\test_kendall_tau.exe : bin\test_kendall_tau.obj bin\pregen_kendall_tau.obj
 bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj
 
 #
@@ -441,7 +445,10 @@ bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj
 
 {$(TOOLDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
-	
+
+{$(TESTDIR)\}.c{$(OBJDIR)\}.obj:
+	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+		
 {$(OBJDIR)\}.obj{$(LIBDIR)\}.dll:
 	@echo Building $@..
 	$(CC) /LD $(PHP_EXT_OBJ) $(PHP_EXT_LIB) $(WINDOWS_LIBS) /Fe$@ /link /FORCE:MULTIPLE /LTCG
