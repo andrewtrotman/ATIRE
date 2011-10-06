@@ -191,7 +191,7 @@ puts("  t<tag>        Snippet is the contents of the first occuernce of the <tag
 puts("  f<tag>        Snippet is the text immediately following the first <tag> element [default=title]");
 puts("  n<n>          Snippet maximum length is <n> characters [default=300]");
 puts("  w<n>          Snippet is a KL-divergence word cloud with at most <n> terms in it [default=40]");
-puts("  S<stemmer>    Use stemming in snippet generation <stemmer> is a valid TERM EXPANSION algorithm (e.g. -Sp)");
+puts("  S<stemmer>    Use stemming in snippet generation (except clouds) <stemmer> is a valid TERM EXPANSION algorithm (e.g. -fSp)");
 puts("  T<tag>        Title is the contents of the first occuernce of the <tag> element [default=title]");
 puts("  N<n>          Title maximum length is <n> characters [default=300]");
 puts("");
