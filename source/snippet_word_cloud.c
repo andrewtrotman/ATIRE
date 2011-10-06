@@ -12,9 +12,10 @@
 	ANT_SNIPPET_WORD_CLOUD()
 	------------------------
 */
-ANT_snippet_word_cloud::ANT_snippet_word_cloud(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer) : ANT_snippet(max_length, length_of_longest_document, engine, stemmer)
+ANT_snippet_word_cloud::ANT_snippet_word_cloud(unsigned long max_length, long length_of_longest_document, ANT_search_engine *engine, ANT_stem *stemmer, long terms) : ANT_snippet(max_length, length_of_longest_document, engine, stemmer)
 {
 cloud_maker = new ANT_relevance_feedback_blind_kl(engine);
+terms_to_generate = terms;
 }
 
 /*
@@ -39,7 +40,7 @@ char *into, *end;
 /*
 	Generate the top 100 terms from the KL divergence of the document and the collection
 */
-top_terms = cloud_maker->feedback(document, 100, &terms_generated);
+top_terms = cloud_maker->feedback(document, terms_to_generate, &terms_generated);
 
 /*
 	now copy as many as you can into the snippet (in order of importance) putting a space between each one

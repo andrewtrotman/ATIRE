@@ -65,6 +65,7 @@ public:
 	char *snippet_tag;					// if they require an XML tag then use this one
 	long snippet_length;				// snippets should be no longer than this (in characters)
 	long snippet_stemmer;				// algorithm to use to stem keywords and search terms when looking for snippets
+	long snippet_word_cloud_terms;		// maximum number of terms to generate when generating word coulds
 
 	long title_algorithm;				// should we construct a title or not (this is a snippet algorithm)
 	char *title_tag;					// use the contents of this element as the title of the document

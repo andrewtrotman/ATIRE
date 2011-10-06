@@ -59,6 +59,7 @@ snippet_algorithm = NONE;
 snippet_tag = "title";
 snippet_length = 300;		// this is the INEX 2011 maximum snippet length
 snippet_stemmer = NONE;
+snippet_word_cloud_terms = 40;
 title_tag = "title";
 title_algorithm = NONE;
 title_length = 300;
@@ -178,7 +179,7 @@ ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// rankin
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
-puts("-f[a][cC][s<stemmer>][-fbBtT<tag>][nN<n>]Focus the results list");
+puts("-f[a][cC][s<stemmer>][-fbBtT<tag>][wnN<n>]Focus the results list");
 puts("  a             Article retrieval [default]");
 //puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
@@ -189,6 +190,7 @@ puts("  C             Snippet is the passage with the tf.icf score");
 puts("  t<tag>        Snippet is the contents of the first occuernce of the <tag> element [default=title]");
 puts("  f<tag>        Snippet is the text immediately following the first <tag> element [default=title]");
 puts("  n<n>          Snippet maximum length is <n> characters [default=300]");
+puts("  w<n>          Snippet is a KL-divergence word cloud with at most <n> terms in it [default=40]");
 puts("  S<stemmer>    Use stemming in snippet generation <stemmer> is a valid TERM EXPANSION algorithm (e.g. -Sp)");
 puts("  T<tag>        Title is the contents of the first occuernce of the <tag> element [default=title]");
 puts("  N<n>          Title maximum length is <n> characters [default=300]");
@@ -487,6 +489,11 @@ switch (*which)
 		title_algorithm = ANT_snippet_factory::SNIPPET_TITLE;
 		if (*(which + 1) != '\0')
 			title_tag = which + 1;
+		break;
+	case 'w':
+		snippet_algorithm = ANT_snippet_factory::SNIPPET_WORD_CLOUD_KL;
+		if ((got = atol(which + 1)) > 0)
+			snippet_word_cloud_terms = got;
 		break;
 	default:
 		exit(printf("Unknown focusing algorithm: '%c'\n", *which));
