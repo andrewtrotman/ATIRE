@@ -115,3 +115,13 @@ for (current = 0; current < top_n; current++)
 		add_to_index(document_buffer);
 	}
 }
+
+/*
+	ANT_RELEVANCE_FEEDBACK::POPULATE()
+	----------------------------------
+*/
+void ANT_relevance_feedback::populate(char *document)
+{
+rewind();
+add_to_index(document);
+}

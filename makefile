@@ -341,12 +341,13 @@ PARTS = \
 	$(OBJDIR)\pregen.obj							\
 	$(OBJDIR)\pregen_kendall_tau.obj				\
 	$(OBJDIR)\unicode.obj							\
-	$(OBJDIR)\snippet.obj					\
+	$(OBJDIR)\snippet.obj							\
 	$(OBJDIR)\snippet_factory.obj					\
 	$(OBJDIR)\snippet_tficf.obj						\
 	$(OBJDIR)\snippet_best_tag.obj					\
 	$(OBJDIR)\snippet_tag.obj						\
 	$(OBJDIR)\snippet_beginning.obj					\
+	$(OBJDIR)\snippet_word_cloud.obj				\
 	$(OBJDIR)\atire_client_param_block.obj			\
 	$(OBJDIR)\atire_broker_param_block.obj			\
 	$(OBJDIR)\atire_broke_engine.obj				\

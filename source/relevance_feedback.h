@@ -42,12 +42,14 @@ protected:
 		Add the top documents_to_examine documents from the results list to the in-memory index
 	*/
 	void populate(ANT_search_engine_result *result, long documents_to_examine);
+	void populate(char *document);
 
 public:
 	ANT_relevance_feedback(ANT_search_engine *engine);
 	virtual ~ANT_relevance_feedback();
 
 	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted, long *terms_found) = 0;
+	virtual ANT_memory_index_one_node **feedback(char *document, long terms_wanted, long *terms_found) = 0;
 } ;
 
 #endif /* RELEVANCE_FEEDBACK_H_ */
