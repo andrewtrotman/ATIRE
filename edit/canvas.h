@@ -7,6 +7,8 @@
 
 #include <windows.h>
 
+class ANT_memory_file_line;
+
 /*
 	class ANT_CANVAS
 	----------------
@@ -18,27 +20,23 @@ friend static LRESULT CALLBACK windows_callback(HWND hwnd, UINT message, WPARAM 
 private:
 	static const long WIDTH_IN_PIXELS = 480;
 	static const long HEIGHT_IN_PIXELS = 240;
-	static const long TIMER_TEXT_FLASH = 1;
-	static const long TIMER_CPU_TICK = 2;
-	static const long TIMER_DISPLAY_REFRESH = 4;
 
 private:
 	HINSTANCE hInstance;
 	HDC bitmap;
-
-public:
 	HWND window;
+
+	ANT_memory_file_line *file;
 
 private:
 	void make_canvas(void);
 	LRESULT windows_callback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-protected:
+	void load_file(void);
 	void menu(WORD clicked);
 
 public:
 	ANT_canvas(HINSTANCE hInstance);
-	virtual ~ANT_canvas() {}
+	virtual ~ANT_canvas();
 
 	long create_window(char *window_title);
 } ;

@@ -32,5 +32,6 @@ while(!done)
 		}
 	}
 
+GetMessage(&msg, NULL, 0, 0);		// get the WM_QUIT event
 return msg.wParam;
 }
