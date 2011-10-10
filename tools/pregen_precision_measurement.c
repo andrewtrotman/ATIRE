@@ -31,6 +31,18 @@
 #include "../source/indexer_param_block_pregen.h"
 #include "../source/pregen_kendall_tau.h"
 
+int file_exists(const char *filename)
+{
+FILE *file = fopen(filename, "r");
+
+if (file)
+	{
+	fclose(file);
+	return 1;
+	}
+return 0;
+}
+
 #ifdef _MSC_VER
 	char *map_entire_file(const char *filename, long long *filesize)
 	{
@@ -175,10 +187,12 @@ void compare_kendall_tau(ANT_pregen & f1, ANT_pregen & f2, int bits)
 assert(f1.doc_count == f2.doc_count);
 assert(bits <= sizeof(pregen_t) * CHAR_BIT);
 
-std::pair<pregen_t, pregen_t> *docs = new std::pair<pregen_t, pregen_t>[f1.doc_count];
+uint32_t doc_count = f1.doc_count;
+
+std::pair<pregen_t, pregen_t> *docs = new std::pair<pregen_t, pregen_t>[doc_count];
 
 //Make an array of  docid -> (score1, score2)
-for (long long i = 0; i < f1.doc_count; i++)
+for (long long i = 0; i < doc_count; i++)
 	{
 	docs[i].first = f1.scores[i];
 
@@ -188,12 +202,12 @@ for (long long i = 0; i < f1.doc_count; i++)
 	docs[i].second = f2.scores[i] & ~(((pregen_t) 1 << (sizeof(pregen_t) * CHAR_BIT - bits)) - 1);
 	}
 
-printf("%d, %.12f\n", bits, kendall_tau(docs, f1.doc_count));
+printf("%d, %.12f\n", bits, kendall_tau(docs, doc_count));
 
 delete[] docs;
 }
 
-void compare_conflation(ANT_pregen & f1, ANT_pregen & f2, int bits)
+void compare_conflation(ANT_pregen &f1, ANT_pregen &f2, int bits)
 {
 assert(f1.doc_count == f2.doc_count);
 assert(bits <= sizeof(pregen_t) * CHAR_BIT);
@@ -219,15 +233,6 @@ for (long long i = 0; i < f1.doc_count; i++)
 //Sort to give an array of  rank -> (docid, score)
 std::sort(docs1, docs1 + f1.doc_count, compare_rsv_greater);
 std::sort(docs2, docs2 + f2.doc_count, compare_rsv_greater);
-
-/*
-printf("rank docid1 rsv1 docid2 rsv2\n");
-for (long long i = 0; i < f1.doc_count; i++)
-	printf("%4lld %6lld %12llu %6lld %12llu\n", i, docs1[i].first, (unsigned long long) docs1[i].second, docs2[i].first, (unsigned long long) docs2[i].second);
-
-printf("\n");
-*/
-
 
 long long i = 0, j = 0;
 unsigned long long conflations = 0;
@@ -327,29 +332,53 @@ delete[] ranks1;
 delete[] ranks2;
 }
 
-int file_exists(const char *filename)
+/* Compare pregens on the same fields so we can check relative effectiveness of different methods.
+ *
+ * We'll take the first appearance of a field's pregen as the baseline to compare the
+ * rest of the results against
+ */
+void mutual_compare_pregens(ANT_pregen *pregens, int num_pregens)
 {
-FILE *file = fopen(filename, "r");
+int *compared = new int[num_pregens]; //Values are true if we've compared against this pregen already
 
-if (file)
-	{
-	fclose(file);
-	return 1;
-	}
-return 0;
+memset((void *) compared, 0, sizeof(compared[0]) * num_pregens);
+
+for (int i = 0; i < num_pregens; i++)
+	if (!compared[i])
+		{
+		printf("Pregen on field: %s, method: %s\n", pregens[i].field_name, pregen_type_to_str(pregens[i].type));
+
+		for (int j = i + 1; j < num_pregens; j++)
+			if (strcmp(pregens[i].field_name, pregens[j].field_name) == 0)
+				{
+				fprintf(stderr, "Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
+				printf("Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
+				printf("Sum of rank diffs, average, percentage\n");
+
+				for (int bits = 64; bits >= 4; bits--)
+					{
+					compare_kendall_tau(pregens[i], pregens[j], bits);
+					}
+
+				compared[j] = 1;
+				}
+		}
 }
 
 int main(int argc, char ** argv)
 {
 ANT_indexer_param_block_pregen pregen_params;
-
-int num_pregens = (argc - 2) / 2;
-char **pregen_type = new char*[num_pregens];
-char **pregen_filenames = new char*[num_pregens];
-
 int already_have_pregen_files = 1;
+int num_pregens;
+ANT_pregen *pregens;
+char **pregen_type, **pregen_filenames;
+
 
 assert(argc >= 3);
+
+num_pregens = (argc - 2) / 2;
+pregen_type = new char*[num_pregens];
+pregen_filenames = new char*[num_pregens];
 
 printf("Pregen field size is %d bytes\n\n", sizeof(pregen_t));
 
@@ -413,61 +442,18 @@ else
 		docindex++;
 		}
 
-	/* Do we have a list of exact strings per-document to display for this pregen? */
-	/*for (int i = 0; i < num_pregens; i++)
-	 if (dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i]))
-	 {
-	 ANT_pregen_writer_exact_strings* p = dynamic_cast<ANT_pregen_writer_exact_strings*>(pregen_writer.fields[i]);
-	 exact_strings = new char*[p->doc_count];
-
-	 for (int j = 0; j < p->doc_count; j++)
-	 {
-	 exact_strings[j] = strdup(p->exact_strings[j].second);
-	 if (strlen(exact_strings[j])>20)
-	 exact_strings[j][20] = 0;
-	 }
-	 }
-	 */
 	pregen_writer.close();
 	}
 
 /* Pregens are written to a file, so read the pregens that we just wrote back into memory */
-ANT_pregen *pregens = new ANT_pregen[num_pregens];
+pregens = new ANT_pregen[num_pregens];
 
 for (int i = 0; i < num_pregens; i++)
 	pregens[i].read(pregen_filenames[i]);
 
 fprintf(stderr, "Comparing pregens...\n");
 
-/* Compare pregens on the same fields so we can check relative effectiveness of different methods.
- *
- * We'll take the first appearance of a field's pregen as the baseline to compare the
- * rest of the results against
- */
-int *compared = new int[num_pregens]; //Values are true if we've compared against this pregen already
-
-memset((void *) compared, 0, sizeof(compared[0]) * num_pregens);
-
-for (int i = 0; i < num_pregens; i++)
-	if (!compared[i])
-		{
-		printf("Pregen on field: %s, method: %s\n", pregens[i].field_name, pregen_type_to_str(pregens[i].type));
-
-		for (int j = i + 1; j < num_pregens; j++)
-			if (strcmp(pregens[i].field_name, pregens[j].field_name) == 0)
-				{
-				fprintf(stderr, "Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
-				printf("Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
-				printf("Sum of rank diffs, average, percentage\n");
-
-				for (int bits = 64; bits >= 4; bits-=1)
-					{
-					compare_kendall_tau(pregens[i], pregens[j], bits);
-					}
-
-				compared[j] = 1;
-				}
-		}
+mutual_compare_pregens(pregens, num_pregens);
 
 //Leak everything
 return EXIT_SUCCESS;

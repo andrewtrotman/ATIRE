@@ -9,6 +9,7 @@
 #define TEST_2_SIZE 253
 #define TEST_3_SIZE 256
 #define TEST_4_SIZE 1023
+#define TEST_5_SIZE 8
 #define TEST_BIG_SIZE 1023125
 
 int approx_equal(double a, double b)
@@ -20,7 +21,7 @@ int test_check_approx_equal(int testnum, double measured, double expected)
 {
 int pass = approx_equal(measured, expected);
 
-printf("Test %d %s: expected %f, got: %f\n", testnum, pass ? "pass" : "FAIL", expected, measured);
+printf("Test %d %s: expected %.8f, got: %.8f\n", testnum, pass ? "pass" : "FAIL", expected, measured);
 
 return pass;
 }
@@ -31,6 +32,7 @@ std::pair<pregen_t, pregen_t> *test1 = new std::pair<pregen_t, pregen_t>[TEST_1_
 std::pair<pregen_t, pregen_t> *test2 = new std::pair<pregen_t, pregen_t>[TEST_2_SIZE];
 std::pair<pregen_t, pregen_t> *test3 = new std::pair<pregen_t, pregen_t>[TEST_3_SIZE];
 std::pair<pregen_t, pregen_t> *test4 = new std::pair<pregen_t, pregen_t>[TEST_4_SIZE];
+std::pair<pregen_t, pregen_t> *test5 = new std::pair<pregen_t, pregen_t>[TEST_5_SIZE];
 std::pair<pregen_t, pregen_t> *test_big = new std::pair<pregen_t, pregen_t>[TEST_BIG_SIZE];
 int works = 1;
 
@@ -70,6 +72,14 @@ for (int i = 0; i < TEST_4_SIZE; i++)
 
 works = works && test_check_approx_equal(4, kendall_tau(test4, TEST_4_SIZE), -1.0);
 
+/* Twiddled ranking, every second element is exchanged with that element before it  */
+for (int i = 0; i < TEST_5_SIZE; i++)
+	{
+	test5[i].first = i;
+	test5[i].second = i + ((i & 1) == 0 ? 1 : -1);
+	}
+
+works = works && test_check_approx_equal(5, kendall_tau(test5, TEST_5_SIZE), 0.714285714);
 
 /* Random rankings which should show very little correlation. Hey, I hope the
  * standard library has a good random number generator! */
@@ -79,7 +89,7 @@ for (int i = 0; i < TEST_BIG_SIZE; i++)
 	test_big[i].second = rand();
 	}
 
-works = works && test_check_approx_equal(5, kendall_tau(test_big, TEST_BIG_SIZE), 0.0);
+works = works && test_check_approx_equal(6, kendall_tau(test_big, TEST_BIG_SIZE), 0.0);
 
 delete[] test1;
 delete[] test2;

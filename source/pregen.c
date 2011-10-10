@@ -723,7 +723,7 @@ delete [] outvalues;
 file.close();
 }
 
-void ANT_pregen_writer_exact_strings::add_field(long long  docindex, ANT_string_pair & _content)
+void ANT_pregen_writer_exact_strings::add_field(long long docindex, ANT_string_pair & _content)
 {
 ANT_string_pair content = _content; //we want a copy we can modify
 long long skip_docs;
@@ -731,7 +731,7 @@ long long skip_docs;
 ANT_string_pair result;
 unsigned char char_decomposition_buffer[UTF8_LONGEST_DECOMPOSITION_LEN];
 unsigned char *encoded_string_buffer, *encoded_string_pos;
-const unsigned char encoded_space = restricted ? ANT_encode_char_base37::encode(' ') : ' ';
+const unsigned char encoded_space = restricted ? ANT_encode_char_base37::encode(' ') : ANT_encode_char_printable_ascii::encode(' ');
 uint32_t character;
 int prev_char_was_space = 0;
 
@@ -771,7 +771,7 @@ while (content.string_length > 0 && (character = utf8_to_wide(content.start)) !=
 			Apply provided character encoding, so we can filter out the characters that we don't
 			care about the ordering of.
 		 */
-		unsigned char encoded = restricted ? ANT_encode_char_base37::encode(char_decomposition_buffer[i]) : char_decomposition_buffer[i];
+		unsigned char encoded = restricted ? ANT_encode_char_base37::encode(char_decomposition_buffer[i]) : ANT_encode_char_printable_ascii::encode(char_decomposition_buffer[i]);
 		
 		if (encoded != CHAR_ENCODE_FAIL)
 			{

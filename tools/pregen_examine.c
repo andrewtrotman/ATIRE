@@ -93,6 +93,8 @@ while (fgets(line, sizeof(line), doclist) != NULL)
 
 fclose(doclist);
 
+fprintf(stderr, "Doclist contains %llu documents.\n", (long long unsigned) docnames.size());
+
 fprintf(stderr, "Printing pregens...\n");
 
 for (int i = 2; i < argc; i++)
@@ -108,7 +110,11 @@ for (int i = 2; i < argc; i++)
 		printf("Pregen doc count %llu doesn't match doclist count %llu\n", pregen.doc_count, docnames.size());
 		}
 	else
-		print_pregen(docnames, pregen, 64);
+		{
+		for (int i = 0; i < pregen.doc_count; i++)
+			printf("%llu\n", (long long unsigned) pregen.scores[i]);
+		//print_pregen(docnames, pregen, 64);
+		}
 	}
 
 //Leak the whole doclist
