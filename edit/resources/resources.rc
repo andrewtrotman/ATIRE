@@ -1,0 +1,243 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_POLY MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Reset",                      ID_FILE_RESET
+        MENUITEM "&Warm Reset",                 ID_FILE_WARM_RESET
+        MENUITEM "E&xit",                       ID_FILE_EXIT
+    END
+    POPUP "&Drive"
+    BEGIN
+        MENUITEM "&0: Empty",                   ID_DRIVE_0
+        MENUITEM "&1: Empty",                   ID_DRIVE_1
+        MENUITEM "&2: Empty",                   ID_DRIVE_2
+        MENUITEM "&3: Empty",                   ID_DRIVE_3
+    END
+    POPUP "&ROMs"
+    BEGIN
+        MENUITEM "BASIC v2.3 (Poly &1)",        ID_ROMS_BASIC_23, CHECKED
+        MENUITEM "BASIC v3.0 (&Poly 2)",        ID_ROMS_BASIC_30
+        MENUITEM "BASIC v3.1 (Poly&2)",         ID_ROMS_BASIC_31
+        MENUITEM "BASIC v3.4 (&Dev Poly)",      ID_ROMS_BASIC_34
+    END
+    POPUP "&Keys"
+    BEGIN
+        POPUP "Directly Mappable Keys"
+        BEGIN
+            MENUITEM "U0 <F10>",                    ID_KEYS_U0
+            MENUITEM "U1 <F1>",                     ID_KEYS_U1
+            MENUITEM "U2 <F2>",                     ID_KEYS_U2
+            MENUITEM "U3 <F3>",                     ID_KEYS_U3
+            MENUITEM "U4 <F4>",                     ID_KEYS_U4
+            MENUITEM "U5 <F5>",                     ID_KEYS_U5
+            MENUITEM "U6 <F6>",                     ID_KEYS_U6
+            MENUITEM "U7 <F7>",                     ID_KEYS_U7
+            MENUITEM "U8 <F8>",                     ID_KEYS_U8
+            MENUITEM "U9 <F9>",                     ID_KEYS_U9
+            MENUITEM ". <Keypad Dot>",              ID_KEYS_DOT
+            MENUITEM SEPARATOR
+            MENUITEM "Up <Up>",                     ID_KEYS_UP
+            MENUITEM "Down <Down>",                 ID_KEYS_DOWN
+            MENUITEM "Left <Left>",                 ID_KEYS_LEFT
+            MENUITEM "Right <Right>",               ID_KEYS_RIGHT
+            MENUITEM SEPARATOR
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Char Insert <Ins>",           ID_KEYS_CHARINSERT
+        MENUITEM "Char Delete <Del>",           ID_KEYS_CHARDELETE
+        MENUITEM "Line Insert <Shift-Ins>",     ID_KEYS_LINEINSERT
+        MENUITEM "Line Delete <Shift-Del>",     ID_KEYS_LINEDELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Next <PageDown>",             ID_KEYS_NEXT
+        MENUITEM "Back <PageUp>",               ID_KEYS_BACK
+        MENUITEM "Repeat <Esc>",                ID_KEYS_REPEAT
+        MENUITEM "Exit <Ctrl-Break>",           ID_KEYS_EXIT
+        MENUITEM SEPARATOR
+        MENUITEM "Help <F11>",                  ID_KEYS_HELP
+        MENUITEM "Calc <F12>",                  ID_KEYS_CALC
+        MENUITEM SEPARATOR
+        MENUITEM "Pause <Pause>",               ID_KEYS_PAUSE
+        MENUITEM "Shift-Pause <Shift-Pause>",   ID_KEYS_SHIFT_PAUSE
+        MENUITEM SEPARATOR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Poly Emulator",        ID_HELP_ABOUT_POLY
+    END
+END
+
+IDR_MENU_PROTEUS MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Reset",                       ID_FILE_RESET
+        MENUITEM "Exit",                        ID_FILE_EXIT
+    END
+    POPUP "Drive"
+    BEGIN
+        MENUITEM "0: Empty",                    ID_DRIVE_0
+        MENUITEM "1: Empty",                    ID_DRIVE_1
+        MENUITEM "2: Empty",                    ID_DRIVE_2
+        MENUITEM "3: Empty",                    ID_DRIVE_3
+    END
+    POPUP "ROMs"
+    BEGIN
+        MENUITEM "030982",                      ID_ROMS_030982
+        MENUITEM "300986",                      ID_ROMS_300986
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "About Proteus Emulator",      ID_HELP_ABOUT_PROTEUS
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT_POLY DIALOGEX 0, 0, 65, 29
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,7,50,14
+END
+
+IDD_ABOUT_PROTEUS DIALOGEX 0, 0, 63, 28
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Proteus Emulator"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,7,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUT_POLY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 58
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 22
+    END
+
+    IDD_ABOUT_PROTEUS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 56
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 21
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON_POLY           ICON                    "icon1.ico"
+IDI_ICON_PROTEUS        ICON                    "icon2.ico"
+IDI_ICON_TERMINAL       ICON                    "ico00001.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_PROTEUS             BITMAP                  "bitmap1.bmp"
+IDB_PROTEUS_PEOPLE      BITMAP                  "bmp00001.bmp"
+IDB_POLY_PEOPLE         BITMAP                  "bitmap2.bmp"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (New Zealand) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENZ)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_NZ
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (New Zealand) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
