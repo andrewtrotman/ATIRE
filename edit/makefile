@@ -1,6 +1,7 @@
 #
 # Makefile for ATIRE/Edit
 #
+.SILENT:
 
 OBJECTS = 								\
 	main.obj							\
@@ -12,14 +13,16 @@ OBJECTS = 								\
 	resources\resources.res
 
 main.exe : $(OBJECTS)
-	$(CXX) $(CXXFLAGS) /Zi -Femain.exe  $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib
+	$(CXX) $(CXXFLAGS) /nologo /Zi -Femain.exe  $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib
 
+
+CFLAGS = $(CFLAGS) /nologo /Zi /c /Tp
 
 .c.obj:
-	$(CC) $(CFLAGS) /Zi /c /Tp $< /Fo$@
+	$(CC) $(CFLAGS) $< /Fo$@
 
 {..\source\}.c.obj:
-	$(CC) $(CFLAGS) /Zi /c /Tp $< /Fo$@
+	$(CC) $(CFLAGS) $< /Fo$@
 
 resources/resources.res : resources/resources.rc
 	rc resources/resources.rc
