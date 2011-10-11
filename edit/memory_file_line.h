@@ -5,6 +5,8 @@
 #ifndef MEMORY_FILE_LINE_H_
 #define MEMORY_FILE_LINE_H_
 
+class ANT_edit_renderer;
+
 /*
 	class ANT_MEMORY_FILE_LINE
 	--------------------------
@@ -15,15 +17,21 @@ friend
 	class ANT_memory_file_line_iterator;
 
 private:
+	static const long long tabstop = 3;	// a tab is equal to this number of spaces
+
+private:
 	char *contents;						// the current file as read from disk
 	char **line;						// an array of pointers into the in-memory version of the disk file
 	long long current_line;				// line at the top of the current display page
 	char **current_line_pointer;		// pointer to the line of text at the top of the current display page
 	long long lines_in_file;			// number of lines in the file
 	long long page_size;				// number of lines on a display page
+	long long window_width;				// width of the viewport into the document
+	long long window_height;			// height of the viewport into the document
+	ANT_edit_renderer *renderer;		// the object that can draw the document
 
 public:
-	ANT_memory_file_line();
+	ANT_memory_file_line(ANT_edit_renderer *renderer);
 	virtual ~ANT_memory_file_line();
 
 	/*
@@ -57,33 +65,12 @@ public:
 	/*
 		Set the current page length
 	*/
-	long long set_page_size(long long to) { return page_size = to; }
+	long long set_window_size(long long width, long long height) { this->window_width = width;  return this->window_height = height; }
+
+	/*
+		render
+	*/
+	long long render(void);
 } ;
 
 #endif /* MEMORY_FILE_LINE_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

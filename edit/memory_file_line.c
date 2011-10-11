@@ -3,20 +3,26 @@
 	------------------
 */
 #include <stdio.h>
+#include <string.h>
 #include "../source/disk.h"
 #include "memory_file_line.h"
+#include "point.h"
+#include "memory_file_line_iterator.h"
+#include "edit_renderer.h"
 
 /*
 	ANT_MEMORY_FILE_LINE::ANT_MEMORY_FILE_LINE()
 	--------------------------------------------
 */
-ANT_memory_file_line::ANT_memory_file_line()
+ANT_memory_file_line::ANT_memory_file_line(ANT_edit_renderer *renderer)
 {
 contents = NULL;
 line = NULL;
 current_line = 1;
 current_line_pointer = NULL;
 page_size = 10;		// lines of text per page
+this->renderer = renderer;
+window_width = window_height = 0;
 }
 
 /*
@@ -27,6 +33,7 @@ ANT_memory_file_line::~ANT_memory_file_line()
 {
 delete [] contents;
 delete [] line;
+delete renderer;
 }
 
 /*
@@ -153,4 +160,31 @@ current_line_pointer = line + new_line - 1;
 
 
 return current_line;
+}
+
+/*
+	ANT_MEMORY_FILE_LINE::RENDER()
+	------------------------------
+*/
+long long ANT_memory_file_line::render(void)
+{
+ANT_rgb colour = {0x00, 0x00, 0x00};
+ANT_point where, size;
+ANT_memory_file_line_iterator iterator(this);
+char *current_line;
+
+if ((current_line = iterator.first()) == NULL)
+	return 0;
+
+where.x = where.y = size.x = size.y = 0;
+while (where.y < window_height)
+	{
+	renderer->render_text_segment(&where, &colour, current_line, strlen(current_line), &size);
+
+	where.y += size.y;
+	if ((current_line = iterator.next()) == NULL)
+		break;
+	}
+
+return where.y;
 }

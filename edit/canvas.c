@@ -5,10 +5,9 @@
 #include <windows.h>
 #include "resources/resource.h"
 #include "canvas.h"
-//#include "bitmapinfor256.h"
-//#include "pallette.h"
 #include "memory_file_line.h"
 #include "memory_file_line_iterator.h"
+#include "point.h"
 
 #define VK_SCROLLLOCK (0x91)
 
@@ -19,7 +18,7 @@
 ANT_canvas::ANT_canvas(HINSTANCE hInstance)
 {
 this->hInstance = hInstance;
-file = new ANT_memory_file_line;
+file = new ANT_memory_file_line(this);
 }
 
 /*
@@ -121,64 +120,38 @@ return position;
 }
 
 /*
+	ANT_CANVAS::RENDER_TEXT_SEGMENT()
+	---------------------------------
+*/
+long long ANT_canvas::render_text_segment(ANT_point *where, ANT_rgb *colour, char *string, long long string_length, ANT_point *text_size)
+{
+TEXTMETRIC text_metrics;
+SIZE size;
+
+SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
+TextOut(hDC, where->x, where->y, string, string_length);
+GetTextExtentPoint(hDC, string, string_length, &size);
+
+text_size->x = size.cx;
+text_size->y = size.cy;
+
+return string_length;
+}
+
+/*
 	ANT_CANVAS::RENDER()
 	--------------------
 */
 void ANT_canvas::render(void)
 {
-HDC hDC;
 PAINTSTRUCT paintStruct;
-TEXTMETRIC text_metrics;
-RECT window_size;
 HGDIOBJ hFont;
-long long vertical_position, vertical_spacing;
-long long left_margin_gap = 5;	
-long long bottom_of_window;
-char *current_line;
-ANT_memory_file_line_iterator iterator(file);
-
-GetClientRect(window, &window_size);
-bottom_of_window = window_size.bottom;
-
-hFont = GetStockObject(OEM_FIXED_FONT);
 
 hDC = BeginPaint(window, &paintStruct);
+hFont = GetStockObject(OEM_FIXED_FONT);
 SelectObject(hDC, hFont);
-//SetBkColor(hDC, RGB(0xFF, 0xFF, 0xFF));
-SetTextColor(hDC, RGB(0x00, 0x00, 0x00));
-GetTextMetrics(hDC, &text_metrics);
-vertical_spacing = text_metrics.tmHeight + text_metrics.tmExternalLeading;
-
-vertical_position = 0;
-current_line = iterator.first();
-if (current_line != NULL)
-	while (vertical_position < bottom_of_window)
-		{
-		TextOut(hDC, left_margin_gap, vertical_position, current_line, strlen(current_line));
-		vertical_position += vertical_spacing;
-		if ((current_line = iterator.next()) == NULL)
-			break;
-		}
-
+file->render();
 EndPaint(window, &paintStruct);
-}
-
-
-/*
-	ANT_CANVAS::SET_PAGE_SIZE()
-	---------------------------
-*/
-long long ANT_canvas::set_page_size(long long pixels)
-{
-TEXTMETRIC text_metrics;
-HDC hDC = GetDC(window);
-
-SelectObject(hDC, GetStockObject(OEM_FIXED_FONT));
-GetTextMetrics(hDC, &text_metrics);
-file->set_page_size( pixels / (text_metrics.tmHeight + text_metrics.tmExternalLeading));
-
-ReleaseDC(window, hDC);
-return 0;
 }
 
 /*
@@ -190,7 +163,7 @@ LRESULT ANT_canvas::windows_callback(HWND hwnd, UINT message, WPARAM wParam, LPA
 switch(message)
 	{
 	case WM_CREATE:
-		set_page_size(((CREATESTRUCT *)lParam)->cy);
+		file->set_window_size(((CREATESTRUCT *)lParam)->cx, ((CREATESTRUCT *)lParam)->cy);
 		return 0;
 
 	case WM_CLOSE:
@@ -249,7 +222,7 @@ switch(message)
 		return 0;
 
 	case WM_SIZE:
-		set_page_size(HIWORD(lParam));
+		file->set_window_size(LOWORD(lParam), HIWORD(lParam));
 		return 0;
 
 	case WM_COMMAND:

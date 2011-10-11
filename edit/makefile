@@ -1,7 +1,29 @@
+#
+# Makefile for ATIRE/Edit
+#
 
-OBJECTS = main.c canvas.c memory_file_line.c memory_file_line_iterator.c ../source/disk.c ../source/file_internals.c
+OBJECTS = 								\
+	main.obj							\
+	canvas.obj							\
+	memory_file_line.obj				\
+	memory_file_line_iterator.obj		\
+	disk.obj							\
+	file_internals.obj					\
+	resources\resources.res
+
+main.exe : $(OBJECTS)
+	$(CXX) $(CXXFLAGS) /Zi -Femain.exe  $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib
 
 
-edit.exe : $(OBJECTS)
+.c.obj:
+	$(CC) $(CFLAGS) /Zi /c /Tp $< /Fo$@
+
+{..\source\}.c.obj:
+	$(CC) $(CFLAGS) /Zi /c /Tp $< /Fo$@
+
+resources/resources.res : resources/resources.rc
 	rc resources/resources.rc
-	$(CXX) $(CXXFLAGS) /Zi -Femain.exe  /TP $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib resources/resources.res
+	
+
+clean :
+	del $(OBJECTS) *.ilk *.pdb *.bak main.exe /s
