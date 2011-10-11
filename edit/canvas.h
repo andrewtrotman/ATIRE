@@ -29,10 +29,12 @@ private:
 	ANT_memory_file_line *file;
 
 private:
-	void make_canvas(void);
 	LRESULT windows_callback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void load_file(void);
+	long long load_file(void);
+	long long set_scroll_position(long long zero, long long position, long long page_length, long long end_of_file);
 	void menu(WORD clicked);
+	void render(void);
+	long long set_page_size(long long pixels);
 
 public:
 	ANT_canvas(HINSTANCE hInstance);

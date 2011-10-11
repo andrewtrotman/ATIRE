@@ -1,5 +1,5 @@
 
-OBJECTS = main.c canvas.c pallette.c ../source/disk.c ../source/file_internals.c
+OBJECTS = main.c canvas.c memory_file_line.c memory_file_line_iterator.c ../source/disk.c ../source/file_internals.c
 
 
 edit.exe : $(OBJECTS)

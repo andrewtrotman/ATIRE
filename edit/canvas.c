@@ -5,9 +5,10 @@
 #include <windows.h>
 #include "resources/resource.h"
 #include "canvas.h"
-#include "bitmapinfor256.h"
-#include "pallette.h"
+//#include "bitmapinfor256.h"
+//#include "pallette.h"
 #include "memory_file_line.h"
+#include "memory_file_line_iterator.h"
 
 #define VK_SCROLLLOCK (0x91)
 
@@ -31,33 +32,10 @@ delete file;
 }
 
 /*
-	ANT_CANVAS::MAKE_CANVAS()
-	-------------------------
-*/
-void ANT_canvas::make_canvas(void)
-{
-HGDIOBJ bmp;
-BITMAPINFO256 info;
-
-info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-info.bmiHeader.biWidth = WIDTH_IN_PIXELS;
-info.bmiHeader.biHeight = -HEIGHT_IN_PIXELS;	// -ve for a top-down DIB
-info.bmiHeader.biPlanes = 1;
-info.bmiHeader.biBitCount = 8;
-info.bmiHeader.biCompression = BI_RGB;			// not compressed
-info.bmiHeader.biSizeImage = 0;
-info.bmiHeader.biXPelsPerMeter = 0;
-info.bmiHeader.biYPelsPerMeter = 0;
-info.bmiHeader.biClrUsed = 0;
-info.bmiHeader.biClrImportant = 0;
-memset(info.bmiColors, 0, sizeof(info.bmiColors));
-}
-
-/*
 	ANT_CANVAS::LOAD_FILE()
 	-----------------------
 */
-void ANT_canvas::load_file(void)
+long long ANT_canvas::load_file(void)
 {
 char chosen_filter[1024];
 char chosen_filename[MAX_PATH];
@@ -85,11 +63,15 @@ parameters.lpfnHook = NULL;
 parameters.lpTemplateName = 0;
 
 #if (_WIN32_WINNT >= 0x0500)
-	parameters.pvReserved = (void *)NULL;
+	parameters.pvReserved = NULL;
 	parameters.dwReserved = 0;
 	parameters.FlagsEx = 0;
-#endif 
-GetOpenFileName(&parameters);
+#endif
+
+if ((GetOpenFileName(&parameters)) != 0)
+	return file->read_file(parameters.lpstrFile);
+else
+	return 0;
 }
 
 /*
@@ -98,6 +80,9 @@ GetOpenFileName(&parameters);
 */
 void ANT_canvas::menu(WORD clicked)
 {
+SCROLLINFO scrollbar;
+long long lines;
+
 switch (clicked)
 	{
 	/*
@@ -107,9 +92,93 @@ switch (clicked)
 		PostQuitMessage(0);
 		break;
 	case ID_FILE_OPEN_FILE:
-		load_file();
+		lines = load_file();
+		set_scroll_position(1, file->get_current_line_number(), file->get_page_size(), file->get_lines_in_file());
 		break;
 	}
+}
+
+/*
+	ANT_CANVAS::SET_SCROLL_POSITION()
+	---------------------------------
+*/
+long long ANT_canvas::set_scroll_position(long long zero, long long position, long long page_length, long long end_of_file)
+{
+SCROLLINFO scrollbar;
+
+SetScrollRange(window, SB_VERT, zero, end_of_file, true);
+scrollbar.cbSize = sizeof(scrollbar);
+scrollbar.fMask = SIF_RANGE | SIF_TRACKPOS | SIF_PAGE | SIF_POS; 
+scrollbar.nMin = zero;
+scrollbar.nMax = end_of_file;
+scrollbar.nPage = page_length;
+scrollbar.nPos = position;
+scrollbar.nTrackPos = 0;
+SetScrollInfo(window, SB_VERT, &scrollbar, true);
+InvalidateRect(window, NULL, true);
+
+return position;
+}
+
+/*
+	ANT_CANVAS::RENDER()
+	--------------------
+*/
+void ANT_canvas::render(void)
+{
+HDC hDC;
+PAINTSTRUCT paintStruct;
+TEXTMETRIC text_metrics;
+RECT window_size;
+HGDIOBJ hFont;
+long long vertical_position, vertical_spacing;
+long long left_margin_gap = 5;	
+long long bottom_of_window;
+char *current_line;
+ANT_memory_file_line_iterator iterator(file);
+
+GetClientRect(window, &window_size);
+bottom_of_window = window_size.bottom;
+
+hFont = GetStockObject(OEM_FIXED_FONT);
+
+hDC = BeginPaint(window, &paintStruct);
+SelectObject(hDC, hFont);
+//SetBkColor(hDC, RGB(0xFF, 0xFF, 0xFF));
+SetTextColor(hDC, RGB(0x00, 0x00, 0x00));
+GetTextMetrics(hDC, &text_metrics);
+vertical_spacing = text_metrics.tmHeight + text_metrics.tmExternalLeading;
+
+vertical_position = 0;
+current_line = iterator.first();
+if (current_line != NULL)
+	while (vertical_position < bottom_of_window)
+		{
+		TextOut(hDC, left_margin_gap, vertical_position, current_line, strlen(current_line));
+		vertical_position += vertical_spacing;
+		if ((current_line = iterator.next()) == NULL)
+			break;
+		}
+
+EndPaint(window, &paintStruct);
+}
+
+
+/*
+	ANT_CANVAS::SET_PAGE_SIZE()
+	---------------------------
+*/
+long long ANT_canvas::set_page_size(long long pixels)
+{
+TEXTMETRIC text_metrics;
+HDC hDC = GetDC(window);
+
+SelectObject(hDC, GetStockObject(OEM_FIXED_FONT));
+GetTextMetrics(hDC, &text_metrics);
+file->set_page_size( pixels / (text_metrics.tmHeight + text_metrics.tmExternalLeading));
+
+ReleaseDC(window, hDC);
+return 0;
 }
 
 /*
@@ -118,12 +187,10 @@ switch (clicked)
 */
 LRESULT ANT_canvas::windows_callback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-HDC hDC; 
-
 switch(message)
 	{
 	case WM_CREATE:
-		make_canvas();
+		set_page_size(((CREATESTRUCT *)lParam)->cy);
 		return 0;
 
 	case WM_CLOSE:
@@ -138,14 +205,55 @@ switch(message)
 	case WM_KEYUP:
 		return 0;
 
+	case WM_VSCROLL:
+		{
+		long long new_line, new_position;
+
+		switch LOWORD(wParam)
+			{
+			case SB_LINEUP:
+				new_line = file->line_up();
+				break;
+			case SB_LINEDOWN:
+				new_line = file->line_down();
+				break;
+			case SB_PAGEUP:
+				new_line = file->page_up();
+				break;
+			case SB_PAGEDOWN:
+				new_line = file->page_down();
+				break;
+			case SB_BOTTOM:
+				new_line = file->file_end();
+				break;
+			case SB_TOP:
+				new_line = file->file_start();
+				break;
+			case SB_ENDSCROLL:			// user has finished scrolling, do nothing
+				break;
+			case SB_THUMBPOSITION:		// user is tracking the scroll bar
+			case SB_THUMBTRACK:
+				new_position = HIWORD(wParam);
+				new_line = file->goto_line(new_position);
+				break;
+			}
+		set_scroll_position(1, file->get_current_line_number(), file->get_page_size(), file->get_lines_in_file());
+		InvalidateRect(window, NULL, true);
+		return 0;
+		}
 	case WM_PAINT:
+		render();
 		return 0;
 
 	case WM_TIMER:
 		return 0;
 
+	case WM_SIZE:
+		set_page_size(HIWORD(lParam));
+		return 0;
+
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDCANCEL)
+		if (LOWORD(wParam) == IDCANCEL)			// ESC key
 			{
 			}
 		else
@@ -193,7 +301,7 @@ windowClass.cbWndExtra = 0;
 windowClass.hInstance = 0;
 windowClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON_ATIRE_EDIT));
 windowClass.hCursor = NULL;
-windowClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+windowClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 windowClass.lpszMenuName = NULL;
 windowClass.lpszClassName = "ATIRE/Edit";
 windowClass.hIconSm = NULL;
@@ -203,7 +311,7 @@ RegisterClassEx(&windowClass);
 window = CreateWindowEx(NULL,			// extended style
 	"ATIRE/Edit",					// class name
 	window_title,					// window name
-	WS_EX_OVERLAPPEDWINDOW | WS_BORDER| WS_SYSMENU | WS_VISIBLE,
+	WS_EX_OVERLAPPEDWINDOW | WS_SYSMENU | WS_VISIBLE | WS_SIZEBOX | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VSCROLL,
 	120, 120,			// x/y coords
 	WIDTH_IN_PIXELS,	// width
 	2 * HEIGHT_IN_PIXELS,	// height
