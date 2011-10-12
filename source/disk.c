@@ -26,6 +26,11 @@ char *block = NULL;
 #ifdef _MSC_VER
 	HANDLE fp;
 	LARGE_INTEGER details;
+	#if defined(UNICODE) || defined(_UNICODE)
+		LPCWSTR true_filename = (LPCWSTR)filename;					// If we're in UNICODE land then the filename is actually a wide-string
+	#else
+		char *true_filename = filename;									// else we're in ASCII land and so the filename is a c-string
+	#endif
 #else
 	FILE *fp;
 	struct stat details;
@@ -38,7 +43,7 @@ if (file_length == NULL)
 	file_length = &unused;
 
 #ifdef _MSC_VER
-	fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+	fp = CreateFile(true_filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (fp == INVALID_HANDLE_VALUE)
 		return NULL;
 
