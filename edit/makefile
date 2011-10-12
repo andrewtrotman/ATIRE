@@ -1,5 +1,6 @@
 #
 # Makefile for ATIRE/Edit
+#/D_UNICODE /DUNICODE
 #
 .SILENT:
 
@@ -16,10 +17,10 @@ OBJECTS = 							\
 	resources\resources.res
 
 main.exe : $(OBJECTS)
-	$(CXX) $(CXXFLAGS) /nologo /Zi -Femain.exe  $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib
-
+	$(CXX) $(CXXFLAGS) /nologo /Zi -Femain.exe  $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib shlwapi.lib kernel32.lib advapi32.lib shell32.lib ole32.lib comctl32.lib
 
 CFLAGS = $(CFLAGS) /nologo /Zi /c /Tp
+
 
 .c.obj:
 	$(CC) $(CFLAGS) $< /Fo$@

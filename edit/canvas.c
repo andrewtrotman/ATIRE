@@ -11,6 +11,25 @@
 
 #define VK_SCROLLLOCK (0x91)
 
+
+
+
+#define STRICT_TYPED_ITEMIDS
+#include <shlobj.h>
+#include <objbase.h>      // For COM headers
+#include <shobjidl.h>     // for IFileDialogEvents and IFileDialogControlEvents
+#include <shlwapi.h>
+#include <knownfolders.h> // for KnownFolder APIs/datatypes/function headers
+#include <propvarutil.h>  // for PROPVAR-related functions
+#include <propkey.h>      // for the Property key APIs/datatypes
+#include <propidl.h>      // for the Property System APIs
+#include <strsafe.h>      // for StringCchPrintfW
+#include <shtypes.h>      // for COMDLG_FILTERSPEC
+#include <new>
+
+
+
+
 /*
 	ANT_CANVAS::ANT_CANVAS()
 	------------------------
@@ -29,7 +48,7 @@ ANT_canvas::~ANT_canvas()
 {
 delete file;
 }
-
+#ifdef NEVER
 /*
 	ANT_CANVAS::LOAD_FILE()
 	-----------------------
@@ -39,6 +58,9 @@ long long ANT_canvas::load_file(void)
 char chosen_filter[1024];
 char chosen_filename[MAX_PATH];
 OPENFILENAME parameters;
+
+memset(chosen_filename, 0, sizeof(chosen_filename));
+memset(chosen_filename, 0, sizeof(chosen_filename));
 
 parameters.lStructSize = sizeof(parameters);
 parameters.hwndOwner = window;
@@ -72,6 +94,89 @@ if ((GetOpenFileName(&parameters)) != 0)
 else
 	return 0;
 }
+#else
+
+long long ANT_canvas::load_file(void)
+{
+extern HRESULT BasicFileOpen();
+
+BasicFileOpen();
+
+return 0;
+}
+
+#pragma comment(lib, "comctl32.lib") // For TaskDialog
+
+#if defined _M_IX86
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_IA64
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
+
+#define INDEX_WORDDOC 1
+
+const COMDLG_FILTERSPEC c_rgSaveTypes[] =
+{
+    {L"Word Document (*.doc)",       L"*.doc"},
+    {L"Web Page (*.htm; *.html)",    L"*.htm;*.html"},
+    {L"Text Document (*.txt)",       L"*.txt"},
+    {L"All Documents (*.*)",         L"*.*"}
+};
+
+HRESULT BasicFileOpen()
+{
+IFileDialog *pfd = NULL;
+HRESULT hr;
+
+/*
+	Create the Open Dialg object IFileDialog
+*/
+hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+if (SUCCEEDED(hr))
+	{
+	/*
+		we have an object, now use it
+	*/
+	DWORD dwFlags;
+
+	pfd->GetOptions(&dwFlags);
+	pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
+	pfd->SetFileTypes(ARRAYSIZE(c_rgSaveTypes), c_rgSaveTypes);
+	pfd->SetFileTypeIndex(INDEX_WORDDOC);
+	pfd->SetDefaultExtension(L"doc;docx");
+	hr = pfd->Show(NULL);
+
+	if (SUCCEEDED(hr))
+		{
+		// Obtain the result once the user clicks 
+		// the 'Open' button.
+		// The result is an IShellItem object.
+		IShellItem *psiResult;
+		hr = pfd->GetResult(&psiResult);
+		if (SUCCEEDED(hr))
+			{
+			// We are just going to print out the 
+			// name of the file for sample sake.
+			PWSTR pszFilePath = NULL;
+			hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+			if (SUCCEEDED(hr))
+				{
+				TaskDialog(NULL, NULL, L"CommonFileDialogApp", pszFilePath, NULL, TDCBF_OK_BUTTON, TD_INFORMATION_ICON, NULL);
+				CoTaskMemFree(pszFilePath);
+				}
+			psiResult->Release();
+			}
+		}
+	pfd->Release();
+	}
+return hr;
+}
+
+#endif
 
 /*
 	ANT_CANVAS::MENU()

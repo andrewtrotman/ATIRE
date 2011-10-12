@@ -21,6 +21,7 @@ ANT_memory_file_line::ANT_memory_file_line(ANT_edit_renderer *renderer)
 contents = NULL;
 line = NULL;
 current_line = 1;
+lines_in_file = 0;
 current_line_pointer = NULL;
 page_size = 10;		// lines of text per page
 this->renderer = renderer;
