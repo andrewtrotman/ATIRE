@@ -9,6 +9,8 @@
 #include "point.h"
 #include "memory_file_line_iterator.h"
 #include "edit_renderer.h"
+#include "source_parser_c.h"
+#include "token_colours.h"
 
 /*
 	ANT_MEMORY_FILE_LINE::ANT_MEMORY_FILE_LINE()
@@ -168,10 +170,13 @@ return current_line;
 */
 long long ANT_memory_file_line::render(void)
 {
-ANT_rgb colour = {0x00, 0x00, 0x00};
+ANT_token_colours colour_set;
 ANT_point where, size;
 ANT_memory_file_line_iterator iterator(this);
+ANT_source_parser_c parser;
+ANT_source_parser_token *token;
 char *current_line;
+long long max_y;
 
 if ((current_line = iterator.first()) == NULL)
 	return 0;
@@ -179,11 +184,25 @@ if ((current_line = iterator.first()) == NULL)
 where.x = where.y = size.x = size.y = 0;
 while (where.y < window_height)
 	{
-	renderer->render_text_segment(&where, &colour, current_line, strlen(current_line), &size);
+	max_y = where.x = 0;
+	parser.set_text(current_line);
+	for (token = parser.first(); token != NULL; token = parser.next())
+		{
+		if (token->type() == ANT_source_parser_token::TAB)
+			renderer->render_text_segment(&where, colour_set.colour(token->type()), "   ", 3, &size);
+		else if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_BLOCK_COMMENT)
+			renderer->render_text_segment(&where, colour_set.colour(ANT_source_parser_token::BLOCK_COMMENT), token->string(), token->length(), &size);
+		else
+			renderer->render_text_segment(&where, colour_set.colour(token->type()), token->string(), token->length(), &size);
+		where.x += size.x;
+		if (size.y > max_y)
+			max_y += size.y;
+		}
 
-	where.y += size.y;
 	if ((current_line = iterator.next()) == NULL)
 		break;
+
+	where.y += max_y;
 	}
 
 return where.y;

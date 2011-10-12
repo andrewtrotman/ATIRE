@@ -145,13 +145,52 @@ return string_length;
 void ANT_canvas::render(void)
 {
 PAINTSTRUCT paintStruct;
+HDC window_dc, dc;
 HGDIOBJ hFont;
+RECT canvas_size;
+HBITMAP bitmap;
 
-hDC = BeginPaint(window, &paintStruct);
+/*
+	Get the window's DC
+*/
+dc = GetDC(window);
+hDC = CreateCompatibleDC(dc);
+
+/*
+	Create a bitmap and put tell the DC to use it.
+*/
+GetClientRect(window, &canvas_size);
+bitmap = CreateCompatibleBitmap(dc, canvas_size.right, canvas_size.bottom);
+SelectObject(hDC, bitmap);
+BitBlt(hDC, 0, 0, canvas_size.right, canvas_size.bottom, hDC, 0, 0, WHITENESS);
+
+/*
+	Set the font
+*/
 hFont = GetStockObject(OEM_FIXED_FONT);
 SelectObject(hDC, hFont);
+
+/*
+	tell ATIRE/Edit to render
+*/
 file->render();
+
+
+/*
+	Copy the bitmap into the new window
+*/
+window_dc = BeginPaint(window, &paintStruct);
+BitBlt(window_dc, 0, 0, canvas_size.right, canvas_size.bottom, hDC, 0, 0, SRCCOPY);
 EndPaint(window, &paintStruct);
+ReleaseDC(window, window_dc);
+
+/*
+	Clean up
+*/
+ReleaseDC(window, dc);
+DeleteObject(bitmap);
+DeleteObject(hFont);
+DeleteDC(hDC);
 }
 
 /*
@@ -221,6 +260,30 @@ switch(message)
 	case WM_TIMER:
 		return 0;
 
+	case WM_MOUSEWHEEL:
+		{
+		long long lines = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
+		long long current;
+
+		if (lines > 0)
+			for (current = 0; current < lines; current++)
+				{
+				file->line_up();
+				file->line_up();
+				file->line_up();
+				}
+		else
+			for (current = 0; current > lines; current--)
+				{
+				file->line_down();
+				file->line_down();
+				file->line_down();
+				}
+
+		set_scroll_position(1, file->get_current_line_number(), file->get_page_size(), file->get_lines_in_file());
+		InvalidateRect(window, NULL, true);
+		return 0;
+		}
 	case WM_SIZE:
 		file->set_window_size(LOWORD(lParam), HIWORD(lParam));
 		return 0;
@@ -274,7 +337,7 @@ windowClass.cbWndExtra = 0;
 windowClass.hInstance = 0;
 windowClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON_ATIRE_EDIT));
 windowClass.hCursor = NULL;
-windowClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+windowClass.hbrBackground = NULL; // (HBRUSH)GetStockObject(WHITE_BRUSH);
 windowClass.lpszMenuName = NULL;
 windowClass.lpszClassName = "ATIRE/Edit";
 windowClass.hIconSm = NULL;

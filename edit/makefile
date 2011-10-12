@@ -3,13 +3,16 @@
 #
 .SILENT:
 
-OBJECTS = 								\
+OBJECTS = 							\
 	main.obj							\
+	source_parser_c.obj					\
 	canvas.obj							\
 	memory_file_line.obj				\
 	memory_file_line_iterator.obj		\
+	token_colours.obj					\
 	disk.obj							\
 	file_internals.obj					\
+	ctypes.obj							\
 	resources\resources.res
 
 main.exe : $(OBJECTS)
