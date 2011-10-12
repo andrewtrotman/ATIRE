@@ -192,6 +192,8 @@ while (where.y < window_height)
 			renderer->render_text_segment(&where, colour_set.colour(token->type()), "   ", 3, &size);
 		else if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_BLOCK_COMMENT)
 			renderer->render_text_segment(&where, colour_set.colour(ANT_source_parser_token::BLOCK_COMMENT), token->string(), token->length(), &size);
+		else if (token->type() == ANT_source_parser_token::CLOSE_BLOCK_COMMENT)
+			renderer->render_text_segment(&where, colour_set.colour(ANT_source_parser_token::KNOWN_ERROR), token->string(), token->length(), &size);
 		else
 			renderer->render_text_segment(&where, colour_set.colour(token->type()), token->string(), token->length(), &size);
 		where.x += size.x;

@@ -135,7 +135,7 @@ if ((cmp = strncmp(token->string(), *word, token->length())) == 0)
 	if (strlen(*word) == token->length())
 		return 0;
 	else
-		return 1;
+		return -1;
 else
 	return cmp;
 }
@@ -251,14 +251,13 @@ else if (*at == '\'')
 	}
 else if (*at == '/' && *(at + 1) == '*')
 	{
-	token.string_type = ANT_source_parser_token::BLOCK_COMMENT;
+	token.string_type = ANT_source_parser_token::OPEN_BLOCK_COMMENT;
 	in_block_comment = true;
 	at += 2;
 	}
 else if (*at == '*' && *(at + 1) == '/')
 	{
-	token.string_type = ANT_source_parser_token::BLOCK_COMMENT;
-	in_block_comment = false;
+	token.string_type = ANT_source_parser_token::CLOSE_BLOCK_COMMENT;
 	at += 2;
 	}
 else if (*at == '/' && *(at + 1) == '/')
@@ -300,7 +299,11 @@ token.string_length = at - start;
 
 token.string_attributes = ANT_source_parser_token::NONE;
 if (in_block_comment)
+	{
 	token.string_attributes = ANT_source_parser_token::ATTRIBUTE_BLOCK_COMMENT;
+	if (token.type() == ANT_source_parser_token::CLOSE_BLOCK_COMMENT)
+		in_block_comment = false;
+	}
 
 return &token;
 }
