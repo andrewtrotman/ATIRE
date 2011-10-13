@@ -44,60 +44,76 @@ delete [] docs1;
 
 int main(int argc, char **argv)
 {
+int argpos, docnames_mode;
+char *doclist_fn;
 char *empty_string = "";
 FILE *doclist;
 std::vector<char*> docnames;
 char line[4096];
 
-if (argc < 3)
+if (argc < 2)
 	{
-	printf("Usage: %s <doclistfile> <pregenfile> ...\n", argv[0]);
+	printf("Usage: %s [-doclist <doclistfile>] <pregenfile> ...\n", argv[0]);
 	return -1;
 	}
 
-doclist = fopen(argv[1], "rb");
-
-if (doclist == NULL)
+if (strcmp(argv[1], "-doclist") == 0)
 	{
-	fprintf(stderr, "Couldn't load doclist file '%s'.\n", argv[1]);
-	exit(-1);
-	}
+	doclist_fn = argv[2];
 
-fprintf(stderr, "Loading doclist...\n");
+	doclist = fopen(doclist_fn, "rb");
 
-while (fgets(line, sizeof(line), doclist) != NULL)
-	{
-	char *titlestart, *titleend;
-	char *docnamestart = line;
-
-	titlestart = strstr(docnamestart, "<title>");
-
-	if (titlestart == NULL)
+	if (doclist == NULL)
 		{
-		docnames.push_back(empty_string);
-		continue;
+		fprintf(stderr, "Couldn't load doclist file '%s'.\n", argv[1]);
+		exit(-1);
 		}
 
-	titlestart += strlen("<title>");
+	fprintf(stderr, "Loading doclist...\n");
 
-	titleend = strstr(titlestart, "</title>");
-
-	if (titleend == NULL)
+	while (fgets(line, sizeof(line), doclist) != NULL)
 		{
-		docnames.push_back(empty_string);
-		continue;
+		char *titlestart, *titleend;
+		char *docnamestart = line;
+
+		titlestart = strstr(docnamestart, "<title>");
+
+		if (titlestart == NULL)
+			{
+			docnames.push_back(empty_string);
+			continue;
+			}
+
+		titlestart += strlen("<title>");
+
+		titleend = strstr(titlestart, "</title>");
+
+		if (titleend == NULL)
+			{
+			docnames.push_back(empty_string);
+			continue;
+			}
+
+		docnames.push_back(strnnew(titlestart, titleend - titlestart));
 		}
 
-	docnames.push_back(strnnew(titlestart, titleend - titlestart));
+	fclose(doclist);
+
+	fprintf(stderr, "Doclist contains %llu documents.\n", (long long unsigned) docnames.size());
+
+	docnames_mode = 1;
+	argpos = 3;
+	}
+else
+	{
+	docnames_mode = 0;
+	argpos = 1;
 	}
 
-fclose(doclist);
-
-fprintf(stderr, "Doclist contains %llu documents.\n", (long long unsigned) docnames.size());
 
 fprintf(stderr, "Printing pregens...\n");
 
-for (int i = 2; i < argc; i++)
+for (int i = argpos; i < argc; i++)
 	{
 	ANT_pregen pregen;
 
@@ -105,16 +121,16 @@ for (int i = 2; i < argc; i++)
 
 	pregen.read(argv[i]);
 
-	if (pregen.doc_count != docnames.size())
+	if (docnames_mode)
 		{
-		printf("Pregen doc count %llu doesn't match doclist count %llu\n", pregen.doc_count, docnames.size());
+		if (pregen.doc_count != docnames.size())
+			printf("Pregen doc count %llu doesn't match doclist count %llu\n", pregen.doc_count, docnames.size());
+		else
+			print_pregen(docnames, pregen, 64);
 		}
 	else
-		{
 		for (int i = 0; i < pregen.doc_count; i++)
 			printf("%llu\n", (long long unsigned) pregen.scores[i]);
-		//print_pregen(docnames, pregen, 64);
-		}
 	}
 
 //Leak the whole doclist
