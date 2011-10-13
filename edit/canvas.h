@@ -23,11 +23,15 @@ private:
 	static const long HEIGHT_IN_PIXELS = 240;
 
 private:
+	HFONT ascii_font;
+	HFONT unicode_font;
 	HINSTANCE hInstance;
 	HDC hDC;
 	HWND window;
 
 	ANT_memory_file_line *file;
+	char *unicode_buffer;
+	long long unicode_buffer_length;
 
 private:
 	LRESULT windows_callback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

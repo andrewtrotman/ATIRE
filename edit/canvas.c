@@ -21,6 +21,10 @@ ANT_canvas::ANT_canvas(HINSTANCE hInstance)
 {
 this->hInstance = hInstance;
 file = new ANT_memory_file_line(this);
+
+ascii_font = (HFONT)GetStockObject(OEM_FIXED_FONT);
+unicode_font = CreateFont(10, 10, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Consolas");
+unicode_buffer = new char [unicode_buffer_length = 1024];
 }
 
 /*
@@ -29,7 +33,11 @@ file = new ANT_memory_file_line(this);
 */
 ANT_canvas::~ANT_canvas()
 {
+DeleteObject(ascii_font);
+DeleteObject(unicode_font);
+
 delete file;
+delete [] unicode_buffer;
 }
 
 /*
@@ -179,18 +187,13 @@ SIZE size;
 static const long long RIGHT_MARGIN = 5;
 HGDIOBJ hfont;
 
-SelectObject(hDC, hfont = GetStockObject(OEM_FIXED_FONT));
-
-
+SelectObject(hDC, ascii_font);
 SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
 TextOutA(hDC, where->x + RIGHT_MARGIN, where->y, string, string_length);
 GetTextExtentPointA(hDC, string, string_length, &size);
 
 text_size->x = size.cx;
 text_size->y = size.cy;
-
-DeleteObject(hfont);
-
 
 return string_length;
 }
@@ -204,60 +207,38 @@ long long ANT_canvas::render_utf8_segment(ANT_point *where, ANT_rgb *colour, cha
 TEXTMETRIC text_metrics;
 SIZE size;
 static const long long RIGHT_MARGIN = 5;
-char buffer[1024];
-HFONT hfont;
+long long result;
 
-//buffer = new (std::nothrow) char [string_length * 2 + 2];
-int got = MultiByteToWideChar(CP_UTF8, 0, string, string_length, (LPWSTR)buffer, 512);
-if (got == 0)
-		{
-		int now_what = GetLastError();
-		switch (now_what)
+while (1)
+	{
+	if ((result = MultiByteToWideChar(CP_UTF8, 0, string, string_length, (LPWSTR)unicode_buffer, unicode_buffer_length / 2)) != 0)
+		break;
+	else
+		if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 			{
-			case ERROR_INSUFFICIENT_BUFFER:
+			result = MultiByteToWideChar(CP_UTF8, 0, string, string_length, NULL, 0);
+			if (result == 0)
+				return render_text_segment(where, colour, string, string_length, text_size);
+			else
 				{
-				int x = 0;
-				break;
-				}
-			case ERROR_INVALID_FLAGS:
-				{
-				int x = 0;
-				break;
-				}
-			case ERROR_INVALID_PARAMETER:
-				{
-				int x = 0;
-				break;
-				}
-			case ERROR_NO_UNICODE_TRANSLATION:
-				{
-				int x = 0;
-				break;
-				}
-			default:
-				{
-				int x = 0;
-				break;
+				unicode_buffer_length = result + 2;		// +2 for the L'\0'
+				delete [] unicode_buffer;
+				unicode_buffer = new (std::nothrow) char [unicode_buffer_length];
 				}
 			}
-		}
+		else
+			return render_text_segment(where, colour, string, string_length, text_size);
+	}
 
-hfont = CreateFont(10, 10, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Consolas");
-SelectObject(hDC, hfont);
 
-
+SelectObject(hDC, unicode_font);
 SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
 
-TextOutW(hDC, where->x + RIGHT_MARGIN, where->y, (LPWSTR)buffer, string_length);
-GetTextExtentPointW(hDC, (LPWSTR)buffer, string_length, &size);
+TextOutW(hDC, where->x + RIGHT_MARGIN, where->y, (LPWSTR)unicode_buffer, result);
+GetTextExtentPointW(hDC, (LPWSTR)unicode_buffer, result, &size);
 
 text_size->x = size.cx;
 text_size->y = size.cy;
-
-//delete [] buffer;
-
-DeleteObject(hfont);
-
 
 return string_length;
 }
@@ -292,8 +273,7 @@ BitBlt(hDC, 0, 0, canvas_size.right, canvas_size.bottom, hDC, 0, 0, WHITENESS);
 /*
 	Set the font
 */
-hFont = GetStockObject(OEM_FIXED_FONT);
-SelectObject(hDC, hFont);
+SelectObject(hDC, ascii_font);
 
 /*
 	tell ATIRE/Edit to render
@@ -314,7 +294,6 @@ ReleaseDC(window, window_dc);
 */
 ReleaseDC(window, dc);
 DeleteObject(bitmap);
-DeleteObject(hFont);
 DeleteDC(hDC);
 }
 
@@ -328,7 +307,6 @@ switch(message)
 	{
 	case WM_CREATE:
 		file->set_window_size(((CREATESTRUCT *)lParam)->cx, ((CREATESTRUCT *)lParam)->cy);
-
 		file->read_file((char *)(L"c:\\ant\\edit\\main.c"));
 		return 0;
 
