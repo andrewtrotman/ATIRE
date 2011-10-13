@@ -403,6 +403,7 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_boolean_parser.exe	\
 	$(BINDIR)\test_unicode_case_convert.exe			\
 	$(BINDIR)\pregen_precision_measurement.exe		\
+	$(BINDIR)\pregen_create.exe		\
 	$(BINDIR)\pregen_examine.exe					\
 	$(BINDIR)\test_pregen.exe						\
 	$(BINDIR)\test_kendall_tau.exe					\
@@ -426,6 +427,7 @@ bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
 bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
 bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj
 bin\pregen_precision_measurement.exe : bin\pregen_precision_measurement.obj bin\pregen_kendall_tau.obj
+bin\pregen_create.exe : bin\pregen_create.obj
 bin\pregen_examine.exe : bin\pregen_examine.obj
 bin\test_pregen.exe : bin\test_pregen.obj
 bin\test_kendall_tau.exe : bin\test_kendall_tau.obj bin\pregen_kendall_tau.obj

@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
-#include <sstream>
 #include <utility>
 #include <algorithm>
 #include <cmath>
@@ -332,128 +331,80 @@ delete[] ranks1;
 delete[] ranks2;
 }
 
-/* Compare pregens on the same fields so we can check relative effectiveness of different methods.
- *
- * We'll take the first appearance of a field's pregen as the baseline to compare the
- * rest of the results against
- */
-void mutual_compare_pregens(ANT_pregen *pregens, int num_pregens)
-{
-int *compared = new int[num_pregens]; //Values are true if we've compared against this pregen already
-
-memset((void *) compared, 0, sizeof(compared[0]) * num_pregens);
-
-for (int i = 0; i < num_pregens; i++)
-	if (!compared[i])
-		{
-		printf("Pregen on field: %s, method: %s\n", pregens[i].field_name, pregen_type_to_str(pregens[i].type));
-
-		for (int j = i + 1; j < num_pregens; j++)
-			if (strcmp(pregens[i].field_name, pregens[j].field_name) == 0)
-				{
-				fprintf(stderr, "Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
-				printf("Comparing with: %s\n", pregen_type_to_str(pregens[j].type));
-				printf("Sum of rank diffs, average, percentage\n");
-
-				for (int bits = 64; bits >= 4; bits--)
-					{
-					compare_kendall_tau(pregens[i], pregens[j], bits);
-					}
-
-				compared[j] = 1;
-				}
-		}
-}
-
 int main(int argc, char ** argv)
 {
 ANT_indexer_param_block_pregen pregen_params;
-int already_have_pregen_files = 1;
+int missing_pregens = 0;
 int num_pregens;
-ANT_pregen *pregens;
-char **pregen_type, **pregen_filenames;
+char **pregen_filenames;
 
-
-assert(argc >= 3);
-
-num_pregens = (argc - 2) / 2;
-pregen_type = new char*[num_pregens];
+num_pregens = argc - 1;
 pregen_filenames = new char*[num_pregens];
 
 printf("Pregen field size is %d bytes\n\n", sizeof(pregen_t));
 
+if (num_pregens < 2)
+	{
+	printf("Need at least two pregens to compare. Usage: %s <pregen_filename> ... \n", argv[0]);
+	return -1;
+	}
+
+for (int i = 1, pregen_index = 0; i < argc; i++, pregen_index++)
+	{
+	char * pregen_filename = argv[i];
+
+	pregen_filenames[pregen_index] = pregen_filename;
+
+	if (!file_exists(pregen_filename))
+		{
+		printf("Pregen file '%s' could not be found\n", pregen_filename);
+		missing_pregens = 1;
+		}
+	}
+
+if (missing_pregens)
+	{
+	printf("Not all pregens could be found, aborting.\n");
+	return -1;
+	}
+
 /*
- * Which pregens are we examining? Use the indexer_param_block_pregen class to parse from command line
- */
-for (int i = 2, pregen_index = 0; i < argc; i += 2, pregen_index++)
-	{
-	char * field_name = argv[i];
-	char * field_type = argv[i + 1];
-	std::ostringstream filenamebuf;
-
-	pregen_type[pregen_index] = field_type;
-
-	filenamebuf << "pregen." << field_name << "." << field_type;
-
-	pregen_filenames[pregen_index] = strnew(filenamebuf.str().c_str());
-
-	if (!pregen_params.add_pregen_field(field_name, field_type))
-		exit(printf("Unknown pregen field type '%s'\n", field_type));
-
-	already_have_pregen_files = already_have_pregen_files && file_exists(pregen_filenames[pregen_index]);
-	}
-
-if (already_have_pregen_files)
-	fprintf(stderr, "Pregen files already exist, reading those...\n");
-else
-	{
-	ANT_pregens_writer pregen_writer;
-	char *doclist, *cur;
-
-	fprintf(stderr, "Generating pregens from doclist...\n");
-
-	//Read document names from the .doclist file
-	doclist = map_entire_file(argv[1], NULL);
-
-	if (!doclist)
-		{
-		fprintf(stderr, "Couldn't read doclist\n");
-		exit(-1);
-		}
-
-	//Create pregen field writers for each of the fields we're examining...
-	for (int i = 0; i < pregen_params.num_pregen_fields; i++)
-		if (!pregen_writer.add_field(pregen_filenames[i], pregen_params.pregens[i].field_name, pregen_params.pregens[i].type))
-			exit(fprintf(stderr, "Couldn't open pregen file '%s'\n", pregen_filenames[i]));
-
-	long long docindex = 0;
-
-	cur = doclist;
-	while (*cur)
-		{
-		char * docnameend = strchr(cur, '\n');
-
-		if (!docnameend)
-			break;
-
-		pregen_writer.process_document(docindex, ANT_string_pair(cur, docnameend - cur));
-
-		cur = docnameend + 1;
-		docindex++;
-		}
-
-	pregen_writer.close();
-	}
-
-/* Pregens are written to a file, so read the pregens that we just wrote back into memory */
-pregens = new ANT_pregen[num_pregens];
-
-for (int i = 0; i < num_pregens; i++)
-	pregens[i].read(pregen_filenames[i]);
-
+	We'll take the first appearance of a field's pregen as the baseline to compare the
+	rest of the results against
+*/
 fprintf(stderr, "Comparing pregens...\n");
 
-mutual_compare_pregens(pregens, num_pregens);
+ANT_pregen baseline;
+
+if (!baseline.read(pregen_filenames[0]))
+	{
+	printf("Failed to read baseline pregen %s\n", pregen_filenames[0]);
+	return -1;
+	}
+
+printf("Baseline for field: %s, method: %s\n", baseline.field_name, pregen_type_to_str(baseline.type));
+
+for (int i = 1; i < num_pregens; i++)
+	{
+	ANT_pregen pregen;
+
+	if (pregen.read(pregen_filenames[i]))
+		{
+		if (strcmp(baseline.field_name,pregen.field_name) == 0)
+			{
+			fprintf(stderr, "Comparing with: %s\n", pregen_type_to_str(pregen.type));
+			printf("Comparing with: %s\n", pregen_type_to_str(pregen.type));
+			printf("Sum of rank diffs, average, percentage\n");
+
+			for (int bits = 64; bits >= 4; bits--)
+				compare_kendall_tau(baseline, pregen, bits);
+			}
+		else
+			printf("Pregen file '%s' has different field name '%s' than baseline '%s', skipping.\n", pregen_filenames[i], pregen.field_name, baseline.field_name);
+		}
+	else
+		printf("Failed to read pregen %s\n", pregen_filenames[i]);
+	}
 
 //Leak everything
 return EXIT_SUCCESS;
