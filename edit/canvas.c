@@ -177,6 +177,10 @@ long long ANT_canvas::render_text_segment(ANT_point *where, ANT_rgb *colour, cha
 TEXTMETRIC text_metrics;
 SIZE size;
 static const long long RIGHT_MARGIN = 5;
+HGDIOBJ hfont;
+
+SelectObject(hDC, hfont = GetStockObject(OEM_FIXED_FONT));
+
 
 SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
 TextOutA(hDC, where->x + RIGHT_MARGIN, where->y, string, string_length);
@@ -184,6 +188,9 @@ GetTextExtentPointA(hDC, string, string_length, &size);
 
 text_size->x = size.cx;
 text_size->y = size.cy;
+
+DeleteObject(hfont);
+
 
 return string_length;
 }
@@ -197,20 +204,60 @@ long long ANT_canvas::render_utf8_segment(ANT_point *where, ANT_rgb *colour, cha
 TEXTMETRIC text_metrics;
 SIZE size;
 static const long long RIGHT_MARGIN = 5;
-char *buffer;
+char buffer[1024];
+HFONT hfont;
 
-buffer = new (std::nothrow) char [string_length * 2];
-MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS, string, string_length, (LPWSTR)buffer, string_length);
+//buffer = new (std::nothrow) char [string_length * 2 + 2];
+int got = MultiByteToWideChar(CP_UTF8, 0, string, string_length, (LPWSTR)buffer, 512);
+if (got == 0)
+		{
+		int now_what = GetLastError();
+		switch (now_what)
+			{
+			case ERROR_INSUFFICIENT_BUFFER:
+				{
+				int x = 0;
+				break;
+				}
+			case ERROR_INVALID_FLAGS:
+				{
+				int x = 0;
+				break;
+				}
+			case ERROR_INVALID_PARAMETER:
+				{
+				int x = 0;
+				break;
+				}
+			case ERROR_NO_UNICODE_TRANSLATION:
+				{
+				int x = 0;
+				break;
+				}
+			default:
+				{
+				int x = 0;
+				break;
+				}
+			}
+		}
+
+hfont = CreateFont(10, 10, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Consolas");
+SelectObject(hDC, hfont);
+
 
 SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
 
-TextOutA(hDC, where->x + RIGHT_MARGIN, where->y, buffer, string_length);
-GetTextExtentPointW(hDC, string, string_length, &size);
+TextOutW(hDC, where->x + RIGHT_MARGIN, where->y, (LPWSTR)buffer, string_length);
+GetTextExtentPointW(hDC, (LPWSTR)buffer, string_length, &size);
 
 text_size->x = size.cx;
 text_size->y = size.cy;
 
-delete [] buffer;
+//delete [] buffer;
+
+DeleteObject(hfont);
+
 
 return string_length;
 }

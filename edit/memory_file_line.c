@@ -212,7 +212,7 @@ while (where.y < window_height)
 				else
 					rgb_colour = colour_set.colour(token->type());
 
-				if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_UNICODE != 0)
+				if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_UNICODE)
 					renderer->render_utf8_segment(&where, rgb_colour, token->string(), token->length(), &size);
 				else
 					renderer->render_text_segment(&where, rgb_colour, token->string(), token->length(), &size);
