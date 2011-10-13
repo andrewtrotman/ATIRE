@@ -7,27 +7,11 @@
 #include <algorithm>
 #include <cmath>
 
-#ifdef _MSC_VER
-
-#include <windows.h>
-
-#else
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
-
-#endif
-
 #include "../source/str.h"
 #include "../source/string_pair.h"
 #include "../source/file.h"
 #include "../source/disk.h"
 #include "../source/pregen.h"
-#include "../source/search_engine_accumulator.h"
-#include "../source/indexer_param_block_pregen.h"
 #include "../source/pregen_kendall_tau.h"
 
 int file_exists(const char *filename)
@@ -41,52 +25,6 @@ if (file)
 	}
 return 0;
 }
-
-#ifdef _MSC_VER
-	char *map_entire_file(const char *filename, long long *filesize)
-	{
-	HANDLE mapping;
-	HANDLE fp;
-	char *result;
-
-	(void) filesize; //TODO fill this parameter
-
-	fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-
-	if (fp == INVALID_HANDLE_VALUE)
-		return NULL;
-
-	mapping = CreateFileMapping(fp, NULL, PAGE_READONLY, 0, 0, NULL);
-
-	if (mapping == NULL)
-		return NULL;
-
-	result = (char*) MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
-
-	return result;
-	}
-#else
-	char *map_entire_file(const char *filename, long long *filesize)
-	{
-	int fd = open(filename, O_RDONLY, (mode_t)0600);
-	struct stat buffer;
-	char *result;
-
-	(void) filesize; //TODO fill this parameter
-
-	if (fd == -1)
-		return NULL;
-
-	fstat(fd, &buffer);
-
-	result = (char*) mmap (0, buffer.st_size, PROT_READ, MAP_SHARED, fd, 0);
-
-	if (result==MAP_FAILED)
-		return NULL;
-
-	return result;
-	}
-#endif
 
 bool compare_rsv_greater(const std::pair<long long, pregen_t>& a, const std::pair<long long, pregen_t>& b)
 {
@@ -333,7 +271,6 @@ delete[] ranks2;
 
 int main(int argc, char ** argv)
 {
-ANT_indexer_param_block_pregen pregen_params;
 int missing_pregens = 0;
 int num_pregens;
 char **pregen_filenames;
