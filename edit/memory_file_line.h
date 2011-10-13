@@ -5,6 +5,8 @@
 #ifndef MEMORY_FILE_LINE_H_
 #define MEMORY_FILE_LINE_H_
 
+#include "line.h"
+
 class ANT_edit_renderer;
 
 /*
@@ -21,9 +23,9 @@ private:
 
 private:
 	char *contents;						// the current file as read from disk
-	char **line;						// an array of pointers into the in-memory version of the disk file
+	ANT_line *line;						// array of objects with pointers to the in-memory version of the disk file
 	long long current_line;				// line at the top of the current display page
-	char **current_line_pointer;		// pointer to the line of text at the top of the current display page
+	ANT_line *current_line_pointer;		// pointer to the line of text at the top of the current display page
 	long long lines_in_file;			// number of lines in the file
 	long long page_size;				// number of lines on a display page
 	long long window_width;				// width of the viewport into the document
@@ -42,7 +44,7 @@ public:
 	/*
 		Return a pointer to the line of text that should be at line display_line on the output device
 	*/
-	char **get_current_line(void) 			{ return current_line_pointer; }
+	ANT_line *get_current_line(void) 			{ return current_line_pointer; }
 
 	/*
 		Return stats about the current document

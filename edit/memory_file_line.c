@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include <new>
 #include "../source/disk.h"
 #include "memory_file_line.h"
 #include "point.h"
@@ -11,6 +12,7 @@
 #include "edit_renderer.h"
 #include "source_parser_c.h"
 #include "token_colours.h"
+#include "line.h"
 
 /*
 	ANT_MEMORY_FILE_LINE::ANT_MEMORY_FILE_LINE()
@@ -57,7 +59,7 @@ line = NULL;
 if ((contents = ANT_disk::read_entire_file(filename)) == NULL)
 	return 0;
 
-line = ANT_disk::buffer_to_list(contents, &lines_in_file);
+line = ANT_line::buffer_to_list(contents, &lines_in_file);
 file_start();
 
 return lines_in_file;
@@ -90,7 +92,7 @@ long long ANT_memory_file_line::line_down(void)
 if (current_line_pointer == NULL)
 	return current_line;
 
-if (*current_line_pointer != NULL)
+if (current_line_pointer->text != NULL)
 	{
 	current_line++;
 	current_line_pointer++;
@@ -171,35 +173,55 @@ return current_line;
 */
 long long ANT_memory_file_line::render(void)
 {
+ANT_rgb *colour;
 ANT_token_colours colour_set;
 ANT_point where, size;
 ANT_memory_file_line_iterator iterator(this);
-ANT_source_parser_c parser;
+ANT_source_parser *parser;
 ANT_source_parser_token *token;
 char *current_line;
 long long max_y;
+ANT_rgb *rgb_colour;
 
 if ((current_line = iterator.first()) == NULL)
 	return 0;
 
+parser = new (std::nothrow) ANT_source_parser_c();
 where.x = where.y = size.x = size.y = 0;
 while (where.y < window_height)
 	{
 	max_y = where.x = 0;
-	parser.set_text(current_line);
-	for (token = parser.first(); token != NULL; token = parser.next())
+	if (current_line == NULL || *current_line == '\0')		// blank lines
 		{
-		if (token->type() == ANT_source_parser_token::TAB)
-			renderer->render_text_segment(&where, colour_set.colour(token->type()), "   ", 3, &size);
-		else if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_BLOCK_COMMENT)
-			renderer->render_text_segment(&where, colour_set.colour(ANT_source_parser_token::BLOCK_COMMENT), token->string(), token->length(), &size);
-		else if (token->type() == ANT_source_parser_token::CLOSE_BLOCK_COMMENT)
-			renderer->render_text_segment(&where, colour_set.colour(ANT_source_parser_token::KNOWN_ERROR), token->string(), token->length(), &size);
-		else
-			renderer->render_text_segment(&where, colour_set.colour(token->type()), token->string(), token->length(), &size);
-		where.x += size.x;
-		if (size.y > max_y)
-			max_y += size.y;
+		renderer->render_text_segment(&where, colour_set.colour(ANT_source_parser_token::KNOWN_ERROR), " ", 1, &size);
+		max_y = size.y;
+		}
+	else
+		{
+		parser->set_text(current_line);
+		for (token = parser->first(); token != NULL; token = parser->next())
+			{
+			if (token->type() == ANT_source_parser_token::TAB)
+				renderer->render_text_segment(&where, colour_set.colour(token->type()), "   ", 3, &size);
+			else
+				{
+				if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_BLOCK_COMMENT)
+					rgb_colour = colour_set.colour(ANT_source_parser_token::BLOCK_COMMENT);
+				else if (token->type() == ANT_source_parser_token::CLOSE_BLOCK_COMMENT)
+					rgb_colour = colour_set.colour(ANT_source_parser_token::KNOWN_ERROR);
+				else
+					rgb_colour = colour_set.colour(token->type());
+
+				if (token->attributes() & ANT_source_parser_token::ATTRIBUTE_UNICODE != 0)
+					renderer->render_utf8_segment(&where, rgb_colour, token->string(), token->length(), &size);
+				else
+					renderer->render_text_segment(&where, rgb_colour, token->string(), token->length(), &size);
+				}
+
+			where.x += size.x;
+			if (size.y > max_y)
+				max_y += size.y;
+			}
 		}
 
 	if ((current_line = iterator.next()) == NULL)
@@ -208,5 +230,6 @@ while (where.y < window_height)
 	where.y += max_y;
 	}
 
+delete parser;
 return where.y;
 }

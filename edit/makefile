@@ -1,16 +1,17 @@
 #
 # Makefile for ATIRE/Edit
-#/D_UNICODE /DUNICODE
 #
 .SILENT:
 
 OBJECTS = 							\
 	main.obj							\
+	source_parser.obj					\
 	source_parser_c.obj					\
 	canvas.obj							\
 	memory_file_line.obj				\
 	memory_file_line_iterator.obj		\
 	token_colours.obj					\
+	line.obj							\
 	disk.obj							\
 	file_internals.obj					\
 	ctypes.obj							\
@@ -19,7 +20,7 @@ OBJECTS = 							\
 main.exe : $(OBJECTS)
 	$(CXX) $(CXXFLAGS) /nologo /Zi -Femain.exe  $(OBJECTS) /link /fixed:no user32.lib gdi32.lib winmm.lib comdlg32.lib shlwapi.lib kernel32.lib advapi32.lib shell32.lib ole32.lib comctl32.lib
 
-CFLAGS = $(CFLAGS) /nologo /Zi /c /Tp
+CFLAGS = $(CFLAGS) /nologo /Zi /c /D_UNICODE /DUNICODE /Tp
 
 
 .c.obj:

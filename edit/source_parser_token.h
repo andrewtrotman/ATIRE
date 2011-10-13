@@ -11,11 +11,12 @@
 */
 class ANT_source_parser_token
 {
+friend class ANT_source_parser;
 friend class ANT_source_parser_c;
 
 public:
 	enum { UNKNOWN, TAB, SPACE, IDENTIFIER, NUMBER, STRING, CHARACTER, RESERVED_WORD, LINE_COMMENT, OPEN_BLOCK_COMMENT, BLOCK_COMMENT, CLOSE_BLOCK_COMMENT, PREPROCESSOR_DIRECTIVE, KNOWN_ERROR }; // token types
-	enum { NONE = 0, ATTRIBUTE_BLOCK_COMMENT = 1 } ;		// token attributes (for example, is it part of a block comment?)
+	enum { NONE = 0, ATTRIBUTE_BLOCK_COMMENT = 1, ATTRIBUTE_UNICODE = 2 } ;		// token attributes (for example, is it part of a block comment?)
 
 private:
 	char *string_start;

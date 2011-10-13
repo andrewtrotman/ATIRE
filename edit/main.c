@@ -1,7 +1,10 @@
+
+
 /*
-	MAIN_FOR_POLY.C
-	---------------
+	MAIN.C
+	------
 */
+
 #include <windows.h>
 #include "canvas.h"
 
@@ -16,7 +19,7 @@ long done;
 ANT_canvas *client;
 
 client = new ANT_canvas(hInstance);
-client->create_window("Edit");
+client->create_window((char *)(L"Edit"));
 
 done = false;
 while(!done)

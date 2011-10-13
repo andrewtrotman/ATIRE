@@ -5,6 +5,7 @@
 #ifndef MEMORY_FILE_LINE_ITERATOR_H_
 #define MEMORY_FILE_LINE_ITERATOR_H_
 
+class ANT_line;
 class ANT_memory_file_line;
 
 /*
@@ -15,7 +16,7 @@ class ANT_memory_file_line_iterator
 {
 private:
 	ANT_memory_file_line *source;
-	char **top_of_screen;
+	ANT_line *top_of_screen;
 
 public:
 	ANT_memory_file_line_iterator(ANT_memory_file_line *source);

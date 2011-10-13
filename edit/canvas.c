@@ -3,6 +3,8 @@
 	--------
 */
 #include <windows.h>
+#include <shlobj.h>
+#include <new>
 #include "resources/resource.h"
 #include "canvas.h"
 #include "memory_file_line.h"
@@ -10,25 +12,6 @@
 #include "point.h"
 
 #define VK_SCROLLLOCK (0x91)
-
-
-
-
-#define STRICT_TYPED_ITEMIDS
-#include <shlobj.h>
-#include <objbase.h>      // For COM headers
-#include <shobjidl.h>     // for IFileDialogEvents and IFileDialogControlEvents
-#include <shlwapi.h>
-#include <knownfolders.h> // for KnownFolder APIs/datatypes/function headers
-#include <propvarutil.h>  // for PROPVAR-related functions
-#include <propkey.h>      // for the Property key APIs/datatypes
-#include <propidl.h>      // for the Property System APIs
-#include <strsafe.h>      // for StringCchPrintfW
-#include <shtypes.h>      // for COMDLG_FILTERSPEC
-#include <new>
-
-
-
 
 /*
 	ANT_CANVAS::ANT_CANVAS()
@@ -48,135 +31,96 @@ ANT_canvas::~ANT_canvas()
 {
 delete file;
 }
-#ifdef NEVER
+
 /*
 	ANT_CANVAS::LOAD_FILE()
 	-----------------------
 */
 long long ANT_canvas::load_file(void)
 {
+long long lines;
+IFileDialog *pfd = NULL;
+IShellItem *psiResult;
+DWORD dwFlags;
+PWSTR pszFilePath = NULL;
 char chosen_filter[1024];
 char chosen_filename[MAX_PATH];
 OPENFILENAME parameters;
 
-memset(chosen_filename, 0, sizeof(chosen_filename));
-memset(chosen_filename, 0, sizeof(chosen_filename));
-
-parameters.lStructSize = sizeof(parameters);
-parameters.hwndOwner = window;
-parameters.hInstance = hInstance;
-parameters.lpstrFilter = "C/C++ files\0*.c;*.cxx;*.cpp\0\0\0";
-parameters.lpstrCustomFilter = chosen_filter;
-parameters.nMaxCustFilter = sizeof(chosen_filter) - 1;
-parameters.nFilterIndex = 1;
-parameters.lpstrFile = chosen_filename;
-parameters.nMaxFile = sizeof(chosen_filename) - 1;
-parameters.lpstrFileTitle = NULL;
-parameters.nMaxFileTitle = 0;
-parameters.lpstrInitialDir = NULL;
-parameters.lpstrTitle = "Open...";
-parameters.Flags = OFN_LONGNAMES;
-parameters.nFileOffset = 0;
-parameters.nFileExtension = 0;
-parameters.lpstrDefExt = NULL;
-parameters.lCustData = 0;
-parameters.lpfnHook = NULL;
-parameters.lpTemplateName = 0;
-
-#if (_WIN32_WINNT >= 0x0500)
-	parameters.pvReserved = NULL;
-	parameters.dwReserved = 0;
-	parameters.FlagsEx = 0;
-#endif
-
-if ((GetOpenFileName(&parameters)) != 0)
-	return file->read_file(parameters.lpstrFile);
-else
-	return 0;
-}
-#else
-
-long long ANT_canvas::load_file(void)
-{
-extern HRESULT BasicFileOpen();
-
-BasicFileOpen();
-
-return 0;
-}
-
-#pragma comment(lib, "comctl32.lib") // For TaskDialog
-
-#if defined _M_IX86
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_IA64
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_X64
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#else
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
-
-#define INDEX_WORDDOC 1
-
-const COMDLG_FILTERSPEC c_rgSaveTypes[] =
-{
-    {L"Word Document (*.doc)",       L"*.doc"},
-    {L"Web Page (*.htm; *.html)",    L"*.htm;*.html"},
-    {L"Text Document (*.txt)",       L"*.txt"},
-    {L"All Documents (*.*)",         L"*.*"}
-};
-
-HRESULT BasicFileOpen()
-{
-IFileDialog *pfd = NULL;
-HRESULT hr;
-
 /*
 	Create the Open Dialg object IFileDialog
 */
-hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
-if (SUCCEEDED(hr))
+if ((CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd)) == S_OK))
 	{
 	/*
-		we have an object, now use it
+		we're on VISTA / Windows 7 or later
 	*/
-	DWORD dwFlags;
+	const COMDLG_FILTERSPEC c_rgSaveTypes[] =
+	{
+	{L"C/C++ files",		L"*.c;*.cxx;*.cpp;*.h;*.hpp.*.hxx;*.mak;makefile"},
+	{L"All Documents (*.*)",		L"*.*"}
+	};
 
 	pfd->GetOptions(&dwFlags);
-	pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
+	pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);					// we want to see a file
 	pfd->SetFileTypes(ARRAYSIZE(c_rgSaveTypes), c_rgSaveTypes);
-	pfd->SetFileTypeIndex(INDEX_WORDDOC);
+	pfd->SetFileTypeIndex(1);										// first item in the list is the default
 	pfd->SetDefaultExtension(L"doc;docx");
-	hr = pfd->Show(NULL);
-
-	if (SUCCEEDED(hr))
+	if (pfd->Show(NULL) == S_OK)
 		{
-		// Obtain the result once the user clicks 
-		// the 'Open' button.
-		// The result is an IShellItem object.
-		IShellItem *psiResult;
-		hr = pfd->GetResult(&psiResult);
-		if (SUCCEEDED(hr))
+		if (pfd->GetResult(&psiResult) == S_OK)						// get the result object if the user clicks "Open"
 			{
-			// We are just going to print out the 
-			// name of the file for sample sake.
-			PWSTR pszFilePath = NULL;
-			hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
-			if (SUCCEEDED(hr))
-				{
-				TaskDialog(NULL, NULL, L"CommonFileDialogApp", pszFilePath, NULL, TDCBF_OK_BUTTON, TD_INFORMATION_ICON, NULL);
-				CoTaskMemFree(pszFilePath);
-				}
+			psiResult->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+
+			lines = file->read_file((char *)pszFilePath);
+
+			CoTaskMemFree(pszFilePath);
 			psiResult->Release();
 			}
 		}
 	pfd->Release();
-	}
-return hr;
-}
 
-#endif
+	return lines;
+	}
+else
+	{
+	/*
+		we're on something prior to VISTA (NT through to XP) so use the old-style common control
+	*/
+	memset(chosen_filename, 0, sizeof(chosen_filename));
+
+	parameters.lStructSize = sizeof(parameters);
+	parameters.hwndOwner = window;
+	parameters.hInstance = hInstance;
+	parameters.lpstrFilter = L"C/C++ files\0*.c;*.cxx;*.cpp;*.h;*.hpp.*.hxx\0\0\0";
+	parameters.lpstrCustomFilter = (LPWSTR)chosen_filter;
+	parameters.nMaxCustFilter = sizeof(chosen_filter) - 1;
+	parameters.nFilterIndex = 1;
+	parameters.lpstrFile = (LPWSTR)chosen_filename;
+	parameters.nMaxFile = sizeof(chosen_filename) - 1;
+	parameters.lpstrFileTitle = NULL;
+	parameters.nMaxFileTitle = 0;
+	parameters.lpstrInitialDir = NULL;
+	parameters.lpstrTitle = L"Open...";
+	parameters.Flags = OFN_LONGNAMES;
+	parameters.nFileOffset = 0;
+	parameters.nFileExtension = 0;
+	parameters.lpstrDefExt = NULL;
+	parameters.lCustData = 0;
+	parameters.lpfnHook = NULL;
+	parameters.lpTemplateName = 0;
+	#if (_WIN32_WINNT >= 0x0500)
+		parameters.pvReserved = NULL;
+		parameters.dwReserved = 0;
+		parameters.FlagsEx = 0;
+	#endif
+
+	if ((GetOpenFileNameW(&parameters)) != 0)
+		return file->read_file((char *)parameters.lpstrFile);
+	}
+
+return 0;
+}
 
 /*
 	ANT_CANVAS::MENU()
@@ -232,16 +176,45 @@ long long ANT_canvas::render_text_segment(ANT_point *where, ANT_rgb *colour, cha
 {
 TEXTMETRIC text_metrics;
 SIZE size;
+static const long long RIGHT_MARGIN = 5;
 
 SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
-TextOut(hDC, where->x, where->y, string, string_length);
-GetTextExtentPoint(hDC, string, string_length, &size);
+TextOutA(hDC, where->x + RIGHT_MARGIN, where->y, string, string_length);
+GetTextExtentPointA(hDC, string, string_length, &size);
 
 text_size->x = size.cx;
 text_size->y = size.cy;
 
 return string_length;
 }
+
+/*
+	ANT_CANVAS::RENDER_UTF8_SEGMENT()
+	---------------------------------
+*/
+long long ANT_canvas::render_utf8_segment(ANT_point *where, ANT_rgb *colour, char *string, long long string_length, ANT_point *text_size)
+{
+TEXTMETRIC text_metrics;
+SIZE size;
+static const long long RIGHT_MARGIN = 5;
+char *buffer;
+
+buffer = new (std::nothrow) char [string_length * 2];
+MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS, string, string_length, (LPWSTR)buffer, string_length);
+
+SetTextColor(hDC, RGB(colour->red, colour->green, colour->blue));
+
+TextOutA(hDC, where->x + RIGHT_MARGIN, where->y, buffer, string_length);
+GetTextExtentPointW(hDC, string, string_length, &size);
+
+text_size->x = size.cx;
+text_size->y = size.cy;
+
+delete [] buffer;
+
+return string_length;
+}
+
 
 /*
 	ANT_CANVAS::RENDER()
@@ -308,6 +281,8 @@ switch(message)
 	{
 	case WM_CREATE:
 		file->set_window_size(((CREATESTRUCT *)lParam)->cx, ((CREATESTRUCT *)lParam)->cy);
+
+		file->read_file((char *)(L"c:\\ant\\edit\\main.c"));
 		return 0;
 
 	case WM_CLOSE:
@@ -444,14 +419,14 @@ windowClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON_ATIRE_EDIT));
 windowClass.hCursor = NULL;
 windowClass.hbrBackground = NULL; // (HBRUSH)GetStockObject(WHITE_BRUSH);
 windowClass.lpszMenuName = NULL;
-windowClass.lpszClassName = "ATIRE/Edit";
+windowClass.lpszClassName = L"ATIRE/Edit";
 windowClass.hIconSm = NULL;
 
 RegisterClassEx(&windowClass);
 
 window = CreateWindowEx(NULL,			// extended style
-	"ATIRE/Edit",					// class name
-	window_title,					// window name
+	L"ATIRE/Edit",					// class name
+	(LPWSTR)window_title,					// window name
 	WS_EX_OVERLAPPEDWINDOW | WS_SYSMENU | WS_VISIBLE | WS_SIZEBOX | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VSCROLL,
 	120, 120,			// x/y coords
 	WIDTH_IN_PIXELS,	// width

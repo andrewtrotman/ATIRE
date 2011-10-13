@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "memory_file_line.h"
 #include "memory_file_line_iterator.h"
+#include "line.h"
 
 /*
 	ANT_MEMORY_FILE_LINE_ITERATOR::ANT_MEMORY_FILE_LINE_ITERATOR()
@@ -35,7 +36,7 @@ top_of_screen = source->get_current_line();
 if (top_of_screen == NULL)
 	return NULL;
 else
-	return *top_of_screen;
+	return top_of_screen->text;
 }
 
 /*
@@ -46,11 +47,11 @@ char *ANT_memory_file_line_iterator::next(void)
 {
 if (top_of_screen == NULL)
 	return NULL;
-else if (*top_of_screen == NULL)
+else if (top_of_screen->attributes == ANT_line::END_OF_FILE)
 	return NULL;
 else
 	{
 	top_of_screen++;
-	return *top_of_screen;
+	return top_of_screen->text;
 	}
 }

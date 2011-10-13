@@ -141,24 +141,6 @@ else
 }
 
 /*
-	ANT_SOURCE_PARSER_C::SET_TEXT()
-	-------------------------------
-*/
-char *ANT_source_parser_c::set_text(char *text)
-{
-return at = source = text;
-}
-
-/*
-	ANT_SOURCE_PARSER_C::FIRST()
-	----------------------------
-*/
-ANT_source_parser_token *ANT_source_parser_c::first(void)
-{
-return next();
-}
-
-/*
 	ANT_SOURCE_PARSER_C::NEXT()
 	---------------------------
 */
@@ -217,37 +199,49 @@ else if (ANT_isdigit(*at) || *at == '.')
 	}
 else if (*at == '"')
 	{
-	token.string_type = ANT_source_parser_token::STRING;
-	at++;
-	while (*at != '"')
+	if (in_block_comment)
+		token.string_type = ANT_source_parser_token::BLOCK_COMMENT;
+	else
 		{
-		if (*at == '\0')
-			break;
-		else if (*at == '\\')
-			if (*(at + 1) == '\0')
-				break;
-			else
-				at++;
+		token.string_type = ANT_source_parser_token::STRING;
 		at++;
+		while (*at != '"')
+			{
+			if (*at == '\0')
+				break;
+			else if (*at == '\\')
+				if (*(at + 1) == '\0')
+					break;
+				else
+					at++;
+			at++;
+			}
 		}
-	at++;
+	if (*at == '"')
+		at++;
 	}
 else if (*at == '\'')
 	{
-	token.string_type = ANT_source_parser_token::CHARACTER;
-	at++;
-	while (*at != '\'')
+	if (in_block_comment)
+		token.string_type = ANT_source_parser_token::BLOCK_COMMENT;
+	else
 		{
-		if (*at == '\0')
-			break;
-		else if (*at == '\\')
-			if (*(at + 1) == '\0')	
-				break;
-			else
-				at++;
+		token.string_type = ANT_source_parser_token::CHARACTER;
 		at++;
+		while (*at != '\'')
+			{
+			if (*at == '\0')
+				break;
+			else if (*at == '\\')
+				if (*(at + 1) == '\0')	
+					break;
+				else
+					at++;
+			at++;
+			}
 		}
-	at++;
+	if (*at == '\'')
+		at++;
 	}
 else if (*at == '/' && *(at + 1) == '*')
 	{
@@ -304,6 +298,10 @@ if (in_block_comment)
 	if (token.type() == ANT_source_parser_token::CLOSE_BLOCK_COMMENT)
 		in_block_comment = false;
 	}
+
+for (start = token.string_start; start < at; start++)
+	if ((*start & 0x80) != 0)
+		token.string_attributes |= ANT_source_parser_token::ATTRIBUTE_UNICODE;
 
 return &token;
 }
