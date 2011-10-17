@@ -70,6 +70,8 @@ USE_MYSQL := 0
 # build a php extension for Atire
 USE_PHP_EXTENSION := 0
 
+# use google's snappy compression library
+USE_SNAPPY := 0
 
 ###############################################################################
 # specified your own setting in a separate file to override the default
@@ -200,6 +202,11 @@ ifeq ($(USE_PHP_EXTENSION), 1)
         PHP_LDFLAGS = -shared -export-dynamic -avoid-version -prefer-pic -module
 endif
 
+ifeq ($(USE_SNAPPY), 1)
+	CFLAGS += -DANT_HAS_SNAPPYLIB -I snappy/snappy-1.0.4
+	EXTRA_OBJS += snappy/libsnappy.a
+endif
+
 ###############################################################################
 # source files and compile commands
 ###############################################################################
@@ -251,7 +258,7 @@ PREGEN_PREC_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PREGEN_PREC_SOUR
 MYSQL_XML_DUMP_SOURCES := mysql_xml_dump.c $(notdir $(SOURCES))
 MYSQL_XML_DUMP_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(MYSQL_XML_DUMP_SOURCES)))
 
-all : info $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
+all : info $(EXTRA_OBJS) $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
 
 php_ext : $(LIBDIR)/atire.so
 
@@ -283,31 +290,35 @@ $(LIBDIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
 	$(CC) $(PHP_LDFLAGS) -o $@ $^
 
 $(BINDIR)/index : $(INDEX_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/atire_client : $(ATIRE_CLIENT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/ant : $(ANT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/atire : $(ATIRE_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 	
 $(BINDIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/mysql_xml_dump : $(MYSQL_XML_DUMP_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(EXTRA_OBJS) $^
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+
+snappy/libsnappy.a:
+	(cd ./snappy; $(MAKE) -f GNUmakefile.static CC=$(CC); cd ..;)
 
 .PHONY : clean
 clean :
+	(cd ./snappy; $(MAKE) -f GNUmakefile.static clean; cd ..;)
 	\rm -f $(OBJDIR)/*.o $(BINDIR)/*
 
 depend :
