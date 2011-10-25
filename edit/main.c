@@ -7,7 +7,6 @@
 
 #include <windows.h>
 #include "canvas.h"
-
 /*
 	WINMAIN()
 	---------

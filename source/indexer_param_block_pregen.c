@@ -58,6 +58,8 @@ else if (strcmp(field_type, "asciiprintables") == 0)
 	pregens[num_pregen_fields].type = ASCII_PRINTABLES;
 else if (strcmp(field_type, "asciiprintablesarith") == 0)
 	pregens[num_pregen_fields].type = ASCII_PRINTABLES_ARITHMETIC;
+else if (strcmp(field_type, "asciiprintablesarithbigram") == 0)
+	pregens[num_pregen_fields].type = ASCII_PRINTABLES_ARITHMETIC_BIGRAM;
 else
 	return 0;
 
@@ -86,7 +88,8 @@ puts("   base37       Alphanumerics and spaces");
 puts("   base37arith  Alphanumerics and spaces with English probability model");
 puts("   base40       Alphanumerics and spaces, with basic sorting for punctuation");
 puts("   asciiprintable All printable ASCII characters");
-puts("   asciiprintablesarith All printable ASCII characters with English probability model");
+puts("   asciiprintablesarith All printable ASCII characters with unigram English probability model");
+puts("   asciiprintablesarithbigram All printable ASCII characters with bigram English probability model");
 puts("");
 }
 

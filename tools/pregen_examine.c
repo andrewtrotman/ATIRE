@@ -129,7 +129,7 @@ for (int i = argpos; i < argc; i++)
 			print_pregen(docnames, pregen, 64);
 		}
 	else
-		for (int i = 0; i < pregen.doc_count; i++)
+		for (unsigned int i = 0; i < pregen.doc_count; i++)
 			printf("%llu\n", (long long unsigned) pregen.scores[i]);
 	}
 

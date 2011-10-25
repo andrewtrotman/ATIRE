@@ -56,6 +56,8 @@ switch (type)
 		return "asciiprintables";
 	case ASCII_PRINTABLES_ARITHMETIC:
 		return "asciiprintablesarith";
+	case ASCII_PRINTABLES_ARITHMETIC_BIGRAM:
+		return "asciiprintablesarithbigram";
 	default:
 		return "Unknown";
 	}
@@ -321,6 +323,7 @@ switch (type)
 	case BASE37_ARITHMETIC:
 		return generate_arithmetic<ANT_encode_char_base37>(field, arithmetic_model);
 	case ASCII_PRINTABLES_ARITHMETIC:
+	case ASCII_PRINTABLES_ARITHMETIC_BIGRAM:
 		return generate_arithmetic<ANT_encode_char_printable_ascii>(field, arithmetic_model);
 	default:
 		assert(0);
@@ -370,7 +373,7 @@ field_count++;
 return 1;
 }
 
-void ANT_pregen_writer_normal::add_field(long long docindex, ANT_string_pair & content)
+void ANT_pregen_writer_normal::add_field(long long docindex, ANT_string_pair content)
 {
 long long skip_docs;
 
@@ -393,6 +396,38 @@ char *dup = doc_name.str();
 process_document(doc_index, dup);
 
 delete [] dup;
+}
+
+ANT_string_pair ANT_pregens_writer::strip_garbage(const ANT_string_pair & s)
+{
+ANT_string_pair result = s;
+
+/* Encoders will strip spaces themselves, but do it here too so we can
+ * get down to prefixes we actually want to strip.
+ */
+while (result.string_length > 0 && *result.start == ' ')
+	{
+	result.start++;
+	result.string_length--;
+	}
+
+//Strip off leading "Re:"
+if (result.string_length >=2 && (result[0] == 'R' || result[0] == 'r')
+		&& (result[1] == 'E' || result[1] == 'e'))
+		{
+		if (result.string_length >= 3 && result[2] == ':')
+			{
+			result.string_length -= 3;
+			result.start += 3;
+			}
+		else
+			{
+			result.string_length -= 2;
+			result.start += 2;
+			}
+		}
+
+return result;
 }
 
 void ANT_pregens_writer::process_document(long long doc_index, char *doc_name)
@@ -446,7 +481,7 @@ while (*pos)
 					{
 					for (int i = 0; i < field_count; i++)
 						if (tag_name.true_strcmp(fields[i]->field_name) == 0)
-							fields[i]->add_field(doc_index, tag_body);
+							fields[i]->add_field(doc_index, strip_garbage(tag_body));
 					state = IDLE;
 					}
 				}
@@ -658,7 +693,7 @@ ANT_pregen_writer_exact_integers::~ANT_pregen_writer_exact_integers()
 delete [] exact_integers;
 }
 
-void ANT_pregen_writer_exact_integers::add_field(long long  docindex, ANT_string_pair & content)
+void ANT_pregen_writer_exact_integers::add_field(long long  docindex, ANT_string_pair content)
 {
 long long skip_docs;
 
@@ -723,9 +758,8 @@ delete [] outvalues;
 file.close();
 }
 
-void ANT_pregen_writer_exact_strings::add_field(long long docindex, ANT_string_pair & _content)
+void ANT_pregen_writer_exact_strings::add_field(long long docindex, ANT_string_pair content)
 {
-ANT_string_pair content = _content; //we want a copy we can modify
 long long skip_docs;
 
 ANT_string_pair result;

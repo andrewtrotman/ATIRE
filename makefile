@@ -339,6 +339,8 @@ PARTS = \
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\pregen.obj							\
+	$(OBJDIR)\arithmetic_model_bigram.obj			\
+	$(OBJDIR)\arithmetic_model_unigram.obj			\
 	$(OBJDIR)\pregen_kendall_tau.obj				\
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\snippet.obj							\
@@ -431,7 +433,7 @@ bin\pregen_create.exe : bin\pregen_create.obj
 bin\pregen_examine.exe : bin\pregen_examine.obj
 bin\test_pregen.exe : bin\test_pregen.obj
 bin\test_kendall_tau.exe : bin\test_kendall_tau.obj bin\pregen_kendall_tau.obj
-bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj
+bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj bin\arithmetic_model_bigram.obj bin\arithmetic_model_unigram.obj
 
 #
 #	Default dependency rules

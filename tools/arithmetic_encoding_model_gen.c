@@ -18,9 +18,12 @@
 #endif
 
 #include "../source/arithmetic_coding.h"
+#include "../source/arithmetic_model_unigram.h"
+#include "../source/arithmetic_model_bigram.h"
 #include "../source/pregen.h"
 #include "../source/string_pair.h"
 
+//Document collection is larger than my memory, so let's memory map it instead...
 #ifdef _MSC_VER
 	char *map_entire_file(const char *filename, long long *filesize)
 	{
@@ -67,12 +70,13 @@ int main(int argc, char**argv)
 char *doclist_filename, *doclist_field, *model_name;
 enum { MODEL_BASE32, MODEL_BASE37, MODEL_PRINTABLES} model_type;
 int num_symbols;
+int bigram = 0;
 unsigned long long total_field_length = 0, documents_with_field = 0,
 		unicode_bytes = 0;
 
 if (argc < 4)
 	{
-	fprintf(stderr, "Usage: %s <doclistfile> <field> <model>\n(model is one of base32, base37 or printables)\n", argv[0]);
+	fprintf(stderr, "Usage: %s <doclistfile> <field> <model>\n(model is one of base32, base37, printables, base32bigram, base37bigram, printablesbigram)\n", argv[0]);
 	exit(-1);
 	}
 
@@ -86,6 +90,21 @@ else if (strcmp(model_name, "base37") == 0)
 	model_type = MODEL_BASE37;
 else if (strcmp(model_name, "printables") == 0)
 	model_type = MODEL_PRINTABLES;
+else if (strcmp(model_name, "base32bigram") == 0)
+	{
+	model_type = MODEL_BASE32;
+	bigram = 1;
+	}
+else if (strcmp(model_name, "base37bigram") == 0)
+	{
+	model_type = MODEL_BASE37;
+	bigram = 1;
+	}
+else if (strcmp(model_name, "printablesbigram") == 0)
+	{
+	model_type = MODEL_PRINTABLES;
+	bigram = 1;
+	}
 else
 	{
 	fprintf(stderr, "Bad model\n");
@@ -107,7 +126,12 @@ switch (model_type)
 		return -1;
 	}
 
-ANT_arithmetic_model model(num_symbols, NULL, 0);
+ANT_arithmetic_model *model;
+
+if (bigram)
+	model = new ANT_arithmetic_model_bigram(num_symbols, NULL, 1);
+else
+	model = new ANT_arithmetic_model_unigram(num_symbols, NULL, 1);
 
 //Read document names from the .doclist file
 char *doclist = map_entire_file(doclist_filename, NULL);
@@ -176,6 +200,8 @@ while (*current_document)
 						{
 						if (tag_name.true_strcmp(doclist_field) == 0)
 							{
+							model->clear_context();
+
 							total_field_length += tag_body.length();
 							documents_with_field++;
 
@@ -207,7 +233,7 @@ while (*current_document)
 									}
 
 								if (symbol != CHAR_ENCODE_FAIL)
-									model.update(symbol);
+									model->update(symbol);
 								}
 							}
 						state = IDLE;
@@ -221,17 +247,7 @@ while (*current_document)
 	current_document = docnameend + 1;
 	}
 
-int col = 0;
-
-for (int i = 0; i < model.nsym; i++)
-	{
-	printf(i == model.nsym - 1 ? "%d" : "%d, ", model.freq[i]);
-
-	col++;
-	if (col % 16 == 0)
-		printf("\n");
-	}
-printf("\n");
+model->print();
 
 printf("Total chars examined: %llu, of which %llu are Unicode bytes\n", total_field_length, unicode_bytes);
 printf("Average field length of %llu documents which contain the field '%s' is %llu\n", documents_with_field, doclist_field, total_field_length / documents_with_field);

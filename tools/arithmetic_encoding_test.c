@@ -3,12 +3,13 @@
 #include <algorithm>
 
 #include "../source/arithmetic_coding.h"
+#include "../source/arithmetic_model_unigram.h"
 
 #define NUM_SYMBOLS (26 + 10 + 1)
 
 typedef uint64_t accumulator_t;
 
-ANT_arithmetic_model *model;
+ANT_arithmetic_model_unigram *model;
 
 struct encode_result {
 	const char * string;
@@ -72,13 +73,13 @@ return a.encoded > b.encoded;
 
 int main(int argc, char**argv)
 {
-static int symbol_frequencies[]= {
+static unsigned int symbol_frequencies[]= {
 		1317, 11, 33, 11, 13, 3, 3, 1, 3, 5, 6, 719,
 		92, 378, 337, 827, 143, 214, 261, 458,15, 61, 351, 219,
 		510, 591, 330, 8, 593, 451, 585, 138, 68, 221, 26, 158, 6
 	};
 
-model = new ANT_arithmetic_model(NUM_SYMBOLS, symbol_frequencies, 0);
+model = new ANT_arithmetic_model_unigram(NUM_SYMBOLS, symbol_frequencies, 0);
 
 accumulator_t encoded = arith_encode(argc > 1 ? argv[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 

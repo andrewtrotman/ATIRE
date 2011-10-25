@@ -1,17 +1,19 @@
 /* Derived from http://www.cipr.rpi.edu/~wheeler/ac/. Modified to encode/decode to a fixed-sized
  * integer instead of a file, and translate to C++ */
 
-#ifndef AC_HEADER
-#define AC_HEADER
+#ifndef ARITHMETIC_CODING_H
+#define ARITHMETIC_CODING_H
 
 #include <stdio.h>
-#include "fundamental_types.h"
 #include <limits>
 #include <limits.h>
 #include <cassert>
 
 #undef max
 #undef min
+
+#include "fundamental_types.h"
+#include "arithmetic_model.h"
 
 class ANT_arithmetic_coding
 {
@@ -21,79 +23,6 @@ protected:
 	static const unsigned long First_qtr = (Top_value/4+1);
 	static const unsigned long Half = (2*First_qtr);
 	static const unsigned long Third_qtr = (3*First_qtr);
-	static const unsigned long Max_frequency = 16383;
-};
-
-class ANT_arithmetic_model : ANT_arithmetic_coding
-{
-public:
-	int nsym;
-	int *freq;
-	int *cfreq;
-	int adapt;
-
-	void update(int sym)
-	{
-	int i;
-
-	if (cfreq[0] == Max_frequency)
-		{
-		int cum = 0;
-		cfreq[nsym] = 0;
-		for (i = nsym - 1; i >= 0; i--)
-			{
-			freq[i] = (freq[i] + 1) / 2;
-			cum += freq[i];
-			cfreq[i] = cum;
-			}
-		}
-
-	freq[sym] += 1;
-	for (i = sym; i >= 0; i--)
-		cfreq[i] += 1;
-	}
-
-	ANT_arithmetic_model(int nsym, int *ifreq, int adapt)
-	{
-	int i;
-
-	this->nsym = nsym;
-	this->adapt = adapt;
-
-	freq = (int *) calloc(nsym, sizeof(int));
-	cfreq = (int *) calloc(nsym + 1, sizeof(int));
-	assert(freq && cfreq);
-
-	if (ifreq)
-		{
-		cfreq[nsym] = 0;
-		for (i = nsym - 1; i >= 0; i--)
-			{
-			freq[i] = ifreq[i];
-			cfreq[i] = cfreq[i + 1] + freq[i];
-			}
-		if (cfreq[0] > Max_frequency)
-			{
-			fprintf(stderr, "arithmetic coder model max frequency exceeded");
-			exit(-1);
-			}
-		}
-	else
-		{
-		for (i = 0; i < nsym; i++)
-			{
-			freq[i] = 1;
-			cfreq[i] = nsym - i;
-			}
-		cfreq[nsym] = 0;
-		}
-	}
-
-	~ANT_arithmetic_model()
-	{
-	free(freq);
-	free(cfreq);
-	}
 };
 
 template<typename T> class ANT_arithmetic_decoder : ANT_arithmetic_coding
@@ -185,8 +114,7 @@ public:
 		value = (value << 1) | input_bit();
 		}
 
-	if (acm->adapt)
-		acm->update(sym);
+	acm->update(sym);
 
 	return sym;
 	}
@@ -228,6 +156,8 @@ public:
 	ANT_arithmetic_encoder(ANT_arithmetic_model *acm)
 	{
 	this->acm = acm;
+
+	acm->clear_context();
 
 	bits_to_go = sizeof(buffer) * CHAR_BIT;
 
@@ -287,8 +217,7 @@ public:
 		high = high * 2 + 1;
 		}
 
-	if (acm->adapt)
-		acm->update(sym);
+	acm->update(sym);
 
 	return bits_to_go > 0;
 	}
