@@ -145,12 +145,12 @@ endif
 
 ifeq ($(USE_BUILT_IN_ZLIB), 1)
 	CFLAGS += -DANT_HAS_ZLIB -I zlib/zlib-1.2.3
-	EXTRA_OBJS += zlib/zlib-1.2.3/libz.a
+	EXTRA_OBJS += zlib/libz.a
 endif
 
 ifeq ($(USE_BUILT_IN_BZLIB), 1)
 	CFLAGS += -DANT_HAS_BZLIB -I bzip/bzip2-1.0.5
-	EXTRA_OBJS += bzip/bzip2-1.0.5/libbz2.a
+	EXTRA_OBJS += bzip/libbz2.a
 endif
 
 ifeq ($(USE_TERM_LOCAL_MAX_IMPACT), 1)
@@ -316,9 +316,17 @@ $(BINDIR)/mysql_xml_dump : $(MYSQL_XML_DUMP_OBJECTS)
 snappy/libsnappy.a:
 	(cd ./snappy; $(MAKE) -f GNUmakefile.static CC=$(CC); cd ..;)
 
+zlib/libz.a:
+	(cd ./zlib; $(MAKE) -f GNUmakefile; cd ..;)
+
+bzip/libbz2.a:
+	(cd ./bzip; $(MAKE) -f GNUmakefile; cd ..;)
+
 .PHONY : clean
 clean :
 	(cd ./snappy; $(MAKE) -f GNUmakefile.static clean; cd ..;)
+	(cd ./zlib; $(MAKE) -f GNUmakefile clean; cd ..;)
+	(cd ./bzip; $(MAKE) -f GNUmakefile clean; cd ..;)
 	\rm -f $(OBJDIR)/*.o $(BINDIR)/*
 
 depend :
