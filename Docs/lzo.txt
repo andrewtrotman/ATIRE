@@ -1,0 +1,15 @@
+For UNIX-like operating systems, you have two options get the lzo lib linked with ATIRE.
+
+(A) Option 1, use the system default lib
+
+	(1) make sure your system has already the required libs installed.
+		On Ubuntu, packages lzop, liblzo2-2 and liblzo2-dev have to be installed
+	(2) enabling the following variables in makefile.unix
+		USE_SYSTEM_LZO = 1
+	(3) then 'make -f GNUmakefile'
+
+
+(B) Option 2, use the built-in lzo lib
+	(5) enabling the following variables in makefile.unix
+		USE_BUILT_IN_LZO = 1
+	(6) then 'make -f GNUmakefile'

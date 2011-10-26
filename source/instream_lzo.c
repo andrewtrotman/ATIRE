@@ -133,14 +133,14 @@ long ANT_instream_lzo::check_lzo_header(void)
 		source->read(&one, sizeof(one));		// compression level (1 byte)
 
 	source->read((unsigned char *)&four, sizeof(four));			// flags (4 bytes)
-	flags = longize(&four);
+	flags = longize((unsigned long *)&four);
 	if (flags & LZOP_MULTIPART)		// we do not support multipart archives (nor does lzop)
 		return FALSE;
 
 	if (flags & LZOP_FILTER)
 		{
 		source->read((unsigned char *)&four, sizeof(four));		// filter (4 bytes)
-		filter = longize(&four);
+		filter = longize((unsigned long *)&four);
 		}
 
 	source->read((unsigned char *)&four, sizeof(four));			// mode (4 bytes)
@@ -163,7 +163,7 @@ long ANT_instream_lzo::check_lzo_header(void)
 	if (flags & LZOP_EXTRA_FIELD)
 		{
 		source->read((unsigned char *)&four, sizeof(four));			// length (4 bytes)
-		number_of_extra_bytes = longize(&four);
+		number_of_extra_bytes = longize((unsigned long *)&four);
 		for (current = 0; current < number_of_extra_bytes; current++)
 			source->read(&one, sizeof(one));		// each byte (1 byte each)
 		source->read((unsigned char *)&four, sizeof(four));			// checksum (4 bytes)
@@ -201,11 +201,11 @@ long long ANT_instream_lzo::decompress_next_block(void)
 		Compressed and uncompressed size (in bytes)
 	*/
 	source->read((unsigned char *)&four, sizeof(four));
-	uncompressed_size = longize(&four);
+	uncompressed_size = longize((unsigned long *)&four);
 	if (uncompressed_size == 0)
 		return 0;
 	source->read((unsigned char *)&four, sizeof(four));
-	compressed_size = longize(&four);
+	compressed_size = longize((unsigned long *)&four);
 
 	/*
 		Uncompressed checksums
@@ -227,7 +227,7 @@ long long ANT_instream_lzo::decompress_next_block(void)
 		Allocate the buffer to store the compressed block.
 
 		lzop, the LZO compressor breaks the source file into 256KB (128KB on DOS) blocks and compresses each one.
-		If the raw data cannot be compressed then it becomes larger.  According to LZO.FAQ the largest you can get 
+		If the raw data cannot be compressed then it becomes larger.  According to LZO.FAQ the largest you can get
 		for LZO1 is (raw + (raw / 16) + 64 + 3), but for LZO2 it is (raw + (raw / 8) + 128 + 3).  So, at this point
 		we know the raw (uncompressed) chunking and so we know the worst case for the size of the compresed block,
 		consequently we can malloc both the compressed and uncompressed blocks.

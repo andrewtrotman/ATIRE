@@ -34,6 +34,11 @@ USE_SYSTEM_BZLIB := 0
 USE_BUILT_IN_ZLIB := 0
 USE_BUILT_IN_BZLIB := 0
 
+# use LZO compression lib
+# Please use either system or built-in libs, not both
+USE_SYSTEM_LZO := 0
+USE_BUILT_IN_LZO := 0
+
 # if to add a term_max_impact to the structure
 # of the dictionary for each term (This is just
 # a temporary flag. In future, this should be
@@ -151,6 +156,16 @@ endif
 ifeq ($(USE_BUILT_IN_BZLIB), 1)
 	CFLAGS += -DANT_HAS_BZLIB -I bzip/bzip2-1.0.5
 	EXTRA_OBJS += bzip/libbz2.a
+endif
+
+ifeq ($(USE_SYSTEM_LZO), 1)
+	CFLAGS += -DANT_HAS_LZO -I /usr/include/lzo
+	LDFLAGS += -llzo2
+endif
+
+ifeq ($(USE_BUILT_IN_LZO), 1)
+	CFLAGS += -DANT_HAS_LZO -I lzo/lzo-2.05/include/lzo lzo/lzo-2.05/include
+	EXTRA_OBJS += lzo/liblzo2.a
 endif
 
 ifeq ($(USE_TERM_LOCAL_MAX_IMPACT), 1)
@@ -322,11 +337,15 @@ zlib/libz.a:
 bzip/libbz2.a:
 	(cd ./bzip; $(MAKE) -f GNUmakefile; cd ..;)
 
+lzo/liblzo2.a:
+	(cd ./lzo; $(MAKE) -f GNUmakefile; cd ..;)
+
 .PHONY : clean
 clean :
 	(cd ./snappy; $(MAKE) -f GNUmakefile.static clean; cd ..;)
 	(cd ./zlib; $(MAKE) -f GNUmakefile clean; cd ..;)
 	(cd ./bzip; $(MAKE) -f GNUmakefile clean; cd ..;)
+	(cd ./lzo; $(MAKE) -f GNUmakefile clean; cd ..;)
 	\rm -f $(OBJDIR)/*.o $(BINDIR)/*
 
 depend :

@@ -182,7 +182,7 @@ return answer;
 */
 long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
 {
-unsigned long long seed;
+unsigned long long seed = 0;
 ANT_memory_indexer_node **term_list, **current;
 long length, bit;
 double *vector;
