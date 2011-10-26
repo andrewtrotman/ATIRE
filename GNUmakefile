@@ -78,6 +78,13 @@ USE_PHP_EXTENSION := 0
 # use google's snappy compression library
 USE_SNAPPY := 0
 
+# use Lovins stemmer
+USE_STEM_LOVINS := 1
+
+# use Paice Husk Stemmer
+USE_STEM_PAICE_HUSK := 1
+
+
 ###############################################################################
 # specified your own setting in a separate file to override the default
 #
@@ -234,17 +241,29 @@ LIBDIR = lib
 IGNORE_LIST := $(SRCDIR)/ant_ant.c \
 			  $(SRCDIR)/ant_api.c \
 			  $(SRCDIR)/ant_plugins.c \
-			  $(SRCDIR)/test_compression.c
+			  $(SRCDIR)/test_compression.c \
+			  $(SRCDIR)/stem_lovins.c \
+			  $(SRCDIR)/stem_paice_husk.c
 
 MAIN_FILES := $(SRCDIR)/ant.c \
 			  $(SRCDIR)/atire.c \
 			  $(SRCDIR)/index.c \
 			  $(SRCDIR)/ant_dictionary.c \
 			  $(SRCDIR)/atire_client.c \
-			  $(SRCDIR)/atire_broker.c \
+			  $(SRCDIR)/atire_broker.c
 
 ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
+
+ifeq ($(USE_STEM_LOVINS), 1)
+	CFLAGS += -DANT_HAS_LOVINS
+	SOURCES += $(SRCDIR)/stem_lovins.c
+endif
+
+ifeq ($(USE_STEM_PAICE_HUSK), 1)
+	CFLAGS += -DANT_HAS_PAICE_HUSK
+	SOURCES += $(SRCDIR)/stem_paice_husk.c
+endif
 
 INDEX_SOURCES := index.c $(notdir $(SOURCES))
 INDEX_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
@@ -279,6 +298,9 @@ php_ext : $(LIBDIR)/atire.so
 
 info:
 	@echo "OS_TYPE:" $(OS_TYPE)
+
+test_all_source:
+	@echo $(ALL_SOURCES)
 
 test_source:
 	@echo $(SOURCES)
