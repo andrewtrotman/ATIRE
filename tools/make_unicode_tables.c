@@ -367,7 +367,7 @@ for (current = lines; *current != NULL; current++)
 			}
 		*utf8_buf_ptr = 0;
 
-		longest_decomposition = max(longest_decomposition, utf8_buf_ptr - utf8_buf);
+		longest_decomposition = max(longest_decomposition, (int) (utf8_buf_ptr - utf8_buf));
 
 		printf("{%ld, \"%s\"}", character, utf8_buf);
 		times++;

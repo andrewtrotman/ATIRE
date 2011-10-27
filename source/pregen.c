@@ -437,7 +437,7 @@ char * pos = doc_name;
 enum { IDLE, INSIDE_TAG, INSIDE_OPEN_TAG, INSIDE_CLOSE_TAG} state = IDLE;
 
 int tag_depth = 0;
-ANT_string_pair tag_name(NULL, 0), tag_body, close_tag_name;
+ANT_string_pair tag_name(NULL, 0), tag_body(NULL, 0), close_tag_name;
 
 /* Parse document name and find matching top-level XML fields to use */
 while (*pos)

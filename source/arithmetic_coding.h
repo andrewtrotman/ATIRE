@@ -70,6 +70,7 @@ public:
 	low = 0;
 	high = Top_value;
 
+	acm->clear_context();
 	}
 
 	int decode_symbol()

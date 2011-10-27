@@ -43,7 +43,7 @@ public:
 	long long write(unsigned short source) 					{ return write((unsigned long long)source); }
 	long long write(unsigned int source) 					{ return write((unsigned long long)source); }
 	long long write(unsigned long source) 					{ return write((unsigned long long)source); }
-	long long write(unsigned long long source) 				{ char buffer[32]; sprintf(buffer, "%ulld", source); return write(buffer); }
+	long long write(unsigned long long source) 				{ char buffer[32]; sprintf(buffer, "%llu", source); return write(buffer); }
 
 	char *read(char *destination, long long length) 	{ return block_read(destination, length); }
 	char *gets(void) 									{ return getsz('\n'); }

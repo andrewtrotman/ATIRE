@@ -21,4 +21,4 @@ public:
 	SOCKET sock, incoming_connection;
 } ;
 
-#endif __SOCKETS_INTERNALS_H__
+#endif /*__SOCKETS_INTERNALS_H__*/

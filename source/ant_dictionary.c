@@ -143,7 +143,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 #else
 		printf("%s ", term);
 #endif
-		printf("%lld %d", leaf.local_collection_frequency, leaf.local_document_frequency);
+		printf("%lld %lld", leaf.local_collection_frequency, leaf.local_document_frequency);
 		if (check_postings && *term != '~')		// ~length and others aren't encoded in the usual way
 			{
 			if (leaf.local_document_frequency > 2)

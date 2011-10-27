@@ -134,6 +134,6 @@ char *ANT_compression_text_factory::decompress(char *destination, unsigned long 
 	The first byte is a pre-amble byte that declares which compression strategy we are using
 	so we use it to identify the decoder then remove it for decoding.
 */
-return scheme[*source].scheme->decompress(destination, destination_length, source + 1, source_length - 1);
+return scheme[(unsigned char)*source].scheme->decompress(destination, destination_length, source + 1, source_length - 1);
 }
 

@@ -20,7 +20,8 @@ unsigned long ANT_compress_text_snappy::space_needed_to_compress(unsigned long s
 #ifdef ANT_HAS_SNAPPYLIB
 
 	return (unsigned long)snappy::MaxCompressedLength((unsigned long)source_length);
-
+#else
+	return 0;
 #endif
 }
 

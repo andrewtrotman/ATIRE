@@ -259,7 +259,9 @@ file_list = handle_stack;
 		}
 	if (last_slash_idx <= 0) 		// the wildcard will be wildcard itself
 		{
-		getcwd(path_buffer, sizeof(path_buffer));
+		if (getcwd(path_buffer, sizeof(path_buffer)) == NULL)
+			return NULL;
+
 		sprintf(path_buffer, "%s/", path_buffer); /* As we will later use this to mark dirs */
 		}
 	else // the wildcard will be after slash

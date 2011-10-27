@@ -26,6 +26,8 @@
 	typedef unsigned long long uint64_t;
 #else
 	#include <stdint.h>
+
+	#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
 /*
@@ -39,7 +41,6 @@ inline unsigned long ANT_get_unsigned_long(unsigned char *from) { return *((uint
 
 inline short ANT_get_short(unsigned char *from) { return *((int16_t *)from); }
 inline unsigned short ANT_get_unsigned_short(unsigned char *from) { return *((uint16_t *)from); }
-
 
 #endif  /* FUNDAMENTAL_TYPES_H_ */
 

@@ -38,7 +38,7 @@ internals = new ANT_event_internals;
 	err1 = pthread_cond_init(&internals->event, NULL);
 	err2 = pthread_mutex_init(&internals->mutex, NULL);
 	if (err1 != 0 || err2 != 0)
-		printf("ANT_event::ANT_event(): err1:%d err2:%d\n", err1, err2);
+		printf("ANT_event::ANT_event(): err1:%ld err2:%ld\n", err1, err2);
 #endif
 internals->val = FALSE;
 }
@@ -57,7 +57,7 @@ ANT_event::~ANT_event()
 	err1 = pthread_mutex_destroy(&internals->mutex);
 	err2 = pthread_cond_destroy(&internals->event);
 	if (err1 != 0 || err2 != 0)
-		printf("ANT_event::~ANT_event(): err1:%d err2:%d\n", err1, err2);
+		printf("ANT_event::~ANT_event(): err1:%ld err2:%ld\n", err1, err2);
 	
 #endif
 delete internals;
@@ -81,7 +81,7 @@ void ANT_event::signal(void)
 	err3 = pthread_mutex_unlock(&internals->mutex);
 
 	if (err1 != 0 || err2 != 0 || err3 != 0)
-		printf("ANT_event::signal(): err1:%d err2:%d err3:%d\n", err1, err2, err3);
+		printf("ANT_event::signal(): err1:%ld err2:%ld err3:%ld\n", err1, err2, err3);
 #endif
 }
 
@@ -102,7 +102,7 @@ void ANT_event::clear(void)
 	err2 = pthread_mutex_unlock(&internals->mutex);
 
 	if (err1 != 0 || err2 != 0)
-		printf("ANT_event::clear(): err1:%d err2:%d\n", err1, err2);
+		printf("ANT_event::clear(): err1:%ld err2:%ld\n", err1, err2);
 #endif
 }
 
@@ -122,13 +122,13 @@ void ANT_event::wait(void)
 		{
 		err = pthread_cond_wait(&internals->event, &internals->mutex);
 		if (err != 0)
-			printf("ANT_event::wait(): err:%d\n", err);
+			printf("ANT_event::wait(): err:%ld\n", err);
 		}
 
 	err2 = pthread_mutex_unlock(&internals->mutex);
 
 	if (err1 != 0 || err2 != 0)
-		printf("ANT_event::wait(): err1:%d err2:%d\n", err1, err2);
+		printf("ANT_event::wait(): err1:%ld err2:%ld\n", err1, err2);
 #endif
 }
 
@@ -149,7 +149,7 @@ long ANT_event::poll(void)
 	err2 = pthread_mutex_unlock(&internals->mutex);
 
 	if (err1 != 0 || err2 != 0)
-		printf("ANT_event::poll(): err1:%d err2:%d\n", err1, err2);
+		printf("ANT_event::poll(): err1:%ld err2:%ld\n", err1, err2);
 
 	return got;
 #endif

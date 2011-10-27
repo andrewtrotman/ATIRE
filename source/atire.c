@@ -148,7 +148,7 @@ if (params->snippet_algorithm != ANT_ANT_param_block::NONE)
 	{
 	snippet = new (std::nothrow) char [params->snippet_length + 1];
 	*snippet = '\0';
-	if (params->snippet_stemmer == NULL)
+	if (params->snippet_stemmer == ANT_stemmer_factory::NONE)
 		snippet_stemmer = NULL;
 	else
 		if ((snippet_stemmer = ANT_stemmer_factory::get_core_stemmer(params->snippet_stemmer)) == NULL)

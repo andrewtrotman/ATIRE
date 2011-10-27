@@ -99,7 +99,7 @@ for (current = lines; *current != 0; current++)
 			space = strpbrk(space, "1234567890");
 			do
 				{
-				params = sscanf(space, "%ld:%ld", &current_passage->offset, &current_passage->length);
+				params = sscanf(space, "%lld:%lld", &current_passage->offset, &current_passage->length);
 				current_passage->next = current_passage + 1;
 				current_passage++;
 				if ((space = strchr(space, ' ')) != NULL)

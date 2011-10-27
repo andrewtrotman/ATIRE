@@ -292,7 +292,7 @@ PREGEN_PREC_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PREGEN_PREC_SOUR
 MYSQL_XML_DUMP_SOURCES := mysql_xml_dump.c $(notdir $(SOURCES))
 MYSQL_XML_DUMP_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(MYSQL_XML_DUMP_SOURCES)))
 
-all : info $(EXTRA_OBJS) $(BINDIR)/index $(BINDIR)/ant $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
+all : info $(EXTRA_OBJS) $(BINDIR)/index $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
 
 php_ext : $(LIBDIR)/atire.so
 
