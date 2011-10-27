@@ -44,7 +44,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 {
 #ifdef ANT_HAS_ZLIB
 	char *decompressed, *byte;
-	unsigned long decompressed_length;
+	size_t decompressed_length;
 	int status;
 	z_stream stream;
 

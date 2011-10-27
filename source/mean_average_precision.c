@@ -23,7 +23,7 @@
 ANT_mean_average_precision::ANT_mean_average_precision(ANT_memory *memory, ANT_relevant_document *relevance_list, long long relevance_list_length)
 {
 long long current, relevant_characters;
-long last_topic, current_topic, relevant_documents, nonrelevant_documents;
+long long last_topic, current_topic, relevant_documents, nonrelevant_documents;
 
 /*
 	Take a copy of the relevance_list and sort it on topic then docid.
@@ -303,12 +303,12 @@ double ANT_mean_average_precision::average_generalised_precision_focused(long to
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
 ANT_relevant_document_passage *which_passage;
-long number_of_documents, current_focused_result;
+long long number_of_documents, current_focused_result;
 long long previous_docid;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
 ANT_focus_result *result;
-long found_relevant_bytes, found_bytes, relevant_bytes;
+long long found_relevant_bytes, found_bytes, relevant_bytes;
 
 if ((got = setup(topic)) == NULL)
 	return 0;

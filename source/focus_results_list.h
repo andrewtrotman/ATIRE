@@ -15,8 +15,8 @@ class ANT_focus_results_list
 {
 private:
 	ANT_focus_result *result;
-	long result_length;
-	long result_used;
+	long long result_length;
+	long long result_used;
 
 public:
 	ANT_focus_results_list(long max_results);
@@ -25,8 +25,8 @@ public:
 	ANT_focus_result *new_result(void);
 	void rewind(void);
 
-	ANT_focus_result *get(long index) { return index < result_used ? result + index : NULL; }
-	long get_list_length(void) { return result_used; }
+	ANT_focus_result *get(long long index) { return index < result_used ? result + index : NULL; }
+	long long get_list_length(void) { return result_used; }
 } ;
 
 #endif /* FOCUS_RESULTS_LIST_H_ */

@@ -61,7 +61,7 @@ void ANT_compression_text_factory::set_scheme(unsigned long new_scheme)
 {
 long which;
 
-scheme_to_use = new_scheme;
+scheme_to_use = (unsigned char)new_scheme;
 current_scheme = NULL;
 
 /*

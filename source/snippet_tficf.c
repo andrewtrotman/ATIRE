@@ -78,7 +78,7 @@ window_start = window_end = keyword_hit;
 for (current = keyword_hit; current->score != 0; current++)
 	{
 	score = 0;
-	for (window = current; window->score != 0 && (window->keyword.string() + window->keyword.length()) - current->keyword.string() < maximum_snippet_length; window++)
+	for (window = current; window->score != 0 && (unsigned long)((window->keyword.string() + window->keyword.length()) - current->keyword.string()) < maximum_snippet_length; window++)
 		score += window->score;
 
 	if (score > best_score)

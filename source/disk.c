@@ -88,7 +88,7 @@ return block;
 char *ANT_disk::write_entire_file(char *filename, char *buffer, long length)
 {
 FILE *fp;
-long success;
+size_t success;
 
 if ((fp = fopen(filename, "wb")) == NULL)
 	return NULL;

@@ -9,7 +9,6 @@
 #include "search_engine.h"
 #include "btree_iterator.h"
 #include "search_engine_btree_leaf.h"
-#include "pdebug.h"
 
 #define FLUSH_CACHE_BEFORE_QUERY 0
 #define USE_O_DIRECT 0

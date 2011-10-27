@@ -20,7 +20,8 @@ long ANT_index_document::index_document(ANT_memory_indexer *indexer, ANT_stem *s
 {
 char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
 ANT_parser_token *token;
-long terms_in_document, length_of_token, length_of_previous_token, is_previous_token_chinese;
+long terms_in_document, length_of_token, is_previous_token_chinese;
+size_t length_of_previous_token;
 char *previous_token_start;
 
 /*

@@ -114,7 +114,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		if (engine == NULL)
 			term_string->tf_weight = 1;
 		else
-			term_string->tf_weight = engine->get_collection_frequency(unstemmed_term, stemmer, &details)->global_collection_frequency;
+			term_string->tf_weight = (double)engine->get_collection_frequency(unstemmed_term, stemmer, &details)->global_collection_frequency;
 
 		/*
 			Now compute the term itself (i.e. the stem if there is one)
@@ -230,7 +230,7 @@ while ((token = parser->get_next_token()) != NULL)
 				if (start == NULL)
 					start = token->string();
 
-				if (length_in_bytes + (token->string() + token->length() - start) >= maximum_snippet_length)
+				if (length_in_bytes + (token->string() + token->length() - start) >= (size_t)maximum_snippet_length)
 					break;
 
 				substring_length = token->string() + token->length() - start;

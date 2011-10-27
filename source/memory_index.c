@@ -25,7 +25,6 @@
 #include "maths.h"
 #include "btree_iterator.h"
 #include "stop_word.h"
-#include "pdebug.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -874,7 +873,7 @@ for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 		where += generate_term_list(hash_table[hash_val], term_list, where, &length_of_longest_term, &highest_df);
 term_list[unique_terms] = NULL;
 
-dbg_printf("unique_terms: %ld\n", unique_terms);
+//printf("unique_terms: %ld\n", unique_terms);
 
 /*
 	Sort the term list
@@ -906,7 +905,7 @@ while (*here != NULL)
 last_header = current_header;
 terms_in_root = last_header - header;
 
-dbg_printf("btree_root_size++: %ld, terms_in_root: %ld\n", btree_root_size, terms_in_root);
+//printf("btree_root_size++: %ld, terms_in_root: %ld\n", btree_root_size, terms_in_root);
 
 /*
 	Take note of where the header will be located on disk
@@ -967,14 +966,14 @@ return 1;
 */
 void ANT_memory_index::add_to_filename_repository(char *filename)
 {
-size_t length, remaining;
+long long remaining, length;
 char *new_buffer;
 
 length = strlen(filename) + 1;		// +1 to include the '\0'
 if ((document_filenames_used + length) > document_filenames_chunk_size)
 	{
 	if ((remaining = document_filenames_chunk_size - document_filenames_used) != 0)
-		memcpy(document_filenames + document_filenames_used, filename, remaining);
+		memcpy(document_filenames + document_filenames_used, filename, (size_t)remaining);
 	new_buffer = (char *)memory->malloc(document_filenames_chunk_size);
 	*(char **)new_buffer = document_filenames;
 	document_filenames_used = sizeof(char *);
@@ -985,7 +984,7 @@ if ((document_filenames_used + length) > document_filenames_chunk_size)
 	}
 if (length != 0)
 	{
-	memcpy(document_filenames + document_filenames_used, filename, length);
+	memcpy(document_filenames + document_filenames_used, filename, (size_t)length);
 	document_filenames_used += length;
 	}
 }

@@ -144,8 +144,6 @@ FIXED = /link /fixed:no /opt:ref
 
 MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1 
 MINUS_D = $(MINUS_D) -DSPECIAL_COMPRESSION=1
-#MINUS_D = $(MINUS_D) -DTOP_K_SEARCH
-MINUS_D = $(MINUS_D) -DHEAP_K_SEARCH
 MINUS_D = $(MINUS_D) -DTWO_D_ACCUMULATORS
 MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
@@ -373,8 +371,7 @@ ANT_TARGETS = \
 	$(BINDIR)\atire.exe 				\
 	$(BINDIR)\atire_broker.exe 			\
 	$(BINDIR)\atire_client.exe			\
-	$(BINDIR)\ant_dictionary.exe		\
-	$(BINDIR)\ant.exe
+	$(BINDIR)\ant_dictionary.exe
 
 OTHER_TARGETS = \
 	$(BINDIR)\link_extract_inex_wikipedia.exe 	\

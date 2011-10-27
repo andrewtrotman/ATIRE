@@ -26,8 +26,8 @@ inline static int consonant_p(const char *s, int i) {
     default: return TRUE;
     }
 }
-inline static int m(const char *s, int j) {
-    int n = 0, i = 0;
+inline static size_t m(const char *s, size_t j) {
+    size_t n = 0, i = 0;
     while(1) {
     	if (i > j)
     		return n;
@@ -69,7 +69,7 @@ size_t ANT_stem_otago_v2::stem(const char *string, char *buffer) {
     buffer[TMP_BUFFER_SIZE - 1] = '\0';
 
     length = strlen(buffer);
-	int buf_m = m(buffer, length - 1);
+	size_t buf_m = m(buffer, length - 1);
 
 	if (buf_m >= 1 && strncmp(buffer + length - 1, "s", 4) == 0 && length >= 3) {
 		buffer[length - 1] = '\0';

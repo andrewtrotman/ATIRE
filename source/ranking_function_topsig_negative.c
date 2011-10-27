@@ -10,6 +10,7 @@
 	Geva, S., De Vries, C. TOPSIG: Topology Preserving Document Signatures, Proceedings of CIKM 2100
 */
 #include <math.h>
+#include <stdlib.h>
 #include "pragma.h"
 #include "ranking_function_topsig_negative.h"
 #include "search_engine_btree_leaf.h"

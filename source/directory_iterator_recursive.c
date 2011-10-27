@@ -171,7 +171,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 {
 #ifdef _MSC_VER
 	ANT_disk_directory *current_file_list;
-	long path_length;
+	size_t path_length;
 
 	while (get_next_candidate())
 		{
@@ -302,7 +302,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_recursive::next(ANT_direct
 char *got;
 
 #ifdef _MSC_VER
-	long path_length;
+	size_t path_length;
 
 	if ((got = next_match_wildcard()) == NULL)
 		return NULL;

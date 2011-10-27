@@ -322,7 +322,7 @@ if (internals->sock != INVALID_SOCKET)
 	FD_ZERO(&err);
 	FD_SET(internals->sock, &err);
 
-	select_val = ::select(internals->sock + 1, &which, NULL, &err, mode == BLOCK ? NULL : &timeout);
+	select_val = ::select((int)internals->sock + 1, &which, NULL, &err, mode == BLOCK ? NULL : &timeout);
 
 	/*
 		OK what did we get from the select?  Presumably instruction to actually fill
@@ -535,14 +535,14 @@ long long ANT_socket::block_write(const char *pbuffer, long long size)
 {
 const char *from;
 unsigned long long len, sent;
-size_t should_send;
+int should_send;
 
 len = size;
 from = pbuffer;
 
 while (len != 0)
 	{
-	should_send = (size_t)ANT_min(len, (unsigned long long)std::numeric_limits<std::size_t>::max());
+	should_send = (int)ANT_min(len, (unsigned long long)std::numeric_limits<int>::max());
 	if ((sent = send(internals->sock, from, should_send, 0)) == SOCKET_ERROR)
 		return -1;
 	len -= sent;

@@ -100,6 +100,7 @@ pregen_t ANT_pregen_writer_normal::generate_recentdate(ANT_string_pair field)
 long long date = atol(field.start);
 
 //Don't need to do any fancy conversion
+#pragma  ANT_PRAGMA_CONST_CONDITIONAL
 if (sizeof(pregen_t) >= 4)
 	return (pregen_t) date;
 

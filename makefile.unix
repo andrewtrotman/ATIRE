@@ -4,12 +4,12 @@ BINDIR = bin
 
 # debuging compiling and linking
 #LDFLAGS = -g -ldl
-#CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -DONE_PARSER -DTOP_K_SEARCH \
+#CFLAGS = -g -Wall -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -DONE_PARSER \
 #         -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 # normal compiling and linking
 LDFLAGS = -ldl
-CFLAGS = -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER -DTOP_K_SEARCH \
+CFLAGS = -DHASHER=1 -DHEADER_HASHER=1 $(COMPRESSION) -O2 -DONE_PARSER \
 #CFLAGS = $CFLAGS -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings
 
 # parallel compiling and linking

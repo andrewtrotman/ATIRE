@@ -12,7 +12,7 @@
 class ANT_relevant_document_passage
 {
 public:
-	long offset, length;
+	long long offset, length;
 	ANT_relevant_document_passage *next;			// next passage in this document (or NULL)
 } ;
 

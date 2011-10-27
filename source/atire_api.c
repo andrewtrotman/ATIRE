@@ -530,9 +530,9 @@ return 0;		// success
 char *ATIRE_API::string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold)
 {
 unsigned long character;
-long length, has_non_upper = false;
+long has_non_upper = false;
 char *current, *dest_current;
-size_t dest_remain;
+size_t dest_remain, length;
 
 /*
 	Terms that are in upper-case are tag names for the bag-of-tags approach whereas mixed / lower case terms are search terms
@@ -863,11 +863,9 @@ long answer, added, terms_in_query = 0;
 ANT_bitstring *valid_result_set = NULL;
 ANT_search_engine_accumulator *accumulator;
 
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	ANT_search_engine_accumulator **accumulator_pointers;
-	long next_relevant_document;
-	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
-#endif
+ANT_search_engine_accumulator **accumulator_pointers;
+long next_relevant_document;
+Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
 
 /*
 	Parse the query and count the number of search terms.  If there's a parse error
@@ -908,51 +906,34 @@ if (parsed_query->subtype == ANT_query::DISJUNCTIVE || feedbacker != NULL)
 */
 valid_result_set = process_boolean_query(parsed_query->boolean_query, &terms_in_query);
 
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	if (terms_in_query > 1)			// the heap is already correct if there's only one term in the query
+if (terms_in_query > 1)			// the heap is already correct if there's only one term in the query
+	{
+	accumulator = search_engine->results_list->accumulator;
+	accumulator_pointers = search_engine->results_list->accumulator_pointers;
+	ANT_bitstring_iterator iterator(valid_result_set);
+
+	heapk = search_engine->results_list->heapk;		// re-use the results list heap
+
+	added = 0;
+	for (next_relevant_document = iterator.first(); next_relevant_document >= 0; next_relevant_document = iterator.next())
 		{
-		accumulator = search_engine->results_list->accumulator;
-		accumulator_pointers = search_engine->results_list->accumulator_pointers;
-		ANT_bitstring_iterator iterator(valid_result_set);
-
-#ifdef HEAP_K_SEARCH
-		heapk = search_engine->results_list->heapk;		// re-use the results list heap
-#else
-		heapk = new Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare>(*accumulator_pointers, sort_top_k);
-#endif
-
-		added = 0;
-		for (next_relevant_document = iterator.first(); next_relevant_document >= 0; next_relevant_document = iterator.next())
+		if (added < sort_top_k)						// just add to the heap
+			accumulator_pointers[added] = accumulator + next_relevant_document;
+		else if (added > sort_top_k)				// update the heap if this node belongs
 			{
-			if (added < sort_top_k)						// just add to the heap
-				accumulator_pointers[added] = accumulator + next_relevant_document;
-			else if (added > sort_top_k)				// update the heap if this node belongs
-				{
-				if (accumulator[next_relevant_document].get_rsv() > accumulator_pointers[0]->get_rsv())
-					heapk->min_insert(accumulator + next_relevant_document);
-				}
-			else		// added == sort_top_k			// insert then sort the heap
-				{
-				accumulator_pointers[added] = accumulator + next_relevant_document;
-				heapk->build_min_heap();
-				}
-			added++;
+			if (accumulator[next_relevant_document].get_rsv() > accumulator_pointers[0]->get_rsv())
+				heapk->min_insert(accumulator + next_relevant_document);
 			}
+		else		// added == sort_top_k			// insert then sort the heap
+			{
+			accumulator_pointers[added] = accumulator + next_relevant_document;
+			heapk->build_min_heap();
+			}
+		added++;
+		}
 
-		search_engine->results_list->results_list_length = added < sort_top_k ? added : sort_top_k;
-#ifdef HEAP_K_SEARCH
-#else
-	delete heapk;
-#endif
-		}
-#else
-	for (added = 0; added < documents_in_id_list; added++)
-		{
-		if (accumulator[added].get_rsv() > 0)
-			if (!valid_result_set->unsafe_getbit(added))
-				accumulator[added].clear_rsv();
-		}
-#endif
+	search_engine->results_list->results_list_length = added < sort_top_k ? added : sort_top_k;
+	}
 
 /*
 	Clean up and finish
@@ -1028,12 +1009,7 @@ long long ATIRE_API::search(char *query, long long top_k, long query_type)
 sort_top_k = top_k;
 
 search_engine->stats_initialise();
-
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	search_engine->init_accumulators(top_k);
-#else
-	search_engine->init_accumulators();
-#endif
+search_engine->init_accumulators(top_k);
 
 /*
 	Parse and do the query
@@ -1075,11 +1051,7 @@ if (feedbacker != NULL)
 		/*
 			Initialise
 		*/
-		#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-			search_engine->init_accumulators(top_k);
-		#else
-			search_engine->init_accumulators();
-		#endif
+		search_engine->init_accumulators(top_k);
 
 		/*
 			Generate query, search, and clean up

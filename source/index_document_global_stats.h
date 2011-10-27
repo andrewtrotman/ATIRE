@@ -21,7 +21,7 @@ public:
 
 public:
 	ANT_index_document_global_stats(ANT_string_pair *string)	{ left = right = 0; term.start = string->start; term.string_length = string->string_length; collection_frequency = 1; }
-	void *operator new (size_t bytes, ANT_memory *memory) { return ::new char [bytes]; }
+	void *operator new (size_t bytes, ANT_memory *memory) { (void)memory; return ::new char [bytes]; }
 } ;
 
 #endif /* INDEX_DOCUMENT_GLOBAL_STATS_H_ */

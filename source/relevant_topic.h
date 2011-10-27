@@ -11,9 +11,9 @@ class ANT_relevant_topic
 public:
 	static int compare(const void *a, const void *b);
 public:
-	long topic;
-	long number_of_relevant_documents;
-	long number_of_nonrelevant_documents;
+	long long topic;
+	long long number_of_relevant_documents;
+	long long number_of_nonrelevant_documents;
 	long long number_of_relevant_characters;
 } ;
 

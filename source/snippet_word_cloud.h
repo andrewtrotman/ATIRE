@@ -24,7 +24,7 @@ public:
 	virtual ~ANT_snippet_word_cloud();
 
 	virtual char *get_snippet(char *snippet, char *document);
-	virtual ANT_NEXI_term_ant **parse_query(char *query) { return NULL; }
+	virtual ANT_NEXI_term_ant **parse_query(char *query) { (void)query; return NULL; }
 } ;
 
 #endif /* SNIPPET_WORD_CLOUD_H_ */

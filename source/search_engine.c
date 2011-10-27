@@ -22,7 +22,6 @@
 #include "stemmer_stem.h"
 #include "stemmer_factory.h"
 #include "compress_variable_byte.h"
-#include "pdebug.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -114,7 +113,7 @@ index->seek(term_header);
 	The first sizeof(int64_t) bytes of the header are the number of nodes in the root
 */
 btree_nodes = (long)(ANT_get_long_long(block) + 1);		// +1 because were going to add a sentinal at the start
-dbg_printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
+//printf("There are %ld nodes in the root of the btree\n", btree_nodes - 1);
 block += sizeof(int64_t);
 btree_root = (ANT_search_engine_btree_node *)memory->malloc((long)(sizeof(ANT_search_engine_btree_node) * (btree_nodes + 1)));	// +1 to null terminate (with the end of last block position)
 
@@ -319,20 +318,12 @@ stats_for_all_queries->add(stats);
 	ANT_SEARCH_ENGINE::INIT_ACCUMULATORS()
 	--------------------------------------
 */
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 void ANT_search_engine::init_accumulators(long long top_k)
-#else
-void ANT_search_engine::init_accumulators(void)
-#endif
 {
 long long now;
 
 now = stats->start_timer();
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
-	results_list->init_accumulators(top_k > documents ? documents + 1 : top_k);		// we add 1 here to prevent the unfortunate repeated re-organisation of the heap when there are number-of-documents in it
-#else
-	results_list->init_accumulators();
-#endif
+results_list->init_accumulators(top_k > documents ? documents + 1 : top_k);		// we add 1 here to prevent the unfortunate repeated re-organisation of the heap when there are number-of-documents in it
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 
@@ -826,11 +817,7 @@ long long now, hits = 0;
 
 now = stats->start_timer();
 
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 end = results_list->accumulator_pointers + results_list->results_list_length;
-#else
-end = results_list->accumulator_pointers + documents;
-#endif
 
 for (current = results_list->accumulator_pointers; current < end; current++)
 	if ((*current)->get_rsv() < terms_in_query)
@@ -838,9 +825,7 @@ for (current = results_list->accumulator_pointers; current < end; current++)
 	else
 		hits++;
 
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 results_list->results_list_length = hits;
-#endif
 
 stats->add_rank_time(stats->stop_timer(now));
 
@@ -856,11 +841,7 @@ char **ANT_search_engine::generate_results_list(char **document_id_list, char **
 ANT_search_engine_accumulator **current, **end;
 char **into = sorted_id_list;
 
-#if (defined TOP_K_SEARCH) || (defined HEAP_K_SEARCH)
 end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
-#else
-end = results_list->accumulator_pointers + (documents < top_k ? documents : top_k);
-#endif
 for (current = results_list->accumulator_pointers; current < end; current++)
 	if ((*current)->is_zero_rsv())
 		break;
