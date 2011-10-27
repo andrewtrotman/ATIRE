@@ -223,7 +223,7 @@ if (get_file)
 		total_length += field_length[current] + 1;
 
 	object->length = total_length + 1;
-	into = object->file = new char [object->length];
+	into = object->file = new char [(size_t) object->length];
 
 	for(current = docname_col + 1; current < fields; current++)
 		{

@@ -79,7 +79,7 @@ long long tau_merge_sort(std::pair<pregen_t, pregen_t> *docs, unsigned long long
 {
 //TODO shuffling around array indexes would be much faster than sorting pairs of 64-bit values.
 
-std::pair<pregen_t, pregen_t> *mergebuf = new std::pair<pregen_t, pregen_t>[doccount];
+std::pair<pregen_t, pregen_t> *mergebuf = new std::pair<pregen_t, pregen_t>[(size_t) doccount];
 
 long long result = tau_merge_sort_inner(docs, doccount, mergebuf);
 
