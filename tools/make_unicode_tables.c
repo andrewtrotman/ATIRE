@@ -132,7 +132,7 @@ char *file, *pos, *end;
 char **lines, **current;
 long long number_of_lines;
 long field, mode, times;
-unsigned long upper_character, lower_character, character, destination_character;
+unsigned long upper_character, lower_character, character, destination_character, last_character;
 int state;
 enum ANT_UNICODE_chartype chartype;
 char utf8_buf[100];
@@ -281,7 +281,8 @@ for (current = lines; *current != NULL; current++)
 		}
 	}
 
-reduce_decompositions();
+if (mode == DECOMPOSITION)
+	reduce_decompositions();
 
 switch (mode)
 	{
@@ -295,7 +296,7 @@ switch (mode)
 		printf("ANT_UNICODE_decomposition ANT_UNICODE_decomposition[] = {\n");
 		break;
 	case CHARTYPE:
-		printf("unsigned char ANT_UNICODE_char_chartype[] = {\n");
+		printf("ANT_UNICODE_char_chartype ANT_UNICODE_char_chartype[] = {\n");
 		break;
 	}
 
@@ -376,21 +377,41 @@ for (current = lines; *current != NULL; current++)
 		{
 		chartype = (ANT_UNICODE_chartype) chartypes[character];
 
+		if (ischinese(character))
+			chartype = CT_OTHER;
+
 		switch (chartype)
 			{
 			case CT_PUNCTUATION:
 			case CT_SEPARATOR:
 			case CT_NUMBER:
 			case CT_LETTER:
-				if (times != 0)
-					{
-					printf(", ");
-					if (times % 16 == 0)
-						printf("\n");
-					}
+				/* CJK characters are in UnicodeData.txt as ranges: (they don't have a line for each codepoint) */
+/*				if (character == 0x03400)
+					last_character = 0x04DB5;
+				else if (character == 0x04e00)
+					last_character = 0x09FCB;
+				else if (character == 0x20000)
+					last_character = 0x2a6df;
+				else if (character == 0x2A700)
+					last_character = 0x2B734;
+				else if (character == 0x2B740)
+					last_character = 0x2B81D;
+				else*/
+					last_character = character;
 
-				printf("{%ld, (unsigned char)(%s%s)}", character, ANT_UNICODE_chartype_string[(int) chartype],
-						ischinese(character) ? " | CT_CHINESE" : "");
+				for (; character <= last_character; character++)
+					{
+					if (times != 0)
+						{
+						printf(", ");
+						if (times % 16 == 0)
+							printf("\n");
+						}
+
+					printf("{%ld, (unsigned char)(%s%s)}", character, ANT_UNICODE_chartype_string[(int) chartype],
+							ischinese(character) ? " | CT_CHINESE" : "");
+					}
 
 				times++;
 				break;

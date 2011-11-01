@@ -115,7 +115,7 @@ for (;;)
 
 	chartype = unicode_chartype_set(character);
 
-	if (chartype == CT_LETTER || chartype == CT_NUMBER || chartype == CT_PUNCTUATION || (chartype & CT_CHINESE) || (chartype==CT_OTHER && character == SPECIAL_TERM_CHAR))
+	if (chartype == CT_LETTER || chartype == CT_NUMBER || chartype == CT_PUNCTUATION || (chartype==CT_OTHER && (character == SPECIAL_TERM_CHAR || ischinese(character))))
 		break;
 
 	current++;
@@ -186,7 +186,7 @@ else if (chartype == CT_OTHER && character == SPECIAL_TERM_CHAR)
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (chartype & CT_CHINESE)
+else if (chartype == CT_OTHER && ischinese(character))
 	{
 	word_count = 1;
 	start = current;
