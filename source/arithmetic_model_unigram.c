@@ -36,7 +36,7 @@ for (i = sym; i >= 0; i--)
 	cfreq[i] += 1;
 }
 
-ANT_arithmetic_model_unigram::ANT_arithmetic_model_unigram(int nsym, unsigned int *ifreq, int adapt)
+ANT_arithmetic_model_unigram::ANT_arithmetic_model_unigram(int nsym, const unsigned int *ifreq, int adapt)
 {
 int i;
 

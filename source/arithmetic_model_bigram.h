@@ -24,7 +24,7 @@ public:
 	virtual void update(int sym);
 	virtual void clear_context();
 
-	ANT_arithmetic_model_bigram(int nsym, unsigned int *ifreq, int adapt);
+	ANT_arithmetic_model_bigram(int nsym, const unsigned int *ifreq, int adapt);
 	virtual ~ANT_arithmetic_model_bigram();
 };
 

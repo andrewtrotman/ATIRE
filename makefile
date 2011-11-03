@@ -337,6 +337,7 @@ PARTS = \
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\pregen.obj							\
+	$(OBJDIR)\arithmetic_model_tables.obj			\
 	$(OBJDIR)\arithmetic_model_bigram.obj			\
 	$(OBJDIR)\arithmetic_model_unigram.obj			\
 	$(OBJDIR)\pregen_kendall_tau.obj				\

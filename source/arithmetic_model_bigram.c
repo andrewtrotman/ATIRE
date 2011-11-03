@@ -60,7 +60,7 @@ if (adapt)
 set_context(sym + 1);
 }
 
-ANT_arithmetic_model_bigram::ANT_arithmetic_model_bigram(int nsym, unsigned int *ifreq, int adapt)
+ANT_arithmetic_model_bigram::ANT_arithmetic_model_bigram(int nsym, const unsigned int *ifreq, int adapt)
 {
 int i, j;
 

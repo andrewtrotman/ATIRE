@@ -11,7 +11,7 @@ public:
 	virtual void print();
 	virtual void update(int sym);
 
-	ANT_arithmetic_model_unigram(int nsym, unsigned int *ifreq, int adapt);
+	ANT_arithmetic_model_unigram(int nsym, const unsigned int *ifreq, int adapt);
 	virtual ~ANT_arithmetic_model_unigram();
 };
 

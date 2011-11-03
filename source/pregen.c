@@ -9,8 +9,16 @@
 
 #include "maths.h"
 #include "pregen.h"
-#include "arithmetic_coding.h"
 #include "str.h"
+
+#include "arithmetic_coding.h"
+#include "encode_char.h"
+#include "encode_char_8bit.h"
+#include "encode_char_base32.h"
+#include "encode_char_base36.h"
+#include "encode_char_base37.h"
+#include "encode_char_base40.h"
+#include "encode_char_printable_ascii.h"
 
 template<typename T> T min (T a, T b)
 {

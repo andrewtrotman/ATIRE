@@ -11,19 +11,23 @@
 #include "str.h"
 #include "arithmetic_coding.h"
 #include "arithmetic_model.h"
+#include "arithmetic_model_tables.h"
 #include "arithmetic_model_unigram.h"
 #include "arithmetic_model_bigram.h"
+#include "encode_char_base32.h"
+#include "encode_char_base37.h"
+#include "encode_char_printable_ascii.h"
 #include "unicode.h"
 #include "unicode_tables.h"
+#include "encode_char.h"
 
 #define MAX_PREGEN_FIELDS 128
 #define PREGEN_FILE_VERSION 2
 
-#define CHAR_ENCODE_FAIL 255
-
 enum pregen_field_type { INTEGER, BINTRUNC, STRTRUNC, BASE32, BASE32_ARITHMETIC, BASE36,
 	BASE37, BASE40, RECENTDATE, INTEGEREXACT, STREXACT, STREXACT_RESTRICTED, BASE37_ARITHMETIC,
-	ASCII_PRINTABLES, ASCII_PRINTABLES_ARITHMETIC, ASCII_PRINTABLES_ARITHMETIC_BIGRAM};
+	ASCII_PRINTABLES, ASCII_PRINTABLES_ARITHMETIC, ASCII_PRINTABLES_ARITHMETIC_BIGRAM,
+	OCTECT_ARITHMETIC_BIGRAM};
 
 typedef ANT_PREGEN_T pregen_t;
 
@@ -34,177 +38,6 @@ struct pregen_file_header
 	uint32_t pregen_t_size;
 	uint32_t field_type;
 	uint32_t field_name_length;
-};
-
-/* Encode a character as a base-36 digit (0-9, a-z), or 255 if there is no
- * mapping for this character */
-class ANT_encode_char_base36
-{
-public:
-	static const unsigned int num_symbols = 36;
-
-	static unsigned char encode(unsigned char c)
-	{
-	if (c >= '0' && c <= '9')
-		{
-		/* Digits sort first*/
-		return c - '0';
-		}
-	else if (c >= 'a' && c <= 'z')
-		{
-		/* Letters last */
-		return c - 'a' + 10;
-		}
-	return CHAR_ENCODE_FAIL;
-	}
-};
-
-/* Encode a character as a base-37 digit (' ', 0-9, a-z), or CHAR_ENCODE_FAIL if
- * there is no mapping for this character */
-class ANT_encode_char_base37
-{
-public:
-	static const unsigned int num_symbols = 37;
-
-	static unsigned char encode(unsigned char c)
-	{
-	if (c == ' ')
-		return 0;
-	if (c >= '0' && c <= '9')
-		{
-		/* Digits sort second*/
-		return c - '0' + 1;
-		}
-	else if (c >= 'a' && c <= 'z')
-		{
-		/* Letters last */
-		return c - 'a' + 1 + 10;
-		}
-
-	return CHAR_ENCODE_FAIL;
-	}
-};
-
-/* Encode a character as a base-40 digit (' ', punctuation between ' ' and '0' as one char, 0-9,
- * punctuation between '9' and 'z' as one char, a-z, punctuation after 'z' as one char). */
-class ANT_encode_char_base40
-{
-public:
-	static const unsigned int num_symbols = 40;
-
-	static unsigned char encode(unsigned char c)
-	{
-	if (c == ' ')
-		return 0;
-
-	if (c < '0')
-		return 1;
-
-	if (c >= '0' && c <= '9')
-		return c - '0' + 2;
-
-	if (c < 'a')
-		return 2 + 10;
-
-	if (c >= 'a' && c <= 'z')
-		return c - 'a' + 2 + 10 + 1;
-
-	if (c > 'z')
-		return 2 + 10 + 1 + 26;
-
-	return CHAR_ENCODE_FAIL;
-	}
-};
-
-/* Encode all printable ASCII characters as distinct codepoints (except uppercase letters,
- * provide lowercased input!), plus encode all Unicode characters as one single
- * codepoint larger than ASCII. */
-class ANT_encode_char_printable_ascii
-{
-public:
-	static const unsigned int num_symbols = 70;
-
-	static unsigned char encode(unsigned char c)
-	{
-	if (c < ' ')
-		return CHAR_ENCODE_FAIL;
-
-	//Unicode folds on top of the delete character
-	if (c > 0x7F)
-		c = 0x7F;
-
-	//Eliminate the hole where uppercase characters used to be
-	if (c > 'Z')
-		c -= ('Z' - 'A' + 1);
-
-	//Eliminate control characters (everything below space)
-	c -= ' ';
-
-	return c;
-	}
-};
-
-/*
- * Encode ASCII alphanumerics into an 5-bit number, with all punctuation merged to one point,
- * and digits doubling up. All letters are distinct codepoints.
- */
-class ANT_encode_char_base32_edges
-{
-public:
-	static const unsigned int num_symbols = 32;
-
-	static unsigned char encode(unsigned char c)
-	{
-	if (c >= '0' && c <= '9')
-		return 1 + ((c - '0') >> 1); //Numbers sort second, but they will have to double-up to fit into 5 encodings
-
-	if (c >= 'a' && c <= 'z')
-		return c - 'a' + 5; //Letters sort last
-
-	if (c <= LAST_ASCII_CHAR)
-		return 0; //Punctuation sorts first
-
-	//We'll sort Unicode along with Z
-	return (unsigned char) (num_symbols - 1);
-	}
-};
-
-/*
- * Encode ASCII alphanumerics into an 5-bit number, with all punctuation merged to one point,
- * and digits doubling up. All letters are distinct codepoints.
- */
-class ANT_encode_char_base32
-{
-public:
-	static const unsigned int num_symbols = 32;
-
-	static unsigned char encode(unsigned char c)
-	{
-	if (c == ' ')
-		return 0;
-
-	if (c >= '0' && c <= '9')
-		return 1 + ((c - '0') >> 1); //Numbers sort second, but they will have to double-up to fit into 5 encodings
-
-	if (c >= 'a' && c <= 'z')
-		return c - 'a' + 6; //Letters sort last
-
-	return CHAR_ENCODE_FAIL;
-	}
-};
-
-/*
- * Null-encoding, just passses 8-bit chars straight through.
- */
-class ANT_encode_char_8bit
-{
-public:
-	static const unsigned int num_symbols = 256;
-
-	static unsigned char encode(unsigned char c)
-	{
-	return c;
-	}
 };
 
 class ANT_pregen
@@ -296,30 +129,11 @@ public:
 	{
 	if (type == BASE37_ARITHMETIC)
 		{
-		static unsigned int symbol_frequencies[] =
-			{
-			1433, 21, 50, 39, 11, 8, 5, 1, 6, 5, 4, 688, 98, 363, 250, 922,
-			140, 200, 265, 462, 14, 70, 342, 226, 579, 557, 334, 16, 636, 474, 574, 181,
-			74, 184, 23, 117, 20
-			};
-
-		arithmetic_model = new ANT_arithmetic_model_unigram(ANT_encode_char_base37::num_symbols, symbol_frequencies, 0);
+		arithmetic_model = new ANT_arithmetic_model_unigram(ANT_encode_char_base37::num_symbols, ANT_symbol_frequencies_base37, 0);
 		}
 	else if (type == ASCII_PRINTABLES_ARITHMETIC)
 		{
-		static unsigned int symbol_frequencies[] =
-			{
-			1907, /* Space */
-			223, 1, 1, 1, 1, 29, 25, 155, 157, 60, 5, 48, 78, 136, 29, /* Punctuation */
-			16, 50, 16, 17,	5, 4, 1, 5, 7, 8, /* 0 - 9 */
-			41, 30, 1, 3, 1, 190, 1, 29, 1, 28, 11, 4, 1, /* Punctuation */
-			1048, 134, 549, 502, 1204, 205, 306, 384, 669, 21, 88, 515, 333, 737, /* a - n */
-			854, 481, 12, 858, 643, 850, 199, 100, 315, 38, 225, 8, /* o - z */
-			28, 13, 29, 93, /* Punctuation */
-			15 /* Unicode */
-			};
-
-		arithmetic_model = new ANT_arithmetic_model_unigram(ANT_encode_char_printable_ascii::num_symbols, symbol_frequencies, 0);
+		arithmetic_model = new ANT_arithmetic_model_unigram(ANT_encode_char_printable_ascii::num_symbols, ANT_symbol_frequencies_ascii_printables, 0);
 		}
 	else if (type == BASE32_ARITHMETIC)
 		{
