@@ -8,13 +8,51 @@
 #include "/ant/source/disk.h"
 
 /*
+	GET_TITLE()
+	-----------
+*/
+char *get_title(char *line)
+{
+char *term, *term_end;
+long long times, lex_id, current;
+
+term = line;
+term = strchr(term, ' ') + 1;
+term = strchr(term, ' ') + 1;
+term = strchr(term, ' ') + 1;
+
+times = atol(term);
+
+if (times > 1)
+	printf("(");
+
+for (current = 0; current < times; current++)
+	{
+	term = strchr(term, ' ') + 1;
+	term_end = strchr(term, ' ');
+
+	if (current != 0)
+		printf(" ");
+	printf("%*.*s", term_end - term, term_end - term, term);
+
+	term = term_end + 1;
+	lex_id = atol(term);
+	}
+if (times > 1)
+	printf(")");
+
+return NULL;
+}
+
+/*
 	LIST_SYNSETS()
 	--------------
 */
 void list_synsets(char *file, char *at, long long times)
 {
 char type[4], pos;
-long long offset, source_target;
+long long offset;
+int source_target;
 
 while (times-- > 0)
 	{
@@ -42,18 +80,9 @@ while (times-- > 0)
 
 	if (*type == '~')		// Hyponym
 		{
-		char *term, *term_end;
-
-		printf("   (%d)", offset);
-
-		term = file + offset;
-		term = strchr(term, ' ') + 1;
-		term = strchr(term, ' ') + 1;
-		term = strchr(term, ' ') + 1;
-		term = strchr(term, ' ') + 1;
-		term_end = strchr(term, ' ') + 1;
-
-		printf("%*.*s\n", term_end - term, term_end - term, term);
+		printf("   [%d]", offset);
+		get_title(file + offset);
+		puts("");
 		}
 	}
 }
@@ -81,7 +110,7 @@ for (current = lines; *current != NULL; current++)
 	long long offset;
 	long long lex_filenum;
 	char ss_type;
-	long long w_cnt;
+	int w_cnt, current_word;
 	char word[1024];
 	long long lex_id;
 	long long p_cnt;
@@ -110,22 +139,20 @@ for (current = lines; *current != NULL; current++)
 		continue;
 	at++;
 
-	sscanf(at, "%s", word);
-	if ((at = strchr(at, ' ')) == NULL)
-		continue;
-	at++;
+	get_title(*current);
 
-	sscanf(at, "%1x", &lex_id);
-	if ((at = strchr(at, ' ')) == NULL)
-		continue;
-	at++;
-
+	for (current_word = 0; current_word < w_cnt; current_word++)
+		{
+		at = strchr(at, ' ') + 1;
+		at = strchr(at, ' ') + 1;
+		}
+	 
 	p_cnt = atol(at);
 	if ((at = strchr(at, ' ')) == NULL)
 		continue;
 	at++;
 
-	printf("%s : %d synsets\n", word, p_cnt);
+	printf(": %d synsets\n", p_cnt);
 	list_synsets(file, at, p_cnt);
 	}
 
