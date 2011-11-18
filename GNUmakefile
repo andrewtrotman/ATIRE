@@ -239,14 +239,12 @@ PHPDIR = php_ext
 LIBDIR = lib
 
 IGNORE_LIST := $(SRCDIR)/ant_ant.c \
-			  $(SRCDIR)/ant_api.c \
 			  $(SRCDIR)/ant_plugins.c \
 			  $(SRCDIR)/test_compression.c \
 			  $(SRCDIR)/stem_lovins.c \
 			  $(SRCDIR)/stem_paice_husk.c
 
-MAIN_FILES := $(SRCDIR)/ant.c \
-			  $(SRCDIR)/atire.c \
+MAIN_FILES := $(SRCDIR)/atire.c \
 			  $(SRCDIR)/index.c \
 			  $(SRCDIR)/ant_dictionary.c \
 			  $(SRCDIR)/atire_client.c \
@@ -267,9 +265,6 @@ endif
 
 INDEX_SOURCES := index.c $(notdir $(SOURCES))
 INDEX_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
-
-ANT_SOURCES := ant.c $(notdir $(SOURCES))
-ANT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_SOURCES)))
 
 ANT_DICT_SOURCES := ant_dictionary.c $(notdir $(SOURCES))
 ANT_DICT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_DICT_SOURCES)))
@@ -330,9 +325,6 @@ $(BINDIR)/index : $(INDEX_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/atire_client : $(ATIRE_CLIENT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
-
-$(BINDIR)/ant : $(ANT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BINDIR)/atire : $(ATIRE_OBJECTS)
