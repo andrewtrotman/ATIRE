@@ -53,13 +53,8 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 # to memcpy for read.
 USE_DIRECT_MEMORY_READ := 0
 
-# enable either TOP_K search or HEAP_K search, but not both
-USE_TOP_K_SEARCH := 0
-USE_HEAP_K_SEARCH := 1
-
-# if top_k or heap_k is enable, then partial decompression of postings list
-# is supported
-USE_PARTIAL_DCOMPRESSION := 0
+# partial decompression of postings list
+USE_PARTIAL_DCOMPRESSION := 1
 
 # represent the static array in two dimensions, reduce accumulators
 # initialisation time
@@ -191,22 +186,8 @@ ifeq ($(USE_DIRECT_MEMORY_READ), 1)
 	CFLAGS += -DDIRECT_MEMORY_READ
 endif
 
-ENABLED_TOP_K_SEARCH := no
-
-ifeq ($(USE_TOP_K_SEARCH), 1)
-	CFLAGS += -DTOP_K_SEARCH
-	ENABLED_TOP_K_SEARCH := yes
-else ifeq ($(USE_HEAP_K_SEARCH), 1)
-	CFLAGS += -DHEAP_K_SEARCH
-	ENABLED_TOP_K_SEARCH := yes
-endif
-
-
-# make sure either top_k or heap_k is enabled
-ifeq ($(ENABLED_TOP_K_SEARCH), yes)
-	ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)
-		CFLAGS += -DTOP_K_READ_AND_DECOMPRESSOR
-	endif
+ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)
+	CFLAGS += -DTOP_K_READ_AND_DECOMPRESSOR
 endif
 
 ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
