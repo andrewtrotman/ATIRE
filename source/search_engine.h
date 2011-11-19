@@ -44,6 +44,9 @@ private:
 	long string_length_of_longest_term;
 	long long highest_df;
 	const char *index_filename;
+#ifdef DIRECT_MEMORY_READ
+	long memory_model;
+#endif
 
 	/*
 		If the index contains the documents then we need to deserialise the positions and store them

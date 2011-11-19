@@ -47,6 +47,10 @@ if (memory_model)
 	index = new ANT_file_memory;
 else
 	index = new ANT_file;
+
+#ifdef DIRECT_MEMORY_READ
+	this->memory_model = memory_model;
+#endif
 }
 
 /*
@@ -98,7 +102,7 @@ highest_df = eight_byte;
 //printf("B-tree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
 #ifdef DIRECT_MEMORY_READ
-	if (memory_model)
+	if (this->memory_model)
 		block = NULL;
 	else
 		block = (unsigned char *)memory->malloc((long)(end - term_header));
@@ -160,7 +164,7 @@ get_postings_details("~length", &collection_details);
 documents = collection_details.local_document_frequency;
 
 #ifdef DIRECT_MEMORY_READ
-	if (memory_model)
+	if (this->memory_model)
 		postings_buffer = NULL;
 	else
 		{
