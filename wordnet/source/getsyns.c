@@ -7,6 +7,124 @@
 #include <string.h>
 #include "/ant/source/disk.h"
 
+
+/*
+	Different relationships seen in WordNet 3
+*/
+enum {
+MEMBER_OF_TOPIC,
+MEMBER_OF_REGION,
+MEMBER_OF_USAGE,
+HYPONYM,
+INSTANCE_HYPONYM,
+ANTONYM,
+MEMBER_HOLONYM,
+PART_HOLONYM,
+SUBSTANCE_HOLONYM,
+VERB_GROUP,
+MEMBER_MERONYM,
+PART_MERONYM,
+SUBSTANCE_MERONYM,
+SIMILAR_TO,
+ENTAILMENT,
+DOMAIN_OF_TOPIC,
+DOMAIN_OF_REGION,
+DOMAIN_OF_USAGE,
+HYPERNYM,
+INSTANCE_HYPERNYM,
+FROM_ABJECTIVE,
+PERTAINYM,
+SEE_ALSO,
+DERIVED_FORM,
+PRINCIPLE_OF_VERB,
+ATTRIBUTE,
+CAUSE
+};
+
+char *name_of_relationship[] = 
+{
+"MEMBER_OF_TOPIC",
+"MEMBER_OF_REGION",
+"MEMBER_OF_USAGE",
+"HYPONYM",
+"INSTANCE_HYPONYM",
+"ANTONYM",
+"MEMBER_HOLONYM",
+"PART_HOLONYM",
+"SUBSTANCE_HOLONYM",
+"VERB_GROUP",
+"MEMBER_MERONYM",
+"PART_MERONYM",
+"SUBSTANCE_MERONYM",
+"SIMILAR_TO",
+"ENTAILMENT",
+"DOMAIN_OF_TOPIC",
+"DOMAIN_OF_REGION",
+"DOMAIN_OF_USAGE",
+"HYPERNYM",
+"INSTANCE_HYPERNYM",
+"FROM_ABJECTIVE",
+"PERTAINYM",
+"SEE_ALSO",
+"DERIVED_FORM",
+"PRINCIPLE_OF_VERB",
+"ATTRIBUTE",
+"CAUSE"
+} ;
+
+struct ANT_relationship
+{
+long long type;
+char *wordnet_identifier;
+char *wordname_name;
+} ;
+
+ANT_relationship relationships[] =
+{
+{ANTONYM, 				"!", "Antonym"}, 
+{MEMBER_HOLONYM, 		"#m", "Member holonym"}, 
+{PART_HOLONYM, 		"#p", "Part holonym"}, 
+{SUBSTANCE_HOLONYM, 	"#s", "Substance holonym"}, 
+{VERB_GROUP, 			"$", "Verb Group"}, 
+{MEMBER_MERONYM, 		"%m", "Member meronym"}, 
+{PART_MERONYM, 		"%p", "Part meronym"}, 
+{SUBSTANCE_MERONYM, 	"%s", "Substance meronym"}, 
+{SIMILAR_TO, 			"&", "Similar to"}, 
+{ENTAILMENT, 			"*", "Entailment"}, 
+{DERIVED_FORM,			"+", "Derivationally related form"}, 
+{MEMBER_OF_TOPIC,  	"-c", "Member of this domain - TOPIC"}, 
+{MEMBER_OF_REGION, 	"-r", "Member of this domain - REGION"}, 
+{MEMBER_OF_USAGE,  	"-u", "Member of this domain - USAGE"}, 
+{DOMAIN_OF_TOPIC,		";c", "Domain of synset - TOPIC"}, 
+{DOMAIN_OF_REGION,		";r", "Domain of synset - REGION"}, 
+{DOMAIN_OF_USAGE,		";u", "Domain of synset - USAGE"}, 
+{PRINCIPLE_OF_VERB,	"<", "Participle of verb"}, 
+{ATTRIBUTE,			"=", "Attribute"}, 
+{CAUSE,				">", "Cause"},
+{HYPERNYM,				"@", "Hypernym"}, 
+{INSTANCE_HYPERNYM,	"@i", "Instance Hypernym"}, 
+//{FROM_ABJECTIVE,		"\", "Derived from adjective"}, 
+{PERTAINYM,			"\\", "Pertainym (pertains to noun)"}, 
+{SEE_ALSO,				"^", "Also see"}, 
+{HYPONYM,   			"~", "Hyponym"}, 
+{INSTANCE_HYPONYM, 	"~i", "Instance Hyponym"}
+};
+
+int number_of_relationships = sizeof(relationships) / sizeof(*relationships);
+
+
+/*
+	RELATIONSHIP_CMP()
+	------------------
+*/
+int relationship_cmp(const void *a, const void *b)
+{
+char *string = (char *)a;
+ANT_relationship *relation = (ANT_relationship *)b;
+
+return strcmp(string, relation->wordnet_identifier);
+}
+
 /*
 	GET_TITLE()
 	-----------
@@ -14,14 +132,15 @@
 char *get_title(char *line)
 {
 char *term, *term_end;
-long long times, lex_id, current;
+long long lex_id, current;
+int times;
 
 term = line;
 term = strchr(term, ' ') + 1;
 term = strchr(term, ' ') + 1;
 term = strchr(term, ' ') + 1;
 
-times = atol(term);
+sscanf(term, "%02X", &times);
 
 if (times > 1)
 	printf("(");
@@ -53,6 +172,7 @@ void list_synsets(char *file, char *at, long long times)
 char type[4], pos;
 long long offset;
 int source_target;
+ANT_relationship *relation;
 
 while (times-- > 0)
 	{
@@ -78,12 +198,19 @@ while (times-- > 0)
 		continue;
 	at++;
 
-	if (*type == '~')		// Hyponym
+	if ((relation = (ANT_relationship *)bsearch(type, relationships, number_of_relationships, sizeof(*relationships), relationship_cmp)) != NULL)
 		{
-		printf("   [%d]", offset);
-		get_title(file + offset);
-		puts("");
+		printf("   %s ", name_of_relationship[relation->type]);
+		if (pos == 'n')
+			{
+			get_title(file + offset);
+			puts("");
+			}
+		else
+			printf("[%c]\n", pos);
 		}
+	else
+		puts("ERROR - unknown relatonship");
 	}
 }
 
