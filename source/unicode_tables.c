@@ -1931,7 +1931,7 @@ static long ANT_UNICODE_char_chartype_length = sizeof(ANT_UNICODE_char_chartype)
 
 /*
 	ANT_UNICODE_SEARCH_DECOMPOSITION()
-	--------------------
+	----------------------------------
 */
 const char* ANT_UNICODE_search_decomposition(long character)
 {
@@ -1954,6 +1954,10 @@ else
 	return 0;
 }
 
+/*
+	ANT_UNICODE_SEARCH_CHARTYPE()
+	-----------------------------
+*/
 unsigned char ANT_UNICODE_search_chartype(long character)
 {
 long low, mid, high;
