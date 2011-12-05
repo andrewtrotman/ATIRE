@@ -136,8 +136,6 @@ while (*start != '\0')
 return source;
 }
 
-
-
 /*
 	STRREV()
 	--------

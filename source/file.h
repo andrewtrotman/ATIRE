@@ -36,10 +36,16 @@ public:
 	virtual long open(const char *filename, char *mode);
 	virtual long close(void);
 	virtual long write(unsigned char *data, long long size);
+	long write(char *data, long long size) { return write((unsigned char *)data, size); }
 	virtual long long puts(const char *string);
+
 	virtual long read(unsigned char *data, long long size);
+	long read(char *data, long long size) { return read((unsigned char *)data, size); }
 	long read(int64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+	long read(uint64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(int32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+	long read(uint32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+
 	virtual long long tell(void) { return file_position; }
 	virtual void seek(long long offset_from_start_of_file);
 	virtual long long file_length(void);
