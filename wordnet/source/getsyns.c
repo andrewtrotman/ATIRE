@@ -8,6 +8,7 @@
 #include "/ant/source/disk.h"
 #include "/ant/source/file.h"
 #include "/ant/source/fundamental_types.h"
+#include "wordnet.h"
 
 uint32_t ANT_ID_THESAURUS_SIGNATURE_MAJOR = 0x54505341;	//"ASPT" (Intel Byte Order)
 uint32_t ANT_ID_THESAURUS_SIGNATURE_MINOR = 0x00000003;	// version 0.3		BCD Major / Minor version number
@@ -441,7 +442,7 @@ for (current = all_of_wordnet; current < current_wordnet_term; current++)
 				one_byte = (uint8_t)name_of_relationship[(*relationship)->relationship];
 				outfile->write(&one_byte, sizeof(one_byte));
 //				printf("  %s %s\n", name_of_relationship[(*relationship)->relationship], (*current_word)->word);
-				outfile->write((*current_word)->word, strlen((*current_word)->word));
+				outfile->write((*current_word)->word, strlen((*current_word)->word)% + 1); // +1 to include the '\0'
 				}
 			}
 		}
@@ -453,7 +454,7 @@ start_of_header = outfile->tell();
 for (current = all_of_wordnet; current < current_wordnet_term; current++)
 	{
 //	printf("%s\n", current->word->word);
-	outfile->write(current->word->word, strlen(current->word->word + 1));		// include the '\0'
+	outfile->write(current->word->word, strlen(current->word->word) + 1);		// include the '\0'
 	eight_byte = (uint64_t)current->file_start;
 	outfile->write((char *)&eight_byte, sizeof(eight_byte));
 
