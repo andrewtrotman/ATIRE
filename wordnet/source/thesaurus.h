@@ -18,7 +18,7 @@ private:
 
 public:
 	ANT_thesaurus(char *filename) { this->filename = strnew(filename); }
-	~ANT_thesaurus() { delete [] filename; }
+	virtual ~ANT_thesaurus() { delete [] filename; }
 } ;
 
 #endif /* THESAURUS_H_ */
