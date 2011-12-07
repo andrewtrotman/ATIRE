@@ -35,7 +35,7 @@ public:
 	ANT_wordnet(char *filename);
 	virtual ~ANT_wordnet();
 
-	ANT_thesaurus_relationship *get_synset(char *term, long long *terms_in_synset = NULL);
+	virtual ANT_thesaurus_relationship *get_synset(char *term, long long *terms_in_synset = NULL);
 } ;
 
 #endif /* WORDNET_H_ */

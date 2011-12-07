@@ -19,6 +19,8 @@ private:
 public:
 	ANT_thesaurus(char *filename) { this->filename = strnew(filename); }
 	virtual ~ANT_thesaurus() { delete [] filename; }
+
+	virtual ANT_thesaurus_relationship *get_synset(char *term, long long *terms_in_synset = NULL);
 } ;
 
 #endif /* THESAURUS_H_ */
