@@ -67,6 +67,11 @@ if (stemming_time != 0)
 	print_time("Stem Computation Time :", stemming_time);
 	print_time("Stem to Postings Time :", stemming_reencode_time);
 	}
+if (thesaurus_time != 0)
+	{
+	print_time("Thes Computation Time :", thesaurus_time);
+	print_time("Thes to Postings Time :", thesaurus_reencode_time);
+	}
 print_time("Decompress Time       :", decompress_time);
 print_time("Rank Time             :", rank_time);
 print_time("Sort Time             :", sort_time);

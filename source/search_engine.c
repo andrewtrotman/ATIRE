@@ -21,6 +21,7 @@
 #include "stemmer.h"
 #include "stemmer_stem.h"
 #include "stemmer_factory.h"
+#include "thesaurus.h"
 #include "compress_variable_byte.h"
 
 #ifndef FALSE
@@ -518,6 +519,9 @@ if (stemmer != NULL && ANT_islower(*term) && (*(term + 1) != '\0' && *(term + 2)
 	term = stemmed_term;
 	}
 
+/*
+	Read the term details out of the vocab
+*/
 verify = get_postings_details(term, term_details);
 stats->add_dictionary_lookup_time(stats->stop_timer(now));
 if (verify == NULL)
@@ -769,6 +773,135 @@ while (term != NULL)
 	now = stats->start_timer();
 	term = stemmer->next();
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
+	}
+
+/*
+	Finally, if we had no problem loading the search terms then
+	do the relevance ranking as if it was a single search term
+*/
+if (verify != NULL)
+	{
+	now = stats->start_timer();
+	stemmed_term_details.local_collection_frequency = collection_frequency;
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), 1, 1);
+	stats->add_rank_time(stats->stop_timer(now));
+	}
+
+stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+}
+
+/*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_THESAURUS_SEARCH_TERM()
+	------------------------------------------------------
+*/
+void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+{
+ANT_thesaurus_relationship *expansion;
+void *verify;
+long long bytes_already_read;
+ANT_search_engine_btree_leaf term_details, stemmed_term_details;
+long long now, collection_frequency;
+ANT_compressable_integer *current_document, *end;
+long document, weight_terms;
+char *term;
+ANT_compressable_integer term_frequency;
+ANT_weighted_tf tf_weight;
+
+/*
+	Thesaurus expansion in this code is treated as synonym conflation which is to
+	combine all the postings lists for all the synonyms into one postings lists and
+	to take the term frequencies and document frequencies form that
+*/
+verify = NULL;
+bytes_already_read = index->get_bytes_read();
+
+/*
+	Initialise the term_frequency accumulators to all zero.
+	Then do the term expansion
+*/
+now = stats->start_timer();
+memset(stem_buffer, 0, (size_t)stem_buffer_length_in_bytes);
+collection_frequency = 0;
+expansion = expander->get_synset(base_term, &number_of_terms_in_expansion);
+stats->add_thesaurus_time(stats->stop_timer(now));
+
+/*
+	Make sure there is an expansion
+*/
+if (number_of_terms_in_expansion == 0)
+	{
+	/*
+		No term expansion so we fall-back to the regular search process because
+		its more efficient than decoding and recoding
+	*/
+	process_one_search_term(term, ranking_function, bitstring);
+	return;
+	}
+
+/*
+	The first term is the keyword itself because a term is not a synonym of itself
+*/
+term = base_term
+
+while (term != NULL)
+	{
+	/*
+		get the location of the postings on disk
+	*/
+	now = stats->start_timer();
+	verify = process_one_term(term, &term_details)		// if the index is stemmed then this will stem the expanded term
+	stats->add_dictionary_lookup_time(stats->stop_timer(now));
+	if (verify != NULL)		// else the term expanded to something not in the vocab!
+		{
+		/*
+			load the postings from disk
+		*/
+		now = stats->start_timer();
+		verify = postings_buffer = get_postings(&term_details, postings_buffer);
+		stats->add_posting_read_time(stats->stop_timer(now));
+		if (verify == NULL)
+			break;			// something has gone wrong because we've got a term in the vocab that isn't in the index!
+
+		/*
+			Decompress the postings
+		*/
+		now = stats->start_timer();
+		factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
+		stats->add_decompress_time(stats->stop_timer(now));
+
+		/*
+			Add to the collecton frequency, the process the postings list
+		*/
+		now = stats->start_timer();
+		collection_frequency += term_details.local_collection_frequency;
+
+		current_document = decompress_buffer;
+		end = decompress_buffer + term_details.impacted_length;
+		while (current_document < end)
+			{
+			term_frequency = *current_document++;
+			document = -1;
+			while (*current_document != 0)
+				{
+				document += *current_document++;
+				stem_buffer[document] += term_frequency;
+				}
+			current_document++;
+			}
+
+		stats->add_thesaurus_time(stats->stop_timer(now));
+		}
+
+	/*
+		Now move on to the next term
+	*/
+	do
+		{
+		if (term = expansion->term) == NULL)
+			break;
+		expansion++;
+		}
+	while (expansion->reationship != ANT_thesaurus_relationship::SYNONYM);
 	}
 
 /*

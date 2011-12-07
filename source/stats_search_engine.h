@@ -23,6 +23,8 @@ public:
 	long long dictionary_time;
 	long long stemming_time;				// time taken to do stemming (except re-convert into a postings list)
 	long long stemming_reencode_time;		// time taken to convert from the stemming tf array into a postings list
+	long long thesaurus_time;				// time taken to do thesaurus (except re-convert into a postings list)
+	long long thesaurus_reencode_time;		// time taken to convert from the thesaurus tf array into a postings list
 	long long queries;						// total number of times stats have been added to this one
 	long long disk_bytes_read_on_init;		// total number of bytes read from the disk on initialisation
 	long long disk_bytes_read_on_search;	// total bytes read from the disk durin the search
@@ -44,6 +46,8 @@ public:
 	void add_dictionary_lookup_time(long long time) { dictionary_time += time; }
 	void add_stemming_time(long long time) { stemming_time += time; }
 	void add_stemming_reencode_time(long long time) { stemming_reencode_time += time; }
+	void add_thesaurus_time(long long time) { thesaurus_time += time; }
+	void add_thesaurus_reencode_time(long long time) { thesaurus_reencode_time += time; }
 	void add_disk_bytes_read_on_init(long long bytes) { disk_bytes_read_on_init += bytes; }
 	void add_disk_bytes_read_on_search(long long bytes) { disk_bytes_read_on_search += bytes; }
 	long long get_cpu_time() { return accumulator_init_time + decompress_time + rank_time + sort_time + count_relevant_time; }

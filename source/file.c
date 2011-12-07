@@ -62,10 +62,11 @@ return buffer == NULL ? 0 : 1;
 /*
 	ANT_FILE::OPEN()
 	----------------
-
 	"Mode" supports the flags from fopen, and supports an additional flag "x"
 	which causes files opened for read to acquire a read lock (excluding other writers)
 	and files opened for write to acquire a write lock (excluding all other processes).
+
+	return 0 (false) on error and 1 (true) on success
 */
 long ANT_file::open(const char *filename, char *mode)
 {
