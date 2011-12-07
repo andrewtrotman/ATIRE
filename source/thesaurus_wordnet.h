@@ -1,11 +1,11 @@
 /*
-	WORDNET.H
-	---------
+	THESAURUS_WORDNET.H
+	-------------------
 */
-#ifndef WORDNET_H_
-#define WORDNET_H_
+#ifndef THESAURUS_WORDNET_H_
+#define THESAURUS_WORDNET_H_
 
-#include "../../source/fundamental_types.h"
+#include "fundamental_types.h"
 #include "thesaurus.h"
 
 class ANT_file;
@@ -13,10 +13,10 @@ class ANT_thesaurus_rootnode;
 class ANT_thesaurus_relationship;
 
 /*
-	class ANT_WORDNET
-	-----------------
+	class ANT_THESAURUS_WORDNET
+	---------------------------
 */
-class ANT_wordnet : public ANT_thesaurus
+class ANT_thesaurus_wordnet : public ANT_thesaurus
 {
 public:
 	static const uint32_t ANT_ID_THESAURUS_SIGNATURE_MAJOR = 0x54505341;	//"ASPT" (Intel Byte Order)
@@ -32,11 +32,10 @@ private:
 	ANT_thesaurus_relationship *synset;		// terms that are related to the current term
 
 public:
-	ANT_wordnet(char *filename);
-	virtual ~ANT_wordnet();
+	ANT_thesaurus_wordnet(char *filename);
+	virtual ~ANT_thesaurus_wordnet();
 
 	virtual ANT_thesaurus_relationship *get_synset(char *term, long long *terms_in_synset = NULL);
 } ;
 
-#endif /* WORDNET_H_ */
-
+#endif /* THESAURUS_WORDNET_H_ */

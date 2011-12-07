@@ -3,8 +3,8 @@
 	--------------
 */
 #include <stdio.h>
-#include "thesaurus_relationship.h"
-#include "wordnet.h"
+#include "../source/thesaurus_relationship.h"
+#include "../source/thesaurus_wordnet.h"
 
 /*
 	MAIN()
@@ -12,12 +12,12 @@
 */
 int main(void)
 {
-ANT_wordnet *wordnet;
+ANT_thesaurus_wordnet *wordnet;
 ANT_thesaurus_relationship *set;
 long long set_length, current;
 char buffer[1024];
 
-wordnet = new ANT_wordnet("wordnet.aspt");
+wordnet = new ANT_thesaurus_wordnet("wordnet.aspt");
 
 while (1)
 	{

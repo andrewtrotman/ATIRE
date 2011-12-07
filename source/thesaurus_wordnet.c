@@ -1,27 +1,28 @@
 /*
-	WORDNET.C
-	---------
+	THESAURUS_WORDNET.C
+	-------------------
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <new>
-#include "wordnet.h"
+#include "thesaurus_wordnet.h"
 #include "thesaurus_rootnode.h"
 #include "thesaurus_relationship.h"
-#include "../../source/fundamental_types.h"
-#include "../../source/file.h"
-#include "../../source/file_memory.h"
+#include "fundamental_types.h"
+#include "file.h"
+#include "file_memory.h"
 
 /*
-	ANT_WORDNET::ANT_WORDNET()
-	--------------------------
+	ANT_THESAURUS_WORDNET::ANT_THESAURUS_WORDNET()
+	----------------------------------------------
 */
-ANT_wordnet::ANT_wordnet(char *filename) : ANT_thesaurus(filename)
+ANT_thesaurus_wordnet::ANT_thesaurus_wordnet(char *filename) : ANT_thesaurus(filename)
 {
 size_t file_tail_length;
 uint64_t root_start, id_wordnet, length_of_longest_leaf, bytes_in_longest_leaf;
 uint32_t id_version, id_ant;
-long long length_of_file, current;
+long long length_of_file;
+unsigned long long current;
 char *position;
 
 leaf_buffer = NULL;
@@ -58,10 +59,10 @@ if ((length_of_file = file->file_length()) > file_tail_length)
 		/*
 			At this point we have verified that the file is an ANT WORDNET file with the right version number
 		*/
-		position = root_buffer = new (std::nothrow) char [length_of_file - root_start];
-		root = new (std::nothrow) ANT_thesaurus_rootnode[root_length_in_terms + 1];
-		leaf_buffer = new (std::nothrow) char [bytes_in_longest_leaf];
-		synset = new (std::nothrow) ANT_thesaurus_relationship[length_of_longest_leaf + 1];
+		position = root_buffer = new (std::nothrow) char [(size_t)(length_of_file - root_start)];
+		root = new (std::nothrow) ANT_thesaurus_rootnode[(size_t)(root_length_in_terms + 1)];
+		leaf_buffer = new (std::nothrow) char [(size_t)bytes_in_longest_leaf];
+		synset = new (std::nothrow) ANT_thesaurus_relationship[(size_t)(length_of_longest_leaf + 1)];
 
 		file->seek(root_start);
 		file->read(root_buffer, length_of_file - root_start);
@@ -91,10 +92,10 @@ printf("Warning: The WORDNET thesaurus file appears be corrupt (ignoring)\n");
 }
 
 /*
-	ANT_WORDNET::~ANT_WORDNET()
-	---------------------------
+	ANT_THESAURUS_WORDNET::~ANT_THESAURUS_WORDNET()
+	-----------------------------------------------
 */
-ANT_wordnet::~ANT_wordnet()
+ANT_thesaurus_wordnet::~ANT_thesaurus_wordnet()
 {
 file->close();
 delete file;
@@ -106,17 +107,17 @@ delete [] leaf_buffer;
 }
 
 /*
-	ANT_WORDNET::GET_SYNSET()
-	-------------------------
+	ANT_THESAURUS_WORDNET::GET_SYNSET()
+	-----------------------------------
 */
-ANT_thesaurus_relationship *ANT_wordnet::get_synset(char *term, long long *terms_in_synset)
+ANT_thesaurus_relationship *ANT_thesaurus_wordnet::get_synset(char *term, long long *terms_in_synset)
 {
 long long terms = 0;
 char *leaf_end, *current;
 ANT_thesaurus_rootnode *got;
 ANT_thesaurus_relationship *current_term, *head;
 
-if ((got = (ANT_thesaurus_rootnode *)bsearch(term, root, root_length_in_terms, sizeof(*root), ANT_thesaurus_rootnode::string_compare)) == NULL)
+if ((got = (ANT_thesaurus_rootnode *)bsearch(term, root, (size_t)root_length_in_terms, sizeof(*root), ANT_thesaurus_rootnode::string_compare)) == NULL)
 	head = NULL;
 else
 	{

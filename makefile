@@ -258,6 +258,8 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_recursive.obj		\
 	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
+	$(OBJDIR)\thesaurus_relationship.obj							\
+	$(OBJDIR)\thesaurus_wordnet.obj							\
 	$(OBJDIR)\stemmer.obj							\
 	$(OBJDIR)\stemmer_term_similarity.obj			\
 	$(OBJDIR)\stemmer_term_similarity_threshold.obj	\
@@ -407,6 +409,8 @@ OTHER_TARGETS = \
 	$(BINDIR)\pregen_examine.exe					\
 	$(BINDIR)\test_pregen.exe						\
 	$(BINDIR)\test_kendall_tau.exe					\
+	$(BINDIR)\wordnet_to_ant_thesaurus.exe		\
+	$(BINDIR)\wordnet_test.exe		\
 	$(BINDIR)\arithmetic_encoding_model_gen.exe		\
 	$(LIBIDR)\atire.dll
 

@@ -22,6 +22,7 @@
 #include "stemmer_stem.h"
 #include "stemmer_factory.h"
 #include "thesaurus.h"
+#include "thesaurus_relationship.h"
 #include "compress_variable_byte.h"
 
 #ifndef FALSE
@@ -798,14 +799,13 @@ void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expande
 {
 ANT_thesaurus_relationship *expansion;
 void *verify;
-long long bytes_already_read;
+long long bytes_already_read, number_of_terms_in_expansion;
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 ANT_compressable_integer *current_document, *end;
-long document, weight_terms;
+long document;
 char *term;
 ANT_compressable_integer term_frequency;
-ANT_weighted_tf tf_weight;
 
 /*
 	Thesaurus expansion in this code is treated as synonym conflation which is to
@@ -834,14 +834,14 @@ if (number_of_terms_in_expansion == 0)
 		No term expansion so we fall-back to the regular search process because
 		its more efficient than decoding and recoding
 	*/
-	process_one_search_term(term, ranking_function, bitstring);
+	process_one_search_term(base_term, ranking_function, bitstring);
 	return;
 	}
 
 /*
 	The first term is the keyword itself because a term is not a synonym of itself
 */
-term = base_term
+term = base_term;
 
 while (term != NULL)
 	{
@@ -849,7 +849,7 @@ while (term != NULL)
 		get the location of the postings on disk
 	*/
 	now = stats->start_timer();
-	verify = process_one_term(term, &term_details)		// if the index is stemmed then this will stem the expanded term
+	verify = process_one_term(term, &term_details);		// if the index is stemmed then this will stem the expanded term
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 	if (verify != NULL)		// else the term expanded to something not in the vocab!
 		{
@@ -897,11 +897,11 @@ while (term != NULL)
 	*/
 	do
 		{
-		if (term = expansion->term) == NULL)
+		if ((term = expansion->term) == NULL)
 			break;
 		expansion++;
 		}
-	while (expansion->reationship != ANT_thesaurus_relationship::SYNONYM);
+	while (expansion->relationship != ANT_thesaurus_relationship::SYNONYM);
 	}
 
 /*

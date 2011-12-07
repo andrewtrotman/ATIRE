@@ -51,8 +51,7 @@ public:
 	char *term;
 
 public:
-	static char *get_relationship_name(long relationship) { return name_of_relationship[relationship]; }
-	
+	inline static char *get_relationship_name(long relationship) { return name_of_relationship[relationship]; }
 } ;
 
 #endif /* THESAURUS_RELATIONSHIP_H_ */

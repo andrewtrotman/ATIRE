@@ -1,15 +1,15 @@
 /*
-	GETSYNS.C
-	---------
+	WORDNET_TO_ANT_THESAURUS.C
+	--------------------------
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "/ant/source/disk.h"
-#include "/ant/source/file.h"
-#include "/ant/source/fundamental_types.h"
-#include "wordnet.h"
-#include "thesaurus_relationship.h"
+#include "../source/disk.h"
+#include "../source/file.h"
+#include "../source/fundamental_types.h"
+#include "../source/thesaurus_wordnet.h"
+#include "../source/thesaurus_relationship.h"
 
 uint32_t ANT_ID_THESAURUS_SIGNATURE_MAJOR = 0x54505341;	//"ASPT" (Intel Byte Order)
 uint32_t ANT_ID_THESAURUS_SIGNATURE_MINOR = 0x00000003;	// version 0.3		BCD Major / Minor version number
@@ -17,7 +17,7 @@ uint64_t ANT_ID_THESAURUS_WORDNET = 0x54454e44524f5700;	//"WORDNET"(Intel Byte O
 
 struct ANT_relationship
 {
-long long type;
+long type;
 char *wordnet_identifier;
 char *wordname_name;
 } ;
@@ -77,7 +77,7 @@ public:
 			{
 			this->word = new char [length + 3];
 			this->word[0] = '"';
-			for (into = this->word + 1, outof = word; outof - word < length; outof++)
+			for (into = this->word + 1, outof = word; (size_t)(outof - word) < length; outof++)
 				if (*outof == '_')
 					*into++ = ' ';
 				else
@@ -131,8 +131,8 @@ class ANT_wordnet_headword
 public:
 	ANT_word *word;
 	ANT_wordnet_row *row;
-	long long file_start;
-	long long file_length;
+	unsigned long long file_start;
+	unsigned long long file_length;
 
 public:
 	static int cmp(const void *a, const void *b) { return strcmp(((ANT_wordnet_headword *)a)->word->word, ((ANT_wordnet_headword *)b)->word->word); }
@@ -221,11 +221,11 @@ char type[4], pos;
 long long offset;
 int source_target;
 ANT_relationship *relation;
-ANT_word **synonym_set, **current_synonym;
+ANT_word **synonym_set;
 ANT_word_type **relationship_set, **current_relationship;
 char *file;
 
-current_relationship = relationship_set = new ANT_word_type *[times + 1];
+current_relationship = relationship_set = new ANT_word_type *[(size_t)(times + 1)];
 while (times-- > 0)
 	{
 	memset(type, 0, sizeof(type));
@@ -293,8 +293,6 @@ long long offset;
 long long lex_filenum;
 char ss_type;
 int w_cnt, current_word;
-char word[1024];
-long long lex_id;
 long long p_cnt;
 
 for (current = lines; *current != NULL; current++)
