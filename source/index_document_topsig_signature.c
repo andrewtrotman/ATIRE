@@ -100,7 +100,15 @@ else if (df == 1 && (stopword_mode & ANT_memory_index::PRUNE_DF_SINGLETONS) != 0
 	However this does not work at all well.  Tim's code uses: (tf*tf) * log(TF.ICF)
 	I suspect Shlomo's code does something slightly different but I've never seen that code
 */
-term_weight = (double)term_frequency * (double)term_frequency * log(1.0 + ((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+//  term_weight = (double)term_frequency * (double)term_frequency * log(1.0 + ((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+
+/*
+	Shlomo says we should not square tf.
+*/
+term_weight = (double)term_frequency * log(((double)term_frequency / (double)document_length) * ((double)collection_length_in_terms / (double)cf));
+
+//term_weight = term_frequency - 0.9;
+//term_weight = term_frequency;
 
 #ifndef NEVER
 /*

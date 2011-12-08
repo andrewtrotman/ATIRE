@@ -12,6 +12,8 @@
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
 #include "ranking_function_dlh13.h"
+#include "ranking_function_dph.h"
+#include "ranking_function_dfree.h"
 #include "ranking_function_similarity.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
@@ -132,6 +134,10 @@ else if (strcmp(which, "impact") == 0)
 	ranking_function = IMPACT;
 else if (strcmp(which, "DLH13") == 0)
 	ranking_function = DLH13;
+else if (strcmp(which, "DPH") == 0)
+	ranking_function = DPH;
+else if (strcmp(which, "DFRee") == 0)
+	ranking_function = DFREE;
 else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;
 else if (strcmp(which, "termcount") == 0)
@@ -194,7 +200,11 @@ if (allowable & BM25)
 if (allowable & DIVERGENCE)
 	printf("   divergence   Divergence from randomness using I(ne)B2 %s\n", isdefault(DIVERGENCE));
 if (allowable & DLH13)
-	printf("   DLH13        Terrier (claims to be ivergence from randomness using DLH13, but isn't) %s\n", isdefault(DIVERGENCE));
+	printf("   DLH13        Terrier (claims to be ivergence from randomness using DLH13, but isn't) %s\n", isdefault(DLH13));
+if (allowable & DPH)
+	printf("   DPH          Terrier DPH %s\n", isdefault(DPH));
+if (allowable & DFREE)
+	printf("   DFRee        Terrier DFRee %s\n", isdefault(DFREE));
 if (allowable & IMPACT)
 	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
 if (allowable & LMD)
@@ -231,6 +241,10 @@ switch (ranking_function)
 		return new ANT_ranking_function_BM25(documents, lengths, bm25_k1, bm25_b);
 	case DLH13:
 		return new ANT_ranking_function_DLH13(documents, lengths);
+	case DPH:
+		return new ANT_ranking_function_DPH(documents, lengths);
+	case DFREE:
+		return new ANT_ranking_function_DFRee(documents, lengths);
 	case LMD:
 		return new ANT_ranking_function_lmd(documents, lengths, lmd_u);
 	case LMJM:

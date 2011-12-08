@@ -38,6 +38,8 @@
 #include "ranking_function_inner_product.h"
 #include "ranking_function_kbtfidf.h"
 #include "ranking_function_dlh13.h"
+#include "ranking_function_dph.h"
+#include "ranking_function_dfree.h"
 #include "ranking_function_docid.h"
 #include "ranking_function_pregen.h"
 #include "ranking_function_topsig_positive.h"
@@ -384,6 +386,8 @@ if (search_engine->quantized())
 		case ANT_ANT_param_block::INNER_PRODUCT:
 		case ANT_ANT_param_block::KBTFIDF:
 		case ANT_ANT_param_block::DLH13:
+		case ANT_ANT_param_block::DPH:
+		case ANT_ANT_param_block::DFREE:
 			return 1;		// failure because we're a quantized ranking function and we don't have TF values in the index
 		}
 	}
@@ -395,6 +399,12 @@ switch (function)
 		break;
 	case ANT_ANT_param_block::DLH13:
 		new_function = new ANT_ranking_function_DLH13(search_engine);
+		break;
+	case ANT_ANT_param_block::DFREE:
+		new_function = new ANT_ranking_function_DFRee(search_engine);
+		break;
+	case ANT_ANT_param_block::DPH:
+		new_function = new ANT_ranking_function_DPH(search_engine);
 		break;
 	case ANT_ANT_param_block::IMPACT:
 		new_function = new ANT_ranking_function_impact(search_engine);
