@@ -659,7 +659,6 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	}
 }
 
-
 /*
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
@@ -672,36 +671,88 @@ process_one_term_detail(process_one_term(term, &term_details), ranking_function,
 }
 
 /*
-	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
-	----------------------------------------------------
+	ANT_SEARCH_ENGINE::PLACE_INTO_INTERNAL_BUFFERS()
+	------------------------------------------------
+	returns collection_frequency or 0 on error
 */
-void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+#ifdef USE_FLOATED_TF
+	long long ANT_search_engine::place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf term_frequency_weight)
+#else
+	long long ANT_search_engine::place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details)
+#endif
 {
 void *verify;
-long long bytes_already_read;
-ANT_search_engine_btree_leaf term_details, stemmed_term_details;
-long long now, collection_frequency;
+long long now;
 ANT_compressable_integer *current_document, *end;
-long document, weight_terms;
-char *term;
+long document;
 ANT_compressable_integer term_frequency;
-ANT_weighted_tf tf_weight;
-/*
-	The way we stem is to load the terms that match the stem one at a time and to
-	accumulate the term frequences into the stem_buffer accumulator list.  This then
-	gets converted into a postings list and processed (ranked) as if a single search
-	term within the search engine.
-*/
-verify = NULL;
-bytes_already_read = index->get_bytes_read();
 
 /*
-	Initialise the term_frequency accumulators to all zero.
+	load the postings from disk
 */
 now = stats->start_timer();
-memset(stem_buffer, 0, (size_t)stem_buffer_length_in_bytes);
-collection_frequency = 0;
+verify = postings_buffer = get_postings(term_details, postings_buffer);
+stats->add_posting_read_time(stats->stop_timer(now));
+if (verify == NULL)			// something has gone wrong
+	return 0;
+
+/*
+	Decompress the postings
+*/
+now = stats->start_timer();
+factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+stats->add_decompress_time(stats->stop_timer(now));
+
+/*
+	Process the postings list
+*/
+now = stats->start_timer();
+
+current_document = decompress_buffer;
+end = decompress_buffer + term_details->impacted_length;
+while (current_document < end)
+	{
+	term_frequency = *current_document++;
+	document = -1;
+	while (*current_document != 0)
+		{
+		document += *current_document++;
+		/*
+			Only weight TFs if we're using floats, this makes no sense for integer tfs.
+		*/
+		#ifdef USE_FLOATED_TF
+			stem_buffer[document] += term_frequency * term_frequency_weight;
+		#else
+			stem_buffer[document] += term_frequency;
+		#endif
+		}
+	current_document++;
+	}
+
 stats->add_stemming_time(stats->stop_timer(now));
+
+return term_details->local_collection_frequency;
+}
+
+/*
+	ANT_SEARCH_ENGINE::STEM_INTO_INTERNAL_BUFFERS()
+	-----------------------------------------------
+	returns 0 on error else cf
+*/
+long long ANT_search_engine::stem_into_internal_buffers(ANT_stemmer *stemmer, char *base_term)
+{
+ANT_search_engine_btree_leaf term_details;
+long long now, collection_frequency;
+char *term;
+#ifdef USE_FLOATED_TF
+	ANT_weighted_tf tf_weight;
+	long weight_terms;
+#endif
+
+/*
+	Initialise cf, which we return later.
+*/
+collection_frequency = 0;
 
 /*
 	Find the first term that matches the stem
@@ -720,53 +771,20 @@ while (term != NULL)
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 
 	/*
-		load the postings from disk
+		Should the term be weighted?
 	*/
-	now = stats->start_timer();
-	verify = postings_buffer = get_postings(&term_details, postings_buffer);
-	stats->add_posting_read_time(stats->stop_timer(now));
-	if (verify == NULL)
-		break;
-
-	/*
-		Decompress the postings
-	*/
-	now = stats->start_timer();
-	factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-	stats->add_decompress_time(stats->stop_timer(now));
-
-	/*
-		Add to the collecton frequency, the process the postings list
-	*/
-	now = stats->start_timer();
-	collection_frequency += term_details.local_collection_frequency;
-
-	current_document = decompress_buffer;
-	end = decompress_buffer + term_details.impacted_length;
+#ifdef USE_FLOATED_TF
 	weight_terms = stemmer->weight_terms(&tf_weight, term);
-	while (current_document < end)
-		{
-		term_frequency = *current_document++;
-		document = -1;
-		while (*current_document != 0)
-			{
-			document += *current_document++;
-			/*
-				Only weight TFs if we're using floats, this makes no sense for integer tfs.
-			*/
-			#ifdef USE_FLOATED_TF
-				if (weight_terms)
-					stem_buffer[document] += term_frequency * tf_weight;
-				else
-					stem_buffer[document] += term_frequency;
-			#else
-				stem_buffer[document] += term_frequency;
-			#endif
-			}
-		current_document++;
-		}
+#endif
 
-	stats->add_stemming_time(stats->stop_timer(now));
+	/*
+		Load the postings from disk then process into the internal buffers
+	*/
+#ifdef USE_FLOATED_TF
+	collection_frequency += place_into_internal_buffers(&term_details, weight_terms ? tf_weight : 1);
+#else
+	collection_frequency += place_into_internal_buffers(&term_details);
+#endif
 
 	/*
 		Now move on to the next term that matches the stem
@@ -776,11 +794,41 @@ while (term != NULL)
 	stats->add_dictionary_lookup_time(stats->stop_timer(now));
 	}
 
+return collection_frequency;
+}
+
+/*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
+	----------------------------------------------------
+*/
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+{
+long long bytes_already_read;
+ANT_search_engine_btree_leaf stemmed_term_details;
+long long now, collection_frequency;
+
+/*
+	The way we stem is to load the terms that match the stem one at a time and to
+	accumulate the term frequences into the stem_buffer accumulator list.  This then
+	gets converted into a postings list and processed (ranked) as if a single search
+	term within the search engine.
+*/
+bytes_already_read = index->get_bytes_read();
+
+/*
+	Initialise the term_frequency accumulators to all zero.
+*/
+now = stats->start_timer();
+memset(stem_buffer, 0, (size_t)stem_buffer_length_in_bytes);
+stats->add_stemming_time(stats->stop_timer(now));
+
+collection_frequency = stem_into_internal_buffers(stemmer, base_term);
+
 /*
 	Finally, if we had no problem loading the search terms then
 	do the relevance ranking as if it was a single search term
 */
-if (verify != NULL)
+if (collection_frequency != 0)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;
@@ -788,6 +836,9 @@ if (verify != NULL)
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 
+/*
+	Update the stats
+*/
 stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 }
 
@@ -795,17 +846,15 @@ stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_rea
 	ANT_SEARCH_ENGINE::PROCESS_ONE_THESAURUS_SEARCH_TERM()
 	------------------------------------------------------
 */
-void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
 {
 ANT_thesaurus_relationship *expansion;
 void *verify;
 long long bytes_already_read, number_of_terms_in_expansion;
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
-ANT_compressable_integer *current_document, *end;
-long document;
 char *term;
-ANT_compressable_integer term_frequency;
+long relationship;
 
 /*
 	Thesaurus expansion in this code is treated as synonym conflation which is to
@@ -832,9 +881,12 @@ if (number_of_terms_in_expansion == 0)
 	{
 	/*
 		No term expansion so we fall-back to the regular search process because
-		its more efficient than decoding and recoding
+		its more efficient than decoding and re-encoding
 	*/
-	process_one_search_term(base_term, ranking_function, bitstring);
+	if (stemmer == NULL)
+		process_one_search_term(base_term, ranking_function, bitstring);
+	else
+		process_one_stemmed_search_term(stemmer, base_term, ranking_function, bitstring);
 	return;
 	}
 
@@ -845,51 +897,26 @@ term = base_term;
 
 while (term != NULL)
 	{
-	/*
-		get the location of the postings on disk
-	*/
-	now = stats->start_timer();
-	verify = process_one_term(term, &term_details);		// if the index is stemmed then this will stem the expanded term
-	stats->add_dictionary_lookup_time(stats->stop_timer(now));
-	if (verify != NULL)		// else the term expanded to something not in the vocab!
+	if (stemmer != NULL)
 		{
 		/*
-			load the postings from disk
+			Stem this term into the internal tf-buffer
 		*/
-		now = stats->start_timer();
-		verify = postings_buffer = get_postings(&term_details, postings_buffer);
-		stats->add_posting_read_time(stats->stop_timer(now));
-		if (verify == NULL)
-			break;			// something has gone wrong because we've got a term in the vocab that isn't in the index!
-
+		collection_frequency += stem_into_internal_buffers(stemmer, term);
+		}
+	else
+		{
 		/*
-			Decompress the postings
+			get the location of the postings on disk
 		*/
 		now = stats->start_timer();
-		factory.decompress(decompress_buffer, postings_buffer, term_details.impacted_length);
-		stats->add_decompress_time(stats->stop_timer(now));
-
+		verify = process_one_term(term, &term_details);		// if the index is stemmed then this will stem the expanded term
+		stats->add_dictionary_lookup_time(stats->stop_timer(now));
 		/*
-			Add to the collecton frequency, the process the postings list
+			process into the internal tf-buffer
 		*/
-		now = stats->start_timer();
-		collection_frequency += term_details.local_collection_frequency;
-
-		current_document = decompress_buffer;
-		end = decompress_buffer + term_details.impacted_length;
-		while (current_document < end)
-			{
-			term_frequency = *current_document++;
-			document = -1;
-			while (*current_document != 0)
-				{
-				document += *current_document++;
-				stem_buffer[document] += term_frequency;
-				}
-			current_document++;
-			}
-
-		stats->add_thesaurus_time(stats->stop_timer(now));
+		if (verify != NULL)		// else the term expanded to something not in the vocab!
+			collection_frequency += ANT_search_engine::place_into_internal_buffers(&term_details);
 		}
 
 	/*
@@ -897,18 +924,18 @@ while (term != NULL)
 	*/
 	do
 		{
-		if ((term = expansion->term) == NULL)
-			break;
+		term = expansion->term;
+		relationship = expansion->relationship;
 		expansion++;
 		}
-	while (expansion->relationship != ANT_thesaurus_relationship::SYNONYM);
+	while (term != NULL && relationship != ANT_thesaurus_relationship::SYNONYM);
 	}
 
 /*
 	Finally, if we had no problem loading the search terms then
 	do the relevance ranking as if it was a single search term
 */
-if (verify != NULL)
+if (collection_frequency != 0)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;

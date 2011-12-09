@@ -22,6 +22,7 @@
 void ANT_ranking_function_DFRee::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;
+double prior, posterior, InvPriorCollection, norm;
 double tf, cf, score;
 ANT_compressable_integer *current, *end;
 
@@ -37,10 +38,10 @@ while (current < end)
 		{
 		docid += *current++;
 
-		double prior = tf / document_lengths[(size_t)docid];
-		double posterior = (tf + 1.0) / (document_lengths[(size_t)docid] + 1);
-		double InvPriorCollection = collection_length_in_terms / tf;
-		double norm = tf * ANT_log2(posterior / prior);
+		prior = tf / document_lengths[(size_t)docid];
+		posterior = (tf + 1.0) / (document_lengths[(size_t)docid] + 1);
+		InvPriorCollection = collection_length_in_terms / tf;
+		norm = tf * ANT_log2(posterior / prior);
 
 		score = 1.0 * norm * (tf * (-ANT_log2(prior * InvPriorCollection)) + (tf + 1.0) *  (+ANT_log2(posterior * InvPriorCollection)) + 0.5 * ANT_log2(posterior / prior));
 
@@ -56,6 +57,14 @@ while (current < end)
 */
 double ANT_ranking_function_DFRee::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
 {
-return 1.0;
+double tf = term_frequency;
+double prior = tf / (double)length;
+double posterior = (tf + 1.0) / ((double)length + 1);
+double InvPriorCollection = collection_length_in_terms / tf;
+double norm = tf * ANT_log2(posterior / prior);
+
+double score = 1.0 * norm * (tf * (-ANT_log2(prior * InvPriorCollection)) + (tf + 1.0) *  (+ANT_log2(posterior * InvPriorCollection)) + 0.5 * ANT_log2(posterior / prior));
+
+return score;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

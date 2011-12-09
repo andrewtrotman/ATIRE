@@ -19,6 +19,7 @@
 #include "snippet_factory.h"
 #include "stemmer_factory.h"
 #include "stem.h"
+#include "thesaurus_wordnet.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
@@ -549,7 +550,7 @@ switch (params.ranking_function)
 	If the search engine fails to load the index from disk (e.g. sharing violation),
 	return NULL.
 */
-ATIRE_API *ant_init(ANT_ANT_param_block & params)
+ATIRE_API *ant_init(ANT_ANT_param_block &params)
 {
 /*
 	Instead of overwriting the global API, create a new one and return it.
@@ -598,6 +599,8 @@ if (params.output_forum != ANT_ANT_param_block::NONE)
 atire->set_trim_postings_k(params.trim_postings_k);
 atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
 atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
+if ((params.query_type & ATIRE_API::QUERY_EXPANSION_INPLACE_WORDNET) != 0)
+	atire->set_inplace_query_expansion(new ANT_thesaurus_wordnet("wordnet.aspt"));
 
 atire->set_segmentation(params.segmentation);
 

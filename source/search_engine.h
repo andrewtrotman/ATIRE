@@ -86,6 +86,12 @@ private:
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 	void initialise(ANT_memory *memory);
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
+#ifdef USE_FLOATED_TF
+	long long ANT_search_engine::place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf term_frequency_weight = 1);
+#else
+	long long ANT_search_engine::place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details);
+#endif
+	long long stem_into_internal_buffers(ANT_stemmer *stemmer, char *base_term);
 
 public:
 	ANT_search_engine(ANT_memory *memory, long memory_model = 0);
@@ -101,7 +107,7 @@ public:
 	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
-	virtual void process_one_thesaurus_search_term(ANT_thesaurus *expander, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring);
+	virtual void process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 
 	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);

@@ -30,6 +30,7 @@ class ANT_pregen;
 class ANT_index_document;
 class ANT_index_document_topsig;
 class ANT_index_document_topsig_signature;
+class ANT_thesaurus;
 
 /*
 	class ATIRE_API
@@ -39,7 +40,7 @@ class ATIRE_API
 {
 public:
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 } ;
-	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8 } ;
+	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8, QUERY_EXPANSION_INPLACE_WORDNET = 16 } ;
 
 private:
 	char token_buffer[MAX_TERM_LENGTH];			// used to convert parsed string_pairs into C char * strings.
@@ -83,6 +84,8 @@ private:
 	ANT_index_document_topsig_signature *topsig_signature;		// the query signature
 	ANT_ranking_function *topsig_positive_ranking_function;		// the ranking function to use for +ve values in the query vector
 	ANT_ranking_function *topsig_negative_ranking_function;		// the ranking function to use for -ve values in the query vector
+
+	ANT_thesaurus *expander;									// this is the tool to use to find synonyms of the query terms
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
@@ -152,6 +155,11 @@ public:
 		Set the stemming function
 	*/
 	long set_stemmer(long which_stemmer, long stemmer_similarity, double threshold);
+
+	/*
+		Set the thesaurus to use for synonym expansion
+	*/
+	long set_inplace_query_expansion(ANT_thesaurus *expander);
 
 	/*
 		Set the relevance feedback mechanism

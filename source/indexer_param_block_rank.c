@@ -200,7 +200,7 @@ if (allowable & BM25)
 if (allowable & DIVERGENCE)
 	printf("   divergence   Divergence from randomness using I(ne)B2 %s\n", isdefault(DIVERGENCE));
 if (allowable & DLH13)
-	printf("   DLH13        Terrier (claims to be ivergence from randomness using DLH13, but isn't) %s\n", isdefault(DLH13));
+	printf("   DLH13        Terrier DLH13 (Terrier's function, not the published DLH13) %s\n", isdefault(DLH13));
 if (allowable & DPH)
 	printf("   DPH          Terrier DPH %s\n", isdefault(DPH));
 if (allowable & DFREE)

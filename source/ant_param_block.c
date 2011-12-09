@@ -118,12 +118,13 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbt][-r]     query type");
+puts("-Q[nbtw][-r]    Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits density <d>% and globalstats <f>");
 puts("  -             no relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d = 10 t = 10]");
+puts("  w             WordNet query expansion by tf-merging (needs external file:wordnet.aspt)");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -325,6 +326,14 @@ do
 			if (second != -1)
 				feedback_terms = (long)second;
 			done = TRUE;
+			break;
+		case 'w':
+			/*
+				Query expansion (inplace) with wordnet.  This is done like stemming by treating the expanded
+				query terms as adding to the term_frequency of the original term rather than just adding words
+				to the query.
+			*/
+			query_type |= ATIRE_API::QUERY_EXPANSION_INPLACE_WORDNET;
 			break;
 		case 't':
 			topsig(*(which + 1) == '\0' ? which + 1 : which + 2);

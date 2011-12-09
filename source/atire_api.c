@@ -95,6 +95,7 @@ parsed_query = new ANT_query;
 search_engine = NULL;
 ranking_function = NULL;
 stemmer = NULL;
+expander = NULL;
 feedbacker = NULL;
 feedback_documents = feedback_terms = 10;
 query_type_is_all_terms = FALSE;
@@ -499,6 +500,7 @@ forum_writer->write(topic_id, answer_list, forum_results_list_length > hits ? hi
 /*
 	ATIRE_API::SET_STEMMER()
 	------------------------
+	returns 0 on success and 1 on failure
 */
 long ATIRE_API::set_stemmer(long which_stemmer, long stemmer_similarity, double threshold)
 {
@@ -514,6 +516,18 @@ else if ((new_stemmer = ANT_stemmer_factory::get_stemmer(which_stemmer, search_e
 
 delete stemmer;
 stemmer = new_stemmer;
+
+return 0;
+}
+
+/*
+	ATIRE_API::SET_INPLACE_QUERY_EXPANSION()
+	----------------------------------------
+	returns 0 on success and 1 on failure
+*/
+long ATIRE_API::set_inplace_query_expansion(ANT_thesaurus *expander)
+{
+this->expander = expander;
 
 return 0;
 }
@@ -681,12 +695,23 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 #endif
 
 	term_string = term_list[current_term];
-	if (stemmer == NULL || !ANT_islower(*term_string->get_term()->start))		// We don't stem numbers or tag names, of if there is no stemmer
+
+	if (!ANT_islower(*term_string->get_term()->start))		// We don't stem (or expand) numbers and tag names
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		{
-		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
+		if (expander != NULL)
+			{
+			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+			search_engine->process_one_thesaurus_search_term(expander, stemmer, token_buffer, ranking_function);
+			}
+		else if (stemmer == NULL)
+			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+		else
+			{
+			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
+			}
 		}
 	}
 
