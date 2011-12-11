@@ -63,7 +63,7 @@ puts("  k             Krovetz stemming");
 puts("  l             Lovins stemming");
 #endif
 puts("  o             Otago stemming");
-puts("  O             Otago stemming v2");
+puts("  O             Otago stemming version 2");
 puts("  p             Porter stemming");
 puts("  s             S-Striping stemming");
 puts("  S             Soundex phonetics");

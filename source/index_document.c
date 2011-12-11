@@ -16,7 +16,7 @@
 	ANT_INDEX_DOCUMENT::INDEX_DOCUMENT()
 	------------------------------------
 */
-long ANT_index_document::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
+long ANT_index_document::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, unsigned char *file)
 {
 char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
 ANT_parser_token *token;
@@ -39,7 +39,7 @@ is_previous_token_chinese = FALSE;
 /*
 	Index the file
 */
-readability->set_document((unsigned char *)current_file->file);
+readability->set_document(file);
 while ((token = readability->get_next_token()) != NULL)
 	{
 //	printf("%*.*s\n", token->string_length, token->string_length, token->start);

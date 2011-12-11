@@ -80,6 +80,7 @@ private:
 	ANT_index_document *document_indexer;	// the file inverter
 
 	long topsig_width;											// width of the bitstring (dimensions to the vector)
+	double topsig_density;										// the proportion of bits that should be set in the TopSig signature
 	ANT_index_document_topsig *topsig_globalstats;				// term statistics if topsig is being used
 	ANT_index_document_topsig_signature *topsig_signature;		// the query signature
 	ANT_ranking_function *topsig_positive_ranking_function;		// the ranking function to use for +ve values in the query vector
@@ -100,6 +101,8 @@ protected:
 	long process_topsig_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
 	void query_object_with_feedback_to_NEXI_query(void);
+	void feedback(long long top_k);
+	void topsig_feedback(long long top_k);
 
 public:
 	ATIRE_API();

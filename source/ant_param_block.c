@@ -51,8 +51,8 @@ file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
 feedbacker = NONE;
 query_type = ATIRE_API::QUERY_NEXI;
-feedback_documents = 10;
-feedback_terms = 10;
+feedback_documents = 17;
+feedback_terms = 5;
 index_filename = strnew("index.aspt");
 doclist_filename = strnew("doclist.aspt");
 pregen_count = 0;
@@ -121,12 +121,13 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbt][-r][-wW]Query type");
+puts("-Q[nbt][-rT][wW]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
-puts("  t:<w>:<d>:<f> TopSig index of width <w> bits density <d>% and globalstats <f>");
+puts("  t:<w>:<d>:<f> TopSig index of width <w> bits, density <d>%, and globalstats <f>");
 puts("  -             no relevance feedback [default]");
-puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=10 t=10]");
+puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=17 t=5]");
+puts("  T:<d>         TopSig blind relevance feedback, analysing <d> top documents [default d=10]");
 puts("  w:<t>         WordNet tf-merging (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
 puts("  W:<t>         WordNet query expansion (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
 puts("");
@@ -361,7 +362,7 @@ do
 			break;
 		case 'r':
 			if (query_type == ATIRE_API::QUERY_TOPSIG)
-				exit(printf("Cannot do Rocchio with Topsig"));
+				exit(printf("Cannot do Rocchio with TopSig"));
 
 			query_type |= ATIRE_API::QUERY_FEEDBACK;
 			feedbacker = ANT_relevance_feedback_factory::BLIND_KL;
@@ -373,6 +374,19 @@ do
 				feedback_terms = (long)second;
 			done = TRUE;
 			break;
+		case 'T':
+			if (query_type != ATIRE_API::QUERY_TOPSIG)
+				exit(printf("Can only use TopSig feedback with TopSig"));
+
+			query_type |= ATIRE_API::QUERY_FEEDBACK;
+			feedbacker = ANT_relevance_feedback_factory::TOPSIG;
+			first = -1;
+			get_one_parameter(which + 1, &first);
+			if (first != -1)
+				feedback_documents = (long)first;
+			done = TRUE;
+			break;
+
 		case 'w':
 			/*
 				Query expansion (inplace) with wordnet.  This is done like stemming by treating the expanded

@@ -44,7 +44,7 @@ public:
 	ANT_index_document_topsig(long stop_mode, long width, double density, char *global_stats_file);
 	virtual ~ANT_index_document_topsig();
 	
-	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file);
+	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc_id, unsigned char *file);
 	long long get_collection_length(void) { return collection_length_in_terms; }
 } ;
 

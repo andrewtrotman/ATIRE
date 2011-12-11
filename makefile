@@ -5,7 +5,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 1
+DEBUG = 0
 
 #
 #	Which compiler are we using
@@ -189,6 +189,7 @@ PARTS = \
 	$(OBJDIR)\atire_api_remote.obj 					\
 	$(OBJDIR)\relevance_feedback.obj 				\
 	$(OBJDIR)\relevance_feedback_blind_kl.obj 		\
+	$(OBJDIR)\relevance_feedback_topsig.obj 		\
 	$(OBJDIR)\relevance_feedback_factory.obj 		\
 	$(OBJDIR)\term_divergence_kl.obj 				\
 	$(OBJDIR)\query.obj 							\

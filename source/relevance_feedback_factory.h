@@ -15,7 +15,7 @@ class ANT_relevance_feedback;
 class ANT_relevance_feedback_factory
 {
 public:
-	enum { NONE, BLIND_KL };
+	enum { NONE, BLIND_KL, TOPSIG };
 
 public:
 	ANT_relevance_feedback_factory() {}

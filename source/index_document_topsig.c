@@ -180,7 +180,7 @@ return answer;
 	ANT_INDEX_DOCUMENT_TOPSIG::INDEX_DOCUMENT()
 	-------------------------------------------
 */
-long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, ANT_directory_iterator_object *current_file)
+long ANT_index_document_topsig::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc_id, unsigned char *file)
 {
 unsigned long long seed = 0;
 ANT_memory_indexer_node **term_list, **current;
@@ -199,7 +199,7 @@ document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 *
 /*
 	First pass index and get the list of terms and term counts
 */
-length = ANT_index_document::index_document(document_indexer, stemmer, segmentation, readability, doc, current_file);
+length = ANT_index_document::index_document(document_indexer, stemmer, segmentation, readability, doc_id, file);
 term_list = document_indexer->get_term_list();
 
 /*
@@ -207,11 +207,8 @@ term_list = document_indexer->get_term_list();
 */
 length = 0;
 for (current = term_list; *current != NULL; current++)
-	{
-	seed = signature->add_term(this, &((*current)->string), (*current)->term_frequency, length, collection_length_in_terms);
-	if (seed != 0)
+	if ((seed = signature->add_term(this, &((*current)->string), (*current)->term_frequency, length, collection_length_in_terms)) != 0)
 		length++;
-	}
 
 /*
 	Walk the bit string converting +ve and 0 into 1s (i.e. postings in a postings list)
@@ -222,14 +219,14 @@ for (bit = 0; bit < width; bit++)
 	if (vector[bit] > 0)		// positive values and get encoded as a 1
 		{
 		ANT_atosp(&as_string, bit);
-		indexer->add_term(&as_string, doc);
+		indexer->add_term(&as_string, doc_id);
 		}
 	else if (vector[bit] == 0)	// zero values are encoded (systematically) randomly as 0 or 1
 		{
 		if (ANT_rand_xorshift64(&seed) & 1)
 			{
 			ANT_atosp(&as_string, bit);
-			indexer->add_term(&as_string, doc);
+			indexer->add_term(&as_string, doc_id);
 			}
 		}
 	}
@@ -237,7 +234,7 @@ for (bit = 0; bit < width; bit++)
 /*
 	Set the document's length in terms (needed for tie breaks on equal hamming distance and for search engie initialisation)
 */
-indexer->set_document_length(doc, length);
+indexer->set_document_length(doc_id, length);
 
 /*
   clean up and return the length of the document

@@ -369,7 +369,7 @@ for (param = first_param; param < argc; param++)
 		delete current_file->index;
 		terms_in_document = current_file->terms;
 #else
-		terms_in_document = document_indexer->index_document(index, stemmer, param_block.segmentation, readability, doc, current_file);
+		terms_in_document = document_indexer->index_document(index, stemmer, param_block.segmentation, readability, doc, current_file->file);
 #endif
 		stats.add_indexing_time(stats.stop_timer(now));
 

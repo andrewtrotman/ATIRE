@@ -58,6 +58,7 @@
 #include "search_engine_forum_TREC.h"
 
 #include "relevance_feedback.h"
+#include "relevance_feedback_topsig.h"
 #include "relevance_feedback_factory.h"
 #include "memory_index_one_node.h"
 
@@ -123,6 +124,7 @@ pregen_count = 0;
 document_indexer = new ANT_index_document;
 
 topsig_width = 0;
+topsig_density = 0;
 topsig_globalstats = NULL;
 topsig_signature = NULL;
 topsig_positive_ranking_function = NULL;
@@ -299,6 +301,7 @@ delete topsig_globalstats;
 delete topsig_signature;
 
 topsig_width = width;
+topsig_density = density;
 topsig_globalstats = new ANT_index_document_topsig(ANT_memory_index::NONE, width, density, global_stats_file);
 topsig_signature = new ANT_index_document_topsig_signature(width, density);
 
@@ -561,10 +564,14 @@ return 0;
 long ATIRE_API::set_feedbacker(long feedback, long documents, long terms)
 {
 ANT_relevance_feedback_factory factory;
+ANT_relevance_feedback_topsig *topsig_rf;
 
 feedbacker = factory.get_feedbacker(search_engine, feedback);
 feedback_documents = documents;
 feedback_terms = terms;
+
+if ((topsig_rf = dynamic_cast<ANT_relevance_feedback_topsig *>(feedbacker)) != NULL)
+	topsig_rf->set_topsig_parameters(topsig_width, topsig_density, search_engine->term_count(), topsig_globalstats);
 
 return 0;		// success
 }
@@ -666,8 +673,6 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-
-	puts(token_buffer);
 
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		{
@@ -1065,6 +1070,101 @@ parsed_query->NEXI_query = new_query;
 }
 
 /*
+	ATIRE_API::FEEDBACK()
+	---------------------
+*/
+void ATIRE_API::feedback(long long top_k)
+{
+/*
+	Get the feedback terms
+*/
+parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
+
+#ifdef NEVER
+	/*
+		Print out the feedback terms
+	*/
+	printf("\nFEEDBACK TERMS:");
+	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
+		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
+	puts("");
+#endif
+
+/*
+	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*
+	in the index then there will be no feedback terms an so this will not happen
+*/
+if (parsed_query->feedback_terms_in_query != 0)
+	{
+	/*
+		Initialise
+	*/
+	search_engine->init_accumulators(top_k);
+
+	/*
+		Generate query, search, and clean up
+	*/
+	query_object_with_feedback_to_NEXI_query();
+	process_NEXI_query(parsed_query->NEXI_query);
+	delete [] parsed_query->feedback_terms;
+	delete [] parsed_query->NEXI_query;
+
+	/*
+		Rank
+	*/
+	search_engine->sort_results_list(top_k, &hits);
+	}
+}
+
+/*
+	ATIRE_API::TOPSIG_FEEDBACK()
+	----------------------------
+*/
+void ATIRE_API::topsig_feedback(long long top_k)
+{
+ANT_string_pair as_string;
+double *feedback_vector;
+long bit;
+
+/*
+	Get the feedback vector
+*/
+feedback_vector = (dynamic_cast<ANT_relevance_feedback_topsig *>(feedbacker))->feedback(search_engine->results_list, feedback_documents);
+
+/*
+	Now pass that to the TopSig search engine
+*/
+if (feedback_vector != NULL)
+	{
+	/*
+		Initialise
+	*/
+	search_engine->init_accumulators(top_k);
+
+	/*
+		Walk through the signature looking for +ve and -ve values as these are the
+		dimenstions that are used in the query's signature.
+	*/
+	int set = 0;
+	for (bit = 0; bit < topsig_width; bit++)
+		if (feedback_vector[bit] != 0 && ANT_atosp(&as_string, bit) != NULL)
+			{
+			set++;
+			if (feedback_vector[bit] > 0)
+				search_engine->process_one_search_term(as_string.string(), topsig_positive_ranking_function);
+			else
+				search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
+			}
+	printf("%d of %lld bits set in query\n", set, (long long)topsig_width);
+
+	/*
+		Rank
+	*/
+	search_engine->sort_results_list(top_k, &hits);
+	}
+}
+
+/*
 	ATIRE_API::SEARCH()
 	-------------------
 	returns the number of documents found
@@ -1106,35 +1206,10 @@ if (query_type_is_all_terms)
 	Blind relevance feedback
 */
 if (feedbacker != NULL)
-	{
-	parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
-#ifdef NEVER
-	printf("\nFEEDBACK TERMS:");
-	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
-		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
-	puts("");
-#endif
-	if (parsed_query->feedback_terms_in_query != 0)
-		{
-		/*
-			Initialise
-		*/
-		search_engine->init_accumulators(top_k);
-
-		/*
-			Generate query, search, and clean up
-		*/
-		query_object_with_feedback_to_NEXI_query();
-		process_NEXI_query(parsed_query->NEXI_query);
-		delete [] parsed_query->feedback_terms;
-		delete [] parsed_query->NEXI_query;
-
-		/*
-			Rank
-		*/
-		search_engine->sort_results_list(top_k, &hits);
-		}
-	}
+	if (query_type & QUERY_NEXI | QUERY_BOOLEAN)
+		feedback(top_k);
+	else if (query_type & QUERY_TOPSIG)
+		topsig_feedback(top_k);
 
 /*
 	Add the time it took to search to the global stats for the search engine
@@ -1182,7 +1257,7 @@ for (current = 0; current < top_n; current++)
 		Now index the document.
 	*/
 	object.file = document_buffer;
-	document_indexer->index_document(indexer, NULL, TRUE, readability, current, &object);
+	document_indexer->index_document(indexer, NULL, TRUE, readability, current, object.file);
 	}
 
 delete [] document_buffer;

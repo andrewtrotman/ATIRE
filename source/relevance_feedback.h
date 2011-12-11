@@ -27,22 +27,24 @@ protected:
 	ANT_parser *parser;
 	char *document_buffer;
 
+	double feedback_vector;					// this is where we sum the bit-string weights
+
 protected:
 	/*
 		Allocate neceessary structures and set them ready for use (clean them up if already in use).
 	*/
-	void rewind(void);
+	virtual void rewind(void);
 
 	/*
 		Add a single document to the in-memory index
 	*/
-	void add_to_index(char *document);
+	virtual void add_to_index(char *document);
 
 	/*
 		Add the top documents_to_examine documents from the results list to the in-memory index
 	*/
-	void populate(ANT_search_engine_result *result, long documents_to_examine);
-	void populate(char *document);
+	virtual void populate(ANT_search_engine_result *result, long documents_to_examine);
+	virtual void populate(char *document);
 
 public:
 	ANT_relevance_feedback(ANT_search_engine *engine);

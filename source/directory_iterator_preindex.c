@@ -54,7 +54,7 @@ void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *ob
 long terms;
 
 object->index = new ANT_memory_index_one(new ANT_memory(1024 * 1024), final_index);
-terms = index_document->index_document(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object);
+terms = index_document->index_document(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object->file);
 object->terms = terms;
 
 store->add(object);
