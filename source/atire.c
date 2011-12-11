@@ -558,6 +558,7 @@ ATIRE_API *ant_init(ANT_ANT_param_block &params)
 */
 ATIRE_API *atire = new ATIRE_API();
 long fail;
+ANT_thesaurus *expander;
 
 if (params.logo)
 	puts(atire->version());				// print the version string is we parsed the parameters OK
@@ -600,7 +601,15 @@ atire->set_trim_postings_k(params.trim_postings_k);
 atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
 atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
 if ((params.query_type & ATIRE_API::QUERY_EXPANSION_INPLACE_WORDNET) != 0)
-	atire->set_inplace_query_expansion(new ANT_thesaurus_wordnet("wordnet.aspt"));
+	{
+	atire->set_inplace_query_expansion(expander = new ANT_thesaurus_wordnet("wordnet.aspt"));
+	expander->set_allowable_relationships(params.expander_tf_types);
+	}
+if ((params.query_type & ATIRE_API::QUERY_EXPANSION_WORDNET) != 0)
+	{
+	atire->set_query_expansion(expander = new ANT_thesaurus_wordnet("wordnet.aspt"));
+	expander->set_allowable_relationships(params.expander_query_types);
+	}
 
 atire->set_segmentation(params.segmentation);
 

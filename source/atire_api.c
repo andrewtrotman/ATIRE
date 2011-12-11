@@ -26,6 +26,8 @@
 #include "stemmer.h"
 #include "stemmer_factory.h"
 
+#include "thesaurus.h"
+
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
 #include "ranking_function_similarity.h"
@@ -95,7 +97,8 @@ parsed_query = new ANT_query;
 search_engine = NULL;
 ranking_function = NULL;
 stemmer = NULL;
-expander = NULL;
+expander_tf = NULL;
+expander_query = NULL;
 feedbacker = NULL;
 feedback_documents = feedback_terms = 10;
 query_type_is_all_terms = FALSE;
@@ -138,6 +141,8 @@ delete parsed_query;
 
 delete search_engine;
 delete stemmer;
+delete expander_tf;
+delete expander_query;
 delete feedbacker;
 delete ranking_function;
 
@@ -326,12 +331,14 @@ return 0;		// success
 	ATIRE_API::PARSE_NEXI_QUERY()
 	-----------------------------
 */
-long ATIRE_API::parse_NEXI_query(char *query)
+ANT_NEXI_term_ant *ATIRE_API::parse_NEXI_query(char *query)
 {
+NEXI_parser->set_thesaurus(expander_query);
 NEXI_parser->set_segmentation(segmentation);
-NEXI_parser->parse(parsed_query, query);
+parsed_query->NEXI_query = NEXI_parser->parse(query);
 
-return parsed_query->parse_error;
+
+return parsed_query->NEXI_query;
 }
 
 /*
@@ -524,10 +531,25 @@ return 0;
 	ATIRE_API::SET_INPLACE_QUERY_EXPANSION()
 	----------------------------------------
 	returns 0 on success and 1 on failure
+
+	This expander is used like a stemmer to increase TF counts.
+	see set_query_expander() for classic query expansion
 */
 long ATIRE_API::set_inplace_query_expansion(ANT_thesaurus *expander)
 {
-this->expander = expander;
+this->expander_tf = expander;
+
+return 0;
+}
+
+/*
+	ATIRE_API::SET_QUERY_EXPANSION()
+	--------------------------------
+	returns 0 on success and 1 on failure
+*/
+long ATIRE_API::set_query_expansion(ANT_thesaurus *expander)
+{
+this->expander_query = expander;
 
 return 0;
 }
@@ -644,6 +666,9 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+
+	puts(token_buffer);
+
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		{
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
@@ -700,10 +725,10 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 	else
 		{
-		if (expander != NULL)
+		if (expander_tf != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_thesaurus_search_term(expander, stemmer, token_buffer, ranking_function);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function);
 			}
 		else if (stemmer == NULL)
 			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
@@ -732,7 +757,7 @@ return terms_in_query;
 */
 long ATIRE_API::process_NEXI_query(char *query)
 {
-return process_NEXI_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
+return process_NEXI_query(parse_NEXI_query(query));
 }
 
 /*
@@ -795,7 +820,7 @@ return terms_in_query;
 */
 long ATIRE_API::process_topsig_query(char *query)
 {
-return process_topsig_query(parsed_query->NEXI_query = NEXI_parser->parse(query));
+return process_topsig_query(parse_NEXI_query(query));
 }
 
 /*
@@ -814,17 +839,24 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	into->set_length((long)documents_in_id_list);
 
 	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), true);
-
-	if (stemmer == NULL || !ANT_islower(*token_buffer))		// We don't stem numbers or tag names, or if there is no stemmer
+	if (!ANT_islower(*token_buffer))		// We don't stem (or expand) numbers and tag names
 		search_engine->process_one_search_term(token_buffer, ranking_function, into);
 	else
-		search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, into);
+		{
+		if (expander_tf != NULL)
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, into);
+		else if (stemmer == NULL)
+			search_engine->process_one_search_term(token_buffer, ranking_function, into);
+		else
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, into);
+		}
 
 	return into;
 	}
 
 if (root->left != NULL)
 	left = process_boolean_query(root->left, leaves);
+
 if (root->right != NULL)
 	right = process_boolean_query(root->right, leaves);
 
@@ -906,6 +938,7 @@ Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *h
 	Parse the query and count the number of search terms.  If there's a parse error
 	then don't do the query
 */
+boolean_parser->set_thesaurus(expander_query);
 boolean_parser->parse(parsed_query, query);
 if (parsed_query->parse_error != ANT_query::ERROR_NONE)
 	return 0;

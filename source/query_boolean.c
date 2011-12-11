@@ -9,14 +9,7 @@
 #include "query_parse_tree.h"
 #include "query.h"
 #include "unicode.h"
-
-#ifndef FALSE
-	#define FALSE 0
-#endif
-
-#ifndef TRUE
-	#define TRUE (!FALSE)
-#endif
+#include "thesaurus.h"
 
 /*
 	ANT_QUERY_BOOLEAN::PARSE()
@@ -29,7 +22,7 @@ ANT_query_parse_tree *answer;
 
 leaves = 0;
 nodes_used = 0;
-query_is_disjunctive = TRUE;
+query_is_disjunctive = true;
 
 this->default_operator = default_operator;
 error_code = ANT_query::ERROR_NONE;
@@ -155,24 +148,13 @@ if (got->string_length == 1 && *got->start == '(')
 	left = parse(depth + 1);
 else if (got->string_length == 1 && *got->start == ')')
 	return NULL;
-else
-	{
-	if ((left = new_node()) == NULL)
-		{
-		error_code = ANT_query::ERROR_NO_MEMORY;
-		return NULL;
-		}
-	left->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
-	left->term = token;			// shallow copy (it does *not* copy the string, it re-uses the pointer)
-	left->left = left->right = NULL;
-	leaves++;
-	}
+else if ((left = make_extended_leaf(&token)) == NULL)
+	return NULL;
 
 #pragma ANT_PRAGMA_CONST_CONDITIONAL
 while (1)
 	{
-	got = peek_token();				// the boolean operator
-	if (got == NULL)
+	if ((got = peek_token()) == NULL)				// the boolean operator
 		return left;
 
 	if (got->string_length == 1 && *got->start == ')')
@@ -186,6 +168,7 @@ while (1)
 		error_code = ANT_query::ERROR_NO_MEMORY;
 		return NULL;
 		}
+
 	node->left = left;
 	node->right = NULL;
 	node->term = *got;			// shallow copy
@@ -199,32 +182,31 @@ while (1)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_XOR;
-		query_is_disjunctive = FALSE;
+		query_is_disjunctive = false;
 		}
 	else if (got->true_strcmp("and") == 0 || got->true_strcmp("AND") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_AND;
-		query_is_disjunctive = FALSE;
+		query_is_disjunctive = false;
 		}
 	else if (got->true_strcmp("not") == 0 || got->true_strcmp("NOT") == 0)
 		{
 		get_token(&token);
 		node->boolean_operator = ANT_query_parse_tree::BOOLEAN_NOT;
-		query_is_disjunctive = FALSE;
+		query_is_disjunctive = false;
 		}
 	else
 		{
 		node->boolean_operator = default_operator;
 		if (default_operator != ANT_query_parse_tree::BOOLEAN_OR) 
-			query_is_disjunctive = FALSE;
+			query_is_disjunctive = false;
 		}
 
 	/*
 		term on the right of the operator
 	*/
-	got = get_token(&token);
-	if (got == NULL)
+	if ((got = get_token(&token)) == NULL)
 		{
 		error_code = ANT_query::ERROR_MISSING_RIGHT_IN_SUBEXPRESSION;
 		return node;			// end of input stream;
@@ -234,18 +216,98 @@ while (1)
 		node->right = parse(depth + 1);
 	else if (got->string_length == 1 && *got->start == ')')
 		return node;
-	else
+	else if ((node->right = make_extended_leaf(got)) == NULL)
+		return NULL;
+
+	left = node;
+	}
+
+return node;
+}
+
+/*
+	ANT_QUERY_BOOLEAN::MAKE_LEAF()
+	------------------------------
+*/
+ANT_query_parse_tree *ANT_query_boolean::make_leaf(char *term)
+{
+ANT_string_pair pair(term);
+
+return make_leaf(&pair);
+}
+
+/*
+	ANT_QUERY_BOOLEAN::MAKE_LEAF()
+	------------------------------
+*/
+ANT_query_parse_tree *ANT_query_boolean::make_leaf(ANT_string_pair *term)
+{
+ANT_query_parse_tree *node;
+
+if ((node = new_node()) == NULL)
+	{
+	error_code = ANT_query::ERROR_NO_MEMORY;
+	return NULL;
+	}
+
+node->left = node->right = NULL;
+node->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
+node->term = *term;	// shallow copy (it does *not* copy the string, it re-uses the pointer)
+
+leaves++;
+
+return node;
+}
+
+/*
+	ANT_QUERY_BOOLEAN::MAKE_EXTENDED_LEAF()
+	---------------------------------------
+*/
+ANT_query_parse_tree *ANT_query_boolean::make_extended_leaf(ANT_string_pair *term)
+{
+char *got;
+ANT_query_parse_tree *left, *node;
+ANT_thesaurus_relationship *synset;
+long long size_of_synset, alternate_term;
+
+/*
+	Get the synset
+*/
+synset = expander->get_synset(term, &size_of_synset);
+
+/*
+	Include the search term itself
+*/
+if ((node = left = make_leaf(term)) == NULL)
+	return NULL;
+
+/*
+	Now walk through the synset term at a time and create a tree with all
+	the terms ORd together
+*/
+for (alternate_term = 0; alternate_term < size_of_synset; alternate_term++)
+	{
+	/*
+		Create an "OR" node between expanded words
+	*/
+	if ((node = new_node()) == NULL)
 		{
-		if ((node->right = new_node()) == NULL)
-			{
-			error_code = ANT_query::ERROR_NO_MEMORY;
-			return NULL;
-			}
-		node->right->left = node->right->right = NULL;
-		node->right->boolean_operator = ANT_query_parse_tree::LEAF_NODE;
-		node->right->term = *got;
-		leaves++;
+		error_code = ANT_query::ERROR_NO_MEMORY;
+		return NULL;
 		}
+
+	node->left = left;
+	node->right = NULL;
+	node->term = fake_or;
+	node->boolean_operator = ANT_query_parse_tree::BOOLEAN_OR;
+
+	/*
+		Now for the next word in the synset
+	*/
+	got = synset[alternate_term].term;
+
+	if ((node->right = make_leaf(got)) == NULL)
+		return NULL;
 
 	left = node;
 	}

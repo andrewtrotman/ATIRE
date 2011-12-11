@@ -8,7 +8,7 @@
 #include "fundamental_types.h"
 #include "thesaurus.h"
 
-class ANT_file;
+class ANT_file_memory;
 class ANT_thesaurus_rootnode;
 class ANT_thesaurus_relationship;
 
@@ -24,7 +24,7 @@ public:
 	static const uint64_t ANT_ID_THESAURUS_WORDNET = 0x54454e44524f5700;	//"WORDNET"(Intel Byte Order)
 
 private:
-	ANT_file *file;							// a pointer to the disk file (which might be in-memory)
+	ANT_file_memory *file;					// a pointer to the disk file
 	char *root_buffer;						// the contents of the root of the tree
 	ANT_thesaurus_rootnode *root;			// the root of the thesaurus tree
 	uint64_t root_length_in_terms;			// the size of the root[] array

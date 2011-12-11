@@ -8,6 +8,10 @@
 
 #include "btree.h"
 
+/*
+	class ANT_SEARCH_ENGINE_BTREE_NODE
+	----------------------------------
+*/
 class ANT_search_engine_btree_node
 {
 public:

@@ -8,6 +8,8 @@
 #include "NEXI_term.h"
 #include "NEXI_term_ant.h"
 #include "query.h"
+#include "thesaurus.h"
+#include "thesaurus_relationship.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -15,6 +17,17 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+/*
+	ANT_NEXI::GET_NEXI_TERM()
+	-------------------------
+*/
+ANT_NEXI_term *ANT_NEXI::get_NEXI_term(ANT_NEXI_term *parent, ANT_string_pair *tag, char *term, long weight)
+{
+ANT_string_pair pair(term);
+
+return get_NEXI_term(parent, tag, &pair, weight);
+}
 
 /*
 	ANT_NEXI::GET_NEXI_TERM()
@@ -178,18 +191,47 @@ else
 */
 ANT_string_pair *ANT_NEXI::get_next_token(void)
 {
+long bytes;
 long length_in_chars, length_in_bytes;
 
 length_in_chars = length_in_bytes = 0;
 
 if (*at != '\0')
 	{
+#ifdef NEVER
+	/*
+		This code is very very wrong.  The parser can only skip over spaces, it cannot skip over
+		the special characters that are part of the NEXI query language.  For example, "//section[about(.,NEXI)]"
+		is valid NEXI and must be parsed as such.  Below is the corected version.
+	*/
 	/*
 		Using the multi-language parser, skip over all characters that are not alphabetic or numeric.
 		Also skip the non-character, e.g. symbol and punctuation in other languages
 	*/
 	while (*at != '\0' && unicode_chartype(utf8_to_wide(at)) != CT_NUMBER && unicode_chartype(utf8_to_wide(at)) != CT_LETTER && utf8_to_wide(at) != SPECIAL_TERM_CHAR)
 		at += utf8_bytes(at);
+#else
+	do
+		{
+		if (*at == '\0')
+			break;
+		else if (unicode_chartype(utf8_to_wide(at)) == CT_NUMBER)
+			break;
+		else if (unicode_chartype(utf8_to_wide(at)) == CT_LETTER)
+			break;
+		else if (utf8_to_wide(at) == SPECIAL_TERM_CHAR)
+			break;
+		else
+			{
+			bytes = utf8_bytes(at);
+			if (bytes == 1 && !ANT_isspace(*at))
+				break;
+
+			at += bytes;
+			}
+		}
+	while (*at != '\0');
+#endif
 
 	if (*at != '\0')
 		while (*(at + length_in_bytes) != '\0' && ispart(at, length_in_chars, at + length_in_bytes))
@@ -429,19 +471,31 @@ do
 		{
 		character = utf8_to_wide(token.start);
 
-		if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER &&
-				token[0] != '-' && !ischinese(character))
+		if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER && token[0] != '-' && !ischinese(character))
 			more = FALSE;
 		}
 	if (more)
 		{
+		/*
+			At this point we have a search term and so we can do a thesaurus expansion (or (in the future) translate into another language)
+		*/
 		node = get_NEXI_term(node, path, &current, weight);
+		if (expander != NULL)
+			{
+			ANT_thesaurus_relationship *synset;
+			long long size_of_synset, alternate_term;
+
+			synset = expander->get_synset(&current, &size_of_synset);
+			for (alternate_term = 0; alternate_term < size_of_synset; alternate_term++)
+				node = get_NEXI_term(node, path, synset[alternate_term].term, weight);
+			}
 		current = *get_next_token();
 		}
 	}
 while (more);
 
 terms->string_length = token.start - terms->start;
+
 return root.next;
 }
 
@@ -464,10 +518,10 @@ do
 	if (parent_path != NULL)
 		{
 		parent_path = duplicate_path_chain(parent_path, &end_of_path_chain);
-		get_NEXI_term(end_of_path_chain, &path, NULL, 0);
+		get_NEXI_term(end_of_path_chain, &path);
 		}
 	else
-		parent_path = get_NEXI_term(end_of_path_chain, &path, NULL, 0);
+		parent_path = get_NEXI_term(end_of_path_chain, &path);
 
 	if (token[0] == '[')
 		{

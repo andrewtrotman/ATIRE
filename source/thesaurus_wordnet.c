@@ -25,13 +25,21 @@ long long length_of_file;
 unsigned long long current;
 char *position;
 
+/*
+	Initialise
+*/
 leaf_buffer = NULL;
 root = NULL;
 root_buffer = NULL;
 root_length_in_terms = 0;
 synset = NULL;
 
-file = new ANT_file();
+/*
+	Its necessary to use an ANT_file_memory object rather than an ANT_file object
+	because query expansion requires the expanded terms to be statically allocated
+	and the only way to do that is to use the strings in the file themselves
+*/
+file = new ANT_file_memory();
 if (file->open(filename, "rb") == false)
 	{
 	file->close();
@@ -42,6 +50,9 @@ if (file->open(filename, "rb") == false)
 	return;
 	}
 
+/*
+	Read the header and verify that we have a thesaurus file
+*/
 file_tail_length = sizeof(id_ant) + sizeof(id_version) + sizeof(id_wordnet) + sizeof(root_start) + sizeof(root_length_in_terms) + sizeof(length_of_longest_leaf) + sizeof(bytes_in_longest_leaf);
 if ((length_of_file = file->file_length()) > file_tail_length)
 	{
@@ -64,9 +75,15 @@ if ((length_of_file = file->file_length()) > file_tail_length)
 		leaf_buffer = new (std::nothrow) char [(size_t)bytes_in_longest_leaf];
 		synset = new (std::nothrow) ANT_thesaurus_relationship[(size_t)(length_of_longest_leaf + 1)];
 
+		/*
+			Load the root node of the tree
+		*/
 		file->seek(root_start);
 		file->read(root_buffer, length_of_file - root_start);
 
+		/*
+			Now decode the header
+		*/
 		if (root != NULL && root_buffer != NULL && leaf_buffer != NULL)
 			{
 			for (current = 0; current < root_length_in_terms; current++)
@@ -113,27 +130,35 @@ delete [] leaf_buffer;
 ANT_thesaurus_relationship *ANT_thesaurus_wordnet::get_synset(char *term, long long *terms_in_synset)
 {
 long long terms = 0;
-char *leaf_end, *current;
+char *leaf_end, *leaf_start, *current;
 ANT_thesaurus_rootnode *got;
 ANT_thesaurus_relationship *current_term, *head;
 
-if ((got = (ANT_thesaurus_rootnode *)bsearch(term, root, (size_t)root_length_in_terms, sizeof(*root), ANT_thesaurus_rootnode::string_compare)) == NULL)
+if (root == NULL)
+	head = NULL;
+else if ((got = (ANT_thesaurus_rootnode *)bsearch(term, root, (size_t)root_length_in_terms, sizeof(*root), ANT_thesaurus_rootnode::string_compare)) == NULL)
 	head = NULL;
 else
 	{
+	leaf_start = leaf_buffer;
 	file->seek(got->start);
-	file->read(leaf_buffer, got->length);
 
-	leaf_end = leaf_buffer + got->length;
+	file->direct_read((unsigned char **)&leaf_start, got->length);
+
+	leaf_end = leaf_start + got->length;
 	current_term = head = synset;
 	terms = 0;
-	for (current = leaf_buffer; current < leaf_end; current++)
+	for (current = leaf_start; current < leaf_end; current++)
 		{
-		terms++;
 		current_term->relationship = *current++;						// first is the relationship;
 		current_term->term = current;									// then the term
 		current = strchr(current, '\0');								// skip over the term
-		current_term++;
+
+		if (allowable_relationship(current_term->relationship))
+			{
+			current_term++;
+			terms++;
+			}
 		}
 	current_term->relationship = ANT_thesaurus_relationship::SENTINAL;	// end of the list
 	current_term->term = NULL;											// is not a string

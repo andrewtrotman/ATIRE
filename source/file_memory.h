@@ -29,6 +29,7 @@ public:
 	virtual long write(unsigned char *data, long long size);
 	virtual long long puts(char *string);
 	virtual long read(unsigned char *data, long long size);
+	using ANT_file::read;
 	virtual long direct_read(unsigned char **data, long long size);
 
 	virtual void seek(long long offset_from_start_of_file);

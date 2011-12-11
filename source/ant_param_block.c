@@ -15,6 +15,7 @@
 #include "atire_api.h"
 #include "search_engine_accumulator.h"
 #include "snippet_factory.h"
+#include "thesaurus.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -63,6 +64,8 @@ snippet_word_cloud_terms = 40;
 title_tag = "title";
 title_algorithm = NONE;
 title_length = 300;
+expander_tf_types = ANT_thesaurus::SYNONYM;
+expander_query_types = ANT_thesaurus::SYNONYM;
 }
 
 /*
@@ -118,13 +121,14 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbtw][-r]    Query type");
+puts("-Q[nbt][-r][-wW]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits density <d>% and globalstats <f>");
 puts("  -             no relevance feedback [default]");
-puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d = 10 t = 10]");
-puts("  w             WordNet query expansion by tf-merging (needs external file:wordnet.aspt)");
+puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=10 t=10]");
+puts("  w:<t>         WordNet tf-merging (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
+puts("  W:<t>         WordNet query expansion (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
 puts("");
 
 puts("OPTIMISATIONS");
@@ -284,6 +288,48 @@ return result;
 }
 
 /*
+	ANT_ANT_PARAM_BLOCK::DECODE_EXPANSION_TYPES()
+	---------------------------------------------
+*/
+unsigned long ANT_ANT_param_block::decode_expansion_types(char *which)
+{
+unsigned long answer = 0;
+
+while (*which != '\0')
+	{
+	switch (*which)
+		{
+		case ':':
+			break;
+		case 'a':
+			answer |= ANT_thesaurus::ANTONYM;
+			break;
+		case 'm':
+			answer |= ANT_thesaurus::MERONYM;
+			break;
+		case 's':
+			answer |= ANT_thesaurus::SYNONYM;
+			break;
+		case 'h':
+			answer |= ANT_thesaurus::HOLONYM;
+			break;
+		case 'o':
+			answer |= ANT_thesaurus::HYPONYM;
+			break;
+		case 'e':
+			answer |= ANT_thesaurus::HYPERNYM;
+			break;
+		default:
+			exit(printf("Unknown type in query expansion '%c'\n", *which));
+			break;
+		}
+	which++;
+	}
+
+return answer;
+}
+
+/*
 	ANT_ANT_PARAM_BLOCK::SET_FEEDBACKER()
 	-------------------------------------
 */
@@ -334,6 +380,22 @@ do
 				to the query.
 			*/
 			query_type |= ATIRE_API::QUERY_EXPANSION_INPLACE_WORDNET;
+			if (*(which + 1) == ':')
+				expander_tf_types = decode_expansion_types(which + 2);
+			else
+				expander_tf_types = ANT_thesaurus::SYNONYM;
+			done = TRUE;
+			break;
+		case 'W':
+			/*
+				Query expansion with wordnet.  This is done by adding words to the query
+			*/
+			query_type |= ATIRE_API::QUERY_EXPANSION_WORDNET;
+			if (*(which + 1) == ':')
+				expander_query_types = decode_expansion_types(which + 2);
+			else
+				expander_query_types = ANT_thesaurus::SYNONYM;
+			done = TRUE;
 			break;
 		case 't':
 			topsig(*(which + 1) == '\0' ? which + 1 : which + 2);

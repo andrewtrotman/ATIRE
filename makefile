@@ -258,8 +258,9 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_recursive.obj		\
 	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
-	$(OBJDIR)\thesaurus_relationship.obj							\
-	$(OBJDIR)\thesaurus_wordnet.obj							\
+	$(OBJDIR)\thesaurus.obj							\
+	$(OBJDIR)\thesaurus_relationship.obj			\
+	$(OBJDIR)\thesaurus_wordnet.obj					\
 	$(OBJDIR)\stemmer.obj							\
 	$(OBJDIR)\stemmer_term_similarity.obj			\
 	$(OBJDIR)\stemmer_term_similarity_threshold.obj	\

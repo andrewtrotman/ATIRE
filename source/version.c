@@ -104,6 +104,8 @@ puts("-----------------");
 puts("UTF-8 parser            : Eric Tang, Andrew Trotman, Nick Sherlock");
 puts("East Asian Segmentation : Eric Tang");
 puts("Dale Chall Readability  : Matt Crane");
+puts("Wordnet 3.0             : WordNet 3.0 Copyright 2006 by Princeton University. All rights reserved.");
+puts("Query Expansion         : Andrew Trotman");
 puts("");
 
 #if defined (ANT_HAS_MYSQL) || defined (ANT_HAS_XPDF)

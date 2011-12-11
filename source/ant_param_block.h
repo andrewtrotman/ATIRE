@@ -78,12 +78,16 @@ public:
 
 	long accumulator_sort;				// the method to be used to sort accumulators
 
+	unsigned long expander_tf_types;	// types of synet expansions for tf-expansion
+	unsigned long expander_query_types;	// types of synet expansions for query expansion
+
 private:
 	void export_format(char *forum);
 	void set_metric(char *which);
 	void set_stats(char *which);
 	void set_focused_ranker(char *which);
 	void set_feedbacker(char *which);
+	unsigned long decode_expansion_types(char *which);
 
 public:
 	ANT_ANT_param_block(int argc, char *argv[]);

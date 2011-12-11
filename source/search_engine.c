@@ -854,7 +854,6 @@ long long bytes_already_read, number_of_terms_in_expansion;
 ANT_search_engine_btree_leaf term_details, stemmed_term_details;
 long long now, collection_frequency;
 char *term;
-long relationship;
 
 /*
 	Thesaurus expansion in this code is treated as synonym conflation which is to
@@ -922,13 +921,8 @@ while (term != NULL)
 	/*
 		Now move on to the next term
 	*/
-	do
-		{
-		term = expansion->term;
-		relationship = expansion->relationship;
-		expansion++;
-		}
-	while (term != NULL && relationship != ANT_thesaurus_relationship::SYNONYM);
+	term = expansion->term;
+	expansion++;
 	}
 
 /*

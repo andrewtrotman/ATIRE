@@ -40,7 +40,7 @@ class ATIRE_API
 {
 public:
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 } ;
-	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8, QUERY_EXPANSION_INPLACE_WORDNET = 16 } ;
+	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8, QUERY_EXPANSION_INPLACE_WORDNET = 16, QUERY_EXPANSION_WORDNET = 32 } ;
 
 private:
 	char token_buffer[MAX_TERM_LENGTH];			// used to convert parsed string_pairs into C char * strings.
@@ -85,7 +85,8 @@ private:
 	ANT_ranking_function *topsig_positive_ranking_function;		// the ranking function to use for +ve values in the query vector
 	ANT_ranking_function *topsig_negative_ranking_function;		// the ranking function to use for -ve values in the query vector
 
-	ANT_thesaurus *expander;									// this is the tool to use to find synonyms of the query terms
+	ANT_thesaurus *expander_tf;									// TF expansion::this is the tool to use to find synonyms of the query terms
+	ANT_thesaurus *expander_query;								// Query expansion::this is the tool to use to find synonyms of the query terms
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
@@ -140,7 +141,7 @@ public:
 	/*
 		Parse a NEXI query
 	*/
-	long parse_NEXI_query(char *query);												// returns an error code (0 = no error, see query.h)
+	ANT_NEXI_term_ant *parse_NEXI_query(char *query);
 
 	/*
 		Set the ranking function
@@ -157,9 +158,14 @@ public:
 	long set_stemmer(long which_stemmer, long stemmer_similarity, double threshold);
 
 	/*
-		Set the thesaurus to use for synonym expansion
+		Set the thesaurus to use for inplace TF synonym expansion
 	*/
 	long set_inplace_query_expansion(ANT_thesaurus *expander);
+
+	/*
+		Set the thesaurus to use for classic query expansion
+	*/
+	long set_query_expansion(ANT_thesaurus *expander);
 
 	/*
 		Set the relevance feedback mechanism
