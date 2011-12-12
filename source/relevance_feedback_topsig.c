@@ -18,8 +18,7 @@
 */
 ANT_relevance_feedback_topsig::ANT_relevance_feedback_topsig(ANT_search_engine *engine) : ANT_relevance_feedback(engine)
 {
-feedback_vector = new double [width];
-memset(feedback_vector, 0, sizeof(*feedback_vector) * width);
+feedback_vector = NULL;
 }
 
 /*
@@ -42,6 +41,10 @@ this->density = density;
 this->collection_length_in_terms = collection_length_in_terms;
 this->stopword_mode = ANT_memory_index::PRUNE_NUMBERS | ANT_memory_index::PRUNE_TAGS;
 this->global_stats = global_stats;
+
+delete [] feedback_vector;
+feedback_vector = new double [width];
+memset(feedback_vector, 0, sizeof(*feedback_vector) * width);
 }
 
 /*
@@ -118,6 +121,9 @@ delete readability;
 */
 double *ANT_relevance_feedback_topsig::feedback(ANT_search_engine_result *result, long documents_to_examine)
 {
+if (feedback_vector == NULL)
+	exit(printf("Must call ANT_relevance_feedback::set_topsig_parameters() before feeding back\n"));
+
 memset(feedback_vector, 0, sizeof(*feedback_vector) * width);
 
 populate(result, documents_to_examine);

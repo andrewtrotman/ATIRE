@@ -1206,7 +1206,7 @@ if (query_type_is_all_terms)
 	Blind relevance feedback
 */
 if (feedbacker != NULL)
-	if (query_type & QUERY_NEXI | QUERY_BOOLEAN)
+	if (query_type & (QUERY_NEXI | QUERY_BOOLEAN))
 		feedback(top_k);
 	else if (query_type & QUERY_TOPSIG)
 		topsig_feedback(top_k);

@@ -338,8 +338,7 @@ void ANT_ANT_param_block::set_feedbacker(char *which)
 {
 double first, second;
 long done;
-
-query_type = 0;
+const long perform_query_mask = ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI | ATIRE_API::QUERY_TOPSIG;
 
 do
 	{
@@ -347,18 +346,22 @@ do
 	switch (*which)
 		{
 		case 'n':
-			if (query_type & ATIRE_API::QUERY_BOOLEAN)
-				exit(printf("Must be either NEXI or Boolean, not both"));
+			query_type &= ~perform_query_mask;
 			query_type |= ATIRE_API::QUERY_NEXI;
 			break;
 		case 'b':
-			if (query_type & ATIRE_API::QUERY_NEXI)
-				exit(printf("Must be either NEXI or Boolean, not both"));
+			query_type &= ~perform_query_mask;
 			query_type |= ATIRE_API::QUERY_BOOLEAN;
 			break;
 		case '-':
 			query_type &= ~ATIRE_API::QUERY_FEEDBACK;
 			feedbacker = ANT_relevance_feedback_factory::NONE;
+			break;
+		case 't':
+			query_type &= ~perform_query_mask;
+			query_type = ATIRE_API::QUERY_TOPSIG;
+			topsig(*(which + 1) == '\0' ? which + 1 : which + 2);
+			done = TRUE;
 			break;
 		case 'r':
 			if (query_type == ATIRE_API::QUERY_TOPSIG)
@@ -375,7 +378,7 @@ do
 			done = TRUE;
 			break;
 		case 'T':
-			if (query_type != ATIRE_API::QUERY_TOPSIG)
+			if ((query_type & ATIRE_API::QUERY_TOPSIG) == 0)
 				exit(printf("Can only use TopSig feedback with TopSig"));
 
 			query_type |= ATIRE_API::QUERY_FEEDBACK;
@@ -386,7 +389,6 @@ do
 				feedback_documents = (long)first;
 			done = TRUE;
 			break;
-
 		case 'w':
 			/*
 				Query expansion (inplace) with wordnet.  This is done like stemming by treating the expanded
@@ -411,11 +413,6 @@ do
 				expander_query_types = ANT_thesaurus::SYNONYM;
 			done = TRUE;
 			break;
-		case 't':
-			topsig(*(which + 1) == '\0' ? which + 1 : which + 2);
-			query_type = ATIRE_API::QUERY_TOPSIG;
-			done = TRUE;
-			break;
 		default:
 			exit(printf("Unknown query type modifier: '%c'\n", *which));
 			break;
@@ -424,7 +421,10 @@ do
 	}
 while (*which != '\0' && done == FALSE);
 
-if ((query_type & (ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI | ATIRE_API::QUERY_TOPSIG)) == 0)
+/*
+	If we have no other query type then use NEXI
+*/
+if ((query_type & perform_query_mask) == 0)
 	query_type |= ATIRE_API::QUERY_NEXI;
 }
 
