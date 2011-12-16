@@ -572,7 +572,7 @@ if (params.inversion_type == ANT_indexer_param_block_topsig::TOPSIG)
 	atire->load_topsig(params.topsig_width, params.topsig_density, params.topsig_global_stats);
 
 
-if (fail) 
+if (fail)
 	{
 	delete atire;
 

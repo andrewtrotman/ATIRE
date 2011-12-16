@@ -26,6 +26,9 @@ collection_length_in_terms_as_integer = engine->get_collection_length();
 collection_length_in_terms = (double)collection_length_in_terms_as_integer;
 
 document_lengths = engine->get_document_lengths(&mean_document_length);
+#ifdef IMPACT_HEADER
+the_impact_header = engine->get_impact_header();
+#endif
 decompress_buffer = engine->get_decompress_buffer();
 
 stats = engine->get_stats();
@@ -66,6 +69,94 @@ stats = NULL;
 	convert from an array of tf values into an ANT postings list that can then be used
 	in a top-k ranking function
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer)
+{
+long bucket, buckets_used;
+ANT_compressable_integer bucket_prev_docid[0x100];
+long long bucket_size[0x100];
+ANT_compressable_integer doc, *pointer[0x100];
+long long document_frequency, collection_frequency, sum;
+ANT_weighted_tf *current, *end;
+
+/*
+	Set all the buckets to empty;
+*/
+memset(bucket_size, 0, sizeof(bucket_size));
+
+/*
+	Set the previous document ID to zero for each bucket (for difference encoding)
+*/
+memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
+
+/*
+	Compute the size of the buckets - and as we are stemming we also have to cap Term Frequency at 255.
+*/
+end = stem_buffer + documents_as_integer;
+document_frequency = collection_frequency = 0;
+for (current = stem_buffer; current < end; current++)
+	if (*current != 0)					// the stemmed term frequency accumulator list contains zeros.
+		{
+		if (*current >= 0x100)
+			*current = 0xFF;			// cap term frequency at 255
+		bucket_size[(size_t) *current]++;
+		document_frequency++;						// count the document frequency
+		collection_frequency += *current;			// count the collecton frequency
+		}
+
+// find the number of non-zero buckets (the number of quantums)
+the_impact_header->the_quantum_count = 0;
+for (bucket = 0; bucket < 0x100; bucket++) {
+	if (bucket_size[bucket] != 0) {
+		the_impact_header->the_quantum_count++;
+	}
+}
+
+// setup the pointers for the header
+the_impact_header->impact_value_ptr = the_impact_header->impact_value_start = the_impact_header->header_buffer;
+the_impact_header->doc_count_ptr = the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
+the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
+
+/*
+	Compute the location of the pointers for each bucket
+*/
+sum = buckets_used = 0;
+for (bucket = 0xFF; bucket >= 0; bucket--) {
+	//pointer[bucket] = destination + sum + 2 * buckets_used;
+	pointer[bucket] = destination + sum;
+	if (bucket_size[(size_t)bucket] != 0) {
+		//*pointer[(size_t)bucket]++ = bucket;
+		*the_impact_header->impact_value_ptr = bucket; the_impact_header->impact_value_ptr++;
+		*the_impact_header->doc_count_ptr = bucket_size[bucket]; the_impact_header->doc_count_ptr++;
+		*the_impact_header->impact_offset_ptr = sum; the_impact_header->impact_offset_ptr++;
+		buckets_used++;
+		sum += bucket_size[(size_t)bucket];
+	}
+}
+
+/*
+	Now generate the impact ordering
+*/
+for (current = stem_buffer; current < end; current++)
+	if (*current != 0)
+		{
+		doc = (ANT_compressable_integer)(current - stem_buffer + 1);
+		*pointer[(size_t)*current]++ = doc - bucket_prev_docid[(size_t)*current];		// because this list is difference encoded
+		bucket_prev_docid[(size_t)*current] = doc;
+		}
+
+/*
+	Finally terminate each impact list with a 0
+*/
+//for (bucket = 0; bucket < 0x100; bucket++)
+//	if (bucket_size[bucket] != 0)
+//		*pointer[bucket] = 0;
+
+term_details->local_document_frequency = term_details->global_document_frequency = document_frequency;
+term_details->local_collection_frequency = term_details->global_collection_frequency = collection_frequency;
+term_details->impacted_length = sum;
+}
+#else
 void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer)
 {
 long bucket, buckets_used;
@@ -137,12 +228,17 @@ term_details->local_document_frequency = term_details->global_document_frequency
 term_details->local_collection_frequency = term_details->global_collection_frequency = collection_frequency;
 term_details->impacted_length = sum + 2 * buckets_used;
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
 	----------------------------------------------
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+#else
 void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+#endif
 {
 long long docid;
 ANT_compressable_integer *current, *end;
@@ -168,7 +264,11 @@ while (current < end)
 /*
 	Now call the top-k based relevance ranking function (pass 2)
 */
+#ifdef IMPACT_HEADER
+relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
+#else
 relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, prescalar, postscalar);
+#endif
 }
 
 /*
@@ -182,16 +282,58 @@ now = stats->start_timer();
 tf_to_postings(term_details, decompress_buffer, tf_array);
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
-if (bitstring == NULL)
+if (bitstring == NULL) {
+#ifdef IMPACT_HEADER
+	relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
+#else
 	relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
-else
+#endif
+} else {
+#ifdef IMPACT_HEADER
+	relevance_rank_boolean(bitstring, accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
+#else
 	relevance_rank_boolean(bitstring, accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
+#endif
+}
 }
 
 /*
 	ANT_RANKING_FUNCTION::COMPUTE_TERM_DETAILS()
 	--------------------------------------------
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function::compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array)
+{
+long long document_frequency, collection_frequency;
+ANT_weighted_tf *current, *end;
+long long now;
+
+/*
+	Compute document frequency which is needed for many ranking functions (but not all)
+*/
+now = stats->start_timer();
+document_frequency = collection_frequency = 0;
+the_impact_header->impact_value_ptr = the_impact_header->impact_value_start;
+the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
+current = tf_array;
+// impact_offset_start is the end of the doc_count
+while(the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start) {
+	end = current + *the_impact_header->doc_count_ptr;
+	while (current < end) {
+		collection_frequency += *current;
+		document_frequency++;
+	}
+	current = end;
+	the_impact_header->impact_value_ptr++;
+	the_impact_header->doc_count_ptr++;
+}
+
+term_details->local_document_frequency = term_details->global_document_frequency = document_frequency;
+term_details->local_collection_frequency = term_details->global_collection_frequency = collection_frequency;
+term_details->impacted_length = 0;
+stats->add_stemming_reencode_time(stats->stop_timer(now));
+}
+#else
 void ANT_ranking_function::compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array)
 {
 long long document_frequency, collection_frequency;
@@ -217,6 +359,7 @@ term_details->local_collection_frequency = term_details->global_collection_frequ
 term_details->impacted_length = 0;
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION::GET_MAX_MIN()

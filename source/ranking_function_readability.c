@@ -30,6 +30,44 @@ this->document_readability = engine->document_readability;
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	const double k1_plus_1 = k1 + 1.0;
+	const double one_minus_b = 1.0 - b;
+	long long docid;
+	double top_row, tf, idf;
+	ANT_compressable_integer *current, *end;
+
+	idf = log((double)(documents) / (double)term_details->global_document_frequency);
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		tf = *impact_header->impact_value_ptr;
+		top_row = prescalar * tf * k1_plus_1;
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+			/*
+				Add the readability for this document - because a low readability score is better, we add the hardest document minus the actual score.
+				We also only want to only consider the readability once per document.
+			*/
+			if (accumulator->is_zero_rsv(docid))
+				accumulator->add_rsv(docid, (1.0 - mix) * (cutoff - (document_readability[(size_t)docid] / 1000.0)));
+
+			/*
+				Add the portion of BM25 for this query term
+			*/
+			accumulator->add_rsv(docid, postscalar * mix * (idf * (top_row / (prescalar * tf + k1 * (one_minus_b + b * (document_lengths[(size_t)docid] / mean_document_length))))));
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 const double k1_plus_1 = k1 + 1.0;
@@ -50,14 +88,14 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		
+
 		/*
 			Add the readability for this document - because a low readability score is better, we add the hardest document minus the actual score.
 			We also only want to only consider the readability once per document.
 		*/
 		if (accumulator->is_zero_rsv(docid))
 			accumulator->add_rsv(docid, (1.0 - mix) * (cutoff - (document_readability[(size_t)docid] / 1000.0)));
-		
+
 		/*
 			Add the portion of BM25 for this query term
 		*/
@@ -66,6 +104,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_READABILITY::RANK()

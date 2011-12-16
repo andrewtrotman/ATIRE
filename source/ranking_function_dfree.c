@@ -19,6 +19,40 @@
 	ANT_RANKING_FUNCTION_DFREE::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_DFRee::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	long long docid;
+	double prior, posterior, InvPriorCollection, norm;
+	double tf, cf, score;
+	ANT_compressable_integer *current, *end;
+
+	cf = (double)term_details->global_collection_frequency;
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		tf = *impact_header->impact_value_ptr * prescalar;
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+
+			prior = tf / document_lengths[(size_t)docid];
+			posterior = (tf + 1.0) / (document_lengths[(size_t)docid] + 1);
+			InvPriorCollection = collection_length_in_terms / tf;
+			norm = tf * ANT_log2(posterior / prior);
+
+			score = 1.0 * norm * (tf * (-ANT_log2(prior * InvPriorCollection)) + (tf + 1.0) *  (+ANT_log2(posterior * InvPriorCollection)) + 0.5 * ANT_log2(posterior / prior));
+
+			accumulator->add_rsv(docid, postscalar * score);
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_DFRee::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;
@@ -50,6 +84,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_DFREE::RANK()

@@ -178,6 +178,14 @@ documents = collection_details.local_document_frequency;
 	memory->realign();
 #endif
 
+
+#ifdef IMPACT_HEADER
+	impact_header.info_size = 2 * sizeof(uint32_t);
+	impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*impact_header.header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
+	memory->realign();
+	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (documents + ANT_COMPRESSION_FACTORY_END_PADDING));
+	memory->realign();
+#else
 /*
 	Allocate space for decompression.
 	NOTES:
@@ -186,6 +194,7 @@ documents = collection_details.local_document_frequency;
 */
 decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
 memory->realign();
+#endif
 
 document_lengths = (ANT_compressable_integer *)memory->malloc(documents * sizeof(*document_lengths));
 
@@ -611,20 +620,57 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 
 	if (term_details->local_document_frequency > trim_postings_k)
 		{
-		bytes = 510 + 5 * trim_postings_k;
+		#ifdef IMPACT_HEADER
+			bytes = impact_header.info_size + 5 * ANT_impact_header::NUM_OF_QUANTUMS * 3 + 5 * trim_postings_k;
+		#else
+			bytes = 510 + 5 * trim_postings_k;
+		#endif
 		if (term_details->postings_length > bytes)
 			term_details->postings_length = bytes;
 		}
 
 	verify = postings_buffer = get_postings(term_details, postings_buffer);
-#endif
+#endif // end of TOP_K_READ_AND_DECOMPRESSOR
 	stats->add_posting_read_time(stats->stop_timer(now));
+
+	//
+	// make sure the postings_buffer is not empty and then decompress it
+	//
 	if (verify != NULL)
 		{
 		now = stats->start_timer();
+		#ifdef IMPACT_HEADER
+			impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[0];
+			impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[1];
+			factory.decompress(impact_header.header_buffer, postings_buffer+impact_header.info_size, impact_header.the_quantum_count * 3);
+			impact_header.impact_value_start = impact_header.header_buffer;
+			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
+			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+		#endif
+
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
 		factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
 #else
+		#ifdef IMPACT_HEADER
+			ANT_compressable_integer *doc_count_end;
+			long long sum = 0;
+			doc_count_end = impact_header.doc_count_start + impact_header.the_quantum_count;
+			impact_header.doc_count_ptr = impact_header.doc_count_start;
+			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
+			while (impact_header.doc_count_ptr < doc_count_end) {
+				if (sum >= trim_postings_k) {
+					break;
+				}
+				factory.decompress(decompress_buffer + sum,
+								   postings_buffer+ impact_header.beginning_of_the_postings + *impact_header.impact_offset_ptr,
+								   *impact_header.doc_count_ptr);
+				sum += *impact_header.doc_count_ptr;
+				impact_header.doc_count_ptr++;
+				impact_header.impact_offset_ptr++;
+			}
+			impact_header.doc_count_trim_ptr = impact_header.doc_count_ptr;
+
+		#else
 		/*
 			The maximum number of postings we need to decompress in the worst case is the case where each posting has
 			a different quantised impact... that is 3*n.  But, there are only 255 possible impacts and so if n > 255
@@ -644,14 +690,24 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 
 		factory.decompress(decompress_buffer, postings_buffer, end);
 		decompress_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
-#endif
+		#endif // end of #ifdef IMPACT_HEADER
+#endif // end of #ifdef TOP_K_READ_AND_DECOMPRESSOR
 		stats->add_decompress_time(stats->stop_timer(now));
 
 		now = stats->start_timer();
-		if (bitstring == NULL)		// it bitstring != NULL then we're boolean ranking hybrid
-			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
-		else
-			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
+		if (bitstring == NULL) {		// it bitstring != NULL then we're boolean ranking hybrid
+			#ifdef IMPACT_HEADER
+				ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			#else
+				ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
+			#endif
+		} else {
+			#ifdef IMPACT_HEADER
+				ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			#else
+				ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
+			#endif
+		}
 		stats->add_rank_time(stats->stop_timer(now));
 		}
 
@@ -700,14 +756,63 @@ if (verify == NULL)			// something has gone wrong
 	Decompress the postings
 */
 now = stats->start_timer();
+#ifdef IMPACT_HEADER
+// decompress the header
+impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[0];
+impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[1];
+factory.decompress(impact_header.header_buffer, postings_buffer+impact_header.info_size, impact_header.the_quantum_count * 3);
+impact_header.impact_value_start = impact_header.header_buffer;
+impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
+impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+
+// decompress the postings
+long long sum = 0;
+//end = impact_header.doc_count_start + impact_header.the_quantum_count;
+impact_header.doc_count_ptr = impact_header.doc_count_start;
+impact_header.impact_offset_ptr = impact_header.impact_offset_start;
+// impact_offset_start is the end of doc_count
+while (impact_header.doc_count_ptr < impact_header.impact_offset_start) {
+	factory.decompress(decompress_buffer + sum,
+					   postings_buffer+ impact_header.beginning_of_the_postings + *impact_header.impact_offset_ptr,
+					   *impact_header.doc_count_ptr);
+	sum += *impact_header.doc_count_ptr;
+	impact_header.doc_count_ptr++;
+	impact_header.impact_offset_ptr++;
+}
+#else
 factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+#endif
 stats->add_decompress_time(stats->stop_timer(now));
 
 /*
 	Process the postings list
 */
 now = stats->start_timer();
-
+#ifdef IMPACT_HEADER
+impact_header.impact_value_ptr = impact_header.impact_value_start;
+impact_header.doc_count_ptr = impact_header.doc_count_start;
+current_document = decompress_buffer;
+// impact_offset_start is the end of the doc_count
+while(impact_header.doc_count_ptr < impact_header.impact_offset_start) {
+	term_frequency = *impact_header.impact_value_ptr;
+	document = -1;
+	end = current_document + *impact_header.doc_count_ptr;
+	while (current_document < end) {
+		document += *current_document++;
+		/*
+			Only weight TFs if we're using floats, this makes no sense for integer tfs.
+		*/
+		#ifdef USE_FLOATED_TF
+			stem_buffer[document] += term_frequency * term_frequency_weight;
+		#else
+			stem_buffer[document] += term_frequency;
+		#endif
+	}
+	current_document = end;
+	impact_header.impact_value_ptr++;
+	impact_header.doc_count_ptr++;
+}
+#else
 current_document = decompress_buffer;
 end = decompress_buffer + term_details->impacted_length;
 while (current_document < end)
@@ -728,7 +833,7 @@ while (current_document < end)
 		}
 	current_document++;
 	}
-
+#endif
 stats->add_stemming_time(stats->stop_timer(now));
 
 return term_details->local_collection_frequency;

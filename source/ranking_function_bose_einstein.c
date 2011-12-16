@@ -18,6 +18,50 @@
 	G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on
 	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_bose_einstein::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	long long docid;
+	double tf, rsv, left, right, tf_prime;
+	ANT_compressable_integer *current, *end;
+
+	/*
+		      log(1 + cf(t) / N) + tf'(td) * log (1 + N / cf(t))
+		rsv = --------------------------------------------------
+		                        tf'(td) + 1
+
+		where
+			tf'(td) = tf(td) * log(1 + av_len_d / len(d))
+
+
+		This implementation has:
+			Inf =according to the Geometric estimation of the Bose Einstein Model of Randomness
+			First Normalisation according to Laplace's Law of Succession
+			Second (length) normalisation according to H2
+		and is therefore GL2
+
+	*/
+	left = log(1.0 + (double)term_details->global_collection_frequency / (double)documents);
+	right = log(1.0 + (double)documents / (double)term_details->global_collection_frequency);
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		tf = *impact_header->impact_value_ptr;
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+			tf_prime = prescalar * tf * log(1.0 + mean_document_length / (double)document_lengths[(size_t)docid]);
+			rsv = (left + tf_prime * right) / (tf_prime + 1.0);
+			accumulator->add_rsv(docid, postscalar * rsv);
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_bose_einstein::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;
@@ -62,6 +106,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_BOSE_EINSTEIN::RANK()

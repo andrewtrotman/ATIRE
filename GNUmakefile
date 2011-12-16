@@ -53,6 +53,9 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 # to memcpy for read.
 USE_DIRECT_MEMORY_READ := 0
 
+# construct impact headers for easy handling the quantums of the postings
+USE_IMPACT_HEADER := 0
+
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1
 
@@ -125,6 +128,10 @@ LDFLAGS += -ldl
 CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
+
+ifeq ($(USE_IMPACT_HEADER), 1)
+	CFLAGS += -DIMPACT_HEADER
+endif
 
 ifeq ($(USE_SPECIAL_COMPRESSION), 1)
 	CFLAGS += -DSPECIAL_COMPRESSION
@@ -316,7 +323,7 @@ $(BINDIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 
 $(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
-	
+
 $(BINDIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 

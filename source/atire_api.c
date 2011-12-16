@@ -448,7 +448,7 @@ switch (function)
 	case ANT_ANT_param_block::KBTFIDF:
 		new_function = new ANT_ranking_function_kbtfidf(search_engine, p1, p2);
 		break;
-	default: 
+	default:
 		return 1;		// failure, invalid parameter
 	}
 
@@ -1058,8 +1058,8 @@ new_query[parsed_query->terms_in_query - 1].next = NULL;
 	{
 	long which;
 	for (which = 0; new_query[which].next != NULL; which++)
-		printf("%*.*s ", new_query[which].term.length(), new_query[which].term.length(), new_query[which].term.string());
-	printf("%*.*s\n", new_query[which].term.length(), new_query[which].term.length(), new_query[which].term.string());
+		printf("%*.*s ", (int)new_query[which].term.length(), (int)new_query[which].term.length(), new_query[which].term.string());
+	printf("%*.*s\n", (int)new_query[which].term.length(), (int)new_query[which].term.length(), new_query[which].term.string());
 	}
 #endif
 

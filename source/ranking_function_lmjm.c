@@ -20,6 +20,39 @@
 	-------------------------------------------------
 	Language Models with Jelinek-Mercer smoothing
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	long long docid;
+	double tf, rsv;
+	double one_minus_lambda, idf;
+	ANT_compressable_integer *current, *end;
+
+	/*
+	                 1 - lambda   tf(dt)   len(c)
+	   rsv = log(1 + ---------- * ------ * ------)
+	                   lambda     len(d)    cf(t)
+	*/
+	one_minus_lambda = (1.0 - lambda) / lambda;
+	idf = (double)collection_length_in_terms / (double)term_details->global_collection_frequency;
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		tf = *impact_header->impact_value_ptr;
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+			rsv = postscalar * log(1 + one_minus_lambda * (prescalar * tf / (double)document_lengths[(size_t)docid]) * idf);
+			accumulator->add_rsv(docid, rsv);
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;
@@ -50,6 +83,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_LMJM::RANK()

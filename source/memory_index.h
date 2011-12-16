@@ -13,6 +13,7 @@
 #include "compression_factory.h"
 #include "compression_text_factory.h"
 #include "hash_table.h"
+#include "impact_header.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -87,6 +88,15 @@ private:
 	static const long long document_filenames_chunk_size = (1024 * 1024);
 	long long document_filenames_used;
 
+#ifdef IMPACT_HEADER
+	ANT_impact_header impact_header;
+	long long compressed_impact_header_size;
+	unsigned char *compressed_impact_header_buffer;
+	long long impact_value_size;
+	long long doc_count_size;
+	long long impact_offset_size;
+#endif
+
 private:
 	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
@@ -97,6 +107,9 @@ private:
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
 	long long node_to_postings(ANT_memory_index_hash_node *root);
+#ifdef IMPACT_HEADER
+	long long impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);
+#endif
 	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
@@ -131,7 +144,7 @@ public:
 
 	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, long term_frequency = 1);
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
-	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; } 
+	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
 	virtual void set_term_culling(long mode, double max_df) {stop_word_removal_mode = mode; stop_word_max_proportion = max_df; }

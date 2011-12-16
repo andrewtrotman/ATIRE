@@ -11,6 +11,7 @@
 #include "ranking_function.h"
 #include "btree_iterator.h"
 #include "search_engine_accumulator.h"
+#include "impact_header.h"
 
 class ANT_memory;
 class ANT_file;
@@ -65,6 +66,9 @@ private:
 	char stemmed_term[MAX_TERM_LENGTH];
 
 protected:
+#ifdef IMPACT_HEADER
+	ANT_impact_header impact_header;
+#endif
 	ANT_compressable_integer *decompress_buffer;
 	ANT_compression_factory factory;
 	ANT_memory *memory;
@@ -87,9 +91,9 @@ private:
 	void initialise(ANT_memory *memory);
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
 #ifdef USE_FLOATED_TF
-	long long ANT_search_engine::place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf term_frequency_weight = 1);
+	long long place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf term_frequency_weight = 1);
 #else
-	long long ANT_search_engine::place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details);
+	long long place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details);
 #endif
 	long long stem_into_internal_buffers(ANT_stemmer *stemmer, char *base_term);
 
@@ -114,6 +118,9 @@ public:
 	long long document_count(void) { return documents; }
 	long long term_count(void) { return collection_length_in_terms; }
 	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
+#ifdef IMPACT_HEADER
+	ANT_impact_header *get_impact_header(void) { return &impact_header; }
+#endif
 	ANT_compressable_integer *get_decompress_buffer(void) { return decompress_buffer; }
 	ANT_stats_search_engine *get_stats(void) { return stats; }
 	void stats_initialise(void);

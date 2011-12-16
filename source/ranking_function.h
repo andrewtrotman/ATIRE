@@ -9,6 +9,10 @@
 #include "search_engine_accumulator.h"
 #include "search_engine_result.h"
 
+#ifdef IMPACT_HEADER
+#include "impact_header.h"
+#endif
+
 class ANT_search_engine;
 class ANT_search_engine_btree_leaf;
 class ANT_stats_search_engine;
@@ -36,6 +40,9 @@ protected:
 	ANT_compressable_integer *document_lengths;
 	ANT_compressable_integer *decompress_buffer;
 	ANT_stats_search_engine *stats;
+#ifdef IMPACT_HEADER
+	ANT_impact_header *the_impact_header;
+#endif
 
 protected:
 	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer);
@@ -60,26 +67,41 @@ public:
 	/*
 		You must override these functions if you're going to add a ranking function.
 	*/
+#ifdef IMPACT_HEADER
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
+#else
 	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
+#endif
 	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency) = 0;
 
 	/*
 		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
 	*/
+#ifdef IMPACT_HEADER
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); }
+#else
 	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
-
+#endif
 	/*
-		You can override this function if you want fast boolean, otherwise it'll run through the postings list 
+		You can override this function if you want fast boolean, otherwise it'll run through the postings list
 		setting bits and then chain through to relevance_rank_top_k().  That is, default behaviour is to double
 		pass the postings list but this can be overridden to touch the postings list only once (see BM25 for
 		and example).
 	*/
+#ifdef IMPACT_HEADER
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+#else
 	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+#endif
 
 	/*
 		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
 	*/
+#ifdef IMPACT_HEADER
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); }
+#else
 	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
+#endif
 
 	/*
 		If you also override this function then you can rank directly from the tf array,

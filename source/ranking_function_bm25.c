@@ -42,6 +42,59 @@ delete [] document_prior_probability;
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	const double k1 = this->k1;
+	const double k1_plus_1 = k1 + 1.0;
+	long long docid;
+	double top_row, tf, idf;
+	ANT_compressable_integer *current, *end;
+
+	/*
+		          N
+		IDF = log -
+		          n
+
+		This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
+	*/
+	idf = log((double)documents / (double)term_details->global_document_frequency);
+
+	/*
+		               tf(td) * (k1 + 1)
+		rsv = ----------------------------------- * IDF
+		                                  len(d)
+		      tf(td) + k1 * (1 - b + b * --------)
+	                                    av_len_d
+
+		In this implementation we ignore k3 and the number of times the term occurs in the query.
+	*/
+	/*
+		Alright, so, we have the trim_point at this point.  The trim point is an optimising factor.  It is the
+		number of postings we should process before early-terminating.  As the postings are stored in impact
+		order (typically from highest to lowest term frequency), the first posting is most probably the most
+		relevant document and so on.  Oh, but as there will be multiple postings with the same impact score
+		and we don't know which is "best", the early termination actually only happens at the end of processing
+		one complete impact value's postings list.
+	*/
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		tf = *impact_header->impact_value_ptr;
+		top_row = prescalar * tf * k1_plus_1;
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+			accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 const double k1 = this->k1;
@@ -76,7 +129,7 @@ idf = log((double)documents / (double)term_details->global_document_frequency);
 	and we don't know which is "best", the early termination actually only happens at the end of processing
 	one complete impact value's postings list.
 
-	So how do we compute where to end?  The impacted list is of length:document frequencies plus the impacts 
+	So how do we compute where to end?  The impacted list is of length:document frequencies plus the impacts
 	plus the terminators.  So we can compute the ending point from document frequency if we add to that pointer
 	for each impact and each zero.  Now that we can compare document frequency, we can compare to the trim_point
 	measured in postings and early terminate after we have processed that "batch" of postings.
@@ -97,6 +150,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_BOOLEAN()
@@ -104,6 +158,36 @@ while (current < end)
 	This is an exact copy of the relevance_rank_top_k() function except that it also flips the
 	sits in the documents_touched bitstring.
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_BM25::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	const double k1 = this->k1;
+	const double k1_plus_1 = k1 + 1.0;
+	long long docid;
+	double top_row, tf, idf;
+	ANT_compressable_integer *current, *end;
+
+	idf = log((double)documents / (double)term_details->global_document_frequency);
+
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		tf = *impact_header->impact_value_ptr;
+		top_row = prescalar * tf * k1_plus_1;
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+			accumulators->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
+			documents_touched->unsafe_setbit(docid);
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_BM25::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 const double k1 = this->k1;
@@ -130,6 +214,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_BM25::RANK()

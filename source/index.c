@@ -87,7 +87,9 @@ long long files_that_match;
 long long bytes_indexed;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL;
 ANT_directory_iterator_object file_object, *current_file;
+#ifdef PARALLEL_INDEXING
 ANT_directory_iterator_multiple *parallel_disk;
+#endif
 ANT_stem *stemmer = NULL;
 ANT_pregens_writer *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
@@ -265,7 +267,7 @@ for (param = first_param; param < argc; param++)
 							"'</subject><title>', REPLACE(topic_title, '\xC2\x80', '\xE2\x82\xAC'), '</title><author>', u.username, '</author><forum>',"
 							"forum_name ,'</forum>'), "
 						"REPLACE(post_subject, '\xC2\x80', '\xE2\x82\xAC'), "
-						"REPLACE(post_text, '\xC2\x80', '\xE2\x82\xAC'), "						
+						"REPLACE(post_text, '\xC2\x80', '\xE2\x82\xAC'), "
 						"IF(post_approved=0, '\xC2\x80""u', '\xC2\x80""a'), CONCAT('\xC2\x80poster-', poster_id), "
 						"CONCAT('\xC2\x80""forum-', p.forum_id), CONCAT('\xC2\x80""topic-', topic_id) "
 					"FROM phpbb_posts p "

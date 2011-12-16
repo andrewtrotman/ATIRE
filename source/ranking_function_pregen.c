@@ -14,6 +14,30 @@
 	ANT_RANKING_FUNCTION_PREGEN::RELEVANCE_RANK_TOP_K()
 	---------------------------------------------------
 */
+#ifdef IMPACT_HEADER
+void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+	long long docid;
+	ANT_compressable_integer *current, *end;
+	ANT_search_engine_accumulator::ANT_accumulator_t value;
+
+	impact_header->impact_value_ptr = impact_header->impact_value_start;
+	impact_header->doc_count_ptr = impact_header->doc_count_start;
+	current = impact_ordering;
+	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
+		docid = -1;
+		end = current + *impact_header->doc_count_ptr;
+		while (current < end) {
+			docid += *current++;
+			value = (ANT_search_engine_accumulator::ANT_accumulator_t) (ascending ? std::numeric_limits<pregen_t>::max() - pregen->scores[docid] : pregen->scores[docid]);
+			accumulator->set_rsv(docid, value);
+		}
+		current = end;
+		impact_header->impact_value_ptr++;
+		impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;
@@ -39,6 +63,7 @@ while (current < end)
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_PREGEN::RANK()
