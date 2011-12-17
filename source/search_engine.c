@@ -812,6 +812,7 @@ while(impact_header.doc_count_ptr < impact_header.impact_offset_start) {
 	impact_header.impact_value_ptr++;
 	impact_header.doc_count_ptr++;
 }
+impact_header.doc_count_trim_ptr = impact_header.doc_count_ptr;
 #else
 current_document = decompress_buffer;
 end = decompress_buffer + term_details->impacted_length;
