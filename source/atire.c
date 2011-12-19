@@ -20,6 +20,10 @@
 #include "stemmer_factory.h"
 #include "stem.h"
 #include "thesaurus_wordnet.h"
+#include "focus.h"
+#include "focus_lowest_tag.h"
+#include "focus_result.h"
+#include "focus_results_list.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
@@ -310,8 +314,69 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			if ((current_document_length = length_of_longest_document) != 0)
 				{
 				atire->get_document(document_buffer, &current_document_length, atoll(command + 5));
-				*outchannel << current_document_length << ANT_channel::endl;
-				outchannel->write(document_buffer, current_document_length);
+
+				if (params->focussing_algorithm == ANT_ANT_param_block::RANGE)
+					{
+					/*
+						Setup for the focussing game
+					*/
+					ANT_focus_results_list focused_results_list(10);		// top 10 focused results
+					ANT_focus_result *document_range;
+					ANT_focus *focusser = new ANT_focus_lowest_tag(&focused_results_list);
+					long focus_length;
+					unsigned char zero_x_ff[] = {0xff, 0x00};
+					ANT_string_pair *search_terms, *current_search_term, *token;
+					ANT_parser parser;
+
+					/*
+						Prime the focusser by adding the search terms to the matcher
+					*/
+					current_search_term = search_terms = new ANT_string_pair [strcountchr(command, ' ')];
+					parser.set_document(command + 1);			// skip over the '.'
+					parser.get_next_token();					// get
+					parser.get_next_token();					// docid
+					while ((token = parser.get_next_token()) != NULL)
+						{
+						*current_search_term = *token;
+						focusser->add_term(current_search_term);			// search terms
+						current_search_term++;
+						}
+
+					/*
+						Focus the document
+					*/
+					document_range = focusser->focus((unsigned char *)document_buffer, &focus_length);
+
+					/*
+						Send the document length (with space added for the markers)
+					*/
+					*outchannel << current_document_length + 2 << ANT_channel::endl;
+
+					/*
+						Send:
+							The first part of the document
+							The start marker
+							the middle of the document
+							The end marker
+							The end of the document
+		
+					*/
+					outchannel->write(document_buffer, document_range->start - document_buffer);
+					outchannel->write(zero_x_ff, 1);
+					outchannel->write(document_range->start, document_range->finish- document_range->start);
+					outchannel->write(zero_x_ff, 1);
+					outchannel->write(document_range->finish, current_document_length - (document_range->finish - document_range->start));
+
+					/*
+						Clean up
+					*/
+					delete [] search_terms;
+					}
+				else
+					{
+					*outchannel << current_document_length << ANT_channel::endl;
+					outchannel->write(document_buffer, current_document_length);
+					}
 				}
 			delete [] command;
 			continue;

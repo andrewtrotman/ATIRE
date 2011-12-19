@@ -81,6 +81,7 @@ ANT_NEXI_term_iterator term;
 char *into = query_buffer;
 size_t stem_length;
 ANT_search_engine_btree_leaf details;
+ANT_search_engine_btree_leaf *leaf;
 
 /*
 	Initialise the parser with the query string
@@ -114,7 +115,13 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		if (engine == NULL)
 			term_string->tf_weight = 1;
 		else
-			term_string->tf_weight = (double)engine->get_collection_frequency(unstemmed_term, stemmer, &details)->global_collection_frequency;
+			{
+			leaf = engine->get_collection_frequency(unstemmed_term, stemmer, &details);
+			if (leaf != NULL)
+				term_string->tf_weight = (double)leaf->global_collection_frequency;
+			else
+				term_string->tf_weight = 0;			// the query term is not in the collection
+			}
 
 		/*
 			Now compute the term itself (i.e. the stem if there is one)

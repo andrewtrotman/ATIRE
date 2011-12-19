@@ -6,6 +6,7 @@
 #define INDEXER_PARAM_BLOCK_PREGEN_H_
 
 #include "pregen.h"
+#include "pregen_field_type.h"
 
 #define MAX_PREGENS 100
 
@@ -19,7 +20,7 @@ public:
 	struct pregen_field_spec
 	{
 	char *field_name;
-	pregen_field_type type;
+	ANT_pregen_field_type type;
 	} ;
 
 public:

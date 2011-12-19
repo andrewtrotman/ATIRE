@@ -41,6 +41,7 @@
 #include "stemmer_factory.h"
 #include "btree_iterator.h"
 #include "unicode.h"
+#include "pregens_writer.h"
 
 #ifndef FALSE
 	#define FALSE 0

@@ -343,10 +343,15 @@ PARTS = \
 	$(OBJDIR)\focus_results_list.obj				\
 	$(OBJDIR)\unicode_tables.obj					\
 	$(OBJDIR)\pregen.obj							\
+	$(OBJDIR)\pregen_kendall_tau.obj				\
+	$(OBJDIR)\pregen_writer.obj						\
+	$(OBJDIR)\pregens_writer.obj					\
+	$(OBJDIR)\pregen_writer_exact_integers.obj		\
+	$(OBJDIR)\pregen_writer_exact_strings.obj		\
+	$(OBJDIR)\pregen_writer_normal.obj				\
 	$(OBJDIR)\arithmetic_model_tables.obj			\
 	$(OBJDIR)\arithmetic_model_bigram.obj			\
 	$(OBJDIR)\arithmetic_model_unigram.obj			\
-	$(OBJDIR)\pregen_kendall_tau.obj				\
 	$(OBJDIR)\unicode.obj							\
 	$(OBJDIR)\snippet.obj							\
 	$(OBJDIR)\snippet_factory.obj					\

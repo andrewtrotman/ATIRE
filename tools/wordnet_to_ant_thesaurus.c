@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../source/ctypes.h"
 #include "../source/disk.h"
 #include "../source/file.h"
 #include "../source/fundamental_types.h"
@@ -19,40 +20,136 @@ struct ANT_relationship
 {
 long type;
 char *wordnet_identifier;
-char *wordname_name;
+char *wordnet_name;
 } ;
 
+enum {
+	MEMBER_OF_TOPIC,
+	MEMBER_OF_REGION,
+	MEMBER_OF_USAGE,
+	HYPONYM,
+	INSTANCE_HYPONYM,
+	ANTONYM,
+	MEMBER_HOLONYM,
+	PART_HOLONYM,
+	SUBSTANCE_HOLONYM,
+	VERB_GROUP,
+	MEMBER_MERONYM,
+	PART_MERONYM,
+	SUBSTANCE_MERONYM,
+	SIMILAR_TO,
+	ENTAILMENT,
+	DOMAIN_OF_TOPIC,
+	DOMAIN_OF_REGION,
+	DOMAIN_OF_USAGE,
+	HYPERNYM,
+	INSTANCE_HYPERNYM,
+	FROM_ABJECTIVE,
+	PERTAINYM,
+	SEE_ALSO,
+	DERIVED_FORM,
+	PRINCIPLE_OF_VERB,
+	ATTRIBUTE,
+	CAUSE,
+	SYNONYM,
+	SENTINAL					// not a relationship, used to mark the end of lists
+	};
+
+long ANT_relationship_of_wordnet_relationship[] = 
+{
+0,
+0,
+0,
+ANT_thesaurus_relationship::HYPONYM,
+ANT_thesaurus_relationship::HYPONYM,
+ANT_thesaurus_relationship::ANTONYM,
+ANT_thesaurus_relationship::HOLONYM,
+ANT_thesaurus_relationship::HOLONYM,
+ANT_thesaurus_relationship::HOLONYM,
+0,
+ANT_thesaurus_relationship::MERONYM,
+ANT_thesaurus_relationship::MERONYM,
+ANT_thesaurus_relationship::MERONYM,
+0,
+0,
+0,
+0,
+0,
+ANT_thesaurus_relationship::HYPERNYM,
+ANT_thesaurus_relationship::HYPERNYM,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+ANT_thesaurus_relationship::SYNONYM
+};
+
+char *name_of_relationship[] = 
+{
+"MEMBER_OF_TOPIC",
+"MEMBER_OF_REGION",
+"MEMBER_OF_USAGE",
+"HYPONYM",
+"INSTANCE_HYPONYM",
+"ANTONYM",
+"MEMBER_HOLONYM",
+"PART_HOLONYM",
+"SUBSTANCE_HOLONYM",
+"VERB_GROUP",
+"MEMBER_MERONYM",
+"PART_MERONYM",
+"SUBSTANCE_MERONYM",
+"SIMILAR_TO",
+"ENTAILMENT",
+"DOMAIN_OF_TOPIC",
+"DOMAIN_OF_REGION",
+"DOMAIN_OF_USAGE",
+"HYPERNYM",
+"INSTANCE_HYPERNYM",
+"FROM_ABJECTIVE",
+"PERTAINYM",
+"SEE_ALSO",
+"DERIVED_FORM",
+"PRINCIPLE_OF_VERB",
+"ATTRIBUTE",
+"CAUSE",
+"SYNONYM",
+"SENTINAL"
+} ;
 
 ANT_relationship relationships[] =
 {
-{ANT_thesaurus_relationship::ANTONYM, 				"!", "Antonym"}, 
-{ANT_thesaurus_relationship::MEMBER_HOLONYM, 		"#m", "Member holonym"}, 
-{ANT_thesaurus_relationship::PART_HOLONYM, 		"#p", "Part holonym"}, 
-{ANT_thesaurus_relationship::SUBSTANCE_HOLONYM, 	"#s", "Substance holonym"}, 
-{ANT_thesaurus_relationship::VERB_GROUP, 			"$", "Verb Group"}, 
-{ANT_thesaurus_relationship::MEMBER_MERONYM, 		"%m", "Member meronym"}, 
-{ANT_thesaurus_relationship::PART_MERONYM, 		"%p", "Part meronym"}, 
-{ANT_thesaurus_relationship::SUBSTANCE_MERONYM, 	"%s", "Substance meronym"}, 
-{ANT_thesaurus_relationship::SIMILAR_TO, 			"&", "Similar to"}, 
-{ANT_thesaurus_relationship::ENTAILMENT, 			"*", "Entailment"}, 
-{ANT_thesaurus_relationship::DERIVED_FORM,			"+", "Derivationally related form"}, 
-{ANT_thesaurus_relationship::MEMBER_OF_TOPIC,  	"-c", "Member of this domain - TOPIC"}, 
-{ANT_thesaurus_relationship::MEMBER_OF_REGION, 	"-r", "Member of this domain - REGION"}, 
-{ANT_thesaurus_relationship::MEMBER_OF_USAGE,  	"-u", "Member of this domain - USAGE"}, 
-{ANT_thesaurus_relationship::DOMAIN_OF_TOPIC,		";c", "Domain of synset - TOPIC"}, 
-{ANT_thesaurus_relationship::DOMAIN_OF_REGION,		";r", "Domain of synset - REGION"}, 
-{ANT_thesaurus_relationship::DOMAIN_OF_USAGE,		";u", "Domain of synset - USAGE"}, 
-{ANT_thesaurus_relationship::PRINCIPLE_OF_VERB,	"<", "Participle of verb"}, 
-{ANT_thesaurus_relationship::ATTRIBUTE,			"=", "Attribute"}, 
-{ANT_thesaurus_relationship::CAUSE,				">", "Cause"},
-{ANT_thesaurus_relationship::HYPERNYM,				"@", "Hypernym"}, 
-{ANT_thesaurus_relationship::INSTANCE_HYPERNYM,	"@i", "Instance Hypernym"}, 
-//{ANT_thesaurus_relationship::FROM_ABJECTIVE,		"\", "Derived from adjective"}, 
-{ANT_thesaurus_relationship::PERTAINYM,			"\\", "Pertainym (pertains to noun)"}, 
-{ANT_thesaurus_relationship::SEE_ALSO,				"^", "Also see"}, 
-{ANT_thesaurus_relationship::HYPONYM,   			"~", "Hyponym"}, 
-{ANT_thesaurus_relationship::INSTANCE_HYPONYM, 	"~i", "Instance Hyponym"},
-{ANT_thesaurus_relationship::SYNONYM,				"~z", "Synonym"}				// NOT A WORDNET TYPE
+{ANTONYM, 				"!", "Antonym"},
+{MEMBER_HOLONYM, 		"#m", "Member holonym"},
+{PART_HOLONYM, 		"#p", "Part holonym"},
+{SUBSTANCE_HOLONYM, 	"#s", "Substance holonym"},
+{VERB_GROUP, 			"$", "Verb Group"},
+{MEMBER_MERONYM, 		"%m", "Member meronym"},
+{PART_MERONYM, 		"%p", "Part meronym"},
+{SUBSTANCE_MERONYM, 	"%s", "Substance meronym"},
+{SIMILAR_TO, 			"&", "Similar to"},
+{ENTAILMENT, 			"*", "Entailment"},
+{DERIVED_FORM,			"+", "Derivationally related form"},
+{MEMBER_OF_TOPIC,  	"-c", "Member of this domain - TOPIC"},
+{MEMBER_OF_REGION, 	"-r", "Member of this domain - REGION"},
+{MEMBER_OF_USAGE,  	"-u", "Member of this domain - USAGE"},
+{DOMAIN_OF_TOPIC,		";c", "Domain of synset - TOPIC"},
+{DOMAIN_OF_REGION,		";r", "Domain of synset - REGION"},
+{DOMAIN_OF_USAGE,		";u", "Domain of synset - USAGE"},
+{PRINCIPLE_OF_VERB,	"<", "Participle of verb"},
+{ATTRIBUTE,			"=", "Attribute"},
+{CAUSE,				">", "Cause"},
+{HYPERNYM,				"@", "Hypernym"},
+{INSTANCE_HYPERNYM,	"@i", "Instance Hypernym"},
+//{FROM_ABJECTIVE,		"\", "Derived from adjective"},
+{PERTAINYM,			"\\", "Pertainym (pertains to noun)"},
+{SEE_ALSO,				"^", "Also see"},
+{HYPONYM,   			"~", "Hyponym"},
+{INSTANCE_HYPONYM, 	"~i", "Instance Hyponym"},
+{SYNONYM,				"~z", "Synonym"}				// NOT A WORDNET TYPE
 };
 
 int number_of_relationships = sizeof(relationships) / sizeof(*relationships);
@@ -70,24 +167,46 @@ public:
 	ANT_word(char *word, size_t length)
 		{
 		char *into, *outof;
+		long as_string = false;
 
-		if (memchr(word, '_', length) == NULL)
-			strncpy(this->word = new char [length + 1], word, length)[length] = '\0';
-		else
+		this->word = new char [length + 3];
+		this->word[0] = '"';
+
+		for (into = this->word + 1, outof = word; (size_t)(outof - word) < length; outof++)
 			{
-			this->word = new char [length + 3];
-			this->word[0] = '"';
-			for (into = this->word + 1, outof = word; (size_t)(outof - word) < length; outof++)
-				if (*outof == '_')
-					*into++ = ' ';
-				else
-					*into++ = *outof;
-//			strncpy(this->word + 1, word, length);
-			this->word[length + 1] = '"';
-			this->word[length + 2] = '\0';
+			if (*outof == '(')
+				{
+				*into = '\0';
+				break;
+				}
+			else if (ANT_isalnum(*outof))
+				*into++ = *outof;
+			else
+				{
+				as_string = true;
+				*into++ = ' ';
+				}
 			}
+
+		/*
+			remove white space from the end of the string (can happen when "u.s.a." -> "u s a "
+		*/
+		into--;
+		while (ANT_isspace(*into))
+			*into--;
+
+		into++;
+
+		if (as_string)
+			*into++ = '"';
+		else
+			this->word++;
+
+		*into = '\0';
+
+		strlower(word);		// convert the whold string to lower case
 		}
-	~ANT_word() { delete [] word; }
+	~ANT_word() {}			// { delete [] word; }
 };
 
 /*
@@ -156,11 +275,25 @@ for (current_word = synonyms; *current_word != NULL; current_word++)
 
 for (relationship = synsets; *relationship != NULL; relationship++)
 	{
-	printf("   %s\n", ANT_thesaurus_relationship::name_of_relationship[(*relationship)->relationship]);
+	printf("   %s\n", name_of_relationship[(*relationship)->relationship]);
 	for (current_word = (*relationship)->words; *current_word != NULL; current_word++)
 		printf("      %s\n", (*current_word)->word);
 	}
 }
+
+/*
+	class ANT_TERM_RELATIONSHIP
+	---------------------------
+*/
+class ANT_term_relationship
+{
+public:
+	char *term;
+	long relationship;
+
+public:
+	static int cmp(const void *a, const void *b) { return strcmp(((ANT_term_relationship *)a)->term, ((ANT_term_relationship *)b)->term); }
+} ;
 
 /*
 	RELATIONSHIP_CMP()
@@ -252,6 +385,9 @@ while (times-- > 0)
 
 	if ((relation = (ANT_relationship *)bsearch(type, relationships, number_of_relationships, sizeof(*relationships), relationship_cmp)) != NULL)
 		{
+		if (ANT_relationship_of_wordnet_relationship[relation->type] == 0)
+			continue;		// skip stuff ANT knowns nothing about
+
 		if (pos == 'n')
 			file = noun_file;
 		else if (pos == 'v')
@@ -349,6 +485,17 @@ for (current = lines; *current != NULL; current++)
 			exit(printf("expand the size of all_of_wordnet[] by making  TERMS_IN_WORDNET larger\n"));
 		}
 	}
+
+current_wordnet_term->word = NULL;		// NULL terminate the list
+}
+
+/*
+	WRITE_NORMALISED_STRING()
+	-------------------------
+*/
+void write_normalised_string(ANT_file *outfile, char *string)
+{
+outfile->write(string, strlen(string) + 1);
 }
 
 /*
@@ -357,7 +504,10 @@ for (current = lines; *current != NULL; current++)
 */
 void build_index(void)
 {
+long combined_relationship;
+ANT_term_relationship *disk_leaf, *pos_in_leaf, *dump;
 char file_header[] = "ANT Search Engine Thesaurus File\n\0\0";
+char *previous_headword, *previous_tailword;
 ANT_wordnet_headword *current;
 ANT_wordnet_row *current_row;
 ANT_word **term, **current_word;
@@ -366,59 +516,106 @@ ANT_file *outfile;
 uint8_t one_byte;
 uint64_t eight_byte, start_of_header, terms_in_header, length_of_longest_synset, length_of_current_synset, bytes_in_longest_leaf;
 
+disk_leaf = new ANT_term_relationship[1024 * 1024];		// 1 million is easily enough
 outfile = new ANT_file;
 outfile->open("wordnet.aspt", "wb");
 outfile->write(file_header, sizeof(file_header));
 
-length_of_longest_synset = terms_in_header = 0;
+previous_headword = "";
+length_of_longest_synset = 0;
+length_of_current_synset = 0;
+pos_in_leaf = disk_leaf;
 for (current = all_of_wordnet; current < current_wordnet_term; current++)
 	{
-	terms_in_header++;
-//	printf("%s\n", current->word->word);
 	current->file_start = outfile->tell();
 
+	if (strcmp(previous_headword, current->word->word) != 0)
+		{
+		length_of_current_synset = 0;
+		pos_in_leaf = disk_leaf;
+		}
+
 	current_row = current->row;
-	length_of_current_synset = 0;
 	for (term = current_row->synonyms; *term != NULL; term++)
-		if (current->word->word != (*term)->word)
+		if (strcmp(current->word->word, (*term)->word) != 0)				// a term is nothing to itself
 			{
 //			printf("  SYNONYM %s\n", (*term)->word);
-			one_byte = (uint8_t)ANT_thesaurus_relationship::SYNONYM;
-			outfile->write(&one_byte, sizeof(one_byte));
-			outfile->write((*term)->word, strlen((*term)->word) + 1);		// +1 to include the '\0'
+			pos_in_leaf->relationship = SYNONYM;
+			pos_in_leaf->term = (*term)->word;
 			length_of_current_synset++;
+			pos_in_leaf++;
 			}
 
 	for (relationship = current_row->synsets; *relationship != NULL; relationship++)
 		for (current_word = (*relationship)->words; *current_word != NULL; current_word++)
-			{
-			one_byte = (uint8_t)((*relationship)->relationship);
-			outfile->write(&one_byte, sizeof(one_byte));
-//				printf("  %s %s\n", ANT_thesaurus_relationship::name_of_relationship[(*relationship)->relationship], (*current_word)->word);
-			outfile->write((*current_word)->word, strlen((*current_word)->word) + 1); // +1 to include the '\0'
-			length_of_current_synset++;
-			}
+			if (strcmp(current->word->word, (*current_word)->word) != 0)	// a term is nothing to itself
+				{
+	//			printf("  %s %s\n", name_of_relationship[(*relationship)->relationship], (*current_word)->word);
+				pos_in_leaf->relationship = (*relationship)->relationship;
+				pos_in_leaf->term = (*current_word)->word;
+				length_of_current_synset++;
+				pos_in_leaf++;
+				}
 
 	if (length_of_current_synset > length_of_longest_synset)
 		length_of_longest_synset = length_of_current_synset;
+
+	/*
+		If we're the last term or (not the same as the next term) then we write to disk
+	*/
+	if ((current + 1)->word == NULL || strcmp((current + 1)->word->word, current->word->word) != 0)
+		{
+		qsort(disk_leaf, pos_in_leaf - disk_leaf, sizeof(*disk_leaf), ANT_term_relationship::cmp);
+
+		dump = disk_leaf;
+		while (dump < pos_in_leaf)
+			{
+			combined_relationship = ANT_relationship_of_wordnet_relationship[dump->relationship];
+			previous_tailword = dump->term;
+			for (dump++; dump < pos_in_leaf && strcmp(previous_tailword, dump->term) == 0; dump++)
+				combined_relationship |= ANT_relationship_of_wordnet_relationship[dump->relationship];
+
+			if (combined_relationship != 0)
+				{
+				one_byte = (uint8_t)combined_relationship;
+				outfile->write(&one_byte, sizeof(one_byte));
+				write_normalised_string(outfile, previous_tailword);
+				}
+			}
+		}
+
 	current->file_length = outfile->tell() - current->file_start;
+
 //	printf("%s %lld %lld\n", current->word->word, current->file_start, current->file_length);
+	previous_headword = current->word->word;
 	}
 
 start_of_header = outfile->tell();
 bytes_in_longest_leaf = 0;
+terms_in_header = 0;
+previous_headword = "";
 for (current = all_of_wordnet; current < current_wordnet_term; current++)
 	{
-//	printf("%s\n", current->word->word);
-	outfile->write(current->word->word, strlen(current->word->word) + 1);		// include the '\0'
-	eight_byte = (uint64_t)current->file_start;
-	outfile->write((char *)&eight_byte, sizeof(eight_byte));
+	if ((current + 1)->word == NULL || strcmp((current + 1)->word->word, current->word->word) != 0)
+		{
+		if (current->file_length != 0)
+			{
+			terms_in_header++;
+		//	printf("%s\n", current->word->word);
+			write_normalised_string(outfile, current->word->word);
 
-	eight_byte = (uint64_t)current->file_length;
-	outfile->write((char *)&eight_byte, sizeof(eight_byte));
+			eight_byte = (uint64_t)current->file_start;
+			outfile->write((char *)&eight_byte, sizeof(eight_byte));
 
-	if (current->file_length > bytes_in_longest_leaf)
-		bytes_in_longest_leaf = current->file_length;
+			eight_byte = (uint64_t)current->file_length;
+			outfile->write((char *)&eight_byte, sizeof(eight_byte));
+
+			if (current->file_length > bytes_in_longest_leaf)
+				bytes_in_longest_leaf = current->file_length;
+			}
+//		else
+//			printf("Dropping term:%s\n", current->word->word);
+		}
 	}
 
 outfile->write((char *)&start_of_header, sizeof(start_of_header));
@@ -432,6 +629,7 @@ outfile->write((char *)&ANT_ID_THESAURUS_SIGNATURE_MAJOR, sizeof(ANT_ID_THESAURU
 
 outfile->close();
 delete outfile;
+delete [] disk_leaf;
 }
 
 /*

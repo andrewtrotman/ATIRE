@@ -29,7 +29,7 @@ delete [] tag;
 	ANT_SNIPPET_BEGINNING::GET_SNIPPET()
 	------------------------------------
 	Find the end of the first instance of the given element and then generate the snippet as the text from that point on.
-	This allows you to say , for example, "the snppet starts after the <title> tag"
+	This allows you to say, for example, "the snppet starts after the <title> tag"
 	
 */
 char *ANT_snippet_beginning::get_snippet(char *snippet, char *document)

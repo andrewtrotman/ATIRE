@@ -1,9 +1,15 @@
-#include "encode_char.h"
-
+/*
+	ENCODE_CHAR_BASE40.H
+	--------------------
+*/
 #ifndef ENCODE_CHAR_BASE40_H_
 #define ENCODE_CHAR_BASE40_H_
 
+#include "encode_char.h"
+
 /*
+	class ANT_ENCODE_CHAR_BASE40
+	----------------------------
 	Encode a character as a base-40 digit (' ', punctuation between ' ' and '0' as one char, 0-9,
 	punctuation between '9' and 'z' as one char, a-z, punctuation after 'z' as one char).
 */
@@ -12,6 +18,7 @@ class ANT_encode_char_base40
 public:
 	static const unsigned int num_symbols = 40;
 
+public:
 	static unsigned char encode(unsigned char c)
 	{
 	if (c == ' ')
@@ -36,4 +43,4 @@ public:
 	}
 };
 
-#endif
+#endif /* ENCODE_CHAR_BASE40_H_ */

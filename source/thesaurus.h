@@ -16,12 +16,9 @@ class ANT_string_pair;
 */
 class ANT_thesaurus
 {
-public:
-	enum { HYPONYM = 1, ANTONYM = 2, HOLONYM = 4, MERONYM = 8, HYPERNYM = 16, SYNONYM = 32 };
-
 private:
-	char *filename;														// the name of the disk file that is this thesaurus
-	unsigned char allowed[ANT_thesaurus_relationship::SENTINAL];	// what relationship types are allowed?
+	char *filename;			// the name of the disk file that is this thesaurus
+	unsigned long allowed;	// what relationship types are allowed?
 
 protected:
 	/*
@@ -30,7 +27,7 @@ protected:
 	virtual long allowable_relationship(long relationship);
 
 public:
-	ANT_thesaurus(char *filename) { this->filename = strnew(filename); set_allowable_relationships(SYNONYM); }
+	ANT_thesaurus(char *filename) { this->filename = strnew(filename); set_allowable_relationships(ANT_thesaurus_relationship::SYNONYM); }
 	virtual ~ANT_thesaurus() { delete [] filename; }
 
 	/*

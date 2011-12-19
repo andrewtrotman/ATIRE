@@ -1,3 +1,7 @@
+/*
+	PREGEN_PRECISION_MEASUREMENT.C
+	------------------------------
+*/
 #include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +18,10 @@
 #include "../source/pregen.h"
 #include "../source/pregen_kendall_tau.h"
 
+/*
+	FILE_EXISTS()
+	-------------
+*/
 int file_exists(const char *filename)
 {
 FILE *file = fopen(filename, "r");
@@ -26,27 +34,39 @@ if (file)
 return 0;
 }
 
-bool compare_rsv_greater(const std::pair<long long, pregen_t>& a, const std::pair<long long, pregen_t>& b)
+/*
+	COMPARE_RSV_GREATER()
+	---------------------
+*/
+bool compare_rsv_greater(const std::pair<long long, ANT_pregen_t>& a, const std::pair<long long, ANT_pregen_t>& b)
 {
 //Tiebreak on docids
 return a.second > b.second ? true : a.second == b.second ? (a.first < b.first) : false;
 }
 
+/*
+	ABSLL()
+	-------
+*/
 unsigned long long absll(signed long long a)
 {
 return a >= 0 ? a : -a;
 }
 
+/*
+	COMPARE()
+	---------
+*/
 void compare(ANT_pregen & f1, ANT_pregen & f2, int bits)
 {
 int print_rsvs = 0, print_ranks = 0, print_diffs = 0;
 
 assert(f1.doc_count == f2.doc_count);
-assert(bits <= sizeof(pregen_t) * CHAR_BIT);
+assert(bits <= sizeof(ANT_pregen_t) * CHAR_BIT);
 
 /* Pregens give a score to each document, but we want to compare document ranks in the ordering */
 
-std::pair<long long, pregen_t> *docs1 =	new std::pair<long long, pregen_t>[f1.doc_count], *docs2 = new std::pair<long long, pregen_t>[f2.doc_count];
+std::pair<long long, ANT_pregen_t> *docs1 =	new std::pair<long long, ANT_pregen_t>[f1.doc_count], *docs2 = new std::pair<long long, ANT_pregen_t>[f2.doc_count];
 long long *ranks1 = new long long[f1.doc_count], *ranks2 = new long long[f2.doc_count];
 
 if (print_rsvs)
@@ -65,7 +85,7 @@ for (long long i = 0; i < f1.doc_count; i++)
 	/* If we need to mask off the lower bits of the pregen to get the desired number
 	 * of bits, do that now.
 	 */
-	docs2[i].second = f2.scores[i] & ~(((pregen_t) 1 << (sizeof(pregen_t) * CHAR_BIT - bits)) - 1);
+	docs2[i].second = f2.scores[i] & ~(((ANT_pregen_t) 1 << (sizeof(ANT_pregen_t) * CHAR_BIT - bits)) - 1);
 
 	if (print_rsvs)
 		printf("%5lld %4llu %4llu\n", i, docs1[i].second, docs2[i].second);
@@ -119,14 +139,18 @@ delete[] ranks1;
 delete[] ranks2;
 }
 
+/*
+	COMPARE_KENDALL_TAU()
+	---------------------
+*/
 void compare_kendall_tau(ANT_pregen & f1, ANT_pregen & f2, int bits)
 {
 assert(f1.doc_count == f2.doc_count);
-assert(bits <= sizeof(pregen_t) * CHAR_BIT);
+assert(bits <= sizeof(ANT_pregen_t) * CHAR_BIT);
 
 uint32_t doc_count = f1.doc_count;
 
-std::pair<pregen_t, pregen_t> *docs = new std::pair<pregen_t, pregen_t>[doc_count];
+std::pair<ANT_pregen_t, ANT_pregen_t> *docs = new std::pair<ANT_pregen_t, ANT_pregen_t>[doc_count];
 
 //Make an array of  docid -> (score1, score2)
 for (long long i = 0; i < doc_count; i++)
@@ -136,22 +160,26 @@ for (long long i = 0; i < doc_count; i++)
 	/* If we need to mask off the lower bits of the pregen to get the desired number
 	 * of bits, do that now.
 	 */
-	docs[i].second = f2.scores[i] & ~(((pregen_t) 1 << (sizeof(pregen_t) * CHAR_BIT - bits)) - 1);
+	docs[i].second = f2.scores[i] & ~(((ANT_pregen_t) 1 << (sizeof(ANT_pregen_t) * CHAR_BIT - bits)) - 1);
 	}
 
-printf("%d, %.12f\n", bits, kendall_tau(docs, doc_count));
+printf("%d, %.12f\n", bits, ANT_kendall_tau(docs, doc_count));
 
 delete[] docs;
 }
 
+/*
+	COMPARE_CONFLATION()
+	--------------------
+*/
 void compare_conflation(ANT_pregen &f1, ANT_pregen &f2, int bits)
 {
 assert(f1.doc_count == f2.doc_count);
-assert(bits <= sizeof(pregen_t) * CHAR_BIT);
+assert(bits <= sizeof(ANT_pregen_t) * CHAR_BIT);
 
 /* Pregens give a score to each document, but we want to compare document ranks in the ordering */
 
-std::pair<long long, pregen_t> *docs1 =	new std::pair<long long, pregen_t>[f1.doc_count], *docs2 = new std::pair<long long, pregen_t>[f2.doc_count];
+std::pair<long long, ANT_pregen_t> *docs1 =	new std::pair<long long, ANT_pregen_t>[f1.doc_count], *docs2 = new std::pair<long long, ANT_pregen_t>[f2.doc_count];
 long long *ranks1 = new long long[f1.doc_count], *ranks2 = new long long[f2.doc_count];
 
 //Make an array of  docid -> (docid, score)
@@ -164,7 +192,7 @@ for (long long i = 0; i < f1.doc_count; i++)
 	/* If we need to mask off the lower bits of the pregen to get the desired number
 	 * of bits, do that now.
 	 */
-	docs2[i].second = f2.scores[i] & ~(((pregen_t) 1 << (sizeof(pregen_t) * CHAR_BIT - bits)) - 1);
+	docs2[i].second = f2.scores[i] & ~(((ANT_pregen_t) 1 << (sizeof(ANT_pregen_t) * CHAR_BIT - bits)) - 1);
 	}
 
 //Sort to give an array of  rank -> (docid, score)
@@ -181,8 +209,8 @@ while (i < f1.doc_count)
 	 * group contains any extra documents, however, then those documents have been conflated, increasing
 	 * our conflation error score.
 	 */
-	pregen_t docs1_group = docs1[i].second;
-	pregen_t docs2_group = docs2[j].second;
+	ANT_pregen_t docs1_group = docs1[i].second;
+	ANT_pregen_t docs2_group = docs2[j].second;
 
 	unsigned long long docs2_group_first_docid = docs2[j].first;
 
@@ -269,6 +297,10 @@ delete[] ranks1;
 delete[] ranks2;
 }
 
+/*
+	MAIN()
+	------
+*/
 int main(int argc, char ** argv)
 {
 int missing_pregens = 0;
@@ -278,7 +310,7 @@ char **pregen_filenames;
 num_pregens = argc - 1;
 pregen_filenames = new char*[num_pregens];
 
-printf("Pregen field size is %d bytes\n\n", sizeof(pregen_t));
+printf("Pregen field size is %d bytes\n\n", sizeof(ANT_pregen_t));
 
 if (num_pregens < 2)
 	{
@@ -319,7 +351,7 @@ if (!baseline.read(pregen_filenames[0]))
 	return -1;
 	}
 
-printf("Baseline for field: %s, method: %s\n", baseline.field_name, pregen_type_to_str(baseline.type));
+printf("Baseline for field: %s, method: %s\n", baseline.field_name, ANT_pregen::pregen_type_to_str(baseline.type));
 
 for (int i = 1; i < num_pregens; i++)
 	{
@@ -329,8 +361,8 @@ for (int i = 1; i < num_pregens; i++)
 		{
 		if (strcmp(baseline.field_name,pregen.field_name) == 0)
 			{
-			fprintf(stderr, "Comparing with: %s\n", pregen_type_to_str(pregen.type));
-			printf("Comparing with: %s\n", pregen_type_to_str(pregen.type));
+			fprintf(stderr, "Comparing with: %s\n", ANT_pregen::pregen_type_to_str(pregen.type));
+			printf("Comparing with: %s\n", ANT_pregen::pregen_type_to_str(pregen.type));
 			printf("Sum of rank diffs, average, percentage\n");
 
 			for (int bits = 64; bits >= 4; bits--)

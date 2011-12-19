@@ -1,7 +1,8 @@
-/**
- * Generate a character histogram from a specified field of a doclist file.
- */
-
+/*
+	ARITHMETIC_ENCODING_MODEL_GEN.C
+	-------------------------------
+	Generate a character histogram from a specified field of a doclist file.
+*/
 #include <cstdio>
 #include <stdlib.h>
 #include <string.h>
@@ -22,8 +23,15 @@
 #include "../source/arithmetic_model_bigram.h"
 #include "../source/pregen.h"
 #include "../source/string_pair.h"
+#include "../source/encode_char_base37.h"
+#include "../source/encode_char_base32.h"
+#include "../source/encode_char_printable_ascii.h"
 
-//Document collection is larger than my memory, so let's memory map it instead...
+/*
+	MAP_ENTIRE_FILE()
+	-----------------
+	Document collection is larger than my memory, so let's memory map it instead...
+*/
 #ifdef _MSC_VER
 	char *map_entire_file(const char *filename, long long *filesize)
 	{
@@ -31,6 +39,7 @@
 	HANDLE fp;
 	char *result;
 
+	(void)filesize;
 	fp = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (fp == INVALID_HANDLE_VALUE)
 		return NULL;
@@ -65,6 +74,10 @@
 	}
 #endif
 
+/*
+	MAIN()
+	------
+*/
 int main(int argc, char**argv)
 {
 char *doclist_filename, *doclist_field, *model_name;
@@ -205,7 +218,7 @@ while (*current_document)
 							total_field_length += tag_body.length();
 							documents_with_field++;
 
-							for (int i = 0; i < tag_body.length(); i++)
+							for (unsigned int i = 0; i < tag_body.length(); i++)
 								{
 								char c = tag_body[i];
 								unsigned char symbol;
@@ -247,7 +260,7 @@ while (*current_document)
 	current_document = docnameend + 1;
 	}
 
-model->print();
+model->text_render();
 
 printf("Total chars examined: %llu, of which %llu are Unicode bytes\n", total_field_length, unicode_bytes);
 printf("Average field length of %llu documents which contain the field '%s' is %llu\n", documents_with_field, doclist_field, total_field_length / documents_with_field);

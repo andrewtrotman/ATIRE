@@ -49,7 +49,7 @@ private:
 		This stuff is to do with computing good terms from documents
 	*/
 	ANT_memory_index_one_node **top_terms;
-	Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node> *heap;
+	ANT_heap<ANT_memory_index_one_node *, ANT_memory_index_one_node> *heap;
 	long heap_terms;		// number of terms in the heap
 	long heap_size;			// maximum size of the heap
 

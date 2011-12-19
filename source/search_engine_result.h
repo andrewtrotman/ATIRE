@@ -34,7 +34,7 @@ public:			// remove this line later
 	long long top_k;
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 
-	Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
+	ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
 	ANT_bitstring *include_set;
 
 #ifdef TWO_D_ACCUMULATORS

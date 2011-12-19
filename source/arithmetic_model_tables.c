@@ -1,6 +1,13 @@
+/*
+	ARITHMETIC_MODEL_TABLES.C
+	-------------------------
+*/
+
 #include "arithmetic_model_tables.h"
 
-/* Symbol frequencies derived from Chicken Smoothie post title collection */
+/*
+	Symbol frequencies derived from Chicken Smoothie post title collection
+*/
 const unsigned int ANT_symbol_frequencies_base37[] =
 	{
 	1433, 21, 50, 39, 11, 8, 5, 1, 6, 5, 4, 688, 98, 363, 250, 922,
@@ -8,7 +15,9 @@ const unsigned int ANT_symbol_frequencies_base37[] =
 	74, 184, 23, 117, 20
 	};
 
-/* Symbol frequencies derived from Chicken Smoothie post title collection */
+/* 
+	Symbol frequencies derived from Chicken Smoothie post title collection 
+*/
 const unsigned int ANT_symbol_frequencies_ascii_printables[] =
 	{
 	1907, /* Space */
@@ -21,7 +30,9 @@ const unsigned int ANT_symbol_frequencies_ascii_printables[] =
 	15 /* Unicode */
 	};
 
-/* Symbol frequencies derived from Chicken Smoothie post title collection */
+/* 
+	Symbol frequencies derived from Chicken Smoothie post title collection 
+*/
 const unsigned int ANT_symbol_frequencies_base32[] =
 	{
 	1724, /* Space */
@@ -31,7 +42,9 @@ const unsigned int ANT_symbol_frequencies_base32[] =
 	88, 223, 26, 139, 25
 	};
 
-/* Symbol frequencies derived from Chicken Smoothie post title collection */
+/* 
+	Symbol frequencies derived from Chicken Smoothie post title collection 
+*/
 const unsigned int ANT_symbol_frequencies_ascii_printables_bigram[] =
 	{
 	1761, 191, 1, 2, 1, 1, 37, 27, 126, 133, 109, 4, 36, 57, 96, 36,
@@ -347,7 +360,9 @@ const unsigned int ANT_symbol_frequencies_ascii_printables_bigram[] =
 	2, 19, 28, 2, 1, 1, 11, 1, 73, 10741
 	};
 
-/* Symbol frequencies derived from Ancestry.com post title collection */
+/* 
+	Symbol frequencies derived from Ancestry.com post title collection 
+*/
 const unsigned int ANT_symbol_frequencies_ascii_printables_bigram_ancestry_titles[] =
 	{
 	604, 9, 4, 1, 1, 1, 5, 9, 8, 8, 2, 1, 59, 29, 32, 14,

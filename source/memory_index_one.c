@@ -418,7 +418,7 @@ top_terms = new ANT_memory_index_one_node *[terms_wanted + 1];
 /*
 	Set up the heap
 */
-heap = new Heap<ANT_memory_index_one_node *, ANT_memory_index_one_node>(*top_terms, terms_wanted);
+heap = new ANT_heap<ANT_memory_index_one_node *, ANT_memory_index_one_node>(*top_terms, terms_wanted);
 heap_terms = 0;
 heap_size = terms_wanted;
 

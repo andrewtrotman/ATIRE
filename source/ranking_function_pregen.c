@@ -2,13 +2,14 @@
 	RANKING_FUNCTION_PREGEN.C
 	-------------------------
 */
+#include <limits>
 #include <math.h>
+#include <stdlib.h>
 #include "pragma.h"
 #include "ranking_function_pregen.h"
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
 #include "search_engine_accumulator.h"
-#include <limits>
 
 /*
 	ANT_RANKING_FUNCTION_PREGEN::RELEVANCE_RANK_TOP_K()
@@ -55,7 +56,7 @@ while (current < end)
 		{
 		docid += *current++;
 
-		value = (ANT_search_engine_accumulator::ANT_accumulator_t) (ascending ? std::numeric_limits<pregen_t>::max() - pregen->scores[docid] : pregen->scores[docid]);
+		value = (ANT_search_engine_accumulator::ANT_accumulator_t) (ascending ? std::numeric_limits<ANT_pregen_t>::max() - pregen->scores[docid] : pregen->scores[docid]);
 
 		accumulator->set_rsv(docid, value);
 		}

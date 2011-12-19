@@ -937,7 +937,7 @@ ANT_search_engine_accumulator *accumulator;
 
 ANT_search_engine_accumulator **accumulator_pointers;
 long next_relevant_document;
-Heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
+ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
 
 /*
 	Parse the query and count the number of search terms.  If there's a parse error

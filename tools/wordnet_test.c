@@ -18,6 +18,7 @@ long long set_length, current;
 char buffer[1024];
 
 wordnet = new ANT_thesaurus_wordnet("wordnet.aspt");
+wordnet->set_allowable_relationships(ANT_thesaurus_relationship::ALL);
 
 while (1)
 	{

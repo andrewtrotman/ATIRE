@@ -44,9 +44,9 @@ for (ch = result; *ch != '\0'; ch++)
 		{
 		fwrite(from, ch - from, 1, stdout);
 		if (enter_highlight)
-			fwrite("<font color=800000>", 19, 1, stdout);
+			fwrite("<font color=F00000><b>", 22, 1, stdout);
 		else
-			fwrite("</font>", 7, 1, stdout);
+			fwrite("</b></font>",11, 1, stdout);
 		enter_highlight = !enter_highlight;
 		from = ch + 1;
 		}

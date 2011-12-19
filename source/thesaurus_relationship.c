@@ -2,38 +2,38 @@
 	THESAURUS_RELATIONSHIP.C
 	------------------------
 */
+#include <sstream>
+#include "str.h"
 #include "thesaurus_relationship.h"
 
-char *ANT_thesaurus_relationship::name_of_relationship[] = 
+/*
+	GET_RELATIONSHIP_NAME()
+	-----------------------
+*/
+char *ANT_thesaurus_relationship::get_relationship_name(long relationship)
 {
-"MEMBER_OF_TOPIC",
-"MEMBER_OF_REGION",
-"MEMBER_OF_USAGE",
-"HYPONYM",
-"INSTANCE_HYPONYM",
-"ANTONYM",
-"MEMBER_HOLONYM",
-"PART_HOLONYM",
-"SUBSTANCE_HOLONYM",
-"VERB_GROUP",
-"MEMBER_MERONYM",
-"PART_MERONYM",
-"SUBSTANCE_MERONYM",
-"SIMILAR_TO",
-"ENTAILMENT",
-"DOMAIN_OF_TOPIC",
-"DOMAIN_OF_REGION",
-"DOMAIN_OF_USAGE",
-"HYPERNYM",
-"INSTANCE_HYPERNYM",
-"FROM_ABJECTIVE",
-"PERTAINYM",
-"SEE_ALSO",
-"DERIVED_FORM",
-"PRINCIPLE_OF_VERB",
-"ATTRIBUTE",
-"CAUSE",
-"SYNONYM",
-"SENTINAL"
-} ;
+std::ostringstream out;
 
+if (relationship == 0)
+	out << "NONE";
+
+if (relationship & HYPONYM)
+	out << "HYPONYM ";
+
+if (relationship & ANTONYM)
+	out << "ANTONYM ";
+
+if (relationship & HOLONYM)
+	out << "HOLONYM ";
+
+if (relationship & MERONYM)
+	out << "MERONYM ";
+
+if (relationship & HYPERNYM)
+	out << "HYPERNYM ";
+
+if (relationship & SYNONYM)
+	out << "SYNONYM ";
+
+return strnew(out.str().c_str());
+}

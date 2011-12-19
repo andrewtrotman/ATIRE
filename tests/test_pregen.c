@@ -1,9 +1,19 @@
+/*
+	TEST_PREGEN.C
+	-------------
+*/
+
 #include <cstdio>
 #include <cassert>
 
 #include "../source/string_pair.h"
 #include "../source/pregen.h"
+#include "../source/pregen_writer_normal.h"
 
+/*
+	MAIN()
+	------
+*/
 int main(void)
 {
 /* Check that leading spaces are not significant, and verify that the encoding of a string of

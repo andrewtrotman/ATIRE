@@ -160,8 +160,8 @@ else
 			terms++;
 			}
 		}
-	current_term->relationship = ANT_thesaurus_relationship::SENTINAL;	// end of the list
-	current_term->term = NULL;											// is not a string
+	current_term->relationship = 0;	// end of the list
+	current_term->term = NULL;		// is not a string
 	}
 
 if (terms_in_synset != NULL)

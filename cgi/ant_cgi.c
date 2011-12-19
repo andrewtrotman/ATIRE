@@ -38,13 +38,13 @@ return strnnew(start, finish - start);
 /*
 	PROCESS_ATIRE_RESULT()
 	--------------------
-	<hit><rank>1</rank><id>28220</id><name>WSJ871216-0063</name><rsv>7.00</rsv><title></title></hit>
+	<hit><rank>1</rank><id>28220</id><name>WSJ871216-0063</name><rsv>7.00</rsv><title></title><snippet></snippet></hit>
 */
 void process_atire_result(char *result, char *query)
 {
 long long antid;
 long result_number;
-char *filename, *title;
+char *filename, *title, *snippet;
 double rsv;
 
 result_number = atol(between(result, "<rank>", "</rank>"));
@@ -52,11 +52,16 @@ antid = atoll(between(result, "<id>", "</id>"));
 filename = between(result, "<name>", "</name>");
 rsv = atof(between(result, "<rsv>", "</rsv>"));
 title = between(result, "<title>", "</title>");
+snippet = between(result, "<snippet>", "</snippet>");
+
+printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld&Q=%s><b>%s</b></a><br>", antid, query, filename);
 
 if (title != NULL && *title != '\0')
-	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld&Q=%s><b>%s</b></a><br>\n%s<br><br>\n\n</li>", antid, query, title, filename);
-else
-	printf("<li><a href=ant_getdoc_cgi.exe?ID=%lld&Q=%s><b>%s</b></a><br><br>\n\n</li>", antid, query, filename);
+	printf("%s<br>", title);
+if (snippet != NULL && *snippet != '\0')
+	printf("<font color=#F00000><b>%s</b></font><br>\n", snippet);
+
+printf("</li><br>");
 }
 
 /*

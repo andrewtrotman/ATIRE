@@ -1,3 +1,7 @@
+/*
+	PREGEN_CREATE.C
+	---------------
+*/
 #include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,17 +13,13 @@
 #include <cmath>
 
 #ifdef _MSC_VER
-
-#include <windows.h>
-
+	#include <windows.h>
 #else
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
-
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <fcntl.h>
+	#include <unistd.h>
+	#include <sys/mman.h>
 #endif
 
 #include "../source/str.h"
@@ -29,7 +29,12 @@
 #include "../source/pregen.h"
 #include "../source/search_engine_accumulator.h"
 #include "../source/indexer_param_block_pregen.h"
+#include "../source/pregens_writer.h"
 
+/*
+	MAP_ENTIRE_FILE()
+	-----------------
+*/
 #ifdef _MSC_VER
 	char *map_entire_file(const char *filename, long long *filesize)
 	{
@@ -76,6 +81,10 @@
 	}
 #endif
 
+/*
+	MAIN()
+	------
+*/
 int main(int argc, char ** argv)
 {
 ANT_indexer_param_block_pregen pregen_params;
@@ -88,7 +97,7 @@ num_pregens = (argc - 2) / 2;
 pregen_type = new char*[num_pregens];
 pregen_filenames = new char*[num_pregens];
 
-printf("Pregen field size is %d bytes\n\n", sizeof(pregen_t));
+printf("Pregen field size is %d bytes\n\n", sizeof(ANT_pregen_t));
 
 for (int i = 2, pregen_index = 0; i < argc; i += 2, pregen_index++)
 	{

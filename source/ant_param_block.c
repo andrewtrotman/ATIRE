@@ -64,8 +64,8 @@ snippet_word_cloud_terms = 40;
 title_tag = "title";
 title_algorithm = NONE;
 title_length = 300;
-expander_tf_types = ANT_thesaurus::SYNONYM;
-expander_query_types = ANT_thesaurus::SYNONYM;
+expander_tf_types = ANT_thesaurus_relationship::SYNONYM;
+expander_query_types = ANT_thesaurus_relationship::SYNONYM;
 }
 
 /*
@@ -187,7 +187,7 @@ puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
 puts("-f[a][cC][s<stemmer>][-fbBtT<tag>][wnN<n>]Focus the results list");
 puts("  a             Article retrieval [default]");
-//puts("  r             Range retrieval Start tag before the first occurence to end tag after the last");
+puts("  r             Range retrieval: Start tag before the first occurence to end tag after the last");
 puts("  -             No snippets [default]");
 puts("  b<tag>        Snippet is the <tag> element with the highest term count");
 puts("  B<tag>        Snippet is the <tag> element with the tf.icf score");
@@ -303,22 +303,22 @@ while (*which != '\0')
 		case ':':
 			break;
 		case 'a':
-			answer |= ANT_thesaurus::ANTONYM;
+			answer |= ANT_thesaurus_relationship::ANTONYM;
 			break;
 		case 'm':
-			answer |= ANT_thesaurus::MERONYM;
+			answer |= ANT_thesaurus_relationship::MERONYM;
 			break;
 		case 's':
-			answer |= ANT_thesaurus::SYNONYM;
+			answer |= ANT_thesaurus_relationship::SYNONYM;
 			break;
 		case 'h':
-			answer |= ANT_thesaurus::HOLONYM;
+			answer |= ANT_thesaurus_relationship::HOLONYM;
 			break;
 		case 'o':
-			answer |= ANT_thesaurus::HYPONYM;
+			answer |= ANT_thesaurus_relationship::HYPONYM;
 			break;
 		case 'e':
-			answer |= ANT_thesaurus::HYPERNYM;
+			answer |= ANT_thesaurus_relationship::HYPERNYM;
 			break;
 		default:
 			exit(printf("Unknown type in query expansion '%c'\n", *which));
@@ -399,7 +399,7 @@ do
 			if (*(which + 1) == ':')
 				expander_tf_types = decode_expansion_types(which + 2);
 			else
-				expander_tf_types = ANT_thesaurus::SYNONYM;
+				expander_tf_types = ANT_thesaurus_relationship::SYNONYM;
 			done = TRUE;
 			break;
 		case 'W':
@@ -410,7 +410,7 @@ do
 			if (*(which + 1) == ':')
 				expander_query_types = decode_expansion_types(which + 2);
 			else
-				expander_query_types = ANT_thesaurus::SYNONYM;
+				expander_query_types = ANT_thesaurus_relationship::SYNONYM;
 			done = TRUE;
 			break;
 		default:
@@ -431,7 +431,6 @@ if ((query_type & perform_query_mask) == 0)
 /*
 	ANT_ANT_PARAM_BLOCK::EXPORT_FORMAT()
 	------------------------------------
-	focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
 */
 void ANT_ANT_param_block::export_format(char *forum)
 {
@@ -527,7 +526,9 @@ switch (*which)
 	case 'a': 
 		focussing_algorithm = ARTICLE;
 		break;
-//	case 'r': focussing_algorithm = RANGE; break;
+	case 'r':
+		focussing_algorithm = RANGE;
+		break;
 	case 'b': 
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEST_TF_TAG;
 		if (*(which + 1) != '\0')
