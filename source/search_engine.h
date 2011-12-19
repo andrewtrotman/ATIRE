@@ -12,6 +12,7 @@
 #include "btree_iterator.h"
 #include "search_engine_accumulator.h"
 #include "impact_header.h"
+#include "version.h"
 
 class ANT_memory;
 class ANT_file;

@@ -14,6 +14,7 @@
 #include "compression_text_factory.h"
 #include "hash_table.h"
 #include "impact_header.h"
+#include "version.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;

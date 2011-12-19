@@ -957,7 +957,7 @@ long ANT_memory_index::serialise(ANT_ranking_function_factory *factory)
 {
 uint8_t zero = 0;
 int32_t length_of_longest_term = 0;
-uint32_t longest_postings_size;
+uint32_t longest_postings_size, four_byte;
 int64_t highest_df = 0;
 uint64_t file_position, terms_in_root, eight_byte;
 long terms_in_node, unique_terms = 0, max_terms_in_node = 0, hash_val, where, bytes, btree_root_size;
@@ -1185,6 +1185,31 @@ index_file->write((unsigned char *)&longest_postings_size, sizeof(longest_postin
 	and the maximum number of postings in a postings list (that is, the largest document frequencty (DF))
 */
 index_file->write((unsigned char *)&highest_df, sizeof(highest_df));		// 8 bytes
+
+//
+// 64 bit integer reserved for future use (maybe checksum)
+//
+eight_byte = 0;
+index_file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
+
+//
+// 64 bit integer reserved for future use (collection name)
+//
+eight_byte = ANT_file_signature_index;
+index_file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
+
+//
+// 32 bit integer for version number (ANT_version)
+//
+four_byte = (uint32_t)ANT_version;
+index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+//
+// 32 bit integer for ANT_ID_THESAURUS_SIGNATURE_MAJOR (tools/wordnet_to_ant_thesaurus.c)
+//
+four_byte = (uint32_t)ANT_file_signature;
+index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
 
 /*
 	We're done!

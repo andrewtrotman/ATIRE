@@ -29,7 +29,7 @@ void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result 
 		end = current + *impact_header->doc_count_ptr;
 		while (current < end) {
 			docid += *current++;
-			value = (ANT_search_engine_accumulator::ANT_accumulator_t) (ascending ? std::numeric_limits<pregen_t>::max() - pregen->scores[docid] : pregen->scores[docid]);
+			value = (ANT_search_engine_accumulator::ANT_accumulator_t) (ascending ? std::numeric_limits<ANT_pregen_t>::max() - pregen->scores[docid] : pregen->scores[docid]);
 			accumulator->set_rsv(docid, value);
 		}
 		current = end;

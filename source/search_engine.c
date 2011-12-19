@@ -84,7 +84,7 @@ index_filename = filename;
 	long long: the maximum number of postings in a postings list (the highest DF)
 */
 end = index->file_length();
-index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte));
+index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
 
 index->read(&eight_byte);
 term_header = eight_byte;
@@ -97,6 +97,24 @@ postings_buffer_length = four_byte;
 
 index->read(&eight_byte);
 highest_df = eight_byte;
+
+// read checksum
+index->read(&eight_byte);
+
+// read collection id
+index->read(&eight_byte);
+if (eight_byte != ANT_file_signature_index)
+	exit(printf("ERROR: file type mismatch\n"));
+
+// read version number
+index->read(&four_byte);
+if (four_byte != ANT_version)
+	exit(printf("ERROR: version mismatch\n"));
+
+// read file signature
+index->read(&four_byte);
+if (four_byte != ANT_file_signature)
+	exit(printf("ERROR: file signature mismatch\n"));
 
 /*
 	Load the B-tree header

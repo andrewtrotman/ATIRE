@@ -6,7 +6,7 @@
 
 #if defined(_WIN64) || (__WORDSIZE == 64) || (defined(__APPLE__) && (_LP64 == 1))
 	#define BITNESS "64"
-#elif defined(_WIN32) || (__WORDSIZE == 32) || defined(__APPLE__) 
+#elif defined(_WIN32) || (__WORDSIZE == 32) || defined(__APPLE__)
 	#define BITNESS "32"
 #else
 	#define BITNESS "Unknown"
@@ -24,8 +24,14 @@
 	#define PURIFYNESS ""
 #endif
 
+#ifdef IMPACT_HEADER
+long ANT_version = 0x0004;		// version number in BCD
+char *ANT_version_string = "ANT Version 0.4 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2011 Andrew Trotman, University of Otago";
+#else
 long ANT_version = 0x0003;		// version number in BCD
 char *ANT_version_string = "ANT Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2011 Andrew Trotman, University of Otago";
+#endif
+
 
 
 /*

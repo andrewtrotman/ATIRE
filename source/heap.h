@@ -12,7 +12,7 @@
 	class ANT_HEAP
 	--------------
 */
-template <typename T, typename _Compare = ANT_primary_cmp<T>> 
+template <typename T, typename _Compare = ANT_primary_cmp<T> >
 class ANT_heap
 {
 private:
@@ -122,28 +122,28 @@ while (i < this->size)
 		{
 		if ((compare(key, array[lpos]) <= 0) && (compare(key, array[rpos]) <= 0))
 			break;
-		else if (compare(array[lpos], array[rpos]) > 0) 
+		else if (compare(array[lpos], array[rpos]) > 0)
 			{
 			array[i] = array[rpos];
 			i = rpos;
-			} 
-		else 
+			}
+		else
 			{
 			array[i] = array[lpos];
 			i = lpos;
 			}
-		} 
-	else if (lpos < this->size) 
+		}
+	else if (lpos < this->size)
 		{
-		if (compare(key, array[lpos]) > 0) 
+		if (compare(key, array[lpos]) > 0)
 			{
 			array[i] = array[lpos];
 			i = lpos;
-			} 
+			}
 		else
 			break;	// we know it's the last one, so just exit the loop
-		} 
-	else 
+		}
+	else
 		break;
 	}
 
@@ -154,21 +154,21 @@ array[i] = key;
 	ANT_HEAP::MAX_HEAPIFY()
 	-----------------------
 */
-template <typename T, typename _Compare> void ANT_heap<T, _Compare>::max_heapify(long long pos) 
+template <typename T, typename _Compare> void ANT_heap<T, _Compare>::max_heapify(long long pos)
 {
 long long left = left_pos(pos);
 long long right = right_pos(pos);
 long long largest;
 
-if ((left < size) && (compare(array[left], array[pos]) > 0)) 
+if ((left < size) && (compare(array[left], array[pos]) > 0))
 	largest = left;
-else 
+else
 	largest = pos;
 
-if ((right < size) && (compare(array[right], array[largest]) > 0)) 
+if ((right < size) && (compare(array[right], array[largest]) > 0))
 	largest = right;
 
-if (largest != pos) 
+if (largest != pos)
 	{
 	swap(&array[pos], &array[largest]);
 	max_heapify(largest);
@@ -185,15 +185,15 @@ long long left = left_pos(pos);
 long long right = right_pos(pos);
 long long largest;
 
-if ((left < hsize) && (compare(array[left], array[pos]) > 0)) 
+if ((left < hsize) && (compare(array[left], array[pos]) > 0))
 	largest = left;
-else 
+else
 	largest = pos;
 
-if ((right < hsize) && (compare(array[right], array[largest]) > 0)) 
+if ((right < hsize) && (compare(array[right], array[largest]) > 0))
 	largest = right;
 
-if (largest != pos) 
+if (largest != pos)
 	{
 	swap(&array[largest], &array[pos]);
 	max_heapify(largest, hsize);
@@ -206,7 +206,7 @@ if (largest != pos)
 */
 template <typename T, typename _Compare> void ANT_heap<T, _Compare>::build_max_heap()
 {
-for (long long i = size/2-1; i >= 0; i--) 
+for (long long i = size/2-1; i >= 0; i--)
 	max_heapify(i);
 }
 
@@ -214,7 +214,7 @@ for (long long i = size/2-1; i >= 0; i--)
 	ANT_HEAP::TEXT_RENDER()
 	-----------------------
 */
-template <typename T, typename _Compare> void ANT_heap<T, _Compare>::text_render(long long i) 
+template <typename T, typename _Compare> void ANT_heap<T, _Compare>::text_render(long long i)
 {
 printf("i: %lld, ", i);
 for (long long i = 0; i < size; i++)
@@ -247,15 +247,15 @@ long long left = left_pos(pos);
 long long right = right_pos(pos);
 long long smallest;
 
-if ((left < size) && (compare(array[left], array[pos]) < 0)) 
+if ((left < size) && (compare(array[left], array[pos]) < 0))
 	smallest = left;
-else 
+else
 	smallest = pos;
 
-if ((right < size) && (compare(array[right], array[smallest]) < 0)) 
+if ((right < size) && (compare(array[right], array[smallest]) < 0))
 	smallest = right;
 
-if (smallest != pos) 
+if (smallest != pos)
 	{
 	swap(&array[pos], &array[smallest]);
 	min_heapify(smallest);
@@ -272,15 +272,15 @@ long long left = left_pos(pos);
 long long right = right_pos(pos);
 long long smallest;
 
-if ((left < hsize) && (compare(array[left], array[pos])) < 0) 
+if ((left < hsize) && (compare(array[left], array[pos])) < 0)
 	smallest = left;
 else
 	smallest = pos;
 
-if ((right < hsize) && (compare(array[right], array[smallest]) < 0)) 
+if ((right < hsize) && (compare(array[right], array[smallest]) < 0))
 	smallest = right;
 
-if (smallest != pos) 
+if (smallest != pos)
 	{
 	swap(&array[pos], &array[smallest]);
 	min_heapify(smallest, hsize);
@@ -293,7 +293,7 @@ if (smallest != pos)
 */
 template <typename T, typename _Compare> void ANT_heap<T, _Compare>::build_min_heap()
 {
-for (long long i = size/2 - 1; i >= 0; i--) 
+for (long long i = size/2 - 1; i >= 0; i--)
 	min_heapify(i);
 }
 
@@ -305,7 +305,7 @@ for (long long i = size/2 - 1; i >= 0; i--)
 template <typename T, typename _Compare> void ANT_heap<T, _Compare>::min_heapsort()
 {
 build_min_heap();
-for (long long i = size-1; i >= 1; i--) 
+for (long long i = size-1; i >= 1; i--)
 	{
 	swap(&array[0], &array[i]);
 	min_heapify(0, i);
