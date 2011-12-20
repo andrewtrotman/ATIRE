@@ -674,9 +674,10 @@ if (!should_prune(root))
 				// compress the impact header
 				compressed_header_ptr = compressed_impact_header_buffer + impact_header.info_size;
 				len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
-				((uint32_t *)compressed_impact_header_buffer)[0] = impact_header.the_quantum_count;
+				((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
+				((uint32_t *)compressed_impact_header_buffer)[2] = impact_header.the_quantum_count;
 				// the offset for the beginning of the postings
-				((uint32_t *)compressed_impact_header_buffer)[1] = impact_header.info_size + len;
+				((uint32_t *)compressed_impact_header_buffer)[3] = impact_header.info_size + len;
 				compressed_header_ptr += len;
 
 				// write the impact header to disk
@@ -732,9 +733,10 @@ if (!should_prune(root))
 			// compress the impact header
 			compressed_header_ptr = compressed_impact_header_buffer + impact_header.info_size;
 			len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
-			((uint32_t *)compressed_impact_header_buffer)[0] = impact_header.the_quantum_count;
+			((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
+			((uint32_t *)compressed_impact_header_buffer)[2] = impact_header.the_quantum_count;
 			// the offset for the beginning of the postings
-			((uint32_t *)compressed_impact_header_buffer)[1] = impact_header.info_size + len;
+			((uint32_t *)compressed_impact_header_buffer)[3] = impact_header.info_size + len;
 			compressed_header_ptr += len;
 
 			// write the impact header to disk
@@ -976,9 +978,9 @@ if (index_file == NULL)
 	return 0;
 
 #ifdef IMPACT_HEADER
+impact_header.postings_chain = 0;
 impact_header.the_quantum_count = 0;
-
-impact_header.info_size = 2 * sizeof(uint32_t);
+impact_header.info_size = sizeof(uint64_t) +  2 * sizeof(uint32_t);
 // extra 1 byte is for the compression scheme
 impact_value_size = 1 + sizeof(*impact_header.impact_value_start) * ANT_impact_header::NUM_OF_QUANTUMS;
 doc_count_size = 1 + sizeof(*impact_header.doc_count_start) * ANT_impact_header::NUM_OF_QUANTUMS;
