@@ -198,7 +198,6 @@ documents = collection_details.local_document_frequency;
 
 
 #ifdef IMPACT_HEADER
-	impact_header.info_size = sizeof(uint64_t) + 2 * sizeof(uint32_t);
 	impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*impact_header.header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
 	memory->realign();
 	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (documents + ANT_COMPRESSION_FACTORY_END_PADDING));
@@ -679,7 +678,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	if (term_details->local_document_frequency > trim_postings_k)
 		{
 		#ifdef IMPACT_HEADER
-			bytes = impact_header.info_size + 5 * ANT_impact_header::NUM_OF_QUANTUMS * 3 + 5 * trim_postings_k;
+			bytes = ANT_impact_header::INFO_SIZE + 5 * ANT_impact_header::NUM_OF_QUANTUMS * 3 + 5 * trim_postings_k;
 		#else
 			bytes = 510 + 5 * trim_postings_k;
 		#endif
@@ -706,7 +705,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			//
 			impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[2];
 			impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[3];
-			factory.decompress(impact_header.header_buffer, postings_buffer+impact_header.info_size, impact_header.the_quantum_count * 3);
+			factory.decompress(impact_header.header_buffer, postings_buffer+ANT_impact_header::INFO_SIZE, impact_header.the_quantum_count * 3);
 			impact_header.impact_value_start = impact_header.header_buffer;
 			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
 			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
@@ -821,7 +820,7 @@ now = stats->start_timer();
 // decompress the header
 impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[2];
 impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[3];
-factory.decompress(impact_header.header_buffer, postings_buffer+impact_header.info_size, impact_header.the_quantum_count * 3);
+factory.decompress(impact_header.header_buffer, postings_buffer+ANT_impact_header::INFO_SIZE, impact_header.the_quantum_count * 3);
 impact_header.impact_value_start = impact_header.header_buffer;
 impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
 impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;

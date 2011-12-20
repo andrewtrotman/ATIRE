@@ -16,7 +16,8 @@ class ANT_impact_header
 {
 public:
 	static const uint32_t NUM_OF_QUANTUMS = 256;
-	long long info_size, header_size;
+	static const long long INFO_SIZE = sizeof(uint64_t) + 2 * sizeof(uint32_t);
+	long long header_size;
 	ANT_compressable_integer *header_buffer;
 	uint64_t postings_chain;
 	uint32_t the_quantum_count;
