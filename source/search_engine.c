@@ -719,7 +719,6 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
 			//while (impact_header.doc_count_ptr < doc_count_end) {
 			while(impact_header.doc_count_ptr < impact_header.impact_offset_start) {
-				printf("doc_count: %lu\n", *impact_header.doc_count_ptr);
 				if (sum >= trim_postings_k) {
 					break;
 				}
