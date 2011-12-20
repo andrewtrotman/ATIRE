@@ -491,6 +491,45 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
 		{
+#ifdef IMPACT_HEADER
+		ANT_compressable_integer *postings_ptr;
+		long long info_size = 2 * sizeof(uint32_t);
+		uint32_t the_quantum_count = term_details->local_document_frequency;
+		uint32_t beginning_of_the_postings = info_size + 1 + the_quantum_count * 3 * sizeof(ANT_compressable_integer);
+
+		((uint32_t *)destination)[0] = the_quantum_count;
+		((uint32_t *)destination)[1] = beginning_of_the_postings;
+
+		*(destination + info_size) = 0; // no compression for the header
+		into = (ANT_compressable_integer *)(destination + info_size + 1); // the beginning of the header
+
+		*(destination + beginning_of_the_postings) = 0; // no compression for the postings
+		postings_ptr = (ANT_compressable_integer *)(destination + beginning_of_the_postings + 1);
+
+		if (the_quantum_count == 1) {
+			// get the impact value
+			*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
+			// get the doc count
+			*into++ = 1;
+			// get the offset
+			*into++ = 0;
+			// the posting
+			*postings_ptr = term_details->postings_position_on_disk >> 32;
+		} else {
+			// get the impact values
+			*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
+			*into++ = (ANT_compressable_integer)term_details->postings_length;
+			// get the doc count
+			*into++ = 1;
+			*into++ = 1;
+			// get the offset
+			*into++ = 0;
+			*into++ = sizeof(ANT_compressable_integer);
+			// the postings
+			*postings_ptr++ = term_details->postings_position_on_disk >> 32;
+			*postings_ptr = term_details->impacted_length;
+		}
+#else
 		/*
 			We're about to generate the impact-ordering here and so we interlace TF, DOC-ID and 0s
 		*/
@@ -503,6 +542,7 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		*into++ = (ANT_compressable_integer)term_details->impacted_length;
 		*into++ = 0;
 		term_details->impacted_length = term_details->local_document_frequency == 1 ? 3 : 6;
+#endif
 		}
 	else
 		{
@@ -657,25 +697,29 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	if (verify != NULL)
 		{
 		now = stats->start_timer();
+#ifndef TOP_K_READ_AND_DECOMPRESSOR
+		factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+#else
 		#ifdef IMPACT_HEADER
+			//
+			// decompress the header
+			//
 			impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[0];
 			impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[1];
 			factory.decompress(impact_header.header_buffer, postings_buffer+impact_header.info_size, impact_header.the_quantum_count * 3);
 			impact_header.impact_value_start = impact_header.header_buffer;
 			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
 			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
-		#endif
 
-#ifndef TOP_K_READ_AND_DECOMPRESSOR
-		factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
-#else
-		#ifdef IMPACT_HEADER
-			ANT_compressable_integer *doc_count_end;
+			//
+			// decompress the postings
+			//
 			long long sum = 0;
-			doc_count_end = impact_header.doc_count_start + impact_header.the_quantum_count;
 			impact_header.doc_count_ptr = impact_header.doc_count_start;
 			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
-			while (impact_header.doc_count_ptr < doc_count_end) {
+			//while (impact_header.doc_count_ptr < doc_count_end) {
+			while(impact_header.doc_count_ptr < impact_header.impact_offset_start) {
+				printf("doc_count: %lu\n", *impact_header.doc_count_ptr);
 				if (sum >= trim_postings_k) {
 					break;
 				}
@@ -688,7 +732,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			}
 			impact_header.doc_count_trim_ptr = impact_header.doc_count_ptr;
 
-		#else
+		#else // else #ifdef IMPACT_HEADER
 		/*
 			The maximum number of postings we need to decompress in the worst case is the case where each posting has
 			a different quantised impact... that is 3*n.  But, there are only 255 possible impacts and so if n > 255

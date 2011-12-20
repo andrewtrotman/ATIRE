@@ -713,28 +713,28 @@ if (!should_prune(root))
 			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 			root->in_disk.end_pos_on_disk = file->tell();
 		} else {
-			impact_value_start = impact_header_buffer;
-			doc_count_start = impact_header_buffer + the_quantum_count;
-			impact_offset_start = impact_header_buffer + the_quantum_count * 2;
+			impact_header.impact_value_start = impact_header.header_buffer;
+			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
+			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
 
 			// compress the impact postings, one quantum at time, and update the corresponding offsets in the header
-			end = impact_offset_start + the_quantum_count;
-			impact_offset_ptr = impact_offset_start;
+			end = impact_header.impact_offset_start + impact_header.the_quantum_count;
+			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
 
 			compressed_postings_ptr = compressed_postings_list;
-			for (impact_offset_ptr = impact_offset_start, doc_count_ptr = doc_count_start; impact_offset_ptr != end; impact_offset_ptr++, doc_count_ptr++) {
-				len = factory->compress(compressed_postings_ptr, (long long)1 + *doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_offset_ptr, *doc_count_ptr);
+			for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++) {
+				len = factory->compress(compressed_postings_ptr, (long long)1 + *impact_header.doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
 				// convert the pointer into offset
-				*impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
+				*impact_header.impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
 				compressed_postings_ptr += len;
 			}
 
 			// compress the impact header
-			compressed_header_ptr = compressed_impact_header_buffer + impact_header_info_size;
-			len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header_buffer, the_quantum_count * 3);
-			((uint32_t *)compressed_impact_header_buffer)[0] = the_quantum_count;
+			compressed_header_ptr = compressed_impact_header_buffer + impact_header.info_size;
+			len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
+			((uint32_t *)compressed_impact_header_buffer)[0] = impact_header.the_quantum_count;
 			// the offset for the beginning of the postings
-			((uint32_t *)compressed_impact_header_buffer)[1] = impact_header_info_size + len;
+			((uint32_t *)compressed_impact_header_buffer)[1] = impact_header.info_size + len;
 			compressed_header_ptr += len;
 
 			// write the impact header to disk
