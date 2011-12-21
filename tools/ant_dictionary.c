@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "maths.h"
-#include "memory.h"
-#include "search_engine.h"
-#include "btree_iterator.h"
-#include "search_engine_btree_leaf.h"
-#include "phonetic_double_metaphone.h"
-#include "phonetic_soundex.h"
-#include "impact_header.h"
+#include "../source/maths.h"
+#include "../source/memory.h"
+#include "../source/search_engine.h"
+#include "../source/btree_iterator.h"
+#include "../source/search_engine_btree_leaf.h"
+#include "../source/phonetic_double_metaphone.h"
+#include "../source/phonetic_soundex.h"
+#include "../source/impact_header.h"
 
 #ifndef FALSE
 	#define FALSE 0

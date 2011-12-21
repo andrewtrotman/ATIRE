@@ -9,7 +9,6 @@
 #include "directory_iterator_object.h"
 #include "producer_consumer.h"
 
-class ANT_indexer_param_block;
 class ANT_memory_indexer;
 class ANT_memory_index;
 class ANT_directory_iterator_preindex_internals;
@@ -32,7 +31,10 @@ private:
 	ANT_critical_section mutex;
 	ANT_memory_index *final_index;
 	ANT_index_document *index_document;
-	ANT_indexer_param_block *param_block;
+
+	long segmentation;							// text segmentaiton algorithm
+	unsigned long readability_measure;			// which (if any) readability measure to use
+	long stemmer;								// which stemmer to use
 
 private:
 	void work_one(ANT_directory_iterator_object *object, ANT_directory_iterator_preindex_internals *internals);
@@ -40,7 +42,7 @@ private:
 	static void *bootstrap(void *param);
 
 public:
-	ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document *index_document_method, ANT_memory_index *final_index, long threads, long get_file);
+	ANT_directory_iterator_preindex(ANT_directory_iterator *source, long segmentation, unsigned long readability_measure, long stemmer, ANT_index_document *index_document_method, ANT_memory_index *final_index, long threads, long get_file);
 	~ANT_directory_iterator_preindex();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);

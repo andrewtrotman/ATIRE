@@ -22,14 +22,14 @@
 	#include <sys/mman.h>
 #endif
 
-#include "../source/str.h"
-#include "../source/string_pair.h"
-#include "../source/file.h"
-#include "../source/disk.h"
-#include "../source/pregen.h"
-#include "../source/search_engine_accumulator.h"
-#include "../source/indexer_param_block_pregen.h"
-#include "../source/pregens_writer.h"
+#include "str.h"
+#include "string_pair.h"
+#include "file.h"
+#include "disk.h"
+#include "pregen.h"
+#include "search_engine_accumulator.h"
+#include "../atire/indexer_param_block_pregen.h"
+#include "pregens_writer.h"
 
 /*
 	MAP_ENTIRE_FILE()

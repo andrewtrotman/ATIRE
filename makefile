@@ -35,6 +35,7 @@ ANT_HAS_PHP_EXT = $(TRUE)
 #	Directories
 #
 SRCDIR = source
+ATIREDIR = atire
 OBJDIR = bin
 BINDIR = bin
 LTWDIR = Link-The-Wiki
@@ -452,18 +453,21 @@ bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj bi
 {$(SRCDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /EHsc /c /Tp $< /Fo$@
 
-{$(PHPDIR)\}.c{$(OBJDIR)\}.obj:
-	@echo Compiling $@..
-	$(CC) $(PHP_EXT_MINUS_D) $(PHP_EXT_INCLUDES) /EHsc /W4 /Od /c /Tp $< /Fo$@
+{$(ATIREDIR)\}.c{$(OBJDIR)\}.obj:
+	$(CC) $(CFLAGS) /EHsc /c -Isource /Tp $< /Fo$@
 
 {$(LTWDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
 
 {$(TOOLDIR)\}.c{$(OBJDIR)\}.obj:
-	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+	$(CC) $(CFLAGS) /EHsc /c -Isource /Tp $< /Fo$@
 
 {$(TESTDIR)\}.c{$(OBJDIR)\}.obj:
-	$(CC) $(CFLAGS) /c /Tp $< /Fo$@
+	$(CC) $(CFLAGS) /EHsc /c -Isource /Tp $< /Fo$@
+
+{$(PHPDIR)\}.c{$(OBJDIR)\}.obj:
+	@echo Compiling $@..
+	$(CC) $(PHP_EXT_MINUS_D) $(PHP_EXT_INCLUDES) /EHsc /W4 /Od /c /Tp $< /Fo$@
 		
 {$(OBJDIR)\}.obj{$(LIBDIR)\}.dll:
 	@echo Building $@..
@@ -509,7 +513,7 @@ clean :
 	del *.obj *.exe *.ilk *.pdb *.suo *.lib *.dll /s
 
 depend:
-	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
+	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
 
 #
 #	And include the dependencie generated using makedepend from cygwin and "make depend"

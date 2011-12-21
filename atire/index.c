@@ -329,7 +329,7 @@ for (param = first_param; param < argc; param++)
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
 
-		disk = new ANT_directory_iterator_preindex(disk, &param_block, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
+		disk = new ANT_directory_iterator_preindex(disk, param_block->segmentation, param_block->readability_measure, param_block->stemmer, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
 
 	#endif
 

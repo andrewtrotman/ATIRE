@@ -1,22 +1,24 @@
 /*
 	IMPACT_HEADER.H
-	--------------------------
+	---------------
 */
 #ifndef IMPACT_HEADER_H_
 #define IMPACT_HEADER_H_
 
 #include "compress.h"
-#include <stdint.h>
+#include "fundamental_types.h"
 
 /*
 	class ANT_IMPACT_HEADER
-	----------------------------------
+	-----------------------
 */
 class ANT_impact_header
 {
 public:
 	static const uint32_t NUM_OF_QUANTUMS = 256;
 	static const long long INFO_SIZE = 2 * sizeof(uint64_t) + 2 * sizeof(uint32_t);
+
+public:
 	long long header_size;
 	ANT_compressable_integer *header_buffer;
 	uint64_t postings_chain;

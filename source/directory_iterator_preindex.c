@@ -24,12 +24,16 @@
 	ANT_DIRECTORY_ITERATOR_PREINDEX::ANT_DIRECTORY_ITERATOR_PREINDEX()
 	------------------------------------------------------------------
 */
-ANT_directory_iterator_preindex::ANT_directory_iterator_preindex(ANT_directory_iterator *source, ANT_indexer_param_block *param_block, ANT_index_document *index_document_method, ANT_memory_index *final_index, long threads, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_preindex::ANT_directory_iterator_preindex(ANT_directory_iterator *source, long segmentation, unsigned long readability_measure, long stemmer, ANT_index_document *index_document_method, ANT_memory_index *final_index, long threads, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->threads = threads;
 this->source = source;
 this->final_index = final_index;
-this->param_block = param_block;
+
+this->segmentation = segmentation;
+this->readability_measure = readability_measure;
+this->stemmer = stemmer;
+
 this->index_document = index_document_method;
 
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
