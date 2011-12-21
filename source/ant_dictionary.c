@@ -136,7 +136,7 @@ long param;
 #ifdef IMPACT_HEADER
 uint32_t the_quantum_count;
 uint32_t beginning_of_the_postings;
-long long impact_header_info_size = sizeof(uint64_t) + 2 * sizeof(uint32_t);
+long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
 long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
 ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
 #endif
@@ -218,9 +218,9 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				}
 #ifdef IMPACT_HEADER
 			// decompress the header
-			// the first 8 bytes are for postings_chain
-			the_quantum_count = ((uint32_t *)postings_list)[2];
-			beginning_of_the_postings = ((uint32_t *)postings_list)[3];
+			// the first 8 bytes are for postings_chain and second 8 bytes are for chain_length
+			the_quantum_count = ((uint32_t *)postings_list)[4];
+			beginning_of_the_postings = ((uint32_t *)postings_list)[5];
 			factory.decompress(impact_header_buffer, postings_list+impact_header_info_size, the_quantum_count*3);
 
 			// print the postings
