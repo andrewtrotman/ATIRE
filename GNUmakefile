@@ -220,25 +220,27 @@ endif
 ###############################################################################
 # source files and compile commands
 ###############################################################################
-SRCDIR = source
-OBJDIR = obj
-BINDIR = bin
-PHPDIR = php_ext
-LIBDIR = lib
+ATIRE_DIR = atire
+SRC_DIR = source
+OBJ_DIR = obj
+BIN_DIR = bin
+PHP_DIR = php_ext
+LIB_DIR = lib
+TOOLS_DIR = tools
 
-IGNORE_LIST := $(SRCDIR)/ant_ant.c \
-			  $(SRCDIR)/ant_plugins.c \
-			  $(SRCDIR)/test_compression.c \
-			  $(SRCDIR)/stem_lovins.c \
-			  $(SRCDIR)/stem_paice_husk.c
+IGNORE_LIST := $(SRC_DIR)/ant_ant.c \
+			  $(SRC_DIR)/ant_plugins.c \
+			  $(SRC_DIR)/test_compression.c \
+			  $(SRC_DIR)/stem_lovins.c \
+			  $(SRC_DIR)/stem_paice_husk.c
 
-MAIN_FILES := $(SRCDIR)/atire.c \
-			  $(SRCDIR)/index.c \
-			  $(SRCDIR)/ant_dictionary.c \
-			  $(SRCDIR)/atire_client.c \
-			  $(SRCDIR)/atire_broker.c
+MAIN_FILES := $(ATIRE_DIR)/atire.c \
+			  $(ATIRE_DIR)/index.c \
+			  $(ATIRE_DIR)/atire_client.c \
+			  $(ATIRE_DIR)/atire_broker.c \
+			  $(TOOLS_DIR)/ant_dictionary.c
 
-ALL_SOURCES := $(shell ls $(SRCDIR)/*.c)
+ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
 
 ifeq ($(USE_STEM_LOVINS), 1)
@@ -252,32 +254,38 @@ ifeq ($(USE_STEM_PAICE_HUSK), 1)
 endif
 
 INDEX_SOURCES := index.c $(notdir $(SOURCES))
-INDEX_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
+INDEX_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
 
 ANT_DICT_SOURCES := ant_dictionary.c $(notdir $(SOURCES))
-ANT_DICT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ANT_DICT_SOURCES)))
+ANT_DICT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ANT_DICT_SOURCES)))
 
 ATIRE_CLIENT_SOURCES := atire_client.c $(notdir $(SOURCES))
-ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SOURCES)))
+ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SOURCES)))
 
 ATIRE_SOURCES := atire.c $(notdir $(SOURCES))
-ATIRE_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
+ATIRE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
 ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
-ATIRE_BROKER_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
+ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
 
-PHP_EXT_SOURCES := $(notdir $(shell ls $(PHPDIR)/*.c))
-PHP_EXT_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
+PHP_EXT_SOURCES := $(notdir $(shell ls $(PHP_DIR)/*.c))
+PHP_EXT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 
 PREGEN_PREC_SOURCES := pregen_precision_measurement.c $(notdir $(SOURCES))
-PREGEN_PREC_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(PREGEN_PREC_SOURCES)))
+PREGEN_PREC_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(PREGEN_PREC_SOURCES)))
 
 MYSQL_XML_DUMP_SOURCES := mysql_xml_dump.c $(notdir $(SOURCES))
-MYSQL_XML_DUMP_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(MYSQL_XML_DUMP_SOURCES)))
+MYSQL_XML_DUMP_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(MYSQL_XML_DUMP_SOURCES)))
 
-all : info $(EXTRA_OBJS) $(BINDIR)/index $(BINDIR)/atire $(BINDIR)/atire_client $(BINDIR)/atire_broker $(BINDIR)/ant_dictionary
+all : info $(EXTRA_OBJS) index atire atire_client atire_broker ant_dictionary
 
-php_ext : $(LIBDIR)/atire.so
+index : $(BIN_DIR)/index
+atire: $(BIN_DIR)/atire
+atire_client: $(BIN_DIR)/atire_client
+atire_broker: $(BIN_DIR)/atire_broker
+ant_dictionary: $(BIN_DIR)/ant_dictionary
+
+php_ext : $(LIB_DIR)/atire.so
 
 info:
 	@echo "OS_TYPE:" $(OS_TYPE)
@@ -297,37 +305,43 @@ test_ant:
 test_atire:
 	@echo $(ATIRE_OBJECTS)
 
-$(OBJDIR)/%.o : $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ_DIR)/%.o : $(ATIRE_DIR)/%.c
+	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
-$(OBJDIR)/%.o : $(PHPDIR)/%.c
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -Isource -c $< -o $@
+
+$(OBJ_DIR)/%.o : $(TOOLS_DIR)/%.c
+	$(CC) $(CFLAGS) -Isource -c $< -o $@
+
+$(OBJ_DIR)/%.o : $(PHP_DIR)/%.c
 	$(CC) $(PHP_CFLAGS) -c $< -o $@
 
-$(OBJDIR)/%.o : tools/%.c
+$(OBJ_DIR)/%.o : tools/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(LIBDIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
+$(LIB_DIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
 	$(CC) $(PHP_LDFLAGS) -o $@ $^
 
-$(BINDIR)/index : $(INDEX_OBJECTS)
+$(BIN_DIR)/index : $(INDEX_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BINDIR)/atire_client : $(ATIRE_CLIENT_OBJECTS)
+$(BIN_DIR)/atire_client : $(ATIRE_CLIENT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BINDIR)/atire : $(ATIRE_OBJECTS)
+$(BIN_DIR)/atire : $(ATIRE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BINDIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
+$(BIN_DIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BINDIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
+$(BIN_DIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BINDIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
+$(BIN_DIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BINDIR)/mysql_xml_dump : $(MYSQL_XML_DUMP_OBJECTS)
+$(BIN_DIR)/mysql_xml_dump : $(MYSQL_XML_DUMP_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 snappy/libsnappy.a:
@@ -348,9 +362,9 @@ clean :
 	(cd ./zlib; $(MAKE) -f GNUmakefile clean; cd ..;)
 	(cd ./bzip; $(MAKE) -f GNUmakefile clean; cd ..;)
 	(cd ./lzo; $(MAKE) -f GNUmakefile clean; cd ..;)
-	\rm -f $(OBJDIR)/*.o $(BINDIR)/*
+	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
 
 depend :
-	makedepend -f- -Y -w1024 -pbin/ source/*.c -- $(CFLAGS) | sed -e "s/bin\/source/bin/" >| GNUmakefile.dependencies
+	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/atire/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > GNUmakefile.dependencies
 
 include GNUmakefile.dependencies
