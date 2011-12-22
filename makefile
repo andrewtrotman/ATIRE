@@ -468,16 +468,14 @@ bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj bi
 {$(PHPDIR)\}.c{$(OBJDIR)\}.obj:
 	@echo Compiling $@..
 	$(CC) $(PHP_EXT_MINUS_D) $(PHP_EXT_INCLUDES) /EHsc /W4 /Od /c /Tp $< /Fo$@
-		
+
 {$(OBJDIR)\}.obj{$(LIBDIR)\}.dll:
 	@echo Building $@..
 	$(CC) /LD $(PHP_EXT_OBJ) $(PHP_EXT_LIB) $(WINDOWS_LIBS) /Fe$@ /link /FORCE:MULTIPLE /LTCG
-	
-	
+
 {$(OBJDIR)\}.obj{$(BINDIR)\}.exe:
 	@echo Building $@...
 	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Fe$@  $(FIXED)
-
 
 $(ANT_TARGETS) : $(PARTS) 
 $(OTHER_TARGETS) : $(OBJDIR)\disk.obj
@@ -513,7 +511,7 @@ clean :
 	del *.obj *.exe *.ilk *.pdb *.suo *.lib *.dll /s
 
 depend:
-	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
+	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/atire/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
 
 #
 #	And include the dependencie generated using makedepend from cygwin and "make depend"
