@@ -2,7 +2,9 @@
 	PRODUCER_CONSUMER.C
 	-------------------
 */
+#ifdef _MSC_VER
 #include <windows.h>
+#endif
 #include <stdio.h>
 #include "../source/critical_section.h"
 #include "../source/semaphores.h"

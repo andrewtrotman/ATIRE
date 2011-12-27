@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include "../source/arithmetic_coding.h"
+#include "../source/arithmetic_coding_encoder.h"
+#include "../source/arithmetic_coding_decoder.h"
 #include "../source/arithmetic_model_unigram.h"
 
 #define NUM_SYMBOLS (26 + 10 + 1)
@@ -18,7 +20,7 @@ struct encode_result {
 
 accumulator_t arith_encode(const char *encode_me)
 {
-ANT_arithmetic_encoder<accumulator_t> ace1(model);
+ANT_arithmetic_coding_encoder<accumulator_t> ace1(model);
 
 char c;
 

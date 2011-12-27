@@ -238,20 +238,22 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
 			  $(ATIRE_DIR)/index.c \
 			  $(ATIRE_DIR)/atire_client.c \
 			  $(ATIRE_DIR)/atire_broker.c \
-			  $(TOOLS_DIR)/ant_dictionary.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
 
 ifeq ($(USE_STEM_LOVINS), 1)
 	CFLAGS += -DANT_HAS_LOVINS
-	SOURCES += $(SRCDIR)/stem_lovins.c
+	SOURCES += $(SRC_DIR)/stem_lovins.c
 endif
 
 ifeq ($(USE_STEM_PAICE_HUSK), 1)
 	CFLAGS += -DANT_HAS_PAICE_HUSK
-	SOURCES += $(SRCDIR)/stem_paice_husk.c
+	SOURCES += $(SRC_DIR)/stem_paice_husk.c
 endif
+
+SOURCES_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(notdir $(SOURCES))))
+
 
 INDEX_SOURCES := index.c $(notdir $(SOURCES))
 INDEX_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
@@ -271,19 +273,21 @@ ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_S
 PHP_EXT_SOURCES := $(notdir $(shell ls $(PHP_DIR)/*.c))
 PHP_EXT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 
-PREGEN_PREC_SOURCES := pregen_precision_measurement.c $(notdir $(SOURCES))
-PREGEN_PREC_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(PREGEN_PREC_SOURCES)))
+TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c \
+				 $(TOOLS_DIR)/get_wikipedia_title.c \
+				 $(TOOLS_DIR)/INEXqrels_to_run.c
+TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)/*.c)))
+TOOLS_EXES := $(basename $(TOOLS_SOURCES))
+TOOLS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TOOLS_SOURCES)))
 
-MYSQL_XML_DUMP_SOURCES := mysql_xml_dump.c $(notdir $(SOURCES))
-MYSQL_XML_DUMP_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(MYSQL_XML_DUMP_SOURCES)))
-
-all : info $(EXTRA_OBJS) index atire atire_client atire_broker ant_dictionary
+all : info $(EXTRA_OBJS) index atire atire_client atire_broker
 
 index : $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
 atire_client: $(BIN_DIR)/atire_client
 atire_broker: $(BIN_DIR)/atire_broker
-ant_dictionary: $(BIN_DIR)/ant_dictionary
+
+tools: $(TOOLS_EXES)
 
 php_ext : $(LIB_DIR)/atire.so
 
@@ -305,6 +309,11 @@ test_ant:
 test_atire:
 	@echo $(ATIRE_OBJECTS)
 
+test_tools:
+	@echo $(TOOLS_SOURCES)
+	@echo $(TOOLS_EXES)
+	@echo $(TOOLS_OBJECTS)
+
 $(OBJ_DIR)/%.o : $(ATIRE_DIR)/%.c
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
@@ -316,9 +325,6 @@ $(OBJ_DIR)/%.o : $(TOOLS_DIR)/%.c
 
 $(OBJ_DIR)/%.o : $(PHP_DIR)/%.c
 	$(CC) $(PHP_CFLAGS) -c $< -o $@
-
-$(OBJ_DIR)/%.o : tools/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIB_DIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
 	$(CC) $(PHP_LDFLAGS) -o $@ $^
@@ -335,14 +341,13 @@ $(BIN_DIR)/atire : $(ATIRE_OBJECTS)
 $(BIN_DIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BIN_DIR)/ant_dictionary : $(ANT_DICT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
-
-$(BIN_DIR)/pregen_precision_measurement : $(PREGEN_PREC_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
-
-$(BIN_DIR)/mysql_xml_dump : $(MYSQL_XML_DUMP_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+# Hacked to compile every single source in the tools directory.
+# The $(TOOLS_OBJECTS) is requied at the dependencies so that
+# all sources in tools can be compiled first. Then only the individual
+# source is linked at a time.
+$(TOOLS_EXES) : $(SOURCES_OBJECTS)
+	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
+	#$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
 
 snappy/libsnappy.a:
 	(cd ./snappy; $(MAKE) -f GNUmakefile.static CC=$(CC); cd ..;)

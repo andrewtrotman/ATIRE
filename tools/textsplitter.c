@@ -6,6 +6,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../source/directory_iterator.h"
 #include "../source/ctypes.h"
 #include "../source/disk.h"

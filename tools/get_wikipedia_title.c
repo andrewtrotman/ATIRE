@@ -1,12 +1,12 @@
-/*
+	/*
 	GET_WIKIPEDIA_TITLE.C
 	---------------------
 */
 #include <stdio.h>
 #include <string.h>
-#include "..\source\ctypes.h"
-#include "..\source\str.h"
-#include "..\source\disk.h"
+#include "../source/ctypes.h"
+#include "../source/str.h"
+#include "../source/disk.h"
 
 char buffer[1024 * 1024];
 

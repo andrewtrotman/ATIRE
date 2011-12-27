@@ -13,7 +13,7 @@ char buffer[1024], metaphone[1024];
 */
 int main(void)
 {
-ANT_phonetic_metaphone meta;
+ANT_phonetic_double_metaphone meta;
 
 while (1)
 	{
