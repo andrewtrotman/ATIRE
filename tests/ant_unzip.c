@@ -1,6 +1,7 @@
 /*
 	ANT_UNZIP.C
 	-----------
+	This program displays a list of the files stored in a ZIP archive.
 */
 #include <stdio.h>
 #include <stdlib.h>

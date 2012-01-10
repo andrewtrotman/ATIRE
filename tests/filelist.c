@@ -1,6 +1,7 @@
 /*
 	FILELIST.C
 	----------
+	test the file iterator code by listing all the files in a directory
 */
 #include <stdio.h>
 #include "../source/directory_iterator_recursive.h"
