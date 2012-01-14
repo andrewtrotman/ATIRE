@@ -74,19 +74,39 @@ delete [] bits;
 */
 void ANT_bitstring::set_length(long long len_in_bits)
 {
+long long new_chunks_long, old_bytes_long, old_chunks_long;
+
+old_bytes_long = bytes_long;
+old_chunks_long = chunks_long;
+
+unsafe_set_length(len_in_bits);
+
+if (chunks_long != old_chunks_long)
+	{
+	bits = strrenew(bits, old_bytes_long, bytes_long);
+	if (bytes_long > old_bytes_long)
+		memset(bits + old_bytes_long, 0, (size_t)(bytes_long - old_bytes_long));
+	}
+}
+
+/*
+	ANT_BITSTRING::UNSAFE_SET_LENGTH()
+	----------------------------------
+	This resets the lengh of the bitstring but not the length of the underlying
+	buffer that holds the bits.  Its only useful if you're going to resize within
+	the bounds that the object was first created with.  It also doesn't zerof the
+	new stuff (because there is no new stuff)
+*/
+void ANT_bitstring::unsafe_set_length(long long len_in_bits)
+{
 long long new_chunks_long, old_bytes_long;
 
 new_chunks_long = (len_in_bits - 1) / BITS_PER_WORD + 1;
 if (new_chunks_long != chunks_long)
 	{
-	old_bytes_long = bytes_long;
-
 	chunks_long = new_chunks_long;
 	bytes_long = chunks_long * (BITS_PER_WORD / 8);
 	bits_long = len_in_bits;
-	bits = strrenew(bits, old_bytes_long, bytes_long);
-	if (bytes_long > old_bytes_long)
-		memset(bits + old_bytes_long, 0, (size_t)(bytes_long - old_bytes_long));
 	}
 }
 

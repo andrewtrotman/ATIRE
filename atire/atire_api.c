@@ -657,6 +657,7 @@ ANT_NEXI_term_ant **term_list;
 long terms_in_query, current_term;
 long long old_static_prune = 0;
 long can_sort;
+long long sum_of_document_frequencies = 0;
 
 /*
 	Load the term details (document frequency, collection frequency, and so on)
@@ -677,6 +678,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		{
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
+		sum_of_document_frequencies += ANT_min(term_string->term_details.local_document_frequency, search_engine->get_trim_postings_k());
 		can_sort = true;
 		}
 	}
@@ -702,6 +704,16 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	if (can_sort)
 		qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
 #endif
+
+/*
+	Now we take a slight divergence.  We know the number of documents (N),
+	the numnber of query terms (Q), and the length of each postings list (L).  From this we
+	can compute B (the optimal width of the 2D accumulators) as B = sqrt(xN / yLQ), where x is the
+	cost of initialising a column flag and y is the cost of initialising an accumulator.
+	see: Jia, X.-F., Trotman, A., Keefe, R.A. (2010), Efficient Accumulator Initialisation, Proceedings of the 15th Australasian Document Computing Symposium (ADCS 2010)
+*/
+//sqrt(search_engine->document_count() / (sum_of_document_frequencies * terms_in_query));
+
 
 /*
 	If we only have one search term then we can static prune the postings list at top-k

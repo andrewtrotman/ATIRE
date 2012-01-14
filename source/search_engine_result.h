@@ -6,11 +6,13 @@
 #define SEARCH_ENGINE_RESULT_H_
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "pragma.h"
 #include "search_engine_accumulator.h"
 #include "bitstring.h"
-#include <string.h>
-
+#include "search_engine_init_flags.h"
+#include "search_engine_init_flags_boolean.h"
 #include "heap.h"
 
 class ANT_memory;
@@ -38,9 +40,31 @@ public:			// remove this line later
 	ANT_bitstring *include_set;
 
 #ifdef TWO_D_ACCUMULATORS
-	unsigned char *init_flags;
+	#ifdef NEVER
+		/*
+			In this case we use unsigned chars for each flag.  Its fast to check a flag but slow to initialise the flags.
+		*/
+		ANT_search_engine_init_flags init_flags;			// using unsigned chars
+	#else
+		/*
+			In this case we use a bit for each flag.  Its slow to check a flag but fast to initialise the flags.
+		*/
+		ANT_search_engine_init_flags_boolean init_flags;	// using a bitstring
+	#endif
 	long long width, height;
 	long long width_in_bits;
+#endif
+
+protected:
+#ifdef TWO_D_ACCUMULATORS
+	inline size_t get_init_flag_row(long long index)
+	{
+	#ifdef TWO_D_ACCUMULATORS_VARIABLE_WIDTH
+		return (size_t)(index / width);
+	#else
+		return (size_t)(index >> width_in_bits);
+	#endif
+	}
 #endif
 
 public:
@@ -50,14 +74,24 @@ public:
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new(size_t bytes, ANT_memory *allocator);
 
+#ifdef TWO_D_ACCUMULATORS
+	/*
+		SET_ACCUMULATOR_WIDTH()
+		-----------------------
+		Note that it is is not necessary to resize the init_flags or the padding in the accumulators
+		array because they are already set to the worst possible case.
+	*/
+	void set_accumulator_width(long long new_width) { width = new_width; }
+#endif
+
 	inline void init_partial_accumulators(long long index)
 	{
 #ifdef TWO_D_ACCUMULATORS
-	unsigned long long row;
+	size_t row;
 
-	if (init_flags[row = (index >> width_in_bits)] == 0)
+	if (init_flags.get(row = get_init_flag_row(index)) == 0)
 		{
-		init_flags[row] = 1;
+		init_flags.set(row);
 		memset(accumulator + (row * width), 0, (size_t)(width * sizeof(*accumulator)));
 		}
 #endif
@@ -134,8 +168,8 @@ public:
 	long is_zero_rsv(long long index)
 		{
 #ifdef TWO_D_ACCUMULATORS
-		if (init_flags[index >> width_in_bits] == 0)
-			return 0 == 0;
+		if (init_flags.get(get_init_flag_row(index)) == 0)
+			return true;
 		else
 			return accumulator[(size_t)index].is_zero_rsv();
 #else

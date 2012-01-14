@@ -24,11 +24,16 @@ this->documents = documents;
 	width_in_bits = 8;
 	width = ANT_pow2_zero_64(width_in_bits);
 	height = (documents / width) + 1;
-	memory->realign();
-	init_flags = (unsigned char *)memory->malloc(sizeof(*init_flags) * height);
-	memset(init_flags, 0, (size_t)(sizeof(*init_flags) * height));
-	padding = (width * height) - documents;
-	//printf("padding: %llu\n", (padding));
+	/*
+		The worst case is that each accumulator is its own row in which case height is equal to documents
+		in which case we need to allocate documents-number of init_flags
+
+		The worst case for the padding is when there a N documents in the collection and the width is set
+		to N-1.  In this case there are N-1 wasted accumulators  A good estimate of this is N itself.
+	*/
+	init_flags.init(documents);
+	init_flags.set_length(height);
+	padding = documents;
 #endif
 
 memory->realign();
@@ -70,9 +75,9 @@ return allocator->malloc(count);
 void ANT_search_engine_result::init_accumulators(long long top_k)
 {
 #ifdef TWO_D_ACCUMULATORS
-memset(init_flags, 0, (size_t)(sizeof(*init_flags) * height));
+	init_flags.rewind();
 #else
-memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
+	memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 #endif
 
 min_in_top_k = 0;

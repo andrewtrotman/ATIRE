@@ -129,6 +129,7 @@ public:
 	void stats_all_text_render(void);
 	void stats_add(void);
 	long long set_trim_postings_k(long long what) { long long old = trim_postings_k; trim_postings_k = what; return old; }
+	long long get_trim_postings_k(void) { return trim_postings_k; }
 	long long get_global_trim_postings_k(void) { return global_trim_postings_k; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
 

@@ -37,10 +37,13 @@ public:
 	virtual ~ANT_bitstring();
 
 	void set_length(long long len_in_bits);
+	void unsafe_set_length(long long len_in_bits);
+
 	long long get_length(void) 			{ return bits_long; }
-	void unsafe_setbit(long long pos) 	{ bits[pos >> 3] |= 1 << (pos & 7); }
-	void unsafe_unsetbit(long long pos)	{ bits[pos >> 3] &= ~(1 << (pos & 7)); }
-	long unsafe_getbit(long long pos)	{ return (bits[pos >> 3] >> (pos & 7)) & 0x01; }
+
+	inline void unsafe_setbit(long long pos) 	{ bits[pos >> 3] |= 1 << (pos & 7); }
+	inline void unsafe_unsetbit(long long pos)	{ bits[pos >> 3] &= ~(1 << (pos & 7)); }
+	inline long unsafe_getbit(long long pos)	{ return (bits[pos >> 3] >> (pos & 7)) & 0x01; }
 
 	void bit_or(ANT_bitstring *ans, ANT_bitstring *with) 		{ operation(OR, ans, this, with); }
 	void bit_xor(ANT_bitstring *ans, ANT_bitstring *with) 		{ operation(XOR, ans, this, with); }
