@@ -705,15 +705,20 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		qsort(term_list, terms_in_query, sizeof(*term_list), ANT_NEXI_term_ant::cmp_collection_frequency);
 #endif
 
-/*
-	Now we take a slight divergence.  We know the number of documents (N),
-	the numnber of query terms (Q), and the length of each postings list (L).  From this we
-	can compute B (the optimal width of the 2D accumulators) as B = sqrt(xN / yLQ), where x is the
-	cost of initialising a column flag and y is the cost of initialising an accumulator.
-	see: Jia, X.-F., Trotman, A., Keefe, R.A. (2010), Efficient Accumulator Initialisation, Proceedings of the 15th Australasian Document Computing Symposium (ADCS 2010)
-*/
-//sqrt(search_engine->document_count() / (sum_of_document_frequencies * terms_in_query));
-
+#ifdef TWO_D_ACCUMULATORS
+	/*
+		Now we take a slight divergence.  We know the number of documents (N),
+		the numnber of query terms (Q), and the length of each postings list (L).  From this we
+		can compute B (the optimal width of the 2D accumulators) as B = sqrt(xN / yLQ), where x is the
+		cost of initialising a column flag and y is the cost of initialising an accumulator.
+		see: Jia, X.-F., Trotman, A., Keefe, R.A. (2010), Efficient Accumulator Initialisation, Proceedings of the 15th Australasian Document Computing Symposium (ADCS 2010)
+	*/
+	#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
+		search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+	#else
+		search_engine->set_accumulator_width(ANT_max((long long)1, (long long)sqrt(64 * search_engine->document_count() / (double)sum_of_document_frequencies)));
+	#endif
+#endif
 
 /*
 	If we only have one search term then we can static prune the postings list at top-k
@@ -747,13 +752,13 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function);
 			}
-		else if (stemmer == NULL)
-			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
-		else
+		else if (stemmer != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
 			}
+		else
+			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
 		}
 	}
 
@@ -837,6 +842,15 @@ return terms_in_query;
 */
 long ATIRE_API::process_topsig_query(char *query)
 {
+/*
+	Initialise the shape of the 2D accumulators
+*/
+#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
+	search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+#else
+	search_engine->set_accumulator_width((long long)sqrt((double)search_engine->document_count()));		// by default use sqrt(N) as the width of the acumulator table
+#endif
+
 return process_topsig_query(parse_NEXI_query(query));
 }
 
@@ -985,6 +999,15 @@ if (parsed_query->subtype == ANT_query::DISJUNCTIVE || feedbacker != NULL)
 		return answer;
 		}
 	}
+
+/*
+	Initialise the shape of the 2D accumulators
+*/
+#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
+	search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+#else
+	search_engine->set_accumulator_width((long long)sqrt((double)search_engine->document_count()));		// by default use sqrt(N) as the width of the acumulator table
+#endif
 
 /*
 	Recurse over the tree

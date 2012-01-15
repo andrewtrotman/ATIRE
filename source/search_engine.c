@@ -347,6 +347,19 @@ stats_for_all_queries->add(stats);
 }
 
 /*
+	ANT_SEARCH_ENGINE::SET_ACCUMULATOR_WIDTH()
+	------------------------------------------
+*/
+void ANT_search_engine::set_accumulator_width(long long width)
+{
+#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
+	results_list->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+#else
+	results_list->set_accumulator_width(width);
+#endif
+}
+
+/*
 	ANT_SEARCH_ENGINE::INIT_ACCUMULATORS()
 	--------------------------------------
 */

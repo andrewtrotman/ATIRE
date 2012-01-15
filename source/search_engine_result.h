@@ -51,7 +51,7 @@ public:			// remove this line later
 		*/
 		ANT_search_engine_init_flags_boolean init_flags;	// using a bitstring
 	#endif
-	long long width, height;
+	long long width;
 	long long width_in_bits;
 #endif
 
@@ -59,10 +59,10 @@ protected:
 #ifdef TWO_D_ACCUMULATORS
 	inline size_t get_init_flag_row(long long index)
 	{
-	#ifdef TWO_D_ACCUMULATORS_VARIABLE_WIDTH
-		return (size_t)(index / width);
-	#else
+	#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
 		return (size_t)(index >> width_in_bits);
+	#else
+		return (size_t)(index / width);
 	#endif
 	}
 #endif
@@ -81,7 +81,19 @@ public:
 		Note that it is is not necessary to resize the init_flags or the padding in the accumulators
 		array because they are already set to the worst possible case.
 	*/
-	void set_accumulator_width(long long new_width) { width = new_width; }
+	void set_accumulator_width(long long new_width)
+	{
+	long long height;
+
+	if (new_width == 0)
+		new_width = 1;
+
+	width = new_width;
+	height = (documents / width) + 1;
+	init_flags.resize(height);
+
+	init_flags.rewind();
+	}
 #endif
 
 	inline void init_partial_accumulators(long long index)

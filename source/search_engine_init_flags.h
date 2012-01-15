@@ -29,6 +29,7 @@ public:
 		}
 
 	void set_length(long long new_length) { length = new_length; }
+	void resize(long long new_length) { length = new_length; }
 	void rewind(void) { memset(array, 0, (size_t)(sizeof(*array) * length)); }
 
 	inline unsigned char get(long long index) { return array[index]; }

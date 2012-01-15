@@ -14,6 +14,7 @@ ANT_search_engine_result::ANT_search_engine_result(ANT_memory *memory, long long
 {
 long long pointer;
 unsigned long long padding = 0;
+long long height = 0;
 
 results_list_length = 0;
 min_in_top_k = 0;
@@ -75,7 +76,7 @@ return allocator->malloc(count);
 void ANT_search_engine_result::init_accumulators(long long top_k)
 {
 #ifdef TWO_D_ACCUMULATORS
-	init_flags.rewind();
+//	init_flags.rewind();		// this is now done later based on a computed width
 #else
 	memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
 #endif
