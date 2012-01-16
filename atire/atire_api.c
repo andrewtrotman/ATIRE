@@ -675,7 +675,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	*/
 	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 
-	if (stemmer == NULL || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
+	if ((stemmer == NULL && expander_tf == NULL) || !ANT_islower(*token_buffer))		// so we don't stem numbers or tag names
 		{
 		search_engine->process_one_term(token_buffer, &term_string->term_details);
 		sum_of_document_frequencies += ANT_min(term_string->term_details.local_document_frequency, search_engine->get_trim_postings_k());
