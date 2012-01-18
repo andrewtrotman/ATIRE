@@ -265,15 +265,51 @@ term_details->impacted_length = sum + 2 * buckets_used;
 }
 #endif
 
+
+#ifdef IMPACT_HEADER
 /*
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
 	----------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
+long long docid;
+ANT_compressable_integer *current, *end;
+
+/*
+	Set the bits in the bitstring (pass 1)
+*/
+impact_header->impact_value_ptr = impact_header->impact_value_start;
+impact_header->doc_count_ptr = impact_header->doc_count_start;
+current = impact_ordering;
+while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+	{
+	docid = -1;
+	end = current + *impact_header->doc_count_ptr;
+	while (current < end)
+		{
+		docid += *current++;
+		documents_touched->unsafe_setbit(docid);
+		}
+	current = end;
+	impact_header->impact_value_ptr++;
+	impact_header->doc_count_ptr++;
+	}
+
+/*
+	Now call the top-k based relevance ranking function (pass 2)
+*/
+relevance_rank_quantum(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
+//relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
+
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
 #else
+/*
+	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
+	----------------------------------------------
+*/
 void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
-#endif
 {
 long long docid;
 ANT_compressable_integer *current, *end;
@@ -299,13 +335,9 @@ while (current < end)
 /*
 	Now call the top-k based relevance ranking function (pass 2)
 */
-#ifdef IMPACT_HEADER
-relevance_rank_quantum(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
-//relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
-#else
 relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, prescalar, postscalar);
-#endif
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
