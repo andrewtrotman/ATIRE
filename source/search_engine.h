@@ -123,6 +123,7 @@ public:
 #ifdef IMPACT_HEADER
 	ANT_impact_header *get_impact_header(void) { return &impact_header; }
 #endif
+
 	ANT_compressable_integer *get_decompress_buffer(void) { return decompress_buffer; }
 	ANT_stats_search_engine *get_stats(void) { return stats; }
 	void stats_initialise(void);

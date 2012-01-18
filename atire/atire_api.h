@@ -103,6 +103,7 @@ protected:
 	void query_object_with_feedback_to_NEXI_query(void);
 	void feedback(long long top_k);
 	void topsig_feedback(long long top_k);
+	void search_term_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function, ANT_thesaurus *expander_tf, ANT_stemmer *stemmer);
 
 public:
 	ATIRE_API();

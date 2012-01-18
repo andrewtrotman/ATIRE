@@ -645,6 +645,50 @@ return destination;
 }
 
 /*
+	ATIRE_API::SEARCH_TERM_AT_A_TIME()
+	----------------------------------
+*/
+void ATIRE_API::search_term_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function, ANT_thesaurus *expander_tf, ANT_stemmer *stemmer)
+{
+long long current_term;
+ANT_NEXI_term_ant *term_string;
+
+/*
+	Process each search term - either stemmed or not.
+*/
+for (current_term = 0; current_term < terms_in_query; current_term++)
+	{
+#ifdef NEVER
+	printf("%*.*s ", term_list[current_term]->term.length(), term_list[current_term]->term.length(), term_list[current_term]->term.start);
+	if (current_term == terms_in_query - 1)
+		puts("");
+#endif
+
+	term_string = term_list[current_term];
+
+	if (!ANT_islower(*term_string->get_term()->start))		// We don't stem (or expand) numbers and tag names
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+	else
+		{
+		if (expander_tf != NULL)
+			{
+			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function);
+			}
+		else if (stemmer != NULL)
+			{
+			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
+			}
+		else
+			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+		}
+	}
+}
+
+
+
+/*
 	ATIRE_API::PROCESS_NEXI_QUERY()
 	-------------------------------
 */
@@ -730,36 +774,9 @@ if (terms_in_query == 1)
 	}
 
 /*
-	Process each search term - either stemmed or not.
+	Now ask the search engine to search
 */
-for (current_term = 0; current_term < terms_in_query; current_term++)
-	{
-#ifdef NEVER
-	printf("%*.*s ", term_list[current_term]->term.length(), term_list[current_term]->term.length(), term_list[current_term]->term.start);
-	if (current_term == terms_in_query - 1)
-		puts("");
-#endif
-
-	term_string = term_list[current_term];
-
-	if (!ANT_islower(*term_string->get_term()->start))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
-	else
-		{
-		if (expander_tf != NULL)
-			{
-			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function);
-			}
-		else if (stemmer != NULL)
-			{
-			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
-			}
-		else
-			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
-		}
-	}
+search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 
 delete [] term_list;
 
