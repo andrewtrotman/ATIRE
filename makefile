@@ -305,7 +305,6 @@ PARTS = \
 	$(OBJDIR)\version.obj							\
 	$(OBJDIR)\ranking_function.obj					\
 	$(OBJDIR)\ranking_function_impact.obj			\
-	$(OBJDIR)\ranking_function_similarity.obj		\
 	$(OBJDIR)\ranking_function_readability.obj		\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
