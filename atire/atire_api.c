@@ -30,7 +30,6 @@
 
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
-#include "ranking_function_similarity.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"

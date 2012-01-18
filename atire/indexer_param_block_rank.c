@@ -14,7 +14,6 @@
 #include "ranking_function_dlh13.h"
 #include "ranking_function_dph.h"
 #include "ranking_function_dfree.h"
-#include "ranking_function_similarity.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
