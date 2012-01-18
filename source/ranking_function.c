@@ -315,7 +315,12 @@ void ANT_ranking_function::relevance_rank_tf(ANT_bitstring *bitstring, ANT_searc
 {
 long long now;
 now = stats->start_timer();
-tf_to_postings(term_details, decompress_buffer, the_impact_header, tf_array);
+
+#ifdef IMPACT_HEADER
+	tf_to_postings(term_details, decompress_buffer, the_impact_header, tf_array);
+#else
+	tf_to_postings(term_details, decompress_buffer, tf_array);
+#endif
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
 if (bitstring == NULL) {

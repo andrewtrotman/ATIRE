@@ -48,8 +48,12 @@ protected:
 #endif
 
 protected:
+#ifdef IMPACT_HEADER
 	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_impact_header *impact_header, ANT_weighted_tf *stem_buffer);
-	void compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array);
+#else
+	void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer);
+#endif	
+void compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array);
 
 public:
 	/*
