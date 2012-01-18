@@ -273,7 +273,13 @@ long long size_of_synset, alternate_term;
 /*
 	Get the synset
 */
-synset = expander->get_synset(term, &size_of_synset);
+if (expander == NULL)
+	{
+	size_of_synset = 0;
+	synset = NULL;
+	}
+else
+	synset = expander->get_synset(term, &size_of_synset);
 
 /*
 	Include the search term itself
