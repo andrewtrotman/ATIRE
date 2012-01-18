@@ -38,11 +38,35 @@ ANT_ranking_function_BM25::~ANT_ranking_function_BM25()
 delete [] document_prior_probability;
 }
 
+
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_ONE_QUANTUM()
+	-------------------------------------------------------
+*/
+void ANT_ranking_function_BM25::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters) {
+const double k1 = this->k1;
+const double k1_plus_1 = k1 + 1.0;
+long long docid;
+double top_row, idf;
+ANT_compressable_integer *current;
+
+idf = log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+top_row = quantum_parameters->prescalar * quantum_parameters->tf * k1_plus_1;
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * idf * (top_row / (quantum_parameters->prescalar * quantum_parameters->tf + document_prior_probability[(size_t)docid])));
+	}
+
+}
+
 /*
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	const double k1 = this->k1;
 	const double k1_plus_1 = k1 + 1.0;
@@ -146,70 +170,6 @@ while (current < end)
 		{
 		docid += *current++;
 		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
-		}
-	current++;		// skip over the zero
-	}
-}
-#endif
-
-/*
-	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_BOOLEAN()
-	---------------------------------------------------
-	This is an exact copy of the relevance_rank_top_k() function except that it also flips the
-	sits in the documents_touched bitstring.
-*/
-#ifdef IMPACT_HEADER
-void ANT_ranking_function_BM25::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
-	const double k1 = this->k1;
-	const double k1_plus_1 = k1 + 1.0;
-	long long docid;
-	double top_row, tf, idf;
-	ANT_compressable_integer *current, *end;
-
-	idf = log((double)documents / (double)term_details->global_document_frequency);
-
-	impact_header->impact_value_ptr = impact_header->impact_value_start;
-	impact_header->doc_count_ptr = impact_header->doc_count_start;
-	current = impact_ordering;
-	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
-		tf = *impact_header->impact_value_ptr;
-		top_row = prescalar * tf * k1_plus_1;
-		docid = -1;
-		end = current + *impact_header->doc_count_ptr;
-		while (current < end) {
-			docid += *current++;
-			accumulators->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
-			documents_touched->unsafe_setbit(docid);
-		}
-		current = end;
-		impact_header->impact_value_ptr++;
-		impact_header->doc_count_ptr++;
-	}
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-}
-#else
-void ANT_ranking_function_BM25::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
-{
-const double k1 = this->k1;
-const double k1_plus_1 = k1 + 1.0;
-long long docid;
-double top_row, tf, idf;
-ANT_compressable_integer *current, *end;
-
-idf = log((double)documents / (double)term_details->global_document_frequency);
-current = impact_ordering;
-end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
-while (current < end)
-	{
-	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;
-	top_row = prescalar * tf * k1_plus_1;
-	docid = -1;
-	while (*current != 0)
-		{
-		docid += *current++;
-		accumulators->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
-		documents_touched->unsafe_setbit(docid);
 		}
 	current++;		// skip over the zero
 	}

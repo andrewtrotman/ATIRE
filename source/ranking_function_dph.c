@@ -15,11 +15,37 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_DPH::RELEVANCE_RANK_ONE_QUANTUM()
+	------------------------------------------------------
+*/
+void ANT_ranking_function_DPH::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+long long docid;
+double f, norm, tf, cf, score;
+ANT_compressable_integer *current;
+
+cf = (double)quantum_parameters->term_details->global_collection_frequency;
+tf = quantum_parameters->tf;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	f = tf / document_lengths[(size_t)docid];
+	norm = (1.0 - f) * (1.0 - f) / (tf + 1.0);
+	score = 1.0 * norm * (tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - f)));
+
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * score);
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_DPH::RELEVANCE_RANK_TOP_K()
 	------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_DPH::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double f, norm, tf, cf, score;

@@ -9,11 +9,32 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_INNER_PRODUCT::RELEVANCE_RANK_ONE_QUANTUM()
+	----------------------------------------------------------------
+*/
+void ANT_ranking_function_inner_product::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+long long docid;
+double idf;
+ANT_compressable_integer *current;
+
+idf = log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * (quantum_parameters->prescalar * quantum_parameters->tf * idf * idf) / 100.0);  // TF.IDF scores blow-out the integer accumulators and so we shift the decimal place back a bit
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_INNER_PRODUCT::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_inner_product::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double tf, idf;
@@ -49,6 +70,10 @@ void ANT_ranking_function_inner_product::relevance_rank_top_k(ANT_search_engine_
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
+/*
+	ANT_RANKING_FUNCTION_INNER_PRODUCT::RELEVANCE_RANK_TOP_K()
+	----------------------------------------------------------
+*/
 void ANT_ranking_function_inner_product::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;

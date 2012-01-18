@@ -26,11 +26,48 @@ this->b = b;
 this->document_readability = engine->document_readability;
 }
 
+
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_ONE_QUANTUM()
+	--------------------------------------------------------------
+*/
+void ANT_ranking_function_readability::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+const double k1_plus_1 = k1 + 1.0;
+const double one_minus_b = 1.0 - b;
+long long docid;
+double top_row, tf, idf;
+ANT_compressable_integer *current;
+
+idf = log((double)(documents) / (double)quantum_parameters->term_details->global_document_frequency);
+tf = quantum_parameters->tf;
+top_row = quantum_parameters->prescalar * tf * k1_plus_1;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	/*
+		Add the readability for this document - because a low readability score is better, we add the hardest document minus the actual score.
+		We also only want to only consider the readability once per document.
+	*/
+	if (quantum_parameters->accumulator->is_zero_rsv(docid))
+		quantum_parameters->accumulator->add_rsv(docid, (1.0 - mix) * (cutoff - (document_readability[(size_t)docid] / 1000.0)));
+
+	/*
+		Add the portion of BM25 for this query term
+	*/
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * mix * (idf * (top_row / (quantum_parameters->prescalar * tf + k1 * (one_minus_b + b * (document_lengths[(size_t)docid] / mean_document_length))))));
+	}
+
+}
+
 /*
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	const double k1_plus_1 = k1 + 1.0;
 	const double one_minus_b = 1.0 - b;

@@ -10,11 +10,29 @@
 #include "search_engine_accumulator.h"
 #include <limits>
 
+
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_DOCID::RELEVANCE_RANK_ONE_QUANTUM()
+	--------------------------------------------------
+*/
+void ANT_ranking_function_docid::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters) {
+long long docid;
+ANT_compressable_integer *current;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	quantum_parameters->accumulator->set_rsv(docid, ascending_order ? (documents_as_integer - docid) : docid + 1);
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_DOCID::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_docid::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	ANT_compressable_integer *current, *end;

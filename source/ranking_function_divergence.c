@@ -13,11 +13,37 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_DIVERGENCE::RELEVANCE_RANK_ONE_QUANTUM()
+	-------------------------------------------------------------
+*/
+void ANT_ranking_function_divergence::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters) {
+long long docid;
+double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;
+ANT_compressable_integer *current;
+
+F = (double)quantum_parameters->term_details->global_collection_frequency;
+F_plus_1 = F + 1.0;
+ne = documents * (1.0 - pow((documents - 1.0) / documents, F));
+inf_right = ANT_log2(((double)documents + 1.0) / (ne + 0.5));
+tf = quantum_parameters->tf;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	tf_prime = quantum_parameters->prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[(size_t)docid]);
+	rsv = tf_prime * inf_right * (F_plus_1 / ((double)quantum_parameters->term_details->global_document_frequency * (tf_prime + 1.0)));
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * rsv);
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_DIVERGENCE::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;

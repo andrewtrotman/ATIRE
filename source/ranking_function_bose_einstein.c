@@ -11,6 +11,33 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_BOSE_EINSTEIN::RELEVANCE_RANK_ONE_QUANTUM()
+	----------------------------------------------------------------
+	Ranking function GL2 from:
+	G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on
+	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
+*/
+void ANT_ranking_function_bose_einstein::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+long long docid;
+double rsv, left, right, tf_prime;
+ANT_compressable_integer *current, *end;
+
+left = log(1.0 + (double)quantum_parameters->term_details->global_collection_frequency / (double)documents);
+right = log(1.0 + (double)documents / (double)quantum_parameters->term_details->global_collection_frequency);
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	tf_prime = quantum_parameters->prescalar * quantum_parameters->tf * log(1.0 + mean_document_length / (double)document_lengths[(size_t)docid]);
+	rsv = (left + tf_prime * right) / (tf_prime + 1.0);
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * rsv);
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_BOSE_EINSTEIN::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------------
@@ -18,7 +45,6 @@
 	G. Amati and C.J. van Rijsbergen (2002), Probabilistic Models of Information Retrieval Based on
 	Measuring the Divergence from Randomness, Transactions on Information Systems 20(4):357-389.
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_bose_einstein::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double tf, rsv, left, right, tf_prime;

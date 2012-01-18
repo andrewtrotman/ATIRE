@@ -19,6 +19,41 @@
 
 
 #ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_DLH13::RELEVANCE_RANK_ONE_QUANTUM()
+	--------------------------------------------------------
+*/
+void ANT_ranking_function_DLH13::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+long long docid;
+double tf, cf, score;
+ANT_compressable_integer *current;
+
+cf = (double)quantum_parameters->term_details->global_collection_frequency;
+tf = quantum_parameters->tf;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	// this is DLH13:
+	//		score = (1.0 / (tf + 0.5)) * (ANT_log2(((tf * mean_document_length) / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[(size_t)docid]))));
+	// this is what Terrier actually uses:
+	score = 1.0 * (quantum_parameters->tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - (tf / document_lengths[(size_t)docid])))) / (tf + 0.5);
+
+	// In both cases you get negative numbers and so we add a bit (this is a hack)
+	score += 10.0;
+
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * score);
+
+	}
+}
+
+/*
+	ANT_RANKING_FUNCTION_DLH13::RELEVANCE_RANK_TOP_K()
+	-------------------------------------------------
+*/
 void ANT_ranking_function_DLH13::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double tf, cf, score;

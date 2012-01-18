@@ -15,12 +15,38 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_LMD::RELEVANCE_RANK_ONE_QUANTUM()
+	------------------------------------------------------
+	Language Models with Dirichlet smoothing
+*/
+void ANT_ranking_function_lmd::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+long long docid;
+double idf, n;
+double left_hand_side, rsv;
+ANT_compressable_integer *current;
+
+n = 3.0;						// this is a hack and should be the length of the query
+idf = ((double)collection_length_in_terms / (double)quantum_parameters->term_details->global_collection_frequency);
+left_hand_side = log (1.0 + (quantum_parameters->prescalar * quantum_parameters->tf / u) * idf);
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * rsv);
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_LMD::RELEVANCE_RANK_TOP_K()
 	------------------------------------------------
 	Language Models with Dirichlet smoothing
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double tf, idf, n;
@@ -58,6 +84,11 @@ void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_result *ac
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
+/*
+	ANT_RANKING_FUNCTION_LMD::RELEVANCE_RANK_TOP_K()
+	------------------------------------------------
+	Language Models with Dirichlet smoothing
+*/
 void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;

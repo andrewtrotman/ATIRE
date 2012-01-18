@@ -8,6 +8,9 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 #include "search_engine_result.h"
+#ifdef IMPACT_HEADER
+#include "ranking_function_quantum_parameters.h"
+#endif
 
 #ifdef IMPACT_HEADER
 #include "impact_header.h"
@@ -45,7 +48,7 @@ protected:
 #endif
 
 protected:
-	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer);
+	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_impact_header *impact_header, ANT_weighted_tf *stem_buffer);
 	void compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array);
 
 public:
@@ -67,6 +70,12 @@ public:
 	/*
 		You must override these functions if you're going to add a ranking function.
 	*/
+#ifdef IMPACT_HEADER
+	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_quantum(accumulator, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); };
+	virtual void relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_paramters) = 0;
+#endif
+
 #ifdef IMPACT_HEADER
 	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
 #else

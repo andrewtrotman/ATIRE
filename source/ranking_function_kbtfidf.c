@@ -8,11 +8,45 @@
 #include "compress.h"
 #include "search_engine_btree_leaf.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_KBTFIDF::RELEVANCE_RANK_ONE_QUANTUM()
+	----------------------------------------------------------
+*/
+void ANT_ranking_function_kbtfidf::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+double tf, idf, score;
+long long docid;
+ANT_compressable_integer *current;
+
+idf = log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+tf = quantum_parameters->prescalar * quantum_parameters->tf;
+score = quantum_parameters->postscalar * (log(k * tf - b) * idf * idf) / 100.0;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	//quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * idf * (top_row / (quantum_parameters->prescalar * quantum_parameters->tf + document_prior_probability[(size_t)docid])));
+	/*
+		This code is Shlomo's W(t) ranking function.
+
+		idf = log((tf / document_lengths[docid]) / (term_details->collection_frequency / collection_length_in_terms));
+		if (idf > 0)
+			{
+			score = tf * idf;
+			accumulator->add_rsv(docid, score);
+			}
+	*/
+	quantum_parameters->accumulator->add_rsv(docid, score);
+	}
+}
+
 /*
 	ANT_RANKING_FUNCTION_KBTFIDF::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_kbtfidf::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	double tf, idf, score;
 	long long docid;
@@ -49,6 +83,10 @@ void ANT_ranking_function_kbtfidf::relevance_rank_top_k(ANT_search_engine_result
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
+/*
+	ANT_RANKING_FUNCTION_KBTFIDF::RELEVANCE_RANK_TOP_K()
+	----------------------------------------------------
+*/
 void ANT_ranking_function_kbtfidf::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 double tf, idf, score;

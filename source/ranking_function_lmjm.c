@@ -15,12 +15,38 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_LMJM::RELEVANCE_RANK_ONE_QUANTUM()
+	-------------------------------------------------------
+	Language Models with Jelinek-Mercer smoothing
+*/
+void ANT_ranking_function_lmjm::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
+long long docid;
+double rsv;
+double one_minus_lambda, idf;
+ANT_compressable_integer *current;
+
+one_minus_lambda = (1.0 - lambda) / lambda;
+idf = (double)collection_length_in_terms / (double)quantum_parameters->term_details->global_collection_frequency;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+	rsv = quantum_parameters->postscalar * log(1 + one_minus_lambda * (quantum_parameters->prescalar * quantum_parameters->tf / (double)document_lengths[(size_t)docid]) * idf);
+	quantum_parameters->accumulator->add_rsv(docid, rsv);
+	}
+
+}
+
 /*
 	ANT_RANKING_FUNCTION_LMJM::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 	Language Models with Jelinek-Mercer smoothing
 */
-#ifdef IMPACT_HEADER
 void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
 	long long docid;
 	double tf, rsv;
@@ -53,6 +79,11 @@ void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *a
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
+/*
+	ANT_RANKING_FUNCTION_LMJM::RELEVANCE_RANK_TOP_K()
+	-------------------------------------------------
+	Language Models with Jelinek-Mercer smoothing
+*/
 void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;

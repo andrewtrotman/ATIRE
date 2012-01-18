@@ -63,6 +63,40 @@ decompress_buffer = NULL;
 stats = NULL;
 }
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION::RELEVANCE_RANK_QUANTUM()
+	----------------------------------------------
+	pass every single quantum to the rank function for evaluation
+*/
+void ANT_ranking_function::relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
+ANT_compressable_integer *current, *end;
+ANT_ranking_function_quantum_parameters quantum_parameters;
+
+quantum_parameters.accumulator = accumulator;
+quantum_parameters.term_details = term_details;
+quantum_parameters.prescalar = prescalar;
+quantum_parameters.postscalar = postscalar;
+
+impact_header->impact_value_ptr = impact_header->impact_value_start;
+impact_header->doc_count_ptr = impact_header->doc_count_start;
+current = impact_ordering;
+while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+	{
+	quantum_parameters.tf = *impact_header->impact_value_ptr;
+	end = current + *impact_header->doc_count_ptr;
+	quantum_parameters.the_quantum = current;
+	quantum_parameters.quantum_end = end;
+	relevance_rank_one_quantum(&quantum_parameters);
+	current = end;
+	impact_header->impact_value_ptr++;
+	impact_header->doc_count_ptr++;
+	}
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#endif
+
 /*
 	ANT_RANKING_FUNCTION::TF_TO_POSTINGS()
 	--------------------------------------
@@ -70,7 +104,7 @@ stats = NULL;
 	in a top-k ranking function
 */
 #ifdef IMPACT_HEADER
-void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_weighted_tf *stem_buffer)
+void ANT_ranking_function::tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_impact_header *impact_header, ANT_weighted_tf *stem_buffer)
 {
 long bucket, buckets_used;
 ANT_compressable_integer bucket_prev_docid[0x100];
@@ -105,17 +139,18 @@ for (current = stem_buffer; current < end; current++)
 		}
 
 // find the number of non-zero buckets (the number of quantums)
-the_impact_header->the_quantum_count = 0;
+impact_header->the_quantum_count = 0;
 for (bucket = 0; bucket < 0x100; bucket++) {
 	if (bucket_size[bucket] != 0) {
-		the_impact_header->the_quantum_count++;
+		impact_header->the_quantum_count++;
 	}
 }
 
 // setup the pointers for the header
-the_impact_header->impact_value_ptr = the_impact_header->impact_value_start = the_impact_header->header_buffer;
-the_impact_header->doc_count_ptr = the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
-the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
+impact_header->impact_value_ptr = impact_header->impact_value_start = impact_header->header_buffer;
+impact_header->doc_count_ptr = impact_header->doc_count_start = impact_header->header_buffer + impact_header->the_quantum_count;
+impact_header->impact_offset_ptr = impact_header->impact_offset_start = impact_header->header_buffer + impact_header->the_quantum_count * 2;
+impact_header->doc_count_trim_ptr = impact_header->impact_offset_start;
 
 /*
 	Compute the location of the pointers for each bucket
@@ -126,12 +161,12 @@ for (bucket = 0xFF; bucket >= 0; bucket--) {
 	pointer[bucket] = destination + sum;
 	if (bucket_size[(size_t)bucket] != 0) {
 		//*pointer[(size_t)bucket]++ = bucket;
-		*the_impact_header->impact_value_ptr = bucket; the_impact_header->impact_value_ptr++;
-		*the_impact_header->doc_count_ptr = bucket_size[bucket]; the_impact_header->doc_count_ptr++;
-		*the_impact_header->impact_offset_ptr = sum; the_impact_header->impact_offset_ptr++;
+		*impact_header->impact_value_ptr = bucket; impact_header->impact_value_ptr++;
+		*impact_header->doc_count_ptr = bucket_size[bucket]; impact_header->doc_count_ptr++;
+		*impact_header->impact_offset_ptr = sum; impact_header->impact_offset_ptr++;
 		buckets_used++;
-		sum += bucket_size[(size_t)bucket];
 	}
+	sum += bucket_size[(size_t)bucket];
 }
 
 /*
@@ -265,7 +300,8 @@ while (current < end)
 	Now call the top-k based relevance ranking function (pass 2)
 */
 #ifdef IMPACT_HEADER
-relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
+relevance_rank_quantum(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
+//relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
 #else
 relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, prescalar, postscalar);
 #endif
@@ -279,12 +315,13 @@ void ANT_ranking_function::relevance_rank_tf(ANT_bitstring *bitstring, ANT_searc
 {
 long long now;
 now = stats->start_timer();
-tf_to_postings(term_details, decompress_buffer, tf_array);
+tf_to_postings(term_details, decompress_buffer, the_impact_header, tf_array);
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
 if (bitstring == NULL) {
 #ifdef IMPACT_HEADER
-	relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
+	relevance_rank_quantum(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
+	//relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
 #else
 	relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
 #endif
