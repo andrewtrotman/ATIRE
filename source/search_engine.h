@@ -13,6 +13,7 @@
 #include "search_engine_accumulator.h"
 #include "impact_header.h"
 #include "version.h"
+#include "quantum.h"
 
 class ANT_memory;
 class ANT_file;
@@ -36,6 +37,7 @@ friend class ANT_btree_iterator;
 friend class ANT_mean_average_precision;
 friend class ANT_search_engine_result_iterator;
 friend class ANT_relevance_feedback;
+friend class ATIRE_API;
 
 private:
 	ANT_stats_search_engine *stats;
@@ -74,6 +76,7 @@ protected:
 	ANT_compression_factory factory;
 	ANT_memory *memory;
 	long long documents;
+	long postings_buffer_length;
 	unsigned char *btree_leaf_buffer, *postings_buffer;
 	ANT_weighted_tf *stem_buffer;
 	ANT_compressable_integer *document_lengths;
@@ -110,6 +113,11 @@ public:
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
 	virtual ANT_search_engine_btree_leaf *get_collection_frequency(char *base_term, ANT_stem *stem_maker, ANT_search_engine_btree_leaf *stemmed_term_details);
+#ifdef IMPACT_HEADER
+	void *read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_compressable_integer *the_decompressed_buffer);
+#else
+	void *read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_compressable_integer *the_decompressed_buffer);
+#endif
 	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);

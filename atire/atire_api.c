@@ -73,6 +73,8 @@
 
 #include "version.h"
 
+#include "quantum.h"
+
 #ifndef FALSE
 	#define FALSE 0
 #endif
@@ -644,6 +646,112 @@ destination[length] = '\0';
 return destination;
 }
 
+#ifdef IMPACT_HEADER
+/*
+	ATIRE_API::SEARCH_QUANTUM_AT_A_TIME()
+	-------------------------------------
+*/
+void ATIRE_API::search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function)
+{
+long long i, q, sum;
+unsigned char *raw_postings_buffer;
+ANT_compressable_integer **decompressed_buffers;
+ANT_impact_header **impact_headers;
+long long current_term, total_quantums = 0;
+ANT_NEXI_term_ant *term_string;
+ANT_quantum *the_quantums;
+void *verify = NULL;
+
+raw_postings_buffer = (unsigned char *)malloc(search_engine->postings_buffer_length);
+
+//
+// allocate an array of impact headers and decompressed buffers for all the terms
+//
+impact_headers = (ANT_impact_header **)malloc(sizeof(*impact_headers) * terms_in_query);
+decompressed_buffers = (ANT_compressable_integer **)malloc(sizeof(ANT_compressable_integer *) * terms_in_query);
+for (i = 0; i < terms_in_query; i++)
+	{
+	impact_headers[i] = (ANT_impact_header *)malloc(sizeof(**impact_headers));
+	impact_headers[i]->header_buffer = (ANT_compressable_integer *)malloc(sizeof(*impact_headers[0]->header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
+	decompressed_buffers[i] = (ANT_compressable_integer *)malloc(sizeof(**decompressed_buffers) * (search_engine->documents + ANT_COMPRESSION_FACTORY_END_PADDING));
+	}
+
+//
+// read all the postings and decompress them
+//
+for (current_term = 0, total_quantums = 0; current_term < terms_in_query; current_term++)
+	{
+	term_string = term_list[current_term];
+	verify = search_engine->read_and_decompress_for_one_term(&term_string->term_details, raw_postings_buffer, impact_headers[current_term], decompressed_buffers[current_term]);
+	//make sure the term was found in the dictionary
+	if (term_string->term_details.local_collection_frequency == 0)
+		continue;
+	total_quantums += impact_headers[current_term]->the_quantum_count;
+	}
+
+//
+// create the quantum array
+//
+the_quantums = (ANT_quantum *)malloc(sizeof(*the_quantums) * total_quantums);
+for (i = q = 0; i < terms_in_query; i++)
+	{
+	term_string = term_list[i];
+	//make sure the term was found in the dictionary
+	if (term_string->term_details.local_collection_frequency != 0)
+		{
+		impact_headers[i]->impact_value_ptr = impact_headers[i]->impact_value_start;
+		impact_headers[i]->doc_count_ptr = impact_headers[i]->doc_count_start;
+		sum = 0;
+		while (impact_headers[i]->doc_count_ptr < impact_headers[i]->doc_count_trim_ptr)
+			{
+			the_quantums[q].impact_value = *impact_headers[i]->impact_value_ptr;
+			the_quantums[q].doc_count = *impact_headers[i]->doc_count_ptr;
+			the_quantums[q].offset_ptr = decompressed_buffers[i] + sum;
+			the_quantums[q].term_details = &term_string->term_details;
+
+			// paramters for calling relevance_rank_one_quantum
+			the_quantums[q].accumulator = search_engine->results_list;
+			the_quantums[q].term_details = the_quantums[q].term_details;
+			the_quantums[q].tf = the_quantums[q].impact_value;
+			the_quantums[q].the_quantum = the_quantums[q].offset_ptr;
+			the_quantums[q].quantum_end = the_quantums[q].offset_ptr
+					+ the_quantums[q].doc_count;
+			the_quantums[q].trim_point = search_engine->trim_postings_k;
+			the_quantums[q].prescalar = 1.0;
+			the_quantums[q].postscalar = 1.0;
+
+			sum += *impact_headers[i]->doc_count_ptr;
+			impact_headers[i]->impact_value_ptr++;
+			impact_headers[i]->doc_count_ptr++;
+			q++;
+			}
+		}
+	}
+
+//
+//
+//
+for (q = 0; q < total_quantums; q++)
+	{
+	ranking_function->relevance_rank_one_quantum(&the_quantums[q]);
+	}
+
+//
+// free local allocated memory
+//
+free(the_quantums);
+for (i = 0; i < terms_in_query; i++)
+	{
+	free(decompressed_buffers[i]);
+	free(impact_headers[i]->header_buffer);
+	free(impact_headers[i]);
+	}
+free(decompressed_buffers);
+free(impact_headers);
+
+}
+#endif
+
 /*
 	ATIRE_API::SEARCH_TERM_AT_A_TIME()
 	----------------------------------
@@ -776,7 +884,12 @@ if (terms_in_query == 1)
 /*
 	Now ask the search engine to search
 */
-search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
+
+//FIXME
+#ifdef IMPACT_HEADER
+search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
+#endif
+//search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 
 delete [] term_list;
 

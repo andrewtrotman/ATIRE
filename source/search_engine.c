@@ -65,7 +65,7 @@ int32_t four_byte;
 int64_t eight_byte;
 unsigned char *block;
 long long end, term_header, this_header_block_size, sum, current_length, which_stemmer;
-long postings_buffer_length, decompressed_integer;
+long decompressed_integer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
@@ -662,13 +662,22 @@ stemmed_term_details->global_document_frequency = 0;
 return stemmed_term_details;
 }
 
+#ifdef IMPACT_HEADER
 /*
-	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
-	--------------------------------------------
+	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_TERM()
+	-----------------------------------------------------
 */
-void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details,
+					unsigned char *raw_postings_buffer,
+					ANT_impact_header *the_impact_header,
+					ANT_compressable_integer *the_decompressed_buffer)
+#else
+void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details,
+					unsigned char *raw_postings_buffer,
+					ANT_compressable_integer *the_decompressed_buffer)
+#endif
 {
-void *verify;
+void *verify = NULL;
 long long now, bytes_already_read;
 long long trim_postings_k;
 
@@ -679,7 +688,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	now = stats->start_timer();
 
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
-	verify = postings_buffer = get_postings(term_details, postings_buffer);
+	verify = raw_postings_buffer = get_postings(term_details, raw_postings_buffer);
 #else
 	/*
 		The maximum number of bytes we need to read is the worst case for compression * the cost of the
@@ -698,7 +707,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			term_details->postings_length = bytes;
 		}
 
-	verify = postings_buffer = get_postings(term_details, postings_buffer);
+	verify = raw_postings_buffer = get_postings(term_details, raw_postings_buffer);
 #endif // end of TOP_K_READ_AND_DECOMPRESSOR
 	stats->add_posting_read_time(stats->stop_timer(now));
 
@@ -709,38 +718,37 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		{
 		now = stats->start_timer();
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
-		factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+		factory.decompress(the_decompressed_buffer, raw_postings_buffer, term_details->impacted_length);
 #else
 		#ifdef IMPACT_HEADER
 			//
 			// decompress the header
 			//
-			impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[4];
-			impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[5];
-			factory.decompress(impact_header.header_buffer, postings_buffer+ANT_impact_header::INFO_SIZE, impact_header.the_quantum_count * 3);
-			impact_header.impact_value_start = impact_header.header_buffer;
-			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
-			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+			the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
+			the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+			factory.decompress(the_impact_header->header_buffer, raw_postings_buffer+ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+			the_impact_header->impact_value_start = the_impact_header->header_buffer;
+			the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
+			the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
 
 			//
 			// decompress the postings
 			//
 			long long sum = 0;
-			impact_header.doc_count_ptr = impact_header.doc_count_start;
-			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
-			//while (impact_header.doc_count_ptr < doc_count_end) {
-			while(impact_header.doc_count_ptr < impact_header.impact_offset_start) {
+			the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
+			the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
+			while(the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start) {
 				if (sum >= trim_postings_k) {
 					break;
 				}
-				factory.decompress(decompress_buffer + sum,
-								   postings_buffer+ impact_header.beginning_of_the_postings + *impact_header.impact_offset_ptr,
-								   *impact_header.doc_count_ptr);
-				sum += *impact_header.doc_count_ptr;
-				impact_header.doc_count_ptr++;
-				impact_header.impact_offset_ptr++;
+				factory.decompress(the_decompressed_buffer + sum,
+								   raw_postings_buffer+ the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr,
+								   *the_impact_header->doc_count_ptr);
+				sum += *the_impact_header->doc_count_ptr;
+				the_impact_header->doc_count_ptr++;
+				the_impact_header->impact_offset_ptr++;
 			}
-			impact_header.doc_count_trim_ptr = impact_header.doc_count_ptr;
+			the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
 
 		#else // else #ifdef IMPACT_HEADER
 		/*
@@ -760,31 +768,57 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 				end = term_details->impacted_length;
 			}
 
-		factory.decompress(decompress_buffer, postings_buffer, end);
-		decompress_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
+		factory.decompress(the_decompressed_buffer, raw_postings_buffer, end);
+		the_decompressed_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
 		#endif // end of #ifdef IMPACT_HEADER
 #endif // end of #ifdef TOP_K_READ_AND_DECOMPRESSOR
 		stats->add_decompress_time(stats->stop_timer(now));
-
-		now = stats->start_timer();
-		if (bitstring == NULL) {		// it bitstring != NULL then we're boolean ranking hybrid
-			#ifdef IMPACT_HEADER
-				//ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
-				ranking_function->relevance_rank_quantum(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
-			#else
-				ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
-			#endif
-		} else {
-			#ifdef IMPACT_HEADER
-				ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
-			#else
-				ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
-			#endif
 		}
-		stats->add_rank_time(stats->stop_timer(now));
-		}
-
 	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+	}
+
+return verify;
+}
+
+/*
+	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
+	--------------------------------------------
+*/
+void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+{
+void *verify;
+long long now;
+
+#ifdef IMPACT_HEADER
+verify = read_and_decompress_for_one_term(term_details, postings_buffer, &impact_header, decompress_buffer);
+#else
+verify = read_and_decompress_for_one_term(term_details, postings_buffer, decompress_buffer);
+#endif
+
+//
+// make sure the postings_buffer is not empty and then decompress it
+//
+if (verify != NULL)
+	{
+	now = stats->start_timer();
+	if (bitstring == NULL)
+		{ // it bitstring != NULL then we're boolean ranking hybrid
+		#ifdef IMPACT_HEADER
+			//ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_quantum(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+		#else
+			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
+		#endif
+		}
+	else
+		{
+		#ifdef IMPACT_HEADER
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+		#else
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
+		#endif
+		}
+	stats->add_rank_time(stats->stop_timer(now));
 	}
 }
 
