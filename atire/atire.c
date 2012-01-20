@@ -679,6 +679,7 @@ if ((params.query_type & ATIRE_API::QUERY_EXPANSION_WORDNET) != 0)
 atire->set_segmentation(params.segmentation);
 
 ant_init_ranking(atire, params); //Error value ignored...
+atire->set_processing_strategy(params.processing_strategy);
 
 return atire;
 }

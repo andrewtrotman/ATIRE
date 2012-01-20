@@ -23,6 +23,7 @@ public:
 	enum { /* NONE = 0, */ INEX = 1, TREC, INEX_EFFICIENCY, INEX_FOCUS, INEX_BEP } ;	// evaluation forum
 	enum { INDEX_IN_FILE, INDEX_IN_MEMORY};												// read the index from disk or load at startup
 	enum { /* NONE = 0, */ ARTICLE = 1, RANGE };										// focused retrieval method
+	enum { TERM_AT_A_TIME, QUANTUM_AT_A_TIME };											// processing strategy (term or quantum at a time)
 
 private:
 	int argc;
@@ -80,6 +81,8 @@ public:
 
 	unsigned long expander_tf_types;	// types of synet expansions for tf-expansion
 	unsigned long expander_query_types;	// types of synet expansions for query expansion
+
+	long processing_strategy;			// term-at-a-time or quantum-at-a-time
 
 private:
 	void export_format(char *forum);

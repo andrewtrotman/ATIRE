@@ -130,6 +130,8 @@ topsig_globalstats = NULL;
 topsig_signature = NULL;
 topsig_positive_ranking_function = NULL;
 topsig_negative_ranking_function = NULL;
+
+processing_strategy = ANT_ANT_param_block::TERM_AT_A_TIME;
 }
 
 /*
@@ -884,12 +886,16 @@ if (terms_in_query == 1)
 /*
 	Now ask the search engine to search
 */
-
-//FIXME
 #ifdef IMPACT_HEADER
-search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
+	if (processing_strategy == ANT_param_block::TERM_AT_A_TIME)
+		search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
+	else if (processing_strategy == ANT_param_block::QUANTUM_AT_A_TIME)
+		search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
+	else		// This is an error case, but do term at a time anyway
+		search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
+#else
+	search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 #endif
-//search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 
 delete [] term_list;
 

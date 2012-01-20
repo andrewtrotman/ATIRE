@@ -66,6 +66,7 @@ title_algorithm = NONE;
 title_length = 300;
 expander_tf_types = ANT_thesaurus_relationship::SYNONYM;
 expander_query_types = ANT_thesaurus_relationship::SYNONYM;
+processing_strategy = TERM_AT_A_TIME;								// term at a time by default
 }
 
 /*
@@ -138,6 +139,8 @@ puts("-k<n>           Top-k search. Document results list accurate to the top <n
 puts("-F<n>           Focus-k. Focused results list accurate to the top <n> [default=2000]");
 puts("-K<n>           Static pruning. Process no fewer than <n> postings (0=all) [default=0]");
 puts("-M              Load the index into memory at startup");
+puts("-Pt             Process postings lists term-at-a-time [default]");
+puts("-Pq             Process postings lists quantum-at-a-time");
 puts("");
 
 puts("METRICS AND ASSESSMENTS");
@@ -627,6 +630,10 @@ for (param = 1; param < argc; param++)
 			focus_top_k = atol(command + 1);
 		else if (*command == 'M')
 			file_or_memory = INDEX_IN_MEMORY;
+		else if (strcmp(command, "Pt") == 0)
+			processing_strategy = TERM_AT_A_TIME;
+		else if (strcmp(command, "Pq") == 0)
+			file_or_memory = QUANTUM_AT_A_TIME;
 		else if (*command == 'm')
 			set_metric(command + 1);
 		else if (*command == 'a') 

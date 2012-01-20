@@ -89,6 +89,8 @@ private:
 	ANT_thesaurus *expander_tf;									// TF expansion::this is the tool to use to find synonyms of the query terms
 	ANT_thesaurus *expander_query;								// Query expansion::this is the tool to use to find synonyms of the query terms
 
+	long processing_strategy;									// term or quantum at a time (term by default)
+
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
@@ -183,6 +185,11 @@ public:
 		Set the static pruning point.  At most sttic_prune_point postings will be read from disk and processedS
 	*/
 	long long set_trim_postings_k(long long static_prune_point);
+
+	/*
+		Set term or quantum at a time processing of the postings lists
+	*/
+	void set_processing_strategy(long new_strategy) { processing_strategy = new_strategy; }
 
 	/*
 		Given the query, do the seach, rank, and return the number of hits
