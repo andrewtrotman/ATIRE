@@ -1,4 +1,8 @@
-#include <stdlib.h>
+/*
+	MYSQL_XML_DUMP.C
+	----------------
+	Dump the contents of a MySQL database
+*/
 #include <stdio.h>
 #include <sstream>
 #include <string>
@@ -44,6 +48,10 @@ MYSQL_RES *result;
 char *page_start_marker_pos;
 long long page_start, page_remain;
 
+/*
+	QUERY_LIMIT()
+	-------------
+*/
 int query_limit()
 {
 sprintf((char*)query_mod.start, "%s LIMIT %lld,%lld", query.start, (long long) page_start, (long long) page_remain);
@@ -56,6 +64,10 @@ if ((result = mysql_use_result(connection)) == NULL)
 return 1;
 }
 
+/*
+	QUERY_RANGE_START_LIMIT()
+	-------------------------
+*/
 int query_range_start_limit()
 {
 sprintf((char*)query_mod.start, "%s%lld%s LIMIT %lld", (char*)query.start, (long long) page_start, page_start_marker_pos + strlen(MYSQL_RANGE_START_MARKER), (long long) page_remain);
@@ -68,13 +80,17 @@ if ((result = mysql_use_result(connection)) == NULL)
 return 1;
 }
 
+/*
+	OPEN_OUTPUT_FILE()
+	------------------
+*/
 FILE * open_output_file(std::string prefix, int index)
 {
 std::stringstream filename_buf;
 
 filename_buf << prefix << "." << index << ".xml";
 
-FILE * output = fopen(filename_buf.str().c_str(), "wb");
+FILE *output = fopen(filename_buf.str().c_str(), "wb");
 
 if (!output)
 	{
@@ -85,6 +101,10 @@ if (!output)
 return output;
 }
 
+/*
+	MAIN()
+	------
+*/
 int main(int argc, char * argv[])
 {
 long fields;
@@ -132,7 +152,7 @@ switch (mode)
 			return EXIT_FAILURE;
 
 		docname_col = 0;
-	break;
+		break;
 	case FETCH_LIMIT:
 		/* We want enough space to store a modified query that includes a limit clause */
 		query_mod.string_length = query.string_length + strlen(" LIMIT ") + MAX_LONG_LONG_FORMATTED_LEN + strlen(",") + MAX_LONG_LONG_FORMATTED_LEN;
@@ -151,7 +171,7 @@ switch (mode)
 			}
 
 		docname_col = 0;
-	break;
+		break;
 	case FETCH_RANGE_START_LIMIT:
 		/* We want enough space to store a modified query that uses a WHERE clause with one value
 		 * and a LIMIT clause to page through the dataset.
@@ -183,7 +203,7 @@ switch (mode)
 			}
 
 		docname_col = 1;
-	break;
+		break;
 	default:
 		fprintf(stderr, "Unknown MySQL fetch method\n");
 		exit(-1);
@@ -261,4 +281,6 @@ while (1)
 		output = open_output_file(output_prefix, output_index);
 		}
 	}
+
+return 0;
 }
