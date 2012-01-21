@@ -32,8 +32,12 @@ int check_postings = 1;
 
 
 #ifdef IMPACT_HEADER
-long long process(ANT_compression_factory *factory, uint32_t quantum_count, ANT_compressable_integer *impact_header, ANT_compressable_integer *buffer, unsigned char *postings_list, long long trim_point, long verbose, long one_postings_per_line)
-{
+	/*
+		PROCESS()
+		---------
+	*/
+	long long process(ANT_compression_factory *factory, uint32_t quantum_count, ANT_compressable_integer *impact_header, ANT_compressable_integer *buffer, unsigned char *postings_list, long long trim_point, long verbose, long one_postings_per_line)
+	{
 	ANT_compressable_integer tf;
 	long long docid, max_docid, sum;
 	ANT_compressable_integer *current, *end, *end_offset;
@@ -44,70 +48,68 @@ long long process(ANT_compression_factory *factory, uint32_t quantum_count, ANT_
 	doc_count_ptr = impact_header + quantum_count;
 	end_offset = impact_header + quantum_count * 3;
 
-	for (impact_offset_ptr = (impact_header + quantum_count * 2); impact_offset_ptr < end_offset; impact_value_ptr++, doc_count_ptr++, impact_offset_ptr++) {
+	for (impact_offset_ptr = (impact_header + quantum_count * 2); impact_offset_ptr < end_offset; impact_value_ptr++, doc_count_ptr++, impact_offset_ptr++)
+		{
 		//printf("*doc_count: %lld, impact_offset: %lld\n", (long long)*doc_count_ptr, (long long)*impact_offset_ptr);
 		factory->decompress(buffer, postings_list + *impact_offset_ptr, *doc_count_ptr);
 
 		end = buffer + *doc_count_ptr;
-		for (current = buffer, docid = -1; current < end; current++) {
+		for (current = buffer, docid = -1; current < end; current++)
+			{
 			docid += *current;
-			if (verbose) {
+			if (verbose)
 				if (one_postings_per_line)
 					printf("\n<%lld,%lld>", docid, (long long)*impact_value_ptr);
 				else
 					printf("<%lld,%lld>", docid, (long long)*impact_value_ptr);
-			}
 
-			if (docid > max_docid) {
+			if (docid > max_docid)
 				max_docid = docid;
 			}
-		}
 
 		sum += *doc_count_ptr;
-		if (sum >= trim_point) {
+		if (sum >= trim_point) 
 			break;
 		}
-	}
 
 	return max_docid;
-}
-#else
-/*
-	PROCESS()
-	---------
-*/
-long long process(ANT_compressable_integer *impact_ordering, long long document_frequency, long verbose, long one_postings_per_line)
-{
-ANT_compressable_integer tf;
-long long docid, max;
-ANT_compressable_integer *current, *end;
-
-max = 0;
-current = impact_ordering;
-end = impact_ordering + document_frequency;
-
-while (current < end)
-	{
-	end += 2;
-	docid = -1;
-	tf = *current++;
-	while (*current != 0)
-		{
-		docid += *current++;
-		if (verbose)
-			if (one_postings_per_line) {
-				printf("\n<%lld,%lld>", docid, (long long)tf);
-			} else {
-				printf("<%lld,%lld>", docid, (long long)tf);
-			}
-		}
-	if (docid > max)
-		max = docid;
-	current++;						// zero
 	}
+#else
+	/*
+		PROCESS()
+		---------
+	*/
+	long long process(ANT_compressable_integer *impact_ordering, long long document_frequency, long verbose, long one_postings_per_line)
+	{
+	ANT_compressable_integer tf;
+	long long docid, max;
+	ANT_compressable_integer *current, *end;
 
-return max;
-}
+	max = 0;
+	current = impact_ordering;
+	end = impact_ordering + document_frequency;
+
+	while (current < end)
+		{
+		end += 2;
+		docid = -1;
+		tf = *current++;
+		while (*current != 0)
+			{
+			docid += *current++;
+			if (verbose)
+				if (one_postings_per_line)
+					printf("\n<%lld,%lld>", docid, (long long)tf);
+				else
+					printf("<%lld,%lld>", docid, (long long)tf);
+			}
+		if (docid > max)
+			max = docid;
+		current++;						// zero
+		}
+
+	return max;
+	}
 #endif
 
 /*
@@ -134,11 +136,11 @@ long metaphone, print_wide, print_postings, one_postings_per_line;
 long param;
 
 #ifdef IMPACT_HEADER
-uint32_t the_quantum_count;
-uint32_t beginning_of_the_postings;
-long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
-long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
-ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
+	uint32_t the_quantum_count;
+	uint32_t beginning_of_the_postings;
+	long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
+	long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
+	ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
 #endif
 
 first_term = last_term = NULL;
@@ -167,7 +169,7 @@ for (param = 1; param < argc; param++)
 	else if (strcmp(argv[param], "-l") == 0)
 		one_postings_per_line = TRUE;
 	else
-		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>] [-l]\n", argv[0]));
+		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>] [-l<PrintOnePostingPerLine>]\n", argv[0]));
 	}
 
 postings_list = (unsigned char *)malloc((size_t)postings_list_size);

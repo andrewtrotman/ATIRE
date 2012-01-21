@@ -1,5 +1,6 @@
 #
-#	Windows makefile for ATIRE and the ATIRE tools
+#	Windows makefile for ATIRE
+#	by Andrew Trotman
 #
 
 #
@@ -71,8 +72,8 @@ DIRECTORY_ITERATOR_MYSQL =
 #
 !IF $(ANT_HAS_ZLIB) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_ZLIB
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I zlib\zlib-1.2.3
-EXTRA_LIBS = $(EXTRA_LIBS) zlib\zlib-1.2.3\zlib.lib
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\unencumbered\zlib\zlib-1.2.5
+EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\zlib\zlib-1.2.5\zlib.lib
 !ENDIF
 
 #
@@ -80,8 +81,8 @@ EXTRA_LIBS = $(EXTRA_LIBS) zlib\zlib-1.2.3\zlib.lib
 #
 !IF $(ANT_HAS_BZLIB) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_BZLIB
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I bzip\bzip2-1.0.5
-EXTRA_LIBS = $(EXTRA_LIBS) bzip\bzip2-1.0.5\libbz2.lib
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\unencumbered\bzip\bzip2-1.0.6
+EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\bzip\bzip2-1.0.6\libbz2.lib
 !ENDIF
 
 #
@@ -383,7 +384,8 @@ ANT_TARGETS = \
 	$(BINDIR)\atire.exe 				\
 	$(BINDIR)\atire_broker.exe 			\
 	$(BINDIR)\atire_client.exe			\
-	$(BINDIR)\ant_dictionary.exe
+	$(BINDIR)\atire_dictionary.exe		\
+	$(LIBIDR)\atire.dll
 
 OTHER_TARGETS = \
 	$(BINDIR)\link_extract_inex_wikipedia.exe 	\
@@ -420,12 +422,13 @@ OTHER_TARGETS = \
 	$(BINDIR)\test_kendall_tau.exe					\
 	$(BINDIR)\wordnet_to_ant_thesaurus.exe		\
 	$(BINDIR)\wordnet_test.exe		\
-	$(BINDIR)\arithmetic_encoding_model_gen.exe		\
-	$(LIBIDR)\atire.dll
+	$(BINDIR)\arithmetic_encoding_model_gen.exe
 
 #
 #	List of objects to build
 #
+atire : $(ANT_TARGETS)
+
 all : $(PARTS) \
       $(ANT_TARGETS) \
       $(OTHER_TARGETS)
@@ -483,15 +486,15 @@ $(PARTS) : makefile $(EXTRA_LIBS)
 #
 #	Make the external libraries
 #
-bzip\bzip2-1.0.5\libbz2.lib :
-	@cd bzip\bzip2-1.0.5
+external\unencumbered\bzip\bzip2-1.0.6\libbz2.lib :
+	@cd external\unencumbered\bzip\bzip2-1.0.6
 	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
-	@cd ..\..
+	@cd ..\..\..\..
 
-zlib\zlib-1.2.3\zlib.lib : 
-	@cd zlib\zlib-1.2.3
+external\unencumbered\zlib\zlib-1.2.5\zlib.lib :
+	@cd external\unencumbered\zlib\zlib-1.2.5
 	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
-	@cd ..\..
+	@cd ..\..\..\..
 
 lzo\lzo2.lib :
 	@cd lzo

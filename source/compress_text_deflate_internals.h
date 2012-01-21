@@ -6,7 +6,7 @@
 #define COMPRESS_TEXT_DEFLATE_INTERNALS_H_
 
 #ifdef ANT_HAS_ZLIB
-	#include "../zlib/zlib-1.2.3/zlib.h"
+	#include "zlib.h"
 #endif
 
 /*

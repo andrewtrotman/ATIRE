@@ -3,7 +3,7 @@
 	-------------------
 */
 #ifdef ANT_HAS_BZLIB
-	#include "../bzip/bzip2-1.0.5/bzlib.h"
+	#include "bzlib.h"
 #endif
 #include "compress_text_bz2.h"
 

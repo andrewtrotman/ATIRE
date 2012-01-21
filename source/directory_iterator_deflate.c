@@ -9,7 +9,7 @@
 #include "compress_text_deflate.h"
 
 #ifdef ANT_HAS_ZLIB
-	#include "../zlib/zlib-1.2.3/zlib.h"
+	#include "zlib.h"
 #endif
 
 /*
