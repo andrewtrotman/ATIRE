@@ -1,6 +1,7 @@
 /*
 	PHONE.C
 	-------
+	Test the metaphone routines
 */
 
 #include <stdio.h>
