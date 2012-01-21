@@ -1,0 +1,75 @@
+# Makefile for zlib using Microsoft (Visual) C
+# zlib is copyright (C) 1995-2006 Jean-loup Gailly and Mark Adler
+#
+# This makefile has been substantially hacked by Andrew Trotman for
+# use with the ATIRE search engine.  It produced only zlib.lib
+#
+# To build using assembly language versions choose one for the following:
+# x64 (amd64)
+#	AS = @ml64
+#	LOC = -DASMV -DASMINF
+#	OBJA = inffasx64.obj gvmat64.obj inffas8664.c
+#
+# x86 (Intel)
+#	AS = @ml
+#	LOC = -DASMV -DASMINF
+#	OBJA = inffas32.obj match686.obj
+#
+# No assembly:
+#	AS =
+#	LOC =
+#	OBJA =
+#
+# Now we try and work it out in the makefile
+#
+!IF [ml64 /nologo /? > nul] == 0
+AS = @ml64 /nologo
+LOC = -DASMV -DASMINF
+OBJA = inffasx64.obj gvmat64.obj inffas8664.c
+!ELSEIF [ml /nologo /? > nul] == 0
+AS = @ml /nologo
+LOC = -DASMV -DASMINF
+OBJA = inffas32.obj match686.obj
+!ELSE
+AS =
+LOC =
+OBJA =
+!ENDIF
+
+# variables
+STATICLIB = zlib.lib
+
+!IF "$(COMPILER)"=="INTEL"
+CC = @icl
+AR = @xilib
+!ELSE
+CC = @cl
+AR = @lib
+!ENDIF
+
+!IF "$(DEBUG)" == "1"
+CFLAGS  = -nologo /MTd /Od $(LOC) /Zi /fp:fast /GL /Gy /MP8 $(LOC)
+!ELSE
+CFLAGS  = -nologo /Ox $(LOC) /Zi /fp:fast /GL /Gy /MP8 $(LOC)
+!ENDIF
+
+ASFLAGS = -coff -Zi $(LOC)
+ARFLAGS = -nologo /LTCG
+
+OBJS = adler32.obj compress.obj crc32.obj deflate.obj gzclose.obj gzlib.obj gzread.obj \
+       gzwrite.obj infback.obj inflate.obj inftrees.obj trees.obj uncompr.obj zutil.obj
+
+$(STATICLIB): $(OBJS) $(OBJA)
+	$(AR) $(ARFLAGS) -out:$@ $(OBJS) $(OBJA)
+
+.c.obj:
+	$(CC) -c $(WFLAGS) $(CFLAGS) $<
+
+{contrib/masmx64}.c.obj:
+	$(CC) -c $(WFLAGS) $(CFLAGS) $<
+
+{contrib/masmx64}.asm.obj:
+	$(AS) -c $(ASFLAGS) $<
+
+{contrib/masmx86}.asm.obj:
+	$(AS) -c $(ASFLAGS) $<

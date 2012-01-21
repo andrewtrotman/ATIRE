@@ -1,0 +1,35 @@
+# Makefile for Microsoft Visual C++ 6.0
+# K.M. Syring (syring@gsf.de)
+# Fixed up by JRS for bzip2-0.9.5d release.
+#
+# This makefile has been substantially hacked by Andrew Trotman for
+# use with the ATIRE search engine.  It produced only zlib.lib
+
+!IF "$(COMPILER)"=="INTEL"
+CC=@icl
+LIB=@xilib
+!ELSE
+CC=@cl
+LIB=@lib
+!ENDIF
+
+!IF "$(DEBUG)" == "1"
+CFLAGS= -DWIN32 /MTd /Od -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
+!ELSE
+CFLAGS= -DWIN32 /MT /Ox -D_FILE_OFFSET_BITS=64 -nologo /Zi /fp:fast /GL /Gy /MP8
+!ENDIF
+
+OBJS= blocksort.obj  \
+      huffman.obj    \
+      crctable.obj   \
+      randtable.obj  \
+      compress.obj   \
+      decompress.obj \
+      bzlib.obj
+
+all: $(OBJS)
+	$(LIB) -nologo /LTCG /out:libbz2.lib $(OBJS)
+
+.c.obj: 
+	$(CC) $(CFLAGS) -c $*.c -Fo$*.obj
+
