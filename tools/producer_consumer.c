@@ -1,9 +1,10 @@
 /*
 	PRODUCER_CONSUMER.C
 	-------------------
+	Example producer / consumer model
 */
 #ifdef _MSC_VER
-#include <windows.h>
+	#include <windows.h>
 #endif
 #include <stdio.h>
 #include "../source/critical_section.h"
