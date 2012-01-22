@@ -90,8 +90,8 @@ EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\bzip\bzip2-1.0.6\libbz2.lib
 #
 !IF $(ANT_HAS_SNAPPYLIB) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_SNAPPYLIB
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I snappy\snappy-1.0.4 -I snappy
-EXTRA_LIBS = $(EXTRA_LIBS) snappy\snappy.lib
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\unencumbered\snappy\snappy-1.0.4 -I external\unencumbered\snappy
+EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\snappy\snappy.lib
 !ENDIF
 
 
@@ -105,8 +105,8 @@ EXTRA_LIBS = $(EXTRA_LIBS) snappy\snappy.lib
 #
 !IF $(ANT_HAS_LZO) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LZO
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I lzo\lzo-2.05\include\lzo
-EXTRA_LIBS = $(EXTRA_LIBS) lzo\lzo2.lib
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\gpl\lzo\lzo-2.06\include\lzo
+EXTRA_LIBS = $(EXTRA_LIBS) external\gpl\lzo\lzo2.lib
 !ENDIF
 
 #
@@ -496,15 +496,15 @@ external\unencumbered\zlib\zlib-1.2.5\zlib.lib :
 	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..\..\..\..
 
-lzo\lzo2.lib :
-	@cd lzo
+external\unencumbered\snappy\snappy.lib :
+	@cd external\unencumbered\snappy
 	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
-	@cd ..
+	@cd ..\..\..
 
-snappy\snappy.lib :
-	@cd snappy
+external\gpl\lzo\lzo2.lib :
+	@cd external\gpl\lzo
 	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
-	@cd ..
+	@cd ..\..\..
 
 #
 #	Management

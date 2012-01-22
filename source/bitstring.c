@@ -74,7 +74,7 @@ delete [] bits;
 */
 void ANT_bitstring::set_length(long long len_in_bits)
 {
-long long new_chunks_long, old_bytes_long, old_chunks_long;
+long long old_bytes_long, old_chunks_long;
 
 old_bytes_long = bytes_long;
 old_chunks_long = chunks_long;
@@ -99,7 +99,7 @@ if (chunks_long != old_chunks_long)
 */
 void ANT_bitstring::unsafe_set_length(long long len_in_bits)
 {
-long long new_chunks_long, old_bytes_long;
+long long new_chunks_long;
 
 new_chunks_long = (len_in_bits - 1) / BITS_PER_WORD + 1;
 if (new_chunks_long != chunks_long)
