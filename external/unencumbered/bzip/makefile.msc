@@ -3,7 +3,7 @@
 # Fixed up by JRS for bzip2-0.9.5d release.
 #
 # This makefile has been substantially hacked by Andrew Trotman for
-# use with the ATIRE search engine.  It produced only zlib.lib
+# use with the ATIRE search engine.
 
 !IF "$(COMPILER)"=="INTEL"
 CC=@icl
