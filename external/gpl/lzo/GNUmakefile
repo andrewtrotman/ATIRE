@@ -1,7 +1,7 @@
 
 CC = gcc
 
-SOURCE_DIR = lzo-2.05/src
+SOURCE_DIR = lzo-2.06/src
 LZO = liblzo2.a
 
 ALL_SOURCES =  $(SOURCE_DIR)/lzo1.c		\

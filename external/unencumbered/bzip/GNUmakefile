@@ -2,7 +2,7 @@
 CC = gcc
 
 BZLIB = libbz2.a
-SOURCE_DIR = bzip2-1.0.5
+SOURCE_DIR = bzip2-1.0.6
 
 ALL_SOURCES = $(SOURCE_DIR)/blocksort.c \
 			  $(SOURCE_DIR)/huffman.c \

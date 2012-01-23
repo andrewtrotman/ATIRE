@@ -1,5 +1,6 @@
 OS_TYPE := $(shell uname)
 CC = g++
+#CC = /opt/local/bin/g++-mp-4.4
 #CC = icpc
 
 ###############################################################################
@@ -7,7 +8,7 @@ CC = g++
 ###############################################################################
 
 # debugging or normal compiling and linking
-USE_GCC_DEBUG := 0
+USE_GCC_DEBUG := 1
 
 # Prepare the binary for profiling
 USE_PREPARE_PROFILING := 0
@@ -39,6 +40,9 @@ USE_BUILT_IN_BZLIB := 0
 USE_SYSTEM_LZO := 0
 USE_BUILT_IN_LZO := 0
 
+# use google's snappy compression library
+USE_SNAPPY := 0
+
 # if to add a term_max_impact to the structure
 # of the dictionary for each term (This is just
 # a temporary flag. In future, this should be
@@ -54,7 +58,7 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 USE_DIRECT_MEMORY_READ := 0
 
 # construct impact headers for easy handling the quantums of the postings
-USE_IMPACT_HEADER := 0
+USE_IMPACT_HEADER := 1
 
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1
@@ -72,9 +76,6 @@ USE_MYSQL := 0
 
 # build a php extension for Atire
 USE_PHP_EXTENSION := 0
-
-# use google's snappy compression library
-USE_SNAPPY := 0
 
 # use Lovins stemmer
 USE_STEM_LOVINS := 1
@@ -97,6 +98,21 @@ USE_STEM_PAICE_HUSK := 1
 ###############################################################################
 # Please use above options to enable corresponding flags
 ###############################################################################
+
+BASE_DIR := $(shell pwd)
+
+ZLIB_DIR := external/unencumbered/zlib
+ZLIB_VERSION := zlib-1.2.5
+
+BZIP_DIR := external/unencumbered/bzip
+BZIP_VERSION := bzip2-1.0.6
+
+SNAPPY_DIR := external/unencumbered/snappy
+SNAPPY_VERSION := snappy-1.0.4
+
+LZO_DIR := external/gpl/lzo
+LZO_VERSION := lzo-2.06
+
 ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g -ggdb
 	CFLAGS += -g -ggdb -DDEBUG
@@ -158,13 +174,13 @@ ifeq ($(USE_SYSTEM_BZLIB), 1)
 endif
 
 ifeq ($(USE_BUILT_IN_ZLIB), 1)
-	CFLAGS += -DANT_HAS_ZLIB -I zlib/zlib-1.2.3
-	EXTRA_OBJS += zlib/libz.a
+	CFLAGS += -DANT_HAS_ZLIB -I $(ZLIB_DIR)/$(ZLIB_VERSION)
+	EXTRA_OBJS += $(ZLIB_DIR)/libz.a
 endif
 
 ifeq ($(USE_BUILT_IN_BZLIB), 1)
-	CFLAGS += -DANT_HAS_BZLIB -I bzip/bzip2-1.0.5
-	EXTRA_OBJS += bzip/libbz2.a
+	CFLAGS += -DANT_HAS_BZLIB -I $(BZIP_DIR)/$(BZIP_VERSION)
+	EXTRA_OBJS += $(BZIP_DIR)/libbz2.a
 endif
 
 ifeq ($(USE_SYSTEM_LZO), 1)
@@ -173,8 +189,8 @@ ifeq ($(USE_SYSTEM_LZO), 1)
 endif
 
 ifeq ($(USE_BUILT_IN_LZO), 1)
-	CFLAGS += -DANT_HAS_LZO -I lzo/lzo-2.05/include/lzo lzo/lzo-2.05/include
-	EXTRA_OBJS += lzo/liblzo2.a
+	CFLAGS += -DANT_HAS_LZO -I $(LZO_DIR)/$(LZO_VERSION)/include/lzo $(LZO_DIR)/$(LZO_VERSION)/include
+	EXTRA_OBJS += $(LZO_DIR)/liblzo2.a
 endif
 
 ifeq ($(USE_TERM_LOCAL_MAX_IMPACT), 1)
@@ -213,8 +229,8 @@ ifeq ($(USE_PHP_EXTENSION), 1)
 endif
 
 ifeq ($(USE_SNAPPY), 1)
-	CFLAGS += -DANT_HAS_SNAPPYLIB -I snappy/snappy-1.0.4
-	EXTRA_OBJS += snappy/libsnappy.a
+	CFLAGS += -DANT_HAS_SNAPPYLIB -I $(SNAPPY_DIR)/$(SNAPPY_VERSION)
+	EXTRA_OBJS += $(SNAPPY_DIR)/libsnappy.a
 endif
 
 ###############################################################################
@@ -238,6 +254,8 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
 			  $(ATIRE_DIR)/index.c \
 			  $(ATIRE_DIR)/atire_client.c \
 			  $(ATIRE_DIR)/atire_broker.c \
+			  $(ATIRE_DIR)/atire_dictionary.c \
+			  $(ATIRE_DIR)/get_doclist.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
@@ -273,19 +291,19 @@ ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_S
 PHP_EXT_SOURCES := $(notdir $(shell ls $(PHP_DIR)/*.c))
 PHP_EXT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
 
-TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c \
-				 $(TOOLS_DIR)/get_wikipedia_title.c \
-				 $(TOOLS_DIR)/INEXqrels_to_run.c
+TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c
 TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)/*.c)))
 TOOLS_EXES := $(basename $(TOOLS_SOURCES))
 TOOLS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TOOLS_SOURCES)))
 
-all : info $(EXTRA_OBJS) index atire atire_client atire_broker
+all : info $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary get_doclist
 
 index : $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
 atire_client: $(BIN_DIR)/atire_client
 atire_broker: $(BIN_DIR)/atire_broker
+atire_dictionary: $(BIN_DIR)/atire_dictionary
+get_doclist: $(BIN_DIR)/get_doclist
 
 tools: $(TOOLS_EXES)
 
@@ -341,32 +359,38 @@ $(BIN_DIR)/atire : $(ATIRE_OBJECTS)
 $(BIN_DIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
+$(BIN_DIR)/atire_dictionary : $(ATIRE_BROKER_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+
+$(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+
 # Hacked to compile every single source in the tools directory.
 # The $(TOOLS_OBJECTS) is requied at the dependencies so that
 # all sources in tools can be compiled first. Then only the individual
 # source is linked at a time.
-$(TOOLS_EXES) : $(SOURCES_OBJECTS)
+$(TOOLS_EXES) : $(SOURCES_OBJECTS) $(TOOLS_OBJECTS)
 	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
 	#$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
 
-snappy/libsnappy.a:
-	(cd ./snappy; $(MAKE) -f GNUmakefile.static CC=$(CC); cd ..;)
+$(SNAPPY_DIR)/libsnappy.a:
+	(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static CC=$(CC); cd $(BASE_DIR);)
 
-zlib/libz.a:
-	(cd ./zlib; $(MAKE) -f GNUmakefile; cd ..;)
+$(ZLIB_DIR)/libz.a:
+	(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
-bzip/libbz2.a:
-	(cd ./bzip; $(MAKE) -f GNUmakefile; cd ..;)
+$(BZIP_DIR)/libbz2.a:
+	(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
-lzo/liblzo2.a:
-	(cd ./lzo; $(MAKE) -f GNUmakefile; cd ..;)
+$(LZO_DIR)/liblzo2.a:
+	(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
 .PHONY : clean
 clean :
-	(cd ./snappy; $(MAKE) -f GNUmakefile.static clean; cd ..;)
-	(cd ./zlib; $(MAKE) -f GNUmakefile clean; cd ..;)
-	(cd ./bzip; $(MAKE) -f GNUmakefile clean; cd ..;)
-	(cd ./lzo; $(MAKE) -f GNUmakefile clean; cd ..;)
+	(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static clean; cd $(BASE_DIR);)
+	(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
+	(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
+	(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
 	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
 
 depend :
