@@ -1,0 +1,21 @@
+.SILENT:
+include mkinc.mak
+
+AR = lib
+CFLAGS = -I include /nologo
+ARFLAGS = -nologo /LTCG
+
+SRC2OBJ = $(snowball_sources:.c=.obj)
+
+libstemmer.lib: $(SRC2OBJ)
+	$(AR) $(ARFLAGS) -out:$@ $(SRC2OBJ)
+
+{libstemmer}.c{libstemmer}.obj:
+    $(CC) $(CFLAGS) /c $< /Fo$*.obj
+
+{runtime}.c{runtime}.obj:
+    $(CC) $(CFLAGS) /c $< /Fo$*.obj
+
+{src_c}.c{src_c}.obj:
+    $(CC) $(CFLAGS) /c $< /Fo$*.obj
+
