@@ -27,6 +27,7 @@ ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
 ANT_HAS_LZO = $(TRUE)
 ANT_HAS_SNAPPYLIB = $(TRUE)
+ANT_HAS_SNOWBALL = $(TRUE)
 ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
 ANT_HAS_MYSQL = $(FALSE)
@@ -94,10 +95,17 @@ EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\unencumbered\snappy\snappy-1.0.4 -I
 EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\snappy\snappy.lib
 !ENDIF
 
-
+#
+# If we have SNOWBAL (Porter's stemming collecton)
+#
+!IF $(ANT_HAS_SNOWBALL) == $(TRUE)
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_SNOWBALL
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\unencumbered\snowball\libstemmer_c\include
+EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\snowball\libstemmer_c\libstemmer.lib
+!ENDIF
 
 #
-#	Now for GPL / BSD license conflicts.
+#	Now for GPL / BSD license conflicts (i.e. the GLP stuff)
 #
 
 #
@@ -270,6 +278,7 @@ PARTS = \
 	$(OBJDIR)\stemmer_term_similarity_weighted.obj	\
 	$(OBJDIR)\stem_porter.obj						\
 	$(OBJDIR)\stem_krovetz.obj						\
+	$(OBJDIR)\stem_snowball.obj						\
 	$(STEM_LOVINS)									\
 	$(STEM_PAICE_HUSK)								\
 	$(OBJDIR)\stemmer_factory.obj					\
@@ -506,6 +515,10 @@ external\gpl\lzo\lzo2.lib :
 	@nmake -nologo -f makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..\..\..
 
+external\unencumbered\snowball\libstemmer_c\libstemmer.lib :
+	@cd external\unencumbered\snowball\libstemmer_c
+	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
+	@cd ..\..\..\..
 #
 #	Management
 #

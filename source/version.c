@@ -101,8 +101,11 @@ puts("Otago (all versions)    : Vaughn Wood");
 #ifdef ANT_HAS_PAICE_HUSK
 	puts("Paice Husk              : Andrew Stark (http://www.scientificpsychic.com/paice/paice.c)");
 #endif
-puts("Porter                  : Andrew Trotman");
+puts("Porter (ATIRE's verison): Andrew Trotman");
 puts("S-stripper              : Andrew Trotman");
+#ifdef ANT_HAS_SNOWBALL
+	puts("Snowball stemmers       : Martin Porter et al. (http://snowball.tartarus.org/)");
+#endif
 puts("");
 
 puts("LANGUAGE FEATURES");
@@ -110,7 +113,7 @@ puts("-----------------");
 puts("UTF-8 parser            : Eric Tang, Andrew Trotman, Nick Sherlock");
 puts("East Asian Segmentation : Eric Tang");
 puts("Dale Chall Readability  : Matt Crane");
-puts("Wordnet 3.0             : WordNet 3.0 Copyright 2006 by Princeton University. All rights reserved.");
+puts("Wordnet 3.0             : Princeton University");
 puts("Query Expansion         : Andrew Trotman");
 puts("");
 

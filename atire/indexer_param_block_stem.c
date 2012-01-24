@@ -32,9 +32,9 @@ stemmer_similarity_threshold = 0.0;
 */
 void ANT_indexer_param_block_stem::help(long has_cutoff)
 {
-char paice_husk[2], lovins[2];
+char paice_husk[2], lovins[2], snowball[2];
 
-paice_husk[0] = paice_husk[1] = lovins[0] = lovins[1] = '\0';
+paice_husk[0] = paice_husk[1] = lovins[0] = lovins[1] = snowball[0] = snowball[1] = '\0';
 
 #ifdef ANT_HAS_PAICE_HUSK
 	paice_husk[0] = 'h';
@@ -42,10 +42,13 @@ paice_husk[0] = paice_husk[1] = lovins[0] = lovins[1] = '\0';
 #ifdef ANT_HAS_LOVINS
 	lovins[0] = 'l';
 #endif
+#ifdef ANT_HAS_SNOWBALL
+	snowball[0] = 'X';
+#endif
 
 puts("TERM EXPANSION");
 puts("--------------");
-printf("-t[-D%sk%soOpsS]", paice_husk, lovins);
+printf("-t[-D%sk%soOpsS%s]", paice_husk, lovins, snowball);
 
 if (has_cutoff)
 	printf("[+-<th>] ");
@@ -64,9 +67,35 @@ puts("  l             Lovins stemming");
 #endif
 puts("  o             Otago stemming");
 puts("  O             Otago stemming version 2");
-puts("  p             Porter stemming");
+puts("  p             Porter stemming (ATIRE's version of Porter v1)");
 puts("  s             S-Striping stemming");
 puts("  S             Soundex phonetics");
+#ifdef ANT_HAS_SNOWBALL
+	puts("  X[abcDdEeFfg2hiklnpRrSst] Stemming using the Snowball libraries");
+	puts("   a Armenian");
+	puts("   b Basque");
+	puts("   c Catalan");
+	puts("   D Danish");
+	puts("   d Dutch");
+	puts("   E English (Porter verison 1)");
+	puts("   e English (Porter version 2)");
+	puts("   F Finnish");
+	puts("   f French");
+	puts("   g German (version 1)");
+	puts("   2 German (version 2)");
+	puts("   h Hungarian");
+	puts("   i Italian");
+	puts("   l Lovins");
+	puts("   k Dutch (using the Snowball variant of Kraaij Pohlmann)");
+	puts("   n Norwegian");
+	puts("   p Portuguese");
+	puts("   R Romanian");
+	puts("   r Russian");
+	puts("   S Spanish");
+	puts("   s Swedish");
+	puts("   t Turkish");
+#endif
+
 if (has_cutoff)
 	{
 	#ifdef USE_FLOATED_TF
@@ -83,7 +112,7 @@ puts("");
 */
 void ANT_indexer_param_block_stem::term_expansion(char *which, long has_cutoff)
 {
-if (*(which + 1) != '\0' && *(which + 1) != '+' && *(which + 1) != '-')
+if (*(which + 1) != '\0' && *(which + 1) != '+' && *(which + 1) != '-' && (*which != 'X'))
 	exit(printf("Only one term expansion algorithm is permitted: '%c'\n", *which));
 
 switch (*which)
@@ -102,6 +131,34 @@ switch (*which)
 	case 's' : stemmer = ANT_stemmer_factory::S_STRIPPER; break;
 	case 'D' : stemmer = ANT_stemmer_factory::DOUBLE_METAPHONE;       break;
 	case 'S' : stemmer = ANT_stemmer_factory::SOUNDEX; break;
+	case 'X' :
+		switch(*(which + 1))
+			{
+			case 'a': stemmer = ANT_stemmer_factory::SNOWBALL_ARMENIAN; break;
+			case 'b': stemmer = ANT_stemmer_factory::SNOWBALL_BASQUE; break;
+			case 'c': stemmer = ANT_stemmer_factory::SNOWBALL_CATALAN; break;
+			case 'D': stemmer = ANT_stemmer_factory::SNOWBALL_DANISH; break;
+			case 'd': stemmer = ANT_stemmer_factory::SNOWBALL_DUTCH; break;
+			case 'E': stemmer = ANT_stemmer_factory::SNOWBALL_PORTER; break;
+			case 'e': stemmer = ANT_stemmer_factory::SNOWBALL_ENGLISH; break;
+			case 'F': stemmer = ANT_stemmer_factory::SNOWBALL_FINNISH; break;
+			case 'f': stemmer = ANT_stemmer_factory::SNOWBALL_FRENCH; break;
+			case 'g': stemmer = ANT_stemmer_factory::SNOWBALL_GERMAN; break;
+			case '2': stemmer = ANT_stemmer_factory::SNOWBALL_GERMAN2; break;
+			case 'h': stemmer = ANT_stemmer_factory::SNOWBALL_HUNGARIAN; break;
+			case 'i': stemmer = ANT_stemmer_factory::SNOWBALL_ITALIAN; break;
+			case 'l': stemmer = ANT_stemmer_factory::SNOWBALL_LOVINS; break;
+			case 'k': stemmer = ANT_stemmer_factory::SNOWBALL_KRAAIJ_POHLMANN; break;
+			case 'n': stemmer = ANT_stemmer_factory::SNOWBALL_NORWEGIAN; break;
+			case 'p': stemmer = ANT_stemmer_factory::SNOWBALL_PORTUGUESE; break;
+			case 'R': stemmer = ANT_stemmer_factory::SNOWBALL_ROMANIAN; break;
+			case 'r': stemmer = ANT_stemmer_factory::SNOWBALL_RUSSIAN; break;
+			case 'S': stemmer = ANT_stemmer_factory::SNOWBALL_SPANISH; break;
+			case 's': stemmer = ANT_stemmer_factory::SNOWBALL_SWEDISH; break;
+			case 't': stemmer = ANT_stemmer_factory::SNOWBALL_TURKISH; break;
+			default : exit(printf("Unknown Snowball term expansion scheme: 'X%c'\n", *(which + 1))); break;
+			}
+		break;
 	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
 	}
 if (!has_cutoff)
