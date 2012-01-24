@@ -10,6 +10,8 @@ SRC2OBJ = $(snowball_sources:.c=.obj)
 libstemmer.lib: $(SRC2OBJ)
 	$(AR) $(ARFLAGS) -out:$@ $(SRC2OBJ)
 
+
+
 {libstemmer}.c{libstemmer}.obj:
     $(CC) $(CFLAGS) /c $< /Fo$*.obj
 
