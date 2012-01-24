@@ -8,7 +8,7 @@ CC = g++
 ###############################################################################
 
 # debugging or normal compiling and linking
-USE_GCC_DEBUG := 1
+USE_GCC_DEBUG := 0
 
 # Prepare the binary for profiling
 USE_PREPARE_PROFILING := 0
@@ -58,7 +58,7 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 USE_DIRECT_MEMORY_READ := 0
 
 # construct impact headers for easy handling the quantums of the postings
-USE_IMPACT_HEADER := 1
+USE_IMPACT_HEADER := 0
 
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1
