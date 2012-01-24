@@ -243,6 +243,7 @@ BIN_DIR = bin
 PHP_DIR = php_ext
 LIB_DIR = lib
 TOOLS_DIR = tools
+TESTS_DIR = tests
 
 IGNORE_LIST := $(SRC_DIR)/ant_ant.c \
 			  $(SRC_DIR)/ant_plugins.c \
@@ -296,6 +297,12 @@ TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)
 TOOLS_EXES := $(basename $(TOOLS_SOURCES))
 TOOLS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TOOLS_SOURCES)))
 
+TESTS_IGNORES :=
+TESTS_SOURCES := $(notdir $(filter-out $(TESTS_IGNORES), $(shell ls $(TESTS_DIR)/*.c)))
+TESTS_EXES := $(basename $(TESTS_SOURCES))
+TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
+
+
 all : info $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary get_doclist
 
 index : $(BIN_DIR)/index
@@ -306,6 +313,8 @@ atire_dictionary: $(BIN_DIR)/atire_dictionary
 get_doclist: $(BIN_DIR)/get_doclist
 
 tools: $(TOOLS_EXES)
+
+tests: $(TESTS_EXES)
 
 php_ext : $(LIB_DIR)/atire.so
 
@@ -332,6 +341,11 @@ test_tools:
 	@echo $(TOOLS_EXES)
 	@echo $(TOOLS_OBJECTS)
 
+test_tests:
+	@echo $(TESTS_SOURCES)
+	@echo $(TESTS_EXES)
+	@echo $(TESTS_OBJECTS)
+
 $(OBJ_DIR)/%.o : $(ATIRE_DIR)/%.c
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
@@ -339,6 +353,9 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
 $(OBJ_DIR)/%.o : $(TOOLS_DIR)/%.c
+	$(CC) $(CFLAGS) -Isource -c $< -o $@
+
+$(OBJ_DIR)/%.o : $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
 $(OBJ_DIR)/%.o : $(PHP_DIR)/%.c
@@ -372,6 +389,10 @@ $(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
 $(TOOLS_EXES) : $(SOURCES_OBJECTS) $(TOOLS_OBJECTS)
 	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
 	#$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
+
+$(TESTS_EXES) : $(SOURCES_OBJECTS) $(TESTS_OBJECTS)
+	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
+
 
 $(SNAPPY_DIR)/libsnappy.a:
 	(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static CC=$(CC); cd $(BASE_DIR);)
