@@ -188,7 +188,7 @@ MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 #
 
 !IF "$(COMPILER)" == "MICROSOFT"
-CC = cl /nologo
+CC = @cl /nologo
 #CC = insure -Zvm -Zvm -Zvm -Zvm 
 !IF "$(DEBUG)" == "1"
 CFLAGS = -D_DEBUG   /MTd /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 

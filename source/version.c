@@ -123,6 +123,9 @@ puts("-------");
 #ifdef ANT_HAS_XPDF
 	puts("xpdf PDF Connection     : http://www.foolabs.com/xpdf/");
 #endif
+#ifdef ANT_HAS_PHP_EXT
+	puts("PHP plug in             : This product includes PHP software, freely available from <http://www.php.net/software/>");
+#endif
 puts("");
 #endif
 
