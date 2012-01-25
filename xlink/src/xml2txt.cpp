@@ -17,7 +17,11 @@
 #include <iostream>
 #include <algorithm>
 
+#ifdef WITH_JNI
+
 #include <gcj/cni.h>
+
+#endif
 
 using namespace QLINK;
 using namespace std;

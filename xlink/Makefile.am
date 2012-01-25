@@ -1,7 +1,8 @@
 #AM_CPPFLAGS = -std=c++0x  -pedantic -DREMOVE_ORPHAN_LINKS -I $(srcdir)/include/stpl
 AM_CPPFLAGS = -std=c++0x  -pedantic -I $(srcdir)/include/ -DCROSSLINK
 
-LTW_LIBS = -lant -lpthread -L$(srcdir) -lxml2txt -lgcj
+LTW_LIBS = -latire -lpthread -L$(srcdir) -lxml2txt 
+#LTW_LIBS ==-lgcj
 
 SRC_DIR = src
 TOOLS_DIR = tools

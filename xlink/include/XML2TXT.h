@@ -6,6 +6,8 @@
 
 #pragma interface
 
+#ifdef WITH_JNI
+
 #include <java/lang/Object.h>
 #include <gcj/array.h>
 
@@ -38,5 +40,7 @@ private:
 public:
   static ::java::lang::Class class$;
 };
+
+#endif
 
 #endif // __crosslink_XML2TXT__

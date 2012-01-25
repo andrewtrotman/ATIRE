@@ -8,16 +8,12 @@
 #include "ltw_task.h"
 #include "algorithm_bep.h"
 #include "link_print.h"
+
+#ifdef WITH_JNI
+
 #include <gcj/cni.h>
 #include <java/lang/Throwable.h>
 #include <java/lang/String.h>
-
-using namespace QLINK;
-
-ltw_task::ltw_algorithm_map ltw_task::alorithm_names;
-ltw_task::ltw_task_type_map ltw_task::task_names;
-
-algorithm_bep::bep_algorithm_map algorithm_bep::alorithm_names;
 
 extern "C" void initJava() {
         try {
@@ -32,6 +28,15 @@ extern "C" void initJava() {
         }
         return;
 }
+
+#endif
+
+using namespace QLINK;
+
+ltw_task::ltw_algorithm_map ltw_task::alorithm_names;
+ltw_task::ltw_task_type_map ltw_task::task_names;
+
+algorithm_bep::bep_algorithm_map algorithm_bep::alorithm_names;
 
 class proxy {
 public:

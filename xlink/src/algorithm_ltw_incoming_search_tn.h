@@ -9,7 +9,7 @@
 #define ALGORITHM_LTW_INCOMING_SEARCH_TN_H_
 
 #include "algorithm.h"
-#include <ant_api.h>
+#include <atire_api.h>
 
 namespace QLINK {
 
@@ -23,7 +23,7 @@ namespace QLINK {
 		long long hits_;
 
 	private:
-		ANT *ant_;
+		ATIRE_API *ant_;
 
 	public:
 		algorithm_ltw_incoming_search_tn(ltw_task *task);
