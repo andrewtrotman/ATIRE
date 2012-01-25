@@ -28,8 +28,8 @@ ANT_HAS_BZLIB = $(TRUE)
 ANT_HAS_LZO = $(TRUE)
 ANT_HAS_SNAPPYLIB = $(TRUE)
 ANT_HAS_SNOWBALL = $(TRUE)
-ANT_HAS_LOVINS = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
+
 ANT_HAS_MYSQL = $(FALSE)
 ANT_HAS_PHP_EXT = $(TRUE)
 
@@ -105,6 +105,17 @@ EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\snowball\libstemmer_c\libstemme
 !ENDIF
 
 #
+#	Paice Husk Stemmer
+#
+!IF $(ANT_HAS_PAICE_HUSK) == $(TRUE)
+STEM_PAICE_HUSK = $(OBJDIR)\stem_paice_husk.obj
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_PAICE_HUSK
+!ELSE
+STEM_PAICE_HUSK = 
+!ENDIF
+
+
+#
 #	Now for GPL / BSD license conflicts (i.e. the GLP stuff)
 #
 
@@ -115,26 +126,6 @@ EXTRA_LIBS = $(EXTRA_LIBS) external\unencumbered\snowball\libstemmer_c\libstemme
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LZO
 EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\gpl\lzo\lzo-2.06\include\lzo
 EXTRA_LIBS = $(EXTRA_LIBS) external\gpl\lzo\lzo2.lib
-!ENDIF
-
-#
-#	Lovins Stemmer
-#
-!IF $(ANT_HAS_LOVINS) == $(TRUE)
-STEM_LOVINS = $(OBJDIR)\stem_lovins.obj
-EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LOVINS
-!ELSE
-STEM_LOVINS = 
-!ENDIF
-
-#
-#	Paice Husk Stemmer
-#
-!IF $(ANT_HAS_PAICE_HUSK) == $(TRUE)
-STEM_PAICE_HUSK = $(OBJDIR)\stem_paice_husk.obj
-EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_PAICE_HUSK
-!ELSE
-STEM_PAICE_HUSK = 
 !ENDIF
 
 #
@@ -279,7 +270,6 @@ PARTS = \
 	$(OBJDIR)\stem_porter.obj						\
 	$(OBJDIR)\stem_krovetz.obj						\
 	$(OBJDIR)\stem_snowball.obj						\
-	$(STEM_LOVINS)									\
 	$(STEM_PAICE_HUSK)								\
 	$(OBJDIR)\stemmer_factory.obj					\
 	$(OBJDIR)\stem_otago.obj						\
