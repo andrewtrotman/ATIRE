@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([ANT], [0.3], [BUG-REPORT-ADDRESS])
-AC_CONFIG_SRCDIR([source/ant_param_block.c])
+AC_CONFIG_SRCDIR([atire/atire.c])
 #AC_CONFIG_HEADERS([config.h])
 #AC_CONFIG_MACRO_DIR([m4])
 

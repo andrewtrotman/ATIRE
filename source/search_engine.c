@@ -354,8 +354,10 @@ void ANT_search_engine::set_accumulator_width(long long width)
 {
 #ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
 	results_list->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
-#else
+#elif TWO_D_ACCUMULATORS
 	results_list->set_accumulator_width(width);
+#else
+	// something should be defined in the results class
 #endif
 }
 

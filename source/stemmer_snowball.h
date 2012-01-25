@@ -5,6 +5,8 @@
 #ifndef STEMMER_SNOWBALL_H_
 #define STEMMER_SNOWBALL_H_
 
+#ifdef ANT_HAS_SNOWBALL
+
 #include "stemmer.h"
 #include "stem_snowball.h"
 
@@ -19,5 +21,6 @@ public:
 	virtual size_t stem(const char *term, char *destination) { return ANT_stem_snowball::stem(term, destination); }
 } ;
 
+#endif
 
 #endif /* STEMMER_SNOWBALL_H_ */

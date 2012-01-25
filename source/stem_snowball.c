@@ -5,6 +5,8 @@
 #include <string.h>
 #include "stem_snowball.h"
 
+#ifdef ANT_HAS_SNOWBALL
+
 /*
 	ANT_STEM_SNOWBALL::STEM()
 	-------------------------
@@ -22,3 +24,4 @@ destination[answer_length] = '\0';
 return 2;
 }
 
+#endif
