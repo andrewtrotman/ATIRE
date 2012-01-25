@@ -23,7 +23,6 @@ public:
 		NONE, 
 		S_STRIPPER, 
 		PORTER, 
-		LOVINS, 
 		PAICE_HUSK, 
 		OTAGO, 
 		OTAGO_V2, 

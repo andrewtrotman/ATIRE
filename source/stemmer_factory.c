@@ -5,7 +5,6 @@
 #include "stem_none.h"
 #include "stemmer_none.h"
 #include "stemmer_porter.h"
-#include "stemmer_lovins.h"
 #include "stemmer_krovetz.h"
 #include "stemmer_paice_husk.h"
 #include "stemmer_otago.h"
@@ -33,9 +32,6 @@ switch (which_stemmer)
 	case OTAGO:			           stemmer = new ANT_stemmer_otago(engine);		break;
 	case OTAGO_V2:		           stemmer = new ANT_stemmer_otago_v2(engine);		break;
 	case KROVETZ:		           stemmer = new ANT_stemmer_krovetz(engine);		break;
-#ifdef ANT_HAS_LOVINS
-	case LOVINS:		           stemmer = new ANT_stemmer_lovins(engine);		break;
-#endif
 #ifdef ANT_HAS_PAICE_HUSK
 	case PAICE_HUSK:	           stemmer = new ANT_stemmer_paice_husk(engine);	break;
 #endif
@@ -95,9 +91,6 @@ switch (which_stemmer)
 	case OTAGO:		               stemmer = new ANT_stem_otago;			break;
 	case OTAGO_V2:	               stemmer = new ANT_stem_otago_v2;		break;
 	case KROVETZ:	       	       stemmer = new ANT_stem_krovetz;			break;
-#ifdef ANT_HAS_LOVINS
-	case LOVINS:		           stemmer = new ANT_stem_lovins;			break;
-#endif
 #ifdef ANT_HAS_PAICE_HUSK
 	case PAICE_HUSK:	           stemmer = new ANT_stem_paice_husk;		break;
 #endif

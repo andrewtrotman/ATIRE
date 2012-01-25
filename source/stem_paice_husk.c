@@ -1,9 +1,9 @@
 /*
 	STEM_PAICE_HUSK.C
 	-----------------
-	Stemmer Program 1994-5,by Andrew Stark   Started 12-9-94.
+	Stemmer Program 1994-5,by Andrew Stark Started 12-9-94.
 	Taken and adapted for use with ANT by Andrew Trotman (2009)
-	The license is not at all clear.
+	The license is not at all clear (see below), but it is assumed to be BSD-like
 
 	When I got this code it was in C and read the rule set from an input file
 	as ANT does not have config files the rules are now inlined.  The "right"
@@ -12,8 +12,27 @@
 	file.  I took the easy way as this code is unlikely to ever get used
 	except as a baseline.
 
-	NOTE:
-		This code leaks on deletion
+	NOTE: This code leaks on deletion
+
+	According to the Lancaster Stemmer Website:
+	http://www.comp.lancs.ac.uk/computing/research/stemming/
+	 
+		This is the official web-site for the Lancaster (Paice/Husk) stemming
+		algorithm, and provides various implementations of the algorithm,
+		together with links to other useful stemming resources.
+
+		If you make any use of resources from this website, we would be
+		interested to hear about it. In particular, please do us the courtesy of
+		acknowledging the source in any resulting publications. If you want to
+		have any comments or questions, please e-mail Chris Paice at
+		cdp@comp.lancs.ac.uk
+
+		DISCLAIMER:
+		The software and other resources available from this Website are
+		provided in good faith, and are believed to be correct and reliable.
+		However, the authors accept no liability for any loss or damage which
+		may be caused by the use or misuse of this material.
+
 */
 #include <stdio.h>
 #include <string.h>
