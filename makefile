@@ -9,6 +9,17 @@
 DEBUG = 1
 
 #
+#	BITNESS.  Are we building on 32 bit or 64 bit windows?
+#
+!IF [ml64 /nologo /? > nul] == 0
+BITNESS = 64
+!ELSEIF [ml /nologo /? > nul] == 0
+BITNESS = 32
+!ELSE
+BITNESS = 128
+!ENDIF
+
+#
 #	Which compiler are we using
 #
 COMPILER=MICROSOFT
@@ -21,7 +32,7 @@ FALSE = 0
 TRUE = 1
 
 #
-#	Declare which external libraries to include
+#	Declare which external BSD libraries to include
 #
 ANT_HAS_ZLIB = $(TRUE)
 ANT_HAS_BZLIB = $(TRUE)
@@ -30,8 +41,18 @@ ANT_HAS_SNAPPYLIB = $(TRUE)
 ANT_HAS_SNOWBALL = $(TRUE)
 ANT_HAS_PAICE_HUSK = $(TRUE)
 
-ANT_HAS_MYSQL = $(FALSE)
+#
+# Declare which GPL libraries to include
+#
+ANT_HAS_GPL = $(TRUE)
+
+!IF (ANT_HAS_GPL) == $(TRUE)
+ANT_HAS_MYSQL = $(TRUE)
 ANT_HAS_PHP_EXT = $(TRUE)
+!ELSE
+ANT_HAS_MYSQL = $(FALSE)
+ANT_HAS_PHP_EXT = $(FLASE)
+!ENDIF
 
 #
 #	Directories
@@ -55,18 +76,6 @@ PHPSRC = C:\Work\php53dev\vc9\x86\php-5.3.5
 #	Directory to PHP install location for library
 #
 PHPAPP = "C:\Program Files\PHP"
-
-#
-#	If we have MySQL (for access to MySQL)  The MySQL is GPL so there's a possible conflict here.
-#
-!IF $(ANT_HAS_MYSQL) == $(TRUE)
-EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_MYSQL
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I \MySQL\server\include
-EXTRA_LIBS = $(EXTRA_LIBS) \mysql\server\lib\opt\libmysql.lib
-DIRECTORY_ITERATOR_MYSQL = $(OBJDIR)\directory_iterator_mysql.obj
-!ELSE
-DIRECTORY_ITERATOR_MYSQL = 
-!ENDIF
 
 #
 #	If we have ZLIB (for the GZIP compression scheme)
@@ -129,6 +138,26 @@ EXTRA_LIBS = $(EXTRA_LIBS) external\gpl\lzo\lzo2.lib
 !ENDIF
 
 #
+#	If we have MySQL Connector/C (libmysql).  The MySQL Connectors are GPL.
+#
+!IF $(ANT_HAS_MYSQL) == $(TRUE)
+!IF $(BITNESS) == 64
+MYSQL_BITNESS = x64
+!ELSEIF $(BITESS) = 32
+MYSQL_BITNESS = 32
+!ELSE
+MYSQL_BITNESS = 128
+!ENDIF
+EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_MYSQL
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\gpl\MySQL\mysql-connector-c-noinstall-6.0.2-win$(MYSQL_BITNESS)\include
+EXTRA_LIBS = $(EXTRA_LIBS) external\gpl\MySQL\mysql-connector-c-noinstall-6.0.2-win$(MYSQL_BITNESS)\lib\libmysql.lib
+DIRECTORY_ITERATOR_MYSQL = $(OBJDIR)\directory_iterator_mysql.obj
+!ELSE
+DIRECTORY_ITERATOR_MYSQL = 
+!ENDIF
+
+
+#
 #	PHP EXTENSION 
 #
 !IF $(ANT_HAS_PHP_EXT) == $(TRUE)
@@ -159,7 +188,7 @@ MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 #
 
 !IF "$(COMPILER)" == "MICROSOFT"
-CC = @cl /nologo
+CC = cl /nologo
 #CC = insure -Zvm -Zvm -Zvm -Zvm 
 !IF "$(DEBUG)" == "1"
 CFLAGS = -D_DEBUG   /MTd /Od /W4 -D_CRT_SECURE_NO_WARNINGS /Zi $(MINUS_D) $(EXTRA_INCLUDE) /GL 
