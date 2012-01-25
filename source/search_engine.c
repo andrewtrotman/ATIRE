@@ -357,7 +357,7 @@ void ANT_search_engine::set_accumulator_width(long long width)
 #elif TWO_D_ACCUMULATORS
 	results_list->set_accumulator_width(width);
 #else
-	// something should be defined in the results class
+	// This is a meaningless case as the accumulators would not have width
 #endif
 }
 
