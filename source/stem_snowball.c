@@ -3,9 +3,10 @@
 	---------------
 */
 #include <string.h>
-#include "stem_snowball.h"
 
 #ifdef ANT_HAS_SNOWBALL
+
+#include "stem_snowball.h"
 
 /*
 	ANT_STEM_SNOWBALL::STEM()
