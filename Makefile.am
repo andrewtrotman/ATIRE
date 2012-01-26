@@ -185,7 +185,6 @@ core_sources =  \
 	$(SRC_DIR)/stats_search_engine.c \
 	$(SRC_DIR)/stats_time.c \
 	$(SRC_DIR)/stem_krovetz.c \
-	$(SRC_DIR)/stem_lovins.c \
 	$(SRC_DIR)/stemmer.c \
 	$(SRC_DIR)/stemmer_factory.c \
 	$(SRC_DIR)/stemmer_term_similarity.c \
@@ -428,11 +427,9 @@ core_noinst_headers = \
 	$(SRC_DIR)/stats_time.h \
 	$(SRC_DIR)/stem.h \
 	$(SRC_DIR)/stem_krovetz.h \
-	$(SRC_DIR)/stem_lovins.h \
 	$(SRC_DIR)/stemmer_factory.h \
 	$(SRC_DIR)/stemmer.h \
 	$(SRC_DIR)/stemmer_krovetz.h \
-	$(SRC_DIR)/stemmer_lovins.h \
 	$(SRC_DIR)/stemmer_none.h \
 	$(SRC_DIR)/stemmer_otago.h \
 	$(SRC_DIR)/stemmer_otago_v2.h \
@@ -593,7 +590,8 @@ atire_broker_LDFLAGS = -static -export-dynamic
 atire_broker_DEPENDENCIES = libatire.la libatire.la
 
 index_SOURCES = \
-	$(ATIRE_DIR)/index.c 
+	$(ATIRE_DIR)/index.c \
+	$(INDEX_PARAM_LIST)
 index_LDADD = ${ATIRE_LIBS}
 #index_LDFLAGS = -rdynamic
 index_LDFLAGS = -static -export-dynamic
