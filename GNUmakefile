@@ -77,11 +77,11 @@ USE_MYSQL := 0
 # build a php extension for Atire
 USE_PHP_EXTENSION := 0
 
-# use Lovins stemmer
-USE_STEM_LOVINS := 1
-
 # use Paice Husk Stemmer
 USE_STEM_PAICE_HUSK := 1
+
+# use snowball stemmers
+USE_SNOWBALL := 1
 
 
 ###############################################################################
@@ -112,6 +112,9 @@ SNAPPY_VERSION := snappy-1.0.4
 
 LZO_DIR := external/gpl/lzo
 LZO_VERSION := lzo-2.06
+
+SNOWBALL_DIR := external/unencumbered/snowball
+SNOWBALL_VERSION := libstemmer_c
 
 ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g -ggdb
@@ -233,6 +236,11 @@ ifeq ($(USE_SNAPPY), 1)
 	EXTRA_OBJS += $(SNAPPY_DIR)/libsnappy.a
 endif
 
+ifeq ($(USE_SNOWBALL), 1)
+	CFLSGS += -DANT_HAS_SNOWBALL -I -I $(SNOWBALL_DIR)/$(SNOWBALL_VERSION)/include
+	EXTRA_OBJS += $(SNOWBALL_DIR)/libstemmer.a
+endif
+
 ###############################################################################
 # source files and compile commands
 ###############################################################################
@@ -260,11 +268,6 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
-
-ifeq ($(USE_STEM_LOVINS), 1)
-	CFLAGS += -DANT_HAS_LOVINS
-	SOURCES += $(SRC_DIR)/stem_lovins.c
-endif
 
 ifeq ($(USE_STEM_PAICE_HUSK), 1)
 	CFLAGS += -DANT_HAS_PAICE_HUSK
@@ -406,12 +409,16 @@ $(BZIP_DIR)/libbz2.a:
 $(LZO_DIR)/liblzo2.a:
 	(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
+$(SNOWBALL_DIR)/libstemmer.a:
+	(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+
 .PHONY : clean
 clean :
 	(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static clean; cd $(BASE_DIR);)
 	(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
 	(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
 	(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
+	(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
 	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
 
 depend :
