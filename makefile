@@ -9,6 +9,12 @@
 DEBUG = 1
 			
 #
+#	Which compiler are we using
+#
+COMPILER=MICROSOFT
+#COMPILER=INTEL
+
+#
 #	BITNESS.  Are we building on 32 bit or 64 bit windows?
 #
 !IF [ml64 /nologo /? > nul] == 0
@@ -20,44 +26,10 @@ BITNESS =128
 !ENDIF
 
 #
-#	Which compiler are we using
-#
-COMPILER=MICROSOFT
-#COMPILER=INTEL
-
-#
-#	The locaiton of the SWIG compiler
-#
-SWIG = external/gpl/swig/swig/swigwin-2.0.4\swig.exe
-
-#
 #	Define TRUE and FALSE
 #
 FALSE = 0
 TRUE = 1
-
-#
-#	Declare which external BSD libraries to include
-#
-ANT_HAS_ZLIB = $(TRUE)
-ANT_HAS_BZLIB = $(TRUE)
-ANT_HAS_LZO = $(TRUE)
-ANT_HAS_SNAPPYLIB = $(TRUE)
-ANT_HAS_SNOWBALL = $(TRUE)
-ANT_HAS_PAICE_HUSK = $(TRUE)
-
-#
-# Declare which GPL libraries to include
-#
-ANT_HAS_GPL = $(TRUE)
-
-!IF $(ANT_HAS_GPL) == $(TRUE)
-ANT_HAS_MYSQL = $(TRUE)
-ANT_HAS_PHP_EXT = $(TRUE)
-!ELSE
-ANT_HAS_MYSQL = $(FALSE)
-ANT_HAS_PHP_EXT = $(FLASE)
-!ENDIF
 
 #
 #	Directories
@@ -69,18 +41,41 @@ BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
 TESTDIR = tests
-PHPDIR = php_ext
 LIBDIR = lib
 
 #
-#	Directory to PHP source for headers
+#	Declare which external BSD libraries to include
 #
-PHPSRC = C:\Work\php53dev\vc9\x86\php-5.3.5
+ANT_HAS_ZLIB = $(TRUE)
+ANT_HAS_BZLIB = $(TRUE)
+ANT_HAS_SNAPPYLIB = $(TRUE)
+ANT_HAS_SNOWBALL = $(TRUE)
+ANT_HAS_PAICE_HUSK = $(TRUE)
 
 #
-#	Directory to PHP install location for library
+# Declare which GPL libraries to include
 #
-PHPAPP = "C:\Program Files\PHP"
+ANT_HAS_GPL = $(TRUE)
+
+!IF $(ANT_HAS_GPL) == $(TRUE)
+ANT_HAS_MYSQL = $(TRUE)
+ANT_HAS_LZO = $(TRUE)
+!ELSE
+ANT_HAS_MYSQL = $(FALSE)
+ANT_HAS_LZO = $(FALSE)
+!ENDIF
+
+#
+#	The locaiton of the SWIG compiler and th PHP libraries
+#
+SWIG = @external\gpl\swig\swigwin-2.0.4\swig.exe
+PHP_DIR = \php-sdk\php53dev\vc9\x86\php5.3-201201260030
+PHP_FLAGS = -I$(PHP_DIR) -I$(PHP_DIR)\main -I$(PHP_DIR)\TSRM -I$(PHP_DIR)\Zend -I$(PHP_DIR)\ext -I$(PHP_DIR)\ext\date\lib -DZEND_WIN32 -DPHP_WIN32 -DWIN32 -DZEND_DEBUG=0 -DZTS=1 -Dstrtoll=_strtoi64
+!IF $(BITNESS) == 32
+PHP_LIBS = $(PHP_DIR)\Release_TS\php5ts.lib
+!ELSE
+PHP_LIBS = $(PHP_DIR)\x64\Release_TS\php5ts.lib
+!ENDIF
 
 #
 #	If we have ZLIB (for the GZIP compression scheme)
@@ -161,16 +156,6 @@ DIRECTORY_ITERATOR_MYSQL = $(OBJDIR)\directory_iterator_mysql.obj
 DIRECTORY_ITERATOR_MYSQL = 
 !ENDIF
 
-
-#
-#	PHP EXTENSION 
-#
-!IF $(ANT_HAS_PHP_EXT) == $(TRUE)
-PHP_EXT = $(lib)\atire.dll
-PHP_EXT_MINUS_D = -DANT_HAS_PHP_EXT -DWIN32 -DPHP_WIN32 -DZEND_WIN32 -DZTS=1 -DZEND_DEBUG=0 -D_USRDLL -D_WINDLL
-PHP_EXT_INCLUDES = -I $(PHPSRC) -I $(PHPSRC)\TSRM -I $(PHPSRC)\Zend -I $(PHPSRC)\main -I \$(SRCDIR)
-PHP_EXT_LIB = $(PHPAPP)\dev\php5ts.lib
-!ENDIF
 
 #
 #	Post configuration, so back to the hard work...
@@ -402,13 +387,6 @@ PARTS = \
 	$(OBJDIR)\atire_engine_result_set_export_INEX_snippet.obj	\
 	$(OBJDIR)\atire_broke.obj
 
-PHP_EXT_OBJ	= \
-	$(OBJDIR)\atire_api_remote.obj			\
-	$(OBJDIR)\str.obj						\
-	$(OBJDIR)\sockets.obj					\
-	$(OBJDIR)\ctypes.obj					\
-	$(OBJDIR)\atire_php_ext.obj		
-
 #
 #	Targets
 #
@@ -466,21 +444,24 @@ all : $(PARTS) \
       $(ANT_TARGETS) \
       $(OTHER_TARGETS)
       
-php_ext :\
-	$(PHP_EXT_OBJ)\
-	$(LIBDIR)\atire.dll
+swig :
+!	IF EXIST(atire/php) == 0
+	mkdir atire/php
+!	ENDIF
+	$(SWIG) -o atire/php/atire_remote_wrap.c -outdir atire/php -php -c++ atire/atire_api_remote.swig
+	$(CC) $(CFLAGS) $(PHP_FLAGS) /LD /Tp atire\php\atire_remote_wrap.c $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Featire\php\php_atire_remote.dll $(PHP_LIBS) /Foatire\php\php_atire_remote.obj /w
 
-bin\link_index_merge.exe : bin\link_index_merge.obj
-bin\make_unicode_tables.exe : bin\make_unicode_tables.obj
-bin\test_unicode_case_convert.exe : bin\test_unicode_case_convert.obj
-bin\test_boolean_parser.exe : bin\test_boolean_parser.obj
-bin\link_extract_index_wikipedia.exe : bin\link_extract_index_wikipedia.obj
-bin\pregen_precision_measurement.exe : bin\pregen_precision_measurement.obj bin\pregen_kendall_tau.obj
-bin\pregen_create.exe : bin\pregen_create.obj
-bin\pregen_examine.exe : bin\pregen_examine.obj
-bin\test_pregen.exe : bin\test_pregen.obj
-bin\test_kendall_tau.exe : bin\test_kendall_tau.obj bin\pregen_kendall_tau.obj
-bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj bin\arithmetic_model_bigram.obj bin\arithmetic_model_unigram.obj
+bin\link_index_merge.exe : $(OBJDIR)\link_index_merge.obj
+bin\make_unicode_tables.exe : $(OBJDIR)\make_unicode_tables.obj
+bin\test_unicode_case_convert.exe : $(OBJDIR)\test_unicode_case_convert.obj
+bin\test_boolean_parser.exe : $(OBJDIR)\test_boolean_parser.obj
+bin\link_extract_index_wikipedia.exe : $(OBJDIR)\link_extract_index_wikipedia.obj
+bin\pregen_precision_measurement.exe : $(OBJDIR)\pregen_precision_measurement.obj $(OBJDIR)\pregen_kendall_tau.obj
+bin\pregen_create.exe : $(OBJDIR)\pregen_create.obj
+bin\pregen_examine.exe : $(OBJDIR)\pregen_examine.obj
+bin\test_pregen.exe : $(OBJDIR)\test_pregen.obj
+bin\test_kendall_tau.exe : $(OBJDIR)\test_kendall_tau.obj $(OBJDIR)\pregen_kendall_tau.obj
+bin\arithmetic_encoding_model_gen.exe : $(OBJDIR)\arithmetic_encoding_model_gen.obj $(OBJDIR)\arithmetic_model_bigram.obj $(OBJDIR)\arithmetic_model_unigram.obj
 
 #
 #	Default dependency rules
@@ -499,14 +480,6 @@ bin\arithmetic_encoding_model_gen.exe : bin\arithmetic_encoding_model_gen.obj bi
 
 {$(TESTDIR)\}.c{$(OBJDIR)\}.obj:
 	$(CC) $(CFLAGS) /EHsc /c -Isource /Tp $< /Fo$@
-
-{$(PHPDIR)\}.c{$(OBJDIR)\}.obj:
-	@echo Compiling $@..
-	$(CC) $(PHP_EXT_MINUS_D) $(PHP_EXT_INCLUDES) /EHsc /W4 /Od /c /Tp $< /Fo$@
-
-{$(OBJDIR)\}.obj{$(LIBDIR)\}.dll:
-	@echo Building $@..
-	$(CC) /LD $(PHP_EXT_OBJ) $(PHP_EXT_LIB) $(WINDOWS_LIBS) /Fe$@ /link /FORCE:MULTIPLE /LTCG
 
 {$(OBJDIR)\}.obj{$(BINDIR)\}.exe:
 	@echo Building $@...
@@ -543,6 +516,7 @@ external\unencumbered\snowball\libstemmer_c\libstemmer.lib :
 	@cd external\unencumbered\snowball\libstemmer_c
 	@nmake -nologo -f ..\makefile.msc COMPILER=$(COMPILER) DEBUG=$(DEBUG)
 	@cd ..\..\..\..
+
 #
 #	Management
 #
@@ -550,9 +524,10 @@ clean :
 	del *.obj *.exe *.ilk *.pdb *.suo *.lib *.dll /s
 
 depend:
-	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/atire/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > makefile.dependencies
+	makedepend  -f- -Y -o.obj -w1024 -p$(OBJDIR)/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/$(OBJDIR)\/source/$(OBJDIR)/" | sed -e "s/$(OBJDIR)\/tools/$(OBJDIR)/" | sed -e "s/$(OBJDIR)\/atire/$(OBJDIR)/" | sed -e "s/$(OBJDIR)\/Link-The-Wiki/$(OBJDIR)/" > makefile.dependencies
 
 #
 #	And include the dependencie generated using makedepend from cygwin and "make depend"
 #
 !include makefile.dependencies
+# DO NOT DELETE

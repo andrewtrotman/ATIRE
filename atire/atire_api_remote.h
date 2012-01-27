@@ -5,8 +5,7 @@
 #ifndef ATIRE_API_REMOTE_H_
 #define ATIRE_API_REMOTE_H_
 
-#include "sockets.h"
-
+class ANT_socket;
 /*
 	class ATIRE_API_REMOTE
 	----------------------
