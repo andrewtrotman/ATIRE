@@ -247,7 +247,7 @@ void ANT_memory::realign(void)
 {
 long long padding;
 
-padding = (allocated % sizeof(long long) == 0) ? 0 : sizeof(long long) - allocated % sizeof(long long);
+padding = (used % sizeof(long long) == 0) ? 0 : sizeof(long long) - used % sizeof(long long);
 
 /*
 	this might overflow if we're at the end of a block but that doesn't matter because the next call to malloc()

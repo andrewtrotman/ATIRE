@@ -1,14 +1,15 @@
 OS_TYPE := $(shell uname)
-CC = g++
+CC = @g++
 #CC = /opt/local/bin/g++-mp-4.4
 #CC = icpc
+PUT_FILENAME = @echo $<
 
 ###############################################################################
 # The following options are the default compilation flags.
 ###############################################################################
 
 # debugging or normal compiling and linking
-USE_GCC_DEBUG := 0
+USE_GCC_DEBUG := 1
 
 # Prepare the binary for profiling
 USE_PREPARE_PROFILING := 0
@@ -73,9 +74,6 @@ CFLAGS += -DANT_PREGEN_T="unsigned long long"
 
 # use mysql database backend
 USE_MYSQL := 0
-
-# build a php extension for Atire
-USE_PHP_EXTENSION := 0
 
 # use Paice Husk Stemmer
 USE_STEM_PAICE_HUSK := 1
@@ -225,12 +223,6 @@ ifeq ($(USE_MYSQL), 1)
 	LDFLAGS += $(shell mysql_config --libs)
 endif
 
-ifeq ($(USE_PHP_EXTENSION), 1)
-        PHP_CFLAGS = -fPIC -DPIC
-        PHP_CFLAGS += $(shell php-config --includes)
-        PHP_LDFLAGS = -shared -export-dynamic -avoid-version -prefer-pic -module
-endif
-
 ifeq ($(USE_SNAPPY), 1)
 	CFLAGS += -DANT_HAS_SNAPPYLIB -I $(SNAPPY_DIR)/$(SNAPPY_VERSION)
 	EXTRA_OBJS += $(SNAPPY_DIR)/libsnappy.a
@@ -248,7 +240,6 @@ ATIRE_DIR = atire
 SRC_DIR = source
 OBJ_DIR = obj
 BIN_DIR = bin
-PHP_DIR = php_ext
 LIB_DIR = lib
 TOOLS_DIR = tools
 TESTS_DIR = tests
@@ -292,9 +283,6 @@ ATIRE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
 ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
 
-PHP_EXT_SOURCES := $(notdir $(shell ls $(PHP_DIR)/*.c))
-PHP_EXT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(PHP_EXT_SOURCES)))
-
 TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c
 TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)/*.c)))
 TOOLS_EXES := $(basename $(TOOLS_SOURCES))
@@ -318,8 +306,6 @@ get_doclist: $(BIN_DIR)/get_doclist
 tools: $(TOOLS_EXES)
 
 tests: $(TESTS_EXES)
-
-php_ext : $(LIB_DIR)/atire.so
 
 info:
 	@echo "OS_TYPE:" $(OS_TYPE)
@@ -350,22 +336,20 @@ test_tests:
 	@echo $(TESTS_OBJECTS)
 
 $(OBJ_DIR)/%.o : $(ATIRE_DIR)/%.c
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
 $(OBJ_DIR)/%.o : $(TOOLS_DIR)/%.c
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
 $(OBJ_DIR)/%.o : $(TESTS_DIR)/%.c
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
-
-$(OBJ_DIR)/%.o : $(PHP_DIR)/%.c
-	$(CC) $(PHP_CFLAGS) -c $< -o $@
-
-$(LIB_DIR)/atire.so : $(PHP_EXT_OBJECTS) $(ATIRE_CLIENT_OBJECTS)
-	$(CC) $(PHP_LDFLAGS) -o $@ $^
 
 $(BIN_DIR)/index : $(INDEX_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)

@@ -59,6 +59,10 @@ inline void *ANT_memory::malloc(long long bytes)
 {
 void *ans;
 
+#ifdef __arm__
+	realign();
+#endif
+
 if (chunk == NULL || at + bytes > chunk_end)
 	if (get_chained_block(bytes) == NULL)
 		exit(printf("ANT:Out of memory:%lld bytes requested %lld bytes used %lld bytes allocated\n", (long long)bytes, (long long)used, (long long)allocated));
