@@ -7,7 +7,7 @@
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
 DEBUG = 1
-
+			
 #
 #	BITNESS.  Are we building on 32 bit or 64 bit windows?
 #
@@ -24,6 +24,11 @@ BITNESS =128
 #
 COMPILER=MICROSOFT
 #COMPILER=INTEL
+
+#
+#	The locaiton of the SWIG compiler
+#
+SWIG = external/gpl/swig/swig/swigwin-2.0.4\swig.exe
 
 #
 #	Define TRUE and FALSE
