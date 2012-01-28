@@ -1,5 +1,5 @@
 
-CC = gcc
+CC = @gcc
 
 LIBSNOWBALL = libstemmer.a
 SOURCE_DIR = libstemmer_c
@@ -19,9 +19,11 @@ $(LIBSNOWBALL): $(ALL_OBJECTS)
 	ar rvs $(LIBSNOWBALL) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/src_c/%.o: $(SOURCE_DIR)/src_c/%.c
+	@echo $<
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SOURCE_DIR)/runtime/%.o: $(SOURCE_DIR)/runtime/%.c
+	@echo $<
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

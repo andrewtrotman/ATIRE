@@ -33,16 +33,16 @@ USE_PARALLEL_INDEXING := 1
 USE_SYSTEM_ZLIB := 0
 USE_SYSTEM_BZLIB := 0
 # use ant's built-in libz and libbz2 libraries
-USE_BUILT_IN_ZLIB := 0
-USE_BUILT_IN_BZLIB := 0
+USE_BUILT_IN_ZLIB := 1
+USE_BUILT_IN_BZLIB := 1
 
 # use LZO compression lib
 # Please use either system or built-in libs, not both
 USE_SYSTEM_LZO := 0
-USE_BUILT_IN_LZO := 0
+USE_BUILT_IN_LZO := 1
 
 # use google's snappy compression library
-USE_SNAPPY := 0
+USE_SNAPPY := 1
 
 # if to add a term_max_impact to the structure
 # of the dictionary for each term (This is just
@@ -190,7 +190,7 @@ ifeq ($(USE_SYSTEM_LZO), 1)
 endif
 
 ifeq ($(USE_BUILT_IN_LZO), 1)
-	CFLAGS += -DANT_HAS_LZO -I $(LZO_DIR)/$(LZO_VERSION)/include/lzo $(LZO_DIR)/$(LZO_VERSION)/include
+	CFLAGS += -DANT_HAS_LZO -I $(LZO_DIR)/$(LZO_VERSION)/include/lzo -I $(LZO_DIR)/$(LZO_VERSION)/include
 	EXTRA_OBJS += $(LZO_DIR)/liblzo2.a
 endif
 
@@ -244,21 +244,17 @@ LIB_DIR = lib
 TOOLS_DIR = tools
 TESTS_DIR = tests
 
-IGNORE_LIST := $(SRC_DIR)/ant_ant.c \
-			  $(SRC_DIR)/ant_plugins.c \
-			  $(SRC_DIR)/test_compression.c \
-			  $(SRC_DIR)/stem_lovins.c \
-			  $(SRC_DIR)/stem_paice_husk.c
+IGNORE_LIST := $(SRC_DIR)/stem_paice_husk.c
 
 MAIN_FILES := $(ATIRE_DIR)/atire.c \
-			  $(ATIRE_DIR)/index.c \
-			  $(ATIRE_DIR)/atire_client.c \
-			  $(ATIRE_DIR)/atire_broker.c \
-			  $(ATIRE_DIR)/atire_dictionary.c \
-			  $(ATIRE_DIR)/get_doclist.c
+                          $(ATIRE_DIR)/index.c \
+                          $(ATIRE_DIR)/atire_client.c \
+                          $(ATIRE_DIR)/atire_broker.c \
+                          $(ATIRE_DIR)/atire_dictionary.c \
+                          $(ATIRE_DIR)/get_doclist.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
-SOURCES := $(filter-out $(IGNORE_LIST) $(MAIN_FILES), $(ALL_SOURCES))
+SOURCES := $(filter-out $(MAIN_FILES) $(IGNORE_LIST), $(ALL_SOURCES))
 
 ifeq ($(USE_STEM_PAICE_HUSK), 1)
 	CFLAGS += -DANT_HAS_PAICE_HUSK
@@ -382,19 +378,19 @@ $(TESTS_EXES) : $(SOURCES_OBJECTS) $(TESTS_OBJECTS)
 
 
 $(SNAPPY_DIR)/libsnappy.a:
-	(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static CC=$(CC); cd $(BASE_DIR);)
+	@(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static CC=$(CC); cd $(BASE_DIR);)
 
 $(ZLIB_DIR)/libz.a:
-	(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
 $(BZIP_DIR)/libbz2.a:
-	(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
 $(LZO_DIR)/liblzo2.a:
-	(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
 $(SNOWBALL_DIR)/libstemmer.a:
-	(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
 
 .PHONY : clean
 clean :

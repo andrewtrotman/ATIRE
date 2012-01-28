@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "../source/str.h"
-#include "../source/atire_api_remote.h"
+#include "../atire/atire_api_remote.h"
 #include "../source/maths.h"
 #include "../source/disk.h"
 #include "header.h"
@@ -20,11 +20,11 @@
 	BETWEEN()
 	---------
 */
-char *between(char *source, char *open_tag, char *close_tag)
+char *between(const char *source, const char *open_tag, const char *close_tag)
 {
 char *start,*finish;
 
-if ((start = strstr(source, open_tag)) == NULL)
+if ((start = strstr((char *)source, (char *)open_tag)) == NULL)
 	return NULL;
 
 start += strlen(open_tag);
@@ -72,7 +72,8 @@ int main(void)
 {
 long hits, current, valid, atire_found = 0, time_taken = 0;
 ATIRE_API_remote socket;
-char *start, *result, *ch, *query_string = getenv("QUERY_STRING");
+char *start, *ch, *query_string = getenv("QUERY_STRING");
+const char *result;
 
 if (query_string == NULL)
 	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
@@ -104,7 +105,7 @@ if (valid == 0)
 	result = "Invalid Query";
 else
 	{
-	socket.open("localhost:8088");
+	socket.open((char *)"localhost:8088");
 	result = socket.search(query_string, 1,10);
 
 	if (result == NULL || strstr(result, "<ATIREerror>") != NULL)
@@ -134,7 +135,7 @@ for (ch = query_string; *ch != '\0'; ch++)
 		*ch = '+';
 
 
-start = result;
+start = (char *)result;
 for (current = 0; current < hits; current++)
 	{
 	start = strstr(start, "<hit>");
@@ -142,7 +143,7 @@ for (current = 0; current < hits; current++)
 	start++;
 	}
 puts("</ol>");
-puts(ANT_disk::read_entire_file("footer.htm"));
+puts(ANT_disk::read_entire_file((char *)"footer.htm"));
 
 return 0;
 }

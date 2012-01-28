@@ -20,6 +20,7 @@ $(SNAPPY_LIB): $(ALL_OBJECTS)
 	$(CC) -shared -o $(SNAPPY_LIB) $(ALL_OBJECTS)
 
 $(SNAPPY_DIR)/%.o: $(SNAPPY_DIR)/%.cc
+	@echo $<
 	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 
 clean:

@@ -75,7 +75,7 @@ if (query_string == NULL)
 
 docid = atoll(query_string + 1);
 if ((hightlight_terms = strchr(query_string + 1, '=')) == NULL)
-	hightlight_terms = "";
+	hightlight_terms = (char *)"";
 
 sprintf(buffer, ".get %lld %s", docid, hightlight_terms);
 for (ch = buffer + 1; *ch != '\0'; ch++)
@@ -90,7 +90,7 @@ for (ch = buffer + 1; *ch != '\0'; ch++)
 //puts("Cache-Control: no-cache");
 puts("Content-Type: text/html\n\n");
 
-socket = new ANT_channel_socket(8088, "localhost");
+socket = new ANT_channel_socket(8088, (char *)"localhost");
 socket->puts(buffer);
 
 if ((result = socket->gets()) == NULL)
@@ -106,7 +106,7 @@ document[size] = '\0';
 
 ANT_CGI_header();;
 process_result((unsigned char *)document);
-puts(ANT_disk::read_entire_file("footer.htm"));
+puts(ANT_disk::read_entire_file((char *)"footer.htm"));
 
 return 0;
 }

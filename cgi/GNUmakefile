@@ -3,15 +3,17 @@ CC := g++
 CFLAGS  := -g
 
 SRCDIR = ../source
-OBJDIR = ../bin
+OBJDIR = ../obj
 BINDIR = ../bin
 
 COMMON_SOURCES := 				\
 	../source/str.c 			\
-	../source/channel_socket.c 	\
+	../source/channel_socket.c 		\
 	../source/sockets.c			\
 	../source/disk.c			\
-	../source/file_internals.c	
+	../source/ctypes.c			\
+	../source/file_internals.c		\
+	../atire/atire_api_remote.c
 	
 COMMON_NOTDIR_SOURCES := $(notdir $(COMMON_SOURCES))
 COMMON_OBJECTS := $(addprefix $(OBJDIR)/, $(subst .c,.o, $(COMMON_NOTDIR_SOURCES)))

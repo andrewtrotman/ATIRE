@@ -1,5 +1,5 @@
 
-CC = gcc
+CC = @gcc
 
 ZLIB = libz.a
 SOURCE_DIR = zlib-1.2.5
@@ -24,9 +24,10 @@ test:
 	@echo $(ALL_SOURCES)
 
 $(ZLIB): $(ALL_OBJECTS)
-	ar rvs $(ZLIB) $(ALL_OBJECTS)
+	@ar rvs $(ZLIB) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/%.o: $(SOURCE_DIR)/%.c
+	@echo $< 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

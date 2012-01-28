@@ -16,6 +16,7 @@ class ANT_channel
 {
 protected:
 	virtual long long block_write(char *source, long long length) = 0;		// returns bytes written
+	virtual long long block_write(const char *source, long long length) { return block_write((char *)source, length); }
 	virtual char *block_read(char *into, long long length) = 0;
 	virtual char *getsz(char terminator = '\0') = 0;
 

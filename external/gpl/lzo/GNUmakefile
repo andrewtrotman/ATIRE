@@ -1,5 +1,5 @@
 
-CC = gcc
+CC = @gcc
 
 SOURCE_DIR = lzo-2.06/src
 LZO = liblzo2.a
@@ -81,9 +81,10 @@ test:
 	@echo $(ALL_SOURCES)
 
 $(LZO): $(ALL_OBJECTS)
-	ar rvs $(LZO) $(ALL_OBJECTS)
+	@ar rvs $(LZO) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/%.o: $(SOURCE_DIR)/%.c
+	@echo $<
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SOURCE_DIR)/../include
 
 clean:

@@ -1,5 +1,5 @@
 
-CC = gcc
+CC = @gcc
 
 BZLIB = libbz2.a
 SOURCE_DIR = bzip2-1.0.6
@@ -20,9 +20,10 @@ test:
 	@echo $(ALL_SOURCES)
 
 $(BZLIB): $(ALL_OBJECTS)
-	ar rvs $(BZLIB) $(ALL_OBJECTS)
+	@ar rvs $(BZLIB) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/%.o: $(SOURCE_DIR)/%.c
+	@echo $<
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

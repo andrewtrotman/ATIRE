@@ -17,7 +17,7 @@ test:
 	@echo $(ALL_OBJECTS)
 	
 $(SNAPPY_LIB): $(ALL_OBJECTS)
-	ar rvs $(SNAPPY_LIB) $(ALL_OBJECTS)
+	@ar rvs $(SNAPPY_LIB) $(ALL_OBJECTS)
 
 $(SNAPPY_DIR)/%.o: $(SNAPPY_DIR)/%.cc
 	$(CC) $(CFLAGS) -c $< -o $@
