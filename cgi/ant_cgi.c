@@ -105,12 +105,17 @@ if (valid == 0)
 	result = "Invalid Query";
 else
 	{
-	socket.open((char *)"localhost:8088");
+	if (!socket.open((char *)"localhost:8088"))
+		{
+		puts("Cannot open socket");
+		return 0;
+		}
+		
 	result = socket.search(query_string, 1,10);
 
 	if (result == NULL || strstr(result, "<ATIREerror>") != NULL)
 		{
-		puts("Communications Error");
+		puts("Communications Error in search request");
 		return 0;
 		}
 	}
@@ -128,6 +133,7 @@ ANT_CGI_header(query_string);
 puts("<font size=+1><b>");
 printf("Found %ld documents in %ldms\n", atire_found, time_taken );
 puts("</b></font><br>");
+
 puts("<ol>");
 
 for (ch = query_string; *ch != '\0'; ch++)
