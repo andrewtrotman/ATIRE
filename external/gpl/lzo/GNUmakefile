@@ -1,5 +1,11 @@
 
-CC = @gcc
+ifeq ($(USE_GCC_VERBOSE), 1)
+	CC = gcc
+	PUT_FILENAME =
+else
+	CC = @gcc
+	PUT_FILENAME = @echo $<
+endif
 
 SOURCE_DIR = lzo-2.06/src
 LZO = liblzo2.a
@@ -84,7 +90,7 @@ $(LZO): $(ALL_OBJECTS)
 	@ar rvs $(LZO) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/%.o: $(SOURCE_DIR)/%.c
-	@echo $<
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -c $< -o $@ -I $(SOURCE_DIR)/../include
 
 clean:

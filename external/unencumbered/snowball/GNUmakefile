@@ -1,5 +1,11 @@
 
-CC = @gcc
+ifeq ($(USE_GCC_VERBOSE), 1)
+	CC = gcc
+	PUT_FILENAME =
+else
+	CC = @gcc
+	PUT_FILENAME = @echo $<
+endif
 
 LIBSNOWBALL = libstemmer.a
 SOURCE_DIR = libstemmer_c
@@ -19,11 +25,11 @@ $(LIBSNOWBALL): $(ALL_OBJECTS)
 	ar rvs $(LIBSNOWBALL) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/src_c/%.o: $(SOURCE_DIR)/src_c/%.c
-	@echo $<
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SOURCE_DIR)/runtime/%.o: $(SOURCE_DIR)/runtime/%.c
-	@echo $<
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

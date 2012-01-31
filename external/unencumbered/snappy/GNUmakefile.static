@@ -1,4 +1,12 @@
 
+ifeq ($(USE_GCC_VERBOSE), 1)
+	CC = gcc
+	PUT_FILENAME =
+else
+	CC = @gcc
+	PUT_FILENAME = @echo $<
+endif
+
 SNAPPY_LIB = libsnappy.a
 SNAPPY_DIR = snappy-1.0.4
 
@@ -15,11 +23,12 @@ all: $(SNAPPY_LIB)
 
 test:
 	@echo $(ALL_OBJECTS)
-	
+
 $(SNAPPY_LIB): $(ALL_OBJECTS)
 	@ar rvs $(SNAPPY_LIB) $(ALL_OBJECTS)
 
 $(SNAPPY_DIR)/%.o: $(SNAPPY_DIR)/%.cc
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

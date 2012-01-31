@@ -1,15 +1,16 @@
 OS_TYPE := $(shell uname)
-CC = @g++
-#CC = /opt/local/bin/g++-mp-4.4
-#CC = icpc
-PUT_FILENAME = @echo $<
 
 ###############################################################################
 # The following options are the default compilation flags.
 ###############################################################################
 
 # debugging or normal compiling and linking
+USE_GCC := 1
+USE_GCC_VERBOSE := 0
 USE_GCC_DEBUG := 1
+
+# use intel c/c++ compile
+USE_INTEL_C := 0
 
 # Prepare the binary for profiling
 USE_PREPARE_PROFILING := 0
@@ -96,6 +97,20 @@ USE_SNOWBALL := 1
 ###############################################################################
 # Please use above options to enable corresponding flags
 ###############################################################################
+
+ifeq ($(USE_GCC), 1)
+	CC = @g++
+	PUT_FILENAME = @echo $<
+	ifeq ($(USE_GCC_VERBOSE), 1)
+		CC = g++
+		#CC = /opt/local/bin/g++-mp-4.4
+		PUT_FILENAME =
+	endif
+endif
+
+ifeq ($(USE_INTEL_C), 1)
+	CC = icpc
+endif
 
 BASE_DIR := $(shell pwd)
 
@@ -378,19 +393,19 @@ $(TESTS_EXES) : $(SOURCES_OBJECTS) $(TESTS_OBJECTS)
 
 
 $(SNAPPY_DIR)/libsnappy.a:
-	@(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static CC=$(CC); cd $(BASE_DIR);)
+	@(cd ./$(SNAPPY_DIR); $(MAKE) -f GNUmakefile.static USE_GCC_VERBOSE=$(USE_GCC_VERBOSE); cd $(BASE_DIR);)
 
 $(ZLIB_DIR)/libz.a:
-	@(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(ZLIB_DIR); $(MAKE) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE); cd $(BASE_DIR);)
 
 $(BZIP_DIR)/libbz2.a:
-	@(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile USE_GCC_VERBOSE="$(USE_GCC_VERBOSE)"; cd $(BASE_DIR);)
 
 $(LZO_DIR)/liblzo2.a:
-	@(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE); cd $(BASE_DIR);)
 
 $(SNOWBALL_DIR)/libstemmer.a:
-	@(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile; cd $(BASE_DIR);)
+	@(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE); cd $(BASE_DIR);)
 
 .PHONY : clean
 clean :

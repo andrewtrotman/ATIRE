@@ -1,5 +1,11 @@
 
-CC = @gcc
+ifeq ($(USE_GCC_VERBOSE), 1)
+	CC = gcc
+	PUT_FILENAME =
+else
+	CC = @gcc
+	PUT_FILENAME = @echo $<
+endif
 
 BZLIB = libbz2.a
 SOURCE_DIR = bzip2-1.0.6
@@ -23,7 +29,7 @@ $(BZLIB): $(ALL_OBJECTS)
 	@ar rvs $(BZLIB) $(ALL_OBJECTS)
 
 $(SOURCE_DIR)/%.o: $(SOURCE_DIR)/%.c
-	@echo $<
+	$(PUT_FILENAME)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
