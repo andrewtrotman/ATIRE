@@ -613,7 +613,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pathend_last,
 	 * and dirent.h as taking pointers to differently typed opaque
 	 * structures.
 	 */
-	struct dirent *(*readdirfunc)();
+	struct dirent *(*readdirfunc)(void *);
 
 	if (pathend > pathend_last)
 		return (GLOB_ABORTED);
@@ -770,22 +770,18 @@ match(Char *name, Char *pat, Char *patend)
 		case M_SET:
 			ok = 0;
 			if ((k = *name++) == EOS)
-				return(0);
+				return 0;
 			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END)
 				if ((*pat & M_MASK) == M_RNG) {
-					if (__collate_load_error ?
-					    CHAR(c) <= CHAR(k) && CHAR(k) <= CHAR(pat[1]) :
-					       __collate_range_cmp(CHAR(c), CHAR(k)) <= 0
-					    && __collate_range_cmp(CHAR(k), CHAR(pat[1])) <= 0
-					   )
+					if (c <= k && k <= pat[1])
 						ok = 1;
 					pat += 2;
 				} else if (c == k)
 					ok = 1;
 			if (ok == negate_range)
-				return(0);
+				return 0;
 			break;
 		default:
 			if (*name++ != c)
