@@ -176,17 +176,15 @@ CORE_SOURCES =  \
 	$(SRC_DIR)/unicode_tables.c \
 	$(SRC_DIR)/version.c 
 
-OTHER_SOURCES := 
+OTHER_SOURCES := glob.c
 
 LOCAL_MODULE    := atire
 LOCAL_SRC_FILES := $(OTHER_SOURCES) \
-				$(CORE_SOURCES) \
-				$(ATIRE_DIR)/atire_api.c \
-				$(ATIRE_DIR)/atire_api_remote.c 
+				$(CORE_SOURCES) 
 LOCAL_LDLIBS    := -lm -llog 
 
 LOCAL_CFLAGS    += -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 		-DSPECIAL_COMPRESSION=1 -DTOP_K_READ_AND_DECOMPRESSOR -DANT_WITHOUT_STL \
-		-I $(INCLUDE)
+		-I $(INCLUDE) 
 
 include $(BUILD_SHARED_LIBRARY)

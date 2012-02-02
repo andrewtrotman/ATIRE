@@ -25,7 +25,10 @@
 #define STEM_KROVETZ_H_
 
 #include <string.h>
-#if (defined(__APPLE_CC__) || defined(__GNUC__))
+#if (defined(ANDROID) || defined(__ANDROID__))
+	#include <hash_map>
+	using namespace std;
+#elif (defined(__APPLE_CC__) || defined(__GNUC__))
 	#include <ext/hash_map>
 	using namespace __gnu_cxx;
 #else
