@@ -2,6 +2,9 @@
 	SEARCH_ENGINE_FORUM_INEX_BEP.H
 	------------------------------
 */
+#ifndef SEARCH_ENGINE_FORUM_INEX_BEP_H_
+#define SEARCH_ENGINE_FORUM_INEX_BEP_H_
+
 #include "search_engine_forum.h"
 #include "search_engine.h"
 
@@ -21,3 +24,4 @@ public:
 	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results);
 } ;
 
+#endif  /* SEARCH_ENGINE_FORUM_INEX_BEP_H_ */
