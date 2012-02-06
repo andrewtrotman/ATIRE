@@ -6,7 +6,7 @@
 #define ATIRE_API_H_
 
 #include <limits.h>
-#include "../source/btree_iterator.h"
+#include "btree_iterator.h"
 
 class ANT_NEXI_ant;
 class ANT_NEXI_term_ant;

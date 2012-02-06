@@ -176,15 +176,48 @@ CORE_SOURCES =  \
 	$(SRC_DIR)/unicode_tables.c \
 	$(SRC_DIR)/version.c 
 
+#API_SOURCES = $(ATIRE_DIR)/atire_api.c \
+#				$(ATIRE_DIR)/atire_api_remote.c 
+
 OTHER_SOURCES := glob.c
 
 LOCAL_MODULE    := atire
+
 LOCAL_SRC_FILES := $(OTHER_SOURCES) \
 				$(CORE_SOURCES) 
-LOCAL_LDLIBS    := -lm -llog 
+#				$(API_SOURCES)
+				
+LOCAL_LDLIBS    := 
 
 LOCAL_CFLAGS    += -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 		-DSPECIAL_COMPRESSION=1 -DTOP_K_READ_AND_DECOMPRESSOR -DANT_WITHOUT_STL \
-		-I $(INCLUDE) 
+		-I ./include
+		
+#LOCAL_C_INCLUDES := ./include $(SRC_DIR)
+
+	
+include $(BUILD_STATIC_LIBRARY)
+
+# the api lib, which will depend on and include the core one
+#
+
+include $(CLEAR_VARS)
+
+LOCAL_CPP_EXTENSION := .c
+
+
+API_SOURCES = $(ATIRE_DIR)/atire_api.c \
+			$(ATIRE_DIR)/atire_api_remote.c 
+
+LOCAL_MODULE    := atireapi
+LOCAL_SRC_FILES := $(API_SOURCES)
+
+LOCAL_STATIC_LIBRARIES := atire
+
+LOCAL_CFLAGS    := -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+		-DSPECIAL_COMPRESSION=1 -DTOP_K_READ_AND_DECOMPRESSOR \
+		-I $(SRC_DIR) -I ./include -I $(ATIRE_DIR)
+		
+LOCAL_C_INCLUDES += $(SRC_DIR)
 
 include $(BUILD_SHARED_LIBRARY)

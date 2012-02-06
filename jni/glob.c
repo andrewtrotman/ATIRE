@@ -87,7 +87,7 @@ __FBSDID("$FreeBSD$");
 #include <unistd.h>
 #include <wchar.h>
 
-#include "collate.h"
+//#include "collate.h"
 
 #define	DOLLAR		'$'
 #define	DOT		'.'

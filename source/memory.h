@@ -5,9 +5,15 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <new>
+#if (defined(ANDROID) || defined(__ANDROID__))
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <stdio.h>
+#else
+	#include <cstdio>
+	#include <cstdlib>
+	#include <new>
+#endif
 
 #if defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
 	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
@@ -65,7 +71,13 @@ void *ans;
 
 if (chunk == NULL || at + bytes > chunk_end)
 	if (get_chained_block(bytes) == NULL)
+#if (defined(ANDROID) || defined(__ANDROID__))
+		return 0;
+		// that is the only solution I can find so far because the compilation error:
+		// error: 'exit' was not declared in this scope
+#else
 		exit(printf("ANT:Out of memory:%lld bytes requested %lld bytes used %lld bytes allocated\n", (long long)bytes, (long long)used, (long long)allocated));
+#endif
 
 ans = at;
 at += bytes;

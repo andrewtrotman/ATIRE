@@ -75,8 +75,13 @@ readability->set_parser(parser);
 /*
 	allocate all the necessary memory
 */
-signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density, stopword_mode);
-document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
+#if (defined(ANDROID) || defined(__ANDROID__))
+	signature = new ANT_index_document_topsig_signature(width, density, stopword_mode);
+	document_indexer = new ANT_memory_index_one(new ANT_memory(1024 * 1024));
+#else
+	signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density, stopword_mode);
+	document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
+#endif
 
 /*
 	First pass index and get the list of terms and term counts
