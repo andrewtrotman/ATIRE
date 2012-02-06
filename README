@@ -50,4 +50,12 @@ source ../../scripts/setdebug32env.bash
   to enable parallel indexing code
   configure --with-pi
   
+5 RUNNING ATIRE
+
+index 
+atire_broker -q:8088 -s localhost:8000 
+atire -sa -q:8000
+atire -sa -q:8001
+atire_client -slocalhost:8088
+  
 
