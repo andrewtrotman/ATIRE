@@ -32,7 +32,7 @@ public:
 	ANT_memory_index_hash_node *left, *right;
 
 /*
-	Thw point of this union is that the in_disk objects are never needed at the same time as the in_memory objects
+	The point of this union is that the in_disk objects are never needed at the same time as the in_memory objects
 	and therefore we can reduce the index-time memory footprint by overlapping them.
 */
 	union
@@ -46,7 +46,7 @@ public:
 
 	long long current_docno;
 	long long collection_frequency, document_frequency;
-	ANT_memory *memory;
+	ANT_memory *postings_memory;
 	ANT_stats_memory_index *stats;
 
 
@@ -67,7 +67,7 @@ private:
 	void insert_docno(long long docno, unsigned char initial_term_frequency = 1);
 
 public:
-	ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
+	ANT_memory_index_hash_node(ANT_memory *string_memory, ANT_memory *postings_memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
 	void set(long long value);
 	void add_posting(long long docno, long extra_term_frequency = 1);
 	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
@@ -83,7 +83,7 @@ public:
 inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(long length_in_bytes)
 {
 stats->posting_fragments++;
-return new (memory) ANT_postings_piece(memory, length_in_bytes);
+return new (postings_memory) ANT_postings_piece(postings_memory, length_in_bytes);
 }
 
 /*

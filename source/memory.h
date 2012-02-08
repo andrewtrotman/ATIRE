@@ -15,7 +15,9 @@
 	#include <new>
 #endif
 
-#if defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
+#if defined(__arm__)
+	const long long ANT_memory_block_size_for_allocation = 32 * 1024 * 1024;
+#elif defined(_WIN64) || (__SIZEOF_POINTER__ == 8) || (defined(__APPLE__) && (_LP64 == 1))
 	const long long ANT_memory_block_size_for_allocation = 1024 * 1024 * 1024;
 #elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4) || defined(__APPLE__) || (__WORDSIZE == 32)
 	const long long ANT_memory_block_size_for_allocation = 64 * 1024 * 1024;

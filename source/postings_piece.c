@@ -15,7 +15,6 @@ void *ANT_postings_piece::operator new (size_t bytes, ANT_memory *allocator)
 return allocator->malloc(bytes);
 }
 
-
 /*
 	ANT_POSTINGS_PIECE::ANT_POSTINGS_PIECE()
 	----------------------------------------

@@ -159,7 +159,7 @@ inline ANT_memory_index_hash_node *ANT_memory_index::new_memory_index_hash_node(
 {
 stats->unique_terms++;
 
-return new (memory) ANT_memory_index_hash_node(memory, string, stats);
+return new (memory) ANT_memory_index_hash_node(memory, memory, string, stats);
 }
 
 #endif  /* MEMORY_INDEX_H_ */

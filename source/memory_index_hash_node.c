@@ -29,13 +29,13 @@ const double ANT_memory_index_hash_node::postings_growth_factor = 1.5;
 	ANT_MEMORY_INDEX_HASH_NODE::ANT_MEMORY_INDEX_HASH_NODE()
 	--------------------------------------------------------
 */
-ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *memory, ANT_string_pair *original_string, ANT_stats_memory_index *stats) : ANT_memory_indexer_node()
+ANT_memory_index_hash_node::ANT_memory_index_hash_node(ANT_memory *string_memory, ANT_memory *postings_memory, ANT_string_pair *original_string, ANT_stats_memory_index *stats) : ANT_memory_indexer_node()
 {
 this->stats = stats;
 left = right = NULL;
-this->memory = memory;
+this->postings_memory = postings_memory;
 
-string.start = (char *)memory->malloc(original_string->length() + 1);		// +1 because it adds a '\0';
+string.start = (char *)string_memory->malloc(original_string->length() + 1);		// +1 because it adds a '\0';
 stats->strings++;
 stats->bytes_in_string_pool += original_string->length() + 1;
 
