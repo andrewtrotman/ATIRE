@@ -266,6 +266,7 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
                           $(ATIRE_DIR)/atire_client.c \
                           $(ATIRE_DIR)/atire_broker.c \
                           $(ATIRE_DIR)/atire_dictionary.c \
+                          $(ATIRE_DIR)/atire_merge.c \
                           $(ATIRE_DIR)/get_doclist.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
@@ -282,14 +283,17 @@ SOURCES_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(notdir $(SOURCES)))
 INDEX_SOURCES := index.c $(notdir $(SOURCES))
 INDEX_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
 
-ANT_DICT_SOURCES := ant_dictionary.c $(notdir $(SOURCES))
-ANT_DICT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ANT_DICT_SOURCES)))
+ATIRE_DICT_SOURCES := atire_dictionary.c $(notdir $(SOURCES))
+ATIRE_DICT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_DICT_SOURCES)))
 
 ATIRE_CLIENT_SOURCES := atire_client.c $(notdir $(SOURCES))
 ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SOURCES)))
 
 ATIRE_SOURCES := atire.c $(notdir $(SOURCES))
 ATIRE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
+
+ATIRE_MERGE_SOURCES := atire_merge.c $(notdir $(SOURCES))
+ATIRE_MERGE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_MERGE_SOURCES)))
 
 ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
 ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
@@ -305,13 +309,14 @@ TESTS_EXES := $(basename $(TESTS_SOURCES))
 TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
 
 
-all : info $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary get_doclist
+all : info $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
 
 index : $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
 atire_client: $(BIN_DIR)/atire_client
 atire_broker: $(BIN_DIR)/atire_broker
 atire_dictionary: $(BIN_DIR)/atire_dictionary
+atire_merge: $(BIN_DIR)/atire_merge
 get_doclist: $(BIN_DIR)/get_doclist
 
 tools: $(TOOLS_EXES)
@@ -374,7 +379,10 @@ $(BIN_DIR)/atire : $(ATIRE_OBJECTS)
 $(BIN_DIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
-$(BIN_DIR)/atire_dictionary : $(ATIRE_BROKER_OBJECTS)
+$(BIN_DIR)/atire_dictionary : $(ATIRE_DICT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+
+$(BIN_DIR)/atire_merge : $(ATIRE_MERGE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
 
 $(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
@@ -386,7 +394,6 @@ $(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
 # source is linked at a time.
 $(TOOLS_EXES) : $(SOURCES_OBJECTS) $(TOOLS_OBJECTS)
 	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
-	#$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
 
 $(TESTS_EXES) : $(SOURCES_OBJECTS) $(TESTS_OBJECTS)
 	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)

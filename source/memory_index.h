@@ -32,7 +32,6 @@ class ANT_ranking_function_factory;
 class ANT_memory_index : public ANT_memory_indexer
 {
 friend class ANT_memory_index_one;
-//friend class ANT_serch_engine_memory_index;
 friend class ANT_search_engine_memory_index;
 
 public:
@@ -44,7 +43,9 @@ public:
 
 private:
 	long hashed_squiggle_length;
+public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
+private:
 	ANT_memory *memory;
 	unsigned char *serialised_docids, *serialised_tfs;
 	long long serialised_docids_size, serialised_tfs_size;
@@ -104,9 +105,11 @@ private:
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
+public:
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df);
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
+private:
 	long long node_to_postings(ANT_memory_index_hash_node *root);
 #ifdef IMPACT_HEADER
 	long long impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);

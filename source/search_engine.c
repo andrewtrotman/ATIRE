@@ -56,8 +56,8 @@ else
 }
 
 /*
-	ANT_SEARCH_ENGINE::ANT_SEARCH_ENGINE()
-	--------------------------------------
+	ANT_SEARCH_ENGINE::OPEN()
+	-------------------------
 */
 int ANT_search_engine::open(const char *filename)
 {

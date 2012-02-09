@@ -47,7 +47,7 @@ protected:
 	ANT_impact_header *the_impact_header;
 #endif
 
-protected:
+public:
 #ifdef IMPACT_HEADER
 	void tf_to_postings(ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *destination, ANT_impact_header *impact_header, ANT_weighted_tf *stem_buffer);
 #else

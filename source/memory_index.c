@@ -762,7 +762,7 @@ if (!should_prune(root))
 			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 			root->in_disk.end_pos_on_disk = file->tell();
 		#endif //end of #ifdef IMPACT_HEADER
-	#endif // end of #ifdef SPECIAL_COMPRESSIOn
+	#endif // end of #ifdef SPECIAL_COMPRESSION
 	}
 
 if (root->left != NULL)
