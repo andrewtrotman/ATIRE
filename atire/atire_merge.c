@@ -104,7 +104,7 @@ merged_index->write((unsigned char *)file_header, sizeof(file_header));
 	Allocate arrays for the tf values, postings lists, etc.
 	+2 for +1 on docids for each index
 */
-ANT_weighted_tf tf_values[combined_docs];
+ANT_weighted_tf *tf_values = new ANT_weighted_tf[combined_docs];
 
 postings_list[0] = (unsigned char *)malloc(sizeof(*postings_list[0]) * postings_list_size);
 postings_list[1] = (unsigned char *)malloc(sizeof(*postings_list[1]) * postings_list_size);
