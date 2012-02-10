@@ -122,8 +122,6 @@ terms[1] = iterators[1].first(NULL);
 while (terms[0] && terms[1])
 	{
 	string_compare_result = strcmp(terms[0], terms[1]);
-	if (*terms[0] != '~' || *terms[1] != '~')
-		goto next;
 	
 	#if MERGE_VERBOSE
 	if (string_compare_result <= 0)
@@ -334,14 +332,13 @@ while (terms[0] && terms[1])
 	p->collection_frequency = leaves[2].local_collection_frequency;
 	p->document_frequency = leaves[2].local_document_frequency;
 	
-	//#if MERGE_VERBOSE
-	//printf("%s: cf(%llu) df(%llu)\n", p->string.str(), p->collection_frequency, p->document_frequency);
+	#if MERGE_VERBOSE
+	printf("%s: cf(%llu) df(%llu)\n", p->string.str(), p->collection_frequency, p->document_frequency);
 	printf("%s: %llu to %llu ~= %llu (%llu)\n", p->string.str(), current_disk_position, p->in_disk.end_pos_on_disk, len, leaves[2].impacted_length);
 	
-	//printf("\n");
-	//#endif
+	printf("\n");
+	#endif
 	
-next:
 	/*
 		Move on to the next terms
 	*/
