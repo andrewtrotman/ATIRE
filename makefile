@@ -36,7 +36,7 @@ TRUE = 1
 #
 SRCDIR = source
 ATIREDIR = atire
-OBJDIR = bin
+OBJDIR = obj
 BINDIR = bin
 LTWDIR = Link-The-Wiki
 TOOLDIR = tools
@@ -396,6 +396,7 @@ ANT_TARGETS = \
 	$(BINDIR)\atire_broker.exe 			\
 	$(BINDIR)\atire_client.exe			\
 	$(BINDIR)\atire_dictionary.exe		\
+	$(BINDIR)\atire_merge.exe		\
 	$(LIBIDR)\atire.dll
 
 OTHER_TARGETS = \
@@ -438,16 +439,16 @@ OTHER_TARGETS = \
 #
 #	List of objects to build
 #
-atire : $(ANT_TARGETS)
+atire : makefile $(ANT_TARGETS)
 
-all : $(PARTS) \
+all : makefile $(PARTS) \
       $(ANT_TARGETS) \
       $(OTHER_TARGETS)
       
 swig :
-!	IF EXIST(atire/php) == 0
+!IF EXIST(atire/php) == 0
 	mkdir atire/php
-!	ENDIF
+!ENDIF
 	$(SWIG) -o atire/php/atire_remote_wrap.c -outdir atire/php -php -c++ atire/atire_api_remote.swig
 	$(CC) $(CFLAGS) $(PHP_FLAGS) /LD /Tp atire\php\atire_remote_wrap.c $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Featire\php\php_atire_remote.dll $(PHP_LIBS) /Foatire\php\php_atire_remote.obj /w
 
@@ -483,11 +484,11 @@ bin\arithmetic_encoding_model_gen.exe : $(OBJDIR)\arithmetic_encoding_model_gen.
 
 {$(OBJDIR)\}.obj{$(BINDIR)\}.exe:
 	@echo Building $@...
-	$(CC) $(CFLAGS) $*.obj $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Fe$@  $(FIXED)
+	$(CC) $(CFLAGS) $< $(PARTS) $(WINDOWS_LIBS) $(EXTRA_LIBS) /Fe$@  $(FIXED)
 
 $(ANT_TARGETS) : $(PARTS) 
 $(OTHER_TARGETS) : $(OBJDIR)\disk.obj
-$(PARTS) : makefile $(EXTRA_LIBS)
+$(PARTS) : $(EXTRA_LIBS)
 
 #
 #	Make the external libraries
