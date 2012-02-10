@@ -75,8 +75,9 @@ if (chunk == NULL || at + bytes > chunk_end)
 	if (get_chained_block(bytes) == NULL)
 #if (defined(ANDROID) || defined(__ANDROID__))
 		return 0;
-		// that is the only solution I can find so far because the compilation error:
-		// error: 'exit' was not declared in this scope
+		/*
+		 	I guess the exit function will cause undefined behaviors when it is called in the JVM environment, so it was filtered in NDK
+		 */
 #else
 		exit(printf("ANT:Out of memory:%lld bytes requested %lld bytes used %lld bytes allocated\n", (long long)bytes, (long long)used, (long long)allocated));
 #endif
