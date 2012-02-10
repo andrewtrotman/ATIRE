@@ -291,8 +291,6 @@ while (terms[0] && terms[1])
 		leaves[2].local_document_frequency += leaves[1].local_document_frequency;
 		}
 	
-	longest_postings = ANT_max(longest_postings, leaves[2].impacted_length);
-	
 	#if MERGE_VERBOSE
 	/*
 		Print the merged postings for confirmation.
@@ -319,6 +317,8 @@ while (terms[0] && terms[1])
 	current_disk_position = merged_index->tell();
 	
 	merged_index->write(postings_list[2], len);
+
+	longest_postings = ANT_max(longest_postings, len);
 	
 	/*
 		Now update the hash node disk values we created way back
@@ -355,8 +355,8 @@ ANT_memory_index_hash_node **term_list, **here;
 size_t bytes = sizeof(*term_list) * (maximum_terms + 1);
 term_list = (ANT_memory_index_hash_node **)malloc(bytes);
 long i, where = 0;
-int32_t longest_term;
-int64_t highest_df;
+int32_t longest_term = 0;
+int64_t highest_df = 0;
 long btree_root_size = 0;
 ANT_btree_head_node *header, *current_header, *last_header;
 uint64_t terms_in_root;

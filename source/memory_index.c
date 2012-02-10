@@ -38,6 +38,7 @@ ANT_string_pair ANT_memory_index::squiggle_document_longest("~documentlongest");
 */
 ANT_memory_index::ANT_memory_index(char *filename)
 {
+stop_word_removal_mode = NONE;
 hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
 memory = new ANT_memory;
