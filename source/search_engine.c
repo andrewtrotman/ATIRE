@@ -8,7 +8,7 @@
 #include <limits.h>
 #include "maths.h"
 #include "ctypes.h"
-#include "search_engine.h"	
+#include "search_engine.h"
 #include "file_memory.h"
 #include "memory.h"
 #include "search_engine_btree_node.h"
@@ -501,6 +501,7 @@ else
 */
 unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
 {
+int ret;
 #ifdef SPECIAL_COMPRESSION
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
@@ -561,19 +562,26 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		{
 		index->seek(term_details->postings_position_on_disk);
 		#ifdef DIRECT_MEMORY_READ
-			index->direct_read(&destination, term_details->postings_length);
+			ret = index->direct_read(&destination, term_details->postings_length);
 		#else
-			index->read(destination, term_details->postings_length);
+			ret = index->read(destination, term_details->postings_length);
 		#endif
 		}
 #else
 	index->seek(term_details->postings_position_on_disk);
 	#ifdef DIRECT_MEMORY_READ
-		index->direct_read(&destination, term_details->postings_length);
+		ret = index->direct_read(&destination, term_details->postings_length);
 	#else
-		index->read(destination, term_details->postings_length);
+		ret = index->read(destination, term_details->postings_length);
+
 	#endif
 #endif
+
+		if (!ret)
+			{
+			fprintf(stderr, "Error reading from index\n");
+			exit(2);
+			}
 
 return destination;
 }
