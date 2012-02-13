@@ -57,6 +57,8 @@
 	#include <limits.h>
 #endif
 
+int index(int argc, char *argv[]);
+
 /*
 	REPORT()
 	--------
@@ -72,6 +74,15 @@ stats->print_elapsed_time();
 	------
 */
 int main(int argc, char *argv[])
+{
+return index(argc, argv);
+}
+
+/*
+	INDEX()
+	------
+*/
+int index(int argc, char *argv[])
 {
 ANT_indexer_param_block param_block(argc, argv);
 ANT_stats_time stats;

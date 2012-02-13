@@ -207,10 +207,18 @@ LOCAL_CPP_EXTENSION := .c
 
 
 API_SOURCES = $(ATIRE_DIR)/atire_api.c \
-			$(ATIRE_DIR)/atire_api_remote.c 
+			$(ATIRE_DIR)/atire_api_remote.c
+			
+INDEX_SOURCES =	$(ATIRE_DIR)/index.c \
+			 $(ATIRE_DIR)/indexer_param_block.c \
+			 $(ATIRE_DIR)/indexer_param_block_rank.c \
+			 $(ATIRE_DIR)/indexer_param_block_topsig.c \
+			 $(ATIRE_DIR)/indexer_param_block_pregen.c \
+			 $(ATIRE_DIR)/indexer_param_block_stem.c
 
 LOCAL_MODULE    := atireapi
-LOCAL_SRC_FILES := $(API_SOURCES)
+LOCAL_SRC_FILES := $(API_SOURCES) \
+			$(INDEX_SOURCES)
 
 LOCAL_STATIC_LIBRARIES := atire
 

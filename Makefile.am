@@ -12,6 +12,7 @@ OBJ_DIR = obj
 BIN_DIR = bin
 PHP_DIR = php_ext
 LIB_DIR = lib
+JNI_DIR = jni
 TOOLS_DIR = tools
 TESTS_DIR = tests
 
@@ -515,13 +516,17 @@ library_headers = \
 	$(ATIRE_DIR)/atire_engine_result_set_export_INEX_snippet.h \
 	$(ATIRE_DIR)/atire_engine_result_set_export_TREC.h
 	
+ATIRE_CORE_LIBS = -L. -latirecore
+ATIRE_LIBS = -L. -latire
+	
 includedir = $(prefix)/include
 include_HEADERS = $(library_headers)
-	
-lib_LTLIBRARIES = libatirecore.la libatire.la
+		
+lib_LTLIBRARIES = libatirecore.la libatire.la libatire_index_param.la libatire_index.la
 
 libatirecore_la_SOURCES = $(core_sources)
 libatirecore_la_LIBADD = -ldl -lpthread
+libatirecore_la_LIBFLAGS = 
 
 libatire_la_SOURCES = $(ATIRE_DIR)/atire_api.c \
 				$(ATIRE_DIR)/atire_api_remote.c \
@@ -531,13 +536,24 @@ libatire_la_SOURCES = $(ATIRE_DIR)/atire_api.c \
 				
 libatire_la_DEPENDENCIES = libatirecore.la
 libatire_la_LIBADD = -L. -latirecore
-libatire_la_LIBFLAGS = -static
-# libatire_ladir = $(prefix)/lib
-# libatire_la_HEADERS = $(library_headers)
-# $(library_noinst_headers)
+#libatire_la_LIBFLAGS = -static
+#libatire_ladir = $(prefix)/lib
+#libatire_la_HEADERS = $(library_headers)
+#$(library_noinst_headers)
+
+libatire_index_param_la_SOURCES = \
+	$(INDEX_PARAM_LIST)
+libatire_index_param_la_LDFLAGS = 	
+libatire_index_param_la_DEPENDENCIES = libatirecore.la
+libatire_index_param_la_LIBADD = -L. -latirecore
+
+libatire_index_la_SOURCES = \
+	$(ATIRE_DIR)/index.c 
+libatire_index_la_LDFLAGS = 
+libatire_index_la_DEPENDENCIES = libatire_index_param.la
+libatire_index_la_LIBADD = 
 
 #ATIRE_LIBS = -L. -latirecore -ldl -lpthread
-ATIRE_LIBS = -L. -latirecore -latire
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
@@ -545,14 +561,13 @@ noinst_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doc
 
 atire_SOURCES = \
 	$(ATIRE_DIR)/atire.c \
-	$(ATIRE_PARAM_LIST) \
-	$(INDEX_PARAM_LIST)
+	$(ATIRE_PARAM_LIST)
 #	$(ATIRE_DIR)/indexer_param_block_rank.c \
 #	$(ATIRE_DIR)/ant_param_block.c
 atire_LDADD = ${ATIRE_LIBS}
 #atire_LDFLAGS = -rdynamic
 atire_LDFLAGS = -static -export-dynamic
-atire_DEPENDENCIES = libatirecore.la libatire.la
+atire_DEPENDENCIES = libatire.la
 
 #atire_atire_SOURCES = \
 #	$(ATIRE_DIR)/atire_ant.c \
@@ -573,7 +588,7 @@ atire_client_SOURCES = \
 atire_client_LDADD = ${ATIRE_LIBS}
 #atire_client_LDFLAGS = -rdynamic
 atire_client_LDFLAGS = -static -export-dynamic
-atire_client_DEPENDENCIES = libatire.la libatire.la
+atire_client_DEPENDENCIES = libatire.la
 
 atire_brokerdir=$(ATIRE_DIR)
 atire_broker_SOURCES = \
@@ -587,23 +602,23 @@ atire_broker_SOURCES = \
 atire_broker_LDADD = ${ATIRE_LIBS}
 #atire_broker_LDFLAGS = -rdynamic
 atire_broker_LDFLAGS = -static -export-dynamic
-atire_broker_DEPENDENCIES = libatire.la libatire.la
+atire_broker_DEPENDENCIES = libatire.la
 
 index_SOURCES = \
-	$(ATIRE_DIR)/index.c \
-	$(INDEX_PARAM_LIST)
-index_LDADD = ${ATIRE_LIBS}
+	$(ATIRE_DIR)/index.c 
+index_LDADD = ${ATIRE_CORE_LIBS} -L. -latire_index_param
 #index_LDFLAGS = -rdynamic
-index_LDFLAGS = -static -export-dynamic
-index_DEPENDENCIES = libatirecore.la
+index_LDFLAGS = -export-dynamic
+index_DEPENDENCIES = libatirecore.la libatire_index_param.la
+index_CFLAGS = $(AM_CFLAGS)
 
 atire_dictionary_SOURCES = $(ATIRE_DIR)/atire_dictionary.c 
-atire_dictionary_LDADD = ${ATIRE_LIBS}
-atire_dictionary_DEPENDENCIES = libatire.la
+atire_dictionary_LDADD = ${ATIRE_CORE_LIBS}
+atire_dictionary_DEPENDENCIES = libatirecore.la
 
 get_doclist_SOURCES = $(ATIRE_DIR)/get_doclist.c 
-get_doclist_LDADD = ${ATIRE_LIBS}
-get_doclist_DEPENDENCIES = libatire.la
+get_doclist_LDADD = ${ATIRE_CORE_LIBS}
+get_doclist_DEPENDENCIES = libatirecore.la
 
 ##############################################################################
 #  use this if it is really necessary to have same source files with libatire.la
