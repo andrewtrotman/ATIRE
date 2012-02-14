@@ -1364,3 +1364,28 @@ for (id = current.first(this, from); id >= 0 && times < get; id = current.next()
 return times;
 }
 
+/*
+	ANT_SEARCH_ENGINE::GET_DOCUMENT_FILENAMES()
+	-------------------------------------------
+*/
+char **ANT_search_engine::get_document_filenames(char *buffer, unsigned long *buf_length)
+{
+long long start = get_variable("~documentfilenamesstart");
+long long end = get_variable("~documentfilenamesfinish");
+long long current_doc;
+char *upto = buffer;
+char **document_filenames = (char **)malloc(sizeof(char *) * (end - start));
+
+*buf_length = end - start;
+
+index->seek(start);
+index->read((unsigned char *)buffer, (long long)(end - start));
+
+for (current_doc = 0; current_doc < documents; current_doc++)
+	{
+	document_filenames[current_doc] = upto;
+	upto += strlen(upto) + 1;
+	}
+
+return document_filenames;
+}
