@@ -58,6 +58,7 @@
 #endif
 
 int index(int argc, char *argv[]);
+int index(char *files);
 
 /*
 	REPORT()
@@ -69,6 +70,8 @@ printf("%lld Documents (%lld bytes) in %lld bytes of memory in ", (long long)doc
 stats->print_elapsed_time();
 }
 
+#ifndef ATIRE_LIBRARY
+
 /*
 	MAIN()
 	------
@@ -76,6 +79,40 @@ stats->print_elapsed_time();
 int main(int argc, char *argv[])
 {
 return index(argc, argv);
+}
+
+#endif
+/*
+	INDEX()
+	------
+	for the simplicity of JNI calling
+	files are seperated with ;
+*/
+int index(char *files)
+{
+static char *seperators = ";";
+char **argv, **file_list;
+char *token;
+int total_length = (files ? strlen(files) : 0) + 7;
+char *copy = new char[total_length];
+strncpy(copy, "index;", 6);
+if (files)
+	strcat(copy, files);
+copy[total_length] = '\0';
+
+argv = file_list = new char *[total_length];
+int argc = 0;
+token = strtok(copy, seperators);
+for (; token != NULL; token = strtok(NULL, seperators))
+	{
+	*argv++ = token;
+	++argc;
+	}
+*argv = NULL;
+int result = index(argc, file_list);
+delete [] copy;
+delete [] file_list;
+return result;
 }
 
 /*

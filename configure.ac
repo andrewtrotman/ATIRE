@@ -7,6 +7,9 @@ AC_CONFIG_SRCDIR([atire/atire.c])
 #AC_CONFIG_HEADERS([config.h])
 #AC_CONFIG_MACRO_DIR([m4])
 
+dnl for target_os
+AC_CANONICAL_SYSTEM
+
 AM_INIT_AUTOMAKE
 AC_PROG_LIBTOOL
 
@@ -36,17 +39,26 @@ AC_ARG_ENABLE([java-feature],
                               [                             
 AC_ARG_VAR([JAVA_HOME], [Java Runtime Environment (JRE) location])
 
-dnl check for JAVA_HOME and add the java include to CFLAGS
-AS_IF([test -z "$JAVA_HOME"],
-[AC_MSG_FAILURE([JAVA_HOME has not been set.  JAVA_HOME must be set at run time to locate jni.h.])],
-[CFLAGS="-I$JAVA_HOME/include -I$JAVA_HOME/include/$JVM_OS $CFLAGS"
-CXXFLAGS="-I$JAVA_HOME/include -I$JAVA_HOME/include/$JVM_OS $CPPFLAGS"])     
-              
+case $target_os in
+	linux*)		JVM_OS=linux ;;
+	solaris*) 	JVM_OS=solaris ;;
+	*)          JVM_OS=$target_os ;;
+esac  
+
 case $target_cpu in
      x86_64) JVM_ARCH=amd64 ;;
      i?86)   JVM_ARCH=i386 ;;
      *)      JVM_ARCH=$target_cpu ;;
 esac
+
+dnl check for JAVA_HOME and add the java include to CFLAGS
+AS_IF([test -z "$JAVA_HOME"],
+[AC_MSG_FAILURE([JAVA_HOME has not been set.  JAVA_HOME must be set at run time to locate jni.h.])],       
+[ 
+CFLAGS="-I$JAVA_HOME/include -I$JAVA_HOME/include/$JVM_OS $CFLAGS"
+CXXFLAGS="-I$JAVA_HOME/include -I$JAVA_HOME/include/$JVM_OS $CXXFLAGS"
+])   
+
 AC_CHECK_HEADER([jni.h], [have_jni=yes]) 
 #AC_SUBST([JVM_ARCH])
 #AS_IF([test X$enable_java_feature != Xno],
