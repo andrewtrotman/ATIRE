@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AtireJ" default="dist" basedir=".">  
+	<property name="lib.dir" value="${basedir}/lib"/>
+    <property name="src.dir" value="${basedir}/src" />
+	<property name="build.dir" value="${basedir}/bin" />  
+	<property name="dist.dir" value="${basedir}/dist" />
+	
+	<property name="dist.jar" value="${dist.dir}/AtireJ.jar" />
+	
+	<path id="class.path">
+		 <fileset dir="${lib.dir}">
+		      <include name="*.jar"/>
+		    </fileset>
+	</path>
+	<!-- classpathref="${engine.classpath} -->
+	<target name="compile">
+	        <mkdir dir="${build.dir}" />
+	        <javac srcdir="${src.dir}" destdir="${build.dir}" debug="on">
+	        	<classpath refid="class.path" />
+	        </javac>
+	</target>
+	
+	<target name="dist" depends="compile">
+		<mkdir dir="${dist.dir}" />
+		<jar jarfile="${dist.jar}" basedir="${build.dir}" excludes="*.o"/>
+	</target>
+	
+	<target name="clean">
+	        <delete dir="${build.dir}" />
+	</target>
+</project>
+

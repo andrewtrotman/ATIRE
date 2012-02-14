@@ -90,7 +90,7 @@ return index(argc, argv);
 */
 int index(char *files)
 {
-static char *seperators = ";";
+static char *seperators = ";: ";
 char **argv, **file_list;
 char *token;
 int total_length = (files ? strlen(files) : 0) + 7;
