@@ -106,7 +106,7 @@ long long combined_docs = 0, maximum_terms = 0;
 long long number_engines = argc - 1;
 long long longest_postings = 0;
 long long document_filenames_start, document_filenames_finish;
-unsigned long longest_doc, buf_size, compress_buf_size;
+unsigned long longest_doc = 0, buf_size, compress_buf_size;
 char *document_decompress_buffer, *document_compress_buffer;
 
 /*
@@ -204,10 +204,10 @@ for (engine = 0; engine < number_engines; engine++)
 		merged_index->write((unsigned char *)document_compress_buffer, compress_buf_size);
 		
 		longest_doc = compress_buf_size = buf_size;
-		sum += raw[number_engines][upto] = current_disk_position - (upto == 0 ? 0 : sum);
+		sum += raw[number_engines][upto] = (ANT_compressable_integer)(current_disk_position - (upto == 0 ? 0 : sum));
 		upto++;
 		}
-raw[number_engines][upto] = merged_index->tell() - sum;
+raw[number_engines][upto] = (ANT_compressable_integer)(merged_index->tell() - sum);
 
 /*
 	Before we write out the "postings" for offsets, we should put the document filenames
@@ -490,7 +490,7 @@ for (current_header = header; current_header < last_header; current_header++)
 merged_index->write((unsigned char *)&current_disk_position, sizeof(current_disk_position));
 
 merged_index->write((unsigned char *)&longest_term, sizeof(longest_term));
-four_byte = longest_postings;
+four_byte = (uint32_t)longest_postings;
 merged_index->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 merged_index->write((unsigned char *)&highest_df, sizeof(highest_df));
