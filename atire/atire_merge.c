@@ -94,10 +94,9 @@ exit(printf("SPECIAL_COMPRESSION not supported, yet\n"));
 #endif
 
 int i;
-int string_compare_result;
 long long postings_list_size = 500 * 1024;
 long long raw_list_size = 500 * 1024;
-long long engine, len, upto = 0;
+long long offset, engine, len, upto = 0;
 
 uint64_t current_disk_position;
 char file_header[] = "ANT Search Engine Index File\n\0\0";
@@ -113,8 +112,8 @@ char *document_decompress_buffer, *document_compress_buffer;
 /*
 	For now, we only support merging two indexes, although this will probably change.
 */
-if (number_engines != 2)
-	exit(printf("Usage: %s <index 1> <index 2>\n", argv[0]));
+if (number_engines < 2)
+	exit(printf("Usage: %s <index 1> <index 2> ... <index n>\n", argv[0]));
 
 ANT_memory *memory = new ANT_memory[number_engines];
 ANT_search_engine **search_engines = (ANT_search_engine **)malloc(sizeof(*search_engines) * number_engines);
@@ -170,6 +169,9 @@ char *doc_buf = NULL;
 char **doc_filenames;
 long long start, end, sum = 0;
 unsigned long buf_len = 0;
+long *strcmp_results = (long *)malloc(sizeof(*strcmp_results) * number_engines);
+char *next_term_to_process = NULL;
+long cont = TRUE;
 
 ANT_file *doclist = new ANT_file;
 ANT_file *merged_index = new ANT_file;
@@ -181,7 +183,7 @@ buf_size = compress_buf_size = longest_doc;
 document_decompress_buffer = (char *)malloc((size_t)longest_doc);
 document_compress_buffer = (char *)malloc((size_t)longest_doc);
 
-merged_index->open("merged_output.aspt", "w");
+merged_index->open("merged_index.aspt", "w");
 merged_index->write((unsigned char *)file_header, sizeof(file_header));
 
 /*
@@ -320,9 +322,6 @@ for (engine = 0; engine < number_engines; engine++)
 	
 	upto += leaves[engine]->local_document_frequency;
 	}
-printf("-----\n");
-printf("%llu %llu %llu %llu\n", sum, leaves[number_engines]->impacted_length, leaves[number_engines]->local_document_frequency, leaves[number_engines]->local_collection_frequency);
-printf("-----\n");
 
 p = temp_index->add_term(new ANT_string_pair("~length"), 0);
 
@@ -341,71 +340,72 @@ p->document_frequency = leaves[number_engines]->local_document_frequency;
 	Now move onto the "normal" terms
 */
 for (engine = 0; engine < number_engines; engine++)
-	terms[engine] = iterators[engine]->first(NULL);
-
-/*
-	Everything above here _should_ be able to deal with more than 2 indexes.
-	Everything below here is still coded for merging 2 indexes only.
-*/
-while (terms[0] && terms[1])
 	{
-	string_compare_result = strcmp(terms[0], terms[1]);
+	terms[engine] = iterators[engine]->first(NULL);
+	cont = cont && terms[engine];
+	}
+
+while (cont)
+	{
+	next_term_to_process = terms[0];
+	for (engine = 1; engine < number_engines; engine++)
+		if (strcmp(terms[engine], next_term_to_process) < 0)
+			next_term_to_process = terms[engine];
 	
 	/*
-		Ignore all ~ terms, they've already been dealt with
+		Now next_term_to_process contains the smallest, alphanumerically,
+		string of the lists we're merging together.
+		
+		Ignore all ~ terms, they've already been dealt with. If the first
+		term starts with a ~ then all must do.
 	*/
-	if (string_compare_result == 0 && *terms[0] == '~')
+	if (*next_term_to_process == '~')
 		break;
 	
 	/*
-		Get the postings from the respective indexes
+		Add the term to our temporary index, and reset the tf_values accumulated so far.
 	*/
-	if (string_compare_result <= 0)
-		raw[0] = search_engines[0]->get_decompressed_postings(terms[0], leaves[0]);
-	if (string_compare_result >= 0)
-		raw[1] = search_engines[1]->get_decompressed_postings(terms[1], leaves[1]);
-	
-	if (string_compare_result <= 0)
-		p = temp_index->add_term(new ANT_string_pair(terms[0]), 0);
-	else
-		p = temp_index->add_term(new ANT_string_pair(terms[1]), 0);
-	
-	/*
-		Reset the tf values accumulated so far, and fill in from
-		the two postings lists we received above.
-	*/
+	p = temp_index->add_term(new ANT_string_pair(next_term_to_process), 0);
 	memset(tf_values, 0, sizeof(*tf_values) * combined_docs);
 	
-	if (string_compare_result <= 0)
-		if (*terms[0] != '~')
-			process(raw[0], leaves[0]->local_document_frequency, tf_values, 0);
+	/*
+		Save repeated doing strcmp in this while loop
+	*/
+	for (engine = 0; engine < number_engines; engine++)
+		strcmp_results[engine] = strcmp(terms[engine], next_term_to_process);
 	
-	if (string_compare_result >= 0)
-		if (*terms[1] != '~')
-			process(raw[1], leaves[1]->local_document_frequency, tf_values, search_engines[0]->document_count());
+	/*
+		Get the postings from the respective indexes, and process them.
+	*/
+	offset = 0;
+	for (engine = 0; engine < number_engines; engine++)
+		{
+		if (strcmp_results[engine] == 0)
+			{
+			raw[engine] = search_engines[engine]->get_decompressed_postings(terms[engine], leaves[engine]);
+			process(raw[engine], leaves[engine]->local_document_frequency, tf_values, offset);
+			}
+		offset += search_engines[engine]->document_count();
+		}
 	
-	rf.tf_to_postings(leaves[2], raw[2], tf_values);
+	rf.tf_to_postings(leaves[number_engines], raw[number_engines], tf_values);
 	
 	/*
 		We ignore the results from tf_to_postings, because those stats are calculated
 		using capped term frequencies, and we want the uncapped statistics.
 	*/
-	leaves[2]->local_collection_frequency = leaves[2]->local_document_frequency = 0;
-	if (string_compare_result <= 0)
-		{
-		leaves[2]->local_collection_frequency += leaves[0]->local_collection_frequency;
-		leaves[2]->local_document_frequency += leaves[0]->local_document_frequency;
-		}
-	if (string_compare_result >= 0)
-		{
-		leaves[2]->local_collection_frequency += leaves[1]->local_collection_frequency;
-		leaves[2]->local_document_frequency += leaves[1]->local_document_frequency;
-		}
+	leaves[number_engines]->local_collection_frequency = leaves[number_engines]->local_document_frequency = 0;
+	for (engine = 0; engine < number_engines; engine++)
+		if (strcmp_results[engine] == 0)
+			{
+			leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency;
+			leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency;
+			}
 	
 	/*
 		Serialise the merged postings
 	*/
-	len = factory.compress(postings_list, postings_list_size, raw[2], leaves[2]->impacted_length);
+	len = factory.compress(postings_list, postings_list_size, raw[number_engines], leaves[number_engines]->impacted_length);
 	current_disk_position = merged_index->tell();
 	merged_index->write(postings_list, len);
 	longest_postings = ANT_max(longest_postings, len);
@@ -414,22 +414,29 @@ while (terms[0] && terms[1])
 		Now update the hash node disk values we created way back
 	*/
 	p->in_disk.docids_pos_on_disk = current_disk_position;
-	p->in_disk.impacted_length = leaves[2]->impacted_length;
+	p->in_disk.impacted_length = leaves[number_engines]->impacted_length;
 	p->in_disk.end_pos_on_disk = merged_index->tell();
 	
 	/*
 		Now update the stats for the term
 	*/
-	p->collection_frequency = leaves[2]->local_collection_frequency;
-	p->document_frequency = leaves[2]->local_document_frequency;
+	p->collection_frequency = leaves[number_engines]->local_collection_frequency;
+	p->document_frequency = leaves[number_engines]->local_document_frequency;
 	
 	/*
-		Move on to the next terms
+		Move on to the next terms if necessary
 	*/
-	if (string_compare_result <= 0)
-		terms[0] = iterators[0]->next();
-	if (string_compare_result >= 0)
-		terms[1] = iterators[1]->next();
+	for (engine = 0; engine < number_engines; engine++)
+		if (strcmp_results[engine] == 0)
+			terms[engine] = iterators[engine]->next();
+	
+	/*
+		Decide if we should keep going, this should never fail in practice, this while loop should exit
+		above when we encounter ~ terms, but for completeness sake
+	*/
+	cont = TRUE;
+	for (engine = 0; engine < number_engines; engine++)
+		cont = cont && terms[engine];
 	}
 
 /*
