@@ -25,8 +25,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-#define MULTI_MERGE TRUE
-
 /*
 	PROCESS()
 	---------
@@ -55,32 +53,50 @@ while (current < end)
 }
 
 /*
+	WRITE_POSTINGS()
+	----------------
+*/
+ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *temp_index, ANT_search_engine_btree_leaf *leaf, long long *longest_postings)
+{
+ANT_compression_factory factory;
+ANT_memory_index_hash_node *node;
+uint64_t current_disk_position;
+long long len = 0;
+
+node = temp_index->add_term(new ANT_string_pair(term), 0);
+
+node->collection_frequency = leaf->local_collection_frequency;
+node->document_frequency = leaf->local_document_frequency;
+
+len = factory.compress(postings_list, postings_list_size, raw, leaf->impacted_length);
+
+current_disk_position = index->tell();
+index->write(postings_list, len);
+
+node->in_disk.docids_pos_on_disk = current_disk_position;
+node->in_disk.impacted_length = leaf->impacted_length;
+node->in_disk.end_pos_on_disk = index->tell();
+
+*longest_postings = ANT_max(len, *longest_postings);
+
+return node;
+}
+
+/*
 	WRITE_VARIABLE()
 	----------------
 */
-void write_variable(char *variable_name, long long value, ANT_file *index_file, ANT_memory_index *temp_index)
+ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *temp_index, ANT_search_engine_btree_leaf *leaf, long long *longest_postings)
 {
-ANT_compression_factory factory;
-ANT_memory_index_hash_node *p = temp_index->add_term(new ANT_string_pair(variable_name), 0);
-
-long long current_disk_position = index_file->tell();
-unsigned long long len;
-
 ANT_compressable_integer raw[2];
-unsigned char *postings_list = (unsigned char *)malloc(1024);// should be more than enough
 
 raw[1] = ((unsigned long long)value) & 0xFFFFFFFF;
 raw[0] = (((unsigned long long)value) >> 32) & 0xFFFFFFFF;
-raw[1] = raw[1] - raw[0]; // diff encoded
+raw[1] = raw[1] - raw[0];
 
-len = factory.compress(postings_list, 1024, raw, 2);
-index_file->write(postings_list, len);
+leaf->impacted_length = leaf->local_collection_frequency = leaf->local_document_frequency = 2;
 
-p->in_disk.docids_pos_on_disk = current_disk_position;
-p->in_disk.impacted_length = 2;
-p->in_disk.end_pos_on_disk = index_file->tell();
-p->collection_frequency = 2;
-p->document_frequency = 2;
+return write_postings(term, raw, postings_list, postings_list_size, index, temp_index, leaf, longest_postings);
 }
 
 /*
@@ -89,14 +105,10 @@ p->document_frequency = 2;
 */
 int main(int argc, char *argv[])
 {
-#ifdef SPECIAL_COMPRESSION
-exit(printf("SPECIAL_COMPRESSION not supported, yet\n"));
-#endif
-
 int i;
 long long postings_list_size = 500 * 1024;
 long long raw_list_size = 500 * 1024;
-long long offset, engine, len, upto = 0;
+long long offset, engine, upto = 0;
 
 uint64_t current_disk_position;
 char file_header[] = "ANT Search Engine Index File\n\0\0";
@@ -109,9 +121,6 @@ long long document_filenames_start, document_filenames_finish;
 unsigned long longest_doc = 0, buf_size, compress_buf_size;
 char *document_decompress_buffer, *document_compress_buffer;
 
-/*
-	For now, we only support merging two indexes, although this will probably change.
-*/
 if (number_engines < 2)
 	exit(printf("Usage: %s <index 1> <index 2> ... <index n>\n", argv[0]));
 
@@ -155,6 +164,8 @@ ANT_memory_index *temp_index = new ANT_memory_index(NULL);
 ANT_memory_index_hash_node *p;
 ANT_memory_index_hash_node **term_list, **here;
 
+term_list = (ANT_memory_index_hash_node **)malloc(sizeof(*term_list) * (maximum_terms + 1));
+
 ANT_btree_head_node *header, *current_header, *last_header;
 
 uint8_t zero = 0;
@@ -172,6 +183,7 @@ unsigned long buf_len = 0;
 long *strcmp_results = (long *)malloc(sizeof(*strcmp_results) * number_engines);
 char *next_term_to_process = NULL;
 long cont = TRUE;
+long long do_documents = TRUE;
 
 ANT_file *doclist = new ANT_file;
 ANT_file *merged_index = new ANT_file;
@@ -186,119 +198,97 @@ document_compress_buffer = (char *)malloc((size_t)longest_doc);
 merged_index->open("merged_index.aspt", "w");
 merged_index->write((unsigned char *)file_header, sizeof(file_header));
 
-/*
-	We should probably actually check that both indexes have the documents in their indexes
-	and if they don't then skip over them, or something.
-	
-	There's also probably a better way we could do this rather than decompress all the
-	documents only to recompress them straight away.
-*/
 for (engine = 0; engine < number_engines; engine++)
-	for (i = 0; i < search_engines[engine]->document_count(); i++)
-		{
-		current_disk_position = merged_index->tell();
-		search_engines[engine]->get_document(document_decompress_buffer, &longest_doc, i);
-		
-		document_compress_buffer = document_factory.compress(document_compress_buffer, &compress_buf_size, document_decompress_buffer, longest_doc);
-		
-		merged_index->write((unsigned char *)document_compress_buffer, compress_buf_size);
-		
-		longest_doc = compress_buf_size = buf_size;
-		sum += raw[number_engines][upto] = (ANT_compressable_integer)(current_disk_position - (upto == 0 ? 0 : sum));
-		upto++;
-		}
-raw[number_engines][upto] = (ANT_compressable_integer)(merged_index->tell() - sum);
+	do_documents = do_documents && (search_engines[engine]->get_postings_details("~documentoffsets", leaves[engine]) != NULL);
 
-/*
-	Before we write out the "postings" for offsets, we should put the document filenames
-	here and get the values for start/finish of those.
-*/
-document_filenames_start = merged_index->tell();
-
-/*
-	Copy over the filenames
-*/
-doclist->open("merged_doclist.aspt", "w");
-
-for (engine = 0; engine < number_engines; engine++)
+if (do_documents)
 	{
-	start = search_engines[engine]->get_variable("~documentfilenamesstart");
-	end = search_engines[engine]->get_variable("~documentfilenamesfinish");
-	
-	doc_buf = (char *)realloc(doc_buf, end - start);
-	doc_filenames = search_engines[engine]->get_document_filenames(doc_buf, &buf_len);
+	for (engine = 0; engine < number_engines; engine++)
+		{
+		for (i = 0; i < search_engines[engine]->document_count(); i++)
+			{
+			current_disk_position = merged_index->tell();
+			search_engines[engine]->get_document(document_decompress_buffer, &longest_doc, i);
+			
+			document_compress_buffer = document_factory.compress(document_compress_buffer, &compress_buf_size, document_decompress_buffer, longest_doc);
+			
+			merged_index->write((unsigned char *)document_compress_buffer, compress_buf_size);
+			
+			longest_doc = compress_buf_size = buf_size;
+			sum += raw[number_engines][upto] = (ANT_compressable_integer)(current_disk_position - (upto == 0 ? 0 : sum));
+			upto++;
+			}
+		}
+	raw[number_engines][upto] = (ANT_compressable_integer)(merged_index->tell() - sum);
 	
 	/*
-		Technically, here we could just write out doc_buf here to the index,
-		but the underlying representation _might_ change.
-		
-		Also write out the the doclist file ... because we need it.
+		Before we write out the "postings" for offsets, we should put the document filenames
+		here and get the values for start/finish of those.
 	*/
-	for (i = 0; i < search_engines[engine]->document_count(); i++)
-		{
-		doclist->puts(strip_space_inplace(doc_filenames[i]));
-		merged_index->write((unsigned char *)doc_filenames[i], strlen(doc_filenames[i]) + 1);
-		}
-	}
-doclist->close();
-
-document_filenames_finish = merged_index->tell();
-
-/*
-	Now we've done the documents, do the filename start/finish. These are "special" variables rather
-	than posting lists of length 1, unlike ~documentlongest.  Don't ask me!
-*/
-write_variable("~documentfilenamesstart", document_filenames_start, merged_index, temp_index);
-write_variable("~documentfilenamesfinish", document_filenames_finish, merged_index, temp_index);
-
-p = temp_index->add_term(new ANT_string_pair("~documentoffsets"), 0);
-
-/*
-	Update stats, because this is a difference encoded list, we start with 1, then substract one
-	for each of the other engines, this works out to be the right number (number_engines + 1)
+	document_filenames_start = merged_index->tell();
 	
-	The documentoffsets are calculated above.
-*/
-leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
-for (engine = 0; engine < number_engines; engine++)
-	{
-	leaves[engine] = search_engines[engine]->get_postings_details("~documentoffsets", leaves[engine]);
-	leaves[number_engines]->impacted_length += leaves[engine]->impacted_length - 1;
-	leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency - 1;
-	leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency - 1;
+	/*
+		Copy over the filenames
+	*/
+	doclist->open("merged_doclist.aspt", "w");
+	
+	for (engine = 0; engine < number_engines; engine++)
+		{
+		start = search_engines[engine]->get_variable("~documentfilenamesstart");
+		end = search_engines[engine]->get_variable("~documentfilenamesfinish");
+		
+		doc_buf = (char *)realloc(doc_buf, end - start);
+		doc_filenames = search_engines[engine]->get_document_filenames(doc_buf, &buf_len);
+		
+		/*
+			Technically, here we could just write out doc_buf here to the index,
+			but the underlying representation _might_ change.
+			
+			Also write out the the doclist file ... because we need it.
+		*/
+		for (i = 0; i < search_engines[engine]->document_count(); i++)
+			{
+			doclist->puts(strip_space_inplace(doc_filenames[i]));
+			merged_index->write((unsigned char *)doc_filenames[i], strlen(doc_filenames[i]) + 1);
+			}
+		}
+	doclist->close();
+	
+	document_filenames_finish = merged_index->tell();
+	
+	/*
+		Now we've done the documents, do the filename start/finish. These are "special" variables rather
+		than posting lists of length 1, unlike ~documentlongest.  Don't ask me!
+	*/
+	p = write_variable("~documentfilenamesstart", document_filenames_start, postings_list, postings_list_size, merged_index, temp_index, leaves[number_engines], &longest_postings);
+	p = write_variable("~documentfilenamesfinish", document_filenames_finish, postings_list, postings_list_size, merged_index, temp_index, leaves[number_engines], &longest_postings);
+	
+	/*
+		Update stats, because this is a difference encoded list, we start with 1, then substract one
+		for each of the other engines, this works out to be the right number (number_engines + 1)
+		
+		The documentoffsets are calculated above.
+	*/
+	leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
+	for (engine = 0; engine < number_engines; engine++)
+		{
+		leaves[engine] = search_engines[engine]->get_postings_details("~documentoffsets", leaves[engine]);
+		leaves[number_engines]->impacted_length += leaves[engine]->impacted_length - 1;
+		leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency - 1;
+		leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency - 1;
+		}
+	
+	p = write_postings("~documentoffsets", raw[number_engines], postings_list, postings_list_size, merged_index, temp_index, leaves[number_engines], &longest_postings);
+	
+	/*
+		Now we've done the documents and offsets, do the longest document.
+		Note, this is a postings list of length 1, rather than a "variable"
+		like documentfilenamesstart/finish, don't ask me why, I'm from Barcelona.
+	*/
+	raw[number_engines][0] = longest_doc;
+	leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
+	p = write_postings("~documentlongest", raw[number_engines], postings_list, postings_list_size, merged_index, temp_index, leaves[number_engines], &longest_postings);
 	}
-
-current_disk_position = merged_index->tell();
-
-len = factory.compress(postings_list, postings_list_size, raw[number_engines], leaves[number_engines]->impacted_length);
-merged_index->write(postings_list, len);
-
-longest_postings = ANT_max(longest_postings, len);
-
-p->in_disk.docids_pos_on_disk = current_disk_position;
-p->in_disk.impacted_length = leaves[number_engines]->impacted_length;
-p->in_disk.end_pos_on_disk = merged_index->tell();
-
-p->collection_frequency = leaves[number_engines]->local_collection_frequency;
-p->document_frequency = leaves[number_engines]->local_document_frequency;
-
-/*
-	Now we've done the documents and offsets, do the longest document.
-	Note, this is a postings list of length 1, rather than a "variable"
-	like documentfilenamesstart/finish, don't ask me why, I'm from Barcelona.
-*/
-p = temp_index->add_term(new ANT_string_pair("~documentlongest"), 0);
-raw[number_engines][0] = longest_doc;
-leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
-current_disk_position = merged_index->tell();
-len = factory.compress(postings_list, postings_list_size, raw[number_engines], leaves[number_engines]->impacted_length);
-merged_index->write(postings_list, len);
-longest_postings = ANT_max(longest_postings, len);
-p->in_disk.docids_pos_on_disk = current_disk_position;
-p->in_disk.impacted_length = leaves[number_engines]->impacted_length;
-p->in_disk.end_pos_on_disk = merged_index->tell();
-p->collection_frequency = leaves[number_engines]->local_collection_frequency;
-p->document_frequency = leaves[number_engines]->local_document_frequency;
 
 /*
 	Now for the final ~ variable, length.
@@ -323,18 +313,7 @@ for (engine = 0; engine < number_engines; engine++)
 	upto += leaves[engine]->local_document_frequency;
 	}
 
-p = temp_index->add_term(new ANT_string_pair("~length"), 0);
-
-len = factory.compress(postings_list, postings_list_size, raw[number_engines], leaves[number_engines]->impacted_length);
-current_disk_position = merged_index->tell();
-merged_index->write(postings_list, len);
-longest_postings = ANT_max(longest_postings, len);
-
-p->in_disk.docids_pos_on_disk = current_disk_position;
-p->in_disk.impacted_length = leaves[number_engines]->impacted_length;
-p->in_disk.end_pos_on_disk = merged_index->tell();
-p->collection_frequency = leaves[number_engines]->local_collection_frequency;
-p->document_frequency = leaves[number_engines]->local_document_frequency;
+p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, merged_index, temp_index, leaves[number_engines], &longest_postings);
 
 /*
 	Now move onto the "normal" terms
@@ -363,9 +342,8 @@ while (cont)
 		break;
 	
 	/*
-		Add the term to our temporary index, and reset the tf_values accumulated so far.
+		Reset the tf_values accumulated so far.
 	*/
-	p = temp_index->add_term(new ANT_string_pair(next_term_to_process), 0);
 	memset(tf_values, 0, sizeof(*tf_values) * combined_docs);
 	
 	/*
@@ -405,23 +383,7 @@ while (cont)
 	/*
 		Serialise the merged postings
 	*/
-	len = factory.compress(postings_list, postings_list_size, raw[number_engines], leaves[number_engines]->impacted_length);
-	current_disk_position = merged_index->tell();
-	merged_index->write(postings_list, len);
-	longest_postings = ANT_max(longest_postings, len);
-	
-	/*
-		Now update the hash node disk values we created way back
-	*/
-	p->in_disk.docids_pos_on_disk = current_disk_position;
-	p->in_disk.impacted_length = leaves[number_engines]->impacted_length;
-	p->in_disk.end_pos_on_disk = merged_index->tell();
-	
-	/*
-		Now update the stats for the term
-	*/
-	p->collection_frequency = leaves[number_engines]->local_collection_frequency;
-	p->document_frequency = leaves[number_engines]->local_document_frequency;
+	p = write_postings(next_term_to_process, raw[number_engines], postings_list, postings_list_size, merged_index, temp_index, leaves[number_engines], &longest_postings);
 	
 	/*
 		Move on to the next terms if necessary
@@ -442,7 +404,6 @@ while (cont)
 /*
 	Now we've done all the postings, it's time to write the dictionary and header.
 */
-term_list = (ANT_memory_index_hash_node **)malloc(sizeof(*term_list) * (maximum_terms + 1));
 
 for (i = 0; i < ANT_memory_index::HASH_TABLE_SIZE; i++)
 	if (temp_index->hash_table[i] != NULL)
