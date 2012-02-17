@@ -633,7 +633,7 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "Pt") == 0)
 			processing_strategy = TERM_AT_A_TIME;
 		else if (strcmp(command, "Pq") == 0)
-			file_or_memory = QUANTUM_AT_A_TIME;
+			processing_strategy = QUANTUM_AT_A_TIME;
 		else if (*command == 'm')
 			set_metric(command + 1);
 		else if (*command == 'a') 
