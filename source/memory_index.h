@@ -46,7 +46,7 @@ private:
 public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 private:
-	ANT_memory *memory;
+	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;
 	unsigned char *serialised_docids, *serialised_tfs;
 	long long serialised_docids_size, serialised_tfs_size;
 	long long largest_docno;
@@ -147,7 +147,7 @@ public:
 	void add_indexed_document(ANT_memory_index_one *index, long long docno);
 
 	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, long term_frequency = 1);
-	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
+	virtual long long get_memory_usage(void) { return dictionary_memory->bytes_used() + postings_memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
@@ -162,7 +162,7 @@ inline ANT_memory_index_hash_node *ANT_memory_index::new_memory_index_hash_node(
 {
 stats->unique_terms++;
 
-return new (memory) ANT_memory_index_hash_node(memory, memory, string, stats);
+return new (dictionary_memory) ANT_memory_index_hash_node(dictionary_memory, postings_memory, string, stats);
 }
 
 #endif  /* MEMORY_INDEX_H_ */

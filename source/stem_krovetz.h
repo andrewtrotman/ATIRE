@@ -25,6 +25,7 @@
 #define STEM_KROVETZ_H_
 
 #include <string.h>
+
 #if (defined(ANDROID) || defined(__ANDROID__))
 	#include <hash_map>
 	using namespace std;
@@ -33,7 +34,9 @@
 	using namespace __gnu_cxx;
 #else
 	#include <hash_map>
+	using namespace std;
 #endif
+
 #include "stem.h"
 
 /*

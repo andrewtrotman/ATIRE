@@ -21,7 +21,8 @@ public:
 	ANT_postings_piece *next;
 
 public:
-	ANT_postings_piece(ANT_memory *alloc, long required_length);
+	ANT_postings_piece() {}
+	unsigned char *initialise(ANT_memory *alloc, long required_length);
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new (size_t size, ANT_memory *allocator);
 } ;

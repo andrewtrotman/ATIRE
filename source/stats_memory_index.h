@@ -17,6 +17,7 @@ public:
 	enum {STAT_MEMORY = 1, STAT_SUMMARY = 2} ;
 
 public:
+	ANT_memory *postings_memory;
 	long hash_nodes;
 	long unique_terms;
 	long long documents;
@@ -37,7 +38,7 @@ public:
 	long long bytes_to_store_documents_on_disk;
 
 public:
-	ANT_stats_memory_index(ANT_memory *memory = NULL);
+	ANT_stats_memory_index(ANT_memory *memory = NULL, ANT_memory *postings_memory = NULL);
 	virtual ~ANT_stats_memory_index();
 
 	virtual void text_render(long which_stats);

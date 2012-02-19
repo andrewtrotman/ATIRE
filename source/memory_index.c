@@ -41,12 +41,13 @@ ANT_memory_index::ANT_memory_index(char *filename)
 stop_word_removal_mode = NONE;
 hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
-memory = new ANT_memory;
-stats = new ANT_stats_memory_index(memory);
+titles_memory = serialisation_memory = dictionary_memory = new ANT_memory;		// if you seperate these then remember to update the stats object
+postings_memory = new ANT_memory;
+stats = new ANT_stats_memory_index(dictionary_memory, postings_memory);
 serialised_docids_size = 1;
-serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
+serialised_docids = (unsigned char *)serialisation_memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
-serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
+serialised_tfs = (unsigned char *)serialisation_memory->malloc(serialised_tfs_size);
 largest_docno = 0;
 factory = new ANT_compression_factory;
 document_lengths = NULL;
@@ -68,7 +69,8 @@ stop_word_max_proportion = 1.1;			// initialising with anything greater than 1.0
 ANT_memory_index::~ANT_memory_index()
 {
 close_index_file();
-delete memory;
+delete dictionary_memory;
+delete postings_memory;
 delete stats;
 delete factory;
 }
@@ -269,107 +271,107 @@ stats->documents = docno;
 }
 
 #ifdef IMPACT_HEADER
-/*
-	ANT_MEMORY_INDEX::IMPACT_ORDER()
-	--------------------------------
-*/
-long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
-{
-ANT_compressable_integer sum, bucket_size[ANT_impact_header::NUM_OF_QUANTUMS], bucket_prev_docid[ANT_impact_header::NUM_OF_QUANTUMS];
-ANT_compressable_integer *pointer[ANT_impact_header::NUM_OF_QUANTUMS], *current_docid, doc, *pruned_point;
-unsigned char *current, *end;
-long bucket, buckets_used, max_bucket;
-
-/*
-	Set all the buckets to empty;
-*/
-memset(bucket_size, 0, sizeof(bucket_size));
-
-/*
-	Set the previous document ID to zero for each bucket (for difference encoding)
-*/
-memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
-
-/*
-	Compute the size of the buckets
-*/
-end = term_frequency + document_frequency;
-for (current = term_frequency; current < end; current++)
-	bucket_size[*current]++;
-
-// find the number of non-zero buckets (the number of quantums)
-impact_header.the_quantum_count = 0;
-for (bucket = 0; bucket < ANT_impact_header::NUM_OF_QUANTUMS; bucket++) {
-	if (bucket_size[bucket] != 0) {
-		impact_header.the_quantum_count++;
-	}
-}
-
-// setup the pointers for the header
-impact_header.impact_value_ptr = impact_header.header_buffer;
-impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
-impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
-
-
-/*
-	Compute the location of the pointers for each bucket
-*/
-pruned_point = NULL;
-buckets_used = sum = 0;
-max_bucket = ANT_impact_header::NUM_OF_QUANTUMS - 1;
-for (bucket = max_bucket; bucket >= 0; bucket--)
+	/*
+		ANT_MEMORY_INDEX::IMPACT_ORDER()
+		--------------------------------
+	*/
+	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
 	{
-	pointer[bucket] = destination + sum;
-	if (bucket_size[bucket] != 0)
-		{
-		*impact_header.impact_value_ptr = bucket; impact_header.impact_value_ptr++;
-		*impact_header.doc_count_ptr = bucket_size[bucket]; impact_header.doc_count_ptr++;
-		*impact_header.impact_offset_ptr = sum; impact_header.impact_offset_ptr++;
-		buckets_used++;
-		if (sum < static_prune_point && (sum + bucket_size[bucket]) >= static_prune_point)
-			pruned_point = pointer[bucket] + (static_prune_point - sum);
-		sum += bucket_size[bucket];
+	ANT_compressable_integer sum, bucket_size[ANT_impact_header::NUM_OF_QUANTUMS], bucket_prev_docid[ANT_impact_header::NUM_OF_QUANTUMS];
+	ANT_compressable_integer *pointer[ANT_impact_header::NUM_OF_QUANTUMS], *current_docid, doc, *pruned_point;
+	unsigned char *current, *end;
+	long bucket, buckets_used, max_bucket;
+
+	/*
+		Set all the buckets to empty;
+	*/
+	memset(bucket_size, 0, sizeof(bucket_size));
+
+	/*
+		Set the previous document ID to zero for each bucket (for difference encoding)
+	*/
+	memset(bucket_prev_docid, 0, sizeof(bucket_prev_docid));
+
+	/*
+		Compute the size of the buckets
+	*/
+	end = term_frequency + document_frequency;
+	for (current = term_frequency; current < end; current++)
+		bucket_size[*current]++;
+
+	// find the number of non-zero buckets (the number of quantums)
+	impact_header.the_quantum_count = 0;
+	for (bucket = 0; bucket < ANT_impact_header::NUM_OF_QUANTUMS; bucket++) {
+		if (bucket_size[bucket] != 0) {
+			impact_header.the_quantum_count++;
 		}
 	}
 
-/*
-	Now generate the impact ordering
-*/
-current_docid = docid;
-doc = 0;
-for (current = term_frequency; current < end; current++)
-	{
-	doc += *current_docid;							// because the original list is difference encoded
-	*pointer[*current]++ = doc - bucket_prev_docid[*current];		// because this list is also difference encoded
-	bucket_prev_docid[*current] = doc;
-	current_docid++;
+	// setup the pointers for the header
+	impact_header.impact_value_ptr = impact_header.header_buffer;
+	impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
+	impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+
+
+	/*
+		Compute the location of the pointers for each bucket
+	*/
+	pruned_point = NULL;
+	buckets_used = sum = 0;
+	max_bucket = ANT_impact_header::NUM_OF_QUANTUMS - 1;
+	for (bucket = max_bucket; bucket >= 0; bucket--)
+		{
+		pointer[bucket] = destination + sum;
+		if (bucket_size[bucket] != 0)
+			{
+			*impact_header.impact_value_ptr = bucket; impact_header.impact_value_ptr++;
+			*impact_header.doc_count_ptr = bucket_size[bucket]; impact_header.doc_count_ptr++;
+			*impact_header.impact_offset_ptr = sum; impact_header.impact_offset_ptr++;
+			buckets_used++;
+			if (sum < static_prune_point && (sum + bucket_size[bucket]) >= static_prune_point)
+				pruned_point = pointer[bucket] + (static_prune_point - sum);
+			sum += bucket_size[bucket];
+			}
+		}
+
+	/*
+		Now generate the impact ordering
+	*/
+	current_docid = docid;
+	doc = 0;
+	for (current = term_frequency; current < end; current++)
+		{
+		doc += *current_docid;							// because the original list is difference encoded
+		*pointer[*current]++ = doc - bucket_prev_docid[*current];		// because this list is also difference encoded
+		bucket_prev_docid[*current] = doc;
+		current_docid++;
+		}
+
+	/*
+		Finally terminate each impact list with a 0
+	*/
+	//for (bucket = 0; bucket < 0x100; bucket++)
+	//	if (bucket_size[bucket] != 0)
+	//		*pointer[bucket] = 0;
+
+	/*
+		The first frequency or impact-value is the max local impact for the term
+	*/
+	*max_local = (unsigned char)impact_header.header_buffer[0];
+
+	/*
+		Should we static print the postings list?
+	*/
+	if (pruned_point != NULL)
+		{
+		return pruned_point - destination;
+		}
+
+	/*
+		Return the length of the impact ordered list
+	*/
+	return sum;
 	}
-
-/*
-	Finally terminate each impact list with a 0
-*/
-//for (bucket = 0; bucket < 0x100; bucket++)
-//	if (bucket_size[bucket] != 0)
-//		*pointer[bucket] = 0;
-
-/*
-	The first frequency or impact-value is the max local impact for the term
-*/
-*max_local = (unsigned char)impact_header.header_buffer[0];
-
-/*
-	Should we static print the postings list?
-*/
-if (pruned_point != NULL)
-	{
-	return pruned_point - destination;
-	}
-
-/*
-	Return the length of the impact ordered list
-*/
-return sum;
-}
 #endif
 
 /*
@@ -473,12 +475,12 @@ while ((total = root->serialise_postings(serialised_docids, doc_size, serialised
 	if (*doc_size > serialised_docids_size)
 		{
 		serialised_docids_size = *doc_size;
-		serialised_docids = (unsigned char *)memory->malloc(serialised_docids_size);
+		serialised_docids = (unsigned char *)serialisation_memory->malloc(serialised_docids_size);
 		}
 	if (*tf_size > serialised_tfs_size)
 		{
 		serialised_tfs_size = *tf_size;
-		serialised_tfs = (unsigned char *)memory->malloc(serialised_tfs_size);
+		serialised_tfs = (unsigned char *)serialisation_memory->malloc(serialised_tfs_size);
 		}
 	}
 return total;
@@ -646,7 +648,58 @@ if (!should_prune(root))
 		else
 			{
 			#ifdef IMPACT_HEADER
-			if (root->string[0] == '~') {
+				if (root->string[0] == '~')
+					{
+					len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+
+					current_disk_position = file->tell();
+					file->write(compressed_postings_list, len);
+
+					root->in_disk.docids_pos_on_disk = current_disk_position;
+					root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+					root->in_disk.end_pos_on_disk = file->tell();
+					}
+				else
+					{
+					impact_header.impact_value_start = impact_header.header_buffer;
+					impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
+					impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+
+					// compress the impact postings, one quantum at time, and update the corresponding offsets in the header
+					end = impact_header.impact_offset_start + impact_header.the_quantum_count;
+					impact_header.impact_offset_ptr = impact_header.impact_offset_start;
+
+					compressed_postings_ptr = compressed_postings_list;
+					for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++)
+						{
+						len = factory->compress(compressed_postings_ptr, (long long)1 + *impact_header.doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
+						// convert the pointer into offset
+						*impact_header.impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
+						compressed_postings_ptr += len;
+						}
+
+					// compress the impact header
+					compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
+					len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
+					((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
+					((uint64_t *)compressed_impact_header_buffer)[1] = impact_header.chain_length;
+					((uint32_t *)compressed_impact_header_buffer)[4] = impact_header.the_quantum_count;
+					// the offset for the beginning of the postings
+					((uint32_t *)compressed_impact_header_buffer)[5] = ANT_impact_header::INFO_SIZE + len;
+					compressed_header_ptr += len;
+
+					// write the impact header to disk
+					current_disk_position = file->tell();
+					file->write(compressed_impact_header_buffer, compressed_header_ptr - compressed_impact_header_buffer);
+
+					// write the compressed postings to disk
+					file->write(compressed_postings_list, compressed_postings_ptr - compressed_postings_list);
+
+					root->in_disk.docids_pos_on_disk = current_disk_position;
+					root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+					root->in_disk.end_pos_on_disk = file->tell();
+				}
+			#else
 				len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
 				current_disk_position = file->tell();
@@ -655,7 +708,23 @@ if (!should_prune(root))
 				root->in_disk.docids_pos_on_disk = current_disk_position;
 				root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 				root->in_disk.end_pos_on_disk = file->tell();
-			} else {
+			#endif
+			}
+	#else // else #ifdef SPECIAL_COMPRESSION
+		#ifdef IMPACT_HEADER
+			if (root->string[0] == '~')
+				{
+				len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+
+				current_disk_position = file->tell();
+				file->write(compressed_postings_list, len);
+
+				root->in_disk.docids_pos_on_disk = current_disk_position;
+				root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+				root->in_disk.end_pos_on_disk = file->tell();
+				}
+			else
+				{
 				impact_header.impact_value_start = impact_header.header_buffer;
 				impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
 				impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
@@ -665,21 +734,22 @@ if (!should_prune(root))
 				impact_header.impact_offset_ptr = impact_header.impact_offset_start;
 
 				compressed_postings_ptr = compressed_postings_list;
-				for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++) {
+				for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++)
+					{
 					len = factory->compress(compressed_postings_ptr, (long long)1 + *impact_header.doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
 					// convert the pointer into offset
 					*impact_header.impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
 					compressed_postings_ptr += len;
-				}
+					}
 
 				// compress the impact header
-				compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
+				compressed_header_ptr = compressed_impact_header_buffer + impact_header.info_size;
 				len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
 				((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
 				((uint64_t *)compressed_impact_header_buffer)[1] = impact_header.chain_length;
 				((uint32_t *)compressed_impact_header_buffer)[4] = impact_header.the_quantum_count;
 				// the offset for the beginning of the postings
-				((uint32_t *)compressed_impact_header_buffer)[5] = ANT_impact_header::INFO_SIZE + len;
+				((uint32_t *)compressed_impact_header_buffer)[5] = impact_header.info_size + len;
 				compressed_header_ptr += len;
 
 				// write the impact header to disk
@@ -692,67 +762,7 @@ if (!should_prune(root))
 				root->in_disk.docids_pos_on_disk = current_disk_position;
 				root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 				root->in_disk.end_pos_on_disk = file->tell();
-			}
-			#else
-			len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
-
-			current_disk_position = file->tell();
-			file->write(compressed_postings_list, len);
-
-			root->in_disk.docids_pos_on_disk = current_disk_position;
-			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-			root->in_disk.end_pos_on_disk = file->tell();
-			#endif
-			}
-	#else // else #ifdef SPECIAL_COMPRESSION
-		#ifdef IMPACT_HEADER
-		if (root->string[0] == '~') {
-			len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
-
-			current_disk_position = file->tell();
-			file->write(compressed_postings_list, len);
-
-			root->in_disk.docids_pos_on_disk = current_disk_position;
-			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-			root->in_disk.end_pos_on_disk = file->tell();
-		} else {
-			impact_header.impact_value_start = impact_header.header_buffer;
-			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
-			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
-
-			// compress the impact postings, one quantum at time, and update the corresponding offsets in the header
-			end = impact_header.impact_offset_start + impact_header.the_quantum_count;
-			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
-
-			compressed_postings_ptr = compressed_postings_list;
-			for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++) {
-				len = factory->compress(compressed_postings_ptr, (long long)1 + *impact_header.doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
-				// convert the pointer into offset
-				*impact_header.impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
-				compressed_postings_ptr += len;
-			}
-
-			// compress the impact header
-			compressed_header_ptr = compressed_impact_header_buffer + impact_header.info_size;
-			len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
-			((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
-			((uint64_t *)compressed_impact_header_buffer)[1] = impact_header.chain_length;
-			((uint32_t *)compressed_impact_header_buffer)[4] = impact_header.the_quantum_count;
-			// the offset for the beginning of the postings
-			((uint32_t *)compressed_impact_header_buffer)[5] = impact_header.info_size + len;
-			compressed_header_ptr += len;
-
-			// write the impact header to disk
-			current_disk_position = file->tell();
-			file->write(compressed_impact_header_buffer, compressed_header_ptr - compressed_impact_header_buffer);
-
-			// write the compressed postings to disk
-			file->write(compressed_postings_list, compressed_postings_ptr - compressed_postings_list);
-
-			root->in_disk.docids_pos_on_disk = current_disk_position;
-			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-			root->in_disk.end_pos_on_disk = file->tell();
-		}
+				}
 		#else
 			len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
@@ -857,7 +867,7 @@ uint64_t eight_byte;
 uint32_t four_byte, string_pos;
 uint32_t terms_in_node, current_node_head_length;
 #ifdef TERM_LOCAL_MAX_IMPACT
-uint8_t one_byte;
+	uint8_t one_byte;
 #endif
 ANT_memory_index_hash_node **current, **end;
 
@@ -981,33 +991,31 @@ if (index_file == NULL)
 	return 0;
 
 #ifdef IMPACT_HEADER
-impact_header.postings_chain = 0;
-impact_header.chain_length = 0;
-impact_header.the_quantum_count = 0;
-// extra 1 byte is for the compression scheme
-impact_value_size = 1 + sizeof(*impact_header.impact_value_start) * ANT_impact_header::NUM_OF_QUANTUMS;
-doc_count_size = 1 + sizeof(*impact_header.doc_count_start) * ANT_impact_header::NUM_OF_QUANTUMS;
-impact_offset_size = 1 + sizeof(*impact_header.impact_offset_start) * ANT_impact_header::NUM_OF_QUANTUMS;
-impact_header.header_size =  impact_value_size + doc_count_size + impact_offset_size;
-impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(impact_header.header_size);
-compressed_impact_header_size = (long long)1 + ANT_impact_header::INFO_SIZE + impact_header.header_size;
-compressed_impact_header_buffer = (unsigned char *)memory->malloc(compressed_impact_header_size);
+	impact_header.postings_chain = 0;
+	impact_header.chain_length = 0;
+	impact_header.the_quantum_count = 0;
+	// extra 1 byte is for the compression scheme
+	impact_value_size = 1 + sizeof(*impact_header.impact_value_start) * ANT_impact_header::NUM_OF_QUANTUMS;
+	doc_count_size = 1 + sizeof(*impact_header.doc_count_start) * ANT_impact_header::NUM_OF_QUANTUMS;
+	impact_offset_size = 1 + sizeof(*impact_header.impact_offset_start) * ANT_impact_header::NUM_OF_QUANTUMS;
+	impact_header.header_size =  impact_value_size + doc_count_size + impact_offset_size;
+	impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(impact_header.header_size);
+	compressed_impact_header_size = (long long)1 + ANT_impact_header::INFO_SIZE + impact_header.header_size;
+	compressed_impact_header_buffer = (unsigned char *)memory->malloc(compressed_impact_header_size);
 
-// the first compressed byte is a indication of what compression scheme is used in each quantum
-compressed_postings_list_length = 1 * ANT_impact_header::NUM_OF_QUANTUMS + (sizeof(*decompressed_postings_list) * largest_docno);
-decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - ANT_impact_header::NUM_OF_QUANTUMS);
-compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
-// 1 * NUM_OF_QUANTUMS because the TF in each of 255 lists
-impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)));
-stats->bytes_for_decompression_recompression += impact_header.header_size * 2 + compressed_postings_list_length * 3 + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)) - ANT_impact_header::NUM_OF_QUANTUMS;
-
+	// the first compressed byte is a indication of what compression scheme is used in each quantum
+	compressed_postings_list_length = 1 * ANT_impact_header::NUM_OF_QUANTUMS + (sizeof(*decompressed_postings_list) * largest_docno);
+	decompressed_postings_list = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length - ANT_impact_header::NUM_OF_QUANTUMS);
+	compressed_postings_list = (unsigned char *)serialisation_memory->malloc(compressed_postings_list_length);
+	// 1 * NUM_OF_QUANTUMS because the TF in each of 255 lists
+	impacted_postings = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)));
+	stats->bytes_for_decompression_recompression += impact_header.header_size * 2 + compressed_postings_list_length * 3 + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)) - ANT_impact_header::NUM_OF_QUANTUMS;
 #else
-
-compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
-decompressed_postings_list = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length - 1);
-compressed_postings_list = (unsigned char *)memory->malloc(compressed_postings_list_length);
-impacted_postings = (ANT_compressable_integer *)memory->malloc(compressed_postings_list_length + (512 * sizeof(*decompressed_postings_list)));		// 512 because the TF and the 0 at the end of each of 255 lists
-stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
+	compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
+	decompressed_postings_list = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length - 1);
+	compressed_postings_list = (unsigned char *)serialisation_memory->malloc(compressed_postings_list_length);
+	impacted_postings = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length + (512 * sizeof(*decompressed_postings_list)));		// 512 because the TF and the 0 at the end of each of 255 lists
+	stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
 #endif
 
 /*
@@ -1052,7 +1060,7 @@ timer = stats->start_timer();
 node = find_add_node(hash_table[hashed_squiggle_length], &squiggle_length);
 
 get_serialised_postings(node, &doc_size, &tf_size);
-document_lengths = (ANT_compressable_integer *)memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
+document_lengths = (ANT_compressable_integer *)serialisation_memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
 variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
 
 /*
@@ -1101,7 +1109,7 @@ for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 */
 bytes = sizeof(*term_list) * (unique_terms + 1);
 stats->bytes_used_to_sort_term_list = bytes;
-term_list = (ANT_memory_index_hash_node **)memory->malloc(bytes);
+term_list = (ANT_memory_index_hash_node **)serialisation_memory->malloc(bytes);
 where = 0;
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
@@ -1128,7 +1136,7 @@ for (here = term_list; *here != NULL; here = find_end_of_node(here))
 	(Generate the first-level of the dictionary, and write the dictionary's
 	  secondary-level to disk)
 */
-current_header = header = (ANT_btree_head_node *)memory->malloc(sizeof(ANT_btree_head_node) * btree_root_size);
+current_header = header = (ANT_btree_head_node *)serialisation_memory->malloc(sizeof(ANT_btree_head_node) * btree_root_size);
 here = term_list;
 while (*here != NULL)
 	{
@@ -1180,9 +1188,9 @@ index_file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_lon
 	The maximum length of a compressed posting list
 */
 #ifdef IMPACT_HEADER
-longest_postings_size = (uint32_t)(impact_header.header_size + serialised_docids_size + serialised_tfs_size);
+	longest_postings_size = (uint32_t)(impact_header.header_size + serialised_docids_size + serialised_tfs_size);
 #else
-longest_postings_size = (uint32_t)(serialised_docids_size + serialised_tfs_size);
+	longest_postings_size = (uint32_t)(serialised_docids_size + serialised_tfs_size);
 #endif
 index_file->write((unsigned char *)&longest_postings_size, sizeof(longest_postings_size));	// 4 byte
 
@@ -1238,7 +1246,7 @@ if ((document_filenames_used + length) > document_filenames_chunk_size)
 	{
 	if ((remaining = document_filenames_chunk_size - document_filenames_used) != 0)
 		memcpy(document_filenames + document_filenames_used, filename, (size_t)remaining);
-	new_buffer = (char *)memory->malloc(document_filenames_chunk_size);
+	new_buffer = (char *)titles_memory->malloc(document_filenames_chunk_size);
 	*(char **)new_buffer = document_filenames;
 	document_filenames_used = sizeof(char *);
 

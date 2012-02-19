@@ -4,6 +4,7 @@
 	This indexer inplements the TopSig indexing scheme as published by Shlomo Geva in CIKM 2011.
 	As the paper has not yet appeared in print a full reference canot be given.
 */
+#include <new>
 #include "hash_table.h"
 #include "disk.h"
 #include "memory_index.h"
@@ -193,13 +194,8 @@ ANT_index_document_topsig_signature *signature;			// the current signature we're
 /*
 	allocate all the necessary memory
 */
-#if (defined(ANDROID) || defined(__ANDROID__))
-	signature = new ANT_index_document_topsig_signature(width, density, stopword_mode);
-	document_indexer = new ANT_memory_index_one(new ANT_memory(1024 * 1024));
-#else
-	signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density, stopword_mode);
-	document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
-#endif
+signature = new (std::nothrow) ANT_index_document_topsig_signature(width, density, stopword_mode);
+document_indexer = new (std::nothrow) ANT_memory_index_one(new ANT_memory(1024 * 1024));
 
 /*
 	First pass index and get the list of terms and term counts

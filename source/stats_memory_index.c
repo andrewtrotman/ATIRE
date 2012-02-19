@@ -12,8 +12,9 @@
 	ANT_STATS_MEMORY_INDEX::ANT_STATS_MEMORY_INDEX()
 	------------------------------------------------
 */
-ANT_stats_memory_index::ANT_stats_memory_index(ANT_memory *memory) : ANT_stats(memory)
+ANT_stats_memory_index::ANT_stats_memory_index(ANT_memory *memory, ANT_memory *postings_memory) : ANT_stats(memory)
 {
+this->postings_memory = postings_memory;
 hash_nodes = 0;
 unique_terms = 0;
 documents = 0;
@@ -58,8 +59,8 @@ if (type & STAT_SUMMARY)
 	printf("Term occurences      :%10lld occurences\n", term_occurences);
 	if (memory != NULL)
 		{
-		printf("Total memory allocd  :%10lld bytes\n", memory->bytes_allocated());
-		printf("Total memory used    :%10lld bytes\n", memory->bytes_used());
+		printf("Total memory allocd  :%10lld bytes\n", memory->bytes_allocated() + postings_memory->bytes_allocated());
+		printf("Total memory used    :%10lld bytes\n", memory->bytes_used() + postings_memory->bytes_used());
 		}
 	}
 
@@ -95,8 +96,8 @@ if (type & STAT_MEMORY)
 	if (memory != NULL)
 		{
 		printf("\nMEMORY UTILISATION\n------------------\n");
-		printf("Total memory allocd  :%10lld bytes\n", memory->bytes_allocated());
-		printf("Total memory used    :%10lld bytes\n", memory->bytes_used());
+		printf("Total memory allocd  :%10lld bytes\n", memory->bytes_allocated() + postings_memory->bytes_allocated());
+		printf("Total memory used    :%10lld bytes\n", memory->bytes_used() + postings_memory->bytes_used());
 		sum = 0;
 		printf("Posting Fragments    :%10lld bytes\n", used = posting_fragments * sizeof(ANT_postings_piece));
 		sum += used;
@@ -116,16 +117,17 @@ if (type & STAT_MEMORY)
 		sum += used;
 		printf("Quantization overhead:%10lld bytes\n", used = bytes_to_quantize);
 		sum += used;
-		printf("Unaccounted for      :%10lld bytes\n", memory->bytes_used() - sum);
+		printf("Unaccounted for      :%10lld bytes\n", memory->bytes_used() + postings_memory->bytes_used() - sum);
 		}
 	}
 
 if (type & STAT_SUMMARY)
 	if (time_to_quantize != 0)
 		print_time("Time to Quantise     :", time_to_quantize);
-	if (time_to_store_documents_on_disk != 0)
-		{
-		print_time("Time to Store Docs   :", time_to_store_documents_on_disk);
-		printf("Bytes to Store Docs  :%10lld bytes\n", bytes_to_store_documents_on_disk);
-		}
+
+if (time_to_store_documents_on_disk != 0)
+	{
+	print_time("Time to Store Docs   :", time_to_store_documents_on_disk);
+	printf("Bytes to Store Docs  :%10lld bytes\n", bytes_to_store_documents_on_disk);
+	}
 }

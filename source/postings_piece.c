@@ -16,12 +16,14 @@ return allocator->malloc(bytes);
 }
 
 /*
-	ANT_POSTINGS_PIECE::ANT_POSTINGS_PIECE()
-	----------------------------------------
+	ANT_POSTINGS_PIECE::INITIALISE()
+	--------------------------------
 */
-ANT_postings_piece::ANT_postings_piece(ANT_memory *allocator, long bytes_wanted)
+unsigned char *ANT_postings_piece::initialise(ANT_memory *allocator, long bytes_wanted)
 {
 data = (unsigned char *)allocator->malloc(bytes_wanted);
 next = NULL;
+
+return data;
 }
 

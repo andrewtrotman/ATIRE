@@ -7,6 +7,7 @@
 #else
 	#include <unistd.h>
 #endif
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "memory.h"
@@ -35,7 +36,7 @@
 	ANT_MEMORY::ANT_MEMORY()
 	------------------------
 */
-ANT_memory::ANT_memory(long long block_size_for_allocation)
+ANT_memory::ANT_memory(long long block_size_for_allocation, long long memory_ceiling)
 {
 #ifdef _MSC_VER
 	OSVERSIONINFO os_info;
@@ -49,14 +50,15 @@ ANT_memory::ANT_memory(long long block_size_for_allocation)
 	short_page_size = hardware_info.dwPageSize;
 #else
 	if ((short_page_size = large_page_size = sysconf(_SC_PAGESIZE)) <= 0)
-		short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium small page size)
+		short_page_size = large_page_size = 4096;		// use 4K blocks by default (as this is the Pentium (and ARM) small page size)
 #endif
 //printf("Large Page Size: %lld Small Page Size:%lld\n", (long long)large_page_size, (long long)short_page_size);
 
-chunk_end = at = chunk = NULL;
-used = 0;
-allocated = 0;
 this->block_size = block_size_for_allocation;
+this->memory_ceiling = memory_ceiling == 0 ? LLONG_MAX : memory_ceiling;
+chunk = NULL;
+
+rewind();
 }
 
 /*
@@ -65,14 +67,7 @@ this->block_size = block_size_for_allocation;
 */
 ANT_memory::~ANT_memory()
 {
-char *killer;
-
-while (chunk != NULL)
-	{
-	killer = chunk;
-	chunk = *(char **)chunk;
-	dealloc(killer);
-	}
+rewind();		// free the all in-use memory (if any)
 }
 
 #ifdef _MSC_VER
@@ -113,14 +108,26 @@ while (chunk != NULL)
 	4. we're not on Vista (or later).
 
 	to check whether or not you have permission to allocate large pages see:
-	Control Panel->Administrative Tools->Local Security Settings->->User Rights Assignment->Lock pages in memory
+	Control Panel->Administrative Tools->Local Security Settings->Local Policies->User Rights Assignment->Lock pages in memory
 */
 void *ANT_memory::alloc(long long *size)
 {
+/*
+	allocate memory from the operating system
+*/
 #ifdef _MSC_VER
 	#ifdef PURIFY
-		return ::malloc((size_t)*size);
+		/*
+			call malloc on every memory allocation
+		*/
+		if (allocated + *size > memory_ceiling)
+			return NULL;			// we've overflowed the soft limit
+		else
+			return ::malloc((size_t)*size);
 	#else
+		/*
+			get a large chunk of memory from Windows
+		*/
 		void *answer = NULL;
 		long long bytes = 0;
 
@@ -132,7 +139,8 @@ void *ANT_memory::alloc(long long *size)
 				if (set_privilege(SE_LOCK_MEMORY_NAME, TRUE))		// try and get permission from the OS to allocate large pages
 					{
 					bytes = large_page_size * ((*size + large_page_size - 1) / large_page_size);
-					answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
+					if (allocated + bytes <= memory_ceiling)		// check for overflow of the soft memory limt
+						answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 					set_privilege(SE_LOCK_MEMORY_NAME, FALSE);		// drop back to the initial security level
 					}
 		#endif
@@ -142,27 +150,36 @@ void *ANT_memory::alloc(long long *size)
 		if (answer == NULL)
 			{
 			bytes = short_page_size * ((*size + short_page_size - 1) / short_page_size);
-			answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-			if (answer != NULL)
-				{
-				/*
-					This code is commented out at the moment because when I ran this over the
-					INEX Wikipedia 2009 collection it caused a VISTA hang!  It looks like you
-					can't lock more than 4GB of memory - but this is a guess.
-				*/
-	//			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
-				}
-			else
-				bytes = 0;		// couldn't allocate any memory.
+			if (allocated + bytes <= memory_ceiling)		// check for overflow of the soft memory limt
+				answer = VirtualAlloc(NULL, (size_t)bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 			}
+
+		if (answer == NULL)
+			bytes = 0;		// couldn't allocate any memory.
+		else
+			{
+			/*
+				This code is commented out at the moment because when I ran this over the
+				INEX Wikipedia 2009 collection it caused a VISTA hang!  It looks like you
+				can't lock more than 4GB of memory - but this is a guess.
+			*/
+//			VirtualLock(answer, (size_t)bytes);		// lock the pages in memory so that it can't page to disk
+			}
+
 		/*
-			If we still can't allocate memory then we're run out (ans so return NULL)
+			If we haven't been able to allocate memory then we're out of memory (either soft or hard)
 		*/
 		*size = bytes;		// number of bytes we allocated
 		return answer;
 	#endif
 #else
-	return ::malloc((size_t)*size);
+	/*
+		We're not on windows so call the C run time library malloc()
+	*/
+	if (allocated + *size > memory_ceiling)
+		return NULL;			// we've overflowed the soft limit
+	else
+		return ::malloc((size_t)*size);
 #endif
 }
 
@@ -264,27 +281,21 @@ used += padding;
 */
 void ANT_memory::rewind(void)
 {
-char *chain, *next_block;
-long long *request;
+char *chain, *killer;
 
 /*
-	Free all memory blocks except for the first one
+	Free all memory blocks
 */
-if (chunk != NULL)
+for (chain = chunk; chain != NULL; chain = killer)
 	{
-	chain = chunk;
-	while ((next_block = *(char **)chain) != NULL)
-		{
-		dealloc(chain);
-		chain = next_block;
-		}
-
-	/*
-		Set up initialisation to start at the beginning of the remaining block
-	*/
-	chunk = chain;
-	request = (long long *)(chunk + sizeof(chain));
-	chunk_end = chunk + *request;
-	at = chunk + sizeof(chain) + sizeof(*request);
+	killer = *(char **)chain;
+	dealloc(chain);
 	}
+
+/*
+	zero the counters and pointers
+*/
+chunk_end = at = chunk = NULL;
+used = 0;
+allocated = 0;
 }
