@@ -135,7 +135,16 @@ while (*pos != '\0')
 	else
 		pos++;
 	}
+/*
+	We have a nasty case here.  If the last line has no CR/LF then we need to include it
+	but shove a NULL on the next line, but if the last line has a CR/LF then we need to avoid
+	adding a blank line to the end of the list.
+	NOTE: its 2012 and its a bit late to be finding this bug!!!
+*/
+if (**(current_line - 1) == '\0')
+	*(current_line - 1) = NULL;
 *current_line = NULL;
+
 *lines = current_line - line_list - 1;		// the true number of lines
 
 return line_list;

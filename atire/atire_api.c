@@ -191,7 +191,7 @@ return ANT_version_string;
 	Read the docid list from the given file and return it, or NULL if the file could
 	not be read.
 */
-char **ATIRE_API::read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
+char **ATIRE_API::read_docid_list(char *doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2)
 {
 char *document_list_buffer, *filename_list_buffer;
 char **id_list, **current;
