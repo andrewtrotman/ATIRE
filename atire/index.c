@@ -94,7 +94,8 @@ static char *seperators = ";: ";
 char **argv, **file_list;
 char *token;
 int total_length = (files ? strlen(files) : 0) + 7;
-char *copy = new char[total_length];
+char *copy = new char[(size_t)total_length];
+
 strncpy(copy, "index;", 6);
 if (files)
 	strcat(copy, files);
@@ -112,6 +113,7 @@ for (; token != NULL; token = strtok(NULL, seperators))
 int result = index(argc, file_list);
 delete [] copy;
 delete [] file_list;
+
 return result;
 }
 
@@ -354,7 +356,20 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
-		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
+		{
+		puts("Load");
+		long long data_stream_length;
+		char *data_stream = ANT_disk::read_entire_file(argv[param], &data_stream_length);
+
+		if (param_block.trec_cleanup)
+			{
+			puts("Clean up");
+			data_stream = ANT_turn_binary_into_ascii(data_stream, data_stream_length);
+			}
+
+		puts("Index");
+		source = new ANT_directory_iterator_file(data_stream, ANT_directory_iterator::READ_FILE);
+		}
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::PKZIP)

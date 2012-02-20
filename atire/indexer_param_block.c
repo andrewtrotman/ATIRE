@@ -45,6 +45,7 @@ doclist_filename = "doclist.aspt";
 static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
 stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
+trec_cleanup = false;
 }
 
 /*
@@ -84,6 +85,7 @@ puts("-rphpbb <username> <password> <hostname> <database> <type> MySQL phpBB ins
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtlzo          Search in tar.lzo files for indexable files");
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
+puts("-rtrecclean     Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>, remove '\0' and high-bit characters from files");
 puts("-rtrecweb       Recursive search for TREC formatted <DOC>...</DOC> formatted files");
 puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
@@ -335,6 +337,11 @@ for (param = 1; param < argc; param++)
 			recursive = TAR_LZO;
 		else if (strcmp(command, "rtrec") == 0)
 			recursive = TREC;
+		else if (strcmp(command, "rtrecclean") == 0)
+			{
+			recursive = TREC;
+			trec_cleanup = true;
+			}
 		else if (strcmp(command, "rtrecweb") == 0)
 			recursive = TRECWEB;
 		else if (strcmp(command, "rcsv") == 0)
