@@ -28,7 +28,7 @@ ANT_search_engine_memory_index::~ANT_search_engine_memory_index()
 	ANT_SEARCH_ENGINE_MEMORY_INDEX::GET_POSTINGS()
 	----------------------------------------------
 */
-unsigned char *ANT_search_engine_memory_index::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
+unsigned char *ANT_search_engine_memory_index::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination, long squiggle)
 {
 ANT_memory_index_hash_node *index_node;
 long long length;

@@ -718,7 +718,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			term_details->postings_length = bytes;
 		}
 
-	verify = raw_postings_buffer = get_postings(term_details, raw_postings_buffer, FALSE);
+	verify = raw_postings_buffer = get_postings(term_details, raw_postings_buffer);
 #endif // end of TOP_K_READ_AND_DECOMPRESSOR
 	stats->add_posting_read_time(stats->stop_timer(now));
 
@@ -865,7 +865,7 @@ ANT_compressable_integer term_frequency;
 	load the postings from disk
 */
 now = stats->start_timer();
-verify = postings_buffer = get_postings(term_details, postings_buffer, FALSE);
+verify = postings_buffer = get_postings(term_details, postings_buffer);
 stats->add_posting_read_time(stats->stop_timer(now));
 if (verify == NULL)			// something has gone wrong
 	return 0;

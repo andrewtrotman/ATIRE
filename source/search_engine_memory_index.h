@@ -22,7 +22,7 @@ public:
 	ANT_search_engine_memory_index(ANT_memory_index *index, ANT_memory *memory);
 	virtual ~ANT_search_engine_memory_index();
 
-	virtual unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
+	virtual unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination, long squiggle);
 	virtual ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 } ;
 
