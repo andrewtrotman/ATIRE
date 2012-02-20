@@ -109,7 +109,7 @@ public:
 	void set_accumulator_width(long long width);
 	void init_accumulators(long long top_k);
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
-	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
+	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination, long squiggle);
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
 	virtual ANT_search_engine_btree_leaf *get_collection_frequency(char *base_term, ANT_stem *stem_maker, ANT_search_engine_btree_leaf *stemmed_term_details);

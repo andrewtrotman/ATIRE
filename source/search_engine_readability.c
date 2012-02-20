@@ -9,6 +9,13 @@
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
 
+#ifndef FALSE
+	#define FALSE 0
+#endif
+#ifndef TRUE
+	#define TRUE (!FALSE)
+#endif
+
 /*
 	ANT_SEARCH_ENGINE_READABILITY::OPEN()
 	-------------------------------------
@@ -36,7 +43,7 @@ memory->realign();
 if (get_postings_details("~dalechall", &collection_details) == NULL)
 	exit(puts("This index is not annotated with readability data - terminating"));
 
-postings_buffer = get_postings(&collection_details, postings_buffer);
+postings_buffer = get_postings(&collection_details, postings_buffer, TRUE);
 factory.decompress(decompress_buffer, postings_buffer, collection_details.local_document_frequency);
 
 hardest_document = 0;

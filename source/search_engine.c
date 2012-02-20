@@ -220,7 +220,7 @@ results_list = new (memory) ANT_search_engine_result(memory, documents);
 /*
 	decompress the document length vector
 */
-postings_buffer = get_postings(&collection_details, postings_buffer);
+postings_buffer = get_postings(&collection_details, postings_buffer, TRUE);
 factory.decompress(decompress_buffer, postings_buffer, collection_details.local_document_frequency);
 
 sum = 0;
@@ -243,7 +243,7 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	{
 	memory->realign();
 	document_offsets = (long long *)memory->malloc(collection_details.local_document_frequency * sizeof(*document_offsets));
-	postings_buffer = get_postings(&collection_details, postings_buffer);
+	postings_buffer = get_postings(&collection_details, postings_buffer, TRUE);
 	factory.decompress(decompress_buffer, postings_buffer, collection_details.local_document_frequency);
 	document_longest_compressed = sum = 0;
 	for (current_length = 0; current_length < collection_details.local_document_frequency; current_length++)
@@ -256,16 +256,8 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 		}
 	document_decompress_buffer = (char *)memory->malloc(document_longest_compressed);
 
-	/*
-		when we call get_decompressed_postings() we get an impact ordered postings list
-		the first value of which is the term-frequency and the second is the value we want
-	*/
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
-#ifdef SPECIAL_COMPRESSION
-		document_longest_raw_length = *(value + 1);
-#else
 		document_longest_raw_length = *value;
-#endif
 	}
 
 /*
@@ -499,9 +491,9 @@ else
 	ANT_SEARCH_ENGINE::GET_POSTINGS()
 	---------------------------------
 */
-unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
+unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination, long squiggle)
 {
-int ret;
+int ret = TRUE;
 #ifdef SPECIAL_COMPRESSION
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
@@ -549,13 +541,26 @@ int ret;
 		*/
 		*destination = 0;		// no compression
 		into = (ANT_compressable_integer *)(destination + 1);
-		*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
-		*into++ = term_details->postings_position_on_disk >> 32;
-		*into++ = 0;
-		*into++ = (ANT_compressable_integer)term_details->postings_length;
-		*into++ = (ANT_compressable_integer)term_details->impacted_length;
-		*into++ = 0;
-		term_details->impacted_length = term_details->local_document_frequency == 1 ? 3 : 6;
+		if (squiggle)
+			{
+			*into++ = term_details->postings_position_on_disk >> 32;
+			/*
+				The list that's given to compress is assumed to be difference encoded,
+				which is not the case for ~ variables
+			*/
+			*into = (ANT_compressable_integer)term_details->impacted_length - *(into - 1);
+			term_details->impacted_length = term_details->local_document_frequency;
+			}
+		else
+			{
+			*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
+			*into++ = term_details->postings_position_on_disk >> 32;
+			*into++ = 0;
+			*into++ = (ANT_compressable_integer)term_details->postings_length;
+			*into++ = (ANT_compressable_integer)term_details->impacted_length;
+			*into++ = 0;
+			term_details->impacted_length = term_details->local_document_frequency == 1 ? 3 : 6;
+			}
 #endif
 		}
 	else
@@ -573,15 +578,11 @@ int ret;
 		ret = index->direct_read(&destination, term_details->postings_length);
 	#else
 		ret = index->read(destination, term_details->postings_length);
-
 	#endif
 #endif
 
-		if (!ret)
-			{
-			fprintf(stderr, "Error reading from index\n");
-			exit(2);
-			}
+if (!ret)
+	exit(printf("Error reading from index\n"));
 
 return destination;
 }
@@ -717,7 +718,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			term_details->postings_length = bytes;
 		}
 
-	verify = raw_postings_buffer = get_postings(term_details, raw_postings_buffer);
+	verify = raw_postings_buffer = get_postings(term_details, raw_postings_buffer, FALSE);
 #endif // end of TOP_K_READ_AND_DECOMPRESSOR
 	stats->add_posting_read_time(stats->stop_timer(now));
 
@@ -864,7 +865,7 @@ ANT_compressable_integer term_frequency;
 	load the postings from disk
 */
 now = stats->start_timer();
-verify = postings_buffer = get_postings(term_details, postings_buffer);
+verify = postings_buffer = get_postings(term_details, postings_buffer, FALSE);
 stats->add_posting_read_time(stats->stop_timer(now));
 if (verify == NULL)			// something has gone wrong
 	return 0;
@@ -1287,7 +1288,7 @@ if (verify == NULL)
 	Load the postings from disk
 */
 now = stats->start_timer();
-verify = postings_buffer = get_postings(term_details, postings_buffer);
+verify = postings_buffer = get_postings(term_details, postings_buffer, *term == '~');
 stats->add_posting_read_time(stats->stop_timer(now));
 if (verify == NULL)
 	return NULL;
