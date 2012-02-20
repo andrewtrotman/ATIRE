@@ -1340,7 +1340,7 @@ long long start, end, times, id, get;
 ANT_search_engine_result_iterator current;
 
 if (document_offsets == NULL)
-	return NULL;
+	return 0;
 
 times = 0;
 get = to - from;
