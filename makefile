@@ -171,7 +171,7 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="unsigned short"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 
-#MINUS_D = $(MINUS_D) -DPURIFY
+MINUS_D = $(MINUS_D) -DPURIFY
 
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
@@ -275,6 +275,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_warc_gz_recursive.obj		\
 	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
+	$(OBJDIR)\directory_iterator_file_buffered.obj	\
 	$(OBJDIR)\directory_iterator_csv.obj			\
 	$(OBJDIR)\directory_iterator_recursive.obj		\
 	$(DIRECTORY_ITERATOR_MYSQL)						\

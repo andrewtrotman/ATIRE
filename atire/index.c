@@ -16,6 +16,7 @@
 #include "directory_iterator_compressor.h"
 #include "directory_iterator_deflate.h"
 #include "directory_iterator_file.h"
+#include "directory_iterator_file_buffered.h"
 #include "directory_iterator_csv.h"
 #include "directory_iterator_object.h"
 #include "directory_iterator_pkzip.h"
@@ -93,8 +94,8 @@ int index(char *files)
 static char *seperators = ";: ";
 char **argv, **file_list;
 char *token;
-int total_length = (files ? strlen(files) : 0) + 7;
-char *copy = new char[(size_t)total_length];
+size_t total_length = (files ? strlen(files) : 0) + 7;
+char *copy = new char[total_length];
 
 strncpy(copy, "index;", 6);
 if (files)
@@ -355,19 +356,21 @@ for (param = first_param; param < argc; param++)
 			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
 		source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE);
 		}
+	else if (param_block.recursive == ANT_indexer_param_block::TRECBIG)
+		{
+		ANT_instream *instream;
+
+		instream = new ANT_instream_file(new ANT_memory, argv[param]);
+		source = new ANT_directory_iterator_file_buffered(instream, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
+		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		{
-		puts("Load");
 		long long data_stream_length;
 		char *data_stream = ANT_disk::read_entire_file(argv[param], &data_stream_length);
 
 		if (param_block.trec_cleanup)
-			{
-			puts("Clean up");
 			data_stream = ANT_turn_binary_into_ascii(data_stream, data_stream_length);
-			}
 
-		puts("Index");
 		source = new ANT_directory_iterator_file(data_stream, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)

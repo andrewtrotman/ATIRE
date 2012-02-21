@@ -19,7 +19,7 @@ class ANT_indexer_param_block : public ANT_indexer_param_block_rank, public ANT_
 {
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 } ;
-	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, TAR_LZO, PKZIP, TREC, WARC_GZ, RECURSIVE_WARC_GZ, CSV, TRECWEB, VBULLETIN, PHPBB, MYSQL };
+	enum { NONE = 0, DIRECTORIES, TAR_BZ2, TAR_GZ, TAR_LZO, PKZIP, WARC_GZ, RECURSIVE_WARC_GZ, CSV, TREC, TRECWEB, TRECBIG, VBULLETIN, PHPBB, MYSQL };
 
 private:
 	int argc;
