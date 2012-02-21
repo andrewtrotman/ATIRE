@@ -6,7 +6,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 1
+DEBUG = 0
 			
 #
 #	Which compiler are we using
@@ -171,7 +171,7 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="unsigned short"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 
-MINUS_D = $(MINUS_D) -DPURIFY
+#MINUS_D = $(MINUS_D) -DPURIFY
 
 #
 #	Compiler and flags (the top line is debug, the bottom is release)
