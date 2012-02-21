@@ -869,7 +869,10 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
 		search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
 	#else
-		search_engine->set_accumulator_width(ANT_max((long long)1, (long long)sqrt(64 * search_engine->document_count() / (double)sum_of_document_frequencies)));
+		if (sum_of_document_frequencies == 0)
+			search_engine->set_accumulator_width(1);
+		else
+			search_engine->set_accumulator_width(ANT_max((long long)1, (long long)sqrt(64 * search_engine->document_count() / (double)sum_of_document_frequencies)));
 	#endif
 #endif
 

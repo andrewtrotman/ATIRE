@@ -88,8 +88,10 @@ public:
 	if (new_width == 0)
 		new_width = 1;
 
-	width = new_width;
-	height = (documents / width) + 1;
+	if ((width = new_width) == 1)
+		height = documents;
+	else
+		height = (documents / width) + 1;
 	init_flags.resize(height);
 
 	init_flags.rewind();

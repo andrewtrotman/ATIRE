@@ -106,8 +106,9 @@ if (new_chunks_long != chunks_long)
 	{
 	chunks_long = new_chunks_long;
 	bytes_long = chunks_long * (BITS_PER_WORD / 8);
-	bits_long = len_in_bits;
 	}
+
+bits_long = len_in_bits;
 }
 
 /*
