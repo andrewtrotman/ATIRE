@@ -27,8 +27,9 @@ public:
 
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new (size_t count, ANT_memory *memory) { return memory->malloc(count); }
-	void *operator new (size_t count)                     { return new char [count]; }
+	void *operator new (size_t count)                     { return (char *)malloc(count); }
 	unsigned char operator[](long pos)                    { return (unsigned char)start[pos]; }
+	void operator delete(void *mem) { free(mem); }
 
 	size_t length(void) { return string_length; }
 	char *string(void)  { return start; }
