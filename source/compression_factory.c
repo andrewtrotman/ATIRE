@@ -154,7 +154,8 @@ for (which = 0; which < number_of_techniques; which++)
 if (preferred < 0)
 	{
 	failures++;
-	return 0;
+	preferred = NONE;		// in the case of failure to compress resort to storing the postings list on disk uncompressed.
+	//return 0;
 	}
 
 scheme[preferred].uses++;
