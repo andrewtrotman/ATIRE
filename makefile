@@ -6,7 +6,7 @@
 #
 #	DEBUG. Comment out the line below to compile in DEBUG mode
 #
-DEBUG = 0
+DEBUG = 1
 			
 #
 #	Which compiler are we using

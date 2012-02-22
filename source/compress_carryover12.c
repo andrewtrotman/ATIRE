@@ -205,7 +205,7 @@ unsigned __mask[33]= {
 	QCEILLOG_2()
 	------------
 */
-static inline long qceillog_2(ANT_compressable_integer x)
+static inline int32_t qceillog_2(ANT_compressable_integer x)
 {
 ANT_compressable_integer _B_x  = x - 1;
 
@@ -219,18 +219,15 @@ return _B_x >> 16 ?
 	---------------
 	Calculate the number of bits needed to store the largest integer in the list
 */
-static inline long calc_min_bits(ANT_compressable_integer *gaps, long long n)
+static inline int32_t calc_min_bits(ANT_compressable_integer *gaps, int64_t n)
 {
-long long i;
-long bits, max = 0;
+int64_t i;
+int32_t bits, max = 0;
 
 for (i = 0; i < n; i++)
-#ifdef ALLOW_ZERO
-	if (max < (bits = qceillog_2(gaps[i] + 1)))
-#else
-	if (max < (bits = qceillog_2(gaps[i])))
-#endif
-		max = bits;
+
+if (max < (bits = qceillog_2(gaps[i] + 1)))
+	max = bits;
 
 return max > 28 ? -1 : max;
 }
@@ -243,30 +240,22 @@ return max > 28 ? -1 : max;
 	code the number of elems  with the remaining < "len"
 	Returns 0 (impossible) otherwise
 */
-long long elems_coded(long avail, long len, ANT_compressable_integer *gaps, long long start, long long end)
+int64_t elems_coded(int32_t avail, int32_t len, ANT_compressable_integer *gaps, int64_t start, int64_t end)
 {
-long long i, real_end, max;
+int64_t i, real_end, max;
 
 if (len)
 	{
 	max = avail/len;
 	real_end = start + max - 1 <= end ? start + max: end + 1; 
-#ifdef ALLOW_ZERO
-	for (i = start; i < real_end && qceillog_2(gaps[i] + 1) <= len; i++);
-#else
-	for (i = start; i < real_end && qceillog_2(gaps[i]) <= len; i++);
-#endif
+	for (i = start; i < real_end && qceillog_2(gaps[i] + 1) <= len; i++);			// empty loop
 	if (i < real_end)
 		return 0;
 	return real_end - start;
 	}
 else
 	{
-#ifdef ALLOW_ZERO
 	for (i = start; i < start + MAX_ELEM_PER_WORD && i <= end && qceillog_2(gaps[i] + 1) <= len; i++);			// empty loop
-#else
-	for (i = start; i < start + MAX_ELEM_PER_WORD && i <= end && qceillog_2(gaps[i]) <= len; i++);			// empty loop
-#endif
 
 	if (i - start < 2)
 		return 0;
@@ -287,12 +276,12 @@ else
 */
 long long ANT_compress_carryover12::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *a, long long n)
 {
-unsigned long max_bits;
+uint32_t max_bits;
 uint32_t __values[32];			// can't compress integers larger than 2^28 so they will all fit in a uint32_t
-unsigned long __bits[32];
-long long i;
-long j, __wremaining = 32, __pvalue = 0, size, avail;
-long long elems = 0;
+uint32_t __bits[32];
+int64_t i;
+int32_t j, __wremaining = 32, __pvalue = 0, size, avail;
+int64_t elems = 0;
 unsigned char *table, *base, *destination_end, *original_destination = destination;
 
 destination_end = destination + destination_length;
@@ -327,11 +316,7 @@ for (i = 0; i < n; )
 	/* 2. Coding: Code elements using row "base" & column "j" */
 	WORD_ENCODE(j + 1, 2);             /* encoding column */
 	for ( ; elems ; elems--, i++)   /* encoding d-gaps */
-#ifdef ALLOW_ZERO
 		WORD_ENCODE(a[i] + 1, size);
-#else
-		WORD_ENCODE(a[i], size);
-#endif
 	}
 
 if (__pvalue)
@@ -354,10 +339,10 @@ return destination - original_destination;
 */
 void ANT_compress_carryover12::decompress(ANT_compressable_integer *destination, unsigned char *compressed, long long n)
 {
-long long i;
-long __wbits = TRANS_TABLE_STARTER;
-long __wremaining = -1;
-unsigned long *__wpos = (unsigned long *)compressed, __wval = 0;
+int64_t i;
+int32_t __wbits = TRANS_TABLE_STARTER;
+int32_t __wremaining = -1;
+uint32_t *__wpos = (uint32_t *)compressed, __wval = 0;
 
 CARRY_BLOCK_DECODE_START;
 for (i = 0; i < n; i++)

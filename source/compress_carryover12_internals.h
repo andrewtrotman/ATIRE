@@ -8,6 +8,7 @@
 #ifndef __COMPRESS_CARRYOVER12_INTERNALS_H__
 #define __COMPRESS_CARRYOVER12_INTERNALS_H__
 
+#include "fundamental_types.h"
 #include "compress_carryover12.h"
 
 extern unsigned char *__pc30, *__pc32;
@@ -40,7 +41,7 @@ extern unsigned __mask[33];
 #define CARRY_BLOCK_DECODE_START											\
 do  																		\
 	{																		\
-	long tmp;																\
+	int32_t tmp;																\
 	WORD_DECODE(tmp, 1);													\
 	__pc30 = tmp == 1 ? trans_B1_30_small : trans_B1_30_big;				\
 	__pc32 = tmp == 1 ? trans_B1_32_small : trans_B1_32_big;				\
@@ -73,29 +74,16 @@ while (0)
 
 
 
-#ifdef ALLOW_ZERO
-	#define CARRY_DECODE(x)													\
-		do 																	\
-			{																\
-			if (__wremaining < __wbits)										\
-			CARRY_DECODE_GET_SELECTOR										\
-			x = (__wval & __mask[__wbits]);									\
-			__wval >>= __wbits;												\
-			__wremaining -= __wbits;										\
-			}																\
-		while(0)
-#else
-	#define CARRY_DECODE(x)													\
-		do 																	\
-			{																\
-			if (__wremaining < __wbits)										\
-			CARRY_DECODE_GET_SELECTOR										\
-			x = (__wval & __mask[__wbits]) + 1;								\
-			__wval >>= __wbits;												\
-			__wremaining -= __wbits;										\
-			}																\
-		while(0)
-#endif
+#define CARRY_DECODE(x)													\
+	do 																		\
+		{																	\
+		if (__wremaining < __wbits)											\
+		CARRY_DECODE_GET_SELECTOR											\
+		x = (__wval & __mask[__wbits]);										\
+		__wval >>= __wbits;													\
+		__wremaining -= __wbits;											\
+		}																	\
+	while(0)
 
 
 #endif  /* __COMPRESS_CARRYOVER12_INTERNALS_H__ */
