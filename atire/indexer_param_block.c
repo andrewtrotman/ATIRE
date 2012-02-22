@@ -85,7 +85,7 @@ puts("-rphpbb <username> <password> <hostname> <database> <type> MySQL phpBB ins
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtlzo          Search in tar.lzo files for indexable files");
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
-puts("-rtrecclean     Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>, remove '\0' and high-bit characters from files");
+puts("-rtrecclean     Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>, remove '\\0' and high-bit characters from files");
 puts("-rtrecbig       see -rtrecclean but indexing a source file large than memory");
 puts("-rtrecweb       Recursive search for TREC formatted <DOC>...</DOC> formatted files");
 puts("-rtgz           Search in tar.gz files for indexable files");
