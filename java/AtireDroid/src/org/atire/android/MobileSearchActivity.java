@@ -2,7 +2,7 @@ package org.atire.android;
 
 import java.util.ArrayList;
 
-import org.atire.Indexer;
+import org.atire.swig.atire_apis;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -22,6 +22,8 @@ public class MobileSearchActivity extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        System.loadLibrary("atire_android_jni");
+        
         Button button = (Button)findViewById(R.id.index_button);
         button.setOnClickListener(this);
         
@@ -32,6 +34,7 @@ public class MobileSearchActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		new Indexer().index("/sdcard/data/moby.txt");
+		atire_apis.atire_index("/sdcard/data/moby.txt");
+		textViewResult.setText("Index finished");
 	}
 }

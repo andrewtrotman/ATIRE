@@ -104,6 +104,6 @@ AC_CHECK_FUNCS([getcwd gettimeofday memmove memset sqrt strchr strcspn strdup st
 AC_CONFIG_FILES([
 				Makefile
 				uniseg/Makefile
-				jni/Makefile
+				java/jni/Makefile
 				])
 AC_OUTPUT

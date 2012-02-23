@@ -58,8 +58,8 @@
 	#include <limits.h>
 #endif
 
-int index(int argc, char *argv[]);
-int index(char *files);
+int atire_index(int argc, char *argv[]);
+int atire_index(char *files);
 
 /*
 	REPORT()
@@ -79,17 +79,27 @@ stats->print_elapsed_time();
 */
 int main(int argc, char *argv[])
 {
-return index(argc, argv);
+return atire_index(argc, argv);
 }
 
+#else
+
+// do nothing
+int atire_exit(int errno) {
+	return errno;
+}
+
+#define exit atire_exit
+
 #endif
+
 /*
-	INDEX()
-	------
+	ATIRE_INDEX()
+	-------------
 	for the simplicity of JNI calling
 	files are seperated with ;
 */
-int index(char *files)
+int atire_index(char *files)
 {
 static char *seperators = ";: ";
 char **argv, **file_list;
@@ -111,7 +121,7 @@ for (; token != NULL; token = strtok(NULL, seperators))
 	++argc;
 	}
 *argv = NULL;
-int result = index(argc, file_list);
+int result = atire_index(argc, file_list);
 delete [] copy;
 delete [] file_list;
 
@@ -119,10 +129,10 @@ return result;
 }
 
 /*
-	INDEX()
-	------
+	ATIRE_INDEX()
+	-------------
 */
-int index(int argc, char *argv[])
+int atire_index(int argc, char *argv[])
 {
 ANT_indexer_param_block param_block(argc, argv);
 ANT_stats_time stats;
