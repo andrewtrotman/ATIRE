@@ -101,7 +101,7 @@ int atire_exit(int errno) {
 */
 int atire_index(char *files)
 {
-static char *seperators = ";: ";
+static char *seperators = ";+ ";
 char **argv, **file_list;
 char *token;
 size_t total_length = (files ? strlen(files) : 0) + 7;
