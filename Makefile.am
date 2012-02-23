@@ -78,6 +78,7 @@ core_sources =  \
 	$(SRC_DIR)/directory_iterator_csv.c \
 	$(SRC_DIR)/directory_iterator_deflate.c \
 	$(SRC_DIR)/directory_iterator_file.c \
+	$(SRC_DIR)/directory_iterator_file_buffered.c \
 	$(SRC_DIR)/directory_iterator_internals.c \
 	$(SRC_DIR)/directory_iterator_multiple.c \
 	$(SRC_DIR)/directory_iterator_mysql.c \
@@ -260,6 +261,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_csv.h \
 	$(SRC_DIR)/directory_iterator_deflate.h \
 	$(SRC_DIR)/directory_iterator_file.h \
+	$(SRC_DIR)/directory_iterator_file_buffered.h \
 	$(SRC_DIR)/directory_iterator.h \
 	$(SRC_DIR)/directory_iterator_internals.h \
 	$(SRC_DIR)/directory_iterator_multiple.h \

@@ -46,6 +46,7 @@ CORE_SOURCES =  \
 	$(SRC_DIR)/directory_iterator_csv.c \
 	$(SRC_DIR)/directory_iterator_deflate.c \
 	$(SRC_DIR)/directory_iterator_file.c \
+	$(SRC_DIR)/directory_iterator_file_buffered.c \
 	$(SRC_DIR)/directory_iterator_internals.c \
 	$(SRC_DIR)/directory_iterator_multiple.c \
 	$(SRC_DIR)/directory_iterator_mysql.c \
@@ -181,7 +182,7 @@ CORE_SOURCES =  \
 
 OTHER_SOURCES := glob.c
 
-LOCAL_MODULE    := atire
+LOCAL_MODULE    := atire_android
 
 LOCAL_SRC_FILES := $(OTHER_SOURCES) \
 				$(CORE_SOURCES) 
@@ -215,14 +216,18 @@ INDEX_SOURCES =	$(ATIRE_DIR)/index.c \
 			 $(ATIRE_DIR)/indexer_param_block_topsig.c \
 			 $(ATIRE_DIR)/indexer_param_block_pregen.c \
 			 $(ATIRE_DIR)/indexer_param_block_stem.c
+			 
+JNI_SOURCES = ./atire_wrap.c
 
-LOCAL_MODULE    := atireapi
-LOCAL_SRC_FILES := $(API_SOURCES) \
+LOCAL_MODULE    := atire_android_jni
+LOCAL_SRC_FILES := \
+			$(JNI_SOURCES) \
+			$(API_SOURCES) \
 			$(INDEX_SOURCES)
+			
+LOCAL_STATIC_LIBRARIES := atire_android
 
-LOCAL_STATIC_LIBRARIES := atire
-
-LOCAL_CFLAGS    := -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
+LOCAL_CFLAGS    := -DATIRE_LIBRARY -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 		-DSPECIAL_COMPRESSION=1 -DTOP_K_READ_AND_DECOMPRESSOR \
 		-I $(SRC_DIR) -I ./include -I $(ATIRE_DIR)
 		

@@ -9,7 +9,7 @@ AM_CPPFLAGS += -std=c++0x -pedantic
 lib_LTLIBRARIES = libatire_jni.la
 
 
-libatire_jni_la_SOURCES = atire_wrap.cxx 
+libatire_jni_la_SOURCES = atire_wrap.c 
 libatire_jni_la_LDFLAGS = 
 libatire_jni_la_DEPENDENCIES = ../libatire_index_param.la ../libatire_index.la
 libatire_jni_la_LIBADD = -L../ -latire_index_param -L../ -latire_index 
