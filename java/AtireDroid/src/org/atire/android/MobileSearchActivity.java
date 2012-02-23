@@ -34,7 +34,7 @@ public class MobileSearchActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		atire_apis.atire_index("/sdcard/data/moby.txt");
+		atire_apis.atire_index("-rtrec;/sdcard/data/moby.txt");
 		textViewResult.setText("Index finished");
 	}
 }
