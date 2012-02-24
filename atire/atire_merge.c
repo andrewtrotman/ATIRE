@@ -71,12 +71,13 @@ while (current < end)
 	WRITE_POSTINGS()
 	----------------
 */
-ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, long long *longest_postings)
+ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, long long trimpoint, long long *longest_postings)
 {
 ANT_compression_factory factory;
 ANT_memory_index_hash_node *node;
+ANT_compressable_integer *current, *end;
 uint64_t current_disk_position;
-long long len = 0;
+long long len = 0, used = 0;
 
 node = combined_term_index->add_term(new ANT_string_pair(term), 0);
 
@@ -111,6 +112,35 @@ if (node->document_frequency <= 2)
 else
 #endif
 	{
+	
+	/*
+		Manipulate the impact ordering to deal with the static prune point if necessary
+	*/
+	if (leaf->local_document_frequency > trimpoint)
+		{
+		current = raw;
+		end = raw + trimpoint;
+		
+		while (used < trimpoint)
+			{
+			end += 2;
+			current++;
+			while (*current != 0 && used < trimpoint)
+				{
+				used++;
+				current++;
+				}
+			if (used < trimpoint)
+				current++;
+			}
+		/*
+			Terminate the impact ordering
+		*/
+		leaf->impacted_length = current - raw;
+		raw[leaf->impacted_length] = 0;
+		leaf->impacted_length++;
+		}
+	
 	len = factory.compress(postings_list, postings_list_size, raw, leaf->impacted_length);
 	
 	current_disk_position = index->tell();
@@ -130,7 +160,7 @@ return node;
 	WRITE_VARIABLE()
 	----------------
 */
-ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, long long *longest_postings)
+ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, long long trimpoint, long long *longest_postings)
 {
 ANT_compressable_integer raw[3]; // make room for it to be impacted in write_postings
 
@@ -140,7 +170,7 @@ raw[1] = raw[1] - raw[0]; // difference encoded
 
 leaf->impacted_length = leaf->local_collection_frequency = leaf->local_document_frequency = 2;
 
-return write_postings(term, raw, postings_list, postings_list_size, index, combined_term_index, leaf, longest_postings);
+return write_postings(term, raw, postings_list, postings_list_size, index, combined_term_index, leaf, trimpoint, longest_postings);
 }
 
 /*
@@ -320,8 +350,8 @@ if (do_documents)
 	/*
 		Now we've done the documents, do the filename start/finish.
 	*/
-	p = write_variable("~documentfilenamesstart", document_filenames_start, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
-	p = write_variable("~documentfilenamesfinish", document_filenames_finish, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
+	p = write_variable("~documentfilenamesstart", document_filenames_start, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+	p = write_variable("~documentfilenamesfinish", document_filenames_finish, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
 	
 	/*
 		Update stats, because this is a difference encoded list, we start with 1, then substract one
@@ -337,14 +367,14 @@ if (do_documents)
 		leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency - 1;
 		leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency - 1;
 		}
-	p = write_postings("~documentoffsets", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
+	p = write_postings("~documentoffsets", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
 	
 	/*
 		Now we've done the documents and offsets, do the longest document.
 	*/
 	raw[number_engines][0] = longest_document;
 	leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
-	p = write_postings("~documentlongest", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
+	p = write_postings("~documentlongest", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
 	}
 
 /*
@@ -367,10 +397,10 @@ for (engine = 0; engine < number_engines; engine++)
 	leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency;
 	}
 
-p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
+p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
 
 if (trimpoint != LONG_MAX)
-	p = write_variable("~trimpoint", trimpoint, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
+	p = write_variable("~trimpoint", trimpoint, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
 
 /*
 	Now move onto the "normal" terms
@@ -437,7 +467,7 @@ while (should_continue)
 		/*
 			Serialise the merged postings
 		*/
-		p = write_postings(next_term_to_process, raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &longest_postings);
+		p = write_postings(next_term_to_process, raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
 		}
 	
 	/*
