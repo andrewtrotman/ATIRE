@@ -18,6 +18,7 @@
 #include "ranking_function_term_count.h"
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
+#include "stop_word.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -38,6 +39,32 @@ puts("");
 
 puts("See COMPRESSION, OPTIMISATIONS, TERM EXPANSION from index");
 exit(0);
+}
+
+/*
+	SHOULD_PRUNE()
+	--------------
+*/
+inline long should_prune(char *term, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno)
+{
+if (param->stop_word_removal == ANT_memory_index::NONE)
+	return false;
+else if (*term == '~')
+	return false;
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_NUMBERS && ANT_isdigit(*term))
+	return true;
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_CF_SINGLETONS && leaf->local_collection_frequency == 1)
+	return true;
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_DF_SINGLETONS && leaf->local_document_frequency == 1)
+	return true;
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_TAGS && ANT_isupper(*term))
+	return true;
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_DF_FREQUENTS && (double)leaf->local_document_frequency / (double)largest_docno >= param->stop_word_df_threshold)
+	return true;
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_NCBI_STOPLIST && ANT_stop_word::isstop(term))
+	return true;
+else
+	return false;
 }
 
 /*
@@ -71,13 +98,16 @@ while (current < end)
 	WRITE_POSTINGS()
 	----------------
 */
-ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, long long trimpoint, long long *longest_postings)
+ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
 {
 ANT_compression_factory factory;
 ANT_memory_index_hash_node *node;
 ANT_compressable_integer *current, *end;
 uint64_t current_disk_position;
 long long len = 0, used = 0;
+
+if (should_prune(term, leaf, param, largest_docno))
+	return NULL;
 
 node = combined_term_index->add_term(new ANT_string_pair(term), 0);
 
@@ -116,21 +146,21 @@ else
 	/*
 		Manipulate the impact ordering to deal with the static prune point if necessary
 	*/
-	if (leaf->local_document_frequency > trimpoint)
+	if (leaf->local_document_frequency > param->static_prune_point)
 		{
 		current = raw;
-		end = raw + trimpoint;
+		end = raw + param->static_prune_point;
 		
-		while (used < trimpoint)
+		while (used < param->static_prune_point)
 			{
 			end += 2;
 			current++;
-			while (*current != 0 && used < trimpoint)
+			while (*current != 0 && used < param->static_prune_point)
 				{
 				used++;
 				current++;
 				}
-			if (used < trimpoint)
+			if (used < param->static_prune_point)
 				current++;
 			}
 		/*
@@ -160,7 +190,7 @@ return node;
 	WRITE_VARIABLE()
 	----------------
 */
-ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, long long trimpoint, long long *longest_postings)
+ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
 {
 ANT_compressable_integer raw[3]; // make room for it to be impacted in write_postings
 
@@ -170,7 +200,7 @@ raw[1] = raw[1] - raw[0]; // difference encoded
 
 leaf->impacted_length = leaf->local_collection_frequency = leaf->local_document_frequency = 2;
 
-return write_postings(term, raw, postings_list, postings_list_size, index, combined_term_index, leaf, trimpoint, longest_postings);
+return write_postings(term, raw, postings_list, postings_list_size, index, combined_term_index, leaf, param, largest_docno, longest_postings);
 }
 
 /*
@@ -237,6 +267,10 @@ for (engine = 0; engine < number_engines; engine++)
 	}
 leaves[number_engines] = new ANT_search_engine_btree_leaf;
 raw[number_engines] = (ANT_compressable_integer *)malloc(sizeof(*raw[number_engines]) * raw_list_size);
+/*
+	Overwrite the trimpoint given by the param block if some of the merged indexes have a smaller trimpoint
+*/
+param_block.static_prune_point = ANT_min(param_block.static_prune_point, trimpoint);
 
 ANT_compression_factory factory;
 ANT_compression_text_factory factory_text;
@@ -247,7 +281,11 @@ factory_text.set_scheme(param_block.document_compression_scheme);
 
 ANT_ranking_function_term_count rf(combined_docs, lengths);
 
+/*
+	We use this index as purely a store for the terms generated, no postings are ever added.
+*/
 ANT_memory_index *combined_term_index = new ANT_memory_index(NULL);
+
 ANT_memory_index_hash_node *p;
 ANT_memory_index_hash_node **term_list, **here;
 
@@ -289,7 +327,7 @@ index->write((unsigned char *)file_header, sizeof(file_header));
 stemmer = search_engines[0]->get_variable("~stemmer");
 for (engine = 1; engine < number_engines; engine++)
 	if (search_engines[engine]->get_variable("~stemmer") != stemmer)
-		exit(printf("Cannot merge indexes that have been stemmed differently (%s/%s at least)\n", argv[first_param], argv[first_param + engine]));
+		exit(printf("Cannot merge indexes that have been stemmed differently (%s/%s)\n", argv[first_param], argv[first_param + engine]));
 
 for (engine = 0; engine < number_engines; engine++)
 	do_documents = do_documents && search_engines[engine]->get_postings_details("~documentoffsets", leaves[engine]);
@@ -350,8 +388,8 @@ if (do_documents)
 	/*
 		Now we've done the documents, do the filename start/finish.
 	*/
-	p = write_variable("~documentfilenamesstart", document_filenames_start, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
-	p = write_variable("~documentfilenamesfinish", document_filenames_finish, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+	p = write_variable("~documentfilenamesstart", document_filenames_start, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	p = write_variable("~documentfilenamesfinish", document_filenames_finish, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 	
 	/*
 		Update stats, because this is a difference encoded list, we start with 1, then substract one
@@ -367,14 +405,14 @@ if (do_documents)
 		leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency - 1;
 		leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency - 1;
 		}
-	p = write_postings("~documentoffsets", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+	p = write_postings("~documentoffsets", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 	
 	/*
 		Now we've done the documents and offsets, do the longest document.
 	*/
 	raw[number_engines][0] = longest_document;
 	leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
-	p = write_postings("~documentlongest", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+	p = write_postings("~documentlongest", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 	}
 
 /*
@@ -397,10 +435,13 @@ for (engine = 0; engine < number_engines; engine++)
 	leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency;
 	}
 
-p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 
 if (trimpoint != LONG_MAX)
-	p = write_variable("~trimpoint", trimpoint, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+	p = write_variable("~trimpoint", param_block.static_prune_point, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+
+if (stemmer)
+	p = write_variable("~stemmer", stemmer, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 
 /*
 	Now move onto the "normal" terms
@@ -467,7 +508,7 @@ while (should_continue)
 		/*
 			Serialise the merged postings
 		*/
-		p = write_postings(next_term_to_process, raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], trimpoint, &longest_postings);
+		p = write_postings(next_term_to_process, raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 		}
 	
 	/*
