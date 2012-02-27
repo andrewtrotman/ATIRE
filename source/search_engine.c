@@ -257,7 +257,11 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	document_decompress_buffer = (char *)memory->malloc(document_longest_compressed);
 
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
+#ifdef SPECIAL_COMPRESSION
+		document_longest_raw_length = *(value + 1);
+#else
 		document_longest_raw_length = *value;
+#endif
 	}
 
 /*
@@ -1288,6 +1292,34 @@ factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_le
 stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;
+}
+
+/*
+	ANT_SEARCH_ENGINE::GET_COMPRESSED_DOCUMENT()
+	--------------------------------------------
+	Note that this also contains the char saying which compression scheme is used as
+	well as the compressed document, so caveat emptor
+*/
+char *ANT_search_engine::get_compressed_document(char *destination, unsigned long *destination_length, long long id)
+{
+long long start, end;
+
+if (document_offsets == NULL || id >= document_count())
+	{
+	*destination = '\0';
+	*destination_length = 0;
+	return NULL;
+	}
+
+start = document_offsets[id];
+end = document_offsets[id + 1];
+
+index->seek(start);
+index->read((unsigned char *)destination, end - start);
+
+*destination_length = end - start;
+
+return destination;
 }
 
 /*

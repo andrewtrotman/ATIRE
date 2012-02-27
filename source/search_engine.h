@@ -154,6 +154,7 @@ public:
 		Methods related to the retrieval of documents from the document repository.
 	*/
 	long get_longest_document_length(void) { return document_longest_raw_length; }
+	char *get_compressed_document(char *destination, unsigned long *destination_length, long long id); // id is the document number
 	char *get_document(char *destination, unsigned long *destination_length, long long id); // id is the document number
 	long long get_document(char **destination, unsigned long **destination_length, long long from) { return get_documents(destination, destination_length, from, from + 1); }
 	long long get_documents(char **destination, unsigned long **destination_length, long long from, long long to); // from and to are relative to the results list.

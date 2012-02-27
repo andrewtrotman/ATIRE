@@ -20,13 +20,6 @@
 #include "search_engine_btree_leaf.h"
 #include "stop_word.h"
 
-#ifndef FALSE
-	#define FALSE 0
-#endif
-#ifndef TRUE
-	#define TRUE (!FALSE)
-#endif
-
 /*
 	USAGE()
 	-------
@@ -37,7 +30,47 @@ puts(ANT_version_string);
 printf("Usage: %s [option...] <index 1> <index 2> ... <index n>\n", program_name);
 puts("");
 
-puts("See COMPRESSION, OPTIMISATIONS, TERM EXPANSION from index");
+puts("GENERAL");
+puts("-------");
+puts("-? -h -H        Display this help message");
+puts("");
+
+puts("OUPUT FILE HANDLING");
+puts("--------------------");
+puts("-findex <fn>    Output filename for index [default merged_index.aspt]");
+puts("-fdoclist <fn>  Output filename for doclist [default merged_doclist.aspt]");
+puts("");
+
+puts("COMPRESSION");
+puts("-----------");
+puts("-c[abBceEgnrsv] Compress postings using any of:");
+puts("   a            try all schemes and choose the best  (same as -cceEgnrsv)");
+puts("   b            try all bitwise schemes and choose the best  (same as -ceEg)");
+puts("   B            try all Bytewise schemes and choose the best (same as -ccrsSv)");
+puts("   c            Carryover-12  (bytewise)");
+puts("   e            Elias Delta   (bitwise)");
+puts("   E            Elias Gamma   (bitwise)");
+puts("   g            Golomb        (bitwise)");
+puts("   n            None          (-)");
+puts("   r            Relative-10   (bytewise)");
+puts("   s            Simple-9      (bytewise)");
+puts("   S            Sigma         (bytewise)");
+puts("   v            Variable Byte (bytewise) [default]");
+puts("");
+
+puts("OPTIMISATIONS");
+puts("-------------");
+puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
+puts("-k[-lL0t][s<n>] Term culling");
+puts("   -            All terms remain in the indes [default]");
+puts("   0            Do not index numbers");
+puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
+puts("   L            Remove (stop) low frequency terms (where document frequency == 1)");
+puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
+puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   t            Do not index XML tag names");
+puts("");
+
 exit(0);
 }
 
@@ -109,6 +142,8 @@ long long len = 0, used = 0;
 if (should_prune(term, leaf, param, largest_docno))
 	return NULL;
 
+factory.set_scheme(param->compression_scheme);
+
 node = combined_term_index->add_term(new ANT_string_pair(term), 0);
 
 node->collection_frequency = leaf->local_collection_frequency;
@@ -118,9 +153,8 @@ node->document_frequency = leaf->local_document_frequency;
 if (node->document_frequency <= 2)
 	{
 	/*
-		Squiggle variables are given to us as an array of values
-		but we need to put them out impact ordered, so here we
-		impact order them under a 'tf' of 1
+		Squiggle variables are given to us as an array of values but we need to put them out
+		impact ordered, so here we impact order them under a 'tf' of 1
 	*/
 	if (node->string[0] == '~')
 		{
@@ -142,11 +176,10 @@ if (node->document_frequency <= 2)
 else
 #endif
 	{
-	
 	/*
 		Manipulate the impact ordering to deal with the static prune point if necessary
 	*/
-	if (leaf->local_document_frequency > param->static_prune_point)
+	if (node->string[0] != '~' && leaf->local_document_frequency > param->static_prune_point)
 		{
 		current = raw;
 		end = raw + param->static_prune_point;
@@ -209,7 +242,7 @@ return write_postings(term, raw, postings_list, postings_list_size, index, combi
 */
 int main(int argc, char *argv[])
 {
-int i;
+long i;
 long long postings_list_size = 500 * 1024;
 long long raw_list_size = 500 * 1024;
 long long offset, engine, upto = 0;
@@ -222,7 +255,13 @@ unsigned char *postings_list;
 
 ANT_indexer_param_block param_block(argc, argv);
 
+/*
+	Set the filename defaults (different from what indexer_param_block sets natively) before parsing
+*/
+param_block.index_filename = "merged_index.aspt";
+param_block.doclist_filename = "merged_doclist.aspt";
 long first_param = param_block.parse();
+
 long long combined_docs = 0, maximum_terms = 0;
 long long number_engines = argc - first_param;
 long long longest_postings = 0;
@@ -268,17 +307,13 @@ for (engine = 0; engine < number_engines; engine++)
 leaves[number_engines] = new ANT_search_engine_btree_leaf;
 raw[number_engines] = (ANT_compressable_integer *)malloc(sizeof(*raw[number_engines]) * raw_list_size);
 /*
-	Overwrite the trimpoint given by the param block if some of the merged indexes have a smaller trimpoint
+	Overwrite the combined trimpoint if we're given another to use if necessary
 */
 param_block.static_prune_point = ANT_min(param_block.static_prune_point, trimpoint);
 
-ANT_compression_factory factory;
 ANT_compression_text_factory factory_text;
+
 ANT_compressable_integer *lengths = new ANT_compressable_integer[combined_docs];
-
-factory.set_scheme(param_block.compression_scheme);
-factory_text.set_scheme(param_block.document_compression_scheme);
-
 ANT_ranking_function_term_count rf(combined_docs, lengths);
 
 /*
@@ -307,8 +342,8 @@ long long start, end, sum = 0;
 unsigned long buf_len = 0;
 long *strcmp_results = (long *)malloc(sizeof(*strcmp_results) * number_engines);
 char *next_term_to_process = NULL;
-long should_continue = TRUE;
-long long do_documents = TRUE;
+long should_continue = true;
+long long do_documents = true;
 long long stemmer;
 
 ANT_file *doclist = new ANT_file;
@@ -321,9 +356,14 @@ buffer_size = compress_buffer_size = longest_document;
 document_decompress_buffer = (char *)malloc((size_t)longest_document);
 document_compress_buffer = (char *)malloc((size_t)longest_document);
 
-index->open("merged_index.aspt", "w");
+index->open(param_block.index_filename, "w");
+doclist->open(param_block.doclist_filename, "w");
+
 index->write((unsigned char *)file_header, sizeof(file_header));
 
+/*
+	Sort out which stemmer to use, if the merged indexes have all been stemmed the same, use that, otherwise we can't stem
+*/
 stemmer = search_engines[0]->get_variable("~stemmer");
 for (engine = 1; engine < number_engines; engine++)
 	if (search_engines[engine]->get_variable("~stemmer") != stemmer)
@@ -338,13 +378,10 @@ if (do_documents)
 		for (i = 0; i < search_engines[engine]->document_count(); i++)
 			{
 			current_disk_position = index->tell();
-			search_engines[engine]->get_document(document_decompress_buffer, &longest_document, i);
 			
-			document_compress_buffer = factory_text.compress(document_compress_buffer, &compress_buffer_size, document_decompress_buffer, longest_document);
-			
+			search_engines[engine]->get_compressed_document(document_compress_buffer, &compress_buffer_size, i);
 			index->write((unsigned char *)document_compress_buffer, compress_buffer_size);
 			
-			longest_document = compress_buffer_size = buffer_size;
 			sum += raw[number_engines][upto] = (ANT_compressable_integer)(current_disk_position - (upto == 0 ? 0 : sum));
 			upto++;
 			}
@@ -359,7 +396,6 @@ if (do_documents)
 	/*
 		Copy over the filenames
 	*/
-	doclist->open("merged_doclist.aspt", "w");
 	
 	for (engine = 0; engine < number_engines; engine++)
 		{
@@ -521,7 +557,7 @@ while (should_continue)
 	/*
 		Decide if we should keep going, or we have processed all terms
 	*/
-	should_continue = TRUE;
+	should_continue = true;
 	for (engine = 0; engine < number_engines; engine++)
 		should_continue = should_continue && terms[engine];
 	}
