@@ -1,6 +1,6 @@
 #APP_OPTIM := release
 APP_OPTIM := debug
-APP_CFLAGS := -DDEBUG
+APP_CFLAGS := -DDEBUG -g
 APP_CPPFLAGS += -frtti # -fexceptions
 
 APP_STL := stlport_static

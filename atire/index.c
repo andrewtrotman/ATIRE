@@ -101,25 +101,42 @@ int atire_exit(int errno) {
 */
 int atire_index(char *files)
 {
-static char *seperators = ";+ ";
+static char *seperators = "+";
 char **argv, **file_list;
 char *token;
 size_t total_length = (files ? strlen(files) : 0) + 7;
-char *copy = new char[total_length];
+char *copy, *copy_start;
 
-strncpy(copy, "index;", 6);
-if (files)
-	strcat(copy, files);
-copy[total_length] = '\0';
+copy = copy_start = new char[total_length];
+
+memset(copy, 0, sizeof(copy));
+
+memcpy(copy, "index+", 6);
+copy += 6;
+if (files) {
+	memcpy(copy, files, strlen(files));
+	copy += strlen(files);
+}
+*copy = '\0';
 
 argv = file_list = new char *[total_length];
 int argc = 0;
-token = strtok(copy, seperators);
+token = strtok(copy_start, seperators);
+
+#ifdef DEBUG
+	fprintf(stderr, "Start indexing with options: %s\n", files);
+#endif
 for (; token != NULL; token = strtok(NULL, seperators))
 	{
+#ifdef DEBUG
+	fprintf(stderr, "%s ", token);
+#endif
 	*argv++ = token;
 	++argc;
 	}
+#ifdef DEBUG
+	fprintf(stderr, "\n");
+#endif
 *argv = NULL;
 int result = atire_index(argc, file_list);
 delete [] copy;
