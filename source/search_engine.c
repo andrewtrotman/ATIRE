@@ -681,7 +681,6 @@ void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btre
 {
 void *verify = NULL;
 long long now, bytes_already_read;
-long long trim_postings_k;
 
 if (term_details != NULL && term_details->local_document_frequency > 0)
 	{
