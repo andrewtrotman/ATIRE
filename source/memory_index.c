@@ -999,9 +999,9 @@ if (index_file == NULL)
 	doc_count_size = 1 + sizeof(*impact_header.doc_count_start) * ANT_impact_header::NUM_OF_QUANTUMS;
 	impact_offset_size = 1 + sizeof(*impact_header.impact_offset_start) * ANT_impact_header::NUM_OF_QUANTUMS;
 	impact_header.header_size =  impact_value_size + doc_count_size + impact_offset_size;
-	impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(impact_header.header_size);
+	impact_header.header_buffer = (ANT_compressable_integer *)serialisation_memory->malloc(impact_header.header_size);
 	compressed_impact_header_size = (long long)1 + ANT_impact_header::INFO_SIZE + impact_header.header_size;
-	compressed_impact_header_buffer = (unsigned char *)memory->malloc(compressed_impact_header_size);
+	compressed_impact_header_buffer = (unsigned char *)serialisation_memory->malloc(compressed_impact_header_size);
 
 	// the first compressed byte is a indication of what compression scheme is used in each quantum
 	compressed_postings_list_length = 1 * ANT_impact_header::NUM_OF_QUANTUMS + (sizeof(*decompressed_postings_list) * largest_docno);

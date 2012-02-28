@@ -713,7 +713,6 @@ for (i = q = 0; i < terms_in_query; i++)
 
 			// paramters for calling relevance_rank_one_quantum
 			the_quantums[q].accumulator = search_engine->results_list;
-			the_quantums[q].term_details = the_quantums[q].term_details;
 			the_quantums[q].tf = the_quantums[q].impact_value;
 			the_quantums[q].the_quantum = the_quantums[q].offset_ptr;
 			the_quantums[q].quantum_end = the_quantums[q].offset_ptr

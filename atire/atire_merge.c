@@ -527,8 +527,12 @@ while (should_continue)
 		/*
 			Convert the array of tf values to a postings list
 		*/
+#ifdef IMPACT_HEADER
+
+#else
 		rf.tf_to_postings(leaves[number_engines], raw[number_engines], tf_values);
-		
+#endif
+
 		/*
 			We ignore the statistic results from tf_to_postings, because they were calculated
 			using capped term frequencies, and we want the uncapped statistics
