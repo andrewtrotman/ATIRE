@@ -13,6 +13,7 @@ if __name__ == '__main__':
 	total_terms_occurred_once = 0
 	total_terms_occurred_twice = 0
 	total_unique_terms = 0
+	collection_size = 0
 
 	#
 	# read dictionary file from command line
@@ -33,20 +34,22 @@ if __name__ == '__main__':
 		collection_freq = int(items[1])
 		document_freq = int(items[2])
 		#print term, collection_freq, document_freq
-		if term[0] == '~':
-			if term == '~length':
-				total_unique_terms = document_freq
+		if '~' == term[0]:
+			if '~length' == term:
+				collection_size = document_freq
 		else:
+			total_unique_terms += 1
 			if document_freq == 1:
 				total_terms_occurred_once += 1
 			elif document_freq == 2:
 				total_terms_occurred_twice += 1
-		pass # end of if term[0] == '~'
+		pass # end of if '~' != term[0]
 	pass # end of for lin in contents
 
 	#
 	# print out the stats
 	#
+	print 'Collection size: %d' % collection_size
 	print 'Total unique terms: %s' % total_unique_terms
 	percentage = total_terms_occurred_once / total_unique_terms * 100
 	print 'Total terms occurred once: %d (%%%.2f)' % (total_terms_occurred_once, percentage)
