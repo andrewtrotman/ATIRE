@@ -235,7 +235,7 @@ for (engine = 0; engine < number_engines; engine++)
 	
 	this_trimpoint = search_engines[engine]->get_variable("~trimpoint");
 	trimpoints[engine] = this_trimpoint ? this_trimpoint : LONG_MAX;
-	global_trimpoint += trimpoints[engine];
+	global_trimpoint += this_trimpoint;
 	}
 leaves[number_engines] = new ANT_search_engine_btree_leaf;
 // worst case, all documents and all tf values
@@ -409,7 +409,7 @@ for (engine = 0; engine < number_engines; engine++)
 
 p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 
-if (global_trimpoint != LONG_MAX)
+if (param_block.static_prune_point != LONG_MAX)
 	p = write_variable("~trimpoint", param_block.static_prune_point, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 
 if (stemmer)
