@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 long i;
 long long postings_list_size = 500 * 1024 * 1024;
 long long offset, engine, upto = 0;
-long long global_trimpoint = LONG_MAX;
+long long global_trimpoint = 0;
 long long this_trimpoint;
 
 uint64_t current_disk_position;
