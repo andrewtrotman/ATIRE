@@ -15,7 +15,6 @@
 #include "memory.h"
 #include "memory_index.h"
 #include "memory_index_hash_node.h"
-#include "ranking_function_term_count.h"
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
 #include "stop_word.h"
@@ -26,51 +25,8 @@
 */
 void usage(char *program_name)
 {
-puts(ANT_version_string);
 printf("Usage: %s [option...] <index 1> <index 2> ... <index n>\n", program_name);
 puts("");
-
-puts("GENERAL");
-puts("-------");
-puts("-? -h -H        Display this help message");
-puts("");
-
-puts("OUPUT FILE HANDLING");
-puts("--------------------");
-puts("-findex <fn>    Output filename for index [default merged_index.aspt]");
-puts("-fdoclist <fn>  Output filename for doclist [default merged_doclist.aspt]");
-puts("");
-
-puts("COMPRESSION");
-puts("-----------");
-puts("-c[abBceEgnrsv] Compress postings using any of:");
-puts("   a            try all schemes and choose the best  (same as -cceEgnrsv)");
-puts("   b            try all bitwise schemes and choose the best  (same as -ceEg)");
-puts("   B            try all Bytewise schemes and choose the best (same as -ccrsSv)");
-puts("   c            Carryover-12  (bytewise)");
-puts("   e            Elias Delta   (bitwise)");
-puts("   E            Elias Gamma   (bitwise)");
-puts("   g            Golomb        (bitwise)");
-puts("   n            None          (-)");
-puts("   r            Relative-10   (bytewise)");
-puts("   s            Simple-9      (bytewise)");
-puts("   S            Sigma         (bytewise)");
-puts("   v            Variable Byte (bytewise) [default]");
-puts("");
-
-puts("OPTIMISATIONS");
-puts("-------------");
-puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
-puts("-k[-lL0t][s<n>] Term culling");
-puts("   -            All terms remain in the indes [default]");
-puts("   0            Do not index numbers");
-puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
-puts("   L            Remove (stop) low frequency terms (where document frequency == 1)");
-puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
-puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
-puts("   t            Do not index XML tag names");
-puts("");
-
 exit(0);
 }
 
@@ -101,33 +57,6 @@ else
 }
 
 /*
-	PROCESS()
-	---------
-*/
-void process(ANT_compressable_integer *impact_ordering, long long document_frequency, ANT_weighted_tf *tf_values, long long offset)
-{
-ANT_compressable_integer tf;
-long long docid;
-ANT_compressable_integer *current, *end;
-
-current = impact_ordering;
-end = impact_ordering + document_frequency;
-
-while (current < end)
-	{
-	end += 2;
-	docid = -1;
-	tf = *current++;
-	while (*current != 0)
-		{
-		docid += *current++;
-		tf_values[docid + offset] = (ANT_weighted_tf)tf;
-		}
-	current++;
-	}
-}
-
-/*
 	WRITE_POSTINGS()
 	----------------
 */
@@ -135,7 +64,7 @@ ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer 
 {
 ANT_compression_factory factory;
 ANT_memory_index_hash_node *node;
-ANT_compressable_integer *current, *end;
+ANT_compressable_integer *current;
 uint64_t current_disk_position;
 long long len = 0, used = 0;
 
@@ -158,20 +87,23 @@ if (node->document_frequency <= 2)
 	*/
 	if (node->string[0] == '~')
 		{
-		raw[2] = raw[1];
+		raw[5] = 0;
+		raw[4] = raw[1];
+		raw[3] = 1;
+		raw[2] = 0;
 		raw[1] = raw[0];
-		raw[0] = 1;
+		raw[0] = 2;
 		}
 	
 	node->in_disk.docids_pos_on_disk = ((long long)raw[1]) << 32 | raw[0];
 	
-	if (node->document_frequency != 2)
-		node->in_disk.impacted_length = node->in_disk.end_pos_on_disk = 0;
-	else
+	if (node->document_frequency == 2)
 		{
-		node->in_disk.impacted_length = (raw[2] == 0 ? raw[4] : raw[2]) + raw[1];
+		node->in_disk.impacted_length = (raw[2] == 0 ? raw[4] : raw[2]);
 		node->in_disk.end_pos_on_disk = (raw[2] == 0 ? raw[3] : raw[0]) + node->in_disk.docids_pos_on_disk;
 		}
+	else
+		node->in_disk.impacted_length = node->in_disk.end_pos_on_disk = 0;
 	}
 else
 #endif
@@ -182,11 +114,9 @@ else
 	if (node->string[0] != '~' && leaf->local_document_frequency > param->static_prune_point)
 		{
 		current = raw;
-		end = raw + param->static_prune_point;
 		
 		while (used < param->static_prune_point)
 			{
-			end += 2;
 			current++;
 			while (*current != 0 && used < param->static_prune_point)
 				{
@@ -225,11 +155,10 @@ return node;
 */
 ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
 {
-ANT_compressable_integer raw[3]; // make room for it to be impacted in write_postings
+ANT_compressable_integer raw[6]; // make room for it to be fiddled with in write_postings
 
 raw[0] = ((unsigned long long)value) >> 32;
 raw[1] = ((unsigned long long)value) & 0xFFFFFFFF;
-raw[1] = raw[1] - raw[0]; // difference encoded
 
 leaf->impacted_length = leaf->local_collection_frequency = leaf->local_document_frequency = 2;
 
@@ -242,11 +171,13 @@ return write_postings(term, raw, postings_list, postings_list_size, index, combi
 */
 int main(int argc, char *argv[])
 {
+#ifdef IMPACT_HEADER
+	exit(printf("Don't support IMPACT_HEADER yet!\n"));
+#endif
 long i;
-long long postings_list_size = 500 * 1024;
-long long raw_list_size = 500 * 1024;
+long long postings_list_size = 500 * 1024 * 1024;
 long long offset, engine, upto = 0;
-long long trimpoint = LONG_MAX;
+long long global_trimpoint = LONG_MAX;
 long long this_trimpoint;
 
 uint64_t current_disk_position;
@@ -273,9 +204,10 @@ if (number_engines < 2)
 	usage(argv[0]);
 
 ANT_memory *memory = new ANT_memory[number_engines];
-ANT_search_engine **search_engines = (ANT_search_engine **)malloc(sizeof(*search_engines) * number_engines);
-ANT_btree_iterator **iterators = (ANT_btree_iterator **)malloc(sizeof(*iterators) * number_engines);
-char **terms = (char **)malloc(sizeof(*terms) * number_engines);
+ANT_search_engine **search_engines = new ANT_search_engine*[number_engines];
+ANT_btree_iterator **iterators = new ANT_btree_iterator*[number_engines];
+char **terms = new char*[number_engines];
+long long *trimpoints = new long long[number_engines];
 
 /*
 	Allocate 1 more for these to allow the merged results to be put on the end
@@ -301,20 +233,20 @@ for (engine = 0; engine < number_engines; engine++)
 	if (search_engines[engine]->quantized())
 		exit(printf("Cannot merge quantized indexes (%s is quantized)\n", argv[engine + first_param]));
 	
-	if ((this_trimpoint = search_engines[engine]->get_variable("~trimpoint")))
-		trimpoint = ANT_min(trimpoint, this_trimpoint);
+	this_trimpoint = search_engines[engine]->get_variable("~trimpoint");
+	trimpoints[engine] = this_trimpoint ? this_trimpoint : LONG_MAX;
+	global_trimpoint += trimpoints[engine];
 	}
 leaves[number_engines] = new ANT_search_engine_btree_leaf;
-raw[number_engines] = (ANT_compressable_integer *)malloc(sizeof(*raw[number_engines]) * raw_list_size);
+// worst case, all documents and all tf values
+raw[number_engines] = new ANT_compressable_integer[510 + combined_docs];
+
 /*
-	Overwrite the combined trimpoint if we're given another to use if necessary
+	global_trimpoint could be 0 if none of the given indexes are pruned
 */
-param_block.static_prune_point = ANT_min(param_block.static_prune_point, trimpoint);
+param_block.static_prune_point = ANT_min(param_block.static_prune_point, global_trimpoint ? global_trimpoint : LONG_MAX);
 
 ANT_compression_text_factory factory_text;
-
-ANT_compressable_integer *lengths = new ANT_compressable_integer[combined_docs];
-ANT_ranking_function_term_count rf(combined_docs, lengths);
 
 /*
 	We use this index as purely a store for the terms generated, no postings are ever added.
@@ -324,7 +256,7 @@ ANT_memory_index *combined_term_index = new ANT_memory_index(NULL);
 ANT_memory_index_hash_node *p;
 ANT_memory_index_hash_node **term_list, **here;
 
-term_list = (ANT_memory_index_hash_node **)malloc(sizeof(*term_list) * (maximum_terms + 1));
+term_list = new ANT_memory_index_hash_node *[maximum_terms + 1];
 
 ANT_btree_head_node *header, *current_header, *last_header;
 
@@ -340,21 +272,27 @@ char *doc_buf = NULL;
 char **doc_filenames;
 long long start, end, sum = 0;
 unsigned long buf_len = 0;
-long *strcmp_results = (long *)malloc(sizeof(*strcmp_results) * number_engines);
+long *strcmp_results = new long[number_engines];
 char *next_term_to_process = NULL;
-long should_continue = true;
+long should_continue = false;
 long long do_documents = true;
 long long stemmer;
 
 ANT_file *doclist = new ANT_file;
 ANT_file *index = new ANT_file;
 
-ANT_weighted_tf *tf_values = new ANT_weighted_tf[combined_docs];
 postings_list = (unsigned char *)malloc(sizeof(*postings_list) * postings_list_size);
 
 buffer_size = compress_buffer_size = longest_document;
-document_decompress_buffer = (char *)malloc((size_t)longest_document);
-document_compress_buffer = (char *)malloc((size_t)longest_document);
+document_decompress_buffer = new char[longest_document];
+document_compress_buffer = new char[longest_document];
+
+unsigned int current_tf;
+ANT_compressable_integer **ends = new ANT_compressable_integer*[number_engines];
+long *should_process = new long[number_engines];
+long previous_docid;
+long process_this_tf;
+ANT_compressable_integer *current = raw[number_engines];
 
 index->open(param_block.index_filename, "w");
 doclist->open(param_block.doclist_filename, "w");
@@ -396,7 +334,6 @@ if (do_documents)
 	/*
 		Copy over the filenames
 	*/
-	
 	for (engine = 0; engine < number_engines; engine++)
 		{
 		start = search_engines[engine]->get_variable("~documentfilenamesstart");
@@ -417,7 +354,6 @@ if (do_documents)
 			index->write((unsigned char *)doc_filenames[i], strlen(doc_filenames[i]) + 1);
 			}
 		}
-	doclist->close();
 	
 	document_filenames_finish = index->tell();
 	
@@ -473,7 +409,7 @@ for (engine = 0; engine < number_engines; engine++)
 
 p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 
-if (trimpoint != LONG_MAX)
+if (global_trimpoint != LONG_MAX)
 	p = write_variable("~trimpoint", param_block.static_prune_point, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
 
 if (stemmer)
@@ -483,60 +419,107 @@ if (stemmer)
 	Now move onto the "normal" terms
 */
 for (engine = 0; engine < number_engines; engine++)
-	should_continue = should_continue && (terms[engine] = iterators[engine]->first(NULL));
+	{
+	terms[engine] = iterators[engine]->first(NULL);
+	should_continue = should_continue || terms[engine] != NULL;
+	}
 
 while (should_continue)
 	{
-	next_term_to_process = terms[0];
-	for (engine = 1; engine < number_engines; engine++)
-		if (strcmp(terms[engine], next_term_to_process) < 0)
+	/*
+		Find the next term that we need to process
+	*/
+	for (engine = 0; engine < number_engines; engine++)
+		if (terms[engine])
+			{
+			next_term_to_process = terms[engine];
+			break;
+			}
+	for (; engine < number_engines; engine++)
+		if (terms[engine] && strcmp(terms[engine], next_term_to_process) < 0)
 			next_term_to_process = terms[engine];
 	
 	/*
 		Save repeated doing strcmp in this while loop
 	*/
 	for (engine = 0; engine < number_engines; engine++)
-		strcmp_results[engine] = strcmp(next_term_to_process, terms[engine]);
-	
+		strcmp_results[engine] = terms[engine] ? strcmp(next_term_to_process, terms[engine]) : 1;
+
 	/*
-		Now next_term_to_process contains the smallest, alphanumerically, string of the lists we're merging together
+		Now next_term_to_process contains the smallest string of the lists we're merging together
 		
 		Ignore all ~ terms, they've already been dealt with
 	*/
 	if (*next_term_to_process != '~')
 		{
 		/*
-			Reset the tf_values accumulated so far
+			Preload the postings lists for each engine
 		*/
-		memset(tf_values, 0, sizeof(*tf_values) * combined_docs);
-		
-		/*
-			Get the postings from the respective indexes, and process them
-		*/
-		offset = 0;
 		for (engine = 0; engine < number_engines; engine++)
-			{
 			if (strcmp_results[engine] == 0)
 				{
-				raw[engine] = search_engines[engine]->get_decompressed_postings(terms[engine], leaves[engine]);
-				process(raw[engine], ANT_min(leaves[engine]->local_document_frequency, trimpoint), tf_values, offset);
+				raw[engine] = search_engines[engine]->get_decompressed_postings(next_term_to_process, leaves[engine]);
+				ends[engine] = raw[engine] + ANT_min(trimpoints[engine], leaves[engine]->local_document_frequency);
 				}
-			offset += search_engines[engine]->document_count();
+		
+		current = raw[number_engines];
+		for (current_tf = 255; current_tf > 0; current_tf--)
+			{
+			process_this_tf = false;
+			
+			for (engine = 0; engine < number_engines; engine++)
+				if (strcmp_results[engine] == 0 && ends[engine] > raw[engine] && *raw[engine] == current_tf)
+					{
+					ends[engine] += 2;
+					raw[engine]++;
+					should_process[engine] = process_this_tf = true;
+					}
+			
+			if (process_this_tf)
+				{
+				*current++ = current_tf;
+				previous_docid = 0;
+				offset = 0;
+				
+				for (engine = 0; engine < number_engines; engine++)
+					{
+					if (should_process[engine])
+						{
+						/*
+							The first docid in the impacted order isn't difference encoded
+							so make it difference encoded while also accounting for the
+							necessary change in docids across engines
+						*/
+						*current = *raw[engine] + offset - previous_docid;
+						previous_docid += *current;
+						current++;
+						raw[engine]++;
+						
+						/*
+							The rest of the docids are difference encoded, so we don't
+							have to worry about that
+						*/
+						while (*raw[engine] != 0)
+							{
+							previous_docid += *raw[engine];
+							*current++ = *raw[engine]++;
+							}
+						/*
+							Skip over the 0 at the end of the impact ordered list
+						*/
+						raw[engine]++;
+						
+						}
+					offset += search_engines[engine]->document_count();
+					should_process[engine] = false;
+					}
+				/*
+					Terminate the impact ordering for this tf
+				*/
+				*current++ = 0;
+				}
 			}
 		
-		/*
-			Convert the array of tf values to a postings list
-		*/
-#ifdef IMPACT_HEADER
-
-#else
-		rf.tf_to_postings(leaves[number_engines], raw[number_engines], tf_values);
-#endif
-
-		/*
-			We ignore the statistic results from tf_to_postings, because they were calculated
-			using capped term frequencies, and we want the uncapped statistics
-		*/
 		leaves[number_engines]->local_collection_frequency = leaves[number_engines]->local_document_frequency = 0;
 		for (engine = 0; engine < number_engines; engine++)
 			if (strcmp_results[engine] == 0)
@@ -544,6 +527,8 @@ while (should_continue)
 				leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency;
 				leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency;
 				}
+		
+		leaves[number_engines]->impacted_length = current - raw[number_engines];
 		
 		/*
 			Serialise the merged postings
@@ -561,9 +546,9 @@ while (should_continue)
 	/*
 		Decide if we should keep going, or we have processed all terms
 	*/
-	should_continue = true;
+	should_continue = false;
 	for (engine = 0; engine < number_engines; engine++)
-		should_continue = should_continue && terms[engine];
+		should_continue = should_continue || terms[engine];
 	}
 
 /*
@@ -629,6 +614,7 @@ four_byte = (uint32_t)ANT_file_signature;
 index->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 index->close();
+doclist->close();
 
 /*
 	Cleanup
@@ -645,15 +631,17 @@ delete combined_term_index;
 delete doclist;
 delete index;
 
+delete [] search_engines;
+delete [] iterators;
+delete [] leaves;
 delete [] memory;
-delete [] lengths;
-delete [] tf_values;
+delete [] strcmp_results;
+delete [] document_compress_buffer;
+delete [] document_decompress_buffer;
+delete [] terms;
+delete [] term_list;
 
-free(terms);
-free(term_list);
 free(postings_list);
-free(document_decompress_buffer);
-free(document_compress_buffer);
 
 return 0;
 }
