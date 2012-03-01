@@ -751,7 +751,7 @@ free(impact_headers);
 
 }
 
-
+#ifdef SEARCH_QUANTUM_WITH_PRUNING
 /*
 	ATIRE_API::SEARCH_QUANTUM_WITH_PRUNING()
 	----------------------------------------
@@ -850,6 +850,9 @@ while (q < total_quantums)
 		max_quantum.the_quantum = max_quantum.offset_ptr;
 		max_quantum.quantum_end = max_quantum.offset_ptr + max_quantum.doc_count;
 
+		if (search_engine->results_list->heap_is_full() && max_quantum.impact_value < search_engine->results_list->get_diff_k_and_k_plus_1())
+			break;
+
 		ranking_function->relevance_rank_one_quantum(&max_quantum);
 
 		//printf("total_quantums: %lld, the max quantum: (%ld, %lld), current_max:%ld\n", total_quantums, (long)max_quantum.impact_value, q, current_max);
@@ -874,8 +877,9 @@ free(decompressed_buffers);
 free(impact_headers);
 
 }
+#endif // end of #ifdef SEARCH_QUANTUM_WITH_PRUNING
 
-#endif
+#endif // end of #ifdef IMPACT_HEADER
 
 /*
 	ATIRE_API::SEARCH_TERM_AT_A_TIME()

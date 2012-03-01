@@ -47,6 +47,7 @@ public:
 	void min_heapsort(void);
 	int min_insert(T key);
 	void min_update(T key);
+	T get_second_smallest(void);
 };
 
 /*
@@ -298,7 +299,7 @@ for (long long i = size/2 - 1; i >= 0; i--)
 }
 
 /*
-	TYPENAME T, TYPENAME _COMPARE> VOID ANT_HEAP<T, _COMPARE>::MIN_HEAPSORT()
+	ANT_HEAP::MIN_HEAPSORT()
 	-------------------------------------------------------------------------
 	Sort in descending order
 */
@@ -309,6 +310,27 @@ for (long long i = size-1; i >= 1; i--)
 	{
 	swap(&array[0], &array[i]);
 	min_heapify(0, i);
+	}
+}
+
+/*
+	ANT_HEAP::get_second_smallest()
+	-------------------------------------------------------------------------
+*/
+template <typename T, typename _Compare> T ANT_heap<T, _Compare>::get_second_smallest() {
+	T the_left, the_right;
+	if (size < 2) {
+		perror("error calling heapk::get_second_smallest\n");
+		exit(2);
+	} else if (size == 2) {
+		//printf("0 left pos[%ld]: %ld\n", left_pos(0), array[left_pos(0)]);
+		return array[left_pos(0)];
+	} else {
+		//printf("0 left pos[%ld]: %ld\n", left_pos(0), array[left_pos(0)]);
+		//printf("0 right pos[%ld]: %ld\n", right_pos(0), array[right_pos(0)]);
+		the_left = array[left_pos(0)];
+		the_right = array[right_pos(0)];
+		return the_left <= the_right ? the_left : the_right;
 	}
 }
 
