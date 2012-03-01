@@ -28,6 +28,7 @@ public:
 	ANT_compressable_integer *impact_value_start, *impact_value_ptr;
 	ANT_compressable_integer *doc_count_start, *doc_count_ptr, *doc_count_trim_ptr;
 	ANT_compressable_integer *impact_offset_start, *impact_offset_ptr;
+	long long sum;
 };
 
 #endif  /* IMPACT_HEADER_H_ */

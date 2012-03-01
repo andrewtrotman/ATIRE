@@ -108,6 +108,7 @@ protected:
 	void search_term_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function, ANT_thesaurus *expander_tf, ANT_stemmer *stemmer);
 #ifdef IMPACT_HEADER
 	void search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function);
+	void search_quantum_with_pruning(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function);
 #endif
 
 public:

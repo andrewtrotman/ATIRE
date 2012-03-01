@@ -44,7 +44,11 @@ accumulator_pointers = (ANT_search_engine_accumulator **)memory->malloc(sizeof(*
 for (pointer = 0; pointer < documents; pointer++)
 	accumulator_pointers[pointer] = &accumulator[pointer];
 
+#ifdef SEARCH_QUANTUM_WITH_PRUNING
+top_k = 10 + 1;
+#else
 top_k = 10;			// this is given a true value later and the heap is then resized - but in the mean time give it a default of 10
+#endif
 heapk = new ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare>(*accumulator_pointers, top_k);
 include_set = new ANT_bitstring();
 include_set->set_length(documents);
@@ -82,7 +86,11 @@ void ANT_search_engine_result::init_accumulators(long long top_k)
 #endif
 
 min_in_top_k = 0;
+#ifdef SEARCH_QUANTUM_WITH_PRUNING
+this->top_k = top_k + 1;
+#else
 this->top_k = top_k;
+#endif
 results_list_length = 0;
 heapk->set_size(top_k);
 include_set->zero();
