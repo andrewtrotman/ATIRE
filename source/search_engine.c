@@ -547,11 +547,25 @@ int ret = TRUE;
 		into = (ANT_compressable_integer *)(destination + 1);
 		*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
 		*into++ = term_details->postings_position_on_disk >> 32;
-		*into++ = 0;
-		*into++ = (ANT_compressable_integer)term_details->postings_length;
-		*into++ = (ANT_compressable_integer)term_details->impacted_length;
-		*into++ = 0;
-		term_details->impacted_length = term_details->local_document_frequency == 1 ? 3 : 6;
+		/*
+			Need to distinguish the cases where we have
+			one tf value with one docid, or two tf values with two docids (this if)
+			or one tf value with two docids (else)
+		*/
+		if (term_details->postings_length != *(into - 2))
+			{
+			*into++ = 0;
+			*into++ = (ANT_compressable_integer)term_details->postings_length;
+			*into++ = (ANT_compressable_integer)term_details->impacted_length;
+			*into++ = 0;
+			term_details->impacted_length = term_details->local_document_frequency == 2 ? 6 : 3;
+			}
+		else
+			{
+			*into++ = (ANT_compressable_integer)term_details->impacted_length;
+			*into++ = 0;
+			term_details->impacted_length = 4;
+			}
 #endif
 		}
 	else
@@ -1238,7 +1252,7 @@ else
 	{
 #ifdef SPECIAL_COMPRESSION
 	/*
-		The sequence we'll get back is a postings list so it will be [1,<high32>,0,1,<low32>,0]
+		The sequence we'll get back is a postings list so it will be [2,<high32>,0,1,<low32>,0]
 		from which we want to extract <high32> and <low32> the high and low 32 bits of the integer
 		so that we can then construct a 64 bit integer from it.
 	*/

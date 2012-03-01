@@ -632,15 +632,30 @@ if (!should_prune(root))
 				Store the first postings(4 bytes) in the higher order of the 8 bytes
 				and store the first term frequency (4 bytes) in the lower order of the 8 bytes
 			*/
-			root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
-
+			if (root->string[0] == '~')
+				root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | (serialised_tfs[0] + serialised_tfs[1]);
+			else
+				root->in_disk.docids_pos_on_disk = ((long long)impacted_postings[1]) << 32 | impacted_postings[0];
+			
 			/*
 				Use impacted_length and end_pos_on_disk to store the second postings and term frequency
 			*/
 			if (root->document_frequency == 2)
 				{
-				root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0];		// because the original list is difference encoded
-				root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk;		// because root->docids_pos_on_disk is subtracted later
+				if (root->string[0] == '~')
+					{
+					root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0]; // because the original list is difference encoded
+					root->in_disk.end_pos_on_disk = serialised_tfs[1];
+					}
+				else
+					{
+					/*
+						If impacted_postings[2] is 0 then we have two different tf values in the impact ordering, otherwise two documents with the same tf value
+					*/
+					root->in_disk.impacted_length = impacted_postings[2] == 0 ? impacted_postings[4] : impacted_postings[2];
+					root->in_disk.end_pos_on_disk = impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0];
+					}
+				root->in_disk.end_pos_on_disk += root->in_disk.docids_pos_on_disk; // because root->docids_pos_on_disk is subtracted later
 				}
 			else
 				root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
