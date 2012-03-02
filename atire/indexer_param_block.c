@@ -44,6 +44,7 @@ index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
 static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
+stop_word_df_frequencies = 1;
 stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
 trec_cleanup = false;
 }
@@ -161,11 +162,11 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
-puts("-k[-lL0t][s<n>] Term culling");
+puts("-k[-l0t][L<n>][s<n>] Term culling");
 puts("   -            All terms remain in the indes [default]");
 puts("   0            Do not index numbers");
 puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
-puts("   L            Remove (stop) low frequency terms (where document frequency == 1)");
+puts("   L<n>         Remove (stop) low frequency terms (where document frequency <= <n>)");
 puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
 puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
 puts("   t            Do not index XML tag names");
@@ -294,11 +295,18 @@ for (which = mode_list; *which != '\0'; which++)
 		{
 		case '-': stop_word_removal = ANT_memory_index::NONE; break;
 		case '0': stop_word_removal |= ANT_memory_index::PRUNE_NUMBERS; break;
-		case 'L': stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS | ANT_memory_index::PRUNE_CF_SINGLETONS; break;
+		case 'L':
+			stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS;
+			stop_word_df_frequencies = atol(which +1);
+			while (isdigit(*(which+1)))
+				which++;
+			if (stop_word_df_frequencies == 0)
+				stop_word_df_frequencies = 1;
+			break;
 		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
 		case 'S': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
-		case 's': 
+		case 's':
 			stop_word_removal |= ANT_memory_index::PRUNE_DF_FREQUENTS;
 			stop_word_df_threshold = atof(which + 1);
 			if (stop_word_df_threshold >= 100 || stop_word_df_threshold <= 0)

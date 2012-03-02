@@ -60,6 +60,7 @@ private:
 
 	long long static_prune_point;					// this is the maximum number of postings allowed in an impact (or tf) ordered postings list
 	long stop_word_removal_mode;					// remove cf-singletons or df-singletons (etc.)
+	long stop_word_df_frequencies;				// remove words based on document frequencies
 	double stop_word_max_proportion;				// remove words that have a dl/N >= this value
 
 	ANT_file *index_file;
@@ -151,7 +152,7 @@ public:
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
-	virtual void set_term_culling(long mode, double max_df) {stop_word_removal_mode = mode; stop_word_max_proportion = max_df; }
+	virtual void set_term_culling(long mode, double max_df, long df) {stop_word_removal_mode = mode; stop_word_max_proportion = max_df; stop_word_df_frequencies = df; }
 } ;
 
 /*

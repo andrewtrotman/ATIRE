@@ -582,7 +582,7 @@ else if (term->string[0] == '~')
 	return false;
 else if (stop_word_removal_mode & PRUNE_CF_SINGLETONS && term->collection_frequency == 1)
 	return true;
-else if (stop_word_removal_mode & PRUNE_DF_SINGLETONS && term->document_frequency == 1)
+else if (stop_word_removal_mode & PRUNE_DF_SINGLETONS && term->document_frequency <= stop_word_df_frequencies)
 	return true;
 else if (stop_word_removal_mode & PRUNE_DF_FREQUENTS && (double)term->document_frequency / (double)largest_docno >= stop_word_max_proportion)
 	return true;

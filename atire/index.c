@@ -194,7 +194,7 @@ id_list.open(param_block.doclist_filename, "wbx");
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
-index->set_term_culling(param_block.stop_word_removal, param_block.stop_word_df_threshold);
+index->set_term_culling(param_block.stop_word_removal, param_block.stop_word_df_threshold, param_block.stop_word_df_frequencies);
 
 if (param_block.readability_measure == ANT_readability_factory::NONE)
 	parser = new ANT_parser(param_block.segmentation);

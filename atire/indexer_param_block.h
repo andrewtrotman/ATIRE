@@ -39,6 +39,7 @@ public:
 	char *index_filename;				// name of index file
 	long long static_prune_point;		// maximum length of a postings list measured in document IDs
 	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
+	long stop_word_df_frequencies;   // remove wrods based on the document frequencies
 	double stop_word_df_threshold;		// if df/N is greater than this and (stop_word_removal & PRUNE_DF_FREQUENTS) != 0 then stop the word
 	long trec_cleanup;					// once we've read the source file from disk, scan from start to finish removing '\0' characters (because WT10g has binary data in it)
 
