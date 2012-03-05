@@ -17,6 +17,7 @@
 #include "memory_index_hash_node.h"
 #include "search_engine.h"
 #include "search_engine_btree_leaf.h"
+#include "stats_memory_index.h"
 #include "stop_word.h"
 
 /*
@@ -57,11 +58,99 @@ else
 }
 
 /*
+	FIND_END_OF_NODE()
+	------------------
+*/
+ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start)
+{
+ANT_memory_index_hash_node **current;
+
+current = start;
+if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
+	current++;
+else
+	while (*current != NULL)
+		{
+		if ((*current)->string.length() < B_TREE_PREFIX_SIZE)
+			break;
+		if ((*current)->string.true_strncmp(&(*start)->string, B_TREE_PREFIX_SIZE) != 0)
+			break;
+		current++;
+		}
+return current;
+}
+
+/*
+	WRITE_NODE()
+	------------
+*/
+ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start)
+{
+uint8_t zero = 0;
+uint64_t eight_byte;
+uint32_t four_byte, string_pos;
+uint32_t terms_in_node, current_node_head_length;
+ANT_memory_index_hash_node **current, **end;
+
+/*
+	Find the end of the node
+*/
+end = find_end_of_node(start);
+
+/*
+	Compute the number of terms in a node
+*/
+four_byte = terms_in_node = (uint32_t)(end - start);		// the number of terms in the node limited to 4 Billion!
+file->write((unsigned char *)&terms_in_node, sizeof(terms_in_node));		// 4 bytes
+
+/*
+	CF, DF, Offset_in_postings, DocIDs_Len, Postings_len, String_pos_in_node
+*/
+current_node_head_length = (*start)->string.length() > B_TREE_PREFIX_SIZE ? B_TREE_PREFIX_SIZE : (uint32_t)(*start)->string.length();
+string_pos = (uint32_t)(end - start) * ANT_btree_iterator::LEAF_SIZE + 4;
+for (current = start; current < end; current++)
+	{
+	four_byte = (uint32_t)(*current)->collection_frequency;
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	four_byte = (uint32_t)(*current)->document_frequency;
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	eight_byte = (uint64_t)((*current)->in_disk.docids_pos_on_disk);
+	file->write((unsigned char *)&eight_byte, sizeof(eight_byte));
+
+	four_byte = (uint32_t)((*current)->in_disk.impacted_length);
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	four_byte = (uint32_t)((*current)->in_disk.end_pos_on_disk - (*current)->in_disk.docids_pos_on_disk);
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	four_byte = (uint32_t)string_pos;
+	file->write((unsigned char *)&four_byte, sizeof(four_byte));
+
+	string_pos += (uint32_t)(*current)->string.length() + 1 - current_node_head_length;
+	}
+
+/*
+	Finally the strings ('\0' terminated)
+*/
+for (current = start; current < end; current++)
+	{
+	file->write((unsigned char *)((*current)->string.string() + current_node_head_length), (uint32_t)((*current)->string.length()) - current_node_head_length);
+	file->write(&zero, 1);
+	}
+
+return end;
+}
+
+/*
 	WRITE_POSTINGS()
 	----------------
 */
-ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
+ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *stats, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
 {
+static long long postings_list_size = 500 * 1024 * 1024;
+static unsigned char *postings_list = new unsigned char[postings_list_size];
 ANT_compression_factory factory;
 ANT_memory_index_hash_node *node;
 ANT_compressable_integer *current;
@@ -73,7 +162,7 @@ if (should_prune(term, leaf, param, largest_docno))
 
 factory.set_scheme(param->compression_scheme);
 
-node = combined_term_index->add_term(new ANT_string_pair(term), 0);
+node = new (stats->postings_memory) ANT_memory_index_hash_node(stats->postings_memory, stats->postings_memory, new ANT_string_pair(term), stats);
 
 node->collection_frequency = leaf->local_collection_frequency;
 node->document_frequency = leaf->local_document_frequency;
@@ -153,7 +242,7 @@ return node;
 	WRITE_VARIABLE()
 	----------------
 */
-ANT_memory_index_hash_node *write_variable(char *term, long long value, unsigned char *postings_list, long long postings_list_size, ANT_file *index, ANT_memory_index *combined_term_index, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
+ANT_memory_index_hash_node *write_variable(char *term, long long value, ANT_stats_memory_index *stats, ANT_file *index, ANT_search_engine_btree_leaf *leaf, ANT_indexer_param_block *param, long long largest_docno, long long *longest_postings)
 {
 ANT_compressable_integer raw[6]; // make room for it to be fiddled with in write_postings
 
@@ -162,7 +251,7 @@ raw[1] = ((unsigned long long)value) & 0xFFFFFFFF;
 
 leaf->impacted_length = leaf->local_collection_frequency = leaf->local_document_frequency = 2;
 
-return write_postings(term, raw, postings_list, postings_list_size, index, combined_term_index, leaf, param, largest_docno, longest_postings);
+return write_postings(term, raw, index, stats, leaf, param, largest_docno, longest_postings);
 }
 
 /*
@@ -175,14 +264,13 @@ int main(int argc, char *argv[])
 	exit(printf("Don't support IMPACT_HEADER yet!\n"));
 #endif
 long i;
-long long postings_list_size = 500 * 1024 * 1024;
 long long offset, engine, upto = 0;
 long long global_trimpoint = 0;
 long long this_trimpoint;
+long long terms_so_far = 0;
 
 uint64_t current_disk_position;
 char file_header[] = "ANT Search Engine Index File\n\0\0";
-unsigned char *postings_list;
 
 ANT_indexer_param_block param_block(argc, argv);
 
@@ -203,7 +291,6 @@ char *document_decompress_buffer, *document_compress_buffer;
 if (number_engines < 2)
 	usage(argv[0]);
 
-ANT_memory *memory = new ANT_memory[number_engines];
 ANT_search_engine **search_engines = new ANT_search_engine*[number_engines];
 ANT_btree_iterator **iterators = new ANT_btree_iterator*[number_engines];
 char **terms = new char*[number_engines];
@@ -212,8 +299,9 @@ long long *trimpoints = new long long[number_engines];
 /*
 	Allocate 1 more for these to allow the merged results to be put on the end
 */
-ANT_search_engine_btree_leaf **leaves = (ANT_search_engine_btree_leaf **)malloc(sizeof(*leaves) * (number_engines + 1));
-ANT_compressable_integer **raw = (ANT_compressable_integer **)malloc(sizeof(*raw) * (number_engines + 1));
+ANT_search_engine_btree_leaf **leaves = new ANT_search_engine_btree_leaf*[number_engines + 1];
+ANT_compressable_integer **raw = new ANT_compressable_integer *[number_engines + 1];
+ANT_memory *memory = new ANT_memory[number_engines + 1];
 
 /*
 	Initialise the search engines, and related variables
@@ -251,7 +339,7 @@ ANT_compression_text_factory factory_text;
 /*
 	We use this index as purely a store for the terms generated, no postings are ever added.
 */
-ANT_memory_index *combined_term_index = new ANT_memory_index(NULL);
+ANT_stats_memory_index *stats = new ANT_stats_memory_index(&memory[number_engines], &memory[number_engines]);
 
 ANT_memory_index_hash_node *p;
 ANT_memory_index_hash_node **term_list, **here;
@@ -263,7 +351,7 @@ ANT_btree_head_node *header, *current_header, *last_header;
 uint8_t zero = 0;
 uint32_t four_byte;
 uint64_t eight_byte;
-long btree_root_size = 0, where = 0;
+long btree_root_size = 0;
 int32_t longest_term = 0;
 int64_t highest_df = 0;
 uint64_t terms_in_root;
@@ -280,8 +368,6 @@ long long stemmer;
 
 ANT_file *doclist = new ANT_file;
 ANT_file *index = new ANT_file;
-
-postings_list = (unsigned char *)malloc(sizeof(*postings_list) * postings_list_size);
 
 buffer_size = compress_buffer_size = longest_document;
 document_decompress_buffer = new char[longest_document];
@@ -360,8 +446,12 @@ if (do_documents)
 	/*
 		Now we've done the documents, do the filename start/finish.
 	*/
-	p = write_variable("~documentfilenamesstart", document_filenames_start, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
-	p = write_variable("~documentfilenamesfinish", document_filenames_finish, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	p = write_variable("~documentfilenamesstart", document_filenames_start, stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	if (p)
+		term_list[terms_so_far++] = p;
+	p = write_variable("~documentfilenamesfinish", document_filenames_finish, stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	if (p)
+		term_list[terms_so_far++] = p;
 	
 	/*
 		Update stats, because this is a difference encoded list, we start with 1, then substract one
@@ -377,14 +467,18 @@ if (do_documents)
 		leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency - 1;
 		leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency - 1;
 		}
-	p = write_postings("~documentoffsets", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	p = write_postings("~documentoffsets", raw[number_engines], index, stats, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	if (p)
+		term_list[terms_so_far++] = p;
 	
 	/*
 		Now we've done the documents and offsets, do the longest document.
 	*/
 	raw[number_engines][0] = longest_document;
 	leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
-	p = write_postings("~documentlongest", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	p = write_postings("~documentlongest", raw[number_engines], index, stats, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	if (p)
+		term_list[terms_so_far++] = p;
 	}
 
 /*
@@ -407,13 +501,23 @@ for (engine = 0; engine < number_engines; engine++)
 	leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency;
 	}
 
-p = write_postings("~length", raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+p = write_postings("~length", raw[number_engines], index, stats, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+if (p)
+	term_list[terms_so_far++] = p;
 
 if (param_block.static_prune_point != LONG_MAX)
-	p = write_variable("~trimpoint", param_block.static_prune_point, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	{
+	p = write_variable("~trimpoint", param_block.static_prune_point, stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	if (p)
+		term_list[terms_so_far++] = p;
+	}
 
 if (stemmer)
-	p = write_variable("~stemmer", stemmer, postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	{
+	p = write_variable("~stemmer", stemmer, stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+	if (p)
+		term_list[terms_so_far++] = p;
+	}
 
 /*
 	Now move onto the "normal" terms
@@ -533,7 +637,9 @@ while (should_continue)
 		/*
 			Serialise the merged postings
 		*/
-		p = write_postings(next_term_to_process, raw[number_engines], postings_list, postings_list_size, index, combined_term_index, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+		p = write_postings(next_term_to_process, raw[number_engines], index, stats, leaves[number_engines], &param_block, combined_docs, &longest_postings);
+		if (p)
+			term_list[terms_so_far++] = p;
 		}
 	
 	/*
@@ -554,27 +660,24 @@ while (should_continue)
 /*
 	Now we've done all the postings, it's time to write the dictionary and header.
 */
-for (i = 0; i < ANT_memory_index::HASH_TABLE_SIZE; i++)
-	if (combined_term_index->hash_table[i] != NULL)
-		where += combined_term_index->generate_term_list(combined_term_index->hash_table[i], term_list, where, &longest_term, &highest_df);
-term_list[where] = NULL;
+term_list[terms_so_far] = NULL;
 
-qsort(term_list, where, sizeof(*term_list), ANT_memory_index_hash_node::term_compare);
+qsort(term_list, terms_so_far, sizeof(*term_list), ANT_memory_index_hash_node::term_compare);
 
-for (here = term_list; *here != NULL; here = combined_term_index->find_end_of_node(here))
+for (here = term_list; *here != NULL; here = find_end_of_node(here))
 	btree_root_size++;
 
 /*
 	Write the second level of the btree.
 */
-current_header = header = (ANT_btree_head_node *)malloc(sizeof(ANT_btree_head_node) * btree_root_size);
+current_header = header = new ANT_btree_head_node[btree_root_size];
 here = term_list;
 while (*here != NULL)
 	{
 	current_header->disk_pos = index->tell();
 	current_header->node = *here;
 	current_header++;
-	here = combined_term_index->write_node(index, here);
+	here = write_node(index, here);
 	}
 last_header = current_header;
 terms_in_root = last_header - header;
@@ -627,7 +730,6 @@ for (engine = 0; engine < number_engines; engine++)
 	}
 delete leaves[number_engines];
 delete raw[number_engines];
-delete combined_term_index;
 delete doclist;
 delete index;
 
@@ -640,8 +742,6 @@ delete [] document_compress_buffer;
 delete [] document_decompress_buffer;
 delete [] terms;
 delete [] term_list;
-
-free(postings_list);
 
 return 0;
 }
