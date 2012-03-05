@@ -1,6 +1,6 @@
 /*
 	MERGER_PARAM_BLOCK.C
-	---------------------
+	--------------------
 */
 #include <limits.h>
 #include <stdio.h>
@@ -11,7 +11,6 @@
 #include "merger_param_block.h"
 #include "compression_text_factory.h"
 #include "compression_factory.h"
-#include "readability_factory.h"
 #include "version.h"
 
 #ifndef FALSE
@@ -23,26 +22,22 @@
 
 /*
 	ANT_MERGER_PARAM_BLOCK::ANT_MERGER_PARAM_BLOCK()
-	--------------------------------------------------
+	-------------------------------------------------
 */
 ANT_merger_param_block::ANT_merger_param_block(int argc, char *argv[]) : ANT_indexer_param_block(argc, argv)
 {
 this->argc = argc;
 this->argv = argv;
-compression_scheme = ANT_compression_factory::VARIABLE_BYTE;
 
 reporting_frequency = 0;
 index_filename = "merged_index.aspt";
 doclist_filename = "merged_doclist.aspt";
-static_prune_point = LLONG_MAX;
-stop_word_removal = ANT_memory_index::NONE;
-stop_word_df_frequencies = 1;
-stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
+document_compression_scheme = ANT_compression_text_factory::DEFLATE; // something non-NONE
 }
 
 /*
 	ANT_MERGER_PARAM_BLOCK::USAGE()
-	--------------------------------
+	-------------------------------
 */
 void ANT_merger_param_block::usage(void)
 {
@@ -53,7 +48,7 @@ exit(0);
 
 /*
 	ANT_MERGER_PARAM_BLOCK::HELP()
-	-------------------------------
+	------------------------------
 */
 void ANT_merger_param_block::help(void)
 {
@@ -89,8 +84,10 @@ puts("   r            Relative-10   (bytewise)");
 puts("   s            Simple-9      (bytewise)");
 puts("   S            Sigma         (bytewise)");
 puts("   v            Variable Byte (bytewise) [default]");
-puts("Documents are included in the index if they are included in all indexes to be merged");
-puts("Documents are compressed using the same methods that were used in the indexes to be merged.");
+puts("-C[-]           Store documents in the repository compressed with one of:");
+puts("   -            don't create the repository");
+puts("By default documents are included in the index if they are included in all indexes to be merged");
+puts("and are compressed using the same methods that were used in the indexes to be merged.");
 puts("If documents are not included in the index, then the doclists will have to be combined manually.");
 puts("");
 
@@ -113,8 +110,24 @@ exit(0);
 }
 
 /*
+	ANT_MERGER_PARAM_BLOCK::DOCUMENT_COMPRESSION()
+	----------------------------------------------
+*/
+void ANT_merger_param_block::document_compression(char *scheme)
+{
+switch (*scheme)
+	{
+	case '-': document_compression_scheme = NONE; break;
+	default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
+	}
+
+if (*(scheme + 1) != '\0')
+	exit(printf("Only one document compresson scheme may be used at a time\n"));
+}
+
+/*
 	ANT_MERGER_PARAM_BLOCK::COMPRESSION()
-	--------------------------------------
+	-------------------------------------
 */
 void ANT_merger_param_block::compression(char *scheme_list)
 {
@@ -141,7 +154,7 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 
 /*
 	ANT_MERGER_PARAM_BLOCK::TERM_REMOVAL()
-	---------------------------------------
+	--------------------------------------
 */
 void ANT_merger_param_block::term_removal(char *mode_list)
 {
@@ -179,7 +192,7 @@ for (which = mode_list; *which != '\0'; which++)
 
 /*
 	ANT_MERGER_PARAM_BLOCK::PARSE()
-	--------------------------------
+	-------------------------------
 */
 long ANT_merger_param_block::parse(void)
 {
@@ -209,6 +222,11 @@ for (param = 1; param < argc; param++)
 			reporting_frequency = atol(command + 1);
 			if (reporting_frequency == 0)
 				reporting_frequency = LLONG_MAX;
+			}
+		else if (*command == 'C')
+			{
+			document_compression_scheme = NONE;
+			document_compression(command + 1);
 			}
 		else if (*command == 'c')
 			{

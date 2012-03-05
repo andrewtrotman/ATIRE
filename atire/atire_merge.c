@@ -345,7 +345,7 @@ unsigned long buf_len = 0;
 long *strcmp_results = new long[number_engines];
 char *next_term_to_process = NULL;
 long should_continue = false;
-long long do_documents = true;
+long long do_documents = param_block.document_compression_scheme != ANT_merger_param_block::NONE;
 long long stemmer;
 
 ANT_file *doclist = new ANT_file;
@@ -627,7 +627,7 @@ while (should_continue)
 		if (p)
 			term_list[terms_so_far++] = p;
 
-		if (terms_so_far % param_block.reporting_frequency == 0)
+		if (param_block.reporting_frequency && terms_so_far % param_block.reporting_frequency == 0)
 			{
 			printf("Processed %lld terms in ", terms_so_far);
 			stats.print_elapsed_time();
@@ -648,8 +648,12 @@ while (should_continue)
 	for (engine = 0; engine < number_engines; engine++)
 		should_continue = should_continue || terms[engine];
 	}
-printf("Processed %lld terms in ", terms_so_far);
-stats.print_elapsed_time();
+
+if (param_block.reporting_frequency != 0)
+	{
+	printf("Processed %lld terms in ", terms_so_far);
+	stats.print_elapsed_time();
+	}
 
 /*
 	Now we've done all the postings, it's time to write the dictionary and header.
@@ -715,12 +719,15 @@ doclist->close();
 
 if (!do_documents)
 	{
-	printf("Warning: empty doclist generated because not all indexes had filenames.\n");
+	printf("Warning: empty doclist generated because not all indexes had filenames or merge was run with -C-.\n");
 	printf("Combine the doclists for the indexes merged in the same order given to file: %s.\n", param_block.doclist_filename);
 	}
 
-printf("Finished merge in ");
-stats.print_elapsed_time();
+if (param_block.reporting_frequency != 0)
+	{
+	printf("Finished merge in ");
+	stats.print_elapsed_time();
+	}
 
 /*
 	Cleanup

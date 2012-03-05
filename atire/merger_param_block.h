@@ -17,17 +17,8 @@ private:
 	int argc;
 	char **argv;
 
-public:
-	unsigned long compression_scheme;	// bitstring of which compression schemes to use
-	long long reporting_frequency;		// the number of terms to merge before reporting progress
-	char *doclist_filename;				// name of file containing the internal docid to external docid translations
-	char *index_filename;				// name of index file
-	long long static_prune_point;		// maximum length of a postings list measured in document IDs
-	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
-	long stop_word_df_frequencies;   // remove wrods based on the document frequencies
-	double stop_word_df_threshold;		// if df/N is greater than this and (stop_word_removal & PRUNE_DF_FREQUENTS) != 0 then stop the word
-
 protected:
+	void document_compression(char *scheme);
 	void compression(char *schemes);
 	void term_removal(char *list);
 
