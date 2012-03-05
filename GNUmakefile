@@ -71,6 +71,7 @@ USE_PARTIAL_DCOMPRESSION := 1
 # represent the static array in two dimensions, reduce accumulators
 # initialisation time
 USE_TWO_D_ACCUMULATORS := 1
+USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
 
 # what type to use for the accumulators
 CFLAGS += -DANT_ACCUMULATOR_T="unsigned short"
@@ -243,6 +244,14 @@ endif
 
 ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
 	CFLAGS += -DTWO_D_ACCUMULATORS
+endif
+
+ifeq ($(USE_TWO_D_ACCUMULATORS_POW2_WIDTH), 1)
+	ifeq ($(USE_TWO_D_ACCUMULATORS), 0)
+		# The next line has to be spaces indented, not tabs. (something funny with GNU make)
+        $(error TWO_D_ACCUMULATORS_POW2_WIDTH requries TWO_D_ACCUMULATORS to be enabled)
+	endif
+	CFLAGS += -DTWO_D_ACCUMULATORS_POW2_WIDTH
 endif
 
 ifeq ($(USE_MYSQL), 1)
