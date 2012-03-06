@@ -138,20 +138,15 @@ return FALSE;
 		ANT_DIRECTORY_ITERATOR_RECURSIVE::FIRST()
 		-----------------------------------------
 	*/
-	char *ANT_directory_iterator_recursive::first_match_wildcard(char *root_directory, char *local_directory)
+	char *ANT_directory_iterator_recursive::first_match_wildcard(char *root_directory)
 	{
 	char path[PATH_MAX];
 
-	if (*local_directory != '\0' && *root_directory != '\0')
-		sprintf(file_list->path, "%s", local_directory);
-	else if (*local_directory == '\0')
-		strcpy(file_list->path, root_directory);
-	else if (*root_directory == '\0')
-		strcpy(file_list->path, local_directory);
+	if (*root_directory != '\0')
+		sprintf(file_list->path, "%s", root_directory);
 	else
 		strcpy(file_list->path, ".");
 
-	//sprintf(path, "%s*", file_list->path); // that is the wildcard used for
 	sprintf(path, "%s%s", file_list->path, wildcard);
 	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
 	file_list->glob_index = 0;
@@ -191,7 +186,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 		}
 	return NULL;
 #else
-	char *dir, *file;
+	char *file;
 	long match = FALSE, at_end = 1;
 
 	while (!match)
@@ -214,9 +209,8 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 				{
 				/* tmp is here as push_directory() will trash current file_list*/
 				char *tmp=file_list->matching_files.gl_pathv[file_list->glob_index];
-				dir = file_list->path;
 				push_directory();
-				if ((file = first_match_wildcard(dir, tmp)) != NULL)
+				if ((file = first_match_wildcard(tmp)) != NULL)
 					return file;
 				}
 			}
@@ -279,7 +273,7 @@ file_list = handle_stack;
 			this->wildcard[wildcard_len] = '\0';
 			}
 		}
-	if ((got = first_match_wildcard(path_buffer, "")) == NULL)
+	if ((got = first_match_wildcard(path_buffer)) == NULL)
 		return NULL;
 
 	object->filename = strnew(got);
