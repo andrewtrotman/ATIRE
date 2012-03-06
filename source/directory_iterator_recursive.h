@@ -37,7 +37,7 @@ private:
 #ifdef _MSC_VER
 	long get_next_candidate(void);
 #else
-	char *first(char *root_directory, char *local_directory);
+	char *first_match_wildcard(char *root_directory, char *local_directory);
 	static long PathMatchSpec(const char *str, const char *pattern);
 #endif
 

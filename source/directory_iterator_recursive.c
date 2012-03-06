@@ -138,7 +138,7 @@ return FALSE;
 		ANT_DIRECTORY_ITERATOR_RECURSIVE::FIRST()
 		-----------------------------------------
 	*/
-	char *ANT_directory_iterator_recursive::first(char *root_directory, char *local_directory)
+	char *ANT_directory_iterator_recursive::first_match_wildcard(char *root_directory, char *local_directory)
 	{
 	char path[PATH_MAX];
 
@@ -207,6 +207,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 			else
 				return NULL;
 			}
+		// check if the matching path is a directory
 		else if (file_list->matching_files.gl_pathv[file_list->glob_index][strlen(file_list->matching_files.gl_pathv[file_list->glob_index]) - 1] == '/')
 			{
 			if (true)
@@ -215,7 +216,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 				char *tmp=file_list->matching_files.gl_pathv[file_list->glob_index];
 				dir = file_list->path;
 				push_directory();
-				if ((file = first(dir, tmp)) != NULL)
+				if ((file = first_match_wildcard(dir, tmp)) != NULL)
 					return file;
 				}
 			}
@@ -278,7 +279,7 @@ file_list = handle_stack;
 			this->wildcard[wildcard_len] = '\0';
 			}
 		}
-	if ((got = first(path_buffer, "")) == NULL)
+	if ((got = first_match_wildcard(path_buffer, "")) == NULL)
 		return NULL;
 
 	object->filename = strnew(got);
