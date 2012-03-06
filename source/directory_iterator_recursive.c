@@ -8,6 +8,7 @@
 	#include <unistd.h>
 	#include <string.h>
 	#include <fnmatch.h>
+	#include <glob.h>
 #endif
 #include <stdio.h>
 #include "str.h"
@@ -148,11 +149,24 @@ return FALSE;
 		strcpy(file_list->path, ".");
 
 	sprintf(path, "%s%s", file_list->path, wildcard);
-	glob(path, GLOB_MARK, NULL, &file_list->matching_files);
-	file_list->glob_index = 0;
+	switch(glob(path, GLOB_MARK, NULL, &file_list->matching_files))
+	{
+		case 0:
+			break;
+		case GLOB_NOSPACE:
+			fprintf(stderr, "ERROR: glob, Out of memory\n");
+			return NULL;
+		case GLOB_ABORTED:
+			fprintf(stderr, "ERROR: glob, Reading error\n");
+			return NULL;
+		case GLOB_NOMATCH:
+			fprintf(stderr, "ERROR: glob, No files found\n");
+			return NULL;
+		default:
+			break;
+	}
 
-	if (file_list->matching_files.gl_pathc == 0) /* None found */
-		return NULL;
+	file_list->glob_index = 0;
 
 	return next_match_wildcard();
 	}
@@ -269,6 +283,7 @@ file_list = handle_stack;
 			char *wildcard_start = slash;
 			wildcard_start++;
 			long wildcard_len = last_char - wildcard_start + 1;
+			// trim the wildcard path string to contain only the wildcard characters
 			strncpy(this->wildcard, wildcard_start, wildcard_len);
 			this->wildcard[wildcard_len] = '\0';
 			}
