@@ -994,7 +994,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		see: Jia, X.-F., Trotman, A., Keefe, R.A. (2010), Efficient Accumulator Initialisation, Proceedings of the 15th Australasian Document Computing Symposium (ADCS 2010)
 	*/
 	#ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
-		search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+		search_engine->set_accumulator_width(ANT_pow2_zero_64(search_engine->results_list->width_in_bits));				// by default use what ever the constructor used
 	#else
 		if (sum_of_document_frequencies == 0)
 			search_engine->set_accumulator_width(1);
@@ -1117,7 +1117,7 @@ long ATIRE_API::process_topsig_query(char *query)
 	Initialise the shape of the 2D accumulators
 */
 #ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
-	search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+	search_engine->set_accumulator_width(ANT_pow2_zero_64(search_engine->results_list->width_in_bits));				// by default use what ever the constructor used
 #else
 	search_engine->set_accumulator_width((long long)sqrt((double)search_engine->document_count()));		// by default use sqrt(N) as the width of the acumulator table
 #endif
@@ -1275,7 +1275,7 @@ if (parsed_query->subtype == ANT_query::DISJUNCTIVE || feedbacker != NULL)
 	Initialise the shape of the 2D accumulators
 */
 #ifdef TWO_D_ACCUMULATORS_POW2_WIDTH
-	search_engine->set_accumulator_width(ANT_pow2_zero_64(results_list->width_in_bits));				// by default use what ever the constructor used
+	search_engine->set_accumulator_width(ANT_pow2_zero_64(search_engine->results_list->width_in_bits));				// by default use what ever the constructor used
 #else
 	search_engine->set_accumulator_width((long long)sqrt((double)search_engine->document_count()));		// by default use sqrt(N) as the width of the acumulator table
 #endif
