@@ -148,7 +148,7 @@ return FALSE;
 	else
 		strcpy(file_list->path, ".");
 
-	sprintf(path, "%s%s", file_list->path, wildcard);
+	sprintf(path, "%s*", file_list->path); // that is the wildcard used for
 	switch(glob(path, GLOB_MARK, NULL, &file_list->matching_files))
 	{
 		case 0:
