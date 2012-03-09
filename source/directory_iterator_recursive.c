@@ -160,7 +160,7 @@ return FALSE;
 			fprintf(stderr, "ERROR: glob, Reading error\n");
 			return NULL;
 		case GLOB_NOMATCH:
-			fprintf(stderr, "ERROR: glob, No files found\n");
+			fprintf(stderr, "WARNING: glob, No files found under path \"%s\"\n", file_list->path);
 			return NULL;
 		default:
 			break;
@@ -205,7 +205,7 @@ char *ANT_directory_iterator_recursive::next_match_wildcard(void)
 
 	while (!match)
 		{
-		if (at_end == 0 || file_list->matching_files.gl_pathv[file_list->glob_index] == NULL)
+		if (at_end == 0 || file_list->glob_index >= file_list->matching_files.gl_pathc)
 			{
 			globfree(&file_list->matching_files);
 			if (pop_directory())
