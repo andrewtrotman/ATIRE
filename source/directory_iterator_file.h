@@ -24,6 +24,7 @@ protected:
 	char *file, *document_start, *document_end;
 	char filename[PATH_MAX];
 	ANT_directory_iterator *source;
+	int trec_cleanup;
 
 protected:
 	ANT_directory_iterator_object *read_entire_file(ANT_directory_iterator_object *object);
@@ -31,8 +32,8 @@ protected:
 	void initialise(void);
 
 public:
-	ANT_directory_iterator_file(char *file, long get_file = 0);
-	ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file = 0);
+	ANT_directory_iterator_file(char *file, long get_file = 0, int cleanup = 0);
+	ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file = 0, int cleanup = 0);
 	virtual ~ANT_directory_iterator_file() { delete [] file; delete source; }
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);

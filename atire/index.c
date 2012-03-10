@@ -376,20 +376,6 @@ for (param = first_param; param < argc; param++)
 		}
 #endif
 
-	else if (param_block.recursive == ANT_indexer_param_block::TRECWEB)
-		{
-		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
-		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
-			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
-		source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE);
-		}
-	else if (param_block.recursive == ANT_indexer_param_block::TRECBIG)
-		{
-		ANT_instream *instream;
-
-		instream = new ANT_instream_file(new ANT_memory, argv[param]);
-		source = new ANT_directory_iterator_file_buffered(instream, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
-		}
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		{
 		long long data_stream_length;
@@ -399,6 +385,20 @@ for (param = first_param; param < argc; param++)
 			data_stream = ANT_turn_binary_into_ascii(data_stream, data_stream_length);
 
 		source = new ANT_directory_iterator_file(data_stream, ANT_directory_iterator::READ_FILE);
+		}
+	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
+			{
+			source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
+			if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
+				source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
+			source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
+			}
+	else if (param_block.recursive == ANT_indexer_param_block::TRECBIG)
+		{
+		ANT_instream *instream;
+
+		instream = new ANT_instream_file(new ANT_memory, argv[param]);
+		source = new ANT_directory_iterator_file_buffered(instream, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);

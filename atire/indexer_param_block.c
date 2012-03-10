@@ -85,10 +85,11 @@ puts("-rmysql <username> <password> <hostname> <database> <query> MySQL query re
 puts("-rphpbb <username> <password> <hostname> <database> <type> MySQL phpBB instance");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtlzo          Search in tar.lzo files for indexable files");
-puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>");
-puts("-rtrecclean     Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>, remove '\\0' and high-bit characters from files");
-puts("-rtrecbig       see -rtrecclean but indexing a source file large than memory");
-puts("-rtrecweb       Recursive search for TREC formatted <DOC>...</DOC> formatted files");
+puts("-rtrec<:clean>  Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>,");
+puts("                <:clean> to remove '\\0' and high-bit characters from files");
+puts("-rrtrec<:clean> Recursive search for TREC formatted <DOC>...</DOC> formatted files,");
+puts("                <:clean> to remove '\\0' and high-bit characters from files");
+puts("-rtrecbig       see -rtrec but indexing a source file large than memory");
 puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
 puts("-rwarcgz        Search in warc.gz files for indexable files");
@@ -344,20 +345,23 @@ for (param = 1; param < argc; param++)
 			recursive = PKZIP;
 		else if (strcmp(command, "rtlzo") == 0)
 			recursive = TAR_LZO;
-		else if (strcmp(command, "rtrec") == 0)
-			recursive = TREC;
-		else if (strcmp(command, "rtrecclean") == 0)
+		else if (strncmp(command, "rtrec", 5) == 0)
 			{
 			recursive = TREC;
-			trec_cleanup = true;
+			if (strncmp(command+5, ":clean", 6) == 0)
+				trec_cleanup = true;
+			}
+		else if (strncmp(command, "rrtrec", 6) == 0)
+			{
+			recursive = RECURSIVE_TREC;
+			if (strncmp(command+6, ":clean", 6) == 0)
+				trec_cleanup = true;
 			}
 		else if (strcmp(command, "rtrecbig") == 0)
 			{
 			recursive = TRECBIG;
 			trec_cleanup = true;
 			}
-		else if (strcmp(command, "rtrecweb") == 0)
-			recursive = TRECWEB;
 		else if (strcmp(command, "rcsv") == 0)
 			recursive = CSV;
 		else if (strcmp(command, "rwarcgz") == 0)

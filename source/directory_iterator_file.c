@@ -12,20 +12,22 @@
 	ANT_DIRECTORY_ITERATOR_FILE::ANT_DIRECTORY_ITERATOR_FILE()
 	----------------------------------------------------------
 */
-ANT_directory_iterator_file::ANT_directory_iterator_file(char *file, long get_file) : ANT_directory_iterator("", get_file) 
+ANT_directory_iterator_file::ANT_directory_iterator_file(char *file, long get_file, int cleanup) : ANT_directory_iterator("", get_file)
 {
 initialise();
 this->file = file;
+trec_cleanup = cleanup;
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILE::ANT_DIRECTORY_ITERATOR_FILE()
 	----------------------------------------------------------
 */
-ANT_directory_iterator_file::ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_file::ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file, int cleanup) : ANT_directory_iterator("", get_file)
 {
 initialise();
 this->source = source;
+trec_cleanup = cleanup;
 }
 
 /*
@@ -55,6 +57,9 @@ if (source != NULL)
 
 	if (success != NULL)
 		{
+		if (trec_cleanup)
+			object.file = ANT_turn_binary_into_ascii(object.file, object.length);
+
 		delete [] file;
 		file = object.file;
 		return document_end = document_start = file;

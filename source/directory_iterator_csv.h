@@ -15,7 +15,7 @@
 class ANT_directory_iterator_csv : public ANT_directory_iterator_file
 {
 public:
-	ANT_directory_iterator_csv(char *file, long get_file = 0) : ANT_directory_iterator_file(file, get_file) {}
+	ANT_directory_iterator_csv(char *file, long get_file = 0) : ANT_directory_iterator_file(file, get_file, 0) {}
 	virtual ~ANT_directory_iterator_csv() {}
 
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);

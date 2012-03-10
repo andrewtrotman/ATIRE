@@ -182,12 +182,14 @@ ifeq ($(USE_SPECIAL_COMPRESSION), 1)
 	CFLAGS += -DSPECIAL_COMPRESSION
 endif
 
-ifeq ($(USE_PARALLEL_INDEXING), 1)
-   ifeq ($(OS_TYPE), SUNOS)
+# link the pthread library even if the parallel indexing is not enabled
+ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lpthread
    else
 	LDFLAGS += -pthread
    endif
+
+ifeq ($(USE_PARALLEL_INDEXING), 1)
 	CFLAGS += -DPARALLEL_INDEXING -DPARALLEL_INDEXING_DOCUMENTS
 endif
 
@@ -332,6 +334,9 @@ TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
 
 all : info $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
 
+# faster compilation without considering extra objects, useful for repeated make for testing
+internal: index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
+
 index : $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
 atire_client: $(BIN_DIR)/atire_client
@@ -442,6 +447,9 @@ clean :
 	(cd ./$(BZIP_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
 	(cd ./$(LZO_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
 	(cd ./$(SNOWBALL_DIR); $(MAKE) -f GNUmakefile clean; cd $(BASE_DIR);)
+	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
+
+clean-internal:
 	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
 
 depend :
