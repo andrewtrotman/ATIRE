@@ -43,7 +43,7 @@ delete decompressor;
 ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_directory_iterator_object *object)
 {
 #ifdef ANT_HAS_ZLIB
-	char *decompressed, *byte;
+	char *decompressed, *byte, *end_of_decompressed;
 	size_t decompressed_length;
 	int status;
 	z_stream stream;
@@ -53,7 +53,9 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 
 	do
 		{
-		if ((decompressed = new (std::nothrow) char [decompressed_length = (size_t)largest_decompressed_file]) == NULL)
+		decompressed_length = (size_t)largest_decompressed_file;
+		// 1 byte for the null terminator
+		if ((decompressed = new (std::nothrow) char [decompressed_length + 1]) == NULL)
 			{
 			printf("Failed to decompress file:%s ... skiping (tried:%lld)\n", object->filename, (long long)largest_decompressed_file);
 			largest_decompressed_file = INITIAL_LARGEST_DECOMPRESSED_FILE_SIZE;
@@ -81,7 +83,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 			delete [] decompressed;
 			decompressed = NULL;
 			}
-
+		end_of_decompressed = (char *)stream.next_out;
 		inflateEnd(&stream);
 		}
 	while (decompressed == NULL);
@@ -89,6 +91,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 	delete [] object->file;
 
 	object->file = decompressed;
+	decompressed_length = end_of_decompressed - decompressed;
 	object->file[decompressed_length] = '\0';			// '\0' terminate the input
 	object->length = decompressed_length;
 
