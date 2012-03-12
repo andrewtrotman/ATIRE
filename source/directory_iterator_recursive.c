@@ -144,7 +144,7 @@ return FALSE;
 	char path[PATH_MAX];
 
 	if (*root_directory != '\0')
-		sprintf(file_list->path, "%s", root_directory);
+		strcpy(file_list->path, root_directory);
 	else
 		strcpy(file_list->path, ".");
 
@@ -276,6 +276,7 @@ file_list = handle_stack;
 	else // the wildcard will be after slash
 		{
 		strncpy(path_buffer, wildcard, last_slash_idx + 1);
+		path_buffer[last_slash_idx+1] = '\0';
 		if (last_char == slash)
 			strcpy(this->wildcard, "*");
 		else
