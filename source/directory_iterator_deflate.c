@@ -34,6 +34,7 @@ largest_decompressed_file = INITIAL_LARGEST_DECOMPRESSED_FILE_SIZE;
 ANT_directory_iterator_deflate::~ANT_directory_iterator_deflate()
 {
 delete decompressor;
+delete source;
 }
 
 /*
@@ -89,6 +90,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 	while (decompressed == NULL);
 
 	delete [] object->file;
+	delete [] object->filename;
 
 	object->file = decompressed;
 	decompressed_length = end_of_decompressed - decompressed;

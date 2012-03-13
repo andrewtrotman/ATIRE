@@ -545,6 +545,7 @@ delete file_stream;
 delete decompressor;
 delete instream_buffer;
 delete pregen;
+delete document_indexer;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{
