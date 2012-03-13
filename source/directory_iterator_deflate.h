@@ -13,7 +13,7 @@ class ANT_compress_text;
 	class ANT_DIRECTORY_ITERATOR_DEFLATE
 	------------------------------------
 	This class takes as input the output of another directory_iterator and decomresses it. The
-	use case is when you have a directory full of .gz files and you want to recursively iterate 
+	use case is when you have a directory full of .gz files and you want to recursively iterate
 	over directory decompressing each file.
 */
 class ANT_directory_iterator_deflate : public ANT_directory_iterator
@@ -34,7 +34,7 @@ protected:
 	virtual ANT_directory_iterator_object *process(ANT_directory_iterator_object *object);
 
 public:
-	ANT_directory_iterator_deflate(ANT_directory_iterator *source, long mode);
+	ANT_directory_iterator_deflate(ANT_directory_iterator *source, long mode = BINARY);
 	virtual ~ANT_directory_iterator_deflate();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return process(source->first(object)); }

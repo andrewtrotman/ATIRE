@@ -390,7 +390,7 @@ for (param = first_param; param < argc; param++)
 			{
 			source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
 			if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
-				source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);		// recursive .gz files
+				source = new ANT_directory_iterator_deflate(source);		// recursive .gz files
 			source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
 			}
 	else if (param_block.recursive == ANT_indexer_param_block::TRECBIG)
