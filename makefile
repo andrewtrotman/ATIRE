@@ -170,6 +170,7 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="unsigned short"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
+MINUS_D = $(MINUS_D) -DIMPACT_HEADER
 
 #MINUS_D = $(MINUS_D) -DPURIFY
 
@@ -321,6 +322,7 @@ PARTS = \
 	$(OBJDIR)\indexer_param_block_pregen.obj		\
 	$(OBJDIR)\indexer_param_block_topsig.obj		\
 	$(OBJDIR)\indexer_param_block.obj				\
+	$(OBJDIR)\merger_param_block.obj				\
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\
 	$(OBJDIR)\ranking_function.obj					\
