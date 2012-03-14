@@ -25,6 +25,8 @@
 /*
 	SHOULD_PRUNE()
 	--------------
+	Dupulicate ANT_memory_index::should_prune to avoid needing a temporary vocab only index, creating an unecessary hash_node
+	and including removing tags and numbers, which are dealt with elsewhere during normal indexing.
 */
 inline long should_prune(char *term, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno)
 {
@@ -51,6 +53,7 @@ else
 /*
 	FIND_END_OF_NODE()
 	------------------
+	Duplicate ANT_memory_index::find_end_of_node to avoid needing a temporary vocab only index
 */
 ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start)
 {
@@ -74,6 +77,7 @@ return current;
 /*
 	WRITE_NODE()
 	------------
+	Duplicate ANT_memory_index::write_node to avoid needing a temporary vocab only index
 */
 ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start)
 {
@@ -137,6 +141,7 @@ return end;
 /*
 	WRITE_POSTINGS()
 	----------------
+	Uses a static 500m buffer, should probably be changed.
 */
 ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
 {
@@ -237,12 +242,15 @@ return node;
 /*
 	WRITE_IMPACT_HEADER_POSTINGS()
 	------------------------------
+	Uses a static 500m buffer, should probably be changed.
 */
 ANT_memory_index_hash_node *write_impact_header_postings(char *term, ANT_compressable_integer *header, ANT_compressable_integer quantum_count, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
 {
 static long long postings_list_size = 500 * 1024 * 1024;
+static long long header_buffer_size = 1 + ANT_impact_header::INFO_SIZE + (ANT_impact_header::NUM_OF_QUANTUMS * 3 * sizeof(*header));
+
 static unsigned char *postings_list = new unsigned char[postings_list_size];
-static unsigned char *compressed_impact_header_buffer = new unsigned char[1 + ANT_impact_header::INFO_SIZE + (ANT_impact_header::NUM_OF_QUANTUMS * 3 * sizeof(*header))];
+static unsigned char *compressed_impact_header_buffer = new unsigned char[header_buffer_size];
 
 unsigned char *postings_ptr = postings_list;
 unsigned char *compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
@@ -319,22 +327,22 @@ node->document_frequency = leaf->local_document_frequency;
 /*
 	Compress each postings
 */
-for (int i = 0; i < quantum_count; impact_value_pointer++, document_count_pointer++, impact_offset_pointer++, i++)
+for (ANT_compressable_integer i = 0; i < quantum_count; impact_value_pointer++, document_count_pointer++, impact_offset_pointer++, i++)
 	{
 	len = factory.compress(postings_ptr, (long long)1 + *document_count_pointer * sizeof(ANT_compressable_integer), raw + *impact_offset_pointer, *document_count_pointer);
-	*impact_offset_pointer = postings_ptr - postings_list; // convert pointer to offset
+	*impact_offset_pointer = (ANT_compressable_integer)(postings_ptr - postings_list); // convert pointer to offset
 	postings_ptr += len;
 	}
 
 /*
 	Compress the header
 */
-len = factory.compress(compressed_header_ptr, 1 + (ANT_impact_header::NUM_OF_QUANTUMS * 3 * sizeof(*header)), header, quantum_count * 3);
+len = factory.compress(compressed_header_ptr, header_buffer_size, header, quantum_count * 3);
 
 ((uint64_t *)compressed_impact_header_buffer)[0] = 0;
 ((uint64_t *)compressed_impact_header_buffer)[1] = 0;
 ((uint32_t *)compressed_impact_header_buffer)[4] = quantum_count;
-((uint32_t *)compressed_impact_header_buffer)[5] = ANT_impact_header::INFO_SIZE + len;
+((uint32_t *)compressed_impact_header_buffer)[5] = (uint32_t)(ANT_impact_header::INFO_SIZE + len);
 
 compressed_header_ptr += len;
 
@@ -364,7 +372,7 @@ return node;
 */
 ANT_memory_index_hash_node *write_variable(char *term, long long value, ANT_stats_memory_index *memory_stats, ANT_file *index, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
 {
-ANT_compressable_integer raw[6]; // make room for it to be fiddled with in write_postings
+ANT_compressable_integer raw[6]; // 6 instead of 2 to make room for it to be fiddled with in write_postings
 
 raw[0] = ((unsigned long long)value) >> 32;
 raw[1] = ((unsigned long long)value) & 0xFFFFFFFF;
@@ -380,7 +388,6 @@ return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno
 */
 int main(int argc, char *argv[])
 {
-long i;
 long long offset, engine, upto = 0;
 long long global_trimpoint = 0;
 long long this_trimpoint;
@@ -395,7 +402,10 @@ long first_param = param_block.parse();
 
 long long combined_docs = 0, maximum_terms = 0;
 long long number_engines = argc - first_param;
+long long document;
 long long longest_postings = 0;
+long long bytes_used = 0;
+long long bytes_allocated = 0;
 long long document_filenames_start, document_filenames_finish;
 unsigned long longest_document = 0, buffer_size, compress_buffer_size;
 char *document_compress_buffer;
@@ -472,7 +482,7 @@ ANT_compressable_integer *postings_begin = new ANT_compressable_integer[number_e
 
 ANT_compressable_integer *quantums_processed = new ANT_compressable_integer[number_engines];
 ANT_compressable_integer *current_impact_header;
-ANT_compressable_integer number_quantums_used, postings_offset;
+ANT_compressable_integer quantum, number_quantums_used, postings_offset;
 
 for (engine = 0; engine < number_engines; engine++)
 	impact_headers[engine] = new ANT_compressable_integer[ANT_impact_header::NUM_OF_QUANTUMS * 3]; // * 3 -> impact values, doc counts, impact offsets
@@ -535,11 +545,11 @@ for (engine = 0; engine < number_engines; engine++)
 if (do_documents)
 	{
 	for (engine = 0; engine < number_engines; engine++)
-		for (i = 0; i < search_engines[engine]->document_count(); i++)
+		for (document = 0; document < search_engines[engine]->document_count(); document++)
 			{
 			current_disk_position = index->tell();
 			
-			search_engines[engine]->get_compressed_document(document_compress_buffer, &compress_buffer_size, i);
+			search_engines[engine]->get_compressed_document(document_compress_buffer, &compress_buffer_size, document);
 			index->write((unsigned char *)document_compress_buffer, compress_buffer_size);
 			
 			sum += raw[number_engines][upto] = (ANT_compressable_integer)(current_disk_position - (upto == 0 ? 0 : sum));
@@ -570,10 +580,10 @@ if (do_documents)
 			
 			Also write out the the doclist file ... because we need it.
 		*/
-		for (i = 0; i < search_engines[engine]->document_count(); i++)
+		for (document = 0; document < search_engines[engine]->document_count(); document++)
 			{
-			doclist->puts(strip_space_inplace(doc_filenames[i]));
-			index->write((unsigned char *)doc_filenames[i], strlen(doc_filenames[i]) + 1);
+			doclist->puts(strip_space_inplace(doc_filenames[document]));
+			index->write((unsigned char *)doc_filenames[document], strlen(doc_filenames[document]) + 1);
 			}
 		}
 	
@@ -635,8 +645,8 @@ leaves[number_engines]->impacted_length = leaves[number_engines]->local_document
 for (engine = 0; engine < number_engines; engine++)
 	{
 	raw[engine] = search_engines[engine]->get_document_lengths(&dummy);
-	for (i = 0; i < leaves[engine]->local_document_frequency; i++)
-		sum += raw[number_engines][i + offset] = raw[engine][i] + 1;
+	for (document = 0; document < leaves[engine]->local_document_frequency; document++)
+		sum += raw[number_engines][document + offset] = raw[engine][document] + 1;
 	
 	offset += search_engines[engine]->document_count();
 	}
@@ -654,7 +664,6 @@ if (param_block.static_prune_point != LONG_MAX)
 if (stemmer)
 	if ((p = write_variable("~stemmer", stemmer, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
 		term_list[terms_so_far++] = p;
-
 
 /*
 	Now move onto the "normal" terms
@@ -767,11 +776,11 @@ while (should_continue)
 						
 						factory.decompress(decompress_buffer, (unsigned char *)raw[engine] + postings_begin[engine] + impact_offset, number_documents);
 						
-						*current = decompress_buffer[0] + offset - previous_docid;
+						*current = (ANT_compressable_integer)(decompress_buffer[0] + offset - previous_docid);
 						previous_docid += *current++;
-						for (int i = 1; i < number_documents; i++)
+						for (document = 1; document < number_documents; document++)
 							{
-							*current = decompress_buffer[i];
+							*current = decompress_buffer[document];
 							previous_docid += *current++;
 							}
 						quantums_processed[engine]++;
@@ -785,7 +794,7 @@ while (should_continue)
 					Set the beginnings of postings
 				*/
 				current_impact_header[ANT_impact_header::NUM_OF_QUANTUMS * 2] = postings_offset;
-				postings_offset = current - raw[number_engines];
+				postings_offset = (ANT_compressable_integer)(current - raw[number_engines]);
 				current_impact_header++;
 				}
 			}
@@ -793,11 +802,10 @@ while (should_continue)
 		/*
 			Move the impact header sections to be contiguous
 		*/
-		
-		for (i = 0; i < number_quantums_used; i++)
-			impact_headers[number_engines][i + number_quantums_used] = impact_headers[number_engines][i + ANT_impact_header::NUM_OF_QUANTUMS];
-		for (i = 0; i < number_quantums_used; i++)
-			impact_headers[number_engines][i + 2 * number_quantums_used] = impact_headers[number_engines][i + 2 * ANT_impact_header::NUM_OF_QUANTUMS];
+		for (quantum = 0; quantum < number_quantums_used; quantum++)
+			impact_headers[number_engines][quantum + number_quantums_used] = impact_headers[number_engines][quantum + ANT_impact_header::NUM_OF_QUANTUMS];
+		for (quantum = 0; quantum < number_quantums_used; quantum++)
+			impact_headers[number_engines][quantum + 2 * number_quantums_used] = impact_headers[number_engines][quantum + 2 * ANT_impact_header::NUM_OF_QUANTUMS];
 
 		/*
 			Now impact_headers[number_engines] contains all the data, in 3 * number_quantums_used, and raw[number_engines] contains the postings
@@ -994,16 +1002,22 @@ index->write((unsigned char *)&four_byte, sizeof(four_byte));
 index->close();
 doclist->close();
 
-if (!do_documents)
+for (engine = 0; engine < number_engines; engine++)
 	{
-	printf("Warning: empty doclist generated because not all indexes had filenames or merge was run with -C-.\n");
-	printf("Combine the doclists for the indexes merged in the same order given to file: %s.\n", param_block.doclist_filename);
+	bytes_used += memory[engine].bytes_used();
+	bytes_allocated += memory[engine].bytes_allocated();
 	}
 
 if (param_block.reporting_frequency != 0)
 	{
-	printf("Finished merge in ");
+	printf("Finished merge using %lld/%lld bytes in ", bytes_used, bytes_allocated);
 	stats.print_elapsed_time();
+	}
+
+if (!do_documents)
+	{
+	printf("Warning: empty doclist generated because not all indexes had filenames or merge was run with -C-.\n");
+	printf("Combine the doclists for the indexes merged in the same order given to doclist file: %s.\n", param_block.doclist_filename);
 	}
 
 /*
@@ -1014,10 +1028,22 @@ for (engine = 0; engine < number_engines; engine++)
 	delete iterators[engine];
 	delete leaves[engine];
 	delete search_engines[engine];
+	#ifdef IMPACT_HEADER
+		delete impact_headers[engine];
+	#endif
 	}
 delete leaves[number_engines];
 delete raw[number_engines];
-
+#ifdef IMPACT_HEADER
+	delete impact_headers[number_engines];
+	
+	delete [] decompress_buffer;
+	delete [] quantum_counts;
+	delete [] postings_begin;
+	delete [] quantums_processed;
+#else
+	delete [] ends;
+#endif
 delete [] document_compress_buffer;
 delete [] header;
 delete [] iterators;
@@ -1029,19 +1055,6 @@ delete [] strcmp_results;
 delete [] term_list;
 delete [] terms;
 delete [] trimpoints;
-
-#ifdef IMPACT_HEADER
-	delete [] decompress_buffer;
-	delete [] quantum_counts;
-	delete [] postings_begin;
-	delete [] quantums_processed;
-	
-	for (engine = 0; engine < number_engines; engine++)
-		delete impact_headers[engine];
-	delete impact_headers[number_engines];
-#else
-	delete [] ends;
-#endif
 
 delete doclist;
 delete index;

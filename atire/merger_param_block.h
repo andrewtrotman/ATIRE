@@ -17,11 +17,6 @@ private:
 	int argc;
 	char **argv;
 
-protected:
-	void document_compression(char *scheme);
-	void compression(char *schemes);
-	void term_removal(char *list);
-
 public:
 	ANT_merger_param_block(int argc, char *argv[]);
 	virtual ~ANT_merger_param_block() {}

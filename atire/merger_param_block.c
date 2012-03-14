@@ -32,7 +32,7 @@ this->argv = argv;
 reporting_frequency = 0;
 index_filename = "merged_index.aspt";
 doclist_filename = "merged_doclist.aspt";
-document_compression_scheme = ANT_compression_text_factory::DEFLATE; // something non-NONE
+document_compression_scheme = ANT_compression_text_factory::DEFLATE; // something non-NONE, doesn't matter what
 }
 
 /*
@@ -85,7 +85,7 @@ puts("   s            Simple-9      (bytewise)");
 puts("   S            Sigma         (bytewise)");
 puts("   v            Variable Byte (bytewise) [default]");
 puts("-C[-]           Store documents in the repository compressed with one of:");
-puts("   -            don't create the repository");
+puts("   -            Don't create the repository");
 puts("By default documents are included in the index if they are included in all indexes to be merged");
 puts("and are compressed using the same methods that were used in the indexes to be merged.");
 puts("If documents are not included in the index, then the doclists will have to be combined manually.");
@@ -107,87 +107,6 @@ puts("   t            Do not index XML tag names");
 puts("");
 
 exit(0);
-}
-
-/*
-	ANT_MERGER_PARAM_BLOCK::DOCUMENT_COMPRESSION()
-	----------------------------------------------
-*/
-void ANT_merger_param_block::document_compression(char *scheme)
-{
-switch (*scheme)
-	{
-	case '-': document_compression_scheme = NONE; break;
-	default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
-	}
-
-if (*(scheme + 1) != '\0')
-	exit(printf("Only one document compresson scheme may be used at a time\n"));
-}
-
-/*
-	ANT_MERGER_PARAM_BLOCK::COMPRESSION()
-	-------------------------------------
-*/
-void ANT_merger_param_block::compression(char *scheme_list)
-{
-char *scheme;
-
-for (scheme = scheme_list; *scheme != '\0'; scheme++)
-	switch (*scheme)
-		{
-		case 'a': compression("ceEgnrsv"); break;
-		case 'b': compression("eEg"); break;
-		case 'B': compression("crsSv"); break;
-		case 'c': compression_scheme |= ANT_compression_factory::CARRYOVER_12; break;
-		case 'e': compression_scheme |= ANT_compression_factory::ELIAS_DELTA; break;
-		case 'E': compression_scheme |= ANT_compression_factory::ELIAS_GAMMA; break;
-		case 'g': compression_scheme |= ANT_compression_factory::GOLOMB; break;
-		case 'n': compression_scheme |= ANT_compression_factory::NONE; break;
-		case 'r': compression_scheme |= ANT_compression_factory::RELATIVE_10; break;
-		case 's': compression_scheme |= ANT_compression_factory::SIMPLE_9; break;
-		case 'S': compression_scheme |= ANT_compression_factory::SIGMA; break;
-		case 'v': compression_scheme |= ANT_compression_factory::VARIABLE_BYTE; break;
-		default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
-		}
-}
-
-/*
-	ANT_MERGER_PARAM_BLOCK::TERM_REMOVAL()
-	--------------------------------------
-*/
-void ANT_merger_param_block::term_removal(char *mode_list)
-{
-char *which;
-
-for (which = mode_list; *which != '\0'; which++)
-	switch (*which)
-		{
-		case '-': stop_word_removal = ANT_memory_index::NONE; break;
-		case '0': stop_word_removal |= ANT_memory_index::PRUNE_NUMBERS; break;
-		case 'L':
-			stop_word_removal |= ANT_memory_index::PRUNE_DF_SINGLETONS;
-			stop_word_df_frequencies = atol(which +1);
-			while (isdigit(*(which+1)))
-				which++;
-			if (stop_word_df_frequencies == 0)
-				stop_word_df_frequencies = 1;
-			break;
-		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
-		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
-		case 'S': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
-		case 's':
-			stop_word_removal |= ANT_memory_index::PRUNE_DF_FREQUENTS;
-			stop_word_df_threshold = atof(which + 1);
-			if (stop_word_df_threshold >= 100 || stop_word_df_threshold <= 0)
-				exit(printf("stopiing parameter must be 0 < n%% < 100 (%f was given)", stop_word_df_threshold));
-			stop_word_df_threshold /= 100.0;
-
-			while (*(which + 1) == '.' || isdigit(*(which + 1)))
-				which++;
-			break;
-		default : exit(printf("Unknown term cull parameter: '%c'\n", *which)); break;
-		}
 }
 
 /*
@@ -225,8 +144,9 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'C')
 			{
+			if (*(command + 1) != '-')
+				exit(printf("Unsupported document compression.\n"));
 			document_compression_scheme = NONE;
-			document_compression(command + 1);
 			}
 		else if (*command == 'c')
 			{
