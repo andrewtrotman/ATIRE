@@ -38,7 +38,6 @@ int check_postings = 1;
 	*/
 	long long process(ANT_compression_factory *factory, uint32_t quantum_count, ANT_compressable_integer *impact_header, ANT_compressable_integer *buffer, unsigned char *postings_list, long long trim_point, long verbose, long one_postings_per_line)
 	{
-	ANT_compressable_integer tf;
 	long long docid, max_docid, sum;
 	ANT_compressable_integer *current, *end, *end_offset;
 	ANT_compressable_integer *impact_value_ptr, *doc_count_ptr, *impact_offset_ptr;
@@ -223,7 +222,7 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 			// the first 8 bytes are for postings_chain and second 8 bytes are for chain_length
 			the_quantum_count = ((uint32_t *)postings_list)[4];
 			beginning_of_the_postings = ((uint32_t *)postings_list)[5];
-			factory.decompress(impact_header_buffer, postings_list+impact_header_info_size, the_quantum_count*3);
+			factory.decompress(impact_header_buffer, postings_list + impact_header_info_size, the_quantum_count * 3);
 
 			// print the postings
 			max = process(&factory, the_quantum_count, impact_header_buffer, raw, postings_list + beginning_of_the_postings, ANT_min(leaf.local_document_frequency, global_trim), print_postings, one_postings_per_line);
