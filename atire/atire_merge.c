@@ -23,6 +23,15 @@
 #include "stop_word.h"
 
 /*
+	Buffers used for compression of postings lists, global because they are
+	shared by write_postings and write_impact_header_postings
+*/
+static long long postings_list_size = 1;
+static unsigned char *postings_list = new unsigned char[postings_list_size];
+static unsigned char *new_postings_list;
+static unsigned char *temp;
+
+/*
 	SHOULD_PRUNE()
 	--------------
 	Dupulicate ANT_memory_index::should_prune to avoid needing a temporary vocab only index, creating an unecessary hash_node
@@ -141,12 +150,9 @@ return end;
 /*
 	WRITE_POSTINGS()
 	----------------
-	Uses a static 500m buffer, should probably be changed.
 */
 ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
 {
-static long long postings_list_size = 500 * 1024 * 1024;
-static unsigned char *postings_list = new unsigned char[postings_list_size];
 ANT_compression_factory factory;
 ANT_memory_index_hash_node *node;
 ANT_compressable_integer *current;
@@ -224,7 +230,20 @@ else
 		leaf->impacted_length++;
 		}
 	
-	len = factory.compress(postings_list, postings_list_size, raw, leaf->impacted_length);
+	/*
+		Keep trying the compression until it works, doubling the size of the buffer each time.
+	*/
+	while ((len = factory.compress(postings_list, postings_list_size, raw, leaf->impacted_length)) == 1)
+		{
+		new_postings_list = new unsigned char[postings_list_size * 2];
+		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
+		
+		temp = postings_list;
+		postings_list = new_postings_list;
+		delete [] temp;
+		
+		postings_list_size *= 2;
+		}
 	
 	current_disk_position = index->tell();
 	index->write(postings_list, len);
@@ -242,14 +261,11 @@ return node;
 /*
 	WRITE_IMPACT_HEADER_POSTINGS()
 	------------------------------
-	Uses a static 500m buffer, should probably be changed.
 */
 ANT_memory_index_hash_node *write_impact_header_postings(char *term, ANT_compressable_integer *header, ANT_compressable_integer quantum_count, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
 {
-static long long postings_list_size = 500 * 1024 * 1024;
 static long long header_buffer_size = 1 + ANT_impact_header::INFO_SIZE + (ANT_impact_header::NUM_OF_QUANTUMS * 3 * sizeof(*header));
 
-static unsigned char *postings_list = new unsigned char[postings_list_size];
 static unsigned char *compressed_impact_header_buffer = new unsigned char[header_buffer_size];
 
 unsigned char *postings_ptr = postings_list;
@@ -329,7 +345,21 @@ node->document_frequency = leaf->local_document_frequency;
 */
 for (ANT_compressable_integer i = 0; i < quantum_count; impact_value_pointer++, document_count_pointer++, impact_offset_pointer++, i++)
 	{
-	len = factory.compress(postings_ptr, (long long)1 + *document_count_pointer * sizeof(ANT_compressable_integer), raw + *impact_offset_pointer, *document_count_pointer);
+	/*
+		Keep trying the compression until it works, doubling the size of the buffer each time.
+	*/
+	while ((len = factory.compress(postings_ptr, postings_list_size - (postings_ptr - postings_list), raw + *impact_offset_pointer, *document_count_pointer)) == 1)
+		{
+		new_postings_list = new unsigned char[postings_list_size * 2];
+		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
+		postings_ptr = new_postings_list + (postings_ptr - postings_list);
+		
+		temp = postings_list;
+		postings_list = new_postings_list;
+		delete [] temp;
+		
+		postings_list_size *= 2;
+		}
 	*impact_offset_pointer = (ANT_compressable_integer)(postings_ptr - postings_list); // convert pointer to offset
 	postings_ptr += len;
 	}
@@ -372,7 +402,7 @@ return node;
 */
 ANT_memory_index_hash_node *write_variable(char *term, long long value, ANT_stats_memory_index *memory_stats, ANT_file *index, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
 {
-ANT_compressable_integer raw[6]; // 6 instead of 2 to make room for it to be fiddled with in write_postings
+static ANT_compressable_integer raw[6]; // 6 instead of 2 to make room for it to be fiddled with in write_postings
 
 raw[0] = ((unsigned long long)value) >> 32;
 raw[1] = ((unsigned long long)value) & 0xFFFFFFFF;
