@@ -240,6 +240,11 @@ public:
 	long long get_term_count(void);
 
 	/*
+		Return the number of unique terms in the index (for merging)
+	*/
+	long long get_unique_term_count(void);
+
+	/*
 		Get the length of the longest document in the repository
 		useful so that you can allocate a buffer for get_document.
 	*/

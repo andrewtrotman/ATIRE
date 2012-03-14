@@ -272,8 +272,8 @@ stats->documents = docno;
 
 #ifdef IMPACT_HEADER
 	/*
-		ANT_MEMORY_INDEX::IMPACT_ORDER()
-		--------------------------------
+		ANT_MEMORY_INDEX::IMPACT_ORDER_WITH_HEADER()
+		--------------------------------------------
 	*/
 	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
 	{
@@ -348,13 +348,6 @@ stats->documents = docno;
 		}
 
 	/*
-		Finally terminate each impact list with a 0
-	*/
-	//for (bucket = 0; bucket < 0x100; bucket++)
-	//	if (bucket_size[bucket] != 0)
-	//		*pointer[bucket] = 0;
-
-	/*
 		The first frequency or impact-value is the max local impact for the term
 	*/
 	*max_local = (unsigned char)impact_header.header_buffer[0];
@@ -363,9 +356,7 @@ stats->documents = docno;
 		Should we static print the postings list?
 	*/
 	if (pruned_point != NULL)
-		{
 		return pruned_point - destination;
-		}
 
 	/*
 		Return the length of the impact ordered list
@@ -602,6 +593,7 @@ long terms = 0;
 long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
 unsigned char *compressed_header_ptr, *compressed_postings_ptr;
 ANT_compressable_integer *end;
+ANT_compressable_integer temp;
 
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
@@ -632,30 +624,62 @@ if (!should_prune(root))
 				Store the first postings(4 bytes) in the higher order of the 8 bytes
 				and store the first term frequency (4 bytes) in the lower order of the 8 bytes
 			*/
+			
+#ifndef IMPACT_HEADER
+			/*
+				If we aren't using IMPACT_HEADER then not doing this will
+				lead to SPECIAL_COMPRESSION errors, so we have to do these manipulations
+			*/
+			if (root->string[0] != '~')
+				{
+				decompressed_postings_list[0] = impacted_postings[1];
+				serialised_tfs[0] = impacted_postings[0];
+				if (root->document_frequency == 2)
+					{
+					decompressed_postings_list[1] = impacted_postings[2] == 0 ? impacted_postings[4] : impacted_postings[2];
+					serialised_tfs[1] = impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0];
+					}
+				}
+#endif
+
+#ifdef IMPACT_HEADER
+			/*
+				We get the docids difference encoded, but if we have different tfs then they don't need to be
+			*/
+			if (root->document_frequency == 2 && serialised_tfs[0] != serialised_tfs[1])
+				decompressed_postings_list[1] += decompressed_postings_list[0];
+#endif
+
+			/*
+				We can _still_ get the tfs around the wrong way, still so put them around the right way
+			*/
+			if (root->document_frequency == 2 && serialised_tfs[1] > serialised_tfs[0])
+				{
+				temp = serialised_tfs[0];
+				serialised_tfs[0] = serialised_tfs[1];
+				serialised_tfs[1] = temp;
+				
+				temp = decompressed_postings_list[0];
+				decompressed_postings_list[0] = decompressed_postings_list[1];
+				decompressed_postings_list[1] = temp;
+				}
+			
+			/*
+				So that the impacts end up being in different
+				sections so that reading back in works correctly
+			*/
 			if (root->string[0] == '~')
-				root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | (serialised_tfs[0] + serialised_tfs[1]);
-			else
-				root->in_disk.docids_pos_on_disk = ((long long)impacted_postings[1]) << 32 | impacted_postings[0];
+				serialised_tfs[0] += serialised_tfs[1];
+			
+			root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
 			
 			/*
 				Use impacted_length and end_pos_on_disk to store the second postings and term frequency
 			*/
 			if (root->document_frequency == 2)
 				{
-				if (root->string[0] == '~')
-					{
-					root->in_disk.impacted_length = decompressed_postings_list[1] + decompressed_postings_list[0]; // because the original list is difference encoded
-					root->in_disk.end_pos_on_disk = serialised_tfs[1];
-					}
-				else
-					{
-					/*
-						If impacted_postings[2] is 0 then we have two different tf values in the impact ordering, otherwise two documents with the same tf value
-					*/
-					root->in_disk.impacted_length = impacted_postings[2] == 0 ? impacted_postings[4] : impacted_postings[2];
-					root->in_disk.end_pos_on_disk = impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0];
-					}
-				root->in_disk.end_pos_on_disk += root->in_disk.docids_pos_on_disk; // because root->docids_pos_on_disk is subtracted later
+				root->in_disk.impacted_length = decompressed_postings_list[1];
+				root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk; // because root->docids_pos_on_disk is subtracted later
 				}
 			else
 				root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
@@ -758,13 +782,13 @@ if (!should_prune(root))
 					}
 
 				// compress the impact header
-				compressed_header_ptr = compressed_impact_header_buffer + impact_header.info_size;
+				compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 				len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
 				((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
 				((uint64_t *)compressed_impact_header_buffer)[1] = impact_header.chain_length;
 				((uint32_t *)compressed_impact_header_buffer)[4] = impact_header.the_quantum_count;
 				// the offset for the beginning of the postings
-				((uint32_t *)compressed_impact_header_buffer)[5] = impact_header.info_size + len;
+				((uint32_t *)compressed_impact_header_buffer)[5] = ANT_impact_header::INFO_SIZE + len;
 				compressed_header_ptr += len;
 
 				// write the impact header to disk
@@ -1040,7 +1064,11 @@ if (index_file == NULL)
 if (find_node(hash_table[hash(&squiggle_document_offsets)], &squiggle_document_offsets) != NULL)
 	{
 	set_document_detail(&squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
+#ifdef IMPACT_HEADER
+	set_variable(&squiggle_document_longest, compressed_longest_raw_document_size);
+#else
 	set_document_detail(&squiggle_document_longest, compressed_longest_raw_document_size);		// store the length of the longest document once it is decompressed
+#endif
 	}
 
 /*
@@ -1188,6 +1216,7 @@ for (current_header = header; current_header < last_header; current_header++)
 	index_file->write((unsigned char *)&eight_byte, sizeof(eight_byte));		// 8 bytes
 	}
 
+
 /*
 	Write the location of the header to file
 */
@@ -1198,6 +1227,14 @@ index_file->write((unsigned char *)&file_position, sizeof(file_position));	// 8 
 	The string length of the longest term
 */
 index_file->write((unsigned char *)&length_of_longest_term, sizeof(length_of_longest_term));		// 4 bytes
+
+#ifdef IMPACT_HEADER
+	/*
+		The number of unique terms
+	*/
+	four_byte = unique_terms;
+	index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
+#endif
 
 /*
 	The maximum length of a compressed posting list

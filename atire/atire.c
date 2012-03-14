@@ -291,6 +291,11 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write("<termnum>");
 			outchannel->write(atire->get_term_count());
 			outchannel->puts("</termnum>");
+#ifdef IMPACT_HEADER
+			outchannel->write("<uniquetermnum>");
+			outchannel->write(atire->get_unique_term_count());
+			outchannel->puts("</uniquetermnum>");
+#endif
 			outchannel->write("<longestdoc>");
 			outchannel->write(atire->get_longest_document_length());
 			outchannel->puts("</longestdoc>");

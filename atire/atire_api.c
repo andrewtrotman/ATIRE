@@ -1664,12 +1664,21 @@ return search_engine->document_count();
 }
 
 /*
-	LONG ATIRE_API::GET_TERM_COUNT()
-	--------------------------------
+	ATIRE_API::GET_TERM_COUNT()
+	---------------------------
 */
 long long ATIRE_API::get_term_count(void)
 {
 return search_engine->term_count();
+}
+
+/*
+	ATIRE_API::GET_UNIQUE_TERM_COUNT()
+	----------------------------------
+*/
+long long ATIRE_API::get_unique_term_count(void)
+{
+return search_engine->get_unique_term_count();
 }
 
 /*

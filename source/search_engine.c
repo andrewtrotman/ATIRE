@@ -69,7 +69,9 @@ long decompressed_integer;
 ANT_search_engine_btree_node *current, *end_of_node_list;
 ANT_search_engine_btree_leaf collection_details;
 ANT_compress_variable_byte variable_byte;
+#ifndef IMPACT_HEADER
 ANT_compressable_integer *value;
+#endif
 
 if (index->open((char *)filename, "rbx") == 0)
 	return 0;
@@ -80,17 +82,27 @@ index_filename = filename;
 	At the end of the file is a "header" that provides various details:
 	long long: the location of the b-tree header block
 	long: the string length of the longest term
+	long: the number of unique terms (new version only)
 	long: the length of the longest compressed postings list
 	long long: the maximum number of postings in a postings list (the highest DF)
 */
 end = index->file_length();
+#ifdef IMPACT_HEADER
+index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
+#else
 index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
+#endif
 
 index->read(&eight_byte);
 term_header = eight_byte;
 
 index->read(&four_byte);
 string_length_of_longest_term = four_byte;
+
+#ifdef IMPACT_HEADER
+index->read(&four_byte);
+unique_terms = four_byte;
+#endif
 
 index->read(&four_byte);
 postings_buffer_length = four_byte;
@@ -256,11 +268,15 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 		}
 	document_decompress_buffer = (char *)memory->malloc(document_longest_compressed);
 
+#ifdef IMPACT_HEADER
+	document_longest_raw_length = get_variable("~documentlongest");
+#else
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
 #ifdef SPECIAL_COMPRESSION
 		document_longest_raw_length = *(value + 1);
 #else
 		document_longest_raw_length = *value;
+#endif
 #endif
 	}
 
@@ -503,10 +519,17 @@ int ret = TRUE;
 	if (term_details->local_document_frequency <= 2)
 		{
 #ifdef IMPACT_HEADER
-		ANT_compressable_integer *postings_ptr;
-		uint32_t the_quantum_count = term_details->local_document_frequency;
-		uint32_t beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1 + the_quantum_count * 3 * sizeof(ANT_compressable_integer);
+		ANT_compressable_integer *postings;
+		uint32_t the_quantum_count = 1;
+		uint32_t beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
+		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
+		ANT_compressable_integer impact_two = term_details->postings_length;
 
+		if (impact_one != impact_two && term_details->local_document_frequency == 2)
+			the_quantum_count = 2;
+		
+		beginning_of_the_postings += the_quantum_count * 3 * sizeof(ANT_compressable_integer);
+		
 		((uint32_t *)destination)[4] = the_quantum_count;
 		((uint32_t *)destination)[5] = beginning_of_the_postings;
 
@@ -514,31 +537,36 @@ int ret = TRUE;
 		into = (ANT_compressable_integer *)(destination + ANT_impact_header::INFO_SIZE + 1); // the beginning of the header
 
 		*(destination + beginning_of_the_postings) = 0; // no compression for the postings
-		postings_ptr = (ANT_compressable_integer *)(destination + beginning_of_the_postings + 1);
+		postings = (ANT_compressable_integer *)(destination + beginning_of_the_postings + 1);
 
-		if (the_quantum_count == 1) {
-			// get the impact value
-			*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
-			// get the doc count
-			*into++ = 1;
-			// get the offset
+		// impacts
+		*into++ = impact_one;
+		if (the_quantum_count == 1)
+			{
+			// document counts
+			*into++ = term_details->local_document_frequency;
+			// offsets
 			*into++ = 0;
-			// the posting
-			*postings_ptr = term_details->postings_position_on_disk >> 32;
-		} else {
-			// get the impact values
-			*into++ = term_details->postings_position_on_disk & 0xFFFFFFFF;
-			*into++ = (ANT_compressable_integer)term_details->postings_length;
-			// get the doc count
+			// fill in postings
+			*postings++ = term_details->postings_position_on_disk >> 32;
+			if (term_details->local_document_frequency == 2)
+				*postings = term_details->impacted_length;
+			term_details->impacted_length = term_details->local_document_frequency;
+			}
+		else
+			{
+			*into++ = impact_two;
+			// document counts
 			*into++ = 1;
 			*into++ = 1;
-			// get the offset
+			// offsets
 			*into++ = 0;
 			*into++ = sizeof(ANT_compressable_integer);
-			// the postings
-			*postings_ptr++ = term_details->postings_position_on_disk >> 32;
-			*postings_ptr = term_details->impacted_length;
-		}
+			// fill the postings
+			*postings++ = term_details->postings_position_on_disk >> 32;
+			*postings = term_details->impacted_length;
+			term_details->impacted_length = 2;
+			}
 #else
 		/*
 			We're about to generate the impact-ordering here and so we interlace TF, DOC-ID and 0s
@@ -1255,8 +1283,14 @@ else
 		The sequence we'll get back is a postings list so it will be [2,<high32>,0,1,<low32>,0]
 		from which we want to extract <high32> and <low32> the high and low 32 bits of the integer
 		so that we can then construct a 64 bit integer from it.
+
+		Unless we use impact headers in which case it's the same as below.
 	*/
-	answer = (((unsigned long long)bits[1]) << 32) | (unsigned long long)bits[4];
+#ifdef IMPACT_HEADER
+		answer = (((unsigned long long)bits[0]) << 32 | (unsigned long long)bits[1]);
+#else
+		answer = (((unsigned long long)bits[1]) << 32) | (unsigned long long)bits[4];
+#endif
 #else
 	/*
 		In the case where we don't have special compression we have shoved the value into a
@@ -1279,6 +1313,9 @@ ANT_compressable_integer *ANT_search_engine::get_decompressed_postings(char *ter
 {
 void *verify;
 long long now;
+#ifdef IMPACT_HEADER
+uint32_t beginning_of_postings = 0;
+#endif
 
 /*
 	Find the term in the term vocab
@@ -1301,7 +1338,24 @@ if (verify == NULL)
 	And now decompress
 */
 now = stats->start_timer();
-factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+#ifdef IMPACT_HEADER
+#ifdef SPECIAL_COMPRESSION
+	/*
+		Special compression assumes that we want an impact header back in get_postings, so builds it, but we don't want it so skip it
+	*/
+	beginning_of_postings = ((uint32_t *)postings_buffer)[5];
+#else
+	/*
+		If we aren't using special compression, then the impact header doesn't exist for ~ terms
+	*/
+	if (*term != '~')
+		beginning_of_postings = ((uint32_t *)postings_buffer)[5];
+#endif
+	
+	factory.decompress(decompress_buffer, postings_buffer + beginning_of_postings, term_details->impacted_length);
+#else
+	factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+#endif
 stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;

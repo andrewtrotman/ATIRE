@@ -85,6 +85,7 @@ protected:
 	long long trim_postings_k;				// the query-based static pruning point (as set in the query)
 	long long global_trim_postings_k;		// the index-based static pruning point (as set by the indexer)
 	long long collection_length_in_terms;
+	long unique_terms;
 	long long is_quantized;					// true if the index is quantized, false if the index is TF values.
 
 public:
@@ -142,6 +143,7 @@ public:
 	long long get_trim_postings_k(void) { return trim_postings_k; }
 	long long get_global_trim_postings_k(void) { return global_trim_postings_k; }
 	long long get_collection_length(void) { return collection_length_in_terms; }
+	long long get_unique_term_count(void) { return unique_terms; }
 
 	ANT_compressable_integer *get_decompressed_postings(char *term, ANT_search_engine_btree_leaf *term_details);
 

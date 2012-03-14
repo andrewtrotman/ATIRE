@@ -87,7 +87,7 @@ bottom = ((unsigned long long)value) & 0xFFFFFFFF;
 
 collection_frequency += 2;
 insert_docno(top);
-insert_docno(bottom - top);		// due to difference encoding
+insert_docno(bottom);
 }
 
 /*
