@@ -26,10 +26,10 @@
 	Buffers used for compression of postings lists, global because they are
 	shared by write_postings and write_impact_header_postings
 */
-static long long postings_list_size = 1;
-static unsigned char *postings_list = new unsigned char[postings_list_size];
-static unsigned char *new_postings_list;
-static unsigned char *temp;
+long long postings_list_size = 1;
+unsigned char *postings_list = new unsigned char[postings_list_size];
+unsigned char *new_postings_list;
+unsigned char *temp;
 
 /*
 	SHOULD_PRUNE()
@@ -466,7 +466,7 @@ for (engine = 0; engine < number_engines; engine++)
 	maximum_terms += search_engines[engine]->get_unique_term_count();
 	longest_document = ANT_max((unsigned long)search_engines[engine]->get_variable("~documentlongest"), longest_document);
 #else
-	maximum_terms += search_engines[engine]->term_count(); // a MASSIVE over-estimation, but won't waste too much memory
+	maximum_terms += 100000;
 	longest_document = ANT_max((unsigned long)search_engines[engine]->get_longest_document_length(), longest_document);
 #endif
 	
@@ -496,7 +496,7 @@ ANT_compression_text_factory factory_text;
 ANT_stats_memory_index *memory_stats = new ANT_stats_memory_index(&memory[number_engines], &memory[number_engines]);
 
 ANT_memory_index_hash_node *p;
-ANT_memory_index_hash_node **term_list, **here;
+ANT_memory_index_hash_node **temp, **term_list, **here;
 
 term_list = new ANT_memory_index_hash_node *[maximum_terms + 1];
 
@@ -670,13 +670,12 @@ if (do_documents)
 	
 	Because get_document_lengths returns the real lengths we need to add 1 so that they work correctly
 */
-sum = offset = 0;
-leaves[number_engines]->impacted_length = leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 0;
+offset = 0;
 for (engine = 0; engine < number_engines; engine++)
 	{
 	raw[engine] = search_engines[engine]->get_document_lengths(&dummy);
-	for (document = 0; document < leaves[engine]->local_document_frequency; document++)
-		sum += raw[number_engines][document + offset] = raw[engine][document] + 1;
+	for (document = 0; document < search_engines[engine]->document_count(); document++)
+		raw[number_engines][document + offset] = raw[engine][document] + 1;
 	
 	offset += search_engines[engine]->document_count();
 	}
@@ -930,6 +929,19 @@ while (should_continue)
 		if ((p = write_postings(next_term_to_process, raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
 			term_list[terms_so_far++] = p;
 #endif
+		
+		/*
+			Make room for more terms if needed
+		*/
+		if (terms_so_far == maximum_terms - 1)
+			{
+			temp = new ANT_memory_index_hash_node*[maximum_terms * 2];
+			memcpy(temp, term_list, terms_so_far * sizeof(*term_list));
+			here = term_list;
+			term_list = temp;
+			delete [] here;
+			maximum_terms *= 2;
+			}
 
 		if (param_block.reporting_frequency && terms_so_far % param_block.reporting_frequency == 0)
 			{
