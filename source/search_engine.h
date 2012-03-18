@@ -134,6 +134,7 @@ public:
 #endif
 
 	ANT_compressable_integer *get_decompress_buffer(void) { return decompress_buffer; }
+	unsigned char *get_postings_buffer(void) { return postings_buffer; }
 	ANT_stats_search_engine *get_stats(void) { return stats; }
 	void stats_initialise(void);
 	void stats_text_render(void);

@@ -151,9 +151,8 @@ return end;
 	WRITE_POSTINGS()
 	----------------
 */
-ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
+ANT_memory_index_hash_node *write_postings(char *term, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings, ANT_compression_factory *factory)
 {
-ANT_compression_factory factory;
 ANT_memory_index_hash_node *node;
 ANT_compressable_integer *current;
 uint64_t current_disk_position;
@@ -161,8 +160,6 @@ long long len = 0, used = 0;
 
 if (should_prune(term, leaf, param, largest_docno))
 	return NULL;
-
-factory.set_scheme(param->compression_scheme);
 
 node = new (memory_stats->postings_memory) ANT_memory_index_hash_node(memory_stats->postings_memory, memory_stats->postings_memory, new ANT_string_pair(term), memory_stats);
 
@@ -233,7 +230,7 @@ else
 	/*
 		Keep trying the compression until it works, doubling the size of the buffer each time.
 	*/
-	while ((len = factory.compress(postings_list, postings_list_size, raw, leaf->impacted_length)) == 1)
+	while ((len = factory->compress(postings_list, postings_list_size, raw, leaf->impacted_length)) == 1)
 		{
 		new_postings_list = new unsigned char[postings_list_size * 2];
 		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
@@ -262,7 +259,7 @@ return node;
 	WRITE_IMPACT_HEADER_POSTINGS()
 	------------------------------
 */
-ANT_memory_index_hash_node *write_impact_header_postings(char *term, ANT_compressable_integer *header, ANT_compressable_integer quantum_count, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
+ANT_memory_index_hash_node *write_impact_header_postings(char *term, ANT_compressable_integer *header, ANT_compressable_integer quantum_count, ANT_compressable_integer *raw, ANT_file *index, ANT_stats_memory_index *memory_stats, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings, ANT_compression_factory *factory)
 {
 static long long header_buffer_size = 1 + ANT_impact_header::INFO_SIZE + (ANT_impact_header::NUM_OF_QUANTUMS * 3 * sizeof(*header));
 
@@ -271,7 +268,6 @@ static unsigned char *compressed_impact_header_buffer = new unsigned char[header
 unsigned char *postings_ptr = postings_list;
 unsigned char *compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 
-ANT_compression_factory factory;
 long long len = 0;
 uint64_t current_disk_position;
 ANT_memory_index_hash_node *node;
@@ -283,8 +279,6 @@ ANT_compressable_integer *impact_offset_start = header + (2 * quantum_count);
 ANT_compressable_integer *impact_value_pointer = impact_value_start;
 ANT_compressable_integer *document_count_pointer = document_count_start;
 ANT_compressable_integer *impact_offset_pointer = impact_offset_start;
-
-factory.set_scheme(param->compression_scheme);
 
 #ifdef SPECIAL_COMPRESSION
 /*
@@ -325,12 +319,12 @@ if (leaf->local_document_frequency <= 2 && *term != '~')
 	raw[1] = doc_one;
 	raw[0] = impact_one;
 	
-	return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno, longest_postings);
+	return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno, longest_postings, factory);
 	}
 #endif
 
 if (*term == '~')
-	return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno, longest_postings);
+	return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno, longest_postings, factory);
 
 if (should_prune(term, leaf, param, largest_docno))
 	return NULL;
@@ -348,7 +342,7 @@ for (ANT_compressable_integer i = 0; i < quantum_count; impact_value_pointer++, 
 	/*
 		Keep trying the compression until it works, doubling the size of the buffer each time.
 	*/
-	while ((len = factory.compress(postings_ptr, postings_list_size - (postings_ptr - postings_list), raw + *impact_offset_pointer, *document_count_pointer)) == 1)
+	while ((len = factory->compress(postings_ptr, postings_list_size - (postings_ptr - postings_list), raw + *impact_offset_pointer, *document_count_pointer)) == 1)
 		{
 		new_postings_list = new unsigned char[postings_list_size * 2];
 		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
@@ -367,7 +361,7 @@ for (ANT_compressable_integer i = 0; i < quantum_count; impact_value_pointer++, 
 /*
 	Compress the header
 */
-len = factory.compress(compressed_header_ptr, header_buffer_size, header, quantum_count * 3);
+len = factory->compress(compressed_header_ptr, header_buffer_size, header, quantum_count * 3);
 
 ((uint64_t *)compressed_impact_header_buffer)[0] = 0;
 ((uint64_t *)compressed_impact_header_buffer)[1] = 0;
@@ -400,7 +394,7 @@ return node;
 	WRITE_VARIABLE()
 	----------------
 */
-ANT_memory_index_hash_node *write_variable(char *term, long long value, ANT_stats_memory_index *memory_stats, ANT_file *index, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings)
+ANT_memory_index_hash_node *write_variable(char *term, long long value, ANT_stats_memory_index *memory_stats, ANT_file *index, ANT_search_engine_btree_leaf *leaf, ANT_merger_param_block *param, long long largest_docno, long long *longest_postings, ANT_compression_factory *factory)
 {
 static ANT_compressable_integer raw[6]; // 6 instead of 2 to make room for it to be fiddled with in write_postings
 
@@ -409,7 +403,7 @@ raw[1] = ((unsigned long long)value) & 0xFFFFFFFF;
 
 leaf->impacted_length = leaf->local_collection_frequency = leaf->local_document_frequency = 2;
 
-return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno, longest_postings);
+return write_postings(term, raw, index, memory_stats, leaf, param, largest_docno, longest_postings, factory);
 }
 
 /*
@@ -439,6 +433,9 @@ long long bytes_allocated = 0;
 long long document_filenames_start, document_filenames_finish;
 unsigned long longest_document = 0, buffer_size, compress_buffer_size;
 char *document_compress_buffer;
+
+ANT_compression_factory *factory = new ANT_compression_factory;
+factory->set_scheme(param_block.compression_scheme);
 
 ANT_stats_time stats;
 ANT_search_engine **search_engines = new ANT_search_engine*[number_engines];
@@ -503,7 +500,6 @@ term_list = new ANT_memory_index_hash_node *[maximum_terms + 1];
 ANT_btree_head_node *header, *current_header, *last_header;
 
 #ifdef IMPACT_HEADER
-ANT_compression_factory factory;
 ANT_compressable_integer *decompress_buffer = new ANT_compressable_integer[combined_docs];
 
 ANT_compressable_integer **impact_headers = new ANT_compressable_integer *[number_engines + 1];
@@ -622,9 +618,9 @@ if (do_documents)
 	/*
 		Now we've done the documents, do the filename start/finish.
 	*/
-	if ((p = write_variable("~documentfilenamesstart", document_filenames_start, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_variable("~documentfilenamesstart", document_filenames_start, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
-	if ((p = write_variable("~documentfilenamesfinish", document_filenames_finish, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_variable("~documentfilenamesfinish", document_filenames_finish, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
 	
 	/*
@@ -641,20 +637,20 @@ if (do_documents)
 		leaves[number_engines]->local_document_frequency += leaves[engine]->local_document_frequency - 1;
 		leaves[number_engines]->local_collection_frequency += leaves[engine]->local_collection_frequency - 1;
 		}
-	if ((p = write_postings("~documentoffsets", raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_postings("~documentoffsets", raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
 	
 	/*
 		Now we've done the documents and offsets, do the longest document.
 	*/
 #ifdef IMPACT_HEADER
-	if ((p = write_variable("~documentlongest", longest_document, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_variable("~documentlongest", longest_document, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
 #else
 	raw[number_engines][0] = longest_document;
 	leaves[number_engines]->local_document_frequency = leaves[number_engines]->local_collection_frequency = 1;
 	leaves[number_engines]->impacted_length = 3;
-	if ((p = write_postings("~documentlongest", raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_postings("~documentlongest", raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
 #endif
 	
@@ -683,15 +679,15 @@ leaves[number_engines]->impacted_length = offset;
 leaves[number_engines]->local_collection_frequency = offset;
 leaves[number_engines]->local_document_frequency = offset;
 
-if ((p = write_postings("~length", raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+if ((p = write_postings("~length", raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 	term_list[terms_so_far++] = p;
 
 if (param_block.static_prune_point != LONG_MAX)
-	if ((p = write_variable("~trimpoint", param_block.static_prune_point, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_variable("~trimpoint", param_block.static_prune_point, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
 
 if (stemmer)
-	if ((p = write_variable("~stemmer", stemmer, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+	if ((p = write_variable("~stemmer", stemmer, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
 
 /*
@@ -737,11 +733,13 @@ while (should_continue)
 		for (engine = 0; engine < number_engines; engine++)
 			if (strcmp_results[engine] == 0)
 				{
+				iterators[engine]->get_postings_details(leaves[engine]);
 #ifdef IMPACT_HEADER
-				leaves[engine] = search_engines[engine]->get_postings_details(next_term_to_process, leaves[engine]);
 				raw[engine] = (ANT_compressable_integer *)search_engines[engine]->get_postings(leaves[engine], (unsigned char *)raw[engine]);
 #else
-				raw[engine] = search_engines[engine]->get_decompressed_postings(next_term_to_process, leaves[engine]);
+				search_engines[engine]->get_postings(leaves[engine], search_engines[engine]->get_postings_buffer());
+				factory->decompress(search_engines[engine]->get_decompress_buffer(), search_engines[engine]->get_postings_buffer(), leaves[engine]->impacted_length);
+				raw[engine] = search_engines[engine]->get_decompress_buffer();
 				ends[engine] = raw[engine] + ANT_min(trimpoints[engine], leaves[engine]->local_document_frequency);
 #endif
 				}
@@ -761,7 +759,7 @@ while (should_continue)
 				/*
 					Decompress the header, * 3 -> impact values, doc counts, impact offsets
 				*/
-				factory.decompress(impact_headers[engine], (unsigned char *)raw[engine] + ANT_impact_header::INFO_SIZE, quantum_counts[engine] * 3);
+				factory->decompress(impact_headers[engine], (unsigned char *)raw[engine] + ANT_impact_header::INFO_SIZE, quantum_counts[engine] * 3);
 				}
 		
 		current = raw[number_engines];
@@ -803,7 +801,7 @@ while (should_continue)
 						current_impact_header[ANT_impact_header::NUM_OF_QUANTUMS] += number_documents; // doc count
 						impact_offset = impact_headers[engine][quantums_processed[engine] + (quantum_counts[engine] * 2)];
 						
-						factory.decompress(decompress_buffer, (unsigned char *)raw[engine] + postings_begin[engine] + impact_offset, number_documents);
+						factory->decompress(decompress_buffer, (unsigned char *)raw[engine] + postings_begin[engine] + impact_offset, number_documents);
 						
 						*current = (ANT_compressable_integer)(decompress_buffer[0] + offset - previous_docid);
 						previous_docid += *current++;
@@ -852,7 +850,7 @@ while (should_continue)
 		/*
 			Serialise the merged postings
 		*/
-		if ((p = write_impact_header_postings(next_term_to_process, impact_headers[number_engines], number_quantums_used, raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+		if ((p = write_impact_header_postings(next_term_to_process, impact_headers[number_engines], number_quantums_used, raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 			term_list[terms_so_far++] = p;
 #else
 		current = raw[number_engines];
@@ -926,7 +924,7 @@ while (should_continue)
 		/*
 			Serialise the merged postings
 		*/
-		if ((p = write_postings(next_term_to_process, raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings)) != NULL)
+		if ((p = write_postings(next_term_to_process, raw[number_engines], index, memory_stats, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 			term_list[terms_so_far++] = p;
 #endif
 		
