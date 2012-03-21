@@ -45,7 +45,10 @@ if (file_length == NULL)
 #ifdef _MSC_VER
 	fp = CreateFile(true_filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (fp == INVALID_HANDLE_VALUE)
+		{
+		DWORD error_code = GetLastError();			// put a break point on this in the debugger to work out what went wrong.
 		return NULL;
+		}
 
 	if (GetFileSizeEx(fp, &details) != 0)
 		if ((*file_length = details.QuadPart) != 0)

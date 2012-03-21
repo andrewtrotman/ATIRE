@@ -278,6 +278,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_file_buffered.obj	\
 	$(OBJDIR)\directory_iterator_csv.obj			\
 	$(OBJDIR)\directory_iterator_recursive.obj		\
+	$(OBJDIR)\directory_iterator_spam_filter.obj		\
 	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\thesaurus.obj							\

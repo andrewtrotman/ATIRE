@@ -6,7 +6,6 @@
 #define DIRECTORY_ITERATOR_SPAM_FILTER_H_
 
 #include "directory_iterator.h"
-#include "critical_section.h"
 
 /*
 	class ANT_DIRECTORY_ITERATOR_SPAM_FILTER
@@ -22,7 +21,6 @@ private:
 	long method;
 	static char **docids;
 	static long long number_docs;
-	ANT_critical_section mutex;
 
 	inline long should_index(char *docid);
 

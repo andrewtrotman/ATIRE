@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include "maths.h"
 #include "str.h"
 #include "disk.h"
 #include "directory_iterator_spam_filter.h"
@@ -24,41 +25,40 @@ this->method = method;
 /*
 	We only want the spam scores to be loaded once
 */
-mutex.enter();
-	if (docids == NULL)
+if (docids == NULL)
+	{
+	char *spam_file = ANT_disk::read_entire_file(filename);
+	char *ptr = spam_file, *nl;
+	long score;
+	long docids_recorded = 0;
+
+	while (*ptr)
 		{
-		char *spam_file = ANT_disk::read_entire_file(filename);
-		char *ptr = spam_file, *nl;
-		long score;
-		long docids_recorded = 0;
-
-		while (*ptr)
-			{
-			score = ANT_atol(ptr);
-			if ((method == INCLUDE && score >= threshold) || (method == EXCLUDE && score < threshold))
-				number_docs++;
-			ptr = strchr(ptr, '\n') + 1; // skip to next score
-			}
-
-		docids = new char *[number_docs];
-		ptr = spam_file;
-
-		while (*ptr)
-			{
-			score = ANT_atol(ptr); // get score
-			ptr = strchr(ptr, ' ') + 1; // skip to document
-			nl = strchr(ptr, '\n'); // find end of docid
-			if ((method == INCLUDE && score >= threshold) || (method == EXCLUDE && score < threshold))
-				docids[docids_recorded++] = strnnew(ptr, nl - ptr);
-			ptr = nl + 1; // skip to next line
-			}
-		
-		/*
-			We've finished with the spam rankings, so free up that memory
-		*/
-		delete [] spam_file;
+		score = ANT_atol(ptr);
+		nl = ANT_max(strchr(ptr, '\r'), strchr(ptr, '\n')); // windows \r\n, linux \n, macos \r ... as long as the file is consistent we win
+		if ((method == INCLUDE && score >= threshold) || (method == EXCLUDE && score < threshold))
+			number_docs++;
+		ptr = nl + 1; // skip to next line
 		}
-mutex.leave();
+
+	docids = new char *[number_docs];
+	ptr = spam_file;
+
+	while (docids_recorded < number_docs)
+		{
+		score = ANT_atol(ptr); // get score
+		ptr = strchr(ptr, ' ') + 1; // skip to document
+		nl = ANT_max(strchr(ptr, '\r'), strchr(ptr, '\n'));
+		if ((method == INCLUDE && score >= threshold) || (method == EXCLUDE && score < threshold))
+			docids[docids_recorded++] = strip_space_inplace(strnnew(ptr, nl - ptr));
+		ptr = nl + 1; // skip to next line
+		}
+	
+	/*
+		We've finished with the spam rankings, so free up that memory
+	*/
+	delete [] spam_file;
+	}
 }
 
 /*
@@ -77,9 +77,21 @@ delete [] docids;
 */
 inline long ANT_directory_iterator_spam_filter::should_index(char *docid)
 {
-void *result = bsearch(strip_space_inplace(docid), docids, number_docs, sizeof(*docids), char_star_char_star_star_strcmp);
+long long low = 0, mid, high = number_docs - 1;
 
-return (!result && method == EXCLUDE) || (!!result && method == INCLUDE);
+strip_space_inplace(docid);
+
+while (low < high)
+	{
+	mid = low + ((high - low) / 2);
+	if (strcmp(docids[mid], docid) < 0)
+		low = mid + 1;
+	else
+		high = mid;
+	}
+
+mid = strcmp(docids[low], docid);
+return (mid != 0 && method == EXCLUDE) || (mid == 0 && method == INCLUDE);
 }
 
 /*
