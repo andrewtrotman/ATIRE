@@ -37,6 +37,9 @@ public:
 	long document_compression_scheme;	// should we and how should we store the documents in the repository?
 	char *doclist_filename;				// name of file containing the internal docid to external docid translations
 	char *index_filename;				// name of index file
+	char *spam_filename;				// where to load spam files from
+	long long spam_threshold; 	// spam percentile threshold
+	long long spam_method;					// whether the spam files we load are what we should include or exclude
 	long long static_prune_point;		// maximum length of a postings list measured in document IDs
 	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
 	long stop_word_df_frequencies;   // remove wrods based on the document frequencies

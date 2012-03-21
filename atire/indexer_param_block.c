@@ -13,6 +13,7 @@
 #include "compression_factory.h"
 #include "readability_factory.h"
 #include "version.h"
+#include "directory_iterator_spam_filter.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -42,6 +43,9 @@ ranking_function = IMPACT;
 document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
+spam_filename = NULL;
+spam_threshold = 70; // as suggested at http://durum0.uwaterloo.ca/clueweb09spam/
+spam_method = spam_threshold < 50 ? ANT_directory_iterator_spam_filter::EXCLUDE : ANT_directory_iterator_spam_filter::INCLUDE;
 static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
 stop_word_df_frequencies = 1;
@@ -95,6 +99,8 @@ puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin in
 puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rrwarcgz       Search in subdirectories for warc.gz files and index them");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
+puts("");
+puts("-ispam[:n] <fn> Load percentile scores from <fn> and treat those < n as spam not to be indexed [default n=70]");
 puts("");
 
 puts("OUPUT FILE HANDLING");
@@ -374,6 +380,20 @@ for (param = 1; param < argc; param++)
 			recursive = MYSQL;
 		else if (strcmp(command, "rvbulletin") == 0)
 			recursive = VBULLETIN;
+		else if (strncmp(command, "ispam", 5) == 0)
+			{
+			if (*(command + 5) == ':')
+				{
+				spam_threshold = atol(command + 6);
+				if (spam_threshold < 0 || spam_threshold > 99)
+					exit(printf("Spam threshold must be between 0-99\n"));
+				if (spam_threshold < 50)
+					spam_method = ANT_directory_iterator_spam_filter::EXCLUDE; // less documents
+				else
+					spam_method = ANT_directory_iterator_spam_filter::INCLUDE; // invert so that there are less documents
+				}
+			spam_filename = argv[++param];
+			}
 		else if (*command == 'S')
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)

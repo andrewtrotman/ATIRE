@@ -22,6 +22,7 @@
 #include "directory_iterator_pkzip.h"
 #include "directory_iterator_preindex.h"
 #include "directory_iterator_mysql.h"
+#include "directory_iterator_spam_filter.h"
 #include "file.h"
 #include "parser.h"
 #include "parser_readability.h"
@@ -387,12 +388,12 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_file(data_stream, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
-			{
-			source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
-			if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
-				source = new ANT_directory_iterator_deflate(source);		// recursive .gz files
-			source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
-			}
+		{
+		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
+		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
+			source = new ANT_directory_iterator_deflate(source);		// recursive .gz files
+		source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE, param_block.trec_cleanup);
+		}
 	else if (param_block.recursive == ANT_indexer_param_block::TRECBIG)
 		{
 		ANT_instream *instream;
@@ -406,6 +407,9 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_pkzip(argv[param], ANT_directory_iterator::READ_FILE);
 	else
 		source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
+	
+	if (param_block.spam_filename != NULL)
+		source = new ANT_directory_iterator_spam_filter(source, param_block.spam_filename, param_block.spam_threshold, param_block.spam_method);
 
 	stats.add_disk_input_time(stats.stop_timer(now));
 
@@ -421,9 +425,7 @@ for (param = first_param; param < argc; param++)
 		}
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
-
 		disk = new ANT_directory_iterator_preindex(disk, param_block.segmentation, param_block.readability_measure, param_block.stemmer, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
-
 	#endif
 
 	files_that_match = 0;

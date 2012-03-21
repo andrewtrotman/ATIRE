@@ -22,6 +22,7 @@
 
 extern "C" int char_star_star_strcmp(const void *one, const void *two);
 extern "C" int char_star_star_star_strcmp(const void *one, const void *two);
+extern "C" int char_star_char_star_star_strcmp(const void *one, const void *two);
 
 inline unsigned char *strstr(const unsigned char *string, const char *key) { return (unsigned char *)::strstr((char *)string, key); }
 inline unsigned char *strchr(const unsigned char *string, int key) { return (unsigned char *)::strchr((char *)string, key); }
