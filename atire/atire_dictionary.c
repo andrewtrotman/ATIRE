@@ -126,7 +126,7 @@ unsigned char *postings_list = NULL;
 char *term, *first_term, *last_term;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
-search_engine.open();
+search_engine.open(argv[1]);
 long long global_trim = search_engine.get_global_trim_postings_k();
 ANT_btree_iterator iterator(&search_engine);
 ANT_search_engine_btree_leaf leaf;
@@ -145,7 +145,7 @@ long param;
 first_term = last_term = NULL;
 print_postings = print_wide = metaphone = one_postings_per_line = FALSE;
 
-for (param = 1; param < argc; param++)
+for (param = 2; param < argc; param++)
 	{
 	if (strcmp(argv[param], "-s") == 0)
 		first_term = argv[++param];
