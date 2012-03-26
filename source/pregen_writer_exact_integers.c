@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "maths.h"
 #include "pregen_t.h"
-#include "pregen_file_header.h"
 #include "pregen_writer_exact_integers.h"
 #include "encode_char_base37.h"
 #include "encode_char_printable_ascii.h"
@@ -99,52 +98,23 @@ add_exact_integer(atol(content.start));
 }
 
 /*
-	ANT_PREGEN_WRITER_EXACT_INTEGERS::OPEN_WRITE()
-	----------------------------------------------
-*/
-int ANT_pregen_writer_exact_integers::open_write(const char *filename)
-{
-if (!file.open(filename, "wbx"))
-	return 0;
-
-return 1;
-}
-
-/*
 	ANT_PREGEN_WRITER_EXACT_INTEGERS::CLOSE_WRITE()
 	-----------------------------------------------
 */
 void ANT_pregen_writer_exact_integers::close_write()
 {
-ANT_pregen_file_header header;
-ANT_pregen_t *outvalues;
+ANT_pregen_t rsv;
 
 /* 
 	Sort the documents in order based on their exact source values, use that order
 	to define the RSV of each document 
 */
-header.doc_count = doc_count;
-header.version = PREGEN_FILE_VERSION;
-header.pregen_t_size = sizeof(ANT_pregen_t);
-header.field_type = type;
-header.field_name_length = (uint32_t) strlen(field_name);
-
-file.write((unsigned char *)&header, sizeof(header));
-
-file.write((unsigned char *)field_name, header.field_name_length * sizeof(*field_name));
-
 std::sort(&exact_integers[0], &exact_integers[doc_count], exact_int_less);
-
-outvalues = new ANT_pregen_t[doc_count];
 
 /* Each document's RSV is its position in the ranking (also add 1 to avoid generating a
  * zero RSV) */
 for (unsigned int i = 0; i < doc_count; i++)
-	outvalues[exact_integers[i].first] = (ANT_pregen_t) (i + 1);
+	file.write((unsigned char *)&(rsv = i + 1), sizeof(rsv));
 
-file.write((unsigned char *)outvalues, doc_count * sizeof(*outvalues));
-
-delete [] outvalues;
-
-file.close();
+ANT_pregen_writer::close_write();
 }

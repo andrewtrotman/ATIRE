@@ -4,7 +4,6 @@
 */
 #include "str.h"
 #include "pregen.h"
-#include "pregen_file_header.h"
 #include "pregen_field_type.h"
 
 /*
@@ -37,32 +36,42 @@ delete [] scores;
 */
 int ANT_pregen::read(const char *filename)
 {
-ANT_pregen_file_header header;
+uint32_t four_byte;
+uint32_t field_name_length;
 
-if (!file.open(filename, "rbx"))
+if (file.open(filename, "rbx") == 0)
 	return 0;
 
-if (!file.read((unsigned char *) &header, sizeof(header)))
+file.seek(file.file_length() - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte));
+
+file.read(&four_byte);
+if (four_byte != PREGEN_FILE_VERSION)
 	return 0;
 
-if (header.version != PREGEN_FILE_VERSION)
+file.read(&four_byte);
+doc_count = four_byte;
+
+file.read(&four_byte);
+if (four_byte != sizeof(ANT_pregen_t))
 	return 0;
 
-if (header.pregen_t_size != sizeof(ANT_pregen_t))
-	return 0;
+file.read(&four_byte);
+type = (ANT_pregen_field_type)four_byte;
 
-doc_count = header.doc_count;
-type = (ANT_pregen_field_type) header.field_type;
+file.read(&four_byte);
+field_name_length = four_byte;
+
+file.seek(sizeof(file_header));
 
 delete [] field_name;
-field_name = new char[header.field_name_length + 1];
-if (!file.read((unsigned char *) field_name, header.field_name_length * sizeof(*field_name)))
+field_name = new char[field_name_length + 1];
+if (file.read((unsigned char *)field_name, field_name_length * sizeof(*field_name)) == 0)
 	return 0;
-field_name[header.field_name_length] = '\0';
+field_name[field_name_length] = '\0';
 
 delete [] scores;
-scores = new ANT_pregen_t[header.doc_count];
-if (!file.read((unsigned char *) scores, header.doc_count * sizeof(*scores)))
+scores = new ANT_pregen_t[doc_count];
+if (file.read((unsigned char *)scores, doc_count * sizeof(*scores)) == 0)
 	return 0;
 
 return 1;

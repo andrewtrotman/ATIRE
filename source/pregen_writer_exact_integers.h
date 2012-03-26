@@ -31,7 +31,6 @@ public:
 
 	virtual void add_field(long long docindex, ANT_string_pair content);
 
-	virtual int open_write(const char * filename);
 	virtual void close_write();
 } ;
 

@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "maths.h"
 #include "pregen_t.h"
-#include "pregen_file_header.h"
 #include "pregen_writer_exact_strings.h"
 #include "encode_char_base37.h"
 #include "encode_char_printable_ascii.h"
@@ -32,7 +31,7 @@ ANT_pregen_writer_exact_strings::~ANT_pregen_writer_exact_strings()
 /*
 	The strings themselves are allocated with our memory pool, so they will all be
 	destroyed automatically.
- */
+*/
 delete [] exact_strings;
 }
 
@@ -177,64 +176,31 @@ delete[] encoded_string_buffer;
 }
 
 /*
-	ANT_PREGEN_WRITER_EXACT_STRINGS::OPEN_WRITE()
-	---------------------------------------------
-*/
-int ANT_pregen_writer_exact_strings::open_write(const char *filename)
-{
-if (!file.open(filename, "wbx"))
-	return 0;
-
-return 1;
-}
-
-/*
 	ANT_PREGEN_WRITER_EXACT_STRINGS::CLOSE_WRITE()
 	----------------------------------------------
 */
 void ANT_pregen_writer_exact_strings::close_write()
 {
-ANT_pregen_file_header header;
-ANT_pregen_t *outvalues;
+/*
+	Start the rsv's at 1
+*/
+ANT_pregen_t rsv = 1;
 
 /*
 	Sort the documents in order based on their exact source values, use that order
 	to define the RSV of each document
 */
-header.doc_count = doc_count;
-header.version = PREGEN_FILE_VERSION;
-header.pregen_t_size = sizeof(ANT_pregen_t);
-header.field_type = type;
-header.field_name_length = (uint32_t) strlen(field_name);
-
-file.write((unsigned char *)&header, sizeof(header));
-
-file.write((unsigned char *)field_name, header.field_name_length * sizeof(*field_name));
-
 std::sort(&exact_strings[0], &exact_strings[doc_count], exact_str_less);
-
-outvalues = new ANT_pregen_t[doc_count];
-
-/* 
-	Each document's RSV is its position in the ranking (also add 1 to avoid generating a
-	zero RSV)
-*/
-ANT_pregen_t out = 1;
 
 for (unsigned int i = 0; i < doc_count; i++)
 	{
 	/*
 		Don't increase RSV if this string is the same as the previous (search engine will tiebreak)
 	*/
-	if (i > 0 && exact_str_less(exact_strings[i-1], exact_strings[i]) != 0)
-		out++;
-
-	outvalues[exact_strings[i].first] = out;
+	if (i > 0 && exact_str_less(exact_strings[i - 1], exact_strings[i]) != 0)
+		rsv++;
+	file.write((unsigned char *)&rsv, sizeof(rsv));
 	}
 
-file.write((unsigned char *)outvalues, doc_count * sizeof(*outvalues));
-
-delete [] outvalues;
-
-file.close();
+ANT_pregen_writer::close_write();
 }

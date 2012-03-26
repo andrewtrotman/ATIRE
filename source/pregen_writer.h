@@ -31,8 +31,8 @@ public:
 	ANT_pregen_writer(ANT_pregen_field_type type, const char *name);
 	virtual ~ANT_pregen_writer()	{ delete [] field_name; }
 
-	virtual int open_write(const char * filename) = 0;
-	virtual void close_write() = 0;
+	virtual int open_write(const char * filename);
+	virtual void close_write();
 
 	virtual void add_field(long long docindex, ANT_string_pair content) = 0;
 };

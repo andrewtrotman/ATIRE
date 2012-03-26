@@ -11,4 +11,8 @@
 
 typedef ANT_PREGEN_T ANT_pregen_t;
 
+#define PREGEN_FILE_VERSION 3
+
+const char file_header[] = "ANT Search Engine Pregen File\n\0";
+
 #endif /* PREGEN_T_H_ */

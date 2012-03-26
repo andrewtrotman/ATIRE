@@ -6,7 +6,6 @@
 #include <limits>
 #include "maths.h"
 #include "pregen_writer_normal.h"
-#include "pregen_file_header.h"
 #include "encode_char_8bit.h"
 #include "encode_char_base36.h"
 #include "encode_char_base40.h"
@@ -212,7 +211,7 @@ while (field.string_length > 0 && (character = utf8_to_wide(field.start)) != 0)
 			{
 			if (symbol == encoded_space)
 				if (prev_char_was_space)
-					continue; //S trip multiple spaces in a row
+					continue; // Strip multiple spaces in a row
 				else
 					prev_char_was_space = 1;
 			else
@@ -301,51 +300,5 @@ void ANT_pregen_writer_normal::add_score(ANT_pregen_t score, long long count)
 {
 for (int i = 0; i < count; i++)
 	file.write((unsigned char *)&score, sizeof(score));
-doc_count = (uint32_t) (doc_count + count);
+doc_count = (uint32_t)(doc_count + count);
 }
-
-/*
-	ANT_PREGEN_WRITER_NORMAL::CLOSE_WRITE()
-	---------------------------------------
-*/
-void ANT_pregen_writer_normal::close_write()
-{
-ANT_pregen_file_header header;
-
-header.doc_count = doc_count;
-
-/*
-	Update doc count field in header before we close the file
-*/
-file.seek(offsetof(ANT_pregen_file_header, doc_count));
-file.write((unsigned char *)&header.doc_count, sizeof(header.doc_count));
-
-file.close();
-}
-
-/*
-	ANT_PREGEN_WRITER_NORMAL::OPEN_WRITE()
-	--------------------------------------
-*/
-int ANT_pregen_writer_normal::open_write(const char *filename)
-{
-ANT_pregen_file_header header;
-
-if (!file.open(filename, "wbx"))
-	return 0;
-
-/*
-	Write header to file to begin with
-*/
-header.doc_count = 0; //We will fill that in later
-header.version = PREGEN_FILE_VERSION;
-header.pregen_t_size = sizeof(ANT_pregen_t);
-header.field_type = type;
-header.field_name_length = (uint32_t) strlen(field_name);
-
-file.write((unsigned char *)&header, sizeof(header));
-file.write((unsigned char *)field_name, header.field_name_length * sizeof(*field_name));
-
-return 1;
-}
-
