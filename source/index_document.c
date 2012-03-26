@@ -47,6 +47,11 @@ while ((token = readability->get_next_token()) != NULL)
 	 * a bit redudant, the code below.
 	 * I think the original code from revision 656 should be fine, except the chinese handling part
 	 */
+	/*
+		Discard super long terms that search can't handle
+	*/
+	if (token->length() > MAX_TERM_LENGTH)
+		continue;
 	switch (token->type)
 		{
 		case TT_WORD:
