@@ -29,13 +29,14 @@ if (docids == NULL)
 	{
 	char *spam_file = ANT_disk::read_entire_file(filename);
 	char *ptr = spam_file, *nl;
+	char new_line = strchr(ptr, '\r') > strchr(ptr, '\n') ? '\r' : '\n'; // as long as the file is consistent
 	long score;
 	long docids_recorded = 0;
 
 	while (*ptr)
 		{
 		score = ANT_atol(ptr);
-		nl = ANT_max(strchr(ptr, '\r'), strchr(ptr, '\n')); // windows \r\n, linux \n, macos \r ... as long as the file is consistent we win
+		nl = strchr(ptr, new_line);
 		if ((method == INCLUDE && score >= threshold) || (method == EXCLUDE && score < threshold))
 			number_docs++;
 		ptr = nl + 1; // skip to next line
@@ -48,9 +49,9 @@ if (docids == NULL)
 		{
 		score = ANT_atol(ptr); // get score
 		ptr = strchr(ptr, ' ') + 1; // skip to document
-		nl = ANT_max(strchr(ptr, '\r'), strchr(ptr, '\n'));
+		nl = strchr(ptr, new_line);
 		if ((method == INCLUDE && score >= threshold) || (method == EXCLUDE && score < threshold))
-			docids[docids_recorded++] = strip_space_inplace(strnnew(ptr, nl - ptr));
+			docids[docids_recorded++] = strip_space_inplace(strnnew(ptr, nl - ptr)); // strip_space_inplace because we might have captured a line ending
 		ptr = nl + 1; // skip to next line
 		}
 	
@@ -68,7 +69,12 @@ if (docids == NULL)
 ANT_directory_iterator_spam_filter::~ANT_directory_iterator_spam_filter()
 {
 delete source;
-delete [] docids;
+
+if (docids)
+	{
+	delete [] docids;
+	docids = NULL;
+	}
 }
 
 /*
@@ -102,7 +108,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_spam_filter::first(ANT_dir
 {
 ANT_directory_iterator_object *t = source->first(object);
 
-if (should_index(t->filename))
+if (t && should_index(t->filename))
 	return t;
 return next(object);
 }

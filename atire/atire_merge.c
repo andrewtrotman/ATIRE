@@ -235,9 +235,8 @@ else
 		new_postings_list = new unsigned char[postings_list_size * 2];
 		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
 		
-		temp = postings_list;
+		delete [] postings_list;
 		postings_list = new_postings_list;
-		delete [] temp;
 		
 		postings_list_size *= 2;
 		}
@@ -348,9 +347,8 @@ for (ANT_compressable_integer i = 0; i < quantum_count; impact_value_pointer++, 
 		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
 		postings_ptr = new_postings_list + (postings_ptr - postings_list);
 		
-		temp = postings_list;
+		delete [] postings_list;
 		postings_list = new_postings_list;
-		delete [] temp;
 		
 		postings_list_size *= 2;
 		}
@@ -493,7 +491,7 @@ ANT_compression_text_factory factory_text;
 ANT_stats_memory_index *memory_stats = new ANT_stats_memory_index(&memory[number_engines], &memory[number_engines]);
 
 ANT_memory_index_hash_node *p;
-ANT_memory_index_hash_node **temp, **term_list, **here;
+ANT_memory_index_hash_node **term_list, **here;
 
 term_list = new ANT_memory_index_hash_node *[maximum_terms + 1];
 
@@ -933,11 +931,12 @@ while (should_continue)
 		*/
 		if (terms_so_far == maximum_terms - 1)
 			{
-			temp = new ANT_memory_index_hash_node*[maximum_terms * 2];
-			memcpy(temp, term_list, terms_so_far * sizeof(*term_list));
-			here = term_list;
-			term_list = temp;
-			delete [] here;
+			here = new ANT_memory_index_hash_node*[maximum_terms * 2];
+			memcpy(here, term_list, terms_so_far * sizeof(*term_list));
+			
+			delete [] term_list;
+			term_list = here;
+			
 			maximum_terms *= 2;
 			}
 

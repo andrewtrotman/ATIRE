@@ -437,12 +437,6 @@ for (param = first_param; param < argc; param++)
 #else
 	disk = source;
 	files_that_match = 0;
-	if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-		{
-		ANT_compression_text_factory *factory_text = new ANT_compression_text_factory;
-		factory_text->set_scheme(param_block.document_compression_scheme);
-		disk = new ANT_directory_iterator_compressor(disk, 1, factory_text, ANT_directory_iterator::READ_FILE);
-		}
 
 	now = stats.start_timer();
 	current_file = disk->first(&file_object);
