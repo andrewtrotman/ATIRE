@@ -7,6 +7,7 @@
 #include <utility>
 #include <algorithm>
 #include <vector>
+#include <limits.h>
 
 #include "../source/pregen.h"
 #include "../source/str.h"
