@@ -89,6 +89,7 @@ core_sources =  \
 	$(SRC_DIR)/directory_iterator_tar.c \
 	$(SRC_DIR)/directory_iterator_warc.c \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.c \
+	$(SRC_DIR)/directory_iterator_spam_filter.c \
 	$(SRC_DIR)/disk.c \
 	$(SRC_DIR)/event.c \
 	$(SRC_DIR)/file.c \
@@ -277,6 +278,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_tar.h \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.h \
 	$(SRC_DIR)/directory_iterator_warc.h \
+	$(SRC_DIR)/directory_iterator_spam_filter.h \
 	$(SRC_DIR)/disk_directory.h \
 	$(SRC_DIR)/disk.h \
 	$(SRC_DIR)/encode_char_8bit.h \
