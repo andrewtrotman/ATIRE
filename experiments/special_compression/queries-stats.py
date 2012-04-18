@@ -8,17 +8,26 @@ from __future__ import division
 import sys
 import os
 
-class Dict_type:
-	def __init__(self, term, collection_freq, document_freq):
-		self.term = term
-		self.collection_freq = collection_freq
-		self.document_freq = document_freq
-	pass
-pass # end of class dict_t
-
 def usage():
 	print "./%s --dict-file <dict-file> --queries-file <queries-file> [--queries-has-id]" % os.path.basename(sys.argv[0])
 pass # end of def usage()
+
+
+def bsearch(the_list, key, low, high):
+	if high < low:
+		return 0, None
+
+	mid = (low + high) // 2
+	# in tuple of (term, document_freq)
+	term, document_freq = the_list[mid]
+	if term == key:
+		return 1, the_list[mid]
+	elif term > key:
+		return bsearch(the_list, key, low, mid-1)
+	else:
+		return bsearch(the_list, key, mid+1, high)
+pass
+
 
 if __name__ == '__main__':
 
@@ -26,8 +35,6 @@ if __name__ == '__main__':
 	total_terms_occurred_twice = 0
 	total_unique_terms = 0
 	collection_size = 0
-
-	all_dict_terms = dict({})
 
 	#
 	# read dictionary file from command line
@@ -41,7 +48,7 @@ if __name__ == '__main__':
 	queries_has_id = 0
 
 	i = 1
-	while (i < len(sys.argv)):
+	while i < len(sys.argv):
 		if '--dict-file' == sys.argv[i]:
 			i += 1
 			dict_file = open(sys.argv[i], 'r')
@@ -53,19 +60,29 @@ if __name__ == '__main__':
 		elif '--queries-has-id' == sys.argv[i]:
 			i += 1
 			queries_has_id = 1
+		else:
+			print "Argument '%s' is not supported" % sys.argv[i]
+			usage()
+			sys.exit(2)
 	pass
 
 	#
 	# parse all the terms in the dictionary
 	#
+	all_dict_terms = list([])
+	#all_dict_terms = [None] * 40650000
 	contents = dict_file.read().splitlines()
+	counter = 0
 	for line in contents:
 		items = line.split()
 		term = items[0]
 		collection_freq = int(items[1])
 		document_freq = int(items[2])
 
-		all_dict_terms[term] = Dict_type(term, collection_freq, document_freq)
+		all_dict_terms.append((term, document_freq))
+		if counter % 100000 == 0:
+			print "counter: %d" % counter
+		counter += 1
 
 		if '~' == term[0]:
 			if '~length' == term:
@@ -100,7 +117,7 @@ if __name__ == '__main__':
 	#
 	num_of_queries = 0
 	longest_query = 0
-	shorest_query = 0
+	shortest_query = 0
 	total_terms = 0
 	total_unique_terms = 0
 	total_terms_occurred_once = 0
@@ -119,19 +136,23 @@ if __name__ == '__main__':
 
 		item_count = len(items)
 		total_terms += item_count
-		if (item_count > longest_query):
+		if item_count > longest_query:
 			longest_query = item_count
-		if (0 == shorest_query):
-			shorest_query = item_count
-		elif shorest_query > item_count:
-			shorest_query = item_count
+		if not shortest_query:
+			shortest_query = item_count
+		elif shortest_query > item_count:
+			shortest_query = item_count
 
+		all_dict_terms_len = len(all_dict_terms)
 		for t in items:
 			queries_terms[t] = 1
-			if t in all_dict_terms and all_dict_terms[t].document_freq == 1:
-				total_terms_occurred_once += 1
-			if t in all_dict_terms and all_dict_terms[t].document_freq == 2:
-				total_terms_occurred_twice += 1
+			found, term_tuple = bsearch(all_dict_terms, t, 0, all_dict_terms_len)
+			if found:
+				term, document_freq = term_tuple
+				if document_freq == 1:
+					total_terms_occurred_once += 1
+				elif document_freq == 2:
+					total_terms_occurred_twice += 1
 	pass # end of for line in contents
 
 	total_unique_terms = len(queries_terms)
@@ -141,7 +162,7 @@ if __name__ == '__main__':
 	print '======================================================='
 	print "Number of queries: %d" % num_of_queries
 	print "Longest queries; %d" % longest_query
-	print "Shorest queries: %d" % shorest_query
+	print "Shorest queries: %d" % shortest_query
 	print "Total terms: %d" % total_terms
 	print "Total unique terms: %d" % total_unique_terms
 	print "Total terms occurred once in the dict: %d" % total_terms_occurred_once
