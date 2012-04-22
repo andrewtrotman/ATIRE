@@ -31,7 +31,7 @@ if (docids == NULL)
 	char *ptr = spam_file, *nl;
 	char new_line = strchr(ptr, '\r') > strchr(ptr, '\n') ? '\r' : '\n'; // as long as the file is consistent
 	long score;
-	long docids_recorded = 0;
+	long docids_recorded = number_docs = 0;
 
 	while (*ptr)
 		{

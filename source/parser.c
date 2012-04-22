@@ -118,7 +118,7 @@ for (;;)
 	if (chartype == CT_LETTER || chartype == CT_NUMBER || chartype == CT_PUNCTUATION || (chartype==CT_OTHER && (character == SPECIAL_TERM_CHAR || ischinese(character))))
 		break;
 
-	current++;
+	current += utf8_bytes(current);
 	}
 
 /*

@@ -39,7 +39,7 @@ protected:
 
 
 public:
-	ANT_directory_iterator_file_buffered(ANT_instream *instream, long get_file = 0, long asciify = false);
+	ANT_directory_iterator_file_buffered(ANT_instream *instream, long get_file = 0);
 	virtual ~ANT_directory_iterator_file_buffered();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }

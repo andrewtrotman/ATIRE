@@ -45,6 +45,10 @@ public:
 	long read(uint64_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(int32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(uint32_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+	long read(int16_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+	long read(uint16_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+	long read(int8_t *data) { return read((unsigned char *)data, sizeof(*data)); }
+	long read(uint8_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 
 	virtual long long tell(void) { return file_position; }
 	virtual void seek(long long offset_from_start_of_file);

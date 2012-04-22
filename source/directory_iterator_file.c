@@ -12,22 +12,20 @@
 	ANT_DIRECTORY_ITERATOR_FILE::ANT_DIRECTORY_ITERATOR_FILE()
 	----------------------------------------------------------
 */
-ANT_directory_iterator_file::ANT_directory_iterator_file(char *file, long get_file, int cleanup) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_file::ANT_directory_iterator_file(char *file, long get_file) : ANT_directory_iterator("", get_file)
 {
 initialise();
 this->file = file;
-trec_cleanup = cleanup;
 }
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILE::ANT_DIRECTORY_ITERATOR_FILE()
 	----------------------------------------------------------
 */
-ANT_directory_iterator_file::ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file, int cleanup) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_file::ANT_directory_iterator_file(ANT_directory_iterator *source, long get_file) : ANT_directory_iterator("", get_file)
 {
 initialise();
 this->source = source;
-trec_cleanup = cleanup;
 }
 
 /*
@@ -57,9 +55,6 @@ if (source != NULL)
 
 	if (success != NULL)
 		{
-		if (trec_cleanup)
-			object.file = ANT_turn_binary_into_ascii(object.file, object.length);
-
 		delete [] file;
 		file = object.file;
 		return document_end = document_start = file;
@@ -130,7 +125,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_file::read_entire_file(ANT
 {
 object->length = document_end - document_start;
 object->file = new (std::nothrow) char [(size_t)(object->length + 1)];
-strncpy(object->file, document_start, (size_t)object->length);
+memcpy(object->file, document_start, (size_t)object->length);
 object->file[(size_t)object->length] = '\0';
 
 return object;

@@ -13,9 +13,8 @@
 	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::ANT_DIRECTORY_ITERATOR_FILE_BUFFERED()
 	----------------------------------------------------------------------------
 */
-ANT_directory_iterator_file_buffered::ANT_directory_iterator_file_buffered(ANT_instream *instream, long get_file, long asciiafy) : ANT_directory_iterator("", get_file) 
+ANT_directory_iterator_file_buffered::ANT_directory_iterator_file_buffered(ANT_instream *instream, long get_file) : ANT_directory_iterator("", get_file) 
 {
-this->asciiafy = asciiafy;
 document_start = document_end = NULL;
 
 source = instream;
@@ -44,10 +43,6 @@ long long got;
 
 if ((got = source->read((unsigned char *)destination, length)) < length)
 	destination[got] = '\0';
-
-
-if (asciiafy)
-	ANT_turn_binary_into_ascii(destination, got);
 
 return got;
 }
@@ -143,7 +138,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_file_buffered::read_entire
 {
 object->length = document_end - document_start;
 object->file = new (std::nothrow) char [(size_t)(object->length + 1)];
-strncpy(object->file, document_start, (size_t)object->length);
+memcpy(object->file, document_start, (size_t)object->length);
 object->file[(size_t)object->length] = '\0';
 
 return object;

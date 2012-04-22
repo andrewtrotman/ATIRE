@@ -97,15 +97,6 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 	object->file[decompressed_length] = '\0';			// '\0' terminate the input
 	object->length = decompressed_length;
 
-	/*
-		If we're in TEXT mode then we check that the output doesn't have any '\0' characters in it
-		if it does then we replace then with spaces.
-	*/
-	if (mode == TEXT)
-		for (byte = decompressed; byte < decompressed + decompressed_length; byte++)
-			if (*byte == '\0')
-				*byte = ' ';
-
 	return object;
 #else
 	return object;

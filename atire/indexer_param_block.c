@@ -14,6 +14,7 @@
 #include "readability_factory.h"
 #include "version.h"
 #include "directory_iterator_spam_filter.h"
+#include "directory_iterator_scrub.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -30,6 +31,7 @@ ANT_indexer_param_block::ANT_indexer_param_block(int argc, char *argv[])
 {
 this->argc = argc;
 this->argv = argv;
+
 segmentation = ANT_parser::NOSEGMENTATION;
 recursive = NONE;
 compression_validation = FALSE;
@@ -50,7 +52,7 @@ static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
 stop_word_df_frequencies = 1;
 stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
-trec_cleanup = false;
+scrubbing = ANT_directory_iterator_scrub::NONE;
 }
 
 /*
@@ -89,17 +91,19 @@ puts("-rmysql <username> <password> <hostname> <database> <query> MySQL query re
 puts("-rphpbb <username> <password> <hostname> <database> <type> MySQL phpBB instance");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtlzo          Search in tar.lzo files for indexable files");
-puts("-rtrec<:clean>  Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>,");
-puts("                <:clean> to remove '\\0' and high-bit characters from files");
-puts("-rrtrec<:clean> Recursive search for TREC formatted <DOC>...</DOC> formatted files,");
-puts("                <:clean> to remove '\\0' and high-bit characters from files");
-puts("-rtrecbig       see -rtrec but indexing a source file large than memory");
+puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>,");
+puts("-rrtrec         Recursive search for TREC formatted <DOC>...</DOC> formatted files,");
+puts("-rtrecbig       Equivalent to -rtrec -iscrub:an");
 puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
 puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rrwarcgz       Search in subdirectories for warc.gz files and index them");
 puts("-rzip           Search in .zip files for indexable files (PKZIP format files)");
 puts("");
+puts("-iscrub:[anu]   Change the following characters to spaces:");
+puts("         a      Non-ascii (high bit set)");
+puts("         n      NUL (\\0)");
+puts("         u      Invalid UTF-8 characters");
 puts("-ispam[:n] <fn> Load percentile scores from <fn> and treat those < n as spam not to be indexed [default n=70]");
 puts("");
 
@@ -328,6 +332,24 @@ for (which = mode_list; *which != '\0'; which++)
 }
 
 /*
+	ANT_INDEXER_PARAM_BLOCK::SCRUB()
+	--------------------------------
+*/
+void ANT_indexer_param_block::scrub(char *scrub_what)
+{
+char *which;
+
+for (which = scrub_what; *which != '\0'; which++)
+	switch (*which)
+		{
+		case 'a': scrubbing |= ANT_directory_iterator_scrub::NON_ASCII; break;
+		case 'n': scrubbing |= ANT_directory_iterator_scrub::NUL; break;
+		case 'u': scrubbing |= ANT_directory_iterator_scrub::UTF8; break;
+		default : exit(printf("Unknown scrub flag: '%c'\n", *which)); break;
+		}
+}
+
+/*
 	ANT_INDEXER_PARAM_BLOCK::PARSE()
 	--------------------------------
 */
@@ -354,19 +376,19 @@ for (param = 1; param < argc; param++)
 		else if (strncmp(command, "rtrec", 5) == 0)
 			{
 			recursive = TREC;
-			if (strncmp(command+5, ":clean", 6) == 0)
-				trec_cleanup = true;
+			if (strncmp(command + 5, ":clean", 6) == 0)
+				scrub("an");
 			}
 		else if (strncmp(command, "rrtrec", 6) == 0)
 			{
 			recursive = RECURSIVE_TREC;
-			if (strncmp(command+6, ":clean", 6) == 0)
-				trec_cleanup = true;
+			if (strncmp(command + 6, ":clean", 6) == 0)
+				scrub("an");
 			}
 		else if (strcmp(command, "rtrecbig") == 0)
 			{
-			recursive = TRECBIG;
-			trec_cleanup = true;
+			recursive = TREC;
+			scrub("an");
 			}
 		else if (strcmp(command, "rcsv") == 0)
 			recursive = CSV;
@@ -394,6 +416,8 @@ for (param = 1; param < argc; param++)
 				}
 			spam_filename = argv[++param];
 			}
+		else if (strncmp(command, "iscrub:", 7) == 0)
+			scrub(command + 7);
 		else if (*command == 'S')
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)

@@ -17,12 +17,14 @@
 	ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE::ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE()
 	------------------------------------------------------------------------------------
 */
-ANT_directory_iterator_warc_gz_recursive::ANT_directory_iterator_warc_gz_recursive(char *source, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_warc_gz_recursive::ANT_directory_iterator_warc_gz_recursive(char *source, long get_file, long long scrubbing_options) : ANT_directory_iterator("", get_file)
 {
 ANT_directory_iterator_object filename;
 
 this->source = source;
 filename_provider = new ANT_directory_iterator_recursive(source, 0);
+
+this->scrubbing_options = scrubbing_options;
 
 more_files = filename_provider->first(&filename);
 first_time = true;

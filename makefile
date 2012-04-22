@@ -279,6 +279,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_csv.obj			\
 	$(OBJDIR)\directory_iterator_recursive.obj		\
 	$(OBJDIR)\directory_iterator_spam_filter.obj		\
+	$(OBJDIR)\directory_iterator_scrub.obj		\
 	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\thesaurus.obj							\
@@ -348,6 +349,7 @@ PARTS = \
 	$(OBJDIR)\instream_bz2.obj						\
 	$(OBJDIR)\instream_buffer.obj					\
 	$(OBJDIR)\instream_lzo.obj						\
+	$(OBJDIR)\instream_scrub.obj						\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_ant.obj							\
 	$(OBJDIR)\nexi_term_iterator.obj				\

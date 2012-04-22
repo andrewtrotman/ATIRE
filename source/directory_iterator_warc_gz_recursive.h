@@ -25,12 +25,13 @@ protected:
 	ANT_memory *memory;
 	ANT_directory_iterator_object *more_files;
 	long first_time;
+	long long scrubbing_options;
 
 protected:
 	ANT_directory_iterator_warc *new_provider(char *filename);
 
 public:
-	ANT_directory_iterator_warc_gz_recursive(char *source, long get_file = 0);
+	ANT_directory_iterator_warc_gz_recursive(char *source, long get_file = 0, long long scrubbing_options = 0);
 	virtual ~ANT_directory_iterator_warc_gz_recursive();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }
