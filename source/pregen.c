@@ -38,6 +38,11 @@ int ANT_pregen::read(const char *filename)
 {
 uint32_t four_byte;
 uint32_t field_name_length;
+uint32_t disk_pregen_size;
+uint64_t eight_byte;
+uint16_t two_byte;
+uint8_t byte;
+long long i;
 
 if (file.open(filename, "rbx") == 0)
 	return 0;
@@ -52,8 +57,12 @@ file.read(&four_byte);
 doc_count = four_byte;
 
 file.read(&four_byte);
-if (four_byte != sizeof(ANT_pregen_t))
+disk_pregen_size = four_byte;
+if (disk_pregen_size > sizeof(ANT_pregen_t))
+	{
+	fprintf(stderr, "ANT_pregen_t isn't big enough for pregen in file\n");
 	return 0;
+	}
 
 file.read(&four_byte);
 type = (ANT_pregen_field_type)four_byte;
@@ -71,8 +80,32 @@ field_name[field_name_length] = '\0';
 
 delete [] scores;
 scores = new ANT_pregen_t[doc_count];
-if (file.read((unsigned char *)scores, doc_count * sizeof(*scores)) == 0)
-	return 0;
+for (i = 0; i < doc_count; i++)
+	{
+	switch (disk_pregen_size)
+		{
+		case 8:
+			file.read(&eight_byte);
+			scores[i] = (ANT_pregen_t)eight_byte;
+			break;
+		case 4:
+			file.read(&four_byte);
+			scores[i] = (ANT_pregen_t)four_byte;
+			break;
+		case 2:
+			file.read(&two_byte);
+			scores[i] = (ANT_pregen_t)two_byte;
+			break;
+		case 1:
+			file.read(&byte);
+			scores[i] = (ANT_pregen_t)byte;
+			break;
+		default:
+			fprintf(stderr, "Error with disk pregen size\n");
+			return 0;
+		}
+	printf("%lld: %lld\n", i, scores[i]);
+	}
 
 return 1;
 }

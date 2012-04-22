@@ -21,8 +21,8 @@
 */
 int main(int argc, char **argv)
 {
-if (argc != 4)
-	exit(printf("Usage: %s <doclist file> <pregen source> <pregen name>\n", argv[0]));
+if (argc < 4)
+	exit(printf("Usage: %s <doclist file> <pregen source> <pregen name> [bytes default=8]\n", argv[0]));
 
 ANT_file *pregen = new ANT_file;
 char file_header[] = "ANT Search Engine Pregen File\n\0";
@@ -30,9 +30,18 @@ char *pregen_filename = new char[strlen("index.aspt.") + strlen(argv[3]) + 1];
 strcpy(pregen_filename, "index.aspt.");
 strcat(pregen_filename, argv[3]);
 
+long long bytes;
+if (argc > 4)
+	bytes = strtod(argv[4], (char **)NULL);
+else
+	bytes = 8;
+
 long long lines, low, mid, high, docs = 0;
+long long parsed, rsv;
+uint64_t eight_byte;
 uint32_t four_byte;
-ANT_pregen_t rsv;
+uint16_t two_byte;
+uint8_t one_byte;
 char line[4096];
 FILE *doclist = fopen(argv[1], "rb");
 size_t docid_len;
@@ -66,21 +75,54 @@ while (fgets(line, sizeof(line), doclist) != NULL)
 		{
 		p = scores[low];
 		while (!ANT_isspace(*p)) p++; // find the space
-		rsv = (ANT_pregen_t)ANT_atol(++p);
+		p++; // skip over the space
+
+		parsed = (ANT_atoi64(p) / 2) + 1;
+		switch (bytes)
+			{
+			case 8:
+				rsv = (uint64_t)parsed;
+				break;
+			case 4:
+				rsv = (uint32_t)parsed;
+				break;
+			case 2:
+				rsv = (uint16_t)parsed;
+				break;
+			case 1:
+				rsv = (uint8_t)parsed;
+				break;
+			}
+		//rsv = (uint16_t)((ANT_atol(p) / 2) + 1); // convert to signed 2 byte entity while preserving non-0
 		}
 	else
 		{
 		rsv = 1;
 		fprintf(stderr, "Warning: didn't find score for %s, setting to 1\n", line);
 		}
-	pregen->write((unsigned char *)&rsv, sizeof(rsv));
+		
+	switch (bytes)
+		{
+		case 8:
+			pregen->write((unsigned char *)&rsv, sizeof(eight_byte));
+			break;
+		case 4:
+			pregen->write((unsigned char *)&rsv, sizeof(four_byte));
+			break;
+		case 2:
+			pregen->write((unsigned char *)&rsv, sizeof(two_byte));
+			break;
+		case 1:
+			pregen->write((unsigned char *)&rsv, sizeof(one_byte));
+			break;
+		}
 	}
 
 four_byte = PREGEN_FILE_VERSION;
 pregen->write((unsigned char *)&four_byte, sizeof(four_byte));
 four_byte = (uint32_t)docs;
 pregen->write((unsigned char *)&four_byte, sizeof(four_byte));
-four_byte = sizeof(ANT_pregen_t);
+four_byte = bytes;
 pregen->write((unsigned char *)&four_byte, sizeof(four_byte));
 four_byte = (uint32_t)INTEGER;
 pregen->write((unsigned char *)&four_byte, sizeof(four_byte));
