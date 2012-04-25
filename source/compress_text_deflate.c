@@ -3,6 +3,7 @@
 	-----------------------
 */
 #include <new>
+#include <stdlib.h>
 #include "compress_text_deflate.h"
 #include "compress_text_deflate_internals.h"
 
