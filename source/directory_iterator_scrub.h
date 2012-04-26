@@ -14,6 +14,7 @@
 class ANT_directory_iterator_scrub : public ANT_directory_iterator
 {
 friend class ANT_instream_scrub;
+friend class ANT_directory_iterator_deflate;
 
 public:
 	enum {

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "directory_iterator_deflate.h"
+#include "directory_iterator_scrub.h"
 #include "compress_text_deflate.h"
 
 #ifdef ANT_HAS_ZLIB
@@ -44,7 +45,7 @@ delete source;
 ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_directory_iterator_object *object)
 {
 #ifdef ANT_HAS_ZLIB
-	char *decompressed, *byte, *end_of_decompressed;
+	char *decompressed, *end_of_decompressed;
 	size_t decompressed_length;
 	int status;
 	z_stream stream;
@@ -96,6 +97,9 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 	decompressed_length = end_of_decompressed - decompressed;
 	object->file[decompressed_length] = '\0';			// '\0' terminate the input
 	object->length = decompressed_length;
+	
+	if (mode == TEXT)
+		ANT_directory_iterator_scrub::scrub((unsigned char *)object->file, object->length, ANT_directory_iterator_scrub::NUL);
 
 	return object;
 #else

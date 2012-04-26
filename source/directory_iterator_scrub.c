@@ -42,7 +42,7 @@ for (; i < size; i++)
 		*(data + i) = ' ';
 	else if (scrubbing & NON_ASCII && *(data + i) & 0x80)
 		*(data + i) = ' ';
-	else if (scrubbing & UTF8)
+	else if (scrubbing & UTF8 && *(data + i) >= 0x80)
 		{
 		if ((*(data + i) & 0xC0) == 0x80)
 			{
