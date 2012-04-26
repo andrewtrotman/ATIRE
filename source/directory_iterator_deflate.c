@@ -97,9 +97,6 @@ ANT_directory_iterator_object *ANT_directory_iterator_deflate::process(ANT_direc
 	decompressed_length = end_of_decompressed - decompressed;
 	object->file[decompressed_length] = '\0';			// '\0' terminate the input
 	object->length = decompressed_length;
-	
-	if (mode == TEXT)
-		ANT_directory_iterator_scrub::scrub((unsigned char *)object->file, object->length, ANT_directory_iterator_scrub::NUL);
 
 	return object;
 #else

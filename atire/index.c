@@ -168,6 +168,7 @@ ANT_file id_list;
 long long files_that_match;
 long long bytes_indexed;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL, *scrubber = NULL;
+ANT_directory_iterator *dir_scrubber = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 #ifdef PARALLEL_INDEXING
 ANT_directory_iterator_multiple *parallel_disk;
@@ -390,7 +391,9 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
 		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
 			source = new ANT_directory_iterator_deflate(source);		// recursive .gz files
-		source = new ANT_directory_iterator_file(source, ANT_directory_iterator::READ_FILE);
+		if (param_block.scrubbing)
+			dir_scrubber = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_file(dir_scrubber == NULL ? source : dir_scrubber, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
@@ -402,7 +405,11 @@ for (param = first_param; param < argc; param++)
 	if (param_block.spam_filename != NULL)
 		source = new ANT_directory_iterator_spam_filter(source, param_block.spam_filename, param_block.spam_threshold, param_block.spam_method, ANT_directory_iterator::READ_FILE);
 	
-	if (param_block.scrubbing)
+	/*
+		We may already had to have created a directory iterator scrubber at some other point in the chain, here's looking at you RECURSIVE_TREC,
+		so don't do it again unnecessarily
+	*/
+	if (param_block.scrubbing && dir_scrubber == NULL)
 		source = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
 
 	stats.add_disk_input_time(stats.stop_timer(now));
