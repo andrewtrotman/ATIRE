@@ -389,7 +389,7 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iter
 		if (relevance_data->relevant_characters == 0)
 			found_and_nonrelevant++;
 		else
-			precision += 1.0 - ((double)found_and_nonrelevant / (double)total_nonrelevant);
+			precision += ((double)found_and_nonrelevant / (double)total_nonrelevant);
 
 return precision / got->number_of_relevant_documents;
 }
