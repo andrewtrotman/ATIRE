@@ -359,7 +359,7 @@ return parsed_query->NEXI_query;
 
 	On failure, the API is left unchanged.
 */
-long ATIRE_API::set_ranking_function_pregen(const char * fieldname, double p1)
+long ATIRE_API::set_ranking_function_pregen(const char *fieldname, double p1)
 {
 long current;
 
@@ -1610,6 +1610,8 @@ if (map != NULL)
 		average_precision = map->average_generalised_precision_document(topic_id, search_engine);
 	else if (metric == ANT_ANT_param_block::RANKEFF)
 		average_precision = map->rank_effectiveness(topic_id, search_engine);
+	else if (metric == ANT_ANT_param_block::BPREF)
+		average_precision = map->bpref(topic_id, search_engine);
 	else if (metric == ANT_ANT_param_block::P_AT_N)
 		average_precision = map->p_at_n(topic_id, search_engine, metric_n);
 	else if (metric == ANT_ANT_param_block::SUCCESS_AT_N)

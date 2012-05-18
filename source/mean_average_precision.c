@@ -15,6 +15,7 @@
 #include "search_engine_result_iterator.h"
 #include "focus_results_list.h"
 #include "precision_recall.h"
+#include "maths.h"
 
 /*
 	ANT_MEAN_AVERAGE_PRECISION::ANT_MEAN_AVERAGE_PRECISION()
@@ -366,6 +367,13 @@ return precision / (double)got->number_of_relevant_documents;
 /*
 	ANT_MEAN_AVERAGE_PRECISION::RANK_EFFECTIVENESS()
 	------------------------------------------------
+	The implementation here breaks from the definition given in [1]. In the given definition,
+	ranking all the relevant documents before all irrelevant would result in a score of 0.0,
+	and vice versa, a score of 1.0. The text and resulting results suggest that this is wrong.
+	So we add the "1.0 -" to give the correct scores, as shown in [2].
+
+	[1] Grönqvist L. (2005), Evaluating Latent Semantic Vector Models with Synonym Tests and Document Retrieval, ELECTRA Workshop: Methodologies and Evaluation of Lexical Cohesion Techniques in Real-World Applications Beyond Bag of Words.
+	[2] Büttcher S., Clarke C.L.A, Cormack G.V. (2010) Information Retrieval: Implementing and Evaluating Search Engines, p452.
 */
 double ANT_mean_average_precision::rank_effectiveness(long topic, ANT_search_engine *search_engine)
 {
@@ -389,9 +397,44 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iter
 		if (relevance_data->relevant_characters == 0)
 			found_and_nonrelevant++;
 		else
-			precision += ((double)found_and_nonrelevant / (double)total_nonrelevant);
+			precision += 1.0 - ((double)found_and_nonrelevant / (double)total_nonrelevant);
 
 return precision / got->number_of_relevant_documents;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::BPREF()
+	-----------------------------------
+*/
+double ANT_mean_average_precision::bpref(long topic, ANT_search_engine *search_engine)
+{
+ANT_search_engine_result_iterator iterator;
+ANT_relevant_topic *got;
+ANT_relevant_document key, *relevance_data;
+long long found_and_nonrelevant, total_nonrelevant, total_relevant;
+double precision, denominator;
+
+if ((got = setup(topic)) == NULL)
+	return 0;
+
+if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
+	return 1;	// topic has no non-relevant documents so they are all relevant so we score a perfect score
+
+if ((total_relevant = got->number_of_relevant_documents) == 0)
+	return 0; // topic has no relevant documents, so all are irrelevant so we score 0
+
+denominator = ANT_min(total_relevant, total_nonrelevant);
+precision = 0;
+found_and_nonrelevant = 0;
+key.topic = topic;
+for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next())
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters == 0)
+			found_and_nonrelevant++;
+		else
+			precision += 1.0 - ((double)ANT_min(found_and_nonrelevant, total_relevant) / denominator);
+
+return precision / total_relevant;
 }
 
 /*
