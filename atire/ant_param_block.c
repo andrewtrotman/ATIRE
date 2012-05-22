@@ -152,8 +152,10 @@ puts("  MAgP          Documents, Uninterpolated Mean Average generalised Precisi
 //puts("  MAiPf         Passages, Measn Average interpolated Precision (INEX)");
 puts("  P@<n>         Documents, Set-based precision at <n> [default=10]");
 puts("  S@<n>         Documents, Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
-puts("  RankEff       Documents, Mean Rank Effectiveness (acount for unassessed documents)");
-puts("  bpref         ");
+puts("  RankEff       Documents, Mean Rank Effectiveness (account for unassessed documents)");
+puts("  bpref         Documents, bpref (account for unassessed documents)");
+puts("  nDCG          Documents, Normalised Discounted Cumulative Gain");
+puts("  nDCGt         Documents, Normalised Discounted Cumulative Gain (TREC version)");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
 puts("");
@@ -486,6 +488,10 @@ else if (strcmp(which, "RankEff") == 0)
 	metric = RANKEFF;
 else if (strcmp(which, "bpref") == 0)
 	metric = BPREF;
+else if (strcmp(which, "nDCG") == 0)
+	metric = NDCG;
+else if (strcmp(which, "nDCGt") == 0)
+	metric = NDCGT;
 else if (strncmp(which, "P@", 2) == 0)
 	{
 	metric = P_AT_N;

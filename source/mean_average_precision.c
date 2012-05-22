@@ -57,6 +57,7 @@ relevant_characters = this->relevance_list[0].relevant_characters;
 relevant_documents = this->relevance_list[0].relevant_characters == 0 ? 0 : 1;
 nonrelevant_documents = relevant_documents ? 0 : 1;
 current_topic = 0;
+topics[current_topic].beginning_of_judgements = 0;
 for (current = 1; current < relevance_list_length; current++)
 	if (this->relevance_list[current].topic != last_topic)
 		{
@@ -66,6 +67,8 @@ for (current = 1; current < relevance_list_length; current++)
 		topics[current_topic].number_of_relevant_characters = relevant_characters;
 
 		current_topic++;
+		topics[current_topic].beginning_of_judgements = current;
+
 		last_topic = this->relevance_list[current].topic;
 		relevant_characters = this->relevance_list[current].relevant_characters;
 		relevant_documents = this->relevance_list[current].relevant_characters == 0 ? 0 : 1;
@@ -492,4 +495,98 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iter
 	}
 
 return found_and_relevant == 0 ? 0.0 : 1.0;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::NDCG()
+	----------------------------------
+*/
+double ANT_mean_average_precision::ndcg(long topic, ANT_search_engine *search_engine)
+{
+ANT_search_engine_result_iterator iterator;
+ANT_relevant_topic *got;
+ANT_relevant_document key, *relevance_data;
+double discounted_cumulative_gain = 0, ideal_discounted_cumulative_gain = 0;
+double *ideal;
+long long offset, i;
+
+if ((got = setup(topic)) == NULL)
+	return 0;
+
+key.topic = topic;
+for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next(), i++)
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters != 0)
+			discounted_cumulative_gain += relevance_data->relevant_characters / ANT_log2(2.0 + i);
+
+// now we have our DCG, we need to ideal DCG to normalise by
+ideal = new double[got->number_of_relevant_documents];
+for (offset = 0, i = 0; i < got->number_of_relevant_documents; i++)
+	{
+	while (relevance_list[got->beginning_of_judgements + i + offset].relevant_characters == 0)
+		offset++;
+	ideal[i] = relevance_list[got->beginning_of_judgements + i + offset].relevant_characters;
+	}
+qsort(ideal, got->number_of_relevant_documents, sizeof(*ideal), ANT_mean_average_precision::gain_compare);
+
+for (i = 0; i < got->number_of_relevant_documents; i++)
+	ideal_discounted_cumulative_gain += ideal[i] / ANT_log2(2.0 + i);
+
+delete [] ideal;
+
+return discounted_cumulative_gain / ideal_discounted_cumulative_gain;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::NDCGT()
+	-----------------------------------
+*/
+double ANT_mean_average_precision::ndcgt(long topic, ANT_search_engine *search_engine)
+{
+ANT_search_engine_result_iterator iterator;
+ANT_relevant_topic *got;
+ANT_relevant_document key, *relevance_data;
+double discounted_cumulative_gain = 0, ideal_discounted_cumulative_gain = 0;
+double *ideal;
+long long offset, i;
+
+if ((got = setup(topic)) == NULL)
+	return 0;
+
+key.topic = topic;
+for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next(), i++)
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		if (relevance_data->relevant_characters != 0)
+			discounted_cumulative_gain += (ANT_pow2(relevance_data->relevant_characters) - 1) / ANT_log2(2.0 + i);
+
+// now we have our DCG, we need to ideal DCG to normalise by
+ideal = new double[got->number_of_relevant_documents];
+for (offset = 0, i = 0; i < got->number_of_relevant_documents; i++)
+	{
+	while (relevance_list[got->beginning_of_judgements + i + offset].relevant_characters == 0)
+		offset++;
+	ideal[i] = relevance_list[got->beginning_of_judgements + i + offset].relevant_characters;
+	}
+qsort(ideal, got->number_of_relevant_documents, sizeof(*ideal), ANT_mean_average_precision::gain_compare);
+
+for (i = 0; i < got->number_of_relevant_documents; i++)
+	ideal_discounted_cumulative_gain += (ANT_pow2(ideal[i]) - 1) / ANT_log2(2.0 + i);
+
+delete [] ideal;
+
+return discounted_cumulative_gain / ideal_discounted_cumulative_gain;
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::GAIN_COMPARE()
+	------------------------------------------
+*/
+int ANT_mean_average_precision::gain_compare(const void *a, const void *b)
+{
+double one, two;
+
+one = *(double *)a;
+two = *(double *)b;
+
+return (one < two) - (one > two);
 }

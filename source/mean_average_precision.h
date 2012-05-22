@@ -41,6 +41,10 @@ public:
 	double bpref(long topic, ANT_search_engine *search_engine);
 	double p_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n);
 	double success_at_n(long topic, ANT_search_engine *search_engine, long precision_point_n);
+	double ndcg(long topic, ANT_search_engine *search_engine);
+	double ndcgt(long topic, ANT_search_engine *search_engine);
+
+	static int gain_compare(const void *a, const void *b);
 } ;
 
 #endif  /* MEAN_AVERAGE_PRECISION_H_ */
