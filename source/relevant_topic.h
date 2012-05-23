@@ -15,6 +15,7 @@ public:
 	long long number_of_relevant_documents;
 	long long number_of_nonrelevant_documents;
 	long long number_of_relevant_characters;
+	long long beginning_of_judgements;
 } ;
 
 
