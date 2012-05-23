@@ -18,6 +18,14 @@
 #include "maths.h"
 
 /*
+	For ERR we need to know the maximum judgement value,
+	in TREC's gdeval this is set to 4, so we do the same.
+*/
+#ifndef MAX_JUDGEMENT
+	#define MAX_JUDGEMENT 4
+#endif
+
+/*
 	ANT_MEAN_AVERAGE_PRECISION::ANT_MEAN_AVERAGE_PRECISION()
 	--------------------------------------------------------
 */
@@ -501,7 +509,7 @@ return found_and_relevant == 0 ? 0.0 : 1.0;
 	ANT_MEAN_AVERAGE_PRECISION::NDCG()
 	----------------------------------
 */
-double ANT_mean_average_precision::ndcg(long topic, ANT_search_engine *search_engine)
+double ANT_mean_average_precision::ndcg(long topic, ANT_search_engine *search_engine, long precision_point_n)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
@@ -514,12 +522,14 @@ if ((got = setup(topic)) == NULL)
 	return 0;
 
 key.topic = topic;
-for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next(), i++)
+for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0 && (precision_point_n ? i < precision_point_n : true); key.docid = iterator.next(), i++)
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		if (relevance_data->relevant_characters != 0)
 			discounted_cumulative_gain += relevance_data->relevant_characters / ANT_log2(2.0 + i);
 
-// now we have our DCG, we need to ideal DCG to normalise by
+/*
+	now we have our DCG, we need to ideal DCG to normalise by
+*/
 ideal = new double[got->number_of_relevant_documents];
 for (offset = 0, i = 0; i < got->number_of_relevant_documents; i++)
 	{
@@ -529,7 +539,7 @@ for (offset = 0, i = 0; i < got->number_of_relevant_documents; i++)
 	}
 qsort(ideal, got->number_of_relevant_documents, sizeof(*ideal), ANT_mean_average_precision::gain_compare);
 
-for (i = 0; i < got->number_of_relevant_documents; i++)
+for (i = 0; i < got->number_of_relevant_documents && (precision_point_n ? i < precision_point_n : true); i++)
 	ideal_discounted_cumulative_gain += ideal[i] / ANT_log2(2.0 + i);
 
 delete [] ideal;
@@ -541,38 +551,40 @@ return discounted_cumulative_gain / ideal_discounted_cumulative_gain;
 	ANT_MEAN_AVERAGE_PRECISION::NDCGT()
 	-----------------------------------
 */
-double ANT_mean_average_precision::ndcgt(long topic, ANT_search_engine *search_engine)
+double ANT_mean_average_precision::ndcgt(long topic, ANT_search_engine *search_engine, long precision_point_n)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
 double discounted_cumulative_gain = 0, ideal_discounted_cumulative_gain = 0;
-double *ideal;
+double *ideal_gain;
 long long offset, i;
 
 if ((got = setup(topic)) == NULL)
 	return 0;
 
 key.topic = topic;
-for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next(), i++)
+for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0 && (precision_point_n ? i < precision_point_n : true); key.docid = iterator.next(), i++)
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		if (relevance_data->relevant_characters != 0)
 			discounted_cumulative_gain += (ANT_pow2(relevance_data->relevant_characters) - 1) / ANT_log2(2.0 + i);
 
-// now we have our DCG, we need to ideal DCG to normalise by
-ideal = new double[got->number_of_relevant_documents];
+/*
+	now we have our DCG, we need to ideal DCG to normalise by
+*/
+ideal_gain = new double[got->number_of_relevant_documents];
 for (offset = 0, i = 0; i < got->number_of_relevant_documents; i++)
 	{
 	while (relevance_list[got->beginning_of_judgements + i + offset].relevant_characters == 0)
 		offset++;
-	ideal[i] = relevance_list[got->beginning_of_judgements + i + offset].relevant_characters;
+	ideal_gain[i] = relevance_list[got->beginning_of_judgements + i + offset].relevant_characters;
 	}
-qsort(ideal, got->number_of_relevant_documents, sizeof(*ideal), ANT_mean_average_precision::gain_compare);
+qsort(ideal_gain, got->number_of_relevant_documents, sizeof(*ideal_gain), ANT_mean_average_precision::gain_compare);
 
-for (i = 0; i < got->number_of_relevant_documents; i++)
-	ideal_discounted_cumulative_gain += (ANT_pow2(ideal[i]) - 1) / ANT_log2(2.0 + i);
+for (i = 0; i < got->number_of_relevant_documents && (precision_point_n ? i < precision_point_n : true); i++)
+	ideal_discounted_cumulative_gain += (ANT_pow2(ideal_gain[i]) - 1) / ANT_log2(2.0 + i);
 
-delete [] ideal;
+delete [] ideal_gain;
 
 return discounted_cumulative_gain / ideal_discounted_cumulative_gain;
 }
@@ -589,4 +601,31 @@ one = *(double *)a;
 two = *(double *)b;
 
 return (one < two) - (one > two);
+}
+
+/*
+	ANT_MEAN_AVERAGE_PRECISION::ERR()
+	---------------------------------
+*/
+double ANT_mean_average_precision::err(long topic, ANT_search_engine *search_engine)
+{
+ANT_search_engine_result_iterator iterator;
+ANT_relevant_topic *got;
+ANT_relevant_document key, *relevance_data;
+double r, score = 0.0, decay = 1.0;
+long i;
+
+if ((got = setup(topic)) == NULL)
+	return 0;
+
+key.topic = topic;
+for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0; key.docid = iterator.next(), i++)
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+		{
+		r = (ANT_pow2(relevance_data->relevant_characters) - 1.0) / ANT_pow2(MAX_JUDGEMENT);
+		score += r * decay / (i + 1.0);
+		decay *= (1 - r);
+		}
+
+return score;
 }

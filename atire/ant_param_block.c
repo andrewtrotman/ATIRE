@@ -154,8 +154,9 @@ puts("  P@<n>         Documents, Set-based precision at <n> [default=10]");
 puts("  S@<n>         Documents, Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
 puts("  RankEff       Documents, Mean Rank Effectiveness (account for unassessed documents)");
 puts("  bpref         Documents, bpref (account for unassessed documents)");
-puts("  nDCG          Documents, Normalised Discounted Cumulative Gain");
-puts("  nDCGt         Documents, Normalised Discounted Cumulative Gain (TREC version)");
+puts("  nDCG[@<n>]    Documents, Normalised Discounted Cumulative Gain at <n> (0=all) [default=0]");
+puts("  nDCGt[@<n>]   Documents, Normalised Discounted Cumulative Gain (TREC version) at <n> (0=all) [default=0]");
+puts("  ERR           Documents, Expected Reciprocal Rank");
 puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
 puts("-q<filename>    Queries are in file <filename> (format: ANT)");
 puts("");
@@ -488,10 +489,34 @@ else if (strcmp(which, "RankEff") == 0)
 	metric = RANKEFF;
 else if (strcmp(which, "bpref") == 0)
 	metric = BPREF;
-else if (strcmp(which, "nDCG") == 0)
-	metric = NDCG;
-else if (strcmp(which, "nDCGt") == 0)
+else if (strncmp(which, "nDCGt", 5) == 0)
+	{
 	metric = NDCGT;
+	if (which[5] == '@')
+		{
+		if (ANT_isdigit(which[6]))
+			metric_n = atol(which + 6);
+		else
+			exit(puts("<n> in nDCGT@<n> must be numeric"));
+		}
+	else
+		metric_n = 0;
+	}
+else if (strcmp(which, "nDCG") == 0)
+	{
+	metric = NDCG;
+	if (which[4] == '@')
+		{
+		if (ANT_isdigit(which[5]))
+			metric_n = atol(which + 5);
+		else
+			exit(puts("<n> in nDCG@<n> must be numeric"));
+		}
+	else
+		metric_n = 0;
+	}
+else if (strncmp(which, "ERR", 3) == 0)
+	metric = ERR;
 else if (strncmp(which, "P@", 2) == 0)
 	{
 	metric = P_AT_N;
@@ -499,10 +524,10 @@ else if (strncmp(which, "P@", 2) == 0)
 		{
 		metric_n = atol(which + 2);
 		if (metric_n == 0)
-			exit(printf("Nice Try... You can't compute P@0!\n"));
+			exit(puts("Nice Try... You can't compute P@0!"));
 		}
 	else
-		exit(printf("<n> in P@<n> must be numeric (e.g. P@10)"));
+		exit(puts("<n> in P@<n> must be numeric (e.g. P@10)"));
 	}
 else if (strncmp(which, "S@", 2) == 0)
 	{
@@ -511,10 +536,10 @@ else if (strncmp(which, "S@", 2) == 0)
 		{
 		metric_n = atol(which + 2);
 		if (metric_n == 0)
-			exit(printf("Nice Try... You can't compute S@0!\n"));
+			exit(puts("Nice Try... You can't compute S@0!"));
 		}
 	else
-		exit(printf("<n> in S@<n> must be numeric (e.g. S@10)"));
+		exit(puts("<n> in S@<n> must be numeric (e.g. S@10)"));
 	}
 else
 	exit(printf("Unknown metric:'%s'\n", which));

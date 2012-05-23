@@ -18,7 +18,7 @@
 class ANT_ANT_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem, public ANT_indexer_param_block_topsig
 {
 public:
-	enum { MAP, MAgP, MAgPf, RANKEFF, BPREF, NDCG, NDCGT, P_AT_N, SUCCESS_AT_N, MAiP } ;					// metrics
+	enum { MAP, MAgP, MAgPf, RANKEFF, BPREF, NDCG, NDCGT, ERR, P_AT_N, SUCCESS_AT_N, MAiP } ;					// metrics
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4, PRECISION = 8 };					// statistics to print (bitstring)
 	enum { /* NONE = 0, */ INEX = 1, TREC, INEX_EFFICIENCY, INEX_FOCUS, INEX_BEP } ;	// evaluation forum
 	enum { INDEX_IN_FILE, INDEX_IN_MEMORY};												// read the index from disk or load at startup

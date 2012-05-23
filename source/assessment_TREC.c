@@ -78,8 +78,8 @@ for (current = lines; *current != 0; current++)
 			current_assessment->docid = *found - docid_list;		// the position in the list of documents is the internal docid used for computing precision
 
 		current_assessment->topic = topic;
-		current_assessment->document_length = 1024;
-		current_assessment->relevant_characters = 1024 * relevant;
+		current_assessment->document_length = relevant;
+		current_assessment->relevant_characters = relevant;
 		current_assessment->passage_list = NULL;
 		current_assessment->number_of_relevant_passages = 0;
 		current_assessment->best_entry_point = 0;

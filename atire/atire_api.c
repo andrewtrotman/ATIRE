@@ -1613,9 +1613,11 @@ if (map != NULL)
 	else if (metric == ANT_ANT_param_block::BPREF)
 		average_precision = map->bpref(topic_id, search_engine);
 	else if (metric == ANT_ANT_param_block::NDCG)
-		average_precision = map->ndcg(topic_id, search_engine);
+		average_precision = map->ndcg(topic_id, search_engine, metric_n);
 	else if (metric == ANT_ANT_param_block::NDCGT)
-		average_precision = map->ndcgt(topic_id, search_engine);
+		average_precision = map->ndcgt(topic_id, search_engine, metric_n);
+	else if (metric == ANT_ANT_param_block::ERR)
+		average_precision = map->err(topic_id, search_engine);
 	else if (metric == ANT_ANT_param_block::P_AT_N)
 		average_precision = map->p_at_n(topic_id, search_engine, metric_n);
 	else if (metric == ANT_ANT_param_block::SUCCESS_AT_N)
