@@ -8,8 +8,10 @@
 #include "indexer_param_block_rank.h"
 #include "indexer_param_block_stem.h"
 #include "indexer_param_block_topsig.h"
+#include "evaluator.h"
 
 #define MAX_PREGEN_COUNT 128
+
 
 /*
 	class ANT_ANT_PARAM_BLOCK
@@ -18,7 +20,6 @@
 class ANT_ANT_param_block : public ANT_indexer_param_block_rank, public ANT_indexer_param_block_stem, public ANT_indexer_param_block_topsig
 {
 public:
-	enum { MAP, MAgP, MAgPf, RANKEFF, BPREF, NDCG, NDCGT, ERR, P_AT_N, SUCCESS_AT_N, MAiP } ;					// metrics
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4, PRECISION = 8 };					// statistics to print (bitstring)
 	enum { /* NONE = 0, */ INEX = 1, TREC, INEX_EFFICIENCY, INEX_FOCUS, INEX_BEP } ;	// evaluation forum
 	enum { INDEX_IN_FILE, INDEX_IN_MEMORY};												// read the index from disk or load at startup
@@ -33,8 +34,7 @@ public:
 	long logo;							// display the ANT banner logo or not
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long trim_postings_k;				// trim the postigs lists at no fewer than k
-	long metric;						// which metric to use (MAP, MAgP, etc)
-	long metric_n;						// so we can so P@10, p@30 and so on using one metric
+	ANT_evaluator *evaluator;			// a proxy for all the evaluation functions we want
 	char *assessments_filename;			// name of the file containing the assessments for the given queries
 	char *queries_filename;				// name of a file containing one query per line (first token of each line is the query ID)
 	long output_forum;					// export the list of results in INEX or TREC format
@@ -86,7 +86,6 @@ public:
 
 private:
 	void export_format(char *forum);
-	void set_metric(char *which);
 	void set_stats(char *which);
 	void set_focused_ranker(char *which);
 	void set_feedbacker(char *which);

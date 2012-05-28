@@ -48,7 +48,7 @@
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
-#include "mean_average_precision.h"
+#include "evaluator.h"
 
 #include "search_engine_forum_INEX.h"
 #include "search_engine_forum_INEX_efficiency.h"
@@ -116,7 +116,7 @@ mem1 = mem2 = NULL;
 assessment_factory = NULL;
 assessments = NULL;
 number_of_assessments = 0;
-map = NULL;
+evaluator = NULL;
 forum_writer = NULL;
 forum_results_list_length = 1500;
 
@@ -159,7 +159,7 @@ delete [] mem2;
 
 delete assessment_factory;
 //delete [] assessments;
-delete map;
+delete evaluator;
 delete forum_writer;
 
 delete [] pregens;
@@ -321,14 +321,20 @@ return true;
 	ATIRE_API::LOAD_ASSESSMENTS()
 	-----------------------------
 */
-long ATIRE_API::load_assessments(char *assessments_filename)
+long ATIRE_API::load_assessments(char *assessments_filename, ANT_evaluator *evaluator)
 {
-if (map != NULL)
-	return 1;	// we've already got assessments loaded
+if (evaluator->is_initialised)
+	return 1; // we've already got assessments loaded
+
+/*
+	If we haven't already said to use an evaluation, use MAP by default
+*/
+if (evaluator->number_evaluations_used == 0)
+	evaluator->add_evaluation("MAP");
 
 assessment_factory = new ANT_assessment_factory(memory, document_list, documents_in_id_list);
 assessments = assessment_factory->read(assessments_filename, &number_of_assessments);
-map = new ANT_mean_average_precision(memory, assessments, number_of_assessments);
+evaluator->initialise(memory, assessments, number_of_assessments);
 
 return 0;		// success
 }
@@ -1589,48 +1595,6 @@ char **ATIRE_API::generate_results_list(void)
 {
 search_engine->generate_results_list(filename_list, answer_list, hits);
 return answer_list;
-}
-
-/*
-	ATIRE_API::GET_WHOLE_DOCUMENT_PRECISION()
-	-----------------------------------------
-*/
-double ATIRE_API::get_whole_document_precision(long topic_id, long metric, long metric_n)
-{
-double average_precision = 0.0;
-
-/*
-	Compute average precision
-*/
-if (map != NULL)
-	{
-	if (metric == ANT_ANT_param_block::MAP)
-		average_precision = map->average_precision(topic_id, search_engine);
-	else if (metric == ANT_ANT_param_block::MAgP)
-		average_precision = map->average_generalised_precision_document(topic_id, search_engine);
-	else if (metric == ANT_ANT_param_block::RANKEFF)
-		average_precision = map->rank_effectiveness(topic_id, search_engine);
-	else if (metric == ANT_ANT_param_block::BPREF)
-		average_precision = map->bpref(topic_id, search_engine);
-	else if (metric == ANT_ANT_param_block::NDCG)
-		average_precision = map->ndcg(topic_id, search_engine, metric_n);
-	else if (metric == ANT_ANT_param_block::NDCGT)
-		average_precision = map->ndcgt(topic_id, search_engine, metric_n);
-	else if (metric == ANT_ANT_param_block::ERR)
-		average_precision = map->err(topic_id, search_engine);
-	else if (metric == ANT_ANT_param_block::P_AT_N)
-		average_precision = map->p_at_n(topic_id, search_engine, metric_n);
-	else if (metric == ANT_ANT_param_block::SUCCESS_AT_N)
-		average_precision = map->success_at_n(topic_id, search_engine, metric_n);
-	/*
-		else it might be a focused evaluation metric
-	*/
-	}
-
-/*
-	Return the precision
-*/
-return average_precision;
 }
 
 /*

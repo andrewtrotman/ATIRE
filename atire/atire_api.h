@@ -19,7 +19,6 @@ class ANT_memory;
 class ANT_memory_index;
 class ANT_memory_index_one;
 class ANT_relevant_document;
-class ANT_mean_average_precision;
 class ANT_search_engine_forum;
 class ANT_assessment_factory;
 class ANT_bitstring;
@@ -31,6 +30,7 @@ class ANT_index_document;
 class ANT_index_document_topsig;
 class ANT_index_document_topsig_signature;
 class ANT_thesaurus;
+class ANT_evaluator;
 
 /*
 	class ATIRE_API
@@ -70,7 +70,7 @@ private:
 	ANT_assessment_factory *assessment_factory;		// the machinery to read different formats of assessments (INEX and TREC)
 	ANT_relevant_document *assessments;		// assessments for measuring percision (at TREC and INEX)
 	long long number_of_assessments;		// length of the assessments array
-	ANT_mean_average_precision *map;		// the object that computes MAP scores
+	ANT_evaluator *evaluator;
 	ANT_search_engine_forum *forum_writer;	// the object that writes the results list in the INEX or TREC format
 	long forum_results_list_length;			// maximum length of a results list for the evaluation form (INEX or TREC)
 
@@ -131,7 +131,7 @@ public:
 	/*
 		Load an assessment file (for INEX or TREC)
 	*/
-	long load_assessments(char *assessments_filename);
+	long load_assessments(char *assessments_filename, ANT_evaluator *evaluator);
 
 	/*
 	    Load a pregenerated ranking
@@ -213,11 +213,6 @@ public:
 		Given a positing in the results list return the internal search engine docid and its relevance
 	*/
 	long long get_relevant_document_details(long long result, long long *docid, double *relevance);
-
-	/*
-		What is the average precision of the query we've just done?
-	*/
-	double get_whole_document_precision(long query_id, long metric, long metric_n);
 
 	/*
 		Configure TREC or INEX output format

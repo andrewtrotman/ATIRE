@@ -16,6 +16,7 @@
 #include "search_engine_accumulator.h"
 #include "snippet_factory.h"
 #include "thesaurus.h"
+#include "evaluator.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -36,8 +37,7 @@ this->argv = argv;
 logo = TRUE;
 sort_top_k = LLONG_MAX;
 focus_top_k = 2000;
-metric = MAP;
-metric_n = 10;
+evaluator = new ANT_evaluator;
 assessments_filename = NULL;
 queries_filename = NULL;
 output_forum = NONE;
@@ -143,23 +143,7 @@ puts("-Pt             Process postings lists term-at-a-time [default]");
 puts("-Pq             Process postings lists quantum-at-a-time");
 puts("");
 
-puts("METRICS AND ASSESSMENTS");
-puts("-----------------------");
-puts("-m[metric]      Score the result set using");
-puts("  MAP           Documents, Uninterpolated Mean Average Precision (TREC) [default]");
-puts("  MAgP          Documents, Uninterpolated Mean Average generalised Precision (INEX)");
-//puts("  MAgPf         Passages, Uninterpolated Mean Average generalised Precision (INEX)");
-//puts("  MAiPf         Passages, Measn Average interpolated Precision (INEX)");
-puts("  P@<n>         Documents, Set-based precision at <n> [default=10]");
-puts("  S@<n>         Documents, Set-based success (1=found at least 1 relevant or 0=none) at <n> [default=10]");
-puts("  RankEff       Documents, Mean Rank Effectiveness (account for unassessed documents)");
-puts("  bpref         Documents, bpref (account for unassessed documents)");
-puts("  nDCG[@<n>]    Documents, Normalised Discounted Cumulative Gain at <n> (0=all) [default=0]");
-puts("  nDCGt[@<n>]   Documents, Normalised Discounted Cumulative Gain (TREC version) at <n> (0=all) [default=0]");
-puts("  ERR           Documents, Expected Reciprocal Rank");
-puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT or INEX 2008)");
-puts("-q<filename>    Queries are in file <filename> (format: ANT)");
-puts("");
+evaluator->help("METRICS", 'm');
 
 puts("TREC / INEX SPECIFIC");
 puts("--------------------");
@@ -464,88 +448,6 @@ while (*forum != '\0');
 }
 
 /*
-	ANT_ANT_PARAM_BLOCK::SET_METRIC()
-	---------------------------------
-*/
-void ANT_ANT_param_block::set_metric(char *which)
-{
-if (strcmp(which, "MAP") == 0)
-	metric = MAP;
-else if (strcmp(which, "MAgP") == 0)
-	metric = MAgP;
-else if (strcmp(which, "MAgPf") == 0)
-	{
-	metric = MAgPf;
-	if (focussing_algorithm == NONE)
-		focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
-	}
-else if (strcmp(which, "MAiP") == 0)
-	{
-	metric = MAiP;
-	if (focussing_algorithm == NONE)
-		focussing_algorithm = ARTICLE;				// if we're not focusing yet then we are now!
-	}
-else if (strcmp(which, "RankEff") == 0)
-	metric = RANKEFF;
-else if (strcmp(which, "bpref") == 0)
-	metric = BPREF;
-else if (strncmp(which, "nDCGt", 5) == 0)
-	{
-	metric = NDCGT;
-	if (which[5] == '@')
-		{
-		if (ANT_isdigit(which[6]))
-			metric_n = atol(which + 6);
-		else
-			exit(puts("<n> in nDCGT@<n> must be numeric"));
-		}
-	else
-		metric_n = 0;
-	}
-else if (strcmp(which, "nDCG") == 0)
-	{
-	metric = NDCG;
-	if (which[4] == '@')
-		{
-		if (ANT_isdigit(which[5]))
-			metric_n = atol(which + 5);
-		else
-			exit(puts("<n> in nDCG@<n> must be numeric"));
-		}
-	else
-		metric_n = 0;
-	}
-else if (strncmp(which, "ERR", 3) == 0)
-	metric = ERR;
-else if (strncmp(which, "P@", 2) == 0)
-	{
-	metric = P_AT_N;
-	if (ANT_isdigit(which[2]))
-		{
-		metric_n = atol(which + 2);
-		if (metric_n == 0)
-			exit(puts("Nice Try... You can't compute P@0!"));
-		}
-	else
-		exit(puts("<n> in P@<n> must be numeric (e.g. P@10)"));
-	}
-else if (strncmp(which, "S@", 2) == 0)
-	{
-	metric = SUCCESS_AT_N;
-	if (ANT_isdigit(which[2]))
-		{
-		metric_n = atol(which + 2);
-		if (metric_n == 0)
-			exit(puts("Nice Try... You can't compute S@0!"));
-		}
-	else
-		exit(puts("<n> in S@<n> must be numeric (e.g. S@10)"));
-	}
-else
-	exit(printf("Unknown metric:'%s'\n", which));
-}
-
-/*
 	ANT_ANT_PARAM_BLOCK::SET_FOCUSED_RANKER()
 	-----------------------------------------
 */
@@ -640,7 +542,7 @@ for (param = 1; param < argc; param++)
 		command = argv[param] + 1;
 		if (strcmp(command, "?") == 0)
 			help();
-                else if (strcmp(command, "h") == 0)
+		else if (strcmp(command, "h") == 0)
 			help();
 		else if (strcmp(command, "H") == 0)
 			help();
@@ -669,7 +571,7 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "Pq") == 0)
 			processing_strategy = QUANTUM_AT_A_TIME;
 		else if (*command == 'm')
-			set_metric(command + 1);
+			evaluator->add_evaluation(command + 1);
 		else if (*command == 'a') 
 			if (*(command + 1) == '\0' && param < argc - 1) 
 				assessments_filename = argv[++param];

@@ -15,6 +15,7 @@ class ANT_relevant_document
 {
 public:
 	long long topic;
+	long long subtopic;
 	long long docid;
 	long long relevant_characters;
 	long long document_length;

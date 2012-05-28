@@ -37,7 +37,7 @@ int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params);
 	PERFORM_QUERY()
 	---------------
 */
-double perform_query(long topic_id, ANT_channel *outchannel, ANT_ANT_param_block *params, char *query, long long *matching_documents)
+double *perform_query(long topic_id, ANT_channel *outchannel, ANT_ANT_param_block *params, char *query, long long *matching_documents)
 {
 ANT_stats_time stats;
 long long now, search_time;
@@ -53,11 +53,7 @@ search_time = stats.stop_timer(now);
 	Report
 */
 if (params->stats & ANT_ANT_param_block::SHORT)
-	{
-	if (topic_id >= 0)
-		*outchannel << "Topic: " << topic_id << ANT_channel::endl;
 	*outchannel << "<query>" << query << "</query>" << "<numhits>" << *matching_documents << "</numhits>" << "<time>" << stats.time_to_milliseconds(search_time) << "</time>" << ANT_channel::endl;
-	}
 
 if (params->stats & ANT_ANT_param_block::QUERY)
 	atire->stats_text_render();
@@ -65,7 +61,9 @@ if (params->stats & ANT_ANT_param_block::QUERY)
 /*
 	Return average precision
 */
-return atire->get_whole_document_precision(topic_id, params->metric, params->metric_n);
+if (params->evaluator)
+	return params->evaluator->perform_evaluation(atire->get_search_engine(), topic_id);
+return NULL;
 }
 
 /*
@@ -101,17 +99,18 @@ return strnnew(start, finish - start);
 	ANT()
 	-----
 */
-double ant(ANT_ANT_param_block *params)
+double *ant(ANT_ANT_param_block *params)
 {
 char *print_buffer, *pos;
 ANT_stats_time post_processing_stats;
 char *command, *query, *ranker;
-long topic_id, number_of_queries;
+long topic_id, number_of_queries, evaluation;
 long long line;
 long long hits, result, last_to_list, first_to_list;
 ANT_indexer_param_block_rank params_rank;
 int custom_ranking;
-double average_precision, sum_of_average_precisions, mean_average_precision, relevance;
+double *average_precision, *sum_of_average_precisions, *mean_average_precision;
+double relevance;
 long length_of_longest_document;
 unsigned long current_document_length;
 long long docid;
@@ -144,7 +143,9 @@ else
 	document_buffer = NULL;
 	}
 
-sum_of_average_precisions = 0.0;
+sum_of_average_precisions = new double[params->evaluator->number_evaluations_used];
+for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
+	sum_of_average_precisions[evaluation] = 0.0;
 number_of_queries = 0;
 line = 0;
 custom_ranking = 0;
@@ -465,13 +466,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		*/
 		number_of_queries++;
 		average_precision = perform_query(topic_id, outchannel, params, query, &hits);
-		sum_of_average_precisions += average_precision;		// zero if we're using a focused metric
+		for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
+			sum_of_average_precisions[evaluation] += average_precision[evaluation];		// zero if we're using a focused metric
 
 		/*
 			Report the average precision for the query
 		*/
 		if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::SHORT)
-			printf("Topic:%ld Average Precision:%f\n", topic_id , average_precision);
+			{
+			*outchannel << "<topic>" << topic_id << "</topic>" << ANT_channel::endl;
+			*outchannel << "<evaluations>";
+			for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
+				{
+				sprintf(print_buffer, "%f", average_precision[evaluation]);
+				*outchannel << "<" << params->evaluator->evaluation_names[evaluation] << ">" << print_buffer << "</" << params->evaluator->evaluation_names[evaluation] << ">";
+				}
+			outchannel->puts("</evaluations>");
+			}
 
 		/*
 			How many results to display on the screen.
@@ -551,13 +562,20 @@ delete [] document_buffer;
 /*
 	Compute Mean Average Precision
 */
-mean_average_precision = sum_of_average_precisions / (double)number_of_queries;
+mean_average_precision = new double[params->evaluator->number_evaluations_used];
+for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
+	mean_average_precision[evaluation] = sum_of_average_precisions[evaluation] / (double)number_of_queries;
 
 /*
 	Report MAP
 */
 if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::PRECISION)
-	printf("\nProcessed %ld topics (MAP:%f)\n\n", number_of_queries, mean_average_precision);
+	{
+	printf("\nProcessed %ld topics:\n", number_of_queries);
+	for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
+		printf("%s: %f\n", params->evaluator->evaluation_names[evaluation], mean_average_precision[evaluation]);
+	puts("");
+	}
 
 /*
 	Report the summary of the stats
@@ -662,7 +680,7 @@ for (int i = 0 ; i < params.pregen_count; i++)
 	}
 
 if (params.assessments_filename != NULL)
-	atire->load_assessments(params.assessments_filename);
+	atire->load_assessments(params.assessments_filename, params.evaluator);
 
 if (params.output_forum != ANT_ANT_param_block::NONE)
 	atire->set_forum(params.output_forum, params.output_filename, params.participant_id, params.run_name, params.results_list_length);

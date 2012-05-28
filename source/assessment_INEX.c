@@ -79,6 +79,7 @@ for (current = lines; *current != 0; current++)
 		else
 			current_assessment->docid = *found - numeric_docid_list;		// the position in the list of documents is the internal docid used for computing precision
 		current_assessment->topic = topic;
+		current_assessment->subtopic = 0; // for now INEX doesn't give subtopics
 		if (relevant_characters > document_length)
 			{
 			if (!length_warned)

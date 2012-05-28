@@ -9,14 +9,16 @@
 class ANT_relevant_topic
 {
 public:
-	static int compare(const void *a, const void *b);
-public:
 	long long topic;
-	long long number_of_relevant_documents;
-	long long number_of_nonrelevant_documents;
-	long long number_of_relevant_characters;
-	long long beginning_of_judgements;
-} ;
+	long long number_of_subtopics;
+	long long *subtopics;
+	long long *number_of_relevant_documents;
+	long long *number_of_nonrelevant_documents;
+	long long *number_of_relevant_characters;
+	long long *beginning_of_judgements;
 
+public:
+	static int compare(const void *a, const void *b);
+} ;
 
 #endif  /* RELEVANT_TOPIC_H_ */

@@ -16,9 +16,13 @@ ANT_relevant_document *one, *two;
 one = (ANT_relevant_document *)a;
 two = (ANT_relevant_document *)b;
 
-if (two->topic == one->topic)						// sort on topic first
-	return two->docid < one->docid ? -1 : two->docid == one->docid ? 0 : 1;		// then on docid
-else
-	return two->topic < one->topic ? -1 : 1;
+// sort on topic, subtopic, docid
+if (two->topic < one->topic) return -1;
+if (two->topic > one->topic) return 1;
+if (two->subtopic < one->subtopic) return -1;
+if (two->subtopic > one->subtopic) return 1;
+if (two->docid < one->docid) return -1;
+if (two->docid > one->docid) return 1;
+return 0;
 }
 
