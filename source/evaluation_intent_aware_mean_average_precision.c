@@ -7,6 +7,7 @@
 #include "evaluation_mean_average_precision.h"
 #include "evaluation_intent_aware_mean_average_precision.h"
 #include "relevant_topic.h"
+#include "pragma.h"
 
 /*
 	ANT_EVALUATION_INTENT_AWARE_MEAN_AVERAGE_PRECISION::EVALUATE()
@@ -25,4 +26,5 @@ for (current_subtopic = 0; current_subtopic < got->number_of_subtopics; current_
 	precision += ANT_evaluation_mean_average_precision::evaluate(search_engine, topic, current_subtopic);
 
 return precision / got->number_of_subtopics;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

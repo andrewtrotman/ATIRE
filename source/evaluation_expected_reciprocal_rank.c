@@ -30,7 +30,7 @@ current = 0;
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next(), current++)
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		{
-		r = (ANT_pow2(relevance_data->relevant_characters) - 1.0) / ANT_pow2(maximum_judgement);
+		r = (ANT_pow2((long)relevance_data->relevant_characters) - 1.0) / ANT_pow2(maximum_judgement);
 		score += r * decay / (current + 1.0);
 		decay *= (1 - r);
 		}

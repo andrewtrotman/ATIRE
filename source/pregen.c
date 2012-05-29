@@ -81,7 +81,6 @@ field_name[field_name_length] = '\0';
 delete [] scores;
 scores = new ANT_pregen_t[doc_count];
 for (i = 0; i < doc_count; i++)
-	{
 	switch (disk_pregen_size)
 		{
 		case 8:
@@ -104,8 +103,6 @@ for (i = 0; i < doc_count; i++)
 			fprintf(stderr, "Error with disk pregen size\n");
 			return 0;
 		}
-	printf("%lld: %lld\n", i, scores[i]);
-	}
 
 return 1;
 }

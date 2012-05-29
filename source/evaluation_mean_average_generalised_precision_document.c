@@ -18,7 +18,7 @@ double ANT_evaluation_mean_average_generalised_precision_document::evaluate(ANT_
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-long long current;
+unsigned long long current;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
 
@@ -29,8 +29,8 @@ if (got->number_of_relevant_documents[subtopic] == 0)
 
 key.topic = topic;
 key.subtopic = got->subtopics[subtopic];
-precision = 0;
-current = found_and_relevant = 0;
+found_and_relevant = precision = 0;
+current = 0;
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next())
 	{
 	current++;

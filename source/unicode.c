@@ -135,7 +135,7 @@ else
 */
 unsigned char *utf8_tolower(unsigned char *here)
 {
-long number_of_bytes;
+unsigned long number_of_bytes;
 unsigned long origcase, lowercase;
 
 if ((*here & 0x80) == 0) //ASCII
@@ -307,7 +307,7 @@ unsigned long utf8_to_wide_safe(const unsigned char *here)
 int numchars = utf8_bytes(here);
 
 if (!isutf8(here))
-	return -1;
+	return 0;
 
 switch (numchars)
 	{
@@ -327,7 +327,7 @@ switch (numchars)
 		else
 			return 0;
 	default:
-		return -1;
+		return 0;
 	}
 }
 
@@ -341,7 +341,7 @@ unsigned long utf8_to_wide_unsafe(const unsigned char *here)
 int numchars = utf8_bytes(here);
 
 if (!isutf8(here))
-	return -1;
+	return 0;
 
 switch (numchars)
 	{
@@ -354,7 +354,7 @@ switch (numchars)
 	case 4:
 		return ((*here & 0x03) << 18) | ((*(here + 1) & 0x3F) << 12) | ((*(here + 2) & 0x3F) << 6) | (*(here + 3) & 0x3F);
 	default:
-		return -1;
+		return 0;
 	}
 }
 
@@ -369,9 +369,9 @@ switch (numchars)
 
 	Returns the number of characters written to buf.
 */
-int wide_to_utf8(unsigned char *buf, size_t buflen, unsigned long c)
+unsigned long wide_to_utf8(unsigned char *buf, size_t buflen, unsigned long c)
 {
-unsigned int numbytes = utf8_bytes(c);
+unsigned long numbytes = utf8_bytes(c);
 
 if (buflen < numbytes)
 	return 0;

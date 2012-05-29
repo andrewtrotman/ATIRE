@@ -176,7 +176,7 @@ if ((needle = strchr(which, '@')) != NULL)
 		exit(puts("<n> in *@<n> must be numeric!"));
 	}
 else
-	evaluators[number_evaluations_used]->set_precision_point(-1);
+	evaluators[number_evaluations_used]->set_precision_point(LLONG_MAX);
 
 evaluation_names[number_evaluations_used] = which;
 number_evaluations_used++;
@@ -189,7 +189,7 @@ return number_evaluations_used;
 	---------------------------
 	Given a list of relevant_documents from the assessment reader, construct relevant_topics, then tell the evaluations to use them
 */
-long ANT_evaluator::initialise(ANT_memory *memory, ANT_relevant_document *relevant_document_list, long long relevant_document_list_length)
+long long ANT_evaluator::initialise(ANT_memory *memory, ANT_relevant_document *relevant_document_list, long long relevant_document_list_length)
 {
 long long current, evaluator, last_topic, current_topic, last_subtopic, current_subtopic, number_subtopics = 1;
 

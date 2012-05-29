@@ -244,17 +244,17 @@ PARTS = \
 	$(OBJDIR)\search_engine_result.obj 				\
 	$(OBJDIR)\search_engine_result_iterator.obj 	\
 	$(OBJDIR)\search_engine_memory_index.obj 		\
-	$(OBJDIR)\evaluator.c							\
-	$(OBJDIR)\evaluation.c							\
-	$(OBJDIR)\evaluation_bpref.c					\
-	$(OBJDIR)\evaluation_expected_reciprocal_rank.c	\
-	$(OBJDIR)\evaluation_intent_aware_mean_average_precision.c	\
-	$(OBJDIR)\evaluation_mean_average_generalised_precision_document.c	\
-	$(OBJDIR)\evaluation_mean_average_precision.c	\
-	$(OBJDIR)\evaluation_normalised_discounted_cumulative_gain.c	\
-	$(OBJDIR)\evaluation_precision_at_n.c		\
-	$(OBJDIR)\evaluation_rank_effectiveness.c	\
-	$(OBJDIR)\evaluation_success_at_n.c			\
+	$(OBJDIR)\evaluator.obj							\
+	$(OBJDIR)\evaluation.obj							\
+	$(OBJDIR)\evaluation_bpref.obj					\
+	$(OBJDIR)\evaluation_expected_reciprocal_rank.obj	\
+	$(OBJDIR)\evaluation_intent_aware_mean_average_precision.obj	\
+	$(OBJDIR)\evaluation_mean_average_generalised_precision_document.obj	\
+	$(OBJDIR)\evaluation_mean_average_precision.obj	\
+	$(OBJDIR)\evaluation_normalised_discounted_cumulative_gain.obj	\
+	$(OBJDIR)\evaluation_precision_at_n.obj		\
+	$(OBJDIR)\evaluation_rank_effectiveness.obj	\
+	$(OBJDIR)\evaluation_success_at_n.obj			\
 	$(OBJDIR)\assessment.obj						\
 	$(OBJDIR)\assessment_ANT.obj					\
 	$(OBJDIR)\assessment_TREC.obj					\

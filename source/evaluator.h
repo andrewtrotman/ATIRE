@@ -38,7 +38,7 @@ public:
 
 	void help(char *title, char switch_char);
 	
-	long initialise(ANT_memory *memory, ANT_relevant_document *relevant_document_list, long long relevant_document_list_length);
+	long long initialise(ANT_memory *memory, ANT_relevant_document *relevant_document_list, long long relevant_document_list_length);
 	ANT_relevant_topic *setup(long topic, long subtopic);
 
 	long add_evaluation(char *which);

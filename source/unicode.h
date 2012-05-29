@@ -65,8 +65,8 @@ unsigned long utf8_bytes(unsigned long c);
 unsigned long utf8_bytes(const unsigned char *here);
 inline unsigned long utf8_bytes(const char *here) { return utf8_bytes((unsigned char *)here); }
 
-int wide_to_utf8(unsigned char *buf, size_t buflen, unsigned long c);
-inline int wide_to_utf8(char *buf, size_t buflen, unsigned long c) { return wide_to_utf8((unsigned char *)buf, buflen, c); }
+unsigned long wide_to_utf8(unsigned char *buf, size_t buflen, unsigned long c);
+inline unsigned long wide_to_utf8(char *buf, size_t buflen, unsigned long c) { return wide_to_utf8((unsigned char *)buf, buflen, c); }
 
 int isutf8(const unsigned char *here);
 

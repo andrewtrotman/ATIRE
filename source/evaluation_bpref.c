@@ -18,7 +18,8 @@ double ANT_evaluation_bpref::evaluate(ANT_search_engine *search_engine, long top
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-long long found_and_nonrelevant, total_nonrelevant, total_relevant, current;
+long long found_and_nonrelevant, total_nonrelevant, total_relevant;
+unsigned long long current;
 double precision, denominator;
 
 if ((got = setup(topic)) == NULL)
@@ -35,7 +36,7 @@ key.subtopic = got->subtopics[subtopic];
 
 precision = 0;
 current = found_and_nonrelevant = 0;
-denominator = minimum + ANT_min(total_relevant, total_nonrelevant);
+denominator = (double)minimum + ANT_min(total_relevant, total_nonrelevant);
 
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next(), current++)
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)

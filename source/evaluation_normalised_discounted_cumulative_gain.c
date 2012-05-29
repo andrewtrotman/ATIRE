@@ -20,7 +20,7 @@ ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
 double discounted_cumulative_gain = 0;
-long long current;
+unsigned long long current;
 
 if ((got = setup(topic)) == NULL)
 	return 0;
@@ -32,7 +32,7 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < prec
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		if (relevance_data->relevant_characters != 0)
 			if (trec_mode)
-				discounted_cumulative_gain += (ANT_pow2(relevance_data->relevant_characters) - 1) / ANT_log2(2.0 + current);
+				discounted_cumulative_gain += (ANT_pow2_64(relevance_data->relevant_characters) - 1) / ANT_log2(2 + (long)current);
 			else
 				discounted_cumulative_gain += relevance_data->relevant_characters / ANT_log2(2.0 + current);
 
@@ -47,8 +47,8 @@ return discounted_cumulative_gain / ideal_gains[got - relevant_topic_list][subto
 void ANT_evaluation_normalised_discounted_cumulative_gain::set_lists(ANT_relevant_document *relevance_list, long long relevance_list_length, ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length)
 {
 long current, topic, offset, subtopic;
+long long *this_topic_ideal = NULL;
 ANT_relevant_topic *got;
-double *this_topic_ideal = NULL;
 
 ANT_evaluation::set_lists(relevance_list, relevance_list_length, relevant_topic_list, relevant_topic_list_length);
 
@@ -69,7 +69,7 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 			}
 		
 		delete [] this_topic_ideal;
-		this_topic_ideal = new double[got->number_of_relevant_documents[subtopic]];
+		this_topic_ideal = new long long[got->number_of_relevant_documents[subtopic]];
 		
 		ideal_gains[topic][subtopic] = 0;
 		
@@ -84,11 +84,12 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 		
 		for (current = 0; current < got->number_of_relevant_documents[subtopic] && current < precision_point; current++)
 			if (trec_mode)
-				ideal_gains[topic][subtopic] += (ANT_pow2(this_topic_ideal[current]) - 1) / ANT_log2(2.0 + current);
+				ideal_gains[topic][subtopic] += (double)(ANT_pow2_64(this_topic_ideal[current]) - 1) / ANT_log2(2 + current);
 			else
-				ideal_gains[topic][subtopic] += this_topic_ideal[current] / ANT_log2(2.0 + current);
+				ideal_gains[topic][subtopic] += (double)this_topic_ideal[current] / ANT_log2(2.0 + current);
 		}
 	}
+delete [] this_topic_ideal;
 }
 
 /*

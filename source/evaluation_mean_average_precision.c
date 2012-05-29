@@ -18,7 +18,8 @@ double ANT_evaluation_mean_average_precision::evaluate(ANT_search_engine *search
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-long long current, found_and_relevant;
+unsigned long long current;
+long long found_and_relevant;
 double precision;
 
 if ((got = setup(topic)) == NULL)

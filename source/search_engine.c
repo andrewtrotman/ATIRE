@@ -1384,7 +1384,7 @@ end = document_offsets[id + 1];
 index->seek(start);
 index->read((unsigned char *)destination, end - start);
 
-*destination_length = end - start;
+*destination_length = (unsigned long)(end - start);
 
 return destination;
 }
@@ -1463,7 +1463,7 @@ long long current_doc;
 char *upto = buffer;
 char **document_filenames = (char **)malloc(sizeof(char *) * (end - start));
 
-*buf_length = end - start;
+*buf_length = (unsigned long)(end - start);
 
 index->seek(start);
 index->read((unsigned char *)buffer, (long long)(end - start));

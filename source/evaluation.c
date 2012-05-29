@@ -10,6 +10,7 @@
 #include "search_engine_result_iterator.h"
 #include "memory.h"
 #include "maths.h"
+#include "pragma.h"
 
 /*
 	ANT_EVALUATION::SET_LISTS()
@@ -27,7 +28,7 @@ this->relevant_topic_list_length = relevant_topic_list_length;
 	ANT_EVALUATION::SETUP()
 	-----------------------
 */
-ANT_relevant_topic *ANT_evaluation::setup(long topic)
+ANT_relevant_topic *ANT_evaluation::setup(long long topic)
 {
 ANT_relevant_topic topic_key, *got;
 
@@ -38,4 +39,14 @@ if (got == NULL)
 	fprintf(stderr, "Unexpected: Topic '%ld' not found in qrels - No relevant docs for query?\n", topic);
 
 return got;
+}
+
+/*
+	ANT_EVALUATION::EVALUATE()
+	--------------------------
+*/
+double ANT_evaluation::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+{
+return 0;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

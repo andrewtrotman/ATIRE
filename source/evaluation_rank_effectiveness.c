@@ -24,7 +24,8 @@ double ANT_evaluation_rank_effectiveness::evaluate(ANT_search_engine *search_eng
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got;
 ANT_relevant_document key, *relevance_data;
-long long found_and_nonrelevant, total_nonrelevant, current;
+long long found_and_nonrelevant, total_nonrelevant;
+unsigned long long current;
 double precision;
 
 if ((got = setup(topic)) == NULL)
@@ -37,7 +38,8 @@ key.topic = topic;
 key.subtopic = got->subtopics[subtopic];
 
 precision = 0;
-current = found_and_nonrelevant = 0;
+current = 0;
+found_and_nonrelevant = 0;
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next(), current++)
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
 		if (relevance_data->relevant_characters == 0)

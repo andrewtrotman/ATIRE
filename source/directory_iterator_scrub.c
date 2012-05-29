@@ -72,7 +72,7 @@ for (; i < size; i++)
 				Overlong encoding of an ASCII character, so replace with correct encoding
 				The wild continuation byte chomper will chomp the second byte
 			*/
-			*(data + i) = utf8_to_wide(data + i);
+			*(data + i) = (char)utf8_to_wide(data + i);
 			/*
 				Of course we could have just deoverlongified a NUL, so check that
 			*/

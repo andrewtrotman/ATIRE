@@ -879,7 +879,7 @@ while (should_continue)
 							so make it difference encoded while also accounting for the
 							necessary change in docids across engines
 						*/
-						*current = *raw[engine] + offset - previous_docid;
+						*current = (ANT_compressable_integer)(*raw[engine] + offset - previous_docid);
 						previous_docid += *current;
 						current++;
 						raw[engine]++;
