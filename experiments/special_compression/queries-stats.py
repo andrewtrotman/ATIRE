@@ -116,12 +116,16 @@ if __name__ == '__main__':
 	# collect stats for the queries
 	#
 	num_of_queries = 0
+	once_queries = 0 # queries containing terms that occurred only once
+	twice_queries = 0 # queries containing terms that occurred only twice
 	longest_query = 0
 	shortest_query = 0
 	total_terms = 0
 	total_unique_terms = 0
 	total_terms_occurred_once = 0
 	total_terms_occurred_twice = 0
+
+	all_dict_terms_len = len(all_dict_terms)
 
 	queries_terms = dict({})
 
@@ -143,7 +147,8 @@ if __name__ == '__main__':
 		elif shortest_query > item_count:
 			shortest_query = item_count
 
-		all_dict_terms_len = len(all_dict_terms)
+		once_term_happened = False
+		twice_term_happend = False
 		for t in items:
 			queries_terms[t] = 1
 			found, term_tuple = bsearch(all_dict_terms, t, 0, all_dict_terms_len)
@@ -151,8 +156,16 @@ if __name__ == '__main__':
 				term, document_freq = term_tuple
 				if document_freq == 1:
 					total_terms_occurred_once += 1
+					once_term_happened = True
 				elif document_freq == 2:
 					total_terms_occurred_twice += 1
+					twice_term_happend = True
+		pass # end of for t in items
+
+		if twice_term_happend:
+			twice_queries += 1
+		elif once_term_happened:
+			once_queries += 1
 	pass # end of for line in contents
 
 	total_unique_terms = len(queries_terms)
@@ -167,6 +180,8 @@ if __name__ == '__main__':
 	print "Total unique terms: %d" % total_unique_terms
 	print "Total terms occurred once in the dict: %d" % total_terms_occurred_once
 	print "Total terms occurred twice in the dict: %d" % total_terms_occurred_twice
+	print "Queries containing terms occurred once: %s" % once_queries
+	print "Queries containing terms occurred twice: %d" % twice_queries
 
 	queries_file.close()
 
