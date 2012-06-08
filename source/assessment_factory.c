@@ -23,7 +23,7 @@ delete factory;
 	ANT_ASSESSMENT_FACTORY::READ()
 	------------------------------
 */
-ANT_relevant_document *ANT_assessment_factory::read(char *filename, long long *reldocs)
+ANT_relevant_document *ANT_assessment_factory::read(char *filename, long long *judgements)
 {
 FILE *fp;
 long separators = 0;
@@ -48,5 +48,5 @@ else
 
 factory->copy(this);
 
-return factory->read(filename, reldocs);
+return factory->read(filename, judgements);
 }

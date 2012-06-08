@@ -143,7 +143,7 @@ puts("-Pt             Process postings lists term-at-a-time [default]");
 puts("-Pq             Process postings lists quantum-at-a-time");
 puts("");
 
-evaluator->help("METRICS", 'm');
+ANT_evaluator::help("METRICS", 'm'); // metrics
 
 puts("TREC / INEX SPECIFIC");
 puts("--------------------");

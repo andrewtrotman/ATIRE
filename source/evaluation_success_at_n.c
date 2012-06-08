@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "evaluation_success_at_n.h"
 #include "search_engine_result_iterator.h"
-#include "relevant_topic.h"
+#include "relevant_subtopic.h"
 #include "relevant_document.h"
 
 /*
@@ -18,20 +18,20 @@
 double ANT_evaluation_success_at_n::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
-ANT_relevant_topic *got;
+ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
 long long found_and_relevant;
 unsigned long long current;
 
-if ((got = setup(topic)) == NULL)
+if ((got = setup(topic, subtopic)) == NULL)
 	return 0;
 
 key.topic = topic;
-key.subtopic = got->subtopics[subtopic];
+key.subtopic = subtopic;
 current = 0;
 found_and_relevant = 0;
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next(), current++)
-	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, got->document_list, (size_t)got->number_of_documents, sizeof(*got->document_list), ANT_relevant_document::compare)) != NULL)
 		if (relevance_data->relevant_characters != 0)
 			found_and_relevant++;
 

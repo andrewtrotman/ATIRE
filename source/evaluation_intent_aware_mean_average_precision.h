@@ -5,8 +5,6 @@
 #ifndef EVALUATION_INTENT_AWARE_MEAN_AVERAGE_PRECISION_H_
 #define EVALUATION_INTENT_AWARE_MEAN_AVERAGE_PRECISION_H_
 
-#include "evaluation.h"
-
 /*
 	class ANT_EVALUATION_INTENT_AWARE_MEAN_AVERAGE_PRECISION
 	--------------------------------------------------------

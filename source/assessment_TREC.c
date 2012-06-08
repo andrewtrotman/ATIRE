@@ -23,11 +23,11 @@
 	ANT_ASSESSMENT_TREC::READ()
 	---------------------------
 */
-ANT_relevant_document *ANT_assessment_TREC::read(char *filename, long long *reldocs)
+ANT_relevant_document *ANT_assessment_TREC::read(char *filename, long long *judgements)
 {
 char ***found, *pointer_to_document, **pointer_to_pointer_to_document, document[128];		// Assume document IDs are going to be less than 128 characters
 char *file, **lines, **current;
-long topic, subtopic, relevant, relevant_documents;
+long topic, subtopic, relevance, relevance_judgements;
 long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
 long params, missing_warned = FALSE;
@@ -40,28 +40,28 @@ if ((file = ANT_disk::read_entire_file(filename)) == NULL)
 lines = ANT_disk::buffer_to_list(file, &lines_in_file);
 
 /*
-	count the number of relevant documents
+	count the number of relevance judgements
 */
-relevant_documents = 0;
+relevance_judgements = 0;
 for (current = lines; *current != 0; current++)
 	{
-	params = sscanf(*current, "%ld %ld %127s %ld", &topic, &subtopic, document, &relevant);
+	params = sscanf(*current, "%ld %ld %127s %ld", &topic, &subtopic, document, &relevance);
 	document[127] = '\0';
 	if (params == 4)
-		relevant_documents++;
+		relevance_judgements++;
 	}
 
 /*
 	allocate space for the assessments
 */
-current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(sizeof(*all_assessments) * relevant_documents);
+current_assessment = all_assessments = (ANT_relevant_document *)memory->malloc(sizeof(*all_assessments) * relevance_judgements);
 
 /*
-	generate the list of relevant documents
+	generate the list of relevance judgements
 */
 for (current = lines; *current != 0; current++)
 	{
-	params = sscanf(*current, "%ld %ld %127s %ld", &topic, &subtopic, document, &relevant);
+	params = sscanf(*current, "%ld %ld %127s %ld", &topic, &subtopic, document, &relevance);
 	document[127] = '\0';
 	if (params >= 4)
 		{
@@ -79,8 +79,8 @@ for (current = lines; *current != 0; current++)
 
 		current_assessment->topic = topic;
 		current_assessment->subtopic = subtopic;
-		current_assessment->document_length = relevant;
-		current_assessment->relevant_characters = relevant;
+		current_assessment->document_length = relevance;
+		current_assessment->relevant_characters = relevance;
 		current_assessment->passage_list = NULL;
 		current_assessment->number_of_relevant_passages = 0;
 		current_assessment->best_entry_point = 0;
@@ -97,7 +97,7 @@ delete [] lines;
 /*
 	and return
 */
-*reldocs = relevant_documents;
+*judgements = relevance_judgements;
 return all_assessments;
 }
 

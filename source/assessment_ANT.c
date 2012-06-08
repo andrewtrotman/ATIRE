@@ -12,7 +12,7 @@
 	ANT_ASSESSMENT_ANT::READ()
 	--------------------------
 */
-ANT_relevant_document *ANT_assessment_ANT::read(char *filename, long long *reldocs)
+ANT_relevant_document *ANT_assessment_ANT::read(char *filename, long long *judgements)
 {
 ANT_relevant_document *current_assessment, *all_assessments;
 long long lines_in_file;
@@ -30,6 +30,7 @@ for (current = lines; *current != NULL; current++)
 		continue;			// blank line
 	if ((sscanf(*current, "%lld %lld", &current_assessment->topic, &current_assessment->docid)) != 2)
 		exit(printf("%s line %lld:Cannot extract '<queryid> <docid>'\n", filename, (long long)(current_assessment - all_assessments)));
+	current_assessment->subtopic = 0; // ANT assessment format doesn't do subtopics(?)
 	current_assessment->document_length = current_assessment->relevant_characters = 1024;		// fake the length and proportion of the document that are relevant
 	current_assessment->passage_list = NULL;
 	current_assessment->number_of_relevant_passages = 0;
@@ -40,7 +41,7 @@ for (current = lines; *current != NULL; current++)
 delete [] file;
 delete [] lines;
 
-*reldocs = lines_in_file;
+*judgements = lines_in_file;
 return all_assessments;
 }
 

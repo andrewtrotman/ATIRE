@@ -20,7 +20,7 @@ protected:
 
 public:
 	ANT_assessment_TREC(ANT_memory *mem, char **docid_list, long long documents) : ANT_assessment(mem, docid_list, documents) {}
-	ANT_relevant_document *read(char *filename, long long *reldocs);
+	ANT_relevant_document *read(char *filename, long long *judgements);
 } ;
 
 #endif /* ASSESSMENT_TREC_H_ */

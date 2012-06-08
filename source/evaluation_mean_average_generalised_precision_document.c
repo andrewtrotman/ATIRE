@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "evaluation_mean_average_generalised_precision_document.h"
 #include "search_engine_result_iterator.h"
-#include "relevant_topic.h"
+#include "relevant_subtopic.h"
 #include "relevant_document.h"
 
 /*
@@ -16,25 +16,26 @@
 double ANT_evaluation_mean_average_generalised_precision_document::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
-ANT_relevant_topic *got;
+ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
 unsigned long long current;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
 
-if ((got = setup(topic)) == NULL)
+if ((got = setup(topic, subtopic)) == NULL)
 	return 0;
-if (got->number_of_relevant_documents[subtopic] == 0)
+if (got->number_of_relevant_documents == 0)
 	return 0;
 
 key.topic = topic;
-key.subtopic = got->subtopics[subtopic];
+key.subtopic = subtopic;
+
 found_and_relevant = precision = 0;
 current = 0;
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next())
 	{
 	current++;
-	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, relevance_list, (size_t)relevance_list_length, sizeof(*relevance_list), ANT_relevant_document::compare)) != NULL)
+	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, got->document_list, (size_t)got->number_of_documents, sizeof(*got->document_list), ANT_relevant_document::compare)) != NULL)
 		{
 		/*
 			We have an assessed document
@@ -53,5 +54,5 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < prec
 		}
 	}
 
-return precision / (double)got->number_of_relevant_documents[subtopic];
+return precision / (double)got->number_of_relevant_documents;
 }

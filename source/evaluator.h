@@ -24,9 +24,10 @@ private:
 	ANT_memory *memory;
 	ANT_relevant_document *relevant_document_list;
 	long long relevant_document_list_length;
+
 	ANT_relevant_topic *relevant_topic_list;
 	long long relevant_topic_list_length;
-	
+
 	long evaluations_performed;
 	long number_evaluation_spaces;
 	ANT_evaluation **evaluators;
@@ -36,13 +37,16 @@ public:
 	ANT_evaluator();
 	~ANT_evaluator();
 
-	void help(char *title, char switch_char);
+	static void help(char *title, char switch_char);
 	
 	long long initialise(ANT_memory *memory, ANT_relevant_document *relevant_document_list, long long relevant_document_list_length);
 	ANT_relevant_topic *setup(long topic, long subtopic);
 
 	long add_evaluation(char *which);
 	double *perform_evaluation(ANT_search_engine *search_engine, long topic);
+
+private:
+	long get_parameter(char *from, double *into);
 };
 
 #endif /* EVALUATOR_H_ */

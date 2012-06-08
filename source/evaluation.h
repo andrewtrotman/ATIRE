@@ -6,8 +6,8 @@
 #define EVALUATION_H_
 
 class ANT_memory;
-class ANT_relevant_document;
 class ANT_relevant_topic;
+class ANT_relevant_subtopic;
 class ANT_search_engine;
 
 /*
@@ -17,8 +17,6 @@ class ANT_search_engine;
 class ANT_evaluation
 {
 protected:
-	ANT_relevant_document *relevance_list;
-	long long relevance_list_length;
 	ANT_relevant_topic *relevant_topic_list;
 	long long relevant_topic_list_length;
 	unsigned long long precision_point;
@@ -28,8 +26,8 @@ public:
 	virtual ~ANT_evaluation() {}
 
 	void set_precision_point(unsigned long long precision_point) { this->precision_point = precision_point; }
-	virtual void set_lists(ANT_relevant_document *relevance_list, long long relevance_list_length, ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
-	ANT_relevant_topic *setup(long long topic);
+	virtual void set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
+	ANT_relevant_subtopic *setup(long long topic, long long subtopic);
 	virtual double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
 } ;
 

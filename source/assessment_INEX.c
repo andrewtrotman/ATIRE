@@ -24,7 +24,7 @@
 	ANT_ASSESSMENT_INEX::READ()
 	---------------------------
 */
-ANT_relevant_document *ANT_assessment_INEX::read(char *filename, long long *reldocs)
+ANT_relevant_document *ANT_assessment_INEX::read(char *filename, long long *judgements)
 {
 char *file, **lines, **current, *space;
 long topic, document, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, *document_pointer, **found;
@@ -128,7 +128,7 @@ delete [] lines;
 /*
 	and return
 */
-*reldocs = relevant_documents;
+*judgements = relevant_documents;
 return all_assessments;
 }
 

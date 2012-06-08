@@ -20,7 +20,7 @@ protected:
 
 public:
 	ANT_assessment_ANT(ANT_memory *mem, char **docid_list, long long documents) : ANT_assessment(mem, docid_list, documents) {}
-	virtual ANT_relevant_document *read(char *filename, long long *reldocs);
+	virtual ANT_relevant_document *read(char *filename, long long *judgements);
 } ;
 
 
