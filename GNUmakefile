@@ -21,6 +21,9 @@ USE_GPROF := 0
 # if use print for debug
 USE_PDEBUG := 0
 
+# use the system memory management
+USE_PURIFY := 0
+
 # special compression for index file
 # better enabled by defualt
 USE_SPECIAL_COMPRESSION := 1
@@ -155,6 +158,10 @@ ifeq ($(USE_GPROF), 1)
 	CFLAGS += -pg
 endif
 
+ifeq ($(USE_PURIFY), 1)
+	CFLAGS += -DPURIFY
+endif
+
 ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lsocket -lnsl
 endif
@@ -185,9 +192,9 @@ endif
 # link the pthread library even if the parallel indexing is not enabled
 ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lpthread
-   else
+else
 	LDFLAGS += -pthread
-   endif
+endif
 
 ifeq ($(USE_PARALLEL_INDEXING), 1)
 	CFLAGS += -DPARALLEL_INDEXING -DPARALLEL_INDEXING_DOCUMENTS
@@ -285,12 +292,12 @@ TESTS_DIR = tests
 IGNORE_LIST := $(SRC_DIR)/stem_paice_husk.c
 
 MAIN_FILES := $(ATIRE_DIR)/atire.c \
-                          $(ATIRE_DIR)/index.c \
-                          $(ATIRE_DIR)/atire_client.c \
-                          $(ATIRE_DIR)/atire_broker.c \
-                          $(ATIRE_DIR)/atire_dictionary.c \
-                          $(ATIRE_DIR)/atire_merge.c \
-                          $(ATIRE_DIR)/get_doclist.c
+              $(ATIRE_DIR)/index.c \
+              $(ATIRE_DIR)/atire_client.c \
+              $(ATIRE_DIR)/atire_broker.c \
+              $(ATIRE_DIR)/atire_dictionary.c \
+              $(ATIRE_DIR)/atire_merge.c \
+              $(ATIRE_DIR)/get_doclist.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(MAIN_FILES) $(IGNORE_LIST), $(ALL_SOURCES))
@@ -332,12 +339,12 @@ TESTS_EXES := $(basename $(TESTS_SOURCES))
 TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
 
 
-all : info $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
+all: $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
 
 # faster compilation without considering extra objects, useful for repeated make for testing
 internal: index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
 
-index : $(BIN_DIR)/index
+index: $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
 atire_client: $(BIN_DIR)/atire_client
 atire_broker: $(BIN_DIR)/atire_broker
@@ -394,25 +401,25 @@ $(OBJ_DIR)/%.o : $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) -Isource -c $< -o $@
 
 $(BIN_DIR)/index : $(INDEX_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_client : $(ATIRE_CLIENT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire : $(ATIRE_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_broker : $(ATIRE_BROKER_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_dictionary : $(ATIRE_DICT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_merge : $(ATIRE_MERGE_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@  $^ $(EXTRA_OBJS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 # Hacked to compile every single source in the tools directory.
 # The $(TOOLS_OBJECTS) is requied at the dependencies so that
