@@ -19,13 +19,13 @@ class ANT_evaluation
 protected:
 	ANT_relevant_topic *relevant_topic_list;
 	long long relevant_topic_list_length;
-	unsigned long long precision_point;
+	long long precision_point;
 
 public:
 	ANT_evaluation() {}
 	virtual ~ANT_evaluation() {}
 
-	void set_precision_point(unsigned long long precision_point) { this->precision_point = precision_point; }
+	void set_precision_point(long long precision_point) { this->precision_point = precision_point; }
 	virtual void set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
 	ANT_relevant_subtopic *setup(long long topic, long long subtopic);
 	virtual double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);

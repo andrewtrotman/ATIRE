@@ -55,7 +55,7 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 	qsort(this_topic_ideal_gain, offset, sizeof(*this_topic_ideal_gain), ANT_evaluation_discounted_cumulative_gain::gain_compare);
 
 	for (offset = 0; offset < subtopic->number_of_relevant_documents && offset < precision_point; offset++)
-		ideal_gains[topic] += gain(this_topic_ideal_gain[offset], offset) * discount(offset);
+		ideal_gains[topic] += gain((long long)this_topic_ideal_gain[offset], offset) * discount(offset);
 	}
 
 delete [] this_topic_ideal_gain;

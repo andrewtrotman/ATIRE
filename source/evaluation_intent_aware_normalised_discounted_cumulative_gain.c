@@ -26,7 +26,7 @@ key_topic.topic = topic;
 got_topic = (ANT_relevant_topic *)bsearch(&key_topic, relevant_topic_list, (size_t)relevant_topic_list_length, sizeof(*relevant_topic_list), ANT_relevant_topic::compare);
 
 for (current_subtopic = 0; current_subtopic < got_topic->number_of_subtopics; current_subtopic++)
-	precision += ANT_evaluation_discounted_cumulative_gain::evaluate(search_engine, topic, got_topic->subtopic_list[current_subtopic].subtopic);
+	precision += ANT_evaluation_discounted_cumulative_gain::evaluate(search_engine, topic, (long)got_topic->subtopic_list[current_subtopic].subtopic);
 
 return precision / ideal_gains[got_topic - relevant_topic_list];
 

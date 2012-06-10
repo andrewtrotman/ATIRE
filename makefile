@@ -246,21 +246,27 @@ PARTS = \
 	$(OBJDIR)\search_engine_memory_index.obj 		\
 	$(OBJDIR)\evaluator.obj							\
 	$(OBJDIR)\evaluation.obj							\
-	$(OBJDIR)\evaluation_bpref.obj					\
-	$(OBJDIR)\evaluation_expected_reciprocal_rank.obj	\
-	$(OBJDIR)\evaluation_intent_aware_mean_average_precision.obj	\
-	$(OBJDIR)\evaluation_mean_average_generalised_precision_document.obj	\
-	$(OBJDIR)\evaluation_mean_average_precision.obj	\
-	$(OBJDIR)\evaluation_normalised_discounted_cumulative_gain.obj	\
-	$(OBJDIR)\evaluation_precision_at_n.obj		\
-	$(OBJDIR)\evaluation_rank_effectiveness.obj	\
-	$(OBJDIR)\evaluation_success_at_n.obj			\
+	$(OBJDIR)\evaluation_binary_preference.obj    \
+	$(OBJDIR)\evaluation_discounted_cumulative_gain.obj                             \
+	$(OBJDIR)\evaluation_expected_reciprocal_rank.obj                               \
+	$(OBJDIR)\evaluation_intent_aware_expected_reciprocal_rank.obj                  \
+	$(OBJDIR)\evaluation_intent_aware_mean_average_precision.obj                    \
+	$(OBJDIR)\evaluation_intent_aware_normalised_discounted_cumulative_gain.obj     \
+	$(OBJDIR)\evaluation_intent_aware_precision_at_n.obj                            \
+	$(OBJDIR)\evaluation_mean_average_generalised_precision_document.obj            \
+	$(OBJDIR)\evaluation_mean_average_precision.obj                                 \
+	$(OBJDIR)\evaluation_normalised_discounted_cumulative_gain.obj                  \
+	$(OBJDIR)\evaluation_precision_at_n.obj       \
+	$(OBJDIR)\evaluation_rank_effectiveness.obj   \
+	$(OBJDIR)\evaluation_success_at_n.obj         \
 	$(OBJDIR)\assessment.obj						\
 	$(OBJDIR)\assessment_ANT.obj					\
 	$(OBJDIR)\assessment_TREC.obj					\
 	$(OBJDIR)\assessment_INEX.obj					\
 	$(OBJDIR)\assessment_factory.obj				\
 	$(OBJDIR)\relevant_document.obj 				\
+	$(OBJDIR)\relevant_topic.obj \
+	$(OBJDIR)\relevant_subtopic.obj \
 	$(OBJDIR)\stats.obj								\
 	$(OBJDIR)\stats_time.obj						\
 	$(OBJDIR)\stats_search_engine.obj				\
@@ -307,7 +313,6 @@ PARTS = \
 	$(OBJDIR)\stem_otago.obj						\
 	$(OBJDIR)\stem_otago_v2.obj						\
 	$(OBJDIR)\stem_s.obj							\
-	$(OBJDIR)\relevant_topic.obj					\
 	$(OBJDIR)\bitstream.obj							\
 	$(OBJDIR)\compress_elias_gamma.obj				\
 	$(OBJDIR)\compress_elias_delta.obj				\

@@ -18,8 +18,7 @@ double ANT_evaluation_binary_preference::evaluate(ANT_search_engine *search_engi
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
-long long found_and_nonrelevant, total_nonrelevant, total_relevant;
-unsigned long long current;
+long long found_and_nonrelevant, total_nonrelevant, total_relevant, current;
 double precision, denominator;
 
 if ((got = setup(topic, subtopic)) == NULL)

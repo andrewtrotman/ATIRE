@@ -18,7 +18,7 @@ double ANT_evaluation_mean_average_generalised_precision_document::evaluate(ANT_
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
-unsigned long long current;
+long long current;
 double precision, doc_precision, doc_recall, doc_f_score, found_and_relevant;
 const double beta = 0.25;
 

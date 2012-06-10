@@ -18,8 +18,8 @@ double ANT_evaluation_expected_reciprocal_rank::evaluate(ANT_search_engine *sear
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
+long long current;
 double r, score = 0.0, decay = 1.0;
-long current;
 
 if ((got = setup(topic, subtopic)) == NULL)
 	return 0;
@@ -31,7 +31,7 @@ current = 0;
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next(), current++)
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, got->document_list, (size_t)got->number_of_documents, sizeof(*got->document_list), ANT_relevant_document::compare)) != NULL)
 		{
-		r = (ANT_pow2((long)relevance_data->relevant_characters) - 1.0) / ANT_pow2(maximum_judgement);
+		r = (ANT_pow2((long)relevance_data->relevant_characters) - 1.0) / ANT_pow2((long)maximum_judgement);
 		score += r * decay / (current + 1.0);
 		decay *= (1 - r);
 		}

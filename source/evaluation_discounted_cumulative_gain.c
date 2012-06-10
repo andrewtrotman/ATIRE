@@ -21,7 +21,7 @@ ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
 double discounted_cumulative_gain = 0;
-unsigned long long current;
+long long current;
 
 if ((got = setup(topic, subtopic)) == NULL)
 	return 0;
@@ -48,11 +48,11 @@ double ANT_evaluation_discounted_cumulative_gain::gain(long long relevance, unsi
 double g;
 
 if (trec_mode)
-	g = ANT_pow2_64(relevance) - 1;
+	g = (double)ANT_pow2_64(relevance) - 1;
 else
-	g = relevance;
+	g = (double)relevance;
 
-return g * pow(1 - alpha, rank);
+return g * pow(1 - alpha, (double)rank);
 }
 
 /*

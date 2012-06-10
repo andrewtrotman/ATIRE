@@ -24,8 +24,7 @@ double ANT_evaluation_rank_effectiveness::evaluate(ANT_search_engine *search_eng
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
 ANT_relevant_document key, *relevance_data;
-long long found_and_nonrelevant, total_nonrelevant;
-unsigned long long current;
+long long found_and_nonrelevant, total_nonrelevant, current;
 double precision;
 
 if ((got = setup(topic, subtopic)) == NULL)
