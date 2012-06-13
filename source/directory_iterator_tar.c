@@ -146,10 +146,13 @@ return NULL;
 */
 void ANT_directory_iterator_tar::read_entire_file(ANT_directory_iterator_object *object)
 {
+long long bytes_got;
+
 object->file =  new (std::nothrow) char [(size_t)(length_of_file_in_bytes + 1)];
 if (object->file == NULL)
 	exit(printf("Out of memory trying to read a document from a TAR file to index (%lld bytes requested)\n", (long long)length_of_file_in_bytes + 1));
-source->read((unsigned char *)object->file, length_of_file_in_bytes);
+if ((bytes_got = source->read((unsigned char *)object->file, length_of_file_in_bytes)) != length_of_file_in_bytes)
+	exit(printf("The TAR file is corrupt (%lld bytes requested, %lld bytes returned)\n", (long long)length_of_file_in_bytes, bytes_got));
 object->file[length_of_file_in_bytes] = '\0';			// NULL terminate the contents of the file.
 object->length = bytes_read = length_of_file_in_bytes;
 }

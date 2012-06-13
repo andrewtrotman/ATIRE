@@ -45,19 +45,31 @@ else
 	{
 	if (position_of_end_of_buffer < 0)
 		return -1;			// at EOF
+
 	where = position_of_end_of_buffer - position;
 	remainder = size - where;
 	memcpy(data, buffer + position, (size_t)where);
 
-	if ((position_of_end_of_buffer = source->read(buffer, buffer_size)) <= 0)
-		return where;		// at EOF
-	
-	if (remainder > position_of_end_of_buffer)
-		remainder = position_of_end_of_buffer;
-	memcpy(data + where, buffer, (size_t)remainder);
-	position = remainder;
+	do
+		{
+		if ((position_of_end_of_buffer = source->read(buffer, buffer_size)) <= 0)
+			return where;		// at EOF
 
-	size = where + remainder;			// the amount that we actually managed to get.
+		if (remainder > position_of_end_of_buffer)
+			{
+			memcpy(data + where, buffer, (size_t)position_of_end_of_buffer);
+			where += position_of_end_of_buffer;
+			remainder -= position_of_end_of_buffer;
+			position = position_of_end_of_buffer;
+			}
+		else
+			{
+			memcpy(data + where, buffer, (size_t)remainder);
+			position = remainder;
+			remainder = 0;
+			}
+		}
+	while (remainder > 0);
 	}
 
 return size;

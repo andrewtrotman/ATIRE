@@ -463,6 +463,9 @@ for (param = first_param; param < argc; param++)
 			Index, this call returns the number of terms we found in the document
 		*/
 		now = stats.start_timer();
+	
+//printf("INDEX:%s\n", current_file->filename);
+
 #ifdef PARALLEL_INDEXING_DOCUMENTS
 		index->add_indexed_document(current_file->index, doc);
 		delete current_file->index;
@@ -474,6 +477,7 @@ for (param = first_param; param < argc; param++)
 
 		if (terms_in_document == 0)
 			{
+//			puts(current_file->filename);
 			/*
 				pretend we never saw the document
 			*/
