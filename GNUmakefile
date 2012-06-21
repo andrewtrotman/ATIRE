@@ -426,10 +426,10 @@ $(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
 # all sources in tools can be compiled first. Then only the individual
 # source is linked at a time.
 $(TOOLS_EXES) : $(SOURCES_OBJECTS) $(TOOLS_OBJECTS)
-	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
+	$(CC) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS) $(LDFLAGS)
 
 $(TESTS_EXES) : $(SOURCES_OBJECTS) $(TESTS_OBJECTS)
-	$(CC) $(LDFLAGS) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS)
+	$(CC) -o $(BIN_DIR)/$@  $(OBJ_DIR)/$(notdir $@).o $(SOURCES_OBJECTS) $(EXTRA_OBJS) $(LDFLAGS)
 
 
 $(SNAPPY_DIR)/libsnappy.a:

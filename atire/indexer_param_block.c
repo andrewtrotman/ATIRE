@@ -89,12 +89,13 @@ puts("-r              Recursive search for files in this and directories below t
 puts("-rcsv           Each document is a single line of the given file");
 puts("-rmysql <username> <password> <hostname> <database> <query> MySQL query returning (docid, ...)");
 puts("-rphpbb <username> <password> <hostname> <database> <type> MySQL phpBB instance");
+puts("-rt             Search in tar files for indexable files");
+puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtlzo          Search in tar.lzo files for indexable files");
 puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>,");
 puts("-rrtrec         Recursive search for TREC formatted <DOC>...</DOC> formatted files,");
 puts("-rtrecbig       Equivalent to -rtrec -iscrub:an");
-puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
 puts("-rwarcgz        Search in warc.gz files for indexable files");
 puts("-rrwarcgz       Search in subdirectories for warc.gz files and index them");
@@ -365,6 +366,8 @@ for (param = 1; param < argc; param++)
 		command = argv[param] + 1;
 		if (strcmp(command, "r") == 0)
 			recursive = DIRECTORIES;
+		else if (strcmp(command, "rt") == 0)
+			recursive = TAR;
 		else if (strcmp(command, "rtgz") == 0)
 			recursive = TAR_GZ;
 		else if (strcmp(command, "rtbz2") == 0)

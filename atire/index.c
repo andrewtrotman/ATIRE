@@ -282,6 +282,12 @@ for (param = first_param; param < argc; param++)
 		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
 			source = new ANT_directory_iterator_deflate(source, ANT_directory_iterator_deflate::TEXT);			// recursive .gz files
 		}
+	else if (param_block.recursive == ANT_indexer_param_block::TAR)
+		{
+		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
+		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
