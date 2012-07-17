@@ -10,7 +10,7 @@ endif
 LIBSNOWBALL = libstemmer.a
 SOURCE_DIR = libstemmer_c
 
-ALL_SOURCES := $(shell ls $(SOURCE_DIR)/src_c/*.c $(SOURCE_DIR)/runtime/*.c)
+ALL_SOURCES := $(shell ls $(SOURCE_DIR)/src_c/*.c $(SOURCE_DIR)/runtime/*.c $(SOURCE_DIR)/libstemmer/*.c)
 
 ALL_OBJECTS := $(subst .c,.o, $(ALL_SOURCES))
 
