@@ -55,7 +55,7 @@ if (docids == NULL)
 			docids[docids_recorded++] = strip_space_inplace(strnnew(ptr, nl - ptr)); // strip_space_inplace because we might have captured a line ending
 		ptr = nl + 1; // skip to next line
 		}
-	
+
 	/*
 		We've finished with the spam rankings, so free up that memory
 	*/
@@ -111,6 +111,17 @@ ANT_directory_iterator_object *t = source->first(object);
 
 if (t && should_index(t->filename))
 	return t;
+
+/*
+	Either we got a NULL, or we shouldn't index, if we did get an
+	object, then clean it up.
+*/
+if (t)
+	{
+	delete [] t->file;
+	delete [] t->filename;
+	}
+
 return next(object);
 }
 
@@ -123,7 +134,12 @@ ANT_directory_iterator_object *ANT_directory_iterator_spam_filter::next(ANT_dire
 ANT_directory_iterator_object *t = source->next(object);
 
 while (t && !should_index(t->filename))
+	{
+	delete [] t->file;
+	delete [] t->filename;
+	
 	t = source->next(object);
+	}
 
 return t;
 }
