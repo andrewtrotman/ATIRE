@@ -19,7 +19,7 @@ enum { LOWER, UPPER, DECOMPOSITION, CHARTYPE };
 #define NUM_UNICODE_CHARS 0x110000
 
 unsigned char chartypes[NUM_UNICODE_CHARS];
-unsigned long *decompositions[NUM_UNICODE_CHARS], lowercase[NUM_UNICODE_CHARS], uppercase[NUM_UNICODE_CHARS];
+uint32_t *decompositions[NUM_UNICODE_CHARS], lowercase[NUM_UNICODE_CHARS], uppercase[NUM_UNICODE_CHARS];
 
 /*
  * Recursively decompose the given character into the buffer pointed to by buf. When done, buf points after the end of the
@@ -27,13 +27,13 @@ unsigned long *decompositions[NUM_UNICODE_CHARS], lowercase[NUM_UNICODE_CHARS], 
  *
  * Return non-zero if the character decomposes to something other than itself.
  */
-int decompose(unsigned long c, unsigned long ** buf)
+int decompose(uint32_t c, uint32_t ** buf)
 {
 assert(c < NUM_UNICODE_CHARS);
 
 if (decompositions[c])
 	{
-	unsigned long * decomp = decompositions[c];
+	uint32_t * decomp = decompositions[c];
 	int decomposed = 0;
 
 	while (*decomp)
@@ -77,9 +77,9 @@ void reduce_decompositions() {
 		for (int i=0; i<NUM_UNICODE_CHARS; i++)
 			if (decompositions[i])
 				{
-				unsigned long buf[1000];
-				unsigned long *buf_pos;
-				unsigned long *src_pos;
+				uint32_t buf[1000];
+				uint32_t *buf_pos;
+				uint32_t *src_pos;
 
 				buf_pos = buf;
 
@@ -93,13 +93,13 @@ void reduce_decompositions() {
 					{
 					made_any_change = 1;
 					delete [] decompositions[i];
-					decompositions[i] = new unsigned long[buf_pos - buf + 1];
+					decompositions[i] = new uint32_t[buf_pos - buf + 1];
 
 					memcpy(decompositions[i], buf, (buf_pos - buf) * sizeof(decompositions[0]));
 					decompositions[i][buf_pos - buf] = 0;
 					}
 
-				for (unsigned long * p = decompositions[i]; p && *p; p++)
+				for (uint32_t * p = decompositions[i]; p && *p; p++)
 					if (lowercase[*p])
 						{
 						made_change = 1;
@@ -127,12 +127,12 @@ return a > b ? a : b;
 */
 int main(int argc, char *argv[])
 {
-unsigned long decomposition[640], *decomposed_pos;
+uint32_t decomposition[640], *decomposed_pos;
 char *file, *pos, *end;
 char **lines, **current;
 long long number_of_lines;
 long field, mode, times;
-unsigned long upper_character, lower_character, character, destination_character, last_character;
+uint32_t character, upper_character, lower_character, destination_character, last_character;
 int state;
 enum ANT_UNICODE_chartype chartype;
 char utf8_buf[100];
@@ -175,7 +175,10 @@ for (current = lines; *current != NULL; current++)
 	pos = *current;
 
 	// Character code for this line
-	sscanf(pos, "%x", &character);
+	if (sscanf(pos, "%x", &character) == 0) {
+		fprintf(stderr, "Bad line read from UnicodeData.txt\n");
+		continue;
+	}
 	pos = strchr(pos, ';') + 1;
 
 	// Skip character name field
@@ -264,7 +267,7 @@ for (current = lines; *current != NULL; current++)
 	if (decomposed_pos > decomposition)
 		{
 		//This character decomposes to something other than itself. Store that decomposition into the list.
-		decompositions[character] = new unsigned long[decomposed_pos - decomposition + 1];
+		decompositions[character] = new uint32_t[decomposed_pos - decomposition + 1];
 		memcpy(decompositions[character], decomposition, sizeof(decomposition[0]) * (decomposed_pos - decomposition));
 
 		//Null-terminate
@@ -275,7 +278,7 @@ for (current = lines; *current != NULL; current++)
 		/* Does this character have a lowercase variant? We won't be decomposing it but we at least want an
 		 * entry in the table for lowercasing
 		 */
-		decompositions[character] = new unsigned long[2];
+		decompositions[character] = new uint32_t[2];
 		decompositions[character][0] = lower_character;
 		decompositions[character][1] = 0;
 		}
@@ -326,7 +329,7 @@ for (current = lines; *current != NULL; current++)
 				if (times % 16 == 0)
 					printf("\n");
 				}
-			printf("{%ld, %ld}", character, destination_character);
+			printf("{%u, %u}", character, destination_character);
 			times++;
 			}
 		}
@@ -340,7 +343,7 @@ for (current = lines; *current != NULL; current++)
 			}
 
 		utf8_buf_ptr = utf8_buf;
-		unsigned long * wide_ptr = decompositions[character];
+		uint32_t * wide_ptr = decompositions[character];
 
 		while (*wide_ptr)
 			{
@@ -370,7 +373,7 @@ for (current = lines; *current != NULL; current++)
 
 		longest_decomposition = max(longest_decomposition, (int) (utf8_buf_ptr - utf8_buf));
 
-		printf("{%ld, \"%s\"}", character, utf8_buf);
+		printf("{%u, \"%s\"}", character, utf8_buf);
 		times++;
 		}
 	else if (mode == CHARTYPE)
@@ -409,7 +412,7 @@ for (current = lines; *current != NULL; current++)
 							printf("\n");
 						}
 
-					printf("{%ld, (unsigned char)(%s%s)}", character, ANT_UNICODE_chartype_string[(int) chartype],
+					printf("{%u, (unsigned char)(%s%s)}", character, ANT_UNICODE_chartype_string[(int) chartype],
 							ischinese(character) ? " | CT_CHINESE" : "");
 					}
 
@@ -425,7 +428,7 @@ for (current = lines; *current != NULL; current++)
 							printf("\n");
 						}
 
-					printf("{%ld, (unsigned char) (CT_OTHER | CT_CHINESE)}", character);
+					printf("{%u, (unsigned char) (CT_OTHER | CT_CHINESE)}", character);
 
 					times++;
 					}
@@ -439,6 +442,8 @@ if (mode == DECOMPOSITION)
 {
 	fprintf(stderr, "#define LONGEST_UTF8_DECOMPOSITION %d\n", longest_decomposition);
 }
+
+//Leak everything.
 
 return 0;
 }
