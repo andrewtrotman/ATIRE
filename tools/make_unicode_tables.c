@@ -175,7 +175,7 @@ for (current = lines; *current != NULL; current++)
 	pos = *current;
 
 	// Character code for this line
-	if (sscanf(pos, "%x", &character) == 0) {
+	if (sscanf(pos, "%x", &character) != 1) {
 		fprintf(stderr, "Bad line read from UnicodeData.txt\n");
 		continue;
 	}
