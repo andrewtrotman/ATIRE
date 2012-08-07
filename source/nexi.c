@@ -223,6 +223,8 @@ if (*at != '\0')
 			break;
 		else
 			{
+			if (ischinese(at))
+				break;
 			bytes = utf8_bytes(at);
 			if (bytes == 1 && !ANT_isspace(*at))
 				break;
