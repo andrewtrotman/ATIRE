@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include "disk.h"
 #include "file_internals.h"
 
@@ -71,7 +72,7 @@ if (file_length == NULL)
 	if (fstat(fileno(fp), &details) == 0)
 		if ((*file_length = details.st_size) != 0)
 			if ((block = new (std::nothrow) char [(size_t)(details.st_size + 1)]) != NULL)		// +1 for the '\0' on the end
-				if (fread(block, (long)details.st_size, 1, fp) == 1)
+				if (ANT_file_internals::read_file_64(fp, block, details.st_size) != 0)
 					block[details.st_size] = '\0';
 				else
 					{

@@ -1,7 +1,3 @@
-/*
-	FILE_INTERNALS.C
-	----------------
-*/
 #include "file_internals.h"
 
 /*
@@ -49,7 +45,24 @@ ANT_file_internals::ANT_file_internals()
 #else
 	int ANT_file_internals::read_file_64(FILE *fp, void *destination, long long bytes_to_read)
 	{
-	return fread(destination, bytes_to_read, 1, fp);		// will return 0 (fail) of 1 (success)
+	static long long chunk_size = 1 * 1024 * 1024 * 1024;
+	long long in_one_go = chunk_size < bytes_to_read ? chunk_size : bytes_to_read;
+	long long bytes_read = 0;
+	long long bytes_left_to_read = bytes_to_read;
+	char *dest = (char *)destination;
+
+	while (bytes_read < bytes_to_read)
+		{
+		if (bytes_left_to_read < in_one_go)
+			in_one_go = bytes_left_to_read;
+
+		bytes_read += fread(dest + bytes_read, 1, in_one_go, fp);
+		bytes_left_to_read = bytes_to_read - bytes_read;
+
+		if (ferror(fp))
+			return 0;
+		}
+	return bytes_read == bytes_to_read; // will return 0 (fail) or 1 (success)
 	}
 
 #endif
