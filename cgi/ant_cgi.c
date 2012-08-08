@@ -15,7 +15,6 @@
 #define RESULTS_PER_PAGE 10
 #define ATIRE 1
 
-
 /*
 	BETWEEN()
 	---------
@@ -100,7 +99,7 @@ for (ch = query_string; *ch != '\0'; ch++)
 */
 //puts("Pragma: no-cache");
 //puts("Cache-Control: no-cache");
-puts("Content-Type: text/html\n\n");
+puts("Content-Type: text/html;charset=UTF-8\n\n");
 if (valid == 0)
 	result = "Invalid Query";
 else

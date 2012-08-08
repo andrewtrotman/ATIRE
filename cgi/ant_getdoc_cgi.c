@@ -88,7 +88,7 @@ for (ch = buffer + 1; *ch != '\0'; ch++)
 */
 //puts("Pragma: no-cache");
 //puts("Cache-Control: no-cache");
-puts("Content-Type: text/html\n\n");
+puts("Content-Type: text/html;charset=UTF-8\n\n");
 
 socket = new ANT_channel_socket(8088, (char *)"localhost");
 socket->puts(buffer);
@@ -104,7 +104,7 @@ document = new char[(size_t)(size + 1)];
 socket->read(document, size);
 document[size] = '\0';
 
-ANT_CGI_header();;
+ANT_CGI_header();
 process_result((unsigned char *)document);
 puts(ANT_disk::read_entire_file((char *)"footer.htm"));
 
