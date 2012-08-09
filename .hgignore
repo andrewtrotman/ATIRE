@@ -1,5 +1,5 @@
 \.o
 \.a
 \.exe
-obj/*
-bin/*
+obj/\.*
+bin/\.*
