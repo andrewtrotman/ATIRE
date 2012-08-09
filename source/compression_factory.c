@@ -112,15 +112,19 @@ integers_compressed += source_integers;
 for (which = 0; which < number_of_techniques; which++)
 	if ((scheme[which].scheme_id & schemes_to_use) != 0)
 		{
-		size = scheme[which].scheme->compress(destination, destination_length, source, source_integers);
-		scheme[which].would_take += size;
+		size = scheme[which].scheme->compress(destination + 1, destination_length - 1, source, source_integers);
 		if (size == 0)				// failure
 			scheme[which].failures++;
-		else if (size < min_size)		// if equal we prefer the first in the list
+		else
 			{
-			min_size = size;
-			preferred = which;
+			scheme[which].would_take += size;
+			if (size < min_size)		// if equal we prefer the first in the list
+				{
+				min_size = size;
+				preferred = scheme[which].scheme_id;
+				}
 			}
+
 		/*
 			If selected, run the compression validator by decompressing each compressed string and
 			comparing it to the original string.  While we're at it, also compute the decmpression
@@ -154,16 +158,23 @@ for (which = 0; which < number_of_techniques; which++)
 if (preferred < 0)
 	{
 	failures++;
-	preferred = NONE;		// in the case of failure to compress resort to storing the postings list on disk uncompressed.
-	//return 0;
+	preferred = ANT_compression_factory::NONE;		// in the case of failure to compress resort to storing the postings list on disk uncompressed.
 	}
 
-scheme[preferred].uses++;
-scheme[preferred].did_take += min_size;
-scheme[preferred].did_compress += source_integers;
+for (which = 0; which < number_of_techniques; which++)
+	if ((scheme[which].scheme_id == preferred) != 0)
+		{
+		*destination = (unsigned char)which;
+		min_size = scheme[which].scheme->compress(destination + 1, destination_length - 1, source, source_integers);
 
-*destination = (unsigned char)preferred;
-return scheme[preferred].scheme->compress(destination + 1, destination_length - 1, source, source_integers) + 1;
+		scheme[which].uses++;
+		scheme[which].did_take += min_size;
+		scheme[which].did_compress += source_integers;
+
+		return min_size + 1;
+		}
+
+return 0;
 }
 
 /*
