@@ -69,7 +69,7 @@ printf("</li><br>");
 */
 int main(void)
 {
-long hits, current, valid, atire_found = 0, time_taken = 0;
+long decoded, hits, current, valid, atire_found = 0, time_taken = 0;
 ATIRE_API_remote socket;
 char *start, *ch, *query_string = getenv("QUERY_STRING");
 const char *result;
@@ -89,7 +89,14 @@ query_string = strnew(query_string + 1);
 */
 valid = 0;
 for (ch = query_string; *ch != '\0'; ch++)
-	if (!isalnum(*ch))
+	if (*ch == '%')
+		{
+		sscanf(ch + 1, "%x", &decoded);
+		*ch = (unsigned char)decoded;
+		strcpy(ch + 1, ch + 3);
+		valid++;
+		}
+	else if (!isalnum(*ch))
 		*ch = ' ';
 	else
 		valid++;
