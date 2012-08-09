@@ -7,7 +7,7 @@ OS_TYPE := $(shell uname)
 # debugging or normal compiling and linking
 USE_GCC := 1
 USE_GCC_VERBOSE := 0
-USE_GCC_DEBUG := 0
+USE_GCC_DEBUG := 1
 
 # use intel c/c++ compile
 USE_INTEL_C := 0
@@ -63,7 +63,7 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 USE_DIRECT_MEMORY_READ := 0
 
 # construct impact headers for easy handling the quantums of the postings
-USE_IMPACT_HEADER := 0
+USE_IMPACT_HEADER := 1
 
 # pruning based on the max impact values of the quantums
 USE_SEARCH_QUANTUM_WITH_PRUNING := 0

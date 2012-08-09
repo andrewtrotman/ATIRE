@@ -593,7 +593,9 @@ long terms = 0;
 long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
 unsigned char *compressed_header_ptr, *compressed_postings_ptr;
 ANT_compressable_integer *end;
+#ifdef SPECIAL_COMPRESSION
 ANT_compressable_integer temp;
+#endif
 
 if (root->right != NULL)
 	terms += serialise_all_nodes(file, root->right);
@@ -624,7 +626,7 @@ if (!should_prune(root))
 				Store the first postings(4 bytes) in the higher order of the 8 bytes
 				and store the first term frequency (4 bytes) in the lower order of the 8 bytes
 			*/
-			
+
 #ifndef IMPACT_HEADER
 			/*
 				If we aren't using IMPACT_HEADER then not doing this will
@@ -658,21 +660,21 @@ if (!should_prune(root))
 				temp = serialised_tfs[0];
 				serialised_tfs[0] = serialised_tfs[1];
 				serialised_tfs[1] = temp;
-				
+
 				temp = decompressed_postings_list[0];
 				decompressed_postings_list[0] = decompressed_postings_list[1];
 				decompressed_postings_list[1] = temp;
 				}
-			
+
 			/*
 				So that the impacts end up being in different
 				sections so that reading back in works correctly
 			*/
 			if (root->string[0] == '~')
 				serialised_tfs[0] += serialised_tfs[1];
-			
+
 			root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
-			
+
 			/*
 				Use impacted_length and end_pos_on_disk to store the second postings and term frequency
 			*/
