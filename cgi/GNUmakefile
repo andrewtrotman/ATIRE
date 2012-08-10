@@ -13,6 +13,8 @@ COMMON_SOURCES := 				\
 	../source/disk.c			\
 	../source/ctypes.c			\
 	../source/file_internals.c		\
+	../source/unicode.c \
+	../source/unicode_tables.c \
 	../atire/atire_api_remote.c
 	
 COMMON_NOTDIR_SOURCES := $(notdir $(COMMON_SOURCES))

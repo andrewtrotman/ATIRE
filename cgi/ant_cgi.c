@@ -10,6 +10,7 @@
 #include "../atire/atire_api_remote.h"
 #include "../source/maths.h"
 #include "../source/disk.h"
+#include "../source/unicode.h"
 #include "header.h"
 
 #define RESULTS_PER_PAGE 10
@@ -69,9 +70,11 @@ printf("</li><br>");
 */
 int main(void)
 {
-long decoded, hits, current, valid, atire_found = 0, time_taken = 0;
+int decoded;
+long hits, current, valid, atire_found = 0, time_taken = 0;
+long long bytes;
 ATIRE_API_remote socket;
-char *start, *ch, *query_string = getenv("QUERY_STRING");
+char *start, *ch, *original_query_string, *query_string = getenv("QUERY_STRING");
 const char *result;
 
 if (query_string == NULL)
@@ -82,10 +85,11 @@ query_string = strchr(query_string, '=');
 if (query_string == NULL)
 	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
 
-query_string = strnew(query_string + 1);
+original_query_string = query_string = strnew(query_string + 1);
+start = strnew(query_string); // set up a copy for later
 
 /*
-	Should really URL decode this string.
+	URL decode this string.
 */
 valid = 0;
 for (ch = query_string; *ch != '\0'; ch++)
@@ -100,6 +104,33 @@ for (ch = query_string; *ch != '\0'; ch++)
 		*ch = ' ';
 	else
 		valid++;
+
+/*
+	Fake the bigram segmentation if necessary
+*/
+result = start;
+if (ischinese(query_string))
+	for (ch = query_string; *ch != '\0'; )
+		{
+		bytes = utf8_bytes(ch);
+		// don't fake segmentation if this is the last character of the sequence
+		if (*(ch + bytes) && *(ch + bytes) != ' ') // nul-terminator or space afterwards
+			{
+			// copy this character and the next followed by a space
+			strcpy(start, ch); 
+			ch += bytes; 
+			start += bytes; 
+			strcpy(start, ch); 
+			start += utf8_bytes(ch); 
+			*start++ = ' '; 
+			}
+		else
+			{
+			*(start - 1) = '\0'; // don't put a space at the end for tidyness' sake
+			ch += bytes;
+			}
+		}
+query_string = strnew(result);
 
 /*
 	Output stuff
@@ -135,7 +166,7 @@ time_taken = atol(between(result, "<time>", "</time>"));
 if (hits > RESULTS_PER_PAGE)
 	hits = RESULTS_PER_PAGE;
 
-ANT_CGI_header(query_string);
+ANT_CGI_header(original_query_string);
 puts("<font size=+1><b>");
 printf("Found %ld documents in %ldms\n", atire_found, time_taken );
 puts("</b></font><br>");
