@@ -22,7 +22,9 @@
 #include "directory_iterator_pkzip.h"
 #include "directory_iterator_preindex.h"
 #include "directory_iterator_mysql.h"
+#include "directory_iterator_filter.h"
 #include "directory_iterator_spam_filter.h"
+#include "directory_iterator_mime_filter.h"
 #include "directory_iterator_scrub.h"
 #include "file.h"
 #include "parser.h"
@@ -408,6 +410,12 @@ for (param = first_param; param < argc; param++)
 	else
 		source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
 
+	if (param_block.filter_filename != NULL)
+		source = new ANT_directory_iterator_filter(source, param_block.filter_filename, ANT_directory_iterator_filter::READ_FILE);
+
+	if (param_block.mime_filter)
+		source = new ANT_directory_iterator_mime_filter(source, ANT_directory_iterator::READ_FILE);
+	
 	if (param_block.spam_filename != NULL)
 		source = new ANT_directory_iterator_spam_filter(source, param_block.spam_filename, param_block.spam_threshold, param_block.spam_method, ANT_directory_iterator::READ_FILE);
 	

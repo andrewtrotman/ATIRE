@@ -40,11 +40,13 @@ public:
 	char *spam_filename;				// where to load spam files from
 	long long spam_threshold; 	// spam percentile threshold
 	long long spam_method;					// whether the spam files we load are what we should include or exclude
+	long long mime_filter;
 	long long static_prune_point;		// maximum length of a postings list measured in document IDs
 	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
 	long stop_word_df_frequencies;   // remove wrods based on the document frequencies
 	double stop_word_df_threshold;		// if df/N is greater than this and (stop_word_removal & PRUNE_DF_FREQUENTS) != 0 then stop the word
 	long scrubbing;					// once we've read the source file from disk, scan from start to finish removing optionally '\0' characters and non-ascii characters
+	char *filter_filename; // file containing documents to filter out
 
 protected:
 	void document_compression(char *scheme);

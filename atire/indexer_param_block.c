@@ -48,11 +48,13 @@ doclist_filename = "doclist.aspt";
 spam_filename = NULL;
 spam_threshold = 70; // as suggested at http://durum0.uwaterloo.ca/clueweb09spam/
 spam_method = spam_threshold < 50 ? ANT_directory_iterator_spam_filter::EXCLUDE : ANT_directory_iterator_spam_filter::INCLUDE;
+mime_filter = false;
 static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
 stop_word_df_frequencies = 1;
 stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
 scrubbing = ANT_directory_iterator_scrub::NONE;
+filter_filename = NULL;
 }
 
 /*
@@ -106,6 +108,8 @@ puts("         a      Non-ascii (high bit set)");
 puts("         n      NUL (\\0)");
 puts("         u      Invalid UTF-8 characters");
 puts("-ispam[:n] <fn> Load percentile scores from <fn> and treat those < n as spam not to be indexed [default n=70]");
+puts("-imime          Filter out mime types that do not begin with text");
+puts("-ifilter <fn>   Filter out all docids that are contained in file <fn>");
 puts("");
 
 puts("OUPUT FILE HANDLING");
@@ -175,7 +179,7 @@ puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
 puts("-k[-l0t][L<n>][s<n>] Term culling");
-puts("   -            All terms remain in the indes [default]");
+puts("   -            All terms remain in the index [default]");
 puts("   0            Do not index numbers");
 puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
 puts("   L<n>         Remove (stop) low frequency terms (where document frequency <= <n>)");
@@ -419,6 +423,10 @@ for (param = 1; param < argc; param++)
 				}
 			spam_filename = argv[++param];
 			}
+		else if (strncmp(command, "imime", 5) == 0)
+			mime_filter = true;
+		else if (strncmp(command, "ifilter", 7) == 0)
+			filter_filename = argv[++param];
 		else if (strncmp(command, "iscrub:", 7) == 0)
 			scrub(command + 7);
 		else if (*command == 'S')
