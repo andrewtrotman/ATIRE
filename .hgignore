@@ -3,3 +3,6 @@
 \.exe
 obj/\.*
 bin/\.*
+.cproect
+.project
+.settings/\.*
