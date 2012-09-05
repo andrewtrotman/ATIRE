@@ -219,7 +219,7 @@ else if (strncmp(which, "IA-", 3) == 0)
 		}
 	else if (strncmp(needle, "ERR", 3) == 0)
 		{
-		evaluators[number_evaluations_used] = new ANT_evaluation_expected_reciprocal_rank;
+		evaluators[number_evaluations_used] = new ANT_evaluation_intent_aware_expected_reciprocal_rank;
 		if (!get_parameter(strchr(needle, ':'), &((ANT_evaluation_intent_aware_expected_reciprocal_rank *)evaluators[number_evaluations_used])->maximum_judgement))
 			exit(puts("<m> in IA-ERR:<m> must be numeric!"));
 		}
@@ -376,7 +376,7 @@ for (current = 1; current < this->relevant_document_list_length; current++)
 		last_subtopic = this->relevant_document_list[current].subtopic;
 		}
 	
-	if (this->relevant_document_list[current].relevant_characters == 0)
+	if (this->relevant_document_list[current].relevant_characters <= 0)
 		nonrelevant_documents++;
 	else
 		{
