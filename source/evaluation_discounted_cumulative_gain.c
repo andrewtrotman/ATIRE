@@ -61,7 +61,10 @@ return g * pow(1 - alpha, (double)rank);
 */
 double ANT_evaluation_discounted_cumulative_gain::discount(unsigned long long rank)
 {
-return 1.0 / ANT_log2(2.0 + rank);
+if (trec_mode)
+	return log(2.0) / log(rank + 2.0);
+else
+	return 1.0 / ANT_log2(2.0 + rank);
 }
 
 /*

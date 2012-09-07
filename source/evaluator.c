@@ -290,9 +290,8 @@ relevant_topic_list = (ANT_relevant_topic *)memory->malloc(sizeof(*relevant_topi
 	Now for each topic, find the number of subtopics and allocate space for them
 */
 last_topic = this->relevant_document_list[0].topic;
-last_subtopic = this->relevant_document_list[0].subtopic;
+number_of_subtopics = last_subtopic = this->relevant_document_list[0].subtopic;
 current_topic = 0;
-number_of_subtopics = 1;
 for (current = 1; current < this->relevant_document_list_length; current++)
 	{
 	/*
@@ -309,15 +308,14 @@ for (current = 1; current < this->relevant_document_list_length; current++)
 		
 		/*
 			By definition if we have a new topic, we _must_ have a new subtopic
+			We have subtopics sorted in descending order, so the first subtopic will
+			have the biggest subtopic id, diversity subtopics are 1-indexed, and we
+			cover the non-diversity qrels which have a 0 subtopic as a special case.
 		*/
-		number_of_subtopics = 0;
+		number_of_subtopics = this->relevant_document_list[current].subtopic;
+		if (number_of_subtopics == 0)
+			number_of_subtopics = 1;
 		last_subtopic = -1;
-		}
-	
-	if (this->relevant_document_list[current].subtopic != last_subtopic)
-		{
-		last_subtopic = this->relevant_document_list[current].subtopic;
-		number_of_subtopics++;
 		}
 	}
 this->relevant_topic_list[current_topic].topic = last_topic;
