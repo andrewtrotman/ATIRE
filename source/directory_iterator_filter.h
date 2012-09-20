@@ -19,7 +19,7 @@ public:
 private:
 	ANT_directory_iterator *source;
 	static char **docids;
-	long long number_docs;
+	static long long number_docs;
 
 public:
 	ANT_directory_iterator_filter(ANT_directory_iterator *source, char *filename, long get_file = 0);

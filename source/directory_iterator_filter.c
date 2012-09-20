@@ -10,6 +10,7 @@
 #include "directory_iterator_filter.h"
 
 char **ANT_directory_iterator_filter::docids = NULL;
+long long ANT_directory_iterator_filter::number_docs = 0;
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILTER::ANT_DIRECTORY_ITERATOR_FILTER()
@@ -21,6 +22,7 @@ this->source = source;
 
 if (docids == NULL)
 	docids = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(filename), &number_docs);
+printf("Filter should exclude: %lld\n", number_docs);
 }
 
 /*
@@ -51,13 +53,13 @@ strip_space_inplace(docid);
 while (low < high)
 	{
 	mid = low + ((high - low) / 2);
-	if (strncmp(docids[mid], docid, strlen(docids[mid])) < 0)
+	if (strcmp(docids[mid], docid) < 0)//, strlen(docids[mid])) < 0)
 		low = mid + 1;
 	else
 		high = mid;
 	}
 
-return strncmp(docids[low], docid, strlen(docids[low])) != 0;
+return strcmp(docids[low], docid) != 0;//, strlen(docids[low])) != 0;
 }
 
 /*
