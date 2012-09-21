@@ -14,7 +14,7 @@
 class ANT_ranking_function_DFI_IDF : public ANT_ranking_function
 {
 public:
-	ANT_ranking_function_DFI_IDF(ANT_search_engine *engine) : ANT_ranking_function(engine) {puts("DFIW_IDF");}
+	ANT_ranking_function_DFI_IDF(ANT_search_engine *engine) : ANT_ranking_function(engine) {}
 	ANT_ranking_function_DFI_IDF(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
 	virtual ~ANT_ranking_function_DFI_IDF() {}
 
