@@ -169,6 +169,7 @@ MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
 MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="unsigned short"
+#MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="double"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 
 #MINUS_D = $(MINUS_D) -DPURIFY
@@ -356,6 +357,10 @@ PARTS = \
 	$(OBJDIR)\ranking_function_dlh13.obj											\
 	$(OBJDIR)\ranking_function_dph.obj												\
 	$(OBJDIR)\ranking_function_dfree.obj											\
+	$(OBJDIR)\ranking_function_dfi.obj												\
+	$(OBJDIR)\ranking_function_dfiw.obj												\
+	$(OBJDIR)\ranking_function_dfi_idf.obj											\
+	$(OBJDIR)\ranking_function_dfiw_idf.obj											\
 	$(OBJDIR)\ranking_function_term_count.obj										\
 	$(OBJDIR)\ranking_function_inner_product.obj									\
 	$(OBJDIR)\ranking_function_kbtfidf.obj											\

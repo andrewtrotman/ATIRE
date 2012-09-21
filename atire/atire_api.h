@@ -159,7 +159,7 @@ public:
 		for LMD:  u = p1
 		for LMJM: l = p1
 	*/
-	long set_ranking_function(long function, double p1, double p2);
+	long set_ranking_function(long long function, double p1, double p2);
 	long set_ranking_function_pregen(const char *fieldname, double p1);
 
 	/*
