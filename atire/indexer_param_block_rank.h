@@ -16,14 +16,14 @@ class ANT_ranking_function;
 class ANT_indexer_param_block_rank : public ANT_ranking_function_factory
 {
 public:
-	enum { BM25 = 1, IMPACT = 2, READABLE = 4, LMD = 8, LMJM = 16, BOSE_EINSTEIN = 32, DIVERGENCE = 64, TERM_COUNT = 128, ALL_TERMS = 256, INNER_PRODUCT = 512, KBTFIDF = 1024, DLH13 = 2048, DOCID = 4096, PREGEN = 8192, DPH = 16384, DFREE = 32768};
+	enum { BM25 = 0x0001, IMPACT = 0x0002, READABLE = 0x0004, LMD = 0x0008, LMJM = 0x0010, BOSE_EINSTEIN = 0x0020, DIVERGENCE = 0x0040, TERM_COUNT = 0x0080, ALL_TERMS = 0x0100, INNER_PRODUCT = 0x0200, KBTFIDF = 0x0400, DLH13 = 0x0800, DOCID = 0x1000, PREGEN = 0x2000, DPH = 0x4000, DFREE = 0x8000, DFI = 0x10000, DFIW = 0x20000, DFI_IDF = 0x40000, DFIW_IDF = 0x80000};	// we get 64 bits here
 
 protected:
-	static const long long index_functions =  BM25 | IMPACT | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | INNER_PRODUCT | KBTFIDF | DLH13 | DPH | DFREE | DOCID | DPH | DFREE;
-	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | ALL_TERMS | INNER_PRODUCT | KBTFIDF | DLH13 | DOCID | PREGEN | DPH | DFREE;
+	static const long long index_functions =  BM25 | IMPACT | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | INNER_PRODUCT | KBTFIDF | DLH13 | DPH | DFREE | DOCID | DPH | DFREE | DFI;
+	static const long long search_functions = BM25 | IMPACT | READABLE | LMD | LMJM | BOSE_EINSTEIN | DIVERGENCE | TERM_COUNT | ALL_TERMS | INNER_PRODUCT | KBTFIDF | DLH13 | DOCID | PREGEN | DPH | DFREE | DFI;
 
 public:
-	long ranking_function;				// what ranking function should we use?
+	long long ranking_function;			// what ranking function should we use?
 
 	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
 	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing

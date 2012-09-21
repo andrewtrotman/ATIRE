@@ -609,7 +609,7 @@ return mean_average_precision;
 	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank
 	Return true if successful. On failure, the API is not altered.
 */
-int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params)
+int ant_init_ranking(ATIRE_API *atire, ANT_indexer_param_block_rank &params)
 {
 switch (params.ranking_function)
 	{

@@ -14,6 +14,10 @@
 #include "ranking_function_dlh13.h"
 #include "ranking_function_dph.h"
 #include "ranking_function_dfree.h"
+#include "ranking_function_dfi.h"
+#include "ranking_function_dfiw.h"
+#include "ranking_function_dfi_idf.h"
+#include "ranking_function_dfiw_idf.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
@@ -137,6 +141,14 @@ else if (strcmp(which, "DPH") == 0)
 	ranking_function = DPH;
 else if (strcmp(which, "DFRee") == 0)
 	ranking_function = DFREE;
+else if (strcmp(which, "DFI") == 0)
+	ranking_function = DFI;
+else if (strcmp(which, "DFIW") == 0)
+	ranking_function = DFIW;
+else if (strcmp(which, "DFIIDF") == 0)
+	ranking_function = DFI_IDF;
+else if (strcmp(which, "DFIWIDF") == 0)
+	ranking_function = DFIW_IDF;
 else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;
 else if (strcmp(which, "termcount") == 0)
@@ -204,6 +216,14 @@ if (allowable & DPH)
 	printf("   DPH          Terrier DPH %s\n", isdefault(DPH));
 if (allowable & DFREE)
 	printf("   DFRee        Terrier DFRee %s\n", isdefault(DFREE));
+if (allowable & DFI)
+	printf("   DFI          Divergence From Independence (TREC 2010 function)%s\n", isdefault(DFI));
+if (allowable & DFIW)
+	printf("   DFIW         Divergence From Independence Web (TREC 2011 function)%s\n", isdefault(DFIW));
+if (allowable & DFI_IDF)
+	printf("   DFI_IDF      Divergence From Independence with IDF %s\n", isdefault(DFI_IDF));
+if (allowable & DFIW_IDF)
+	printf("   DFIW_IDF     Divergence From Independence Web with IDF%s\n", isdefault(DFIW_IDF));
 if (allowable & IMPACT)
 	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
 if (allowable & LMD)
@@ -244,6 +264,14 @@ switch (ranking_function)
 		return new ANT_ranking_function_DPH(documents, lengths);
 	case DFREE:
 		return new ANT_ranking_function_DFRee(documents, lengths);
+	case DFI:
+		return new ANT_ranking_function_DFI(documents, lengths);
+	case DFIW:
+		return new ANT_ranking_function_DFIW(documents, lengths);
+	case DFI_IDF:
+		return new ANT_ranking_function_DFI_IDF(documents, lengths);
+	case DFIW_IDF:
+		return new ANT_ranking_function_DFIW_IDF(documents, lengths);
 	case LMD:
 		return new ANT_ranking_function_lmd(documents, lengths, lmd_u);
 	case LMJM:
