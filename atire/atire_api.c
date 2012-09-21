@@ -381,6 +381,16 @@ for (current = 0; current < pregen_count; current++)
 return 1;
 }
 
+ANT_pregen *ATIRE_API::get_pregen()
+{
+/* assume the first pregen is going to be used for accumulator initialisation */
+if (pregen_count > 0)
+	return &pregens[0];
+
+return NULL;
+
+}
+
 /*
 	ATIRE_API::SET_RANKING_FUNCTION()
 	---------------------------------

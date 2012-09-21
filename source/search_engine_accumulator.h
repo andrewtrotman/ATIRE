@@ -8,7 +8,7 @@
 #include <stddef.h>		// needed for size_t
 
 #ifndef ANT_ACCUMULATOR_T
-	typedef short ANT_ACCUMULATOR_T;
+	typedef unsigned short ANT_ACCUMULATOR_T;
 #endif
 
 #ifdef min

@@ -14,6 +14,7 @@
 #include "search_engine_init_flags.h"
 #include "search_engine_init_flags_boolean.h"
 #include "heap.h"
+#include "pregen.h"
 
 class ANT_memory;
 
@@ -38,6 +39,9 @@ public:			// remove this line later
 
 	ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
 	ANT_bitstring *include_set;
+
+	ANT_search_engine_accumulator *pregen_scores;
+	void set_pregen(ANT_pregen *pg);
 
 #ifdef TWO_D_ACCUMULATORS
 	#ifdef NEVER
@@ -111,11 +115,13 @@ public:
 	{
 #ifdef TWO_D_ACCUMULATORS
 	size_t row;
+	long long start_acc;
 
 	if (init_flags.get(row = get_init_flag_row(index)) == 0)
 		{
 		init_flags.set(row);
-		memset(accumulator + (row * width), 0, (size_t)(width * sizeof(*accumulator)));
+		start_acc = row * width;
+		memcpy(accumulator + start_acc, pregen_scores + start_acc, (size_t)(width * sizeof(*accumulator)));
 		}
 #endif
 	}
@@ -139,7 +145,7 @@ public:
 
 	if (results_list_length < top_k)
 		{
-		if (old_val == 0)
+		if (old_val == pregen_scores[index].get_rsv())
 			{
 			accumulator_pointers[results_list_length++] = which;
 			include_set->unsafe_setbit(index);
@@ -166,11 +172,12 @@ public:
 
 	init_partial_accumulators(index);
 	old_val = which->get_rsv();
+	//new_val = which->add_rsv(score * 0.9);
 	new_val = which->add_rsv(score);
 
 	if (results_list_length < top_k)
 		{
-		if (old_val == 0)
+		if (old_val == pregen_scores[index].get_rsv())
 			{
 			accumulator_pointers[results_list_length++] = which;
 			include_set->unsafe_setbit(index);
