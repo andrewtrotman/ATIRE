@@ -77,7 +77,8 @@ while (fgets(line, sizeof(line), doclist) != NULL)
 		while (!ANT_isspace(*p)) p++; // find the space
 		p++; // skip over the space
 
-		parsed = (ANT_atoi64(p) / 2) + 1;
+		parsed = ANT_atoi64(p);
+		//parsed = (ANT_atoi64(p) / 2) + 1;
 		switch (bytes)
 			{
 			case 8:
