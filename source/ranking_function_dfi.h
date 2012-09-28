@@ -14,7 +14,7 @@
 class ANT_ranking_function_DFI : public ANT_ranking_function
 {
 public:
-	ANT_ranking_function_DFI(ANT_search_engine *engine) : ANT_ranking_function(engine) { puts("DFI"); }
+	ANT_ranking_function_DFI(ANT_search_engine *engine) : ANT_ranking_function(engine) {}
 	ANT_ranking_function_DFI(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
 	virtual ~ANT_ranking_function_DFI() {}
 
