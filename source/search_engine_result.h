@@ -200,10 +200,14 @@ public:
 #ifdef TWO_D_ACCUMULATORS
 		if (init_flags.get(get_init_flag_row(index)) == 0)
 			return true;
-		else
-			return accumulator[(size_t)index].is_zero_rsv();
+	else
+		{
+		//return accumulator[(size_t)index].is_zero_rsv();
+		return accumulator[(size_t)index].get_rsv() == pregen_scores[(size_t)index].get_rsv();
+		}
 #else
-		return accumulator[(size_t)index].is_zero_rsv();
+		//return accumulator[(size_t)index].is_zero_rsv();
+		return accumulator[(size_t)index].get_rsv() == pregen_scores[(size_t)index].get_rsv();
 #endif
 		}
 
