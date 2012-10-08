@@ -56,6 +56,7 @@ feedback_terms = 5;
 index_filename = strnew("index.aspt");
 doclist_filename = strnew("doclist.aspt");
 pregen_count = 0;
+pregen_ratio = 1.0;
 snippet_algorithm = NONE;
 snippet_tag = "title";
 snippet_length = 300;		// this is the INEX 2011 maximum snippet length
@@ -636,6 +637,11 @@ for (param = 1; param < argc; param++)
 			set_focused_ranker(command + 1);
 		else if (strcmp(command, "pregen") == 0)
 			{
+			if (command[6] == ':')
+				{
+				pregen_ratio = atof(&command[7]);
+				printf("Pregen Ratio: %f\n", pregen_ratio);
+				}
 			pregen_names[pregen_count] = strnew(argv[++param]);
 			pregen_count++;
 			}

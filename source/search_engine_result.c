@@ -22,6 +22,7 @@ long long height = 0;
 /* initialise the pregen scores */
 pregen_scores = new ANT_search_engine_accumulator[documents];
 memset(pregen_scores, 0, sizeof(*pregen_scores)*documents);
+pregen_ratio = 1.0;
 
 results_list_length = 0;
 min_in_top_k = 0;
@@ -117,12 +118,18 @@ return results_list_length;
 	ANT_SEARCH_ENGINE_RESULT::SET_PREGEN()
 	-----------------------------------------
 */
-void ANT_search_engine_result::set_pregen(ANT_pregen *pg)
+void ANT_search_engine_result::set_pregen(ANT_pregen *pg, double ratio)
 {
 if (pg)
+	{
+	pregen_ratio = ratio;
 	for (long long i = 0; i < documents; i++)
 		{
-		//pregen_scores[i].set_rsv((ANT_ACCUMULATOR_T)(log(pg->scores[i])*0.1));
-		pregen_scores[i].set_rsv((ANT_ACCUMULATOR_T)pg->scores[i]);
+		pregen_scores[i].add_rsv(log((double)pg->scores[i]) * (1 - pregen_ratio) - 0.01);
+		//pregen_scores[i].add_rsv(log((double)pg->scores[i]) * 0.1 - 0.01);
+
+		//printf("orig: %lld, scores: %f\n", pg->scores[i], pregen_scores[i].get_rsv());
+		//pregen_scores[i].set_rsv((ANT_ACCUMULATOR_T)pg->scores[i]);
 		}
+	}
 }

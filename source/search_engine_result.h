@@ -41,7 +41,8 @@ public:			// remove this line later
 	ANT_bitstring *include_set;
 
 	ANT_search_engine_accumulator *pregen_scores;
-	void set_pregen(ANT_pregen *pg);
+	double pregen_ratio;
+	void set_pregen(ANT_pregen *pg, double ratio);
 
 #ifdef TWO_D_ACCUMULATORS
 	#ifdef NEVER
@@ -141,7 +142,7 @@ public:
 
 	init_partial_accumulators(index);
 	old_val = which->get_rsv();
-	which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t) score);
+	which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t) score  * pregen_ratio);
 
 	if (results_list_length < top_k)
 		{
@@ -172,8 +173,7 @@ public:
 
 	init_partial_accumulators(index);
 	old_val = which->get_rsv();
-	//new_val = which->add_rsv(score * 0.9);
-	new_val = which->add_rsv(score);
+	new_val = which->add_rsv(score * pregen_ratio);
 
 	if (results_list_length < top_k)
 		{

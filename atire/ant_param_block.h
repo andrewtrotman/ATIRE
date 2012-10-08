@@ -45,7 +45,7 @@ public:
 	long stats;							// which stats to display
 
 	/*
-		Because these are expected to be replaced several times during the lifetime of this class, 
+		Because these are expected to be replaced several times during the lifetime of this class,
 		this class owns the memory for these strings and calls delete [] on them:
 	*/
 	char *index_filename;				// Filename of index to read
@@ -53,6 +53,7 @@ public:
 
 	char *pregen_names[MAX_PREGEN_COUNT];// pregens to load
 	int pregen_count;					// count of entries in list
+	double pregen_ratio;						// the ratio of score to be used in the rsv values
 
 	long segmentation;					// query segmentation need or not for east-asian languages, e.g. Chinese
 	long file_or_memory;				// the index be loaded into memory at startup (TRUE / FALSE)
