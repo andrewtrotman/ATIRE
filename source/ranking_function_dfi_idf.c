@@ -11,6 +11,23 @@
 #include "compress.h"
 #include "search_engine_accumulator.h"
 
+#ifdef IMPACT_HEADER
+/*
+	ANT_RANKING_FUNCTION_DFI_IDF::RELEVANCE_RANK_ONE_QUANTUM()
+	-------------------------------------------------------
+*/
+void ANT_ranking_function_DFI_IDF::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters) {
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+
+/*
+	ANT_RANKING_FUNCTION_DFI_IFD::RELEVANCE_RANK_TOP_K()
+	-------------------------------------------------
+*/
+void ANT_ranking_function_DFI_IDF::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+#else
 /*
 	ANT_RANKING_FUNCTION_DFI_IDF::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------
@@ -63,6 +80,7 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
+#endif
 
 /*
 	ANT_RANKING_FUNCTION_DFI_IDF::RANK()

@@ -6,3 +6,4 @@ bin/\.*
 .cproect
 .project
 .settings/\.*
+atire.xcodeproj/\.*
