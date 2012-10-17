@@ -561,10 +561,12 @@ int ret = TRUE;
 			*into++ = 1;
 			// offsets
 			*into++ = 0;
-			*into++ = sizeof(ANT_compressable_integer);
+			*into++ = sizeof(ANT_compressable_integer) + 1; // +1 to cover byte for compression scheme
 			// fill the postings
-			*postings++ = term_details->postings_position_on_disk >> 32;
-			*postings = term_details->impacted_length;
+			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
+			*(unsigned char *)postings = 0; // no compression for second docid list
+			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
+			*postings = term_details->impacted_length; // second docid
 			term_details->impacted_length = 2;
 			}
 #else
