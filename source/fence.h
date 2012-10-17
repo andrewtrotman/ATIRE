@@ -27,7 +27,7 @@ static inline void ANT_write_fence(void)
 		#endif
 	#endif
 #elif defined (__GNUC__)
-	#if (__GUNC__) >= 4
+	#if (__GNUC__) >= 4
 		__sync_synchronize();
 	#endif
 #else
