@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <strstream>
 #include "stop_word.h"
@@ -74,6 +75,14 @@ while ((end >= source) && (isspace(*end)))
 
 return source;
 }
+
+#ifndef _MSC_VER
+void strlwr(char *source)
+{
+while (*source)
+	*source = tolower(*source);
+}
+#endif
 
 
 /*

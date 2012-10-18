@@ -32,7 +32,7 @@ current++;
 if (current >= results_list_length)
 	return -1;
 
-if (result->accumulator_pointers[current]->is_zero_rsv())
+if (result->is_zero_rsv(result->accumulator_pointers[current] - result->accumulator))
 	return -1;
 else
 	return result->accumulator_pointers[current] - result->accumulator;

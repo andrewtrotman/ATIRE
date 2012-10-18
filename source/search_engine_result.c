@@ -5,6 +5,7 @@
 #include "search_engine_result.h"
 #include "memory.h"
 #include "maths.h"
+#include "search_engine_accumulator.h"
 
 /*
 	ANT_SEARCH_ENGINE_RESULT::ANT_SEARCH_ENGINE_RESULT()
@@ -14,7 +15,14 @@ ANT_search_engine_result::ANT_search_engine_result(ANT_memory *memory, long long
 {
 long long pointer;
 unsigned long long padding = 0;
+#ifdef TWO_D_ACCUMULATORS
 long long height = 0;
+#endif
+
+/* initialise the pregen scores */
+pregen_scores = new ANT_search_engine_accumulator[documents];
+memset(pregen_scores, 0, sizeof(*pregen_scores)*documents);
+pregen_ratio = 1.0;
 
 results_list_length = 0;
 min_in_top_k = 0;
@@ -62,6 +70,7 @@ ANT_search_engine_result::~ANT_search_engine_result()
 {
 delete heapk;
 delete include_set;
+delete pregen_scores;
 }
 
 /*
@@ -82,7 +91,7 @@ void ANT_search_engine_result::init_accumulators(long long top_k)
 #ifdef TWO_D_ACCUMULATORS
 //	init_flags.rewind();		// this is now done later based on a computed width
 #else
-	memset(accumulator, 0, (size_t)(sizeof(*accumulator) * documents));
+	memcpy(accumulator, pregen_scores, sizeof(*accumulator) * documents);
 #endif
 
 min_in_top_k = 0;
@@ -103,4 +112,24 @@ include_set->zero();
 long long ANT_search_engine_result::init_pointers(void)
 {
 return results_list_length;
+}
+
+/*
+	ANT_SEARCH_ENGINE_RESULT::SET_PREGEN()
+	-----------------------------------------
+*/
+void ANT_search_engine_result::set_pregen(ANT_pregen *pg, double ratio)
+{
+if (pg)
+	{
+	pregen_ratio = ratio;
+	for (long long i = 0; i < documents; i++)
+		{
+		pregen_scores[i].add_rsv(log((double)pg->scores[i]) * (1 - pregen_ratio) - 0.01);
+		//pregen_scores[i].add_rsv(log((double)pg->scores[i]) * 0.1 - 0.01);
+
+		//printf("orig: %lld, scores: %f\n", pg->scores[i], pregen_scores[i].get_rsv());
+		//pregen_scores[i].set_rsv((ANT_ACCUMULATOR_T)pg->scores[i]);
+		}
+	}
 }

@@ -8,7 +8,7 @@
 #include <stddef.h>		// needed for size_t
 
 #ifndef ANT_ACCUMULATOR_T
-	typedef short ANT_ACCUMULATOR_T;
+	typedef unsigned short ANT_ACCUMULATOR_T;
 #endif
 
 #ifdef min
@@ -22,6 +22,8 @@
 */
 class ANT_search_engine_accumulator
 {
+friend class ANT_search_engine_result;
+
 public:
 	/*
 		ANT_accumulator_t is the type used for storing rsv scores in the search engine.  Experiments with 50 topics
@@ -58,13 +60,16 @@ private:
 	static inline long long min(long long a, long long b);
 	static inline void swapfunc(ANT_search_engine_accumulator **a, ANT_search_engine_accumulator **b, long long n);
 
+protected:
+	/* this should be protected and only be called in ANT_search_engine_result class*/
+	long is_zero_rsv(void) { return rsv == 0; }
+
 public:
 	ANT_accumulator_t add_rsv(double score) { return rsv += 1 + (ANT_accumulator_t)(score * 100.0); }		// +1 to prevent rounding to zero
 	ANT_accumulator_t add_rsv(long score) { return rsv += (ANT_accumulator_t)score; }
 
 	void set_rsv(ANT_accumulator_t score) { rsv = score; }
 
-	long is_zero_rsv(void) { return rsv == 0; }
 	ANT_accumulator_t get_rsv(void) { return rsv; }
 	void clear_rsv(void) { rsv = 0; }
 

@@ -63,7 +63,7 @@ private:
 
 	char **document_list;					// list (in order) of the external IDs of the documents in the collection
 	char **filename_list;					// the same list, but assuming filenames (parsed for INEX)
-	char **answer_list;						// 
+	char **answer_list;						//
 	long long documents_in_id_list;			// the length of the above two lists (the number of docs in the collection)
 	char *mem1, *mem2;						// arrays of memory holding the above;
 
@@ -159,8 +159,10 @@ public:
 		for LMD:  u = p1
 		for LMJM: l = p1
 	*/
-	long set_ranking_function(long function, double p1, double p2);
+	long set_ranking_function(long long function, double p1, double p2);
 	long set_ranking_function_pregen(const char *fieldname, double p1);
+
+	ANT_pregen *get_pregen();
 
 	/*
 		Set the stemming function

@@ -24,6 +24,7 @@
 #include "focus_lowest_tag.h"
 #include "focus_result.h"
 #include "focus_results_list.h"
+#include "search_engine.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
@@ -365,7 +366,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 							the middle of the document
 							The end marker
 							The end of the document
-		
+
 					*/
 					outchannel->write(document_buffer, document_range->start - document_buffer);
 					outchannel->write(zero_x_ff, 1);
@@ -609,7 +610,7 @@ return mean_average_precision;
 	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank
 	Return true if successful. On failure, the API is not altered.
 */
-int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params)
+int ant_init_ranking(ATIRE_API *atire, ANT_indexer_param_block_rank &params)
 {
 switch (params.ranking_function)
 	{
@@ -704,6 +705,9 @@ atire->set_segmentation(params.segmentation);
 ant_init_ranking(atire, params); //Error value ignored...
 atire->set_processing_strategy(params.processing_strategy);
 
+// set the pregren to use for accumulator initialisation
+if (params.ranking_function != ANT_indexer_param_block_rank::PREGEN)
+	atire->get_search_engine()->results_list->set_pregen(atire->get_pregen(), params.pregen_ratio);
 return atire;
 }
 
