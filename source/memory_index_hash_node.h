@@ -81,6 +81,7 @@ private:
 	inline void compress_into(unsigned char *dest, long long docno);
 	ANT_postings_piece *new_postings_piece(long length_in_bytes);
 	long insert_docno(long long docno, unsigned char initial_term_frequency = 1);
+	inline long append_docno(long long docno, ANT_postings_piece **buffer);
 	long copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned char *term_frequency_buffer);
 	long bytes_needed_for_early_doc_buffer(void);
 
