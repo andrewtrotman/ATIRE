@@ -38,9 +38,10 @@ static inline void ANT_write_fence(void)
 }
 
 #ifdef _MSC_VER
-#define ANT_compare_and_swap _InterlockedCompareExchange
+#undef max
+#define ANT_compare_and_swap(a, b, c) _InterlockedCompareExchange((LONG *)(a), (LONG)(b), (LONG)(c))
 #else
-#define ANT_compare_and_swap(a, b, c) __sync_val_compare_and_swap(a, c, b);
+#define ANT_compare_and_swap(a, b, c) __sync_val_compare_and_swap(a, c, b)
 #endif
 
 #endif /* FENCE_H_ */

@@ -361,6 +361,10 @@ PARTS = \
 	$(OBJDIR)\ranking_function_kbtfidf.obj			\
 	$(OBJDIR)\ranking_function_topsig_positive.obj	\
 	$(OBJDIR)\ranking_function_topsig_negative.obj	\
+	$(OBJDIR)\ranking_function_dfi.obj \
+	$(OBJDIR)\ranking_function_dfiw.obj \
+	$(OBJDIR)\ranking_function_dfiw_idf.obj \
+	$(OBJDIR)\ranking_function_dfi_idf.obj \
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
