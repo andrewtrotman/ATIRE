@@ -6,6 +6,7 @@
 	TopicID (0|SubtopicID) DocID Rel
 */
 #include <string.h>
+#include "hash_table.h"
 #include "assessment_TREC.h"
 #include "relevant_document.h"
 #include "memory.h"
@@ -72,6 +73,12 @@ for (current = lines; *current != 0; current++)
 			{
 			if (!missing_warned)
 				printf("Warning: DOC '%s' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
+			/*
+				Include it as a document with a _bad_ id that would never
+				exist in the collection
+			*/
+			current_assessment->docid = -ANT_random_hash_24(document, strlen(document));
+			//current_assessment->docid *= -1;
 			missing_warned = TRUE;
 			}
 		else

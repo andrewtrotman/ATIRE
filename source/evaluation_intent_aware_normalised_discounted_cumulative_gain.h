@@ -18,7 +18,7 @@ private:
 public:
 	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
 	
-	void set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
+	virtual void set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
 } ;
 
 #endif /* EVALUATION_INTENT_AWARE_NORMALISED_DISCOUNTED_CUMULATIVE_GAIN_H_ */
