@@ -25,6 +25,7 @@
 #include "maths.h"
 #include "btree_iterator.h"
 #include "stop_word.h"
+#include "fence.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -129,12 +130,18 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
 	if (cmp > 0)
 		if (root->left == NULL)
-			return root->left = new_memory_index_hash_node(string);
+			{
+			ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL);
+			return root->left;
+			}
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
-			return root->right = new_memory_index_hash_node(string);
+			{
+			ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL);
+			return root->right;
+			}
 		else
 			root = root->right;
 	}
@@ -156,7 +163,8 @@ hash_value = hash(string);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	node = hash_table[hash_value] = new_memory_index_hash_node(string);
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL);
+	node = hash_table[hash_value];
 	}
 else
 	node = find_add_node(hash_table[hash_value], string);
@@ -178,7 +186,8 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	node = hash_table[hash_value] = new_memory_index_hash_node(measure_name);
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
+	node = hash_table[hash_value];
 	}
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
@@ -213,7 +222,8 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	node = hash_table[hash_value] = new_memory_index_hash_node(measure_name);
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
+	node = hash_table[hash_value];
 	}
 else
 	node = find_add_node(hash_table[hash_value], measure_name);
@@ -605,7 +615,6 @@ if (!should_prune(root))
 	terms += 1;
 
 	stats->term_occurences += root->collection_frequency;
-	//printf("\t%s (df:%lld cf:%lld)\n", root->string.str(), root->document_frequency, root->collection_frequency);
 	get_serialised_postings(root, &doc_size, &tf_size);
 
 	stats->bytes_to_store_docids += doc_size;
@@ -1092,12 +1101,6 @@ if (static_prune_point < largest_docno)
 	set_variable("~trimpoint", static_prune_point);
 
 /*
-	If we want to quantize the ranking scores for impact ordering in the index then
-	we need to compute the min and max scores the function will produce and then
-	use those later - this takes time so time it.
-*/
-timer = stats->start_timer();
-/*
 	Compute the array of document lengths and other parameters necessary for impact ordering on
 	the relevance ranking functions
 */
@@ -1107,6 +1110,13 @@ node = find_add_node(hash_table[hashed_squiggle_length], &squiggle_length);
 get_serialised_postings(node, &doc_size, &tf_size);
 document_lengths = (ANT_compressable_integer *)serialisation_memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
 variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
+
+/*
+	If we want to quantize the ranking scores for impact ordering in the index then
+	we need to compute the min and max scores the function will produce and then
+	use those later - this takes time so time it.
+*/
+timer = stats->start_timer();
 
 /*
 	Create the quantizer
