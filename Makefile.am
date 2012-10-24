@@ -543,7 +543,8 @@ main_headers = $(ATIRE_DIR)/atire_api_remote.h \
 			$(ATIRE_DIR)/indexer_param_block_pregen.h \
 			$(ATIRE_DIR)/indexer_param_block_rank.h \
 			$(ATIRE_DIR)/indexer_param_block_stem.h \
-			$(ATIRE_DIR)/indexer_param_block_topsig.h			  			  
+			$(ATIRE_DIR)/indexer_param_block_topsig.h	
+				  
 			  
 #ATIRE_PARAM_LIST = $(shell ls $(SRCIDR)/ant_param_*.c)
 #INDEX_PARAM_LIST = $(shell ls $(SRCDIR)/indexer_param_*.c)		  
@@ -572,7 +573,7 @@ ATIRE_LIBS = -L. -latire_api
 includedir = $(prefix)/include
 include_HEADERS = $(library_headers)
 		
-lib_LTLIBRARIES = libatire_core.la libatire_api.la libatire_index_param.la libatire_index.la
+noinst_LTLIBRARIES = libatire_core.la libatire_api.la libatire_index_param.la libatire_index.la
 
 libatire_core_la_SOURCES = $(core_sources)
 libatire_core_la_LIBADD = -ldl -lpthread
@@ -603,6 +604,10 @@ libatire_index_la_LDFLAGS =
 libatire_index_la_CFLAGS = $(AM_CFLAGS) -DATIRE_LIBRARY
 libatire_index_la_DEPENDENCIES = libatire_index_param.la
 libatire_index_la_LIBADD = -L. -latire_index_param
+
+lib_LTLIBRARIES = libatire.la
+libatire_la_SOURCES = 
+libatire_la_LIBADD = libatire_core.la libatire_api.la libatire_index_param.la libatire_index.la
 
 #ATIRE_LIBS = -L. -latire_core -ldl -lpthread
 
