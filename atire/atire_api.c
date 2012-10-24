@@ -45,6 +45,10 @@
 #include "ranking_function_pregen.h"
 #include "ranking_function_topsig_positive.h"
 #include "ranking_function_topsig_negative.h"
+#include "ranking_function_dfi.h"
+#include "ranking_function_dfiw.h"
+#include "ranking_function_dfi_idf.h"
+#include "ranking_function_dfiw_idf.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -381,6 +385,16 @@ for (current = 0; current < pregen_count; current++)
 return 1;
 }
 
+ANT_pregen *ATIRE_API::get_pregen()
+{
+/* assume the first pregen is going to be used for accumulator initialisation */
+if (pregen_count > 0)
+	return &pregens[0];
+
+return NULL;
+
+}
+
 /*
 	ATIRE_API::SET_RANKING_FUNCTION()
 	---------------------------------
@@ -390,7 +404,7 @@ return 1;
 
 	On failure, the API is left unchanged.
 */
-long ATIRE_API::set_ranking_function(long function, double p1, double p2)
+long ATIRE_API::set_ranking_function(long long function, double p1, double p2)
 {
 ANT_ranking_function *new_function;
 
@@ -457,7 +471,20 @@ switch (function)
 	case ANT_ANT_param_block::KBTFIDF:
 		new_function = new ANT_ranking_function_kbtfidf(search_engine, p1, p2);
 		break;
+	case ANT_ANT_param_block::DFI:
+		new_function = new ANT_ranking_function_DFI(search_engine);
+		break;
+	case ANT_ANT_param_block::DFIW:
+		new_function = new ANT_ranking_function_DFIW(search_engine);
+		break;
+	case ANT_ANT_param_block::DFI_IDF:
+		new_function = new ANT_ranking_function_DFI_IDF(search_engine);
+		break;
+	case ANT_ANT_param_block::DFIW_IDF:
+		new_function = new ANT_ranking_function_DFIW_IDF(search_engine);
+		break;
 	default:
+		printf("Error: Unknown ranking function selected in ATIRE_API::set_ranking_function\n"); 
 		return 1;		// failure, invalid parameter
 	}
 

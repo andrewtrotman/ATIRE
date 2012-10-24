@@ -136,8 +136,8 @@ void perform_query(char *query, query_data_s *data, ANT_stemmer *stemmer) {
 			data->top_scores[i] = 0.0;
 
 		data->top_doc_count = 0;
-		
-		if (!results[i]->is_zero_rsv())
+
+		if (!search_engine->results_list->is_zero_rsv(i))
 			for (i = 0; i < docs_returned; i++) {
 				if (data->top_scores[0] * data->top_threshold > (double) results[i]->get_rsv())
 					break;

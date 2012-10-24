@@ -527,9 +527,9 @@ int ret = TRUE;
 
 		if (impact_one != impact_two && term_details->local_document_frequency == 2)
 			the_quantum_count = 2;
-		
+
 		beginning_of_the_postings += the_quantum_count * 3 * sizeof(ANT_compressable_integer);
-		
+
 		((uint32_t *)destination)[4] = the_quantum_count;
 		((uint32_t *)destination)[5] = beginning_of_the_postings;
 
@@ -561,10 +561,12 @@ int ret = TRUE;
 			*into++ = 1;
 			// offsets
 			*into++ = 0;
-			*into++ = sizeof(ANT_compressable_integer);
+			*into++ = sizeof(ANT_compressable_integer) + 1; // +1 to cover byte for compression scheme
 			// fill the postings
-			*postings++ = term_details->postings_position_on_disk >> 32;
-			*postings = term_details->impacted_length;
+			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
+			*(unsigned char *)postings = 0; // no compression for second docid list
+			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
+			*postings = term_details->impacted_length; // second docid
 			term_details->impacted_length = 2;
 			}
 #else
@@ -1256,7 +1258,7 @@ char **into = sorted_id_list;
 
 end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
 for (current = results_list->accumulator_pointers; current < end; current++)
-	if ((*current)->is_zero_rsv())
+	if (results_list->is_zero_rsv(*current - results_list->accumulator))
 		break;
 	else
 		*into++ = document_id_list[*current - results_list->accumulator];
@@ -1351,7 +1353,7 @@ now = stats->start_timer();
 	if (*term != '~')
 		beginning_of_postings = ((uint32_t *)postings_buffer)[5];
 #endif
-	
+
 	factory.decompress(decompress_buffer, postings_buffer + beginning_of_postings, term_details->impacted_length);
 #else
 	factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);

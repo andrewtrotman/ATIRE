@@ -166,8 +166,8 @@ MINUS_D = $(EXTRA_MINUS_D) -DHASHER=1 -DHEADER_HASHER=1
 MINUS_D = $(MINUS_D) -DSPECIAL_COMPRESSION=1
 MINUS_D = $(MINUS_D) -DTWO_D_ACCUMULATORS
 MINUS_D = $(MINUS_D) -DTOP_K_READ_AND_DECOMPRESSOR
-#MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
-#MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
+MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING
+MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="unsigned short"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 
@@ -294,8 +294,10 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_file_buffered.obj	\
 	$(OBJDIR)\directory_iterator_csv.obj			\
 	$(OBJDIR)\directory_iterator_recursive.obj		\
-	$(OBJDIR)\directory_iterator_spam_filter.obj		\
-	$(OBJDIR)\directory_iterator_scrub.obj		\
+	$(OBJDIR)\directory_iterator_spam_filter.obj	\
+	$(OBJDIR)\directory_iterator_scrub.obj			\
+	$(OBJDIR)\directory_iterator_mime_filter.obj	\
+	$(OBJDIR)\directory_iterator_filter.obj			\
 	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\thesaurus.obj							\
@@ -359,6 +361,10 @@ PARTS = \
 	$(OBJDIR)\ranking_function_kbtfidf.obj			\
 	$(OBJDIR)\ranking_function_topsig_positive.obj	\
 	$(OBJDIR)\ranking_function_topsig_negative.obj	\
+	$(OBJDIR)\ranking_function_dfi.obj \
+	$(OBJDIR)\ranking_function_dfiw.obj \
+	$(OBJDIR)\ranking_function_dfiw_idf.obj \
+	$(OBJDIR)\ranking_function_dfi_idf.obj \
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
