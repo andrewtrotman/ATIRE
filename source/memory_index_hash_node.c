@@ -91,6 +91,55 @@ insert_docno(bottom);
 }
 
 /*
+	ANT_MEMORY_INDEX_HASH_NODE::APPEND_DOCNO()
+	------------------------------------------
+*/
+long ANT_memory_index_hash_node::append_docno(long long docno, ANT_postings_piece **buffer)
+{
+unsigned char holding_pen[16];
+long remain, needed = compress_bytes_needed(docno);
+size_t new_docid_node_length;
+ANT_postings_piece *underlying = *buffer;
+
+if (docid_node_used + needed > docid_node_length)
+	{
+	/*
+		Allocate the new block
+	*/
+	new_docid_node_length = (size_t)(postings_growth_factor * docid_node_length);
+	if ((underlying->next = new_postings_piece(new_docid_node_length)) == NULL)
+		return false;		// out of memory
+
+	/*
+		Fill to the end of the block (if there's anything to copy)
+	*/
+	compress_into(holding_pen, docno);
+	if (docid_node_length - docid_node_used != 0)
+		memcpy(underlying->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
+	remain = needed - (docid_node_length - docid_node_used);
+
+	/*
+		Move to the buffer we just allocated
+	*/
+	stats->bytes_allocated_for_docids += docid_node_length = new_docid_node_length;
+	*buffer = underlying = underlying->next;
+
+	/*
+		And place the "extra" into the beginning of the new block
+	*/
+	memcpy(underlying->data, holding_pen + (needed - remain), remain);
+	docid_node_used = remain;
+	}
+else
+	{
+	compress_into(underlying->data + docid_node_used, docno);
+	docid_node_used += needed;
+	}
+
+return true;
+}
+
+/*
 	ANT_MEMORY_INDEX_HASH_NODE::COPY_FROM_EARLY_BUFFERS_INTO_LISTS()
 	----------------------------------------------------------------
 */
@@ -138,10 +187,9 @@ return needed;
 */
 long ANT_memory_index_hash_node::insert_docno(long long docno, unsigned char initial_term_frequency)
 {
-unsigned char holding_pen[16];	//	we only actually need 10 (64 bits / 7 bit bytes);
-long needed, remain;
-size_t new_tf_node_length, new_docid_node_length;
-ANT_postings_piece *document_buffer, *tf_buffer;
+long posting;
+size_t new_tf_node_length;
+ANT_postings_piece *document_buffer, *tf_buffer, *document_head;
 
 /*
 	First check to see if we can put the result into the "early" structure
@@ -168,8 +216,9 @@ if (document_frequency <= early.postings_held_in_vocab)
 
 		/*
 			allocate buffers for the postings and the term frequencies, check for low memory, then add to the stats
+			we need the head because buffer may be moved along
 		*/
-		document_buffer = new_postings_piece(postings_initial_length);
+		document_head = document_buffer = new_postings_piece(postings_initial_length);
 		tf_buffer = new_postings_piece(postings_initial_length);
 
 		if (document_buffer == NULL || tf_buffer == NULL)
@@ -181,13 +230,18 @@ if (document_frequency <= early.postings_held_in_vocab)
 		/*
 			Copy from the early array into the buffer
 		*/
-		docid_node_used = copy_from_early_buffers_into_lists(document_buffer->data, tf_buffer->data);
+		for (posting = 0; posting < early.postings_held_in_vocab; posting++)
+			if (append_docno(early.docid[posting], &document_buffer))
+				tf_buffer->data[posting] = early.tf[posting];
+			else
+				return false;
 		tf_node_used = early.postings_held_in_vocab;
 
 		/*
 			Now shove the lists into the internal structures (thus overwriting the "early" objects due to the union)
 		*/
-		in_memory.docid_list_head = in_memory.docid_list_tail = document_buffer;
+		in_memory.docid_list_head = document_head;
+		in_memory.docid_list_tail = document_buffer;
 		in_memory.tf_list_head = in_memory.tf_list_tail = tf_buffer;
 
 		/*
@@ -221,41 +275,8 @@ if (tf_node_used + 1 > tf_node_length)
 	In this case we need to allocate the new memory before we copy the first part of the compressed
 	buffer because otherwise we might incorrectly write it to disk.
 */
-needed = compress_bytes_needed(docno);
-if (docid_node_used + needed > docid_node_length)
-	{
-	/*
-		Allocate the new block
-	*/
-	new_docid_node_length = (size_t)(postings_growth_factor * docid_node_length);
-	if ((in_memory.docid_list_tail->next = new_postings_piece(new_docid_node_length)) == NULL)
-		return false;		// out of memory
-
-	/*
-		Fill to the end of the block (if there's anything to copy)
-	*/
-	compress_into(holding_pen, docno);
-	if (docid_node_length - docid_node_used != 0)
-		memcpy(in_memory.docid_list_tail->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
-	remain = needed - (docid_node_length - docid_node_used);
-
-	/*
-		Move to the buffer we just allocated
-	*/
-	stats->bytes_allocated_for_docids += docid_node_length = new_docid_node_length;
-	in_memory.docid_list_tail = in_memory.docid_list_tail->next;
-
-	/*
-		And place the "extra" into the beginning of the new block
-	*/
-	memcpy(in_memory.docid_list_tail->data, holding_pen + (needed - remain), remain);
-	docid_node_used = remain;
-	}
-else
-	{
-	compress_into(in_memory.docid_list_tail->data + docid_node_used, docno);
-	docid_node_used += needed;
-	}
+if (!append_docno(docno, &in_memory.docid_list_tail))
+	return false;
 
 /*
 	Update of the docid buffer worked, we know there is memory for the tf-buffer, and so we update

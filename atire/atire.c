@@ -707,7 +707,7 @@ atire->set_processing_strategy(params.processing_strategy);
 
 // set the pregren to use for accumulator initialisation
 if (params.ranking_function != ANT_indexer_param_block_rank::PREGEN)
-	atire->get_search_engine()->results_list->set_pregen(atire->get_pregen());
+	atire->get_search_engine()->results_list->set_pregen(atire->get_pregen(), params.pregen_ratio);
 return atire;
 }
 

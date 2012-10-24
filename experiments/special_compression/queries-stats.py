@@ -104,11 +104,11 @@ if __name__ == '__main__':
 	print 'Collection size: %d' % collection_size
 	print 'Total unique terms: %s' % total_unique_terms
 	percentage = total_terms_occurred_once / total_unique_terms * 100
-	print 'Total terms occurred once: %d (%%%.2f)' % (total_terms_occurred_once, percentage)
+	print 'Total terms occurred once: %d (%.2f%%)' % (total_terms_occurred_once, percentage)
 	percentage = total_terms_occurred_twice / total_unique_terms * 100
-	print 'total terms occurred twice: %d (%%%.2f)' % (total_terms_occurred_twice, percentage)
+	print 'total terms occurred twice: %d (%.2f%%)' % (total_terms_occurred_twice, percentage)
 	percentage = (total_terms_occurred_once + total_terms_occurred_twice) / total_unique_terms * 100;
-	print 'total terms occurred either once or twice: %d (%%%.2f)' % (total_terms_occurred_once + total_terms_occurred_twice, percentage)
+	print 'total terms occurred either once or twice: %d (%.2f%%)' % (total_terms_occurred_once + total_terms_occurred_twice, percentage)
 
 	dict_file.close()
 
@@ -151,7 +151,7 @@ if __name__ == '__main__':
 		twice_term_happend = False
 		for t in items:
 			queries_terms[t] = 1
-			found, term_tuple = bsearch(all_dict_terms, t, 0, all_dict_terms_len)
+			found, term_tuple = bsearch(all_dict_terms, t, 0, all_dict_terms_len-1)
 			if found:
 				term, document_freq = term_tuple
 				if document_freq == 1:

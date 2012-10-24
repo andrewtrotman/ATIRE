@@ -3,7 +3,7 @@
 	------------------------
 	Convert an INEX 2008 / 2009 topic file into an ANT query file
 */
-#include "/ant/source/str.h"
+#include "../source/str.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
