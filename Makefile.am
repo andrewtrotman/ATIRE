@@ -608,7 +608,8 @@ libatire_index_la_LIBADD = -L. -latire_index_param
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-noinst_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doclist
+bin_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doclist
+
 
 atire_SOURCES = \
 	$(ATIRE_DIR)/atire.c \

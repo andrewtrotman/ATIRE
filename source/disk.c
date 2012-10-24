@@ -15,6 +15,7 @@
 #include <errno.h>
 #include "disk.h"
 #include "file_internals.h"
+#include "bool.h"
 
 /*
 	ANT_DISK::READ_ENTIRE_FILE()
@@ -153,4 +154,20 @@ if (**(current_line - 1) == '\0')
 
 return line_list;
 }
+
+/*
+	ANT_DISK::IS_DIRECTORY()
+	--------------------------
+*/
+long ANT_disk::is_directory(char* filename) {
+#ifdef _MSC_VER
+	return (FILE_ATTRIBUTE_DIRECTORY & GetFileAttributes(filename)) ? TRUE : FALSE;
+#else
+	struct stat st;
+	if(stat(filename, &st) == 0)
+		return S_ISDIR(st.st_mode);
+	return FALSE;
+#endif
+}
+
 
