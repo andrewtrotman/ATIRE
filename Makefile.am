@@ -90,8 +90,26 @@ core_sources =  \
 	$(SRC_DIR)/directory_iterator_warc.c \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.c \
 	$(SRC_DIR)/directory_iterator_spam_filter.c \
+	$(SRC_DIR)/directory_iterator_scrub.c \
+	$(SRC_DIR)/directory_iterator_filter.c \
+	$(SRC_DIR)/directory_iterator_mime_filter.c \
 	$(SRC_DIR)/disk.c \
 	$(SRC_DIR)/event.c \
+	$(SRC_DIR)/evaluation_binary_preference.c \
+	$(SRC_DIR)/evaluation.c \
+	$(SRC_DIR)/evaluation_discounted_cumulative_gain.c \
+	$(SRC_DIR)/evaluation_expected_reciprocal_rank.c \
+	$(SRC_DIR)/evaluation_intent_aware_expected_reciprocal_rank.c \
+	$(SRC_DIR)/evaluation_intent_aware_mean_average_precision.c \
+	$(SRC_DIR)/evaluation_intent_aware_normalised_discounted_cumulative_gain.c \
+	$(SRC_DIR)/evaluation_intent_aware_precision_at_n.c \
+	$(SRC_DIR)/evaluation_mean_average_generalised_precision_document.c \
+	$(SRC_DIR)/evaluation_mean_average_precision.c \
+	$(SRC_DIR)/evaluation_normalised_discounted_cumulative_gain.c \
+	$(SRC_DIR)/evaluation_precision_at_n.c \
+	$(SRC_DIR)/evaluation_rank_effectiveness.c \
+	$(SRC_DIR)/evaluation_success_at_n.c \
+	$(SRC_DIR)/evaluator.c \
 	$(SRC_DIR)/file.c \
 	$(SRC_DIR)/file_internals.c \
 	$(SRC_DIR)/file_memory.c \
@@ -108,8 +126,8 @@ core_sources =  \
 	$(SRC_DIR)/instream_deflate.c \
 	$(SRC_DIR)/instream_file.c \
 	$(SRC_DIR)/instream_lzo.c \
+	$(SRC_DIR)/instream_scrub.c \
 	$(SRC_DIR)/maths.c \
-	$(SRC_DIR)/mean_average_precision.c \
 	$(SRC_DIR)/memory.c \
 	$(SRC_DIR)/memory_index.c \
 	$(SRC_DIR)/memory_indexer.c \
@@ -138,6 +156,10 @@ core_sources =  \
 	$(SRC_DIR)/query_parse_tree.c \
 	$(SRC_DIR)/ranking_function_bm25.c \
 	$(SRC_DIR)/ranking_function_bose_einstein.c \
+	$(SRC_DIR)/ranking_function_dfi_idf.c \
+	$(SRC_DIR)/ranking_function_dfi.c \
+	$(SRC_DIR)/ranking_function_dfiw_idf.c \
+	$(SRC_DIR)/ranking_function_dfiw.c \
 	$(SRC_DIR)/ranking_function.c \
 	$(SRC_DIR)/ranking_function_dfree.c \
 	$(SRC_DIR)/ranking_function_divergence.c \
@@ -161,6 +183,7 @@ core_sources =  \
 	$(SRC_DIR)/relevance_feedback_factory.c \
 	$(SRC_DIR)/relevance_feedback_topsig.c \
 	$(SRC_DIR)/relevant_document.c \
+	$(SRC_DIR)/relevant_subtopic.c \
 	$(SRC_DIR)/relevant_topic.c \
 	$(SRC_DIR)/search_engine_accumulator.c \
 	$(SRC_DIR)/search_engine.c \
@@ -279,6 +302,9 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.h \
 	$(SRC_DIR)/directory_iterator_warc.h \
 	$(SRC_DIR)/directory_iterator_spam_filter.h \
+	$(SRC_DIR)/directory_iterator_scrub.h \
+	$(SRC_DIR)/directory_iterator_filter.h \
+	$(SRC_DIR)/directory_iterator_mime_filter.h \
 	$(SRC_DIR)/disk_directory.h \
 	$(SRC_DIR)/disk.h \
 	$(SRC_DIR)/encode_char_8bit.h \
@@ -291,6 +317,21 @@ core_noinst_headers = \
 	$(SRC_DIR)/encode_char_printable_ascii.h \
 	$(SRC_DIR)/event.h \
 	$(SRC_DIR)/event_internals.h \
+	$(SRC_DIR)/evaluation_binary_preference.h \
+	$(SRC_DIR)/evaluation_discounted_cumulative_gain.h \
+	$(SRC_DIR)/evaluation_expected_reciprocal_rank.h \
+	$(SRC_DIR)/evaluation.h \
+	$(SRC_DIR)/evaluation_intent_aware_expected_reciprocal_rank.h \
+	$(SRC_DIR)/evaluation_intent_aware_mean_average_precision.h \
+	$(SRC_DIR)/evaluation_intent_aware_normalised_discounted_cumulative_gain.h \
+	$(SRC_DIR)/evaluation_intent_aware_precision_at_n.h \
+	$(SRC_DIR)/evaluation_mean_average_generalised_precision_document.h \
+	$(SRC_DIR)/evaluation_mean_average_precision.h \
+	$(SRC_DIR)/evaluation_normalised_discounted_cumulative_gain.h \
+	$(SRC_DIR)/evaluation_precision_at_n.h \
+	$(SRC_DIR)/evaluation_rank_effectiveness.h \
+	$(SRC_DIR)/evaluation_success_at_n.h \
+	$(SRC_DIR)/evaluator.h \
 	$(SRC_DIR)/fence.h \
 	$(SRC_DIR)/file.h \
 	$(SRC_DIR)/file_internals.h \
@@ -317,8 +358,8 @@ core_noinst_headers = \
 	$(SRC_DIR)/instream_file.h \
 	$(SRC_DIR)/instream.h \
 	$(SRC_DIR)/instream_lzo.h \
+	$(SRC_DIR)/instream_scrub.h \
 	$(SRC_DIR)/maths.h \
-	$(SRC_DIR)/mean_average_precision.h \
 	$(SRC_DIR)/memory.h \
 	$(SRC_DIR)/memory_indexer.h \
 	$(SRC_DIR)/memory_indexer_node.h \
@@ -365,6 +406,10 @@ core_noinst_headers = \
 	$(SRC_DIR)/query_parse_tree.h \
 	$(SRC_DIR)/ranking_function_bm25.h \
 	$(SRC_DIR)/ranking_function_bose_einstein.h \
+	$(SRC_DIR)/ranking_function_dfi_idf.h \
+	$(SRC_DIR)/ranking_function_dfi.h \
+	$(SRC_DIR)/ranking_function_dfiw_idf.h \
+	$(SRC_DIR)/ranking_function_dfiw.h \
 	$(SRC_DIR)/ranking_function_dfree.h \
 	$(SRC_DIR)/ranking_function_divergence.h \
 	$(SRC_DIR)/ranking_function_dlh13.h \
@@ -395,6 +440,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/relevance_feedback_topsig.h \
 	$(SRC_DIR)/relevant_document.h \
 	$(SRC_DIR)/relevant_document_passage.h \
+	$(SRC_DIR)/relevant_subtopic.h \
 	$(SRC_DIR)/relevant_topic.h \
 	$(SRC_DIR)/search_engine_accumulator.h \
 	$(SRC_DIR)/search_engine_btree_leaf.h \
