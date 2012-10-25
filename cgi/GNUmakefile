@@ -1,10 +1,11 @@
 CC := g++
 #CFLAGS  := -O3
-CFLAGS  := -g
+CFLAGS  := -g  -I ../source
 
 SRCDIR = ../source
 OBJDIR = ../obj
 BINDIR = ../bin
+APIDIR = ../atire
 
 COMMON_SOURCES := 				\
 	../source/str.c 			\
@@ -35,6 +36,9 @@ ant_getdoc_cgi.exe: $(COMMON_OBJECTS) ant_getdoc_cgi.o
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
     	
+$(OBJDIR)/atire_api_remote.o: $(APIDIR)/atire_api_remote.c
+	$(CC) $(CFLAGS) -c $< -o $@
+	    	
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 	
