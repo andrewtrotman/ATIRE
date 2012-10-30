@@ -6,11 +6,7 @@
 #define ATIRE_API_H_
 
 #include <limits.h>
-//#include "btree_iterator.h"
-/*
- * the MAX_TERM_LENGTH should be defined somewhere where it can be accessed by "btree_iterator.h" to avoid multi-definitions
- */
-#define MAX_TERM_LENGTH (20 * 1024)
+#include "btree_iterator.h"
 
 class ANT_NEXI_ant;
 class ANT_NEXI_term_ant;
