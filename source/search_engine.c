@@ -756,46 +756,15 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 #endif // end of TOP_K_READ_AND_DECOMPRESSOR
 	stats->add_posting_read_time(stats->stop_timer(now));
 
-	//
-	// make sure the postings_buffer is not empty and then decompress it
-	//
+	/*
+		Make sure the postings_buffer is not empty and then decompress it
+	*/
 	if (verify != NULL)
 		{
 		now = stats->start_timer();
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
 		factory.decompress(the_decompressed_buffer, raw_postings_buffer, term_details->impacted_length);
 #else
-		#ifdef IMPACT_HEADER
-			//
-			// decompress the header
-			//
-			the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
-			the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
-			factory.decompress(the_impact_header->header_buffer, raw_postings_buffer+ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
-			the_impact_header->impact_value_start = the_impact_header->header_buffer;
-			the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
-			the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
-
-			//
-			// decompress the postings
-			//
-			long long sum = 0;
-			the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
-			the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
-			while(the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start) {
-				if (sum >= trim_postings_k) {
-					break;
-				}
-				factory.decompress(the_decompressed_buffer + sum,
-								   raw_postings_buffer+ the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr,
-								   *the_impact_header->doc_count_ptr);
-				sum += *the_impact_header->doc_count_ptr;
-				the_impact_header->doc_count_ptr++;
-				the_impact_header->impact_offset_ptr++;
-			}
-			the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
-
-		#else // else #ifdef IMPACT_HEADER
 		/*
 			The maximum number of postings we need to decompress in the worst case is the case where each posting has
 			a different quantised impact... that is 3*n.  But, there are only 255 possible impacts and so if n > 255
@@ -813,8 +782,42 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 				end = term_details->impacted_length;
 			}
 
-		factory.decompress(the_decompressed_buffer, raw_postings_buffer, end);
-		the_decompressed_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
+		#ifdef IMPACT_HEADER
+			/*
+				Decompress the header
+			*/
+			the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
+			the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+			factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+			the_impact_header->impact_value_start = the_impact_header->header_buffer;
+			the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
+			the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
+
+			/*
+				Decompress the postings
+			*/
+			long long sum = 0;
+			the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
+			the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
+			while (the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start)
+				{
+				/*
+					Because we can interrupt a quantum part way through (following non-impact header logic),
+					then we want to check, and modify the header so that future processing doesn't go awry
+				*/
+				if (*the_impact_header->doc_count_ptr > end)
+					*the_impact_header->doc_count_ptr = end;
+
+				factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
+				sum += *the_impact_header->doc_count_ptr;
+				end -= *the_impact_header->doc_count_ptr;
+				the_impact_header->doc_count_ptr++;
+				the_impact_header->impact_offset_ptr++;
+				}
+			the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
+		#else // else #ifdef IMPACT_HEADER
+			factory.decompress(the_decompressed_buffer, raw_postings_buffer, end);
+			the_decompressed_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
 		#endif // end of #ifdef IMPACT_HEADER
 #endif // end of #ifdef TOP_K_READ_AND_DECOMPRESSOR
 		stats->add_decompress_time(stats->stop_timer(now));
