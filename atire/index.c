@@ -408,8 +408,12 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::PKZIP)
 		source = new ANT_directory_iterator_pkzip(argv[param], ANT_directory_iterator::READ_FILE);
 	else
-		source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
-
+		{
+		if (ANT_disk::is_directory(argv[param]))
+			source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
+		else
+			source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
+		}
 	if (param_block.filter_filename != NULL)
 		source = new ANT_directory_iterator_filter(source, param_block.filter_filename, ANT_directory_iterator_filter::READ_FILE);
 

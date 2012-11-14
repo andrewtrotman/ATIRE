@@ -90,8 +90,26 @@ core_sources =  \
 	$(SRC_DIR)/directory_iterator_warc.c \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.c \
 	$(SRC_DIR)/directory_iterator_spam_filter.c \
+	$(SRC_DIR)/directory_iterator_scrub.c \
+	$(SRC_DIR)/directory_iterator_filter.c \
+	$(SRC_DIR)/directory_iterator_mime_filter.c \
 	$(SRC_DIR)/disk.c \
 	$(SRC_DIR)/event.c \
+	$(SRC_DIR)/evaluation_binary_preference.c \
+	$(SRC_DIR)/evaluation.c \
+	$(SRC_DIR)/evaluation_discounted_cumulative_gain.c \
+	$(SRC_DIR)/evaluation_expected_reciprocal_rank.c \
+	$(SRC_DIR)/evaluation_intent_aware_expected_reciprocal_rank.c \
+	$(SRC_DIR)/evaluation_intent_aware_mean_average_precision.c \
+	$(SRC_DIR)/evaluation_intent_aware_normalised_discounted_cumulative_gain.c \
+	$(SRC_DIR)/evaluation_intent_aware_precision_at_n.c \
+	$(SRC_DIR)/evaluation_mean_average_generalised_precision_document.c \
+	$(SRC_DIR)/evaluation_mean_average_precision.c \
+	$(SRC_DIR)/evaluation_normalised_discounted_cumulative_gain.c \
+	$(SRC_DIR)/evaluation_precision_at_n.c \
+	$(SRC_DIR)/evaluation_rank_effectiveness.c \
+	$(SRC_DIR)/evaluation_success_at_n.c \
+	$(SRC_DIR)/evaluator.c \
 	$(SRC_DIR)/file.c \
 	$(SRC_DIR)/file_internals.c \
 	$(SRC_DIR)/file_memory.c \
@@ -108,8 +126,8 @@ core_sources =  \
 	$(SRC_DIR)/instream_deflate.c \
 	$(SRC_DIR)/instream_file.c \
 	$(SRC_DIR)/instream_lzo.c \
+	$(SRC_DIR)/instream_scrub.c \
 	$(SRC_DIR)/maths.c \
-	$(SRC_DIR)/mean_average_precision.c \
 	$(SRC_DIR)/memory.c \
 	$(SRC_DIR)/memory_index.c \
 	$(SRC_DIR)/memory_indexer.c \
@@ -138,6 +156,10 @@ core_sources =  \
 	$(SRC_DIR)/query_parse_tree.c \
 	$(SRC_DIR)/ranking_function_bm25.c \
 	$(SRC_DIR)/ranking_function_bose_einstein.c \
+	$(SRC_DIR)/ranking_function_dfi_idf.c \
+	$(SRC_DIR)/ranking_function_dfi.c \
+	$(SRC_DIR)/ranking_function_dfiw_idf.c \
+	$(SRC_DIR)/ranking_function_dfiw.c \
 	$(SRC_DIR)/ranking_function.c \
 	$(SRC_DIR)/ranking_function_dfree.c \
 	$(SRC_DIR)/ranking_function_divergence.c \
@@ -161,6 +183,7 @@ core_sources =  \
 	$(SRC_DIR)/relevance_feedback_factory.c \
 	$(SRC_DIR)/relevance_feedback_topsig.c \
 	$(SRC_DIR)/relevant_document.c \
+	$(SRC_DIR)/relevant_subtopic.c \
 	$(SRC_DIR)/relevant_topic.c \
 	$(SRC_DIR)/search_engine_accumulator.c \
 	$(SRC_DIR)/search_engine.c \
@@ -279,6 +302,9 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.h \
 	$(SRC_DIR)/directory_iterator_warc.h \
 	$(SRC_DIR)/directory_iterator_spam_filter.h \
+	$(SRC_DIR)/directory_iterator_scrub.h \
+	$(SRC_DIR)/directory_iterator_filter.h \
+	$(SRC_DIR)/directory_iterator_mime_filter.h \
 	$(SRC_DIR)/disk_directory.h \
 	$(SRC_DIR)/disk.h \
 	$(SRC_DIR)/encode_char_8bit.h \
@@ -291,6 +317,21 @@ core_noinst_headers = \
 	$(SRC_DIR)/encode_char_printable_ascii.h \
 	$(SRC_DIR)/event.h \
 	$(SRC_DIR)/event_internals.h \
+	$(SRC_DIR)/evaluation_binary_preference.h \
+	$(SRC_DIR)/evaluation_discounted_cumulative_gain.h \
+	$(SRC_DIR)/evaluation_expected_reciprocal_rank.h \
+	$(SRC_DIR)/evaluation.h \
+	$(SRC_DIR)/evaluation_intent_aware_expected_reciprocal_rank.h \
+	$(SRC_DIR)/evaluation_intent_aware_mean_average_precision.h \
+	$(SRC_DIR)/evaluation_intent_aware_normalised_discounted_cumulative_gain.h \
+	$(SRC_DIR)/evaluation_intent_aware_precision_at_n.h \
+	$(SRC_DIR)/evaluation_mean_average_generalised_precision_document.h \
+	$(SRC_DIR)/evaluation_mean_average_precision.h \
+	$(SRC_DIR)/evaluation_normalised_discounted_cumulative_gain.h \
+	$(SRC_DIR)/evaluation_precision_at_n.h \
+	$(SRC_DIR)/evaluation_rank_effectiveness.h \
+	$(SRC_DIR)/evaluation_success_at_n.h \
+	$(SRC_DIR)/evaluator.h \
 	$(SRC_DIR)/fence.h \
 	$(SRC_DIR)/file.h \
 	$(SRC_DIR)/file_internals.h \
@@ -317,8 +358,8 @@ core_noinst_headers = \
 	$(SRC_DIR)/instream_file.h \
 	$(SRC_DIR)/instream.h \
 	$(SRC_DIR)/instream_lzo.h \
+	$(SRC_DIR)/instream_scrub.h \
 	$(SRC_DIR)/maths.h \
-	$(SRC_DIR)/mean_average_precision.h \
 	$(SRC_DIR)/memory.h \
 	$(SRC_DIR)/memory_indexer.h \
 	$(SRC_DIR)/memory_indexer_node.h \
@@ -365,6 +406,10 @@ core_noinst_headers = \
 	$(SRC_DIR)/query_parse_tree.h \
 	$(SRC_DIR)/ranking_function_bm25.h \
 	$(SRC_DIR)/ranking_function_bose_einstein.h \
+	$(SRC_DIR)/ranking_function_dfi_idf.h \
+	$(SRC_DIR)/ranking_function_dfi.h \
+	$(SRC_DIR)/ranking_function_dfiw_idf.h \
+	$(SRC_DIR)/ranking_function_dfiw.h \
 	$(SRC_DIR)/ranking_function_dfree.h \
 	$(SRC_DIR)/ranking_function_divergence.h \
 	$(SRC_DIR)/ranking_function_dlh13.h \
@@ -395,6 +440,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/relevance_feedback_topsig.h \
 	$(SRC_DIR)/relevant_document.h \
 	$(SRC_DIR)/relevant_document_passage.h \
+	$(SRC_DIR)/relevant_subtopic.h \
 	$(SRC_DIR)/relevant_topic.h \
 	$(SRC_DIR)/search_engine_accumulator.h \
 	$(SRC_DIR)/search_engine_btree_leaf.h \
@@ -521,12 +567,13 @@ library_headers = \
 	$(ATIRE_DIR)/atire_engine_result_set_export_TREC.h
 	
 ATIRE_CORE_LIBS = -L. -latire_core
-ATIRE_LIBS = -L. -latire_api
+ATIRE_API_LIBS = -L. -latire_api
 	
 includedir = $(prefix)/include
 include_HEADERS = $(library_headers)
 		
-lib_LTLIBRARIES = libatire_core.la libatire_api.la libatire_index_param.la libatire_index.la
+noinst_LTLIBRARIES = libatire_core.la libatire_index_param.la libatire_index.la
+lib_LTLIBRARIES = libatire_api.la
 
 libatire_core_la_SOURCES = $(core_sources)
 libatire_core_la_LIBADD = -ldl -lpthread
@@ -539,7 +586,7 @@ libatire_api_la_SOURCES = $(ATIRE_DIR)/atire_api.c \
 				$(ATIRE_DIR)/atire_engine_result_set_export_TREC.c
 				
 libatire_api_la_DEPENDENCIES = libatire_core.la
-libatire_api_la_LIBADD = -L. -latire_core
+libatire_api_la_LIBADD = libatire_core.la
 #libatire_api_la_LIBFLAGS = -static
 #libatire_api_ladir = $(prefix)/lib
 #libatire_api_la_HEADERS = $(library_headers)
@@ -558,18 +605,19 @@ libatire_index_la_CFLAGS = $(AM_CFLAGS) -DATIRE_LIBRARY
 libatire_index_la_DEPENDENCIES = libatire_index_param.la
 libatire_index_la_LIBADD = -L. -latire_index_param
 
-#ATIRE_LIBS = -L. -latire_core -ldl -lpthread
+#ATIRE_API_LIBS = -L. -latire_core -ldl -lpthread
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-noinst_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doclist
+bin_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doclist
+
 
 atire_SOURCES = \
 	$(ATIRE_DIR)/atire.c \
 	$(ATIRE_PARAM_LIST)
 #	$(ATIRE_DIR)/indexer_param_block_rank.c \
 #	$(ATIRE_DIR)/ant_param_block.c
-atire_LDADD = ${ATIRE_CORE_LIBS} ${ATIRE_LIBS} -L. -latire_index_param
+atire_LDADD = ${ATIRE_CORE_LIBS} ${ATIRE_API_LIBS} -L. -latire_index_param
 #atire_LDFLAGS = -rdynamic
 atire_LDFLAGS = -static -export-dynamic
 atire_DEPENDENCIES = libatire_core.la libatire_index_param.la
@@ -580,7 +628,7 @@ atire_DEPENDENCIES = libatire_core.la libatire_index_param.la
 #	$(INDEX_PARAM_LIST)
 #	$(ATIRE_DIR)/indexer_param_block_rank.c \
 #	$(ATIRE_DIR)/atire_param_block.c
-#atire_atire_LDADD = ${ATIRE_LIBS}
+#atire_atire_LDADD = ${ATIRE_API_LIBS}
 #atire_atire_LDFLAGS = -rdynamic
 #atire_atire_LDFLAGS = -static -export-dynamic
 #atire_atire_DEPENDENCIES = libatire_api.la
@@ -590,7 +638,7 @@ atire_client_SOURCES = \
 	$(ATIRE_DIR)/atire_client.c \
 	$(ATIRE_DIR)/atire_client_param_block.c
 #atire_client_HEADERS = atire_client_param_block.h
-atire_client_LDADD = ${ATIRE_LIBS}
+atire_client_LDADD = ${ATIRE_API_LIBS}
 #atire_client_LDFLAGS = -rdynamic
 atire_client_LDFLAGS = -static -export-dynamic
 atire_client_DEPENDENCIES = libatire_api.la
@@ -604,7 +652,7 @@ atire_broker_SOURCES = \
 #atire_broker_HEADERS = $(ATIRE_DIR)/atire_broker_param_block.h \
 	$(ATIRE_DIR)/atire_broke_engine.h \
 	$(ATIRE_DIR)/atire_broke.h
-atire_broker_LDADD = ${ATIRE_LIBS}
+atire_broker_LDADD = ${ATIRE_API_LIBS}
 #atire_broker_LDFLAGS = -rdynamic
 atire_broker_LDFLAGS = -static -export-dynamic
 atire_broker_DEPENDENCIES = libatire_api.la
@@ -635,7 +683,7 @@ get_doclist_DEPENDENCIES = libatire_core.la
 #atire_plugins_SOURCES = $(ATIRE_DIR)/plugins.c \
 					$(ATIRE_DIR)/plugin_manager.c
 #atire_plugins_CFLAGS = $(AM_CFLAGS)
-#atire_plugins_LDADD = ${ATIRE_LIBS}
+#atire_plugins_LDADD = ${ATIRE_API_LIBS}
 #atire_plugins_LDFLAGS = -rdynamic
 #atire_plugins_DEPENDENCIES = 
 	
@@ -645,42 +693,42 @@ get_doclist_DEPENDENCIES = libatire_core.la
 #################################################################################
 #filelist_SOURCES = $(TOOLDIR)/filelist.c
 #filelist_LDFLAGS = -rdynamic
-#filelist_LDADD = ${ATIRE_LIBS}
+#filelist_LDADD = ${ATIRE_API_LIBS}
 #filelist_DEPENDENCIES = libatire_core.la
 #
 #topic_tree_cas_SOURCES = $(TOOLDIR)/topic_tree_cas.c
 #topic_tree_cas_LDFLAGS = -rdynamic
-#topic_tree_cas_LDADD = ${ATIRE_LIBS}
+#topic_tree_cas_LDADD = ${ATIRE_API_LIBS}
 #topic_tree_cas_DEPENDENCIES = libatire_core.la
 #
 #bindiff_SOURCES = $(TOOLDIR)/bindiff.c
 #bindiff_LDFLAGS = -rdynamic
-#bindiff_LDADD = ${ATIRE_LIBS}
+#bindiff_LDADD = ${ATIRE_API_LIBS}
 #bindiff_DEPENDENCIES = libatire_core.la
 #
 #term_frequencies_SOURCES = $(TOOLDIR)/term_frequencies.c
 #term_frequencies_LDFLAGS = -rdynamic
-#term_frequencies_LDADD = ${ATIRE_LIBS}
+#term_frequencies_LDADD = ${ATIRE_API_LIBS}
 #term_frequencies_DEPENDENCIES = libatire_core.la
 #
 #topic_tree_SOURCES = $(TOOLDIR)/topic_tree.c
 #topic_tree_LDFLAGS = -rdynamic
-#topic_tree_LDADD = ${ATIRE_LIBS}
+#topic_tree_LDADD = ${ATIRE_API_LIBS}
 #topic_tree_DEPENDENCIES = libatire_core.la
 #
 #INEXqrels_to_run_SOURCES = $(TOOLDIR)/INEXqrels_to_run.c
 #INEXqrels_to_run_LDFLAGS = -rdynamic
-#INEXqrels_to_run_LDADD = ${ATIRE_LIBS}
+#INEXqrels_to_run_LDADD = ${ATIRE_API_LIBS}
 #INEXqrels_to_run_DEPENDENCIES = libatire_core.la
 #
 #foltbl_to_aspt_SOURCES = $(TOOLDIR)/foltbl_to_aspt.c
 #foltbl_to_aspt_LDFLAGS = -rdynamic
-#foltbl_to_aspt_LDADD = ${ATIRE_LIBS}
+#foltbl_to_aspt_LDADD = ${ATIRE_API_LIBS}
 #foltbl_to_aspt_DEPENDENCIES = libatire_core.la
 #
 #zipf_graph_SOURCES = $(TOOLDIR)/zipf_graph.c
 #zipf_graph_LDFLAGS = -rdynamic
-#zipf_graph_LDADD = ${ATIRE_LIBS}
+#zipf_graph_LDADD = ${ATIRE_API_LIBS}
 #zipf_graph_DEPENDENCIES = libatire_core.la
 #
 #test_stop_SOURCES = $(TOOLDIR)/test_stop.c \
@@ -695,39 +743,39 @@ get_doclist_DEPENDENCIES = libatire_core.la
 #link_extract_SOURCES = $(LTWDIR)/link_extract.c
 ##link_extract_LDFLAGS = -rdynamic
 #link_extract_LDFLAGS = -static
-#link_extract_LDADD = ${ATIRE_LIBS}
+#link_extract_LDADD = ${ATIRE_API_LIBS}
 #link_extract_DEPENDENCIES = libatire_core.la
 #
 #link_index_SOURCES = $(LTWDIR)/link_index.c
 ##link_index_LDFLAGS = -rdynamic
 #link_index_LDFLAGS = -static
-#link_index_LDADD = ${ATIRE_LIBS}
+#link_index_LDADD = ${ATIRE_API_LIBS}
 #link_index_DEPENDENCIES = libatire_core.la
 #
 #link_this_SOURCES = $(LTWDIR)/link_this.c
 ##link_this_LDFLAGS = -rdynamic
 #link_this_LDFLAGS = -static
-#link_this_LDADD = ${ATIRE_LIBS}
+#link_this_LDADD = ${ATIRE_API_LIBS}
 #link_this_DEPENDENCIES = libatire_core.la
 #
 #link_index_merge_SOURCES = $(LTWDIR)/link_index_merge.c
 #link_index_merge_LDFLAGS = -rdynamic
-#link_index_merge_LDADD = ${ATIRE_LIBS}
+#link_index_merge_LDADD = ${ATIRE_API_LIBS}
 #link_index_merge_DEPENDENCIES = libatire_core.la
 #
 #link_extract_pass2_SOURCES = $(LTWDIR)/link_extract_pass2.c
 ##link_extract_pass2_LDFLAGS = -rdynamic
 #link_extract_pass2_LDFLAGS = -static
-#link_extract_pass2_LDADD = ${ATIRE_LIBS}
+#link_extract_pass2_LDADD = ${ATIRE_API_LIBS}
 #link_extract_pass2_DEPENDENCIES = libatire_core.la
 #
 #link_length_correlate_SOURCES = $(LTWDIR)/link_length_correlate.c
 #link_length_correlate_LDFLAGS = -rdynamic
-#link_length_correlate_LDADD = ${ATIRE_LIBS}
+#link_length_correlate_LDADD = ${ATIRE_API_LIBS}
 #link_length_correlate_DEPENDENCIES = libatire_core.la
 #
 #remove_head_SOURCES = $(LTWDIR)/remove_head.c
 #remove_head_LDFLAGS = -rdynamic
-#remove_head_LDADD = ${ATIRE_LIBS}
+#remove_head_LDADD = ${ATIRE_API_LIBS}
 #remove_head_DEPENDENCIES = libatire_core.la
 #

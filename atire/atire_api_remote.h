@@ -6,6 +6,12 @@
 #define ATIRE_API_REMOTE_H_
 
 class ANT_socket;
+
+#ifndef NULL
+	#define NULL 0
+#endif
+
+
 /*
 	class ATIRE_API_REMOTE
 	----------------------

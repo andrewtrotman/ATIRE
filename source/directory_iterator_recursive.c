@@ -259,36 +259,46 @@ file_list = handle_stack;
 	char *slash = last_char;
 	char *got;
 
-	while (slash != wildcard)
+	if (!ANT_disk::is_directory(wildcard))
 		{
-		if(*slash == '/')
-			break;
-		slash--;
-		last_slash_idx--;
-		}
-	if (last_slash_idx <= 0) 		// the wildcard will be wildcard itself
-		{
-		if (getcwd(path_buffer, sizeof(path_buffer)) == NULL)
-			return NULL;
-
-		sprintf(path_buffer, "%s/", path_buffer); /* As we will later use this to mark dirs */
-		}
-	else // the wildcard will be after slash
-		{
-		strncpy(path_buffer, wildcard, last_slash_idx + 1);
-		path_buffer[last_slash_idx+1] = '\0';
-		if (last_char == slash)
-			strcpy(this->wildcard, "*");
-		else
+		while (slash != wildcard)
 			{
-			char *wildcard_start = slash;
-			wildcard_start++;
-			long wildcard_len = last_char - wildcard_start + 1;
-			// trim the wildcard path string to contain only the wildcard characters
-			strncpy(this->wildcard, wildcard_start, wildcard_len);
-			this->wildcard[wildcard_len] = '\0';
+			if(*slash == '/')
+				break;
+			slash--;
+			last_slash_idx--;
+			}
+
+		if (last_slash_idx <= 0) 		// the wildcard will be wildcard itself
+			{
+			if (getcwd(path_buffer, sizeof(path_buffer)) == NULL)
+				return NULL;
+
+			sprintf(path_buffer, "%s/", path_buffer); /* As we will later use this to mark dirs */
+			}
+		else // the wildcard will be after slash
+			{
+			strncpy(path_buffer, wildcard, last_slash_idx + 1);
+			path_buffer[last_slash_idx+1] = '\0';
+			if (last_char == slash)
+				strcpy(this->wildcard, "*");
+			else
+				{
+				char *wildcard_start = slash;
+				wildcard_start++;
+				long wildcard_len = last_char - wildcard_start + 1;
+				// trim the wildcard path string to contain only the wildcard characters
+				strncpy(this->wildcard, wildcard_start, wildcard_len);
+				this->wildcard[wildcard_len] = '\0';
+				}
 			}
 		}
+	else
+		{
+		strcpy(path_buffer, wildcard);
+		strcpy(wildcard, "*");
+		}
+
 	if ((got = first_match_wildcard(path_buffer)) == NULL)
 		return NULL;
 

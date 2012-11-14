@@ -88,6 +88,14 @@
 #endif
 
 /*
+ * This created just for the purpose of automatic atire api library checking
+ * for configure.ac, it must use AC_LANG(C++) to force library check with g++
+ */
+extern "C" {
+	void atire_api_check() {};
+}
+
+/*
 	ATIRE_API::ATIRE_API()
 	----------------------
 */
