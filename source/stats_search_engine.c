@@ -21,7 +21,7 @@ initialise();
 */
 void ANT_stats_search_engine::initialise(void)
 {
-stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = 0;
+thesaurus_reencode_time = thesaurus_time = stemming_reencode_time = stemming_time = dictionary_time = count_relevant_time = 0;
 sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
 disk_bytes_read_on_init = disk_bytes_read_on_search = 0;
 queries = 0;
@@ -43,6 +43,8 @@ this->count_relevant_time += which->count_relevant_time;
 this->dictionary_time += which->dictionary_time;
 this->stemming_time += which->stemming_time;
 this->stemming_reencode_time += which->stemming_reencode_time;
+this->thesaurus_time += which->thesaurus_time;
+this->thesaurus_reencode_time += which->thesaurus_reencode_time;
 this->queries++;
 this->disk_bytes_read_on_init += which->disk_bytes_read_on_init;
 this->disk_bytes_read_on_search += which->disk_bytes_read_on_search;

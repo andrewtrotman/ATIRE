@@ -287,10 +287,16 @@ for (current = 0; current < this->relevant_document_list_length; current++)
 relevant_topic_list = (ANT_relevant_topic *)memory->malloc(sizeof(*relevant_topic_list) * relevant_topic_list_length);
 
 /*
-	Now for each topic, find the number of subtopics and allocate space for them
+	Now for each topic, find the number of subtopics and allocate space for them, + 1 because
+	0-based vs. 1-based subtopic indexing
+
+	0-based: will get the correct number
+	1-based: will get an extra 1 that won't be found when doing evaluations,
+					 so it does not matter
 */
 last_topic = this->relevant_document_list[0].topic;
-number_of_subtopics = last_subtopic = this->relevant_document_list[0].subtopic;
+last_subtopic = this->relevant_document_list[0].subtopic;
+number_of_subtopics = last_subtopic + 1;
 current_topic = 0;
 for (current = 1; current < this->relevant_document_list_length; current++)
 	{
@@ -309,12 +315,13 @@ for (current = 1; current < this->relevant_document_list_length; current++)
 		/*
 			By definition if we have a new topic, we _must_ have a new subtopic
 			We have subtopics sorted in descending order, so the first subtopic will
-			have the biggest subtopic id, diversity subtopics are 1-indexed, and we
-			cover the non-diversity qrels which have a 0 subtopic as a special case.
+			have the biggest subtopic id
+
+			0-based: will get the correct number
+			1-based: will get an extra 1 that won't be found when doing evaluations,
+			         so it does not matter
 		*/
-		number_of_subtopics = this->relevant_document_list[current].subtopic;
-		if (number_of_subtopics == 0)
-			number_of_subtopics = 1;
+		number_of_subtopics = this->relevant_document_list[current].subtopic + 1;
 		last_subtopic = -1;
 		}
 	}

@@ -70,7 +70,7 @@ ANT_search_engine_result::~ANT_search_engine_result()
 {
 delete heapk;
 delete include_set;
-delete pregen_scores;
+delete [] pregen_scores;
 }
 
 /*
