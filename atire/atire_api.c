@@ -200,32 +200,32 @@ char *slish, *slash, *slosh, *start, *dot;
 if ((document_list_buffer = ANT_disk::read_entire_file(doclist_filename)) == NULL)
 	return NULL;
 
-//filename_list_buffer = strnew(document_list_buffer);
-id_list = *filename_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
+filename_list_buffer = strnew(document_list_buffer);
+*filename_list = ANT_disk::buffer_to_list(filename_list_buffer, documents_in_id_list);
 
-//id_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
+id_list = ANT_disk::buffer_to_list(document_list_buffer, documents_in_id_list);
 
 /*
 	This code converts filenames into DOCIDs
 */
-//for (current = id_list; *current != NULL; current++)
-//	{
-//	slish = *current;
-//	slash = strrchr(*current, '/');
-//	slosh = strrchr(*current, '\\');
-//	start = ANT_max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
-//	if (*start != '\0')		// avoid blank lines at the end of the file
-//		{
-//		if ((dot = strchr(start, '.')) != NULL)
-//			*dot = '\0';
-//		*current = start == *current ? *current : start + 1;		// +1 to skip over the '/'
-//		}
-//	}
+for (current = id_list; *current != NULL; current++)
+	{
+	slish = *current;
+	slash = strrchr(*current, '/');
+	slosh = strrchr(*current, '\\');
+	start = ANT_max(slish, slash, slosh);		// get the posn of the final dir seperator (or the start of the string)
+	if (*start != '\0')		// avoid blank lines at the end of the file
+		{
+		if ((dot = strchr(start, '.')) != NULL)
+			*dot = '\0';
+		*current = start == *current ? *current : start + 1;		// +1 to skip over the '/'
+		}
+	}
 /*
 	The caller must delete these two on termination
 */
 *mem1 = document_list_buffer;
-*mem2 = document_list_buffer;
+*mem2 = filename_list_buffer;
 
 /*
 	Now return the list
