@@ -801,6 +801,9 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
 			while (the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start)
 				{
+				if (sum >= trim_postings_k)
+					break;
+
 				/*
 					Because we can interrupt a quantum part way through (following non-impact header logic),
 					then we want to check, and modify the header so that future processing doesn't go awry

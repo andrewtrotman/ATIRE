@@ -675,13 +675,6 @@ if (!should_prune(root))
 				decompressed_postings_list[1] = temp;
 				}
 
-			/*
-				So that the impacts end up being in different
-				sections so that reading back in works correctly
-			*/
-			if (root->string[0] == '~')
-				serialised_tfs[0] += serialised_tfs[1];
-
 			root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
 
 			/*
