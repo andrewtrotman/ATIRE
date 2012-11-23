@@ -10,7 +10,6 @@
 #include <string.h>
 #include "pragma.h"
 #include "search_engine_accumulator.h"
-#include "bitstring.h"
 #include "search_engine_init_flags.h"
 #include "search_engine_init_flags_boolean.h"
 #include "heap.h"
@@ -38,7 +37,6 @@ public:			// remove this line later
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 
 	ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
-	ANT_bitstring *include_set;
 
 	ANT_search_engine_accumulator *pregen_scores;
 	double pregen_ratio;
@@ -137,61 +135,80 @@ public:
 	template <class T> inline void set_rsv(long long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
-	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
+	ANT_search_engine_accumulator::ANT_accumulator_t old_value;
 	ANT_search_engine_accumulator::compare cmp;
 
 	init_partial_accumulators(index);
-	old_val = which->get_rsv();
-	which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t) score  * pregen_ratio);
 
 	if (results_list_length < top_k)
 		{
-		if (old_val == pregen_scores[index].get_rsv())
-			{
+		/*
+			We haven't got enough to worry about the heap yet, so just plonk it in
+		*/
+		old_value = which->get_rsv();
+		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score  * pregen_ratio);
+
+		if (old_value == pregen_scores[index].get_rsv())
 			accumulator_pointers[results_list_length++] = which;
-			include_set->unsafe_setbit(index);
-			}
 		if (results_list_length == top_k)
 			heapk->build_min_heap();
 		}
-	else if (include_set->unsafe_getbit(index))
-			heapk->min_update(which);
-	else if (cmp(which, accumulator_pointers[0]) > 0)
+	else if (cmp(which, accumulator_pointers[0]) >= 0)
 		{
-		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
-		heapk->min_insert(which);
-		include_set->unsafe_setbit(index);
+		/*
+			We were already in the heap, so update
+		*/
+		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score  * pregen_ratio);
+		heapk->min_update(which);
+		}
+	else
+		{
+		/*
+			We weren't in the heap, but we could get put there
+		*/
+		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score * pregen_ratio);
+		if (cmp(which, accumulator_pointers[0]) > 0)
+			heapk->min_insert(which);
 		}
 	}
 
 	template <class T> inline void add_rsv(long long index, T score)
 	{
 	ANT_search_engine_accumulator *which = accumulator + index;
-	ANT_search_engine_accumulator::ANT_accumulator_t old_val;
-	ANT_search_engine_accumulator::ANT_accumulator_t new_val;
+	ANT_search_engine_accumulator::ANT_accumulator_t old_value;
 	ANT_search_engine_accumulator::compare cmp;
 
 	init_partial_accumulators(index);
-	old_val = which->get_rsv();
-	new_val = which->add_rsv(score * pregen_ratio);
 
 	if (results_list_length < top_k)
 		{
-		if (old_val == pregen_scores[index].get_rsv())
-			{
+		/*
+			We haven't got enough to worry about the heap yet, so just plonk it in
+		*/
+		old_value = which->get_rsv();
+		which->add_rsv(score * pregen_ratio);
+
+		if (old_value == pregen_scores[index].get_rsv())
 			accumulator_pointers[results_list_length++] = which;
-			include_set->unsafe_setbit(index);
-			}
 		if (results_list_length == top_k)
 			heapk->build_min_heap();
 		}
-	else if (include_set->unsafe_getbit(index))
-		heapk->min_update(which);
-	else if (cmp(which, accumulator_pointers[0]) > 0)
+	else if (cmp(which, accumulator_pointers[0]) >= 0)
 		{
-		include_set->unsafe_unsetbit((long)(accumulator_pointers[0] - accumulator));
-		heapk->min_insert(which);
-		include_set->unsafe_setbit(index);
+		/*
+			We were already in the heap, so update
+		*/
+		which->add_rsv(score * pregen_ratio);
+		heapk->min_update(which);
+		}
+	else
+		{
+		/*
+			We weren't in the heap, but we could get put there
+		*/
+		which->add_rsv(score * pregen_ratio);
+		if (cmp(which, accumulator_pointers[0]) > 0)
+			heapk->min_insert(which);
 		}
 	}
 

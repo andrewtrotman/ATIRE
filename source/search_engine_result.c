@@ -58,8 +58,6 @@ top_k = 10 + 1;
 top_k = 10;			// this is given a true value later and the heap is then resized - but in the mean time give it a default of 10
 #endif
 heapk = new ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare>(*accumulator_pointers, top_k);
-include_set = new ANT_bitstring();
-include_set->set_length(documents);
 }
 
 /*
@@ -69,7 +67,6 @@ include_set->set_length(documents);
 ANT_search_engine_result::~ANT_search_engine_result()
 {
 delete heapk;
-delete include_set;
 delete [] pregen_scores;
 }
 
@@ -102,7 +99,6 @@ this->top_k = top_k;
 #endif
 results_list_length = 0;
 heapk->set_size(top_k);
-include_set->zero();
 }
 
 /*
