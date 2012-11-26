@@ -50,10 +50,20 @@ public:
 	long read(int8_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 	long read(uint8_t *data) { return read((unsigned char *)data, sizeof(*data)); }
 
+	virtual unsigned char *read_return_ptr(unsigned char *data, long long size);
+	unsigned char *read_return_ptr(char *data, long long size) { return read_return_ptr((unsigned char *)data, size); }
+	unsigned char *read_return_ptr(int64_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(uint64_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(int32_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(uint32_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(int16_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(uint16_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(int8_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+	unsigned char *read_return_ptr(uint8_t *data) { return read_return_ptr((unsigned char *)data, sizeof(*data)); }
+
 	virtual long long tell(void) { return file_position; }
 	virtual void seek(long long offset_from_start_of_file);
 	virtual long long file_length(void);
-	virtual long direct_read(unsigned char **data, long long size) { return read(*data, size); }
 
 	long long get_bytes_read(void) { return bytes_read; }
 	long long get_bytes_written(void) { return bytes_written; }

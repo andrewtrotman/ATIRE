@@ -49,9 +49,7 @@ private:
 	long string_length_of_longest_term;
 	long long highest_df;
 	const char *index_filename;
-#ifdef DIRECT_MEMORY_READ
 	long memory_model;
-#endif
 
 	/*
 		If the index contains the documents then we need to deserialise the positions and store them
@@ -161,7 +159,7 @@ public:
 	char *get_document(char *destination, unsigned long *destination_length, long long id); // id is the document number
 	long long get_document(char **destination, unsigned long **destination_length, long long from) { return get_documents(destination, destination_length, from, from + 1); }
 	long long get_documents(char **destination, unsigned long **destination_length, long long from, long long to); // from and to are relative to the results list.
-	
+
 	char **get_document_filenames(char *buffer, unsigned long *buf_length);
 };
 

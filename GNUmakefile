@@ -58,10 +58,6 @@ USE_TERM_LOCAL_MAX_IMPACT := 0
 # for profiling purpose
 USE_PRINT_TIME_NO_CONVERSION := 0
 
-# when the whole index file is read into memory, then there is no need
-# to memcpy for read.
-USE_DIRECT_MEMORY_READ := 0
-
 # construct impact headers for easy handling the quantums of the postings
 USE_IMPACT_HEADER := 1
 
@@ -241,10 +237,6 @@ endif
 
 ifeq ($(USE_PRINT_TIME_NO_CONVERSION), 1)
 	CFLAGS += -DPRINT_TIME_NO_CONVERSION
-endif
-
-ifeq ($(USE_DIRECT_MEMORY_READ), 1)
-	CFLAGS += -DDIRECT_MEMORY_READ
 endif
 
 ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)

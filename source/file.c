@@ -295,6 +295,35 @@ return internals->read_file_64(internals->fp, data, size);
 }
 
 /*
+	ANT_FILE::READ()
+	----------------
+*/
+unsigned char *ANT_file::read_return_ptr(unsigned char *data, long long size)
+{
+/*
+	Keep track of the number of bytes we've been asked to write
+*/
+bytes_read += size;
+
+/*
+	Flush the write cache
+*/
+flush();
+/*
+	Take note of the new file position (at the end of the read)
+*/
+file_position += size;		// this is where we'll be at the end of the read
+
+/*
+	And now perform the read
+*/
+if (internals->read_file_64(internals->fp, data, size) > 0)
+	return data;
+else
+	return NULL;
+}
+
+/*
 	ANT_FILE::SEEK()
 	----------------
 */

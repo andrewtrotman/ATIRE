@@ -143,7 +143,8 @@ else
 	leaf_start = leaf_buffer;
 	file->seek(got->start);
 
-	file->direct_read((unsigned char **)&leaf_start, got->length);
+	//file->direct_read((unsigned char **)&leaf_start, got->length);
+	leaf_start = (char *)file->read_return_ptr((unsigned char *)leaf_start, got->length);
 
 	leaf_end = leaf_start + got->length;
 	current_term = head = synset;

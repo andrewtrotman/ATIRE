@@ -50,9 +50,7 @@ if (memory_model)
 else
 	index = new ANT_file;
 
-#ifdef DIRECT_MEMORY_READ
-	this->memory_model = memory_model;
-#endif
+this->memory_model = memory_model;
 }
 
 /*
@@ -133,17 +131,11 @@ if (four_byte != ANT_file_signature)
 */
 //printf("B-tree header is %lld bytes on disk\n", end - term_header);
 index->seek(term_header);
-#ifdef DIRECT_MEMORY_READ
-	if (this->memory_model)
-		block = NULL;
-	else
-		block = (unsigned char *)memory->malloc((long)(end - term_header));
-
-	index->direct_read(&block, (long)(end - term_header));
-#else
+if (this->memory_model) // INDEX_IN_MEMORY, no need to allocate memory
+	block = NULL;
+else
 	block = (unsigned char *)memory->malloc((long)(end - term_header));
-	index->read(block, (long)(end - term_header));
-#endif
+block = index->read_return_ptr(block, (long)(end - term_header));
 
 /*
 	The first sizeof(int64_t) bytes of the header are the number of nodes in the root
@@ -195,19 +187,13 @@ btree_leaf_buffer = (unsigned char *)memory->malloc((long)max_header_block_size)
 get_postings_details("~length", &collection_details);
 documents = collection_details.local_document_frequency;
 
-#ifdef DIRECT_MEMORY_READ
-	if (this->memory_model)
-		postings_buffer = NULL;
-	else
-		{
-		postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
-		memory->realign();
-		}
-#else
+if (this->memory_model) //INDEX_IN_MEMORY, no need to allocate memory
+	postings_buffer = NULL;
+else
+	{
 	postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
 	memory->realign();
-#endif
-
+	}
 
 #ifdef IMPACT_HEADER
 	impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*impact_header.header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
@@ -513,7 +499,6 @@ else
 */
 unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
 {
-int ret = TRUE;
 #ifdef SPECIAL_COMPRESSION
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
@@ -601,22 +586,15 @@ int ret = TRUE;
 	else
 		{
 		index->seek(term_details->postings_position_on_disk);
-		#ifdef DIRECT_MEMORY_READ
-			ret = index->direct_read(&destination, term_details->postings_length);
-		#else
-			ret = index->read(destination, term_details->postings_length);
-		#endif
+		destination = index->read_return_ptr(destination, term_details->postings_length);
 		}
 #else
 	index->seek(term_details->postings_position_on_disk);
-	#ifdef DIRECT_MEMORY_READ
-		ret = index->direct_read(&destination, term_details->postings_length);
-	#else
-		ret = index->read(destination, term_details->postings_length);
-	#endif
+	destination = index->read_return_ptr(destination, term_details->postings_length);
+
 #endif
 
-if (!ret)
+if (!destination)
 	exit(printf("Error reading from index\n"));
 
 return destination;

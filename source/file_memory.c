@@ -70,15 +70,15 @@ return 1;		// success
 }
 
 /*
-	ANT_FILE_MEMORY::DIRECT_READ()
-	------------------------------
+	ANT_FILE_MEMORY::READ_RETURN_PTR()
+	----------------------------------
 	get rid of extra memory copy
 */
-long ANT_file_memory::direct_read(unsigned char **data, long long size)
+unsigned char *ANT_file_memory::read_return_ptr(unsigned char *data, long long size)
 {
-*data = buffer + file_position;
+data = buffer + file_position;
 file_position += size;
-return 1; // success
+return data;
 }
 
 /*
