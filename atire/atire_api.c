@@ -492,7 +492,7 @@ switch (function)
 		new_function = new ANT_ranking_function_DFIW_IDF(search_engine);
 		break;
 	default:
-		printf("Error: Unknown ranking function selected in ATIRE_API::set_ranking_function\n"); 
+		printf("Error: Unknown ranking function selected in ATIRE_API::set_ranking_function\n");
 		return 1;		// failure, invalid parameter
 	}
 
@@ -1005,6 +1005,16 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	}
 
 /*
+   Check if the number of terms exceed the limit
+ */
+if (terms_in_query > this->MAX_ALLOWED_TERMS_IN_QUERY)
+	{
+	printf("Exceeded the allowed number of 1024 terms per query\n");
+	exit(1);
+	}
+
+
+/*
 	Prepare an array structure for sorting
 */
 term_list = new ANT_NEXI_term_ant *[terms_in_query];
@@ -1062,15 +1072,16 @@ if (terms_in_query == 1)
 		search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 	else if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
 		{
-#ifdef SEARCH_QUANTUM_WITH_PRUNING
-		search_quantum_with_pruning(term_list, terms_in_query, ranking_function);
-#else
-		search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
-#endif
+		#ifdef SEARCH_QUANTUM_WITH_PRUNING
+			search_quantum_with_pruning(term_list, terms_in_query, ranking_function);
+		#else
+			search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
+		#endif
 		}
 	else		// This is an error case, but do term at a time anyway
 		search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
-#else
+
+#else //if IMPACT_HRADER is not defined, can only use search_term_at_a_time
 	search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 #endif
 

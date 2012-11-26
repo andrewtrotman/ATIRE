@@ -41,6 +41,7 @@ class ATIRE_API
 public:
 	enum { INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2 } ;
 	enum { QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8, QUERY_EXPANSION_INPLACE_WORDNET = 16, QUERY_EXPANSION_WORDNET = 32 } ;
+	static const int MAX_ALLOWED_TERMS_IN_QUERY = 1024;
 
 private:
 	char token_buffer[MAX_TERM_LENGTH];			// used to convert parsed string_pairs into C char * strings.
