@@ -768,14 +768,17 @@ for (i = q = 0; i < terms_in_query; i++)
 			}
 		}
 	}
+/*
+	total_quantums is pessimistic, and we might have ended up processing less quantums thanks
+	to top-k or pruning, so make total_quantums have the real value so we don't get in trouble later
+*/
+total_quantums = q;
 
 //
 //
 //
 for (q = 0; q < total_quantums; q++)
-	{
 	ranking_function->relevance_rank_one_quantum(&the_quantums[q]);
-	}
 
 //
 // free local allocated memory
