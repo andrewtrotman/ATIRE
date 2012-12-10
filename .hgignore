@@ -9,3 +9,4 @@ bin/\.*
 atire.xcodeproj/\.*
 atire.kdev4
 .kdev_include_paths
+.DS_Store
