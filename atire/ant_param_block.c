@@ -458,34 +458,34 @@ long got;
 
 switch (*which)
 	{
-	case '-': 
+	case '-':
 		focussing_algorithm = NONE;
 		snippet_algorithm = NONE;
 		title_algorithm = NONE;
 		break;
-	case 'a': 
+	case 'a':
 		focussing_algorithm = ARTICLE;
 		break;
 	case 'r':
 		focussing_algorithm = RANGE;
 		break;
-	case 'b': 
+	case 'b':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEST_TF_TAG;
 		if (*(which + 1) != '\0')
 			snippet_tag = which + 1;
 		break;
-	case 'B': 
+	case 'B':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEST_TFICF_TAG;
 		if (*(which + 1) != '\0')
 			snippet_tag = which + 1;
 		break;
-	case 'c': 
+	case 'c':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TF;
 		break;
-	case 'C': 
+	case 'C':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_TFICF;
 		break;
-	case 'f': 
+	case 'f':
 		snippet_algorithm = ANT_snippet_factory::SNIPPET_BEGINNING;
 		if (*(which + 1) != '\0')
 			snippet_tag = which + 1;
@@ -570,11 +570,15 @@ for (param = 1; param < argc; param++)
 		else if (strcmp(command, "Pt") == 0)
 			processing_strategy = TERM_AT_A_TIME;
 		else if (strcmp(command, "Pq") == 0)
+			{
 			processing_strategy = QUANTUM_AT_A_TIME;
+			// quantum-at-a-time only works when the index is in memory
+			file_or_memory = INDEX_IN_MEMORY;
+			}
 		else if (*command == 'm')
 			evaluator->add_evaluation(command + 1);
-		else if (*command == 'a') 
-			if (*(command + 1) == '\0' && param < argc - 1) 
+		else if (*command == 'a')
+			if (*(command + 1) == '\0' && param < argc - 1)
 				assessments_filename = argv[++param];
 			else
 				assessments_filename = command + 1;
@@ -589,7 +593,7 @@ for (param = 1; param < argc; param++)
 				}
 			else
 				{
-				if (*(command + 1) == '\0' && param < argc - 1) 
+				if (*(command + 1) == '\0' && param < argc - 1)
 					queries_filename = argv[++param];
 				else
 					queries_filename = command + 1;

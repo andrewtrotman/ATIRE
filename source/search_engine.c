@@ -493,6 +493,124 @@ else
 	return NULL;
 }
 
+
+#ifdef IMPACT_HEADER
+/*
+	ANT_SEARCH_ENGINE::GET_ONE_QUANTUM()
+	-------------------------------------
+*/
+unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination) {
+#ifdef SPECIAL_COMPRESSION
+	if (term_details->local_document_frequency <= 2)
+		{
+		ANT_compressable_integer *postings;
+		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
+		ANT_compressable_integer impact_two = term_details->postings_length;
+
+		// first byte of a quantum is the compression scheme, no compression for special compression
+		*destination = 0;
+		postings = (ANT_compressable_integer *)(destination + 1);
+
+		// fill in postings
+		if (the_impact_header->the_quantum_count == 1)
+			{
+			*postings++ = term_details->postings_position_on_disk >> 32;
+			if (term_details->local_document_frequency == 2)
+				*postings = term_details->impacted_length;
+			term_details->impacted_length = term_details->local_document_frequency;
+			}
+		else
+			{
+			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
+			*(unsigned char *)postings = 0; // no compression for second docid list
+			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
+			*postings = term_details->impacted_length; // second docid
+			term_details->impacted_length = 2;
+			}
+		}
+	else
+		{
+		index->seek(term_details->postings_position_on_disk + the_impact_header->beginning_of_the_postings + (long long)the_quantum->offset);
+		destination = index->read_return_ptr(destination, term_details->postings_length - the_impact_header->beginning_of_the_postings - (long long)the_quantum->offset);
+		}
+#else
+	index->seek(term_details->postings_position_on_disk + the_impact_header->beginning_of_the_postings + the_quantum->offset_ptr);
+	destination = index->read_return_ptr(destination, term_details->postings_length - the_impact_header->beginning_of_the_postings - the_quantum->offset_ptr);
+#endif // end of #ifdef SPECIAL_COMPRESSION
+
+if (!destination)
+	exit(printf("Error reading from index\n"));
+
+return destination;
+}
+
+/*
+	ANT_SEARCH_ENGINE::GET_IMPACT_HEADER()
+	--------------------------------------
+*/
+unsigned char *ANT_search_engine::get_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
+{
+#ifdef SPECIAL_COMPRESSION
+	ANT_compressable_integer *into;
+	if (term_details->local_document_frequency <= 2)
+		{
+		ANT_compressable_integer *postings;
+		uint32_t the_quantum_count = 1;
+		uint32_t beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
+		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
+		ANT_compressable_integer impact_two = term_details->postings_length;
+
+		if (impact_one != impact_two && term_details->local_document_frequency == 2)
+			the_quantum_count = 2;
+
+		beginning_of_the_postings += the_quantum_count * 3 * sizeof(ANT_compressable_integer);
+
+		((uint32_t *)destination)[4] = the_quantum_count;
+		((uint32_t *)destination)[5] = beginning_of_the_postings;
+
+		*(destination + ANT_impact_header::INFO_SIZE) = 0; // no compression for the header
+		into = (ANT_compressable_integer *)(destination + ANT_impact_header::INFO_SIZE + 1); // the beginning of the header
+
+		// impacts
+		*into++ = impact_one;
+		if (the_quantum_count == 1)
+			{
+			// document counts
+			*into++ = term_details->local_document_frequency;
+			// offsets
+			*into++ = 0;
+			}
+		else
+			{
+			*into++ = impact_two;
+			// document counts
+			*into++ = 1;
+			*into++ = 1;
+			// offsets
+			*into++ = 0;
+			*into++ = sizeof(ANT_compressable_integer) + 1; // +1 to cover byte for compression scheme
+			}
+		}
+	else
+		{
+		index->seek(term_details->postings_position_on_disk);
+		// FIXME
+		destination = index->read_return_ptr(destination, term_details->postings_length);
+		}
+#else
+	index->seek(term_details->postings_position_on_disk);
+	// FIXME
+	destination = index->read_return_ptr(destination, term_details->postings_length);
+
+#endif // end of #ifdef SPECIAL_COMPRESSION
+
+if (!destination)
+	exit(printf("Error reading from index\n"));
+
+return destination;
+}
+#endif // end of #ifdef IMPACT_HEADER
+
 /*
 	ANT_SEARCH_ENGINE::GET_POSTINGS()
 	---------------------------------
@@ -685,6 +803,90 @@ stemmed_term_details->global_document_frequency = 0;
 
 return stemmed_term_details;
 }
+
+#ifdef IMPACT_HEADER
+/*
+	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_QUANTUM()
+	--------------------------------------------------------
+*/
+void *ANT_search_engine::read_and_decompress_for_one_quantum(ANT_search_engine_btree_leaf *term_details,
+					unsigned char *raw_postings_buffer,
+					ANT_impact_header *the_impact_header,
+					ANT_quantum *the_quantum,
+					ANT_compressable_integer *the_decompressed_buffer)
+{
+void *verify = NULL;
+long long now, bytes_already_read;
+
+if (term_details != NULL && term_details->local_document_frequency > 0)
+	{
+	bytes_already_read = index->get_bytes_read();
+
+	now = stats->start_timer();
+	verify = raw_postings_buffer = get_one_quantum(term_details, the_impact_header, the_quantum, raw_postings_buffer);
+	stats->add_posting_read_time(stats->stop_timer(now));
+
+	/*
+		Make sure the postings_buffer is not empty and then decompress it
+	*/
+	if (verify != NULL)
+		{
+		now = stats->start_timer();
+		factory.decompress(the_decompressed_buffer, raw_postings_buffer, the_quantum->doc_count);
+		stats->add_decompress_time(stats->stop_timer(now));
+		}
+	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+	}
+
+return verify;
+}
+
+/*
+	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_IMPACT_HEADER()
+	--------------------------------------------------------------
+*/
+void *ANT_search_engine::read_and_decompress_for_one_impact_header(ANT_search_engine_btree_leaf *term_details,
+					unsigned char *raw_postings_buffer,
+					ANT_impact_header *the_impact_header)
+{
+void *verify = NULL;
+long long now, bytes_already_read;
+
+if (term_details != NULL && term_details->local_document_frequency > 0)
+	{
+	bytes_already_read = index->get_bytes_read();
+
+	now = stats->start_timer();
+	verify = raw_postings_buffer = get_impact_header(term_details, raw_postings_buffer);
+	stats->add_posting_read_time(stats->stop_timer(now));
+
+	/*
+		Make sure the postings_buffer is not empty and then decompress it
+	*/
+	if (verify != NULL)
+		{
+		now = stats->start_timer();
+		long long end = term_details->impacted_length;
+
+		/*
+		 Decompress the header
+		 */
+		the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
+		the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+		factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+		the_impact_header->impact_value_start = the_impact_header->header_buffer;
+		the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
+		the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
+
+		stats->add_decompress_time(stats->stop_timer(now));
+		}
+	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
+	}
+
+return verify;
+}
+#endif // end of #ifdef IMPACT_HEADER
+
 
 #ifdef IMPACT_HEADER
 /*

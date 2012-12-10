@@ -144,6 +144,8 @@ topsig_positive_ranking_function = NULL;
 topsig_negative_ranking_function = NULL;
 
 processing_strategy = ANT_ANT_param_block::TERM_AT_A_TIME;
+impact_header_buffers = NULL;
+number_of_impact_headers = 0;
 }
 
 /*
@@ -696,233 +698,103 @@ return destination;
 */
 void ATIRE_API::search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function)
 {
-long long i, q, sum;
-unsigned char *raw_postings_buffer;
-ANT_compressable_integer **decompressed_buffers;
-ANT_impact_header **impact_headers;
+long long i;
 long long current_term, total_quantums = 0;
 ANT_NEXI_term_ant *term_string;
-ANT_quantum *the_quantums;
+ANT_quantum the_quantum;
 void *verify = NULL;
-
-raw_postings_buffer = (unsigned char *)malloc(search_engine->postings_buffer_length);
-
-//
-// allocate an array of impact headers and decompressed buffers for all the terms
-//
-impact_headers = (ANT_impact_header **)malloc(sizeof(*impact_headers) * terms_in_query);
-decompressed_buffers = (ANT_compressable_integer **)malloc(sizeof(ANT_compressable_integer *) * terms_in_query);
-for (i = 0; i < terms_in_query; i++)
-	{
-	impact_headers[i] = (ANT_impact_header *)malloc(sizeof(**impact_headers));
-	impact_headers[i]->header_buffer = (ANT_compressable_integer *)malloc(sizeof(*impact_headers[0]->header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
-	decompressed_buffers[i] = (ANT_compressable_integer *)malloc(sizeof(**decompressed_buffers) * (search_engine->documents + ANT_COMPRESSION_FACTORY_END_PADDING));
-	}
+ANT_max_quantum *current_max = NULL;
+ANT_impact_header *current_impact_header = NULL;
 
 //
-// read all the postings and decompress them
+// read all the postings and get the decompressed impact headers
 //
+heap_items = 0;
 for (current_term = 0, total_quantums = 0; current_term < terms_in_query; current_term++)
 	{
 	term_string = term_list[current_term];
-	verify = search_engine->read_and_decompress_for_one_term(&term_string->term_details, raw_postings_buffer, impact_headers[current_term], decompressed_buffers[current_term]);
-	//make sure the term was found in the dictionary
-	if (term_string->term_details.local_collection_frequency == 0)
-		continue;
-	total_quantums += impact_headers[current_term]->the_quantum_count;
-	}
 
-//
-// create the quantum array
-//
-the_quantums = (ANT_quantum *)malloc(sizeof(*the_quantums) * total_quantums);
-for (i = q = 0; i < terms_in_query; i++)
-	{
-	term_string = term_list[i];
+	// after calling the function, the header_info and impact header are stored in the impact_header_buffers[current_term]
+	verify = search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details,
+																							raw_postings_buffer,
+																							impact_header_buffers[current_term]);
 	//make sure the term was found in the dictionary
 	if (term_string->term_details.local_collection_frequency != 0)
 		{
-		impact_headers[i]->impact_value_ptr = impact_headers[i]->impact_value_start;
-		impact_headers[i]->doc_count_ptr = impact_headers[i]->doc_count_start;
-		sum = 0;
-		while (impact_headers[i]->doc_count_ptr < impact_headers[i]->doc_count_trim_ptr)
-			{
-			the_quantums[q].impact_value = *impact_headers[i]->impact_value_ptr;
-			the_quantums[q].doc_count = *impact_headers[i]->doc_count_ptr;
-			the_quantums[q].offset_ptr = decompressed_buffers[i] + sum;
-			the_quantums[q].term_details = &term_string->term_details;
+		impact_header_buffers[current_term]->impact_value_ptr = impact_header_buffers[current_term]->impact_value_start;
+		impact_header_buffers[current_term]->doc_count_ptr = impact_header_buffers[current_term]->doc_count_start;
+		impact_header_buffers[current_term]->impact_offset_ptr = impact_header_buffers[current_term]->impact_offset_start;
 
-			// paramters for calling relevance_rank_one_quantum
-			the_quantums[q].accumulator = search_engine->results_list;
-			the_quantums[q].tf = the_quantums[q].impact_value;
-			the_quantums[q].the_quantum = the_quantums[q].offset_ptr;
-			the_quantums[q].quantum_end = the_quantums[q].offset_ptr + the_quantums[q].doc_count;
-			the_quantums[q].trim_point = search_engine->trim_postings_k;
-			the_quantums[q].prescalar = 1.0;
-			the_quantums[q].postscalar = 1.0;
+		total_quantums += impact_header_buffers[current_term]->the_quantum_count;
 
-			sum += *impact_headers[i]->doc_count_ptr;
-			impact_headers[i]->impact_value_ptr++;
-			impact_headers[i]->doc_count_ptr++;
-			q++;
-			}
+		// set up the heap of max quantum
+		max_quantums[heap_items].current_max_quantum = *impact_header_buffers[current_term]->impact_value_ptr;
+		max_quantums[heap_items].quantum_count = impact_header_buffers[current_term]->the_quantum_count;
+		max_quantums[heap_items].the_impact_header = impact_header_buffers[current_term];
+		max_quantums[heap_items].term_details = &term_string->term_details;
+		max_quantums_pointers[heap_items] = &max_quantums[heap_items];
+		heap_items++;
 		}
 	}
-/*
-	total_quantums is pessimistic, and we might have ended up processing less quantums thanks
-	to top-k or pruning, so make total_quantums have the real value so we don't get in trouble later
-*/
-total_quantums = q;
+
+// set the correct number of items to keep track in the heap and build the heap
+quantum_heap->set_size(heap_items);
+quantum_heap->build_max_heap();
 
 //
+// process the quantum in descending order of impact values
 //
-//
-for (q = 0; q < total_quantums; q++)
-	ranking_function->relevance_rank_one_quantum(&the_quantums[q]);
-
-//
-// free local allocated memory
-//
-free(the_quantums);
-for (i = 0; i < terms_in_query; i++)
-	{
-	free(decompressed_buffers[i]);
-	free(impact_headers[i]->header_buffer);
-	free(impact_headers[i]);
-	}
-free(decompressed_buffers);
-free(impact_headers);
-
-}
-
-#ifdef SEARCH_QUANTUM_WITH_PRUNING
-/*
-	ATIRE_API::SEARCH_QUANTUM_WITH_PRUNING()
-	----------------------------------------
-*/
-void ATIRE_API::search_quantum_with_pruning(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function)
-{
-long long i, q;
-unsigned char *raw_postings_buffer;
-ANT_compressable_integer **decompressed_buffers;
-ANT_impact_header **impact_headers;
-long long current_term, total_quantums = 0;
-ANT_NEXI_term_ant *term_string;
-void *verify = NULL;
-
-raw_postings_buffer = (unsigned char *)malloc(search_engine->postings_buffer_length);
-
-//
-// allocate an array of impact headers and decompressed buffers for all the terms
-//
-impact_headers = (ANT_impact_header **)malloc(sizeof(*impact_headers) * terms_in_query);
-decompressed_buffers = (ANT_compressable_integer **)malloc(sizeof(ANT_compressable_integer *) * terms_in_query);
-for (i = 0; i < terms_in_query; i++)
-	{
-	impact_headers[i] = (ANT_impact_header *)malloc(sizeof(**impact_headers));
-	impact_headers[i]->header_buffer = (ANT_compressable_integer *)malloc(sizeof(*impact_headers[0]->header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
-	decompressed_buffers[i] = (ANT_compressable_integer *)malloc(sizeof(**decompressed_buffers) * (search_engine->documents + ANT_COMPRESSION_FACTORY_END_PADDING));
-	}
-
-//
-// read all the postings and decompress them
-//
-for (current_term = 0, total_quantums = 0; current_term < terms_in_query; current_term++)
-	{
-	term_string = term_list[current_term];
-	verify = search_engine->read_and_decompress_for_one_term(&term_string->term_details, raw_postings_buffer, impact_headers[current_term], decompressed_buffers[current_term]);
-	//make sure the term was found in the dictionary
-	if (term_string->term_details.local_collection_frequency == 0)
-		continue;
-	total_quantums += impact_headers[current_term]->the_quantum_count;
-	}
-
-
-//
-// create the quantum array
-//
-long long current_max;
-ANT_quantum max_quantum;
-max_quantum.accumulator = search_engine->results_list;
-max_quantum.trim_point = search_engine->trim_postings_k;
-max_quantum.prescalar = 1.0;
-max_quantum.postscalar = 1.0;
-
-// initialise the pointers and sums
-for (i = 0; i < terms_in_query; i++)
-	{
-	impact_headers[i]->impact_value_ptr = impact_headers[i]->impact_value_start;
-	impact_headers[i]->doc_count_ptr = impact_headers[i]->doc_count_start;
-	impact_headers[i]->sum = 0;
-	}
-
-q = 0;
-while (q < total_quantums)
+the_quantum.accumulator = search_engine->results_list;
+the_quantum.trim_point = search_engine->trim_postings_k;
+the_quantum.prescalar = 1.0;
+the_quantum.postscalar = 1.0;
+while (heap_items > 0)
 	{
 	//
-	// search for the current max quantum
+	// process the current max quantum in the heap
 	//
-	current_max = -1;
-	for (i = 0; i < terms_in_query; i++)
+	current_max = max_quantums_pointers[0];
+	current_impact_header = current_max->the_impact_header;
+	//printf("(%d) current max quantum: %lld, quantum_count: %lld\n", q, current_max->current_max_quantum, current_max->quantum_count);
+
+	the_quantum.impact_value = *current_impact_header->impact_value_ptr;
+	the_quantum.doc_count = *current_impact_header->doc_count_ptr;
+	the_quantum.offset = *current_impact_header->impact_offset_ptr;
+	the_quantum.term_details = current_max->term_details;
+	the_quantum.tf = the_quantum.impact_value;
+
+	//if (search_engine->results_list->heap_is_full() && the_quantum.impact_value < search_engine->results_list->get_diff_k_and_k_plus_1())
+	//	break;
+
+	search_engine->read_and_decompress_for_one_quantum(current_max->term_details, raw_postings_buffer, current_impact_header, &the_quantum, one_decompressed_quantum);
+	the_quantum.the_quantum = one_decompressed_quantum;
+	the_quantum.quantum_end = one_decompressed_quantum + the_quantum.doc_count;
+
+
+
+	ranking_function->relevance_rank_one_quantum(&the_quantum);
+
+	//
+	// update the pointers and insert the current max quantum for the term into the heap
+	//
+	current_max->quantum_count--;
+	if (current_max->quantum_count > 0)
 		{
-		term_string = term_list[i];
-		//make sure the term was found in the dictionary
-		if (term_string->term_details.local_collection_frequency != 0)
-			{
-			if (impact_headers[i]->doc_count_ptr < impact_headers[i]->doc_count_trim_ptr)
-				{
-				if (current_max < 0)
-					current_max = i;
-				else if (*impact_headers[i]->impact_value_ptr > *impact_headers[current_max]->impact_value_ptr)
-					current_max  = i;
-				}
-			}
+		current_impact_header->impact_value_ptr++;
+		current_impact_header->impact_offset_ptr++;
+		current_impact_header->doc_count_ptr++;
+		current_max->current_max_quantum = *current_impact_header->impact_value_ptr;
+		quantum_heap->max_update_maximum(current_max);
 		}
-
-	//
-	// process the current max quantum
-	//
-	if (current_max >= 0)
+	else
 		{
-		max_quantum.impact_value = *impact_headers[current_max]->impact_value_ptr;
-		max_quantum.doc_count = *impact_headers[current_max]->doc_count_ptr;
-		max_quantum.offset_ptr = decompressed_buffers[current_max] + impact_headers[current_max]->sum;
-		term_string = term_list[current_max];
-		max_quantum.term_details = &term_string->term_details;
-		// paramters for calling relevance_rank_one_quantum
-		max_quantum.tf = max_quantum.impact_value;
-		max_quantum.the_quantum = max_quantum.offset_ptr;
-		max_quantum.quantum_end = max_quantum.offset_ptr + max_quantum.doc_count;
-
-		if (search_engine->results_list->heap_is_full() && max_quantum.impact_value < search_engine->results_list->get_diff_k_and_k_plus_1())
-			break;
-
-		ranking_function->relevance_rank_one_quantum(&max_quantum);
-
-		//printf("total_quantums: %lld, the max quantum: (%ld, %lld), current_max:%ld\n", total_quantums, (long)max_quantum.impact_value, q, current_max);
-		impact_headers[current_max]->sum += *impact_headers[current_max]->doc_count_ptr;
-		impact_headers[current_max]->impact_value_ptr++;
-		impact_headers[current_max]->doc_count_ptr++;
-		q++;
+		// pseudo-remove the item
+		current_max->current_max_quantum = 0;
+		quantum_heap->max_update_maximum(current_max);
+		heap_items--;
 		}
 	}
-
-
-//
-// free local allocated memory
-//
-for (i = 0; i < terms_in_query; i++)
-	{
-	free(decompressed_buffers[i]);
-	free(impact_headers[i]->header_buffer);
-	free(impact_headers[i]);
-	}
-free(decompressed_buffers);
-free(impact_headers);
-
 }
-#endif // end of #ifdef SEARCH_QUANTUM_WITH_PRUNING
-
 #endif // end of #ifdef IMPACT_HEADER
 
 /*
@@ -1074,13 +946,7 @@ if (terms_in_query == 1)
 	if (processing_strategy == ANT_ANT_param_block::TERM_AT_A_TIME)
 		search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 	else if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
-		{
-		#ifdef SEARCH_QUANTUM_WITH_PRUNING
-			search_quantum_with_pruning(term_list, terms_in_query, ranking_function);
-		#else
-			search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
-		#endif
-		}
+		search_quantum_at_a_time(term_list, terms_in_query, ranking_function);
 	else		// This is an error case, but do term at a time anyway
 		search_term_at_a_time(term_list, terms_in_query, ranking_function, expander_tf, stemmer);
 
@@ -1538,7 +1404,10 @@ long long ATIRE_API::search(char *query, long long top_k, long query_type)
 sort_top_k = top_k;
 
 search_engine->stats_initialise();
-search_engine->init_accumulators(top_k);
+if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
+	search_engine->init_accumulators(top_k == LLONG_MAX ? top_k : top_k+1);
+else
+	search_engine->init_accumulators(top_k);
 
 /*
 	Parse and do the query
@@ -1674,6 +1543,37 @@ long long ATIRE_API::set_trim_postings_k(long long static_prune_point)
 {
 return search_engine->set_trim_postings_k(static_prune_point);
 }
+
+void ATIRE_API::set_processing_strategy(long new_strategy)
+{
+long long i;
+processing_strategy = new_strategy;
+
+if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
+	{
+	memory->realign();
+	impact_header_buffers = (ANT_impact_header **)memory->malloc(MAX_ALLOWED_TERMS_IN_QUERY * sizeof(*impact_header_buffers));
+	for (i = 0; i < MAX_ALLOWED_TERMS_IN_QUERY; i++)
+		{
+		impact_header_buffers[i] = (ANT_impact_header *)malloc(sizeof(**impact_header_buffers));
+		impact_header_buffers[i]->header_buffer = (ANT_compressable_integer *)malloc(sizeof(*impact_header_buffers[0]->header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
+		}
+
+	memory->realign();
+	max_quantums = (ANT_max_quantum *)memory->malloc(MAX_ALLOWED_TERMS_IN_QUERY * sizeof(*max_quantums));
+	memory->realign();
+	max_quantums_pointers = (ANT_max_quantum **)memory->malloc(MAX_ALLOWED_TERMS_IN_QUERY * sizeof(**max_quantums_pointers));
+	memory->realign();
+	quantum_heap = new ANT_heap<ANT_max_quantum *, ANT_max_quantum::compare>(*max_quantums_pointers, MAX_ALLOWED_TERMS_IN_QUERY);
+	heap_items = 0;
+
+	memory->realign();
+	raw_postings_buffer = (unsigned char *)memory->malloc(search_engine->get_postings_buffer_length());
+	memory->realign();
+	one_decompressed_quantum = (ANT_compressable_integer *)memory->malloc(ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*one_decompressed_quantum));
+	}
+}
+
 
 /*
 	ATIRE_API::GET_DOCUMENT_COUNT()

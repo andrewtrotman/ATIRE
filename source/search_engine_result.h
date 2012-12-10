@@ -77,12 +77,10 @@ public:
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new(size_t bytes, ANT_memory *allocator);
 
-#ifdef SEARCH_QUANTUM_WITH_PRUNING
 	inline long get_diff_k_and_k_plus_1()
 	{
 		return (long)(heapk->get_second_smallest() - accumulator_pointers[0]);
 	}
-#endif
 
 	inline int heap_is_full(void) { return min_in_top_k == top_k; }
 

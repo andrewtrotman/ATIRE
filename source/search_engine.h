@@ -109,10 +109,21 @@ public:
 	void init_accumulators(long long top_k);
 	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
 	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
+#ifdef IMPACT_HEADER
+	unsigned char *get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination);
+	unsigned char *get_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
+#endif
+	long long get_postings_buffer_length() { return postings_buffer_length; }
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
 	virtual ANT_search_engine_btree_leaf *get_collection_frequency(char *base_term, ANT_stem *stem_maker, ANT_search_engine_btree_leaf *stemmed_term_details);
 #ifdef IMPACT_HEADER
+	void *read_and_decompress_for_one_quantum(ANT_search_engine_btree_leaf *term_details,
+						unsigned char *raw_postings_buffer,
+						ANT_impact_header *the_impact_header,
+						ANT_quantum *the_quantum,
+						ANT_compressable_integer *the_decompressed_buffer);
+	void *read_and_decompress_for_one_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header);
 	void *read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_compressable_integer *the_decompressed_buffer);
 #else
 	void *read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_compressable_integer *the_decompressed_buffer);

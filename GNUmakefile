@@ -61,9 +61,6 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 # construct impact headers for easy handling the quantums of the postings
 USE_IMPACT_HEADER := 1
 
-# pruning based on the max impact values of the quantums
-USE_SEARCH_QUANTUM_WITH_PRUNING := 0
-
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1
 
@@ -170,14 +167,6 @@ CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS 
 
 ifeq ($(USE_IMPACT_HEADER), 1)
 	CFLAGS += -DIMPACT_HEADER
-endif
-
-ifeq ($(USE_SEARCH_QUANTUM_WITH_PRUNING), 1)
-	ifeq ($(USE_IMPACT_HEADER), 0)
-		# The next line has to be spaces indented, not tabs. (something funny with GNU make)
-        $(error SEARCH_QUANTUM_WITH_PRUNING requries impact header to be enabled)
-	endif
-	CFLAGS += -DSEARCH_QUANTUM_WITH_PRUNING
 endif
 
 

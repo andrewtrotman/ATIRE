@@ -7,6 +7,10 @@
 
 #include <limits.h>
 #include "btree_iterator.h"
+#include "compress.h"
+#include "impact_header.h"
+#include "max_quantum.h"
+#include "heap.h"
 
 class ANT_NEXI_ant;
 class ANT_NEXI_term_ant;
@@ -31,6 +35,7 @@ class ANT_index_document_topsig;
 class ANT_index_document_topsig_signature;
 class ANT_thesaurus;
 class ANT_evaluator;
+class ANT_ANT_param_block;
 
 /*
 	class ATIRE_API
@@ -92,6 +97,16 @@ private:
 
 	long processing_strategy;									// term or quantum at a time (term by default)
 
+	// for quantum-at-a-time
+	ANT_impact_header **impact_header_buffers;
+	long long number_of_impact_headers;
+	unsigned char *raw_postings_buffer;
+	ANT_compressable_integer *one_decompressed_quantum;
+	ANT_max_quantum *max_quantums;
+	ANT_max_quantum **max_quantums_pointers;
+	ANT_heap<ANT_max_quantum *, ANT_max_quantum::compare> *quantum_heap;
+	long long heap_items;
+
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
@@ -109,7 +124,6 @@ protected:
 	void search_term_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function, ANT_thesaurus *expander_tf, ANT_stemmer *stemmer);
 #ifdef IMPACT_HEADER
 	void search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function);
-	void search_quantum_with_pruning(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function);
 #endif
 
 public:
@@ -193,7 +207,7 @@ public:
 	/*
 		Set term or quantum at a time processing of the postings lists
 	*/
-	void set_processing_strategy(long new_strategy) { processing_strategy = new_strategy; }
+	void set_processing_strategy(long new_strategy);
 
 	/*
 		Given the query, do the seach, rank, and return the number of hits

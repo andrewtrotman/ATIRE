@@ -34,10 +34,12 @@ public:
 	#define right_pos(i) (((i) << 1) + 2)
 
 	void set_size(long long size) { this->size = size; }
+	long long get_size(void) { return this->size; }
 
 	void max_heapify(long long pos);
 	void max_heapify(long long pos, long long hsize);
 	void build_max_heap(void);
+	int max_update_maximum(T key);
 	void max_heapsort(void);
 	void text_render(long long i);
 
@@ -49,6 +51,53 @@ public:
 	void min_update(T key);
 	T get_second_smallest(void);
 };
+
+/*
+	ANT_HEAP::MAX_UPDATE_MAXIMUM()
+	------------------------------
+*/
+template <typename T, typename _Compare> int ANT_heap<T, _Compare>::max_update_maximum(T key)
+{
+long long i = 0, lpos, rpos;
+
+while (i < this->size)
+	{
+	lpos = left_pos(i);
+	rpos = right_pos(i);
+
+	// check array out of bound, it's also the stopping condition
+ 	if (lpos < this->size && rpos < this->size)
+		{
+	 	if (compare(key, array[lpos]) >= 0 && compare(key, array[rpos]) >= 0)
+			break;			// we're smaller then the left and the right so we're done
+		else if (compare(array[lpos], array[rpos]) > 0)
+			{
+			array[i] = array[lpos];
+			i = lpos;
+			}
+		else
+			{
+			array[i] = array[rpos];
+			i = rpos;
+			}
+		}
+	else if (lpos < this->size)			// and rpos > this->size (because this is an else)
+		{
+		if (compare(key, array[lpos]) < 0)
+			{
+			array[i] = array[lpos];
+			i = lpos;
+			}
+		else
+			break;
+		}
+	else
+		break;			// both lpos and lpos exceed end of array
+	}
+
+array[i] = key;
+return 1;
+}
 
 /*
 	ANT_HEAP::MIN_INSERT()
