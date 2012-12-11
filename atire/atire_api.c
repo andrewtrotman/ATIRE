@@ -709,7 +709,7 @@ ANT_impact_header *current_impact_header = NULL;
 //
 // read all the postings and get the decompressed impact headers
 //
-heap_items = 0;
+heap_items = max_remaining_quantum = 0;
 for (current_term = 0, total_quantums = 0; current_term < terms_in_query; current_term++)
 	{
 	term_string = term_list[current_term];
@@ -733,6 +733,7 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 		max_quantums[heap_items].the_impact_header = impact_header_buffers[current_term];
 		max_quantums[heap_items].term_details = &term_string->term_details;
 		max_quantums_pointers[heap_items] = &max_quantums[heap_items];
+		max_remaining_quantum += max_quantums[heap_items].current_max_quantum;
 		heap_items++;
 		}
 	}
@@ -740,6 +741,8 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 // set the correct number of items to keep track in the heap and build the heap
 quantum_heap->set_size(heap_items);
 quantum_heap->build_max_heap();
+
+//printf("total_quantum: %lld\n", total_quantums);
 
 //
 // process the quantum in descending order of impact values
@@ -763,8 +766,12 @@ while (heap_items > 0)
 	the_quantum.term_details = current_max->term_details;
 	the_quantum.tf = the_quantum.impact_value;
 
-	//if (search_engine->results_list->heap_is_full() && the_quantum.impact_value < search_engine->results_list->get_diff_k_and_k_plus_1())
-	//	break;
+	//printf("max remaining quantum: %lld, diff of k and k+1: %lld\n", max_remaining_quantum, search_engine->results_list->get_diff_k_and_k_plus_1());
+	if (search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
+		{
+		//printf(">>>>>>> stopped\n");
+		break;
+		}
 
 	search_engine->read_and_decompress_for_one_quantum(current_max->term_details, raw_postings_buffer, current_impact_header, &the_quantum, one_decompressed_quantum);
 	the_quantum.the_quantum = one_decompressed_quantum;
@@ -778,12 +785,17 @@ while (heap_items > 0)
 	// update the pointers and insert the current max quantum for the term into the heap
 	//
 	current_max->quantum_count--;
+	total_quantums--;
+	// re-calculate the maximum remaining quantum
+	max_remaining_quantum -= current_max->current_max_quantum;
 	if (current_max->quantum_count > 0)
 		{
 		current_impact_header->impact_value_ptr++;
 		current_impact_header->impact_offset_ptr++;
 		current_impact_header->doc_count_ptr++;
 		current_max->current_max_quantum = *current_impact_header->impact_value_ptr;
+		max_remaining_quantum += current_max->current_max_quantum;
+		// update the heap
 		quantum_heap->max_update_maximum(current_max);
 		}
 	else
@@ -794,6 +806,8 @@ while (heap_items > 0)
 		heap_items--;
 		}
 	}
+
+//printf("remaining quantums: %lld\n", total_quantums);
 }
 #endif // end of #ifdef IMPACT_HEADER
 

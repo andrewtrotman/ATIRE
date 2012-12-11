@@ -106,6 +106,7 @@ private:
 	ANT_max_quantum **max_quantums_pointers;
 	ANT_heap<ANT_max_quantum *, ANT_max_quantum::compare> *quantum_heap;
 	long long heap_items;
+	long long max_remaining_quantum;
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);

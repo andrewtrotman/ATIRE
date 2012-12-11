@@ -79,10 +79,10 @@ public:
 
 	inline long get_diff_k_and_k_plus_1()
 	{
-		return (long)(heapk->get_second_smallest() - accumulator_pointers[0]);
+		return (long)(heapk->get_second_smallest()->get_rsv() - accumulator_pointers[0]->get_rsv());
 	}
 
-	inline int heap_is_full(void) { return min_in_top_k == top_k; }
+	inline int heap_is_full(void) { return results_list_length >= top_k; }
 
 #ifdef TWO_D_ACCUMULATORS
 	/*

@@ -6,6 +6,7 @@
 #define HEAP_H
 
 #include <math.h>
+#include <stdlib.h>
 #include "primary_cmp.h"
 
 /*
@@ -349,7 +350,7 @@ for (long long i = size/2 - 1; i >= 0; i--)
 
 /*
 	ANT_HEAP::MIN_HEAPSORT()
-	-------------------------------------------------------------------------
+	------------------------
 	Sort in descending order
 */
 template <typename T, typename _Compare> void ANT_heap<T, _Compare>::min_heapsort()
@@ -364,7 +365,7 @@ for (long long i = size-1; i >= 1; i--)
 
 /*
 	ANT_HEAP::get_second_smallest()
-	-------------------------------------------------------------------------
+	-------------------------------
 */
 template <typename T, typename _Compare> T ANT_heap<T, _Compare>::get_second_smallest() {
 	T the_left, the_right;
