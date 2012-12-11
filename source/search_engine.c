@@ -943,7 +943,35 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		{
 		now = stats->start_timer();
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
+	#ifdef IMPACT_HEADER
+		/*
+			Decompress the header
+		*/
+		the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
+		the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+		factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+		the_impact_header->impact_value_start = the_impact_header->header_buffer;
+		the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
+		the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
+
+		/*
+			Decompress the postings
+		*/
+		long long sum = 0;
+		the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
+		the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
+		while (the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start)
+			{
+
+			factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
+			sum += *the_impact_header->doc_count_ptr;
+			the_impact_header->doc_count_ptr++;
+			the_impact_header->impact_offset_ptr++;
+			}
+		the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
+	#else // else of #ifdef IMPACT_HEADER
 		factory.decompress(the_decompressed_buffer, raw_postings_buffer, term_details->impacted_length);
+	#endif // end of #ifdef IMPACT_HEADER
 #else
 		/*
 			The maximum number of postings we need to decompress in the worst case is the case where each posting has
