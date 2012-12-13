@@ -25,6 +25,11 @@ public:
 	enum { INDEX_IN_FILE, INDEX_IN_MEMORY};												// read the index from disk or load at startup
 	enum { /* NONE = 0, */ ARTICLE = 1, RANGE };										// focused retrieval method
 	enum { TERM_AT_A_TIME, QUANTUM_AT_A_TIME };											// processing strategy (term or quantum at a time)
+	enum { QUANTUM_STOP_NONE = 0,             // no early termination
+			 QUANTUM_STOP_DIFF = 1,             // early terminated based on the difference of the top k and k+1
+			 QUANTUM_STOP_DIFF_SMALLEST = 2,    // early terminated based on the smallest difference among the top k documents
+			 QUANTUM_STOP_DIFF_LARGEST = 4      // early terminated based on the difference between the largest and second largest in the top documents
+	};
 
 private:
 	int argc;
@@ -84,6 +89,7 @@ public:
 	unsigned long expander_query_types;	// types of synet expansions for query expansion
 
 	long processing_strategy;			// term-at-a-time or quantum-at-a-time
+	uint8_t quantum_stopping;           // the early termination strategy for quantum-at-a-time
 
 private:
 	void export_format(char *forum);

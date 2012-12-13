@@ -41,6 +41,55 @@ public:			// remove this line later
 	ANT_search_engine_accumulator *pregen_scores;
 	double pregen_ratio;
 	void set_pregen(ANT_pregen *pg, double ratio);
+	ANT_ACCUMULATOR_T get_smallest_diff_amoung_the_top()
+	{
+	long long i;
+	ANT_ACCUMULATOR_T smallest, diff;
+
+	qsort(accumulator_pointers, results_list_length, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::cmp_rsv);
+
+	smallest = accumulator_pointers[results_list_length - 2]->get_rsv();
+	for (i = results_list_length - 2; i > 0; i--)
+		{
+		diff = accumulator_pointers[i]->get_rsv() - accumulator_pointers[i - 1]->get_rsv();
+		if (smallest > diff)
+			smallest = diff;
+		}
+	return smallest;
+	}
+
+	ANT_ACCUMULATOR_T get_diff_between_largest_and_second_largest()
+	{
+	long long i;
+	ANT_search_engine_accumulator *largest, *second_largest;
+
+	// linear scan to find the largest and the second largest
+	// because it is a min-heap, large values are at the end of the array,
+	// so scan the array in the reverse order
+	largest = accumulator_pointers[results_list_length - 2];
+	second_largest = accumulator_pointers[results_list_length - 3];
+	if (second_largest->get_rsv() > largest->get_rsv())
+		{
+		largest = second_largest;
+		second_largest = accumulator_pointers[results_list_length - 2];
+		}
+	for (i = results_list_length - 2 - 2; i >=0; i--)
+		{
+			if (accumulator_pointers[i]->get_rsv() > second_largest->get_rsv())
+				{
+				if (accumulator_pointers[i]->get_rsv() > largest->get_rsv())
+					{
+					second_largest = largest;
+					largest = accumulator_pointers[i];
+					}
+				else
+					{
+					second_largest = accumulator_pointers[i];
+					}
+				}
+		}
+	return (largest->get_rsv() - second_largest->get_rsv());
+	}
 
 #ifdef TWO_D_ACCUMULATORS
 	#ifdef NEVER

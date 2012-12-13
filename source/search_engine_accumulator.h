@@ -49,6 +49,14 @@ public:
 		}
 	};
 
+	static int cmp_rsv(const void *a, const void *b)
+	{
+	ANT_search_engine_accumulator *one, *two;
+	one = *(ANT_search_engine_accumulator **)a;
+	two = *(ANT_search_engine_accumulator **)b;
+	return one->rsv < two->rsv ? -1 : (one->rsv == two->rsv ? 0 : 1);
+	}
+
 private:
 	ANT_accumulator_t rsv;
 

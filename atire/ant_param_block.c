@@ -141,7 +141,11 @@ puts("-F<n>           Focus-k. Focused results list accurate to the top <n> [def
 puts("-K<n>           Static pruning. Process no fewer than <n> postings (0=all) [default=0]");
 puts("-M              Load the index into memory at startup");
 puts("-Pt             Process postings lists term-at-a-time [default]");
-puts("-Pq             Process postings lists quantum-at-a-time");
+puts("-Pq:[ndsl]      Process postings lists quantum-at-a-time");
+puts("  n             no early termination for the quantum-at-a-time approach [default]");
+puts("  d             early termination based on the difference between the top k and k+1");
+puts("  s             early termination based on the smallest difference among the top documents");
+puts("  l             early termination based on the difference between the largest and second-largest documents");
 puts("");
 
 ANT_evaluator::help("METRICS", 'm'); // metrics
@@ -569,11 +573,33 @@ for (param = 1; param < argc; param++)
 			file_or_memory = INDEX_IN_MEMORY;
 		else if (strcmp(command, "Pt") == 0)
 			processing_strategy = TERM_AT_A_TIME;
-		else if (strcmp(command, "Pq") == 0)
+		else if (strncmp(command, "Pq", 2) == 0)
 			{
 			processing_strategy = QUANTUM_AT_A_TIME;
 			// quantum-at-a-time only works when the index is in memory
 			file_or_memory = INDEX_IN_MEMORY;
+			quantum_stopping = QUANTUM_STOP_NONE;
+			if ((command[2] == ':') && (command[3] != '\0'))
+				{
+					switch(command[3])
+					{
+						case 'n':
+							quantum_stopping = QUANTUM_STOP_NONE;
+							break;
+						case 'd':
+							quantum_stopping = QUANTUM_STOP_DIFF;
+							break;
+						case 's':
+							quantum_stopping = QUANTUM_STOP_DIFF | QUANTUM_STOP_DIFF_SMALLEST;
+							break;
+						case 'l':
+							quantum_stopping = QUANTUM_STOP_DIFF | QUANTUM_STOP_DIFF_LARGEST;
+							break;
+						default :
+							printf("the early termination operation \"%c\" is not supported\n", command[3]);
+							exit(0);
+					}
+				}
 			}
 		else if (*command == 'm')
 			evaluator->add_evaluation(command + 1);

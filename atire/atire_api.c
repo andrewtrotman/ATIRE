@@ -699,7 +699,7 @@ return destination;
 void ATIRE_API::search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function)
 {
 long long i;
-long long current_term, total_quantums = 0;
+long long current_term, total_quantums = 0, processed_quantums;
 ANT_NEXI_term_ant *term_string;
 ANT_quantum the_quantum;
 void *verify = NULL;
@@ -742,7 +742,11 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 quantum_heap->set_size(heap_items);
 quantum_heap->build_max_heap();
 
-//printf("total_quantum: %lld\n", total_quantums);
+//#define PRINT_QUANTUM_STATS
+
+#ifdef PRINT_QUANTUM_STATS
+printf("total quantums: %lld\n", total_quantums);
+#endif
 
 //
 // process the quantum in descending order of impact values
@@ -751,6 +755,7 @@ the_quantum.accumulator = search_engine->results_list;
 the_quantum.trim_point = search_engine->trim_postings_k;
 the_quantum.prescalar = 1.0;
 the_quantum.postscalar = 1.0;
+processed_quantums = 0;
 while (heap_items > 0)
 	{
 	//
@@ -758,7 +763,6 @@ while (heap_items > 0)
 	//
 	current_max = max_quantums_pointers[0];
 	current_impact_header = current_max->the_impact_header;
-	//printf("(%d) current max quantum: %lld, quantum_count: %lld\n", q, current_max->current_max_quantum, current_max->quantum_count);
 
 	the_quantum.impact_value = *current_impact_header->impact_value_ptr;
 	the_quantum.doc_count = *current_impact_header->doc_count_ptr;
@@ -767,10 +771,30 @@ while (heap_items > 0)
 	the_quantum.tf = the_quantum.impact_value;
 
 	//printf("max remaining quantum: %lld, diff of k and k+1: %lld\n", max_remaining_quantum, search_engine->results_list->get_diff_k_and_k_plus_1());
-	if (search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
+	if ((early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF) && search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
 		{
-		//printf(">>>>>>> stopped\n");
-		break;
+			if (early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF_SMALLEST)
+				{
+				if (max_remaining_quantum < search_engine->results_list->get_smallest_diff_amoung_the_top())
+					{
+					//printf(">>>>>>> QUANTUM_STOP_DIFF_SMALLEST stopped\n");
+					break;
+					}
+				}
+			else if (early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF_LARGEST)
+				{
+				if (max_remaining_quantum < search_engine->results_list->get_diff_between_largest_and_second_largest())
+					{
+					//printf(">>>>>>> QUANTUM_STOP_DIFF_LARGEST stopped\n");
+					break;
+					}
+				}
+			else // the QUANTUM_STOP_DIFF case
+				{
+				//printf(">>>>>>> QUANTUM_STOP_DIFF stopped\n");
+				break;
+				}
+
 		}
 
 	search_engine->read_and_decompress_for_one_quantum(current_max->term_details, raw_postings_buffer, current_impact_header, &the_quantum, one_decompressed_quantum);
@@ -778,7 +802,7 @@ while (heap_items > 0)
 	the_quantum.quantum_end = one_decompressed_quantum + the_quantum.doc_count;
 
 
-
+	processed_quantums++;
 	ranking_function->relevance_rank_one_quantum(&the_quantum);
 
 	//
@@ -807,7 +831,9 @@ while (heap_items > 0)
 		}
 	}
 
-//printf("remaining quantums: %lld\n", total_quantums);
+#ifdef PRINT_QUANTUM_STATS
+printf("processed quantums: %lld\n", processed_quantums);
+#endif
 }
 #endif // end of #ifdef IMPACT_HEADER
 
@@ -1558,10 +1584,11 @@ long long ATIRE_API::set_trim_postings_k(long long static_prune_point)
 return search_engine->set_trim_postings_k(static_prune_point);
 }
 
-void ATIRE_API::set_processing_strategy(long new_strategy)
+void ATIRE_API::set_processing_strategy(long new_strategy, uint8_t early_termination_strategy)
 {
 long long i;
 processing_strategy = new_strategy;
+early_termination = early_termination_strategy;
 
 if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
 	{

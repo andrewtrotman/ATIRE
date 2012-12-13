@@ -107,6 +107,7 @@ private:
 	ANT_heap<ANT_max_quantum *, ANT_max_quantum::compare> *quantum_heap;
 	long long heap_items;
 	long long max_remaining_quantum;
+	uint8_t early_termination;
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
@@ -208,7 +209,7 @@ public:
 	/*
 		Set term or quantum at a time processing of the postings lists
 	*/
-	void set_processing_strategy(long new_strategy);
+	void set_processing_strategy(long new_strategy, uint8_t early_termination_strategy);
 
 	/*
 		Given the query, do the seach, rank, and return the number of hits

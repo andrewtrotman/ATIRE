@@ -703,7 +703,7 @@ if ((params.query_type & ATIRE_API::QUERY_EXPANSION_WORDNET) != 0)
 atire->set_segmentation(params.segmentation);
 
 ant_init_ranking(atire, params); //Error value ignored...
-atire->set_processing_strategy(params.processing_strategy);
+atire->set_processing_strategy(params.processing_strategy, params.quantum_stopping);
 
 // set the pregren to use for accumulator initialisation
 if (params.ranking_function != ANT_indexer_param_block_rank::PREGEN)
