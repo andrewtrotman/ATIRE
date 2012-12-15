@@ -705,11 +705,12 @@ ANT_quantum the_quantum;
 void *verify = NULL;
 ANT_max_quantum *current_max = NULL;
 ANT_impact_header *current_impact_header = NULL;
+long long trim_postings_k = search_engine->get_trim_postings_k();
 
 //
 // read all the postings and get the decompressed impact headers
 //
-heap_items = max_remaining_quantum = 0;
+heap_items = max_remaining_quantum = processed_postings = 0;
 for (current_term = 0, total_quantums = 0; current_term < terms_in_query; current_term++)
 	{
 	term_string = term_list[current_term];
@@ -797,13 +798,21 @@ while (heap_items > 0)
 
 		}
 
+	processed_postings += the_quantum.doc_count;
+	// partial process of the last quantum based on the command line option "-K"
+	if (processed_postings > trim_postings_k)
+		the_quantum.doc_count = processed_postings - trim_postings_k;
+
 	search_engine->read_and_decompress_for_one_quantum(current_max->term_details, raw_postings_buffer, current_impact_header, &the_quantum, one_decompressed_quantum);
 	the_quantum.the_quantum = one_decompressed_quantum;
 	the_quantum.quantum_end = one_decompressed_quantum + the_quantum.doc_count;
 
-
 	processed_quantums++;
 	ranking_function->relevance_rank_one_quantum(&the_quantum);
+
+	// static pruning base on the command line option "-K"
+	if (processed_postings >= trim_postings_k)
+		break;
 
 	//
 	// update the pointers and insert the current max quantum for the term into the heap

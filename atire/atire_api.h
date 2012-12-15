@@ -108,6 +108,7 @@ private:
 	long long heap_items;
 	long long max_remaining_quantum;
 	uint8_t early_termination;
+	long long processed_postings;
 
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
