@@ -1612,6 +1612,13 @@ if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
 	raw_postings_buffer = (unsigned char *)memory->malloc(search_engine->get_postings_buffer_length());
 	memory->realign();
 	one_decompressed_quantum = (ANT_compressable_integer *)memory->malloc(ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*one_decompressed_quantum));
+
+	// reset the early termination strategy if the index is TF impacted
+    if (early_termination != ANT_ANT_param_block::QUANTUM_STOP_NONE && !search_engine->get_is_quantized())
+		{
+		early_termination = ANT_ANT_param_block::QUANTUM_STOP_NONE;
+		printf("WARNING: the index is not quantized, the early termination for quantum-at-a-time is reset to none.\n");
+		}
 	}
 }
 

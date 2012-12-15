@@ -113,6 +113,7 @@ public:
 	unsigned char *get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination);
 	unsigned char *get_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
 #endif
+	long long get_is_quantized() { return is_quantized; }
 	long long get_postings_buffer_length() { return postings_buffer_length; }
 
 	virtual ANT_search_engine_btree_leaf *process_one_term(char *term, ANT_search_engine_btree_leaf *term_details);
