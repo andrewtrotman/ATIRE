@@ -1,8 +1,8 @@
 #
-# Created : 09-Aug-2010
-#  Author : xjianz@gmail.com
+# Created : December-2012
+#  Author : fei@cs.otago.ac.nz
 #
-# This script is used to collect profiling stats for accumulators initialisation.
+# This script is used to collect profiling stats for quantum-at-a-time.
 #
 #
 import sys
@@ -42,7 +42,6 @@ pass # end of class profile
 
 
 def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety):
-	# we want to catch the last 14 lines for the total stats summary
 	args = list([exe_file])
 	#args.extend(['-M'])
 	#args.extend(['-Pq:d'])
@@ -51,12 +50,6 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 	args.extend(['-a', assessment_file])
 	args.extend(['-q', query_file])
 	args.extend(['-l0'])
-	#args.extend(['--postings_list_length',str( postings_list_length)])
-	#args.extend(['--num_of_terms', str(number_of_terms)])
-	#args.extend(['--width_in_bits', str(width_in_bits)])
-	#args.extend(['--seed', str(global_seed)])
-	#if (width_in_bits == 1):
-	#	args.extend(['--optimal_width'])
 
 	print "the command is: %s\n" % args
 	process = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -72,27 +65,24 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 	# create a new profile for the current run
 	prof = Profile()
 	prof.top_k = top_k
-#	prof.postings_list_legnth = postings_list_length
-#	prof.number_of_terms = number_of_terms
-#	prof.width_in_bits = width_in_bits
 	prof.query_time = 0.0
+	prof.total_quantum = 0
+	prof.processed_quantum = 0
 
 	# split the output string and process line by line
 	for l in child_stdout.split('\n'):
 		result = Profile.QUERY_TIME_PATTERN.search(l)
 		if result != None:
 			prof.query_time += int(result.group(1))
-			#print "\n\n\n>>>> %d" % prof.query_time
 		result = Profile.FINAL_MAP_PATTERN.search(l)
 		if result != None:
 			prof.final_map= float(result.group(1))
-			#print "\n\n\n>>>> %f" % prof.final_map
 		result = Profile.PROCESSED_QUANTUM_PATTERN.search(l)
 		if result != None:
-			prof.processed_quantum = int(result.group(1))
+			prof.processed_quantum += int(result.group(1))
 		result = Profile.TOTAL_QUANTUM_PATTERN.search(l)
 		if result != None:
-			prof.total_quantum = int(result.group(1))
+			prof.total_quantum += int(result.group(1))
 	pass #end of for l in
 
 	prof_list.append(prof)
@@ -179,7 +169,7 @@ def main():
 	#
 	for repeat in xrange(1,6):
 		for top_k in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-			#for top_k in [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
+		#for top_k in [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
 			print "repeat: %d, top_k: %d" % (repeat, top_k)
 			run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety)
 		pass

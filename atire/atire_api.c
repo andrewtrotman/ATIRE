@@ -812,7 +812,10 @@ while (heap_items > 0)
 
 	// static pruning base on the command line option "-K"
 	if (processed_postings >= trim_postings_k)
+		{
+		//printf(">>>>>>> trim_postings_k stopped\n");
 		break;
+		}
 
 	//
 	// update the pointers and insert the current max quantum for the term into the heap
