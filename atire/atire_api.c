@@ -9,6 +9,9 @@
 #include "atire_api.h"
 
 #include "btree_iterator.h"
+#include "compress.h"
+#include "impact_header.h"
+#include "heap.h"
 
 #include "memory.h"
 #include "disk.h"

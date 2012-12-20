@@ -6,14 +6,16 @@
 #define ATIRE_API_H_
 
 #include <limits.h>
-#include "compress.h"
-#include "impact_header.h"
-#include "max_quantum.h"
 #include "heap.h"
+#include "max_quantum.h"
+#include "compress.h"
 
 /*
-     the reason for removing btree_iterator.h here is that when the atire api headers can be installed in a system path. We need only a few api headers disclosed to users
-     and btree_iterator.h really should not be one of them (api heades). If this header is kept here, compiler will complain not being able to locate this header file.
+     the reason for removing btree_iterator.h here is that when the atire api headers can be installed in a system path, and they should be kept minimum.
+     We need only a few api headers disclosed to users, and btree_iterator.h really should not be one of them (api heades). If this header is kept here, compiler will complain not being able to locate this header file.
+     It is the same for other headers, api should provide only key access to the main search engine functions, only necessary other supporting functions
+
+     It may need a bit re-design like we better not to include too much headers in the key api header
      Any other better solutions?
  */
 #define MAX_TERM_LENGTH (20 * 1024)

@@ -5,8 +5,8 @@
 #ifndef MAX_QUANTUM_POINTER
 #define MAX_QUANTUM_POINTER
 
-#include "impact_header.h"
-#include "search_engine_btree_leaf.h"
+class ANT_impact_header;
+class ANT_search_engine_btree_leaf;
 
 class ANT_max_quantum {
 public:

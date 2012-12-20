@@ -560,6 +560,12 @@ INDEX_PARAM_LIST = $(ATIRE_DIR)/indexer_param_block.c \
 				 $(ATIRE_DIR)/indexer_param_block_stem.c
 	
 library_headers = \
+	$(SRC_DIR)/heap.h \
+	$(SRC_DIR)/max_quantum.h \
+	$(SRC_DIR)/primary_cmp.h \
+	$(SRC_DIR)/impact_header.h \
+	$(SRC_DIR)/fundamental_types.h \
+	$(SRC_DIR)/compress.h \
 	$(ATIRE_DIR)/atire_api.h \
 	$(ATIRE_DIR)/atire_api_remote.h \
 	$(ATIRE_DIR)/atire_engine_result_set.h \
