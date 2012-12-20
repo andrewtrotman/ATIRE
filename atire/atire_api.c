@@ -8,6 +8,8 @@
 #include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
 #include "atire_api.h"
 
+#include "btree_iterator.h"
+
 #include "memory.h"
 #include "disk.h"
 #include "bitstring.h"

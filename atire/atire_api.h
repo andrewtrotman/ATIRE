@@ -6,11 +6,17 @@
 #define ATIRE_API_H_
 
 #include <limits.h>
-#include "btree_iterator.h"
 #include "compress.h"
 #include "impact_header.h"
 #include "max_quantum.h"
 #include "heap.h"
+
+/*
+     the reason for removing btree_iterator.h here is that when the atire api headers can be installed in a system path. We need only a few api headers disclosed to users
+     and btree_iterator.h really should not be one of them (api heades). If this header is kept here, compiler will complain not being able to locate this header file.
+     Any other better solutions?
+ */
+#define MAX_TERM_LENGTH (20 * 1024)
 
 class ANT_NEXI_ant;
 class ANT_NEXI_term_ant;
