@@ -1,7 +1,7 @@
 /*
 	FUNDAMENTAL_TYPES.H
 	-------------------
-	Some C/C++ compilers (i.e. Microsoft Visual Studio 2008) don't have the C99 stdint.h, so we 
+	Some C/C++ compilers (i.e. Microsoft Visual Studio 2008) don't have the C99 stdint.h, so we
 	have to make the parts we need ourselves
 */
 
@@ -9,7 +9,9 @@
 #define FUNDAMENTAL_TYPES_H_
 
 #ifdef _MSC_VER
-	#define inline __forceinline
+	#if (_MSC_VER < 1700)
+		#define inline __forceinline
+	#endif
 
 	typedef char int8_t;
 	typedef unsigned char uint8_t;
@@ -38,7 +40,7 @@
 	----------------------------
 */
 inline unsigned long long ANT_get_unsigned_long_long(unsigned char *from)
-{ 
+{
 #ifdef __arm__
 	return
 		(((uint64_t)*(from + 0)) <<  0) |
