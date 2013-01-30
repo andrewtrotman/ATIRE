@@ -850,6 +850,7 @@ while (heap_items > 0)
 
 #ifdef PRINT_QUANTUM_STATS
 printf("processed quantums: %lld\n", processed_quantums);
+printf("processed postings: %lld\n", processed_postings);
 #endif
 }
 #endif // end of #ifdef IMPACT_HEADER

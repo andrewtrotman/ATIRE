@@ -17,11 +17,13 @@ class Profile:
 	QUERY_TIME_STR = 'Query Time'
 	TOTAL_QUANTUM_STR = 'Total Quantum'
 	PROCESSED_QUANTUM_STR = 'Processed Quantum'
+	PROCESSED_POSTINGS_STR = 'Processed Postings'
 	FINAL_MAP_STR = 'MAP'
 
 	QUERY_TIME_PATTERN = re.compile(r'.*<time>([0-9]*)</time>', re.IGNORECASE)
 	TOTAL_QUANTUM_PATTERN = re.compile(r'total quantums:\s*([0-9]*)', re.IGNORECASE)
 	PROCESSED_QUANTUM_PATTERN = re.compile(r'processed quantums:\s*([0-9]*)', re.IGNORECASE)
+	PROCESSED_POSTINGS_PATTERN = re.compile(r'processed postings:\s*([0-9]*)', re.IGNORECASE)
 	FINAL_MAP_PATTERN = re.compile(r'\s*MAP:\s*([0-9.]*)', re.IGNORECASE)
 
 	def __init__(self):
@@ -29,15 +31,16 @@ class Profile:
 		self.query_time = 0;
 		self.total_quantum = 0;
 		self.processed_quantum = 0;
+		self.processed_postings = 0;
 		self.final_map = 0.0;
 	def __str__(self):
-		output = "P@: %d\nquery_time: %d\ntotal_quantum: %d\nprocessed_quantum: %d\nfinal_MAP: %d\n"
-		return  output % (self.top_k, self.query_time, self.total_quantum, self.processed_quantum, self.final_map)
+		output = "P@: %d\nquery_time: %d\ntotal_quantum: %d\nprocessed_quantum: %d\nprocessed_postings: %d\nfinal_MAP: %d\n"
+		return  output % (self.top_k, self.query_time, self.total_quantum, self.processed_quantum, self.processed_postings, self.final_map)
 	def get_headers():
-		return tuple((Profile.TOP_K_STR, Profile.QUERY_TIME_STR, Profile.TOTAL_QUANTUM_STR, Profile.PROCESSED_QUANTUM_STR, Profile.FINAL_MAP_STR))
+		return tuple((Profile.TOP_K_STR, Profile.QUERY_TIME_STR, Profile.TOTAL_QUANTUM_STR, Profile.PROCESSED_QUANTUM_STR, Profile.PROCESSED_POSTINGS_STR, Profile.FINAL_MAP_STR))
 	get_headers = staticmethod(get_headers)
 	def get_values(self):
-		return tuple((self.top_k, self.query_time, self.total_quantum, self.processed_quantum, self.final_map))
+		return tuple((self.top_k, self.query_time, self.total_quantum, self.processed_quantum, self.processed_postings, self.final_map))
 pass # end of class profile
 
 
@@ -80,6 +83,9 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 		result = Profile.PROCESSED_QUANTUM_PATTERN.search(l)
 		if result != None:
 			prof.processed_quantum += int(result.group(1))
+		result = Profile.PROCESSED_POSTINGS_PATTERN.search(l)
+		if result != None:
+			prof.processed_postings += int(result.group(1))
 		result = Profile.TOTAL_QUANTUM_PATTERN.search(l)
 		if result != None:
 			prof.total_quantum += int(result.group(1))
