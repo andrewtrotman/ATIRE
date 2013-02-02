@@ -787,8 +787,8 @@ if (!should_prune(root))
 				compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 				len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
 				// the offset for the beginning of the postings
-				impact_header.beginning_of_the_postings_type = ANT_impact_header::INFO_SIZE + len;
-				impact_header.set_INFO(compressed_imapct_header);
+				impact_header.beginning_of_the_postings = ANT_impact_header::INFO_SIZE + len;
+				impact_header.set_INFO(compressed_impact_header_buffer);
 				compressed_header_ptr += len;
 
 				// write the impact header to disk

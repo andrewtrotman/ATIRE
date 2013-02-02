@@ -534,8 +534,8 @@ unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *
 		destination = index->read_return_ptr(destination, term_details->postings_length - the_impact_header->beginning_of_the_postings - (long long)the_quantum->offset);
 		}
 #else
-	index->seek(term_details->postings_position_on_disk + the_impact_header->beginning_of_the_postings + the_quantum->offset_ptr);
-	destination = index->read_return_ptr(destination, term_details->postings_length - the_impact_header->beginning_of_the_postings - the_quantum->offset_ptr);
+	index->seek(term_details->postings_position_on_disk + the_impact_header->beginning_of_the_postings + the_quantum->offset);
+	destination = index->read_return_ptr(destination, term_details->postings_length - the_impact_header->beginning_of_the_postings - the_quantum->offset);
 #endif // end of #ifdef SPECIAL_COMPRESSION
 
 if (!destination)
