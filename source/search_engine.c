@@ -555,8 +555,8 @@ unsigned char *ANT_search_engine::get_impact_header(ANT_search_engine_btree_leaf
 	if (term_details->local_document_frequency <= 2)
 		{
 		ANT_compressable_integer *postings;
-		uint32_t the_quantum_count = 1;
-		uint32_t beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
+		quantum_count_type the_quantum_count = 1;
+		beginning_of_the_postings_type beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
 		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
 		ANT_compressable_integer impact_two = term_details->postings_length;
 
@@ -565,8 +565,8 @@ unsigned char *ANT_search_engine::get_impact_header(ANT_search_engine_btree_leaf
 
 		beginning_of_the_postings += the_quantum_count * 3 * sizeof(ANT_compressable_integer);
 
-		((uint32_t *)destination)[4] = the_quantum_count;
-		((uint32_t *)destination)[5] = beginning_of_the_postings;
+		ANT_impact_header::set_quantum_count(destination, the_quantum_count);
+		ANT_impact_header::set_beginning_of_the_postings(destination, beginning_of_the_postings);
 
 		*(destination + ANT_impact_header::INFO_SIZE) = 0; // no compression for the header
 		into = (ANT_compressable_integer *)(destination + ANT_impact_header::INFO_SIZE + 1); // the beginning of the header
@@ -623,8 +623,8 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		{
 #ifdef IMPACT_HEADER
 		ANT_compressable_integer *postings;
-		uint32_t the_quantum_count = 1;
-		uint32_t beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
+		quantum_count_type the_quantum_count = 1;
+		beginning_of_the_postings_type beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
 		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
 		ANT_compressable_integer impact_two = term_details->postings_length;
 
@@ -633,8 +633,8 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 
 		beginning_of_the_postings += the_quantum_count * 3 * sizeof(ANT_compressable_integer);
 
-		((uint32_t *)destination)[4] = the_quantum_count;
-		((uint32_t *)destination)[5] = beginning_of_the_postings;
+		ANT_impact_header::set_quantum_count(destination, the_quantum_count);
+		ANT_impact_header::set_beginning_of_the_postings(destination, beginning_of_the_postings);
 
 		*(destination + ANT_impact_header::INFO_SIZE) = 0; // no compression for the header
 		into = (ANT_compressable_integer *)(destination + ANT_impact_header::INFO_SIZE + 1); // the beginning of the header
@@ -871,8 +871,8 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		/*
 		 Decompress the header
 		 */
-		the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
-		the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+		the_impact_header->the_quantum_count = ANT_impact_header::get_quantum_count(raw_postings_buffer);
+		the_impact_header->beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(raw_postings_buffer);
 		factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
 		the_impact_header->impact_value_start = the_impact_header->header_buffer;
 		the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
@@ -947,8 +947,8 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		/*
 			Decompress the header
 		*/
-		the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
-		the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+		the_impact_header->the_quantum_count = ANT_impact_header::get_quantum_count(raw_postings_buffer);
+		the_impact_header->beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(raw_postings_buffer);
 		factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
 		the_impact_header->impact_value_start = the_impact_header->header_buffer;
 		the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
@@ -994,8 +994,8 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			/*
 				Decompress the header
 			*/
-			the_impact_header->the_quantum_count = ((uint32_t *)raw_postings_buffer)[4];
-			the_impact_header->beginning_of_the_postings = ((uint32_t *)raw_postings_buffer)[5];
+			the_impact_header->the_quantum_count = ANT_impact_header::get_quantum_count(raw_postings_buffer);
+			the_impact_header->beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(raw_postings_buffer);
 			factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
 			the_impact_header->impact_value_start = the_impact_header->header_buffer;
 			the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
@@ -1124,8 +1124,8 @@ if (verify == NULL)			// something has gone wrong
 now = stats->start_timer();
 #ifdef IMPACT_HEADER
 // decompress the header
-impact_header.the_quantum_count = ((uint32_t *)postings_buffer)[4];
-impact_header.beginning_of_the_postings = ((uint32_t *)postings_buffer)[5];
+impact_header.the_quantum_count = ANT_impact_header::get_quantum_count(postings_buffer);
+impact_header.beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(postings_buffer);
 factory.decompress(impact_header.header_buffer, postings_buffer+ANT_impact_header::INFO_SIZE, impact_header.the_quantum_count * 3);
 impact_header.impact_value_start = impact_header.header_buffer;
 impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;

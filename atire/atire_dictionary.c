@@ -67,7 +67,7 @@ int check_postings = 1;
 			}
 
 		sum += *doc_count_ptr;
-		if (sum >= trim_point) 
+		if (sum >= trim_point)
 			break;
 		}
 
@@ -135,8 +135,8 @@ long metaphone, print_wide, print_postings, one_postings_per_line;
 long param;
 
 #ifdef IMPACT_HEADER
-	uint32_t the_quantum_count;
-	uint32_t beginning_of_the_postings;
+	quantum_count_type the_quantum_count;
+	beginning_of_the_postings_type beginning_of_the_postings;
 	long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
 	long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
 	ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
@@ -219,9 +219,8 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 				}
 #ifdef IMPACT_HEADER
 			// decompress the header
-			// the first 8 bytes are for postings_chain and second 8 bytes are for chain_length
-			the_quantum_count = ((uint32_t *)postings_list)[4];
-			beginning_of_the_postings = ((uint32_t *)postings_list)[5];
+			the_quantum_count = ANT_impact_header::get_quantum_count(postings_list);
+			beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(postings_list);
 			factory.decompress(impact_header_buffer, postings_list + impact_header_info_size, the_quantum_count * 3);
 
 			// print the postings

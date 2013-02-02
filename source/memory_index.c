@@ -724,11 +724,9 @@ if (!should_prune(root))
 					// compress the impact header
 					compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 					len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
-					((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
-					((uint64_t *)compressed_impact_header_buffer)[1] = impact_header.chain_length;
-					((uint32_t *)compressed_impact_header_buffer)[4] = impact_header.the_quantum_count;
 					// the offset for the beginning of the postings
-					((uint32_t *)compressed_impact_header_buffer)[5] = ANT_impact_header::INFO_SIZE + len;
+					impact_header.beginning_of_the_postings = ANT_impact_header::INFO_SIZE + len;
+					impact_header.set_INFO(compressed_impact_header_buffer);
 					compressed_header_ptr += len;
 
 					// write the impact header to disk
@@ -788,11 +786,9 @@ if (!should_prune(root))
 				// compress the impact header
 				compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 				len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
-				((uint64_t *)compressed_impact_header_buffer)[0] = impact_header.postings_chain;
-				((uint64_t *)compressed_impact_header_buffer)[1] = impact_header.chain_length;
-				((uint32_t *)compressed_impact_header_buffer)[4] = impact_header.the_quantum_count;
 				// the offset for the beginning of the postings
-				((uint32_t *)compressed_impact_header_buffer)[5] = ANT_impact_header::INFO_SIZE + len;
+				impact_header.beginning_of_the_postings_type = ANT_impact_header::INFO_SIZE + len;
+				impact_header.set_INFO(compressed_imapct_header);
 				compressed_header_ptr += len;
 
 				// write the impact header to disk
