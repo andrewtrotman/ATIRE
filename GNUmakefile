@@ -441,6 +441,6 @@ clean-internal:
 	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
 
 depend :
-	makedepend  -f- -Y -o.obj -w1024 -pbin/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/bin\/source/bin/" | sed -e "s/bin\/tools/bin/" | sed -e "s/bin\/atire/bin/" | sed -e "s/bin\/Link-The-Wiki/bin/" > GNUmakefile.dependencies
+	@makedepend  -f- -Y -o.o -w1024 -pobj/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/obj\/source/obj/" | sed -e "s/obj\/tools/obj/" | sed -e "s/obj\/atire/obj/" | sed -e "s/obj\/Link-The-Wiki/obj/" > GNUmakefile.dependencies
 
 include GNUmakefile.dependencies
