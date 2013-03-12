@@ -19,9 +19,9 @@ return allocator->malloc(bytes);
 	ANT_POSTINGS_PIECE::INITIALISE()
 	--------------------------------
 */
-unsigned char *ANT_postings_piece::initialise(ANT_memory *allocator, long bytes_wanted)
+unsigned short *ANT_postings_piece::initialise(ANT_memory *allocator, long bytes_wanted)
 {
-data = (unsigned char *)allocator->malloc(bytes_wanted);
+data = (unsigned short *)allocator->malloc(bytes_wanted);
 next = NULL;
 
 return data;

@@ -95,7 +95,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_TOPSIG_POSITIVE::RANK()
 	--------------------------------------------
 */
-double ANT_ranking_function_topsig_positive::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_topsig_positive::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
 {
 exit(printf("Cannot pre-compute the topsig collating sequence\n"));
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

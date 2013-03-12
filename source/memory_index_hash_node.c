@@ -115,7 +115,7 @@ if (docid_node_used + needed > docid_node_length)
 	*/
 	compress_into(holding_pen, docno);
 	if (docid_node_length - docid_node_used != 0)
-		memcpy(underlying->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
+		memcpy((unsigned char *)underlying->data + docid_node_used, holding_pen, docid_node_length - docid_node_used);
 	remain = needed - (docid_node_length - docid_node_used);
 
 	/*
@@ -127,12 +127,12 @@ if (docid_node_used + needed > docid_node_length)
 	/*
 		And place the "extra" into the beginning of the new block
 	*/
-	memcpy(underlying->data, holding_pen + (needed - remain), remain);
+	memcpy((unsigned char *)underlying->data, holding_pen + (needed - remain), remain);
 	docid_node_used = remain;
 	}
 else
 	{
-	compress_into(underlying->data + docid_node_used, docno);
+	compress_into((unsigned char *)underlying->data + docid_node_used, docno);
 	docid_node_used += needed;
 	}
 
@@ -143,7 +143,7 @@ return true;
 	ANT_MEMORY_INDEX_HASH_NODE::COPY_FROM_EARLY_BUFFERS_INTO_LISTS()
 	----------------------------------------------------------------
 */
-long ANT_memory_index_hash_node::copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned char *term_frequency_buffer)
+long ANT_memory_index_hash_node::copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned short *term_frequency_buffer)
 {
 long long which, end;
 long bytes_needed;
@@ -185,7 +185,7 @@ return needed;
 	------------------------------------------
 	returns true on success and false on failure.  Failure can only happen if we run out of memory
 */
-long ANT_memory_index_hash_node::insert_docno(long long docno, unsigned char initial_term_frequency)
+long ANT_memory_index_hash_node::insert_docno(long long docno, unsigned short initial_term_frequency)
 {
 long posting;
 size_t new_tf_node_length;
@@ -297,13 +297,12 @@ return true;
 	ANT_MEMORY_INDEX_HASH_NODE::SERIALISE_POSTINGS()
 	------------------------------------------------
 */
-long long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size)
+long long ANT_memory_index_hash_node::serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned short *tf_into, long long *tf_size)
 {
 ANT_postings_piece *where;
 long long err, size, doc_bytes, tf_bytes, more;
 
 err = false;
-doc_bytes = 0;
 
 /*
 	if there are very few postings then they are in the "early" buffers, if there
@@ -316,7 +315,7 @@ if (document_frequency <= early.postings_held_in_vocab)
 		compute the storage space needed.
 	*/
 	doc_bytes = bytes_needed_for_early_doc_buffer();
-	tf_bytes = early.postings_held_in_vocab;
+	tf_bytes = 2 * early.postings_held_in_vocab; // 2 * because shorts are 2 byte
 
 	/*
 		if it fits then copy into the buffers (that were passed as parameters) else error
@@ -331,18 +330,16 @@ else
 	/*
 		serialise the doc ids by walking the linked list of blocks
 	*/
+	doc_bytes = 0;
 	size = postings_initial_length;
 	for (where = in_memory.docid_list_head; where != NULL; where = where->next)
 		{
 		more = where->next == NULL ? docid_node_used : size;
 		if (doc_bytes + more <= *doc_size)
-			if (where->next == NULL)
-				memcpy(doc_into + doc_bytes, where->data, docid_node_used);			// final block many not be full
-			else
-				{
-				memcpy(doc_into + doc_bytes, where->data, (size_t)size);
-				size = (long)(postings_growth_factor * size);
-				}
+			{
+			memcpy(doc_into + doc_bytes, where->data, more);			// final block many not be full
+			size = (long)(postings_growth_factor * size);
+			}
 		else
 			err = true;
 		doc_bytes += more;
@@ -355,15 +352,18 @@ else
 	size = postings_initial_length;
 	for (where = in_memory.tf_list_head; where != NULL; where = where->next)
 		{
-		more = where->next == NULL ? tf_node_used : size;
+		more = where->next == NULL ? 2 * tf_node_used : size;
 		if (tf_bytes + more <= *tf_size)
-			if (where->next == NULL)
-				memcpy(tf_into + tf_bytes, where->data, tf_node_used);
-			else
-				{
-				memcpy(tf_into + tf_bytes, where->data, (size_t)size);
-				size = (long)(postings_growth_factor * size);
-				}
+			{
+			memcpy((unsigned char *)tf_into + tf_bytes, where->data, more);
+			size = (long)(postings_growth_factor * size);
+			/*
+				Because the tfs are 2 bytes and have to fit nice, size can get uneven and
+				make it all wobbly
+			*/
+			if (size % 2 != 0)
+				size++;
+			}
 		else
 			err = true;
 		tf_bytes += more;

@@ -17,12 +17,12 @@ class ANT_memory;
 class ANT_postings_piece
 {
 public:
-	unsigned char *data;
+	unsigned short *data;
 	ANT_postings_piece *next;
 
 public:
 	ANT_postings_piece() {}
-	unsigned char *initialise(ANT_memory *alloc, long required_length);
+	unsigned short *initialise(ANT_memory *alloc, long required_length);
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new (size_t size, ANT_memory *allocator);
 } ;

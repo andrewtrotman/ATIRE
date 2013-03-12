@@ -8,6 +8,10 @@
 #include "compress.h"
 #include "fundamental_types.h"
 
+#ifndef QBITS
+	#define QBITS 8
+#endif
+
 typedef uint64_t postings_chain_type;
 typedef uint64_t chain_length_type;
 typedef uint32_t quantum_count_type;
@@ -22,7 +26,7 @@ typedef uint32_t beginning_of_the_postings_type;
 class ANT_impact_header
 {
 public:
-	static const uint32_t NUM_OF_QUANTUMS = 256;
+	static const uint32_t NUM_OF_QUANTUMS = 1 << QBITS;
 	static const long long INFO_SIZE = sizeof(postings_chain_type) + sizeof(chain_length_type)
 													+ sizeof(quantum_count_type) + sizeof(beginning_of_the_postings_type);
 

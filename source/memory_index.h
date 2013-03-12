@@ -47,7 +47,8 @@ public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 private:
 	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;
-	unsigned char *serialised_docids, *serialised_tfs;
+	unsigned char *serialised_docids;
+	unsigned short *serialised_tfs;
 	long long serialised_docids_size, serialised_tfs_size;
 	long long largest_docno;
 	ANT_stats_memory_index *stats;
@@ -113,9 +114,9 @@ public:
 private:
 	long long node_to_postings(ANT_memory_index_hash_node *root);
 #ifdef IMPACT_HEADER
-	long long impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);
+	long long impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local);
 #endif
-	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local);
+	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
 	void open_index_file(char *filename);
@@ -127,7 +128,7 @@ private:
 
 	long should_prune(ANT_memory_index_hash_node *term);
 
-	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size);
+	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned short *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
 

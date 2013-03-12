@@ -114,7 +114,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_INNER_PRODUCT::RANK()
 	------------------------------------------
 */
-double ANT_ranking_function_inner_product::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_inner_product::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
 {
 double idf, tf, rsv;
 

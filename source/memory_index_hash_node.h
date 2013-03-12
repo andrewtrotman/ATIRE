@@ -54,7 +54,7 @@ public:
 			{
 			static const size_t postings_held_in_vocab = 2;		// because this is how many are stored in the vocab on disk
 			long long docid[postings_held_in_vocab];
-			unsigned char tf[postings_held_in_vocab];
+			unsigned short tf[postings_held_in_vocab];
 			} early;
 		} ;
 
@@ -80,16 +80,16 @@ private:
 	inline long compress_bytes_needed(long long val);
 	inline void compress_into(unsigned char *dest, long long docno);
 	ANT_postings_piece *new_postings_piece(long length_in_bytes);
-	long insert_docno(long long docno, unsigned char initial_term_frequency = 1);
+	long insert_docno(long long docno, unsigned short initial_term_frequency = 1);
 	inline long append_docno(long long docno, ANT_postings_piece **buffer);
-	long copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned char *term_frequency_buffer);
+	long copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned short *term_frequency_buffer);
 	long bytes_needed_for_early_doc_buffer(void);
 
 public:
 	ANT_memory_index_hash_node(ANT_memory *string_memory, ANT_memory *postings_memory, ANT_string_pair *string, ANT_stats_memory_index *stats);
 	void set(long long value);
 	long add_posting(long long docno, long extra_term_frequency = 1);
-	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned char *tf_into, long long *tf_size);
+	long long serialise_postings(unsigned char *doc_into, long long *doc_size, unsigned short *tf_into, long long *tf_size);
 
 	static long decompress(unsigned char **from);
 	static int term_compare(const void *a, const void *b);
@@ -119,7 +119,7 @@ return NULL;
 */
 inline long ANT_memory_index_hash_node::add_posting(long long docno, long extra_term_frequency)
 {
-unsigned char *into;
+unsigned short *into;
 
 if (docno == current_docno)
 	{
@@ -134,10 +134,10 @@ if (docno == current_docno)
 	/*
 		Now check for overflow and incrament only up-to the cap (of one unsigned byte)
 	*/
-	if (*into + extra_term_frequency <= 254)
+	if (*into + extra_term_frequency <= ((1 << QBITS) - 1))
 		*into += (unsigned char)extra_term_frequency;
 	else
-		*into = 254;
+		*into = (1 << QBITS) - 1;
 
 	/*
 		update the true term_frequency value (recall that the number above is capped at 254)
@@ -149,7 +149,7 @@ else
 	/*
 		We're seeing a new doc-id which means we need to store the docid and might need to allocate memory
 	*/
-	if (!insert_docno(docno - current_docno, extra_term_frequency > 254 ? 254 : (unsigned char)extra_term_frequency))
+	if (!insert_docno(docno - current_docno, extra_term_frequency > ((1 << QBITS) - 1) ? ((1 << QBITS) - 1) : (unsigned short)extra_term_frequency))
 		return false;
 	current_docno = docno;
 	term_frequency = extra_term_frequency;

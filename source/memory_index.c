@@ -48,7 +48,7 @@ stats = new ANT_stats_memory_index(dictionary_memory, postings_memory);
 serialised_docids_size = 1;
 serialised_docids = (unsigned char *)serialisation_memory->malloc(serialised_docids_size);
 serialised_tfs_size = 1;
-serialised_tfs = (unsigned char *)serialisation_memory->malloc(serialised_tfs_size);
+serialised_tfs = (unsigned short *)serialisation_memory->malloc(serialised_tfs_size);
 largest_docno = 0;
 factory = new ANT_compression_factory;
 document_lengths = NULL;
@@ -285,12 +285,12 @@ stats->documents = docno;
 		ANT_MEMORY_INDEX::IMPACT_ORDER_WITH_HEADER()
 		--------------------------------------------
 	*/
-	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
+	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
 	{
 	ANT_compressable_integer sum, bucket_size[ANT_impact_header::NUM_OF_QUANTUMS], bucket_prev_docid[ANT_impact_header::NUM_OF_QUANTUMS];
 	ANT_compressable_integer *pointer[ANT_impact_header::NUM_OF_QUANTUMS], *current_docid, doc, *pruned_point;
-	unsigned char *current, *end;
-	long bucket, buckets_used, max_bucket;
+	unsigned short *current, *end;
+	long bucket, buckets_used;
 
 	/*
 		Set all the buckets to empty;
@@ -311,25 +311,21 @@ stats->documents = docno;
 
 	// find the number of non-zero buckets (the number of quantums)
 	impact_header.the_quantum_count = 0;
-	for (bucket = 0; bucket < ANT_impact_header::NUM_OF_QUANTUMS; bucket++) {
-		if (bucket_size[bucket] != 0) {
+	for (bucket = 0; bucket < ANT_impact_header::NUM_OF_QUANTUMS; bucket++)
+		if (bucket_size[bucket] != 0)
 			impact_header.the_quantum_count++;
-		}
-	}
 
 	// setup the pointers for the header
 	impact_header.impact_value_ptr = impact_header.header_buffer;
 	impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
 	impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
 
-
 	/*
 		Compute the location of the pointers for each bucket
 	*/
 	pruned_point = NULL;
 	buckets_used = sum = 0;
-	max_bucket = ANT_impact_header::NUM_OF_QUANTUMS - 1;
-	for (bucket = max_bucket; bucket >= 0; bucket--)
+	for (bucket = ANT_impact_header::NUM_OF_QUANTUMS - 1; bucket >= 0; bucket--)
 		{
 		pointer[bucket] = destination + sum;
 		if (bucket_size[bucket] != 0)
@@ -379,11 +375,11 @@ stats->documents = docno;
 	ANT_MEMORY_INDEX::IMPACT_ORDER()
 	--------------------------------
 */
-long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency, unsigned char *max_local)
+long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
 {
-ANT_compressable_integer sum, bucket_size[0x100], bucket_prev_docid[0x100];
-ANT_compressable_integer *pointer[0x100], *current_docid, doc, *zero_point;
-unsigned char *current, *end;
+ANT_compressable_integer sum, bucket_size[1 << QBITS], bucket_prev_docid[1 << QBITS];
+ANT_compressable_integer *pointer[1 << QBITS], *current_docid, doc, *zero_point;
+unsigned short *current, *end;
 long bucket, buckets_used;
 
 /*
@@ -408,7 +404,7 @@ for (current = term_frequency; current < end; current++)
 */
 zero_point = NULL;
 buckets_used = sum = 0;
-for (bucket = 0xFF; bucket >= 0; bucket--)
+for (bucket = ((1 << QBITS) - 1); bucket >= 0; bucket--)
 	{
 	pointer[bucket] = destination + sum + 2 * buckets_used; // the extra 1 (from 2) counts for the number terminator at the end of each quantum
 	if (bucket_size[bucket] != 0)
@@ -437,7 +433,7 @@ for (current = term_frequency; current < end; current++)
 /*
 	Finally terminate each impact list with a 0
 */
-for (bucket = 0; bucket < 0x100; bucket++)
+for (bucket = 0; bucket < (1 << QBITS); bucket++)
 	if (bucket_size[bucket] != 0)
 		*pointer[bucket] = 0;
 
@@ -481,7 +477,7 @@ while ((total = root->serialise_postings(serialised_docids, doc_size, serialised
 	if (*tf_size > serialised_tfs_size)
 		{
 		serialised_tfs_size = *tf_size;
-		serialised_tfs = (unsigned char *)serialisation_memory->malloc(serialised_tfs_size);
+		serialised_tfs = (unsigned short *)serialisation_memory->malloc(serialised_tfs_size);
 		}
 	}
 return total;
@@ -651,9 +647,7 @@ if (!should_prune(root))
 					serialised_tfs[1] = impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0];
 					}
 				}
-#endif
-
-#ifdef IMPACT_HEADER
+#else
 			/*
 				We get the docids difference encoded, but if we have different tfs then they don't need to be
 			*/
@@ -978,10 +972,11 @@ if (index_file == NULL && filename != NULL)
 	{
 	index_file = new ANT_file;
 
-	if (index_file->open(filename, "w+bx")==0) {
+	if (index_file->open(filename, "w+bx") == 0)
+		{
 		fprintf(stderr, "Couldn't open index file for writing \"%s\"\n", filename);
 		exit(-1);
-	}
+		}
 
 	index_file->setvbuff(DISK_BUFFER_SIZE);
 	stats->disk_buffer = DISK_BUFFER_SIZE;
@@ -1366,7 +1361,7 @@ stats->time_to_store_documents_on_disk += stats->stop_timer(timer);
 	ANT_MEMORY_INDEX::TEXT_RENDER()
 	-------------------------------
 */
-void ANT_memory_index::text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned char *serialised_tfs, long tf_size)
+void ANT_memory_index::text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned short *serialised_tfs, long tf_size)
 {
 unsigned char *pos;
 long tf, doc = 0;

@@ -85,7 +85,7 @@ public:
 #else
 	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
 #endif
-	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned char term_frequency, long long collection_frequency, long long document_frequency) = 0;
+	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency) = 0;
 
 	/*
 		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
@@ -137,8 +137,8 @@ public:
 		behaviour.  Anyone wanting to hack up a ranking function need only supply the one rank() function
 		but anyone wanting efficient support needs to supply several funcitons including these two.
 	*/
-	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies);
-	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies);
+	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
+	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

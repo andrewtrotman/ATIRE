@@ -440,11 +440,11 @@ stats->add_stemming_reencode_time(stats->stop_timer(now));
 	-----------------------------------
 	maximum and minimum have already been initialised
 */
-void ANT_ranking_function::get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
+void ANT_ranking_function::get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies)
 {
 long docid;
 double rsv;
-unsigned char *current_tf, *end;
+unsigned short *current_tf, *end;
 ANT_compressable_integer *current_docid;
 
 current_docid = document_ids;
@@ -471,11 +471,11 @@ while (current_tf < end)
 	ANT_RANKING_FUNCTION::QUANTIZE()
 	--------------------------------
 */
-void ANT_ranking_function::quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned char *term_frequencies)
+void ANT_ranking_function::quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies)
 {
 long docid;
 double rsv, range;
-unsigned char *current_tf, *end;
+unsigned short *current_tf, *end;
 ANT_compressable_integer *current_docid;
 
 range = maximum - minimum;
@@ -489,7 +489,10 @@ while (current_tf < end)
 	docid += *current_docid;
 	rsv = rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency);
 
-	*current_tf = (unsigned char)(((rsv - minimum) / range) * 0xFE) + 1;			// change the tf value into an impact value
+	/*
+		-1 to get in range, -1 to avoid 0
+	*/
+	*current_tf = (unsigned short)(((rsv - minimum) / range) * ((1 << QBITS) - 2)) + 1;			// change the tf value into an impact value
 	current_tf++;
 	current_docid++;
 	}
