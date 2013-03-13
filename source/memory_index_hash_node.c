@@ -252,14 +252,19 @@ if (document_frequency <= early.postings_held_in_vocab)
 
 /*
 	Now add to the regular (growing) buffers
-*/
 
-/*
 	First we'll do the tf because that's easy to wind-back on out of memory.
+
+	2 * because tf_node_used keeps track of items, tf_node_length is bytes, and items are 2 bytes (shorts)
 */
-if (tf_node_used + 1 > tf_node_length)
+if (2 * (tf_node_used + 1) > tf_node_length)
 	{
 	new_tf_node_length = (size_t)(tf_node_length * postings_growth_factor);
+	/*
+		Have to check that the tf's will fit, so tf_node_length has to be divisible by 2
+	*/
+	if (new_tf_node_length % 2 != 0)
+		new_tf_node_length++;
 	if ((in_memory.tf_list_tail->next = new_postings_piece(new_tf_node_length)) == NULL)
 		return false;		// out of memory
 	stats->bytes_allocated_for_tfs += tf_node_length = new_tf_node_length;
