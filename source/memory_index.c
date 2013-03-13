@@ -292,21 +292,25 @@ stats->documents = docno;
 	unsigned short *current, *end;
 	long bucket, buckets_used;
 
+	/*
+		If we only have the term occuring in one document, then we don't need to bother
+		doing any processing, so don't
+	*/
 	if (document_frequency == 1)
 		{
-		impact_header.the_quantum_count = 1;
+		impact_header.the_quantum_count = document_frequency;
 
 		impact_header.impact_value_ptr = impact_header.header_buffer;
 		impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
 		impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
 
 		*the_impact_header.impact_value_ptr = *term_frequency;
-		*the_impact_header.doc_count_ptr = 1;
+		*the_impact_header.doc_count_ptr = document_frequency;
 		*the_impact_header.impact_offset_ptr = 0;
 
 		*destination = *docid;
 		*max_local = (unsigned char)impact_header.header_buffer[0];
-		return 1;
+		return document_frequency;
 		}
 
 	/*
