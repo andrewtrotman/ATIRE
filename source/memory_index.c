@@ -304,9 +304,9 @@ stats->documents = docno;
 		impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
 		impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
 
-		*the_impact_header.impact_value_ptr = *term_frequency;
-		*the_impact_header.doc_count_ptr = document_frequency;
-		*the_impact_header.impact_offset_ptr = 0;
+		*impact_header.impact_value_ptr = *term_frequency;
+		*impact_header.doc_count_ptr = document_frequency;
+		*impact_header.impact_offset_ptr = 0;
 
 		*destination = *docid;
 		*max_local = (unsigned char)impact_header.header_buffer[0];
