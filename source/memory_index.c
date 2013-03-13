@@ -292,6 +292,23 @@ stats->documents = docno;
 	unsigned short *current, *end;
 	long bucket, buckets_used;
 
+	if (document_frequency == 1)
+		{
+		impact_header.the_quantum_count = 1;
+
+		impact_header.impact_value_ptr = impact_header.header_buffer;
+		impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
+		impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+
+		*the_impact_header.impact_value_ptr = *term_frequency;
+		*the_impact_header.doc_count_ptr = 1;
+		*the_impact_header.impact_offset_ptr = 0;
+
+		*destination = *docid;
+		*max_local = (unsigned char)impact_header.header_buffer[0];
+		return 1;
+		}
+
 	/*
 		Set all the buckets to empty;
 	*/
@@ -330,9 +347,9 @@ stats->documents = docno;
 		pointer[bucket] = destination + sum;
 		if (bucket_size[bucket] != 0)
 			{
-			*impact_header.impact_value_ptr = bucket; impact_header.impact_value_ptr++;
-			*impact_header.doc_count_ptr = bucket_size[bucket]; impact_header.doc_count_ptr++;
-			*impact_header.impact_offset_ptr = sum; impact_header.impact_offset_ptr++;
+			*impact_header.impact_value_ptr++ = bucket;
+			*impact_header.doc_count_ptr++ = bucket_size[bucket];
+			*impact_header.impact_offset_ptr++ = sum;
 			buckets_used++;
 			if (sum < static_prune_point && (sum + bucket_size[bucket]) >= static_prune_point)
 				pruned_point = pointer[bucket] + (static_prune_point - sum);
