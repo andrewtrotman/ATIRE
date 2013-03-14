@@ -35,7 +35,7 @@ long long length;
 
 index_node = (ANT_memory_index_hash_node *)term_details->postings_position_on_disk;
 
-length = index->node_to_postings(index_node);
+length = index->node_to_postings(index_node, (long)ceil(5.4 + 5.4e-4 * sqrt(documents)));
 memcpy(destination, index->impacted_postings, (size_t)(length * sizeof(*index->impacted_postings)));
 
 return destination;

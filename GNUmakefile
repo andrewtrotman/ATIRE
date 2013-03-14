@@ -259,9 +259,6 @@ ifeq ($(USE_SNOWBALL), 1)
 	EXTRA_OBJS += $(SNOWBALL_DIR)/libstemmer.a
 endif
 
-QBITS := 16
-CFLAGS += -DQBITS="$(QBITS)"
-
 ###############################################################################
 # source files and compile commands
 ###############################################################################

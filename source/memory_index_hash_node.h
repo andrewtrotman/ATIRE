@@ -134,10 +134,10 @@ if (docno == current_docno)
 	/*
 		Now check for overflow and incrament only up-to the cap (of one unsigned byte)
 	*/
-	if (*into + extra_term_frequency <= ((1 << QBITS) - 1))
+	if (*into + extra_term_frequency <= 0xFF)
 		*into += (unsigned char)extra_term_frequency;
 	else
-		*into = (1 << QBITS) - 1;
+		*into = 0xFF;
 
 	/*
 		update the true term_frequency value (recall that the number above is capped at 254)
@@ -149,7 +149,7 @@ else
 	/*
 		We're seeing a new doc-id which means we need to store the docid and might need to allocate memory
 	*/
-	if (!insert_docno(docno - current_docno, extra_term_frequency > ((1 << QBITS) - 1) ? ((1 << QBITS) - 1) : (unsigned short)extra_term_frequency))
+	if (!insert_docno(docno - current_docno, extra_term_frequency > 0xFF ? 0xFF : (unsigned short)extra_term_frequency))
 		return false;
 	current_docno = docno;
 	term_frequency = extra_term_frequency;

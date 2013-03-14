@@ -285,10 +285,10 @@ stats->documents = docno;
 		ANT_MEMORY_INDEX::IMPACT_ORDER_WITH_HEADER()
 		--------------------------------------------
 	*/
-	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
+	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local, long quantization_bits)
 	{
-	ANT_compressable_integer sum, bucket_size[ANT_impact_header::NUM_OF_QUANTUMS], bucket_prev_docid[ANT_impact_header::NUM_OF_QUANTUMS];
-	ANT_compressable_integer *pointer[ANT_impact_header::NUM_OF_QUANTUMS], *current_docid, doc, *pruned_point;
+	ANT_compressable_integer sum, bucket_size[1 << quantization_bits], bucket_prev_docid[1 << quantization_bits];
+	ANT_compressable_integer *pointer[1 << quantization_bits], *current_docid, doc, *pruned_point;
 	unsigned short *current, *end;
 	long bucket, buckets_used;
 
@@ -332,7 +332,7 @@ stats->documents = docno;
 
 	// find the number of non-zero buckets (the number of quantums)
 	impact_header.the_quantum_count = 0;
-	for (bucket = 0; bucket < ANT_impact_header::NUM_OF_QUANTUMS; bucket++)
+	for (bucket = 0; bucket < (1 << quantization_bits); bucket++)
 		if (bucket_size[bucket] != 0)
 			impact_header.the_quantum_count++;
 
@@ -346,7 +346,7 @@ stats->documents = docno;
 	*/
 	pruned_point = NULL;
 	buckets_used = sum = 0;
-	for (bucket = ANT_impact_header::NUM_OF_QUANTUMS - 1; bucket >= 0; bucket--)
+	for (bucket = ((1 << quantization_bits) - 1); bucket >= 0; bucket--)
 		{
 		pointer[bucket] = destination + sum;
 		if (bucket_size[bucket] != 0)
@@ -396,10 +396,10 @@ stats->documents = docno;
 	ANT_MEMORY_INDEX::IMPACT_ORDER()
 	--------------------------------
 */
-long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
+long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local, long quantization_bits)
 {
-ANT_compressable_integer sum, bucket_size[1 << QBITS], bucket_prev_docid[1 << QBITS];
-ANT_compressable_integer *pointer[1 << QBITS], *current_docid, doc, *zero_point;
+ANT_compressable_integer sum, bucket_size[1 << quantization_bits], bucket_prev_docid[1 << quantization_bits];
+ANT_compressable_integer *pointer[1 << quantization_bits], *current_docid, doc, *zero_point;
 unsigned short *current, *end;
 long bucket, buckets_used;
 
@@ -425,7 +425,7 @@ for (current = term_frequency; current < end; current++)
 */
 zero_point = NULL;
 buckets_used = sum = 0;
-for (bucket = ((1 << QBITS) - 1); bucket >= 0; bucket--)
+for (bucket = ((1 << quantization_bits) - 1); bucket >= 0; bucket--)
 	{
 	pointer[bucket] = destination + sum + 2 * buckets_used; // the extra 1 (from 2) counts for the number terminator at the end of each quantum
 	if (bucket_size[bucket] != 0)
@@ -454,7 +454,7 @@ for (current = term_frequency; current < end; current++)
 /*
 	Finally terminate each impact list with a 0
 */
-for (bucket = 0; bucket < (1 << QBITS); bucket++)
+for (bucket = 0; bucket < (1 << quantization_bits); bucket++)
 	if (bucket_size[bucket] != 0)
 		*pointer[bucket] = 0;
 
@@ -558,7 +558,7 @@ else
 	This function puts the impact ordered (not compressed) postings in decompressed_postings_list
 	and returns the length of that list (in integers).
 */
-long long ANT_memory_index::node_to_postings(ANT_memory_index_hash_node *root)
+long long ANT_memory_index::node_to_postings(ANT_memory_index_hash_node *root, long quantization_bits)
 {
 long long timer, impacted_postings_length;
 
@@ -575,13 +575,13 @@ else
 	if (quantizer != NULL)
 		{
 		timer = stats->start_timer();
-		quantizer->quantize(maximum_collection_rsv, minimum_collection_rsv, root->collection_frequency, root->document_frequency, decompressed_postings_list, serialised_tfs);
+		quantizer->quantize(maximum_collection_rsv, minimum_collection_rsv, root->collection_frequency, root->document_frequency, decompressed_postings_list, serialised_tfs, quantization_bits);
 		stats->time_to_quantize += stats->stop_timer(timer);
 		}
 #ifdef IMPACT_HEADER
-	impacted_postings_length = impact_order_with_header(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
+	impacted_postings_length = impact_order_with_header(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact, quantization_bits);
 #else
-	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact);
+	impacted_postings_length = impact_order(impacted_postings, decompressed_postings_list, serialised_tfs, root->document_frequency, &root->term_local_max_impact, quantization_bits);
 #endif
 	}
 
@@ -614,7 +614,7 @@ else
 	ANT_MEMORY_INDEX::SERIALISE_ALL_NODES()
 	---------------------------------------
 */
-long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
+long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root, long quantization_bits)
 {
 long terms = 0;
 long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
@@ -625,7 +625,7 @@ ANT_compressable_integer temp;
 #endif
 
 if (root->right != NULL)
-	terms += serialise_all_nodes(file, root->right);
+	terms += serialise_all_nodes(file, root->right, quantization_bits);
 
 if (!should_prune(root))
 	{
@@ -637,7 +637,7 @@ if (!should_prune(root))
 	stats->bytes_to_store_docids += doc_size;
 	stats->bytes_to_store_tfs += tf_size;
 
-	impacted_postings_length = node_to_postings(root);
+	impacted_postings_length = node_to_postings(root, quantization_bits);
 
 	/*
 		At this point the impact ordered (not compressed) postings list is in impacted_postings
@@ -831,7 +831,7 @@ if (!should_prune(root))
 	}
 
 if (root->left != NULL)
-	terms += serialise_all_nodes(file, root->left);
+	terms += serialise_all_nodes(file, root->left, quantization_bits);
 
 return terms;
 }
@@ -1124,6 +1124,11 @@ variable_byte.decompress(document_lengths, serialised_docids, node->document_fre
 timer = stats->start_timer();
 
 /*
+	Calculate how many bits we need to dedicate to quantization
+*/
+long quantization_bits = 8;
+
+/*
 	Create the quantizer
 */
 if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths)) != NULL)
@@ -1147,6 +1152,10 @@ if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths)) 
 			if (min_rsv_for_node < minimum_collection_rsv)
 				minimum_collection_rsv = min_rsv_for_node;
 			}
+	/*
+		Crane M, Trotman A, and O'Keefe R. Maintaining Discriminatory Power in Quantized Indexes -- somewhere
+	*/
+	quantization_bits = (long)ceil(5.4 + 5.4e-4 * sqrt(largest_docno));
 	}
 /*
 	Store how long quantizaton took.
@@ -1159,7 +1168,7 @@ stats->time_to_quantize += stats->stop_timer(timer);
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
 		{
-		if ((terms_in_node = serialise_all_nodes(index_file, hash_table[hash_val])) > max_terms_in_node)
+		if ((terms_in_node = serialise_all_nodes(index_file, hash_table[hash_val], quantization_bits)) > max_terms_in_node)
 			max_terms_in_node = terms_in_node;
 		unique_terms += terms_in_node;
 		}

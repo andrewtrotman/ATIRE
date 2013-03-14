@@ -138,7 +138,7 @@ public:
 		but anyone wanting efficient support needs to supply several funcitons including these two.
 	*/
 	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
-	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
+	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies, long quantization_bits);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */
