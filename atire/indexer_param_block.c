@@ -47,7 +47,6 @@ index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
 spam_filename = NULL;
 spam_threshold = 70; // as suggested at http://durum0.uwaterloo.ca/clueweb09spam/
-spam_method = spam_threshold < 50 ? ANT_directory_iterator_spam_filter::EXCLUDE : ANT_directory_iterator_spam_filter::INCLUDE;
 mime_filter = false;
 static_prune_point = LLONG_MAX;
 stop_word_removal = ANT_memory_index::NONE;
@@ -416,10 +415,6 @@ for (param = 1; param < argc; param++)
 				spam_threshold = atol(command + 6);
 				if (spam_threshold < 0 || spam_threshold > 99)
 					exit(printf("Spam threshold must be between 0-99\n"));
-				if (spam_threshold < 50)
-					spam_method = ANT_directory_iterator_spam_filter::EXCLUDE; // less documents
-				else
-					spam_method = ANT_directory_iterator_spam_filter::INCLUDE; // invert so that there are less documents
 				}
 			spam_filename = argv[++param];
 			}

@@ -25,7 +25,7 @@ private:
 	inline long should_index(char *docid);
 
 public:
-	ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long long method, long get_file = 0);
+	ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long get_file = 0);
 	~ANT_directory_iterator_spam_filter();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);

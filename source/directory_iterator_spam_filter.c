@@ -17,10 +17,10 @@ long long ANT_directory_iterator_spam_filter::number_docs = 0;
 	------------------------------------------------------------------------
 	Each line of the file containing spam scores should have the score followed by docid and be sorted by docid
 */
-ANT_directory_iterator_spam_filter::ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long long method, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_spam_filter::ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->source = source;
-this->method = method;
+method = threshold < 50 ? EXCLUDE : INCLUDE;
 
 /*
 	We only want the spam scores to be loaded once

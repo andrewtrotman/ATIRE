@@ -39,7 +39,6 @@ public:
 	char *index_filename;				// name of index file
 	char *spam_filename;				// where to load spam files from
 	long long spam_threshold; 	// spam percentile threshold
-	long long spam_method;					// whether the spam files we load are what we should include or exclude
 	long long mime_filter;
 	long long static_prune_point;		// maximum length of a postings list measured in document IDs
 	long stop_word_removal;				// what kinds of stopwords should be removed from the index (NONE, SINGLETONS, etc.)
