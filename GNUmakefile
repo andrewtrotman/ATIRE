@@ -138,7 +138,7 @@ ifeq ($(USE_GCC_DEBUG), 1)
 	endif
 else
 	#LDFLAGS +=
-	CFLAGS += -O3
+	CFLAGS += -O3 -fno-tree-vectorize
 endif
 
 ifeq ($(USE_PREPARE_PROFILING), 1)
