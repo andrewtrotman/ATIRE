@@ -150,7 +150,7 @@ public:
 		Load all the necessary stuff for the search engine to start up
 		This assumes we are in same directory as the index
 	*/
-	long open(long type, char * index_filename = "index.aspt", char * doclist_filename = "doclist.aspt");		// see the enum above for possible types (ORed together)
+	long open(long type, char *index_filename, char *doclist_filename, long quantize, long long quantization_bits);		// see the enum above for possible types (ORed together)
 
 	ANT_search_engine *get_search_engine(void) { return search_engine; }
 
@@ -185,7 +185,7 @@ public:
 		for LMD:  u = p1
 		for LMJM: l = p1
 	*/
-	long set_ranking_function(long long function, double p1, double p2);
+	long set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
 	long set_ranking_function_pregen(const char *fieldname, double p1);
 
 	ANT_pregen *get_pregen();

@@ -37,6 +37,9 @@ protected:
 	ANT_search_engine *engine;
 	double documents;
 	long long documents_as_integer;
+	long quantization;
+	long long quantization_bits;
+	double minimum_collection_rsv, maximum_collection_rsv;
 	double collection_length_in_terms;
 	long long collection_length_in_terms_as_integer;
 	double mean_document_length;
@@ -57,12 +60,14 @@ void compute_term_details(ANT_search_engine_btree_leaf *term_details, ANT_weight
 
 public:
 	/*
-		This constructor is called from the search engine
+		This constructor is called from the search engine.
+		We might want to quantize at search time, to find the best quantization bits, which we can then push to the index.
 	*/
-	ANT_ranking_function(ANT_search_engine *engine);
+	ANT_ranking_function(ANT_search_engine *engine, long quantize, long long quantization_bits);
 
 	/*
 		This constructor is called for quantized impact ordering during indexing
+		Unlike the search engine version, the memory index object already knows if to quantize it's results, and how many bits it needs.
 	*/
 	ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths);
 
@@ -138,7 +143,9 @@ public:
 		but anyone wanting efficient support needs to supply several funcitons including these two.
 	*/
 	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
-	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies, long quantization_bits);
+	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
+
+	unsigned short quantize(double rsv, double maximum, double minimum);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

@@ -218,8 +218,8 @@ if (param_block.stemmer != 0)
 		The user has asked for a stemmed index and so we create a stemmer
 		and store the fact in the index (so that the search engine knows)
 	*/
-	ANT_string_pair squiggle_quantized("~stemmer");
-	index->set_variable(&squiggle_quantized, param_block.stemmer);
+	ANT_string_pair squiggle_stemmed("~stemmer");
+	index->set_variable(&squiggle_stemmed, param_block.stemmer);
 	stemmer = ANT_stemmer_factory::get_core_stemmer(param_block.stemmer);
 	}
 

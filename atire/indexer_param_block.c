@@ -54,6 +54,8 @@ stop_word_df_frequencies = 1;
 stop_word_df_threshold = 1.1;		// anything greater than 1.0 will do.
 scrubbing = ANT_directory_iterator_scrub::NONE;
 filter_filename = NULL;
+quantization = FALSE;
+quantization_bits = -1; // -1 indicates run-time calculation, wil be overwritten if necessary by the user
 }
 
 /*
@@ -159,6 +161,11 @@ puts("   f            Flesch-Kincaid");
 puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
+puts("-q[:n]          Really quantize, the Q options will store variables in the index so quantization."); 
+puts("                This option pushes the quantization into n-bits to indexing time.");
+puts("                [default n=5.4 + 5.4e-4 * sqrt(number documents)]");
+puts("");
+
 ANT_indexer_param_block_stem::help(FALSE);
 ANT_indexer_param_block_topsig::help();
 
@@ -492,6 +499,12 @@ for (param = 1; param < argc; param++)
 			{
 			if (!set_ranker(command + 1))
 				exit(printf("Bad ranking function or ranking parameters '%s'\n", command + 1));
+			}
+		else if (*command == 'q')
+			{
+			quantization = TRUE;
+			if (*(command + 1) == ':')
+				quantization_bits = atoll(command + 2);
 			}
 		else if (*command == 't')
 			term_expansion(command + 1, FALSE);

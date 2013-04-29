@@ -19,7 +19,7 @@ public:
 	ANT_ranking_function_factory() {}
 	virtual ~ANT_ranking_function_factory() {}
 	
-	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths) = 0;
+	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths, long *index_quantization, long long *quantization_bits) = 0;
 } ;
 
 #endif /* RANKING_FUNCTION_FACTORY_H_ */

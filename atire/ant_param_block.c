@@ -68,6 +68,8 @@ title_length = 300;
 expander_tf_types = ANT_thesaurus_relationship::SYNONYM;
 expander_query_types = ANT_thesaurus_relationship::SYNONYM;
 processing_strategy = TERM_AT_A_TIME;								// term at a time by default
+quantization = false; // by default don't quantize
+quantization_bits = -1; // by default use the maths to calculate the bits we need
 }
 
 /*
@@ -178,6 +180,8 @@ puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking functions
+puts("-r[:n]          Quantize search results in n bits [default n=maths!]");
+puts("");
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
 puts("-----------------------------");
@@ -652,6 +656,12 @@ for (param = 1; param < argc; param++)
 			{
 			if (!set_ranker(command + 1))
 				exit(printf("Bad ranking function or ranking parameters '%s'\n", command + 1));
+			}
+		else if (*command == 'r')
+			{
+			quantization = true;
+			if (*(command + 1) == ':')
+				quantization_bits = atoll(command + 2);
 			}
 		else if (strcmp(command, "findex") == 0)
 			{

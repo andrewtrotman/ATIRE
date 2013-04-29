@@ -252,8 +252,11 @@ puts("");
 	ANT_INDEXER_PARAM_BLOCK_RANK::GET_INDEXING_RANKER()
 	---------------------------------------------------
 */
-ANT_ranking_function *ANT_indexer_param_block_rank::get_indexing_ranker(long long documents, ANT_compressable_integer *lengths)
+ANT_ranking_function *ANT_indexer_param_block_rank::get_indexing_ranker(long long documents, ANT_compressable_integer *lengths, long *quantization, long long *quantization_bits)
 {
+*quantization = this->quantization;
+*quantization_bits = this->quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt(documents) : this->quantization_bits;
+
 switch (ranking_function)
 	{
 	case BM25:

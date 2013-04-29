@@ -256,7 +256,7 @@ return id_list;
 	ATIRE_API::OPEN()
 	-----------------
 */
-long ATIRE_API::open(long type, char * index_filename, char * doclist_filename)
+long ATIRE_API::open(long type, char *index_filename, char *doclist_filename, long quantize, long long quantization_bits)
 {
 ANT_search_engine_readability *readable_search_engine;
 
@@ -274,7 +274,10 @@ if (type & READABILITY_SEARCH_ENGINE)
 	if (search_engine->open(index_filename)==0)
 		return 1; //fail
 
-	ranking_function = new ANT_ranking_function_readability(readable_search_engine);
+	/*
+		Makes no sense to quantize readability based ranking ... at least it doesn't now
+	*/
+	ranking_function = new ANT_ranking_function_readability(readable_search_engine, false, 0);
 	}
 else
 	{
@@ -282,10 +285,14 @@ else
 	if (search_engine->open(index_filename) == 0)
 		return 1; //fail
 
+	/*
+		If it's already quantized, then ignore what the
+		user says about quantization
+	*/
 	if (search_engine->quantized())
-		ranking_function = new ANT_ranking_function_impact(search_engine);
+		ranking_function = new ANT_ranking_function_impact(search_engine, false, -1);
 	else
-		ranking_function = new ANT_ranking_function_divergence(search_engine);
+		ranking_function = new ANT_ranking_function_divergence(search_engine, quantize, quantization_bits);
 	}
 
 return 0;		// success
@@ -328,10 +335,10 @@ topsig_globalstats = new ANT_index_document_topsig(ANT_memory_index::NONE, width
 topsig_signature = new ANT_index_document_topsig_signature(width, density);
 
 if (topsig_positive_ranking_function == NULL)
-	topsig_positive_ranking_function = new ANT_ranking_function_topsig_positive(search_engine, width);
+	topsig_positive_ranking_function = new ANT_ranking_function_topsig_positive(search_engine, width, false, -1);
 
 if (topsig_negative_ranking_function == NULL)
-	topsig_negative_ranking_function = new ANT_ranking_function_topsig_negative(search_engine, width);
+	topsig_negative_ranking_function = new ANT_ranking_function_topsig_negative(search_engine, width, false, -1);
 
 return true;
 }
@@ -392,7 +399,7 @@ for (current = 0; current < pregen_count; current++)
 	if (strcmp(pregens[current].field_name, fieldname) == 0)
 		{
 		delete ranking_function;
-		ranking_function = new ANT_ranking_function_pregen(search_engine, &pregens[current], (long)p1);
+		ranking_function = new ANT_ranking_function_pregen(search_engine, false, -1, &pregens[current], (long)p1);
 
 		return 0;		// success
 		}
@@ -419,7 +426,7 @@ return NULL;
 
 	On failure, the API is left unchanged.
 */
-long ATIRE_API::set_ranking_function(long long function, double p1, double p2)
+long ATIRE_API::set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
 {
 ANT_ranking_function *new_function;
 
@@ -444,59 +451,59 @@ if (search_engine->quantized())
 switch (function)
 	{
 	case ANT_ANT_param_block::BM25:
-		new_function = new ANT_ranking_function_BM25(search_engine, p1, p2);
+		new_function = new ANT_ranking_function_BM25(search_engine, quantization, quantization_bits, p1, p2);
 		break;
 	case ANT_ANT_param_block::DLH13:
-		new_function = new ANT_ranking_function_DLH13(search_engine);
+		new_function = new ANT_ranking_function_DLH13(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DFREE:
-		new_function = new ANT_ranking_function_DFRee(search_engine);
+		new_function = new ANT_ranking_function_DFRee(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DPH:
-		new_function = new ANT_ranking_function_DPH(search_engine);
+		new_function = new ANT_ranking_function_DPH(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::IMPACT:
-		new_function = new ANT_ranking_function_impact(search_engine);
+		new_function = new ANT_ranking_function_impact(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::LMD:
-		new_function = new ANT_ranking_function_lmd(search_engine, p1);
+		new_function = new ANT_ranking_function_lmd(search_engine, quantization, quantization_bits, p1);
 		break;
 	case ANT_ANT_param_block::LMJM:
-		new_function = new ANT_ranking_function_lmjm(search_engine, p1);
+		new_function = new ANT_ranking_function_lmjm(search_engine, quantization, quantization_bits, p1);
 		break;
 	case ANT_ANT_param_block::BOSE_EINSTEIN:
-		new_function = new ANT_ranking_function_bose_einstein(search_engine);
+		new_function = new ANT_ranking_function_bose_einstein(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DIVERGENCE:
-		new_function = new ANT_ranking_function_divergence(search_engine);
+		new_function = new ANT_ranking_function_divergence(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::TERM_COUNT:
-		new_function = new ANT_ranking_function_term_count(search_engine);
+		new_function = new ANT_ranking_function_term_count(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DOCID:
-		new_function = new ANT_ranking_function_docid(search_engine, (int) p1);
+		new_function = new ANT_ranking_function_docid(search_engine, quantization, quantization_bits, (int) p1);
 		break;
 	case ANT_ANT_param_block::INNER_PRODUCT:
-		new_function = new ANT_ranking_function_inner_product(search_engine);
+		new_function = new ANT_ranking_function_inner_product(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::ALL_TERMS:
 		query_type_is_all_terms = TRUE;
-		new_function = new ANT_ranking_function_term_count(search_engine);
+		new_function = new ANT_ranking_function_term_count(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::KBTFIDF:
-		new_function = new ANT_ranking_function_kbtfidf(search_engine, p1, p2);
+		new_function = new ANT_ranking_function_kbtfidf(search_engine, quantization, quantization_bits, p1, p2);
 		break;
 	case ANT_ANT_param_block::DFI:
-		new_function = new ANT_ranking_function_DFI(search_engine);
+		new_function = new ANT_ranking_function_DFI(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DFIW:
-		new_function = new ANT_ranking_function_DFIW(search_engine);
+		new_function = new ANT_ranking_function_DFIW(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DFI_IDF:
-		new_function = new ANT_ranking_function_DFI_IDF(search_engine);
+		new_function = new ANT_ranking_function_DFI_IDF(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DFIW_IDF:
-		new_function = new ANT_ranking_function_DFIW_IDF(search_engine);
+		new_function = new ANT_ranking_function_DFIW_IDF(search_engine, quantization, quantization_bits);
 		break;
 	default:
 		printf("Error: Unknown ranking function selected in ATIRE_API::set_ranking_function\n");
@@ -703,7 +710,6 @@ return destination;
 */
 void ATIRE_API::search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long long terms_in_query, ANT_ranking_function *ranking_function)
 {
-long long i;
 long long current_term, total_quantums = 0, processed_quantums;
 ANT_NEXI_term_ant *term_string;
 ANT_quantum the_quantum;
@@ -721,9 +727,7 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 	term_string = term_list[current_term];
 
 	// after calling the function, the header_info and impact header are stored in the impact_header_buffers[current_term]
-	verify = search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details,
-																							raw_postings_buffer,
-																							impact_header_buffers[current_term]);
+	verify = search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details, raw_postings_buffer, impact_header_buffers[current_term]);
 	//make sure the term was found in the dictionary
 	if (term_string->term_details.local_collection_frequency != 0)
 		{
@@ -779,28 +783,27 @@ while (heap_items > 0)
 	//printf("max remaining quantum: %lld, diff of k and k+1: %lld\n", max_remaining_quantum, search_engine->results_list->get_diff_k_and_k_plus_1());
 	if ((early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF) && search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
 		{
-			if (early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF_SMALLEST)
+		if (early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF_SMALLEST)
+			{
+			if (max_remaining_quantum < search_engine->results_list->get_smallest_diff_amoung_the_top())
 				{
-				if (max_remaining_quantum < search_engine->results_list->get_smallest_diff_amoung_the_top())
-					{
-					//printf(">>>>>>> QUANTUM_STOP_DIFF_SMALLEST stopped\n");
-					break;
-					}
-				}
-			else if (early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF_LARGEST)
-				{
-				if (max_remaining_quantum < search_engine->results_list->get_diff_between_largest_and_second_largest())
-					{
-					//printf(">>>>>>> QUANTUM_STOP_DIFF_LARGEST stopped\n");
-					break;
-					}
-				}
-			else // the QUANTUM_STOP_DIFF case
-				{
-				//printf(">>>>>>> QUANTUM_STOP_DIFF stopped\n");
+				//printf(">>>>>>> QUANTUM_STOP_DIFF_SMALLEST stopped\n");
 				break;
 				}
-
+			}
+		else if (early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF_LARGEST)
+			{
+			if (max_remaining_quantum < search_engine->results_list->get_diff_between_largest_and_second_largest())
+				{
+				//printf(">>>>>>> QUANTUM_STOP_DIFF_LARGEST stopped\n");
+				break;
+				}
+			}
+		else // the QUANTUM_STOP_DIFF case
+			{
+			//printf(">>>>>>> QUANTUM_STOP_DIFF stopped\n");
+			break;
+			}
 		}
 
 	processed_postings += the_quantum.doc_count;
@@ -940,11 +943,8 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 /*
    Check if the number of terms exceed the limit
  */
-if (terms_in_query > this->MAX_ALLOWED_TERMS_IN_QUERY)
-	{
-	printf("Exceeded the allowed number of 1024 terms per query\n");
-	exit(1);
-	}
+if (terms_in_query > MAX_ALLOWED_TERMS_IN_QUERY)
+	exit(printf("Exceeded the allowed number of %d terms per query\n", MAX_ALLOWED_TERMS_IN_QUERY));
 
 
 /*
@@ -1463,7 +1463,7 @@ sort_top_k = top_k;
 
 search_engine->stats_initialise();
 if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
-	search_engine->init_accumulators(top_k == LLONG_MAX ? top_k : top_k+1);
+	search_engine->init_accumulators(top_k == LLONG_MAX ? top_k : top_k + 1);
 else
 	search_engine->init_accumulators(top_k);
 
@@ -1632,7 +1632,7 @@ if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
 	one_decompressed_quantum = (ANT_compressable_integer *)memory->malloc(ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*one_decompressed_quantum));
 
 	// reset the early termination strategy if the index is TF impacted
-    if (early_termination != ANT_ANT_param_block::QUANTUM_STOP_NONE && !search_engine->get_is_quantized())
+	if (early_termination != ANT_ANT_param_block::QUANTUM_STOP_NONE && !search_engine->get_is_quantized())
 		{
 		early_termination = ANT_ANT_param_block::QUANTUM_STOP_NONE;
 		printf("WARNING: the index is not quantized, the early termination for quantum-at-a-time is reset to none.\n");

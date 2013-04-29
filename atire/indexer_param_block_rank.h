@@ -32,6 +32,9 @@ public:
 
 	int ascending;						// ascending/descending switch for docid ranking
 	char *field_name;					// field to rank on for pregens
+	long quantization;  // whether the quantization should be performed
+	long quantization_bits;  // the number of bits to quantize into
+
 private:
 	const char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
 
@@ -41,7 +44,7 @@ protected:
 
 	virtual void help(char *title, char switch_char, long long allowable);
 
-	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths);
+	virtual ANT_ranking_function *get_indexing_ranker(long long documents, ANT_compressable_integer *lengths, long *index_quantization, long long *quantization_bits);
 public:
 	ANT_indexer_param_block_rank();
 	virtual ~ANT_indexer_param_block_rank();

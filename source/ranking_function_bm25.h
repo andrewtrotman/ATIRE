@@ -25,7 +25,7 @@ private:
 	void init(double k1, double b);
 
 public:
-	ANT_ranking_function_BM25(ANT_search_engine *engine, double k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, double b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B) : ANT_ranking_function(engine) { init(k1, b); }
+	ANT_ranking_function_BM25(ANT_search_engine *engine, long quantize, long long quantization_bits, double k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, double b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B) : ANT_ranking_function(engine, quantize, quantization_bits) { init(k1, b); }
 	ANT_ranking_function_BM25(long long documents, ANT_compressable_integer *document_lengths, double k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, double b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B) : ANT_ranking_function(documents, document_lengths) { init(k1, b); }
 	virtual ~ANT_ranking_function_BM25();
 

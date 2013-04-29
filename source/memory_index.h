@@ -73,6 +73,8 @@ private:
 	*/
 	ANT_compressable_integer *document_lengths;
 	ANT_ranking_function *quantizer;
+	long long quantization_bits;
+	long index_quantization;
 	double maximum_collection_rsv, minimum_collection_rsv;
 
 	/*
@@ -105,18 +107,18 @@ private:
 	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
-	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root, long quantization_bits);
+	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
 public:
 	long generate_term_list(ANT_memory_index_hash_node *root, ANT_memory_index_hash_node **into, long where, int32_t *length_of_longest_term, int64_t *highest_df);
 	ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start);
 	ANT_memory_index_hash_node **write_node(ANT_file *file, ANT_memory_index_hash_node **start);
 private:
-	long long node_to_postings(ANT_memory_index_hash_node *root, long quantization_bits);
+	long long node_to_postings(ANT_memory_index_hash_node *root);
 #ifdef IMPACT_HEADER
-	long long impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local, long quantization_bits);
+	long long impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local);
 #endif
-	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local, long quantization_bits);
+	long long impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local);
 	double rsv_all_nodes(double *minimum, ANT_memory_index_hash_node *root);
 	long long get_serialised_postings(ANT_memory_index_hash_node *root, long long *doc_size, long long *tf_size);
 	void open_index_file(char *filename);

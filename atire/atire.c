@@ -298,6 +298,24 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write(atire->get_unique_term_count());
 			outchannel->puts("</uniquetermnum>");
 #endif
+			outchannel->write("<quantized>");
+			long long var = atire->get_search_engine()->get_is_quantized();
+			outchannel->write(var);
+			outchannel->puts("</quantized>");
+			var = atire->get_search_engine()->get_variable("~quantmax");
+			if (var)
+				{
+				outchannel->write("<quantmax>");
+				printf("%f", *(double *)&var);
+				outchannel->puts("</quantmax>");
+				}
+			var = atire->get_search_engine()->get_variable("~quantmin");
+			if (var)
+				{
+				outchannel->write("<quantmin>");
+				printf("%f", *(double *)&var);
+				outchannel->puts("</quantmin>");
+				}
 			outchannel->write("<longestdoc>");
 			outchannel->write(atire->get_longest_document_length());
 			outchannel->puts("</longestdoc>");
@@ -615,19 +633,19 @@ int ant_init_ranking(ATIRE_API *atire, ANT_indexer_param_block_rank &params)
 switch (params.ranking_function)
 	{
 	case ANT_indexer_param_block_rank::BM25:
-		return atire->set_ranking_function(params.ranking_function, params.bm25_k1, params.bm25_b) == 0;
+		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.bm25_k1, params.bm25_b) == 0;
 	case ANT_indexer_param_block_rank::LMD:
-		return atire->set_ranking_function(params.ranking_function, params.lmd_u, 0.0) == 0;
+		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmd_u, 0.0) == 0;
 	case ANT_indexer_param_block_rank::LMJM:
-		return atire->set_ranking_function(params.ranking_function, params.lmjm_l, 0.0) == 0;
+		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmjm_l, 0.0) == 0;
 	case ANT_indexer_param_block_rank::KBTFIDF:
-		return atire->set_ranking_function(params.ranking_function, params.kbtfidf_k, params.kbtfidf_b) == 0;
+		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.kbtfidf_k, params.kbtfidf_b) == 0;
 	case ANT_indexer_param_block_rank::DOCID:
-		return atire->set_ranking_function(params.ranking_function, params.ascending, 0) == 0;
+		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.ascending, 0) == 0;
 	case ANT_indexer_param_block_rank::PREGEN:
 		return atire->set_ranking_function_pregen(params.field_name, params.ascending) == 0;
 	default:
-		return atire->set_ranking_function(params.ranking_function, 0.0, 0.0) == 0;
+		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, 0.0, 0.0) == 0;
 	}
 }
 
@@ -653,13 +671,12 @@ if (params.logo)
 	puts(atire->version());				// print the version string is we parsed the parameters OK
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
-	fail = atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename);
+	fail = atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
 else
-	fail = atire->open(params.file_or_memory, params.index_filename, params.doclist_filename);
+	fail = atire->open(params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
 
 if (params.inversion_type == ANT_indexer_param_block_topsig::TOPSIG)
 	atire->load_topsig(params.topsig_width, params.topsig_density, params.topsig_global_stats);
-
 
 if (fail)
 	{

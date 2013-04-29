@@ -16,7 +16,7 @@
 	ANT_RANKING_FUNCTION_READABILITY::ANT_RANKING_FUNCTION_READABILITY()
 	--------------------------------------------------------------------
 */
-ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_engine_readability *engine, double mix, double cutoff, double k1, double b) : ANT_ranking_function(engine)
+ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_engine_readability *engine, double mix, double cutoff, double k1, double b) : ANT_ranking_function(engine, false, -1)
 {
 this->cutoff = cutoff ? cutoff : engine->hardest_document / 1000.0;
 this->mix = mix;

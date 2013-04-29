@@ -31,7 +31,7 @@ private:
 	}
 
 public:
-	ANT_ranking_function_topsig(ANT_search_engine *engine, long width) : ANT_ranking_function(engine) { compute_prior_probabilities(width); }
+	ANT_ranking_function_topsig(ANT_search_engine *engine, long quantize, long long quantization_bits, long width) : ANT_ranking_function(engine, quantize, quantization_bits) { compute_prior_probabilities(width); }
 	ANT_ranking_function_topsig(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
 	~ANT_ranking_function_topsig() { delete [] document_prior_probability; }
 } ;
