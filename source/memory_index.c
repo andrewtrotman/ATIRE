@@ -287,8 +287,8 @@ stats->documents = docno;
 	*/
 	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
 	{
-	ANT_compressable_integer sum, bucket_size[1 << 8], bucket_prev_docid[1 << 8];
-	ANT_compressable_integer *pointer[1 << 8], *current_docid, doc, *pruned_point;
+	ANT_compressable_integer sum, bucket_size[0x10000], bucket_prev_docid[0x10000];
+	ANT_compressable_integer *pointer[0x10000], *current_docid, doc, *pruned_point;
 	unsigned short *current, *end;
 	long bucket, buckets_used;
 
@@ -332,7 +332,7 @@ stats->documents = docno;
 
 	// find the number of non-zero buckets (the number of quantums)
 	impact_header.the_quantum_count = 0;
-	for (bucket = 0; bucket < (1 << 8); bucket++)
+	for (bucket = 0; bucket < (1 << quantization_bits); bucket++)
 		if (bucket_size[bucket] != 0)
 			impact_header.the_quantum_count++;
 
@@ -346,7 +346,7 @@ stats->documents = docno;
 	*/
 	pruned_point = NULL;
 	buckets_used = sum = 0;
-	for (bucket = ((1 << 8) - 1); bucket >= 0; bucket--)
+	for (bucket = (1 << quantization_bits) - 1; bucket >= 0; bucket--)
 		{
 		pointer[bucket] = destination + sum;
 		if (bucket_size[bucket] != 0)
@@ -398,8 +398,8 @@ stats->documents = docno;
 */
 long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
 {
-ANT_compressable_integer sum, bucket_size[1 << 8], bucket_prev_docid[1 << 8];
-ANT_compressable_integer *pointer[1 << 8], *current_docid, doc, *zero_point;
+ANT_compressable_integer sum, bucket_size[0x10000], bucket_prev_docid[0x10000];
+ANT_compressable_integer *pointer[0x10000], *current_docid, doc, *zero_point;
 unsigned short *current, *end;
 long bucket, buckets_used;
 
@@ -425,7 +425,7 @@ for (current = term_frequency; current < end; current++)
 */
 zero_point = NULL;
 buckets_used = sum = 0;
-for (bucket = ((1 << 8) - 1); bucket >= 0; bucket--)
+for (bucket = ((1 << quantization_bits) - 1); bucket >= 0; bucket--)
 	{
 	pointer[bucket] = destination + sum + 2 * buckets_used; // the extra 1 (from 2) counts for the number terminator at the end of each quantum
 	if (bucket_size[bucket] != 0)
@@ -454,7 +454,7 @@ for (current = term_frequency; current < end; current++)
 /*
 	Finally terminate each impact list with a 0
 */
-for (bucket = 0; bucket < (1 << 8); bucket++)
+for (bucket = 0; bucket < (1 << quantization_bits); bucket++)
 	if (bucket_size[bucket] != 0)
 		*pointer[bucket] = 0;
 
@@ -1133,6 +1133,8 @@ if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths, &
 	*/
 	if (index_quantization)
 		set_variable("~quantized", 1);
+	else
+		quantization_bits = 8; // this is by default for tf-indexes
 
 	/*
 		Now compute the maximum impact score across the collection

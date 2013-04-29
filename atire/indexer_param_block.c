@@ -161,7 +161,7 @@ puts("   f            Flesch-Kincaid");
 puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
-puts("-q[:n]          Really quantize, the Q options will store variables in the index so quantization."); 
+puts("-q[n]           Really quantize, the Q options will store variables in the index so quantization."); 
 puts("                This option pushes the quantization into n-bits to indexing time.");
 puts("                [default n=5.4 + 5.4e-4 * sqrt(number documents)]");
 puts("");
@@ -503,8 +503,10 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'q')
 			{
 			quantization = TRUE;
-			if (*(command + 1) == ':')
-				quantization_bits = atoll(command + 2);
+			if (*(command + 1))
+				quantization_bits = atoll(command + 1);
+			if (quantization_bits > 16)
+				exit(printf("Cannot quantize using more than 16 bits"));
 			}
 		else if (*command == 't')
 			term_expansion(command + 1, FALSE);

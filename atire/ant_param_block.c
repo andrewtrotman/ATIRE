@@ -180,7 +180,7 @@ puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
 ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking functions
-puts("-r[:n]          Quantize search results in n bits [default n=maths!]");
+puts("-r[n]           Quantize search results in n bits [default n=maths!]");
 puts("");
 
 puts("FOCUSED AND SNIPPET RETRIEVAL");
@@ -660,8 +660,10 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'r')
 			{
 			quantization = true;
-			if (*(command + 1) == ':')
-				quantization_bits = atoll(command + 2);
+			if (*(command + 1))
+				quantization_bits = atoll(command + 1);
+			if (quantization_bits > 16)
+				exit(printf("Cannot quantize using more than 16 bits"));
 			}
 		else if (strcmp(command, "findex") == 0)
 			{
