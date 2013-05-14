@@ -21,7 +21,7 @@ class ANT_thesaurus_wordnet : public ANT_thesaurus
 public:
 	static const uint32_t ANT_ID_THESAURUS_SIGNATURE_MAJOR = 0x54505341;	//"ASPT" (Intel Byte Order)
 	static const uint32_t ANT_ID_THESAURUS_SIGNATURE_MINOR = 0x00000003;	// version 0.3		BCD Major / Minor version number
-	static const uint64_t ANT_ID_THESAURUS_WORDNET = 0x54454e44524f5700;	//"WORDNET"(Intel Byte Order)
+	static const uint64_t ANT_ID_THESAURUS_WORDNET = 0x54454e44524f5700LL;	//"WORDNET"(Intel Byte Order)
 
 private:
 	ANT_file_memory *file;					// a pointer to the disk file

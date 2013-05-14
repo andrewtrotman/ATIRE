@@ -1,5 +1,3 @@
-OS_TYPE := $(shell uname)
-
 ###############################################################################
 # The following options are the default compilation flags.
 ###############################################################################
@@ -69,10 +67,6 @@ USE_PARTIAL_DCOMPRESSION := 1
 USE_TWO_D_ACCUMULATORS := 1
 USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
 
-# what type to use for the accumulators
-CFLAGS += -DANT_ACCUMULATOR_T="unsigned short"
-CFLAGS += -DANT_PREGEN_T="unsigned long long"
-
 # use mysql database backend
 USE_MYSQL := 0
 
@@ -90,9 +84,22 @@ USE_SNOWBALL := 1
 # called "GNUmakeifle.specific.include"
 #
 # PLEASE do not commit this file to the repository.
+#
+# also, it is possible to include a file written for a specific target like iOS
+# for example, make TARGET=iOS, GNUMakile.iOS will be included,
+# however, a generic iOS make file so far is not successful
+# you might want to use autotools the configurations files of which are 
+# also included in this project
+#
 ###############################################################################
 -include GNUmakefile.specific.include
+-include GNUmakefile.${TARGET}
 
+OS_TYPE := $(shell uname)
+
+# what type to use for the accumulators
+CFLAGS += -DANT_ACCUMULATOR_T="unsigned short"
+CFLAGS += -DANT_PREGEN_T="unsigned long long"
 
 ###############################################################################
 # Please use above options to enable corresponding flags
@@ -160,10 +167,14 @@ ifeq ($(OS_TYPE), SUNOS)
 endif
 
 # common flags
-LDFLAGS += -ldl
-CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
+ifndef $LDFLAGS
+	LDFLAGS += -ldl
+endif
+ifndef $CFLAGS
+	CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
+endif
 
 ifeq ($(USE_IMPACT_HEADER), 1)
 	CFLAGS += -DIMPACT_HEADER

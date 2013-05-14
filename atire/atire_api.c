@@ -97,7 +97,7 @@
  * for configure.ac, it must use AC_LANG(C++) to force library check with g++
  */
 extern "C" {
-	void atire_api_check() {};
+	void atire_api_check() {}
 }
 
 /*

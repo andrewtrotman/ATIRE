@@ -34,7 +34,7 @@ struct ANT_UNICODE_decomposition
 
 enum ANT_UNICODE_xml_char_class {
 	XMLCC_NAME_START = 1,
-	XMLCC_NAME = 2,
+	XMLCC_NAME = 2
 };
 
 unsigned long utf8_to_wide_safe(const unsigned char *here);
