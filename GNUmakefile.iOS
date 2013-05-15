@@ -1,4 +1,4 @@
-projectect=atire
+projectect=atire_api
 
 ifeq ($(device), armv7)
     ARCH=armv7
@@ -7,7 +7,7 @@ ifeq ($(device), armv7)
 #    CFLAGS ?=-mcpu=cortex-a8 -marm
 else
 	ifeq ($(device), armv6)
-	    ARCH=armv7
+	    ARCH=armv6
 	    DEVICE=OS
 	    CC_FLAGS=-arch $(ARCH)
 	else
