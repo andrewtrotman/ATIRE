@@ -133,6 +133,13 @@ export CXXFLAGS="${CFLAGS}"
 export CPP="${CC} -E"
 export CXXCPP="${CPP}"
 
+#
+# compiler may be not happy about that ::malloc and ::realloc not defined
+# whether this will have side-effect, not tested yet at this stage
+#
+export ac_cv_func_realloc_0_nonnull=yes
+export ac_cv_func_malloc_0_nonnull=yes
+
 configure_file=./configure
 if ! [ -e $configure_file ]
 then
