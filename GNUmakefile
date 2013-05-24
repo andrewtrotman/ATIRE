@@ -90,8 +90,16 @@ USE_SNOWBALL := 1
 # called "GNUmakeifle.specific.include"
 #
 # PLEASE do not commit this file to the repository.
+#
+# also, it is possible to include a file written for a specific target like iOS
+# for example, make TARGET=iOS, GNUMakile.iOS will be included,
+# however, a generic iOS make file so far is not successful
+# you might want to use autotools the configurations files of which are 
+# also included in this project
+#
 ###############################################################################
 -include GNUmakefile.specific.include
+-include GNUmakefile.${TARGET}
 
 
 ###############################################################################

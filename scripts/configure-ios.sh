@@ -1,0 +1,164 @@
+#!/bin/bash
+
+################################################################################
+#
+# Copyright (c) 2008-2009 Christopher J. Stawarz
+#
+# Modified by Nathaniel Gray in 2012 to support Clang, custom dev tool locations, 
+# and armv7.  Also removed "make install" phase, since that can easily be done by
+# hand.
+#
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation files
+# (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+################################################################################
+
+
+
+# Disallow undefined variables
+set -u
+
+
+default_iphoneos_version=4.3
+default_macos_version=10.6
+developer_dir="/Developer"
+
+export IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET:-$default_iphoneos_version}"
+export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-$default_macos_version}"
+
+export DEVELOPER_DIR="${DEVELOPER_DIR:-$developer_dir}"
+
+usage ()
+{
+    cat >&2 << EOF
+Usage: ${0##*/} [-ht] [-p prefix] target [configure_args]
+	-h	Print help message
+	-p	Installation prefix (default: \$HOME/Developer/Platforms/...)
+	-t	Use 16-bit Thumb instruction set (instead of 32-bit ARM)
+	-g 	Use gcc/g++ compilers (default: clang/clang++)
+	-o 	Use other compilers, clang2.9/clang2.9++)
+
+The target must be "device", "device7" (for armv7 architecture only) or "simulator".  
+Any additional arguments are passed to configure.
+
+The following environment variables affect the build process:
+
+	IPHONEOS_DEPLOYMENT_TARGET	(default: $default_iphoneos_version)
+	MACOSX_DEPLOYMENT_TARGET	(default: $default_macos_version)
+	DEVELOPER_DIR           	(default: $developer_dir)
+
+EOF
+}
+
+#cc=clang
+#cxx=clang++
+
+cc=llvm-g++-4.2
+cxx=llvm-g++-4.2
+
+while getopts ":hptgo" opt; do
+    case $opt in
+	h  ) usage ; exit 0 ;;
+	p  ) prefix="$OPTARG" ;;
+	t  ) thumb_opt=thumb ;;
+	g  ) cc=gcc ; cxx=g++ ;;
+	o  ) cc=clang-mp-2.9 ; cxx=clang++-mp-2.9 ;;
+	\? ) usage ; exit 2 ;;
+    esac
+done
+shift $(( $OPTIND - 1 ))
+
+if (( $# < 1 )); then
+    usage
+    exit 2
+fi
+
+target=$1
+shift
+
+case $target in
+
+    device )
+    export arch=armv6
+    platform=iPhoneOS
+    extra_cflags="-m${thumb_opt:-no-thumb} -mthumb-interwork"
+    ;;
+    
+    device7 )
+    export arch=armv7
+    platform=iPhoneOS
+    extra_cflags="-m${thumb_opt:-no-thumb} -mthumb-interwork"
+    ;;
+    
+    simulator )
+	export arch=i386
+	platform=iPhoneSimulator
+	extra_cflags="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
+	;;
+
+    * )
+	usage
+	exit 2
+
+esac
+
+
+platform_dir="$DEVELOPER_DIR/Platforms/${platform}.platform/Developer"
+platform_bin_dir="${platform_dir}/usr/bin"
+platform_sdk_dir="${platform_dir}/SDKs/${platform}${IPHONEOS_DEPLOYMENT_TARGET}.sdk"
+prefix="${prefix:-${HOME}${platform_sdk_dir}}"
+
+export CC="${platform_bin_dir}/${cc}"
+export CFLAGS="-arch ${arch} -pipe -Os -gdwarf-2 -isysroot ${platform_sdk_dir} ${extra_cflags}"
+export LDFLAGS="-arch ${arch} -isysroot ${platform_sdk_dir}"
+export CXX="${platform_bin_dir}/${cxx}"
+export CXXFLAGS="${CFLAGS}"
+export CPP="${CC} -E"
+export CXXCPP="${CPP}"
+
+#
+# compiler may be not happy about that ::malloc and ::realloc not defined
+# whether this will have side-effect, not tested yet at this stage
+#
+export ac_cv_func_realloc_0_nonnull=yes
+export ac_cv_func_malloc_0_nonnull=yes
+
+configure_file=./configure
+if ! [ -e $configure_file ]
+then
+    configure_file=../configure
+    if ! [ -e $configure_file ]
+    then
+        configure_file=../../configure
+    fi
+fi
+
+$configure_file \
+    --prefix="${prefix}" \
+    --host="${arch}-apple-darwin" \
+    --disable-shared \
+    --enable-static \
+    "$@" || exit
+
+cat >&2 << EOF
+
+Configure succeeded!
+
+EOF

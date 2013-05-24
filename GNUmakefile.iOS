@@ -1,0 +1,31 @@
+projectect=atire_api
+
+ifeq ($(device), armv7)
+    ARCH=armv7
+    DEVICE=OS
+    CC_FLAGS=-arch $(ARCH)
+#    CFLAGS ?=-mcpu=cortex-a8 -marm
+else
+	ifeq ($(device), armv6)
+	    ARCH=armv6
+	    DEVICE=OS
+	    CC_FLAGS=-arch $(ARCH)
+	else
+	    ARCH=i386
+	    CC_FLAGS=-arch $(ARCH)
+	    DEVICE=Simulator
+	endif
+endif
+ 
+DEVROOT=/Developer/Platforms/iPhone$(DEVICE).platform/Developer
+SDKROOT=${DEVROOT}/SDKs/iPhone$(DEVICE)4.3.sdk
+CC=$(DEVROOT)/usr/bin/g++ $(CC_FLAGS)
+LD=$(CC)
+CFLAGS +=-isysroot ${SDKROOT} -Iheaders 
+LDFLAGS=-isysroot ${SDKROOT} -Wl, -syslibroot ${SDKROOT}
+
+#.PHONY: lipo
+#lipo:
+#	lipo -create -arch armv7 armv7-$(project).a -arch i386 i386-$(project).a -output $(project).a
+
+

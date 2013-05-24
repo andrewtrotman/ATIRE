@@ -21,7 +21,8 @@ AM_LDFLAGS = @LIBS@
 # using HEADER HASH FUNCTION
 AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
 		-DSPECIAL_COMPRESSION=1 -DTOP_K_READ_AND_DECOMPRESSOR \
-       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings 
+       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
+        -Wno-long-long
        
 # for parallel indexing, but it will be configured by configure script with --with-pi option
 # -DPARALLEL_INDEXING
@@ -31,9 +32,9 @@ AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_
 #AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DRANDOM_HASHER=1 \
 #       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings     
 
-CC = g++
+CC ?= g++
 
-AM_CFLAGS += -std=c++0x -pedantic 
+#AM_CFLAGS += -std=c++0x -pedantic 
 
 AM_CFLAGS += -I $(srcdir)/$(SRC_DIR)
 

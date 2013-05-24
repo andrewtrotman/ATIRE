@@ -20,6 +20,8 @@ AC_PROG_CXX
 AM_PROG_CC_C_O
 
 # Check for macros
+AC_FUNC_MALLOC
+
 AC_ARG_WITH([pi],
             AC_HELP_STRING([--with-pi],
                        [Define PARALLEL_INDEXING macro]),

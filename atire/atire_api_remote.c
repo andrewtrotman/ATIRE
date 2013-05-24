@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include "ctypes.h"
 #include "str.h"
