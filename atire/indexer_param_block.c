@@ -505,8 +505,8 @@ for (param = 1; param < argc; param++)
 			quantization = TRUE;
 			if (*(command + 1))
 				quantization_bits = atoll(command + 1);
-			if (quantization_bits > 16)
-				exit(printf("Cannot quantize using more than 16 bits"));
+			if (quantization_bits < 2 || quantization_bits > 16)
+				exit(printf("Have to quantize into range 2--16 bits inclusive\n"));
 			}
 		else if (*command == 't')
 			term_expansion(command + 1, FALSE);

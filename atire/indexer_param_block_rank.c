@@ -255,12 +255,12 @@ puts("");
 ANT_ranking_function *ANT_indexer_param_block_rank::get_indexing_ranker(long long documents, ANT_compressable_integer *lengths, long *quantization, long long *quantization_bits)
 {
 *quantization = this->quantization;
-*quantization_bits = this->quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt(documents) : this->quantization_bits;
+*quantization_bits = (long long)(this->quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt(documents) : this->quantization_bits);
 
 switch (ranking_function)
 	{
 	case BM25:
-		return new ANT_ranking_function_BM25(documents, lengths, bm25_k1, bm25_b);
+		return new ANT_ranking_function_BM25(documents, lengths, *quantization_bits, bm25_k1, bm25_b);
 	case DLH13:
 		return new ANT_ranking_function_DLH13(documents, lengths);
 	case DPH:

@@ -67,9 +67,8 @@ public:
 
 	/*
 		This constructor is called for quantized impact ordering during indexing
-		Unlike the search engine version, the memory index object already knows if to quantize it's results, and how many bits it needs.
 	*/
-	ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths);
+	ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits = 8);
 
 	/*
 		Nothing to destroy
@@ -144,8 +143,7 @@ public:
 	*/
 	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
 	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
-
-	unsigned short quantize(double rsv, double maximum, double minimum);
+	double quantize(double rsv, double maximum, double minimum);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

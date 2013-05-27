@@ -26,23 +26,11 @@ this->quantization = quantize;
 /*
 	See: Crane M, Trotman A, and O'Keefe R. Maintaining Discriminatory Power in Quantized Indexes
 */
-this->quantization_bits = quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt(documents) : quantization_bits;
+this->quantization_bits = (long long)(quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt(documents) : quantization_bits);
 
-static bool printed = false;
-long long var;
-
-minimum_collection_rsv = *(double *)&(var = engine->get_variable("~quantmin"));
-maximum_collection_rsv = *(double *)&(var = engine->get_variable("~quantmax"));
-
-if (!printed)
-	{
-	printf("RQ: Search engine quantized? %s\n", engine->get_is_quantized() ? "yes" : "no");
-	printf("RQ: Should we quantize? %s\n", quantization ? "yes" : "no");
-	printf("RQ: Into %lld bits\n", this->quantization_bits);
-	printf("RQ: min: %f\n", minimum_collection_rsv);
-	printf("RQ: max: %f\n", maximum_collection_rsv);
-	printed = true;
-	}
+long long dummy;
+minimum_collection_rsv = *(double *)&(dummy = engine->get_variable("~quantmin"));
+maximum_collection_rsv = *(double *)&(dummy = engine->get_variable("~quantmax"));
 
 collection_length_in_terms_as_integer = engine->get_collection_length();
 collection_length_in_terms = (double)collection_length_in_terms_as_integer;
@@ -60,7 +48,7 @@ stats = engine->get_stats();
 	ANT_RANKING_FUNCTION::ANT_RANKING_FUNCTION()
 	--------------------------------------------
 */
-ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths)
+ANT_ranking_function::ANT_ranking_function(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits)
 {
 ANT_compressable_integer *current, *end;
 
@@ -83,6 +71,9 @@ this->document_lengths = document_lengths;
 decompress_buffer = NULL;
 
 stats = NULL;
+
+quantization = true;
+this->quantization_bits = quantization_bits;
 }
 
 #ifdef IMPACT_HEADER
@@ -496,11 +487,9 @@ while (current_tf < end)
 void ANT_ranking_function::quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies)
 {
 long docid;
-double rsv, range;
 unsigned short *current_tf, *end;
 ANT_compressable_integer *current_docid;
 
-range = maximum - minimum;
 current_docid = document_ids;
 current_tf = term_frequencies;
 end = term_frequencies + document_frequency;
@@ -509,29 +498,20 @@ docid = -1;
 while (current_tf < end)
 	{
 	docid += *current_docid;
-	rsv = rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency);
-
-	/*
-		eg 8 bits -> 1-255, so -1 to get to right range, -1 to avoid 0
-	*/
-	*current_tf = quantize(rsv, minimum, maximum);
-//	*current_tf = (unsigned short)(((rsv - minimum) / range) * ((1 << 8) - 2)) + 1;			// change the tf value into an impact value
+	*current_tf = (unsigned short)quantize(rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency), maximum, minimum);
 	current_tf++;
 	current_docid++;
 	}
 }
 
-unsigned short ANT_ranking_function::quantize(double rsv, double minimum, double maximum)
+/*
+	ANT_RANKING_FUNCTION::QUANTIZE()
+	--------------------------------
+*/
+double ANT_ranking_function::quantize(double rsv, double maximum, double minimum)
 {
-if (quantization)
-	{
-	/*
-		eg 8 bits -> 1-255, so -1 to get to right range, -1 to avoid 0
-	*/
-	return (unsigned short)(((rsv - minimum) / (maximum - minimum)) * ((1 << quantization_bits) - 2)) + 1;			// change the tf value into an impact value
-	}
-else
-	{
-	return rsv;
-	}
+/*
+	eg 8 bits -> 1-255, so -1 to get to right range, -1 to avoid 0
+*/
+return quantization ? (((rsv - minimum) / (maximum - minimum)) * ((1 << quantization_bits) - 2)) + 1 : rsv;
 }

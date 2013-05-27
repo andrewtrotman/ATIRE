@@ -287,8 +287,8 @@ stats->documents = docno;
 	*/
 	long long ANT_memory_index::impact_order_with_header(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
 	{
-	ANT_compressable_integer sum, bucket_size[0x10000], bucket_prev_docid[0x10000];
-	ANT_compressable_integer *pointer[0x10000], *current_docid, doc, *pruned_point;
+	ANT_compressable_integer sum, bucket_size[1 << 16], bucket_prev_docid[1 << 16];
+	ANT_compressable_integer *pointer[1 << 16], *current_docid, doc, *pruned_point;
 	unsigned short *current, *end;
 	long bucket, buckets_used;
 
@@ -398,8 +398,8 @@ stats->documents = docno;
 */
 long long ANT_memory_index::impact_order(ANT_compressable_integer *destination, ANT_compressable_integer *docid, unsigned short *term_frequency, long long document_frequency, unsigned char *max_local)
 {
-ANT_compressable_integer sum, bucket_size[0x10000], bucket_prev_docid[0x10000];
-ANT_compressable_integer *pointer[0x10000], *current_docid, doc, *zero_point;
+ANT_compressable_integer sum, bucket_size[1 << 16], bucket_prev_docid[1 << 16];
+ANT_compressable_integer *pointer[1 << 16], *current_docid, doc, *zero_point;
 unsigned short *current, *end;
 long bucket, buckets_used;
 
@@ -425,7 +425,7 @@ for (current = term_frequency; current < end; current++)
 */
 zero_point = NULL;
 buckets_used = sum = 0;
-for (bucket = ((1 << quantization_bits) - 1); bucket >= 0; bucket--)
+for (bucket = (1 << quantization_bits) - 1; bucket >= 0; bucket--)
 	{
 	pointer[bucket] = destination + sum + 2 * buckets_used; // the extra 1 (from 2) counts for the number terminator at the end of each quantum
 	if (bucket_size[bucket] != 0)

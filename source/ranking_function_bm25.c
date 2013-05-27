@@ -60,7 +60,7 @@ while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
 	rsv = quantum_parameters->postscalar * idf * (top_row / (quantum_parameters->prescalar * quantum_parameters->tf + document_prior_probability[(size_t)docid]));
-	quantum_parameters->accumulator->add_rsv(docid, quantize(rsv, minimum_collection_rsv, maximum_collection_rsv));
+	quantum_parameters->accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
 }
 
