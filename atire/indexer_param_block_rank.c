@@ -262,35 +262,35 @@ switch (ranking_function)
 	case BM25:
 		return new ANT_ranking_function_BM25(documents, lengths, *quantization_bits, bm25_k1, bm25_b);
 	case DLH13:
-		return new ANT_ranking_function_DLH13(documents, lengths);
+		return new ANT_ranking_function_DLH13(documents, lengths, *quantization_bits);
 	case DPH:
-		return new ANT_ranking_function_DPH(documents, lengths);
+		return new ANT_ranking_function_DPH(documents, lengths, *quantization_bits);
 	case DFREE:
-		return new ANT_ranking_function_DFRee(documents, lengths);
+		return new ANT_ranking_function_DFRee(documents, lengths, *quantization_bits);
 	case DFI:
-		return new ANT_ranking_function_DFI(documents, lengths);
+		return new ANT_ranking_function_DFI(documents, lengths, *quantization_bits);
 	case DFIW:
-		return new ANT_ranking_function_DFIW(documents, lengths);
+		return new ANT_ranking_function_DFIW(documents, lengths, *quantization_bits);
 	case DFI_IDF:
-		return new ANT_ranking_function_DFI_IDF(documents, lengths);
+		return new ANT_ranking_function_DFI_IDF(documents, lengths, *quantization_bits);
 	case DFIW_IDF:
-		return new ANT_ranking_function_DFIW_IDF(documents, lengths);
+		return new ANT_ranking_function_DFIW_IDF(documents, lengths, *quantization_bits);
 	case LMD:
-		return new ANT_ranking_function_lmd(documents, lengths, lmd_u);
+		return new ANT_ranking_function_lmd(documents, lengths, *quantization_bits, lmd_u);
 	case LMJM:
-		return new ANT_ranking_function_lmd(documents, lengths, lmjm_l);
+		return new ANT_ranking_function_lmd(documents, lengths, *quantization_bits, lmjm_l);
 	case BOSE_EINSTEIN:
-		return new ANT_ranking_function_bose_einstein(documents, lengths);
+		return new ANT_ranking_function_bose_einstein(documents, lengths, *quantization_bits);
 	case DIVERGENCE:
-		return new ANT_ranking_function_divergence(documents, lengths);
+		return new ANT_ranking_function_divergence(documents, lengths, *quantization_bits);
 	case TERM_COUNT:
-		return new ANT_ranking_function_term_count(documents, lengths);
+		return new ANT_ranking_function_term_count(documents, lengths, *quantization_bits);
 	case INNER_PRODUCT:
-		return new ANT_ranking_function_inner_product(documents, lengths);
+		return new ANT_ranking_function_inner_product(documents, lengths, *quantization_bits);
 	case KBTFIDF:
-		return new ANT_ranking_function_kbtfidf(documents, lengths, kbtfidf_k, kbtfidf_b);
+		return new ANT_ranking_function_kbtfidf(documents, lengths, *quantization_bits, kbtfidf_k, kbtfidf_b);
 	case DOCID:
-		return new ANT_ranking_function_docid(documents, lengths, ascending);
+		return new ANT_ranking_function_docid(documents, lengths, *quantization_bits, ascending);
 	}
 return NULL;
 }

@@ -15,7 +15,7 @@ class ANT_ranking_function_DFIW_IDF : public ANT_ranking_function
 {
 public:
 	ANT_ranking_function_DFIW_IDF(ANT_search_engine *engine, long quantize, long long quantization_bits) : ANT_ranking_function(engine, quantize, quantization_bits) {}
-	ANT_ranking_function_DFIW_IDF(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
+	ANT_ranking_function_DFIW_IDF(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits) : ANT_ranking_function(documents, document_lengths, quantization_bits) {}
 	virtual ~ANT_ranking_function_DFIW_IDF() {}
 
 #ifdef IMPACT_HEADER

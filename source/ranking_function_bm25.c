@@ -114,7 +114,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	while (current < end)
 		{
 		docid += *current++;
-		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
+		accumulator->add_rsv(docid, quantize(postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])), maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;
 	impact_header->impact_value_ptr++;
@@ -173,7 +173,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator->add_rsv(docid, postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])));
+		accumulator->add_rsv(docid, quantize(postscalar * idf * (top_row / (prescalar * tf + document_prior_probability[(size_t)docid])), maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current++;		// skip over the zero
 	}

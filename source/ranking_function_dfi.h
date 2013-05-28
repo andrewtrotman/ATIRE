@@ -15,7 +15,7 @@ class ANT_ranking_function_DFI : public ANT_ranking_function
 {
 public:
 	ANT_ranking_function_DFI(ANT_search_engine *engine, long quantize, long long quantization_bits) : ANT_ranking_function(engine, quantize, quantization_bits) {}
-	ANT_ranking_function_DFI(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
+	ANT_ranking_function_DFI(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits) : ANT_ranking_function(documents, document_lengths, quantization_bits) {}
 	virtual ~ANT_ranking_function_DFI() {}
 #ifdef IMPACT_HEADER
 	virtual void relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters);

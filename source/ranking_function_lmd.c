@@ -38,7 +38,7 @@ while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
 	rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
-	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * rsv);
+	quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
 }
 
@@ -47,39 +47,42 @@ while (current < quantum_parameters->quantum_end)
 	------------------------------------------------
 	Language Models with Dirichlet smoothing
 */
-void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
-	long long docid;
-	double tf, idf, n;
-	double left_hand_side, rsv;
-	ANT_compressable_integer *current, *end;
+void ANT_ranking_function_lmd::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
+long long docid;
+double tf, idf, n;
+double left_hand_side, rsv;
+ANT_compressable_integer *current, *end;
 
-	/*
-	                 tf(td)   len(c)              len(d)
-	   rsv = log(1 + ------ * ------) - n log(1 + ------)
-	                    u     cf(t)                 u
+/*
+								 tf(td)   len(c)              len(d)
+	 rsv = log(1 + ------ * ------) - n log(1 + ------)
+										u     cf(t)                 u
 
-		where  len(c) is the length of the collection (in terms), len(d) is the length of the document
-		tf(td) is the term frequency of the term and cf(t) is the collection_frequency of the term
-		and n is the length of the querty in terms.
-	*/
-	n = 3.0;						// this is a hack and should be the length of the query
-	idf = ((double)collection_length_in_terms / (double)term_details->global_collection_frequency);
-	impact_header->impact_value_ptr = impact_header->impact_value_start;
-	impact_header->doc_count_ptr = impact_header->doc_count_start;
-	current = impact_ordering;
-	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
-		tf = *impact_header->impact_value_ptr;
-		left_hand_side = log (1.0 + (prescalar * tf / u) * idf);
-		docid = -1;
-		end = current + *impact_header->doc_count_ptr;
-		while (current < end) {
-			docid += *current++;
-			rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
-			accumulator->add_rsv(docid, postscalar * rsv);
+	where  len(c) is the length of the collection (in terms), len(d) is the length of the document
+	tf(td) is the term frequency of the term and cf(t) is the collection_frequency of the term
+	and n is the length of the querty in terms.
+*/
+n = 3.0;						// this is a hack and should be the length of the query
+idf = ((double)collection_length_in_terms / (double)term_details->global_collection_frequency);
+impact_header->impact_value_ptr = impact_header->impact_value_start;
+impact_header->doc_count_ptr = impact_header->doc_count_start;
+current = impact_ordering;
+while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+	{
+	tf = *impact_header->impact_value_ptr;
+	left_hand_side = log (1.0 + (prescalar * tf / u) * idf);
+	docid = -1;
+	end = current + *impact_header->doc_count_ptr;
+	while (current < end)
+		{
+		docid += *current++;
+		rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
+		accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
-		current = end;
-		impact_header->impact_value_ptr++;
-		impact_header->doc_count_ptr++;
+	current = end;
+	impact_header->impact_value_ptr++;
+	impact_header->doc_count_ptr++;
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
@@ -119,7 +122,7 @@ while (current < end)
 		{
 		docid += *current++;
 		rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
-		accumulator->add_rsv(docid, postscalar * rsv);
+		accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current++;		// skip over the zero
 	}

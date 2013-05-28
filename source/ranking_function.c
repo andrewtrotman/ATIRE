@@ -72,6 +72,7 @@ decompress_buffer = NULL;
 
 stats = NULL;
 
+// because this is only created when we do index quantization, we can guarantee this
 quantization = true;
 this->quantization_bits = quantization_bits;
 }
@@ -511,7 +512,8 @@ while (current_tf < end)
 double ANT_ranking_function::quantize(double rsv, double maximum, double minimum)
 {
 /*
-	eg 8 bits -> 1-255, so -1 to get to right range, -1 to avoid 0
+	Quantizes the rsv into the range minimum -> maximum
+	8 bits -> 1 << 8 = 256, but we want 1-255, so -1 to get to right range, -1 to avoid 0
 */
 return quantization ? (((rsv - minimum) / (maximum - minimum)) * ((1 << quantization_bits) - 2)) + 1 : rsv;
 }

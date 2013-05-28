@@ -21,7 +21,7 @@ private:
 
 public:
 	ANT_ranking_function_kbtfidf(ANT_search_engine *engine, long quantize, long long quantization_bits, double k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K, double b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B) : ANT_ranking_function(engine, quantize, quantization_bits) { this->k = k; this->b = b; }
-	ANT_ranking_function_kbtfidf(long long documents, ANT_compressable_integer *document_lengths, double k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K, double b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B) : ANT_ranking_function(documents, document_lengths) { this->k = k; this->b = b; }
+	ANT_ranking_function_kbtfidf(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits, double k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K, double b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B) : ANT_ranking_function(documents, document_lengths, quantization_bits) { this->k = k; this->b = b; }
 	virtual ~ANT_ranking_function_kbtfidf() {};
 
 #ifdef IMPACT_HEADER

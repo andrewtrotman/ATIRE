@@ -15,7 +15,7 @@ class ANT_ranking_function_DLH13 : public ANT_ranking_function
 {
 public:
 	ANT_ranking_function_DLH13(ANT_search_engine *engine, long quantize, long long quantization_bits) : ANT_ranking_function(engine, quantize, quantization_bits) {}
-	ANT_ranking_function_DLH13(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
+	ANT_ranking_function_DLH13(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits) : ANT_ranking_function(documents, document_lengths, quantization_bits) {}
 	virtual ~ANT_ranking_function_DLH13() {}
 
 #ifdef IMPACT_HEADER

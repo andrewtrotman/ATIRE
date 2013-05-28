@@ -20,7 +20,7 @@ private:
 
 public:
 	ANT_ranking_function_pregen(ANT_search_engine *engine, long quantize, long long quantization_bits,ANT_pregen *pregen, long ascending) : ANT_ranking_function(engine, quantize, quantization_bits), pregen(pregen), ascending(ascending) {};
-	ANT_ranking_function_pregen(long long documents, ANT_compressable_integer *document_lengths, long ascending) : ANT_ranking_function(documents, document_lengths), pregen(NULL), ascending(ascending) {}
+	ANT_ranking_function_pregen(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits, long ascending) : ANT_ranking_function(documents, document_lengths, quantization_bits), pregen(NULL), ascending(ascending) {}
 	virtual ~ANT_ranking_function_pregen() {}
 
 #ifdef IMPACT_HEADER

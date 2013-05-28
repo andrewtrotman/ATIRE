@@ -18,7 +18,8 @@
 	ANT_RANKING_FUNCTION_DFI::RELEVANCE_RANK_ONE_QUANTUM()
 	-------------------------------------------------------
 */
-void ANT_ranking_function_DFI::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters) {
+void ANT_ranking_function_DFI::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
@@ -26,7 +27,8 @@ void ANT_ranking_function_DFI::relevance_rank_one_quantum(ANT_ranking_function_q
 	ANT_RANKING_FUNCTION_DFI::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
-void ANT_ranking_function_DFI::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
+void ANT_ranking_function_DFI::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
@@ -76,7 +78,7 @@ while (current < end)
 
 //		if (score > 0)
 		if (tf - ef > 0)
-			accumulator->add_rsv(docid, postscalar * score);
+			accumulator->add_rsv(docid, quantize(postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current++;		// skip over the zero
 	}

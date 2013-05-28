@@ -14,8 +14,8 @@
 class ANT_ranking_function_topsig_negative : public ANT_ranking_function_topsig
 {
 public:
-	ANT_ranking_function_topsig_negative(ANT_search_engine *engine, long quantize, long long quantization_bits,long width) : ANT_ranking_function_topsig(engine, quantize, quantization_bits, width) {}
-	ANT_ranking_function_topsig_negative(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function_topsig(documents, document_lengths) {}
+	ANT_ranking_function_topsig_negative(ANT_search_engine *engine, long quantize, long long quantization_bits, long width) : ANT_ranking_function_topsig(engine, quantize, quantization_bits, width) {}
+	ANT_ranking_function_topsig_negative(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits) : ANT_ranking_function_topsig(documents, document_lengths, quantization_bits) {}
 	virtual ~ANT_ranking_function_topsig_negative() {}
 
 #ifdef IMPACT_HEADER

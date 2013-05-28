@@ -37,9 +37,8 @@ while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
 	rsv = quantum_parameters->postscalar * log(1 + one_minus_lambda * (quantum_parameters->prescalar * quantum_parameters->tf / (double)document_lengths[(size_t)docid]) * idf);
-	quantum_parameters->accumulator->add_rsv(docid, rsv);
+	quantum_parameters->accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
-
 }
 
 /*
@@ -47,34 +46,37 @@ while (current < quantum_parameters->quantum_end)
 	-------------------------------------------------
 	Language Models with Jelinek-Mercer smoothing
 */
-void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
-	long long docid;
-	double tf, rsv;
-	double one_minus_lambda, idf;
-	ANT_compressable_integer *current, *end;
+void ANT_ranking_function_lmjm::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
+long long docid;
+double tf, rsv;
+double one_minus_lambda, idf;
+ANT_compressable_integer *current, *end;
 
-	/*
-	                 1 - lambda   tf(dt)   len(c)
-	   rsv = log(1 + ---------- * ------ * ------)
-	                   lambda     len(d)    cf(t)
-	*/
-	one_minus_lambda = (1.0 - lambda) / lambda;
-	idf = (double)collection_length_in_terms / (double)term_details->global_collection_frequency;
-	impact_header->impact_value_ptr = impact_header->impact_value_start;
-	impact_header->doc_count_ptr = impact_header->doc_count_start;
-	current = impact_ordering;
-	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
-		tf = *impact_header->impact_value_ptr;
-		docid = -1;
-		end = current + *impact_header->doc_count_ptr;
-		while (current < end) {
-			docid += *current++;
-			rsv = postscalar * log(1 + one_minus_lambda * (prescalar * tf / (double)document_lengths[(size_t)docid]) * idf);
-			accumulator->add_rsv(docid, rsv);
+/*
+								 1 - lambda   tf(dt)   len(c)
+	 rsv = log(1 + ---------- * ------ * ------)
+									 lambda     len(d)    cf(t)
+*/
+one_minus_lambda = (1.0 - lambda) / lambda;
+idf = (double)collection_length_in_terms / (double)term_details->global_collection_frequency;
+impact_header->impact_value_ptr = impact_header->impact_value_start;
+impact_header->doc_count_ptr = impact_header->doc_count_start;
+current = impact_ordering;
+while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+	{
+	tf = *impact_header->impact_value_ptr;
+	docid = -1;
+	end = current + *impact_header->doc_count_ptr;
+	while (current < end)
+		{
+		docid += *current++;
+		rsv = postscalar * log(1 + one_minus_lambda * (prescalar * tf / (double)document_lengths[(size_t)docid]) * idf);
+		accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
-		current = end;
-		impact_header->impact_value_ptr++;
-		impact_header->doc_count_ptr++;
+	current = end;
+	impact_header->impact_value_ptr++;
+	impact_header->doc_count_ptr++;
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
@@ -109,7 +111,7 @@ while (current < end)
 		{
 		docid += *current++;
 		rsv = postscalar * log(1 + one_minus_lambda * (prescalar * tf / (double)document_lengths[(size_t)docid]) * idf);
-		accumulator->add_rsv(docid, rsv);
+		accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current++;		// skip over the zero
 	}

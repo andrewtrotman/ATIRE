@@ -18,7 +18,8 @@
 	ANT_RANKING_FUNCTION_DIVERGENCE::RELEVANCE_RANK_ONE_QUANTUM()
 	-------------------------------------------------------------
 */
-void ANT_ranking_function_divergence::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters) {
+void ANT_ranking_function_divergence::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
+{
 long long docid;
 double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;
 ANT_compressable_integer *current;
@@ -36,7 +37,7 @@ while (current < quantum_parameters->quantum_end)
 	docid += *current++;
 	tf_prime = quantum_parameters->prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[(size_t)docid]);
 	rsv = tf_prime * inf_right * (F_plus_1 / ((double)quantum_parameters->term_details->global_document_frequency * (tf_prime + 1.0)));
-	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * rsv);
+	quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
 }
 
@@ -44,67 +45,70 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_DIVERGENCE::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------------
 */
-void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
-	long long docid;
-	double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;
-	ANT_compressable_integer *current, *end;
+void ANT_ranking_function_divergence::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
+long long docid;
+double tf, rsv, tf_prime, ne, F, F_plus_1, inf_right;
+ANT_compressable_integer *current, *end;
 
-	/*
-		we are using I(ne)B2 defined thus:
+/*
+	we are using I(ne)B2 defined thus:
 
-		                            N + 1
-		Inf1 = I(ne) = tf' * log2(--------)
-		                          ne + 0.5
+															N + 1
+	Inf1 = I(ne) = tf' * log2(--------)
+														ne + 0.5
 
-		where
-		               N - 1
-		ne = N * (1 - (-----)^F )
-		                 N
+	where
+								 N - 1
+	ne = N * (1 - (-----)^F )
+									 N
 
-		where
-		tf' = normalised term frequency (see below)
-		N = Number of documents
-		F = collection frequency
+	where
+	tf' = normalised term frequency (see below)
+	N = Number of documents
+	F = collection frequency
 
-		and use First Normalisation B
+	and use First Normalisation B
 
-		                  F + 1
-		weight(t,d) = ------------- * Inf1
-		              n * (tf' + 1)
+										F + 1
+	weight(t,d) = ------------- * Inf1
+								n * (tf' + 1)
 
-		where n = document frequency
-		finally we length normalise tf using H2
+	where n = document frequency
+	finally we length normalise tf using H2
 
-		                   av_len
-		tf' = tf.log2(1 + ------)
-		                    len
+										 av_len
+	tf' = tf.log2(1 + ------)
+											len
 
-		where
-			len is the length of the document,
-			av_len is the average document length,
-			ttf is the number of occurences of the term in the document
-	*/
-	F = (double)term_details->global_collection_frequency;
-	F_plus_1 = F + 1.0;
-	ne = documents * (1.0 - pow((documents - 1.0) / documents, F));
-	inf_right = ANT_log2(((double)documents + 1.0) / (ne + 0.5));
+	where
+		len is the length of the document,
+		av_len is the average document length,
+		ttf is the number of occurences of the term in the document
+*/
+F = (double)term_details->global_collection_frequency;
+F_plus_1 = F + 1.0;
+ne = documents * (1.0 - pow((documents - 1.0) / documents, F));
+inf_right = ANT_log2(((double)documents + 1.0) / (ne + 0.5));
 
-	impact_header->impact_value_ptr = impact_header->impact_value_start;
-	impact_header->doc_count_ptr = impact_header->doc_count_start;
-	current = impact_ordering;
-	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
-		tf = *impact_header->impact_value_ptr;
-		docid = -1;
-		end = current + *impact_header->doc_count_ptr;
-		while (current < end) {
-			docid += *current++;
-			tf_prime = prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[(size_t)docid]);
-			rsv = tf_prime * inf_right * (F_plus_1 / ((double)term_details->global_document_frequency * (tf_prime + 1.0)));
-			accumulator->add_rsv(docid, postscalar * rsv);
+impact_header->impact_value_ptr = impact_header->impact_value_start;
+impact_header->doc_count_ptr = impact_header->doc_count_start;
+current = impact_ordering;
+while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+	{
+	tf = *impact_header->impact_value_ptr;
+	docid = -1;
+	end = current + *impact_header->doc_count_ptr;
+	while (current < end)
+		{
+		docid += *current++;
+		tf_prime = prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[(size_t)docid]);
+		rsv = tf_prime * inf_right * (F_plus_1 / ((double)term_details->global_document_frequency * (tf_prime + 1.0)));
+		accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
-		current = end;
-		impact_header->impact_value_ptr++;
-		impact_header->doc_count_ptr++;
+	current = end;
+	impact_header->impact_value_ptr++;
+	impact_header->doc_count_ptr++;
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
@@ -168,7 +172,7 @@ while (current < end)
 		docid += *current++;
 		tf_prime = prescalar * tf * ANT_log2(1.0 + (double)mean_document_length / (double)document_lengths[(size_t)docid]);
 		rsv = tf_prime * inf_right * (F_plus_1 / ((double)term_details->global_document_frequency * (tf_prime + 1.0)));
-		accumulator->add_rsv(docid, postscalar * rsv);
+		accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current++;		// skip over the zero
 	}
@@ -194,5 +198,3 @@ rsv = tf_prime * inf_right * (F_plus_1 / ((double)document_frequency * (tf_prime
 return rsv;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
-
-

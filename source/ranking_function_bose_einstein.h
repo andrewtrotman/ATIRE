@@ -15,7 +15,7 @@ class ANT_ranking_function_bose_einstein : public ANT_ranking_function
 {
 public:
 	ANT_ranking_function_bose_einstein(ANT_search_engine *engine, long quantize, long long quantization_bits) : ANT_ranking_function(engine, quantize, quantization_bits) {}
-	ANT_ranking_function_bose_einstein(long long documents, ANT_compressable_integer *document_lengths) : ANT_ranking_function(documents, document_lengths) {}
+	ANT_ranking_function_bose_einstein(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits) : ANT_ranking_function(documents, document_lengths, quantization_bits) {}
 	virtual ~ANT_ranking_function_bose_einstein() {}
 	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency);
 

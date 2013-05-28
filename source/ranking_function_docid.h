@@ -19,7 +19,7 @@ private:
 
 public:
 	ANT_ranking_function_docid(ANT_search_engine *engine, long quantize, long long quantization_bits, int ascending = 1) : ANT_ranking_function(engine, quantize, quantization_bits), ascending_order(ascending) {}
-	ANT_ranking_function_docid(long long documents, ANT_compressable_integer *document_lengths, int ascending = 1) : ANT_ranking_function(documents, document_lengths), ascending_order(ascending) {}
+	ANT_ranking_function_docid(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits, int ascending = 1) : ANT_ranking_function(documents, document_lengths, quantization_bits), ascending_order(ascending) {}
 	virtual ~ANT_ranking_function_docid() {}
 
 #ifdef IMPACT_HEADER

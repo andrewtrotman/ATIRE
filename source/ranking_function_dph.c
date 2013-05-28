@@ -38,7 +38,7 @@ while (current < quantum_parameters->quantum_end)
 	norm = (1.0 - f) * (1.0 - f) / (tf + 1.0);
 	score = 1.0 * norm * (tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - f)));
 
-	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * score);
+	quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
 	}
 }
 
@@ -46,30 +46,33 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_DPH::RELEVANCE_RANK_TOP_K()
 	------------------------------------------------
 */
-void ANT_ranking_function_DPH::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) {
-	long long docid;
-	double f, norm, tf, cf, score;
-	ANT_compressable_integer *current, *end;
+void ANT_ranking_function_DPH::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+{
+long long docid;
+double f, norm, tf, cf, score;
+ANT_compressable_integer *current, *end;
 
-	cf = (double)term_details->global_collection_frequency;
-	impact_header->impact_value_ptr = impact_header->impact_value_start;
-	impact_header->doc_count_ptr = impact_header->doc_count_start;
-	current = impact_ordering;
-	while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr) {
-		tf = *impact_header->impact_value_ptr * prescalar;
-		docid = -1;
-		end = current + *impact_header->doc_count_ptr;
-		while (current < end) {
-			docid += *current++;
-			f = tf / document_lengths[(size_t)docid];
-			norm = (1.0 - f) * (1.0 - f) / (tf + 1.0);
-			score = 1.0 * norm * (tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - f)));
+cf = (double)term_details->global_collection_frequency;
+impact_header->impact_value_ptr = impact_header->impact_value_start;
+impact_header->doc_count_ptr = impact_header->doc_count_start;
+current = impact_ordering;
+while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+	{
+	tf = *impact_header->impact_value_ptr * prescalar;
+	docid = -1;
+	end = current + *impact_header->doc_count_ptr;
+	while (current < end)
+		{
+		docid += *current++;
+		f = tf / document_lengths[(size_t)docid];
+		norm = (1.0 - f) * (1.0 - f) / (tf + 1.0);
+		score = 1.0 * norm * (tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - f)));
 
-			accumulator->add_rsv(docid, postscalar * score);
+		accumulator->add_rsv(docid, quantize(postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
 		}
-		current = end;
-		impact_header->impact_value_ptr++;
-		impact_header->doc_count_ptr++;
+	current = end;
+	impact_header->impact_value_ptr++;
+	impact_header->doc_count_ptr++;
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
@@ -96,7 +99,7 @@ while (current < end)
 		norm = (1.0 - f) * (1.0 - f) / (tf + 1.0);
 		score = 1.0 * norm * (tf * ANT_log2((tf * mean_document_length / document_lengths[(size_t)docid]) * (documents / cf)) + 0.5 * ANT_log2(2.0 * M_PI * tf * (1.0 - f)));
 
-		accumulator->add_rsv(docid, postscalar * score);
+		accumulator->add_rsv(docid, quantize(postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current++;		// skip over the zero
 	}
