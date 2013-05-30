@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([ANT], [0.3], [BUG-REPORT-ADDRESS])
+AC_INIT([Atire], [0.3], [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([atire/atire.c])
 #AC_CONFIG_HEADERS([config.h])
 #AC_CONFIG_MACRO_DIR([m4])
@@ -33,7 +33,8 @@ AC_CHECK_LIB([z], [inflateReset], [LIBS="$LIBS -lz"; CXXFLAGS="$CXXFLAGS -DANT_H
 AC_CHECK_LIB([bz2], [BZ2_bzDecompressInit], [LIBS="$LIBS -lbz2"; CXXFLAGS="$CXXFLAGS -DANT_HAS_BZLIB"; CFLAGS="$CXXFLAGS"])
 
 # Checks for header files.
-AC_CHECK_HEADERS([float.h limits.h stddef.h stdint.h stdlib.h string.h sys/time.h unistd.h values.h])
+AC_HEADER_STDC++
+AC_CHECK_HEADERS([float.h limits.h stddef.h stdint.h stdlib.h string.h sys/time.h unistd.h values.h limits])
 
 AC_ARG_ENABLE([java-feature],
               [AC_HELP_STRING([--disable-java-feature],

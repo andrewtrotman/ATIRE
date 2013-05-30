@@ -32,7 +32,7 @@ AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_
 #AM_CFLAGS = -g -Wall -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DRANDOM_HASHER=1 \
 #       -Wno-endif-labels -Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings     
 
-CC ?= g++
+CC = g++
 
 #AM_CFLAGS += -std=c++0x -pedantic 
 
