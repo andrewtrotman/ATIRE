@@ -162,12 +162,18 @@ public:
 #ifdef TWO_D_ACCUMULATORS
 	size_t row;
 	long long start_acc;
+	long long this_width = width;
 
 	if (init_flags.get(row = get_init_flag_row(index)) == 0)
 		{
 		init_flags.set(row);
 		start_acc = row * width;
-		memcpy(accumulator + start_acc, pregen_scores + start_acc, (size_t)(width * sizeof(*accumulator)));
+
+		// don't write past the end for the last row
+		if (start_acc + width > documents)
+			this_width = documents - start_acc;
+
+		memcpy(accumulator + start_acc, pregen_scores + start_acc, (size_t)(this_width * sizeof(*accumulator)));
 		}
 #endif
 	}
