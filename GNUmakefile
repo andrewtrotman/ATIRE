@@ -22,7 +22,7 @@ USE_GPROF := 0
 USE_PDEBUG := 0
 
 # use the system memory management
-USE_PURIFY := 0
+USE_PURIFY := 1
 
 # special compression for index file
 # better enabled by defualt

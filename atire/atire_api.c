@@ -1336,7 +1336,7 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
 new_query[parsed_query->terms_in_query - 1].next = NULL;
 
-#ifndef NEVER
+#ifdef NEVER
 	/*
 		This code prints out the expanded query
 	*/

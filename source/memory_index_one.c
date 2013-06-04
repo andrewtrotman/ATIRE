@@ -61,6 +61,9 @@ delete memory;
 void ANT_memory_index_one::rewind(void)
 {
 memory->rewind();
+// the memory->rewind will free the token_as_string, which we then attempt to use
+// in the next iteration, so set it to NULL so that it will always be malloc'd afresh
+token_as_string = NULL;
 memset(hash_table, 0, sizeof(hash_table));
 document_length = 0;
 nodes_used = 0;
