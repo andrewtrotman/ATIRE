@@ -1133,8 +1133,6 @@ if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths, &
 	*/
 	if (index_quantization)
 		set_variable("~quantized", 1);
-	else
-		quantization_bits = 8; // this is by default for tf-indexes
 
 	/*
 		Now compute the maximum impact score across the collection
@@ -1154,6 +1152,8 @@ if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths, &
 	set_variable("~quantmax", *(long long *)&maximum_collection_rsv);
 	set_variable("~quantmin", *(long long *)&minimum_collection_rsv);
 	}
+else
+	quantization_bits = 8; // this is by default for tf-indexes
 
 /*
 	Store how long quantizaton took.

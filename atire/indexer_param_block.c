@@ -503,7 +503,7 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'q')
 			{
 			quantization = TRUE;
-			if (*(command + 1))
+			if (*(command + 1) != '\0')
 				quantization_bits = atoll(command + 1);
 			if (quantization_bits < 2 || quantization_bits > 16)
 				exit(printf("Have to quantize into range 2--16 bits inclusive\n"));
