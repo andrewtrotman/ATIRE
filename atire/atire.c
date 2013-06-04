@@ -303,19 +303,13 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write(var);
 			outchannel->puts("</quantized>");
 			var = atire->get_search_engine()->get_variable("~quantmax");
-			if (var)
-				{
-				outchannel->write("<quantmax>");
-				printf("%f", *(double *)&var);
-				outchannel->puts("</quantmax>");
-				}
+			outchannel->write("<quantmax>");
+			printf("%f", *(double *)&var);
+			outchannel->puts("</quantmax>");
 			var = atire->get_search_engine()->get_variable("~quantmin");
-			if (var)
-				{
-				outchannel->write("<quantmin>");
-				printf("%f", *(double *)&var);
-				outchannel->puts("</quantmin>");
-				}
+			outchannel->write("<quantmin>");
+			printf("%f", *(double *)&var);
+			outchannel->puts("</quantmin>");
 			outchannel->write("<longestdoc>");
 			outchannel->write(atire->get_longest_document_length());
 			outchannel->puts("</longestdoc>");
