@@ -423,7 +423,7 @@ for (param = 1; param < argc; param++)
 				{
 				spam_threshold = atol(command + 6);
 				if (spam_threshold < 0 || spam_threshold > 99)
-					exit(printf("Spam threshold must be in range 0-99, given %ld\n", spam_threshold));
+					exit(printf("Spam threshold must be in range 0-99, given %lld\n", spam_threshold));
 				}
 			spam_filename = argv[++param];
 			}
@@ -435,7 +435,7 @@ for (param = 1; param < argc; param++)
 				{
 				case 'i': filter_method = ANT_directory_iterator_filter::INCLUDE; break;
 				case 'e': filter_method = ANT_directory_iterator_filter::EXCLUDE; break;
-				default: exit(printf("Filter method must be one of [ie], given '%c'\n", m));
+				default: exit(printf("Filter method must be one of [ie], given '%c'\n", *(command + 7)));
 				}
 			filter_filename = argv[++param];
 			}
