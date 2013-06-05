@@ -405,6 +405,8 @@ for (param = 1; param < argc; param++)
 			}
 		else if (strcmp(command, "rcsv") == 0)
 			recursive = CSV;
+		else if (strcmp(command, "rtsv") == 0)
+			recursive = TSV;
 		else if (strcmp(command, "rwarcgz") == 0)
 			recursive = WARC_GZ;
 		else if (strcmp(command, "rrwarcgz") == 0)
