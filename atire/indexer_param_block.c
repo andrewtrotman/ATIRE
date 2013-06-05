@@ -110,7 +110,7 @@ puts("         n      NUL (\\0)");
 puts("         u      Invalid UTF-8 characters");
 puts("-ispam[:n] <fn> Load percentile scores from <fn> and treat those < n as spam not to be indexed [default n=70]");
 puts("-imime          Filter out mime types that do not begin with text");
-puts("-ifilter[n] <fn> Filter docids that are contained in file <fn>, when [n] is specified, filter dodcids that aren't in the file");
+puts("-ifilter[ie] <fn> Either [i]nclude or [e]xclude docids that are in file <fn>");
 puts("");
 
 puts("OUPUT FILE HANDLING");
@@ -423,7 +423,7 @@ for (param = 1; param < argc; param++)
 				{
 				spam_threshold = atol(command + 6);
 				if (spam_threshold < 0 || spam_threshold > 99)
-					exit(printf("Spam threshold must be between 0-99\n"));
+					exit(printf("Spam threshold must be in range 0-99, given %ld\n", spam_threshold));
 				}
 			spam_filename = argv[++param];
 			}
@@ -431,7 +431,12 @@ for (param = 1; param < argc; param++)
 			mime_filter = true;
 		else if (strncmp(command, "ifilter", 7) == 0)
 			{
-			filter_method = *(command + 7) == 'n' ? ANT_directory_iterator_filter::EXCLUDE : ANT_directory_iterator_filter::INCLUDE;
+			switch (*(command + 7))
+				{
+				case 'i': filter_method = ANT_directory_iterator_filter::INCLUDE; break;
+				case 'e': filter_method = ANT_directory_iterator_filter::EXCLUDE; break;
+				default: exit(printf("Filter method must be one of [ie], given '%c'\n", m));
+				}
 			filter_filename = argv[++param];
 			}
 		else if (strncmp(command, "iscrub:", 7) == 0)
