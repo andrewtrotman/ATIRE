@@ -18,7 +18,7 @@ class ANT_directory_iterator_tsv : public ANT_directory_iterator
 {
 private:
 	ANT_instream *source;
-	unsigned char buffer[50 * 1024 * 1024]; // 50MB
+	unsigned char buffer[11 * 1024 * 1024]; // 11MB -- The anchors are trimmed at 10MB per document, but we can throw a little extra to be sure
 
 	unsigned char *read_line();
 

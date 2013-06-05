@@ -45,6 +45,7 @@ public:
 	long stop_word_df_frequencies;   // remove wrods based on the document frequencies
 	double stop_word_df_threshold;		// if df/N is greater than this and (stop_word_removal & PRUNE_DF_FREQUENTS) != 0 then stop the word
 	long scrubbing;					// once we've read the source file from disk, scan from start to finish removing optionally '\0' characters and non-ascii characters
+	long filter_method;
 	char *filter_filename; // file containing documents to filter out
 
 protected:

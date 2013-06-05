@@ -16,19 +16,20 @@ class ANT_directory_iterator_filter : public ANT_directory_iterator
 public:
 	enum { EXCLUDE = 0, INCLUDE };
 
-private:
+protected:
 	ANT_directory_iterator *source;
 	static char **docids;
 	static long long number_docs;
+	long method;
 
 public:
-	ANT_directory_iterator_filter(ANT_directory_iterator *source, char *filename, long get_file = 0);
+	ANT_directory_iterator_filter(ANT_directory_iterator *source, char *filename, long filter_method, long get_file = 0);
 	virtual ~ANT_directory_iterator_filter();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 
-private:
+protected:
 	long should_index(char *docid);
 
 } ;

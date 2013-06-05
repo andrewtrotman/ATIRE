@@ -16,13 +16,13 @@ long long ANT_directory_iterator_filter::number_docs = 0;
 	ANT_DIRECTORY_ITERATOR_FILTER::ANT_DIRECTORY_ITERATOR_FILTER()
 	--------------------------------------------------------------
 */
-ANT_directory_iterator_filter::ANT_directory_iterator_filter(ANT_directory_iterator *source, char *filename, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_filter::ANT_directory_iterator_filter(ANT_directory_iterator *source, char *filename, long filter_method, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->source = source;
+method = filter_method;
 
 if (docids == NULL)
 	docids = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(filename), &number_docs);
-printf("Filter should exclude: %lld\n", number_docs);
 }
 
 /*
@@ -53,13 +53,14 @@ strip_space_inplace(docid);
 while (low < high)
 	{
 	mid = low + ((high - low) / 2);
-	if (strcmp(docids[mid], docid) < 0)//, strlen(docids[mid])) < 0)
+	if (strcmp(docids[mid], docid) < 0)
 		low = mid + 1;
 	else
 		high = mid;
 	}
 
-return strcmp(docids[low], docid) != 0;//, strlen(docids[low])) != 0;
+mid = strcmp(docids[low], docid);
+return (mid != 0 && method == EXCLUDE) || (mid == 0 && method == INCLUDE);
 }
 
 /*

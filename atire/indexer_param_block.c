@@ -13,7 +13,7 @@
 #include "compression_factory.h"
 #include "readability_factory.h"
 #include "version.h"
-#include "directory_iterator_spam_filter.h"
+#include "directory_iterator_filter.h"
 #include "directory_iterator_scrub.h"
 
 #ifndef FALSE
@@ -110,7 +110,7 @@ puts("         n      NUL (\\0)");
 puts("         u      Invalid UTF-8 characters");
 puts("-ispam[:n] <fn> Load percentile scores from <fn> and treat those < n as spam not to be indexed [default n=70]");
 puts("-imime          Filter out mime types that do not begin with text");
-puts("-ifilter <fn>   Filter out all docids that are contained in file <fn>");
+puts("-ifilter[n] <fn> Filter docids that are contained in file <fn>, when [n] is specified, filter dodcids that aren't in the file");
 puts("");
 
 puts("OUPUT FILE HANDLING");
@@ -430,7 +430,10 @@ for (param = 1; param < argc; param++)
 		else if (strncmp(command, "imime", 5) == 0)
 			mime_filter = true;
 		else if (strncmp(command, "ifilter", 7) == 0)
+			{
+			filter_method = *(command + 7) == 'n' ? ANT_directory_iterator_filter::EXCLUDE : ANT_directory_iterator_filter::INCLUDE;
 			filter_filename = argv[++param];
+			}
 		else if (strncmp(command, "iscrub:", 7) == 0)
 			scrub(command + 7);
 		else if (*command == 'S')

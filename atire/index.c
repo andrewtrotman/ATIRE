@@ -422,7 +422,7 @@ for (param = first_param; param < argc; param++)
 			source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
 		}
 	if (param_block.filter_filename != NULL)
-		source = new ANT_directory_iterator_filter(source, param_block.filter_filename, ANT_directory_iterator_filter::READ_FILE);
+		source = new ANT_directory_iterator_filter(source, param_block.filter_filename, param_block.filter_method, ANT_directory_iterator_filter::READ_FILE);
 
 	if (param_block.mime_filter)
 		source = new ANT_directory_iterator_mime_filter(source, ANT_directory_iterator::READ_FILE);
