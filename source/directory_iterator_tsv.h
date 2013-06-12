@@ -17,10 +17,13 @@
 class ANT_directory_iterator_tsv : public ANT_directory_iterator
 {
 private:
-	ANT_instream *source;
-	unsigned char buffer[11 * 1024 * 1024]; // 11MB -- The anchors are trimmed at 10MB per document, but we can throw a little extra to be sure
+	static const long buffer_size = 11 * 1024 * 1024;
 
-	unsigned char *read_line();
+	ANT_instream *source;
+	unsigned char *buffer;
+	long long position;
+
+	long long read_line();
 
 public:
 	ANT_directory_iterator_tsv(ANT_instream *source, long get_file = 0) : ANT_directory_iterator("", get_file), source(source) {}

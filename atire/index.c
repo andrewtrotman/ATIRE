@@ -410,7 +410,9 @@ for (param = first_param; param < argc; param++)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-		source = new ANT_directory_iterator_tsv(decompressor, ANT_directory_iterator::READ_FILE);
+		scrubber = new ANT_instream_scrub(&file_buffer, decompressor, param_block.scrubbing);
+		instream_buffer = new ANT_instream_buffer(&file_buffer, scrubber);
+		source = new ANT_directory_iterator_tsv(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::PKZIP)
 		source = new ANT_directory_iterator_pkzip(argv[param], ANT_directory_iterator::READ_FILE);
@@ -421,6 +423,7 @@ for (param = first_param; param < argc; param++)
 		else
 			source = new ANT_directory_iterator(argv[param], ANT_directory_iterator::READ_FILE);					// current directory
 		}
+
 	if (param_block.filter_filename != NULL)
 		source = new ANT_directory_iterator_filter(source, param_block.filter_filename, param_block.filter_method, ANT_directory_iterator_filter::READ_FILE);
 
