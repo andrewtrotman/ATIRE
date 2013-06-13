@@ -135,7 +135,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_scrub::first(ANT_directory
 {
 ANT_directory_iterator_object *t = source->first(object);
 
-if (t)
+if (t != NULL)
 	scrub((unsigned char *)t->file, t->length, scrubbing);
 
 return t;
@@ -149,7 +149,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_scrub::next(ANT_directory_
 {
 ANT_directory_iterator_object *t = source->next(object);
 
-if (t)
+if (t != NULL)
 	scrub((unsigned char *)t->file, t->length, scrubbing);
 
 return t;

@@ -437,7 +437,7 @@ for (param = first_param; param < argc; param++)
 		We may already had to have created a directory iterator scrubber at some other point in the chain, here's looking at you RECURSIVE_TREC,
 		so don't do it again unnecessarily
 	*/
-	if (param_block.scrubbing && dir_scrubber == NULL)
+	if (param_block.scrubbing && dir_scrubber == NULL && scrubber == NULL)
 		source = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
 
 	stats.add_disk_input_time(stats.stop_timer(now));

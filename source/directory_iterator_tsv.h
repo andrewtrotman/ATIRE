@@ -17,11 +17,12 @@
 class ANT_directory_iterator_tsv : public ANT_directory_iterator
 {
 private:
-	static const long buffer_size = 11 * 1024 * 1024;
+	static const long long buffer_size = 11 * 1024 * 1024;
 
 	ANT_instream *source;
 	unsigned char *buffer;
 	long long position;
+	long long end_of_buffer;
 
 	long long read_line();
 

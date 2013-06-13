@@ -12,41 +12,43 @@
 /*
 	ANT_DIRECTORY_ITERATOR_TSV::READ_LINE()
 	---------------------------------------
-	Doesn't really read a line, returns the beginning of the next line
-	and sets up for the next line so that it won't contain any extraneous
-	characters
 */
 long long ANT_directory_iterator_tsv::read_line()
 {
 long long remain, beginning;
 unsigned char *nl;
-char *n = strchr((char *)buffer + position, '\n');
-char *r = strchr((char *)buffer + position, '\r');
 
-// if we didn't find a \n or \r then move the end of the buffer
-// to the beginning and get fill the rest of the buffer
+char *n = strchr((char *)buffer + position, '\n');
+char *r = NULL;
+
+// if we didn't find it, then move the end to the beginning, refill the end
+// and check again
 if (n == NULL && r == NULL)
 	{
-	remain = buffer_size - position;
+	end_of_buffer = remain = buffer_size - position;
 	memcpy(buffer, buffer + position, remain);
 
 	// try to read more from the source
-	source->read(buffer + remain, buffer_size - remain);
+	end_of_buffer += source->read(buffer + remain, buffer_size - remain);
 
+	n = strchr((char *)buffer, '\n');
+	r = NULL;
 	position = 0;
-
-	n = strchr((char *)buffer + position, '\n');
-	r = strchr((char *)buffer + position, '\r');
 	}
 
 if (n == NULL && r == NULL)
-	return -1;
+	nl = buffer + end_of_buffer + 1; // force the fail later
 else if (n == NULL)
 	nl = (unsigned char *)r;
 else if (r == NULL)
 	nl = (unsigned char *)n;
 else
 	nl = (unsigned char *)(n > r ? r : n);
+
+// because we have a reused buffer, if we don't read anything new into the end, we could
+// refind a nl that we've already used, so check against the end of buffer
+if ((nl - buffer) > end_of_buffer)
+	return -1;
 
 // replace the new line with a nul so that strlen blah work
 *nl = '\0';
@@ -56,8 +58,8 @@ beginning = position;
 // skip over this "line"
 position = (nl - buffer) + 1;
 
-// skip over any extra newlines we might have found (\r\n pairs)
-while (position < buffer_size && buffer[position] != '\0' && (buffer[position] == '\r' || buffer[position] == '\n'))
+// skip over any extra newlines we might have found
+while (position < end_of_buffer && buffer[position] != '\0' && buffer[position] == '\n')
 	position++;
 
 return beginning;
@@ -69,9 +71,11 @@ return beginning;
 */
 ANT_directory_iterator_object *ANT_directory_iterator_tsv::first(ANT_directory_iterator_object *object)
 {
-position = 0;
+end_of_buffer = position = 0;
+
 buffer = new unsigned char[buffer_size];
-source->read(buffer, buffer_size);
+
+end_of_buffer = source->read(buffer, buffer_size);
 
 return next(object);
 }
@@ -80,7 +84,7 @@ return next(object);
 	ANT_DIRECTORY_ITERATOR_TSV::NEXT()
 	----------------------------------
 	Reads line by line, file format for Djeord provided anchors:
-	<filename>\t<url>\t<anchor>\t...\t<anchor>
+	<filename>\t<url>\t<anchor>\t...\t<anchor>\n
 */
 ANT_directory_iterator_object *ANT_directory_iterator_tsv::next(ANT_directory_iterator_object *object)
 {
@@ -93,23 +97,17 @@ if (begin == -1)
 	return NULL;
 
 filename_start = buffer + begin;
-filename_end = strchr(filename_start, '\t');
-file = strchr(filename_end + 1, '\t');
 
-//if ((filename_end = strchr(filename_start, '\t')) == NULL)
-//	return NULL;
-//
-//if ((file = strchr(filename_end + 1, '\t')) == NULL)
-//	return NULL;
+if ((filename_end = strchr(filename_start, '\t')) == NULL)
+	return NULL;
 
-//file = strchr(filename_end + 1, '\t');
-//if (file == NULL)
-//	return NULL;
-
-printf("%d %d\n", strlen(file), position - begin);
+if ((file = strchr(filename_end + 1, '\t')) == NULL)
+	return NULL;
+file++;
 
 object->filename = strnnew((char *)filename_start, filename_end - filename_start);
 object->length = strlen(file);
+
 if (get_file)
 	{
 	object->file = new (std::nothrow) char[(size_t)(object->length + 1)];
