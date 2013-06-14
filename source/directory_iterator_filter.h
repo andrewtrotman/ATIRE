@@ -20,16 +20,18 @@ protected:
 	ANT_directory_iterator *source;
 	static char **docids;
 	static long long number_docs;
-	long method;
+	long long method;
 
 public:
 	ANT_directory_iterator_filter(ANT_directory_iterator *source, char *filename, long filter_method, long get_file = 0);
+	ANT_directory_iterator_filter(ANT_directory_iterator *source, long get_file = 0) : ANT_directory_iterator("", get_file), source(source) {}
+
 	virtual ~ANT_directory_iterator_filter();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
 
-protected:
+private:
 	long should_index(char *docid);
 
 } ;

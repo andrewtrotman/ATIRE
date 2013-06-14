@@ -9,22 +9,15 @@
 #include "disk.h"
 #include "directory_iterator_spam_filter.h"
 
-char **ANT_directory_iterator_spam_filter::docids = NULL;
-long long ANT_directory_iterator_spam_filter::number_docs = 0;
-
 /*
 	ANT_DIRECTORY_ITERATOR_SPAM_FILTER::ANT_DIRECTORY_ITERATOR_SPAM_FILTER()
 	------------------------------------------------------------------------
 	Each line of the file containing spam scores should have the score followed by docid and be sorted by docid
 */
-ANT_directory_iterator_spam_filter::ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_spam_filter::ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long get_file) : ANT_directory_iterator_filter(source, get_file)
 {
-this->source = source;
 method = threshold < 50 ? EXCLUDE : INCLUDE;
 
-/*
-	We only want the spam scores to be loaded once
-*/
 if (docids == NULL)
 	{
 	char *spam_file = ANT_disk::read_entire_file(filename);
@@ -61,85 +54,4 @@ if (docids == NULL)
 	*/
 	delete [] spam_file;
 	}
-}
-
-/*
-	ANT_DIRECTORY_ITERATOR_SPAM_FILTER::~ANT_DIRECTORY_ITERATOR_SPAM_FILTER()
-	-------------------------------------------------------------------------
-*/
-ANT_directory_iterator_spam_filter::~ANT_directory_iterator_spam_filter()
-{
-delete source;
-
-if (docids)
-	{
-	delete [] docids;
-	docids = NULL;
-	}
-}
-
-/*
-	ANT_DIRECTORY_ITERATOR_SPAM_FILTER::SHOULD_INDEX()
-	--------------------------------------------------
-*/
-inline long ANT_directory_iterator_spam_filter::should_index(char *docid)
-{
-long long low = 0, mid, high = number_docs - 1;
-
-strip_space_inplace(docid);
-
-while (low < high)
-	{
-	mid = low + ((high - low) / 2);
-	if (strcmp(docids[mid], docid) < 0)
-		low = mid + 1;
-	else
-		high = mid;
-	}
-
-mid = strcmp(docids[low], docid);
-return (mid != 0 && method == EXCLUDE) || (mid == 0 && method == INCLUDE);
-}
-
-/*
-	ANT_DIRECTORY_ITERATOR_SPAM_FILTER::FIRST()
-	-------------------------------------------
-*/
-ANT_directory_iterator_object *ANT_directory_iterator_spam_filter::first(ANT_directory_iterator_object *object)
-{
-ANT_directory_iterator_object *t = source->first(object);
-
-if (t && should_index(t->filename))
-	return t;
-
-/*
-	Either we got a NULL, or we shouldn't index, if we did get an
-	object, then clean it up.
-*/
-if (t)
-	{
-	delete [] t->file;
-	delete [] t->filename;
-	}
-
-return next(object);
-}
-
-/*
-	ANT_DIRECTORY_ITERATOR_SPAM_FILTER::NEXT()
-	------------------------------------------
-*/
-ANT_directory_iterator_object *ANT_directory_iterator_spam_filter::next(ANT_directory_iterator_object *object)
-{
-ANT_directory_iterator_object *t = source->next(object);
-
-while (t && !should_index(t->filename))
-	{
-	delete [] t->file;
-	delete [] t->filename;
-	
-	t = source->next(object);
-	}
-
-return t;
 }
