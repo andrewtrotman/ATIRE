@@ -1,5 +1,5 @@
 /*
-	DIRECTORY_ITERATOR_SPAM_FILTER.C
+	DIRECTORY_ITERATOR_FILTER_SPAM.C
 	--------------------------------
 */
 #include <stdio.h>
@@ -7,14 +7,14 @@
 #include "maths.h"
 #include "str.h"
 #include "disk.h"
-#include "directory_iterator_spam_filter.h"
+#include "directory_iterator_filter_spam.h"
 
 /*
-	ANT_DIRECTORY_ITERATOR_SPAM_FILTER::ANT_DIRECTORY_ITERATOR_SPAM_FILTER()
+	ANT_DIRECTORY_ITERATOR_FILTER_SPAM::ANT_DIRECTORY_ITERATOR_FILTER_SPAM()
 	------------------------------------------------------------------------
 	Each line of the file containing spam scores should have the score followed by docid and be sorted by docid
 */
-ANT_directory_iterator_spam_filter::ANT_directory_iterator_spam_filter(ANT_directory_iterator *source, char *filename, long long threshold, long get_file) : ANT_directory_iterator_filter(source, get_file)
+ANT_directory_iterator_filter_spam::ANT_directory_iterator_filter_spam(ANT_directory_iterator *source, char *filename, long long threshold, long get_file) : ANT_directory_iterator_filter(source, get_file)
 {
 method = threshold < 50 ? EXCLUDE : INCLUDE;
 

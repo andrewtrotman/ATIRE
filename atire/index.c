@@ -24,7 +24,7 @@
 #include "directory_iterator_preindex.h"
 #include "directory_iterator_mysql.h"
 #include "directory_iterator_filter.h"
-#include "directory_iterator_spam_filter.h"
+#include "directory_iterator_filter_spam.h"
 #include "directory_iterator_mime_filter.h"
 #include "directory_iterator_scrub.h"
 #include "file.h"
@@ -431,7 +431,7 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_mime_filter(source, ANT_directory_iterator::READ_FILE);
 	
 	if (param_block.spam_filename != NULL)
-		source = new ANT_directory_iterator_spam_filter(source, param_block.spam_filename, param_block.spam_threshold, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_filter_spam(source, param_block.spam_filename, param_block.spam_threshold, ANT_directory_iterator::READ_FILE);
 	
 	/*
 		We may already had to have created a directory iterator scrubber at some other point in the chain, here's looking at you RECURSIVE_TREC,
