@@ -120,15 +120,26 @@ for (pos = strstr(source, "<hit>"); pos != NULL; pos = strstr(end, "<hit>"))
 	if (hits + 1 > length_of_results)
 		extend(length_of_results * expansion_factor);
 
-	results[hits].rank = ANT_atoi64(rank);
-	results[hits].id = ANT_atoi64(id) + docid_base;
-	results[hits].name = name;
-	results[hits].rsv = atof(rsv);
-	results[hits].title = title;
-	results[hits].snippet = snippet;
+	bool retrieved = false;
+	for (long long hit = 0; !retrieved && hit < hits; hit++)
+		if (strcmp(results[hit].name, name) == 0)
+			{
+			retrieved = true;
+			results[hit].rsv += 0.3 * atof(rsv); // anchors
+			}
 
-	found++;
-	hits++;
+	if (!retrieved)
+		{
+		results[hits].rank = ANT_atoi64(rank);
+		results[hits].id = ANT_atoi64(id) + docid_base;
+		results[hits].name = name;
+		results[hits].rsv = 0.7 * atof(rsv); // full-text
+		results[hits].title = title;
+		results[hits].snippet = snippet;
+
+		found++;
+		hits++;
+		}
 	}
 
 return found;
@@ -189,7 +200,7 @@ result << "<time>" << time_taken << "</time>";
 
 result << std::fixed << std::setprecision(2);
 
-if (first < hits)
+if (first <= hits)
 	{
 	sort();
 

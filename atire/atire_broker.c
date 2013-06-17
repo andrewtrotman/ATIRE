@@ -94,7 +94,7 @@ prompt(params);
 for (command = inchannel->gets(); command != NULL; prompt(params), command = inchannel->gets())
 	{
 	strip_space_inplace(command);
-	printf("->%s<-\n", command);
+	//printf("->%s<-\n", command);
 	if (*command != '\0')
 		{
 		if (strncmp(command, "<ATIREloadindex>", 16) == 0)
