@@ -661,7 +661,7 @@ for (param = 1; param < argc; param++)
 			{
 			quantization = true;
 			if (*(command + 1))
-				quantization_bits = atoll(command + 1);
+				quantization_bits = atol(command + 1);
 			if (quantization_bits > 16)
 				exit(printf("Cannot quantize using more than 16 bits"));
 			}

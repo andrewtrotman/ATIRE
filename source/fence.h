@@ -38,8 +38,7 @@ static inline void ANT_write_fence(void)
 }
 
 #ifdef _MSC_VER
-#undef max
-#define ANT_compare_and_swap(a, b, c) InterlockedCompareExchange((LONG *)(a), (LONG)(b), (LONG)(c))
+#define ANT_compare_and_swap(a, b, c) InterlockedCompareExchangePointer((volatile PVOID *)(a), (b), (c))
 #else
 #define ANT_compare_and_swap(a, b, c) __sync_val_compare_and_swap(a, c, b)
 #endif
