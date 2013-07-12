@@ -88,11 +88,12 @@ core_sources =  \
 	$(SRC_DIR)/directory_iterator_preindex_internals.c \
 	$(SRC_DIR)/directory_iterator_recursive.c \
 	$(SRC_DIR)/directory_iterator_tar.c \
+	$(SRC_DIR)/directory_iterator_tsv.c \
 	$(SRC_DIR)/directory_iterator_warc.c \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.c \
-	$(SRC_DIR)/directory_iterator_spam_filter.c \
 	$(SRC_DIR)/directory_iterator_scrub.c \
 	$(SRC_DIR)/directory_iterator_filter.c \
+	$(SRC_DIR)/directory_iterator_filter_spam.c \
 	$(SRC_DIR)/directory_iterator_mime_filter.c \
 	$(SRC_DIR)/disk.c \
 	$(SRC_DIR)/event.c \
@@ -300,11 +301,12 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_recursive.h \
 	$(SRC_DIR)/directory_iterator_tar_file_header.h \
 	$(SRC_DIR)/directory_iterator_tar.h \
+	$(SRC_DIR)/directory_iterator_tsv.h \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.h \
 	$(SRC_DIR)/directory_iterator_warc.h \
-	$(SRC_DIR)/directory_iterator_spam_filter.h \
 	$(SRC_DIR)/directory_iterator_scrub.h \
 	$(SRC_DIR)/directory_iterator_filter.h \
+	$(SRC_DIR)/directory_iterator_filter_spam.h \
 	$(SRC_DIR)/directory_iterator_mime_filter.h \
 	$(SRC_DIR)/disk_directory.h \
 	$(SRC_DIR)/disk.h \
