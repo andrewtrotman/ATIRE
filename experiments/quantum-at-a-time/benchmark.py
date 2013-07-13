@@ -128,6 +128,7 @@ def main():
 	processing_stragety = None
 	assessment_file = None
 	query_file = None
+	range = 'small' # either 'small' or 'large'
 	#test()
 
 	i = 1;
@@ -155,8 +156,12 @@ def main():
 			i += 1
 			query_file = sys.argv[i]
 			i += 1
+		elif sys.argv[i] == '--range':
+			i += 1
+			range = sys.argv[i]
+			i += 1
 		else:
-			print "un-recognished option: %s" % sys.argv[i]
+			print "un-recognised option: %s" % sys.argv[i]
 			sys.exit(2)
 		pass
 	pass
@@ -164,6 +169,12 @@ def main():
 	if assessment_file == '' or query_file == '':
 		usage(sys.argv[0])
 		sys.exit(2)
+
+	top_k_list = []
+	if range == 'small':
+		top_k_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+	else:
+		top_k_list = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 
 	#
 	# all profiling data is stored in this variable
@@ -174,8 +185,7 @@ def main():
 	# generate the parameters and call run_benchmark
 	#
 	for repeat in xrange(1,6):
-		for top_k in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-		#for top_k in [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
+		for top_k in top_k_list:
 			print "repeat: %d, top_k: %d" % (repeat, top_k)
 			run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety)
 		pass
