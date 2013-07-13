@@ -24,21 +24,25 @@ cd "$HOME/source-devel/hg/atire"
 make clean
 make -f ./experiments/quantum-at-a-time/GNUmakefile-${Q_OR_T}
 
-exit
 #
 # cd to the directory where it get called
 #
 cd $PWD
 
+if [ "$Q_OR_T" = "QaaT" ]; then
+	strategies=( M Pq:n Pq:d Pq:s Pq:l )
+elif [ "$Q_OR_T" = "TaaT" ]; then
+	strategies=( M )
+fi
 #
 # run the benchmark for the small range of top k
 #
-strategies=( M Pq:n Pq:d Pq:s Pq:l )
+
 for st in "${strategies[@]}"
 do
 	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-small-${s}.csv --range small"
 	echo $cmd
-	$cmd
+	#$cmd
 done
 
 #
@@ -48,5 +52,5 @@ for st in "${strategies[@]}"
 do
 	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-large-${s}.csv --range large"
 	echo $cmd
-	$cmd
+	#$cmd
 done
