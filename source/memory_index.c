@@ -1152,7 +1152,8 @@ if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths, &
 	set_variable("~quantmax", *(long long *)&maximum_collection_rsv);
 	set_variable("~quantmin", *(long long *)&minimum_collection_rsv);
 	}
-else
+
+if (quantizer == NULL || !index_quantization)
 	quantization_bits = 8; // this is by default for tf-indexes
 
 /*
