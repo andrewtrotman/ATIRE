@@ -73,7 +73,8 @@ protected:
 	long is_zero_rsv(void) { return rsv == 0; }
 
 public:
-	ANT_accumulator_t add_rsv(double score) { return rsv += 1 + (ANT_accumulator_t)(score * 100.0); }		// +1 to prevent rounding to zero
+	//ANT_accumulator_t add_rsv(double score) { return rsv += 1 + (ANT_accumulator_t)(score * 100.0); }		// +1 to prevent rounding to zero
+	ANT_accumulator_t add_rsv(double score) { return rsv += (ANT_accumulator_t)score; }
 	ANT_accumulator_t add_rsv(long score) { return rsv += (ANT_accumulator_t)score; }
 
 	void set_rsv(ANT_accumulator_t score) { rsv = score; }
