@@ -15,7 +15,7 @@ collection_dir="$HOME/collections"
 assessment_file="${collection_dir}/2009-INEX-Wikipedia/2010.qrels"
 query_file="${collection_dir}/2009-INEX-Wikipedia/2010.topics"
 
-PWD=`pwd`
+CURRENT_DIR=`pwd`
 
 #
 # cd to ATIRE source directory and compile
@@ -27,11 +27,11 @@ make -f ./experiments/quantum-at-a-time/GNUmakefile-${Q_OR_T} -j 4
 #
 # cd to the directory where it get called
 #
-cd $PWD
+cd $CURRENT_DIR
 
 if [ "$Q_OR_T" = "QaaT" ]; then
 	strategies=( M Pq:n Pq:d Pq:s Pq:l )
-elif [ "$Q_OR_T" = "TaaT" ]; then
+elif [ "$Q_OR_T" = "TaaT" ] || [ "$Q_OR_T" = "TaaT-partial" ]; then
 	strategies=( M )
 fi
 

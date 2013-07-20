@@ -1,19 +1,19 @@
 (1) index for Quantum-at-a-time
 > cd ~/source-devel/hg/atire
-> make -f experiments/quantum-at-a-time/GNUmakefile-QaaT
-> cd ~/index-atire/quantum-at-time/qaat
+> make -f experiments/quantum-at-a-time/GNUmakefile-QaaT -j 8
+> cd ~/index-atire/quantum-at-a-time/qaat
 > ~/source-devel/hg/atire/bin/index -sa -N10000 -QBM25 -q8 -rtlzo ~/collections/2009-INEX-Wikipedia/lzo/*.lzo
 
 (2) index for Term-at-a-time
 > cd ~/source-devel/hg/atire
-> make -f experiments/quantum-at-a-time/GNUmakefile-TaaT
-> cd ~/index-atire/quantum-at-time/taat
+> make -f experiments/quantum-at-a-time/GNUmakefile-TaaT -j 8
+> cd ~/index-atire/quantum-at-a-time/taat
 > ~/source-devel/hg/atire/bin/index -sa -N10000 -QBM25 -q8 -rtlzo ~/collections/2009-INEX-Wikipedia/lzo/*.lzo
 
 (3) index for Term-at-a-time with partial decompression
 > cd ~/source-devel/hg/atire
-> make -f experiments/quantum-at-a-time/GNUmakefile-TaaT-partial
-> cd ~/index-atire/quantum-at-time/taat-partial
+> make -f experiments/quantum-at-a-time/GNUmakefile-TaaT-partial -j 8
+> cd ~/index-atire/quantum-at-a-time/taat-partial
 # no need to re-index, just use the previous index
 > cp ../taat/doclist.aspt ../taat/index.aspt .
 
@@ -21,13 +21,13 @@
 > ~/source-devel/hg/atire/bin/atire -mMAP -q ~/collections/2009-INEX-Wikipedia/2010.topics -a ~/collections/2009-INEX-Wikipedia/2010.qrels -l0
 
 (5) benchmark Quantum-at-a-time
-> cd ~/index-atire/quantum-at-time/qaat
+> cd ~/index-atire/quantum-at-a-time/qaat
 > ~/source-devel/hg/atire/experiments/quantum-at-a-time/QaaT-run.sh
 
 (6) benchmark Term-at-a-time
-> cd ~/index-atire/quantum-at-time/taat
+> cd ~/index-atire/quantum-at-a-time/taat
 > ~/source-devel/hg/atire/experiments/quantum-at-a-time/TaaT-run.sh
 
 (7) benchmark Term-at-a-time with partial decompression
-> cd ~/index-atire/quantum-at-time/taat-partial
+> cd ~/index-atire/quantum-at-a-time/taat-partial
 > ~/source-devel/hg/atire/experiments/quantum-at-a-time/TaaT-partial-run.sh
