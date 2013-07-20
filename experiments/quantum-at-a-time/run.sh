@@ -4,7 +4,7 @@ Q_OR_T=$1
 
 echo $Q_OR_T
 
-if [ "$Q_OR_T" != "QaaT" ] && [ "$Q_OR_T" != "TaaT" ]; then
+if [ "$Q_OR_T" != "QaaT" ] && [ "$Q_OR_T" != "TaaT" ]  && [ "$Q_OR_T" != "TaaT-partial" ]; then
 	echo "please specify either QaaT or TaaT"
 	exit
 fi
@@ -22,7 +22,7 @@ PWD=`pwd`
 #
 cd "$HOME/source-devel/hg/atire"
 make clean
-make -f ./experiments/quantum-at-a-time/GNUmakefile-${Q_OR_T}
+make -f ./experiments/quantum-at-a-time/GNUmakefile-${Q_OR_T} -j 4
 
 #
 # cd to the directory where it get called
@@ -40,7 +40,7 @@ fi
 #
 for st in "${strategies[@]}"
 do
-	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-small-${s}.csv --range small"
+	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-small-${st}.csv --range small"
 	echo $cmd
 	$cmd
 done
@@ -50,7 +50,7 @@ done
 #
 for st in "${strategies[@]}"
 do
-	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-large-${s}.csv --range large"
+	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-large-${st}.csv --range large"
 	echo $cmd
 	$cmd
 done

@@ -62,7 +62,7 @@ USE_PRINT_TIME_NO_CONVERSION := 1
 USE_IMPACT_HEADER := 0
 
 # partial decompression of postings list
-USE_PARTIAL_DCOMPRESSION := 1
+USE_PARTIAL_DCOMPRESSION := 0
 
 # represent the static array in two dimensions, reduce accumulators
 # initialisation time

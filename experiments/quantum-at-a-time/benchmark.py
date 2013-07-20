@@ -13,7 +13,7 @@ import csv
 import time
 
 class Profile:
-	TOP_K_STR = 'P@'
+	TOP_K_STR = 'Topk'
 	QUERY_TIME_STR = 'Query Time'
 	TOTAL_QUANTUM_STR = 'Total Quantum'
 	PROCESSED_QUANTUM_STR = 'Processed Quantum'
@@ -34,7 +34,7 @@ class Profile:
 		self.processed_postings = 0;
 		self.final_map = 0.0;
 	def __str__(self):
-		output = "P@: %d\nquery_time: %d\ntotal_quantum: %d\nprocessed_quantum: %d\nprocessed_postings: %d\nfinal_MAP: %d\n"
+		output = "Topk: %d\nquery_time: %d\ntotal_quantum: %d\nprocessed_quantum: %d\nprocessed_postings: %d\nfinal_MAP: %d\n"
 		return  output % (self.top_k, self.query_time, self.total_quantum, self.processed_quantum, self.processed_postings, self.final_map)
 	def get_headers():
 		return tuple((Profile.TOP_K_STR, Profile.QUERY_TIME_STR, Profile.TOTAL_QUANTUM_STR, Profile.PROCESSED_QUANTUM_STR, Profile.PROCESSED_POSTINGS_STR, Profile.FINAL_MAP_STR))
@@ -92,7 +92,7 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 	pass #end of for l in
 
 	prof_list.append(prof)
-	#print prof
+	print prof
 pass # end of def run_benchmark
 
 
