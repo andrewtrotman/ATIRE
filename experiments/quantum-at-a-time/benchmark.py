@@ -11,6 +11,7 @@ import subprocess
 import re
 import csv
 import time
+from os.path import expanduser
 
 class Profile:
 	TOP_K_STR = 'Topk'
@@ -24,7 +25,7 @@ class Profile:
 	TOTAL_QUANTUM_PATTERN = re.compile(r'total quantums:\s*([0-9]*)', re.IGNORECASE)
 	PROCESSED_QUANTUM_PATTERN = re.compile(r'processed quantums:\s*([0-9]*)', re.IGNORECASE)
 	PROCESSED_POSTINGS_PATTERN = re.compile(r'processed postings:\s*([0-9]*)', re.IGNORECASE)
-	FINAL_MAP_PATTERN = re.compile(r'\s*MAP:\s*([0-9.]*)', re.IGNORECASE)
+	FINAL_MAP_PATTERN = re.compile(r'\s*MAP.*:\s*([0-9.]*)', re.IGNORECASE)
 
 	def __init__(self):
 		self.top_k = 0;
@@ -34,7 +35,7 @@ class Profile:
 		self.processed_postings = 0;
 		self.final_map = 0.0;
 	def __str__(self):
-		output = "Topk: %d\nquery_time: %d\ntotal_quantum: %d\nprocessed_quantum: %d\nprocessed_postings: %d\nfinal_MAP: %d\n"
+		output = "Topk: %d\nquery_time: %d\ntotal_quantum: %d\nprocessed_quantum: %d\nprocessed_postings: %d\nfinal_MAP: %f\n"
 		return  output % (self.top_k, self.query_time, self.total_quantum, self.processed_quantum, self.processed_postings, self.final_map)
 	def get_headers():
 		return tuple((Profile.TOP_K_STR, Profile.QUERY_TIME_STR, Profile.TOTAL_QUANTUM_STR, Profile.PROCESSED_QUANTUM_STR, Profile.PROCESSED_POSTINGS_STR, Profile.FINAL_MAP_STR))
@@ -44,10 +45,11 @@ class Profile:
 pass # end of class profile
 
 
-def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety):
+def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety, precision_measure):
 	args = list([exe_file])
 	#args.extend(['-M'])
 	#args.extend(['-Pq:d'])
+	args.append('-m%s' % precision_measure)
 	args.extend(['-%s' % processing_stragety])
 	args.extend(['-k%d' % top_k])
 	args.extend(['-a', assessment_file])
@@ -68,9 +70,10 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 	# create a new profile for the current run
 	prof = Profile()
 	prof.top_k = top_k
-	prof.query_time = 0.0
-	prof.total_quantum = 0
-	prof.processed_quantum = 0
+	#prof.query_time = 0.0
+	#prof.total_quantum = 0
+	#prof.processed_quantum = 0
+	#prof.final_map = 0.0
 
 	# split the output string and process line by line
 	for l in child_stdout.split('\n'):
@@ -123,13 +126,16 @@ pass # end of def test()
 
 def main():
 
+	home_dir = expanduser('~')
 	output_file = 'output.csv'
-	exe_file = '/home/fei/source-devel/hg/atire/bin/atire'
+	exe_file = '%s/source-devel/hg/atire/bin/atire' % home_dir
 	processing_stragety = None
 	assessment_file = None
 	query_file = None
 	range = 'small' # either 'small' or 'large'
 	#test()
+	repeat = 5
+	precision_measure = 'MAP' # or 'MAP@10'
 
 	i = 1;
 	while i < len(sys.argv):
@@ -147,6 +153,7 @@ def main():
 		elif sys.argv[i] == '--outfile':
 			i += 1
 			output_file = sys.argv[i]
+			output_file = output_file.replace(':', '.')
 			i += 1
 		elif sys.argv[i] == '-a':
 			i += 1
@@ -159,6 +166,14 @@ def main():
 		elif sys.argv[i] == '--range':
 			i += 1
 			range = sys.argv[i]
+			i += 1
+		elif sys.argv[i] == '--repeat':
+			i += 1
+			repeat = int(sys.argv[i])
+			i += 1
+		elif sys.argv[i] == '--precision-measure':
+			i += 1
+			precision_measure = sys.argv[i]
 			i += 1
 		else:
 			print "un-recognised option: %s" % sys.argv[i]
@@ -173,6 +188,7 @@ def main():
 	top_k_list = []
 	if range == 'small':
 		top_k_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+		#top_k_list = [10]
 	else:
 		top_k_list = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 
@@ -184,10 +200,10 @@ def main():
 	#
 	# generate the parameters and call run_benchmark
 	#
-	for repeat in xrange(1,6):
+	for repeat in xrange(1,repeat+1):
 		for top_k in top_k_list:
 			print "repeat: %d, top_k: %d" % (repeat, top_k)
-			run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety)
+			run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, processing_stragety, precision_measure)
 		pass
 	pass
 
