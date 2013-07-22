@@ -61,6 +61,9 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 # construct impact headers for easy handling the quantums of the postings
 USE_IMPACT_HEADER := 1
 
+# print extra info for quantum-at-a-time and term-at-a-time
+USE_PRINT_QUANTUM_STATS := 1
+
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1
 
@@ -94,7 +97,7 @@ USE_SNOWBALL := 1
 # also, it is possible to include a file written for a specific target like iOS
 # for example, make TARGET=iOS, GNUMakile.iOS will be included,
 # however, a generic iOS make file so far is not successful
-# you might want to use autotools the configurations files of which are 
+# you might want to use autotools the configurations files of which are
 # also included in this project
 #
 ###############################################################################
@@ -177,6 +180,9 @@ ifeq ($(USE_IMPACT_HEADER), 1)
 	CFLAGS += -DIMPACT_HEADER
 endif
 
+ifeq ($(USE_PRINT_QUANTUM_STATS), 1)
+	CFLAGS += -DPRINT_QUANTUM_STATS
+endif
 
 ifeq ($(USE_SPECIAL_COMPRESSION), 1)
 	CFLAGS += -DSPECIAL_COMPRESSION

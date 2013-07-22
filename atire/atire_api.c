@@ -752,8 +752,6 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 quantum_heap->set_size(heap_items);
 quantum_heap->build_max_heap();
 
-//#define PRINT_QUANTUM_STATS
-
 #ifdef PRINT_QUANTUM_STATS
 printf("total quantums: %lld\n", total_quantums);
 #endif
@@ -855,6 +853,7 @@ while (heap_items > 0)
 printf("processed quantums: %lld\n", processed_quantums);
 printf("processed postings: %lld\n", processed_postings);
 #endif
+printf("\n\nllllll\n\n\n\n");
 }
 #endif // end of #ifdef IMPACT_HEADER
 
