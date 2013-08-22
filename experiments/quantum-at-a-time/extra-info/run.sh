@@ -1,8 +1,10 @@
 #! /bin/bash
 
 Q_OR_T=$1
+PRECISION_MEASURE=$2
 
 echo $Q_OR_T
+echo $PRECISION_MEASURE
 
 if [ "$Q_OR_T" != "QaaT" ] && [ "$Q_OR_T" != "TaaT" ]  && [ "$Q_OR_T" != "TaaT-partial" ]; then
 	echo "please specify either QaaT or TaaT"
@@ -40,7 +42,7 @@ fi
 #
 for st in "${strategies[@]}"
 do
-	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-small-${st}.csv --range small --repeat 1 --precision-measure MAP@10"
+	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-small-${st}.csv --range small --repeat 1 --precision-measure ${PRECISION_MEASURE}"
 	echo $cmd
 	$cmd
 done
@@ -50,7 +52,7 @@ done
 #
 for st in "${strategies[@]}"
 do
-	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-large-${st}.csv --range large --repeat 1 --precision-measure MAP@100"
+	cmd="python ${py_script} --ps ${st} -a ${assessment_file} -q ${query_file} --outfile output-large-${st}.csv --range large --repeat 1 --precision-measure ${PRECISION_MEASURE}"
 	echo $cmd
 	$cmd
 done

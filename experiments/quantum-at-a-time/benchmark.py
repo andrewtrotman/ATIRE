@@ -25,7 +25,7 @@ class Profile:
 	TOTAL_QUANTUM_PATTERN = re.compile(r'total quantums:\s*([0-9]*)', re.IGNORECASE)
 	PROCESSED_QUANTUM_PATTERN = re.compile(r'processed quantums:\s*([0-9]*)', re.IGNORECASE)
 	PROCESSED_POSTINGS_PATTERN = re.compile(r'processed postings:\s*([0-9]*)', re.IGNORECASE)
-	FINAL_MAP_PATTERN = re.compile(r'\s*MAP.*:\s*([0-9.]*)', re.IGNORECASE)
+	FINAL_MAP_PATTERN = re.compile(r'\s*(MAP|nDCG).*:\s*([0-9.]*)', re.IGNORECASE)
 
 	def __init__(self):
 		self.top_k = 0;
@@ -49,7 +49,10 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 	args = list([exe_file])
 	#args.extend(['-M'])
 	#args.extend(['-Pq:d'])
-	args.append('-m%s' % precision_measure)
+	if precision_measure == 'MAP':
+		args.append('-m%s' % precision_measure)
+	elif precision_measure == 'MAP@' or precision_measure == 'nDCG@':
+		args.append('-m%s%d' % (precision_measure, top_k))
 	args.extend(['-%s' % processing_stragety])
 	args.extend(['-k%d' % top_k])
 	args.extend(['-a', assessment_file])
@@ -82,7 +85,8 @@ def run_benchmark(exe_file, prof_list, top_k, assessment_file, query_file, proce
 			prof.query_time += int(result.group(1))
 		result = Profile.FINAL_MAP_PATTERN.search(l)
 		if result != None:
-			prof.final_map= float(result.group(1))
+			print 'the match is :%s' % result.group(2)
+			prof.final_map= float(result.group(2))
 		result = Profile.PROCESSED_QUANTUM_PATTERN.search(l)
 		if result != None:
 			prof.processed_quantum += int(result.group(1))
@@ -135,7 +139,7 @@ def main():
 	range = 'small' # either 'small' or 'large'
 	#test()
 	repeat = 5
-	precision_measure = 'MAP' # or 'MAP@10'
+	precision_measure = 'MAP' # or 'MAP@' or 'nDCG@'
 
 	i = 1;
 	while i < len(sys.argv):
