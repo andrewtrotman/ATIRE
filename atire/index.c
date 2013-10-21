@@ -472,7 +472,7 @@ for (param = first_param; param < argc; param++)
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 
-	while (current_file != NULL)
+	while (current_file != NULL && current_file->file != NULL)
 		{
 		/*
 			How much data do we have?
