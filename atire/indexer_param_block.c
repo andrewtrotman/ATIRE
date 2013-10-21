@@ -136,6 +136,7 @@ puts("   s            Simple-9      (bytewise)");
 puts("   S            Sigma         (bytewise)");
 puts("   v            Variable Byte (bytewise) [default]");
 puts("-vc             Validate posting compression (and report decompression rates)");
+puts("");
 puts("-C[-bnz]        Store documents in the repository compressed with one of:");
 puts("   -            don't create the repositorty [default]");
 puts("   b            bz2");
