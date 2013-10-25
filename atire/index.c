@@ -65,7 +65,7 @@
 #endif
 
 int atire_index(int argc, char *argv[]);
-int atire_index(char *files);
+int atire_index(char *options);
 
 /*
 	REPORT()
@@ -103,14 +103,14 @@ int atire_exit(int errno) {
 	ATIRE_INDEX()
 	-------------
 	for the simplicity of JNI calling
-	files are seperated with ;
+	options are separated with +
 */
-int atire_index(char *files)
+int atire_index(char *options)
 {
 static char *seperators = "+";
 char **argv, **file_list;
 char *token;
-size_t total_length = (files ? strlen(files) : 0) + 7;
+size_t total_length = (options ? strlen(options) : 0) + 7;
 char *copy, *copy_start;
 
 copy = copy_start = new char[total_length];
@@ -119,9 +119,9 @@ memset(copy, 0, sizeof(copy));
 
 memcpy(copy, "index+", 6);
 copy += 6;
-if (files) {
-	memcpy(copy, files, strlen(files));
-	copy += strlen(files);
+if (options) {
+	memcpy(copy, options, strlen(options));
+	copy += strlen(options);
 }
 *copy = '\0';
 
@@ -130,7 +130,7 @@ int argc = 0;
 token = strtok(copy_start, seperators);
 
 #ifdef DEBUG
-	fprintf(stderr, "Start indexing with options: %s\n", files);
+	fprintf(stderr, "Start indexing with options: %s\n", options);
 #endif
 for (; token != NULL; token = strtok(NULL, seperators))
 	{
@@ -181,6 +181,8 @@ ANT_pregens_writer *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
 ANT_index_document *document_indexer;
+ANT_compression_text_factory *factory_text;
+unsigned long compressed_size;
 
 if (argc < 2)
 	param_block.usage();
@@ -442,16 +444,20 @@ for (param = first_param; param < argc; param++)
 
 	stats.add_disk_input_time(stats.stop_timer(now));
 
+	if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+		{
+		factory_text = new ANT_compression_text_factory;
+		factory_text->set_scheme(param_block.document_compression_scheme);
+		}
+	else
+		factory_text = NULL;
+
 #ifdef PARALLEL_INDEXING
 	parallel_disk->add_iterator(source);
 	}
 	disk = parallel_disk;
-	if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-		{
-		ANT_compression_text_factory *factory_text = new ANT_compression_text_factory;
-		factory_text->set_scheme(param_block.document_compression_scheme);
+	if (factory_text != null)
 		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text, ANT_directory_iterator::READ_FILE);
-		}
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
 		disk = new ANT_directory_iterator_preindex(disk, param_block.segmentation, param_block.readability_measure, param_block.stemmer, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
@@ -521,6 +527,14 @@ for (param = first_param; param < argc; param++)
 			*/
 			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
 				{
+				/*
+				 * the following code is copied from from the directory_iterator_compressor
+				 * it may be better to have it refactored to include a compressor in the base class (i.e. ANT_directory_iterator)
+				 */
+				current_file->compressed = new (std::nothrow) char [(size_t)(compressed_size = factory_text->space_needed_to_compress((unsigned long)current_file->length + 1))];		// +1 to include the '\0'
+				if (factory_text->compress(current_file->compressed, &compressed_size, current_file->file, (unsigned long)(current_file->length + 1)) == NULL)
+					exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
+				current_file->compressed_length = compressed_size;
 				index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
 				delete [] current_file->compressed;
 				}

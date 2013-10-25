@@ -16,7 +16,11 @@ JNI_DIR = jni
 TOOLS_DIR = tools
 TESTS_DIR = tests
 
-AM_LDFLAGS = @LIBS@
+###############################################################################
+# ldd -d xxxx.so might produce undefined symbol: __cxa_pure_virtual errors.
+# so add linking options as follows
+###############################################################################
+AM_LDFLAGS = -Wl,--gc-sections -fPIC -shared -lstdc++ @LIBS@
 
 # using HEADER HASH FUNCTION
 AM_CFLAGS = -g -Wall -DONE_PARSER -D_CRT_SECURE_NO_WARNINGS -DHASHER=1 -DHEADER_HASHER=1 \
@@ -556,6 +560,7 @@ main_headers = $(ATIRE_DIR)/atire_api_remote.h \
 #core_sources = $(filter-out $(IGNORE_LIST) $(ATIRE_PARAM_LIST) $(INDEX_PARAM_LIST), $(all_sources))
 	
 ATIRE_PARAM_LIST = $(ATIRE_DIR)/ant_param_block.c
+
 INDEX_PARAM_LIST = $(ATIRE_DIR)/indexer_param_block.c \
 				 $(ATIRE_DIR)/indexer_param_block_rank.c \
 				 $(ATIRE_DIR)/indexer_param_block_topsig.c \
@@ -575,14 +580,19 @@ library_headers = \
 	$(ATIRE_DIR)/atire_engine_result_set_export_INEX_snippet.h \
 	$(ATIRE_DIR)/atire_engine_result_set_export_TREC.h
 	
-ATIRE_CORE_LIBS = -L. -latire_core
-ATIRE_API_LIBS = -L. -latire_api
+ATIRE_API_LIB = libatire_api.la
+
+ATIRE_CORE_LIB = libatire_core.la
+ATIRE_INDEX_PARAM_LIB = libatire_index_param.la
+ATIRE_ANT_PARAM_LIB = libatire_ant_param.la
+
+ATIRE_LIBS = $(ATIRE_CORE_LIB)  $(ATIRE_INDEX_PARAM_LIB) $(ATIRE_ANT_PARAM_LIB)
 	
 includedir = $(prefix)/include
 include_HEADERS = $(library_headers)
 		
-noinst_LTLIBRARIES = libatire_core.la libatire_index_param.la libatire_index.la
-lib_LTLIBRARIES = libatire_api.la
+noinst_LTLIBRARIES = libatire_index.la 
+lib_LTLIBRARIES = $(ATIRE_CORE_LIB) $(ATIRE_INDEX_PARAM_LIB) $(ATIRE_ANT_PARAM_LIB) $(ATIRE_API_LIB) 
 
 libatire_core_la_SOURCES = $(core_sources)
 libatire_core_la_LIBADD = -ldl -lpthread
@@ -594,8 +604,8 @@ libatire_api_la_SOURCES = $(ATIRE_DIR)/atire_api.c \
 				$(ATIRE_DIR)/atire_engine_result_set_export_INEX_snippet.c \
 				$(ATIRE_DIR)/atire_engine_result_set_export_TREC.c
 				
-libatire_api_la_DEPENDENCIES = libatire_core.la
-libatire_api_la_LIBADD = libatire_core.la
+libatire_api_la_DEPENDENCIES = $(ATIRE_ANT_PARAM_LIB)
+libatire_api_la_LIBADD = $(ATIRE_ANT_PARAM_LIB)
 #libatire_api_la_LIBFLAGS = -static
 #libatire_api_ladir = $(prefix)/lib
 #libatire_api_la_HEADERS = $(library_headers)
@@ -604,32 +614,36 @@ libatire_api_la_LIBADD = libatire_core.la
 libatire_index_param_la_SOURCES = \
 	$(INDEX_PARAM_LIST)
 libatire_index_param_la_LDFLAGS = 
-libatire_index_param_la_DEPENDENCIES = libatire_core.la
-libatire_index_param_la_LIBADD = -L. -latire_core
+libatire_index_param_la_DEPENDENCIES = $(ATIRE_CORE_LIB)
+libatire_index_param_la_LIBADD = $(ATIRE_CORE_LIB)
 
 libatire_index_la_SOURCES = \
 	$(ATIRE_DIR)/index.c 
 libatire_index_la_LDFLAGS = 
 libatire_index_la_CFLAGS = $(AM_CFLAGS) -DATIRE_LIBRARY
-libatire_index_la_DEPENDENCIES = libatire_index_param.la
-libatire_index_la_LIBADD = -L. -latire_index_param
+libatire_index_la_DEPENDENCIES = $(ATIRE_INDEX_PARAM_LIB)
+libatire_index_la_LIBADD = $(ATIRE_INDEX_PARAM_LIB)
 
-#ATIRE_API_LIBS = -L. -latire_core -ldl -lpthread
+libatire_ant_param_la_SOURCES = \
+	$(ATIRE_PARAM_LIST)
+libatire_ant_param_la_LDFLAGS =
+libatire_ant_param_la_DEPENDENCIES = $(ATIRE_INDEX_PARAM_LIB)
+libatire_ant_param_la_LIBADD = $(ATIRE_INDEX_PARAM_LIB)
+
+#ATIRE_API_LIB = -L. -latire_core -ldl -lpthread
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
 bin_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doclist
 
-
 atire_SOURCES = \
-	$(ATIRE_DIR)/atire.c \
-	$(ATIRE_PARAM_LIST)
+	$(ATIRE_DIR)/atire.c 
 #	$(ATIRE_DIR)/indexer_param_block_rank.c \
 #	$(ATIRE_DIR)/ant_param_block.c
-atire_LDADD = ${ATIRE_CORE_LIBS} ${ATIRE_API_LIBS} -L. -latire_index_param
+atire_LDADD = $(ATIRE_LIBS) $(ATIRE_API_LIB)
 #atire_LDFLAGS = -rdynamic
 atire_LDFLAGS = -static -export-dynamic
-atire_DEPENDENCIES = libatire_core.la libatire_index_param.la
+atire_DEPENDENCIES = $(noinst_LTLIBRARIES) $(lib_LTLIBRARIES)
 
 #atire_atire_SOURCES = \
 #	$(ATIRE_DIR)/atire_ant.c \
@@ -637,20 +651,20 @@ atire_DEPENDENCIES = libatire_core.la libatire_index_param.la
 #	$(INDEX_PARAM_LIST)
 #	$(ATIRE_DIR)/indexer_param_block_rank.c \
 #	$(ATIRE_DIR)/atire_param_block.c
-#atire_atire_LDADD = ${ATIRE_API_LIBS}
+#atire_atire_LDADD = $(ATIRE_API_LIB)
 #atire_atire_LDFLAGS = -rdynamic
 #atire_atire_LDFLAGS = -static -export-dynamic
-#atire_atire_DEPENDENCIES = libatire_api.la
+#atire_atire_DEPENDENCIES = $(ATIRE_API_LIB)
 
 atire_clientdir=$(ATIRE_DIR)
 atire_client_SOURCES = \
 	$(ATIRE_DIR)/atire_client.c \
 	$(ATIRE_DIR)/atire_client_param_block.c
 #atire_client_HEADERS = atire_client_param_block.h
-atire_client_LDADD = ${ATIRE_API_LIBS}
+atire_client_LDADD = $(ATIRE_API_LIB)
 #atire_client_LDFLAGS = -rdynamic
 atire_client_LDFLAGS = -static -export-dynamic
-atire_client_DEPENDENCIES = libatire_api.la
+atire_client_DEPENDENCIES = $(ATIRE_API_LIB)
 
 atire_brokerdir=$(ATIRE_DIR)
 atire_broker_SOURCES = \
@@ -661,29 +675,29 @@ atire_broker_SOURCES = \
 #atire_broker_HEADERS = $(ATIRE_DIR)/atire_broker_param_block.h \
 	$(ATIRE_DIR)/atire_broke_engine.h \
 	$(ATIRE_DIR)/atire_broke.h
-atire_broker_LDADD = ${ATIRE_API_LIBS}
+atire_broker_LDADD = $(ATIRE_API_LIB)
 #atire_broker_LDFLAGS = -rdynamic
 atire_broker_LDFLAGS = -static -export-dynamic
-atire_broker_DEPENDENCIES = libatire_api.la
+atire_broker_DEPENDENCIES = $(ATIRE_API_LIB)
 
 index_SOURCES = \
 	$(ATIRE_DIR)/index.c 
-index_LDADD = ${ATIRE_CORE_LIBS} -L. -latire_index_param
+index_LDADD = $(ATIRE_CORE_LIB) $(ATIRE_INDEX_PARAM_LIB)
 #index_LDFLAGS = -rdynamic
-index_LDFLAGS = -export-dynamic
-index_DEPENDENCIES = libatire_core.la libatire_index_param.la
+index_LDFLAGS = -static -export-dynamic
+index_DEPENDENCIES = $(ATIRE_CORE_LIB) $(ATIRE_INDEX_PARAM_LIB)
 index_CFLAGS = $(AM_CFLAGS)
 
 atire_dictionary_SOURCES = $(ATIRE_DIR)/atire_dictionary.c 
-atire_dictionary_LDADD = ${ATIRE_CORE_LIBS}
-atire_dictionary_DEPENDENCIES = libatire_core.la
+atire_dictionary_LDADD = $(ATIRE_CORE_LIB)
+atire_dictionary_DEPENDENCIES = $(ATIRE_CORE_LIB)
 
 get_doclist_SOURCES = $(ATIRE_DIR)/get_doclist.c 
-get_doclist_LDADD = ${ATIRE_CORE_LIBS}
-get_doclist_DEPENDENCIES = libatire_core.la
+get_doclist_LDADD = $(ATIRE_CORE_LIB)
+get_doclist_DEPENDENCIES = $(ATIRE_CORE_LIB)
 
 ##############################################################################
-#  use this if it is really necessary to have same source files with libatire_api.la
+#  use this if it is really necessary to have same source files with $(ATIRE_API_LIB)
 #  otherwise, it will cause automake problem:
 #  object `XXXX.$(OBJEXT)' created both with libtool and without
 # atire_dictionary_CFLAGS = $(AM_CFLAGS)
@@ -692,7 +706,7 @@ get_doclist_DEPENDENCIES = libatire_core.la
 #atire_plugins_SOURCES = $(ATIRE_DIR)/plugins.c \
 					$(ATIRE_DIR)/plugin_manager.c
 #atire_plugins_CFLAGS = $(AM_CFLAGS)
-#atire_plugins_LDADD = ${ATIRE_API_LIBS}
+#atire_plugins_LDADD = $(ATIRE_API_LIB)
 #atire_plugins_LDFLAGS = -rdynamic
 #atire_plugins_DEPENDENCIES = 
 	
@@ -702,89 +716,46 @@ get_doclist_DEPENDENCIES = libatire_core.la
 #################################################################################
 #filelist_SOURCES = $(TOOLDIR)/filelist.c
 #filelist_LDFLAGS = -rdynamic
-#filelist_LDADD = ${ATIRE_API_LIBS}
-#filelist_DEPENDENCIES = libatire_core.la
+#filelist_LDADD = $(ATIRE_API_LIB)
+#filelist_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #topic_tree_cas_SOURCES = $(TOOLDIR)/topic_tree_cas.c
 #topic_tree_cas_LDFLAGS = -rdynamic
-#topic_tree_cas_LDADD = ${ATIRE_API_LIBS}
-#topic_tree_cas_DEPENDENCIES = libatire_core.la
+#topic_tree_cas_LDADD = $(ATIRE_API_LIB)
+#topic_tree_cas_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #bindiff_SOURCES = $(TOOLDIR)/bindiff.c
 #bindiff_LDFLAGS = -rdynamic
-#bindiff_LDADD = ${ATIRE_API_LIBS}
-#bindiff_DEPENDENCIES = libatire_core.la
+#bindiff_LDADD = $(ATIRE_API_LIB)
+#bindiff_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #term_frequencies_SOURCES = $(TOOLDIR)/term_frequencies.c
 #term_frequencies_LDFLAGS = -rdynamic
-#term_frequencies_LDADD = ${ATIRE_API_LIBS}
-#term_frequencies_DEPENDENCIES = libatire_core.la
+#term_frequencies_LDADD = $(ATIRE_API_LIB)
+#term_frequencies_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #topic_tree_SOURCES = $(TOOLDIR)/topic_tree.c
 #topic_tree_LDFLAGS = -rdynamic
-#topic_tree_LDADD = ${ATIRE_API_LIBS}
-#topic_tree_DEPENDENCIES = libatire_core.la
+#topic_tree_LDADD = $(ATIRE_API_LIB)
+#topic_tree_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #INEXqrels_to_run_SOURCES = $(TOOLDIR)/INEXqrels_to_run.c
 #INEXqrels_to_run_LDFLAGS = -rdynamic
-#INEXqrels_to_run_LDADD = ${ATIRE_API_LIBS}
-#INEXqrels_to_run_DEPENDENCIES = libatire_core.la
+#INEXqrels_to_run_LDADD = $(ATIRE_API_LIB)
+#INEXqrels_to_run_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #foltbl_to_aspt_SOURCES = $(TOOLDIR)/foltbl_to_aspt.c
 #foltbl_to_aspt_LDFLAGS = -rdynamic
-#foltbl_to_aspt_LDADD = ${ATIRE_API_LIBS}
-#foltbl_to_aspt_DEPENDENCIES = libatire_core.la
+#foltbl_to_aspt_LDADD = $(ATIRE_API_LIB)
+#foltbl_to_aspt_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #zipf_graph_SOURCES = $(TOOLDIR)/zipf_graph.c
 #zipf_graph_LDFLAGS = -rdynamic
-#zipf_graph_LDADD = ${ATIRE_API_LIBS}
-#zipf_graph_DEPENDENCIES = libatire_core.la
+#zipf_graph_LDADD = $(ATIRE_API_LIB)
+#zipf_graph_DEPENDENCIES = $(ATIRE_CORE_LIB)
 #
 #test_stop_SOURCES = $(TOOLDIR)/test_stop.c \
 #				$(SRCDIR)/stop_word.c \
 #				$(SRCDIR)/str.c
 #test_stop_CFLAGS = $(AM_CFLAGS)
-#
-##################################################################################
-##                               LINK-THE-WIKI
-##################################################################################
-#
-#link_extract_SOURCES = $(LTWDIR)/link_extract.c
-##link_extract_LDFLAGS = -rdynamic
-#link_extract_LDFLAGS = -static
-#link_extract_LDADD = ${ATIRE_API_LIBS}
-#link_extract_DEPENDENCIES = libatire_core.la
-#
-#link_index_SOURCES = $(LTWDIR)/link_index.c
-##link_index_LDFLAGS = -rdynamic
-#link_index_LDFLAGS = -static
-#link_index_LDADD = ${ATIRE_API_LIBS}
-#link_index_DEPENDENCIES = libatire_core.la
-#
-#link_this_SOURCES = $(LTWDIR)/link_this.c
-##link_this_LDFLAGS = -rdynamic
-#link_this_LDFLAGS = -static
-#link_this_LDADD = ${ATIRE_API_LIBS}
-#link_this_DEPENDENCIES = libatire_core.la
-#
-#link_index_merge_SOURCES = $(LTWDIR)/link_index_merge.c
-#link_index_merge_LDFLAGS = -rdynamic
-#link_index_merge_LDADD = ${ATIRE_API_LIBS}
-#link_index_merge_DEPENDENCIES = libatire_core.la
-#
-#link_extract_pass2_SOURCES = $(LTWDIR)/link_extract_pass2.c
-##link_extract_pass2_LDFLAGS = -rdynamic
-#link_extract_pass2_LDFLAGS = -static
-#link_extract_pass2_LDADD = ${ATIRE_API_LIBS}
-#link_extract_pass2_DEPENDENCIES = libatire_core.la
-#
-#link_length_correlate_SOURCES = $(LTWDIR)/link_length_correlate.c
-#link_length_correlate_LDFLAGS = -rdynamic
-#link_length_correlate_LDADD = ${ATIRE_API_LIBS}
-#link_length_correlate_DEPENDENCIES = libatire_core.la
-#
-#remove_head_SOURCES = $(LTWDIR)/remove_head.c
-#remove_head_LDFLAGS = -rdynamic
-#remove_head_LDADD = ${ATIRE_API_LIBS}
-#remove_head_DEPENDENCIES = libatire_core.la
 #
