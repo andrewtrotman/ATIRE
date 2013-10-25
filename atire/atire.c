@@ -332,7 +332,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		else if (strncmp(command, ".get ", 5) == 0)
 			{
 			*document_buffer = '\0';
-//			if ((current_document_length = length_of_longest_document) != 0)
+			if ((current_document_length = length_of_longest_document) != 0)
 				{
 				atire->get_document(document_buffer, &current_document_length, atoll(command + 5));
 
