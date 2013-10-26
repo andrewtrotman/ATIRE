@@ -478,71 +478,77 @@ for (param = first_param; param < argc; param++)
 	stats.add_disk_input_time(stats.stop_timer(now));
 #endif
 
-	while (current_file != NULL && current_file->file != NULL)
+	while (current_file != NULL)
 		{
 		/*
-			How much data do we have?
-		*/
-		files_that_match++;
-		doc++;
-		bytes_indexed += current_file->length;
+		 	 It could be an empty file without any text (content)
+		 */
+		if (current_file->file != NULL)
+			{
+			/*
+				How much data do we have?
+			*/
+			files_that_match++;
+			doc++;
+			bytes_indexed += current_file->length;
 
-		/*
-			Report
-		*/
-		if (doc % param_block.reporting_frequency == 0 && doc != last_report)
-			report(last_report = doc, index, &stats, bytes_indexed);
-
-		/*
-			Index, this call returns the number of terms we found in the document
-		*/
-		now = stats.start_timer();
+			/*
+				Report
+			*/
+			if (doc % param_block.reporting_frequency == 0 && doc != last_report)
+				report(last_report = doc, index, &stats, bytes_indexed);
 	
-//printf("INDEX:%s\n", current_file->filename);
+			/*
+				Index, this call returns the number of terms we found in the document
+			*/
+			now = stats.start_timer();
+
+			//printf("INDEX:%s\n", current_file->filename);
 
 #ifdef PARALLEL_INDEXING_DOCUMENTS
-		index->add_indexed_document(current_file->index, doc);
-		delete current_file->index;
-		terms_in_document = current_file->terms;
+			index->add_indexed_document(current_file->index, doc);
+			delete current_file->index;
+			terms_in_document = current_file->terms;
 #else
-		terms_in_document = document_indexer->index_document(index, stemmer, param_block.segmentation, readability, doc, current_file->file);
+			terms_in_document = document_indexer->index_document(index, stemmer, param_block.segmentation, readability, doc, current_file->file);
 #endif
-		stats.add_indexing_time(stats.stop_timer(now));
+			stats.add_indexing_time(stats.stop_timer(now));
 
-		if (terms_in_document == 0)
-			{
-//			puts(current_file->filename);
-			/*
-				pretend we never saw the document
-			*/
-			doc--;
-			}
-		else
-			{
-			if (pregen)
-				pregen->process_document(doc - 1, current_file->filename);
-
-			/*
-				Store the document in the repository.
-			*/
-			if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+			if (terms_in_document == 0)
 				{
+	//			puts(current_file->filename);
 				/*
-				 * the following code is copied from from the directory_iterator_compressor
-				 * it may be better to have it refactored to include a compressor in the base class (i.e. ANT_directory_iterator)
-				 */
-				current_file->compressed = new (std::nothrow) char [(size_t)(compressed_size = factory_text->space_needed_to_compress((unsigned long)current_file->length + 1))];		// +1 to include the '\0'
-				if (factory_text->compress(current_file->compressed, &compressed_size, current_file->file, (unsigned long)(current_file->length + 1)) == NULL)
-					exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
-				current_file->compressed_length = compressed_size;
-				index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
-				delete [] current_file->compressed;
+					pretend we never saw the document
+				*/
+				doc--;
 				}
-//			puts(current_file->filename);
-			id_list.puts(strip_space_inplace(current_file->filename));
+			else
+				{
+				if (pregen)
+					pregen->process_document(doc - 1, current_file->filename);
+
+				/*
+					Store the document in the repository.
+				*/
+				if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+					{
+					/*
+					 * the following code is copied from from the directory_iterator_compressor
+					 * it may be better to have it refactored to include a compressor in the base class (i.e. ANT_directory_iterator)
+					 */
+					current_file->compressed = new (std::nothrow) char [(size_t)(compressed_size = factory_text->space_needed_to_compress((unsigned long)current_file->length + 1))];		// +1 to include the '\0'
+					if (factory_text->compress(current_file->compressed, &compressed_size, current_file->file, (unsigned long)(current_file->length + 1)) == NULL)
+						exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
+					current_file->compressed_length = compressed_size;
+					index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
+					delete [] current_file->compressed;
+					}
+	//			puts(current_file->filename);
+				id_list.puts(strip_space_inplace(current_file->filename));
+				}
+			delete [] current_file->file;
+			delete [] current_file->filename;
 			}
-		delete [] current_file->file;
-		delete [] current_file->filename;
 
 		/*
 			Get the next file
