@@ -26,10 +26,10 @@
 
 #ifdef IMPACT_HEADER
 long ANT_version = 0x0004;		// version number in BCD
-char *ANT_version_string = "ATIRE Version 0.4 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2012 Andrew Trotman, University of Otago";
+char *ANT_version_string = "ATIRE Version 0.4 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2013 Andrew Trotman, University of Otago";
 #else
 long ANT_version = 0x0003;		// version number in BCD
-char *ANT_version_string = "ATIRE Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2012 Andrew Trotman, University of Otago";
+char *ANT_version_string = "ATIRE Version 0.3 alpha (" BITNESS "-bit" DEBUGNESS PURIFYNESS")\nWritten (w) 2008-2013 Andrew Trotman, University of Otago";
 #endif
 
 

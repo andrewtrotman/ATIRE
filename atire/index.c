@@ -78,32 +78,30 @@ stats->print_elapsed_time();
 }
 
 #ifndef ATIRE_LIBRARY
-
-/*
-	MAIN()
-	------
-*/
-int main(int argc, char *argv[])
-{
-return atire_index(argc, argv);
-}
-
+	/*
+		MAIN()
+		------
+	*/
+	int main(int argc, char *argv[])
+	{
+	return atire_index(argc, argv);
+	}
 #else
-
-// do nothing
-int atire_exit(int errno) {
+	/*
+		ATIRE_EXIT()
+		------------
+	*/
+	int atire_exit(int errno)
+	{
 	return errno;
-}
-
-#define exit atire_exit
-
+	}
+	#define exit atire_exit
 #endif
 
 /*
 	ATIRE_INDEX()
 	-------------
-	for the simplicity of JNI calling
-	options are separated with +
+	For the simplicity of JNI calling options are separated with +
 */
 int atire_index(char *options)
 {
@@ -112,6 +110,8 @@ char **argv, **file_list;
 char *token;
 size_t total_length = (options ? strlen(options) : 0) + 7;
 char *copy, *copy_start;
+int argc = 0;
+int result;
 
 copy = copy_start = new char[total_length];
 
@@ -119,32 +119,34 @@ memset(copy, 0, sizeof(copy));
 
 memcpy(copy, "index+", 6);
 copy += 6;
-if (options) {
+if (options)
+	{
 	memcpy(copy, options, strlen(options));
 	copy += strlen(options);
-}
+	}
 *copy = '\0';
 
 argv = file_list = new char *[total_length];
-int argc = 0;
 token = strtok(copy_start, seperators);
 
 #ifdef DEBUG
 	fprintf(stderr, "Start indexing with options: %s\n", options);
 #endif
-for (; token != NULL; token = strtok(NULL, seperators))
+while (token != NULL)
 	{
 #ifdef DEBUG
 	fprintf(stderr, "%s ", token);
 #endif
 	*argv++ = token;
-	++argc;
+	argc++;
+	token = strtok(NULL, seperators);
 	}
 #ifdef DEBUG
 	fprintf(stderr, "\n");
 #endif
 *argv = NULL;
-int result = atire_index(argc, file_list);
+result = atire_index(argc, file_list);
+
 delete [] copy;
 delete [] file_list;
 
@@ -174,7 +176,7 @@ ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL,
 ANT_directory_iterator *dir_scrubber = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 #ifdef PARALLEL_INDEXING
-ANT_directory_iterator_multiple *parallel_disk;
+	ANT_directory_iterator_multiple *parallel_disk;
 #endif
 ANT_stem *stemmer = NULL;
 ANT_pregens_writer *pregen = NULL;
@@ -444,20 +446,17 @@ for (param = first_param; param < argc; param++)
 
 	stats.add_disk_input_time(stats.stop_timer(now));
 
-	if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
-		{
-		factory_text = new ANT_compression_text_factory;
-		factory_text->set_scheme(param_block.document_compression_scheme);
-		}
-	else
-		factory_text = NULL;
-
 #ifdef PARALLEL_INDEXING
 	parallel_disk->add_iterator(source);
 	}
 	disk = parallel_disk;
-	if (factory_text != null)
+
+	if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
+		{
+		factory_text = new ANT_compression_text_factory;
+		factory_text->set_scheme(param_block.document_compression_scheme);
 		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text, ANT_directory_iterator::READ_FILE);
+		}
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
 		disk = new ANT_directory_iterator_preindex(disk, param_block.segmentation, param_block.readability_measure, param_block.stemmer, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
@@ -532,14 +531,6 @@ for (param = first_param; param < argc; param++)
 				*/
 				if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
 					{
-					/*
-					 * the following code is copied from from the directory_iterator_compressor
-					 * it may be better to have it refactored to include a compressor in the base class (i.e. ANT_directory_iterator)
-					 */
-					current_file->compressed = new (std::nothrow) char [(size_t)(compressed_size = factory_text->space_needed_to_compress((unsigned long)current_file->length + 1))];		// +1 to include the '\0'
-					if (factory_text->compress(current_file->compressed, &compressed_size, current_file->file, (unsigned long)(current_file->length + 1)) == NULL)
-						exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
-					current_file->compressed_length = compressed_size;
 					index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
 					delete [] current_file->compressed;
 					}
