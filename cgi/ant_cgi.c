@@ -65,6 +65,16 @@ printf("</li><br>");
 }
 
 /*
+	OUTPUT_MISSING_QUERY_STRING_ERROR_INFO()
+	-------------------------------------------------------------------------
+	we don't need to exit the program even if the query string is missing
+*/
+void output_missing_query_string_error_info() {
+	puts("Content-Type: text/plain;charset=UTF-8\n\n");
+	puts("MISSING_QUERY_STRING:CGI must be called via a web server");
+}
+
+/*
 	MAIN()
 	------
 */
@@ -78,12 +88,18 @@ char *start, *ch, *original_query_string, *query_string = getenv("QUERY_STRING")
 const char *result;
 
 if (query_string == NULL)
-	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
+	{
+	output_missing_query_string_error_info();
+	return 0;
+	}
 
 query_string = strchr(query_string, '=');
 
 if (query_string == NULL)
-	exit(puts("MISSING_QUERY_STRING:CGI must be called via a web server"));
+	{
+	output_missing_query_string_error_info();
+	return 0;
+	}
 
 original_query_string = query_string = strnew(query_string + 1);
 start = strnew(query_string); // set up a copy for later
