@@ -533,6 +533,11 @@ for (param = first_param; param < argc; param++)
 				if (param_block.document_compression_scheme != ANT_indexer_param_block::NONE)
 					{
 					/*
+					   if parallel indexing macro is set and "-C" option is set too, text will be compressed when being retrieved
+					   so we don't need to compress it again, and the following code is for the situation where parallel indexing is not set
+					 */
+#ifndef PARALLEL_INDEXING
+					/*
 					 * the following code is copied from from the directory_iterator_compressor
 					 * it may be better to have it refactored to include a compressor in the base class (i.e. ANT_directory_iterator)
 					 */
@@ -540,8 +545,10 @@ for (param = first_param; param < argc; param++)
 					if (factory_text->compress(current_file->compressed, &compressed_size, current_file->file, (unsigned long)(current_file->length + 1)) == NULL)
 						exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
 					current_file->compressed_length = compressed_size;
+#endif
 					index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
-					delete [] current_file->compressed;
+					if (current_file->compressed)
+						delete [] current_file->compressed;
 					}
 	//			puts(current_file->filename);
 				id_list.puts(strip_space_inplace(current_file->filename));
