@@ -112,6 +112,15 @@ int check_postings = 1;
 #endif
 
 /*
+	ABOUT()
+	-------
+*/
+void about(char *exename)
+{
+exit(printf("Usage:%s [index.aspt] [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>] [-l<PrintOnePostingPerLine>]\n", exename));
+}
+
+/*
 	MAIN()
 	------
 */
@@ -122,17 +131,23 @@ ANT_compressable_integer *raw;
 long long max = 0;
 long long postings_list_size = 100 * 1024 * 1024;
 long long raw_list_size = 100 * 1024 * 1024;
+long long global_trim;
 unsigned char *postings_list = NULL;
+long param, param_filenames = 0, filename = 0;
 char *term, *first_term, *last_term;
-ANT_memory memory;
-ANT_search_engine search_engine(&memory);
-search_engine.open(argv[1]);
-long long global_trim = search_engine.get_global_trim_postings_k();
-ANT_btree_iterator iterator(&search_engine);
 ANT_search_engine_btree_leaf leaf;
 ANT_compression_factory factory;
 long metaphone, print_wide, print_postings, one_postings_per_line;
-long param;
+ANT_memory memory;
+ANT_search_engine search_engine(&memory);
+
+for (param = 1; param < argc; param++)
+	if (*argv[param] != '-')
+		filename = param;
+search_engine.open(filename == 0 ? "index.aspt" : argv[1]);
+
+global_trim = search_engine.get_global_trim_postings_k();
+ANT_btree_iterator iterator(&search_engine);
 
 #ifdef IMPACT_HEADER
 	quantum_count_type the_quantum_count;
@@ -145,7 +160,8 @@ long param;
 first_term = last_term = NULL;
 print_postings = print_wide = metaphone = one_postings_per_line = FALSE;
 
-for (param = 2; param < argc; param++)
+param_filenames = 0;
+for (param = 1; param < argc; param++)
 	{
 	if (strcmp(argv[param], "-s") == 0)
 		first_term = argv[++param];
@@ -167,8 +183,18 @@ for (param = 2; param < argc; param++)
 		print_postings = TRUE;
 	else if (strcmp(argv[param], "-l") == 0)
 		one_postings_per_line = TRUE;
+	else if (strcmp(argv[param], "-h") == 0)
+		about(argv[0]);
+	else if (strcmp(argv[param], "-?") == 0)
+		about(argv[0]);
+	else if (*argv[param] == '-')
+		about(argv[0]);
 	else
-		exit(printf("Usage:%s [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>] [-l<PrintOnePostingPerLine>]\n", argv[0]));
+		{
+		param_filenames++;
+		if (param_filenames > 1)
+			about(argv[0]);
+		}
 	}
 
 postings_list = (unsigned char *)malloc((size_t)postings_list_size);
