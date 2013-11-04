@@ -456,7 +456,7 @@ for (param = first_param; param < argc; param++)
 	parallel_disk->add_iterator(source);
 	}
 	disk = parallel_disk;
-	if (factory_text != null)
+	if (factory_text != NULL)
 		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text, ANT_directory_iterator::READ_FILE);
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
