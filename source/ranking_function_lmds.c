@@ -56,9 +56,11 @@ current = quantum_parameters->the_quantum;
 while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
+
 	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
-		rsv += query_length * log(u / ((double)document_lengths[(size_t)docid] + u));
-	quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (rsv + query_length * log(u / ((double)document_lengths[(size_t)docid] + u))), maximum_collection_rsv, minimum_collection_rsv));
+	else
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
 }
 
