@@ -36,6 +36,7 @@
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
 #include "ranking_function_lmd.h"
+#include "ranking_function_lmds.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
@@ -436,6 +437,7 @@ if (search_engine->quantized())
 		{
 		case ANT_ANT_param_block::BM25:
 		case ANT_ANT_param_block::LMD:
+		case ANT_ANT_param_block::LMDS:
 		case ANT_ANT_param_block::LMJM:
 		case ANT_ANT_param_block::BOSE_EINSTEIN:
 		case ANT_ANT_param_block::DIVERGENCE:
@@ -444,6 +446,10 @@ if (search_engine->quantized())
 		case ANT_ANT_param_block::DLH13:
 		case ANT_ANT_param_block::DPH:
 		case ANT_ANT_param_block::DFREE:
+		case ANT_ANT_param_block::DFI:
+		case ANT_ANT_param_block::DFIW:
+		case ANT_ANT_param_block::DFI_IDF:
+		case ANT_ANT_param_block::DFIW_IDF:
 			return 1;		// failure because we're a quantized ranking function and we don't have TF values in the index
 		}
 	}
@@ -467,6 +473,9 @@ switch (function)
 		break;
 	case ANT_ANT_param_block::LMD:
 		new_function = new ANT_ranking_function_lmd(search_engine, quantization, quantization_bits, p1);
+		break;
+	case ANT_ANT_param_block::LMDS:
+		new_function = new ANT_ranking_function_lmds(search_engine, quantization, quantization_bits, p1);
 		break;
 	case ANT_ANT_param_block::LMJM:
 		new_function = new ANT_ranking_function_lmjm(search_engine, quantization, quantization_bits, p1);
