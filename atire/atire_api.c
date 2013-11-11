@@ -954,7 +954,6 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 if (terms_in_query > MAX_ALLOWED_TERMS_IN_QUERY)
 	exit(printf("Exceeded the allowed number of %d terms per query\n", MAX_ALLOWED_TERMS_IN_QUERY));
 
-
 /*
 	Prepare an array structure for sorting
 */
