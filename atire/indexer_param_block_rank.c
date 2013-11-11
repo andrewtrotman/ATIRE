@@ -239,7 +239,7 @@ if (allowable & IMPACT)
 if (allowable & LMD)
 	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u = 6750] %s\n" , isdefault(LMD));
 if (allowable & LMDS)
-	printf("   lmds:<u>      Language Models with Dirichlet smoothing  (Petri et al), u=<u> [default u = 2500] %s\n" , isdefault(LMDS));
+	printf("   lmds:<u>     Language Models with Dirichlet smoothing (see Petri et al, ADCS 2013), u=<u> [default u = 2500] %s\n" , isdefault(LMDS));
 if (allowable & LMJM)
 	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l = 0.5] %s\n", isdefault(LMJM));
 if (allowable & READABLE)

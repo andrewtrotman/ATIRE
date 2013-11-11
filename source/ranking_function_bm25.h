@@ -8,6 +8,9 @@
 #include "ranking_function.h"
 #include "ranking_function_quantum_parameters.h"
 
+/*
+	Trained on the INEX Wikipedia Collection and the 2009 query set (k1=0.9, b=0.4)
+*/
 #define ANT_RANKING_FUNCTION_BM25_DEFAULT_K1  0.9
 #define ANT_RANKING_FUNCTION_BM25_DEFAULT_B   0.4
 

@@ -934,6 +934,7 @@ terms_in_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
 	terms_in_query++;
+
 	/*
 		Take the search term (as an ANT_string_pair) and convert into a string
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
@@ -947,6 +948,11 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 		can_sort = true;
 		}
 	}
+
+/*
+	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
+*/
+search_engine->results_list->set_term_count(terms_in_query);
 
 /*
    Check if the number of terms exceed the limit
@@ -1070,6 +1076,12 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	else
 		topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, topsig_globalstats->get_collection_length());
 	}
+
+/*
+	Tell the search engine how many terms are in the query.  Although this is used in Language Models, it's unlikely
+	to ever get used here.
+*/
+search_engine->results_list->set_term_count(terms_in_query);
 
 /*
 	Walk through the signature looking for +ve and -ve values as these are the
@@ -1230,6 +1242,11 @@ boolean_parser->set_thesaurus(expander_query);
 boolean_parser->parse(parsed_query, query);
 if (parsed_query->parse_error != ANT_query::ERROR_NONE)
 	return 0;
+
+/*
+	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
+*/
+search_engine->results_list->set_term_count(parsed_query->terms_in_query);
 
 /*
 	In the case of a purely disjunctive query (OR operators only) we can fall-back to the

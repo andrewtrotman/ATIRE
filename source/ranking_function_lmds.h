@@ -7,6 +7,9 @@
 
 #include "ranking_function.h"
 
+/*
+	u=2500 is in the Petri et al (ADCS 2013) paper, I have no idea where they got it from.
+*/
 #define ANT_RANKING_FUNCTION_LMDS_DEFAULT_U 2500.0
 
 /*
