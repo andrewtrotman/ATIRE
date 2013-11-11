@@ -45,7 +45,7 @@ ANT_compressable_integer *current;
 	where fqt is the number of times the term appears in the query, tdt is the number of times the term appears in the document,
 	|C| is the length of the collection (measured in terms) and Ft is the number of times t occurs in the collection.
 */
-query_length = accumulator->get_term_count();
+query_length = quantum_parameters->accumulator->get_term_count();
 query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
 
 idf = ((double)collection_length_in_terms / (double)quantum_parameters->term_details->global_collection_frequency);
