@@ -25,20 +25,39 @@
 void ANT_ranking_function_lmds::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
 long long docid;
-double idf, n;
-double left_hand_side, rsv;
+double rsv, idf, query_length, query_occurences;
 ANT_compressable_integer *current;
 
-n = 3.0;						// this is a hack and should be the length of the query
+/*
+	Each document gets a "prior" of:
+					 u
+   |q| * log -------
+	          |d| + u
+
+
+	where |q| is the length of the query, |d| is the length of the document, and u is a smoothing parameter (Petri et al. use 2500)
+	Then for each term (t in q^d)
+	
+	                 fdt   |C|
+	rsv = fqt * log (--- * --- + 1)
+	                  u     Ft
+
+	where fqt is the number of times the term appears in the query, tdt is the number of times the term appears in the document,
+	|C| is the length of the collection (measured in terms) and Ft is the number of times t occurs in the collection.
+*/
+query_length = 3.0; // this is a hack and should be the length of the query
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+
 idf = ((double)collection_length_in_terms / (double)quantum_parameters->term_details->global_collection_frequency);
-left_hand_side = log (1.0 + (quantum_parameters->prescalar * quantum_parameters->tf / u) * idf);
+rsv =	query_occurences * log((quantum_parameters->tf / u) * idf + 1.0);
 
 docid = -1;
 current = quantum_parameters->the_quantum;
 while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
-	rsv = left_hand_side - n * log(1.0 + ((double)document_lengths[(size_t)docid] / u));
+	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		rsv += query_length * log(u / ((double)document_lengths[(size_t)docid] + u));
 	quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
 }
@@ -71,7 +90,6 @@ ANT_compressable_integer *current, *end;
 	where fqt is the number of times the term appears in the query, tdt is the number of times the term appears in the document,
 	|C| is the length of the collection (measured in terms) and Ft is the number of times t occurs in the collection.
 */
-printf("LMDS");
 query_length = 3.0; // this is a hack and should be the length of the query
 query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
 
@@ -130,7 +148,6 @@ ANT_compressable_integer *current, *end;
 	where fqt is the number of times the term appears in the query, tdt is the number of times the term appears in the document,
 	|C| is the length of the collection (measured in terms) and Ft is the number of times t occurs in the collection.
 */
-printf("LMDS");
 current = impact_ordering;
 end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 
