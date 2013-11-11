@@ -30,7 +30,7 @@ ANT_compressable_integer *current;
 
 /*
 	Each document gets a "prior" of:
-					 u
+	             u
    |q| * log -------
 	          |d| + u
 
@@ -75,7 +75,7 @@ ANT_compressable_integer *current, *end;
 
 /*
 	Each document gets a "prior" of:
-					 u
+	             u
    |q| * log -------
 	          |d| + u
 
@@ -133,7 +133,7 @@ ANT_compressable_integer *current, *end;
 
 /*
 	Each document gets a "prior" of:
-					 u
+	             u
    |q| * log -------
 	          |d| + u
 
