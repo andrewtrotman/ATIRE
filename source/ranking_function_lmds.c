@@ -148,6 +148,10 @@ ANT_compressable_integer *current, *end;
 	where fqt is the number of times the term appears in the query, tdt is the number of times the term appears in the document,
 	|C| is the length of the collection (measured in terms) and Ft is the number of times t occurs in the collection.
 */
+
+query_length = 3.0; // this is a hack and should be the length of the query
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+
 current = impact_ordering;
 end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 
