@@ -1,77 +1,16 @@
-##############################################################
-#
-#          ANT *NIX README FILE  
-#
-###############################################################
+How to build ATIRE
+------------------
+ATIRE builds with the native compilers on Mac (Xcode), Linux (gcc), and Windows (Visual Studio).  The build process is the same in all cases.
 
-1 AUTOTOOLS
-  ---------
-To have autotools to handle the environment setting and libraries checking. Do:
-aclocal
-autoconf
-libtoolize
-touch NEWS README AUTHORS ChangeLog
-automake --add-missing
+First, get the source code:
 
-Alternatively, 
-./scripts/runautotools.sh
+> hg clone http://www.atire.org/hg/atire
 
+Second, build
 
-2 DEBUG BUILD AND RELEASE BUILD
-  -----------------------------
-mkdir -p build/debug
-mkdir -p build/release
+>make
 
+This should leave you with a numner of executable files in the bin directory. one of those tools, index, is the indexer.  Another, atire, is the search engine.
 
-2.1 COMPILING FOR DEBUG BUILD
-    -------------------------
-cd build/debug
-source ../../scripts/setdebugenv.bash
-../../configure
-
-2.2 COMPILING FOR RELEASE BUILD
-    -------------------------
-cd build/release
-../../configure
-
-The default build in autotools is to use -O2 flag
-
-2.3 COMPILING FOR DEBUG BUILD IN 32 BIT
-    -----------------------------------
-cd build/debug
-source ../../scripts/setdebug32env.bash
-../../configure
-
-3 NOTES
-  -----
-  The autotools will automatically handle the configuration for whether with ZLIB and BZ2LIB support or not 
-  
-4 PARALLEL INDEXING
-  to enable parallel indexing code
-  configure --with-pi
-  
-5 RUNNING ATIRE IN A DISTRIBUTED WAY
-
-The following instructions are directly from Fei (: )):
-
-For instance:
-Let's say I split the wsj collection into two pieces, wsj_head.xml and wxj_tail.xml
-they are in separate directories called "head" and "tail"
-
-
- cd into the directories, and create the index withindex -sa -N10000 -rtrec wsj_head.xml"
-> index -sa -N10000 -rtrec wsj_head.xml
-> index -sa -N10000 -rtrec wsj_tail.xml
-
-and then start the atire instances in both of the directories:
-> atire -sa -q:8000
-> cd ../tail
-> atire -sa -q:8001
-then start the broker:
-> atire_broker -q:8088 -s localhost:8000 localhost:8001
-then start the client to search:
-> atire_client -s localhost:8088
-
-you might have to install apache to get it work
-  
+Please contact us if you need help building or running ATIRE.
 
