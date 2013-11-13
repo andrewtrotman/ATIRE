@@ -10,6 +10,7 @@
 #ifdef _MSC_VER
 	#include <windows.h>
 	#define PATH_MAX MAX_PATH
+	#define strstr	strcasestr
 #else
 	#include <limits.h>
 #endif
@@ -32,6 +33,7 @@ protected:
 	long long read_buffer_used;
 	long asciiafy;
 	ANT_instream *source;
+	long auto_file_id;
 
 protected:
 	ANT_directory_iterator_object *read_entire_file(ANT_directory_iterator_object *object);
