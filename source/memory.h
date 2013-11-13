@@ -34,7 +34,9 @@ private:
 	long long used;
 	long long allocated;
 	long long block_size;
+#ifdef _MSC_VER
 	long has_large_pages;
+#endif
 	long long memory_ceiling;
 	size_t short_page_size, large_page_size;
 

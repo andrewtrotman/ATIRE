@@ -742,7 +742,7 @@ char *copy, *copy_start;
 
 copy = copy_start = new char[total_length];
 
-memset(copy, 0, sizeof(copy));
+memset(copy, 0, sizeof(*copy) * total_length);
 
 memcpy(copy, "atire+", 6);
 copy += 6;

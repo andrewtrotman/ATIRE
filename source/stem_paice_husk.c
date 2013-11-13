@@ -65,8 +65,11 @@ int ANT_stem_paice_husk::tblindex(char *s)
 {
 int x;
 
-for (x = 0; *(s + x) != '\0'; x++); /* Read to end of string */
-	x--; /* Go back one letter to be at end of word */
+x = 0;
+while (*(s + x) != '\0')
+	x++;	 /* Read to end of string */
+
+x--; /* Go back one letter to be at end of word */
 
 return (*(s + x) - 'a'); /* Return number from 0..25 */
 }

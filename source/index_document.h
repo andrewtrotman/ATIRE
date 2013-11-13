@@ -21,6 +21,7 @@ protected:
 
 public:
 	ANT_index_document(long stop_mode = 0) { stopword_mode = stop_mode; }
+	virtual ~ANT_index_document() {}
 
 	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc_id, unsigned char *file);
 	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc_id, char *file) { return index_document(indexer, stemmer, segmentation, readability, doc_id, (unsigned char *)file); }

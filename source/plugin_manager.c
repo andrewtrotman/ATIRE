@@ -96,7 +96,7 @@ void ANT_plugin_manager::load_library(const char *library_file, int id)
 			fprintf(stderr, "found plugin(%s)\n", library_file);
 			if (plugin_factory[plugin_ids[id]].maker == NULL)
 				{
-				fprintf(stderr, "this library wasn't made as a ANT plugin, please make sure WITH_ANT_PLUGIN macro is defined\n", library_file);
+				fprintf(stderr, "this library(%s) wasn't made as a ANT plugin, please make sure WITH_ANT_PLUGIN macro is defined\n", library_file);
 				return;
 				}
 			plugin_factory[plugin_ids[id]].plugin = plugin_factory[plugin_ids[id]].maker();

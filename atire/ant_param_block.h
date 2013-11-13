@@ -108,6 +108,7 @@ public:
 	virtual char* swap_doclist_filename(char * filename);
 
 	virtual void usage(void);
+	using ANT_indexer_param_block_stem::help;
 	virtual void help(void);
 	using ANT_indexer_param_block_rank::help;
 	virtual long parse(void);

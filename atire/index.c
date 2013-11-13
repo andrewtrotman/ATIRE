@@ -115,7 +115,7 @@ char *copy, *copy_start;
 
 copy = copy_start = new char[total_length];
 
-memset(copy, 0, sizeof(copy));
+memset(copy, 0, sizeof(*copy) * total_length);
 
 memcpy(copy, "index+", 6);
 copy += 6;
@@ -182,7 +182,6 @@ char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
 ANT_index_document *document_indexer;
 ANT_compression_text_factory *factory_text;
-unsigned long compressed_size;
 
 if (argc < 2)
 	param_block.usage();
@@ -537,6 +536,8 @@ for (param = first_param; param < argc; param++)
 					   so we don't need to compress it again, and the following code is for the situation where parallel indexing is not set
 					 */
 #ifndef PARALLEL_INDEXING
+					unsigned long compressed_size;
+
 					/*
 					 * the following code is copied from from the directory_iterator_compressor
 					 * it may be better to have it refactored to include a compressor in the base class (i.e. ANT_directory_iterator)

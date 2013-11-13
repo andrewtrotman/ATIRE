@@ -23,7 +23,7 @@ void ANT_ranking_function_bose_einstein::relevance_rank_one_quantum(ANT_ranking_
 {
 long long docid;
 double rsv, left, right, tf_prime;
-ANT_compressable_integer *current, *end;
+ANT_compressable_integer *current;
 
 left = log(1.0 + (double)quantum_parameters->term_details->global_collection_frequency / (double)documents);
 right = log(1.0 + (double)documents / (double)quantum_parameters->term_details->global_collection_frequency);

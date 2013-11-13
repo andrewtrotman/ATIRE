@@ -110,10 +110,10 @@ USE_SNOWBALL := 1
 ###############################################################################
 
 ifeq ($(USE_GCC), 1)
-	CC = @g++
+	CC = @g++ 
 	PUT_FILENAME = @echo $<
 	ifeq ($(USE_GCC_VERBOSE), 1)
-		CC = g++
+		CC = g++ 
 		#CC = /opt/local/bin/g++-mp-4.4
 		PUT_FILENAME =
 	endif
@@ -172,7 +172,7 @@ endif
 
 # common flags
 LDFLAGS += -ldl
-CFLAGS += -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
+CFLAGS += -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 

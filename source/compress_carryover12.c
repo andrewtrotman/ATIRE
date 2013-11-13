@@ -276,7 +276,7 @@ else
 */
 long long ANT_compress_carryover12::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *a, long long n)
 {
-uint32_t max_bits;
+int32_t max_bits;
 uint32_t __values[32];			// can't compress integers larger than 2^28 so they will all fit in a uint32_t
 uint32_t __bits[32];
 int64_t i;

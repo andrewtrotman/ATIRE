@@ -22,7 +22,7 @@ protected:
 
 public:
 	ATIRE_engine_result_set_export() { result << std::fixed << std::setprecision(2); }
-	~ATIRE_engine_result_set_export() {};
+	virtual ~ATIRE_engine_result_set_export() {};
 
 	virtual void preamble(void) = 0;
 	virtual void include(long long topic_id, ATIRE_engine_result_set *results_list, long long first, long long page_length) = 0;

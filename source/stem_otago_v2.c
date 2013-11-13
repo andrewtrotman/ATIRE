@@ -94,7 +94,7 @@ if (buf_m >= 1 && strncmp(buffer + length - 1, "s", 4) == 0 && length >= 3)
 	length -= 1;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 3, "dar", 4) == 0 && length >= 5)
+else if (strncmp(buffer + length - 3, "dar", 4) == 0 && length >= 5)
 	{
 	strncpy(buffer + length - 3, "ater", 4);
 	buffer[length - -1] = '\0';
@@ -109,7 +109,7 @@ if (buf_m >= 4 && strncmp(buffer + length - 4, "enet", 4) == 0 && length >= 6)
 	length -= 3;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 2, "ya", 4) == 0 && length >= 4)
+else if (strncmp(buffer + length - 2, "ya", 4) == 0 && length >= 4)
 	{
 	strncpy(buffer + length - 2, "ros", 4);
 	buffer[length - -1] = '\0';
@@ -130,7 +130,7 @@ else if (buf_m >= 1 && strncmp(buffer + length - 2, "ce", 4) == 0 && length >= 4
 	length += 1;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 1, "c", 4) == 0 && length >= 3)
+else if (strncmp(buffer + length - 1, "c", 4) == 0 && length >= 3)
 	{
 	buffer[length - 1] = '\0';
 	length -= 1;
@@ -150,7 +150,7 @@ else if (buf_m >= 3 && strncmp(buffer + length - 1, "n", 4) == 0 && length >= 3)
 	buf_m = m(buffer, length - 1);
 	}
 
-if (buf_m >= 0 && strncmp(buffer + length - 2, "ki", 4) == 0 && length >= 4)
+if (strncmp(buffer + length - 2, "ki", 4) == 0 && length >= 4)
 	{
 	strncpy(buffer + length - 2, "gby", 4);
 	buffer[length - -1] = '\0';
@@ -171,13 +171,13 @@ if (buf_m >= 4 && strncmp(buffer + length - 2, "na", 4) == 0 && length >= 4)
 	length += 2;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 3, "bco", 4) == 0 && length >= 5)
+else if (strncmp(buffer + length - 3, "bco", 4) == 0 && length >= 5)
 	{
 	buffer[length - 3] = '\0';
 	length -= 3;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 4, "alur", 4) == 0 && length >= 6)
+else if (strncmp(buffer + length - 4, "alur", 4) == 0 && length >= 6)
 	{
 	strncpy(buffer + length - 4, "s", 4);
 	buffer[length - 3] = '\0';
@@ -210,7 +210,7 @@ else if (buf_m >= 3 && strncmp(buffer + length - 4, "welt", 4) == 0 && length >=
 	length -= 3;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 1, "w", 4) == 0 && length >= 3)
+else if (strncmp(buffer + length - 1, "w", 4) == 0 && length >= 3)
 	{
 	strncpy(buffer + length - 1, "gia", 4);
 	buffer[length - -2] = '\0';
@@ -231,7 +231,7 @@ else if (buf_m >= 3 && strncmp(buffer + length - 2, "ri", 4) == 0 && length >= 4
 	length -= 1;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 4, "ioco", 4) == 0 && length >= 6)
+else if (strncmp(buffer + length - 4, "ioco", 4) == 0 && length >= 6)
 	{
 	buffer[length - 4] = '\0';
 	length -= 4;
@@ -243,7 +243,7 @@ else if (buf_m >= 4 && strncmp(buffer + length - 3, "mer", 4) == 0 && length >= 
 	length -= 3;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 2, "uk", 4) == 0 && length >= 4)
+else if (strncmp(buffer + length - 2, "uk", 4) == 0 && length >= 4)
 	{
 	strncpy(buffer + length - 2, "ia", 4);
 	buffer[length - 0] = '\0';
@@ -276,14 +276,14 @@ else if (buf_m >= 4 && strncmp(buffer + length - 4, "ongo", 4) == 0 && length >=
 	buf_m = m(buffer, length - 1);
 	}
 
-if (buf_m >= 0 && strncmp(buffer + length - 2, "ya", 4) == 0 && length >= 4)
+if (strncmp(buffer + length - 2, "ya", 4) == 0 && length >= 4)
 	{
 	strncpy(buffer + length - 2, "kas", 4);
 	buffer[length - -1] = '\0';
 	length += 1;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 1, "y", 4) == 0 && length >= 3)
+else if (strncmp(buffer + length - 1, "y", 4) == 0 && length >= 3)
 	{
 	strncpy(buffer + length - 1, "i", 4);
 	buffer[length - 0] = '\0';
@@ -304,7 +304,7 @@ if (buf_m >= 3 && strncmp(buffer + length - 1, "n", 4) == 0 && length >= 3)
 	buf_m = m(buffer, length - 1);
 	}
 
-if (buf_m >= 0 && strncmp(buffer + length - 2, "ki", 4) == 0 && length >= 4)
+if (strncmp(buffer + length - 2, "ki", 4) == 0 && length >= 4)
 	{
 	strncpy(buffer + length - 2, "gby", 4);
 	buffer[length - -1] = '\0';
@@ -326,13 +326,13 @@ if (buf_m >= 4 && strncmp(buffer + length - 2, "na", 4) == 0 && length >= 4)
 	length += 2;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 3, "miy", 4) == 0 && length >= 5)
+else if (strncmp(buffer + length - 3, "miy", 4) == 0 && length >= 5)
 	{
 	buffer[length - 3] = '\0';
 	length -= 3;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 4, "alur", 4) == 0 && length >= 6)
+else if (strncmp(buffer + length - 4, "alur", 4) == 0 && length >= 6)
 	{
 	strncpy(buffer + length - 4, "s", 4);
 	buffer[length - 3] = '\0';
@@ -346,7 +346,7 @@ else if (buf_m >= 2 && strncmp(buffer + length - 3, "ovo", 4) == 0 && length >= 
 	length += 1;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 4, "wahj", 4) == 0 && length >= 6)
+else if (strncmp(buffer + length - 4, "wahj", 4) == 0 && length >= 6)
 	{
 	strncpy(buffer + length - 4, "nes", 4);
 	buffer[length - 1] = '\0';
@@ -380,7 +380,7 @@ else if (buf_m >= 4 && strncmp(buffer + length - 1, "k", 4) == 0 && length >= 3)
 	length += 3;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 1, "s", 4) == 0 && length >= 3)
+else if (strncmp(buffer + length - 1, "s", 4) == 0 && length >= 3)
 	{
 	buffer[length - 1] = '\0';
 	length -= 1;
@@ -401,7 +401,7 @@ else if (buf_m >= 2 && strncmp(buffer + length - 2, "ry", 4) == 0 && length >= 4
 	length -= 1;
 	buf_m = m(buffer, length - 1);
 	}
-else if (buf_m >= 0 && strncmp(buffer + length - 4, "rian", 4) == 0 && length >= 6)
+else if (strncmp(buffer + length - 4, "rian", 4) == 0 && length >= 6)
 	{
 	strncpy(buffer + length - 4, "n", 4);
 	buffer[length - 3] = '\0';
@@ -415,7 +415,7 @@ else if (buf_m >= 2 && strncmp(buffer + length - 1, "e", 4) == 0 && length >= 3)
 	buf_m = m(buffer, length - 1);
 	}
 
-if (buf_m >= 0 && strncmp(buffer + length - 3, "lit", 4) == 0 && length >= 5)
+if (strncmp(buffer + length - 3, "lit", 4) == 0 && length >= 5)
 	{
 	strncpy(buffer + length - 3, "ns", 4);
 	buffer[length - 1] = '\0';

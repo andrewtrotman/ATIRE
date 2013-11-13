@@ -504,8 +504,6 @@ unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *
 	if (term_details->local_document_frequency <= 2)
 		{
 		ANT_compressable_integer *postings;
-		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
-		ANT_compressable_integer impact_two = term_details->postings_length;
 
 		// first byte of a quantum is the compression scheme, no compression for special compression
 		*destination = 0;
@@ -554,7 +552,6 @@ unsigned char *ANT_search_engine::get_impact_header(ANT_search_engine_btree_leaf
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
 		{
-		ANT_compressable_integer *postings;
 		quantum_count_type the_quantum_count = 1;
 		beginning_of_the_postings_type beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
 		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
@@ -866,7 +863,6 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	if (verify != NULL)
 		{
 		now = stats->start_timer();
-		long long end = term_details->impacted_length;
 
 		/*
 		 Decompress the header

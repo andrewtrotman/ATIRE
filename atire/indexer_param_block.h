@@ -61,8 +61,9 @@ public:
 	ANT_indexer_param_block(int argc, char *argv[]);
 	virtual ~ANT_indexer_param_block() {}
 	virtual void usage(void);
-	virtual void help(void);
+	using ANT_indexer_param_block_stem::help;
 	using ANT_indexer_param_block_rank::help;
+	virtual void help(void);
 	virtual long parse(void);
 } ;
 

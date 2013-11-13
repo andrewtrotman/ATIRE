@@ -91,7 +91,7 @@ long long ANT_instream_deflate::read(unsigned char *data, long long size)
 		}
 	while (state == Z_OK);
 
-	printf("ANT_instream_deflate::read() failure trying to decompress (zlib reports:%lld)\n", state);
+	printf("ANT_instream_deflate::read() failure trying to decompress (zlib reports:%ld)\n", state);
 	return -1;			// something has gone wrong
 #else
 	return -1;
