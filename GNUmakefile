@@ -172,7 +172,7 @@ endif
 
 # common flags
 LDFLAGS += -ldl
-CFLAGS += -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
+CFLAGS +=  -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 
