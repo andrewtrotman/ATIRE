@@ -97,8 +97,8 @@ insert_docno(bottom);
 long ANT_memory_index_hash_node::append_docno(long long docno, ANT_postings_piece **buffer)
 {
 unsigned char holding_pen[16];
-long remain, needed = compress_bytes_needed(docno);
-size_t new_docid_node_length;
+long needed = compress_bytes_needed(docno);
+size_t new_docid_node_length, remain;
 ANT_postings_piece *underlying = *buffer;
 
 if (docid_node_used + needed > docid_node_length)
@@ -170,7 +170,7 @@ long ANT_memory_index_hash_node::bytes_needed_for_early_doc_buffer(void)
 {
 size_t posting;
 long needed;
-long long end;
+unsigned long long end;
 
 needed = 0;
 end = postings_held_in_vocab < document_frequency ? postings_held_in_vocab : document_frequency;

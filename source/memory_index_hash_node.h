@@ -83,7 +83,7 @@ public:
 private:
 	inline long compress_bytes_needed(long long val);
 	inline void compress_into(unsigned char *dest, long long docno);
-	ANT_postings_piece *new_postings_piece(long length_in_bytes);
+	ANT_postings_piece *new_postings_piece(size_t length_in_bytes);
 	long insert_docno(long long docno, unsigned short initial_term_frequency = 1);
 	inline long append_docno(long long docno, ANT_postings_piece **buffer);
 	long copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned short *term_frequency_buffer);
@@ -103,7 +103,7 @@ public:
 	ANT_MEMORY_INDEX_HASH_NODE::NEW_POSTINGS_PIECE()
 	------------------------------------------------
 */
-inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(long length_in_bytes)
+inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(size_t length_in_bytes)
 {
 ANT_postings_piece *object;
 
