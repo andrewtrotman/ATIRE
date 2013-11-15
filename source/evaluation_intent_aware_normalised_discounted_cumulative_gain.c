@@ -115,7 +115,7 @@ ANT_relevant_document *current_doc, *first_doc;
 long long topic, subtopic, examine_docid, total_documents, relevant_documents, position, best_docid = -1;
 double max_score, current_score = 0;
 double *subtopicGain = NULL;
-long this_subtopic_position;
+long long this_subtopic_position;
 
 ANT_evaluation::set_lists(relevant_topic_list, relevant_topic_list_length);
 

@@ -162,7 +162,7 @@ if (preferred < 0)
 	}
 
 for (which = 0; which < number_of_techniques; which++)
-	if ((scheme[which].scheme_id == preferred) != 0)
+	if (scheme[which].scheme_id == preferred)
 		{
 		*destination = (unsigned char)which;
 		min_size = scheme[which].scheme->compress(destination + 1, destination_length - 1, source, source_integers);

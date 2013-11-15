@@ -4,8 +4,6 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
-#include "str.h"
-#include "ctypes.h"
 #include "atire_api_remote.h"
 #include "channel_file.h"
 #include "channel_socket.h"
@@ -14,6 +12,9 @@
 #include "version.h"
 #include "atire_engine_result_set_export_TREC.h"
 #include "atire_engine_result_set_export_INEX_snippet.h"
+
+#include "str.h"
+#include "ctypes.h"
 
 const long long MAX_RETRIES = 10;
 const char * const PROMPT = "]";		// tribute to Apple

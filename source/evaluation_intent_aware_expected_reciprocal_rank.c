@@ -44,7 +44,7 @@ if (got_topic == NULL)
 */
 subtopicGain = new double[got_topic->number_of_subtopics];
 idealIdeal = new double[precision_point];
-idealIdealGain = got_topic->number_of_subtopics;
+idealIdealGain = (double)got_topic->number_of_subtopics;
 err = new double[precision_point];
 
 for (i = 0; i < precision_point; i++)

@@ -76,9 +76,15 @@ for (current = lines; *current != 0; current++)
 			/*
 				Include it as a document with a _bad_ id that would never
 				exist in the collection
+
+				So, we can't just drop assessments for documents that aren't in the collection becasuse of spam filtering.
+				If we drop a relevant document in the spam filter then that should not affect the ideal gain vector in DCG
+				so each must have a unique id and be un-findable.  We achieve this by hashing the document's (TREC) ID and
+				making that negative so that it does not clash with true internal docids.
+
+				Matt Crane made did this.  It might result in a hash collision and so I've asked him to fix it.
 			*/
-			current_assessment->docid = -ANT_random_hash_24(document, strlen(document));
-			//current_assessment->docid *= -1;
+			current_assessment->docid = -((long long)ANT_random_hash_24(document, strlen(document)));
 			missing_warned = TRUE;
 			}
 		else

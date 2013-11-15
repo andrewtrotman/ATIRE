@@ -181,7 +181,7 @@ ANT_pregens_writer *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
 ANT_index_document *document_indexer;
-ANT_compression_text_factory *factory_text;
+ANT_compression_text_factory *factory_text = NULL;
 
 if (argc < 2)
 	param_block.usage();

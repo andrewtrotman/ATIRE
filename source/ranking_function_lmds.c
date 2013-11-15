@@ -49,7 +49,7 @@ query_length = quantum_parameters->accumulator->get_term_count();
 query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
 
 idf = ((double)collection_length_in_terms / (double)quantum_parameters->term_details->global_collection_frequency);
-rsv =	query_occurences * log((quantum_parameters->tf / u) * idf + 1.0);
+rsv =	query_occurences * log(((quantum_parameters->tf * quantum_parameters->prescalar )/ u) * idf + 1.0);
 
 docid = -1;
 current = quantum_parameters->the_quantum;
@@ -103,7 +103,7 @@ current = impact_ordering;
 while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	{
 	tf = *impact_header->impact_value_ptr;
-	rsv = query_occurences * log((tf / u) * idf + 1.0);
+	rsv = query_occurences * log(((tf * prescalar) / u) * idf + 1.0);
 	docid = -1;
 	end = current + *impact_header->doc_count_ptr;
 	while (current < end)
@@ -163,7 +163,7 @@ while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
 	tf = *current++;
-	rsv = query_occurences * log((tf / u) * idf + 1.0);
+	rsv = query_occurences * log(((tf * prescalar) / u) * idf + 1.0);
 	docid = -1;
 	while (*current != 0)
 		{
