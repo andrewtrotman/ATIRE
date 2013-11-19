@@ -27,4 +27,4 @@ public:
 } ;
 
 
-#endif __STOP_WORD_H__
+#endif

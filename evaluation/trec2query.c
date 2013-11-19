@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <strstream>
+#include <sstream>
 #include "stop_word.h"
 
 using namespace std;
 
 char buffer[1024 * 1024];
 
-char *new_stop_words[] =
+const char *new_stop_words[] =
 	{
 	"alternative",
 	"arguments",
@@ -77,11 +77,19 @@ return source;
 }
 
 #ifndef _MSC_VER
+/*
+	STRLWR()
+	--------
+*/
 void strlwr(char *source)
 {
 while (*source)
+	{
 	*source = tolower(*source);
+	source++;
+	}
 }
+void strlwr(const char *source) { strlwr((char *)source); }
 #endif
 
 
@@ -134,7 +142,7 @@ while (1)
 			}
 		if (match)
 			{
-			ostrstream query;
+			ostringstream query;
 
 			query << strchr(buffer, '>') + 1;			// character after the "<desc>"
 			while (fgets(buffer, sizeof(buffer), fp) != NULL)
@@ -149,7 +157,7 @@ while (1)
 				}
 
 			query << '\0';
-			from = query.str();
+			from = (char *)query.str().c_str();
 			strlwr(from);
 			for (ch = from; *ch != '\0'; ch++)
 				if (isspace(*ch))
@@ -161,7 +169,7 @@ while (1)
 				{
 				if (number != old_number)
 					{
-					printf("\n%d", number);
+					printf("\n%ld", number);
 					old_number = number;
 					}
 				for (ch = strtok(from, SEPERATORS); ch != NULL; ch = strtok(NULL, SEPERATORS))
@@ -174,7 +182,6 @@ while (1)
 				}
 			else
 				exit(printf("\nBroken file\n"));
-			delete [] from;
 			}
 		}
 	}

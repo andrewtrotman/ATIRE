@@ -101,7 +101,7 @@ total_relevant = atol(argv[4]);
 /*
 	Topic number
 */
-printf("%d ", topic);
+printf("%ld ", topic);
 
 /*
 	Compute the best score
