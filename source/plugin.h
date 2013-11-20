@@ -21,6 +21,7 @@ public:
 	enum plugin_id { SEGMENTATION  = 0 };
 
 public:
+	virtual ~ANT_plugin() {}
 	virtual const unsigned char *do_segmentation(unsigned char *c, int length);
 	virtual const unsigned char *get_input();
 	virtual const unsigned char *get_output();

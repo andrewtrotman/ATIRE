@@ -105,7 +105,7 @@ return results_list_length;
 
 /*
 	ANT_SEARCH_ENGINE_RESULT::SET_PREGEN()
-	-----------------------------------------
+	--------------------------------------
 */
 void ANT_search_engine_result::set_pregen(ANT_pregen *pg, double ratio)
 {

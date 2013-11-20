@@ -81,7 +81,7 @@ for (current = lines; *current != NULL; current++)
 			INEX 2002
 		*/
 		if (!done)
-			printf("%d %*.*s\n", topic, file_end - file_start, file_end - file_start, file_start);
+			printf("%ld %*.*s\n", topic, (int)(file_end - file_start), (int)(file_end - file_start), file_start);
 		done = TRUE;
 		}
 	else if ((strstr(*current, "exhaustiveness=\"1") != NULL) || (strstr(*current, "exhaustiveness=\"2") != NULL) || (strstr(*current, "exhaustiveness=\"3") != NULL))
@@ -90,7 +90,7 @@ for (current = lines; *current != NULL; current++)
 			INEX 2003
 		*/
 		if (!done)
-			printf("%d %*.*s\n", topic, file_end - file_start, file_end - file_start, file_start);
+			printf("%ld %*.*s\n", topic, (int)(file_end - file_start), (int)(file_end - file_start), file_start);
 		done = TRUE;
 		}
 	else if ((strstr(*current, "exhaustiveness=\'1") != NULL) || (strstr(*current, "exhaustiveness=\'2") != NULL) || (strstr(*current, "exhaustiveness=\'3") != NULL))
@@ -99,7 +99,7 @@ for (current = lines; *current != NULL; current++)
 			INEX 2004
 		*/
 		if (!done)
-			printf("%d %*.*s\n", topic, file_end - file_start, file_end - file_start, file_start);
+			printf("%ld %*.*s\n", topic, (int)(file_end - file_start), (int)(file_end - file_start), file_start);
 		done = TRUE;
 		}
 
@@ -109,7 +109,7 @@ for (current = lines; *current != NULL; current++)
 			WIKIPEDIA 2006
 		*/
 		if (!done)
-			printf("%d %*.*s\n", topic, file_end - file_start, file_end - file_start, file_start);
+			printf("%ld %*.*s\n", topic, (int)(file_end - file_start), (int)(file_end - file_start), file_start);
 		done = TRUE;
 		}
 	}

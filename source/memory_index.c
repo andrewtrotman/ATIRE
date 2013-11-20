@@ -618,10 +618,12 @@ long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash
 {
 long terms = 0;
 long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
-unsigned char *compressed_header_ptr, *compressed_postings_ptr;
-ANT_compressable_integer *end;
+#ifdef IMPACT_HEADER
+	unsigned char *compressed_header_ptr, *compressed_postings_ptr;
+	ANT_compressable_integer *end;
+#endif
 #ifdef SPECIAL_COMPRESSION
-ANT_compressable_integer temp;
+	ANT_compressable_integer temp;
 #endif
 
 if (root->right != NULL)

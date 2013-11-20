@@ -97,8 +97,8 @@ insert_docno(bottom);
 long ANT_memory_index_hash_node::append_docno(long long docno, ANT_postings_piece **buffer)
 {
 unsigned char holding_pen[16];
-long remain, needed = compress_bytes_needed(docno);
-size_t new_docid_node_length;
+long needed = compress_bytes_needed(docno);
+size_t new_docid_node_length, remain;
 ANT_postings_piece *underlying = *buffer;
 
 if (docid_node_used + needed > docid_node_length)
@@ -149,7 +149,7 @@ long long which, end;
 long bytes_needed;
 unsigned char *here = document_buffer;
 
-end = early.postings_held_in_vocab < document_frequency ? early.postings_held_in_vocab : document_frequency;
+end = postings_held_in_vocab < document_frequency ? postings_held_in_vocab : document_frequency;
 for (which = 0; which < end; which++)
 	{
 	bytes_needed = compress_bytes_needed(early.docid[which]);
@@ -170,10 +170,10 @@ long ANT_memory_index_hash_node::bytes_needed_for_early_doc_buffer(void)
 {
 size_t posting;
 long needed;
-long long end;
+unsigned long long end;
 
 needed = 0;
-end = early.postings_held_in_vocab < document_frequency ? early.postings_held_in_vocab : document_frequency;
+end = postings_held_in_vocab < document_frequency ? postings_held_in_vocab : document_frequency;
 for (posting = 0; posting < end; posting++)
 	needed += compress_bytes_needed(early.docid[posting]);
 
@@ -194,9 +194,9 @@ ANT_postings_piece *document_buffer, *tf_buffer, *document_head;
 /*
 	First check to see if we can put the result into the "early" structure
 */
-if (document_frequency <= early.postings_held_in_vocab)
+if (document_frequency <= postings_held_in_vocab)
 	{
-	if (document_frequency < early.postings_held_in_vocab)
+	if (document_frequency < postings_held_in_vocab)
 		{
 		/*
 			We can put the scores into the vocab, so do so.
@@ -230,12 +230,12 @@ if (document_frequency <= early.postings_held_in_vocab)
 		/*
 			Copy from the early array into the buffer
 		*/
-		for (posting = 0; posting < early.postings_held_in_vocab; posting++)
+		for (posting = 0; posting < postings_held_in_vocab; posting++)
 			if (append_docno(early.docid[posting], &document_buffer))
 				tf_buffer->data[posting] = early.tf[posting];
 			else
 				return false;
-		tf_node_used = early.postings_held_in_vocab;
+		tf_node_used = postings_held_in_vocab;
 
 		/*
 			Now shove the lists into the internal structures (thus overwriting the "early" objects due to the union)
@@ -314,13 +314,13 @@ err = false;
 	are many then they are in buffers external to this object.  Check which is the
 	case and handle appropriately
 */
-if (document_frequency <= early.postings_held_in_vocab)
+if (document_frequency <= postings_held_in_vocab)
 	{
 	/*
 		compute the storage space needed.
 	*/
 	doc_bytes = bytes_needed_for_early_doc_buffer();
-	tf_bytes = 2 * early.postings_held_in_vocab; // 2 * because shorts are 2 byte
+	tf_bytes = 2 * postings_held_in_vocab; // 2 * because shorts are 2 byte
 
 	/*
 		if it fits then copy into the buffers (that were passed as parameters) else error

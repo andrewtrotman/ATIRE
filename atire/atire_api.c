@@ -36,6 +36,7 @@
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
 #include "ranking_function_lmd.h"
+#include "ranking_function_lmds.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
@@ -436,6 +437,7 @@ if (search_engine->quantized())
 		{
 		case ANT_ANT_param_block::BM25:
 		case ANT_ANT_param_block::LMD:
+		case ANT_ANT_param_block::LMDS:
 		case ANT_ANT_param_block::LMJM:
 		case ANT_ANT_param_block::BOSE_EINSTEIN:
 		case ANT_ANT_param_block::DIVERGENCE:
@@ -444,6 +446,10 @@ if (search_engine->quantized())
 		case ANT_ANT_param_block::DLH13:
 		case ANT_ANT_param_block::DPH:
 		case ANT_ANT_param_block::DFREE:
+		case ANT_ANT_param_block::DFI:
+		case ANT_ANT_param_block::DFIW:
+		case ANT_ANT_param_block::DFI_IDF:
+		case ANT_ANT_param_block::DFIW_IDF:
 			return 1;		// failure because we're a quantized ranking function and we don't have TF values in the index
 		}
 	}
@@ -467,6 +473,9 @@ switch (function)
 		break;
 	case ANT_ANT_param_block::LMD:
 		new_function = new ANT_ranking_function_lmd(search_engine, quantization, quantization_bits, p1);
+		break;
+	case ANT_ANT_param_block::LMDS:
+		new_function = new ANT_ranking_function_lmds(search_engine, quantization, quantization_bits, p1);
 		break;
 	case ANT_ANT_param_block::LMJM:
 		new_function = new ANT_ranking_function_lmjm(search_engine, quantization, quantization_bits, p1);
@@ -925,6 +934,7 @@ terms_in_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	{
 	terms_in_query++;
+
 	/*
 		Take the search term (as an ANT_string_pair) and convert into a string
 		If you want to know if the term is a + or - term then call term_string->get_sign() which will return 0 if it is not (or +ve or -ve if it is)
@@ -940,11 +950,15 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	}
 
 /*
+	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
+*/
+search_engine->results_list->set_term_count(terms_in_query);
+
+/*
    Check if the number of terms exceed the limit
  */
 if (terms_in_query > MAX_ALLOWED_TERMS_IN_QUERY)
 	exit(printf("Exceeded the allowed number of %d terms per query\n", MAX_ALLOWED_TERMS_IN_QUERY));
-
 
 /*
 	Prepare an array structure for sorting
@@ -1062,6 +1076,12 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	else
 		topsig_signature->add_term(topsig_globalstats, token_buffer, 1, 1, topsig_globalstats->get_collection_length());
 	}
+
+/*
+	Tell the search engine how many terms are in the query.  Although this is used in Language Models, it's unlikely
+	to ever get used here.
+*/
+search_engine->results_list->set_term_count(terms_in_query);
 
 /*
 	Walk through the signature looking for +ve and -ve values as these are the
@@ -1222,6 +1242,11 @@ boolean_parser->set_thesaurus(expander_query);
 boolean_parser->parse(parsed_query, query);
 if (parsed_query->parse_error != ANT_query::ERROR_NONE)
 	return 0;
+
+/*
+	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
+*/
+search_engine->results_list->set_term_count(parsed_query->terms_in_query);
 
 /*
 	In the case of a purely disjunctive query (OR operators only) we can fall-back to the

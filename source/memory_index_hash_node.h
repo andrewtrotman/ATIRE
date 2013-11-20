@@ -35,6 +35,11 @@ public:
 		The point of this union is that the in_disk objects are never needed at the same time as the in_memory objects
 		and therefore we can reduce the index-time memory footprint by overlapping them.
 	*/
+	/*
+		clang on the Mac doesn't allow static consts in an anonymous union - so we can't delcare this where it should
+		have been declared (which is in the "early" struct).
+	*/
+	static const size_t postings_held_in_vocab = 2;		// because this is how many are stored in the vocab on disk
 	union
 		{
 		struct { ANT_postings_piece *docid_list_head, *docid_list_tail, *tf_list_head, *tf_list_tail; } in_memory;
@@ -52,7 +57,6 @@ public:
 		*/
 		struct
 			{
-			static const size_t postings_held_in_vocab = 2;		// because this is how many are stored in the vocab on disk
 			long long docid[postings_held_in_vocab];
 			unsigned short tf[postings_held_in_vocab];
 			} early;
@@ -79,7 +83,7 @@ public:
 private:
 	inline long compress_bytes_needed(long long val);
 	inline void compress_into(unsigned char *dest, long long docno);
-	ANT_postings_piece *new_postings_piece(long length_in_bytes);
+	ANT_postings_piece *new_postings_piece(size_t length_in_bytes);
 	long insert_docno(long long docno, unsigned short initial_term_frequency = 1);
 	inline long append_docno(long long docno, ANT_postings_piece **buffer);
 	long copy_from_early_buffers_into_lists(unsigned char *document_buffer, unsigned short *term_frequency_buffer);
@@ -99,7 +103,7 @@ public:
 	ANT_MEMORY_INDEX_HASH_NODE::NEW_POSTINGS_PIECE()
 	------------------------------------------------
 */
-inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(long length_in_bytes)
+inline ANT_postings_piece *ANT_memory_index_hash_node::new_postings_piece(size_t length_in_bytes)
 {
 ANT_postings_piece *object;
 
@@ -126,7 +130,7 @@ if (docno == current_docno)
 	/*
 		Work out where to put the result
 	*/
-	if (document_frequency < early.postings_held_in_vocab + 1)			// +1 because document_frequency is pre-incramented (because the indexer counts from 1)
+	if (document_frequency < postings_held_in_vocab + 1)			// +1 because document_frequency is pre-incramented (because the indexer counts from 1)
 		into = early.tf + document_frequency - 1;
 	else
 		into = in_memory.tf_list_tail->data + tf_node_used - 1;

@@ -348,6 +348,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function.obj					\
 	$(OBJDIR)\ranking_function_impact.obj			\
 	$(OBJDIR)\ranking_function_readability.obj		\
+	$(OBJDIR)\ranking_function_lmds.obj				\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
 	$(OBJDIR)\ranking_function_docid.obj			\

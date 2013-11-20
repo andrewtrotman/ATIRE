@@ -1,10 +1,9 @@
 /*
- * PLUGIN_MANAGER.C
- * ----------------
- *
- *  Created on: Jul 10, 2009
- *      Author: monfee
- */
+	PLUGIN_MANAGER.C
+	----------------
+	Created on: Jul 10, 2009
+	Author: monfee
+*/
 
 #ifdef _MSC_VER
 	#include <windows.h>
@@ -19,11 +18,8 @@
 #include "plugin_manager.h"
 
 char ANT_plugin_manager::PLUGIN_DIRECTORY_NAME[] = { "plugins" };
-
-int	ANT_plugin_manager::plugin_ids[] = { ANT_plugin::SEGMENTATION };
-
+int ANT_plugin_manager::plugin_ids[] = { ANT_plugin::SEGMENTATION };
 int ANT_plugin_manager::num_of_plugins = sizeof(ANT_plugin_manager::plugin_ids)/sizeof(int);
-
 
 #ifdef _MSC_VER
 	char *ANT_plugin_manager::plugin_names[] = { "uniseg.dll" };
@@ -80,29 +76,33 @@ delete [] plugin_factory;
 	ANT_PLUGIN_MANAGER::LOAD_LIBRARY()
 	----------------------------------
 */
+#ifdef _MSC_VER
 void ANT_plugin_manager::load_library(const char *library_file, int id)
 {
-#ifdef _MSC_VER
-		/*
-		 * please help with implementation of loading dynamic library on Windows
-		 */
+/*
+	please help with implementation of loading dynamic library on Windows
+*/
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
 
 #else
-		plugin_factory[plugin_ids[id]].dlib = dlopen(library_file, RTLD_NOW);
-		if (plugin_factory[plugin_ids[id]].dlib == NULL )
-			printf("opening plugin(%s) failed: %s\n", library_file, dlerror());
-		else
-			{
-			fprintf(stderr, "found plugin(%s)\n", library_file);
-			if (plugin_factory[plugin_ids[id]].maker == NULL)
-				{
-				fprintf(stderr, "this library wasn't made as a ANT plugin, please make sure WITH_ANT_PLUGIN macro is defined\n", library_file);
-				return;
-				}
-			plugin_factory[plugin_ids[id]].plugin = plugin_factory[plugin_ids[id]].maker();
-			}
-#endif
+void ANT_plugin_manager::load_library(const char *library_file, int id)
+{
+plugin_factory[plugin_ids[id]].dlib = dlopen(library_file, RTLD_NOW);
+if (plugin_factory[plugin_ids[id]].dlib == NULL )
+	printf("opening plugin(%s) failed: %s\n", library_file, dlerror());
+else
+	{
+	fprintf(stderr, "found plugin(%s)\n", library_file);
+	if (plugin_factory[plugin_ids[id]].maker == NULL)
+		{
+		fprintf(stderr, "this library(%s) wasn't made as a ANT plugin, please make sure WITH_ANT_PLUGIN macro is defined\n", library_file);
+		return;
+		}
+	plugin_factory[plugin_ids[id]].plugin = plugin_factory[plugin_ids[id]].maker();
+	}
 }
+#endif
 
 /*
 	ANT_PLUGIN_MANAGER::LOAD()
@@ -123,7 +123,7 @@ for (int i = 0; i < num_of_plugins; i++)
 	#else
 		char sep[] = { "/" };
 	#endif
-	int len = strlen(PLUGIN_DIRECTORY_NAME) + strlen(sep) + strlen(name);
+	size_t len = strlen(PLUGIN_DIRECTORY_NAME) + strlen(sep) + strlen(name);
 	char *name_with_plugin_path = new char[len + 1];
 	strcpy(name_with_plugin_path, PLUGIN_DIRECTORY_NAME);
 	strcat(name_with_plugin_path, sep);

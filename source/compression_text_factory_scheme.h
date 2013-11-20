@@ -14,7 +14,7 @@
 class ANT_compression_text_factory_scheme
 {
 public:
-	unsigned long scheme_id;	// the external name of the scheme as a bit pattern.  Done so the user can select which schemes to use
+	long scheme_id;	// the external name of the scheme as a bit pattern.  Done so the user can select which schemes to use
 	ANT_compress_text *scheme;	// ANT_compress_text object
 	const char *name;			// the name of the scheme
 } ;

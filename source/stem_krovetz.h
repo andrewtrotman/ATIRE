@@ -30,8 +30,13 @@
 	#include <hash_map>
 	using namespace std;
 #elif (defined(__APPLE_CC__) || defined(__GNUC__))
-	#include <ext/hash_map>
-	using namespace __gnu_cxx;
+	#include <tr1/unordered_map>
+	#define hash_map unordered_map
+	using namespace std::tr1;
+	/*
+		#include <ext/hash_map>
+		using namespace __gnu_cxx;
+	*/
 #else
 	#include <hash_map>
 	using namespace std;

@@ -19,6 +19,7 @@
 #include "ranking_function_dfi_idf.h"
 #include "ranking_function_dfiw_idf.h"
 #include "ranking_function_lmd.h"
+#include "ranking_function_lmds.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
@@ -45,6 +46,7 @@ ANT_indexer_param_block_rank::ANT_indexer_param_block_rank()
 {
 ranking_function = BM25;
 lmd_u = ANT_RANKING_FUNCTION_LMD_DEFAULT_U;
+lmds_u = ANT_RANKING_FUNCTION_LMDS_DEFAULT_U;
 lmjm_l = ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA;
 bm25_k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1;
 bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
@@ -119,15 +121,23 @@ if (strncmp(which, "BM25", 4) == 0)
 	get_two_parameters(which + 4, &bm25_k1, &bm25_b);
 //	printf("K1=%f B=%f\n", bm25_k1, bm25_b);
 	}
+else if (strncmp(which, "lmds", 4) == 0)
+	{
+	ranking_function = LMDS;
+	get_one_parameter(which + 4, &lmds_u);
+//	printf("U = %f\n", lmds_u);
+	}
 else if (strncmp(which, "lmd", 3) == 0)
 	{
 	ranking_function = LMD;
-	return get_one_parameter(which + 3, &lmd_u);
+	get_one_parameter(which + 3, &lmd_u);
+//	printf("U = %f\n", lmd_u);
 	}
 else if (strncmp(which, "lmjm", 4) == 0)
 	{
 	ranking_function = LMJM;
-	return get_one_parameter(which + 4, &lmjm_l);
+	get_one_parameter(which + 4, &lmjm_l);
+//	printf("L = %f\n", lmjm_l);
 	}
 else if (strcmp(which, "be") == 0)
 	ranking_function = BOSE_EINSTEIN;
@@ -228,6 +238,8 @@ if (allowable & IMPACT)
 	printf("   impact       Sum of impact scores %s\n", isdefault(IMPACT));
 if (allowable & LMD)
 	printf("   lmd:<u>      Language Models with Dirichlet smoothing, u=<u> [default u = 6750] %s\n" , isdefault(LMD));
+if (allowable & LMDS)
+	printf("   lmds:<u>     Language Models with Dirichlet smoothing (see Petri et al, ADCS 2013), u=<u> [default u = 2500] %s\n" , isdefault(LMDS));
 if (allowable & LMJM)
 	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l = 0.5] %s\n", isdefault(LMJM));
 if (allowable & READABLE)
@@ -277,6 +289,8 @@ switch (ranking_function)
 		return new ANT_ranking_function_DFIW_IDF(documents, lengths, *quantization_bits);
 	case LMD:
 		return new ANT_ranking_function_lmd(documents, lengths, *quantization_bits, lmd_u);
+	case LMDS:
+		return new ANT_ranking_function_lmds(documents, lengths, *quantization_bits, lmds_u);
 	case LMJM:
 		return new ANT_ranking_function_lmd(documents, lengths, *quantization_bits, lmjm_l);
 	case BOSE_EINSTEIN:

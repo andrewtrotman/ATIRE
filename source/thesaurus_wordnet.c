@@ -21,7 +21,7 @@ ANT_thesaurus_wordnet::ANT_thesaurus_wordnet(char *filename) : ANT_thesaurus(fil
 size_t file_tail_length;
 uint64_t root_start, id_wordnet, length_of_longest_leaf, bytes_in_longest_leaf;
 uint32_t id_version, id_ant;
-long long length_of_file;
+size_t length_of_file;
 unsigned long long current;
 char *position;
 

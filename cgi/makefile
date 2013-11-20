@@ -9,6 +9,8 @@ LIBS = WS2_32.lib 					\
 	../obj/ctypes.obj				\
 	../obj/disk.obj				\
 	../obj/atire_api_remote.obj	\
+	../obj/unicode.obj	\
+	../obj/unicode_tables.obj	\
 	../obj/file_internals.obj	
 
 

@@ -35,8 +35,7 @@ ANT_file_internals::ANT_file_internals()
 	if (bytes_to_read > 0)			// catches a call to read 0 bytes 
 		if (ReadFile(fp, from, (DWORD)bytes_to_read, &got_in_one_read, NULL) == 0)
 			{
-			DWORD error_code = GetLastError();			// put a break point on this in the debugger to work out what went wrong.
-
+//			DWORD error_code = GetLastError();			// put a break point on this in the debugger to work out what went wrong.
 			return 0;
 			}
 

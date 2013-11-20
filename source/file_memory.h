@@ -27,7 +27,7 @@ public:
 	virtual long close(void) { return 1; }
 	virtual long long file_length(void) { return length_of_file; }
 	virtual long write(unsigned char *data, long long size);
-	virtual long long puts(char *string);
+	virtual long long puts(const char *string);
 	virtual long read(unsigned char *data, long long size);
 	virtual unsigned char *read_return_ptr(unsigned char *data, long long size);
 	using ANT_file::read;

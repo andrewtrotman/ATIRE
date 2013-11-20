@@ -134,8 +134,8 @@ FILE *fp;
 char *title_pos, *first_char, *into, *filename, *pos;
 long topic, parameter;
 bool clean = false, cas = false;
-char *TITLE = "<title>";
-char *SLASH_TITLE = "</title>";
+const char *TITLE = "<title>";
+const char *SLASH_TITLE = "</title>";
 char *answer;
 
 if (argc <= 1 || argc > 4)
@@ -208,7 +208,7 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 		else
 			answer = title;
 
-		printf("%d %s\n", topic, title);
+		printf("%ld %s\n", topic, title);
 		}
 	}
 }

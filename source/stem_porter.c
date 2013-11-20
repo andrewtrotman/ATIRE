@@ -87,7 +87,7 @@ if (*at == 's')
 	else if (strncmp(at, "sei", 3) == 0)
 		at += 2;
 	else if (strncmp(at, "ss", 2) == 0)
-		at = at; // do nothing
+		{ /* do nothing */ }
 	else
 		at++;
 	}

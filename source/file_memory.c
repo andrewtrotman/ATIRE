@@ -24,7 +24,7 @@ exit(printf("Cannot write to an in-memory file\n"));
 	ANT_FILE_MEMORY::PUTS()
 	-----------------------
 */
-long long ANT_file_memory::puts(char *string)
+long long ANT_file_memory::puts(const char *string)
 {
 exit(printf("Cannot write to an in-memory file\n"));
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

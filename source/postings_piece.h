@@ -22,7 +22,7 @@ public:
 
 public:
 	ANT_postings_piece() {}
-	unsigned short *initialise(ANT_memory *alloc, long required_length);
+	unsigned short *initialise(ANT_memory *alloc, size_t required_length);
 #pragma ANT_PRAGMA_NO_DELETE
 	void *operator new (size_t size, ANT_memory *allocator);
 } ;

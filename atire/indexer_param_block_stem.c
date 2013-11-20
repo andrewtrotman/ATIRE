@@ -124,7 +124,7 @@ switch (*which)
 	case 'S' : stemmer = ANT_stemmer_factory::SOUNDEX; break;
 	case 'X' :
 		if (*(which + 2) != '\0')
-			exit(printf("Unknown stemmer: '-%s'\n", *which));
+			exit(printf("Unknown stemmer: '-%c'\n", *which));
 
 		switch (*(which + 1))
 			{

@@ -32,7 +32,9 @@ public:			// remove this line later
 	ANT_search_engine_accumulator **accumulator_pointers;
 	long long documents;
 	long long results_list_length;
-
+	long term_count;			// number of terms in the query
+	void set_term_count(long terms) { term_count = terms; }
+	long get_term_count(void) { return term_count; }
 	long long top_k;
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 
