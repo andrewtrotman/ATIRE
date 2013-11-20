@@ -8,7 +8,7 @@ public class Indexer {
 	}
     
     public void index(String what) {
-    	atire_apis.index(what);
+    	atire_apis.atire_index(what);
     }
     
     public static void usage() {
