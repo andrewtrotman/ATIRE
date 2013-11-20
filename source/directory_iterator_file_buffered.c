@@ -137,7 +137,7 @@ if (document_id_end == NULL && !auto_file_id)
 else
 	{
 	if (auto_file_id) {
-		sprintf(file_id_buffer, "%d", auto_file_id);
+		sprintf(file_id_buffer, "%d", auto_file_id++);
 		object->filename = strnew(file_id_buffer);
 	}
 	else

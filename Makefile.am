@@ -176,6 +176,7 @@ core_sources =  \
 	$(SRC_DIR)/ranking_function_inner_product.c \
 	$(SRC_DIR)/ranking_function_kbtfidf.c \
 	$(SRC_DIR)/ranking_function_lmd.c \
+	$(SRC_DIR)/ranking_function_lmds.c \
 	$(SRC_DIR)/ranking_function_lmjm.c \
 	$(SRC_DIR)/ranking_function_pregen.c \
 	$(SRC_DIR)/ranking_function_readability.c \
@@ -428,6 +429,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/ranking_function_inner_product.h \
 	$(SRC_DIR)/ranking_function_kbtfidf.h \
 	$(SRC_DIR)/ranking_function_lmd.h \
+	$(SRC_DIR)/ranking_function_lmds.h \
 	$(SRC_DIR)/ranking_function_lmjm.h \
 	$(SRC_DIR)/ranking_function_pregen.h \
 	$(SRC_DIR)/ranking_function_quantum_parameters.h \
