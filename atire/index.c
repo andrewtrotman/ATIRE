@@ -400,7 +400,7 @@ for (param = first_param; param < argc; param++)
 			scrubber = file_stream;
 		source = new ANT_directory_iterator_file_buffered(scrubber, ANT_directory_iterator::READ_FILE);
 */
-		source = new ANT_directory_iterator_file(argv[param], ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
 		{
