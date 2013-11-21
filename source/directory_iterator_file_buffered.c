@@ -61,7 +61,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_file_buffered::next(ANT_di
 {
 char *start, *document_id_start, *document_id_end;
 long long bytes_read;
-char *file_id_buffer = new char[sizeof(long) * 8 + 1];
+char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
 
 start = read_buffer + read_buffer_used;
 
@@ -126,7 +126,6 @@ if (!auto_file_id )
 			document_start = strchr(document_id_end, '>') + 1;
 		}
 	}
-else
 
 /*
 	Copy the id into the document object and get the document
@@ -136,17 +135,17 @@ if (document_id_end == NULL && !auto_file_id)
 	object->filename = strnew("Unknown");
 else
 	{
-	if (auto_file_id) {
-		sprintf(file_id_buffer, "%d", auto_file_id++);
+	if (auto_file_id)
+		{
+		sprintf(file_id_buffer, "%ld", auto_file_id++);
 		object->filename = strnew(file_id_buffer);
-	}
+		}
 	else
 		object->filename = strnnew(document_id_start, document_id_end - document_id_start);
 
 	if (get_file)
 		read_entire_file(object);
 	}
-delete file_id_buffer;
 return object;
 }
 
