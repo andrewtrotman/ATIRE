@@ -10,13 +10,16 @@
 #include "ctypes.h"
 
 #ifdef __APPLE__
-#include <stdlib.h>
+	#include <stdlib.h>
 #endif
 
 #ifdef _MSC_VER
 	inline char *strlower(char *a) { return _strlwr(a); }
 	inline char *strlower(const char *a) { return strlower((char *)a); }
 	#define strnicmp _strnicmp
+
+	extern "C" {char *StrStrI(char *pszFirst, const char *pszSrch);}
+	inline char *strcasestr(const char *a, const char *b) { return StrStrI((char *)a, b); }
 #else
 	inline int strnicmp (const char *s1, const char *s2, size_t n) { return ::strncasecmp (s1, s2, n); }
 #endif
@@ -249,15 +252,21 @@ return out;
 
 #define wcsupr wcstrupper
 
-	inline wchar_t *wcstrupper(wchar_t *s) {
-		wchar_t *p = s;
+	/*
+		WCSTRUPPER()
+		------------
+	*/
+	inline wchar_t *wcstrupper(wchar_t *s)
+	{
+	wchar_t *p = s;
 
-		while (*p) {
-			*p = (wchar_t) ANT_toupper(*p);
-			p++;
+	while (*p)
+		{
+		*p = (wchar_t) ANT_toupper(*p);
+		p++;
 		}
 
-		return s;
+	return s;
 	}
 
 #endif

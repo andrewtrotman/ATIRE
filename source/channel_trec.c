@@ -86,6 +86,7 @@ delete in_channel;
 char *ANT_channel_trec::block_read(char *into, long long length)
 {
 exit(printf("ANT_channel_trec::block_read not implemented (class only supports gets())"));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
@@ -96,6 +97,7 @@ exit(printf("ANT_channel_trec::block_read not implemented (class only supports g
 long long ANT_channel_trec::block_write(char *source, long long length)
 {
 exit(printf("ANT_channel_trec::block_write not implemented (class only supports gets())"));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
