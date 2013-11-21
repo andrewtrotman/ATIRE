@@ -604,7 +604,7 @@ else if (stop_word_removal_mode & PRUNE_DF_SINGLETONS && term->document_frequenc
 	return true;
 else if (stop_word_removal_mode & PRUNE_DF_FREQUENTS && (double)term->document_frequency / (double)largest_docno >= stop_word_max_proportion)
 	return true;
-else if (stop_word_removal_mode & PRUNE_NCBI_STOPLIST && ANT_stop_word::isstop(term->string.string()))
+else if (stop_word_removal_mode & PRUNE_NCBI_STOPLIST && stopwords.isstop(term->string.string()))
 	return true;
 else
 	return false;

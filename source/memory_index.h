@@ -15,6 +15,7 @@
 #include "hash_table.h"
 #include "impact_header.h"
 #include "version.h"
+#include "stop_word.h"
 
 class ANT_memory_index_hash_node;
 class ANT_memory;
@@ -43,6 +44,7 @@ public:
 
 private:
 	long hashed_squiggle_length;
+	ANT_stop_word stopwords;
 public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 private:

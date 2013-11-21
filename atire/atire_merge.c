@@ -31,6 +31,7 @@ unsigned char *postings_list = new unsigned char[postings_list_size];
 unsigned char *new_postings_list;
 unsigned char *temp;
 
+ANT_stop_word stop_words;
 /*
 	SHOULD_PRUNE()
 	--------------
@@ -53,7 +54,7 @@ else if (param->stop_word_removal & ANT_memory_index::PRUNE_TAGS && ANT_isupper(
 	return true;
 else if (param->stop_word_removal & ANT_memory_index::PRUNE_DF_FREQUENTS && (double)leaf->local_document_frequency / (double)largest_docno >= param->stop_word_df_threshold)
 	return true;
-else if (param->stop_word_removal & ANT_memory_index::PRUNE_NCBI_STOPLIST && ANT_stop_word::isstop(term))
+else if (param->stop_word_removal & ANT_memory_index::PRUNE_NCBI_STOPLIST && stop_words.isstop(term))
 	return true;
 else
 	return false;

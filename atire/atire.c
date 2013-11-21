@@ -13,6 +13,7 @@
 #include "stats_time.h"
 #include "channel_file.h"
 #include "channel_socket.h"
+#include "channel_trec.h"
 #include "relevance_feedback_factory.h"
 #include "ranking_function_pregen.h"
 #include "snippet.h"
@@ -132,6 +133,12 @@ if (params->port == 0)
 	}
 else
 	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
+
+if ((params->query_type & ATIRE_API::QUERY_TREC_FILE) != 0)
+	{
+	puts("TREC FILE");
+	inchannel = new ANT_channel_trec(inchannel, "t");
+	}
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 

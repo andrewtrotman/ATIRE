@@ -220,6 +220,7 @@ PARTS = \
 	$(OBJDIR)\bitstring_iterator.obj 				\
 	$(OBJDIR)\channel_file.obj						\
 	$(OBJDIR)\channel_socket.obj					\
+	$(OBJDIR)\channel_trec.obj						\
 	$(OBJDIR)\parser.obj 							\
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\index_document.obj					\

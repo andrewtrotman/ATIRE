@@ -19,9 +19,107 @@
 long ANT_stop_word::isstop(const char *term)
 {
 if (bsearch(&term, ANT_stop_word_list, ANT_stop_word_list_len, sizeof(*ANT_stop_word_list), char_star_star_strcmp) == NULL)
-	return 0;
+	if (bsearch(&term, extra_stop, extra_stop_length, sizeof(*extra_stop), char_star_star_strcmp) == NULL)
+		return 0;
 
 return 1;
+}
+
+/*
+	ANT_STOP_WORD::ISSTOP()
+	------------------------
+*/
+long ANT_stop_word::isstop(const char *term, long term_len)
+{
+if (term_len >= len)
+	{
+	delete [] buffer;
+	buffer = new char [term_len + 1];
+	len = term_len;
+	}
+strncpy(buffer, term, term_len);
+buffer[term_len] = '\0';
+
+return isstop(buffer);
+}
+
+/*
+	ANT_STOP_WORD::ANT_STOP_WORD()
+	------------------------------
+*/
+ANT_stop_word::ANT_stop_word()
+{
+buffer = NULL;
+len = 0;
+extra_stop = NULL;
+extra_stop_length = 0;
+}
+
+/*
+	ANT_STOP_WORD::~ANT_STOP_WORD()
+	-------------------------------
+*/
+ANT_stop_word::~ANT_stop_word()
+{
+delete [] buffer;
+delete [] extra_stop;
+}
+
+/*
+	ANT_STOP_WORD::ADDSTOP()
+	-------------------------
+*/
+long ANT_stop_word::addstop(const char *term)
+{
+char **copy;
+
+copy = new char *[extra_stop_length + 1];
+memcpy(copy, extra_stop, sizeof(*extra_stop) * extra_stop_length);
+
+copy[extra_stop_length] = strnew(term);
+extra_stop_length++;
+delete [] extra_stop;
+extra_stop = copy;
+
+/*
+	this isn't very efficient so if you have a batch of terms to
+	add, add them as a NULL terminated list.
+*/
+qsort(extra_stop, extra_stop_length, sizeof(*extra_stop), char_star_star_strcmp);
+
+return extra_stop_length;
+}
+
+/*
+	ANT_STOP_WORD::ADDSTOP()
+	-------------------------
+*/
+long ANT_stop_word::addstop(const char **term)
+{
+long len, which;
+char **copy;
+
+len = 0;
+while (term[len] != NULL)
+	len++;
+
+if (len != 0)
+	{
+	copy = new char *[extra_stop_length + len];
+	memcpy(copy, extra_stop, sizeof(*extra_stop) * extra_stop_length);
+
+
+	for (which = 0; which < len; which++)
+		copy[extra_stop_length + which] = strnew(term[which]);
+
+	extra_stop_length += len;
+	delete [] extra_stop;
+	extra_stop = copy;
+
+	qsort(extra_stop, extra_stop_length, sizeof(*extra_stop), char_star_star_strcmp);
+	}
+
+return extra_stop_length;
 }
 
 /*

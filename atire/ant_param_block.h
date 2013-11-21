@@ -36,7 +36,7 @@ private:
 	char **argv;
 
 public:
-	long logo;							// display the ANT banner logo or not
+	long logo;								// display the ANT banner logo or not
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long trim_postings_k;				// trim the postigs lists at no fewer than k
 	ANT_evaluator *evaluator;			// a proxy for all the evaluation functions we want
@@ -47,7 +47,7 @@ public:
 	char *participant_id;				// participant id (used in the export file)
 	char *run_name;						// name of the run (used in the export file)
 	long results_list_length;			// length of the results list as exported
-	long stats;							// which stats to display
+	long stats;								// which stats to display
 
 	/*
 		Because these are expected to be replaced several times during the lifetime of this class,
