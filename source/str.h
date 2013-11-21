@@ -17,9 +17,6 @@
 	inline char *strlower(char *a) { return _strlwr(a); }
 	inline char *strlower(const char *a) { return strlower((char *)a); }
 	#define strnicmp _strnicmp
-
-	extern "C" {char *StrStrI(char *pszFirst, const char *pszSrch);}
-	inline char *strcasestr(const char *a, const char *b) { return StrStrI((char *)a, b); }
 #else
 	inline int strnicmp (const char *s1, const char *s2, size_t n) { return ::strncasecmp (s1, s2, n); }
 #endif

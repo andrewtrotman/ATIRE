@@ -55,7 +55,7 @@ return got;
 */
 ANT_directory_iterator_object *ANT_directory_iterator_file_buffered::next(ANT_directory_iterator_object *object)
 {
-char *start, *document_id_start, *document_id_end;
+char *start, *document_id_start = NULL, *document_id_end = NULL;
 long long bytes_read;
 char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
 
@@ -123,7 +123,7 @@ if (!auto_file_id)
 	}
 if (auto_file_id)
 	{
-	document_id_start = document_id_end = file_id_buffer);
+	document_id_start = document_id_end = file_id_buffer;
 	document_id_end += sprintf(file_id_buffer, "%ld", auto_file_id++);
 	}
 

@@ -137,7 +137,7 @@ else
 if ((params->query_type & ATIRE_API::QUERY_TREC_FILE) != 0)
 	{
 	puts("TREC FILE");
-	inchannel = new ANT_channel_trec(inchannel, "t");
+	inchannel = new ANT_channel_trec(inchannel, params->query_fields);
 	}
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];

@@ -33,6 +33,8 @@ ATIRE_client_param_block::ATIRE_client_param_block(long argc, char *argv[]) : AT
 {
 connect_string = "localhost:8088";
 queries_filename = NULL;
+queries_format = QUERIES_ANT;
+queries_fields = "t";
 results_list_length = -1;
 
 output_forum = NONE;
@@ -71,7 +73,8 @@ puts("");
 
 puts("INPUT");
 puts("-----");
-puts("-q<filename>    Queries are in file <filename> (format: ANT)");
+puts("-q<filename>    Queries are in file <filename> [default format: ANT]");
+puts("-QN:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) t=title, n=narrative, d=description [default=t]");
 puts("");
 
 puts("SERVERS");
@@ -155,6 +158,33 @@ else
 }
 
 /*
+	ATIRE_CLIENT_PARAM_BLOCK::QUERY_FORMAT()
+	----------------------------------------
+*/
+void ATIRE_client_param_block::query_format(char *command)
+{
+char *fields, *check;
+
+fields = strchr(command, ':');
+if (fields == NULL)
+	queries_fields = "t";
+else
+	{
+	fields++;
+	if (*fields == '\0')
+		queries_fields = "t";
+	else
+		{
+		for (check = fields; *check != '\0'; check++)
+			if (strchr("tdn", *check) == NULL)
+				exit(printf("Unknown field combination to extract from TREC file:%s\n", fields));
+		queries_fields = fields;
+		}
+	}
+queries_format = QUERIES_TREC;
+}
+
+/*
 	ATIRE_CLIENT_PARAM_BLOCK::PARSE()
 	---------------------------------
 */
@@ -208,6 +238,8 @@ for (param = 1; param < argc; param++)
 			else
 				queries_filename = command + 1;
 			}
+		else if (*command == 'Q')
+			query_format(command);
 		else if (*command == 's')
 			{
 			if (*(command + 1) == '\0' && param < argc - 1) 

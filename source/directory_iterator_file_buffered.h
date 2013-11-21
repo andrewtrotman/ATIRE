@@ -10,7 +10,6 @@
 #ifdef _MSC_VER
 	#include <windows.h>
 	#define PATH_MAX MAX_PATH
-	#define strstr	strcasestr
 #else
 	#include <limits.h>
 #endif
