@@ -170,13 +170,7 @@ while (1)
 				}
 			stopped_query << ends;
 
-#ifdef DEBUG
-			char *got = strnew((char *)stopped_query.str().c_str());
-			fprintf(stderr, "%s\n", got);
-			return got;
-#else
 			return strnew((char *)stopped_query.str().c_str());
-#endif
 			}
 		}
 	}
