@@ -135,10 +135,7 @@ else
 	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
 
 if ((params->query_type & ATIRE_API::QUERY_TREC_FILE) != 0)
-	{
-	puts("TREC FILE");
 	inchannel = new ANT_channel_trec(inchannel, params->query_fields);
-	}
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
@@ -482,7 +479,8 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			query = command;
 			}
 
-		outchannel->puts("<ATIREsearch>");
+		if (params->stats & ANT_ANT_param_block::SHORT)
+			outchannel->puts("<ATIREsearch>");
 		/*
 			Do the query and compute average precision
 		*/
@@ -572,7 +570,9 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			if (first_to_list < last_to_list)
 				outchannel->puts("</hits>");
 			}
-		outchannel->puts("</ATIREsearch>");
+
+		if (params->stats & ANT_ANT_param_block::SHORT)
+			outchannel->puts("</ATIREsearch>");
 		delete [] command;
 		}
 	}

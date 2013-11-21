@@ -132,7 +132,7 @@ for (ch = strtok(from, SEPERATORS); ch != NULL; ch = strtok(NULL, SEPERATORS))
 stopped_query << ends;
 delete [] from;
 
-printf("[%s]\n", (char *)stopped_query.str().c_str());
+//printf("[%s]\n", (char *)stopped_query.str().c_str());
 
 return strnew((char *)stopped_query.str().c_str());
 }
