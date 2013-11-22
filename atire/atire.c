@@ -26,6 +26,7 @@
 #include "focus_result.h"
 #include "focus_results_list.h"
 #include "search_engine.h"
+#include "memory_index_one_node.h"
 
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
@@ -332,6 +333,23 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			outchannel->write(atire->get_document_count());
 			outchannel->puts("");
 			continue;
+			}
+		else if (strncmp(command, ".morelike ", 10) == 0)
+			{
+			*document_buffer = '\0';
+			if ((current_document_length = length_of_longest_document) != 0)
+				{
+				atire->get_document(document_buffer, &current_document_length, atoll(command + 10));
+				query = atire->extract_query_terms(document_buffer, 10);		// choose top 10 terms
+
+				delete [] command;
+				command = query;
+				}
+			else
+				{
+				delete [] command;
+				continue;
+				}
 			}
 		else if (strncmp(command, ".get ", 5) == 0)
 			{
@@ -787,7 +805,7 @@ return result;
 
 /*
 	RUN_ATIRE()
-	-------------------
+	-----------
 */
 int run_atire(int argc, char *argv[])
 {
@@ -805,6 +823,7 @@ delete atire;
 printf("Total elapsed time including startup and shutdown ");
 stats.print_elapsed_time();
 ANT_stats::print_operating_system_process_time();
+
 return 0;
 }
 
@@ -816,7 +835,7 @@ return 0;
 */
 int main(int argc, char *argv[])
 {
-	return run_atire(argc, argv);
+return run_atire(argc, argv);
 }
 
 #endif

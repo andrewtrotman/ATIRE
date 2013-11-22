@@ -3,6 +3,7 @@
 	-----------
 */
 #include <stdlib.h>
+#include <sstream>
 #include "maths.h"
 #include "numbers.h"
 #include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
@@ -119,6 +120,7 @@ ranking_function = NULL;
 stemmer = NULL;
 expander_tf = NULL;
 expander_query = NULL;
+more_like_term_chooser = NULL;
 feedbacker = NULL;
 feedback_documents = feedback_terms = 10;
 query_type_is_all_terms = FALSE;
@@ -169,6 +171,7 @@ delete stemmer;
 delete expander_tf;
 delete expander_query;
 delete feedbacker;
+delete more_like_term_chooser;
 delete ranking_function;
 
 delete [] document_list;
@@ -1727,3 +1730,30 @@ void ATIRE_API::stats_all_text_render(void)
 {
 search_engine->stats_all_text_render();
 }
+
+/*
+	ATIRE_API::EXTRACT_QUERY_TERMS()
+	--------------------------------
+*/
+char *ATIRE_API::extract_query_terms(char *document, long terms)
+{
+long terms_found;
+ANT_memory_index_one_node **feedback_terms;
+std::ostringstream query;
+
+if (more_like_term_chooser == NULL)
+	{
+	ANT_relevance_feedback_factory factory;
+	more_like_term_chooser = factory.get_feedbacker(search_engine, ANT_relevance_feedback_factory::BLIND_KL);
+	}
+
+feedback_terms = more_like_term_chooser->feedback(document, terms, &terms_found);
+
+for (ANT_memory_index_one_node **current = feedback_terms; *current != NULL; current++)
+	query.write((*current)->string.start, (*current)->string.length()) << ' ';
+
+delete [] feedback_terms;
+
+return strnew(query.str().c_str());
+}
+
