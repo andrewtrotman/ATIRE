@@ -37,19 +37,17 @@ while (fgets(buffer, sizeof(buffer), fp) != 0)
 		break;
 fclose(fp);
 
-if (separators == 1)
+
+if ((strrcmp(filename, ".tgz") == 0) || (strrcmp(filename, ".tar.gz") == 0))
+	factory = new ANT_assessment_TREC();		// assume its a TREC assessment file
+else if (separators == 1)
 	factory = new ANT_assessment_ANT();
 else if (separators >= 4)
 	factory = new ANT_assessment_INEX();
 else if (separators == 3)
 	factory = new ANT_assessment_TREC();
 else	
-	{
-	if ((strrcmp(filename, ".tgz") == 0) || (strrcmp(filename, ".tar.gz") == 0))
-		factory = new ANT_assessment_TREC();		// assume its a TREC assessment file
-	else
-		exit(fprintf(stderr, "Unrecognised assessment format.\n"));
-	}
+	exit(fprintf(stderr, "Unrecognised assessment format.\n"));
 
 factory->copy(this);
 
