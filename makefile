@@ -218,6 +218,7 @@ PARTS = \
 	$(OBJDIR)\query_boolean.obj 					\
 	$(OBJDIR)\bitstring.obj 						\
 	$(OBJDIR)\bitstring_iterator.obj 				\
+	$(OBJDIR)\channel_file_star.obj						\
 	$(OBJDIR)\channel_file.obj						\
 	$(OBJDIR)\channel_socket.obj					\
 	$(OBJDIR)\channel_trec.obj						\

@@ -4,6 +4,9 @@
 */
 #include "channel_file.h"
 #include "str.h"
+#include "memory.h"
+#include "instream_file.h"
+#include "instream_file_star.h"
 
 /*
 	ANT_CHANNEL_FILE::ANT_CHANNEL_FILE()
@@ -17,8 +20,9 @@ if (filename == NULL)
 else
 	this->filename = strnew(filename);
 
-infile = stdin;
+eof = false;
 outfile = stdout;
+infile = new ANT_instream_file_star(stdin);
 }
 
 /*
@@ -37,6 +41,8 @@ if (outfile != stdout)
 	fclose(outfile);
 
 delete [] filename;
+delete memory;
+delete infile;
 }
 
 /*
@@ -45,11 +51,13 @@ delete [] filename;
 */
 void ANT_channel_file::connect(void)
 {
-if (filename != NULL && infile == stdin)
+if (filename != NULL && outfile == stdout)
 	{
-	infile = fopen(filename, "a+b");		// open for append
-	fseek(infile, 0L, SEEK_SET);
-	outfile = infile;
+	outfile = fopen(filename, "a+b");		// open for append
+	fseek(outfile, 0L, SEEK_SET);
+
+	memory = new ANT_memory(1024 * 1024);		// use a 1MB buffer;
+	infile = new ANT_instream_file(memory, filename);
 	}
 }
 
@@ -70,11 +78,14 @@ return fwrite(source, (size_t)length, 1, outfile);
 char *ANT_channel_file::block_read(char *into, long long length)
 {
 connect();
-if (feof(infile))
+if (eof)
 	return NULL;
 
-return fread(into, (size_t)length, 1, infile) == 1 ? into : NULL;
+if (infile->read(into, (size_t)length) == 1)
+	return into;
 
+eof = true;
+return NULL;
 }
 
 /*
@@ -85,7 +96,8 @@ char *ANT_channel_file::getsz(char terminator)
 {
 char *buffer = NULL;
 long buffer_length, used, old_length, block_size = 1024;
-long next;
+char next;
+long long got;
 
 buffer_length = used = 0;
 connect();
@@ -93,16 +105,18 @@ connect();
 /*
 	At EOF and so we fail
 */
-if (feof(infile))
+if (eof)
 	return NULL;
 
 buffer = new char [old_length = block_size + 2];
 /*
 	Else we do a gets() and stop when we hit the terminator
 */
-while ((next = fgetc(infile)) != terminator)
+while (got = infile->read(&next, 1))
 	{
-	if  (next == EOF)
+	if (next == terminator)
+		break;
+	if  (got == 0)
 		if (used == 0)
 			{
 			delete [] buffer;
@@ -129,7 +143,7 @@ if (buffer != NULL)
 	buffer[used] = (char)next;
 	buffer[used + 1] = '\0';
 	}
-
+eof = true;
 return buffer;
 }
 

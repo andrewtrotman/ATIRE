@@ -22,6 +22,7 @@ public:
 	virtual ~ANT_instream() {}
 
 	virtual long long read(unsigned char *buffer, long long bytes) = 0;
+	virtual long long read(char *buffer, long long bytes) { return read((unsigned char *)buffer,bytes); }
 } ;
 
 

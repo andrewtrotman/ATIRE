@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "file.h"
 
+
 /*
 	ANT_INSTREAM_FILE::ANT_INSTREAM_FILE()
 	--------------------------------------
