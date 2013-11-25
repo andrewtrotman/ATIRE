@@ -7,6 +7,7 @@
 #include "atire_api_remote.h"
 #include "channel_file.h"
 #include "channel_socket.h"
+#include "channel_trec.h"
 #include "atire_engine_result_set.h"
 #include "atire_client_param_block.h"
 #include "version.h"
@@ -124,6 +125,9 @@ if (params.logo)
 */
 inchannel = new ANT_channel_file(params.queries_filename);
 outchannel = new ANT_channel_file(params.output_forum == ATIRE_client_param_block::NONE ? NULL : params.output_filename);
+
+if (params.queries_format == ATIRE_client_param_block::QUERIES_TREC)
+	inchannel = new ANT_channel_trec(inchannel, params.queries_fields);
 
 /*
 	Are we creating a run for an evaluation forum?

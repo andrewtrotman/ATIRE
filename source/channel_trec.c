@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include "pragma.h"
 #include "str.h"
 #include "stop_word.h"
 #include "ctypes.h"
@@ -63,10 +64,12 @@ static const char *new_stop_words[] =
 ANT_channel_trec::ANT_channel_trec(ANT_channel *in, char *taglist)
 {
 stopper.addstop((const char **)new_stop_words);
-tag = strlower(strnew(taglist));
+tag = strnew(taglist);
 in_channel = in;
 
 read = true;
+number = -1;
+at_eof = false;
 }
 
 /*
@@ -86,6 +89,7 @@ delete in_channel;
 char *ANT_channel_trec::block_read(char *into, long long length)
 {
 exit(printf("ANT_channel_trec::block_read not implemented (class only supports gets())"));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
@@ -96,6 +100,41 @@ exit(printf("ANT_channel_trec::block_read not implemented (class only supports g
 long long ANT_channel_trec::block_write(char *source, long long length)
 {
 exit(printf("ANT_channel_trec::block_write not implemented (class only supports gets())"));
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+
+/*
+	ANT_CHANNEL_TREC::CLEAN()
+	-------------------------
+*/
+char *ANT_channel_trec::clean(long number, ostringstream &raw_query)
+{
+static const char *SEPERATORS = ",./;'[]!@#$%^&*()_+-=\\|<>?:{}\r\n\t \"`~";
+char *from, *ch;
+ostringstream stopped_query;
+
+raw_query << ends;
+from = strnew(strlower((char *)raw_query.str().c_str()));
+for (ch = from; *ch != '\0'; ch++)
+	if (ANT_isspace(*ch))
+		*ch = ' ';
+
+strip_space_inplace(from);
+
+stopped_query << number;
+for (ch = strtok(from, SEPERATORS); ch != NULL; ch = strtok(NULL, SEPERATORS))
+	{
+	if (!stopper.isstop(ch))
+		if (strlen(ch) > 2)			// stop words 2 characters or less
+			if (!isdigit(*ch))		// doesn't contain a number
+				stopped_query << ' ' << ch;
+	}
+stopped_query << ends;
+delete [] from;
+
+//printf("[%s]\n", (char *)stopped_query.str().c_str());
+
+return strnew((char *)stopped_query.str().c_str());
 }
 
 /*
@@ -104,21 +143,27 @@ exit(printf("ANT_channel_trec::block_write not implemented (class only supports 
 */
 char *ANT_channel_trec::getsz(char terminator)
 {
-static const char *SEPERATORS = ",./;'[]!@#$%^&*()_+-=\\|<>?:{}\r\n\t \"`~";
-char *from, *ch;
-long number, match;
+long match, old_number;
+ostringstream raw_query;
 
-number = -1;
+if (at_eof)
+	return NULL;
 
 while (1)
 	{
 	if (read)
 		if ((buffer = in_channel->gets()) == NULL)
-			return NULL;		// at end of input
+			break;		// at end of input
 
 	read = true;
 	if (strncmp(buffer, "<num>", 5) == 0)
+		{
+		old_number = number;
 		number = atol(strchr(buffer, ':') + 1);
+
+		if (old_number >= 0)
+			return clean(old_number, raw_query);
+		}
 	else
 		{
 		match = false;
@@ -134,11 +179,8 @@ while (1)
 			}
 		if (match)
 			{
-			ostringstream raw_query, stopped_query;
-
-			delete [] buffer;
-
 			raw_query << strchr(buffer, '>') + 1;			// character after the "<desc>"
+			delete [] buffer;
 			while ((buffer = in_channel->gets()) != NULL)
 				{
 				if (*buffer == '<')
@@ -150,29 +192,11 @@ while (1)
 				raw_query << ' ' << buffer;
 				delete [] buffer;
 				}
-
-			raw_query << ends;
-			from = (char *)raw_query.str().c_str();
-			strlower(from);
-			for (ch = from; *ch != '\0'; ch++)
-				if (ANT_isspace(*ch))
-					*ch = ' ';
-
-			strip_space_inplace(from);
-
-			stopped_query << number;
-			for (ch = strtok(from, SEPERATORS); ch != NULL; ch = strtok(NULL, SEPERATORS))
-				{
-				if (!stopper.isstop(ch))
-					if (strlen(ch) > 2)			// stop words 2 characters or less
-						if (!isdigit(*ch))		// doesn't contain a number
-							stopped_query << ' ' << ch;
-				}
-			stopped_query << ends;
-
-			return strnew((char *)stopped_query.str().c_str());
 			}
 		}
 	}
-return NULL;
+
+at_eof = true;
+return clean(number, raw_query);
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

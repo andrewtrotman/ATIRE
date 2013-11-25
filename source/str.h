@@ -10,7 +10,7 @@
 #include "ctypes.h"
 
 #ifdef __APPLE__
-#include <stdlib.h>
+	#include <stdlib.h>
 #endif
 
 #ifdef _MSC_VER
@@ -249,15 +249,21 @@ return out;
 
 #define wcsupr wcstrupper
 
-	inline wchar_t *wcstrupper(wchar_t *s) {
-		wchar_t *p = s;
+	/*
+		WCSTRUPPER()
+		------------
+	*/
+	inline wchar_t *wcstrupper(wchar_t *s)
+	{
+	wchar_t *p = s;
 
-		while (*p) {
-			*p = (wchar_t) ANT_toupper(*p);
-			p++;
+	while (*p)
+		{
+		*p = (wchar_t) ANT_toupper(*p);
+		p++;
 		}
 
-		return s;
+	return s;
 	}
 
 #endif

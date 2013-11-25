@@ -7,6 +7,7 @@
 
 #include "stop_word.h"
 #include "channel.h"
+#include <sstream>
 
 /*
 	class ANT_CHANNEL_TREC
@@ -18,8 +19,13 @@ private:
 	ANT_channel *in_channel;
 	ANT_stop_word stopper;
 	char *buffer;
-	long read;
+	long read, at_eof;
+	long number;
 	char *tag;
+
+private:
+	char *clean(long number, 
+std::ostringstream &raw_query);
 
 protected:
 	virtual long long block_write(char *source, long long length);

@@ -69,6 +69,7 @@ private:
 	ANT_ranking_function *ranking_function;	// the ranking function to use (default is the perameterless Divergence From Randomness)
 	ANT_stemmer *stemmer;					// stemming function to use
 	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
+	ANT_relevance_feedback *more_like_term_chooser;	// used to choose terms for "more like this"
 	long feedback_documents;				// documents to analyse in relevance feedback
 	long feedback_terms;					// terms (extracted from top documents) to use in relevance feedback
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
@@ -277,6 +278,11 @@ public:
 		Load a document from the repository (if there is one)
 	*/
 	char *get_document(char *buffer, unsigned long *length, long long id);
+
+	/*
+		Extract the best query terms from the given document
+	*/
+	char *extract_query_terms(char *document, long terms);
 
 	/*
 		Rendering of statistics to do with the last query

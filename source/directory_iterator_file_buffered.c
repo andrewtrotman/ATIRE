@@ -10,10 +10,6 @@
 #include "instream.h"
 #include "directory_iterator_file_buffered.h"
 
-#ifdef _MSC_VER
-	#define strstr	strcasestr
-#endif
-
 /*
 	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::ANT_DIRECTORY_ITERATOR_FILE_BUFFERED()
 	----------------------------------------------------------------------------
@@ -59,7 +55,7 @@ return got;
 */
 ANT_directory_iterator_object *ANT_directory_iterator_file_buffered::next(ANT_directory_iterator_object *object)
 {
-char *start, *document_id_start, *document_id_end;
+char *start, *document_id_start = NULL, *document_id_end = NULL;
 long long bytes_read;
 char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
 
@@ -68,7 +64,7 @@ start = read_buffer + read_buffer_used;
 /*
 	Get the start tag
 */
-if ((document_start = strcasestr(start, "<DOC")) == NULL)
+if ((document_start = strstr(start, "<DOC")) == NULL)
 	{
 	/*
 		We might be at the end of a buffer and half-way through a tag so we copy the remainder of the file to the
@@ -76,14 +72,14 @@ if ((document_start = strcasestr(start, "<DOC")) == NULL)
 	*/
 	memmove(read_buffer, read_buffer + read_buffer_used, buffer_size - read_buffer_used);
 	bytes_read = read(read_buffer + (buffer_size - read_buffer_used), read_buffer_used);
-	if ((bytes_read == 0) || (document_start = strcasestr(read_buffer, "<DOC")) == NULL)
+	if ((bytes_read == 0) || (document_start = strstr(read_buffer, "<DOC")) == NULL)
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
 	}
 
 /*
 	Get the end tag
 */
-if ((document_end = strcasestr(document_start, "</DOC>")) == NULL)
+if ((document_end = strstr(document_start, "</DOC>")) == NULL)
 	{
 	/*
 		This happens when we move find the start tag in the buffer, but the end tag is
@@ -94,7 +90,7 @@ if ((document_end = strcasestr(document_start, "</DOC>")) == NULL)
 	bytes_read = read(read_buffer + buffer_size - (document_start - read_buffer), document_start - read_buffer);
 
 	document_start = read_buffer;
-	if ((bytes_read == 0) || (document_end = strcasestr(document_start, "</DOC>")) == NULL)
+	if ((bytes_read == 0) || (document_end = strstr(document_start, "</DOC>")) == NULL)
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
 	}
 document_end += 6;			// skip to end of tag
@@ -105,18 +101,17 @@ document_end += 6;			// skip to end of tag
 read_buffer_used = document_end - read_buffer;
 
 /*
-	Now get the DOCID (or in the case of NTCIR, the id=
+	Now get the DOCID (or in the case of NTCIR, the id=)
 */
-
-if (!auto_file_id )
+if (!auto_file_id)
 	{
 	if (*(document_start + 4) == '>')
 		{
-		document_id_start = strcasestr(document_start, "<DOCNO>");
+		document_id_start = strstr(document_start, "<DOCNO>");
 		if (document_id_start != NULL)
-			document_id_end = strcasestr(document_id_start += 7, "</DOCNO>");
+			document_id_end = strstr(document_id_start += 7, "</DOCNO>");
 		else
-			++auto_file_id;
+			auto_file_id++;
 		}
 	else
 		{
@@ -126,26 +121,26 @@ if (!auto_file_id )
 			document_start = strchr(document_id_end, '>') + 1;
 		}
 	}
+if (auto_file_id)
+	{
+	document_id_start = document_id_end = file_id_buffer;
+	document_id_end += sprintf(file_id_buffer, "%ld", auto_file_id++);
+	}
 
 /*
 	Copy the id into the document object and get the document
 */
 object->file = NULL;
-if (document_id_end == NULL && !auto_file_id)
+if (document_id_end == NULL)
 	object->filename = strnew("Unknown");
 else
 	{
-	if (auto_file_id)
-		{
-		sprintf(file_id_buffer, "%ld", auto_file_id++);
-		object->filename = strnew(file_id_buffer);
-		}
-	else
-		object->filename = strnnew(document_id_start, document_id_end - document_id_start);
+	object->filename = strnnew(document_id_start, document_id_end - document_id_start);
 
 	if (get_file)
 		read_entire_file(object);
 	}
+
 return object;
 }
 

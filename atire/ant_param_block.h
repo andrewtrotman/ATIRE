@@ -79,6 +79,7 @@ public:
 	long title_length;					// titles should be no longer than this (in characters)
 
 	long query_type;					// NEXI, Boolean, and optionally additionally with relevance feedback
+	char *query_fields;					// in the case of a TREC topic file, which fields should we use (i.e. title, etc).
 	long feedbacker;					// relevance feedback algorithm to use
 	long feedback_documents;			// documents to analyse for feedback terms
 	long feedback_terms;				// terms to add to the query in relevance feedback

@@ -4,7 +4,7 @@
 #
 
 #
-#	DEBUG. Comment out the line below to compile in DEBUG mode
+#	DEBUG. set DEBUG=1 for compile in DEBUG mode.  Set DEBUG=0 for RELEASE mode.
 #
 DEBUG = 0
 			

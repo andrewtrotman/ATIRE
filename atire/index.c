@@ -393,8 +393,12 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::TREC)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
-		scrubber = new ANT_instream_scrub(&file_buffer, file_stream, param_block.scrubbing);
+		if (param_block.scrubbing)
+			scrubber = new ANT_instream_scrub(&file_buffer, file_stream, param_block.scrubbing);
+		else
+			scrubber = file_stream;
 		source = new ANT_directory_iterator_file_buffered(scrubber, ANT_directory_iterator::READ_FILE);
+//		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
 		{

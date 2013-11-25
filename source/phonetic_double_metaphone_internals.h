@@ -387,7 +387,11 @@ private:
 /*
 	ANT:This is the C cedilla French Character
 */
+#ifdef __APPLE__
+			case (tchar)0xC7: // 'Ç':		// character 0xC7 (decimal 199)
+#else
 			case 0xC7: // 'Ç':		// character 0xC7 (decimal 199)
+#endif
 				addMetaphoneCharacter(_TEXT("S"));
 				current += 1;
 				break;
@@ -750,7 +754,11 @@ private:
 /*
 	ANT:This is the N tilde Character (Spanish ene)
 */
+#ifdef __APPLE__
+			case (tchar)0xD1: //'Ñ':		// 0xD1, (decimal 209)
+#else
 			case 0xD1: //'Ñ':		// 0xD1, (decimal 209)
+#endif
 				current += 1;
 				addMetaphoneCharacter(_TEXT("N"));
 				break;

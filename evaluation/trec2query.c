@@ -15,7 +15,7 @@ char buffer[1024 * 1024];
 
 const char *new_stop_words[] =
 	{
-	"alternative",
+//	"alternative",
 	"arguments",
 	"can",
 	"current",

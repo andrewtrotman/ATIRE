@@ -128,7 +128,7 @@ puts("----------");
 puts("-Q[nbtN][-rT][wW]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
-puts("  N             NIST (TREC) query file (from downloaded from trec.nist.gov)");
+puts("  N:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>arrative, <d>escription [default=t]");
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits, density <d>%, and globalstats <f>");
 puts("  -             no relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=17 t=5]");
@@ -337,6 +337,7 @@ return answer;
 */
 void ANT_ANT_param_block::set_feedbacker(char *which)
 {
+char *fields, *check;
 double first, second;
 long done;
 const long perform_query_mask = ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI | ATIRE_API::QUERY_TOPSIG | ATIRE_API::QUERY_TREC_FILE;
@@ -357,6 +358,24 @@ do
 		case 'N':
 			query_type &= ~perform_query_mask;
 			query_type |= ATIRE_API::QUERY_TREC_FILE | ATIRE_API::QUERY_NEXI;
+
+			fields = strchr(which, ':');
+			if (fields == NULL)
+				query_fields = "t";
+			else
+				{
+				fields++;
+				if (*fields == '\0')
+					query_fields = "t";
+				else
+					{
+					for (check = fields; *check != '\0'; check++)
+						if (strchr("tdn", *check) == NULL)
+							exit(printf("Unknown field combination to extract from TREC file:%s\n", fields));
+					query_fields = fields;
+					}
+				}
+			done = TRUE;
 			break;
 		case '-':
 			query_type &= ~ATIRE_API::QUERY_FEEDBACK;
