@@ -15,14 +15,24 @@
 */
 ANT_channel_file::ANT_channel_file(char *filename)
 {
+memory = NULL;
 if (filename == NULL)
 	this->filename = NULL;
 else
 	this->filename = strnew(filename);
 
-eof = false;
-outfile = stdout;
-infile = new ANT_instream_file_star(stdin);
+if (filename == NULL)
+	{
+	outfile = stdout;
+	infile = new ANT_instream_file_star(stdin);
+	eof = false;
+	}
+else
+	{
+	outfile = NULL;
+	infile = NULL;
+	eof = true;
+	}
 }
 
 /*
@@ -37,7 +47,7 @@ ANT_channel_file::~ANT_channel_file()
 	close all other files.  Since outfile and infile are the same we only
 	check one and close that.
 */
-if (outfile != stdout)
+if (outfile != stdout && outfile != NULL)
 	fclose(outfile);
 
 delete [] filename;
@@ -46,28 +56,16 @@ delete infile;
 }
 
 /*
-	ANT_CHANNEL_FILE::CONNECT()
-	---------------------------
-*/
-void ANT_channel_file::connect(void)
-{
-if (filename != NULL && outfile == stdout)
-	{
-	outfile = fopen(filename, "a+b");		// open for append
-	fseek(outfile, 0L, SEEK_SET);
-
-	memory = new ANT_memory(1024 * 1024);		// use a 1MB buffer;
-	infile = new ANT_instream_file(memory, filename);
-	}
-}
-
-/*
 	ANT_CHANNEL_FILE::BLOCK_WRITE()
 	-------------------------------
 */
 long long ANT_channel_file::block_write(char *source, long long length)
 {
-connect();
+if (outfile == NULL)
+	{
+	outfile = fopen(filename, "a+b");		// open for append
+	fseek(outfile, 0L, SEEK_SET);
+	}
 return fwrite(source, (size_t)length, 1, outfile);
 }
 
@@ -77,7 +75,13 @@ return fwrite(source, (size_t)length, 1, outfile);
 */
 char *ANT_channel_file::block_read(char *into, long long length)
 {
-connect();
+if (infile == NULL)
+	{
+	memory = new ANT_memory(1024 * 1024);		// use a 1MB buffer;
+	infile = new ANT_instream_file(memory, filename);
+	eof = false;
+	}
+
 if (eof)
 	return NULL;
 
@@ -95,28 +99,22 @@ return NULL;
 char *ANT_channel_file::getsz(char terminator)
 {
 char *buffer = NULL;
-long buffer_length, used, old_length, block_size = 1024;
-char next;
-long long got;
+long bytes_read, buffer_length, used, old_length, block_size = 1024;
+char next, *got;
 
-buffer_length = used = 0;
-connect();
-
-/*
-	At EOF and so we fail
-*/
-if (eof)
-	return NULL;
+bytes_read = buffer_length = used = 0;
 
 buffer = new char [old_length = block_size + 2];
+*buffer = '\0';
 /*
 	Else we do a gets() and stop when we hit the terminator
 */
-while (got = infile->read(&next, 1))
+while ((got = block_read(&next, 1)) != NULL)
 	{
+	bytes_read++;
 	if (next == terminator)
 		break;
-	if  (got == 0)
+	if  (got == NULL)
 		if (used == 0)
 			{
 			delete [] buffer;
@@ -143,7 +141,13 @@ if (buffer != NULL)
 	buffer[used] = (char)next;
 	buffer[used + 1] = '\0';
 	}
-eof = true;
+
+if (bytes_read == 0)
+	{
+	delete [] buffer;
+	return NULL;
+	}
+
 return buffer;
 }
 

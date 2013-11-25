@@ -24,9 +24,6 @@ private:
 	ANT_memory *memory;
 	long eof;
 
-private:
-	void connect(void);
-
 protected:
 	virtual long long block_write(char *source, long long length);
 	virtual char *block_read(char *into, long long length);
