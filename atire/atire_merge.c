@@ -32,6 +32,7 @@ unsigned char *new_postings_list;
 unsigned char *temp;
 
 ANT_stop_word stop_words;
+
 /*
 	SHOULD_PRUNE()
 	--------------
@@ -63,7 +64,7 @@ else
 /*
 	FIND_END_OF_NODE()
 	------------------
-	Duplicate ANT_memory_index::find_end_of_node to avoid needing a temporary vocab only index
+	Duplicate of ANT_memory_index::find_end_of_node
 */
 ANT_memory_index_hash_node **find_end_of_node(ANT_memory_index_hash_node **start)
 {
@@ -418,7 +419,7 @@ long long terms_so_far = 0;
 double dummy;
 
 uint64_t current_disk_position;
-char file_header[] = "ANT Search Engine Index File\n\0\0";
+char file_header[] = "ATIRE Search Engine Index File\n\0\0";
 
 ANT_merger_param_block param_block(argc, argv);
 long first_param = param_block.parse();
@@ -427,10 +428,8 @@ long long combined_docs = 0, maximum_terms = 0;
 long long number_engines = argc - first_param;
 long long document;
 long long longest_postings = 0;
-long long bytes_used = 0;
-long long bytes_allocated = 0;
 long long document_filenames_start, document_filenames_finish;
-unsigned long longest_document = 0, buffer_size, compress_buffer_size;
+unsigned long longest_document = 0, compress_buffer_size;
 char *document_compress_buffer;
 
 ANT_compression_factory *factory = new ANT_compression_factory;
@@ -459,10 +458,10 @@ for (engine = 0; engine < number_engines; engine++)
 	
 	combined_docs += search_engines[engine]->document_count();
 #ifdef IMPACT_HEADER
-	maximum_terms += search_engines[engine]->get_unique_term_count();
+	maximum_terms += search_engines[engine]->get_unique_term_count(); // Will definitely not be exceeded
 	longest_document = ANT_max((unsigned long)search_engines[engine]->get_variable("~documentlongest"), longest_document);
 #else
-	maximum_terms += 100000;
+	maximum_terms += 100000; // A not-unreasonable guesstimate ... will expand if necessary
 	longest_document = ANT_max((unsigned long)search_engines[engine]->get_longest_document_length(), longest_document);
 #endif
 	
@@ -499,21 +498,21 @@ term_list = new ANT_memory_index_hash_node *[maximum_terms + 1];
 ANT_btree_head_node *header, *current_header, *last_header;
 
 #ifdef IMPACT_HEADER
-ANT_compressable_integer *decompress_buffer = new ANT_compressable_integer[combined_docs];
+	ANT_compressable_integer *decompress_buffer = new ANT_compressable_integer[combined_docs];
 
-ANT_compressable_integer **impact_headers = new ANT_compressable_integer *[number_engines + 1];
-ANT_compressable_integer *quantum_counts = new ANT_compressable_integer[number_engines + 1];
-ANT_compressable_integer *postings_begin = new ANT_compressable_integer[number_engines + 1];
+	ANT_compressable_integer **impact_headers = new ANT_compressable_integer *[number_engines + 1];
+	ANT_compressable_integer *quantum_counts = new ANT_compressable_integer[number_engines + 1];
+	ANT_compressable_integer *postings_begin = new ANT_compressable_integer[number_engines + 1];
 
-ANT_compressable_integer *quantums_processed = new ANT_compressable_integer[number_engines];
-ANT_compressable_integer *current_impact_header;
-ANT_compressable_integer quantum, number_quantums_used, postings_offset;
+	ANT_compressable_integer *quantums_processed = new ANT_compressable_integer[number_engines];
+	ANT_compressable_integer *current_impact_header;
+	ANT_compressable_integer quantum, number_quantums_used, postings_offset;
 
-for (engine = 0; engine < number_engines; engine++)
-	impact_headers[engine] = new ANT_compressable_integer[ANT_impact_header::NUM_OF_QUANTUMS * 3]; // * 3 -> impact values, doc counts, impact offsets
-impact_headers[number_engines] = new ANT_compressable_integer[ANT_impact_header::NUM_OF_QUANTUMS * 3];
+	for (engine = 0; engine < number_engines; engine++)
+		impact_headers[engine] = new ANT_compressable_integer[ANT_impact_header::NUM_OF_QUANTUMS * 3]; // * 3 -> impact values, doc counts, impact offsets
+	impact_headers[number_engines] = new ANT_compressable_integer[ANT_impact_header::NUM_OF_QUANTUMS * 3];
 
-long number_documents, impact_offset;
+	long number_documents, impact_offset;
 #endif
 
 uint8_t zero = 0;
@@ -537,12 +536,12 @@ long long stemmer;
 ANT_file *doclist = new ANT_file;
 ANT_file *index = new ANT_file;
 
-buffer_size = compress_buffer_size = longest_document;
+compress_buffer_size = longest_document;
 document_compress_buffer = new char[longest_document];
 
 unsigned int current_tf;
 #ifndef IMPACT_HEADER
-ANT_compressable_integer **ends = new ANT_compressable_integer*[number_engines];
+	ANT_compressable_integer **ends = new ANT_compressable_integer*[number_engines];
 #endif
 long *should_process = new long[number_engines];
 long previous_docid;
@@ -661,7 +660,7 @@ if (do_documents)
 	}
 
 /*
-	Now for the final ~ variable, length
+	Now for the final ~ variable that needs any new computation, length
 	
 	Because get_document_lengths returns the real lengths we need to add 1 so that they work correctly
 */
@@ -781,8 +780,11 @@ while (should_continue)
 				Work out if we should process this tf value and each engine
 			*/
 			for (engine = 0; engine < number_engines; engine++)
+				{
+				should_process[engine] = false;
 				if (strcmp_results[engine] == 0 && quantums_processed[engine] < quantum_counts[engine] && impact_headers[engine][quantums_processed[engine]] == current_tf)
 					should_process[engine] = process_this_tf = true;
+				}
 
 			if (process_this_tf)
 				{
@@ -858,12 +860,15 @@ while (should_continue)
 			process_this_tf = false;
 			
 			for (engine = 0; engine < number_engines; engine++)
+				{
+				should_process[engine] = false;
 				if (strcmp_results[engine] == 0 && ends[engine] > raw[engine] && *raw[engine] == current_tf)
 					{
 					ends[engine] += 2;
 					raw[engine]++;
 					should_process[engine] = process_this_tf = true;
 					}
+				}
 			
 			if (process_this_tf)
 				{
@@ -1042,15 +1047,9 @@ index->write((unsigned char *)&four_byte, sizeof(four_byte));
 index->close();
 doclist->close();
 
-for (engine = 0; engine < number_engines; engine++)
-	{
-	bytes_used += memory[engine].bytes_used();
-	bytes_allocated += memory[engine].bytes_allocated();
-	}
-
 if (param_block.reporting_frequency != 0)
 	{
-	printf("Finished merge using %lld/%lld bytes in ", bytes_used, bytes_allocated);
+	printf("Finished merge in ");
 	stats.print_elapsed_time();
 	}
 
@@ -1069,13 +1068,14 @@ for (engine = 0; engine < number_engines; engine++)
 	delete leaves[engine];
 	delete search_engines[engine];
 	#ifdef IMPACT_HEADER
-		delete impact_headers[engine];
+		delete [] impact_headers[engine];
 	#endif
 	}
 delete leaves[number_engines];
 delete raw[number_engines];
 #ifdef IMPACT_HEADER
-	delete impact_headers[number_engines];
+	delete [] impact_headers[number_engines];
+	delete [] impact_headers;
 	
 	delete [] decompress_buffer;
 	delete [] quantum_counts;
@@ -1096,7 +1096,10 @@ delete [] term_list;
 delete [] terms;
 delete [] trimpoints;
 
+delete [] postings_list;
+
 delete doclist;
+delete factory;
 delete index;
 delete memory_stats;
 
