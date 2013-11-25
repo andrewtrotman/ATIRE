@@ -62,7 +62,7 @@ puts("  k             English Krovetz stemming");
 puts("  o             English Otago stemming");
 puts("  O             English Otago stemming version 2");
 puts("  p             English Porter stemming (ATIRE's version of Porter v1)");
-puts("  s             English S-Striping stemming");
+puts("  s             English S-Stripping stemming");
 puts("  S             Soundex phonetics");
 #ifdef ANT_HAS_SNOWBALL
 	puts("  X[abcDdEeFfg2hiklnpRrSst] Stemming using the Snowball libraries");
