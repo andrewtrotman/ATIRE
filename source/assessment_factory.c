@@ -43,8 +43,13 @@ else if (separators >= 4)
 	factory = new ANT_assessment_INEX();
 else if (separators == 3)
 	factory = new ANT_assessment_TREC();
-else
-	exit(fprintf(stderr, "Unrecognised assessment format.\n"));
+else	
+	{
+	if ((strrcmp(filename, ".tgz") == 0) || (strrcmp(filename, ".tar.gz") == 0))
+		factory = new ANT_assessment_TREC();		// assume its a TREC assessment file
+	else
+		exit(fprintf(stderr, "Unrecognised assessment format.\n"));
+	}
 
 factory->copy(this);
 

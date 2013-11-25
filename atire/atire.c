@@ -109,7 +109,7 @@ double *ant(ANT_ANT_param_block *params)
 char *print_buffer, *pos;
 ANT_stats_time post_processing_stats;
 char *command, *query, *ranker;
-long topic_id, number_of_queries, evaluation;
+long topic_id = -1, number_of_queries, evaluation;
 long long line;
 long long hits, result, last_to_list, first_to_list;
 ANT_indexer_param_block_rank params_rank;

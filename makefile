@@ -369,6 +369,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_dfiw.obj \
 	$(OBJDIR)\ranking_function_dfiw_idf.obj \
 	$(OBJDIR)\ranking_function_dfi_idf.obj \
+	$(OBJDIR)\instream_memory.obj						\
 	$(OBJDIR)\instream_file_star.obj						\
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\

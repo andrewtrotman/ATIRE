@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "instream_file.h"
 #include "instream_file_star.h"
+#include "instream_deflate.h"
 
 /*
 	ANT_CHANNEL_FILE::ANT_CHANNEL_FILE()
@@ -51,8 +52,8 @@ if (outfile != stdout && outfile != NULL)
 	fclose(outfile);
 
 delete [] filename;
-delete memory;
 delete infile;
+delete memory;
 }
 
 /*
@@ -75,10 +76,17 @@ return fwrite(source, (size_t)length, 1, outfile);
 */
 char *ANT_channel_file::block_read(char *into, long long length)
 {
+long filename_length;
+
 if (infile == NULL)
 	{
 	memory = new ANT_memory(1024 * 1024);		// use a 1MB buffer;
-	infile = new ANT_instream_file(memory, filename);
+
+	filename_length = strlen(filename);
+	if (filename_length > 3 && strcmp(filename + filename_length - 3, ".gz") == 0)
+		infile = new ANT_instream_deflate(memory, new ANT_instream_file(memory, filename));
+	else
+		infile = new ANT_instream_file(memory, filename);
 	eof = false;
 	}
 

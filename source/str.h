@@ -386,4 +386,21 @@ return memmem(buffer, buffer_length, string, strlen(string));
 }
 
 
+/*
+	STRRCMP()
+	---------
+	look for string_2 at the end of string_1
+*/
+static inline long strrcmp(const char *string_1, const char *string_2)
+{
+size_t string_1_length = strlen(string_1);
+size_t string_2_length = strlen(string_2);
+
+if (string_1_length < string_2_length)
+	return 1;
+
+return strcmp(string_1 + string_1_length - string_2_length, string_2);
+}
+
+
 #endif  /* STR_H_ */
