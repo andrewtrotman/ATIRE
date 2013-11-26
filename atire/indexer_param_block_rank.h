@@ -18,6 +18,7 @@ class ANT_indexer_param_block_rank : public ANT_ranking_function_factory
 public:
 	enum
 		{
+		NONE = 0x0000,
 		BM25 = 0x0001,
 		IMPACT = 0x0002,
 		READABLE = 0x0004,
@@ -47,12 +48,19 @@ protected:
 
 public:
 	long long ranking_function;			// what ranking function should we use?
+	long long feedback_ranking_function;			// what ranking function should we use?
 
 	double lmd_u;						// the u value for Language Modelling with Dirichlet smoothing
 	double lmds_u;						// the u value for Language Modelling with Dirichlet smoothing (Petri et al.)
 	double lmjm_l;						// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
 	double bm25_k1, bm25_b;				// the k1 and b value for BM25
 	double kbtfidf_k, kbtfidf_b;		// the k and b paramters for KBTFIDF
+
+	double feedback_lmd_u;							// the u value for Language Modelling with Dirichlet smoothing
+	double feedback_lmds_u;							// the u value for Language Modelling with Dirichlet smoothing (Petri et al.)
+	double feedback_lmjm_l;							// the l (lamda) value for Language Modelling with Jelinek-Mercer smoothing
+	double feedback_bm25_k1, feedback_bm25_b;		// the k1 and b value for BM25
+	double feedback_kbtfidf_k, feedback_kbtfidf_b;	// the k and b paramters for KBTFIDF
 
 	int ascending;						// ascending/descending switch for docid ranking
 	char *field_name;					// field to rank on for pregens
@@ -73,7 +81,7 @@ public:
 	ANT_indexer_param_block_rank();
 	virtual ~ANT_indexer_param_block_rank();
 
-	virtual int set_ranker(char *which);
+	virtual int set_ranker(char *which, long feedbacker = false);
 } ;
 
 #endif /* INDEXER_PARAM_BLOCK_RANK_H_ */

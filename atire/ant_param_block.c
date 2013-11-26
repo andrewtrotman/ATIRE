@@ -132,6 +132,7 @@ puts("  N:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>ar
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits, density <d>%, and globalstats <f>");
 puts("  -             no relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=17 t=5]");
+puts("  R:<ranker>    Use <ranker> as the relevance feedback ranking function (<ranker> is a valid RANKING FUNCTION, excludes pregen)");
 puts("  T:<d>         TopSig blind relevance feedback, analysing <d> top documents [default d=10]");
 puts("  w:<t>         WordNet tf-merging (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
 puts("  W:<t>         WordNet query expansion (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
@@ -180,7 +181,7 @@ puts("------------------------");
 puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
-ANT_indexer_param_block_rank::help("RANKING", 'R', search_functions);		// ranking functions
+ANT_indexer_param_block_rank::help("RANKING FUNCTION", 'R', search_functions);		// ranking functions
 puts("-r[n]           Quantize search results in n bits [default n=maths!]");
 puts("");
 
@@ -399,6 +400,11 @@ do
 				feedback_documents = (long)first;
 			if (second != -1)
 				feedback_terms = (long)second;
+			done = TRUE;
+			break;
+		case 'R':
+			if (!set_ranker(which + 1, TRUE))
+				exit(printf("Bad feedback ranking function or ranking parameters '%s'\n", which + 1));
 			done = TRUE;
 			break;
 		case 'T':

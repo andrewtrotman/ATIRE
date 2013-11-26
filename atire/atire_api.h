@@ -68,10 +68,11 @@ private:
 	ANT_search_engine *search_engine;		// the search engine itself
 	ANT_ranking_function *ranking_function;	// the ranking function to use (default is the perameterless Divergence From Randomness)
 	ANT_stemmer *stemmer;					// stemming function to use
-	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
 	ANT_relevance_feedback *more_like_term_chooser;	// used to choose terms for "more like this"
+	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
 	long feedback_documents;				// documents to analyse in relevance feedback
 	long feedback_terms;					// terms (extracted from top documents) to use in relevance feedback
+	ANT_ranking_function *feedback_ranking_function;	// the ranking function to use with relevance feedback
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
 	long long hits;							// how many documents were found at the last query
 	long long sort_top_k;					// ranking is only accurate to this position in the results list
@@ -82,7 +83,7 @@ private:
 	long long documents_in_id_list;			// the length of the above two lists (the number of docs in the collection)
 	char *mem1, *mem2;						// arrays of memory holding the above;
 
-	ANT_assessment_factory *assessment_factory;		// the machinery to read different formats of assessments (INEX and TREC)
+	ANT_assessment_factory *assessment_factory;			// the machinery to read different formats of assessments (INEX and TREC)
 	ANT_relevant_document *assessments;		// assessments for measuring percision (at TREC and INEX)
 	long long number_of_assessments;		// length of the assessments array
 	ANT_evaluator *evaluator;
@@ -122,11 +123,12 @@ private:
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
+	ANT_ranking_function *decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
 	long process_NEXI_query(char *query);
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
 	long process_topsig_query(ANT_NEXI_term_ant *parse_tree);
 	void boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves);
-	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree);
+	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function);
 	long process_boolean_query(char *query);
 	long process_topsig_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
@@ -186,6 +188,7 @@ public:
 		for LMD:  u = p1
 		for LMJM: l = p1
 	*/
+	long set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
 	long set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
 	long set_ranking_function_pregen(const char *fieldname, double p1);
 

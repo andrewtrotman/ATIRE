@@ -34,7 +34,7 @@ const long MAX_TITLE_LENGTH = 1024;
 ATIRE_API *atire = NULL;
 
 ATIRE_API *ant_init(ANT_ANT_param_block & params);
-int ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params);
+long ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params);
 int run_atire(int argc, char *argv[]);
 int run_atire(char *files);
 
@@ -649,27 +649,66 @@ return mean_average_precision;
 	Set up the ranking portion of the API parameters from the given ANT_indexer_param_block_rank
 	Return true if successful. On failure, the API is not altered.
 */
-int ant_init_ranking(ATIRE_API *atire, ANT_indexer_param_block_rank &params)
+long ant_init_ranking(ATIRE_API *atire, ANT_indexer_param_block_rank &params)
 {
+long ranker_ok;
+
 switch (params.ranking_function)
 	{
 	case ANT_indexer_param_block_rank::BM25:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.bm25_k1, params.bm25_b) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.bm25_k1, params.bm25_b) == 0;
+		break;
 	case ANT_indexer_param_block_rank::LMD:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmd_u, 0.0) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmd_u, 0.0) == 0;
+		break;
 	case ANT_indexer_param_block_rank::LMDS:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmds_u, 0.0) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmds_u, 0.0) == 0;
+		break;
 	case ANT_indexer_param_block_rank::LMJM:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmjm_l, 0.0) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmjm_l, 0.0) == 0;
+		break;
 	case ANT_indexer_param_block_rank::KBTFIDF:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.kbtfidf_k, params.kbtfidf_b) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.kbtfidf_k, params.kbtfidf_b) == 0;
+		break;
 	case ANT_indexer_param_block_rank::DOCID:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.ascending, 0) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.ascending, 0) == 0;
+		break;
 	case ANT_indexer_param_block_rank::PREGEN:
-		return atire->set_ranking_function_pregen(params.field_name, params.ascending) == 0;
+		ranker_ok = atire->set_ranking_function_pregen(params.field_name, params.ascending) == 0;
+		break;
 	default:
-		return atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, 0.0, 0.0) == 0;
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, 0.0, 0.0) == 0;
+		break;
 	}
+if (!ranker_ok)
+	return ranker_ok;
+
+switch (params.feedback_ranking_function)
+	{
+	case ANT_indexer_param_block_rank::BM25:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_bm25_k1, params.feedback_bm25_b) == 0;
+		break;
+	case ANT_indexer_param_block_rank::LMD:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_lmd_u, 0.0) == 0;
+		break;
+	case ANT_indexer_param_block_rank::LMDS:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_lmds_u, 0.0) == 0;
+		break;
+	case ANT_indexer_param_block_rank::LMJM:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_lmjm_l, 0.0) == 0;
+		break;
+	case ANT_indexer_param_block_rank::KBTFIDF:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_kbtfidf_k, params.feedback_kbtfidf_b) == 0;
+		break;
+	case ANT_indexer_param_block_rank::DOCID:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.ascending, 0.0) == 0;
+		break;
+	default:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, 0.0, 0.0) == 0;
+		break;
+	}
+
+return ranker_ok;
 }
 
 /*

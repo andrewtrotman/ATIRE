@@ -122,6 +122,7 @@ expander_tf = NULL;
 expander_query = NULL;
 more_like_term_chooser = NULL;
 feedbacker = NULL;
+feedback_ranking_function = NULL;
 feedback_documents = feedback_terms = 10;
 query_type_is_all_terms = FALSE;
 hits = 0;
@@ -418,7 +419,6 @@ if (pregen_count > 0)
 	return &pregens[0];
 
 return NULL;
-
 }
 
 /*
@@ -427,10 +427,48 @@ return NULL;
 	returns:
 		0 on success
 		1 on failure
-
-	On failure, the API is left unchanged.
 */
 long ATIRE_API::set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+{
+ANT_ranking_function *new_function;
+
+if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
+	return 1;
+
+ranking_function = new_function;
+
+return 0;
+}
+
+/*
+	ATIRE_API::SET_FEEDBACK_RANKING_FUNCTION()
+	------------------------------------------
+	returns:
+		0 on success
+		1 on failure
+*/
+long ATIRE_API::set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+{
+ANT_ranking_function *new_function;
+
+if (function == ANT_ANT_param_block::NONE)
+	new_function = NULL;
+else
+	if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
+		return 1;
+
+feedback_ranking_function = new_function;
+
+return 0;
+}
+
+/*
+	ATIRE_API::DECODE_RANKING_FUNCTION()
+	------------------------------------
+	returns:
+		NULL on failure
+*/
+ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
 {
 ANT_ranking_function *new_function;
 
@@ -453,7 +491,7 @@ if (search_engine->quantized())
 		case ANT_ANT_param_block::DFIW:
 		case ANT_ANT_param_block::DFI_IDF:
 		case ANT_ANT_param_block::DFIW_IDF:
-			return 1;		// failure because we're a quantized ranking function and we don't have TF values in the index
+			return NULL;		// failure because we're a quantized ranking function and we don't have TF values in the index
 		}
 	}
 
@@ -519,13 +557,10 @@ switch (function)
 		break;
 	default:
 		printf("Error: Unknown ranking function selected in ATIRE_API::set_ranking_function\n");
-		return 1;		// failure, invalid parameter
+		return NULL;		// failure, invalid parameter
 	}
 
-delete ranking_function;
-ranking_function = new_function;
-
-return 0;		// success
+return new_function;
 }
 
 /*
@@ -917,7 +952,7 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 	ATIRE_API::PROCESS_NEXI_QUERY()
 	-------------------------------
 */
-long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree)
+long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function)
 {
 ANT_NEXI_term_ant *term_string;
 ANT_NEXI_term_iterator term;
@@ -1045,7 +1080,7 @@ return terms_in_query;
 */
 long ATIRE_API::process_NEXI_query(char *query)
 {
-return process_NEXI_query(parse_NEXI_query(query));
+return process_NEXI_query(parse_NEXI_query(query), ranking_function);
 }
 
 /*
@@ -1267,7 +1302,7 @@ if (parsed_query->subtype == ANT_query::DISJUNCTIVE || feedbacker != NULL)
 
 	if (parsed_query->subtype == ANT_query::DISJUNCTIVE)
 		{
-		answer = process_NEXI_query(parsed_query->NEXI_query);
+		answer = process_NEXI_query(parsed_query->NEXI_query, ranking_function);
 		if (feedbacker == NULL)
 			{
 			delete [] parsed_query->NEXI_query;
@@ -1417,7 +1452,7 @@ if (parsed_query->feedback_terms_in_query != 0)
 		Generate query, search, and clean up
 	*/
 	query_object_with_feedback_to_NEXI_query();
-	process_NEXI_query(parsed_query->NEXI_query);
+	process_NEXI_query(parsed_query->NEXI_query, feedback_ranking_function == NULL ? ranking_function : feedback_ranking_function);
 	delete [] parsed_query->feedback_terms;
 	delete [] parsed_query->NEXI_query;
 
@@ -1467,7 +1502,7 @@ if (feedback_vector != NULL)
 			else
 				search_engine->process_one_search_term(as_string.string(), topsig_negative_ranking_function);
 			}
-	printf("%d of %lld bits set in query\n", set, (long long)topsig_width);
+//	printf("%d of %lld bits set in query\n", set, (long long)topsig_width);
 
 	/*
 		Rank

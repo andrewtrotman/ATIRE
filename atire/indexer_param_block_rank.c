@@ -44,15 +44,16 @@ delete [] field_name;
 */
 ANT_indexer_param_block_rank::ANT_indexer_param_block_rank()
 {
+feedback_ranking_function = NONE;
 ranking_function = BM25;
-lmd_u = ANT_RANKING_FUNCTION_LMD_DEFAULT_U;
-lmds_u = ANT_RANKING_FUNCTION_LMDS_DEFAULT_U;
-lmjm_l = ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA;
-bm25_k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1;
-bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
 
-kbtfidf_k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K;
-kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
+feedback_lmd_u = lmd_u = ANT_RANKING_FUNCTION_LMD_DEFAULT_U;
+feedback_lmds_u = lmds_u = ANT_RANKING_FUNCTION_LMDS_DEFAULT_U;
+feedback_lmjm_l = lmjm_l = ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA;
+feedback_bm25_k1 = bm25_k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1;
+feedback_bm25_b = bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
+feedback_kbtfidf_k = kbtfidf_k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K;
+feedback_kbtfidf_b = kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
 
 ascending = 1;
 field_name = NULL;
@@ -105,32 +106,42 @@ else
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::SET_RANKER()
 	------------------------------------------
-
 	Parse the string to determine which ranking function (and parameters) to use.
+	If the feedbacker parameter is true then set the ranking parameters for the feedbacker
 
 	Returns non-zero on success, 0 on failure (e.g. no such ranking function or bad parameters).
 	Failure leaves the parsed information in an undefined state.
 */
-int ANT_indexer_param_block_rank::set_ranker(char *which)
+int ANT_indexer_param_block_rank::set_ranker(char *which, long feedbacker)
 {
-char * separator;
+char *separator;
+long ranking_function;
 
 if (strncmp(which, "BM25", 4) == 0)
 	{
 	ranking_function = BM25;
-	get_two_parameters(which + 4, &bm25_k1, &bm25_b);
+	if (feedbacker)
+		get_two_parameters(which + 4, &feedback_bm25_k1, &feedback_bm25_b);
+	else
+		get_two_parameters(which + 4, &bm25_k1, &bm25_b);
 //	printf("K1=%f B=%f\n", bm25_k1, bm25_b);
 	}
 else if (strncmp(which, "lmds", 4) == 0)
 	{
 	ranking_function = LMDS;
-	get_one_parameter(which + 4, &lmds_u);
+	if (feedbacker)
+		get_one_parameter(which + 4, &feedback_lmds_u);
+	else
+		get_one_parameter(which + 4, &lmds_u);
 //	printf("U = %f\n", lmds_u);
 	}
 else if (strncmp(which, "lmd", 3) == 0)
 	{
 	ranking_function = LMD;
-	get_one_parameter(which + 3, &lmd_u);
+	if (feedbacker)
+		get_one_parameter(which + 3, &feedback_lmd_u);
+	else
+		get_one_parameter(which + 3, &lmd_u);
 //	printf("U = %f\n", lmd_u);
 	}
 else if (strncmp(which, "lmjm", 4) == 0)
@@ -138,6 +149,15 @@ else if (strncmp(which, "lmjm", 4) == 0)
 	ranking_function = LMJM;
 	get_one_parameter(which + 4, &lmjm_l);
 //	printf("L = %f\n", lmjm_l);
+	}
+else if (strcmp(which, "kbtfidf") == 0)
+	{
+	ranking_function = KBTFIDF;
+	if (feedbacker)
+		get_two_parameters(which + 7, &feedback_kbtfidf_k, &feedback_kbtfidf_b);
+	else
+		get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
+//	printf("K=%f B=%f\n", kbtfidf_k, kbtfidf_b);
 	}
 else if (strcmp(which, "be") == 0)
 	ranking_function = BOSE_EINSTEIN;
@@ -177,7 +197,7 @@ else if (strcmp(which, "docidd") == 0)
 	ranking_function = DOCID;
 	ascending = 0;
 	}
-else if (strncmp(which, "pregen:", strlen("pregen:")) == 0)
+else if ((strncmp(which, "pregen:", strlen("pregen:")) == 0) && !feedbacker)
 	{
 	ranking_function = PREGEN;
 	delete [] field_name;
@@ -193,13 +213,13 @@ else if (strncmp(which, "pregen:", strlen("pregen:")) == 0)
 	else
 		ascending = 0;
 	}
-else if (strcmp(which, "kbtfidf") == 0)
-	{
-	ranking_function = KBTFIDF;
-	get_two_parameters(which + 7, &kbtfidf_k, &kbtfidf_b);
-	}
 else
 	return 0; //Unknown Ranking Function
+
+if (feedbacker)
+	this->feedback_ranking_function = ranking_function;
+else
+	this->ranking_function = ranking_function;
 
 return 1;
 }
