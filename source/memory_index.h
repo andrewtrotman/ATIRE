@@ -104,6 +104,10 @@ private:
 	long long doc_count_size;
 	long long impact_offset_size;
 #endif
+	/*
+		These are needed for impact_order() and impact_order_with_header()
+	*/
+	ANT_compressable_integer bucket_size[1 << 16], bucket_prev_docid[1 << 16], *pointer[1 << 16];
 
 private:
 	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
