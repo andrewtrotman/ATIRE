@@ -155,10 +155,11 @@ puts("");
 
 puts("READABILITY");
 puts("-----------");
-puts("-R[ndf]         Calculate readability using one of:");
+puts("-R[ndft]         Calculate readability using one of:");
 puts("   n            none [default]");
 puts("   d            Dale-Chall");
 puts("   f            Flesch-Kincaid");
+puts("   t            Special tags (such as TITLE, CATEGORY) weighting");
 puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
@@ -259,6 +260,7 @@ for (measure = measures; *measure != '\0'; measure++)
 		case 'n': readability_measure = ANT_readability_factory::NONE; break;
 		case 'd': readability_measure |= ANT_readability_factory::DALE_CHALL; break;
 		case 'f': readability_measure |= ANT_readability_factory::FLESCH_KINCAID; break;
+		case 't': readability_measure = ANT_readability_factory::TAG_WEIGHTING; break;
 		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}
 }
@@ -369,6 +371,7 @@ long ANT_indexer_param_block::parse(void)
 {
 long param;
 char *command;
+char *start;
 
 for (param = 1; param < argc; param++)
 	{
@@ -390,8 +393,19 @@ for (param = 1; param < argc; param++)
 		else if (strncmp(command, "rtrec", 5) == 0)
 			{
 			recursive = TREC;
+			doc_tag = NULL;
+			docno_tag = NULL;
 			if (strncmp(command + 5, ":clean", 6) == 0)
 				scrub("an");
+			else if (strncmp(command + 5, ":tag", 4) == 0)
+				{
+				doc_tag = command + 10;
+				if ((start = strchr(doc_tag, ':')) != NULL)
+					{
+					*start = '\0';
+					docno_tag = ++start;
+					}
+				}
 			}
 		else if (strncmp(command, "rrtrec", 6) == 0)
 			{

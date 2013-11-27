@@ -53,6 +53,8 @@ public:
 	void set_document(char *document) { set_document((unsigned char *)document); }
 	void set_document(unsigned char *document);
 	virtual ANT_parser_token *get_next_token(void);
+	long get_segment_info();
+	void set_segment_info(long should_segment);
 } ;
 
 #endif  /* PARSER_H_ */

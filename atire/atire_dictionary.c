@@ -202,7 +202,8 @@ raw = (ANT_compressable_integer *)malloc((size_t)raw_list_size);
 for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 	{
 	iterator.get_postings_details(&leaf);
-	if (last_term != NULL && strcmp(last_term, term) < 0)
+	if ((last_term != NULL && strcmp(last_term, term) < 0)
+			|| (first_term != NULL && last_term == NULL && strncmp(first_term, term, strlen(first_term)) != 0))
 		break;
 	else
 		{
