@@ -336,6 +336,7 @@ PARTS = \
 	$(OBJDIR)\compression_text_factory.obj			\
 	$(OBJDIR)\readability_dale_chall.obj			\
 	$(OBJDIR)\readability_factory.obj				\
+	$(OBJDIR)\readability_tag_weighting.obj				\
 	$(OBJDIR)\search_engine_readability.obj			\
 	$(OBJDIR)\plugin_manager.obj					\
 	$(OBJDIR)\indexer_param_block_rank.obj			\
