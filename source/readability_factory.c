@@ -26,15 +26,6 @@ measure[4] = new ANT_readability_TAG_WEIGHTING();
 }
 
 /*
-	ANT_READABILITY_FACTORY::ANT_READABILITY_FACTORY()
-	--------------------------------------------------
-*/
-ANT_readability_factory::ANT_readability_factory(ANT_parser *parser) : ANT_readability_factory()
-{
-this->parser = parser;
-}
-
-/*
 	ANT_READABILITY_FACTORY::~ANT_READABILITY_FACTORY()
 	---------------------------------------------------
 */

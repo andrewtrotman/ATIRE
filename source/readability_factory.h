@@ -29,7 +29,6 @@ private:
 
 public:
 	ANT_readability_factory();
-	ANT_readability_factory(ANT_parser *parser);
 	virtual ~ANT_readability_factory();
 	
 	ANT_parser_token *get_next_token(void);
