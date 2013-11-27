@@ -26,7 +26,11 @@ read_buffer_used = buffer_size;
 this->auto_file_id = 0;
 
 doc_tag = new char*[2];
+doc_tag[0] = NULL;
+doc_tag[1] = NULL;
 docno_tag = new char*[2];
+docno_tag[0] = NULL;
+docno_tag[1] = NULL;
 set_tags("DOC", "DOCNO");
 }
 
@@ -167,7 +171,7 @@ return object;
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::FREE_TAG()
-	--------------------------------------------------------
+	------------------------------------------------
  */
 void ANT_directory_iterator_file_buffered::free_tag()
 {
@@ -180,17 +184,17 @@ for (int i = 0; i < 2; ++i)
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::SET_TAGS()
-	--------------------------------------------------------
+	------------------------------------------------
  */
 void ANT_directory_iterator_file_buffered::set_tags(char *doc_name, char *docno_name)
 {
-	free_tag();
-	doc_tag[0] = new char[strlen(doc_name) + 2];   //"<" \0
-	doc_tag[1] = new char[strlen(doc_name) + 4];  // "</>" plus \0
-	docno_tag[0] = new char[strlen(docno_name) + 3];  //"<DOCNO>",  extra 3 bytes include < > \0
-	docno_tag[1] = new char[strlen(docno_name) + 4];  // </DOCNO>", extra 3 bytes include </ > \0
-	sprintf(doc_tag[0], "<%s", doc_name);
-	sprintf(doc_tag[1], "</%s>", doc_name);
-	sprintf(docno_tag[0], "<%s>", docno_name);
-	sprintf(docno_tag[1], "</%s>", docno_name);
+free_tag();
+doc_tag[0] = new char[strlen(doc_name) + 2];   //"<" \0
+doc_tag[1] = new char[strlen(doc_name) + 4];  // "</>" plus \0
+docno_tag[0] = new char[strlen(docno_name) + 3];  //"<DOCNO>",  extra 3 bytes include < > \0
+docno_tag[1] = new char[strlen(docno_name) + 4];  // </DOCNO>", extra 3 bytes include </ > \0
+sprintf(doc_tag[0], "<%s", doc_name);
+sprintf(doc_tag[1], "</%s>", doc_name);
+sprintf(docno_tag[0], "<%s>", docno_name);
+sprintf(docno_tag[1], "</%s>", docno_name);
 }

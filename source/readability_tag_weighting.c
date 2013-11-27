@@ -1,8 +1,8 @@
 /*
- * readability_TAG_WEIGHTING.cpp
- *
- *  Created on: 23/11/2013
- *      Author: monfee
+	READABILITY_TAG_WEIGHTING.C
+	---------------------------
+ 	Created on: 23/11/2013
+ 	Author: monfee
  */
 
 #include "readability_tag_weighting.h"
@@ -15,25 +15,25 @@
 	#define TRUE (!FALSE)
 #endif
 
-char **ANT_readability_TAG_WEIGHTING::special_tags = (char *[]) {"CATEGORY", "TITLE"};
+char *ANT_readability_TAG_WEIGHTING::special_tags[] = {"CATEGORY", "TITLE"};
 
 /*
 	ANT_READABILITY_TAG_WEIGHTING::~ANT_READABILITY_TAG_WEIGHTING()
-	---------------------------------------------------
+	---------------------------------------------------------------
 */
 ANT_readability_TAG_WEIGHTING::ANT_readability_TAG_WEIGHTING()
 {
-	number_of_tags = 2;
-	matching_tag = NULL;
-	where = -1;
-	term_count = 0;
-	tag_processing_on = FALSE;
-	terms = new char*[MAX_TERM_COUNT + 1];
+number_of_tags = 2;
+matching_tag = NULL;
+where = -1;
+term_count = 0;
+tag_processing_on = FALSE;
+terms = new char*[MAX_TERM_COUNT + 1];
 }
 
 /*
 	ANT_READABILITY_TAG_WEIGHTING::~ANT_READABILITY_TAG_WEIGHTING()
-	---------------------------------------------------
+	---------------------------------------------------------------
 */
 ANT_readability_TAG_WEIGHTING::~ANT_readability_TAG_WEIGHTING()
 {
@@ -43,7 +43,7 @@ delete [] terms;
 
 /*
 	READABILITY_TAG_WEIGHTING::HANDLE_TAG()
-	----------------------------------
+	---------------------------------------
 */
 void ANT_readability_TAG_WEIGHTING::clean_up()
 {
@@ -58,7 +58,7 @@ term_count = 0;
 
 /*
 	READABILITY_TAG_WEIGHTING::HANDLE_TAG()
-	----------------------------------
+	---------------------------------------
 */
 void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_string_pair *tag, long tag_open, ANT_parser *parser)
 {

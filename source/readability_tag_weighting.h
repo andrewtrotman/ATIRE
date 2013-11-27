@@ -1,6 +1,6 @@
 /*
 	READABILITY_TAG_WEIGHTING.H
-	------------------------
+	---------------------------
  */
 
 #ifndef READABILITY_TAG_WEIGHTING_H_
@@ -18,18 +18,18 @@ class ANT_string_pair;
 class ANT_readability_TAG_WEIGHTING : public ANT_readability
 {
 private:
-	static char 	**special_tags;
+	static char *special_tags[];
 
 private:
-	const char 	*matching_tag;
-	int				number_of_tags;
-	char				**terms;
-	int				where;
-	char				info_buf[MAX_TERM_LENGTH];
-	long				tag_processing_on;
-	int				term_count;
-	char				prefix_char;
-	long 			should_segment;  // for keeping the old segment information
+	const char *matching_tag;
+	int number_of_tags;
+	char **terms;
+	int where;
+	char info_buf[MAX_TERM_LENGTH];
+	long tag_processing_on;
+	int term_count;
+	char prefix_char;
+	long should_segment;  // for keeping the old segment information
 
 private:
 	void clean_up();
