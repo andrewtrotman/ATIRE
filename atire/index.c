@@ -204,7 +204,8 @@ index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
 index->set_term_culling(param_block.stop_word_removal, param_block.stop_word_df_threshold, param_block.stop_word_df_frequencies);
 
-if (param_block.readability_measure == ANT_readability_factory::NONE)
+if (param_block.readability_measure == ANT_readability_factory::NONE
+		|| param_block.readability_measure == ANT_readability_factory::TAG_WEIGHTING)
 	parser = new ANT_parser(param_block.segmentation);
 else
 	parser = new ANT_parser_readability();
@@ -397,7 +398,10 @@ for (param = first_param; param < argc; param++)
 			scrubber = new ANT_instream_scrub(&file_buffer, file_stream, param_block.scrubbing);
 		else
 			scrubber = file_stream;
-		source = new ANT_directory_iterator_file_buffered(scrubber, ANT_directory_iterator::READ_FILE);
+		ANT_directory_iterator_file_buffered *buffered_file_iterator = new ANT_directory_iterator_file_buffered(scrubber, ANT_directory_iterator::READ_FILE);
+		if (param_block.doc_tag != NULL && param_block.docno_tag != NULL)
+			buffered_file_iterator->set_tags(param_block.doc_tag, param_block.docno_tag);
+		source = buffered_file_iterator;
 //		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
