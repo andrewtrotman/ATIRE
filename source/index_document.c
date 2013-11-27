@@ -116,9 +116,10 @@ while ((token = readability->get_next_token()) != NULL)
 		case TT_TAG_OPEN:
 			if ((stopword_mode & ANT_memory_index::PRUNE_TAGS) == 0)
 				readability->handle_node(indexer->add_term(token, doc));						// open tag
+			readability->handle_tag(token, TRUE);
 			break;
 		case TT_TAG_CLOSE:
-			//no-op
+			readability->handle_tag(token, FALSE);
 			break;
 		case TT_PUNCTUATION:
 			//no-op
@@ -132,7 +133,7 @@ while ((token = readability->get_next_token()) != NULL)
 if (terms_in_document != 0)
 	{
 	indexer->set_document_length(doc, terms_in_document);
-	readability->index(indexer);
+	readability->index(indexer, doc);
 	}
 
 return terms_in_document;

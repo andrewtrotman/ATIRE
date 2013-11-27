@@ -10,7 +10,7 @@
 //extern "C" {
 //#endif
 
-extern int atire_index(char *files);
+extern int atire_index(char *options);
 //extern FILE *atire_output;
 
 //#ifdef __cplusplus
