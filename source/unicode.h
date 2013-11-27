@@ -54,6 +54,7 @@ int utf8_tolower(unsigned char **dest, size_t *destlen, const unsigned char **sr
 unsigned char *utf8_tolower(unsigned char *here);
 inline char *utf8_tolower(char *here) { return (char *)utf8_tolower((unsigned char *)here); }
 
+ANT_UNICODE_chartype unicode_chartype_utf8(unsigned char *current, unsigned long *character, long *bytes);
 ANT_UNICODE_chartype unicode_chartype(unsigned long character);
 unsigned char unicode_chartype_set(unsigned long character);
 int unicode_xml_class(unsigned long character);

@@ -9,6 +9,23 @@
 #include <stdlib.h>
 
 /*
+	UNICODE_CHARTYPE_ASCII[]
+	------------------------
+	Given an ASCII character (ch < 0x80), return the char type by looking up in this table
+*/
+ANT_UNICODE_chartype unicode_chartype_ASCII[] =
+{
+CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_SEPARATOR, CT_SEPARATOR, CT_SEPARATOR, CT_SEPARATOR, CT_SEPARATOR, CT_OTHER, CT_OTHER, 
+CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, 
+CT_SEPARATOR, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, 
+CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_NUMBER, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, 
+CT_PUNCTUATION, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, 
+CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, 
+CT_PUNCTUATION, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, 
+CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_LETTER, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_PUNCTUATION, CT_OTHER
+};
+
+/*
 	UNICODE_XML_CLASS()
 	-------------------
 	Classify the given Unicode character according to the XML spec,
@@ -203,8 +220,8 @@ if (!*buflen)
 
 if (character <= LAST_ASCII_CHAR)
 	{
-	**buf = ANT_tolower((unsigned char) character);
-	
+	**buf = ANT_tolower((unsigned char)character);
+
 	*buf = *buf + 1;
 	*buflen = *buflen - 1;
 
@@ -265,6 +282,55 @@ if (character <= LAST_ASCII_CHAR)
 	}
 
 return ANT_UNICODE_search_chartype(character);
+}
+
+
+
+/*
+	UNICODE_CHARTYPE_UTF8()
+	-----------------------
+	Given a pointer to a UTF-8 string, convert into a wide and return: it, its length (in bytes), and its chartype
+*/
+ANT_UNICODE_chartype unicode_chartype_utf8(unsigned char *current, unsigned long *character, long *bytes)
+{
+if (*current < 0x80)
+	{
+	*bytes = 1;
+	*character = *current;
+	return unicode_chartype_ASCII[*character];
+	}
+else if ((*current & 0xE0) == 0xC0)
+	{
+	*bytes = 2;
+	if (current[1] >> 6 == 2)
+		*character = ((*current & 0x1F) << 6) | (*(current + 1) & 0x3F);
+	else
+		*character = 0;
+	}
+else if ((*current & 0xF0) == 0xE0)
+	{
+	*bytes = 3;
+	if ((current[1] >> 6 == 2) && (current[2] >> 6 == 2))
+		*character = ((*current & 0x0F) << 12) | ((*(current + 1) & 0x3F) << 6) | (*(current + 2) & 0x3F);
+	else
+		*character = 0;
+	}
+else if ((*current & 0xF8) == 0xF0)
+	{
+	*bytes = 4;
+	if ((current[1] >> 6 == 2) && (current[2] >> 6 == 2) && (current[3] >> 6 == 2))
+		*character = ((*current & 0x07) << 18) | ((*(current + 1) & 0x3F) << 12) | ((*(current + 2) & 0x3F) << 6) | (*(current + 3) & 0x3F);
+	else
+		*character = 0;
+	}
+else
+	{
+	*bytes = 8;
+	*character = 0;
+	return CT_OTHER;
+	}
+
+return (ANT_UNICODE_chartype)(ANT_UNICODE_search_chartype(*character) & ~CT_CHINESE);
 }
 
 /*

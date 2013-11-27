@@ -59,8 +59,10 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 	ANT_PARSER::GET_NEXT_TOKEN()
 	----------------------------
 */
+#define ASPT_UTF8_METHODS
 ANT_parser_token *ANT_parser::get_next_token(void)
 {
+long bytes;
 unsigned char *start, *here;
 long word_count = 0, pre_length_of_token = 0;
 unsigned long character;
@@ -108,6 +110,20 @@ if (segmentation != NULL)
 */
 for (;;)
 	{
+#ifdef ASPT_UTF8_METHODS
+	chartype = (unsigned char)unicode_chartype_utf8(current, &character, &bytes);
+
+	if (character == 0)
+		return NULL;
+
+	/*
+		This is ordered on the most probable character we're going to see (so it isn't that dumb)
+	*/
+	if (chartype == CT_LETTER || chartype == CT_NUMBER || chartype == CT_PUNCTUATION || (chartype == CT_OTHER && (character == SPECIAL_TERM_CHAR || ischinese(character))))
+		break;
+
+	current += bytes;
+#else
 	character = utf8_to_wide(current);
 
 	if (character == 0)
@@ -119,6 +135,7 @@ for (;;)
 		break;
 
 	current += utf8_bytes(current);
+#endif
 	}
 
 /*
@@ -135,12 +152,19 @@ if (chartype == CT_LETTER)
 	bufferlen = sizeof(current_token.normalized_buf);
 
 	ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
-
-	while (character = utf8_to_wide(current), unicode_chartype(character)==CT_LETTER)
+#ifdef ASPT_UTF8_METHODS
+	while (unicode_chartype_utf8(current, &character, &bytes) == CT_LETTER)
+		{
+		current += bytes;
+		ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+		}
+#else
+	while (character = utf8_to_wide(current), unicode_chartype(character) == CT_LETTER)
 		{
 		current += utf8_bytes(current);
 		ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
 		}
+#endif
 
 	current_token.type = TT_WORD;
 	current_token.normalized.string_length = bufferpos - current_token.normalized_buf;
@@ -152,8 +176,13 @@ else if (chartype == CT_NUMBER)
 	start = current;
 	current += utf8_bytes(current);
 
+#ifdef ASPT_UTF8_METHODS
+	while (unicode_chartype_utf8(current, &character, &bytes) == CT_NUMBER)
+		current += bytes;
+#else
 	while (character = utf8_to_wide(current), unicode_chartype(character)==CT_NUMBER)
 		current += utf8_bytes(current);
+#endif
 
 	current_token.type = TT_NUMBER;
 	current_token.start = (char *)start;
@@ -164,8 +193,13 @@ else if (chartype == CT_PUNCTUATION && *current != '<')
 	start = current;
 	current += utf8_bytes(current);
 
+#ifdef ASPT_UTF8_METHODS
+	while (unicode_chartype_utf8(current, &character, &bytes) == CT_PUNCTUATION && character != '<')		// this catches the case of punction before a tag "blah.</b>"
+		current += utf8_bytes(current);
+#else
 	while (character = utf8_to_wide(current), unicode_chartype(character) == CT_PUNCTUATION && character != '<')		// this catches the case of punction before a tag "blah.</b>"
 		current += utf8_bytes(current);
+#endif
 
 	current_token.type = TT_PUNCTUATION;
 	current_token.start = (char *)start;
@@ -301,7 +335,7 @@ return &current_token;
 
 /*
 	ANT_PARSER::GET_SEGMENT_INFO()
-	----------------------------
+	------------------------------
 */
 long ANT_parser::get_segment_info()
 {
