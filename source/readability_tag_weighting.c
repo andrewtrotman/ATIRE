@@ -1,8 +1,6 @@
 /*
 	READABILITY_TAG_WEIGHTING.C
 	---------------------------
- 	Created on: 23/11/2013
- 	Author: monfee
  */
 
 #include "readability_tag_weighting.h"
