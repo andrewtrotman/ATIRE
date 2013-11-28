@@ -59,7 +59,7 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 	ANT_PARSER::GET_NEXT_TOKEN()
 	----------------------------
 */
-//#define ASPT_UTF8_METHODS
+#define ASPT_UTF8_METHODS
 ANT_parser_token *ANT_parser::get_next_token(void)
 {
 long bytes;
@@ -144,6 +144,7 @@ for (;;)
 
 if (chartype == CT_LETTER)
 	{
+#ifdef ASPT_UTF8_METHODS
 	start = current;
 	current += bytes;
 
@@ -151,7 +152,8 @@ if (chartype == CT_LETTER)
 	bufferpos = &current_token.normalized_buf[0];
 	bufferlen = sizeof(current_token.normalized_buf);
 
-#ifdef ASPT_UTF8_METHODS
+	ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+
 	while (unicode_chartype_utf8(current, &character, &bytes) == CT_LETTER)
 		{
 		if (bytes == 1)
@@ -173,11 +175,21 @@ if (chartype == CT_LETTER)
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 #else
-	while (character = utf8_to_wide(current), unicode_chartype(character) == CT_LETTER)
+	start = current;
+	current += utf8_bytes(character);
+
+	//normalize the word into this buffer
+	bufferpos = &current_token.normalized_buf[0];
+	bufferlen = sizeof(current_token.normalized_buf);
+
+	ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+
+	while (character = utf8_to_wide(current), unicode_chartype(character)==CT_LETTER)
 		{
 		current += utf8_bytes(current);
 		ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
 		}
+
 	current_token.type = TT_WORD;
 	current_token.normalized.string_length = bufferpos - current_token.normalized_buf;
 	current_token.start = (char *)start;
