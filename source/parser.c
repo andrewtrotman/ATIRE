@@ -117,9 +117,6 @@ bytes = 1;
 while (!ANT_isalnumpunczero(*current))
 	current++;
 
-if (*current == 0)
-	return NULL;
-
 /*
 	If we've hit a non-white space then either its an ASCII non-white space,
 	else we have to skip over UNICODE white space
@@ -183,16 +180,12 @@ if (character_type == CT_LETTER)
 		/*
 			If the first character is ASCII then assume the remainder will be
 		*/
-		*buffer_pos = ANT_tolower(*start);
-		buffer_pos++;
+		*buffer_pos++ = ANT_tolower(*start);
 
 		while (ANT_isalpha(*current))
 			{
 			if (buffer_pos < buffer_end)
-				{
-				*buffer_pos = ANT_tolower(*current);
-				buffer_pos++;
-				}
+				*buffer_pos++ = ANT_tolower(*current);
 			current++;
 			}
 		/*
@@ -282,6 +275,8 @@ else if (character_type == CT_PUNCTUATION && *current != '<')
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
+else if (character_type == CT_ZERO)
+	return NULL;			// at end of document
 else if (character_type == CT_OTHER && character == SPECIAL_TERM_CHAR)
 	{
 	/* Special term which begins with the 0x80 marker and ends after the first non-alnum or non -: */

@@ -30,7 +30,10 @@ readability = new ANT_readability_factory;
 readability->set_measure(parent->readability_measure);
 readability->set_parser(parser);
 
-stemmer = ANT_stemmer_factory::get_core_stemmer(parent->stemmer);
+if (parent->stemmer == ANT_stemmer_factory::NONE)
+	stemmer = NULL;
+else
+	stemmer = ANT_stemmer_factory::get_core_stemmer(parent->stemmer);
 }
 
 /*

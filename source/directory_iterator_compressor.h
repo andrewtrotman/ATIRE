@@ -19,7 +19,6 @@ class ANT_directory_iterator_compressor : public ANT_directory_iterator
 private:
 	ANT_producer_consumer <ANT_directory_iterator_object> *store;
 	ANT_directory_iterator *source;
-//	long get_file;		// also in the parent object so removed from this object
 	long threads;
 	ANT_critical_section mutex;
 	ANT_compression_text_factory *compressor;
