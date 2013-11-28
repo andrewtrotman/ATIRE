@@ -155,8 +155,18 @@ if (chartype == CT_LETTER)
 #ifdef ASPT_UTF8_METHODS
 	while (unicode_chartype_utf8(current, &character, &bytes) == CT_LETTER)
 		{
-		current += bytes;
-		ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+		if (bytes == 1)
+			{
+			*bufferpos = ANT_tolower(*current);
+			bufferpos++;
+			bufferlen--;
+			current++;
+			}
+		else
+			{
+			ANT_UNICODE_normalize_lowercase_toutf8(&bufferpos, &bufferlen, character);
+			current += bytes;
+			}
 		}
 #else
 	while (character = utf8_to_wide(current), unicode_chartype(character) == CT_LETTER)

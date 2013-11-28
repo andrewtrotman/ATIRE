@@ -284,22 +284,16 @@ if (character <= LAST_ASCII_CHAR)
 return ANT_UNICODE_search_chartype(character);
 }
 
-
-
 /*
 	UNICODE_CHARTYPE_UTF8()
 	-----------------------
 	Given a pointer to a UTF-8 string, convert into a wide and return: it, its length (in bytes), and its chartype
+	We know, when we get into this routine, that the sequence must be more than one-byte long.  For the version that
+	handles one-byte sequences too use: unicode_chartype_utf8
 */
-ANT_UNICODE_chartype unicode_chartype_utf8(unsigned char *current, unsigned long *character, long *bytes)
+ANT_UNICODE_chartype unicode_chartype_utf8_multibye(unsigned char *current, unsigned long *character, long *bytes)
 {
-if (*current < 0x80)
-	{
-	*bytes = 1;
-	*character = *current;
-	return unicode_chartype_ASCII[*character];
-	}
-else if ((*current & 0xE0) == 0xC0)
+if ((*current & 0xE0) == 0xC0)
 	{
 	*bytes = 2;
 	if (current[1] >> 6 == 2)

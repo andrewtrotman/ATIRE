@@ -45,6 +45,7 @@ public:
 	ANT_readability_dale_chall();
 	virtual ~ANT_readability_dale_chall();
 	
+	using ANT_readability::index;
 	void index(ANT_memory_indexer *index);
 } ;
 
