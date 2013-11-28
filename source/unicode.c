@@ -9,11 +9,11 @@
 #include <stdlib.h>
 
 /*
-	UNICODE_CHARTYPE_ASCII[]
-	------------------------
+	UNICODE_CHARTYPE_ASCII_TABLE[]
+	------------------------------
 	Given an ASCII character (ch < 0x80), return the char type by looking up in this table
 */
-ANT_UNICODE_chartype unicode_chartype_ASCII[] =
+ANT_UNICODE_chartype unicode_chartype_ASCII_table[] =
 {
 CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_SEPARATOR, CT_SEPARATOR, CT_SEPARATOR, CT_SEPARATOR, CT_SEPARATOR, CT_OTHER, CT_OTHER, 
 CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, 

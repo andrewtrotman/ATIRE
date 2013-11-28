@@ -20,6 +20,7 @@ enum {
 	ANT_CTYPE_HEADCHAR = 1024,			// ANT parser start of token
 	ANT_CTYPE_XML_NAME_START = 2048,
 	ANT_CTYPE_XML_NAME = 4096,
+	ANT_CTYPE_ZERO = 8192,				// used for '\0'
 
 	ANT_CTYPE_ISALPHA = ANT_CTYPE_UPPER | ANT_CTYPE_LOWER,
 	ANT_CTYPE_ISALNUM = ANT_CTYPE_ISALPHA | ANT_CTYPE_DIGIT,
@@ -27,7 +28,9 @@ enum {
 	ANT_CTYPE_ISGRAPH  = ANT_CTYPE_PUNC | ANT_CTYPE_UPPER | ANT_CTYPE_LOWER | ANT_CTYPE_DIGIT,
 	ANT_CTYPE_ISPRINT = ANT_CTYPE_PUNC | ANT_CTYPE_ISALNUM | ANT_CTYPE_HARD_SPACE,
 
-	ANT_CTYPE_ISLOWERNUM = ANT_CTYPE_LOWER | ANT_CTYPE_DIGIT						// special for indexing purposes
+	ANT_CTYPE_ISLOWERNUM = ANT_CTYPE_LOWER | ANT_CTYPE_DIGIT,						// special for indexing purposes
+	ANT_CTYPE_ISALNUMPUNC = ANT_CTYPE_ISALNUM | ANT_CTYPE_PUNC,
+	ANT_CTYPE_ISALNUMPUNCZERO = ANT_CTYPE_ISALNUM | ANT_CTYPE_PUNC | ANT_CTYPE_ZERO
 } ;
 
 extern unsigned short ANT_ctype[];
@@ -61,6 +64,8 @@ inline int ANT_isascii(int c) { return (unsigned char)(c) <= 0x7f; }
 /*
 	Special IS() routines for ANT indexing
 */
+inline int ANT_isalnumpunc(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISALNUMPUNC) != 0; }
+inline int ANT_isalnumpunczero(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISALNUMPUNCZERO) != 0; }
 inline int ANT_islowernum(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISLOWERNUM) != 0; }
 inline int ANT_isheadchar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_HEADCHAR) != 0; }
 inline int ANT_ispuncheadchar(int c) { return (ANT_to_ctype(c) & (ANT_CTYPE_HEADCHAR | ANT_CTYPE_PUNC)) != 0; }

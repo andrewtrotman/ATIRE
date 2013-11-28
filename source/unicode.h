@@ -50,7 +50,7 @@ XMLCC_NAME_START = 1,
 XMLCC_NAME = 2
 };
 
-extern ANT_UNICODE_chartype unicode_chartype_ASCII[];
+extern ANT_UNICODE_chartype unicode_chartype_ASCII_table[];
 
 unsigned long utf8_to_wide_safe(const unsigned char *here);
 unsigned long utf8_to_wide_unsafe(const unsigned char *here);
@@ -88,6 +88,16 @@ int isutf8(const unsigned char *here);
 
 inline int isutf8(const char *here) { return isutf8((unsigned char *)here); }
 
+
+/*
+	UNICODE_CHARTYPE_ASCII()
+	------------------------
+*/
+static inline ANT_UNICODE_chartype unicode_chartype_ASCII(unsigned char character)
+{
+return unicode_chartype_ASCII_table[character];
+}
+
 /*
 	UNICODE_CHARTYPE_UTF8()
 	-----------------------
@@ -99,11 +109,16 @@ if (*current < LAST_ASCII_CHAR)
 	{
 	*bytes = 1;
 	*character = *current;
-	return unicode_chartype_ASCII[*character];
+	return unicode_chartype_ASCII(*character);
 	}
 else
 	return unicode_chartype_utf8_multibye(current, character, bytes);
 }
+
+
+
+
+
 
 
 
