@@ -59,7 +59,7 @@ segmentation = (unsigned char *)ANT_plugin_manager::instance().do_segmentation(s
 	ANT_PARSER::GET_NEXT_TOKEN()
 	----------------------------
 */
-#define ASPT_UTF8_METHODS
+//#define ASPT_UTF8_METHODS
 ANT_parser_token *ANT_parser::get_next_token(void)
 {
 long bytes;
