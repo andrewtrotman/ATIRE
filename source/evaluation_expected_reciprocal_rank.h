@@ -20,7 +20,7 @@ private:
 	
 public:
 	ANT_evaluation_expected_reciprocal_rank() : ANT_evaluation() { this->maximum_judgement = 4; }
-	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 	void set_maximum_judgement(double maximum_judgement) { this->maximum_judgement = maximum_judgement; }
 
 } ;

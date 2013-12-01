@@ -19,7 +19,7 @@
 	[1] Grönqvist L. (2005), Evaluating Latent Semantic Vector Models with Synonym Tests and Document Retrieval, ELECTRA Workshop: Methodologies and Evaluation of Lexical Cohesion Techniques in Real-World Applications Beyond Bag of Words.
 	[2] Büttcher S., Clarke C.L.A, Cormack G.V. (2010) Information Retrieval: Implementing and Evaluating Search Engines, p452.
 */
-double ANT_evaluation_rank_effectiveness::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation_rank_effectiveness::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
@@ -27,8 +27,14 @@ ANT_relevant_document key, *relevance_data;
 long long found_and_nonrelevant, total_nonrelevant, current;
 double precision;
 
+
 if ((got = setup(topic, subtopic)) == NULL)
+	{
+	*valid = false;
 	return 0;
+	}
+
+*valid = true;
 
 if ((total_nonrelevant = got->number_of_nonrelevant_documents) == 0)
 	return 1;	// topic has no non-relevant documents so they are all relevant so we score a perfect score

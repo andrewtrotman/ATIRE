@@ -21,7 +21,7 @@ protected:
 
 public:
 	ANT_evaluation_discounted_cumulative_gain() : ANT_evaluation() { this->trec_mode = true; alpha = 0.5; }
-	virtual double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	virtual double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 
 	void set_mode(long trec_mode) { this->trec_mode = trec_mode; }
 	void set_alpha(double alpha) { this->alpha = alpha; }

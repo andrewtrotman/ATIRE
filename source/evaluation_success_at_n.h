@@ -14,7 +14,7 @@
 class ANT_evaluation_success_at_n : public ANT_evaluation
 {
 public:
-	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 } ;
 
 #endif /* EVALUATION_SUCCESS_AT_N_H_ */

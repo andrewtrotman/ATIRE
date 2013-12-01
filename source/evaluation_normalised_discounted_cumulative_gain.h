@@ -15,7 +15,7 @@ private:
 	double *ideal_gains;
 
 public:
-	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 
 	void set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
 

@@ -43,7 +43,7 @@ public:
 	ANT_relevant_topic *setup(long topic, long subtopic);
 
 	long add_evaluation(char *which);
-	double *perform_evaluation(ANT_search_engine *search_engine, long topic);
+	double *perform_evaluation(ANT_search_engine *search_engine, long topic, long *valid_topic);
 
 private:
 	long get_parameter(char *from, double *into);

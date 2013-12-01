@@ -15,7 +15,7 @@
 	ANT_EVALUATION_DISCOUNTED_CUMULATIVE_GAIN::EVALUATE()
 	-----------------------------------------------------
 */
-double ANT_evaluation_discounted_cumulative_gain::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation_discounted_cumulative_gain::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
@@ -24,7 +24,11 @@ double discounted_cumulative_gain = 0;
 long long current;
 
 if ((got = setup(topic, subtopic)) == NULL)
+	{
+	*valid = false;
 	return 0;
+	}
+*valid = true;
 
 key.topic = topic;
 key.subtopic = subtopic;

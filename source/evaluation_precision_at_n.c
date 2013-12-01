@@ -13,7 +13,7 @@
 	ANT_EVALUATION_PRECISION_AT_N::EVALUATE()
 	-----------------------------------------
 */
-double ANT_evaluation_precision_at_n::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation_precision_at_n::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
@@ -21,7 +21,12 @@ ANT_relevant_document key, *relevance_data;
 long long found_and_relevant, current;
 
 if ((got = setup(topic, subtopic)) == NULL)
+	{
+	*valid = false;
 	return 0;
+	}
+
+*valid = true;
 
 key.topic = topic;
 key.subtopic = subtopic;
