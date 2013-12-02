@@ -47,8 +47,9 @@ return got_subtopic;
 	ANT_EVALUATION::EVALUATE()
 	--------------------------
 */
-double ANT_evaluation::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
+*valid = false;
 return 0;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

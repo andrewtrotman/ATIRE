@@ -14,7 +14,7 @@
 class ANT_evaluation_rank_effectiveness : public ANT_evaluation
 {
 public:
-	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 } ;
 
 #endif /* EVALUATION_RANK_EFFECTIVENESS_H_ */

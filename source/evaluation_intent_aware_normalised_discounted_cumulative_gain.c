@@ -17,7 +17,7 @@
 	ANT_EVALUATION_INTENT_AWARE_NORMALISED_DISCOUNTED_CUMULATIVE_GAIN::EVALUATE()
 	-----------------------------------------------------------------------------
 */
-double ANT_evaluation_intent_aware_normalised_discounted_cumulative_gain::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation_intent_aware_normalised_discounted_cumulative_gain::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
 #if 1
 double score, precision;
@@ -35,8 +35,12 @@ got_topic = (ANT_relevant_topic *)bsearch(&key_topic, relevant_topic_list, (size
 if (got_topic == NULL)
 	{
 	printf("Didn't find %ld in qrels... no judgements?\n", topic);
+	*valid = false;
+	
 	return 0;
 	}
+
+*valid = true;
 
 dcg = new double[precision_point];
 subtopicGain = new double[got_topic->number_of_subtopics];

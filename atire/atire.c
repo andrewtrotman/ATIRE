@@ -46,6 +46,8 @@ double *perform_query(long topic_id, ANT_channel *outchannel, ANT_ANT_param_bloc
 {
 ANT_stats_time stats;
 long long now, search_time;
+long valid_to_evaluate;
+double *evaluations;
 
 /*
 	Search
@@ -67,7 +69,14 @@ if (params->stats & ANT_ANT_param_block::QUERY)
 	Return average precision
 */
 if (params->evaluator)
-	return params->evaluator->perform_evaluation(atire->get_search_engine(), topic_id);
+	{
+	evaluations = params->evaluator->perform_evaluation(atire->get_search_engine(), topic_id, &valid_to_evaluate);
+	if (evaluations == NULL || !valid_to_evaluate)
+		return NULL;
+
+	return evaluations;
+	}
+
 return NULL;
 }
 
@@ -109,7 +118,7 @@ double *ant(ANT_ANT_param_block *params)
 char *print_buffer, *pos;
 ANT_stats_time post_processing_stats;
 char *command, *query, *ranker;
-long topic_id = -1, number_of_queries, evaluation;
+long topic_id = -1, number_of_queries, number_of_queries_evaluated, evaluation;
 long long line;
 long long hits, result, last_to_list, first_to_list;
 ANT_indexer_param_block_rank params_rank;
@@ -154,7 +163,7 @@ else
 sum_of_average_precisions = new double[params->evaluator->number_evaluations_used];
 for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
 	sum_of_average_precisions[evaluation] = 0.0;
-number_of_queries = 0;
+number_of_queries = number_of_queries_evaluated = 0;
 line = 0;
 custom_ranking = 0;
 
@@ -504,13 +513,16 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		*/
 		number_of_queries++;
 		average_precision = perform_query(topic_id, outchannel, params, query, &hits);
-		for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
-			sum_of_average_precisions[evaluation] += average_precision[evaluation];		// zero if we're using a focused metric
-
+		if (average_precision != NULL)
+			{
+			number_of_queries_evaluated++;
+			for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
+				sum_of_average_precisions[evaluation] += average_precision[evaluation];		// zero if we're using a focused metric
+			}
 		/*
 			Report the average precision for the query
 		*/
-		if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::SHORT)
+		if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::SHORT & average_precision != NULL)
 			{
 			*outchannel << "<topic>" << topic_id << "</topic>" << ANT_channel::endl;
 			*outchannel << "<evaluations>";
@@ -604,14 +616,14 @@ delete [] document_buffer;
 */
 mean_average_precision = new double[params->evaluator->number_evaluations_used];
 for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
-	mean_average_precision[evaluation] = sum_of_average_precisions[evaluation] / (double)number_of_queries;
+	mean_average_precision[evaluation] = sum_of_average_precisions[evaluation] / (double)number_of_queries_evaluated;
 
 /*
 	Report MAP
 */
 if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::PRECISION)
 	{
-	printf("\nProcessed %ld topics:\n", number_of_queries);
+	printf("\nProcessed %ld topics (%ld evaluated):\n", number_of_queries, number_of_queries_evaluated);
 	for (evaluation = 0; evaluation < params->evaluator->number_evaluations_used; evaluation++)
 		printf("%s: %f\n", params->evaluator->evaluation_names[evaluation], mean_average_precision[evaluation]);
 	puts("");
@@ -792,7 +804,7 @@ return atire;
 
 /*
 	RUN_ATIRE()
-	-------------
+	-----------
 	for the simplicity of JNI calling
 	options are separated with +
 */

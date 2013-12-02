@@ -13,7 +13,7 @@
 	ANT_EVALUATION_EXPECTED_RECIPROCAL_RANK::EVALUATE()
 	---------------------------------------------------
 */
-double ANT_evaluation_expected_reciprocal_rank::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation_expected_reciprocal_rank::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_subtopic *got;
@@ -22,7 +22,12 @@ long long current;
 double r, score = 0.0, decay = 1.0;
 
 if ((got = setup(topic, subtopic)) == NULL)
+	{
+	*valid = false;
 	return 0;
+	}
+
+*valid = true;
 
 key.topic = topic;
 key.subtopic = subtopic;

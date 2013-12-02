@@ -16,7 +16,7 @@ private:
 	enum { UNUSED = 0, EXAMINED, USED }; // statuses for calculating ideal gain
 
 public:
-	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 	
 	virtual void set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length);
 } ;

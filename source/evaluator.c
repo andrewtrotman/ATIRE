@@ -411,12 +411,18 @@ return relevant_topic_list_length;
 	ANT_EVALUATOR::PERFORM_EVALUATION()
 	-----------------------------------
 */
-double *ANT_evaluator::perform_evaluation(ANT_search_engine *engine, long topic)
+double *ANT_evaluator::perform_evaluation(ANT_search_engine *engine, long topic, long *valid_topic)
 {
 long evaluator;
+long valid;
 
+*valid_topic = true;			// a topic is only valid if it can be assessed over.
 for (evaluator = 0; evaluator < number_evaluations_used; evaluator++)
-	evaluations[evaluator] = evaluators[evaluator]->evaluate(engine, topic);
+	{
+	evaluations[evaluator] = evaluators[evaluator]->evaluate(engine, topic, &valid);
+	if (!valid)
+		*valid_topic = false;
+	}
 
 return evaluations;
 }

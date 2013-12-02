@@ -21,7 +21,7 @@ private:
 public:
 	ANT_evaluation_binary_preference() : ANT_evaluation() { this->minimum = 0; }
 
-	double evaluate(ANT_search_engine *search_engine, long topic, long subtopic = 0);
+	double evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic = 0);
 
 	void set_minimum(double minimum) { this->minimum = minimum; }
 } ;

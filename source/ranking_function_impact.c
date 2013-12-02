@@ -13,7 +13,7 @@
 #ifdef IMPACT_HEADER
 /*
 	ANT_RANKING_FUNCTION_IMPACT::RELEVANCE_RANK_ONE_QUANTUM()
-	---------------------------------------------------
+	---------------------------------------------------------
 */
 void ANT_ranking_function_impact::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
@@ -56,6 +56,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	impact_header->impact_value_ptr++;
 	impact_header->doc_count_ptr++;
 	}
+
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else

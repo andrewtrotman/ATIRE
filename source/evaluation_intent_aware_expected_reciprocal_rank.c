@@ -17,7 +17,7 @@
 	ANT_EVALUATION_INTENT_AWARE_EXPECTED_RECIPROCAL_RANK::EVALUATE()
 	----------------------------------------------------------------
 */
-double ANT_evaluation_intent_aware_expected_reciprocal_rank::evaluate(ANT_search_engine *search_engine, long topic, long subtopic)
+double ANT_evaluation_intent_aware_expected_reciprocal_rank::evaluate(ANT_search_engine *search_engine, long topic, long *valid, long subtopic)
 {
 ANT_search_engine_result_iterator iterator;
 ANT_relevant_topic *got_topic, key_topic;
@@ -34,8 +34,12 @@ got_topic = (ANT_relevant_topic *)bsearch(&key_topic, relevant_topic_list, (size
 if (got_topic == NULL)
 	{
 	printf("Didn't find topic %ld in relevant topic list!\n", topic);
+	*valid = false;
+	
 	return 0;
 	}
+
+*valid = true;
 
 #if 1
 /*
