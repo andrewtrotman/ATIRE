@@ -529,6 +529,8 @@ for (param = 1; param < argc; param++)
 			}
 		else if (*command == 'q')
 			{
+			quantization = TRUE;
+
 			if (*(command + 1) == '-')
 				quantization = FALSE;
 			else if (*(command + 1) != '\0')
