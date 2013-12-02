@@ -163,8 +163,9 @@ puts("   t            Special tags (such as TITLE, CATEGORY) weighting");
 puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
-puts("-q[n]           Really quantize, the Q options will store variables in the index so quantization."); 
-puts("                This option pushes the quantization into n-bits to indexing time.");
+puts("-q[-n]          Really quantize, the Q options will store variables in the index so quantization."); 
+puts("    n           This option pushes the quantization into n-bits to indexing time.");
+puts("    -           Don't push the quantization to the index, store max and min for search time quantization.");
 puts("                [default n=5.4 + 5.4e-4 * sqrt(number documents)]");
 puts("");
 
@@ -522,16 +523,20 @@ for (param = 1; param < argc; param++)
 			topsig(command + 7);
 		else if (*command == 'Q')
 			{
+			quantization = TRUE;
 			if (!set_ranker(command + 1))
 				exit(printf("Bad ranking function or ranking parameters '%s'\n", command + 1));
 			}
 		else if (*command == 'q')
 			{
-			quantization = TRUE;
-			if (*(command + 1) != '\0')
+			if (*(command + 1) == '-')
+				quantization = FALSE;
+			else if (*(command + 1) != '\0')
+				{
 				quantization_bits = atol(command + 1);
-			if (quantization_bits < 2 || quantization_bits > 16)
-				exit(printf("Have to quantize into range 2--16 bits inclusive\n"));
+				if (quantization_bits < 2 || quantization_bits > 16)
+					exit(printf("Have to quantize into range 2--16 bits inclusive\n"));
+				}
 			}
 		else if (*command == 't')
 			term_expansion(command + 1, FALSE);
