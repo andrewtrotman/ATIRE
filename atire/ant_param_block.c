@@ -40,6 +40,7 @@ focus_top_k = 2000;
 evaluator = new ANT_evaluator;
 assessments_filename = NULL;
 queries_filename = NULL;
+query_fields = "t";
 output_forum = NONE;
 run_name = participant_id = "unknown";
 output_filename = "ant.out";

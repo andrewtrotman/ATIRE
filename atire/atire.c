@@ -136,16 +136,21 @@ ANT_snippet *snippet_generator = NULL;
 ANT_snippet *title_generator = NULL;
 ANT_stem *snippet_stemmer = NULL;
 
-if (params->port == 0)
-	{
-	inchannel = new ANT_channel_file(params->queries_filename);		// stdin
-	outchannel = new ANT_channel_file();							// stdout
-	}
-else
+if (params->port != 0)
 	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
+else
+	{
+	inchannel = new ANT_channel_file(params->queries_filename);		// my stdin
+	outchannel = new ANT_channel_file();							// my stdout
 
-if ((params->query_type & ATIRE_API::QUERY_TREC_FILE) != 0)
-	inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+	if (params->queries_filename != NULL)
+		{
+		if ((params->query_type & ATIRE_API::QUERY_TREC_FILE) != 0)
+			inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+		else if (strrcmp(params->queries_filename, "gz") == 0)		// probably a TREC file so assume it is
+			inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+		}
+	}
 
 print_buffer = new char [MAX_TITLE_LENGTH + 1024];
 
