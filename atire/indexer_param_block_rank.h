@@ -64,7 +64,7 @@ public:
 
 	int ascending;						// ascending/descending switch for docid ranking
 	char *field_name;					// field to rank on for pregens
-	long quantization;  // whether the quantization should be performed
+	long quantization;  		// whether the quantization should be performed
 	long quantization_bits;  // the number of bits to quantize into
 
 private:

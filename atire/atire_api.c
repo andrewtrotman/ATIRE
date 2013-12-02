@@ -472,6 +472,7 @@ ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, lon
 {
 ANT_ranking_function *new_function;
 
+
 if (search_engine->quantized())
 	{
 	switch (function)
@@ -491,6 +492,7 @@ if (search_engine->quantized())
 		case ANT_ANT_param_block::DFIW:
 		case ANT_ANT_param_block::DFI_IDF:
 		case ANT_ANT_param_block::DFIW_IDF:
+			puts("Cannot set ranking function as the index is quantized");
 			return NULL;		// failure because we're a quantized ranking function and we don't have TF values in the index
 		}
 	}

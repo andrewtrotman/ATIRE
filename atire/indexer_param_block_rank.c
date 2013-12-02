@@ -31,7 +31,7 @@
 
 /*
 	ANT_INDEXER_PARAM_BLOCK_RANK::!ANT_INDEXER_PARAM_BLOCK_RANK()
-	------------------------------------------------------------_
+	-------------------------------------------------------------
 */
 ANT_indexer_param_block_rank::~ANT_indexer_param_block_rank()
 {
@@ -57,6 +57,8 @@ feedback_kbtfidf_b = kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
 
 ascending = 1;
 field_name = NULL;
+quantization = false;
+quantization_bits = 8;
 }
 
 /*
