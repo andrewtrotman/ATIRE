@@ -17,6 +17,7 @@
 #include "instream_buffer.h"
 #include "instream_memory.h"
 #include "directory_iterator_tar.h"
+#include "directory_iterator_pkzip.h"
 #include "compress_text_deflate.h"
 
 #ifndef FALSE
@@ -27,11 +28,11 @@
 #endif
 
 /*
-	ANT_ASSESSMENT_TREC::READ_ASSESSMENT_FILE()
-	-------------------------------------------
+	ANT_ASSESSMENT_TREC::READ_ENTIRE_FILE()
+	---------------------------------------
 	read the assessment file.  If its a .tar.gz then read each piece and join them together.
 */
-char *ANT_assessment_TREC::read_assessment_file(char *filename)
+char *ANT_assessment_TREC::read_entire_file(char *filename)
 {
 ANT_instream *file_stream, *decompressor, *instream_buffer;
 ANT_directory_iterator *source;
@@ -42,7 +43,15 @@ long long length[MAX_PARTS], total_size, current;
 ANT_memory file_buffer(10 * 1024 * 1024);
 ANT_directory_iterator_object file_object, *piece;
 
-if ((strrcmp(filename, ".tar.gz") == 0) || (strrcmp(filename, ".tgz") == 0))
+if (strrcmp(filename, ".zip") == 0)
+	{
+	ANT_directory_iterator_pkzip source(filename);
+
+	if (source.first(&file_object) == NULL)
+		exit(printf("Cannot load assessment file:%s\n", filename));
+	return file_object.file;
+	}
+else if ((strrcmp(filename, ".tar.gz") == 0) || (strrcmp(filename, ".tgz") == 0))
 	{
 	file_stream = new ANT_instream_file(&file_buffer, filename);
 	decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
@@ -122,13 +131,8 @@ long params, missing_warned = FALSE;
 /*
 	load the assessment file into memory
 */
-#ifdef NEVER
-	if ((file = ANT_disk::read_entire_file(filename)) == NULL)
-		return NULL;
-#else
-	if ((file = read_assessment_file(filename)) == NULL)
-		return NULL;
-#endif
+if ((file = read_entire_file(filename)) == NULL)
+	return NULL;
 
 lines = ANT_disk::buffer_to_list(file, &lines_in_file);
 

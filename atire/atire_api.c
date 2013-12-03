@@ -365,6 +365,8 @@ if (evaluator->number_evaluations_used == 0)
 
 assessment_factory = new ANT_assessment_factory(memory, document_list, documents_in_id_list);
 assessments = assessment_factory->read(assessments_filename, &number_of_assessments);
+if (assessments == NULL)
+	exit(printf("Can't open assessment file:%s\n", assessments_filename));
 evaluator->initialise(memory, assessments, number_of_assessments);
 
 return 0;		// success

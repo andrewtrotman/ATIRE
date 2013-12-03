@@ -6,6 +6,7 @@
 	TopicID Q0 DocID RelBytes DocLength [BEPOffset [Offset:Length]]
 */
 #include <string.h>
+#include "assessment_TREC.h"
 #include "assessment_INEX.h"
 #include "relevant_document.h"
 #include "relevant_document_passage.h"
@@ -36,7 +37,7 @@ long params, missing_warned = FALSE, length_warned = FALSE;
 /*
 	load the assessment file into memory
 */
-if ((file = ANT_disk::read_entire_file(filename)) == NULL)
+if ((file = ANT_assessment_TREC::read_entire_file(filename)) == NULL)
 	return NULL;
 lines = ANT_disk::buffer_to_list(file, &lines_in_file);
 

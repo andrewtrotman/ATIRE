@@ -17,7 +17,7 @@ friend class ANT_assessment_factory;
 
 protected:
 	ANT_assessment_TREC() {}
-	char *read_assessment_file(char *filename);
+	static char *read_entire_file(char *filename);
 
 public:
 	ANT_assessment_TREC(ANT_memory *mem, char **docid_list, long long documents) : ANT_assessment(mem, docid_list, documents) {}
