@@ -117,8 +117,8 @@ puts("FILE HANDLING");
 puts("-------------");
 puts("-findex <fn>    Filename of index");
 puts("-fdoclist <fn>  Filename of doclist");
-puts("-a<filenane>    Topic assessments are in <filename> (formats: TREC, ANT, INEX 2008)");
-puts("-q<filename>    Queries are in file <filename> (format: ANT)");
+puts("-a<filenane>    Topic assessments are in <filename> (formats: ANT, TREC, INEX 2008)");
+puts("-q<filename>    Queries are in file <filename> (format: ANT, TREC, INEX 2008)");
 puts("-q:<port>       ANT SERVER:Queries from TCP/IP port <port> [default=8088]");
 puts("");
 
@@ -126,10 +126,11 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbtN][-rT][wW]Query type");
+puts("-Q[nbt][-rT][NI][wW]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  N:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>arrative, <d>escription [default=t]");
+puts("  I:<t><c><n><d>INEX query file (from inex.otago.ac.nz) <t>itle, <c>astitle, <n>arrative, <d>escription [default=t]");
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits, density <d>%, and globalstats <f>");
 puts("  -             no relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=17 t=5]");
@@ -169,6 +170,9 @@ puts("-o<filename>    Output filename for the run [default=ant.out]");
 puts("-i<id>          Forum participant id is <id> [default=unknown]");
 puts("-n<name>        Run is named <name> [default=unknown]");
 puts("-l<n>           Length of the results list [default=1500 for batch, default=10 for interactive)]");
+puts("-QN:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>arrative, <d>escription [default=t]");
+puts("-QI:<t><c><n><d>INEX query file (from inex.otago.ac.nz) <t>itle, <c>astitle, <n>arrative, <d>escription [default=t]");
+
 puts("");
 
 puts("SEGMENTATION");
@@ -342,7 +346,7 @@ void ANT_ANT_param_block::set_feedbacker(char *which)
 char *fields, *check;
 double first, second;
 long done;
-const long perform_query_mask = ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI | ATIRE_API::QUERY_TOPSIG | ATIRE_API::QUERY_TREC_FILE;
+const long perform_query_mask = ATIRE_API::QUERY_BOOLEAN | ATIRE_API::QUERY_NEXI | ATIRE_API::QUERY_TOPSIG | ATIRE_API::QUERY_TREC_FILE | ATIRE_API::QUERY_INEX_FILE;
 
 do
 	{
@@ -358,8 +362,12 @@ do
 			query_type |= ATIRE_API::QUERY_BOOLEAN;
 			break;
 		case 'N':
+		case 'I':
 			query_type &= ~perform_query_mask;
-			query_type |= ATIRE_API::QUERY_TREC_FILE | ATIRE_API::QUERY_NEXI;
+			if (*which == 'N')
+				query_type |= ATIRE_API::QUERY_TREC_FILE | ATIRE_API::QUERY_NEXI;
+			else
+				query_type |= ATIRE_API::QUERY_INEX_FILE | ATIRE_API::QUERY_NEXI;
 
 			fields = strchr(which, ':');
 			if (fields == NULL)
@@ -372,8 +380,8 @@ do
 				else
 					{
 					for (check = fields; *check != '\0'; check++)
-						if (strchr("tdn", *check) == NULL)
-							exit(printf("Unknown field combination to extract from TREC file:%s\n", fields));
+						if (strchr(*which == 'N' ? "tdn" : "tcdn", *check) == NULL)
+							exit(printf("Unknown field combination to extract from query file:%s\n", fields));
 					query_fields = fields;
 					}
 				}

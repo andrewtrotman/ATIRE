@@ -35,8 +35,8 @@ if ((fp = fopen(filename, "r")) == NULL)
 while (fgets(buffer, sizeof(buffer), fp) != 0)
 	if ((separators = strcountchr(buffer, ' ')) != 0)
 		break;
-fclose(fp);
 
+fclose(fp);
 
 if ((strrcmp(filename, ".tgz") == 0) || (strrcmp(filename, ".tar.gz") == 0))
 	factory = new ANT_assessment_TREC();		// assume its a TREC assessment file

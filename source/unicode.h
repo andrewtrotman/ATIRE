@@ -109,7 +109,7 @@ if (*current < LAST_ASCII_CHAR)
 	{
 	*bytes = 1;
 	*character = *current;
-	return unicode_chartype_ASCII(*character);
+	return unicode_chartype_ASCII((unsigned char)*character);
 	}
 else
 	return unicode_chartype_utf8_multibye(current, character, bytes);

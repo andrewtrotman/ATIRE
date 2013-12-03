@@ -14,6 +14,7 @@
 #include "channel_file.h"
 #include "channel_socket.h"
 #include "channel_trec.h"
+#include "channel_inex.h"
 #include "relevance_feedback_factory.h"
 #include "ranking_function_pregen.h"
 #include "snippet.h"
@@ -145,10 +146,42 @@ else
 
 	if (params->queries_filename != NULL)
 		{
-		if ((params->query_type & ATIRE_API::QUERY_TREC_FILE) != 0)
-			inchannel = new ANT_channel_trec(inchannel, params->query_fields);
-		else if (strrcmp(params->queries_filename, "gz") == 0)		// probably a TREC file so assume it is
-			inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+		char first_bytes[0x200];		// enough to hold the INEX DTD and then a bit
+		/*
+			We might be a TREC topic file (usually a .gz) or an INEX topic file (usually a .zip) so we'll file out which.
+			Its unreasonable to make the assumption based on the file type (who knows, INEX might start using .gz or
+			TREC might start using .zip) so we'll open the file, read the first few bytes, and guess.  Guessing also
+			allows us to handle ANT query files (one topic per line, in the form <id> <query>).
+		*/
+		ANT_channel_file test_channel(params->queries_filename);
+		if (test_channel.read(first_bytes, sizeof(first_bytes)) == NULL)
+			exit(printf("Cannot determine the format of the queries file... is it valid?"));
+		else
+			{
+			/*
+				We can use the first few bytes to guess the file type
+			*/
+			if (atoll(first_bytes) != 0)
+				{
+				/*
+					no work required because we're a compressed ANT formatted queries file
+				*/
+				}
+			else if (strstr(first_bytes, "inex-topic-file") != NULL)
+				inchannel = new ANT_channel_inex(inchannel, params->query_fields);
+			else if (strstr(first_bytes, "<top>") != NULL)
+				inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+			else
+				{
+				/*
+					We're going to guess based on file type
+				*/
+				if (strrcmp(params->queries_filename, "gz") == 0)			// probably a TREC file
+					inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+				else if (strrcmp(params->queries_filename, "zip") == 0)		// probably an INEX file
+					inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+				}
+			}
 		}
 	}
 
@@ -527,7 +560,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		/*
 			Report the average precision for the query
 		*/
-		if (params->assessments_filename != NULL && params->stats & ANT_ANT_param_block::SHORT & average_precision != NULL)
+		if ((params->assessments_filename != NULL) && ((params->stats & ANT_ANT_param_block::SHORT) != 0) && (average_precision != NULL))
 			{
 			*outchannel << "<topic>" << topic_id << "</topic>" << ANT_channel::endl;
 			*outchannel << "<evaluations>";

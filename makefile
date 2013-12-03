@@ -6,7 +6,7 @@
 #
 #	DEBUG. set DEBUG=1 for compile in DEBUG mode.  Set DEBUG=0 for RELEASE mode.
 #
-DEBUG = 0
+DEBUG = 1
 			
 #
 #	Which compiler are we using
@@ -221,6 +221,7 @@ PARTS = \
 	$(OBJDIR)\channel_file.obj						\
 	$(OBJDIR)\channel_socket.obj					\
 	$(OBJDIR)\channel_trec.obj						\
+	$(OBJDIR)\channel_inex.obj						\
 	$(OBJDIR)\parser.obj 							\
 	$(OBJDIR)\parser_readability.obj				\
 	$(OBJDIR)\index_document.obj					\
@@ -371,6 +372,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_dfiw_idf.obj \
 	$(OBJDIR)\ranking_function_dfi_idf.obj \
 	$(OBJDIR)\instream_memory.obj						\
+	$(OBJDIR)\instream_pkzip.obj						\
 	$(OBJDIR)\instream_file_star.obj						\
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
