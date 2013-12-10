@@ -404,12 +404,12 @@ long bucket, buckets_used;
 /*
 	Set all the buckets to empty;
 */
-memset(bucket_size, 0, sizeof(*bucket_size) * (1 << quantization_bits));
+memset(bucket_size, 0, sizeof(*bucket_size) * ((unsigned long long)1 << quantization_bits));
 
 /*
 	Set the previous document ID to zero for each bucket (for difference encoding)
 */
-memset(bucket_prev_docid, 0, sizeof(*bucket_prev_docid) * (1 << quantization_bits));
+memset(bucket_prev_docid, 0, sizeof(*bucket_prev_docid) * ((unsigned long long)1 << quantization_bits));
 
 /*
 	Compute the size of the buckets
@@ -661,11 +661,11 @@ if (!should_prune(root))
 			if (root->string[0] != '~')
 				{
 				decompressed_postings_list[0] = impacted_postings[1];
-				serialised_tfs[0] = impacted_postings[0];
+				serialised_tfs[0] = (unsigned short)impacted_postings[0];
 				if (root->document_frequency == 2)
 					{
 					decompressed_postings_list[1] = impacted_postings[2] == 0 ? impacted_postings[4] : impacted_postings[2];
-					serialised_tfs[1] = impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0];
+					serialised_tfs[1] = (unsigned short)(impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0]);
 					}
 				}
 #else
@@ -683,7 +683,7 @@ if (!should_prune(root))
 				{
 				temp = serialised_tfs[0];
 				serialised_tfs[0] = serialised_tfs[1];
-				serialised_tfs[1] = temp;
+				serialised_tfs[1] = (unsigned short)temp;
 
 				temp = decompressed_postings_list[0];
 				decompressed_postings_list[0] = decompressed_postings_list[1];

@@ -150,7 +150,7 @@ ostringstream raw_query;
 if (at_eof)
 	return NULL;
 
-while (1)
+for (;;)
 	{
 	if (read)
 		if ((buffer = in_channel->gets()) == NULL)

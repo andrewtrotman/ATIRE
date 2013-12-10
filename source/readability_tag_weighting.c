@@ -107,7 +107,7 @@ if (tag_processing_on && term_count <= MAX_TERM_COUNT)
 
 	terms[term_count] = strnnew(token->start, token->string_length);
 	term = start = terms[term_count];
-	while (start != NULL && (start - term) < strlen(term))
+	while (start != NULL && (start - term) < (ptrdiff_t)strlen(term))
 		start = utf8_tolower(start);
 	++term_count;
 	}

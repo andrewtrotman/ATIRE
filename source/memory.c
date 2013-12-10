@@ -40,7 +40,7 @@ ANT_memory::ANT_memory(long long block_size_for_allocation, long long memory_cei
 {
 #ifdef _MSC_VER
 	OSVERSIONINFO os_info;
-	SYSTEM_INFO hardware_info;
+	SYSTEM_INFO hardware_info = {0};
 
 	os_info.dwOSVersionInfoSize = sizeof(os_info);
 	GetVersionEx(&os_info);
