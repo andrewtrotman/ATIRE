@@ -48,7 +48,7 @@
 		#define hash_map unordered_map
 	#endif
 #elif defined(__GNUC__)
-	#include <unordered_map>
+	#include <tr1/unordered_map>
 	using namespace std;
 	#define hash_map unordered_map
 #else
@@ -162,7 +162,7 @@ public:
 	void kstem_add_table_entry(const char *variant, const char *word, bool exc = false);
 
 	/*
-		ANT specific stuff
+		ATIRE specific stuff
 	*/
 	virtual size_t stem(const char *term, char *destination) { return kstem_stem_tobuffer((char *)term, destination); }
 	virtual char *name(void) { return "Krovetz"; }
