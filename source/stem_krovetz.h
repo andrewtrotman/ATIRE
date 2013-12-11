@@ -29,7 +29,8 @@
 #if (defined(ANDROID) || defined(__ANDROID__))
 	#include <hash_map>
 	using namespace std;
-#elif (defined(__GNUC__))
+#elif defined(__APPLE__)
+	#include <AvailabilityMacros.h>
 	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == 1080
 		/*
 			It isn't at all obvious why or how, but the install of Xcode in the Information Retrieval Lab at
@@ -46,6 +47,10 @@
 		using namespace std;
 		#define hash_map unordered_map
 	#endif
+#elif defined(__GNUC__)
+	#include <unordered_map>
+	using namespace std;
+	#define hash_map unordered_map
 #else
 	#include <hash_map>
 	using namespace std;
