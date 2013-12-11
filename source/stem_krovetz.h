@@ -29,7 +29,7 @@
 #if (defined(ANDROID) || defined(__ANDROID__))
 	#include <hash_map>
 	using namespace std;
-#elif (defined(__APPLE_CC__) || defined(__GNUC__))
+#elif (defined(__GNUC__))
 	#include <tr1/unordered_map>
 	#define hash_map unordered_map
 	using namespace std::tr1;

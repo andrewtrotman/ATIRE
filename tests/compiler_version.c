@@ -1,3 +1,4 @@
+#include <iso646.h> // detect std::lib
 #include <stdio.h>
 
 int main(void)
@@ -31,6 +32,10 @@ int main(void)
 	printf("__clang_minor__     :%d\n", __clang_minor__);
 	printf("__clang_patchlevel__:%d\n", __clang_patchlevel__);
 	printf("__clang_version__   :\"%s\"\n", __clang_version__);
+#endif
+
+#ifdef _LIBCPP_VERSION 
+prints("_LIBCPP_VERSION:%d\n", _LIBCPP_VERSION);
 #endif
 
 return 0;
