@@ -1,10 +1,17 @@
 #include <iso646.h> // detect std::lib
 #include <stdio.h>
 
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
+
 int main(void)
 {
 #ifdef __APPLE__
 	puts("Apple");
+	#ifdef MAC_OS_X_VERSION_MIN_REQUIRED
+		printf("MAC_OS_X_VERSION_MIN_REQUIRED:%d\n", MAC_OS_X_VERSION_MIN_REQUIRED);
+	#endif
 #endif
 
 #ifdef _WIN63

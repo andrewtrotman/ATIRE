@@ -99,7 +99,7 @@ loadTables();
 */
 ANT_stem_krovetz::~ANT_stem_krovetz() 
 {
-delete[](stemCache);
+delete [] stemCache;
 }
 
 /*
@@ -116,7 +116,7 @@ if (it != dictEntries.end())
 	// duplicate.
 #ifdef NEVER
 	/*
-		We don't want this in ANT
+		We don't want this in ATIRE
 	*/
 	std::cerr << "kstem_add_table_entry: Duplicate word "<< variant << " will be ignored." << std::endl;
 #endif

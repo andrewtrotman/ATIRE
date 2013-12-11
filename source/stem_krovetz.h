@@ -30,14 +30,22 @@
 	#include <hash_map>
 	using namespace std;
 #elif (defined(__GNUC__))
-	#include <tr1/unordered_map>
-	#define hash_map unordered_map
-	using namespace std::tr1;
-	using namespace std;
-	/*
-		#include <ext/hash_map>
-		using namespace __gnu_cxx;
-	*/
+	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == MAC_OS_X_VERSION_10_8
+		/*
+			It isn't at all obvious why or how, but the install of Xcode in the Information Retrieval Lab at
+			the University of Otago has two configurations.  One has unordered_map in the tr1 directory and
+			the other does not.  At present its possible to distinguish between the two by examining the OSX
+			version of the machine Xcode is installed on.  The versions of Xcode are identical, but it might
+			be that one has the command line tools and the other does not.
+		*/
+		#include <tr1/unordered_map>
+		using namespace std::tr1;
+		#define hash_map unordered_map
+	#else
+		#include <unordered_map>
+		using namespace std;
+		#define hash_map unordered_map
+	#endif
 #else
 	#include <hash_map>
 	using namespace std;
