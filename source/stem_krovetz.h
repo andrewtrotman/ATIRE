@@ -30,7 +30,7 @@
 	#include <hash_map>
 	using namespace std;
 #elif (defined(__GNUC__))
-	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == MAC_OS_X_VERSION_10_8
+	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == 1080
 		/*
 			It isn't at all obvious why or how, but the install of Xcode in the Information Retrieval Lab at
 			the University of Otago has two configurations.  One has unordered_map in the tr1 directory and
