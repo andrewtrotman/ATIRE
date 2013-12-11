@@ -49,7 +49,7 @@
 	#endif
 #elif defined(__GNUC__)
 	#include <tr1/unordered_map>
-	using namespace std;
+	using namespace std::tr1;
 	#define hash_map unordered_map
 #else
 	#include <hash_map>
