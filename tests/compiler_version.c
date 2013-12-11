@@ -35,7 +35,7 @@ int main(void)
 #endif
 
 #ifdef _LIBCPP_VERSION 
-prints("_LIBCPP_VERSION:%d\n", _LIBCPP_VERSION);
+printf("_LIBCPP_VERSION:%d\n", _LIBCPP_VERSION);
 #endif
 
 return 0;
