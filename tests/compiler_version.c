@@ -35,7 +35,11 @@ int main(void)
 #endif
 
 #ifdef _LIBCPP_VERSION 
-printf("_LIBCPP_VERSION:%d\n", _LIBCPP_VERSION);
+	printf("_LIBCPP_VERSION:%d\n", _LIBCPP_VERSION);
+#endif
+
+#ifdef __cplusplus
+	printf("__cplusplus:%ld\n", __cplusplus);
 #endif
 
 return 0;
