@@ -90,6 +90,19 @@ private:
 		char stem2[MAX_WORD_LENGTH];	/// second entry stem
 		} cacheEntry;
 
+
+
+#ifndef NEVER
+    struct eqstr {
+      bool operator()(const char* s1, const char* s2) const {
+        return strcmp(s1, s2) == 0;
+      }
+    };
+    typedef std::tr1::unordered_map<const char *, dictEntry, std::tr1::hash<std::string>, eqstr> dictTable;
+
+#else
+
+
 	#if defined(ATIRE_KROVETZ_HAS_UNORDERED_MAP)
 		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
 		typedef unordered_map<const char *, dictEntry, hash<std::string>, eqstr> dictTable;
@@ -107,6 +120,8 @@ private:
 			typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
 		#endif
 	#endif
+
+#endif
 
 private:
 	dictTable dictEntries;
