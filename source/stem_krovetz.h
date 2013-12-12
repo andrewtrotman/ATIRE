@@ -164,7 +164,18 @@ public:
 	/*
 		ATIRE specific stuff
 	*/
-	virtual size_t stem(const char *term, char *destination) { return kstem_stem_tobuffer((char *)term, destination); }
+	virtual size_t stem(const char *term, char *destination)
+		{
+		size_t length;
+		if ((length = kstem_stem_tobuffer((char *)term, destination)) == 0)
+			{
+			strcpy(destination, term);
+			return strlen(destination);
+			}
+		else
+			return length;
+		
+		}
 	virtual char *name(void) { return "Krovetz"; }
 };
 
