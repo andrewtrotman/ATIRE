@@ -16,7 +16,7 @@ between : between.o
 mkqrel : mkqrel.o
 
 trec2query : trec2query.o stop_word.o
-	$(CC) trec2query.o stop_word.o\ ../obj/channel_file.o ../obj/channel_trec.o ../obj/ctypes.o ../obj/memory.o ../obj/file.o ../obj/file_internals.o ../obj/instream_deflate.o ../obj/instream_file.o ../obj/instream_file_star.o ../external/unencumbered/zlib/libz.a -o trec2query
+	$(CC) trec2query.o stop_word.o ../obj/channel_file.o ../obj/channel_trec.o ../obj/ctypes.o ../obj/memory.o ../obj/file.o ../obj/file_internals.o ../obj/instream_deflate.o ../obj/instream_file.o ../obj/instream_file_star.o ../obj/instream_pkzip.o ../obj/directory_iterator.o ../obj/directory_iterator_pkzip.o ../obj/directory_iterator_internals.o ../obj/disk.o ../external/unencumbered/zlib/libz.a ../external/unencumbered/bzip/libbz2.a -o trec2query
 
 INEXtopics_to_ANTquery : INEXtopics_to_ANTquery.o
 	$(CC) INEXtopics_to_ANTquery.o ../obj/ctypes.o -o INEXtopics_to_ANTquery
