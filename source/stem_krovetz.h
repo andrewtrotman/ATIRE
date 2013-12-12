@@ -24,16 +24,18 @@
 #ifndef STEM_KROVETZ_H_
 #define STEM_KROVETZ_H_
 
+#include <iostream>
 #include <string.h>
+
+using namespace std;
 
 #if (defined(ANDROID) || defined(__ANDROID__))
 	#include <hash_map>
 	#define ATIRE_KROVETZ_HAS_HASH_MAP
-	using namespace std;
 #elif defined(__APPLE__)
 	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
 	#include <AvailabilityMacros.h>
-	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == 1080
+	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == MAC_OS_X_VERSION_10_8
 		/*
 			It isn't at all obvious why or how, but the install of Xcode in the Information Retrieval Lab at
 			the University of Otago has two configurations.  One has unordered_map in the tr1 directory and
@@ -45,12 +47,12 @@
 		using namespace std::tr1;
 	#else
 		#include <unordered_map>
-		using namespace std;
 	#endif
 #elif defined(__GNUC__)
 	#include <tr1/unordered_map>
 	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
 	using namespace std::tr1;
+//	using namespace __gnu_cxx;
 #elif defined (_MSC_VER)
 	#include <unordered_map>
 	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
@@ -58,7 +60,6 @@
 #else
 	#include <hash_map>
 	#define ATIRE_KROVETZ_HAS_HASH_MAP
-	using namespace std;
 #endif
 
 #include "stem.h"
@@ -90,22 +91,9 @@ private:
 		char stem2[MAX_WORD_LENGTH];	/// second entry stem
 		} cacheEntry;
 
-
-
-#ifndef NEVER
-    struct eqstr {
-      bool operator()(const char* s1, const char* s2) const {
-        return strcmp(s1, s2) == 0;
-      }
-    };
-    typedef std::tr1::unordered_map<const char *, dictEntry, std::tr1::hash<std::string>, eqstr> dictTable;
-
-#else
-
-
 	#if defined(ATIRE_KROVETZ_HAS_UNORDERED_MAP)
 		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
-		typedef unordered_map<const char *, dictEntry, hash<std::string>, eqstr> dictTable;
+		typedef unordered_map<const char *, dictEntry, hash<string>, eqstr> dictTable;
 	#elif defined (ATIRE_KROVETZ_HAS_HASH_MAP)
 		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
 		typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
@@ -120,8 +108,6 @@ private:
 			typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
 		#endif
 	#endif
-
-#endif
 
 private:
 	dictTable dictEntries;
