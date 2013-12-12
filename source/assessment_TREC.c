@@ -146,6 +146,8 @@ for (current = lines; *current != 0; current++)
 	document[127] = '\0';
 	if (params == 4)
 		relevance_judgements++;
+	else
+		exit(printf("TREC assessment (line %lld) not quite right (expecting \"int int string int\" but got: \"%s\")\n", (long long)(current - lines), *current));
 	}
 
 /*
