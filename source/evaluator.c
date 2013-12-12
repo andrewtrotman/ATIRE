@@ -49,6 +49,7 @@ evaluators = new ANT_evaluation *[number_evaluation_spaces];
 evaluations = new double[number_evaluation_spaces];
 evaluation_names = new char *[number_evaluation_spaces];
 memset(evaluation_names, 0, sizeof(*evaluation_names) * number_evaluation_spaces);
+memset(evaluators, 0, sizeof(*evaluators) * number_evaluation_spaces);
 }
 
 /*
