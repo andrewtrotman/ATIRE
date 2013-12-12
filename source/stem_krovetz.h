@@ -28,8 +28,10 @@
 
 #if (defined(ANDROID) || defined(__ANDROID__))
 	#include <hash_map>
+	#define ATIRE_KROVETZ_HAS_HASH_MAP
 	using namespace std;
 #elif defined(__APPLE__)
+	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
 	#include <AvailabilityMacros.h>
 	#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ == 1080
 		/*
@@ -41,18 +43,21 @@
 		*/
 		#include <tr1/unordered_map>
 		using namespace std::tr1;
-		#define hash_map unordered_map
 	#else
 		#include <unordered_map>
 		using namespace std;
-		#define hash_map unordered_map
 	#endif
 #elif defined(__GNUC__)
 	#include <tr1/unordered_map>
+	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
 	using namespace std::tr1;
-	#define hash_map unordered_map
+#elif defined (_MSC_VER)
+	#include <unordered_map>
+	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
+	using namespace std::tr1;
 #else
 	#include <hash_map>
+	#define ATIRE_KROVETZ_HAS_HASH_MAP
 	using namespace std;
 #endif
 
@@ -85,22 +90,22 @@ private:
 		char stem2[MAX_WORD_LENGTH];	/// second entry stem
 		} cacheEntry;
 
-	#ifdef _WIN32
-		struct ltstr
-		{
-		bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) < 0; }
-		};
-
-		//	studio 7 hash_map provides hash_compare, rather than hash
-		//	needing an < predicate, rather than an == predicate.
-		typedef stdext::hash_map<const char *, dictEntry, stdext::hash_compare<const char *, ltstr> > dictTable;
-	#else
-		struct eqstr
-		{
-		bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }
-		};
-
+	#if defined(ATIRE_KROVETZ_HAS_UNORDERED_MAP)
+		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
+		typedef unordered_map<const char *, dictEntry, std::tr1::hash<std::string>, eqstr> dictTable;
+	#elif defined (ATIRE_KROVETZ_HAS_HASH_MAP)
+		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
 		typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
+	#else
+		#if defined(_WIN32)
+			//	studio 7 hash_map provides hash_compare, rather than hash
+			//	needing an < predicate, rather than an == predicate.
+			struct ltstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) < 0; }};
+			typedef stdext::hash_map<const char *, dictEntry, stdext::hash_compare<const char *, ltstr> > dictTable;
+		#else
+			struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
+			typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
+		#endif
 	#endif
 
 private:

@@ -48,7 +48,7 @@ public:			// remove this line later
 	long long i;
 	ANT_ACCUMULATOR_T smallest, diff;
 
-	qsort(accumulator_pointers, results_list_length, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::cmp_rsv);
+	qsort(accumulator_pointers, (size_t)results_list_length, sizeof(*accumulator_pointers), ANT_search_engine_accumulator::cmp_rsv);
 
 	smallest = accumulator_pointers[results_list_length - 2]->get_rsv();
 	for (i = results_list_length - 2; i > 0; i--)
