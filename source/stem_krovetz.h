@@ -92,7 +92,7 @@ private:
 
 	#if defined(ATIRE_KROVETZ_HAS_UNORDERED_MAP)
 		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
-		typedef unordered_map<const char *, dictEntry, std::tr1::hash<std::string>, eqstr> dictTable;
+		typedef unordered_map<const char *, dictEntry, hash<std::string>, eqstr> dictTable;
 	#elif defined (ATIRE_KROVETZ_HAS_HASH_MAP)
 		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
 		typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
