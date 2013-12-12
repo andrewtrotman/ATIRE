@@ -48,6 +48,7 @@ number_evaluation_spaces = 1;
 evaluators = new ANT_evaluation *[number_evaluation_spaces];
 evaluations = new double[number_evaluation_spaces];
 evaluation_names = new char *[number_evaluation_spaces];
+memset(evaluation_names, 0, sizeof(*evaluation_names) * number_evaluation_spaces);
 }
 
 /*
@@ -56,8 +57,16 @@ evaluation_names = new char *[number_evaluation_spaces];
 */
 ANT_evaluator::~ANT_evaluator()
 {
+long current;
+
+for (current = 0; current < number_evaluation_spaces; current++)
+	{
+	delete evaluators[current];
+	delete evaluation_names[current];
+	}
 delete [] evaluators;
 delete [] evaluations;
+delete [] evaluation_names;
 }
 
 /*
@@ -116,6 +125,7 @@ return true; // successfully didn't get a parameter
 long ANT_evaluator::add_evaluation(char *which)
 {
 ANT_evaluation **new_evaluators;
+long current;
 double *new_evaluations;
 char **new_evaluation_names;
 char *needle, *eval, buf[20];
@@ -131,9 +141,16 @@ if (number_evaluations_used == number_evaluation_spaces)
 	memcpy(new_evaluators, evaluators, number_evaluations_used * sizeof(*evaluators));
 	memcpy(new_evaluations, evaluations, number_evaluations_used * sizeof(*evaluations));
 	memcpy(new_evaluation_names, evaluation_names, number_evaluations_used * sizeof(*evaluation_names));
+	
+	for (current = 0; current < number_evaluation_spaces; current++)
+		{
+		delete evaluators[current];
+		delete evaluation_names[current];
+		}
 	delete [] evaluators;
 	delete [] evaluations;
 	delete [] evaluation_names;
+
 	evaluators = new_evaluators;
 	evaluations = new_evaluations;
 	evaluation_names = new_evaluation_names;

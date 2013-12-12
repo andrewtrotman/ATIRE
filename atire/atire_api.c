@@ -439,6 +439,7 @@ ANT_ranking_function *new_function;
 if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
 	return 1;
 
+delete ranking_function;
 ranking_function = new_function;
 
 return 0;
