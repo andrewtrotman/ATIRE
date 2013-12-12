@@ -282,6 +282,7 @@ if (type & READABILITY_SEARCH_ENGINE)
 	/*
 		Makes no sense to quantize readability based ranking ... at least it doesn't now
 	*/
+	delete ranking_function;
 	ranking_function = new ANT_ranking_function_readability(readable_search_engine, false, 0);
 	}
 else
@@ -294,6 +295,7 @@ else
 		If it's already quantized, then ignore what the
 		user says about quantization
 	*/
+	delete ranking_function;
 	if (search_engine->quantized())
 		ranking_function = new ANT_ranking_function_impact(search_engine, false, -1);
 	else

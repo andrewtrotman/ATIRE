@@ -35,7 +35,7 @@ const long MAX_TITLE_LENGTH = 1024;
 ATIRE_API *atire = NULL;
 
 ATIRE_API *ant_init(ANT_ANT_param_block & params);
-long ant_init_ranking(ATIRE_API * atire, ANT_indexer_param_block_rank & params);
+long ant_init_ranking(ATIRE_API *atire, ANT_indexer_param_block_rank & params);
 int run_atire(int argc, char *argv[]);
 int run_atire(char *files);
 
@@ -276,7 +276,7 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			}
 		else
 			{
-			ATIRE_API * new_api = ant_init(*params);
+			ATIRE_API *new_api = ant_init(*params);
 
 			if (new_api)
 				{
@@ -683,6 +683,7 @@ delete inchannel;
 delete [] print_buffer;
 delete [] snippet;
 delete [] title;
+delete [] sum_of_average_precisions;
 delete snippet_generator;
 delete title_generator;
 delete snippet_stemmer;
@@ -905,7 +906,7 @@ params.parse();
 
 atire = ant_init(params);
 
-ant(&params);
+delete [] ant(&params);
 
 delete atire;
 

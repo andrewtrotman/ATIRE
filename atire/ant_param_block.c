@@ -71,6 +71,7 @@ expander_query_types = ANT_thesaurus_relationship::SYNONYM;
 processing_strategy = TERM_AT_A_TIME;								// term at a time by default
 quantization = false; // by default don't quantize
 quantization_bits = -1; // by default use the maths to calculate the bits we need
+quantum_stopping = QUANTUM_STOP_NONE;
 }
 
 /*
@@ -79,6 +80,7 @@ quantization_bits = -1; // by default use the maths to calculate the bits we nee
 */
 ANT_ANT_param_block::~ANT_ANT_param_block()
 {
+delete evaluator;
 delete [] doclist_filename;
 delete [] index_filename;
 

@@ -118,7 +118,7 @@ long ANT_evaluator::add_evaluation(char *which)
 ANT_evaluation **new_evaluators;
 double *new_evaluations;
 char **new_evaluation_names;
-char *needle, *eval, *buf = new char[20];
+char *needle, *eval, buf[20];
 
 /*
 	Make sure we have enough space for our evaluators

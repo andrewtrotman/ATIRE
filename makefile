@@ -6,7 +6,7 @@
 #
 #	DEBUG. set DEBUG=1 for compile in DEBUG mode.  Set DEBUG=0 for RELEASE mode.
 #
-DEBUG = 0
+DEBUG = 1
 			
 #
 #	Which compiler are we using
@@ -172,6 +172,7 @@ MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="double"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 MINUS_D = $(MINUS_D) -DNOMINMAX
 
+MINUS_D = $(MINUS_D) -DIMPACT_HEADER
 #MINUS_D = $(MINUS_D) -DPURIFY
 
 #
