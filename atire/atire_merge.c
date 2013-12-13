@@ -462,6 +462,7 @@ if (param_block.skip_intersection == false)
   if (intersection_file_buffer == NULL)
     exit(printf("Cannot read %s for intersecting\n", intersection_filename));
   intersection_term_list = ANT_disk::buffer_to_list(intersection_file_buffer, &intersection_term_count);
+	qsort(intersection_term_list, intersection_term_count, sizeof(*intersection_term_list), char_star_star_strcmp);
   }
 
 ANT_stats_time stats;
