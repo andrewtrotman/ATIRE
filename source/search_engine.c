@@ -368,7 +368,13 @@ void ANT_search_engine::init_accumulators(long long top_k)
 long long now;
 
 now = stats->start_timer();
-results_list->init_accumulators(top_k > documents ? documents + 1 : top_k);		// we add 1 here to prevent the unfortunate repeated re-organisation of the heap when there are number-of-documents in it
+
+/*
+	The line of code below used to add one to documents to prevent a slow-down when every document is in the 
+	results list, however this lead to a crash as it would fill the list and then overflow (with a duplicate
+	document). So we no longer add one.
+*/
+results_list->init_accumulators(top_k > documents ? documents : top_k);
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 
@@ -1468,10 +1474,21 @@ char **into = sorted_id_list;
 
 end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
 for (current = results_list->accumulator_pointers; current < end; current++)
-	if (results_list->is_zero_rsv(*current - results_list->accumulator))
-		break;
-	else
+	{
+	#ifdef NEVER
+		/*
+			Is this a hang over from way-back when we used to walk through the entire array?  Leaving it in means we can
+			no longer find relevant documents with a zero rsv (which happens when a query contains one term and that term
+			is in every document).
+		*/
+		if (results_list->is_zero_rsv(*current - results_list->accumulator))
+			break;
+		else
+			*into++ = document_id_list[*current - results_list->accumulator];
+	#else
 		*into++ = document_id_list[*current - results_list->accumulator];
+	#endif
+	}
 
 return sorted_id_list;
 }
