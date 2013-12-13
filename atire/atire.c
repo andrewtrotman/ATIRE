@@ -155,7 +155,20 @@ else
 		*/
 		ANT_channel_file test_channel(params->queries_filename);
 		if (test_channel.read(first_bytes, sizeof(first_bytes)) == NULL)
-			exit(printf("Cannot determine the format of the queries file... is it valid?"));
+			{
+			/*
+				Does the file exist?
+			*/
+			ANT_channel_file test_channel(params->queries_filename);
+			if (test_channel.read(first_bytes, 1) == NULL)
+				exit(printf("Query file '%s' not found!", params->queries_filename));
+
+			/*
+				else
+					probably and ANT file as its very small.
+			*/
+			//exit(printf("Cannot determine the format of the queries file... is it valid?"));
+			}
 		else
 			{
 			/*
