@@ -41,7 +41,7 @@ into = dest + 1;
 last_coded = 0;
 for (ch = what + 1; *ch != '\0'; ch++)
 	{
-	if (ANT_isalnum(*ch))		// ignore non-alphanumerics
+	if (ANT_isalpha(*ch))		// ignore non-alphabetics
 		{
 		current = soundex_val[*ch - 'a'];
 		if (current != '0' && current !='9' && current != last)

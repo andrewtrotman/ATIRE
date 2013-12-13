@@ -7,7 +7,7 @@ OS_TYPE := $(shell uname)
 # debugging or normal compiling and linking
 USE_GCC := 1
 USE_GCC_VERBOSE := 0
-USE_GCC_DEBUG := 0
+USE_GCC_DEBUG := 1
 
 # use intel c/c++ compile
 USE_INTEL_C := 0
