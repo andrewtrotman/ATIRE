@@ -54,9 +54,10 @@ using namespace std;
 	using namespace std::tr1;
 //	using namespace __gnu_cxx;
 #elif defined (_MSC_VER)
-	#include <unordered_map>
-	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
-	using namespace std::tr1;
+	#include <hash_map>
+//	#include <unordered_map>
+//	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
+//	using namespace std::tr1;
 #else
 	#include <hash_map>
 	#define ATIRE_KROVETZ_HAS_HASH_MAP
