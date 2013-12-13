@@ -9,6 +9,7 @@
 #include "btree.h"
 #include "btree_head_node.h"
 #include "btree_iterator.h"
+#include "disk.h"
 #include "file.h"
 #include "impact_header.h"
 #include "maths.h"
@@ -32,6 +33,15 @@ unsigned char *new_postings_list;
 unsigned char *temp;
 
 ANT_stop_word stop_words;
+
+/*
+   TERM_COMPARE()
+   --------------
+*/
+int term_compare(const void *term, const void *list_term_pointer)
+{
+	return strcmp((char *)term, *(char **)list_term_pointer);
+}
 
 /*
 	SHOULD_PRUNE()
@@ -418,6 +428,12 @@ long long this_trimpoint;
 long long terms_so_far = 0;
 double dummy;
 
+char *intersection_file_buffer;
+char *intersection_filename;
+char **intersection_term_list;
+int skip_intersection = true;
+long long intersection_term_count = 0;
+
 uint64_t current_disk_position;
 char file_header[] = "ATIRE Search Engine Index File\n\0\0";
 
@@ -434,6 +450,20 @@ char *document_compress_buffer;
 
 ANT_compression_factory *factory = new ANT_compression_factory;
 factory->set_scheme(param_block.compression_scheme);
+
+/*
+  If performing an intersection, need to load list of terms from disk
+*/
+if (param_block.skip_intersection == false)
+  {
+  skip_intersection = false;
+  intersection_filename = param_block.intersection_filename;
+  intersection_file_buffer = ANT_disk::read_entire_file(intersection_filename);
+  if (intersection_file_buffer == NULL)
+    exit(printf("Cannot read %s for intersecting\n", intersection_filename));
+  intersection_term_list = ANT_disk::buffer_to_list(intersection_file_buffer, &intersection_term_count);
+	qsort(intersection_term_list, intersection_term_count, sizeof(*intersection_term_list), char_star_star_strcmp);
+  }
 
 ANT_stats_time stats;
 ANT_search_engine **search_engines = new ANT_search_engine*[number_engines];
@@ -722,8 +752,10 @@ while (should_continue)
 		Now next_term_to_process contains the smallest string of the lists we're merging together
 		
 		Ignore all ~ terms, they've already been dealt with
+
+    Add term if skipping intersection, else add if it is in intersection list
 	*/
-	if (*next_term_to_process != '~')
+	if (*next_term_to_process != '~' && (skip_intersection || (bsearch(next_term_to_process, intersection_term_list, intersection_term_count, sizeof(*intersection_term_list), term_compare) != NULL)))
 		{
 		/*
 			Preload the postings lists for each engine

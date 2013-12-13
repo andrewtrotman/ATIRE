@@ -23,6 +23,8 @@ public:
 	virtual void usage(void);
 	virtual void help(void);
 	virtual long parse(void);
+	char *intersection_filename;
+	int skip_intersection;
 } ;
 
 #endif  /* MERGER_PARAM_BLOCK_H_ */
