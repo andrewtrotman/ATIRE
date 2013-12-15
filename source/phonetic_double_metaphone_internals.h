@@ -118,6 +118,10 @@ public:
 
 	/** Default ctor, initializes to a zero-length string.  Call computeKeys to compute keys for a word */
 	DoubleMetaphone() {
+/*
+	CHANGE FOR ATIRE: 1 line added (m_originalWord = m_word = NULL;) because m_word was uninitialised, now its set to NULL on creation
+*/
+		m_originalWord = m_word = NULL;
 		computeKeys(_TEXT(""));
 	}
 
