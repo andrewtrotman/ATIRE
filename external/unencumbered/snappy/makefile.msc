@@ -24,5 +24,5 @@ snappy.lib : $(OBJS)
 	lib /LTCG /NOLOGO /OUT:$(SNAPPY_LIB) $(OBJS)
 
 {$(SNAPPY_DIR)}.cc{$(SNAPPY_DIR)}.obj:
-	$(CC) $(CFLAGS) -nologo -DHAVE_WINDOWS_H -DWIN32 /c $*.cc -Fo$@
+	$(CC) $(CFLAGS) -nologo -DHAVE_WINDOWS_H -DWIN32 -Dssize_t=intptr_t /c $*.cc -Fo$@
 
