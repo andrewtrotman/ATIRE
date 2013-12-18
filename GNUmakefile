@@ -62,7 +62,7 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 USE_IMPACT_HEADER := 1
 
 # print extra info for quantum-at-a-time and term-at-a-time
-USE_PRINT_QUANTUM_STATS := 1
+USE_PRINT_QUANTUM_STATS := 0
 
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1

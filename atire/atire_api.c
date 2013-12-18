@@ -861,7 +861,7 @@ while (heap_items > 0)
 	processed_postings += the_quantum.doc_count;
 	// partial process of the last quantum based on the command line option "-K"
 	if (processed_postings > trim_postings_k)
-		the_quantum.doc_count = processed_postings - trim_postings_k;
+		the_quantum.doc_count = (ANT_compressable_integer)(processed_postings - trim_postings_k);
 
 	search_engine->read_and_decompress_for_one_quantum(current_max->term_details, raw_postings_buffer, current_impact_header, &the_quantum, one_decompressed_quantum);
 	the_quantum.the_quantum = one_decompressed_quantum;
@@ -907,7 +907,6 @@ while (heap_items > 0)
 printf("processed quantums: %lld\n", processed_quantums);
 printf("processed postings: %lld\n", processed_postings);
 #endif
-printf("\n\nllllll\n\n\n\n");
 }
 #endif // end of #ifdef IMPACT_HEADER
 
