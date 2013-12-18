@@ -55,9 +55,9 @@ double left_hand_side, rsv;
 ANT_compressable_integer *current, *end;
 
 /*
-								 tf(td)   len(c)              len(d)
+	               tf(td)   len(c)              len(d)
 	 rsv = log(1 + ------ * ------) - n log(1 + ------)
-										u     cf(t)                 u
+	                 u     cf(t)                 u
 
 	where  len(c) is the length of the collection (in terms), len(d) is the length of the document
 	tf(td) is the term frequency of the term and cf(t) is the collection_frequency of the term
