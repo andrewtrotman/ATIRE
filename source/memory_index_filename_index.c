@@ -54,10 +54,13 @@ ANT_memory_index_filename_index::~ANT_memory_index_filename_index()
 {
 long current_chunk;
 
-for (current_chunk = 0; current_chunk < chunks_used; current_chunk++)
-	delete [] chunk[current_chunk];
+if (chunk != NULL)
+	{
+	for (current_chunk = 0; current_chunk <= chunks_used; current_chunk++)
+		delete [] chunk[current_chunk];
 
-free(chunk);
+	free(chunk);
+	}
 }
 
 /*
@@ -78,6 +81,7 @@ if (members_used >= members_per_chunk)
 	members_used = 0;
 	}
 chunk[chunks_used][members_used] = value;
+members_used++;
 }
 
 /*
@@ -88,13 +92,19 @@ void ANT_memory_index_filename_index::text_render(void)
 {
 size_t current, member;
 
-printf("%lld elements in array\n", (long long)((chunks_used - 1) * members_per_chunk + members_used));
-for (current = 0; current < chunks_used - 1; current++)
-	for (member = 0; member < members_per_chunk; member++)
-		printf("%lld", chunk[current][member]);
+if (chunk == NULL)
+	puts("0 elements in array");
+else
+	{
+	printf("%lld elements in array\n", (long long)((chunks_used) * members_per_chunk + members_used));
 
-for (member = 0; member < members_used; member++)
-	printf("%lld", chunk[chunks_used][member]);
+	for (current = 0; current < chunks_used; current++)
+		for (member = 0; member < members_per_chunk; member++)
+			printf("%lld\n", chunk[current][member]);
+
+	for (member = 0; member < members_used; member++)
+		printf("%lld\n", chunk[chunks_used][member]);
+	}
 }
 
 /*
@@ -106,7 +116,7 @@ int main(void)
 ANT_memory_index_filename_index array;
 long long number;
 
-for (number = 0; number < 25; number++)
+for (number = 0; number < 1; number++)
 	array.add(number);
 
 array.text_render();
