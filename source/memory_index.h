@@ -96,6 +96,16 @@ private:
 	static const long long document_filenames_chunk_size = (1024 * 1024);
 	long long document_filenames_used;
 
+	/*
+		It takes too long to load the document filenames in a large collection (i.e. ClueWeb12) so we
+		now (version 0.5) build an index to the filenames (an array of pointers) and store a pointer to
+		that elswehere
+	*/
+#ifdef FILENAME_INDEX
+	ANT_memory_index_filename_index document_filename_index;
+	
+#endif
+
 #ifdef IMPACT_HEADER
 	ANT_impact_header impact_header;
 	long long compressed_impact_header_size;

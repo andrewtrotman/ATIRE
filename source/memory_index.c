@@ -1300,7 +1300,6 @@ index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
 four_byte = (uint32_t)ANT_file_signature;
 index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-
 /*
 	We're done!
 */
@@ -1321,6 +1320,9 @@ char *new_buffer;
 length = strlen(filename) + 1;		// +1 to include the '\0'
 if ((document_filenames_used + length) > document_filenames_chunk_size)
 	{
+	#ifdef FILENAME_INDEX
+
+	#endif
 	if ((remaining = document_filenames_chunk_size - document_filenames_used) != 0)
 		memcpy(document_filenames + document_filenames_used, filename, (size_t)remaining);
 	new_buffer = (char *)titles_memory->malloc(document_filenames_chunk_size);
@@ -1331,6 +1333,7 @@ if ((document_filenames_used + length) > document_filenames_chunk_size)
 	length -= remaining;
 	document_filenames = new_buffer;
 	}
+
 if (length != 0)
 	{
 	memcpy(document_filenames + document_filenames_used, filename, (size_t)length);

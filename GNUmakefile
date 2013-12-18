@@ -7,7 +7,7 @@ OS_TYPE := $(shell uname)
 # debugging or normal compiling and linking
 USE_GCC := 1
 USE_GCC_VERBOSE := 0
-USE_GCC_DEBUG := 0
+USE_GCC_DEBUG := 1
 
 # use intel c/c++ compile
 USE_INTEL_C := 0
@@ -58,8 +58,11 @@ USE_TERM_LOCAL_MAX_IMPACT := 0
 # for profiling purpose
 USE_PRINT_TIME_NO_CONVERSION := 0
 
-# construct impact headers for easy handling the quantums of the postings
+# construct impact headers for easy handling the quantums of the postings (version 0.4 of the index)
 USE_IMPACT_HEADER := 1
+
+# place the external document ID (its "filename") in the index and build and index on that for fast access
+USE_FILENAME_INDEX := 1
 
 # print extra info for quantum-at-a-time and term-at-a-time
 USE_PRINT_QUANTUM_STATS := 0
@@ -175,6 +178,10 @@ LDFLAGS += -ldl
 CFLAGS +=  -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
+
+ifeq ($(USE_FILENAME_INDEX), 1)
+	CFLAGS += -DFILENAME_INDEX
+endif
 
 ifeq ($(USE_IMPACT_HEADER), 1)
 	CFLAGS += -DIMPACT_HEADER
