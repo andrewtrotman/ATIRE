@@ -63,7 +63,7 @@ ANT_compressable_integer *current, *end;
 	tf(td) is the term frequency of the term and cf(t) is the collection_frequency of the term
 	and n is the length of the querty in terms.
 */
-n = quantum_parameters->accumulator->get_term_count();
+n = accumulator->get_term_count();
 idf = ((double)collection_length_in_terms / (double)term_details->global_collection_frequency);
 impact_header->impact_value_ptr = impact_header->impact_value_start;
 impact_header->doc_count_ptr = impact_header->doc_count_start;
@@ -108,7 +108,7 @@ ANT_compressable_integer *current, *end;
 	tf(td) is the term frequency of the term and cf(t) is the collection_frequency of the term
 	and n is the length of the querty in terms.
 */
-n = quantum_parameters->accumulator->get_term_count();
+n = accumulator->get_term_count();
 current = impact_ordering;
 end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 idf = ((double)collection_length_in_terms / (double)term_details->global_collection_frequency);

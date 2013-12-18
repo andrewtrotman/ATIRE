@@ -17,6 +17,10 @@
 #include "version.h"
 #include "stop_word.h"
 
+#ifdef FILENAME_INDEX
+	#include "memory_index_filename_index.h"
+#endif
+
 class ANT_memory_index_hash_node;
 class ANT_memory;
 class ANT_memory_index_one;
@@ -103,7 +107,7 @@ private:
 	*/
 #ifdef FILENAME_INDEX
 	ANT_memory_index_filename_index document_filename_index;
-	
+	long long document_filename_bytes_used;
 #endif
 
 #ifdef IMPACT_HEADER

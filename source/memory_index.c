@@ -61,6 +61,11 @@ document_filenames = NULL;
 document_filenames_used = document_filenames_chunk_size;
 static_prune_point = -1;
 stop_word_max_proportion = 1.1;			// initialising with anything greater than 1.0 will do
+
+#ifdef FILENAME_INDEX
+	document_filename_bytes_used = 0;
+#endif
+
 }
 
 /*
@@ -1321,7 +1326,8 @@ length = strlen(filename) + 1;		// +1 to include the '\0'
 if ((document_filenames_used + length) > document_filenames_chunk_size)
 	{
 	#ifdef FILENAME_INDEX
-
+		document_filename_index.add(document_filename_bytes_used);
+		document_filename_bytes_used += length;
 	#endif
 	if ((remaining = document_filenames_chunk_size - document_filenames_used) != 0)
 		memcpy(document_filenames + document_filenames_used, filename, (size_t)remaining);
@@ -1356,6 +1362,16 @@ if (depth == 0)
 	index_file->write((unsigned char *)(source + sizeof(char *)), document_filenames_used - sizeof(char *));
 else
 	index_file->write((unsigned char *)(source + sizeof(char *)), document_filenames_chunk_size - sizeof(char *));
+
+#ifdef FILENAME_INDEX
+	long long *offsets;
+	long long offset_index_location;
+
+	offsets = document_filename_index.serialise();
+	offset_index_location = index_file->tell();
+	index_file->write((unsigned char *)offsets, document_filename_index.members() * sizeof(long long));
+	delete [] offsets;
+#endif
 }
 
 /*

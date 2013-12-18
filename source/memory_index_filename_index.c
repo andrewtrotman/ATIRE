@@ -1,38 +1,11 @@
 /*
-	MEMORY_INDEX_FILENAME_INDEX.H
+	MEMORY_INDEX_FILENAME_INDEX.C
 	-----------------------------
 */
-#ifndef MEMORY_INDEX_FILENAME_INDEX_H_
-#define MEMORY_INDEX_FILENAME_INDEX_H_
-
 #include <stdio.h>
 #include <stdlib.h>
-
-/*
-	class ANT_MEMORY_INDEX_FILENAME_INDEX
-	-------------------------------------
-*/
-class ANT_memory_index_filename_index
-{
-protected:
-//	static const size_t members_per_chunk = 4 * 1024 * 1024;
-//	static const size_t chunk_growth_rate = 10;
-	static const size_t members_per_chunk = 3;
-	static const size_t chunk_growth_rate = 2;
-
-protected:
-	size_t chunks_allocated;
-	size_t chunks_used;
-	size_t members_used;
-	long long **chunk;
-
-public:
-	ANT_memory_index_filename_index();
-	~ANT_memory_index_filename_index();
-	void add(long long value);
-
-	void text_render(void);
-} ;
+#include <string.h>
+#include "memory_index_filename_index.h"
 
 /*
 	ANT_MEMORY_INDEX_FILENAME_INDEX::ANT_MEMORY_INDEX_FILENAME_INDEX()
@@ -85,6 +58,30 @@ members_used++;
 }
 
 /*
+	ANT_MEMORY_INDEX_FILENAME_INDEX::SERIALISE()
+	--------------------------------------------
+*/
+long long *ANT_memory_index_filename_index::serialise(void)
+{
+long long current, *answer, *into;
+
+if (chunk == NULL)
+	return NULL;
+
+into = answer = new long long [(size_t)members()];
+
+for (current = 0; current < chunks_used; current++)
+	{
+	memcpy(into, chunk[current], sizeof(**chunk) * members_per_chunk);
+	into += members_per_chunk;
+	}
+
+memcpy(into, chunk[chunks_used], sizeof(**chunk) * members_used);
+
+return answer;
+}
+
+/*
 	ANT_MEMORY_INDEX_FILENAME_INDEX::TEXT_RENDER()
 	----------------------------------------------
 */
@@ -106,21 +103,3 @@ else
 		printf("%lld\n", chunk[chunks_used][member]);
 	}
 }
-
-/*
-	MAIN()
-	------
-*/
-int main(void)
-{
-ANT_memory_index_filename_index array;
-long long number;
-
-for (number = 0; number < 1; number++)
-	array.add(number);
-
-array.text_render();
-}
-
-
-#endif
