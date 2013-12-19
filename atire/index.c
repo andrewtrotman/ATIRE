@@ -167,7 +167,9 @@ ANT_memory_index *index;
 long long doc, now, last_report;
 long param, first_param;
 ANT_memory file_buffer(1024 * 1024);
-ANT_file id_list;
+#ifndef FILENAME_INDEX
+	ANT_file id_list;
+#endif
 long long files_that_match;
 long long bytes_indexed;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL, *scrubber = NULL;
@@ -197,8 +199,9 @@ if (first_param >= argc)
 last_report = 0;
 doc = 0;
 index = new ANT_memory_index(param_block.index_filename);
-id_list.open(param_block.doclist_filename, "wbx");
-
+#ifndef FILENAME_INDEX
+	id_list.open(param_block.doclist_filename, "wbx");
+#endif
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
@@ -559,8 +562,13 @@ for (param = first_param; param < argc; param++)
 					if (current_file->compressed)
 						delete [] current_file->compressed;
 					}
+#ifdef FILENAME_INDEX
+				else
+						index->add_to_document_repository(strip_space_inplace(current_file->filename));
+#else
 	//			puts(current_file->filename);
 				id_list.puts(strip_space_inplace(current_file->filename));
+#endif
 				}
 			delete [] current_file->file;
 			delete [] current_file->filename;
@@ -587,8 +595,9 @@ if (doc == 0)
 	puts("No documents indexed (check your file list)");
 else
 	{
+#ifndef FILENAME_INDEX
 	id_list.close();
-
+#endif
 	if (pregen)
 		{
 		for (int i = 0; i < pregen->field_count; i++)

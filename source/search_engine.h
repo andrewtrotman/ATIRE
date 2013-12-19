@@ -141,7 +141,11 @@ public:
 	virtual void process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
 
 	ANT_search_engine_accumulator **sort_results_list(long long accurrate_rank_point, long long *hits);
+#ifdef FILENAME_INDEX
+	char *get_document_filename(char *filename, long long internal_document_id);
+#else
 	char **generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k);
+#endif
 	long long document_count(void) { return documents; }
 	long long term_count(void) { return collection_length_in_terms; }
 	ANT_compressable_integer *get_document_lengths(double *mean) { *mean = mean_document_length; return document_lengths; }
@@ -179,9 +183,6 @@ public:
 	long long get_documents(char **destination, unsigned long **destination_length, long long from, long long to); // from and to are relative to the results list.
 
 	char **get_document_filenames(char *buffer, unsigned long *buf_length);
-#ifdef FILENAME_INDEX
-	char *get_document_filename(char *filename, long long internal_document_id);
-#endif
 };
 
 #endif  /* SEARCH_ENGINE_H_ */

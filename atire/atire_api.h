@@ -236,11 +236,17 @@ public:
 	*/
 	void rerank(void);
 
+#ifdef FILENAME_INDEX
+	/*
+		Given an ATIRE document ID, return the esternal ID (the ATIRE "filename")
+	*/
+	char *get_document_filename(char *filename, long long internal_document_id);
+#else
 	/*
 		Turn the numeric internal IDs into a list of external string IDs (post search)
 	*/
 	char **generate_results_list(void);
-
+#endif
 	/*
 		Given a positing in the results list return the internal search engine docid and its relevance
 	*/

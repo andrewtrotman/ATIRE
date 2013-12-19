@@ -17,11 +17,18 @@ one = (ANT_relevant_document *)a;
 two = (ANT_relevant_document *)b;
 
 // sort on topic, subtopic, docid
-if (two->topic < one->topic) return -1;
-if (two->topic > one->topic) return 1;
-if (two->subtopic < one->subtopic) return -1;
-if (two->subtopic > one->subtopic) return 1;
-if (two->docid < one->docid) return -1;
-if (two->docid > one->docid) return 1;
+if (two->topic < one->topic)
+	return -1;
+if (two->topic > one->topic)
+	return 1;
+if (two->subtopic < one->subtopic)
+	return -1;
+if (two->subtopic > one->subtopic)
+	return 1;
+if (two->docid < one->docid)
+	return -1;
+if (two->docid > one->docid)
+	return 1;
+
 return 0;
 }

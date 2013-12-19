@@ -42,7 +42,7 @@ for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < prec
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, got->document_list, (size_t)got->number_of_documents, sizeof(*got->document_list), ANT_relevant_document::compare)) != NULL)
 		{
 		/*
-			At this point we have an assessment for the document, but it might have been assessed are irrelevant
+			At this point we have an assessment for the document, but it might have been assessed as irrelevant
 		*/
 		if (relevance_data->relevant_characters != 0)
 			{

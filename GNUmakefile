@@ -61,7 +61,7 @@ USE_PRINT_TIME_NO_CONVERSION := 0
 # construct impact headers for easy handling the quantums of the postings (version 0.4 of the index)
 USE_IMPACT_HEADER := 1
 
-# place the external document ID (its "filename") in the index and build and index on that for fast access
+# place the external document ID (its "filename") in the index and build and index on that for fast access (version 0.5 of the index)
 USE_FILENAME_INDEX := 0
 
 # print extra info for quantum-at-a-time and term-at-a-time

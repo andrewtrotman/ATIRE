@@ -295,17 +295,6 @@ stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
 	filename_finish = get_variable("~documentfilenamesfinish");
 	filename_index_start = get_variable("~documentfilenamesindexstart");
 	filename_index_finish = get_variable("~documentfilenamesindexfinish");
-
-	{
-	char filename[1024];
-	long current;
-
-	for (current = 0; current < documents; current++)
-		{
-		get_document_filename(filename, current);
-		puts(filename);
-		}
-	}
 #endif
 
 return 1;
@@ -1485,7 +1474,6 @@ return hits;
 }
 
 #ifdef FILENAME_INDEX
-
 	/*
 		ANT_SEARCH_ENGINE::GET_DOCUMENT_FILENAME()
 		------------------------------------------
@@ -1514,39 +1502,36 @@ return hits;
 
 	return filename;
 	}
-
 #else
-
-/*
-	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
-	------------------------------------------
-*/
-char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k)
-{
-ANT_search_engine_accumulator **current, **end;
-char **into = sorted_id_list;
-
-end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
-for (current = results_list->accumulator_pointers; current < end; current++)
+	/*
+		ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
+		------------------------------------------
+	*/
+	char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k)
 	{
-	#ifdef NEVER
-		/*
-			Is this a hang over from way-back when we used to walk through the entire array?  Leaving it in means we can
-			no longer find relevant documents with a zero rsv (which happens when a query contains one term and that term
-			is in every document).
-		*/
-		if (results_list->is_zero_rsv(*current - results_list->accumulator))
-			break;
-		else
+	ANT_search_engine_accumulator **current, **end;
+	char **into = sorted_id_list;
+
+	end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
+	for (current = results_list->accumulator_pointers; current < end; current++)
+		{
+		#ifdef NEVER
+			/*
+				Is this a hang over from way-back when we used to walk through the entire array?  Leaving it in means we can
+				no longer find relevant documents with a zero rsv (which happens when a query contains one term and that term
+				is in every document).
+			*/
+			if (results_list->is_zero_rsv(*current - results_list->accumulator))
+				break;
+			else
+				*into++ = document_id_list[*current - results_list->accumulator];
+		#else
 			*into++ = document_id_list[*current - results_list->accumulator];
-	#else
-		*into++ = document_id_list[*current - results_list->accumulator];
-	#endif
+		#endif
+		}
+
+	return sorted_id_list;
 	}
-
-return sorted_id_list;
-}
-
 #endif
 
 /*

@@ -268,9 +268,11 @@ ANT_search_engine_readability *readable_search_engine;
 if (document_list != NULL)
 	return 1;		//we're already open;
 
+#ifndef FILENAME_INDEX
 document_list = read_docid_list(doclist_filename, &documents_in_id_list, &filename_list, &mem1, &mem2);
 if (document_list == NULL)
 	return 1;		//document list could not be read
+#endif
 
 answer_list = (char **)memory->malloc(sizeof(*answer_list) * documents_in_id_list);
 if (type & READABILITY_SEARCH_ENGINE)
@@ -612,11 +614,15 @@ return 0;
 */
 void ATIRE_API::write_to_forum_file(long topic_id)
 {
-if (forum_writer == NULL)
-	return;
+#ifdef FILENAME_INDEX
+	#warning "reenable this code"
+#else
+	if (forum_writer == NULL)
+		return;
 
-search_engine->generate_results_list(document_list, answer_list, hits);
-forum_writer->write(topic_id, answer_list, forum_results_list_length > hits ? hits : forum_results_list_length, search_engine, NULL);
+	search_engine->generate_results_list(document_list, answer_list, hits);
+	forum_writer->write(topic_id, answer_list, forum_results_list_length > hits ? hits : forum_results_list_length, search_engine, NULL);
+#endif
 }
 
 /*
@@ -1632,6 +1638,14 @@ delete memory;
 }
 
 #ifdef FILENAME_INDEX
+	/*
+		ATIRE_API::GET_DOCUMENT_FILENAME()
+		----------------------------------
+	*/
+	char *ATIRE_API::get_document_filename(char *filename, long long internal_document_id)
+	{
+	return search_engine->get_document_filename(filename, internal_document_id);
+	}
 
 #else
 	/*
