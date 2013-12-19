@@ -145,6 +145,9 @@ private:
 	void close_index_file(void);
 	void add_to_filename_repository(char *filename);
 	void serialise_filenames(char *source,  long depth = 0);
+#ifdef FILENAME_INDEX
+	void serialise_filenames_index(void);
+#endif
 
 	void add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 

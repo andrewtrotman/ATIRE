@@ -35,7 +35,7 @@ start = search_engine.get_variable("~documentfilenamesstart");
 end = search_engine.get_variable("~documentfilenamesfinish");
 
 if (start == 0 || end == 0)
-	exit(printf("Filenames aren't in the index\n"));
+	exit(printf("Document IDs aren't in the index\n"));
 
 buffer_length = (unsigned long)(end - start);
 buffer = (char *)malloc(sizeof(*buffer) * buffer_length);

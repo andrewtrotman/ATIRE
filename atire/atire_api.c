@@ -1631,15 +1631,19 @@ delete in_memory_index;
 delete memory;
 }
 
-/*
-	ATIRE_API::GENERATE_RESULTS_LIST()
-	----------------------------------
-*/
-char **ATIRE_API::generate_results_list(void)
-{
-search_engine->generate_results_list(filename_list, answer_list, hits);
-return answer_list;
-}
+#ifdef FILENAME_INDEX
+
+#else
+	/*
+		ATIRE_API::GENERATE_RESULTS_LIST()
+		----------------------------------
+	*/
+	char **ATIRE_API::generate_results_list(void)
+	{
+	search_engine->generate_results_list(filename_list, answer_list, hits);
+	return answer_list;
+	}
+#endif
 
 /*
 	ATIRE_API::GET_RELEVANT_DOCUMENT_DETAILS()

@@ -70,6 +70,12 @@ protected:
 #ifdef IMPACT_HEADER
 	ANT_impact_header impact_header;
 #endif
+#ifdef FILENAME_INDEX
+	long long filename_index_start;
+	long long filename_index_finish;
+	long long filename_start;
+	long long filename_finish;
+#endif
 	ANT_compressable_integer *decompress_buffer;
 	ANT_compression_factory factory;
 	ANT_memory *memory;
@@ -173,6 +179,9 @@ public:
 	long long get_documents(char **destination, unsigned long **destination_length, long long from, long long to); // from and to are relative to the results list.
 
 	char **get_document_filenames(char *buffer, unsigned long *buf_length);
+#ifdef FILENAME_INDEX
+	char *get_document_filename(char *filename, long long internal_document_id);
+#endif
 };
 
 #endif  /* SEARCH_ENGINE_H_ */

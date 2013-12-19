@@ -555,7 +555,7 @@ for (param = first_param; param < argc; param++)
 						exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
 					current_file->compressed_length = compressed_size;
 #endif
-					index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
+					index->add_to_document_repository(strip_space_inplace(current_file->filename), current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
 					if (current_file->compressed)
 						delete [] current_file->compressed;
 					}

@@ -86,9 +86,9 @@ index_filename = filename;
 */
 end = index->file_length();
 #ifdef IMPACT_HEADER
-index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
+	index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
 #else
-index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
+	index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
 #endif
 
 index->read(&eight_byte);
@@ -98,8 +98,8 @@ index->read(&four_byte);
 string_length_of_longest_term = four_byte;
 
 #ifdef IMPACT_HEADER
-index->read(&four_byte);
-unique_terms = four_byte;
+	index->read(&four_byte);
+	unique_terms = four_byte;
 #endif
 
 index->read(&four_byte);
@@ -201,14 +201,14 @@ else
 	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (documents + ANT_COMPRESSION_FACTORY_END_PADDING));
 	memory->realign();
 #else
-/*
-	Allocate space for decompression.
-	NOTES:
-		Add 512 because of the tf and 0 at each end of each impact ordered list.
-		Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
-*/
-decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
-memory->realign();
+	/*
+		Allocate space for decompression.
+		NOTES:
+			Add 512 because of the tf and 0 at each end of each impact ordered list.
+			Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
+	*/
+	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
+	memory->realign();
 #endif
 
 document_lengths = (ANT_compressable_integer *)memory->malloc(documents * sizeof(*document_lengths));
@@ -258,11 +258,11 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	document_longest_raw_length = get_variable("~documentlongest");
 #else
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
-#ifdef SPECIAL_COMPRESSION
-		document_longest_raw_length = *(value + 1);
-#else
-		document_longest_raw_length = *value;
-#endif
+		#ifdef SPECIAL_COMPRESSION
+			document_longest_raw_length = *(value + 1);
+		#else
+			document_longest_raw_length = *value;
+		#endif
 #endif
 	}
 
@@ -286,6 +286,27 @@ if ((global_trim_postings_k = get_variable("~trimpoint")) == 0)
 	global_trim_postings_k = LONG_MAX;									// trim at 0 means no trimming
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
+
+#ifdef FILENAME_INDEX
+	/*
+		Get the location of the filename and the index to the filenames.
+	*/
+	filename_start = get_variable("~documentfilenamesstart");
+	filename_finish = get_variable("~documentfilenamesfinish");
+	filename_index_start = get_variable("~documentfilenamesindexstart");
+	filename_index_finish = get_variable("~documentfilenamesindexfinish");
+
+	{
+	char filename[1024];
+	long current;
+
+	for (current = 0; current < documents; current++)
+		{
+		get_document_filename(filename, current);
+		puts(filename);
+		}
+	}
+#endif
 
 return 1;
 }
@@ -1463,6 +1484,39 @@ stats->add_rank_time(stats->stop_timer(now));
 return hits;
 }
 
+#ifdef FILENAME_INDEX
+
+	/*
+		ANT_SEARCH_ENGINE::GET_DOCUMENT_FILENAME()
+		------------------------------------------
+	*/
+	char *ANT_search_engine::get_document_filename(char *filename, long long internal_document_id)
+	{
+	long long offset[2];
+
+	/*
+		Read the location of the filename
+	*/
+	index->seek(filename_index_start + internal_document_id * sizeof (long long));
+	index->read((unsigned char *)&offset, sizeof(offset));
+
+	/*
+		Fix the byte order (for portability to ARM)
+	*/
+	offset[0] = ANT_get_long_long((unsigned char *)offset);
+	offset[1] = ANT_get_long_long((unsigned char *)(offset + 1));
+
+	/*
+		Get the filename
+	*/
+	index->seek(filename_start + offset[0]);
+	index->read((unsigned char *)filename, offset[1] - offset[0]);
+
+	return filename;
+	}
+
+#else
+
 /*
 	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
 	------------------------------------------
@@ -1492,6 +1546,8 @@ for (current = results_list->accumulator_pointers; current < end; current++)
 
 return sorted_id_list;
 }
+
+#endif
 
 /*
 	ANT_SEARCH_ENGINE::GET_VARIABLE()
@@ -1705,3 +1761,4 @@ for (current_doc = 0; current_doc < documents; current_doc++)
 
 return document_filenames;
 }
+
