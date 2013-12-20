@@ -1625,7 +1625,6 @@ for (current = 0; current < top_n; current++)
 delete [] document_buffer;
 delete readability;
 delete parser;
-delete indexer;
 
 /*
 	turn the index into a search engine.
@@ -1633,7 +1632,7 @@ delete indexer;
 memory = new ANT_memory;
 in_memory_index = new ANT_search_engine_memory_index(indexer, memory);
 delete in_memory_index;
-
+delete indexer;
 delete memory;
 }
 
