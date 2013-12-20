@@ -28,7 +28,12 @@
 ANT_relevant_document *ANT_assessment_INEX::read(char *filename, long long *judgements)
 {
 char *file, **lines, **current, *space;
-long topic, document, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, *document_pointer, **found;
+#ifdef FILENAME_INDEX
+	long topic, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, **found;
+	char document[128];
+#else
+	long topic, document, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, *document_pointer, **found;
+#endif
 long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
 ANT_relevant_document_passage *current_passage, *all_passages, *passage_list_for_this_document;
@@ -48,7 +53,11 @@ relevant_documents = 0;
 relevant_passages = 0;
 for (current = lines; *current != 0; current++)
 	{
-	params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
+	#ifdef FILENAME_INDEX
+		params = sscanf(*current, "%ld %*s %127s %ld %ld", &topic, &document, &relevant_characters, &document_length);
+	#else
+		params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
+	#endif
 	relevant_passages += strcountchr(*current, ':');
 	if (params == 4)
 		relevant_documents++;
@@ -63,22 +72,33 @@ current_passage = all_passages = (ANT_relevant_document_passage *)memory->malloc
 /*
 	generate the list of relevant documents
 */
-document_pointer = &document;
+#ifndef FILENAME_INDEX
+	document_pointer = &document;
+#endif
 for (current = lines; *current != 0; current++)
 	{
 	best_entry_point = 0;
-	params = sscanf(*current, "%ld %*s %ld %ld %ld %ld", &topic, &document, &relevant_characters, &document_length, &best_entry_point);
+	#ifdef FILENAME_INDEX
+		params = sscanf(*current, "%ld %*s %127s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length, &best_entry_point);
+		document[127] = '\0';
+	#else
+		params = sscanf(*current, "%ld %*s %ld %ld %ld %ld", &topic, &document, &relevant_characters, &document_length, &best_entry_point);
+	#endif
 	if (params >= 4)
 		{
-		found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
-		if (found == NULL)
-			{
-			if (!missing_warned)
-				printf("Warning: DOC '%ld' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
-			missing_warned = TRUE;
-			}
-		else
-			current_assessment->docid = *found - numeric_docid_list;		// the position in the list of documents is the internal docid used for computing precision
+		#ifdef FILENAME_INDEX
+			current_assessment->docid = strnew(document);
+		#else
+			found = (long **)bsearch(&document_pointer, sorted_numeric_docid_list, (size_t)documents, sizeof(*sorted_numeric_docid_list), cmp);
+			if (found == NULL)
+				{
+				if (!missing_warned)
+					printf("Warning: DOC '%ld' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
+				missing_warned = TRUE;
+				}
+			else
+				current_assessment->docid = *found - numeric_docid_list;		// the position in the list of documents is the internal docid used for computing precision
+		#endif
 		current_assessment->topic = topic;
 		current_assessment->subtopic = 0; // for now INEX doesn't give subtopics
 		if (relevant_characters > document_length)

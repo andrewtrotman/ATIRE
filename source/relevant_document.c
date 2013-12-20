@@ -25,10 +25,15 @@ if (two->subtopic < one->subtopic)
 	return -1;
 if (two->subtopic > one->subtopic)
 	return 1;
-if (two->docid < one->docid)
-	return -1;
-if (two->docid > one->docid)
-	return 1;
 
-return 0;
+#ifdef FILENAME_INDEX
+	return strcmp(one->docid, two->docid);
+#else
+	if (two->docid < one->docid)
+		return -1;
+	if (two->docid > one->docid)
+		return 1;
+
+	return 0;
+#endif
 }

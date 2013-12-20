@@ -283,7 +283,7 @@ long long last_topic, current_topic, changed_topic;
 long long last_subtopic, current_subtopic, number_of_subtopics;
 
 /*
- Take a copy of the relevance_list and sort it on topic, subtopic, then docid.^M
+	Take a copy of the relevance_list and sort it on topic, subtopic, then docid.
 */
 this->memory = memory;
 this->relevant_document_list = (ANT_relevant_document *)memory->malloc(sizeof(*relevant_document_list) * relevant_document_list_length);
