@@ -15,7 +15,11 @@
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
 #include "search_engine_result.h"
-#include "search_engine_result_iterator.h"
+#ifdef FILENAME_INDEX
+	#include "search_engine_result_id_iterator.h"
+#else
+	#include "search_engine_result_iterator.h"
+#endif
 #include "stats_search_engine.h"
 #include "ranking_function_bm25.h"
 #include "stemmer.h"
@@ -1688,12 +1692,15 @@ return destination;
 /*
 	ANT_SEARCH_ENGINE::GET_DOCUMENTS()
 	----------------------------------
-	semanticly: for (x = from; x < to; x++) read_document(x);
 */
 long long ANT_search_engine::get_documents(char **destination, unsigned long **destination_length, long long from, long long to)
 {
-long long start, end, times, id, get;
-ANT_search_engine_result_iterator current;
+long long start, end, times, get, id;
+#ifdef FILENAME_INDEX
+	ANT_search_engine_result_id_iterator current;
+#else
+	ANT_search_engine_result_iterator current;
+#endif
 
 if (document_offsets == NULL)
 	return 0;

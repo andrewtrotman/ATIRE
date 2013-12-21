@@ -36,7 +36,11 @@ key.subtopic = subtopic;
 
 found_and_relevant = precision = 0;
 current = 0;
+#ifdef FILENAME_INDEX
+for (key.docid = iterator.first(search_engine); key.docid != NULL && current < precision_point; key.docid = iterator.next())
+#else
 for (key.docid = iterator.first(search_engine); key.docid >= 0 && current < precision_point; key.docid = iterator.next())
+#endif
 	{
 	current++;
 	if ((relevance_data = (ANT_relevant_document *)bsearch(&key, got->document_list, (size_t)got->number_of_documents, sizeof(*got->document_list), ANT_relevant_document::compare)) != NULL)

@@ -615,7 +615,13 @@ return 0;
 void ATIRE_API::write_to_forum_file(long topic_id)
 {
 #ifdef FILENAME_INDEX
-	#warning "reenable this code"
+	#ifdef _MSC_VER
+		#if _MSC_VER > 1500
+			#warning "reenable this code"
+		#endif
+	#else
+		#warning "reenable this code"
+	#endif
 #else
 	if (forum_writer == NULL)
 		return;

@@ -165,7 +165,7 @@ for (current = lines; *current != 0; current++)
 	if (params >= 4)
 		{
 		#ifdef FILENAME_INDEX
-			current_assessment->docid = strnew(docment);
+			current_assessment->docid = strnew(document);
 		#else
 			pointer_to_document = (char *)document;
 			pointer_to_pointer_to_document = &pointer_to_document;

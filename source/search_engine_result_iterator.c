@@ -31,17 +31,11 @@ return next();
 #ifdef FILENAME_INDEX
 	char *ANT_search_engine_result_iterator::next(void)
 	{
-	/*
-		New-fangled rvs must be positive version
-	*/
 	current++;
 	if (current >= results_list_length)
 		return NULL;
 
-	if (result->is_zero_rsv(result->accumulator_pointers[current] - result->accumulator))
-		return NULL;
-	else
-		return get_document_filename(filename_buffer, result->accumulator_pointers[current] - result->accumulator);
+	return search_engine->get_document_filename(filename_buffer, result->accumulator_pointers[current] - result->accumulator);
 	}
 #else
 	long long ANT_search_engine_result_iterator::next(void)

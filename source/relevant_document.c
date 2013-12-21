@@ -2,7 +2,7 @@
 	RELEVANT_DOCUMENT.C
 	-------------------
 */
-
+#include <string.h>
 #include "relevant_document.h"
 
 /*

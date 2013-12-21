@@ -52,7 +52,11 @@ for (i = 0; i < got_topic->number_of_subtopics; i++)
 	subtopicGain[i] = 1;
 
 key.topic = topic;
+#ifdef FILENAME_INDEX
+for (i = 0, key.docid = iterator.first(search_engine); key.docid != NULL && i < precision_point; key.docid = iterator.next(), i++)
+#else
 for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0 && i < precision_point; key.docid = iterator.next(), i++)
+#endif
 	{
 	score = 0;
 	for (current_subtopic = 0; current_subtopic < got_topic->number_of_subtopics; current_subtopic++)
@@ -114,9 +118,14 @@ return precision / ideal_gains[got_topic - relevant_topic_list];
 */
 void ANT_evaluation_intent_aware_normalised_discounted_cumulative_gain::set_lists(ANT_relevant_topic *relevant_topic_list, long long relevant_topic_list_length)
 {
+#ifdef FILENAME_INDEX
+	char *examine_docid, *best_docid = NULL;
+#else
+	long long examine_docid, best_docid = -1;
+#endif
 ANT_relevant_topic *got_top;
 ANT_relevant_document *current_doc, *first_doc;
-long long topic, subtopic, examine_docid, total_documents, relevant_documents, position, best_docid = -1;
+long long topic, subtopic, total_documents, relevant_documents, position;
 double max_score, current_score = 0;
 double *subtopicGain = NULL;
 long long this_subtopic_position;
@@ -147,7 +156,11 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 	*/
 	for (position = 0; position < relevant_documents && position < precision_point; position++)
 		{
+#ifdef FILENAME_INDEX
+		examine_docid = NULL;
+#else
 		examine_docid = -1;
+#endif
 		max_score = 0;
 		current_doc = first_doc;
 
@@ -157,7 +170,11 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 				If we haven't set the document to examine, then find the first one that hasn't been used
 				otherwise find the next judgement for the document
 			*/
+#ifdef FILENAME_INDEX
+			if (examine_docid == NULL)
+#else
 			if (examine_docid == -1)
+#endif
 				{
 				while (current_doc->topic == got_top->topic && current_doc->best_entry_point != UNUSED)
 					current_doc++;
@@ -171,13 +188,21 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 					break;
 				}
 			else
+#ifdef FILENAME_INDEX
+				while (current_doc->topic == got_top->topic && strcmp(current_doc->docid, examine_docid) != 0)
+#else
 				while (current_doc->topic == got_top->topic && current_doc->docid != examine_docid)
+#endif
 					current_doc++;
 
 			/*
 				If we found an assessment, add it's contribution to this documents score, and mark it examined.
 			*/
+#ifdef FILENAME_INDEX
+			if (current_doc->topic == got_top->topic && strcmp(current_doc->docid, examine_docid) == 0)
+#else
 			if (current_doc->topic == got_top->topic && current_doc->docid == examine_docid)
+#endif
 				{
 				this_subtopic_position = got_top->subtopic_list[0].subtopic - current_doc->subtopic;
 				if (current_doc->relevant_characters > 0)
@@ -202,7 +227,11 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 					Reset for the next document
 				*/
 				current_doc = first_doc;
+#ifdef FILENAME_INDEX
+				examine_docid = NULL;
+#else
 				examine_docid = -1;
+#endif
 				current_score = 0;
 				}
 			}
@@ -212,7 +241,11 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 			document as used, and reset the others
 		*/
 		for (current_doc = first_doc; current_doc->topic == got_top->topic; current_doc++)
+#ifdef FILENAME_INDEX
+			if (strcmp(current_doc->docid, best_docid) == 0)
+#else
 			if (current_doc->docid == best_docid)
+#endif
 				{
 				this_subtopic_position = got_top->subtopic_list[0].subtopic - current_doc->subtopic;
 				// modify the subtopic gains now we've selected the document we're going to put in this position
