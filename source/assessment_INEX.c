@@ -29,15 +29,16 @@ ANT_relevant_document *ANT_assessment_INEX::read(char *filename, long long *judg
 {
 char *file, **lines, **current, *space;
 #ifdef FILENAME_INDEX
-	long topic, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, **found;
+	long topic, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point;
 	char document[128];
 #else
 	long topic, document, document_length, relevant_characters, relevant_documents, relevant_passages, best_entry_point, *document_pointer, **found;
+	long missing_warned = FALSE;
 #endif
 long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
 ANT_relevant_document_passage *current_passage, *all_passages, *passage_list_for_this_document;
-long params, missing_warned = FALSE, length_warned = FALSE;
+long params, length_warned = FALSE;
 
 /*
 	load the assessment file into memory
@@ -54,7 +55,7 @@ relevant_passages = 0;
 for (current = lines; *current != 0; current++)
 	{
 	#ifdef FILENAME_INDEX
-		params = sscanf(*current, "%ld %*s %127s %ld %ld", &topic, &document, &relevant_characters, &document_length);
+		params = sscanf(*current, "%ld %*s %127s %ld %ld", &topic, document, &relevant_characters, &document_length);
 	#else
 		params = sscanf(*current, "%ld %*s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length);
 	#endif
@@ -79,7 +80,7 @@ for (current = lines; *current != 0; current++)
 	{
 	best_entry_point = 0;
 	#ifdef FILENAME_INDEX
-		params = sscanf(*current, "%ld %*s %127s %ld %ld %ld", &topic, &document, &relevant_characters, &document_length, &best_entry_point);
+		params = sscanf(*current, "%ld %*s %127s %ld %ld %ld", &topic, document, &relevant_characters, &document_length, &best_entry_point);
 		document[127] = '\0';
 	#else
 		params = sscanf(*current, "%ld %*s %ld %ld %ld %ld", &topic, &document, &relevant_characters, &document_length, &best_entry_point);

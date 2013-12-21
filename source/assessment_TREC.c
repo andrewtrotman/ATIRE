@@ -121,12 +121,16 @@ else
 */
 ANT_relevant_document *ANT_assessment_TREC::read(char *filename, long long *judgements)
 {
-char ***found, *pointer_to_document, **pointer_to_pointer_to_document, document[128];		// Assume document IDs are going to be less than 128 characters
+#ifndef FILENAME_INDEX
+	char ***found, *pointer_to_document, **pointer_to_pointer_to_document;
+	long missing_warned = FALSE;
+#endif
+char document[128];		// Assume document IDs are going to be less than 128 characters
 char *file, **lines, **current;
 long topic, subtopic, relevance, relevance_judgements;
 long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
-long params, missing_warned = FALSE;
+long params;
 
 /*
 	load the assessment file into memory
