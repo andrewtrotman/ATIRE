@@ -173,7 +173,7 @@ MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 MINUS_D = $(MINUS_D) -DNOMINMAX
 
 MINUS_D = $(MINUS_D) -DIMPACT_HEADER
-#MINUS_D = $(MINUS_D) -DFILENAME_INDEX
+MINUS_D = $(MINUS_D) -DFILENAME_INDEX
 #MINUS_D = $(MINUS_D) -DPURIFY
 
 #
@@ -434,7 +434,8 @@ ANT_TARGETS = \
 	$(BINDIR)\atire_broker.exe 			\
 	$(BINDIR)\atire_client.exe			\
 	$(BINDIR)\atire_dictionary.exe		\
-	$(BINDIR)\atire_merge.exe		\
+	$(BINDIR)\atire_merge.exe			\
+	$(BINDIR)\atire_doclist.exe			\
 	$(LIBIDR)\atire.dll
 
 OTHER_TARGETS = \
