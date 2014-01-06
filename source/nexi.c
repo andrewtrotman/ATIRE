@@ -76,9 +76,9 @@ return answer;
 */
 ANT_NEXI_term *ANT_NEXI::duplicate_path_chain(ANT_NEXI_term *start, ANT_NEXI_term **end_of_chain)
 {
-ANT_NEXI_term sentinal, *current, *head, *tail;
+ANT_NEXI_term sentinal, *current, *tail;
 
-head = tail = &sentinal;
+tail = &sentinal;
 for (current = start; current != NULL; current = current->next)
 	tail = get_NEXI_term(tail,  &current->path, &current->term, current->sign);
 

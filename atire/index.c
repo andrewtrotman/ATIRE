@@ -176,9 +176,11 @@ ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL,
 ANT_directory_iterator *dir_scrubber = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 #ifdef PARALLEL_INDEXING
-ANT_directory_iterator_multiple *parallel_disk;
+	ANT_directory_iterator_multiple *parallel_disk;
 #endif
-ANT_stem *stemmer = NULL;
+#ifndef PARALLEL_INDEXING_DOCUMENTS
+	ANT_stem *stemmer = NULL;
+#endif
 ANT_pregens_writer *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
@@ -226,7 +228,9 @@ if (param_block.stemmer != 0)
 	*/
 	ANT_string_pair squiggle_stemmed("~stemmer");
 	index->set_variable(&squiggle_stemmed, param_block.stemmer);
+#ifndef PARALLEL_INDEXING_DOCUMENTS
 	stemmer = ANT_stemmer_factory::get_core_stemmer(param_block.stemmer);
+#endif
 	}
 
 readability = new ANT_readability_factory;

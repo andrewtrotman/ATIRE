@@ -118,7 +118,7 @@ ANT_compressable_integer last, pow, from, to;
 
 gap = preorder = new ANT_compress_sigma_frequency[uniques];
 *uniques_over_threshold = 0;
-last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler should work this out
+last = sizeof(last) == 4 ? (ANT_compressable_integer)LONG_MAX : (ANT_compressable_integer)LLONG_MAX;		// the compiler should work this out
 for (current = map; current < end; current++)
 	{
 	if (current->gap != last)
@@ -187,7 +187,7 @@ qsort(map, (size_t)size, sizeof(*map), map_cmp);
 /*
 	Compute the frequences of each unique value in the source array
 */
-last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler should work this out
+last = sizeof(last) == 4 ? (ANT_compressable_integer)LONG_MAX : (ANT_compressable_integer)LLONG_MAX;		// the compiler should work this out
 uniques = 0;
 from = map;
 freq = 1;
@@ -225,7 +225,7 @@ destination = new ANT_compressable_integer[raw_size];
 gap = destination + 1;
 list = destination + uniques_over_threshold + 1;
 
-last = sizeof(last) == 4 ? LONG_MAX : LLONG_MAX;		// the compiler should work this out
+last = sizeof(last) == 4 ? (ANT_compressable_integer)LONG_MAX : (ANT_compressable_integer)LLONG_MAX;		// the compiler should work this out
 for (current = map; current < end; current++)					// for each term in the list
 	{
 	if (current->gap != last)

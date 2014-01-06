@@ -779,7 +779,6 @@ void ATIRE_API::search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long lon
 long long current_term, total_quantums = 0, processed_quantums;
 ANT_NEXI_term_ant *term_string;
 ANT_quantum the_quantum;
-void *verify = NULL;
 ANT_max_quantum *current_max = NULL;
 ANT_impact_header *current_impact_header = NULL;
 long long trim_postings_k = search_engine->get_trim_postings_k();
@@ -793,7 +792,7 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 	term_string = term_list[current_term];
 
 	// after calling the function, the header_info and impact header are stored in the impact_header_buffers[current_term]
-	verify = search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details, raw_postings_buffer, impact_header_buffers[current_term]);
+	search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details, raw_postings_buffer, impact_header_buffers[current_term]);
 	//make sure the term was found in the dictionary
 	if (term_string->term_details.local_collection_frequency != 0)
 		{

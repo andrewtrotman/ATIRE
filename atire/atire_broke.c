@@ -149,7 +149,7 @@ char *ATIRE_broke::search(char *query, long long first, long long page_length)
 {
 ANT_stats stats;
 ATIRE_broke_engine **engine;
-long long current, timer, hits, time_taken, virtual_document_id;
+long long timer, hits, time_taken, virtual_document_id;
 char *one_answer, *numhits;
 
 /*
@@ -168,7 +168,6 @@ if (search_engine[1] == NULL)
 	Connected to many instances and so we need to merge
 */
 timer = stats.start_timer();
-current = 0;
 hits = 0;
 results_list->rewind();
 virtual_document_id = 0;

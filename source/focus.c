@@ -127,7 +127,7 @@ long ANT_focus::match(ANT_string_pair *string)
 long hash = ANT_hash_8(string);
 
 if (hash_table[hash] == 0)
-	return NULL;
+	return FALSE;
 else
 	return find_node(hash_table[hash], string) == NULL ? FALSE : TRUE;
 }

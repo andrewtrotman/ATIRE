@@ -19,9 +19,9 @@ protected:
 	static const size_t chunk_growth_rate = 10;
 
 protected:
-	size_t chunks_allocated;
-	size_t chunks_used;
-	size_t members_used;
+	long chunks_allocated;
+	long chunks_used;
+	long members_used;
 	long long **chunk;
 
 public:
