@@ -58,11 +58,14 @@ USE_TERM_LOCAL_MAX_IMPACT := 0
 # for profiling purpose
 USE_PRINT_TIME_NO_CONVERSION := 0
 
-# construct impact headers for easy handling the quantums of the postings
+# construct impact headers for easy handling the quantums of the postings (version 0.4 of the index)
 USE_IMPACT_HEADER := 1
 
+# place the external document ID (its "filename") in the index and build and index on that for fast access (version 0.5 of the index)
+USE_FILENAME_INDEX := 0
+
 # print extra info for quantum-at-a-time and term-at-a-time
-USE_PRINT_QUANTUM_STATS := 1
+USE_PRINT_QUANTUM_STATS := 0
 
 # partial decompression of postings list
 USE_PARTIAL_DCOMPRESSION := 1
@@ -175,6 +178,10 @@ LDFLAGS += -ldl
 CFLAGS +=  -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
+
+ifeq ($(USE_FILENAME_INDEX), 1)
+	CFLAGS += -DFILENAME_INDEX
+endif
 
 ifeq ($(USE_IMPACT_HEADER), 1)
 	CFLAGS += -DIMPACT_HEADER
@@ -292,7 +299,7 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
               $(ATIRE_DIR)/atire_broker.c \
               $(ATIRE_DIR)/atire_dictionary.c \
               $(ATIRE_DIR)/atire_merge.c \
-              $(ATIRE_DIR)/get_doclist.c
+              $(ATIRE_DIR)/atire_doclist.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(MAIN_FILES) $(IGNORE_LIST), $(ALL_SOURCES))
@@ -334,10 +341,10 @@ TESTS_EXES := $(basename $(TESTS_SOURCES))
 TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
 
 
-all: $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
+all: $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
 
 # faster compilation without considering extra objects, useful for repeated make for testing
-internal: index atire atire_client atire_broker atire_dictionary atire_merge get_doclist
+internal: index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
 
 index: $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
@@ -345,7 +352,7 @@ atire_client: $(BIN_DIR)/atire_client
 atire_broker: $(BIN_DIR)/atire_broker
 atire_dictionary: $(BIN_DIR)/atire_dictionary
 atire_merge: $(BIN_DIR)/atire_merge
-get_doclist: $(BIN_DIR)/get_doclist
+atire_doclist: $(BIN_DIR)/atire_doclist
 
 tools: $(TOOLS_EXES)
 
@@ -413,7 +420,7 @@ $(BIN_DIR)/atire_dictionary : $(ATIRE_DICT_OBJECTS)
 $(BIN_DIR)/atire_merge : $(ATIRE_MERGE_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
-$(BIN_DIR)/get_doclist : $(ATIRE_BROKER_OBJECTS)
+$(BIN_DIR)/atire_doclist : $(ATIRE_BROKER_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 # Hacked to compile every single source in the tools directory.

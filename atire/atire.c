@@ -131,11 +131,16 @@ unsigned long current_document_length;
 long long docid;
 char *document_buffer;
 ANT_channel *inchannel, *outchannel;
-char **answer_list;
 char *snippet = NULL, *title = NULL;
 ANT_snippet *snippet_generator = NULL;
 ANT_snippet *title_generator = NULL;
 ANT_stem *snippet_stemmer = NULL;
+#ifdef FILENAME_INDEX
+	char *document_name;
+	document_name = new char [MAX_TITLE_LENGTH];
+#else
+	char **answer_list;
+#endif
 
 if (params->port != 0)
 	inchannel = outchannel = new ANT_channel_socket(params->port);	// in/out to given port
@@ -155,7 +160,20 @@ else
 		*/
 		ANT_channel_file test_channel(params->queries_filename);
 		if (test_channel.read(first_bytes, sizeof(first_bytes)) == NULL)
-			exit(printf("Cannot determine the format of the queries file... is it valid?"));
+			{
+			/*
+				Does the file exist?
+			*/
+			ANT_channel_file test_channel(params->queries_filename);
+			if (test_channel.read(first_bytes, 1) == NULL)
+				exit(printf("Query file '%s' not found!", params->queries_filename));
+
+			/*
+				else
+					probably and ANT file as its very small.
+			*/
+			//exit(printf("Cannot determine the format of the queries file... is it valid?"));
+			}
 		else
 			{
 			/*
@@ -590,7 +608,9 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 			atire->write_to_forum_file(topic_id);
 		else
 			{
-			answer_list = atire->generate_results_list();
+			#ifndef FILENAME_INDEX
+				answer_list = atire->generate_results_list();
+			#endif
 
 			if (first_to_list < last_to_list)
 				outchannel->puts("<hits>");
@@ -626,7 +646,11 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 				*outchannel << "<hit>";
 				*outchannel << "<rank>" << result + 1 << "</rank>";
 				*outchannel << "<id>" << docid << "</id>";
-				*outchannel << "<name>" << answer_list[result] << "</name>";
+				#ifdef FILENAME_INDEX
+					*outchannel << "<name>" << atire->get_document_filename(document_name, docid) << "</name>";
+				#else
+					*outchannel << "<name>" << answer_list[result] << "</name>";
+				#endif
 				sprintf(print_buffer, "%0.2f", relevance);
 				*outchannel << "<rsv>" << print_buffer << "</rsv>";
 				if (title != NULL && *title != '\0')
@@ -645,8 +669,11 @@ for (command = inchannel->gets(); command != NULL; prompt(params), command = inc
 		}
 	}
 /*
-	delete the document buffer
+	delete the document buffer (and the "filename" buffer).
 */
+#ifdef FILENAME_INDEX
+	delete [] document_name;
+#endif
 delete [] document_buffer;
 
 /*
@@ -781,7 +808,7 @@ long fail;
 ANT_thesaurus *expander;
 
 if (params.logo)
-	puts(atire->version());				// print the version string is we parsed the parameters OK
+	puts(atire->version());				// print the version string if we parsed the parameters OK
 
 if (params.ranking_function == ANT_ANT_param_block::READABLE)
 	fail = atire->open(ANT_ANT_param_block::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);

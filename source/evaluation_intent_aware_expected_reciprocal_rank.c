@@ -58,7 +58,11 @@ for (i = 0; i < got_topic->number_of_subtopics; i++)
 	subtopicGain[i] = 1.0;
 
 key.topic = topic;
+#ifdef FILENAME_INDEX
+for (i = 0, key.docid = iterator.first(search_engine); key.docid != NULL && i < precision_point; key.docid = iterator.next(), i++)
+#else
 for (i = 0, key.docid = iterator.first(search_engine); key.docid >= 0 && i < precision_point; key.docid = iterator.next(), i++)
+#endif
 	{
 	score = 0;
 	// for each subtopic

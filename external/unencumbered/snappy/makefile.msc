@@ -6,7 +6,7 @@
 .SUFFIXES: .cc
 
 SNAPPY_LIB = snappy.lib
-SNAPPY_DIR = snappy-1.0.4
+SNAPPY_DIR = snappy-1.1.1
 
 ALL_FLAGS = /nologo -DWIN32 /Zi /fp:fast /GL /Gy /MP8 /wd4530 /I.
 
@@ -24,5 +24,5 @@ snappy.lib : $(OBJS)
 	lib /LTCG /NOLOGO /OUT:$(SNAPPY_LIB) $(OBJS)
 
 {$(SNAPPY_DIR)}.cc{$(SNAPPY_DIR)}.obj:
-	$(CC) $(CFLAGS) -nologo -DHAVE_WINDOWS_H -DWIN32 /c $*.cc -Fo$@
+	$(CC) $(CFLAGS) -nologo -DHAVE_WINDOWS_H -DWIN32 -Dssize_t=intptr_t /c $*.cc -Fo$@
 

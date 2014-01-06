@@ -285,7 +285,7 @@ unsigned long long disk_file_location;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_local_file_header lfh;
 ANT_directory_iterator_pkzip_internals::ANT_ZIP_data_descriptor data_descriptor;
 unsigned char signature_bytes[4];
-uint16_t filename_length, extradata_length, method, flags, version;
+uint16_t filename_length, extradata_length, method; // flags, version;
 uint32_t compressed_data_length, raw_data_length, signature;
 unsigned char *compressed_data;
 #ifdef ANT_HAS_BZLIB
@@ -331,8 +331,8 @@ else
 	}
 
 method = ANT_get_unsigned_short(lfh.compression_method);
-flags = ANT_get_unsigned_short(lfh.general_purpose_bit_flag);
-version = ANT_get_unsigned_short(lfh.version_needed_to_extract);
+//flags = ANT_get_unsigned_short(lfh.general_purpose_bit_flag);
+//version = ANT_get_unsigned_short(lfh.version_needed_to_extract);
 
 extradata_length = ANT_get_unsigned_short(lfh.extra_field_length);
 read_and_forget(extradata_length);

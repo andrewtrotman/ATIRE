@@ -96,7 +96,6 @@ void ANT_relevance_feedback::populate(ANT_search_engine_result *result, long doc
 {
 long long docid;
 long long current, top_n;
-double relevance;
 unsigned long current_document_length;
 
 rewind();
@@ -107,7 +106,6 @@ top_n = documents_to_examine < result->results_list_length ? documents_to_examin
 
 for (current = 0; current < top_n; current++)
 	{
-	relevance = search_engine->results_list->accumulator_pointers[current]->get_rsv();
 	docid = search_engine->results_list->accumulator_pointers[current] - search_engine->results_list->accumulator;
 
 	current_document_length = search_engine->get_longest_document_length();

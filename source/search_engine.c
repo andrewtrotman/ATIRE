@@ -15,7 +15,11 @@
 #include "search_engine_btree_leaf.h"
 #include "search_engine_accumulator.h"
 #include "search_engine_result.h"
-#include "search_engine_result_iterator.h"
+#ifdef FILENAME_INDEX
+	#include "search_engine_result_id_iterator.h"
+#else
+	#include "search_engine_result_iterator.h"
+#endif
 #include "stats_search_engine.h"
 #include "ranking_function_bm25.h"
 #include "stemmer.h"
@@ -86,9 +90,9 @@ index_filename = filename;
 */
 end = index->file_length();
 #ifdef IMPACT_HEADER
-index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
+	index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
 #else
-index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
+	index->seek(end - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(eight_byte) - sizeof(four_byte) - sizeof(four_byte));
 #endif
 
 index->read(&eight_byte);
@@ -98,8 +102,8 @@ index->read(&four_byte);
 string_length_of_longest_term = four_byte;
 
 #ifdef IMPACT_HEADER
-index->read(&four_byte);
-unique_terms = four_byte;
+	index->read(&four_byte);
+	unique_terms = four_byte;
 #endif
 
 index->read(&four_byte);
@@ -201,14 +205,14 @@ else
 	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (documents + ANT_COMPRESSION_FACTORY_END_PADDING));
 	memory->realign();
 #else
-/*
-	Allocate space for decompression.
-	NOTES:
-		Add 512 because of the tf and 0 at each end of each impact ordered list.
-		Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
-*/
-decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
-memory->realign();
+	/*
+		Allocate space for decompression.
+		NOTES:
+			Add 512 because of the tf and 0 at each end of each impact ordered list.
+			Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
+	*/
+	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
+	memory->realign();
 #endif
 
 document_lengths = (ANT_compressable_integer *)memory->malloc(documents * sizeof(*document_lengths));
@@ -258,11 +262,11 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	document_longest_raw_length = get_variable("~documentlongest");
 #else
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
-#ifdef SPECIAL_COMPRESSION
-		document_longest_raw_length = *(value + 1);
-#else
-		document_longest_raw_length = *value;
-#endif
+		#ifdef SPECIAL_COMPRESSION
+			document_longest_raw_length = *(value + 1);
+		#else
+			document_longest_raw_length = *value;
+		#endif
 #endif
 	}
 
@@ -286,6 +290,16 @@ if ((global_trim_postings_k = get_variable("~trimpoint")) == 0)
 	global_trim_postings_k = LONG_MAX;									// trim at 0 means no trimming
 
 stats_for_all_queries->add_disk_bytes_read_on_init(index->get_bytes_read());
+
+#ifdef FILENAME_INDEX
+	/*
+		Get the location of the filename and the index to the filenames.
+	*/
+	filename_start = get_variable("~documentfilenamesstart");
+	filename_finish = get_variable("~documentfilenamesfinish");
+	filename_index_start = get_variable("~documentfilenamesindexstart");
+	filename_index_finish = get_variable("~documentfilenamesindexfinish");
+#endif
 
 return 1;
 }
@@ -368,7 +382,13 @@ void ANT_search_engine::init_accumulators(long long top_k)
 long long now;
 
 now = stats->start_timer();
-results_list->init_accumulators(top_k > documents ? documents + 1 : top_k);		// we add 1 here to prevent the unfortunate repeated re-organisation of the heap when there are number-of-documents in it
+
+/*
+	The line of code below used to add one to documents to prevent a slow-down when every document is in the 
+	results list, however this lead to a crash as it would fill the list and then overflow (with a duplicate
+	document). So we no longer add one.
+*/
+results_list->init_accumulators(top_k > documents ? documents : top_k);
 stats->add_accumulator_init_time(stats->stop_timer(now));
 }
 
@@ -1457,24 +1477,66 @@ stats->add_rank_time(stats->stop_timer(now));
 return hits;
 }
 
-/*
-	ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
-	------------------------------------------
-*/
-char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k)
-{
-ANT_search_engine_accumulator **current, **end;
-char **into = sorted_id_list;
+#ifdef FILENAME_INDEX
+	/*
+		ANT_SEARCH_ENGINE::GET_DOCUMENT_FILENAME()
+		------------------------------------------
+	*/
+	char *ANT_search_engine::get_document_filename(char *filename, long long internal_document_id)
+	{
+	long long offset[2];
 
-end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
-for (current = results_list->accumulator_pointers; current < end; current++)
-	if (results_list->is_zero_rsv(*current - results_list->accumulator))
-		break;
-	else
-		*into++ = document_id_list[*current - results_list->accumulator];
+	/*
+		Read the location of the filename
+	*/
+	index->seek(filename_index_start + internal_document_id * sizeof (long long));
+	index->read((unsigned char *)&offset, sizeof(offset));
 
-return sorted_id_list;
-}
+	/*
+		Fix the byte order (for portability to ARM)
+	*/
+	offset[0] = ANT_get_long_long((unsigned char *)offset);
+	offset[1] = ANT_get_long_long((unsigned char *)(offset + 1));
+
+	/*
+		Get the filename
+	*/
+	index->seek(filename_start + offset[0]);
+	index->read((unsigned char *)filename, offset[1] - offset[0]);
+
+	return filename;
+	}
+#else
+	/*
+		ANT_SEARCH_ENGINE::GENERATE_RESULTS_LIST()
+		------------------------------------------
+	*/
+	char **ANT_search_engine::generate_results_list(char **document_id_list, char **sorted_id_list, long long top_k)
+	{
+	ANT_search_engine_accumulator **current, **end;
+	char **into = sorted_id_list;
+
+	end = results_list->accumulator_pointers + (results_list->results_list_length < top_k ? results_list->results_list_length : top_k);
+	for (current = results_list->accumulator_pointers; current < end; current++)
+		{
+		#ifdef NEVER
+			/*
+				Is this a hang over from way-back when we used to walk through the entire array?  Leaving it in means we can
+				no longer find relevant documents with a zero rsv (which happens when a query contains one term and that term
+				is in every document).
+			*/
+			if (results_list->is_zero_rsv(*current - results_list->accumulator))
+				break;
+			else
+				*into++ = document_id_list[*current - results_list->accumulator];
+		#else
+			*into++ = document_id_list[*current - results_list->accumulator];
+		#endif
+		}
+
+	return sorted_id_list;
+	}
+#endif
 
 /*
 	ANT_SEARCH_ENGINE::GET_VARIABLE()
@@ -1630,12 +1692,15 @@ return destination;
 /*
 	ANT_SEARCH_ENGINE::GET_DOCUMENTS()
 	----------------------------------
-	semanticly: for (x = from; x < to; x++) read_document(x);
 */
 long long ANT_search_engine::get_documents(char **destination, unsigned long **destination_length, long long from, long long to)
 {
-long long start, end, times, id, get;
-ANT_search_engine_result_iterator current;
+long long start, end, times, get, id;
+#ifdef FILENAME_INDEX
+	ANT_search_engine_result_id_iterator current;
+#else
+	ANT_search_engine_result_iterator current;
+#endif
 
 if (document_offsets == NULL)
 	return 0;
@@ -1688,3 +1753,4 @@ for (current_doc = 0; current_doc < documents; current_doc++)
 
 return document_filenames;
 }
+

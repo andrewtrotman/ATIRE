@@ -167,16 +167,20 @@ ANT_memory_index *index;
 long long doc, now, last_report;
 long param, first_param;
 ANT_memory file_buffer(1024 * 1024);
-ANT_file id_list;
+#ifndef FILENAME_INDEX
+	ANT_file id_list;
+#endif
 long long files_that_match;
 long long bytes_indexed;
 ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL, *scrubber = NULL;
 ANT_directory_iterator *dir_scrubber = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 #ifdef PARALLEL_INDEXING
-ANT_directory_iterator_multiple *parallel_disk;
+	ANT_directory_iterator_multiple *parallel_disk;
 #endif
-ANT_stem *stemmer = NULL;
+#ifndef PARALLEL_INDEXING_DOCUMENTS
+	ANT_stem *stemmer = NULL;
+#endif
 ANT_pregens_writer *pregen = NULL;
 char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
@@ -197,8 +201,9 @@ if (first_param >= argc)
 last_report = 0;
 doc = 0;
 index = new ANT_memory_index(param_block.index_filename);
-id_list.open(param_block.doclist_filename, "wbx");
-
+#ifndef FILENAME_INDEX
+	id_list.open(param_block.doclist_filename, "wbx");
+#endif
 index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
@@ -223,7 +228,9 @@ if (param_block.stemmer != 0)
 	*/
 	ANT_string_pair squiggle_stemmed("~stemmer");
 	index->set_variable(&squiggle_stemmed, param_block.stemmer);
+#ifndef PARALLEL_INDEXING_DOCUMENTS
 	stemmer = ANT_stemmer_factory::get_core_stemmer(param_block.stemmer);
+#endif
 	}
 
 readability = new ANT_readability_factory;
@@ -555,12 +562,17 @@ for (param = first_param; param < argc; param++)
 						exit(printf("Cannot compress document (name:%s)\n", current_file->filename));
 					current_file->compressed_length = compressed_size;
 #endif
-					index->add_to_document_repository(current_file->filename, current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
+					index->add_to_document_repository(strip_space_inplace(current_file->filename), current_file->compressed, (long)current_file->compressed_length, (long)current_file->length);
 					if (current_file->compressed)
 						delete [] current_file->compressed;
 					}
+#ifdef FILENAME_INDEX
+				else
+						index->add_to_document_repository(strip_space_inplace(current_file->filename));
+#else
 	//			puts(current_file->filename);
 				id_list.puts(strip_space_inplace(current_file->filename));
+#endif
 				}
 			delete [] current_file->file;
 			delete [] current_file->filename;
@@ -587,8 +599,9 @@ if (doc == 0)
 	puts("No documents indexed (check your file list)");
 else
 	{
+#ifndef FILENAME_INDEX
 	id_list.close();
-
+#endif
 	if (pregen)
 		{
 		for (int i = 0; i < pregen->field_count; i++)

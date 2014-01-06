@@ -25,10 +25,9 @@ void ANT_ranking_function_DFRee::relevance_rank_one_quantum(ANT_ranking_function
 {
 long long docid;
 double prior, posterior, InvPriorCollection, norm;
-double tf, cf, score;
+double tf, score;
 ANT_compressable_integer *current;
 
-cf = (double)quantum_parameters->term_details->global_collection_frequency;
 tf = quantum_parameters->tf;
 
 docid = -1;
@@ -55,10 +54,9 @@ void ANT_ranking_function_DFRee::relevance_rank_top_k(ANT_search_engine_result *
 {
 long long docid;
 double prior, posterior, InvPriorCollection, norm;
-double tf, cf, score;
+double tf, score;
 ANT_compressable_integer *current, *end;
 
-cf = (double)term_details->global_collection_frequency;
 impact_header->impact_value_ptr = impact_header->impact_value_start;
 impact_header->doc_count_ptr = impact_header->doc_count_start;
 current = impact_ordering;
@@ -91,12 +89,11 @@ void ANT_ranking_function_DFRee::relevance_rank_top_k(ANT_search_engine_result *
 {
 long long docid;
 double prior, posterior, InvPriorCollection, norm;
-double tf, cf, score;
+double tf, score;
 ANT_compressable_integer *current, *end;
 
 current = impact_ordering;
 end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
-cf = (double)term_details->global_collection_frequency;
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator

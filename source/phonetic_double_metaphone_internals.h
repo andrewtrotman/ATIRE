@@ -118,6 +118,10 @@ public:
 
 	/** Default ctor, initializes to a zero-length string.  Call computeKeys to compute keys for a word */
 	DoubleMetaphone() {
+/*
+	CHANGE FOR ATIRE: 1 line added (m_originalWord = m_word = NULL;) because m_word was uninitialised, now its set to NULL on creation
+*/
+		m_originalWord = m_word = NULL;
 		computeKeys(_TEXT(""));
 	}
 
@@ -388,6 +392,8 @@ private:
 	ANT:This is the C cedilla French Character
 */
 #ifdef __APPLE__
+			case (tchar)0xC7: // 'Ç':		// character 0xC7 (decimal 199)
+#elif defined (__GNUC__)
 			case (tchar)0xC7: // 'Ç':		// character 0xC7 (decimal 199)
 #else
 			case 0xC7: // 'Ç':		// character 0xC7 (decimal 199)
@@ -755,6 +761,8 @@ private:
 	ANT:This is the N tilde Character (Spanish ene)
 */
 #ifdef __APPLE__
+			case (tchar)0xD1: //'Ñ':		// 0xD1, (decimal 209)
+#elif defined (__GNUC__)
 			case (tchar)0xD1: //'Ñ':		// 0xD1, (decimal 209)
 #else
 			case 0xD1: //'Ñ':		// 0xD1, (decimal 209)

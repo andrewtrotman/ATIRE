@@ -121,12 +121,16 @@ else
 */
 ANT_relevant_document *ANT_assessment_TREC::read(char *filename, long long *judgements)
 {
-char ***found, *pointer_to_document, **pointer_to_pointer_to_document, document[128];		// Assume document IDs are going to be less than 128 characters
+#ifndef FILENAME_INDEX
+	char ***found, *pointer_to_document, **pointer_to_pointer_to_document;
+	long missing_warned = FALSE;
+#endif
+char document[128];		// Assume document IDs are going to be less than 128 characters
 char *file, **lines, **current;
 long topic, subtopic, relevance, relevance_judgements;
 long long lines_in_file;
 ANT_relevant_document *current_assessment, *all_assessments;
-long params, missing_warned = FALSE;
+long params;
 
 /*
 	load the assessment file into memory
@@ -164,29 +168,33 @@ for (current = lines; *current != 0; current++)
 	document[127] = '\0';
 	if (params >= 4)
 		{
-		pointer_to_document = (char *)document;
-		pointer_to_pointer_to_document = &pointer_to_document;
-		found = (char ***)bsearch(&pointer_to_pointer_to_document, sorted_docid_list, (size_t)documents, sizeof(*sorted_docid_list), char_star_star_star_strcmp);
-		if (found == NULL)
-			{
-			if (!missing_warned)
-				printf("Warning: DOC '%s' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
-			/*
-				Include it as a document with a _bad_ id that would never
-				exist in the collection
+		#ifdef FILENAME_INDEX
+			current_assessment->docid = strnew(document);
+		#else
+			pointer_to_document = (char *)document;
+			pointer_to_pointer_to_document = &pointer_to_document;
+			found = (char ***)bsearch(&pointer_to_pointer_to_document, sorted_docid_list, (size_t)documents, sizeof(*sorted_docid_list), char_star_star_star_strcmp);
+			if (found == NULL)
+				{
+				if (!missing_warned)
+					printf("Warning: DOC '%s' is in the assessments, but not in the collection (now surpressing this warning)\n", document);
+				/*
+					Include it as a document with a _bad_ id that would never
+					exist in the collection
 
-				So, we can't just drop assessments for documents that aren't in the collection becasuse of spam filtering.
-				If we drop a relevant document in the spam filter then that should not affect the ideal gain vector in DCG
-				so each must have a unique id and be un-findable.  We achieve this by hashing the document's (TREC) ID and
-				making that negative so that it does not clash with true internal docids.
+					So, we can't just drop assessments for documents that aren't in the collection becasuse of spam filtering.
+					If we drop a relevant document in the spam filter then that should not affect the ideal gain vector in DCG
+					so each must have a unique id and be un-findable.  We achieve this by hashing the document's (TREC) ID and
+					making that negative so that it does not clash with true internal docids.
 
-				Matt Crane made did this.  It might result in a hash collision and so I've asked him to fix it.
-			*/
-			current_assessment->docid = -((long long)ANT_random_hash_24(document, strlen(document)));
-			missing_warned = TRUE;
-			}
-		else
-			current_assessment->docid = *found - docid_list;		// the position in the list of documents is the internal docid used for computing precision
+					Matt Crane made did this.  It might result in a hash collision and so I've asked him to fix it.
+				*/
+				current_assessment->docid = -((long long)ANT_random_hash_24(document, strlen(document)));
+				missing_warned = TRUE;
+				}
+			else
+				current_assessment->docid = *found - docid_list;		// the position in the list of documents is the internal docid used for computing precision
+		#endif
 
 		current_assessment->topic = topic;
 		current_assessment->subtopic = subtopic;

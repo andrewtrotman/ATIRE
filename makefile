@@ -173,6 +173,7 @@ MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 MINUS_D = $(MINUS_D) -DNOMINMAX
 
 MINUS_D = $(MINUS_D) -DIMPACT_HEADER
+#MINUS_D = $(MINUS_D) -DFILENAME_INDEX
 #MINUS_D = $(MINUS_D) -DPURIFY
 
 #
@@ -229,6 +230,7 @@ PARTS = \
 	$(OBJDIR)\index_document_topsig.obj				\
 	$(OBJDIR)\index_document_topsig_signature.obj	\
 	$(OBJDIR)\memory_index_hash_node.obj			\
+	$(OBJDIR)\memory_index_filename_index.obj 						\
 	$(OBJDIR)\memory_index.obj 						\
 	$(OBJDIR)\memory_indexer.obj 					\
 	$(OBJDIR)\memory_index_one.obj 					\
@@ -246,6 +248,7 @@ PARTS = \
 	$(OBJDIR)\search_engine.obj 					\
 	$(OBJDIR)\search_engine_accumulator.obj 		\
 	$(OBJDIR)\search_engine_result.obj 				\
+	$(OBJDIR)\search_engine_result_id_iterator.obj 	\
 	$(OBJDIR)\search_engine_result_iterator.obj 	\
 	$(OBJDIR)\search_engine_memory_index.obj 		\
 	$(OBJDIR)\evaluator.obj							\
@@ -264,7 +267,6 @@ PARTS = \
 	$(OBJDIR)\evaluation_rank_effectiveness.obj   \
 	$(OBJDIR)\evaluation_success_at_n.obj         \
 	$(OBJDIR)\assessment.obj						\
-	$(OBJDIR)\assessment_ANT.obj					\
 	$(OBJDIR)\assessment_TREC.obj					\
 	$(OBJDIR)\assessment_INEX.obj					\
 	$(OBJDIR)\assessment_factory.obj				\
@@ -432,7 +434,8 @@ ANT_TARGETS = \
 	$(BINDIR)\atire_broker.exe 			\
 	$(BINDIR)\atire_client.exe			\
 	$(BINDIR)\atire_dictionary.exe		\
-	$(BINDIR)\atire_merge.exe		\
+	$(BINDIR)\atire_merge.exe			\
+	$(BINDIR)\atire_doclist.exe			\
 	$(LIBIDR)\atire.dll
 
 OTHER_TARGETS = \

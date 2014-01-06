@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include "str.h"
 #include "assessment_factory.h"
-#include "assessment_ANT.h"
 #include "assessment_TREC.h"
 #include "assessment_INEX.h"
 
@@ -42,8 +41,6 @@ if ((strrcmp(filename, ".tgz") == 0) || (strrcmp(filename, ".tar.gz") == 0))
 	factory = new ANT_assessment_TREC();		// assume its a TREC assessment file
 else if (strrcmp(filename, ".zip") == 0)
 	factory = new ANT_assessment_INEX();		// assume its an INEX assessment file
-else if (separators == 1)
-	factory = new ANT_assessment_ANT();
 else if (separators >= 4)
 	factory = new ANT_assessment_INEX();
 else if (separators == 3)

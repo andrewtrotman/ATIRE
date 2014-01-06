@@ -177,9 +177,9 @@ else if (strcmp(which, "DFI") == 0)
 	ranking_function = DFI;
 else if (strcmp(which, "DFIW") == 0)
 	ranking_function = DFIW;
-else if (strcmp(which, "DFIIDF") == 0)
+else if (strcmp(which, "DFI_IDF") == 0)
 	ranking_function = DFI_IDF;
-else if (strcmp(which, "DFIWIDF") == 0)
+else if (strcmp(which, "DFIW_IDF") == 0)
 	ranking_function = DFIW_IDF;
 else if (strcmp(which, "readable") == 0)
 	ranking_function = READABLE;

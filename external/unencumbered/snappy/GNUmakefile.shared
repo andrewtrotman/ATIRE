@@ -1,6 +1,6 @@
 
 SNAPPY_LIB = libsnappy.so
-SNAPPY_DIR = snappy-1.0.4
+SNAPPY_DIR = snappy-1.1.1
 
 OBJS =	\
 	$(SNAPPY_DIR)/snappy-sinksource.o \

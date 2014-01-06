@@ -17,6 +17,10 @@
 #include "version.h"
 #include "stop_word.h"
 
+#ifdef FILENAME_INDEX
+	#include "memory_index_filename_index.h"
+#endif
+
 class ANT_memory_index_hash_node;
 class ANT_memory;
 class ANT_memory_index_one;
@@ -96,6 +100,16 @@ private:
 	static const long long document_filenames_chunk_size = (1024 * 1024);
 	long long document_filenames_used;
 
+	/*
+		It takes too long to load the document filenames in a large collection (i.e. ClueWeb12) so we
+		now (version 0.5) build an index to the filenames (an array of pointers) and store a pointer to
+		that elswehere
+	*/
+#ifdef FILENAME_INDEX
+	ANT_memory_index_filename_index document_filename_index;
+	long long document_filename_bytes_used;
+#endif
+
 #ifdef IMPACT_HEADER
 	ANT_impact_header impact_header;
 	long long compressed_impact_header_size;
@@ -131,6 +145,9 @@ private:
 	void close_index_file(void);
 	void add_to_filename_repository(char *filename);
 	void serialise_filenames(char *source,  long depth = 0);
+#ifdef FILENAME_INDEX
+	void serialise_filenames_index(void);
+#endif
 
 	void add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 
@@ -151,7 +168,7 @@ public:
 	void set_compression_scheme(unsigned long scheme) { factory->set_scheme(scheme); }
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 
-	void add_to_document_repository(char *filename, char *compressed_document, long compressed_length, long length);
+	void add_to_document_repository(char *filename, char *compressed_document = NULL, long compressed_length = 0, long length = 0);
 	long serialise(ANT_ranking_function_factory *factory);
 
 	void add_indexed_document(ANT_memory_index_one *index, long long docno);

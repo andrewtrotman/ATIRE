@@ -15,7 +15,11 @@ class ANT_relevant_document_passage;
 class ANT_relevant_document
 {
 public:
+#ifdef FILENAME_INDEX
+	char *docid;
+#else
 	long long docid;
+#endif
 	long long subtopic;
 	long long topic;
 	

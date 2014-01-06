@@ -61,6 +61,11 @@ document_filenames = NULL;
 document_filenames_used = document_filenames_chunk_size;
 static_prune_point = -1;
 stop_word_max_proportion = 1.1;			// initialising with anything greater than 1.0 will do
+
+#ifdef FILENAME_INDEX
+	document_filename_bytes_used = 0;
+#endif
+
 }
 
 /*
@@ -1097,6 +1102,14 @@ if (document_filenames != NULL)
 	serialise_filenames(document_filenames);
 	pos = index_file->tell();
 	set_variable("~documentfilenamesfinish", pos);
+
+#ifdef FILENAME_INDEX
+	pos = index_file->tell();
+	set_variable("~documentfilenamesindexstart", pos);
+	serialise_filenames_index();
+	pos = index_file->tell();
+	set_variable("~documentfilenamesindexfinish", pos);
+#endif
 	}
 
 /*
@@ -1300,7 +1313,6 @@ index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
 four_byte = (uint32_t)ANT_file_signature;
 index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
 
-
 /*
 	We're done!
 */
@@ -1319,6 +1331,13 @@ long long remaining, length;
 char *new_buffer;
 
 length = strlen(filename) + 1;		// +1 to include the '\0'
+
+#ifdef FILENAME_INDEX
+	document_filename_index.add(document_filename_bytes_used);
+	document_filename_bytes_used += length;
+#endif
+
+length = strlen(filename) + 1;		// +1 to include the '\0'
 if ((document_filenames_used + length) > document_filenames_chunk_size)
 	{
 	if ((remaining = document_filenames_chunk_size - document_filenames_used) != 0)
@@ -1331,6 +1350,7 @@ if ((document_filenames_used + length) > document_filenames_chunk_size)
 	length -= remaining;
 	document_filenames = new_buffer;
 	}
+
 if (length != 0)
 	{
 	memcpy(document_filenames + document_filenames_used, filename, (size_t)length);
@@ -1354,6 +1374,22 @@ if (depth == 0)
 else
 	index_file->write((unsigned char *)(source + sizeof(char *)), document_filenames_chunk_size - sizeof(char *));
 }
+
+#ifdef FILENAME_INDEX
+	/*
+		ANT_MEMORY_INDEX::SERIALISE_FILENAMES_INDEX()
+		---------------------------------------------
+	*/
+	void ANT_memory_index::serialise_filenames_index(void)
+	{
+	long long *offsets;
+
+	offsets = document_filename_index.serialise();
+	index_file->write((unsigned char *)offsets, document_filename_index.members() * sizeof(long long));
+	index_file->write((unsigned char *)&document_filename_bytes_used, sizeof(document_filename_bytes_used));
+	delete [] offsets;
+	}
+#endif
 
 /*
 	ANT_MEMORY_INDEX::ADD_TO_DOCUMENT_REPOSITORY()

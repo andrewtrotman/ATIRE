@@ -268,9 +268,11 @@ ANT_search_engine_readability *readable_search_engine;
 if (document_list != NULL)
 	return 1;		//we're already open;
 
+#ifndef FILENAME_INDEX
 document_list = read_docid_list(doclist_filename, &documents_in_id_list, &filename_list, &mem1, &mem2);
 if (document_list == NULL)
 	return 1;		//document list could not be read
+#endif
 
 answer_list = (char **)memory->malloc(sizeof(*answer_list) * documents_in_id_list);
 if (type & READABILITY_SEARCH_ENGINE)
@@ -612,11 +614,21 @@ return 0;
 */
 void ATIRE_API::write_to_forum_file(long topic_id)
 {
-if (forum_writer == NULL)
-	return;
+#ifdef FILENAME_INDEX
+	#ifdef _MSC_VER
+		#if _MSC_VER > 1500
+			#warning "reenable this code"
+		#endif
+	#else
+		#warning "reenable this code"
+	#endif
+#else
+	if (forum_writer == NULL)
+		return;
 
-search_engine->generate_results_list(document_list, answer_list, hits);
-forum_writer->write(topic_id, answer_list, forum_results_list_length > hits ? hits : forum_results_list_length, search_engine, NULL);
+	search_engine->generate_results_list(document_list, answer_list, hits);
+	forum_writer->write(topic_id, answer_list, forum_results_list_length > hits ? hits : forum_results_list_length, search_engine, NULL);
+#endif
 }
 
 /*
@@ -767,7 +779,6 @@ void ATIRE_API::search_quantum_at_a_time(ANT_NEXI_term_ant **term_list, long lon
 long long current_term, total_quantums = 0, processed_quantums;
 ANT_NEXI_term_ant *term_string;
 ANT_quantum the_quantum;
-void *verify = NULL;
 ANT_max_quantum *current_max = NULL;
 ANT_impact_header *current_impact_header = NULL;
 long long trim_postings_k = search_engine->get_trim_postings_k();
@@ -781,7 +792,7 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 	term_string = term_list[current_term];
 
 	// after calling the function, the header_info and impact header are stored in the impact_header_buffers[current_term]
-	verify = search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details, raw_postings_buffer, impact_header_buffers[current_term]);
+	search_engine->read_and_decompress_for_one_impact_header(&term_string->term_details, raw_postings_buffer, impact_header_buffers[current_term]);
 	//make sure the term was found in the dictionary
 	if (term_string->term_details.local_collection_frequency != 0)
 		{
@@ -861,7 +872,7 @@ while (heap_items > 0)
 	processed_postings += the_quantum.doc_count;
 	// partial process of the last quantum based on the command line option "-K"
 	if (processed_postings > trim_postings_k)
-		the_quantum.doc_count = processed_postings - trim_postings_k;
+		the_quantum.doc_count = (ANT_compressable_integer)(processed_postings - trim_postings_k);
 
 	search_engine->read_and_decompress_for_one_quantum(current_max->term_details, raw_postings_buffer, current_impact_header, &the_quantum, one_decompressed_quantum);
 	the_quantum.the_quantum = one_decompressed_quantum;
@@ -907,7 +918,6 @@ while (heap_items > 0)
 printf("processed quantums: %lld\n", processed_quantums);
 printf("processed postings: %lld\n", processed_postings);
 #endif
-printf("\n\nllllll\n\n\n\n");
 }
 #endif // end of #ifdef IMPACT_HEADER
 
@@ -1620,7 +1630,6 @@ for (current = 0; current < top_n; current++)
 delete [] document_buffer;
 delete readability;
 delete parser;
-delete indexer;
 
 /*
 	turn the index into a search engine.
@@ -1628,19 +1637,31 @@ delete indexer;
 memory = new ANT_memory;
 in_memory_index = new ANT_search_engine_memory_index(indexer, memory);
 delete in_memory_index;
-
+delete indexer;
 delete memory;
 }
 
-/*
-	ATIRE_API::GENERATE_RESULTS_LIST()
-	----------------------------------
-*/
-char **ATIRE_API::generate_results_list(void)
-{
-search_engine->generate_results_list(filename_list, answer_list, hits);
-return answer_list;
-}
+#ifdef FILENAME_INDEX
+	/*
+		ATIRE_API::GET_DOCUMENT_FILENAME()
+		----------------------------------
+	*/
+	char *ATIRE_API::get_document_filename(char *filename, long long internal_document_id)
+	{
+	return search_engine->get_document_filename(filename, internal_document_id);
+	}
+
+#else
+	/*
+		ATIRE_API::GENERATE_RESULTS_LIST()
+		----------------------------------
+	*/
+	char **ATIRE_API::generate_results_list(void)
+	{
+	search_engine->generate_results_list(filename_list, answer_list, hits);
+	return answer_list;
+	}
+#endif
 
 /*
 	ATIRE_API::GET_RELEVANT_DOCUMENT_DETAILS()

@@ -55,7 +55,7 @@ return strnnew(start, finish - start);
 void broker(ATIRE_engine *engine, ATIRE_broker_param_block *params)
 {
 ANT_channel *inchannel, *outchannel;
-long long line, documents, terms, length_of_longest_document, current_document_length;
+long long documents, terms, length_of_longest_document, current_document_length;
 long success;
 char *pos, *command, *query, *hits;
 char *new_index, *old_index, *new_doclist, *old_doclist;
@@ -81,11 +81,6 @@ else
 broker_knows_total_number_of_documents = false;
 document_buffer = NULL;
 length_of_document_buffer = length_of_longest_document = 0;
-
-/*
-	Initialise the instruction counter (nunmber of requests we're been asked to perform
-*/
-line = 0;
 
 /*
 	And now we can be a broker
