@@ -188,6 +188,12 @@ if (node->document_frequency <= 2)
 	if (node->string[0] == '~')
 		{
 		raw[5] = 0;
+#ifdef IMPACT_HEADER
+		raw[4] = raw[3] = 0;
+		raw[2] = raw[1];
+		raw[1] = raw[0];
+		raw[0] = 1;
+#else
 		if (node->document_frequency == 2)
 			{
 			raw[4] = raw[1];
@@ -198,6 +204,7 @@ if (node->document_frequency <= 2)
 		raw[2] = 0;
 		raw[1] = raw[0];
 		raw[0] = 2;
+#endif
 		}
 
 	node->in_disk.docids_pos_on_disk = ((long long)raw[1]) << 32 | raw[0];
@@ -511,6 +518,12 @@ leaves[number_engines] = new ANT_search_engine_btree_leaf;
 */
 raw[number_engines] = new ANT_compressable_integer[510 + combined_docs];
 
+#ifdef FILENAME_INDEX
+long long *filename_index_offsets = new long long[combined_docs];
+long long filename_offset_sum = 0;
+long long filename_offset = 0;
+#endif
+
 /*
 	global_trimpoint could be 0 if none of the given indexes are pruned
 */
@@ -610,6 +623,9 @@ if (do_documents)
 			upto++;
 			}
 	raw[number_engines][upto] = (ANT_compressable_integer)(index->tell() - sum);
+#ifdef FILENAME_INDEX
+	}
+#endif
 	
 	/*
 		Before we write out the "postings" for offsets, we should put the document filenames
@@ -636,7 +652,12 @@ if (do_documents)
 		*/
 		for (document = 0; document < search_engines[engine]->document_count(); document++)
 			{
+#ifdef FILENAME_INDEX
+			filename_index_offsets[filename_offset++] = filename_offset_sum;
+			filename_offset_sum += strlen(doc_filenames[document]) + 1;
+#else
 			doclist->puts(strip_space_inplace(doc_filenames[document]));
+#endif
 			index->write((unsigned char *)doc_filenames[document], strlen(doc_filenames[document]) + 1);
 			}
 		}
@@ -650,6 +671,24 @@ if (do_documents)
 		term_list[terms_so_far++] = p;
 	if ((p = write_variable("~documentfilenamesfinish", document_filenames_finish, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
 		term_list[terms_so_far++] = p;
+
+#ifdef FILENAME_INDEX
+
+document_filenames_start = index->tell();
+
+index->write((unsigned char *)filename_index_offsets, sizeof(*filename_index_offsets) * combined_docs);
+index->write((unsigned char *)&filename_offset_sum, sizeof(filename_offset_sum));
+
+document_filenames_finish = index->tell();
+
+if ((p = write_variable("~documentfilenamesindexstart", document_filenames_start, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
+	term_list[terms_so_far++] = p;
+if ((p = write_variable("~documentfilenamesindexfinish", document_filenames_finish, memory_stats, index, leaves[number_engines], &param_block, combined_docs, &longest_postings, factory)) != NULL)
+	term_list[terms_so_far++] = p;
+
+if (do_documents)
+	{
+#endif
 	
 	/*
 		Update stats, because this is a difference encoded list, we start with 1, then substract one
@@ -1085,11 +1124,13 @@ if (param_block.reporting_frequency != 0)
 	stats.print_elapsed_time();
 	}
 
+#ifndef FILENAME_INDEX
 if (!do_documents)
 	{
 	printf("Warning: empty doclist generated because not all indexes had filenames or merge was run with -C-.\n");
 	printf("Combine the doclists for the indexes merged in the same order given to doclist file: %s.\n", param_block.doclist_filename);
 	}
+#endif
 
 /*
 	Cleanup
