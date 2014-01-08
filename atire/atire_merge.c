@@ -576,7 +576,9 @@ long should_continue = false;
 long long do_documents = param_block.document_compression_scheme != ANT_merger_param_block::NONE;
 long long stemmer;
 
-ANT_file *doclist = new ANT_file;
+#ifndef FILENAME_INDEX
+	ANT_file *doclist = new ANT_file;
+#endif
 ANT_file *index = new ANT_file;
 
 compress_buffer_size = longest_document;
@@ -591,10 +593,13 @@ long previous_docid;
 long process_this_tf;
 ANT_compressable_integer *current = raw[number_engines];
 
-puts(ANT_version_string);
+if (param_block.logo)
+	puts(ANT_version_string);
 
 index->open(param_block.index_filename, "w");
-doclist->open(param_block.doclist_filename, "w");
+#ifndef FILENAME_INDEX
+	doclist->open(param_block.doclist_filename, "w");
+#endif
 
 index->write((unsigned char *)file_header, sizeof(file_header));
 
@@ -1116,7 +1121,9 @@ four_byte = (uint32_t)ANT_file_signature;
 index->write((unsigned char *)&four_byte, sizeof(four_byte));
 
 index->close();
-doclist->close();
+#ifndef FILENAME_INDEX
+	doclist->close();
+#endif
 
 if (param_block.reporting_frequency != 0)
 	{
@@ -1171,7 +1178,9 @@ delete [] trimpoints;
 
 delete [] postings_list;
 
-delete doclist;
+#ifndef FILENAME_INDEX
+	delete doclist;
+#endif
 delete factory;
 delete index;
 delete memory_stats;

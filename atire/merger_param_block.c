@@ -62,7 +62,6 @@ puts("GENERAL");
 puts("-------");
 puts("-? -h -H        Display this help message");
 puts("-nologo         Suppress banner");
-puts("-people         Display credits");
 puts("");
 
 puts("OUPUT FILE HANDLING");
