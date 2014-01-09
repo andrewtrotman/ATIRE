@@ -19,6 +19,7 @@
 #include "ranking_function_dfi_idf.h"
 #include "ranking_function_dfiw_idf.h"
 #include "ranking_function_lmd.h"
+#include "ranking_function_puurula.h"
 #include "ranking_function_lmds.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
@@ -54,6 +55,8 @@ feedback_bm25_k1 = bm25_k1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1;
 feedback_bm25_b = bm25_b = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
 feedback_kbtfidf_k = kbtfidf_k = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_K;
 feedback_kbtfidf_b = kbtfidf_b = ANT_RANKING_FUNCTION_KBTFIDF_DEFAULT_B;
+feedback_puurula_u = puurula_u = ANT_RANKING_FUNCTION_PUURULA_U;
+feedback_puurula_g = puurula_g = ANT_RANKING_FUNCTION_PUURULA_G;
 
 ascending = 1;
 field_name = NULL;
@@ -127,6 +130,15 @@ if (strncmp(which, "BM25", 4) == 0)
 	else
 		get_two_parameters(which + 4, &bm25_k1, &bm25_b);
 //	printf("K1=%f B=%f\n", bm25_k1, bm25_b);
+	}
+else if (strncmp(which, "lmp", 3) == 0)
+	{
+	ranking_function = PUURULA;
+	if (feedbacker)
+		get_two_parameters(which + 3, &feedback_puurula_u, &feedback_puurula_g);
+	else
+		get_two_parameters(which + 3, &puurula_u, &puurula_g);
+printf("U=%f G=%f\n", puurula_u, puurula_g);
 	}
 else if (strncmp(which, "lmds", 4) == 0)
 	{
@@ -264,6 +276,8 @@ if (allowable & LMDS)
 	printf("   lmds:<u>     Language Models with Dirichlet smoothing (see Petri et al, ADCS 2013), u=<u> [default u = 2500] %s\n" , isdefault(LMDS));
 if (allowable & LMJM)
 	printf("   lmjm:<l>     Language Models with Jelinek-Mercer smoothing, l=<l> [default l = 0.5] %s\n", isdefault(LMJM));
+if (allowable & PUURULA)
+	printf("   lmp:<u>:<g>  Language Models with discounting Dirichlet smoothing (see Puurula, ALTA 2013), u=<u>, g=<g> [default u=0.0017, g=0.9124] %s\n", isdefault(PUURULA));
 if (allowable & READABLE)
 	printf("   readable     The readability search engine (BM25 with Dale-Chall) %s\n", isdefault(READABLE));
 if (allowable & TERM_COUNT)

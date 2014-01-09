@@ -15,6 +15,7 @@
 #include "version.h"
 #include "directory_iterator_filter.h"
 #include "directory_iterator_scrub.h"
+#include "ranking_function_puurula.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -56,6 +57,7 @@ scrubbing = ANT_directory_iterator_scrub::NONE;
 filter_filename = NULL;
 quantization = FALSE;
 quantization_bits = -1; // -1 indicates run-time calculation, wil be overwritten if necessary by the user
+puurula_length_g = ANT_RANKING_FUNCTION_PUURULA_G;
 }
 
 /*
@@ -494,6 +496,11 @@ for (param = 1; param < argc; param++)
 			doclist_filename = argv[++param];
 		else if (strcmp(command, "Inverted") == 0)
 			inversion_type = INVERTED_FILE;
+		else if (strncmp(command, "Ilmp", 4) == 0)
+			{
+			inversion_extras |= PUURULA_LENGTH_VECTORS;
+			ANT_indexer_param_block_rank::get_one_parameter(command + 4, &puurula_length_g);
+			}
 		else if (strcmp(command, "pregen") == 0)
 			{
 			char *field_type, *field_name;

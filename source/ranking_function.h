@@ -22,9 +22,9 @@ class ANT_stats_search_engine;
 class ANT_bitstring;
 
 #ifdef USE_FLOATED_TF
-typedef double ANT_weighted_tf;
+	typedef double ANT_weighted_tf;
 #else
-typedef long ANT_weighted_tf;
+	typedef long ANT_weighted_tf;
 #endif
 
 /*

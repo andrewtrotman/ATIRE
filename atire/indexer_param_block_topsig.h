@@ -12,10 +12,12 @@
 class ANT_indexer_param_block_topsig
 {
 public:
-	enum { INVERTED_FILE, TOPSIG } ;	// inverted file or TopSig file
+	enum { INVERTED_FILE, TOPSIG };			// inverted file or TopSig file
+	enum { NONE = 0, PUURULA_LENGTH_VECTORS = 1 };	// inverted file "extra" stuff we can generate in the indexes
 
 public:
 	long inversion_type;				// is the index a "standard" inverted file or a TopSig file?
+	long inversion_extras;				// what "extras" do we need to generate (e.g. the Puurula length vector)
 	long topsig_width;					// with of the TopSig signature
 	double topsig_density;				// density of the set bits in the TopSig index
 	char *topsig_global_stats;			// file containing the cf parameters (from ANT_dictionary)

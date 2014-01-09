@@ -39,6 +39,7 @@
 #include "ranking_function_lmd.h"
 #include "ranking_function_lmds.h"
 #include "ranking_function_lmjm.h"
+#include "ranking_function_puurula.h"
 #include "ranking_function_bose_einstein.h"
 #include "ranking_function_divergence.h"
 #include "ranking_function_readability.h"
@@ -530,6 +531,9 @@ switch (function)
 	case ANT_ANT_param_block::LMJM:
 		new_function = new ANT_ranking_function_lmjm(search_engine, quantization, quantization_bits, p1);
 		break;
+	case ANT_ANT_param_block::PUURULA:
+		new_function = new ANT_ranking_function_puurula(search_engine, quantization, quantization_bits, p1, p2);
+		break;
 	case ANT_ANT_param_block::BOSE_EINSTEIN:
 		new_function = new ANT_ranking_function_bose_einstein(search_engine, quantization, quantization_bits);
 		break;
@@ -540,7 +544,7 @@ switch (function)
 		new_function = new ANT_ranking_function_term_count(search_engine, quantization, quantization_bits);
 		break;
 	case ANT_ANT_param_block::DOCID:
-		new_function = new ANT_ranking_function_docid(search_engine, quantization, quantization_bits, (int) p1);
+		new_function = new ANT_ranking_function_docid(search_engine, quantization, quantization_bits, (int)p1);
 		break;
 	case ANT_ANT_param_block::INNER_PRODUCT:
 		new_function = new ANT_ranking_function_inner_product(search_engine, quantization, quantization_bits);
@@ -565,7 +569,7 @@ switch (function)
 		new_function = new ANT_ranking_function_DFIW_IDF(search_engine, quantization, quantization_bits);
 		break;
 	default:
-		printf("Error: Unknown ranking function selected in ATIRE_API::set_ranking_function\n");
+		printf("Error: Unknown ranking function selected in ATIRE_API::decode_ranking_function\n");
 		return NULL;		// failure, invalid parameter
 	}
 

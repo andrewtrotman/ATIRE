@@ -448,3 +448,33 @@ delete heap;
 return top_terms;
 }
 
+/*
+	ANT_MEMORY_INDEX_ONE::TREE_GET_FREQUENCIES()
+	--------------------------------------------
+*/
+void ANT_memory_index_one::tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency)
+{
+if (node->string[0] != '~' && !ANT_isupper(node->string[0]))
+	frequency[node->term_frequency]++;
+
+if  (node->left != NULL)
+	tree_get_frequencies(node->left, frequency);
+if  (node->right != NULL)
+	tree_get_frequencies(node->right, frequency);
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::GET_FREQUENCIES()
+	---------------------------------------
+*/
+short *ANT_memory_index_one::get_frequencies(short *frequency)
+{
+long node;
+
+for (node = 0; node < HASH_TABLE_SIZE; node++)
+	if (hash_table[node] != NULL)
+		tree_get_frequencies(hash_table[node], frequency);
+
+return frequency;
+}
+

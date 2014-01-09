@@ -24,15 +24,18 @@ public:
 
 protected:
 	static ANT_string_pair squiggle_length;
+	static ANT_string_pair squiggle_puurula_length;
 
 public:
-	ANT_memory_indexer() { }
-	virtual ~ANT_memory_indexer() { }
+	ANT_memory_indexer() {}
+	virtual ~ANT_memory_indexer() {}
 
 	virtual ANT_memory_indexer_node *add_term(ANT_string_pair *string, long long docno, long extra_term_frequency = 1) = 0;
 	virtual void set_document_length(long long docno, long long length) = 0;
+	virtual void set_puurula_length(double length) = 0;
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE) = 0;
 	virtual long long get_memory_usage(void) = 0;
+	virtual short *get_frequencies(short *frequency) = 0;
 } ;
 
 

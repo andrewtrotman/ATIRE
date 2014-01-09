@@ -173,7 +173,8 @@ MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 MINUS_D = $(MINUS_D) -DNOMINMAX
 
 MINUS_D = $(MINUS_D) -DIMPACT_HEADER
-#MINUS_D = $(MINUS_D) -DFILENAME_INDEX
+MINUS_D = $(MINUS_D) -DFILENAME_INDEX
+
 #MINUS_D = $(MINUS_D) -DPURIFY
 
 #
@@ -357,6 +358,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_lmds.obj				\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
+	$(OBJDIR)\ranking_function_puurula.obj				\
 	$(OBJDIR)\ranking_function_docid.obj			\
 	$(OBJDIR)\ranking_function_pregen.obj			\
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\

@@ -66,6 +66,8 @@ private:
 
 	void add_term_to_table(ANT_memory_indexer_node **table, ANT_memory_index_one_node *node, long *term_id);
 
+	void tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency);
+
 public:
 	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index = NULL);
 	virtual ~ANT_memory_index_one();
@@ -74,8 +76,10 @@ public:
 
 	virtual ANT_memory_indexer_node *add_term(ANT_string_pair *string, long long docno = 1, long extra_term_frequency = 1);
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, document_length = length); } 
+	virtual void set_puurula_length(double length) { set_document_detail(&squiggle_puurula_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ } 
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
  	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+	virtual short *get_frequencies(short *frequency);
 
 	ANT_memory_indexer_node **get_term_list(void);
 

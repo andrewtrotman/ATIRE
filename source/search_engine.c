@@ -1079,8 +1079,8 @@ if (verify != NULL)
 	if (bitstring == NULL)
 		{ // it bitstring != NULL then we're boolean ranking hybrid
 		#ifdef IMPACT_HEADER
-			//ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
-			ranking_function->relevance_rank_quantum(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			//ranking_function->relevance_rank_quantum(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
 		#else
 			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
 		#endif

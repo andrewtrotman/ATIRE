@@ -18,9 +18,10 @@ class ANT_index_document
 {
 protected:
 	long stopword_mode;
+	double puurula_length_g;
 
 public:
-	ANT_index_document(long stop_mode = 0) { stopword_mode = stop_mode; }
+	ANT_index_document(long stop_mode = 0, double puurula_length_g = -1) { stopword_mode = stop_mode; this->puurula_length_g = puurula_length_g; }
 	virtual ~ANT_index_document() {}
 
 	virtual long index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc_id, unsigned char *file);

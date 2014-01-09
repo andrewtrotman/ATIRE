@@ -736,6 +736,9 @@ switch (params.ranking_function)
 	case ANT_indexer_param_block_rank::BM25:
 		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.bm25_k1, params.bm25_b) == 0;
 		break;
+	case ANT_indexer_param_block_rank::PUURULA:
+		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.puurula_u, params.puurula_g) == 0;
+		break;
 	case ANT_indexer_param_block_rank::LMD:
 		ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.lmd_u, 0.0) == 0;
 		break;
@@ -765,6 +768,9 @@ switch (params.feedback_ranking_function)
 	{
 	case ANT_indexer_param_block_rank::BM25:
 		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_bm25_k1, params.feedback_bm25_b) == 0;
+		break;
+	case ANT_indexer_param_block_rank::PUURULA:
+		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_puurula_u, params.feedback_puurula_g) == 0;
 		break;
 	case ANT_indexer_param_block_rank::LMD:
 		ranker_ok = atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_lmd_u, 0.0) == 0;

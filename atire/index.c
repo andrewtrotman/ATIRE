@@ -218,7 +218,12 @@ else
 if (param_block.inversion_type == ANT_indexer_param_block::TOPSIG)
 	document_indexer = new ANT_index_document_topsig(param_block.stop_word_removal, param_block.topsig_width, param_block.topsig_density, param_block.topsig_global_stats);
 else
-	document_indexer = new ANT_index_document(param_block.stop_word_removal);
+	{
+	if ((param_block.inversion_extras & ANT_indexer_param_block_topsig::PUURULA_LENGTH_VECTORS) == 0)
+		document_indexer = new ANT_index_document(param_block.stop_word_removal);
+	else
+		document_indexer = new ANT_index_document(param_block.stop_word_removal, param_block.puurula_length_g);
+	}
 
 if (param_block.stemmer != 0)
 	{
