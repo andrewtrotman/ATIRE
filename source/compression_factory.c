@@ -144,7 +144,7 @@ for (which = 0; which < number_of_techniques; which++)
 				validation_buffer[source_integers] = 0xCCCCCCCC;		// terminate the list so that we can check for overflow at the end
 
 				start_time = ANT_stats::start_timer();		// time the decompression
-				scheme[which].scheme->decompress(validation_buffer, destination, source_integers);
+				scheme[which].scheme->decompress(validation_buffer, destination + 1, source_integers);
 				scheme[which].time += ANT_stats::stop_timer(start_time);
 
 				if (memcmp(source, validation_buffer, (size_t)(source_integers * sizeof(ANT_compressable_integer))))
