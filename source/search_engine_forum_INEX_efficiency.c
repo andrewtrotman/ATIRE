@@ -62,12 +62,20 @@ fprintf(file, "</efficiency-submission>");
 	ANT_SEARCH_ENGINE_FORUM_INEX_EFFICIENCY::WRITE()
 	------------------------------------------------
 */
+#ifdef FILENAME_INDEX
+void ANT_search_engine_forum_INEX_efficiency::write(long topic_id, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#else
 void ANT_search_engine_forum_INEX_efficiency::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#endif
 {
 long long which;
 ANT_stats_search_engine *stats = search_engine->get_stats();
 long long cpu_time_ms = stats->get_cpu_time_ms();
 long long io_time_ms = stats->get_io_time_ms();
+#ifdef FILENAME_INDEX
+	char filename[128];
+#endif
+
 
 fprintf(file, "<topic");
 //fprintf(file, " topic-id = \"%s%ld\"\n", ANT_search_engine_forum_INEX_efficiency::ID_PREFIX, topic_id);
@@ -81,7 +89,12 @@ fprintf(file, ">\n");
 for (which = 0; which < hits; which++)
 	{
 	fprintf(file, "<result>\n");
+#ifdef FILENAME_INDEX
+	search_engine->get_document_filename(filename, search_engine->results_list->accumulator_pointers[which] - search_engine->results_list->accumulator);
+	fprintf(file, "<file>%s</file>\n", filename);
+#else
 	fprintf(file, "<file>%s</file>\n", docids[which]);
+#endif
 	fprintf(file, "<path>/article[1]></path>\n");
 	fprintf(file, "<rank>%lld</rank>\n", which);
 	fprintf(file, "<rsv>%lld</rsv>\n", hits - which);

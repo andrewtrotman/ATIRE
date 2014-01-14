@@ -21,7 +21,11 @@ private:
 
 public:
 	ANT_search_engine_forum_INEX_bep(char *filename, char *participant_id, char *run_id, char *task);
+#ifdef FILENAME_INDEX
+	void write(long topic_id, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results);
+#else
 	void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results);
+#endif
 } ;
 
 #endif  /* SEARCH_ENGINE_FORUM_INEX_BEP_H_ */

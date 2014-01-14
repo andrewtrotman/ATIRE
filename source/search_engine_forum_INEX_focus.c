@@ -22,16 +22,19 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 	ANT_SEARCH_ENGINE_FORUM_INEX_FOCUS::WRITE()
 	-------------------------------------------
 */
-void ANT_search_engine_forum_INEX_focus::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
-{
-long which;
-ANT_focus_result *current;
+#ifdef FILENAME_INDEX
+	void ANT_search_engine_forum_INEX_focus::write(long topic_id, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#else
+	void ANT_search_engine_forum_INEX_focus::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#endif
+	{
+	long which;
+	ANT_focus_result *current;
 
-if (focused_results != NULL)
-	for (which = 0; which < hits; which++)
-		if ((current = focused_results->get(which)) != NULL)
-			fprintf(file, "%ld Q0 %s %lld %lld %s %lld %lld\n", topic_id, current->document_name, (long long)(which + 1), hits - which, run_id, current->INEX_start, current->INEX_finish);
+	if (focused_results != NULL)
+		for (which = 0; which < hits; which++)
+			if ((current = focused_results->get(which)) != NULL)
+				fprintf(file, "%ld Q0 %s %lld %lld %s %lld %lld\n", topic_id, current->document_name, (long long)(which + 1), hits - which, run_id, current->INEX_start, current->INEX_finish);
 
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-}
-
+	#pragma ANT_PRAGMA_UNUSED_PARAMETER
+	}

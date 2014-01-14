@@ -618,18 +618,12 @@ return 0;
 */
 void ATIRE_API::write_to_forum_file(long topic_id)
 {
-#ifdef FILENAME_INDEX
-	#ifdef _MSC_VER
-		#if _MSC_VER > 1500
-			#warning "reenable this code"
-		#endif
-	#else
-		#warning "reenable this code"
-	#endif
-#else
-	if (forum_writer == NULL)
-		return;
+if (forum_writer == NULL)
+	return;
 
+#ifdef FILENAME_INDEX
+	forum_writer->write(topic_id, forum_results_list_length > hits ? hits : forum_results_list_length, search_engine, NULL);
+#else
 	search_engine->generate_results_list(document_list, answer_list, hits);
 	forum_writer->write(topic_id, answer_list, forum_results_list_length > hits ? hits : forum_results_list_length, search_engine, NULL);
 #endif
