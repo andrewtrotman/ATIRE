@@ -183,7 +183,7 @@ return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
 void ANT_compress_simple16::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
 {
 uint32_t *compressed_sequence = (uint32_t *)source;
-uint32_t value, mask_type, i;
+uint32_t value, mask_type;
 ANT_compressable_integer *end = destination + destination_integers;
 
 while (destination < end)
