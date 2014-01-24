@@ -71,6 +71,7 @@ core_sources =  \
 	$(SRC_DIR)/compress_relative10.c \
 	$(SRC_DIR)/compress_sigma.c \
 	$(SRC_DIR)/compress_simple9.c \
+	$(SRC_DIR)/compress_simple16.c \
 	$(SRC_DIR)/compress_text_bz2.c \
 	$(SRC_DIR)/compress_text_deflate.c \
 	$(SRC_DIR)/compress_text_none.c \
@@ -278,6 +279,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/compress_sigma_frequency.h \
 	$(SRC_DIR)/compress_sigma.h \
 	$(SRC_DIR)/compress_simple9.h \
+	$(SRC_DIR)/compress_simple16.h \
 	$(SRC_DIR)/compress_text_bz2.h \
 	$(SRC_DIR)/compress_text_deflate.h \
 	$(SRC_DIR)/compress_text_deflate_internals.h \

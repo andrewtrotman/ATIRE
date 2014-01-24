@@ -115,6 +115,7 @@ OBJECTS = \
 	compress_relative10.o \
 	compress_carryover12.o \
 	compress_variable_byte.o \
+	compress_simple16.o \
 	compress_none.o \
 	compress_sigma.o \
 	compression_factory.o \

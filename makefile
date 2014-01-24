@@ -333,6 +333,7 @@ PARTS = \
 	$(OBJDIR)\compress_variable_byte.obj			\
 	$(OBJDIR)\compress_none.obj						\
 	$(OBJDIR)\compress_sigma.obj					\
+	$(OBJDIR)\compress_simple16.obj					\
 	$(OBJDIR)\compression_factory.obj				\
 	$(OBJDIR)\compress_text_none.obj				\
 	$(OBJDIR)\compress_text_snappy.obj				\

@@ -28,7 +28,8 @@ public:
 		SIGMA 			=  32, 
 		ELIAS_DELTA 	=  64, 
 		ELIAS_GAMMA 	= 128, 
-		GOLOMB 			= 256
+		GOLOMB 			= 256,
+		SIMPLE_16		= 512
 		} ;
 private:
 	static long number_of_techniques;
