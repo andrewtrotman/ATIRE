@@ -51,8 +51,6 @@ else
 	}
 }
 
-
-
 #ifdef IMPACT_HEADER
 
 /*
@@ -78,7 +76,7 @@ impact_value_ptr = impact_header->impact_value_start;
 doc_count_ptr = impact_header->doc_count_start;
 while (doc_count_ptr < impact_header->doc_count_trim_ptr)
 	{
-	tf =  *impact_value_ptr;
+	tf = *impact_value_ptr;
 	discounted_tf = max(tf - g * pow(tf, g), 0);
 
 	discounted_cf += *doc_count_ptr * discounted_tf;
@@ -90,43 +88,88 @@ while (doc_count_ptr < impact_header->doc_count_trim_ptr)
 return discounted_cf;
 }
 
-/*
-	ANT_RANKING_FUNCTION_PUURULA::RELEVANCE_RANK_TOP_K()
-	----------------------------------------------------
-	1 parameter is wrong... discounted_document_lengths
-*/
-void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
-{
-long long docid;
-double top_row, tf, idf, discounted_tf, alpha_d, discounted_cf, score;
-ANT_compressable_integer *current, *end;
-
-discounted_cf = discount_collection_frequency(impact_header);
-
-impact_header->impact_value_ptr = impact_header->impact_value_start;
-impact_header->doc_count_ptr = impact_header->doc_count_start;
-current = impact_ordering;
-while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
-	{
-	tf =  *impact_header->impact_value_ptr * prescalar;
-	discounted_tf = max(tf - g * pow(tf, g), 0);
-
-	docid = -1;
-	end = current + *impact_header->doc_count_ptr;
-	while (current < end)
+	#ifdef NEVER
+		/*
+			ANT_RANKING_FUNCTION_PUURULA::RELEVANCE_RANK_TOP_K()
+			----------------------------------------------------
+		*/
+		void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 		{
-		docid += *current++;
-		alpha_d = 1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u);
-		score = ((1.0 - alpha_d) * (discounted_tf / discounted_cf)) + (alpha_d * ((double)term_details->global_collection_frequency / (double)collection_length_in_terms));
+		long long docid;
+		double top_row, tf, idf, discounted_tf, alpha_d, discounted_cf, score;
+		ANT_compressable_integer *current, *end;
 
-		accumulator->add_rsv(docid, quantize(postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
+		discounted_cf = discount_collection_frequency(impact_header);
+
+		impact_header->impact_value_ptr = impact_header->impact_value_start;
+		impact_header->doc_count_ptr = impact_header->doc_count_start;
+		current = impact_ordering;
+		while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+			{
+			tf =  *impact_header->impact_value_ptr * prescalar;
+			discounted_tf = max(tf - g * pow(tf, g), 0);
+
+			docid = -1;
+			end = current + *impact_header->doc_count_ptr;
+			while (current < end)
+				{
+				docid += *current++;
+				alpha_d = 1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u);
+				score = ((1.0 - alpha_d) * (discounted_tf / discounted_cf)) + (alpha_d * ((double)term_details->global_collection_frequency / (double)collection_length_in_terms));
+//				score = ((1.0 - alpha_d) * (discounted_tf / discounted_cf)) + (alpha_d * ((double)collection_length_in_terms / (double)term_details->global_collection_frequency));
+				score = log(score);
+
+				accumulator->add_rsv(docid, quantize(postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
+				}
+			current = end;
+			impact_header->impact_value_ptr++;
+			impact_header->doc_count_ptr++;
+			}
+		#pragma ANT_PRAGMA_UNUSED_PARAMETER
 		}
-	current = end;
-	impact_header->impact_value_ptr++;
-	impact_header->doc_count_ptr++;
-	}
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-}
+	#else
+		void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+		{
+		long long docid;
+		double rsv, tf, idf, query_length, query_occurences, prior;
+		ANT_compressable_integer *current, *end;
+
+		query_length = accumulator->get_term_count();
+		query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+
+		idf = ((double)collection_length_in_terms / (double)term_details->global_collection_frequency);
+
+		impact_header->impact_value_ptr = impact_header->impact_value_start;
+		impact_header->doc_count_ptr = impact_header->doc_count_start;
+		current = impact_ordering;
+		while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
+			{
+			tf = *impact_header->impact_value_ptr;
+/**/		tf = max(tf - g * pow(tf, g), 0);
+
+			rsv = query_occurences * log(((tf * prescalar) / u) * idf + 1.0);
+			docid = -1;
+			end = current + *impact_header->doc_count_ptr;
+			while (current < end)
+				{
+				docid += *current++;
+				if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+					{
+					prior = query_length * log(u / ((double)document_lengths[(size_t)docid] + u));
+/**/				prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+					accumulator->add_rsv(docid, quantize(postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
+					}
+				else
+					accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+				}
+			current = end;
+			impact_header->impact_value_ptr++;
+			impact_header->doc_count_ptr++;
+			}
+		#pragma ANT_PRAGMA_UNUSED_PARAMETER
+		}
+
+	#endif
 
 #else
 
