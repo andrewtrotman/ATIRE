@@ -26,7 +26,7 @@ ANT_parser_token *token;
 long terms_in_document, length_of_token, is_previous_token_chinese, current;
 size_t length_of_previous_token;
 char *previous_token_start;
-short frequencies[0x100];		// terms can't occur more than 0xFF times
+short frequencies[0x200];		// terms can't occur more than 0xFF times
 
 /*
 	Initialise
@@ -145,7 +145,7 @@ if (terms_in_document != 0)
 		discounted_document_length = 0;
 		memset(frequencies, 0, sizeof(frequencies));
 
-		indexer->get_frequencies(frequencies);
+		indexer->get_frequencies(frequencies, (sizeof(frequencies) / sizeof(*frequencies) - 1));
 		for (current = 0; current < 0x100; current++)
 			if (frequencies[current] != 0)
 				{

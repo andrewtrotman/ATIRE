@@ -39,7 +39,7 @@ public:
 	virtual void set_puurula_length(double length) = 0;
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE) = 0;
 	virtual long long get_memory_usage(void) = 0;
-	virtual short *get_frequencies(short *frequency) = 0;
+	virtual short *get_frequencies(short *frequency, long long tf_cap) = 0;
 } ;
 
 

@@ -182,7 +182,7 @@ public:
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
 	virtual void set_term_culling(long mode, double max_df, long df);
-	virtual short *get_frequencies(short *frequency) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
+	virtual short *get_frequencies(short *frequency, long long tf_cap) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
 } ;
 
 /*

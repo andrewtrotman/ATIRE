@@ -12,6 +12,7 @@
 #include "memory_index.h"
 #include "memory_index_hash_node.h"
 #include "term_divergence.h"
+#include "maths.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -453,28 +454,33 @@ return top_terms;
 	ANT_MEMORY_INDEX_ONE::TREE_GET_FREQUENCIES()
 	--------------------------------------------
 */
-void ANT_memory_index_one::tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency)
+void ANT_memory_index_one::tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency, long long tf_cap)
 {
+long use;
+
 if (node->string[0] != '~' && !ANT_isupper(node->string[0]))
-	frequency[node->term_frequency]++;
+	{
+	use = ANT_min(node->term_frequency, tf_cap);
+	frequency[use]++;
+	}
 
 if  (node->left != NULL)
-	tree_get_frequencies(node->left, frequency);
+	tree_get_frequencies(node->left, frequency, tf_cap);
 if  (node->right != NULL)
-	tree_get_frequencies(node->right, frequency);
+	tree_get_frequencies(node->right, frequency, tf_cap);
 }
 
 /*
 	ANT_MEMORY_INDEX_ONE::GET_FREQUENCIES()
 	---------------------------------------
 */
-short *ANT_memory_index_one::get_frequencies(short *frequency)
+short *ANT_memory_index_one::get_frequencies(short *frequency, long long tf_cap)
 {
 long node;
 
 for (node = 0; node < HASH_TABLE_SIZE; node++)
 	if (hash_table[node] != NULL)
-		tree_get_frequencies(hash_table[node], frequency);
+		tree_get_frequencies(hash_table[node], frequency, tf_cap);
 
 return frequency;
 }
