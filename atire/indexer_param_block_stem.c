@@ -125,8 +125,8 @@ switch (*which)
 	case 'X' :
 		if (*(which + 2) != '\0')
 			exit(printf("Unknown stemmer: '-%c'\n", *which));
-
-		switch (*(which + 1))
+		which++;
+		switch (*which)
 			{
 			case 'a': stemmer = ANT_stemmer_factory::SNOWBALL_ARMENIAN; break;
 			case 'b': stemmer = ANT_stemmer_factory::SNOWBALL_BASQUE; break;
@@ -155,6 +155,7 @@ switch (*which)
 		break;
 	default : exit(printf("Unknown term expansion scheme: '%c'\n", *which)); break;
 	}
+
 if (!has_cutoff)
 	if (*(which + 1) != '\0')
 		exit(printf("Badly formed term expansion parameter:%s\n", which + 1));

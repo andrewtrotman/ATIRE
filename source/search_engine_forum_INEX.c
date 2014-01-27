@@ -110,7 +110,9 @@ void ANT_search_engine_forum_INEX::write(long topic_id, char **docids, long long
 #endif
 {
 long long which;
+#ifdef FILENAME_INDEX
 char filename[128];
+#endif
 
 fprintf(file, "<topic topic-id=\"%ld\">\n", topic_id);
 

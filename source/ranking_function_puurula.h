@@ -24,9 +24,6 @@ private:
 	double g, u;
 	double *discounted_document_lengths;
 
-private:
-	double discount_collection_frequency(ANT_impact_header *impact_header);
-
 public:
 	ANT_ranking_function_puurula(ANT_search_engine *engine, long quantize, long long quantization_bits, double u = ANT_RANKING_FUNCTION_PUURULA_U, double g =  ANT_RANKING_FUNCTION_PUURULA_G);
 	ANT_ranking_function_puurula(long long documents, ANT_compressable_integer *document_lengths, long long quantization_bits, double u = ANT_RANKING_FUNCTION_PUURULA_U, double g = ANT_RANKING_FUNCTION_PUURULA_G) : ANT_ranking_function(documents, document_lengths, quantization_bits) { this->u = u; this->g = g; }

@@ -44,13 +44,15 @@ public:
 
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
-	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8, PRUNE_DF_FREQUENTS = 16, PRUNE_NCBI_STOPLIST = 32 };
+	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8, PRUNE_DF_FREQUENTS = 16, PRUNE_NCBI_STOPLIST = 32, PRUNE_PUURULA_STOPLIST = 64};
 
 private:
 	long hashed_squiggle_length;
-	ANT_stop_word stopwords;
+	ANT_stop_word *stopwords;
+
 public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
+
 private:
 	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;
 	unsigned char *serialised_docids;
@@ -180,7 +182,7 @@ public:
 
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
-	virtual void set_term_culling(long mode, double max_df, long df) {stop_word_removal_mode = mode; stop_word_max_proportion = max_df; stop_word_df_frequencies = df; }
+	virtual void set_term_culling(long mode, double max_df, long df);
 	virtual short *get_frequencies(short *frequency) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
 } ;
 

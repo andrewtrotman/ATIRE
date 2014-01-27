@@ -40,6 +40,7 @@ ANT_string_pair ANT_memory_index::squiggle_document_longest("~documentlongest");
 ANT_memory_index::ANT_memory_index(char *filename)
 {
 stop_word_removal_mode = NONE;
+stopwords = new ANT_stop_word(ANT_stop_word::NCBI);
 hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
 titles_memory = serialisation_memory = dictionary_memory = new ANT_memory;		// if you seperate these then remember to update the stats object
@@ -79,7 +80,25 @@ delete dictionary_memory;
 delete postings_memory;
 delete stats;
 delete factory;
+delete stopwords;
 }
+
+/*
+	ANT_MEMORY_INDEX::SET_TERM_CULLING()
+	------------------------------------
+*/
+void ANT_memory_index::set_term_culling(long mode, double max_df, long df)
+{
+stop_word_removal_mode = mode;
+stop_word_max_proportion = max_df;
+stop_word_df_frequencies = df;
+delete stopwords;
+if (mode & PRUNE_PUURULA_STOPLIST)
+	stopwords = new ANT_stop_word(ANT_stop_word::PUURULA);
+else
+	stopwords = new ANT_stop_word(ANT_stop_word::NCBI);
+}
+
 
 /*
 	ANT_MEMORY_INDEX::TEXT_RENDER()
@@ -607,7 +626,7 @@ else if (stop_word_removal_mode & PRUNE_DF_SINGLETONS && term->document_frequenc
 	return true;
 else if (stop_word_removal_mode & PRUNE_DF_FREQUENTS && (double)term->document_frequency / (double)largest_docno >= stop_word_max_proportion)
 	return true;
-else if (stop_word_removal_mode & PRUNE_NCBI_STOPLIST && stopwords.isstop(term->string.string()))
+else if (stop_word_removal_mode & PRUNE_NCBI_STOPLIST && stopwords->isstop(term->string.string()))
 	return true;
 else
 	return false;

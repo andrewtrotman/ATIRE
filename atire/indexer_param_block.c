@@ -190,13 +190,14 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
-puts("-k[-l0t][L<n>][s<n>] Term culling");
+puts("-k[-l0t][n|p][L<n>][s<n>] Term culling");
 puts("   -            All terms remain in the index [default]");
 puts("   0            Do not index numbers");
 puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
 puts("   L<n>         Remove (stop) low frequency terms (where document frequency <= <n>)");
 puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
-puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   n            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   p            Remove (stop) words that are on Puurula's 988 stopword list use at ADCS/ALTA 2013");
 puts("   t            Do not index XML tag names");
 puts("");
 
@@ -335,7 +336,8 @@ for (which = mode_list; *which != '\0'; which++)
 			break;
 		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
-		case 'S': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
+		case 'n': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
+		case 'p': stop_word_removal |= ANT_memory_index::PRUNE_PUURULA_STOPLIST; break;
 		case 's':
 			stop_word_removal |= ANT_memory_index::PRUNE_DF_FREQUENTS;
 			stop_word_df_threshold = atof(which + 1);
