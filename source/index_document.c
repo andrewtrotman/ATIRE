@@ -98,6 +98,9 @@ while ((token = readability->get_next_token()) != NULL)
 				is_previous_token_chinese = FALSE;
 				previous_token_start = NULL;
 
+				if ((stopword_mode & ANT_memory_index::PRUNE_STOPWORDS_BEFORE_INDEXING) && indexer->stopwords->isstop(token->normalized_pair()->string(), token->normalized_pair()->length()))
+					break;
+
 				if (stemmer == NULL || token->string_length <= 3)
 					readability->handle_node(indexer->add_term(token->normalized_pair(), doc));			// indexable the term
 				else

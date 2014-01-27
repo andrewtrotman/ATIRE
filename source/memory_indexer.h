@@ -12,6 +12,7 @@
 #pragma ANT_PRAGMA_UNUSED_PARAMETER_DISABLE
 
 class ANT_ranking_function_factory;
+class ANT_stop_word;
 
 /*
 	class ANT_MEMORY_INDEXER
@@ -27,7 +28,10 @@ protected:
 	static ANT_string_pair squiggle_puurula_length;
 
 public:
-	ANT_memory_indexer() {}
+	ANT_stop_word *stopwords;
+
+public:
+	ANT_memory_indexer() { stopwords = 0; }
 	virtual ~ANT_memory_indexer() {}
 
 	virtual ANT_memory_indexer_node *add_term(ANT_string_pair *string, long long docno, long extra_term_frequency = 1) = 0;
