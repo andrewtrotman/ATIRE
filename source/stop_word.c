@@ -34,12 +34,11 @@ return 1;
 */
 long ANT_stop_word::isstop(const char *term, long term_len)
 {
-if (term_len >= len)
-	{
-	delete [] buffer;
-	buffer = new char [term_len + 1];
-	len = term_len;
-	}
+char buffer[128];		// we won't stop words longer than 128 characters
+
+if (term_len >= sizeof(buffer) - 1)
+	return 0;
+
 strncpy(buffer, term, term_len);
 buffer[term_len] = '\0';
 
@@ -52,10 +51,10 @@ return isstop(buffer);
 */
 ANT_stop_word::ANT_stop_word(long which_stop_word_list)
 {
-buffer = NULL;
-len = 0;
 extra_stop = NULL;
 extra_stop_length = 0;
+
+type = which_stop_word_list;
 
 switch (which_stop_word_list)
 	{
@@ -78,7 +77,6 @@ switch (which_stop_word_list)
 */
 ANT_stop_word::~ANT_stop_word()
 {
-delete [] buffer;
 delete [] extra_stop;
 }
 
@@ -464,7 +462,7 @@ char *ANT_stop_word::ANT_NCBI_stop_word_list[] = {
 	ANT_NCBI_STOP_WORD_LIST_LEN
 	---------------------------
 */
-long ANT_stop_word::ANT_NCBI_stop_word_list_len = sizeof(ANT_stop_word::ANT_stop_word_list) / sizeof(*ANT_stop_word::ANT_stop_word_list);
+long ANT_stop_word::ANT_NCBI_stop_word_list_len = sizeof(ANT_stop_word::ANT_NCBI_stop_word_list) / sizeof(*ANT_stop_word::ANT_NCBI_stop_word_list);
 
 /*
 	ANT_PUURULA_STOP_WORD_LIST

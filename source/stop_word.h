@@ -21,8 +21,7 @@ private:
 
 	char **extra_stop;
 	long extra_stop_length;
-	char *buffer;
-	long len;
+	long type;
 
 public:
 	ANT_stop_word(long which_stop_word_list = NCBI);
@@ -33,6 +32,8 @@ public:
 
 	virtual long isstop(const char *term);
 	virtual long isstop(const char *term, long len);
+
+	long get_type(void) { return type; }
 } ;
 
 

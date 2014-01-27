@@ -39,6 +39,7 @@ ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index 
 hashed_squiggle_length = hash(&squiggle_length);
 this->memory = memory;
 this->final_index = index;
+this->stopwords = new ANT_stop_word(index->stopwords->get_type());		// re-use the same stop words list for each instance of this class
 rewind();
 
 term_details = NULL;
