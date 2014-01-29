@@ -342,7 +342,7 @@ else
 		more = where->next == NULL ? docid_node_used : size;
 		if (doc_bytes + more <= *doc_size)
 			{
-			memcpy(doc_into + doc_bytes, where->data, more);			// final block many not be full
+			memcpy(doc_into + doc_bytes, where->data, (size_t)more);			// final block many not be full
 			size = (long)(postings_growth_factor * size);
 			}
 		else
@@ -360,7 +360,7 @@ else
 		more = where->next == NULL ? 2 * tf_node_used : size;
 		if (tf_bytes + more <= *tf_size)
 			{
-			memcpy((unsigned char *)tf_into + tf_bytes, where->data, more);
+			memcpy((unsigned char *)tf_into + tf_bytes, where->data, (size_t)more);
 			size = (long)(postings_growth_factor * size);
 			/*
 				Because the tfs are 2 bytes and have to fit nice, size can get uneven and

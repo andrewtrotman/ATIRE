@@ -16,6 +16,7 @@
 #include "directory_iterator_filter.h"
 #include "directory_iterator_scrub.h"
 #include "ranking_function_puurula.h"
+#include "ranking_function_factory_object.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -42,7 +43,7 @@ readability_measure = ANT_readability_factory::NONE;
 statistics = 0;
 logo = TRUE;
 reporting_frequency = LLONG_MAX;
-ranking_function = IMPACT;
+ranking_function = ANT_ranking_function_factory_object::NONE;
 document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
@@ -165,11 +166,10 @@ puts("   f            Flesch-Kincaid");
 puts("   t            Special tags (such as TITLE, CATEGORY) weighting");
 puts("");
 
-ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
-puts("-q[-n]          Really quantize, the Q options will store variables in the index so quantization."); 
-puts("    n           This option pushes the quantization into n-bits to indexing time.");
-puts("    -           Don't push the quantization to the index, store max and min for search time quantization.");
-puts("                [default n=5.4 + 5.4e-4 * sqrt(number documents)]");
+ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', ANT_ranking_function_factory_object::INDEXABLE);
+puts("-q[-<n>]        Quantization"); 
+puts("   -            Don't push the quantization to the index, only store max and min for search time quantization.");
+puts("   <n>          Quantize into <n>-bits [default <n>=5.4 + 5.4e-4 * sqrt(number documents)]");
 puts("");
 
 ANT_indexer_param_block_stem::help(FALSE);

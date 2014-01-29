@@ -34,29 +34,13 @@
 
 #include "thesaurus.h"
 
-#include "ranking_function_impact.h"
-#include "ranking_function_bm25.h"
-#include "ranking_function_lmd.h"
-#include "ranking_function_lmds.h"
-#include "ranking_function_lmjm.h"
-#include "ranking_function_puurula.h"
-#include "ranking_function_bose_einstein.h"
-#include "ranking_function_divergence.h"
+#include "ranking_function_factory.h"
 #include "ranking_function_readability.h"
-#include "ranking_function_term_count.h"
-#include "ranking_function_inner_product.h"
-#include "ranking_function_kbtfidf.h"
-#include "ranking_function_dlh13.h"
-#include "ranking_function_dph.h"
-#include "ranking_function_dfree.h"
-#include "ranking_function_docid.h"
-#include "ranking_function_pregen.h"
+#include "ranking_function_divergence.h"
+#include "ranking_function_impact.h"
 #include "ranking_function_topsig_positive.h"
 #include "ranking_function_topsig_negative.h"
-#include "ranking_function_dfi.h"
-#include "ranking_function_dfiw.h"
-#include "ranking_function_dfi_idf.h"
-#include "ranking_function_dfiw_idf.h"
+#include "ranking_function_pregen.h"
 
 #include "assessment_factory.h"
 #include "relevant_document.h"
@@ -478,102 +462,21 @@ return 0;
 */
 ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
 {
-ANT_ranking_function *new_function;
-
+long current;
 
 if (search_engine->quantized())
-	{
-	switch (function)
-		{
-		case ANT_ANT_param_block::BM25:
-		case ANT_ANT_param_block::LMD:
-		case ANT_ANT_param_block::LMDS:
-		case ANT_ANT_param_block::LMJM:
-		case ANT_ANT_param_block::BOSE_EINSTEIN:
-		case ANT_ANT_param_block::DIVERGENCE:
-		case ANT_ANT_param_block::INNER_PRODUCT:
-		case ANT_ANT_param_block::KBTFIDF:
-		case ANT_ANT_param_block::DLH13:
-		case ANT_ANT_param_block::DPH:
-		case ANT_ANT_param_block::DFREE:
-		case ANT_ANT_param_block::DFI:
-		case ANT_ANT_param_block::DFIW:
-		case ANT_ANT_param_block::DFI_IDF:
-		case ANT_ANT_param_block::DFIW_IDF:
-			puts("Cannot set ranking function as the index is quantized");
-			return NULL;		// failure because we're a quantized ranking function and we don't have TF values in the index
-		}
-	}
+	for (current = 0; ANT_list_of_rankers[current].name != NULL; current++)
+		if (function == ANT_list_of_rankers[current].id)
+			if ((ANT_list_of_rankers[current].flags & ANT_ranking_function_factory_object::QUANTABLE) != 0)
+				{
+				puts("Cannot set ranking function as the index is quantized");
+				return NULL;		// failure because we're a quantized ranking function and we don't have TF values in the index
+				}
 
-switch (function)
-	{
-	case ANT_ANT_param_block::BM25:
-		new_function = new ANT_ranking_function_BM25(search_engine, quantization, quantization_bits, p1, p2);
-		break;
-	case ANT_ANT_param_block::DLH13:
-		new_function = new ANT_ranking_function_DLH13(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DFREE:
-		new_function = new ANT_ranking_function_DFRee(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DPH:
-		new_function = new ANT_ranking_function_DPH(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::IMPACT:
-		new_function = new ANT_ranking_function_impact(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::LMD:
-		new_function = new ANT_ranking_function_lmd(search_engine, quantization, quantization_bits, p1);
-		break;
-	case ANT_ANT_param_block::LMDS:
-		new_function = new ANT_ranking_function_lmds(search_engine, quantization, quantization_bits, p1);
-		break;
-	case ANT_ANT_param_block::LMJM:
-		new_function = new ANT_ranking_function_lmjm(search_engine, quantization, quantization_bits, p1);
-		break;
-	case ANT_ANT_param_block::PUURULA:
-		new_function = new ANT_ranking_function_puurula(search_engine, quantization, quantization_bits, p1, p2);
-		break;
-	case ANT_ANT_param_block::BOSE_EINSTEIN:
-		new_function = new ANT_ranking_function_bose_einstein(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DIVERGENCE:
-		new_function = new ANT_ranking_function_divergence(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::TERM_COUNT:
-		new_function = new ANT_ranking_function_term_count(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DOCID:
-		new_function = new ANT_ranking_function_docid(search_engine, quantization, quantization_bits, (int)p1);
-		break;
-	case ANT_ANT_param_block::INNER_PRODUCT:
-		new_function = new ANT_ranking_function_inner_product(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::ALL_TERMS:
-		query_type_is_all_terms = TRUE;
-		new_function = new ANT_ranking_function_term_count(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::KBTFIDF:
-		new_function = new ANT_ranking_function_kbtfidf(search_engine, quantization, quantization_bits, p1, p2);
-		break;
-	case ANT_ANT_param_block::DFI:
-		new_function = new ANT_ranking_function_DFI(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DFIW:
-		new_function = new ANT_ranking_function_DFIW(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DFI_IDF:
-		new_function = new ANT_ranking_function_DFI_IDF(search_engine, quantization, quantization_bits);
-		break;
-	case ANT_ANT_param_block::DFIW_IDF:
-		new_function = new ANT_ranking_function_DFIW_IDF(search_engine, quantization, quantization_bits);
-		break;
-	default:
-		printf("Error: Unknown ranking function selected in ATIRE_API::decode_ranking_function\n");
-		return NULL;		// failure, invalid parameter
-	}
+if (function == ANT_ranking_function_factory_object::ALL_TERMS)
+	query_type_is_all_terms = true;
 
-return new_function;
+return ANT_ranking_function_factory::get_searching_ranker(search_engine, function, quantization, quantization_bits, p1, p2);
 }
 
 /*

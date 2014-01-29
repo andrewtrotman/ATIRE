@@ -354,6 +354,7 @@ PARTS = \
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\
 	$(OBJDIR)\ranking_function.obj					\
+	$(OBJDIR)\ranking_function_factory.obj					\
 	$(OBJDIR)\ranking_function_impact.obj			\
 	$(OBJDIR)\ranking_function_readability.obj		\
 	$(OBJDIR)\ranking_function_lmds.obj				\

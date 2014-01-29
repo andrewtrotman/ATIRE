@@ -20,8 +20,8 @@ long long height = 0;
 #endif
 
 /* initialise the pregen scores */
-pregen_scores = new ANT_search_engine_accumulator[documents];
-memset(pregen_scores, 0, sizeof(*pregen_scores)*documents);
+pregen_scores = new ANT_search_engine_accumulator[(size_t)documents];
+memset(pregen_scores, 0, (size_t)(sizeof(*pregen_scores) * documents));
 pregen_ratio = 1.0;
 
 results_list_length = 0;

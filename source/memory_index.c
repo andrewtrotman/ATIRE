@@ -26,6 +26,7 @@
 #include "btree_iterator.h"
 #include "stop_word.h"
 #include "fence.h"
+#include "ranking_function_factory.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -67,6 +68,7 @@ stop_word_max_proportion = 1.1;			// initialising with anything greater than 1.0
 	document_filename_bytes_used = 0;
 #endif
 
+quantization_bits = -1;
 }
 
 /*
@@ -321,14 +323,14 @@ stats->documents = docno;
 	*/
 	if (document_frequency == 1)
 		{
-		impact_header.the_quantum_count = document_frequency;
+		impact_header.the_quantum_count = (quantum_count_type)document_frequency;
 
 		impact_header.impact_value_ptr = impact_header.header_buffer;
 		impact_header.doc_count_ptr = impact_header.header_buffer + impact_header.the_quantum_count;
 		impact_header.impact_offset_ptr = impact_header.header_buffer + impact_header.the_quantum_count * 2;
 
 		*impact_header.impact_value_ptr = *term_frequency;
-		*impact_header.doc_count_ptr = document_frequency;
+		*impact_header.doc_count_ptr = (ANT_compressable_integer)document_frequency;
 		*impact_header.impact_offset_ptr = 0;
 
 		*destination = *docid;
@@ -764,7 +766,7 @@ if (!should_prune(root))
 					compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 					len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
 					// the offset for the beginning of the postings
-					impact_header.beginning_of_the_postings = ANT_impact_header::INFO_SIZE + len;
+					impact_header.beginning_of_the_postings = (beginning_of_the_postings_type)(ANT_impact_header::INFO_SIZE + len);
 					impact_header.set_INFO(compressed_impact_header_buffer);
 					compressed_header_ptr += len;
 
@@ -1047,7 +1049,7 @@ if (index_file != NULL)
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
-long ANT_memory_index::serialise(ANT_ranking_function_factory *factory)
+long ANT_memory_index::serialise(void)
 {
 uint8_t zero = 0;
 int32_t length_of_longest_term = 0;
@@ -1157,8 +1159,12 @@ timer = stats->start_timer();
 
 /*
 	Create the quantizer
+	How many bits should we quantize into?
+	see:
+		M. Crane, A. Trotman, R. O'Keefe (2013), Maintaining Discriminatory Power in Quantized Indexes, Proceedings of CIKM 2013
 */
-if ((quantizer = factory->get_indexing_ranker(largest_docno, document_lengths, &index_quantization, &quantization_bits)) != NULL)
+quantization_bits = (long long)(quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt((double)documents_in_repository) : quantization_bits);
+if ((quantizer = ANT_ranking_function_factory::get_indexing_ranker(ranking_function_id, largest_docno, document_lengths, quantization_bits, ranking_function_p1, ranking_function_p2)) != NULL)
 	{
 	/*
 		Store (in the index) the fact that we're a quantized index

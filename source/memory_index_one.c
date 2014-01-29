@@ -456,7 +456,7 @@ return top_terms;
 */
 void ANT_memory_index_one::tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency, long long tf_cap)
 {
-long use;
+long long use;
 
 if (node->string[0] != '~' && !ANT_isupper(node->string[0]))
 	{

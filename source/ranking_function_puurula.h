@@ -9,10 +9,16 @@
 #include "ranking_function_quantum_parameters.h"
 
 /*
-	Trained on the INEX Wikipedia Collection and the 2009 query set (k1=0.9, b=0.4)
+	No idea how Puurula trained these, but I think on WSJ
 */
-#define ANT_RANKING_FUNCTION_PUURULA_U 0.001705343
-#define ANT_RANKING_FUNCTION_PUURULA_G 0.912423962
+#define ANT_RANKING_FUNCTION_PUURULA_U 1000.0
+#define ANT_RANKING_FUNCTION_PUURULA_G 0.5
+
+/*
+	These were his original suggested parameters
+*/
+//#define ANT_RANKING_FUNCTION_PUURULA_U 0.001705343
+//#define ANT_RANKING_FUNCTION_PUURULA_G 0.912423962
 
 /*
 	class ANT_RANKING_FUNCTION_PUURULA

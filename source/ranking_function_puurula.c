@@ -1,6 +1,8 @@
 /*
 	RANKING_FUNCTION_PUURULA.C
 	--------------------------
+	See 
+		A. Puurula. Cumulative Progress in Language Models for Information Retrieval. Australasian Language Technology Workshop, 2013
 */
 #include <math.h>
 #include "search_engine.h"
@@ -59,6 +61,35 @@ else
 */
 void ANT_ranking_function_puurula::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
+long long docid;
+double rsv, tf, df, query_length, query_occurences, prior;
+ANT_compressable_integer *current;
+
+query_length = quantum_parameters->accumulator->get_term_count();
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+
+df = (double)quantum_parameters->term_details->global_collection_frequency;
+df /= collection_length_in_terms;
+
+tf = quantum_parameters->tf;
+tf = max(tf - g * pow(tf, g), 0);
+
+rsv = query_occurences * log((tf * quantum_parameters->prescalar) / (u * df) + 1.0);
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+
+	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		{
+		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
+		}
+	else
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+	}
 }
 
 /*
@@ -74,7 +105,7 @@ ANT_compressable_integer *current, *end;
 query_length = accumulator->get_term_count();
 query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query (which is almost always 1 anyway)
 
-df = term_details->global_collection_frequency;
+df = (double)term_details->global_collection_frequency;
 df /= collection_length_in_terms;
 
 impact_header->impact_value_ptr = impact_header->impact_value_start;
@@ -126,4 +157,5 @@ void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result
 double ANT_ranking_function_puurula::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
 {
 return term_frequency;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

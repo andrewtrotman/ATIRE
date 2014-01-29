@@ -36,6 +36,7 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 
 		fprintf(file, "%ld Q0 %s %lld %f %s\n", topic_id, filename, result + 1, relevance, run_id);
 		}
+	#pragma ANT_PRAGMA_UNUSED_PARAMETER
 	}
 #else
 	void ANT_search_engine_forum_TREC::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)

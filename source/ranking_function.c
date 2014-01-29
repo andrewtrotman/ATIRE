@@ -154,11 +154,9 @@ for (current = stem_buffer; current < end; current++)
 
 // find the number of non-zero buckets (the number of quantums)
 impact_header->the_quantum_count = 0;
-for (bucket = 0; bucket < 0x100; bucket++) {
-	if (bucket_size[bucket] != 0) {
+for (bucket = 0; bucket < 0x100; bucket++)
+	if (bucket_size[bucket] != 0)
 		impact_header->the_quantum_count++;
-	}
-}
 
 // setup the pointers for the header
 impact_header->impact_value_ptr = impact_header->impact_value_start = impact_header->header_buffer;
@@ -170,18 +168,23 @@ impact_header->doc_count_trim_ptr = impact_header->impact_offset_start;
 	Compute the location of the pointers for each bucket
 */
 sum = buckets_used = 0;
-for (bucket = 0xFF; bucket >= 0; bucket--) {
+for (bucket = 0xFF; bucket >= 0; bucket--)
+	{
 	//pointer[bucket] = destination + sum + 2 * buckets_used;
 	pointer[bucket] = destination + sum;
-	if (bucket_size[(size_t)bucket] != 0) {
+	if (bucket_size[(size_t)bucket] != 0)
+		{
 		//*pointer[(size_t)bucket]++ = bucket;
-		*impact_header->impact_value_ptr = bucket; impact_header->impact_value_ptr++;
-		*impact_header->doc_count_ptr = bucket_size[bucket]; impact_header->doc_count_ptr++;
-		*impact_header->impact_offset_ptr = sum; impact_header->impact_offset_ptr++;
+		*impact_header->impact_value_ptr = bucket;
+		impact_header->impact_value_ptr++;
+		*impact_header->doc_count_ptr = (ANT_compressable_integer)bucket_size[bucket];
+		impact_header->doc_count_ptr++;
+		*impact_header->impact_offset_ptr = (ANT_compressable_integer)sum;
+		impact_header->impact_offset_ptr++;
 		buckets_used++;
-	}
+		}
 	sum += bucket_size[(size_t)bucket];
-}
+	}
 
 /*
 	Now generate the impact ordering

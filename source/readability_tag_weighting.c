@@ -148,10 +148,10 @@ if (term_count > 1)
 	//		continue;
 
 		length = strlen(terms[i]);
-		memcpy(start, terms[i], length);
+		memcpy(start, terms[i], (size_t)length);
 		start += length;
 		*start = '\0';
-		what.string_length = length + 2; // including prefix string "C:" or "T:"
+		what.string_length = (size_t)(length + 2); // including prefix string "C:" or "T:"
 		indexer->add_term(&what, doc, 10);
 		start =  buffer + 2;
 		}
@@ -168,11 +168,11 @@ info_buf_start = info_buf + 3;
 *info_buf_start = '\0';
 
 length = strlen(terms[0]);
-memcpy(info_buf_start, terms[0], length);
+memcpy(info_buf_start, terms[0], (size_t)length);
 info_buf_start += length;
 *info_buf_start = '\0';
 what.start = info_buf;
-what.string_length = length + 3;
+what.string_length = (size_t)(length + 3);
 
 for (i = 1; i < term_count; ++i)
 	{
@@ -182,10 +182,10 @@ for (i = 1; i < term_count; ++i)
 		what.string_length++;
 		}
 	length = strlen(terms[i]);
-	memcpy(info_buf_start, terms[i], length);
+	memcpy(info_buf_start, terms[i], (size_t)length);
 	info_buf_start += length;
 	*info_buf_start = '\0';
-	what.string_length += length;
+	what.string_length += (size_t)length;
 	}
 
 indexer->add_term(&what, doc, 10); // avoid being culled of optimization
