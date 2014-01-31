@@ -175,7 +175,7 @@ for (ranker = 0; ANT_list_of_rankers[ranker].name != NULL; ranker++)
 	if (allowable & ANT_list_of_rankers[ranker].flags)
 		{
 		if (ANT_list_of_rankers[ranker].parameter_count == 0)
-			sprintf(buffer, "%s%20.20s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters, " ");
+			sprintf(buffer, "%s%20.20s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters);
 		else
 			sprintf(buffer, "%s:%s%20.20s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters, " ");
 		printf("  %17.17s %s %s\n", buffer, ANT_list_of_rankers[ranker].description, isdefault(ANT_list_of_rankers[ranker].id));
