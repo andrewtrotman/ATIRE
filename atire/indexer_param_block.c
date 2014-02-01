@@ -159,11 +159,11 @@ puts("");
 
 puts("READABILITY");
 puts("-----------");
-puts("-R[ndft]         Calculate readability using one of:");
-puts("   n            none [default]");
+puts("-R[-dft]        Calculate readability using one of:");
+puts("   -            none [default]");
 puts("   d            Dale-Chall");
 puts("   f            Flesch-Kincaid");
-puts("   t            Special tags (such as TITLE, CATEGORY) weighting");
+puts("   t            Tag up-weighting for TITLE and CATEGORY elements");
 puts("");
 
 ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', ANT_ranking_function_factory_object::INDEXABLE);
@@ -265,9 +265,9 @@ char *measure;
 for (measure = measures; *measure != '\0'; measure++)
 	switch (*measure)
 		{
-		case 'n': readability_measure = ANT_readability_factory::NONE; break;
-		case 'd': readability_measure |= ANT_readability_factory::DALE_CHALL; break;
-		case 'f': readability_measure |= ANT_readability_factory::FLESCH_KINCAID; break;
+		case '-': readability_measure = ANT_readability_factory::NONE; break;
+		case 'd': readability_measure = ANT_readability_factory::DALE_CHALL; break;
+		case 'f': readability_measure = ANT_readability_factory::FLESCH_KINCAID; break;
 		case 't': readability_measure = ANT_readability_factory::TAG_WEIGHTING; break;
 		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}

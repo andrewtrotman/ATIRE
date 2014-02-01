@@ -23,7 +23,7 @@ private:
 	long *document_readability;
 
 public:
-	ANT_ranking_function_readability(ANT_search_engine_readability *engine, double mix = 0, double cutoff = 0, double k1 = 0.9, double b = 0.4);
+	ANT_ranking_function_readability(ANT_search_engine *engine, double mix = 0, double cutoff = 0, double k1 = 0.9, double b = 0.4);
 	virtual ~ANT_ranking_function_readability() {}
 
 #ifdef IMPACT_HEADER

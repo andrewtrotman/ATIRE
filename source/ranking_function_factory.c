@@ -51,7 +51,7 @@ ANT_ranking_function_factory_object ANT_list_of_rankers[] =
 {ANT_ranking_function_factory_object::ALL_TERMS,     "allterms",   NULL,     ANT_ranking_function_factory_object::NONINDEXABLE | ANT_ranking_function_factory_object::QUANTABLE, 0, 0, 0, 0, 0, "Relevant only if all query terms are present (Boolean AND)"},
 {ANT_ranking_function_factory_object::TERM_COUNT,    "termcount",  NULL,     ANT_ranking_function_factory_object::INDEXABLE | ANT_ranking_function_factory_object::QUANTABLE, 0, 0, 0, 0, 0, "The number of query terms in the document (Boolean OR)"}, 
 {ANT_ranking_function_factory_object::IMPACT,        "impact",     NULL,     ANT_ranking_function_factory_object::NONINDEXABLE | ANT_ranking_function_factory_object::QUANTABLE, 0, 0, 0, 0, 0, "Sum of impact scores"}, 
-{ANT_ranking_function_factory_object::READABLE,      "readable",   NULL,     ANT_ranking_function_factory_object::NONINDEXABLE, 0, 0, 0, 0, 0, "The readability search engine (BM25 with Dale-Chall)"}, 
+{ANT_ranking_function_factory_object::READABLE,      "readable",  "<k1>:<b>",ANT_ranking_function_factory_object::NONINDEXABLE, 2, ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, ANT_RANKING_FUNCTION_BM25_DEFAULT_B, ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, ANT_RANKING_FUNCTION_BM25_DEFAULT_B, "Readability (BM25 with Dale-Chall) [default k1=0.9 b=0.4]"}, 
 {ANT_ranking_function_factory_object::DOCID,         "docid",     "<d>",     ANT_ranking_function_factory_object::NONINDEXABLE | ANT_ranking_function_factory_object::QUANTABLE, 1, 1, 0, 1, 0, "Sort by document index (<d=1> ascending or <d=0> descending [default d=1]"},
 {ANT_ranking_function_factory_object::NONE,          "none"},       // sentinal every ranking function after here requires special handeling
 
@@ -174,6 +174,13 @@ switch (function)
 		break;
 	case ANT_ranking_function_factory_object::DOCID:
 		new_function = new ANT_ranking_function_docid(search_engine, quantization, quantization_bits, (int)p1);
+		break;
+	case ANT_ranking_function_factory_object::READABLE:
+		/*
+			I've got no idea why, but the readability function does not take quantization parameters.
+			Someone should ask Matt Crane why not because he wrote both pieces of code.	
+		*/
+		new_function = new ANT_ranking_function_readability(search_engine, 0, 0, p1, p2);
 		break;
 	default:
 		printf("Error: Unknown ranking function selected in ANT_ranking_function_factory::get_searching_ranker()\n");

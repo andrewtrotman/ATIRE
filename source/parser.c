@@ -233,7 +233,7 @@ if (character_type == CT_LETTER)
 
 	ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_length, character);
 
-	while (character = utf8_to_wide(current), unicode_chartype(character)==CT_LETTER)
+	while (character = utf8_to_wide(current), unicode_chartype(character) == CT_LETTER)
 		{
 		current += utf8_bytes(current);
 		ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_length, character);

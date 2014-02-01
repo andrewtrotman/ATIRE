@@ -1,10 +1,10 @@
 /*
 	READABILITY_TAG_WEIGHTING.C
 	---------------------------
- */
-
+*/
 #include "readability_tag_weighting.h"
 #include "unicode.h"
+#include "parser_token.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -46,7 +46,7 @@ delete [] terms;
 void ANT_readability_TAG_WEIGHTING::clean_up()
 {
 for (int i = 0; i < term_count; ++i)
-		delete terms[i];
+	delete terms[i];
 tag_processing_on = FALSE;
 where = -1;
 matching_tag = NULL;
@@ -58,7 +58,7 @@ term_count = 0;
 	READABILITY_TAG_WEIGHTING::HANDLE_TAG()
 	---------------------------------------
 */
-void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_string_pair *tag, long tag_open, ANT_parser *parser)
+void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_parser_token *tag, long tag_open, ANT_parser *parser)
 {
 if (tag_open)
 	{
@@ -82,8 +82,15 @@ else
 	}
 }
 
-void ANT_readability_TAG_WEIGHTING::handle_token(ANT_string_pair *token)
+/*
+	ANT_READABILITY_TAG_WEIGHTING::HANDLE_TOKEN()
+	---------------------------------------------
+*/
+void ANT_readability_TAG_WEIGHTING::handle_token(ANT_parser_token *token)
 {
+if (token == NULL || token->type == TT_TAG_CLOSE)
+	return;
+
 /*
   the title may begin with "Wikipedia:", if term_count is greater than 1, then we ignoring it
   it is not best solution, but we can live with it.
