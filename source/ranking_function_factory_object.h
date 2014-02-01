@@ -43,7 +43,8 @@ public:
 		DFI_IDF,
 		DFIW_IDF,
 		LMDS,
-		PUURULA
+		PUURULA,
+		PUURULA_IDF
 		};
 
 public:

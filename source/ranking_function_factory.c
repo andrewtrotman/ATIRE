@@ -16,6 +16,7 @@
 #include "ranking_function_dfiw_idf.h"
 #include "ranking_function_lmd.h"
 #include "ranking_function_puurula.h"
+#include "ranking_function_puurula_idf.h"
 #include "ranking_function_lmds.h"
 #include "ranking_function_lmjm.h"
 #include "ranking_function_bose_einstein.h"
@@ -36,6 +37,7 @@ ANT_ranking_function_factory_object ANT_list_of_rankers[] =
 {ANT_ranking_function_factory_object::LMD,           "lmd",       "<u>",     ANT_ranking_function_factory_object::NONINDEXABLE, 1, ANT_RANKING_FUNCTION_LMD_DEFAULT_U, 0, ANT_RANKING_FUNCTION_LMD_DEFAULT_U, 0, "Language Models with Dirichlet smoothing, u=<u> [default u = 6750]"}, 
 {ANT_ranking_function_factory_object::LMDS,          "lmds",      "<u>",     ANT_ranking_function_factory_object::NONINDEXABLE, 1, ANT_RANKING_FUNCTION_LMDS_DEFAULT_U, 0, ANT_RANKING_FUNCTION_LMDS_DEFAULT_U, 0, "Language Models with Dirichlet smoothing (see Petri et al, ADCS 2013), u=<u> [default u = 2500]"}, 
 {ANT_ranking_function_factory_object::PUURULA,       "lmp",       "<u>:<g>", ANT_ranking_function_factory_object::NONINDEXABLE, 2, ANT_RANKING_FUNCTION_PUURULA_U, ANT_RANKING_FUNCTION_PUURULA_G, ANT_RANKING_FUNCTION_PUURULA_U, ANT_RANKING_FUNCTION_PUURULA_G, "Language Models with Pittman-Yor Process Dirichlet smoothing (see Puurula, ALTA 2013), u=<u>, g=<g> [default u=1000, g=0.5]"}, 
+{ANT_ranking_function_factory_object::PUURULA_IDF,   "lmpd",      "<u>:<g>", ANT_ranking_function_factory_object::NONINDEXABLE, 2, ANT_RANKING_FUNCTION_PUURULA_U, ANT_RANKING_FUNCTION_PUURULA_G, ANT_RANKING_FUNCTION_PUURULA_U, ANT_RANKING_FUNCTION_PUURULA_G, "LMP with TF.IDF weighting (see Puurula, ALTA 2013), u=<u>, g=<g> [default u=1000, g=0.5]"}, 
 {ANT_ranking_function_factory_object::LMJM,          "lmjm",      "<l>",     ANT_ranking_function_factory_object::INDEXABLE, 1, ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA, 0, ANT_RANKING_FUNCTION_LMJM_DEFAULT_LAMBDA, 0, "Language Models with Jelinek-Mercer smoothing, l=<l> [default l = 0.5]"}, 
 {ANT_ranking_function_factory_object::DIVERGENCE,    "divergence", NULL,     ANT_ranking_function_factory_object::INDEXABLE, 0, 0, 0, 0, 0, "Divergence from randomness using I(ne)B2"}, 
 {ANT_ranking_function_factory_object::BOSE_EINSTEIN, "be",         NULL,     ANT_ranking_function_factory_object::INDEXABLE, 0, 0, 0, 0, 0, "Bose-Einstein GL2"}, 
@@ -126,6 +128,9 @@ switch (function)
 		break;
 	case ANT_ranking_function_factory_object::PUURULA:
 		new_function = new ANT_ranking_function_puurula(search_engine, quantization, quantization_bits, p1, p2);
+		break;
+	case ANT_ranking_function_factory_object::PUURULA_IDF:
+		new_function = new ANT_ranking_function_puurula_idf(search_engine, quantization, quantization_bits, p1, p2);
 		break;
 	case ANT_ranking_function_factory_object::LMJM:
 		new_function = new ANT_ranking_function_lmjm(search_engine, quantization, quantization_bits, p1);

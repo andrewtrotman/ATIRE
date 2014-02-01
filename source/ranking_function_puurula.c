@@ -146,7 +146,6 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 */
 void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
-{
 long long docid;
 double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current, *end;
@@ -183,8 +182,6 @@ while (current < end)
 		}
 	current++;		// skip over the zero
 	}
-}
-
 }
 
 #endif

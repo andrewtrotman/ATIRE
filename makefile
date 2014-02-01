@@ -359,6 +359,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_lmds.obj				\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
+	$(OBJDIR)\ranking_function_puurula_idf.obj				\
 	$(OBJDIR)\ranking_function_puurula.obj				\
 	$(OBJDIR)\ranking_function_docid.obj			\
 	$(OBJDIR)\ranking_function_pregen.obj			\
