@@ -86,8 +86,13 @@ top = (((unsigned long long)value) >> 32) & 0xFFFFFFFF;
 bottom = ((unsigned long long)value) & 0xFFFFFFFF;
 
 collection_frequency += 2;
-insert_docno(top);
-insert_docno(bottom);
+
+/*
+	when these get decopressed at the other end they are going to converted into an impact ordered postings list.
+	that means that if the two TF values are the same then they will be in the wrong positions for extraction.
+*/
+insert_docno(top, 2);				// this word must come first so we set the TF to 2 (high)
+insert_docno(bottom, 1);			// this word must come second so we set the TF to 1 (low)
 }
 
 /*

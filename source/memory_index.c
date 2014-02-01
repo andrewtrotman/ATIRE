@@ -1120,16 +1120,20 @@ if (document_filenames != NULL)
 	{
 	pos = index_file->tell();
 	set_variable("~documentfilenamesstart", pos);
+printf("~documentfilenamesstart:%lld\n", (long long)pos);
 	serialise_filenames(document_filenames);
 	pos = index_file->tell();
 	set_variable("~documentfilenamesfinish", pos);
+printf("~documentfilenamesfinish:%lld\n", (long long)pos);
 
 #ifdef FILENAME_INDEX
 	pos = index_file->tell();
 	set_variable("~documentfilenamesindexstart", pos);
+printf("~documentfilenamesindexstart:%lld\n", (long long)pos);
 	serialise_filenames_index();
 	pos = index_file->tell();
 	set_variable("~documentfilenamesindexfinish", pos);
+printf("~documentfilenamesindexfinish:%lld\n", (long long)pos);
 #endif
 	}
 
