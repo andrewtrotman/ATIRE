@@ -91,7 +91,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 
 		tf = *impact_header->impact_value_ptr;
 		tf = log(1.0 + tf / document_lengths[docid]) * log((double)documents / (double)term_details->global_document_frequency);		// should use unique words in document not document_lengths[]
-		tf = max(tf - g * pow(tf, g), 0);
+//		tf = max(tf - g * pow(tf, g), 0);
 
 		rsv = query_occurences * log((tf * prescalar) / (u * df) + 1.0);
 
