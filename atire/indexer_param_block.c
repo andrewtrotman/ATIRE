@@ -125,12 +125,13 @@ ANT_indexer_param_block_pregen::help();
 puts("COMPRESSION");
 puts("-----------");
 puts("-c[abBceEgnrstv] Compress postings using any of:");
-puts("   a            try all schemes and choose the best  (same as -cceEgnrstv)");
+puts("   a            try all schemes and choose the best  (same as -cceEfgnrstv)");
 puts("   b            try all bitwise schemes and choose the best  (same as -ceEg)");
-puts("   B            try all Bytewise schemes and choose the best (same as -ccrsStv)");
+puts("   B            try all Bytewise schemes and choose the best (same as -ccfrsStv)");
 puts("   c            Carryover-12  (bytewise)");
 puts("   e            Elias Delta   (bitwise)");
 puts("   E            Elias Gamma   (bitwise)");
+puts("   f            Four Integer Variable Byte    (bytewise)");
 puts("   g            Golomb        (bitwise)");
 puts("   n            None          (-)");
 puts("   r            Relative-10   (bytewise)");
@@ -234,12 +235,13 @@ char *scheme;
 for (scheme = scheme_list; *scheme != '\0'; scheme++)
 	switch (*scheme)
 		{
-		case 'a': compression("ceEgnrstv"); break;
+		case 'a': compression("ceEfgnrstv"); break;
 		case 'b': compression("eEg"); break;
-		case 'B': compression("crsStv"); break;
+		case 'B': compression("cfrsStv"); break;
 		case 'c': compression_scheme |= ANT_compression_factory::CARRYOVER_12; break;
 		case 'e': compression_scheme |= ANT_compression_factory::ELIAS_DELTA; break;
 		case 'E': compression_scheme |= ANT_compression_factory::ELIAS_GAMMA; break;
+		case 'f': compression_scheme |= ANT_compression_factory::FOUR_INTEGER_VARIABLE_BYTE; break;
 		case 'g': compression_scheme |= ANT_compression_factory::GOLOMB; break;
 		case 'n': compression_scheme |= ANT_compression_factory::NONE; break;
 		case 'r': compression_scheme |= ANT_compression_factory::RELATIVE_10; break;
