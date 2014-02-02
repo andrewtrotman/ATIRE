@@ -1,6 +1,8 @@
 /*
 	RANKING_FUNCTION_PUURULA.C
 	--------------------------
+	See 
+		A. Puurula. Cumulative Progress in Language Models for Information Retrieval. Australasian Language Technology Workshop, 2013
 */
 #include <math.h>
 #include "search_engine.h"
@@ -51,8 +53,6 @@ else
 	}
 }
 
-
-
 #ifdef IMPACT_HEADER
 
 /*
@@ -61,65 +61,74 @@ else
 */
 void ANT_ranking_function_puurula::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
-}
+long long docid;
+double rsv, tf, df, query_length, query_occurences, prior;
+ANT_compressable_integer *current;
 
-/*
-	ANT_RANKING_FUNCTION_PUURULA::DISCOUNT_COLLECTION_FREQUENCY()
-	-------------------------------------------------------------
-*/
-double ANT_ranking_function_puurula::discount_collection_frequency(ANT_impact_header *impact_header)
-{
-ANT_compressable_integer *doc_count_ptr, *impact_value_ptr;
-double tf, discounted_tf, discounted_cf;
+query_length = quantum_parameters->accumulator->get_term_count();
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
 
-discounted_cf = 0;
+df = (double)quantum_parameters->term_details->global_collection_frequency;
+df /= collection_length_in_terms;
 
-impact_value_ptr = impact_header->impact_value_start;
-doc_count_ptr = impact_header->doc_count_start;
-while (doc_count_ptr < impact_header->doc_count_trim_ptr)
+tf = quantum_parameters->tf;
+tf = max(tf - g * pow(tf, g), 0);
+
+rsv = query_occurences * log((tf * quantum_parameters->prescalar) / (u * df) + 1.0);
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
 	{
-	tf =  *impact_value_ptr;
-	discounted_tf = max(tf - g * pow(tf, g), 0);
+	docid += *current++;
 
-	discounted_cf += *doc_count_ptr * discounted_tf;
-
-	impact_value_ptr++;
-	doc_count_ptr++;
+	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		{
+		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
+		}
+	else
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 	}
-
-return discounted_cf;
 }
 
 /*
 	ANT_RANKING_FUNCTION_PUURULA::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------
-	1 parameter is wrong... discounted_document_lengths
 */
 void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 long long docid;
-double top_row, tf, idf, discounted_tf, alpha_d, discounted_cf, score;
+double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current, *end;
 
-discounted_cf = discount_collection_frequency(impact_header);
+query_length = accumulator->get_term_count();
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query (which is almost always 1 anyway)
+
+df = (double)term_details->global_collection_frequency;
+df /= collection_length_in_terms;
 
 impact_header->impact_value_ptr = impact_header->impact_value_start;
 impact_header->doc_count_ptr = impact_header->doc_count_start;
 current = impact_ordering;
 while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	{
-	tf =  *impact_header->impact_value_ptr * prescalar;
-	discounted_tf = max(tf - g * pow(tf, g), 0);
+	tf = *impact_header->impact_value_ptr;
+	tf = max(tf - g * pow(tf, g), 0);
 
+	rsv = query_occurences * log((tf * prescalar) / (u * df) + 1.0);
 	docid = -1;
 	end = current + *impact_header->doc_count_ptr;
 	while (current < end)
 		{
 		docid += *current++;
-		alpha_d = 1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u);
-		score = ((1.0 - alpha_d) * (discounted_tf / discounted_cf)) + (alpha_d * ((double)term_details->global_collection_frequency / (double)collection_length_in_terms));
-
-		accumulator->add_rsv(docid, quantize(postscalar * score, maximum_collection_rsv, minimum_collection_rsv));
+		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+			{
+			prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+			accumulator->add_rsv(docid, quantize(postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
+			}
+		else
+			accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;
 	impact_header->impact_value_ptr++;
@@ -127,6 +136,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
+
 
 #else
 
@@ -136,6 +146,42 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 */
 void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
+long long docid;
+double rsv, tf, df, query_length, query_occurences, prior;
+ANT_compressable_integer *current, *end;
+
+query_length = accumulator->get_term_count();
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+
+current = impact_ordering;
+end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
+
+df = (double)term_details->global_collection_frequency;
+df /= collection_length_in_terms;
+
+while (current < end)
+	{
+	end += 2;		// account for the impact_order and the terminator
+	tf = *current++;
+	tf = max(tf - g * pow(tf, g), 0);
+
+	rsv = query_occurences * log((tf * prescalar) / (u * df) + 1.0);
+
+	docid = -1;
+	while (*current != 0)
+		{
+		docid += *current++;
+
+		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+			{
+			prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+			accumulator->add_rsv(docid, quantize(postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
+			}
+		else
+			accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+		}
+	current++;		// skip over the zero
+	}
 }
 
 #endif
@@ -147,4 +193,5 @@ void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result
 double ANT_ranking_function_puurula::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
 {
 return term_frequency;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

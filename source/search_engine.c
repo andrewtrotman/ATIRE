@@ -259,7 +259,7 @@ if (get_postings_details("~documentoffsets", &collection_details) != NULL)
 	document_decompress_buffer = (char *)memory->malloc(document_longest_compressed);
 
 #ifdef IMPACT_HEADER
-	document_longest_raw_length = get_variable("~documentlongest");
+	document_longest_raw_length = (long)get_variable("~documentlongest");
 #else
 	if ((value = get_decompressed_postings("~documentlongest", &collection_details)) != NULL)
 		#ifdef SPECIAL_COMPRESSION
@@ -534,7 +534,7 @@ unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *
 			{
 			*postings++ = term_details->postings_position_on_disk >> 32;
 			if (term_details->local_document_frequency == 2)
-				*postings = term_details->impacted_length;
+				*postings = (ANT_compressable_integer)term_details->impacted_length;
 			term_details->impacted_length = term_details->local_document_frequency;
 			}
 		else
@@ -542,7 +542,7 @@ unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *
 			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
 			*(unsigned char *)postings = 0; // no compression for second docid list
 			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
-			*postings = term_details->impacted_length; // second docid
+			*postings = (ANT_compressable_integer)term_details->impacted_length; // second docid
 			term_details->impacted_length = 2;
 			}
 		}
@@ -575,7 +575,7 @@ unsigned char *ANT_search_engine::get_impact_header(ANT_search_engine_btree_leaf
 		quantum_count_type the_quantum_count = 1;
 		beginning_of_the_postings_type beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
 		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
-		ANT_compressable_integer impact_two = term_details->postings_length;
+		ANT_compressable_integer impact_two = (ANT_compressable_integer)term_details->postings_length;
 
 		if (impact_one != impact_two && term_details->local_document_frequency == 2)
 			the_quantum_count = 2;
@@ -593,7 +593,7 @@ unsigned char *ANT_search_engine::get_impact_header(ANT_search_engine_btree_leaf
 		if (the_quantum_count == 1)
 			{
 			// document counts
-			*into++ = term_details->local_document_frequency;
+			*into++ = (ANT_compressable_integer)term_details->local_document_frequency;
 			// offsets
 			*into++ = 0;
 			}
@@ -643,7 +643,7 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		quantum_count_type the_quantum_count = 1;
 		beginning_of_the_postings_type beginning_of_the_postings = ANT_impact_header::INFO_SIZE + 1;
 		ANT_compressable_integer impact_one = term_details->postings_position_on_disk & 0xFFFFFFFF;
-		ANT_compressable_integer impact_two = term_details->postings_length;
+		ANT_compressable_integer impact_two = (ANT_compressable_integer)term_details->postings_length;
 
 		if (impact_one != impact_two && term_details->local_document_frequency == 2)
 			the_quantum_count = 2;
@@ -664,13 +664,13 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 		if (the_quantum_count == 1)
 			{
 			// document counts
-			*into++ = term_details->local_document_frequency;
+			*into++ = (ANT_compressable_integer)term_details->local_document_frequency;
 			// offsets
 			*into++ = 0;
 			// fill in postings
 			*postings++ = term_details->postings_position_on_disk >> 32;
 			if (term_details->local_document_frequency == 2)
-				*postings = term_details->impacted_length;
+				*postings = (ANT_compressable_integer)term_details->impacted_length;
 			term_details->impacted_length = term_details->local_document_frequency;
 			}
 		else
@@ -686,7 +686,7 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
 			*(unsigned char *)postings = 0; // no compression for second docid list
 			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
-			*postings = term_details->impacted_length; // second docid
+			*postings = (ANT_compressable_integer)term_details->impacted_length; // second docid
 			term_details->impacted_length = 2;
 			}
 #else
@@ -1033,7 +1033,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 					then we want to check, and modify the header so that future processing doesn't go awry
 				*/
 				if (*the_impact_header->doc_count_ptr > end)
-					*the_impact_header->doc_count_ptr = end;
+					*the_impact_header->doc_count_ptr = (ANT_compressable_integer)end;
 
 				factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
 				sum += *the_impact_header->doc_count_ptr;
@@ -1738,7 +1738,7 @@ long long start = get_variable("~documentfilenamesstart");
 long long end = get_variable("~documentfilenamesfinish");
 long long current_doc;
 char *upto = buffer;
-char **document_filenames = (char **)malloc(sizeof(char *) * (end - start));
+char **document_filenames = (char **)malloc((size_t)(sizeof(char *) * (end - start)));
 
 *buf_length = (unsigned long)(end - start);
 

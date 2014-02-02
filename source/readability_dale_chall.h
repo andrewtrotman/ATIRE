@@ -38,15 +38,13 @@ private:
 
 protected:
 	long score(void);
-	void handle_token(ANT_string_pair *token);
+	void handle_token(ANT_parser_token *token);
 	void handle_node(ANT_memory_indexer_node *node);
 
 public:
 	ANT_readability_dale_chall();
 	virtual ~ANT_readability_dale_chall();
-	
-	using ANT_readability::index;
-	void index(ANT_memory_indexer *index);
+	virtual void index(ANT_memory_indexer *index, long long doc);
 } ;
 
 #endif  /* READABILITY_DALE_CHALL_H_ */

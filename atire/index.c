@@ -208,6 +208,8 @@ index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
 index->set_term_culling(param_block.stop_word_removal, param_block.stop_word_df_threshold, param_block.stop_word_df_frequencies);
+index->set_quantization(param_block.quantization, param_block.quantization_bits);
+index->set_ranking_function(param_block.ranking_function, param_block.p1, param_block.p2);
 
 if (param_block.readability_measure == ANT_readability_factory::NONE
 		|| param_block.readability_measure == ANT_readability_factory::TAG_WEIGHTING)
@@ -616,7 +618,7 @@ else
 		}
 
 	now = stats.start_timer();
-	index->serialise(&param_block);
+	index->serialise();
 	stats.add_disk_output_time(stats.stop_timer(now));
 	index->text_render(param_block.statistics);
 	}

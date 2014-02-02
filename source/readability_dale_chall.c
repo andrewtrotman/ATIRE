@@ -38,7 +38,7 @@ delete [] words_encountered;
 	ANT_READABILITY_DALE_CHALL::HANDLE_TOKEN()
 	------------------------------------------
 */
-void ANT_readability_dale_chall::handle_token(ANT_string_pair *token)
+void ANT_readability_dale_chall::handle_token(ANT_parser_token *token)
 {
 char *str;
 
@@ -234,9 +234,10 @@ number_of_words++;
 	ANT_READABILITY_DALE_CHALL::INDEX()
 	-----------------------------------
 */
-void ANT_readability_dale_chall::index(ANT_memory_indexer *index)
+void ANT_readability_dale_chall::index(ANT_memory_indexer *index, long long doc)
 {
 index->set_document_detail(&measure_name, score());
 
 number_of_sentences = number_of_words = number_of_unfamiliar_words = 0;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

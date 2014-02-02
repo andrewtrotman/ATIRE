@@ -46,10 +46,10 @@ if (got_topic == NULL)
 	This is the calculation that's done in TREC's provided ndeval.c
 	I don't believe this is the correct calculation, but we do it for consistency.
 */
-subtopicGain = new double[got_topic->number_of_subtopics];
-idealIdeal = new double[precision_point];
+subtopicGain = new double[(size_t)got_topic->number_of_subtopics];
+idealIdeal = new double[(size_t)precision_point];
 idealIdealGain = (double)got_topic->number_of_subtopics;
-err = new double[precision_point];
+err = new double[(size_t)precision_point];
 
 for (i = 0; i < precision_point; i++)
 	err[i] = 0.0;

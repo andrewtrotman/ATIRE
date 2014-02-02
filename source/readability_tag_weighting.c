@@ -1,10 +1,10 @@
 /*
 	READABILITY_TAG_WEIGHTING.C
 	---------------------------
- */
-
+*/
 #include "readability_tag_weighting.h"
 #include "unicode.h"
+#include "parser_token.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -46,7 +46,7 @@ delete [] terms;
 void ANT_readability_TAG_WEIGHTING::clean_up()
 {
 for (int i = 0; i < term_count; ++i)
-		delete terms[i];
+	delete terms[i];
 tag_processing_on = FALSE;
 where = -1;
 matching_tag = NULL;
@@ -58,7 +58,7 @@ term_count = 0;
 	READABILITY_TAG_WEIGHTING::HANDLE_TAG()
 	---------------------------------------
 */
-void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_string_pair *tag, long tag_open, ANT_parser *parser)
+void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_parser_token *tag, long tag_open, ANT_parser *parser)
 {
 if (tag_open)
 	{
@@ -82,8 +82,15 @@ else
 	}
 }
 
-void ANT_readability_TAG_WEIGHTING::handle_token(ANT_string_pair *token)
+/*
+	ANT_READABILITY_TAG_WEIGHTING::HANDLE_TOKEN()
+	---------------------------------------------
+*/
+void ANT_readability_TAG_WEIGHTING::handle_token(ANT_parser_token *token)
 {
+if (token == NULL || token->type == TT_TAG_CLOSE)
+	return;
+
 /*
   the title may begin with "Wikipedia:", if term_count is greater than 1, then we ignoring it
   it is not best solution, but we can live with it.
@@ -148,10 +155,10 @@ if (term_count > 1)
 	//		continue;
 
 		length = strlen(terms[i]);
-		memcpy(start, terms[i], length);
+		memcpy(start, terms[i], (size_t)length);
 		start += length;
 		*start = '\0';
-		what.string_length = length + 2; // including prefix string "C:" or "T:"
+		what.string_length = (size_t)(length + 2); // including prefix string "C:" or "T:"
 		indexer->add_term(&what, doc, 10);
 		start =  buffer + 2;
 		}
@@ -168,11 +175,11 @@ info_buf_start = info_buf + 3;
 *info_buf_start = '\0';
 
 length = strlen(terms[0]);
-memcpy(info_buf_start, terms[0], length);
+memcpy(info_buf_start, terms[0], (size_t)length);
 info_buf_start += length;
 *info_buf_start = '\0';
 what.start = info_buf;
-what.string_length = length + 3;
+what.string_length = (size_t)(length + 3);
 
 for (i = 1; i < term_count; ++i)
 	{
@@ -182,10 +189,10 @@ for (i = 1; i < term_count; ++i)
 		what.string_length++;
 		}
 	length = strlen(terms[i]);
-	memcpy(info_buf_start, terms[i], length);
+	memcpy(info_buf_start, terms[i], (size_t)length);
 	info_buf_start += length;
 	*info_buf_start = '\0';
-	what.string_length += length;
+	what.string_length += (size_t)length;
 	}
 
 indexer->add_term(&what, doc, 10); // avoid being culled of optimization

@@ -171,7 +171,6 @@ MINUS_D = $(MINUS_D) -DPARALLEL_INDEXING_DOCUMENTS
 MINUS_D = $(MINUS_D) -DANT_ACCUMULATOR_T="double"
 MINUS_D = $(MINUS_D) -DANT_PREGEN_T="unsigned long long"
 MINUS_D = $(MINUS_D) -DNOMINMAX
-
 MINUS_D = $(MINUS_D) -DIMPACT_HEADER
 MINUS_D = $(MINUS_D) -DFILENAME_INDEX
 
@@ -354,11 +353,13 @@ PARTS = \
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\
 	$(OBJDIR)\ranking_function.obj					\
+	$(OBJDIR)\ranking_function_factory.obj					\
 	$(OBJDIR)\ranking_function_impact.obj			\
 	$(OBJDIR)\ranking_function_readability.obj		\
 	$(OBJDIR)\ranking_function_lmds.obj				\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
+	$(OBJDIR)\ranking_function_puurula_idf.obj				\
 	$(OBJDIR)\ranking_function_puurula.obj				\
 	$(OBJDIR)\ranking_function_docid.obj			\
 	$(OBJDIR)\ranking_function_pregen.obj			\

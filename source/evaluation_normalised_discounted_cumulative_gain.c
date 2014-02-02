@@ -46,20 +46,20 @@ double *this_topic_ideal_gain = NULL;
 
 ANT_evaluation::set_lists(relevant_topic_list, relevant_topic_list_length);
 
-ideal_gains = new double[relevant_topic_list_length];
+ideal_gains = new double[(size_t)relevant_topic_list_length];
 for (topic = 0; topic < relevant_topic_list_length; topic++)
 	{
 	subtopic = relevant_topic_list[topic].subtopic_list;
 	ideal_gains[topic] = 0;
 
 	delete [] this_topic_ideal_gain;
-	this_topic_ideal_gain = new double[subtopic->number_of_relevant_documents];
+	this_topic_ideal_gain = new double[(size_t)subtopic->number_of_relevant_documents];
 
 	for (offset = 0, document = 0; document < subtopic->number_of_documents; document++)
 		if (subtopic->document_list[document].relevant_characters != 0)
 			this_topic_ideal_gain[offset++] = (double)subtopic->document_list[document].relevant_characters;
 
-	qsort(this_topic_ideal_gain, offset, sizeof(*this_topic_ideal_gain), ANT_evaluation_discounted_cumulative_gain::gain_compare);
+	qsort(this_topic_ideal_gain, (size_t)offset, sizeof(*this_topic_ideal_gain), ANT_evaluation_discounted_cumulative_gain::gain_compare);
 
 	for (offset = 0; offset < subtopic->number_of_relevant_documents && offset < precision_point; offset++)
 		ideal_gains[topic] += gain((long long)this_topic_ideal_gain[offset], offset) * discount(offset);

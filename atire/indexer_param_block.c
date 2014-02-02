@@ -16,6 +16,7 @@
 #include "directory_iterator_filter.h"
 #include "directory_iterator_scrub.h"
 #include "ranking_function_puurula.h"
+#include "ranking_function_factory_object.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -42,7 +43,7 @@ readability_measure = ANT_readability_factory::NONE;
 statistics = 0;
 logo = TRUE;
 reporting_frequency = LLONG_MAX;
-ranking_function = IMPACT;
+ranking_function = ANT_ranking_function_factory_object::NONE;
 document_compression_scheme = NONE;
 index_filename = "index.aspt";
 doclist_filename = "doclist.aspt";
@@ -159,18 +160,17 @@ puts("");
 
 puts("READABILITY");
 puts("-----------");
-puts("-R[ndft]         Calculate readability using one of:");
-puts("   n            none [default]");
+puts("-R[-dft]        Calculate readability using one of:");
+puts("   -            none [default]");
 puts("   d            Dale-Chall");
 puts("   f            Flesch-Kincaid");
-puts("   t            Special tags (such as TITLE, CATEGORY) weighting");
+puts("   t            Tag up-weighting for TITLE and CATEGORY elements");
 puts("");
 
-ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', index_functions);
-puts("-q[-n]          Really quantize, the Q options will store variables in the index so quantization."); 
-puts("    n           This option pushes the quantization into n-bits to indexing time.");
-puts("    -           Don't push the quantization to the index, store max and min for search time quantization.");
-puts("                [default n=5.4 + 5.4e-4 * sqrt(number documents)]");
+ANT_indexer_param_block_rank::help("QUANTIZATION", 'Q', ANT_ranking_function_factory_object::INDEXABLE);
+puts("-q[-<n>]        Quantization"); 
+puts("   -            Don't push the quantization to the index, only store max and min for search time quantization.");
+puts("   <n>          Quantize into <n>-bits [default <n>=5.4 + 5.4e-4 * sqrt(number documents)]");
 puts("");
 
 ANT_indexer_param_block_stem::help(FALSE);
@@ -191,13 +191,16 @@ puts("");
 puts("OPTIMISATIONS");
 puts("-------------");
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
-puts("-k[-l0t][L<n>][s<n>] Term culling");
+puts("-k[-l0t][npNP][L<n>][s<n>] Term culling");
 puts("   -            All terms remain in the index [default]");
 puts("   0            Do not index numbers");
 puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
 puts("   L<n>         Remove (stop) low frequency terms (where document frequency <= <n>)");
 puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
-puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   n            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   N            see -n, but before indexing (i.e. don't add to term counts");
+puts("   p            Remove (stop) words that are on Puurula's 988 stopword list use at ADCS/ALTA 2013");
+puts("   P            see -p, but before indexing (i.e. don't add to term counts");
 puts("   t            Do not index XML tag names");
 puts("");
 
@@ -264,9 +267,9 @@ char *measure;
 for (measure = measures; *measure != '\0'; measure++)
 	switch (*measure)
 		{
-		case 'n': readability_measure = ANT_readability_factory::NONE; break;
-		case 'd': readability_measure |= ANT_readability_factory::DALE_CHALL; break;
-		case 'f': readability_measure |= ANT_readability_factory::FLESCH_KINCAID; break;
+		case '-': readability_measure = ANT_readability_factory::NONE; break;
+		case 'd': readability_measure = ANT_readability_factory::DALE_CHALL; break;
+		case 'f': readability_measure = ANT_readability_factory::FLESCH_KINCAID; break;
 		case 't': readability_measure = ANT_readability_factory::TAG_WEIGHTING; break;
 		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}
@@ -337,7 +340,10 @@ for (which = mode_list; *which != '\0'; which++)
 			break;
 		case 'l': stop_word_removal |= ANT_memory_index::PRUNE_CF_SINGLETONS; break;
 		case 't': stop_word_removal |= ANT_memory_index::PRUNE_TAGS; break;
-		case 'S': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
+		case 'n': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST; break;
+		case 'N': stop_word_removal |= ANT_memory_index::PRUNE_NCBI_STOPLIST | ANT_memory_index::PRUNE_STOPWORDS_BEFORE_INDEXING; break;
+		case 'p': stop_word_removal |= ANT_memory_index::PRUNE_PUURULA_STOPLIST; break;
+		case 'P': stop_word_removal |= ANT_memory_index::PRUNE_PUURULA_STOPLIST | ANT_memory_index::PRUNE_STOPWORDS_BEFORE_INDEXING; break;
 		case 's':
 			stop_word_removal |= ANT_memory_index::PRUNE_DF_FREQUENTS;
 			stop_word_df_threshold = atof(which + 1);

@@ -44,13 +44,14 @@ public:
 
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
-	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8, PRUNE_DF_FREQUENTS = 16, PRUNE_NCBI_STOPLIST = 32 };
+	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8, PRUNE_DF_FREQUENTS = 16, PRUNE_NCBI_STOPLIST = 32, PRUNE_PUURULA_STOPLIST = 64, PRUNE_STOPWORDS_BEFORE_INDEXING = 128};
 
 private:
 	long hashed_squiggle_length;
-	ANT_stop_word stopwords;
+
 public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
+
 private:
 	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;
 	unsigned char *serialised_docids;
@@ -79,6 +80,9 @@ private:
 	*/
 	ANT_compressable_integer *document_lengths;
 	ANT_ranking_function *quantizer;
+	long ranking_function_id;
+	double ranking_function_p1;
+	double ranking_function_p2;
 	long long quantization_bits;
 	long index_quantization;
 	double maximum_collection_rsv, minimum_collection_rsv;
@@ -169,7 +173,7 @@ public:
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 
 	void add_to_document_repository(char *filename, char *compressed_document = NULL, long compressed_length = 0, long length = 0);
-	long serialise(ANT_ranking_function_factory *factory);
+	long serialise(void);
 
 	void add_indexed_document(ANT_memory_index_one *index, long long docno);
 
@@ -177,11 +181,12 @@ public:
 	virtual long long get_memory_usage(void) { return dictionary_memory->bytes_used() + postings_memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_puurula_length(double length) { set_document_detail(&squiggle_puurula_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ } 
-
+	virtual void set_quantization(long quantization, long bits) { this->index_quantization = quantization; this->quantization_bits = bits;}
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
+	virtual void set_ranking_function(long ranking_function, double p1, double p2) {ranking_function_id = ranking_function; ranking_function_p1 = p1; ranking_function_p2 = p2;}
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
-	virtual void set_term_culling(long mode, double max_df, long df) {stop_word_removal_mode = mode; stop_word_max_proportion = max_df; stop_word_df_frequencies = df; }
-	virtual short *get_frequencies(short *frequency) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
+	virtual void set_term_culling(long mode, double max_df, long df);
+	virtual short *get_frequencies(short *frequency, long long tf_cap) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
 } ;
 
 /*

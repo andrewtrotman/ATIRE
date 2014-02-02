@@ -17,6 +17,7 @@
 #include "snippet_factory.h"
 #include "thesaurus.h"
 #include "evaluator.h"
+#include "ranking_function_factory_object.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -188,7 +189,7 @@ puts("------------------------");
 puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
-ANT_indexer_param_block_rank::help("RANKING FUNCTION", 'R', search_functions);		// ranking functions
+ANT_indexer_param_block_rank::help("RANKING FUNCTION", 'R', ANT_ranking_function_factory_object::INDEXABLE | ANT_ranking_function_factory_object::NONINDEXABLE);		// ranking functions
 puts("-r[n]           Quantize search results in n bits [default n=maths!]");
 puts("");
 

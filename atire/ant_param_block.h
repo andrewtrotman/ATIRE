@@ -5,13 +5,13 @@
 #ifndef ANT_PARAM_BLOCK_H_
 #define ANT_PARAM_BLOCK_H_
 
+#include "fundamental_types.h"
 #include "indexer_param_block_rank.h"
 #include "indexer_param_block_stem.h"
 #include "indexer_param_block_topsig.h"
 #include "evaluator.h"
 
 #define MAX_PREGEN_COUNT 128
-
 
 /*
 	class ANT_ANT_PARAM_BLOCK
@@ -31,11 +31,10 @@ public:
 			 QUANTUM_STOP_DIFF_LARGEST = 4      // early terminated based on the difference between the largest and second largest in the top documents
 	};
 
-private:
+public:
 	int argc;
 	char **argv;
 
-public:
 	long logo;								// display the ANT banner logo or not
 	long long sort_top_k;				// accurate rank point in the accumulator sort (in the call to sort_results_list())
 	long trim_postings_k;				// trim the postigs lists at no fewer than k
@@ -91,6 +90,8 @@ public:
 
 	long processing_strategy;			// term-at-a-time or quantum-at-a-time
 	uint8_t quantum_stopping;           // the early termination strategy for quantum-at-a-time
+	long quantization_bits;				// how many bits to quantize into
+	long quantization;					// whether or not we should quantize
 
 private:
 	void export_format(char *forum);
