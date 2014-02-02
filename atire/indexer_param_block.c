@@ -160,10 +160,9 @@ puts("");
 
 puts("READABILITY");
 puts("-----------");
-puts("-R[-dft]        Calculate readability using one of:");
+puts("-R[-dt]        Calculate readability using one of:");
 puts("   -            none [default]");
 puts("   d            Dale-Chall");
-puts("   f            Flesch-Kincaid");
 puts("   t            Tag up-weighting for TITLE and CATEGORY elements");
 puts("");
 
@@ -269,7 +268,6 @@ for (measure = measures; *measure != '\0'; measure++)
 		{
 		case '-': readability_measure = ANT_readability_factory::NONE; break;
 		case 'd': readability_measure = ANT_readability_factory::DALE_CHALL; break;
-		case 'f': readability_measure = ANT_readability_factory::FLESCH_KINCAID; break;
 		case 't': readability_measure = ANT_readability_factory::TAG_WEIGHTING; break;
 		default : exit(printf("Unknown readability measure: '%c'\n", *measure)); break;
 		}

@@ -18,10 +18,10 @@ number_of_measures = 4;
 measure_to_use = number_of_measures - 1;		// should be a measure[] that is NULL
 
 measure = new ANT_readability*[number_of_measures];
-measure[0] = new ANT_readability_none();
-measure[1] = new ANT_readability_dale_chall();
-measure[2] = new ANT_readability_TAG_WEIGHTING();
-measure[3] = NULL;//new ANT_readability;
+measure[NONE] = new ANT_readability_none();
+measure[DALE_CHALL] = new ANT_readability_dale_chall();
+measure[TAG_WEIGHTING] = new ANT_readability_TAG_WEIGHTING();
+measure[END_OF_LIST] = NULL;//new ANT_readability;
 }
 
 /*

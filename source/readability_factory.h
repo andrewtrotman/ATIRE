@@ -15,10 +15,10 @@ class ANT_readability_factory : public ANT_readability
 {
 public:
 	enum {
-		NONE           = 0,
-		DALE_CHALL     = 1,
-		FLESCH_KINCAID = 2,
-		TAG_WEIGHTING  = 4
+		NONE,
+		DALE_CHALL,
+		TAG_WEIGHTING,
+		END_OF_LIST
 		};
 
 private:
