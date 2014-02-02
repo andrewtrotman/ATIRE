@@ -31,7 +31,7 @@ long long ANT_compress_four_integer_variable_byte::compress(unsigned char *desti
 {
 long long pos, bytes_used;
 unsigned char *header_byte;
-unsigned char num_to_pack, header_shift;
+long num_to_pack, header_shift;
 
 bytes_used = 0;
 pos = 0;
@@ -42,21 +42,22 @@ while (pos < source_integers)
 	pos += num_to_pack;
 	bytes_used++;
 	header_byte = destination++;
+	*header_byte = 0;
 	while (num_to_pack--)
 		{
-		if (*source < 0xFF)
+		if (*source <= 0xFF)
 			{
 			*destination++ = *source & 0xFF;
 			bytes_used += 1;
 			}
-		else if (*source < 0xFFFF)
+		else if (*source <= 0xFFFF)
 			{
 			*destination++ = (*source >> 8) & 0xFF;
 			*destination++ = *source & 0xFF;
 			*header_byte |= 1 << (2 * num_to_pack);
 			bytes_used += 2;
 			}
-		else if (*source < 0xFFFFFF)
+		else if (*source <= 0xFFFFFF)
 			{
 			*destination++ = (*source >> 16) & 0xFF;
 			*destination++ = (*source >> 8) & 0xFF;
@@ -75,8 +76,8 @@ while (pos < source_integers)
 			}
 		source++;
 		}
-	}
 	*header_byte <<= header_shift;
+	}
 
 return bytes_used;
 }

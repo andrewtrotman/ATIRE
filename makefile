@@ -323,6 +323,7 @@ PARTS = \
 	$(OBJDIR)\stem_otago_v2.obj						\
 	$(OBJDIR)\stem_s.obj							\
 	$(OBJDIR)\bitstream.obj							\
+	$(OBJDIR)\compress_four_integer_variable_byte.obj		\
 	$(OBJDIR)\compress_elias_gamma.obj				\
 	$(OBJDIR)\compress_elias_delta.obj				\
 	$(OBJDIR)\compress_golomb.obj					\

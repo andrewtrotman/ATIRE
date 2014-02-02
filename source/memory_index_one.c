@@ -54,6 +54,7 @@ token_as_string = NULL;
 ANT_memory_index_one::~ANT_memory_index_one()
 {
 delete memory;
+delete stopwords;
 }
 
 /*
