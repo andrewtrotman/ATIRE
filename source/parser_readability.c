@@ -54,6 +54,10 @@ else if (ANT_isdigit(*current))
 	current_token.type = TT_NUMBER;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
+	current_token.string_length = current - start;
+	for (into = current_token.normalized.start, from = (char *)start; into < current_token.normalized.start + current_token.string_length; into++)
+		*into = *from++;
+	current_token.normalized.string_length = current_token.string_length; 
 	}
 else if (*current == '\0')						// end of string
 	return NULL;
