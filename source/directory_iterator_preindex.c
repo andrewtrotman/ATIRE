@@ -11,6 +11,7 @@
 #include "memory.h"
 #include "memory_index_one.h"
 #include "index_document.h"
+#include "stats.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -19,6 +20,8 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+long ANT_directory_iterator_preindex::tid = 0;
 
 /*
 	ANT_DIRECTORY_ITERATOR_PREINDEX::ANT_DIRECTORY_ITERATOR_PREINDEX()
@@ -37,6 +40,12 @@ this->stemmer = stemmer;
 this->index_document = index_document_method;
 
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
+
+clock = new ANT_stats(new ANT_memory);
+message = new char[50];
+sprintf(message, "ANT_directory_iterator_preindex %ld ", ANT_directory_iterator_preindex::tid++);
+
+//printf("%sstart_upstream %lld\n", message, clock->start_timer());
 }
 
 /*
@@ -45,6 +54,7 @@ store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
 */
 ANT_directory_iterator_preindex::~ANT_directory_iterator_preindex()
 {
+//printf("%send_upstream %lld\n", message, clock->start_timer());
 delete store;
 delete source;
 }
@@ -53,15 +63,18 @@ delete source;
 	ANT_DIRECTORY_ITERATOR_PREINDEX::WORK_ONE()
 	-------------------------------------------
 */
-void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *object, ANT_directory_iterator_preindex_internals *internals)
+void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *object, ANT_directory_iterator_preindex_internals *internals, long id)
 {
 long terms;
+
+printf("ANT_directory_iterator_preindex %lu start_process %lld\n", id, clock->start_timer());
 
 object->index = new ANT_memory_index_one(new ANT_memory(1024 * 1024), final_index);
 terms = index_document->index_document(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object->file);
 object->terms = terms;
 
 store->add(object);
+printf("ANT_directory_iterator_preindex %lu end_process %lld\n", id, clock->start_timer());
 }
 
 /*
@@ -71,9 +84,11 @@ store->add(object);
 void ANT_directory_iterator_preindex::work(ANT_directory_iterator_preindex_internals *internals)
 {
 ANT_directory_iterator_object object;
+	static long idd = 0;
+long id = idd++;
 
 while (source->next(&object) != NULL)
-	work_one(&object, internals);
+	work_one(&object, internals, id);
 
 object.filename = NULL;
 store->add(&object);
@@ -109,7 +124,7 @@ ANT_directory_iterator_preindex_internals *next_thread;
 */
 next_thread = new ANT_directory_iterator_preindex_internals(this);
 if (source->first(object) != NULL)
-	work_one(object, next_thread);
+	work_one(object, next_thread, 0);
 else
 	{
 	/*

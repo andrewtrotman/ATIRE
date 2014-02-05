@@ -5,6 +5,8 @@
 #ifndef INSTREAM_H_
 #define INSTREAM_H_
 
+#include "stats.h"
+
 class ANT_memory;
 
 /*
@@ -23,6 +25,13 @@ public:
 
 	virtual long long read(unsigned char *buffer, long long bytes) = 0;
 	virtual long long read(char *buffer, long long bytes) { return read((unsigned char *)buffer,bytes); }
+
+	char *message;
+	unsigned long long wait_input_time;
+	unsigned long long wait_output_time;
+	unsigned long long process_time;
+	ANT_stats *clock;
+	bool printed;
 } ;
 
 

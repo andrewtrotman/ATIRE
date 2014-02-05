@@ -8,6 +8,7 @@
 #include "directory_iterator_object.h"
 
 class ANT_directory_iterator_internals;
+class ANT_stats;
 
 /*
 	class ANT_DIRECTORY_ITERATOR
@@ -39,6 +40,16 @@ public:
 	*/
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
+
+	/*
+		blah de blah
+	*/
+	char *message;
+	unsigned long long wait_input_time;
+	unsigned long long wait_output_time;
+	unsigned long long process_time;
+	ANT_stats *clock;
+	bool printed;
 } ;
 
 #endif  /* DIRECTORY_ITERATOR_H_ */

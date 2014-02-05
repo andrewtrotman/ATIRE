@@ -258,10 +258,10 @@ else
 /*
 	Now check the left and the right subtrees for hash collisions
 */
-if  (node->left != NULL)
+if (node->left != NULL)
 	add_indexed_document_node(node->left, docno);
 
-if  (node->right != NULL)
+if (node->right != NULL)
 	add_indexed_document_node(node->right, docno);
 }
 

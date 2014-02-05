@@ -187,6 +187,7 @@ long terms_in_document;
 ANT_index_document *document_indexer;
 ANT_compression_text_factory *factory_text = NULL;
 
+
 if (argc < 2)
 	param_block.usage();
 
@@ -620,21 +621,22 @@ else
 	stats.add_disk_output_time(stats.stop_timer(now));
 	index->text_render(param_block.statistics);
 	}
-delete index;
-delete disk;
-delete parser;
-delete readability;
-delete file_stream;
-delete decompressor;
-delete instream_buffer;
-delete pregen;
-delete document_indexer;
+
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{
 	printf("\nTIMINGS\n-------\n");
 	stats.text_render();
+	printf("\n");
 	}
+
+delete index;
+delete disk;
+delete parser;
+delete readability;
+delete decompressor;
+delete pregen;
+delete document_indexer;
 
 return 0;
 }

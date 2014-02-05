@@ -16,6 +16,7 @@ class ANT_directory_iterator_object;
 class ANT_stem;
 class ANT_readability_factory;
 class ANT_index_document;
+class ANT_stats;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_PREINDEX
@@ -36,8 +37,10 @@ private:
 	unsigned long readability_measure;			// which (if any) readability measure to use
 	long stemmer;								// which stemmer to use
 
+	static long tid;
+
 private:
-	void work_one(ANT_directory_iterator_object *object, ANT_directory_iterator_preindex_internals *internals);
+	void work_one(ANT_directory_iterator_object *object, ANT_directory_iterator_preindex_internals *internals, long id);
 	void work(ANT_directory_iterator_preindex_internals *internals);
 	static void *bootstrap(void *param);
 

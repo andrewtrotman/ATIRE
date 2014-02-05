@@ -8,6 +8,8 @@
 #include "producer_consumer.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_multiple_internals.h"
+#include "stats.h"
+#include "memory.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -15,6 +17,8 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+long ANT_directory_iterator_multiple::tid = 0;
 
 /*
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::ANT_DIRECTORY_ITERATOR_MULTIPLE()
@@ -26,6 +30,11 @@ sources_length = sources_used = 0;
 sources = NULL;
 thread_details = NULL;
 producer = NULL;
+
+clock = new ANT_stats(new ANT_memory);
+
+message = new char[50];
+sprintf(message, "ANT_directory_iterator_multiple %ld ", ANT_directory_iterator_multiple::tid);
 }
 
 /*
@@ -75,13 +84,20 @@ sources_used++;
 void ANT_directory_iterator_multiple::produce(ANT_directory_iterator_multiple_internals *my)
 {
 ANT_directory_iterator_object *got;
+char *message = new char[50];
+
+sprintf(message, "ANT_directory_iterator_multiple %ld ", ANT_directory_iterator_multiple::tid++);
+
+//printf("%sstart_upstream %lld\n", message, clock->start_timer());
 
 /*
 	Exhaust the supply
 */
+//printf("%sstart_wait %lld\n", message, clock->start_timer());
 for (got = my->iterator->first(&my->file_object); got != NULL; got = my->iterator->next(&my->file_object))
 	producer->add(&my->file_object);
 
+//printf("%send_wait %lld\n", message, clock->start_timer());
 /*
 	At this point the thread is finished, but we have the remaining problem of
 	signaling back to the consumer that all the producers are done.
@@ -91,6 +107,7 @@ for (got = my->iterator->first(&my->file_object); got != NULL; got = my->iterato
 */
 my->file_object.filename = NULL;
 producer->add(&my->file_object);
+//printf("%send_upstream %lld\n", message, clock->start_timer());
 
 /*
 	Now the thread is done it'll die its natural death
@@ -158,6 +175,8 @@ ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directo
 {
 long finished = FALSE;
 
+printf("%sstart_process %lld\n", message, clock->start_timer());
+
 mutex.enter();
 	if (active_threads <= 0)
 		finished = TRUE;
@@ -174,6 +193,7 @@ mutex.enter();
 		while (!finished);
 mutex.leave();
 
+printf("%send_process %lld\n", message, clock->start_timer());
 if (finished)
 	return NULL;
 else
