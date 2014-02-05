@@ -157,6 +157,9 @@ private:
 
 	long should_prune(ANT_memory_index_hash_node *term);
 
+	void compute_puurula_idf_document_lengths(double *length_vector, ANT_memory_index_hash_node *root);
+	void compute_puurula_idf_document_lengths(void);
+
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned short *serialised_tfs, long tf_size);
 	void text_render(ANT_compressable_integer *impact_ordering, size_t document_frequency);
 	void text_render(ANT_compressable_integer *docid, unsigned char *term_frequency, long long document_frequency);
