@@ -1052,7 +1052,6 @@ if (index_file != NULL)
 void ANT_memory_index::compute_puurula_idf_document_lengths(double *length_vector, ANT_memory_index_hash_node *root)
 {
 long long doc_size, tf_size;
-
 /*
 	What is the max from the children of this node?
 */
@@ -1118,7 +1117,6 @@ long long pos;
 */
 if (index_file == NULL)
 	return 0;
-
 
 #ifdef PUURULA_IDF
 	compute_puurula_idf_document_lengths();
