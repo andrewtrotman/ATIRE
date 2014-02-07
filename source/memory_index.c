@@ -1049,16 +1049,20 @@ if (index_file != NULL)
 	ANT_MEMORY_INDEX::COMPUTE_PUURULA_IDF_DOCUMENT_LENGTHS()
 	--------------------------------------------------------
 */
-void ANT_memory_index::compute_puurula_idf_document_lengths(double *length_vector, ANT_memory_index_hash_node *root)
+void ANT_memory_index::compute_puurula_idf_document_lengths(double *length_vector, ANT_compressable_integer *document_lengths, ANT_memory_index_hash_node *root)
 {
 long long doc_size, tf_size;
+long docid;
+unsigned short *current_tf, *end;
+ANT_compressable_integer *current_docid;
+
 /*
 	What is the max from the children of this node?
 */
 if (root->right != NULL)
-	compute_puurula_idf_document_lengths(length_vector, root->right);
+	compute_puurula_idf_document_lengths(length_vector, document_lengths, root->right);
 if (root->left != NULL)
-	compute_puurula_idf_document_lengths(length_vector, root->left);
+	compute_puurula_idf_document_lengths(length_vector, document_lengths, root->left);
 
 /*
 	Get the postings lists (docids and tf scores) for the current node
@@ -1071,7 +1075,15 @@ get_serialised_postings(root, &doc_size, &tf_size);
 if (root->string[0] != '~')		// ignore "special" terms
 	{
 	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
-//	quantizer->get_max_min(&max, &min, root->collection_frequency, root->document_frequency, impacted_postings, serialised_tfs);
+
+	current_docid = impacted_postings;
+	docid = -1;
+	for (current_tf = serialised_tfs, end = serialised_tfs + root->document_frequency; current_tf < end; current_tf++)
+		{
+		docid += *current_docid;
+		length_vector[docid] += *current_tf / document_lengths[docid] * (root->document_frequency / largest_docno);
+		current_docid++;
+		}
 	}
 }
 
@@ -1079,17 +1091,35 @@ if (root->string[0] != '~')		// ignore "special" terms
 	ANT_MEMORY_INDEX::COMPUTE_PUURULA_IDF_DOCUMENT_LENGTHS()
 	--------------------------------------------------------
 */
-void ANT_memory_index::compute_puurula_idf_document_lengths(void)
+void ANT_memory_index::compute_puurula_idf_document_lengths(ANT_compressable_integer *document_lengths)
 {
 double *length_vector;
 long hash_val;
+long long current;
 
-length_vector = new double[documents_in_repository];
-memset(length_vector, 0, sizeof(double) * documents_in_repository);
+/*
+	Allocate space to compute the Puurula document lengths
+*/
+length_vector = new double[largest_docno];
+memset(length_vector, 0, sizeof(double) * largest_docno);
 
+/*
+	Compute the lengths
+*/
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
-		compute_puurula_idf_document_lengths(length_vector, hash_table[hash_val]);
+		compute_puurula_idf_document_lengths(length_vector, document_lengths, hash_table[hash_val]);
+
+/*
+	Add the lengths to the index
+*/
+for (current = 0; current < largest_docno; current++)
+	set_puurula_length(length_vector[current]);
+
+/*
+	clean up
+*/
+delete [] length_vector;
 }
 
 /*
@@ -1117,10 +1147,6 @@ long long pos;
 */
 if (index_file == NULL)
 	return 0;
-
-#ifdef PUURULA_IDF
-	compute_puurula_idf_document_lengths();
-#endif
 
 #ifdef IMPACT_HEADER
 	impact_header.postings_chain = 0;
@@ -1200,6 +1226,13 @@ node = find_add_node(hash_table[hashed_squiggle_length], &squiggle_length);
 get_serialised_postings(node, &doc_size, &tf_size);
 document_lengths = (ANT_compressable_integer *)serialisation_memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
 variable_byte.decompress(document_lengths, serialised_docids, node->document_frequency);
+
+/*
+	Compute any "extra" length vectors we might need for particular ranking functions (e.g. Language Models with Pittman-Yor Process and TF.IDF discounting)
+*/
+#ifdef PUURULA_IDF
+	compute_puurula_idf_document_lengths(document_lengths);
+#endif
 
 /*
 	If we want to quantize the ranking scores for impact ordering in the index then
