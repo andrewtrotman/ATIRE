@@ -45,6 +45,7 @@ public:
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
 	enum { NONE = 0, PRUNE_CF_SINGLETONS = 1, PRUNE_DF_SINGLETONS = 2, PRUNE_TAGS = 4, PRUNE_NUMBERS = 8, PRUNE_DF_FREQUENTS = 16, PRUNE_NCBI_STOPLIST = 32, PRUNE_PUURULA_STOPLIST = 64, PRUNE_STOPWORDS_BEFORE_INDEXING = 128};
+	enum { PUURULA_LENGTH_VECTORS = 1, PUURULA_LENGTH_VECTORS_TFIDF = 2 };	// inverted file "extra" stuff we can generate in the indexes (bit pattern)
 
 private:
 	long hashed_squiggle_length;
@@ -127,6 +128,14 @@ private:
 	*/
 	ANT_compressable_integer bucket_size[1 << 16], bucket_prev_docid[1 << 16], *pointer[1 << 16];
 
+
+	/*
+		If we need to compute "special" vectors (such as the Puurula length vector or Puurula TF.IDF length vector) then inverted_index_mode
+		will be non-zero.  If some parameter is needed (e.g. Puurula's g value) then its stored in inverted_index_parameter
+	*/
+	long inverted_index_mode;
+	double inverted_index_parameter;
+
 private:
 	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
@@ -184,6 +193,7 @@ public:
 	virtual long long get_memory_usage(void) { return dictionary_memory->bytes_used() + postings_memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_puurula_length(double length) { set_document_detail(&squiggle_puurula_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ } 
+	virtual void set_inverted_index_mode(long mode, double parameter) { inverted_index_mode = mode; inverted_index_parameter = parameter; }
 	virtual void set_quantization(long quantization, long bits) { this->index_quantization = quantization; this->quantization_bits = bits;}
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_ranking_function(long ranking_function, double p1, double p2) {ranking_function_id = ranking_function; ranking_function_p1 = p1; ranking_function_p2 = p2;}

@@ -64,6 +64,9 @@ document_filenames_used = document_filenames_chunk_size;
 static_prune_point = -1;
 stop_word_max_proportion = 1.1;			// initialising with anything greater than 1.0 will do
 
+inverted_index_mode = NONE;
+inverted_index_parameter = 0;
+
 #ifdef FILENAME_INDEX
 	document_filename_bytes_used = 0;
 #endif
@@ -1055,6 +1058,7 @@ long long doc_size, tf_size;
 long docid;
 unsigned short *current_tf, *end;
 ANT_compressable_integer *current_docid;
+double discounted_tf;
 
 /*
 	What is the max from the children of this node?
@@ -1081,7 +1085,11 @@ if (root->string[0] != '~')		// ignore "special" terms
 	for (current_tf = serialised_tfs, end = serialised_tfs + root->document_frequency; current_tf < end; current_tf++)
 		{
 		docid += *current_docid;
-		length_vector[docid] += *current_tf / document_lengths[docid] * (root->document_frequency / largest_docno);
+
+//		length_vector[docid] += *current_tf / document_lengths[docid] * (root->document_frequency / largest_docno);
+		discounted_tf = ANT_max((double)*current_tf - inverted_index_parameter * pow((double)*current_tf, inverted_index_parameter), 0.0);
+		length_vector[docid] += discounted_tf;
+
 		current_docid++;
 		}
 	}
@@ -1230,9 +1238,8 @@ variable_byte.decompress(document_lengths, serialised_docids, node->document_fre
 /*
 	Compute any "extra" length vectors we might need for particular ranking functions (e.g. Language Models with Pittman-Yor Process and TF.IDF discounting)
 */
-#ifdef PUURULA_IDF
+if (inverted_index_mode & PUURULA_LENGTH_VECTORS)
 	compute_puurula_idf_document_lengths(document_lengths);
-#endif
 
 /*
 	If we want to quantize the ranking scores for impact ordering in the index then
