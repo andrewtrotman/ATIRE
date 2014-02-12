@@ -39,6 +39,11 @@ if (engine->get_postings_details("~puurula_length", &term_details) == NULL)
 	*/
 	for (current = 0; current < documents; current++)
 		discounted_document_lengths[current] = document_lengths[current];
+
+	/*
+		We don't know the number of documents in the collection so we'll so we'll estimate it to be the number of documents (Heaps' law of 1:1)
+	*/
+	unique_terms_in_collection = documents;
 	}
 else
 	{
@@ -50,6 +55,8 @@ else
 
 	for (current = 0; current < documents; current++)
 		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
+
+	unique_terms_in_collection = engine->get_variable("~uniqueterms");
 	}
 }
 
@@ -91,7 +98,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 
 		tf = *impact_header->impact_value_ptr;
 		tf = log(1.0 + tf / document_lengths[docid]) * log((double)documents / (double)term_details->global_document_frequency);		// should use unique words in document not document_lengths[]
-//		tf = max(tf - g * pow(tf, g), 0);
+		tf = max(tf - g * pow(tf, g), 0);
 
 		rsv = query_occurences * log((tf * prescalar) / (u * df) + 1.0);
 

@@ -1052,21 +1052,22 @@ if (index_file != NULL)
 	ANT_MEMORY_INDEX::COMPUTE_PUURULA_IDF_DOCUMENT_LENGTHS()
 	--------------------------------------------------------
 */
-void ANT_memory_index::compute_puurula_idf_document_lengths(double *length_vector, ANT_compressable_integer *document_lengths, ANT_memory_index_hash_node *root)
+long ANT_memory_index::compute_puurula_idf_document_lengths(double *length_vector, ANT_compressable_integer *document_lengths, ANT_memory_index_hash_node *root)
 {
 long long doc_size, tf_size;
 long docid;
 unsigned short *current_tf, *end;
 ANT_compressable_integer *current_docid;
-double discounted_tf;
+double discounted_tf, tf;
+long unique_terms = 0;
 
 /*
 	What is the max from the children of this node?
 */
 if (root->right != NULL)
-	compute_puurula_idf_document_lengths(length_vector, document_lengths, root->right);
+	unique_terms += compute_puurula_idf_document_lengths(length_vector, document_lengths, root->right);
 if (root->left != NULL)
-	compute_puurula_idf_document_lengths(length_vector, document_lengths, root->left);
+	unique_terms += compute_puurula_idf_document_lengths(length_vector, document_lengths, root->left);
 
 /*
 	Get the postings lists (docids and tf scores) for the current node
@@ -1085,26 +1086,31 @@ if (root->string[0] != '~')		// ignore "special" terms
 	for (current_tf = serialised_tfs, end = serialised_tfs + root->document_frequency; current_tf < end; current_tf++)
 		{
 		docid += *current_docid;
+		tf = *current_tf;
 
-//		length_vector[docid] += *current_tf / document_lengths[docid] * (root->document_frequency / largest_docno);
-		discounted_tf = ANT_max((double)*current_tf - inverted_index_parameter * pow((double)*current_tf, inverted_index_parameter), 0.0);
+		if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
+			tf = log(1.0 + tf / document_lengths[docid]) * log((double)largest_docno / (double)root->document_frequency);		// should use unique words in document not document_lengths[]
+
+		discounted_tf = ANT_max(tf - inverted_index_parameter * pow(tf, inverted_index_parameter), 0.0);
 		length_vector[docid] += discounted_tf;
 
 		current_docid++;
 		}
 	}
+
+return unique_terms;
 }
 
 /*
 	ANT_MEMORY_INDEX::COMPUTE_PUURULA_IDF_DOCUMENT_LENGTHS()
 	--------------------------------------------------------
 */
-void ANT_memory_index::compute_puurula_idf_document_lengths(ANT_compressable_integer *document_lengths)
+long ANT_memory_index::compute_puurula_idf_document_lengths(ANT_compressable_integer *document_lengths)
 {
 double *length_vector;
 long hash_val;
 long long current;
-
+long unique_terms = 0;
 /*
 	Allocate space to compute the Puurula document lengths
 */
@@ -1116,13 +1122,15 @@ memset(length_vector, 0, sizeof(double) * largest_docno);
 */
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
-		compute_puurula_idf_document_lengths(length_vector, document_lengths, hash_table[hash_val]);
+		unique_terms += compute_puurula_idf_document_lengths(length_vector, document_lengths, hash_table[hash_val]);
 
 /*
 	Add the lengths to the index
 */
 for (current = 0; current < largest_docno; current++)
-	set_puurula_length(length_vector[current]);
+	set_puurula_length(length_vector[current]);					// set_puurula_length() will multiply by 100 to make it accurate to 2 decimal places
+
+set_variable("~uniqueterms", unique_terms);
 
 /*
 	clean up

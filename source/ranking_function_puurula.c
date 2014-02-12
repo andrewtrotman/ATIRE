@@ -49,7 +49,7 @@ else
 	factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
 
 	for (current = 0; current < documents; current++)
-		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
+		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;				// accurate to 2 decimal places
 	}
 }
 
