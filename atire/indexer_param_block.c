@@ -198,9 +198,9 @@ puts("   l            Remove (stop) low frequency terms (where collection freque
 puts("   L<n>         Remove (stop) low frequency terms (where document frequency <= <n>)");
 puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
 puts("   n            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
-puts("   N            see -n, but before indexing (i.e. don't add to term counts");
+puts("   N            see -n, but before indexing (i.e. don't add to term counts)");
 puts("   p            Remove (stop) words that are on Puurula's 988 stopword list use at ADCS/ALTA 2013");
-puts("   P            see -p, but before indexing (i.e. don't add to term counts");
+puts("   P            see -p, but before indexing (i.e. don't add to term counts)");
 puts("   t            Do not index XML tag names");
 puts("");
 
@@ -505,15 +505,20 @@ for (param = 1; param < argc; param++)
 			doclist_filename = argv[++param];
 		else if (strcmp(command, "Inverted") == 0)
 			inversion_type = INVERTED_FILE;
-		else if (strncmp(command, "Ilmpidf", 7) == 0)
+		else if (strncmp(command, "Ilmptfidf", 9) == 0)
 			{
 			inversion_extras |= ANT_memory_index::PUURULA_LENGTH_VECTORS | ANT_memory_index::PUURULA_LENGTH_VECTORS_TFIDF;
-			ANT_indexer_param_block_rank::get_one_parameter(command + 7, &puurula_length_g);
+			ANT_indexer_param_block_rank::get_one_parameter(command + 9, &puurula_length_g);
 			}
 		else if (strncmp(command, "Ilmp", 4) == 0)
 			{
-			inversion_extras |= ANT_memory_index::PUURULA_LENGTH_VECTORS;
-			ANT_indexer_param_block_rank::get_one_parameter(command + 4, &puurula_length_g);
+			if (command[4] == '\0' || command[4] == ':')
+				{
+				inversion_extras |= ANT_memory_index::PUURULA_LENGTH_VECTORS;
+				ANT_indexer_param_block_rank::get_one_parameter(command + 4, &puurula_length_g);
+				}
+			else
+				printf("Unknown -Ilmp parameter ('-%s'), ignoring\n", command);
 			}
 		else if (strcmp(command, "pregen") == 0)
 			{

@@ -51,6 +51,6 @@ puts("---------------");
 puts("-Topsig:<w>:<d>:<f> Generate a TopSig index of width <w>bits density <d>% and globalstats <f>");
 puts("-Inverted       Generate an inverted file [default]"); 
 puts("-Ilmp:<g>       Inverted file with Puurula discounted length vectors [default g=0.9124]"); 
-puts("-Ilmpidf:<g>    Inverted file with Puurula discounted length vectors using tf.idf[default g=0.9124]");
+puts("-Ilmptfidf:<g>    Inverted file with Puurula discounted length vectors using tf.idf[default g=0.9124]");
 puts("");
 }

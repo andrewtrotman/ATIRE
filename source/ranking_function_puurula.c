@@ -39,6 +39,8 @@ if (engine->get_postings_details("~puurula_length", &term_details) == NULL)
 	*/
 	for (current = 0; current < documents; current++)
 		discounted_document_lengths[current] = document_lengths[current];
+
+	puts("Estimating the Puurula parameters as this index does not contain them");
 	}
 else
 	{

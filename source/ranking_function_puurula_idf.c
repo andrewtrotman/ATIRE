@@ -32,7 +32,7 @@ this->g = g;
 documents = (size_t)engine->document_count();
 discounted_document_lengths = new double[documents];
 
-if (engine->get_postings_details("~puurula_length", &term_details) == NULL)
+if (engine->get_postings_details("~puurula_tfidf_length", &term_details) == NULL)
 	{
 	/*
 		The index was constructed without discounted TF values so we do the best we can, which is to use undiscounted lengths
@@ -44,6 +44,8 @@ if (engine->get_postings_details("~puurula_length", &term_details) == NULL)
 		We don't know the number of documents in the collection so we'll so we'll estimate it to be the number of documents (Heaps' law of 1:1)
 	*/
 	unique_terms_in_collection = documents;
+
+	puts("Estimating the Puurula parameters as this index does not contain them");
 	}
 else
 	{
@@ -57,6 +59,7 @@ else
 		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
 
 	unique_terms_in_collection = engine->get_variable("~uniqueterms");
+	printf("UNIQUE_TERMS:%f", (double)unique_terms_in_collection);
 	}
 }
 
@@ -83,7 +86,7 @@ ANT_compressable_integer *current, *end;
 query_length = accumulator->get_term_count();
 query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query (which is almost always 1 anyway)
 
-df = 1.0 / (double)collection_length_in_terms;		// should this be the number of unique terms in the collections?
+df = 1.0 / (double)unique_terms_in_collection;
 
 impact_header->impact_value_ptr = impact_header->impact_value_start;
 impact_header->doc_count_ptr = impact_header->doc_count_start;
@@ -97,7 +100,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		docid += *current++;
 
 		tf = *impact_header->impact_value_ptr;
-		tf = log(1.0 + tf / document_lengths[docid]) * log((double)documents / (double)term_details->global_document_frequency);		// should use unique words in document not document_lengths[]
+		tf = log(1.0 + tf / discounted_document_lengths[docid]) * log((double)documents / (double)term_details->global_document_frequency);
 		tf = max(tf - g * pow(tf, g), 0);
 
 		rsv = query_occurences * log((tf * prescalar) / (u * df) + 1.0);

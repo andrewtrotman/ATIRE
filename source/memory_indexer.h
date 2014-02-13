@@ -26,6 +26,7 @@ public:
 protected:
 	static ANT_string_pair squiggle_length;
 	static ANT_string_pair squiggle_puurula_length;
+	static ANT_string_pair squiggle_puurula_tfidf_length;
 
 public:
 	ANT_stop_word *stopwords;
