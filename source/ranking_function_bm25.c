@@ -77,20 +77,20 @@ double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
 /*
-						N
+	          N
 	IDF = log -
-						n
+	          n
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
 idf = log((double)documents / (double)term_details->global_document_frequency);
 
 /*
-								 tf(td) * (k1 + 1)
+	                tf(td) * (k1 + 1)
 	rsv = ----------------------------------- * IDF
-																		len(d)
-				tf(td) + k1 * (1 - b + b * --------)
-																		av_len_d
+	                                  len(d)
+	      tf(td) + k1 * (1 - b + b * --------)
+	                                 av_len_d
 
 	In this implementation we ignore k3 and the number of times the term occurs in the query.
 */
