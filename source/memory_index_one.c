@@ -486,3 +486,17 @@ for (node = 0; node < HASH_TABLE_SIZE; node++)
 return frequency;
 }
 
+/*
+	ANT_MEMORY_INDEX_ONE::GET_TERM_NODE()
+	-------------------------------------
+*/
+ANT_memory_index_one_node *ANT_memory_index_one::get_term_node(ANT_string_pair *term)
+{
+size_t hash_value = hash(term);
+
+if (hash_table[hash_value] == NULL)
+	return 0;
+
+return find_node(hash_table[hash_value], term);
+}
+

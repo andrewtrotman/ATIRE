@@ -8,6 +8,8 @@
 #include "memory_index_one.h"
 #include "query.h"
 #include "NEXI_term_ant.h"
+#include "maths.h"
+#include "memory_index_one_node.h"
 
 /*
 	ANT_RELEVANCE_FEEDBACK_BLIND_KL_RM::COMPUTE()
@@ -17,14 +19,20 @@
 */
 ANT_memory_index_one_node **ANT_relevance_feedback_blind_kl_rm::compute(long terms_wanted, long *terms_found)
 {
-long current_term;
+long current_term, into, max_terms;
+long long length;
+ANT_memory_index_one_node **top_terms, *node;
 
-for (current_term = 0; current_term < query->terms_in_query; current_term++)
-	printf("%*.*s ", (int)query->NEXI_query[current_term].term.length(), (int)query->NEXI_query[current_term].term.length(), query->NEXI_query[current_term].term.string());
+max_terms = ANT_min(query->terms_in_query, terms_wanted);
+top_terms = new ANT_memory_index_one_node *[max_terms + 1];
+length = one->get_document_length();
+for (current_term = into = 0; current_term < max_terms; current_term++)
+	if ((node = one->get_term_node(&query->NEXI_query[current_term].term)) != NULL)
+		(top_terms[into++] = node)->kl_score = (double)node->term_frequency / (double)length;
 
-exit(puts("Not Yet.... still working on it"));
+ *terms_found = into;
 
-return NULL;
+return top_terms;
 }
 
 /*

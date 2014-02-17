@@ -1404,7 +1404,6 @@ parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list,
 
 if (feedback_mode == FEEDBACK_INTERPOLATED)
 	{
-	puts("INTERPOLATED FEEDBACK");
 	feedback_memory = new ANT_memory(1024);
 	feedback_result = new (feedback_memory) ANT_search_engine_result(feedback_memory, search_engine->document_count());
 	normalised_initial_result = new (feedback_memory) ANT_search_engine_result(feedback_memory, search_engine->document_count());

@@ -87,6 +87,7 @@ public:
 	double kl_divergence(ANT_term_divergence *divergence, ANT_memory_index_one *collection);
 	ANT_memory_index_one_node **top_n_terms(long terms_wanted, long *terms_found);
 	long long get_document_length() { return document_length; }
+	ANT_memory_index_one_node *get_term_node(ANT_string_pair *term);
 } ;
 
 #endif /* MEMORY_INDEX_ONE_H_ */
