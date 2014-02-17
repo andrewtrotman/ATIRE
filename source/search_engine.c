@@ -1707,7 +1707,11 @@ if (document_offsets == NULL)
 
 times = 0;
 get = to - from;
+#ifdef FILENAME_INDEX
+for (id = current.first(this->results_list, from); id >= 0 && times < get; id = current.next())
+#else
 for (id = current.first(this, from); id >= 0 && times < get; id = current.next())
+#endif
 	{
 	/*
 		This isn't really the best way to do this but it will suffice in the mean time.  The best way is to

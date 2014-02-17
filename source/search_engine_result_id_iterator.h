@@ -15,7 +15,6 @@ class ANT_search_engine_result;
 class ANT_search_engine_result_id_iterator
 {
 private:
-	ANT_search_engine *search_engine;
 	ANT_search_engine_result *result;
 	long long results_list_length;
 	long long current;
@@ -24,7 +23,7 @@ public:
 	ANT_search_engine_result_id_iterator() {}
 	virtual ~ANT_search_engine_result_id_iterator() {}
 
-	virtual long long first(ANT_search_engine *engine, long long start = 0);	// start is the position in the results list from which to start (counting from 0)
+	virtual long long first(ANT_search_engine_result *results_list, long long start = 0);	// start is the position in the results list from which to start (counting from 0)
 	virtual long long next(void);
 } ;
 

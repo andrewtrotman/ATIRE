@@ -6,10 +6,13 @@
 #include "search_engine_result.h"
 #include "search_engine_result_id_iterator.h"
 
-long long ANT_search_engine_result_id_iterator::first(ANT_search_engine *engine, long long start)
+/*
+	ANT_SEARCH_ENGINE_RESULT_ID_ITERATOR::FIRST()
+	---------------------------------------------
+*/
+long long ANT_search_engine_result_id_iterator::first(ANT_search_engine_result *results_list, long long start)
 {
-search_engine = engine;
-result = engine->results_list;
+result = results_list;
 results_list_length = result->results_list_length;
 current = start - 1;
 
