@@ -30,13 +30,11 @@ public:
 	ANT_relevance_feedback_topsig(ANT_search_engine *engine);
 	virtual ~ANT_relevance_feedback_topsig();
 
-	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted, long *terms_found);
+	virtual ANT_memory_index_one_node **feedback(ANT_search_engine_result *result, ANT_query *query, long documents_to_examine, long terms_wanted, long *terms_found);
 	virtual ANT_memory_index_one_node **feedback(char *document, long terms_wanted, long *terms_found);
 
 	virtual double *feedback(ANT_search_engine_result *result, long documents_to_examine);
 	void set_topsig_parameters(long width, double density, long long collection_length_in_terms, ANT_index_document_topsig *global_stats);
-
-
 } ;
 
 #endif /* RELEVANCE_FEEDBACK_TOPSIG_H_ */

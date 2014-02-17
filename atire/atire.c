@@ -800,6 +800,9 @@ if (params.output_forum != ANT_ANT_param_block::NONE)
 atire->set_trim_postings_k(params.trim_postings_k);
 atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
 atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
+if (params.feedbacker == ANT_relevance_feedback_factory::BLIND_RM)
+	atire->set_feedback_interpolation(params.feedback_lambda);
+
 if ((params.query_type & ATIRE_API::QUERY_EXPANSION_INPLACE_WORDNET) != 0)
 	{
 	atire->set_inplace_query_expansion(expander = new ANT_thesaurus_wordnet("wordnet.aspt"));

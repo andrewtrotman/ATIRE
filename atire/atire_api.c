@@ -6,7 +6,7 @@
 #include <sstream>
 #include "maths.h"
 #include "numbers.h"
-#include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
+#include "ant_param_block.h"
 #include "atire_api.h"
 
 #include "btree_iterator.h"
@@ -28,6 +28,7 @@
 
 #include "search_engine.h"
 #include "search_engine_readability.h"
+#include "search_engine_result_id_iterator.h"
 
 #include "stemmer.h"
 #include "stemmer_factory.h"
@@ -109,6 +110,8 @@ more_like_term_chooser = NULL;
 feedbacker = NULL;
 feedback_ranking_function = NULL;
 feedback_documents = feedback_terms = 10;
+feedback_lambda = 0.5;
+feedback_mode = FEEDBACK_REPLACE;
 query_type_is_all_terms = FALSE;
 hits = 0;
 sort_top_k = LLONG_MAX;
@@ -1282,6 +1285,39 @@ return terms_in_query;
 }
 
 /*
+	ATIRE_API::QUERY_OBJECT_TURN_FEEDBACK_INTO_NEXI_QUERY()
+	-------------------------------------------------------
+*/
+void ATIRE_API::query_object_turn_feedback_into_NEXI_query(void)
+{
+ANT_NEXI_term_ant *new_query, *term;
+long current_feedback;
+
+new_query = new ANT_NEXI_term_ant [parsed_query->feedback_terms_in_query];
+
+/*
+	Add the feedback terms
+*/
+for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_query; current_feedback++)
+	{
+	term = new_query + current_feedback;
+	term->next = term + 1;
+	term->parent_path = NULL;
+	term->path.start = NULL;
+	term->sign = 0;
+	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	}
+
+parsed_query->terms_in_query = parsed_query->feedback_terms_in_query;
+new_query[parsed_query->terms_in_query - 1].next = NULL;
+
+if (parsed_query->type & QUERY_BOOLEAN)
+	delete [] parsed_query->NEXI_query;
+
+parsed_query->NEXI_query = new_query;
+}
+
+/*
 	ATIRE_API::QUERY_OBJECT_WITH_FEEDBACK_TO_NEXI_QUERY()
 	-----------------------------------------------------
 */
@@ -1341,9 +1377,20 @@ parsed_query->NEXI_query = new_query;
 void ATIRE_API::feedback(long long top_k)
 {
 /*
+	There are two kinds of relevance feedback supported. In the first we use the top documents to choose new terms
+	and term weights for a new query.  In the second approach we do the initial query, then the second query, then
+	the results of the two are merged some how (usually linear interpolation).
+*/
+ANT_search_engine_result *feedback_result = NULL, *initial_result = NULL, *normalised_initial_result = NULL;
+ANT_memory *feedback_memory = NULL;
+ANT_search_engine_result_id_iterator iterator;
+long long id;
+double feedback_sum, initial_sum, rsv;
+
+/*
 	Get the feedback terms
 */
-parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
+parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, parsed_query, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
 
 #ifdef NEVER
 	/*
@@ -1354,6 +1401,16 @@ parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list,
 		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
 	puts("");
 #endif
+
+if (feedback_mode == FEEDBACK_INTERPOLATED)
+	{
+	puts("INTERPOLATED FEEDBACK");
+	feedback_memory = new ANT_memory(1024);
+	feedback_result = new (feedback_memory) ANT_search_engine_result(feedback_memory, search_engine->document_count());
+	normalised_initial_result = new (feedback_memory) ANT_search_engine_result(feedback_memory, search_engine->document_count());
+	initial_result = search_engine->results_list;
+	search_engine->results_list = feedback_result;
+	}
 
 /*
 	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*
@@ -1369,7 +1426,11 @@ if (parsed_query->feedback_terms_in_query != 0)
 	/*
 		Generate query, search, and clean up
 	*/
-	query_object_with_feedback_to_NEXI_query();
+	if (feedback_mode == FEEDBACK_INTERPOLATED)
+		query_object_turn_feedback_into_NEXI_query();
+	else
+		query_object_with_feedback_to_NEXI_query();
+
 	process_NEXI_query(parsed_query->NEXI_query, feedback_ranking_function == NULL ? ranking_function : feedback_ranking_function);
 	delete [] parsed_query->feedback_terms;
 	delete [] parsed_query->NEXI_query;
@@ -1378,6 +1439,49 @@ if (parsed_query->feedback_terms_in_query != 0)
 		Rank
 	*/
 	search_engine->sort_results_list(top_k, &hits);
+	}
+
+/*
+	Clean up the double-result method
+*/
+if (feedback_mode == FEEDBACK_INTERPOLATED)
+	{
+	/*
+		Get the sum of the RSVs for each phase of the feedback process
+	*/
+	for (initial_sum = 0, id = iterator.first(initial_result); id >= 0; id = iterator.next())
+		initial_sum += initial_result->accumulator[id].get_rsv();
+
+	for (feedback_sum = 0, id = iterator.first(feedback_result); id >= 0; id = iterator.next())
+		feedback_sum += feedback_result->accumulator[id].get_rsv();
+
+	/*
+		Normalise into a copy
+	*/
+	normalised_initial_result->init_accumulators(search_engine->document_count());
+	for (id = iterator.first(initial_result); id >= 0; id = iterator.next())
+		normalised_initial_result->set_rsv(id, initial_result->accumulator[id].get_rsv() / initial_sum);
+
+	/*
+		Merge, but first re-initialise the original results list (so we don't have to worry about whose memory we're playing with)
+		Then re-rank
+	*/
+	search_engine->results_list = initial_result;
+	search_engine->init_accumulators(top_k);
+
+	search_engine->set_accumulator_width(ANT_pow2_zero_64(search_engine->results_list->width_in_bits));				// by default use what ever the constructor used
+
+	for (id = iterator.first(feedback_result); id >= 0; id = iterator.next())
+		{
+		rsv = ((1.0 - feedback_lambda) * normalised_initial_result->accumulator[id].get_rsv()) + (feedback_lambda * (feedback_result->accumulator[id].get_rsv() / feedback_sum));
+		initial_result->set_rsv(id, rsv);
+		}
+	search_engine->sort_results_list(top_k, &hits);
+
+	/*
+		Clean up (recall that the ANT_results_list object is fully enclosed in the memory object)
+	*/
+	delete feedback_memory;
 	}
 }
 

@@ -82,6 +82,7 @@ public:
 	long feedbacker;					// relevance feedback algorithm to use
 	long feedback_documents;			// documents to analyse for feedback terms
 	long feedback_terms;				// terms to add to the query in relevance feedback
+	double feedback_lambda;				// used for linear interpolation of initial and feedback result sets
 
 	long accumulator_sort;				// the method to be used to sort accumulators
 

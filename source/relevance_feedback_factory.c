@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "relevance_feedback_factory.h"
 #include "relevance_feedback_blind_kl.h"
+#include "relevance_feedback_blind_kl_rm.h"
 #include "relevance_feedback_topsig.h"
 
 /*
@@ -21,6 +22,8 @@ switch (which)
 	case TOPSIG:
 		return new ANT_relevance_feedback_topsig(engine);
 		break;
+	case BLIND_RM:
+		return new ANT_relevance_feedback_blind_kl_rm(engine);
 	default:
 		return NULL;
 	}
