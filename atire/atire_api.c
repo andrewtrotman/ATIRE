@@ -1103,11 +1103,11 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 	else
 		{
 		if (expander_tf != NULL)
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, into);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, 1, 1, into);
 		else if (stemmer == NULL)
 			search_engine->process_one_search_term(token_buffer, ranking_function, into);
 		else
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, into);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, 1, 1, into);
 		}
 
 	return into;
@@ -1306,7 +1306,7 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->path.start = NULL;
 	term->sign = 0;
 	term->tf_weight = 1;
-//	term->rsv_weight = parsed_query->feedback_terms[current_feedback].kl_score;
+	term->rsv_weight = parsed_query->feedback_terms[current_feedback]->kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
 	}
 
@@ -1350,7 +1350,7 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->path.start = NULL;
 	term->sign = 0;
 	term->tf_weight = 1;
-//	term->rsv_weight = parsed_query->feedback_terms[current_feedback].kl_score;
+	term->rsv_weight = parsed_query->feedback_terms[current_feedback]->kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
 	}
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;

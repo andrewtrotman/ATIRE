@@ -30,7 +30,8 @@ for (current_term = into = 0; current_term < max_terms; current_term++)
 	if ((node = one->get_term_node(&query->NEXI_query[current_term].term)) != NULL)
 		(top_terms[into++] = node)->kl_score = (double)node->term_frequency / (double)length;
 
- *terms_found = into;
+*terms_found = into;
+top_terms[into] = NULL;
 
 return top_terms;
 }
@@ -42,5 +43,6 @@ return top_terms;
 ANT_memory_index_one_node **ANT_relevance_feedback_blind_kl_rm::feedback(ANT_search_engine_result *result, ANT_query *query, long documents_to_examine, long terms_to_fetch, long *terms_found)
 {
 this->query = query;
+    
 return  ANT_relevance_feedback_blind_kl::feedback(result, query, documents_to_examine, terms_to_fetch, terms_found);
 }

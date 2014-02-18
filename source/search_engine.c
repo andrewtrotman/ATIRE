@@ -1059,7 +1059,7 @@ return verify;
 	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, double prescalar, double postscalar, ANT_bitstring *bitstring)
 {
 void *verify;
 long long now;
@@ -1105,7 +1105,7 @@ void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function
 {
 ANT_search_engine_btree_leaf term_details;
 
-process_one_term_detail(process_one_term(term, &term_details), ranking_function, bitstring);
+process_one_term_detail(process_one_term(term, &term_details), ranking_function, 1, 1, bitstring);
 }
 
 /*
@@ -1288,7 +1288,7 @@ return collection_frequency;
 	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
 	----------------------------------------------------
 */
-void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, double prescalar, double postscalar, ANT_bitstring *bitstring)
 {
 long long bytes_already_read;
 ANT_search_engine_btree_leaf stemmed_term_details;
@@ -1333,7 +1333,7 @@ stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_rea
 	ANT_SEARCH_ENGINE::PROCESS_ONE_THESAURUS_SEARCH_TERM()
 	------------------------------------------------------
 */
-void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, double prescalar, double postscalar, ANT_bitstring *bitstring)
 {
 ANT_thesaurus_relationship *expansion;
 void *verify;
@@ -1372,7 +1372,7 @@ if (number_of_terms_in_expansion == 0)
 	if (stemmer == NULL)
 		process_one_search_term(base_term, ranking_function, bitstring);
 	else
-		process_one_stemmed_search_term(stemmer, base_term, ranking_function, bitstring);
+		process_one_stemmed_search_term(stemmer, base_term, ranking_function, 1, 1, bitstring);
 	return;
 	}
 
