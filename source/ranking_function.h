@@ -80,7 +80,6 @@ public:
 	*/
 #ifdef IMPACT_HEADER
 	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
-	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_quantum(accumulator, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); };
 	virtual void relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_paramters) = 0;
 #endif
 
@@ -92,14 +91,6 @@ public:
 	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency) = 0;
 
 	/*
-		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
-	*/
-#ifdef IMPACT_HEADER
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); }
-#else
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
-#endif
-	/*
 		You can override this function if you want fast boolean, otherwise it'll run through the postings list
 		setting bits and then chain through to relevance_rank_top_k().  That is, default behaviour is to double
 		pass the postings list but this can be overridden to touch the postings list only once (see BM25 for
@@ -109,15 +100,6 @@ public:
 	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
 #else
 	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
-#endif
-
-	/*
-		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
-	*/
-#ifdef IMPACT_HEADER
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); }
-#else
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
 #endif
 
 	/*

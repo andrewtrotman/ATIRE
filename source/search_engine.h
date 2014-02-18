@@ -132,7 +132,7 @@ public:
 	void *read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_compressable_integer *the_decompressed_buffer);
 #endif
 	virtual void process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, double prescalar = 1, double postscalar = 1, ANT_bitstring *bitstring = NULL);
-	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring = NULL);
+	virtual void process_one_search_term(char *term, ANT_ranking_function *ranking_function, double prescalar = 1, double postscalar = 1, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, double prescalar = 1, double postscalar = 1, ANT_bitstring *bitstring = NULL);
 	virtual void process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, double prescalar = 1, double postscalar = 1, ANT_bitstring *bitstring = NULL);
 

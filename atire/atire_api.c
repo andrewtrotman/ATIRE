@@ -711,6 +711,8 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 		max_quantums[heap_items].quantum_count = impact_header_buffers[current_term]->the_quantum_count;
 		max_quantums[heap_items].the_impact_header = impact_header_buffers[current_term];
 		max_quantums[heap_items].term_details = &term_string->term_details;
+		max_quantums[heap_items].prescalar = term_string->tf_weight;
+		max_quantums[heap_items].postscalar = term_string->rsv_weight;
 		max_quantums_pointers[heap_items] = &max_quantums[heap_items];
 		max_remaining_quantum += max_quantums[heap_items].current_max_quantum;
 		heap_items++;
@@ -730,8 +732,6 @@ printf("total quantums: %lld\n", total_quantums);
 //
 the_quantum.accumulator = search_engine->results_list;
 the_quantum.trim_point = search_engine->trim_postings_k;
-the_quantum.prescalar = 1.0;
-the_quantum.postscalar = 1.0;
 processed_quantums = 0;
 while (heap_items > 0)
 	{
@@ -746,6 +746,8 @@ while (heap_items > 0)
 	the_quantum.offset = *current_impact_header->impact_offset_ptr;
 	the_quantum.term_details = current_max->term_details;
 	the_quantum.tf = the_quantum.impact_value;
+	the_quantum.prescalar = current_max->prescalar;
+	the_quantum.postscalar = current_max->postscalar;
 
 	//printf("max remaining quantum: %lld, diff of k and k+1: %lld\n", max_remaining_quantum, search_engine->results_list->get_diff_k_and_k_plus_1());
 	if ((early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF) && search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
@@ -848,26 +850,24 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 	term_string = term_list[current_term];
 
 	if (!ANT_islower(*term_string->get_term()->start))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight);
 	else
 		{
 		if (expander_tf != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight);
 			}
 		else if (stemmer != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight);
 			}
 		else
-			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+			search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight);
 		}
 	}
 }
-
-
 
 /*
 	ATIRE_API::PROCESS_NEXI_QUERY()
@@ -1099,13 +1099,13 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 
 	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), true);
 	if (!ANT_islower(*token_buffer))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_search_term(token_buffer, ranking_function, into);
+		search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, into);
 	else
 		{
 		if (expander_tf != NULL)
 			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, 1, 1, into);
 		else if (stemmer == NULL)
-			search_engine->process_one_search_term(token_buffer, ranking_function, into);
+			search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, into);
 		else
 			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, 1, 1, into);
 		}

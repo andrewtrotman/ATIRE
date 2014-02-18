@@ -1079,18 +1079,18 @@ if (verify != NULL)
 	if (bitstring == NULL)
 		{ // it bitstring != NULL then we're boolean ranking hybrid
 		#ifdef IMPACT_HEADER
-			ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k, prescalar, postscalar);
 			//ranking_function->relevance_rank_quantum(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
 		#else
-			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k, prescalar, postscalar);
 		#endif
 		}
 	else
 		{
 		#ifdef IMPACT_HEADER
-			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k, prescalar, postscalar);
 		#else
-			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k, prescalar, postscalar);
 		#endif
 		}
 	stats->add_rank_time(stats->stop_timer(now));
@@ -1101,11 +1101,11 @@ if (verify != NULL)
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function, double prescalar, double postscalar, ANT_bitstring *bitstring)
 {
 ANT_search_engine_btree_leaf term_details;
 
-process_one_term_detail(process_one_term(term, &term_details), ranking_function, 1, 1, bitstring);
+process_one_term_detail(process_one_term(term, &term_details), ranking_function, prescalar, postscalar, bitstring);
 }
 
 /*
@@ -1319,7 +1319,7 @@ if (collection_frequency != 0)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), 1, 1);
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), prescalar, postscalar);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 
@@ -1370,9 +1370,9 @@ if (number_of_terms_in_expansion == 0)
 		its more efficient than decoding and re-encoding
 	*/
 	if (stemmer == NULL)
-		process_one_search_term(base_term, ranking_function, bitstring);
+		process_one_search_term(base_term, ranking_function, prescalar, postscalar, bitstring);
 	else
-		process_one_stemmed_search_term(stemmer, base_term, ranking_function, 1, 1, bitstring);
+		process_one_stemmed_search_term(stemmer, base_term, ranking_function, prescalar, postscalar, bitstring);
 	return;
 	}
 
@@ -1420,7 +1420,7 @@ if (collection_frequency != 0)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), 1, 1);
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), prescalar, postscalar);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 
