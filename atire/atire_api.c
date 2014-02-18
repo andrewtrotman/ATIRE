@@ -1476,7 +1476,7 @@ if (feedback_mode == FEEDBACK_INTERPOLATED)
 
 	for (id = iterator.first(feedback_result); id >= 0; id = iterator.next())
 		{
-		rsv = ((1.0 - feedback_lambda) * normalised_initial_result->accumulator[id].get_rsv()) + (feedback_lambda * (feedback_result->accumulator[id].get_rsv() / feedback_sum));
+		rsv = ((1.0 - feedback_lambda) * normalised_initial_result->accumulator[id].get_rsv()) * (feedback_lambda * (feedback_result->accumulator[id].get_rsv() / feedback_sum));
 		initial_result->set_rsv(id, rsv);
 		}
 	search_engine->sort_results_list(top_k, &hits);

@@ -59,7 +59,6 @@ else
 		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
 
 	unique_terms_in_collection = engine->get_variable("~uniqueterms");
-	printf("UNIQUE_TERMS:%f", (double)unique_terms_in_collection);
 	}
 }
 
@@ -71,6 +70,35 @@ else
 */
 void ANT_ranking_function_puurula_idf::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
+long long docid;
+double rsv, tf, df, query_length, query_occurences, prior;
+ANT_compressable_integer *current;
+
+query_length = quantum_parameters->accumulator->get_term_count();
+query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+
+df = 1.0 / (double)unique_terms_in_collection;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+
+	tf = quantum_parameters->tf;
+	tf = log(1.0 + tf / discounted_document_lengths[docid]) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+	tf = max(tf - g * pow(tf, g), 0);
+
+	rsv = query_occurences * log((tf * quantum_parameters->prescalar) / (u * df) + 1.0);
+
+	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		{
+		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
+		}
+	else
+		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+	}
 }
 
 /*
