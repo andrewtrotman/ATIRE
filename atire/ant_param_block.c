@@ -427,7 +427,7 @@ do
 			if (first != -1)
 				feedback_documents = (long)first;
 			if (second != -1)
-				feedback_lambda = (long)first;
+				feedback_lambda = second;
 			done = TRUE;
 			break;
 		case 'R':
