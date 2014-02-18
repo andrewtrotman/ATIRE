@@ -1305,6 +1305,8 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->parent_path = NULL;
 	term->path.start = NULL;
 	term->sign = 0;
+	term->tf_weight = 1;
+//	term->rsv_weight = parsed_query->feedback_terms[current_feedback].kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
 	}
 
@@ -1347,6 +1349,8 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->parent_path = NULL;
 	term->path.start = NULL;
 	term->sign = 0;
+	term->tf_weight = 1;
+//	term->rsv_weight = parsed_query->feedback_terms[current_feedback].kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
 	}
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
