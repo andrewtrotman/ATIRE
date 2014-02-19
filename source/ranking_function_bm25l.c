@@ -76,6 +76,27 @@ this->delta = delta;
 */
 void ANT_ranking_function_BM25L::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
+double tf, idf, rsv, c_prime, f_prime;
+long long docid;
+ANT_compressable_integer *current;
+
+idf = log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+tf = quantum_parameters->tf * quantum_parameters->prescalar;
+
+docid = -1;
+current = quantum_parameters->the_quantum;
+while (current < quantum_parameters->quantum_end)
+	{
+	docid += *current++;
+
+	c_prime =  tf / (1 - b + b * ((double)document_lengths[docid] / (double)mean_document_length));
+	f_prime = ((k1 + 1) * (c_prime + delta)) / (k1 + c_prime + delta);
+
+	rsv = f_prime * idf * quantum_parameters->postscalar;
+
+	quantum_parameters->accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
+	}
+
 }
 
 /*
