@@ -735,12 +735,12 @@ long ranker_ok;
 if (params.ranking_function == ANT_ranking_function_factory_object::PREGEN)
 	ranker_ok = atire->set_ranking_function_pregen(params.field_name, params.p1) == 0;
 else
-	ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.p1, params.p2) == 0;
+	ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.p1, params.p2, params.p3) == 0;
 
 if (!ranker_ok)
 	return ranker_ok;
 
-return atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_p1, params.feedback_p2) == 0;
+return atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_p1, params.feedback_p2, params.feedback_p3) == 0;
 }
 
 /*

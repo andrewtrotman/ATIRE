@@ -126,7 +126,7 @@ private:
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
-	ANT_ranking_function *decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
+	ANT_ranking_function *decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3);
 	long process_NEXI_query(char *query);
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
 	long process_topsig_query(ANT_NEXI_term_ant *parse_tree);
@@ -192,8 +192,8 @@ public:
 		for LMD:  u = p1
 		for LMJM: l = p1
 	*/
-	long set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
-	long set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
+	long set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3);
+	long set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3);
 	long set_ranking_function_pregen(const char *fieldname, double p1);
 	void set_feedback_interpolation(double lambda) { feedback_lambda = lambda; feedback_mode = FEEDBACK_INTERPOLATED; }
 	ANT_pregen *get_pregen();

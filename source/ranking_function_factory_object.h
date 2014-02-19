@@ -23,6 +23,7 @@ public:
 		{
 		NONE = 0x0000,
 		BM25,
+		BM25L,
 		IMPACT,
 		READABLE,
 		LMD,
@@ -55,8 +56,10 @@ public:
 	long parameter_count;			// 2 parameters
 	double p1;						// default k1
 	double p2;						// default b
+	double p3;						// default delta
 	double feedback_p1;				// default k1 when relevance feedback is used
-	double feedback_p2;				// default p2 when relevance feedback is used
+	double feedback_p2;				// default b when relevance feedback is used
+	double feedback_p3;				// default delta when relevance feedback is used
 	char *description;				// "BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4, use 1.1:0.3 for INEX 2009]"
 } ;
 

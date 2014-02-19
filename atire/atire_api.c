@@ -422,11 +422,11 @@ return NULL;
 		0 on success
 		1 on failure
 */
-long ATIRE_API::set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+long ATIRE_API::set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3)
 {
 ANT_ranking_function *new_function;
 
-if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
+if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2, p3)) == NULL)
 	return 1;
 
 delete ranking_function;
@@ -442,14 +442,14 @@ return 0;
 		0 on success
 		1 on failure
 */
-long ATIRE_API::set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+long ATIRE_API::set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3)
 {
 ANT_ranking_function *new_function;
 
 if (function == ANT_ANT_param_block::NONE)
 	new_function = NULL;
 else
-	if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
+	if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2, p3)) == NULL)
 		return 1;
 
 feedback_ranking_function = new_function;
@@ -463,7 +463,7 @@ return 0;
 	returns:
 		NULL on failure
 */
-ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3)
 {
 long current;
 
@@ -479,7 +479,7 @@ if (search_engine->quantized())
 if (function == ANT_ranking_function_factory_object::ALL_TERMS)
 	query_type_is_all_terms = true;
 
-return ANT_ranking_function_factory::get_searching_ranker(search_engine, function, quantization, quantization_bits, p1, p2);
+return ANT_ranking_function_factory::get_searching_ranker(search_engine, function, quantization, quantization_bits, p1, p2, p3);
 }
 
 /*

@@ -209,7 +209,7 @@ index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
 index->set_term_culling(param_block.stop_word_removal, param_block.stop_word_df_threshold, param_block.stop_word_df_frequencies);
 index->set_quantization(param_block.quantization, param_block.quantization_bits);
-index->set_ranking_function(param_block.ranking_function, param_block.p1, param_block.p2);
+index->set_ranking_function(param_block.ranking_function, param_block.p1, param_block.p2, param_block.p3);
 index->set_inverted_index_mode(param_block.inversion_extras, param_block.puurula_length_g);
 
 if (param_block.readability_measure == ANT_readability_factory::NONE

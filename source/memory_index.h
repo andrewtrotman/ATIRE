@@ -84,6 +84,7 @@ private:
 	long ranking_function_id;
 	double ranking_function_p1;
 	double ranking_function_p2;
+	double ranking_function_p3;
 	long long quantization_bits;
 	long index_quantization;
 	double maximum_collection_rsv, minimum_collection_rsv;
@@ -198,7 +199,7 @@ public:
 	virtual void set_inverted_index_mode(long mode, double parameter) { inverted_index_mode = mode; inverted_index_parameter = parameter; }
 	virtual void set_quantization(long quantization, long bits) { this->index_quantization = quantization; this->quantization_bits = bits;}
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
-	virtual void set_ranking_function(long ranking_function, double p1, double p2) {ranking_function_id = ranking_function; ranking_function_p1 = p1; ranking_function_p2 = p2;}
+	virtual void set_ranking_function(long ranking_function, double p1, double p2, double p3) {ranking_function_id = ranking_function; ranking_function_p1 = p1; ranking_function_p2 = p2; ranking_function_p3 = p3;}
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
 	virtual void set_term_culling(long mode, double max_df, long df);
 	virtual short *get_frequencies(short *frequency, long long tf_cap) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}

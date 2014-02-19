@@ -32,11 +32,28 @@ ranking_function = ANT_ranking_function_factory_object::BM25;
 
 feedback_p1 = p1 = ANT_RANKING_FUNCTION_BM25_DEFAULT_K1;
 feedback_p2 = p2 = ANT_RANKING_FUNCTION_BM25_DEFAULT_B;
-
+feedback_p3 = p3 = 0;
 field_name = NULL;
 
 //quantization = false;
 //quantization_bits = 8;
+}
+
+/*
+	ANT_INDEXER_PARAM_BLOCK_RANK::GET_ONE_PARAMETER()
+	-------------------------------------------------
+*/
+int ANT_indexer_param_block_rank::get_one_parameter(char *from, double *into)
+{
+if (from != NULL && *from == ':')
+	{
+	*into = atof(from + 1);
+	return 1;
+	}
+else
+	return 0;
+
+//printf("[%s][%f]\n", from, *into);
 }
 
 /*
@@ -48,39 +65,34 @@ int ANT_indexer_param_block_rank::get_two_parameters(char *from, double *first, 
 {
 char *ch = from;
 
-if (*ch == ':')
-	*first = atof(ch + 1);
-else
+if (get_one_parameter(ch, first) == 0)
 	return 0;
 
-for (ch++; *ch != '\0'; ch++)
-	if (*ch == ':')
-		{
-		*second = atof(ch + 1);
-		break;
-		}
-	else if (!(isdigit(*ch) || *ch == '.'))
-		return 1;
+if (get_one_parameter(ch = strchr(ch + 1, ':'), second) == 0)
+	return 1;
 
 return 2;
-//printf("[%s][%f][%f]\n", from, *first, *second);
 }
 
 /*
-	ANT_INDEXER_PARAM_BLOCK_RANK::GET_ONE_PARAMETER()
-	-------------------------------------------------
+	ANT_INDEXER_PARAM_BLOCK_RANK::GET_THREE_PARAMETERS()
+	----------------------------------------------------
+	returns the number of parameters correctly parsed
 */
-int ANT_indexer_param_block_rank::get_one_parameter(char *from, double *into)
+int ANT_indexer_param_block_rank::get_three_parameters(char *from, double *first, double *second, double *third)
 {
-if (*from == ':')
-	{
-	*into = atof(from + 1);
-	return 1;
-	}
-else
+char *ch = from;
+
+if (get_one_parameter(ch, first) == 0)
 	return 0;
 
-//printf("[%s][%f]\n", from, *into);
+if (get_one_parameter(ch = strchr(ch + 1, ':'), second) == 0)
+	return 1;
+
+if (get_one_parameter(ch = strchr(ch + 1, ':'), third) == 0)
+	return 2;
+
+return 3;
 }
 
 /*
@@ -100,7 +112,7 @@ char *separator;
 for (ranker = 0; ANT_list_of_rankers[ranker].id != ANT_ranking_function_factory_object::NONE; ranker++)
 	{
 	name_length = strlen(ANT_list_of_rankers[ranker].name);
-	if (strncmp(ANT_list_of_rankers[ranker].name, which, name_length) == 0)
+	if ((strncmp(ANT_list_of_rankers[ranker].name, which, name_length) == 0) && (which[name_length] == '\0' || which[name_length] == ':'))
 		{
 		/*
 			check for prefixing (because lmd is a substring of lmds)
@@ -112,12 +124,15 @@ for (ranker = 0; ANT_list_of_rankers[ranker].id != ANT_ranking_function_factory_
 			{
 			feedback_p1 = ANT_list_of_rankers[ranker].feedback_p1;
 			feedback_p2 = ANT_list_of_rankers[ranker].feedback_p2;
+			feedback_p3 = ANT_list_of_rankers[ranker].feedback_p3;
 
 			if (ANT_list_of_rankers[ranker].parameter_count == 1)
 				get_one_parameter(which + strlen(ANT_list_of_rankers[ranker].name), &feedback_p1);
-			else
+			else if (ANT_list_of_rankers[ranker].parameter_count == 2)
 				get_two_parameters(which + strlen(ANT_list_of_rankers[ranker].name), &feedback_p1, &feedback_p2);
-			//	printf("feedback_p1=%f feedback_p2=%f\n", feedback_p1, feedback_p2);
+			else
+				get_three_parameters(which + strlen(ANT_list_of_rankers[ranker].name), &feedback_p1, &feedback_p2, &feedback_p3);
+			//	printf("feedback_p1=%f feedback_p2=%f feedback_p3=%f\n", feedback_p1, feedback_p2, feedback_p3);
 			this->feedback_ranking_function = ANT_list_of_rankers[ranker].id;
 
 			return 1;
@@ -126,12 +141,16 @@ for (ranker = 0; ANT_list_of_rankers[ranker].id != ANT_ranking_function_factory_
 			{
 			p1 = ANT_list_of_rankers[ranker].p1;
 			p2 = ANT_list_of_rankers[ranker].p2;
+			p3 = ANT_list_of_rankers[ranker].p3;
 
 			if (ANT_list_of_rankers[ranker].parameter_count == 1)
 				get_one_parameter(which + strlen(ANT_list_of_rankers[ranker].name), &p1);
-			else
+			else if (ANT_list_of_rankers[ranker].parameter_count == 2)
 				get_two_parameters(which + strlen(ANT_list_of_rankers[ranker].name), &p1, &p2);
-			//	printf("p1=%f p2=%f\n", p1, p2);
+			else
+				get_three_parameters(which + strlen(ANT_list_of_rankers[ranker].name), &p1, &p2, &p3);
+
+			// printf("p1=%f p2=%f p3=%f\n", p1, p2, p3);
 			this->ranking_function = ANT_list_of_rankers[ranker].id;
 
 			return 1;
@@ -175,10 +194,10 @@ for (ranker = 0; ANT_list_of_rankers[ranker].name != NULL; ranker++)
 	if (allowable & ANT_list_of_rankers[ranker].flags)
 		{
 		if (ANT_list_of_rankers[ranker].parameter_count == 0)
-			sprintf(buffer, "%s%20.20s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters);
+			sprintf(buffer, "%s%30.30s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters);
 		else
-			sprintf(buffer, "%s:%s%20.20s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters, " ");
-		printf("  %17.17s %s %s\n", buffer, ANT_list_of_rankers[ranker].description, isdefault(ANT_list_of_rankers[ranker].id));
+			sprintf(buffer, "%s:%s%30.30s", ANT_list_of_rankers[ranker].name, ANT_list_of_rankers[ranker].parameters, " ");
+		printf("  %18.18s %s %s\n", buffer, ANT_list_of_rankers[ranker].description, isdefault(ANT_list_of_rankers[ranker].id));
 		}
 
 puts("");

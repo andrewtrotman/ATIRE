@@ -17,17 +17,16 @@ public:
 	long long ranking_function;				// which ranking function should we use?
 	long long feedback_ranking_function;	// which ranking function should we use for feedback?
 
-	double p1, p2;							// ranking function parameters (e.g. k1 and b)
-	double feedback_p1, feedback_p2;		// ranking function parameters for the feedbacker (e.g. k1 and b)
+	double p1, p2, p3;							// ranking function parameters (e.g. k1 and b)
+	double feedback_p1, feedback_p2, feedback_p3;		// ranking function parameters for the feedbacker (e.g. k1 and b)
 
-	char *field_name;						// field to rank on for pregens
-//	long quantization;  					// whether the quantization should be performed
-//	long quantization_bits;  				// the number of bits to quantize into
+	char *field_name;								// field to rank on for pregens
 
 private:
 	const char *isdefault(long long what) { return ranking_function == what ? "[default]" : ""; }
 
 protected:
+	static int get_three_parameters(char *from, double *first, double *second, double *third);
 	static int get_two_parameters(char *from, double *first, double *second);
 	static int get_one_parameter(char *from, double *into);
 
