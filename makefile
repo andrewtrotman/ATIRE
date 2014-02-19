@@ -370,6 +370,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_bm25.obj				\
 	$(OBJDIR)\ranking_function_bm25l.obj			\
 	$(OBJDIR)\ranking_function_bm25plus.obj			\
+	$(OBJDIR)\ranking_function_bm25adpt.obj			\
 	$(OBJDIR)\ranking_function_bm25t.obj			\
 	$(OBJDIR)\ranking_function_dlh13.obj			\
 	$(OBJDIR)\ranking_function_dph.obj				\

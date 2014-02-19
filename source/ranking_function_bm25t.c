@@ -90,7 +90,6 @@ double ANT_ranking_function_BM25T::compute_k1(ANT_search_engine_btree_leaf *term
 {
 long long docid;
 double c_prime, tf, sum;
-double k1, smallest_k1, smallest_score, score, g;
 ANT_compressable_integer *current, *end;
 
 /*
@@ -121,30 +120,6 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 sum /= term_details->global_document_frequency;
 
 return ANT_secant(1.0, 1.1, evaluate_k1, &sum);
-#ifdef NEVER
-/*
-	Now solve for k1.  I know this is a grid search, but since its only 100 points in the grid and only once per term, it won't take long
-*/
-smallest_k1 = 0;
-smallest_score = DBL_MAX;
-for (k1 = 0; k1 <= 2; k1 += 0.01)
-	{
-	if (k1 == 1)
-		g = 1;
-	else
-		g = (k1 / (k1 - 1)) * log(k1);
-
-	score = (g - sum) * (g - sum);
-
-	if (score < smallest_score)
-		{
-		smallest_score = score;
-		smallest_k1 = k1;
-		}
-	}
-
-return smallest_k1;
-#endif
 }
 
 /*

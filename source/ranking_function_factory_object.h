@@ -26,6 +26,7 @@ public:
 		BM25L,
 		BM25PLUS,
 		BM25T,
+		BM25ADPT,
 		IMPACT,
 		READABLE,
 		LMD,
