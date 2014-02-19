@@ -8,6 +8,7 @@
 #include "ranking_function_impact.h"
 #include "ranking_function_bm25.h"
 #include "ranking_function_bm25l.h"
+#include "ranking_function_bm25t.h"
 #include "ranking_function_dlh13.h"
 #include "ranking_function_dph.h"
 #include "ranking_function_dfree.h"
@@ -36,6 +37,7 @@ ANT_ranking_function_factory_object ANT_list_of_rankers[] =
 {
 {ANT_ranking_function_factory_object::BM25,          "BM25",      "<k1>:<b>",     ANT_ranking_function_factory_object::INDEXABLE, 2, ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, ANT_RANKING_FUNCTION_BM25_DEFAULT_B, 0, ANT_RANKING_FUNCTION_BM25_DEFAULT_K1, ANT_RANKING_FUNCTION_BM25_DEFAULT_B, 0, "BM25 with k1=<k1> and b=<b> [default k1=0.9 b=0.4, use 1.1:0.3 for INEX 2009"},
 {ANT_ranking_function_factory_object::BM25L,         "BM25L",     "<k1>:<b>:<d>", ANT_ranking_function_factory_object::NONINDEXABLE, 3, ANT_RANKING_FUNCTION_BM25L_DEFAULT_K1, ANT_RANKING_FUNCTION_BM25L_DEFAULT_B, ANT_RANKING_FUNCTION_BM25L_DEFAULT_DELTA, ANT_RANKING_FUNCTION_BM25L_DEFAULT_K1, ANT_RANKING_FUNCTION_BM25L_DEFAULT_B, ANT_RANKING_FUNCTION_BM25L_DEFAULT_DELTA, "BM25L with k1=<k1>, b=<b>, delta=<d> [default k1=0.9 b=0.4, d=0.5]"},
+{ANT_ranking_function_factory_object::BM25T,         "BM25T",     "<b>",          ANT_ranking_function_factory_object::NONINDEXABLE, 1, ANT_RANKING_FUNCTION_BM25T_DEFAULT_B, 0, 0, ANT_RANKING_FUNCTION_BM25T_DEFAULT_B, 0, 0, "BM25T with b=<b> [default b=0.4]"},
 {ANT_ranking_function_factory_object::LMD,           "lmd",       "<u>",          ANT_ranking_function_factory_object::NONINDEXABLE, 1, ANT_RANKING_FUNCTION_LMD_DEFAULT_U, 0, 0, ANT_RANKING_FUNCTION_LMD_DEFAULT_U, 0, 0, "Language Models with Dirichlet smoothing, u=<u> [default u = 6750]"},
 {ANT_ranking_function_factory_object::LMDS,          "lmds",      "<u>",          ANT_ranking_function_factory_object::NONINDEXABLE, 1, ANT_RANKING_FUNCTION_LMDS_DEFAULT_U, 0, 0, ANT_RANKING_FUNCTION_LMDS_DEFAULT_U, 0, 0, "Language Models with Dirichlet smoothing (see Petri et al, ADCS 2013), u=<u> [default u = 2500]"},
 {ANT_ranking_function_factory_object::PUURULA,       "lmp",       "<u>:<g>",      ANT_ranking_function_factory_object::NONINDEXABLE, 2, ANT_RANKING_FUNCTION_PUURULA_U, ANT_RANKING_FUNCTION_PUURULA_G, 0, ANT_RANKING_FUNCTION_PUURULA_U, ANT_RANKING_FUNCTION_PUURULA_G, 0, "Language Models with Pittman-Yor Process Dirichlet smoothing (see Puurula, ALTA 2013), u=<u>, g=<g> [default u=1000, g=0.5]"},
@@ -124,6 +126,9 @@ switch (function)
 		break;
 	case ANT_ranking_function_factory_object::BM25L:
 		new_function = new ANT_ranking_function_BM25L(search_engine, quantization, quantization_bits, p1, p2, p3);
+		break;
+	case ANT_ranking_function_factory_object::BM25T:
+		new_function = new ANT_ranking_function_BM25T(search_engine, quantization, quantization_bits, p1);
 		break;
 	case ANT_ranking_function_factory_object::LMD:
 		new_function = new ANT_ranking_function_lmd(search_engine, quantization, quantization_bits, p1);

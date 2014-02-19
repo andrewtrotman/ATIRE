@@ -24,6 +24,7 @@ public:
 		NONE = 0x0000,
 		BM25,
 		BM25L,
+		BM25T,
 		IMPACT,
 		READABLE,
 		LMD,

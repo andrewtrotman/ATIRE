@@ -170,7 +170,31 @@ return (*seed ^= (*seed << 17));
 }
 
 /*
-	ANT_compiletime_floor_log_to_base
+	ANT_SECANT()
+	------------
+*/
+static inline double ANT_secant(double x1, double x2, double (*function)(double, void *parameter), void *function_param)
+{
+static const double E = 0.00001;
+double x3, f1, f2;
+
+f1 = function(x1, function_param);
+do
+	{
+	f2 = function(x2, function_param);
+	x3 = (f2 * x1 - f1 * x2) / (f2 - f1);
+
+	x1 = x2;
+	f1 = f2;
+	x2 = x3;
+	}
+while (fabs((x1 - x2) / x2) > E);
+
+return x2;
+}
+
+/*
+	ANT_COMPILETIME_FLOOR_LOG_TO_BASE
 	---------------------------------
 	Code for computing logs of arbitrary bases at compile-time. This allows logs to be computed as part of constant expressions.
 */
@@ -187,7 +211,7 @@ enum { value = 0 };
 };
 
 /*
-	ANT_compiletime_ispowerof2
+	ANT_COMPILETIME_ISPOWEROF2
 	--------------------------
 */
 template <int n>
@@ -197,7 +221,7 @@ enum { value = !(n & (n-1)) };
 };
 
 /*
-	ANT_compiletime_floor_log2
+	ANT_COMPILETIME_FLOOR_LOG2
 	--------------------------
 */
 template <unsigned long long n>
@@ -219,7 +243,7 @@ enum { value = 0 };
 };
 
 /*
-	ANT_compiletime_pow
+	ANT_COMPILETIME_POW
 	-------------------
 */
 template <unsigned int base, unsigned int exponent>
@@ -241,7 +265,7 @@ static const unsigned long long value = 1;
 };
 
 /*
-	ANT_compiletime_int_max
+	ANT_COMPILETIME_INT_MAX
 	-----------------------
 	This is needed because numeric_limits<T>::max() is unavailable at compile-time:
 */
@@ -252,7 +276,7 @@ static const T value = (T) (std::numeric_limits<T>::is_signed ? ~(T) (1ULL << (s
 };
 
 /*
-	ANT_compiletime_int_floor_log_to_base
+	ANT_COMPILETIME_INT_FLOOR_LOG_TO_BASE
 	-------------------------------------
 	How many 'base' digits would fit into an integer of type T? This is required in addition to ANT_compiletime_floor_log_to_base,
 	because we need to be able to compute it precisely for the largest supported integral type, too.
@@ -269,7 +293,7 @@ enum { value = (ANT_compiletime_ispowerof2<base>::value ? (sizeof(T) * CHAR_BIT 
 };
 
 /*
-	ANT_compiletime_int_floor_log_to_base_has_remainder
+	ANT_COMPILETIME_INT_FLOOR_LOG_TO_BASE_HAS_REMAINDER
 	---------------------------------------------------
 	Is there a remainder when computing the log of the integer type T (i.e. 2^(num_bits_in_T)) to the given base?
 */
@@ -283,7 +307,7 @@ enum { value = (ANT_compiletime_ispowerof2<base>::value ? ((sizeof(T) * CHAR_BIT
 };
 
 /*
-	ANT_compiletime_int_floor_log_to_base_remainder
+	ANT_COMPILETIME_INT_FLOOR_LOG_TO_BASE_REMAINDER
 	-----------------------------------------------
 	Computes 2^(num_bits_in_T) / pow(base, floor(log_base(2^(num_bits_in_T), base))))
 */
@@ -300,3 +324,5 @@ enum { value = 1 } ;
 };
 
 #endif  /* MATHS_H_ */
+
+

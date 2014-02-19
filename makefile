@@ -368,6 +368,8 @@ PARTS = \
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
+	$(OBJDIR)\ranking_function_bm25l.obj			\
+	$(OBJDIR)\ranking_function_bm25t.obj			\
 	$(OBJDIR)\ranking_function_dlh13.obj			\
 	$(OBJDIR)\ranking_function_dph.obj				\
 	$(OBJDIR)\ranking_function_dfree.obj			\

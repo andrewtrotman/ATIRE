@@ -97,7 +97,6 @@ while (current < quantum_parameters->quantum_end)
 		quantum_parameters->accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	}
-
 }
 
 /*
@@ -138,10 +137,10 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	impact_header->doc_count_ptr++;
 	}
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
-
 }
+
 #else
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25L::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
 {
 }
 #endif
