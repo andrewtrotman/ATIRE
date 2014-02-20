@@ -372,6 +372,7 @@ PARTS = \
 	$(OBJDIR)\ranking_function_bm25plus.obj			\
 	$(OBJDIR)\ranking_function_bm25adpt.obj			\
 	$(OBJDIR)\ranking_function_bm25t.obj			\
+	$(OBJDIR)\ranking_function_tflodop.obj			\
 	$(OBJDIR)\ranking_function_dlh13.obj			\
 	$(OBJDIR)\ranking_function_dph.obj				\
 	$(OBJDIR)\ranking_function_dfree.obj			\

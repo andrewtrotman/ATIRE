@@ -323,6 +323,20 @@ struct ANT_compiletime_int_floor_log_to_base_remainder<T, base, 0>
 enum { value = 1 } ;
 };
 
+/*
+	ANT_LOGSUM()
+	------------
+	Compute the log of the sum of two logs.  That is,
+	ANT_logsum(a,b) = log(exp(a) + exp(b)), but worry (a little bit) about rounding.
+*/
+static inline double ANT_logsum(double val1, double val2)
+{
+if (val1 > val2)
+	return log(exp(val2 - val1) + 1.0) + val1;
+else
+	return log(exp(val1 - val2) + 1.0) + val2;
+}
+
 #endif  /* MATHS_H_ */
 
 

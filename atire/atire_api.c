@@ -1452,18 +1452,31 @@ if (feedback_mode == FEEDBACK_INTERPOLATED)
 	/*
 		Get the sum of the RSVs for each phase of the feedback process
 	*/
+#define FEEDBACK_USES_LOGS 1
+#ifdef FEEDBACK_USES_LOGS
+	for (initial_sum = 0, id = iterator.first(initial_result); id >= 0; id = iterator.next())
+		initial_sum = ANT_logsum(initial_sum, initial_result->accumulator[id].get_rsv());
+
+	for (feedback_sum = 0, id = iterator.first(feedback_result); id >= 0; id = iterator.next())
+		feedback_sum = ANT_logsum(feedback_sum, feedback_result->accumulator[id].get_rsv());
+#else
 	for (initial_sum = 0, id = iterator.first(initial_result); id >= 0; id = iterator.next())
 		initial_sum += initial_result->accumulator[id].get_rsv();
 
 	for (feedback_sum = 0, id = iterator.first(feedback_result); id >= 0; id = iterator.next())
 		feedback_sum += feedback_result->accumulator[id].get_rsv();
+#endif
 
 	/*
 		Normalise into a copy
 	*/
 	normalised_initial_result->init_accumulators(search_engine->document_count());
 	for (id = iterator.first(initial_result); id >= 0; id = iterator.next())
-		normalised_initial_result->set_rsv(id, initial_result->accumulator[id].get_rsv() / initial_sum);
+		#ifdef FEEDBACK_USES_LOGS
+			normalised_initial_result->set_rsv(id, initial_result->accumulator[id].get_rsv() - initial_sum);
+		#else
+			normalised_initial_result->set_rsv(id, initial_result->accumulator[id].get_rsv() / initial_sum);
+		#endif
 
 	/*
 		Merge, but first re-initialise the original results list (so we don't have to worry about whose memory we're playing with)
@@ -1476,7 +1489,11 @@ if (feedback_mode == FEEDBACK_INTERPOLATED)
 
 	for (id = iterator.first(feedback_result); id >= 0; id = iterator.next())
 		{
-		rsv = ((1.0 - feedback_lambda) * normalised_initial_result->accumulator[id].get_rsv()) * (feedback_lambda * (feedback_result->accumulator[id].get_rsv() / feedback_sum));
+		#ifdef FEEDBACK_USES_LOGS
+			rsv = (((1.0 - feedback_lambda) * exp(normalised_initial_result->accumulator[id].get_rsv())) * (feedback_lambda * exp((feedback_result->accumulator[id].get_rsv() - feedback_sum))));
+		#else
+			rsv = ((1.0 - feedback_lambda) * normalised_initial_result->accumulator[id].get_rsv()) * (feedback_lambda * (feedback_result->accumulator[id].get_rsv() / feedback_sum));
+		#endif
 		initial_result->set_rsv(id, rsv);
 		}
 	search_engine->sort_results_list(top_k, &hits);
