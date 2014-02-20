@@ -107,8 +107,8 @@ impact_header->doc_count_ptr = impact_header->doc_count_start;
 current = impact_ordering;
 while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	{
-	tf = *impact_header->impact_value_ptr;
-	top_row = prescalar * tf * k1_plus_1;
+	tf = *impact_header->impact_value_ptr * prescalar;
+	top_row = tf * k1_plus_1;
 	docid = -1;
 	end = current + *impact_header->doc_count_ptr;
 	while (current < end)
@@ -167,8 +167,8 @@ end = impact_ordering + (term_details->local_document_frequency >= trim_point ? 
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;
-	top_row = prescalar * tf * k1_plus_1;
+	tf = *current++ * prescalar;
+	top_row = tf * k1_plus_1;
 	docid = -1;
 	while (*current != 0)
 		{

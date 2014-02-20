@@ -85,7 +85,7 @@ while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
 
-	tf = quantum_parameters->tf;
+	tf = quantum_parameters->tf * quantum_parameters->prescalar;
 	tf = log(1.0 + tf / discounted_document_lengths[docid]) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
 	tf = max(tf - g * pow(tf, g), 0);
 
@@ -127,7 +127,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		{
 		docid += *current++;
 
-		tf = *impact_header->impact_value_ptr;
+		tf = *impact_header->impact_value_ptr * prescalar;
 		tf = log(1.0 + tf / discounted_document_lengths[docid]) * log((double)documents / (double)term_details->global_document_frequency);
 		tf = max(tf - g * pow(tf, g), 0);
 

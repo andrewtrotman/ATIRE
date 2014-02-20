@@ -152,7 +152,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		c_prime = tf / (1 - b + b * ((double)document_lengths[docid] / (double)mean_document_length));
 		f_prime = ((k1 + 1) * c_prime) / (k1 + c_prime);
 
-		rsv = f_prime * idf * postscalar;
+		rsv = f_prime * idf;
 		accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;

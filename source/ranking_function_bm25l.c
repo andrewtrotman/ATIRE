@@ -93,8 +93,8 @@ while (current < quantum_parameters->quantum_end)
 		{
 		f_prime = ((k1 + 1) * (c_prime + delta)) / (k1 + c_prime + delta);
 
-		rsv = f_prime * idf * quantum_parameters->postscalar;
-		quantum_parameters->accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
+		rsv = f_prime * idf;
+		quantum_parameters->accumulator->add_rsv(docid, quantize(rsv * quantum_parameters->postscalar, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	}
 }
@@ -128,7 +128,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 			{
 			f_prime = ((k1 + 1) * (c_prime + delta)) / (k1 + c_prime + delta);
 
-			rsv = f_prime * idf * postscalar;
+			rsv = f_prime * idf;
 			accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 			}
 		}
