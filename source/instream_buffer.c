@@ -18,8 +18,12 @@ long ANT_instream_buffer::tid = 0;
 ANT_instream_buffer::ANT_instream_buffer(ANT_memory *memory, ANT_instream *source) : ANT_instream(memory, source)
 {
 position = 0;
-buffer = (unsigned char *)memory->malloc(buffer_size);
-position_of_end_of_buffer = source->read(buffer, buffer_size);
+primary_buffer = (unsigned char *)memory->malloc(buffer_size);
+secondary_buffer = (unsigned char *)memory->malloc(buffer_size);
+
+position_of_end_of_buffer = source->read(primary_buffer, buffer_size);
+
+buffer_to_read_into = &secondary_buffer;
 
 wait_input_time = 0;
 wait_output_time = 0;
@@ -32,8 +36,11 @@ sem->leave();
 message = new char[50];
 sprintf(message, "buffer %ld ", ANT_instream_buffer::tid++);
 
-params.buffer = buffer;
+params.buffer = &buffer_to_read_into;
 params.sem = sem;
+params.source = source;
+
+fprintf(stderr, "%p %p %p\n", sem, *buffer_to_read_into, source);
 
 ANT_thread(background_read, (void *)&params);
 }
@@ -51,8 +58,9 @@ void *ANT_instream_buffer::background_read(void *params)
 struct background_read_params *p = (struct background_read_params *)params;
 
 p->sem->enter();
-fprintf(stderr, "ANT_instream_buffer::background_read()\n");
-fprintf(stderr, "%p %p\n", p->sem, p->buffer);
+
+p->source->read(**p->buffer, buffer_size);
+
 p->sem->leave();
 
 return params;
@@ -70,7 +78,7 @@ START;
 if (position + size < position_of_end_of_buffer)
 	{
 	// all held within buffer, simply copy it across
-	memcpy(data, buffer + position, (size_t)size);
+	memcpy(data, *buffer_to_read_into + position, (size_t)size);
 	position += size;
 	}
 else
@@ -84,20 +92,20 @@ else
 	// copy the end of the buffer -- the beginning of the requested data
 	where = position_of_end_of_buffer - position;
 	remainder = size - where;
-	memcpy(data, buffer + position, (size_t)where);
+	memcpy(data, *buffer_to_read_into + position, (size_t)where);
 
 	do
 		{
 		END;
 		// fill the buffer up with more data from downstream
-		if ((position_of_end_of_buffer = source->read(buffer, buffer_size)) <= 0)
+		if ((position_of_end_of_buffer = source->read(primary_buffer, buffer_size)) <= 0)
 			return where;		// at EOF
 
 		START;
 		// if what we have left to get is larger than buffer, copy it all across
 		if (remainder > position_of_end_of_buffer)
 			{
-			memcpy(data + where, buffer, (size_t)position_of_end_of_buffer);
+			memcpy(data + where, primary_buffer, (size_t)position_of_end_of_buffer);
 			where += position_of_end_of_buffer;
 			remainder -= position_of_end_of_buffer;
 			position = position_of_end_of_buffer;
@@ -105,7 +113,7 @@ else
 		else
 			{
 			// otherwise copy only what's needed
-			memcpy(data + where, buffer, (size_t)remainder);
+			memcpy(data + where, primary_buffer, (size_t)remainder);
 			position = remainder;
 			remainder = 0;
 			}

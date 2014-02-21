@@ -20,12 +20,15 @@ protected:
 	static long tid;
 
 	struct background_read_params {
-		unsigned char *buffer;
+		unsigned char ***buffer;
 		ANT_semaphores *sem;
+		ANT_instream *source;
 	} params;
 
 protected:
-	unsigned char *buffer;
+	unsigned char *primary_buffer;
+	unsigned char *secondary_buffer;
+	unsigned char **buffer_to_read_into;
 	long long position;
 	long long position_of_end_of_buffer;
 
