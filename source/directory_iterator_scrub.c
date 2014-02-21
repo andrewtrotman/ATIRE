@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include "directory_iterator_scrub.h"
 #include "unicode.h"
+#include "stats.h"
+#include "memory.h"
+
+long ANT_directory_iterator_scrub::tid = 0;
 
 /*
 	ANT_DIRECTORY_ITERATOR_SCRUB::ANT_DIRECTORY_ITERATOR_SCRUB()
@@ -15,6 +19,11 @@ ANT_directory_iterator_scrub::ANT_directory_iterator_scrub(ANT_directory_iterato
 {
 this->source = source;
 this->scrubbing = scrubbing;
+
+clock = new ANT_stats(new ANT_memory);
+
+message = new char[50];
+sprintf(message, "scrub %ld ", ANT_directory_iterator_scrub::tid++);
 }
 
 /*
@@ -133,10 +142,12 @@ for (i = 0; i < size; i++)
 ANT_directory_iterator_object *ANT_directory_iterator_scrub::first(ANT_directory_iterator_object *object)
 {
 ANT_directory_iterator_object *t = source->first(object);
+START;
 
 if (t != NULL)
 	scrub((unsigned char *)t->file, t->length, scrubbing);
 
+END;
 return t;
 }
 
@@ -148,8 +159,10 @@ ANT_directory_iterator_object *ANT_directory_iterator_scrub::next(ANT_directory_
 {
 ANT_directory_iterator_object *t = source->next(object);
 
+START;
 if (t != NULL)
 	scrub((unsigned char *)t->file, t->length, scrubbing);
 
+END;
 return t;
 }

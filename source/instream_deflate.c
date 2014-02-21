@@ -9,6 +9,8 @@
 #include "instream_deflate.h"
 #include "instream_deflate_internals.h"
 
+long ANT_instream_deflate::tid = 0;
+
 /*
 	ANT_INSTREAM_DEFLATE::ANT_INSTREAM_DEFLATE()
 	--------------------------------------------
@@ -28,6 +30,14 @@ ANT_instream_deflate::ANT_instream_deflate(ANT_memory *memory, ANT_instream *sou
 #else
 	exit(printf("You are trying to decompress a zip file but ZLIB is not included in this build"));
 #endif
+
+wait_input_time = 0;
+wait_output_time = 0;
+process_time = 0;
+clock = new ANT_stats(memory);
+
+message = new char[50];
+sprintf(message, "deflate %ld ", ANT_instream_deflate::tid++);
 }
 
 /*
@@ -51,14 +61,21 @@ long long ANT_instream_deflate::read(unsigned char *data, long long size)
 	long long got;
 	long state;
 
+START;
 	if (size == 0)
+	{
+END;
 		return 0;
+	}
 
 	if (buffer == NULL)
 		{
 		buffer = (unsigned char *)memory->malloc(buffer_length);
 		if (inflateInit2(&internals->stream, 15 + 32) != Z_OK)		// 2^15 window with zlib/gzip header detection
+		{
+END;
 			return -1;		// error
+		}
 		}
 
 	internals->stream.avail_out = (uInt)size;
@@ -68,8 +85,10 @@ long long ANT_instream_deflate::read(unsigned char *data, long long size)
 		{
 		if (internals->stream.avail_in <= 0)
 			{
+END;
 			if ((got = source->read(buffer, buffer_length)) < 0)
 				return -1;			// the instream is at EOF and so we are too
+START;
 			internals->stream.avail_in = (uInt)got;
 			internals->stream.next_in = buffer;	
 			}
@@ -80,16 +99,20 @@ long long ANT_instream_deflate::read(unsigned char *data, long long size)
 			{
 			got = size - internals->stream.avail_out;		// number of bytes that were decompressed
 			total_written += got;
+END;
 			return got;			// at EOF
 			}
 
 		if (internals->stream.avail_out == 0)
 			{
 			total_written += size;
+END;
 			return size;			// filled the output buffer and so return bytes read
 			}
 		}
 	while (state == Z_OK);
+
+END;
 
 	printf("ANT_instream_deflate::read() failure trying to decompress (zlib reports:%ld)\n", state);
 	return -1;			// something has gone wrong

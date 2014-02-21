@@ -42,8 +42,6 @@ this->index_document = index_document_method;
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
 
 clock = new ANT_stats(new ANT_memory);
-message = new char[50];
-sprintf(message, "ANT_directory_iterator_preindex %ld ", ANT_directory_iterator_preindex::tid++);
 
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 }
@@ -67,14 +65,14 @@ void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *ob
 {
 long terms;
 
-printf("ANT_directory_iterator_preindex %lu start_process %lld\n", id, clock->start_timer());
+STARTV("preindex");
 
 object->index = new ANT_memory_index_one(new ANT_memory(1024 * 1024), final_index);
 terms = index_document->index_document(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object->file);
 object->terms = terms;
 
 store->add(object);
-printf("ANT_directory_iterator_preindex %lu end_process %lld\n", id, clock->start_timer());
+ENDV("preindex");
 }
 
 /*

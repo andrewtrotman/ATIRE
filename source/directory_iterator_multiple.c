@@ -34,7 +34,7 @@ producer = NULL;
 clock = new ANT_stats(new ANT_memory);
 
 message = new char[50];
-sprintf(message, "ANT_directory_iterator_multiple %ld ", ANT_directory_iterator_multiple::tid);
+sprintf(message, "multiple %ld ", ANT_directory_iterator_multiple::tid);
 }
 
 /*
@@ -86,7 +86,7 @@ void ANT_directory_iterator_multiple::produce(ANT_directory_iterator_multiple_in
 ANT_directory_iterator_object *got;
 char *message = new char[50];
 
-sprintf(message, "ANT_directory_iterator_multiple %ld ", ANT_directory_iterator_multiple::tid++);
+sprintf(message, "multiple %ld ", ANT_directory_iterator_multiple::tid++);
 
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 
@@ -175,7 +175,7 @@ ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directo
 {
 long finished = FALSE;
 
-printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 
 mutex.enter();
 	if (active_threads <= 0)
@@ -193,7 +193,7 @@ mutex.enter();
 		while (!finished);
 mutex.leave();
 
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 if (finished)
 	return NULL;
 else

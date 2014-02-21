@@ -9,6 +9,7 @@
 #include "producer_consumer.h"
 
 class ANT_compression_text_factory;
+class ANT_stats;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_COMPRESSOR
@@ -23,8 +24,10 @@ private:
 	ANT_critical_section mutex;
 	ANT_compression_text_factory *compressor;
 
+	static long tid;
+
 private:
-	void work_one(ANT_compression_text_factory *compressor, ANT_directory_iterator_object *object);
+	void work_one(ANT_compression_text_factory *compressor, ANT_directory_iterator_object *object, long id);
 	void work(void);
 	static void *bootstrap(void *param);
 

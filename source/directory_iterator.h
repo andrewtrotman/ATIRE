@@ -5,6 +5,20 @@
 #ifndef DIRECTORY_ITERATOR_H_
 #define DIRECTORY_ITERATOR_H_
 
+#ifndef START
+	#ifdef LOGGING
+		#define START printf("%ss %lld\n", message, clock->start_timer())
+		#define END printf("%se %lld\n", message, clock->start_timer())
+		#define STARTV(m) printf("%s %lu s %lld\n", m, id, clock->start_timer())
+		#define ENDV(m) printf("%s %lu e %lld\n", m, id, clock->start_timer())
+	#else
+		#define START //
+		#define END //
+		#define STARTV(m) // m
+		#define ENDV(m) // m
+	#endif
+#endif
+
 #include "directory_iterator_object.h"
 
 class ANT_directory_iterator_internals;

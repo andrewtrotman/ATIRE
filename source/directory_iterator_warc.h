@@ -16,6 +16,7 @@ class ANT_directory_iterator_warc : public ANT_directory_iterator
 {
 private:
 	static const long WARC_BLOCK_SIZE = 1024;
+	static long tid;
 
 private:
 	ANT_instream *source;
@@ -26,7 +27,7 @@ private:
 	void read_entire_file(ANT_directory_iterator_object *object);
 
 public:
-	ANT_directory_iterator_warc(ANT_instream *source, long get_file = 0) : ANT_directory_iterator("", get_file) { this->source = source; }
+	ANT_directory_iterator_warc(ANT_instream *source, long get_file = 0);// : ANT_directory_iterator("", get_file) { this->source = source; }
 	virtual ~ANT_directory_iterator_warc() {}
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }

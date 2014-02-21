@@ -7,6 +7,8 @@
 
 #include "instream.h"
 
+class ANT_semaphores;
+
 /*
 	class ANT_INSTREAM_BUFFER
 	-------------------------
@@ -17,10 +19,18 @@ protected:
 	static const long buffer_size = 1024 * 1024 * 16;
 	static long tid;
 
+	struct background_read_params {
+		unsigned char *buffer;
+		ANT_semaphores *sem;
+	} params;
+
 protected:
 	unsigned char *buffer;
 	long long position;
 	long long position_of_end_of_buffer;
+
+	static void *background_read(void *);
+	ANT_semaphores *sem;
 
 public:
 	ANT_instream_buffer(ANT_memory *memory, ANT_instream *source);

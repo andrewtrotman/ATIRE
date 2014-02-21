@@ -26,6 +26,7 @@ public:
 private:
 	ANT_directory_iterator *source;
 	long long scrubbing;
+	static long tid;
 	
 	static void scrub(unsigned char *data, long long size, long long scrubbing);
 

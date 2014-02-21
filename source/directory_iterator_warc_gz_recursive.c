@@ -13,6 +13,8 @@
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_warc.h"
 
+long ANT_directory_iterator_warc_gz_recursive::tid = 0;
+
 /*
 	ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE::ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE()
 	------------------------------------------------------------------------------------
@@ -36,6 +38,14 @@ dewarcer = NULL;
 memory = NULL;
 
 new_provider(filename.filename);
+
+wait_input_time = 0;
+wait_output_time = 0;
+process_time = 0;
+clock = new ANT_stats(new ANT_memory);
+
+message = new char[50];
+sprintf(message, "warc_gz_recursive %ld ", ANT_directory_iterator_warc_gz_recursive::tid++);
 }
 
 /*
@@ -80,12 +90,16 @@ ANT_directory_iterator_object *ANT_directory_iterator_warc_gz_recursive::next(AN
 {
 ANT_directory_iterator_object *got;
 
+START;
+
 while (more_files != NULL)
 	{
+END;
 	if (first_time)
 		got = dewarcer->first(object);
 	else
 		got = dewarcer->next(object);
+START;
 
 	first_time = false;
 
@@ -98,9 +112,13 @@ while (more_files != NULL)
 			}
 		}
 	else
+	{
+END;
 		return got;
+	}
 		
 	}
 
+END;
 return NULL;
 }

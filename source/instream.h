@@ -5,6 +5,16 @@
 #ifndef INSTREAM_H_
 #define INSTREAM_H_
 
+#ifndef START
+	#ifdef LOGGING
+		#define START printf("%ss %lld\n", message, clock->start_timer())
+		#define END printf("%se %lld\n", message, clock->start_timer())
+	#else
+		#define START //
+		#define END //
+	#endif
+#endif
+
 #include "stats.h"
 
 class ANT_memory;

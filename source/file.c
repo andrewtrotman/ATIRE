@@ -19,6 +19,9 @@
 #endif
 #include <stdlib.h>
 #include <fcntl.h>
+#include "critical_section.h"
+
+ANT_critical_section *ANT_file::mutex = new ANT_critical_section;
 
 /*
 	ANT_FILE::ANT_FILE()
@@ -291,7 +294,10 @@ file_position += size;		// this is where we'll be at the end of the read
 /*
 	And now perform the read
 */
-return internals->read_file_64(internals->fp, data, size);
+//ANT_file::mutex->enter();
+int to_return = internals->read_file_64(internals->fp, data, size);
+//ANT_file::mutex->leave();
+return to_return;
 }
 
 /*

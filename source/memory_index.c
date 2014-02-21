@@ -273,6 +273,10 @@ void ANT_memory_index::add_indexed_document(ANT_memory_index_one *index, long lo
 {
 long node;
 
+#ifdef LOGGING
+printf("ANT_memory_index 0 s %lld\n", stats->start_timer());
+#endif
+
 /*
 	March through the hash table of the indexed document looking for non-NULL nodes
 	then add those nodes to the collection's hash table
@@ -283,6 +287,10 @@ for (node = 0; node < ANT_memory_index_one::HASH_TABLE_SIZE; node++)
 
 largest_docno = docno;
 stats->documents = docno;
+
+#ifdef LOGGING
+printf("memory_index 0 e %lld\n", stats->start_timer());
+#endif
 }
 
 #ifdef IMPACT_HEADER
@@ -1050,6 +1058,10 @@ long long pos;
 if (index_file == NULL)
 	return 0;
 
+#ifdef LOGGING
+printf("memory_index 0 s %lld\n", stats->start_timer());
+#endif
+
 #ifdef IMPACT_HEADER
 	impact_header.postings_chain = 0;
 	impact_header.chain_length = 0;
@@ -1316,6 +1328,10 @@ index_file->write((unsigned char *)&four_byte, sizeof(four_byte));
 /*
 	We're done!
 */
+
+#ifdef LOGGING
+printf("memory_index 0 e %lld\n", stats->start_timer());
+#endif
 return 1;
 }
 
@@ -1402,6 +1418,10 @@ long long start, timer;
 if (index_file == NULL)
 	return;			// don't write documents if we're an in-memory indexer
 
+#ifdef LOGGING
+printf("memory_index 0 s %lld\n", stats->start_timer());
+#endif
+
 timer = stats->start_timer();
 
 if (filename != NULL)
@@ -1419,6 +1439,9 @@ if (compressed_document != NULL)
 
 	documents_in_repository++;
 	}
+#ifdef LOGGING
+printf("memory_index 0 e %lld\n", stats->start_timer());
+#endif
 stats->time_to_store_documents_on_disk += stats->stop_timer(timer);
 }
 

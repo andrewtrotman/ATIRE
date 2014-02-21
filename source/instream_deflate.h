@@ -23,6 +23,7 @@ private:
 	long long total_read;				// number of bytes read from the source stream
 	unsigned char *buffer;
 	static const long long buffer_length = (1024*1024);			// use a 1MB buffer
+	static long tid;
 
 public:
 	ANT_instream_deflate(ANT_memory *memory, ANT_instream *source);

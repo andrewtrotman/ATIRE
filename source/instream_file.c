@@ -25,7 +25,7 @@ process_time = 0;
 clock = new ANT_stats(memory);
 
 message = new char[50];
-sprintf(message, "ANT_instream_file %ld ", ANT_instream_file::tid++);
+sprintf(message, "file %ld ", ANT_instream_file::tid++);
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 
 file = NULL;
@@ -58,11 +58,11 @@ long long ANT_instream_file::read(unsigned char *buffer, long long bytes)
 //now = clock->start_timer();
 
 //printf("%send_upstream %lld\n", message, now);
-printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 
 if (bytes == 0)		// read no bytes
 	{
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 //	wait_input_time += clock->stop_timer(now);
 	return 0;
@@ -79,7 +79,7 @@ if (file == NULL)
 	}
 if (bytes_read >= file_length)
 	{
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 //	wait_input_time += clock->stop_timer(now);
 	return -1;		// at EOF so nothing to read
@@ -93,7 +93,7 @@ bytes_read += bytes;
 
 //printf("%sstart_wait %lld\n", message, clock->start_timer());
 file->read(buffer, bytes);
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //printf("%send_wait %lld\n", message, clock->start_timer());
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 //wait_input_time += clock->stop_timer(now);

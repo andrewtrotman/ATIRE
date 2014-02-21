@@ -199,6 +199,8 @@ if (param_block.logo)
 if (first_param >= argc)
 	exit(0);				// no files to index so terminate
 
+printf("ATIRE_index 0 start_process %lld\n", stats.start_timer());
+
 last_report = 0;
 doc = 0;
 index = new ANT_memory_index(param_block.index_filename);
@@ -629,6 +631,8 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	stats.text_render();
 	printf("\n");
 	}
+
+printf("ATIRE_index 0 end_process %lld\n", stats.start_timer());
 
 delete index;
 delete disk;

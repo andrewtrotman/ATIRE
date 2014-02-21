@@ -22,7 +22,7 @@ process_time = 0;
 clock = new ANT_stats(memory);
 
 message = new char[50];
-sprintf(message, "ANT_instream_scrub %ld ", ANT_instream_scrub::tid++);
+sprintf(message, "scrub %ld ", ANT_instream_scrub::tid++);
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 }
 
@@ -60,9 +60,9 @@ long long got = source->read(data, size);
 
 // don't scrub out invalid utf-8 quite yet, wait till we have the whole document
 //now = clock->start_timer();
-printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 ANT_directory_iterator_scrub::scrub(data, got, scrubbing);
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //process_time += clock->stop_timer(now);
 
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());

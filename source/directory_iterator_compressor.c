@@ -8,6 +8,9 @@
 #include "directory_iterator_compressor.h"
 #include "compression_text_factory.h"
 #include "threads.h"
+#include "stats.h"
+#include "memory.h"
+
 
 #ifndef FALSE
 	#define FALSE 0
@@ -16,6 +19,8 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
+
+long ANT_directory_iterator_compressor::tid = 0;
 
 /*
 	ANT_DIRECTORY_ITERATOR_COMPRESSOR::ANT_DIRECTORY_ITERATOR_COMPRESSOR()
@@ -27,6 +32,8 @@ this->compressor = compressor;
 this->threads = threads;
 this->source = source;
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
+
+clock = new ANT_stats(new ANT_memory);
 }
 
 /*
@@ -44,9 +51,10 @@ delete compressor;
 	ANT_DIRECTORY_ITERATOR_COMPRESSOR::WORK_ONE()
 	---------------------------------------------
 */
-void ANT_directory_iterator_compressor::work_one(ANT_compression_text_factory *compressor, ANT_directory_iterator_object *object)
+void ANT_directory_iterator_compressor::work_one(ANT_compression_text_factory *compressor, ANT_directory_iterator_object *object, long id)
 {
 unsigned long size;
+STARTV("compressor");
 
 /*
 	The length of the object does not include the '\0' on the end, which we want to store
@@ -59,6 +67,7 @@ if (compressor->compress(object->compressed, &size, object->file, (unsigned long
 	exit(printf("Cannot compress document (name:%s)\n", object->filename));
 object->compressed_length = size;
 store->add(object);
+ENDV("compressor");
 }
 
 /*
@@ -70,10 +79,13 @@ void ANT_directory_iterator_compressor::work()
 ANT_compression_text_factory *my_compressor;
 ANT_directory_iterator_object object;
 
+static long idd = 0;
+long id = idd++;
+
 my_compressor = compressor->replicate();
 
 while (source->next(&object) != NULL)
-	work_one(my_compressor, &object);
+	work_one(my_compressor, &object, id);
 
 object.filename = NULL;
 store->add(&object); 
@@ -108,7 +120,7 @@ long instance;
 	to get around the problem of not knowing who should call first().
 */
 if (source->first(object) != NULL)
-	work_one(compressor, object);
+	work_one(compressor, object, 0);
 else
 	{
 	/*
