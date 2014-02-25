@@ -185,7 +185,6 @@ while (current < end)
 	current++;		// skip over the zero
 	}
 }
-
 #endif
 
 /*
@@ -194,6 +193,19 @@ while (current < end)
 */
 double ANT_ranking_function_puurula::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
 {
-return term_frequency;
+double prior, query_occurences, query_length, rsv, df, tf = term_frequency;
+
+query_occurences = 1;
+query_length = 1;					// fix this
+
+tf = max(tf - g * pow(tf, g), 0);
+df = (double)collection_frequency / (double)collection_length_in_terms;
+
+rsv = query_occurences * log(tf / (u * df) + 1.0);
+
+prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+
+return rsv + prior;
+
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }

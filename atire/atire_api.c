@@ -1381,17 +1381,6 @@ parsed_query->NEXI_query = new_query;
 void ATIRE_API::feedback(long long top_k)
 {
 /*
-	There are two kinds of relevance feedback supported. In the first we use the top documents to choose new terms
-	and term weights for a new query.  In the second approach we do the initial query, then the second query, then
-	the results of the two are merged some how (usually linear interpolation).
-*/
-ANT_search_engine_result *feedback_result = NULL, *initial_result = NULL, *normalised_initial_result = NULL;
-ANT_memory *feedback_memory = NULL;
-ANT_search_engine_result_id_iterator iterator;
-long long id;
-double feedback_sum, initial_sum, rsv;
-
-/*
 	Get the feedback terms
 */
 parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, parsed_query, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
@@ -1408,13 +1397,48 @@ parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list,
 
 if (feedback_mode == FEEDBACK_INTERPOLATED)
 	{
-	feedback_memory = new ANT_memory(1024);
-	feedback_result = new (feedback_memory) ANT_search_engine_result(feedback_memory, search_engine->document_count());
-	normalised_initial_result = new (feedback_memory) ANT_search_engine_result(feedback_memory, search_engine->document_count());
-	initial_result = search_engine->results_list;
-	search_engine->results_list = feedback_result;
-	}
+	ANT_search_engine_result_id_iterator iterator;
+	ANT_memory_index_one_node **current;
+	double normalizer, term_normaliser, document_score, document_term_score;
+	double term_weight[feedback_terms];
+	long long id;
+	long long term;
 
+
+	long long term_frequency, document_frequency, collection_frequency;
+	normalizer = 0;
+	for (current = parsed_query->feedback_terms; *current != NULL; current++)
+		{
+		term_normaliser = 0;
+		for (id = iterator.first(search_engine->results_list); id >= 0; id = iterator.next())
+			{
+			term_frequency = 1;		// the number of times the term occurs in the document
+			collection_frequency = 1;// the number of times the term occurs in the collection
+			document_frequency = 1;// the number of documents in which the term occurs
+
+			document_term_score = ranking_function->rank(id, search_engine->document_lengths[id], term_frequency, collection_frequency, document_frequency);
+			document_score = search_engine->results_list->accumulator[id].get_rsv();
+			ANT_logsum(term_normaliser, document_term_score + document_score);
+			}
+		ANT_logsum(normalizer, term_normaliser);
+		}
+
+	for (current = parsed_query->feedback_terms, term = 0; *current != NULL; current++, term++)
+		{
+		term_normaliser = 0;
+		for (id = iterator.first(search_engine->results_list); id >= 0; id = iterator.next())
+			{
+			term_frequency = 1;		// the number of times the term occurs in the document
+			collection_frequency = 1;// the number of times the term occurs in the collection
+			document_frequency = 1;// the number of documents in which the term occurs
+
+			document_term_score = ranking_function->rank(id, search_engine->document_lengths[id], term_frequency, collection_frequency, document_frequency);
+			document_score = search_engine->results_list->accumulator[id].get_rsv();
+			ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
+			}
+		term_weight[term] = exp(term_normaliser) * feedback_lambda + (1 - feedback_lambda) * 1 / feedback_terms;
+		}
+	}
 /*
 	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*
 	in the index then there will be no feedback terms an so this will not happen
@@ -1442,66 +1466,6 @@ if (parsed_query->feedback_terms_in_query != 0)
 		Rank
 	*/
 	search_engine->sort_results_list(top_k, &hits);
-	}
-
-/*
-	Clean up the double-result method
-*/
-if (feedback_mode == FEEDBACK_INTERPOLATED)
-	{
-	/*
-		Get the sum of the RSVs for each phase of the feedback process
-	*/
-#define FEEDBACK_USES_LOGS 1
-#ifdef FEEDBACK_USES_LOGS
-	for (initial_sum = 0, id = iterator.first(initial_result); id >= 0; id = iterator.next())
-		initial_sum = ANT_logsum(initial_sum, initial_result->accumulator[id].get_rsv());
-
-	for (feedback_sum = 0, id = iterator.first(feedback_result); id >= 0; id = iterator.next())
-		feedback_sum = ANT_logsum(feedback_sum, feedback_result->accumulator[id].get_rsv());
-#else
-	for (initial_sum = 0, id = iterator.first(initial_result); id >= 0; id = iterator.next())
-		initial_sum += initial_result->accumulator[id].get_rsv();
-
-	for (feedback_sum = 0, id = iterator.first(feedback_result); id >= 0; id = iterator.next())
-		feedback_sum += feedback_result->accumulator[id].get_rsv();
-#endif
-
-	/*
-		Normalise into a copy
-	*/
-	normalised_initial_result->init_accumulators(search_engine->document_count());
-	for (id = iterator.first(initial_result); id >= 0; id = iterator.next())
-		#ifdef FEEDBACK_USES_LOGS
-			normalised_initial_result->set_rsv(id, initial_result->accumulator[id].get_rsv() - initial_sum);
-		#else
-			normalised_initial_result->set_rsv(id, initial_result->accumulator[id].get_rsv() / initial_sum);
-		#endif
-
-	/*
-		Merge, but first re-initialise the original results list (so we don't have to worry about whose memory we're playing with)
-		Then re-rank
-	*/
-	search_engine->results_list = initial_result;
-	search_engine->init_accumulators(top_k);
-
-	search_engine->set_accumulator_width(ANT_pow2_zero_64(search_engine->results_list->width_in_bits));				// by default use what ever the constructor used
-
-	for (id = iterator.first(feedback_result); id >= 0; id = iterator.next())
-		{
-		#ifdef FEEDBACK_USES_LOGS
-			rsv = (((1.0 - feedback_lambda) * exp(normalised_initial_result->accumulator[id].get_rsv())) * (feedback_lambda * exp((feedback_result->accumulator[id].get_rsv() - feedback_sum))));
-		#else
-			rsv = ((1.0 - feedback_lambda) * normalised_initial_result->accumulator[id].get_rsv()) * (feedback_lambda * (feedback_result->accumulator[id].get_rsv() / feedback_sum));
-		#endif
-		initial_result->set_rsv(id, rsv);
-		}
-	search_engine->sort_results_list(top_k, &hits);
-
-	/*
-		Clean up (recall that the ANT_results_list object is fully enclosed in the memory object)
-	*/
-	delete feedback_memory;
 	}
 }
 
