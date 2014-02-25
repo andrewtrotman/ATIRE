@@ -765,7 +765,7 @@ if (params.logo)
 	puts(atire->version());				// print the version string if we parsed the parameters OK
 
 if (params.ranking_function == ANT_ranking_function_factory_object::READABLE)
-	fail = atire->open(ANT_ranking_function_factory_object::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
+	fail = atire->open(ATIRE_API::READABILITY_SEARCH_ENGINE | params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
 else
 	fail = atire->open(params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
 
