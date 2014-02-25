@@ -44,6 +44,7 @@ class ANT_index_document_topsig_signature;
 class ANT_thesaurus;
 class ANT_evaluator;
 class ANT_ANT_param_block;
+class ANT_search_engine_memory_index;
 
 /*
 	class ATIRE_API
@@ -135,6 +136,7 @@ protected:
 	long process_boolean_query(char *query);
 	long process_topsig_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
+	void feedback_interpolated(long long top_k);
 	void query_object_turn_feedback_into_NEXI_query(void);
 	void query_object_with_feedback_to_NEXI_query(void);
 	void feedback(long long top_k);
@@ -235,10 +237,9 @@ public:
 	long long search(char *query, long long top_k = LLONG_MAX, long query_type = QUERY_NEXI);
 
 	/*
-		Call the re-ranker.  This takes the top few results and re-orders based on
-		analysis of the result set.
+		Call the re-ranker.  This takes the top few results and builds an index from them
 	*/
-	void rerank(void);
+	ANT_search_engine_memory_index *rerank(long long top_k);
 
 #ifdef FILENAME_INDEX
 	/*

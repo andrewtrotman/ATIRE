@@ -1202,6 +1202,40 @@ delete [] unique_term_vector;
 }
 
 /*
+	ANT_MEMORY_INDEX::ALLOCATE_DECOMPRESS_BUFFER()
+	----------------------------------------------
+*/
+void ANT_memory_index::allocate_decompress_buffer(void)
+{
+#ifdef IMPACT_HEADER
+	impact_header.postings_chain = 0;
+	impact_header.chain_length = 0;
+	impact_header.the_quantum_count = 0;
+	// extra 1 byte is for the compression scheme
+	impact_value_size = 1 + sizeof(*impact_header.impact_value_start) * ANT_impact_header::NUM_OF_QUANTUMS;
+	doc_count_size = 1 + sizeof(*impact_header.doc_count_start) * ANT_impact_header::NUM_OF_QUANTUMS;
+	impact_offset_size = 1 + sizeof(*impact_header.impact_offset_start) * ANT_impact_header::NUM_OF_QUANTUMS;
+	impact_header.header_size =  impact_value_size + doc_count_size + impact_offset_size;
+	impact_header.header_buffer = (ANT_compressable_integer *)serialisation_memory->malloc(impact_header.header_size);
+	compressed_impact_header_size = (long long)1 + ANT_impact_header::INFO_SIZE + impact_header.header_size;
+	compressed_impact_header_buffer = (unsigned char *)serialisation_memory->malloc(compressed_impact_header_size);
+
+	decompressed_postings_list = (ANT_compressable_integer *)serialisation_memory->malloc(sizeof(*decompressed_postings_list) * largest_docno);
+	compressed_postings_list_length = 1 * ANT_impact_header::NUM_OF_QUANTUMS + (sizeof(*decompressed_postings_list) * largest_docno);
+	compressed_postings_list = (unsigned char *)serialisation_memory->malloc(compressed_postings_list_length);
+	// 1 * NUM_OF_QUANTUMS because the TF in each of 255 lists
+	impacted_postings = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)));
+	stats->bytes_for_decompression_recompression += impact_header.header_size * 2 + compressed_postings_list_length * 3 + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)) - ANT_impact_header::NUM_OF_QUANTUMS;
+#else
+	compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
+	decompressed_postings_list = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length - 1);
+	compressed_postings_list = (unsigned char *)serialisation_memory->malloc(compressed_postings_list_length);
+	impacted_postings = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length + (512 * sizeof(*decompressed_postings_list)));		// 512 because the TF and the 0 at the end of each of 255 lists
+	stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
+#endif
+}
+
+/*
 	ANT_MEMORY_INDEX::SERIALISE()
 	-----------------------------
 */
@@ -1227,33 +1261,7 @@ long long pos;
 if (index_file == NULL)
 	return 0;
 
-#ifdef IMPACT_HEADER
-	impact_header.postings_chain = 0;
-	impact_header.chain_length = 0;
-	impact_header.the_quantum_count = 0;
-	// extra 1 byte is for the compression scheme
-	impact_value_size = 1 + sizeof(*impact_header.impact_value_start) * ANT_impact_header::NUM_OF_QUANTUMS;
-	doc_count_size = 1 + sizeof(*impact_header.doc_count_start) * ANT_impact_header::NUM_OF_QUANTUMS;
-	impact_offset_size = 1 + sizeof(*impact_header.impact_offset_start) * ANT_impact_header::NUM_OF_QUANTUMS;
-	impact_header.header_size =  impact_value_size + doc_count_size + impact_offset_size;
-	impact_header.header_buffer = (ANT_compressable_integer *)serialisation_memory->malloc(impact_header.header_size);
-	compressed_impact_header_size = (long long)1 + ANT_impact_header::INFO_SIZE + impact_header.header_size;
-	compressed_impact_header_buffer = (unsigned char *)serialisation_memory->malloc(compressed_impact_header_size);
-
-	// the first compressed byte is a indication of what compression scheme is used in each quantum
-	compressed_postings_list_length = 1 * ANT_impact_header::NUM_OF_QUANTUMS + (sizeof(*decompressed_postings_list) * largest_docno);
-	decompressed_postings_list = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length - ANT_impact_header::NUM_OF_QUANTUMS);
-	compressed_postings_list = (unsigned char *)serialisation_memory->malloc(compressed_postings_list_length);
-	// 1 * NUM_OF_QUANTUMS because the TF in each of 255 lists
-	impacted_postings = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)));
-	stats->bytes_for_decompression_recompression += impact_header.header_size * 2 + compressed_postings_list_length * 3 + (1 * ANT_impact_header::NUM_OF_QUANTUMS * sizeof(*decompressed_postings_list)) - ANT_impact_header::NUM_OF_QUANTUMS;
-#else
-	compressed_postings_list_length = 1 + (sizeof(*decompressed_postings_list) * largest_docno);
-	decompressed_postings_list = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length - 1);
-	compressed_postings_list = (unsigned char *)serialisation_memory->malloc(compressed_postings_list_length);
-	impacted_postings = (ANT_compressable_integer *)serialisation_memory->malloc(compressed_postings_list_length + (512 * sizeof(*decompressed_postings_list)));		// 512 because the TF and the 0 at the end of each of 255 lists
-	stats->bytes_for_decompression_recompression += compressed_postings_list_length * 3 + 512 - 1;
-#endif
+allocate_decompress_buffer();
 
 /*
 	If we have the documents stored on disk then we need to store the position of the end of the final document.

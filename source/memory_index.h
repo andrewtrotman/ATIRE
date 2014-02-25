@@ -187,6 +187,7 @@ public:
 	void set_compression_validation(unsigned long validate) { factory->set_validation(validate); }
 
 	void add_to_document_repository(char *filename, char *compressed_document = NULL, long compressed_length = 0, long length = 0);
+	void allocate_decompress_buffer(void);
 	long serialise(void);
 
 	void add_indexed_document(ANT_memory_index_one *index, long long docno);

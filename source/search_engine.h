@@ -99,11 +99,6 @@ private:
 	ANT_search_engine_btree_leaf *get_leaf(unsigned char *leaf, long term_in_leaf, ANT_search_engine_btree_leaf *term_details);
 	void initialise(ANT_memory *memory);
 	long long get_btree_leaf_position(char *term, long long *length, long *exact_match, long *btree_root_node);
-#ifdef USE_FLOATED_TF
-	long long place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf term_frequency_weight = 1);
-#else
-	long long place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details);
-#endif
 	long long stem_into_internal_buffers(ANT_stemmer *stemmer, char *base_term);
 
 public:
@@ -113,8 +108,13 @@ public:
 	virtual int open(const char *filename = "index.aspt");
 	void set_accumulator_width(long long width);
 	void init_accumulators(long long top_k);
-	ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
-	unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
+	virtual ANT_search_engine_btree_leaf *get_postings_details(char *term, ANT_search_engine_btree_leaf *term_details);
+	virtual unsigned char *get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
+#ifdef USE_FLOATED_TF
+	long long place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf term_frequency_weight = 1);
+#else
+	long long place_into_internal_buffers(ANT_search_engine_btree_leaf *term_details);
+#endif
 #ifdef IMPACT_HEADER
 	unsigned char *get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination);
 	unsigned char *get_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *destination);
