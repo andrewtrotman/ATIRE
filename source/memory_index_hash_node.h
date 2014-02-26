@@ -81,6 +81,8 @@ public:
 //#endif
 
 private:
+	friend class ANT_search_engine_memory_index;
+	ANT_memory_index_hash_node() {};		// used by ANT_search_engine_memory_index
 	inline long compress_bytes_needed(long long val);
 	inline void compress_into(unsigned char *dest, long long docno);
 	ANT_postings_piece *new_postings_piece(size_t length_in_bytes);

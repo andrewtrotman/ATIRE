@@ -89,12 +89,13 @@ return 1;
 */
 unsigned char *ANT_search_engine_memory_index::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
 {
-ANT_memory_index_hash_node *index_node;
+ANT_memory_index_hash_node *index_node, duplicate_node;
 
 /*
-	Get the node
+	Get the node and take a copy of it (because serialise_one_node() will change it)
 */
 index_node = (ANT_memory_index_hash_node *)term_details->postings_position_on_disk;
+duplicate_node = *index_node;
 
 /*
 	Rewind the buffer
@@ -104,7 +105,7 @@ postings_buffer_location = postings_buffer;
 /*
 	Serialise it
 */
-index->serialise_one_node(this, index_node);
+index->serialise_one_node(this, &duplicate_node);
 
 return (unsigned char *)postings_buffer;
 }

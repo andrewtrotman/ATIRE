@@ -79,16 +79,16 @@ public:
 		You must override these functions if you're going to add a ranking function.
 	*/
 #ifdef IMPACT_HEADER
-	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency);
 	virtual void relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_paramters) = 0;
 #endif
 
 #ifdef IMPACT_HEADER
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency) = 0;
 #else
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency) = 0;
 #endif
-	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency) = 0;
+	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency) = 0;
 
 	/*
 		You can override this function if you want fast boolean, otherwise it'll run through the postings list
@@ -97,9 +97,9 @@ public:
 		and example).
 	*/
 #ifdef IMPACT_HEADER
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency);
 #else
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency);
 #endif
 
 	/*
@@ -113,7 +113,7 @@ public:
 		postings list is generated from the tf array it is then (correctly) trimmed thus further reducing the
 		computational cost of the search.
 	*/
-	virtual void relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar, double query_frequency);
 
 	/*
 		Functions used for quantised impact ordering.  We need to compute the range of values that will be

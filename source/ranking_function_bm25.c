@@ -68,7 +68,7 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
@@ -123,7 +123,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
@@ -184,7 +184,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_BM25::RANK()
 	---------------------------------
 */
-double ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 const double k1_plus_1 = k1 + 1.0;
 double idf, tf, rsv;

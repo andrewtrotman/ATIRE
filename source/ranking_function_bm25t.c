@@ -126,7 +126,7 @@ return ANT_secant(1.0, 1.1, evaluate_k1, &sum);
 	ANT_RANKING_FUNCTION_BM25T::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------
 */
-void ANT_ranking_function_BM25T::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25T::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 double c_prime, f_prime, rsv, tf, idf, k1;
@@ -163,7 +163,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 }
 
 #else
-void ANT_ranking_function_BM25T::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25T::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 }
 #endif
@@ -172,7 +172,7 @@ void ANT_ranking_function_BM25T::relevance_rank_top_k(ANT_search_engine_result *
 	ANT_RANKING_FUNCTION_BM25T::RANK()
 	----------------------------------
 */
-double ANT_ranking_function_BM25T::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_BM25T::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 return term_frequency;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

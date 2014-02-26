@@ -712,6 +712,7 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 		max_quantums[heap_items].term_details = &term_string->term_details;
 		max_quantums[heap_items].prescalar = term_string->tf_weight;
 		max_quantums[heap_items].postscalar = term_string->rsv_weight;
+		max_quantums[heap_items].query_frequency = term_string->query_frequency;
 		max_quantums_pointers[heap_items] = &max_quantums[heap_items];
 		max_remaining_quantum += max_quantums[heap_items].current_max_quantum;
 		heap_items++;
@@ -849,21 +850,21 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 	term_string = term_list[current_term];
 
 	if (!ANT_islower(*term_string->get_term()->start))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight);
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 	else
 		{
 		if (expander_tf != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 			}
 		else if (stemmer != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 			}
 		else
-			search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight);
+			search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 		}
 	}
 }
@@ -1098,15 +1099,15 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 
 	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), true);
 	if (!ANT_islower(*token_buffer))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, into);
+		search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, 1, into);
 	else
 		{
 		if (expander_tf != NULL)
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, 1, 1, into);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, 1, 1, 1, into);
 		else if (stemmer == NULL)
-			search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, into);
+			search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, 1, into);
 		else
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, 1, 1, into);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, 1, 1, 1, into);
 		}
 
 	return into;
@@ -1307,6 +1308,7 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->tf_weight = 1;
 	term->rsv_weight = parsed_query->feedback_terms[current_feedback]->kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	term->query_frequency = 1;
 	}
 
 parsed_query->terms_in_query = parsed_query->feedback_terms_in_query;
@@ -1351,6 +1353,7 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->tf_weight = 1;
 	term->rsv_weight = parsed_query->feedback_terms[current_feedback]->kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	term->query_frequency = 1;
 	}
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
 new_query[parsed_query->terms_in_query - 1].next = NULL;
@@ -1386,7 +1389,7 @@ ANT_NEXI_term_ant *term_string;
 double normalizer, term_normaliser, document_score, document_term_score;
 double *term_weight;
 ANT_search_engine_btree_leaf term_details;
-long long id;
+long long id, docid;
 long long term;
 unsigned short term_frequency;
 long long document_frequency, collection_frequency;
@@ -1394,7 +1397,10 @@ long long document_frequency, collection_frequency;
 /*
 	Create space for the feedback weights
 */
-term_weight = new double [feedback_terms];
+term = 0;
+for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next())
+	term++;
+term_weight = new double [term];
 
 /*
 	Build an index from the top_k documents
@@ -1402,7 +1408,7 @@ term_weight = new double [feedback_terms];
 memory_index = rerank(top_k);
 
 /*
-	Compute the term-specific weighting component
+	Compute the term-specific weighting component normlizer
 */
 normalizer = 0;
 for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
@@ -1417,42 +1423,61 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		Turn the poistings list into an array[index] where index is the document number in the rankge 1..feedback_documents.  The
 		attat is search_engine->stem_buffer
 	*/
-	memset(search_engine->stem_buffer, 0, top_k * sizeof(*search_engine->stem_buffer));
+	memset(memory_index->stem_buffer, 0, top_k * sizeof(*memory_index->stem_buffer));
 	memory_index->place_into_internal_buffers(&term_details);
 
 	term_normaliser = 0;
 	for (id = 0; id < top_k; id++)
 		{
-		term_frequency = search_engine->stem_buffer[id];			// the number of times the term occurs in the document
+		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
+
+		term_frequency = memory_index->stem_buffer[id];			// the number of times the term occurs in the document
 		collection_frequency = term_details.global_collection_frequency;
 		document_frequency = term_details.global_document_frequency;
 
-		document_term_score = ranking_function->rank((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[id], term_frequency, collection_frequency, document_frequency);
-		document_score = search_engine->results_list->accumulator[id].get_rsv();
+		document_term_score = ranking_function->rank((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1);
+		document_score = search_engine->results_list->accumulator[docid].get_rsv();
 		ANT_logsum(term_normaliser, document_term_score + document_score);
 		}
 	ANT_logsum(normalizer, term_normaliser);
 	}
 
+/*
+	Build the term specific weight
+*/
 for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
 	{
+	/*
+		get the search term and its stats in the top few documents
+	*/
+	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	memory_index->process_one_term(token_buffer, &term_details);
+
+	/*
+		Turn the poistings list into an array[index] where index is the document number in the rankge 1..feedback_documents.  The
+		attat is search_engine->stem_buffer
+	*/
+	memset(memory_index->stem_buffer, 0, top_k * sizeof(*memory_index->stem_buffer));
+	memory_index->place_into_internal_buffers(&term_details);
+
 	term_normaliser = 0;
-	for (id = iterator.first(search_engine->results_list); id >= 0; id = iterator.next())
+
+	for (id = 0; id < top_k; id++)
 		{
-		term_frequency = 1;		// the number of times the term occurs in the document
+		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
+
+		term_frequency = memory_index->stem_buffer[id];			// the number of times the term occurs in the document
 		collection_frequency = term_details.global_collection_frequency;
 		document_frequency = term_details.global_document_frequency;
 
-		document_term_score = ranking_function->rank((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[id], term_frequency, collection_frequency, document_frequency);
-		document_score = search_engine->results_list->accumulator[id].get_rsv();
+		document_term_score = ranking_function->rank((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1);
+		document_score = search_engine->results_list->accumulator[docid].get_rsv();
 		ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
 		}
 	term_weight[term] = exp(term_normaliser) * feedback_lambda + (1 - feedback_lambda) * 1 / feedback_terms;
 	}
+
 delete [] term_weight;
-
-
-
 
 /*
 	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*

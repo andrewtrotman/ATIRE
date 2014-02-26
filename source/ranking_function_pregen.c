@@ -36,7 +36,7 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_PREGEN::RELEVANCE_RANK_TOP_K()
 	---------------------------------------------------
 */
-void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 ANT_compressable_integer *current, *end;
@@ -67,7 +67,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	ANT_RANKING_FUNCTION_PREGEN::RELEVANCE_RANK_TOP_K()
 	---------------------------------------------------
 */
-void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_pregen::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 ANT_compressable_integer *current, *end;
@@ -96,7 +96,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_PREGEN::RANK()
 	-----------------------------------
 */
-double ANT_ranking_function_pregen::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_pregen::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 exit(printf("Cannot compute a static rsv for a pregen because they are runtime plugable\n"));
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

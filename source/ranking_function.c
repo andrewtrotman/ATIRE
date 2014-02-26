@@ -83,7 +83,7 @@ this->quantization_bits = quantization_bits;
 	----------------------------------------------
 	pass every single quantum to the rank function for evaluation
 */
-void ANT_ranking_function::relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function::relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 ANT_compressable_integer *current, *end;
 ANT_ranking_function_quantum_parameters quantum_parameters;
@@ -92,6 +92,7 @@ quantum_parameters.accumulator = accumulator;
 quantum_parameters.term_details = term_details;
 quantum_parameters.prescalar = prescalar;
 quantum_parameters.postscalar = postscalar;
+quantum_parameters.query_frequency = query_frequency;
 
 impact_header->impact_value_ptr = impact_header->impact_value_start;
 impact_header->doc_count_ptr = impact_header->doc_count_start;
@@ -288,7 +289,7 @@ term_details->impacted_length = sum + 2 * buckets_used;
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
 	----------------------------------------------
 */
-void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 ANT_compressable_integer *current, *end;
@@ -316,8 +317,8 @@ while(impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 /*
 	Now call the top-k based relevance ranking function (pass 2)
 */
-relevance_rank_quantum(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
-//relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar);
+relevance_rank_quantum(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar, query_frequency);
+//relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, prescalar, postscalar, query_frequency);
 
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
@@ -326,7 +327,7 @@ relevance_rank_quantum(accumulators, term_details, impact_header, impact_orderin
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_BOOLEAN()
 	----------------------------------------------
 */
-void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function::relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 ANT_compressable_integer *current, *end;
@@ -352,7 +353,7 @@ while (current < end)
 /*
 	Now call the top-k based relevance ranking function (pass 2)
 */
-relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, prescalar, postscalar);
+relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, prescalar, postscalar, query_frequency);
 }
 #endif
 
@@ -360,7 +361,7 @@ relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, pr
 	ANT_RANKING_FUNCTION::RELEVANCE_RANK_TF()
 	-----------------------------------------
 */
-void ANT_ranking_function::relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function::relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long now;
 now = stats->start_timer();
@@ -372,20 +373,23 @@ now = stats->start_timer();
 #endif
 stats->add_stemming_reencode_time(stats->stop_timer(now));
 
-if (bitstring == NULL) {
-#ifdef IMPACT_HEADER
-	relevance_rank_quantum(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
-	//relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
-#else
-	relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
-#endif
-} else {
-#ifdef IMPACT_HEADER
-	relevance_rank_boolean(bitstring, accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar);
-#else
-	relevance_rank_boolean(bitstring, accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar);
-#endif
-}
+if (bitstring == NULL)
+	{
+	#ifdef IMPACT_HEADER
+		relevance_rank_quantum(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+		//relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+	#else
+		relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+	#endif
+	}
+else
+	{
+	#ifdef IMPACT_HEADER
+		relevance_rank_boolean(bitstring, accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+	#else
+		relevance_rank_boolean(bitstring, accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+	#endif
+	}
 }
 
 /*
@@ -472,7 +476,7 @@ docid = -1;
 while (current_tf < end)
 	{
 	docid += *current_docid;
-	rsv = rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency);
+	rsv = rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency, 1);
 
 	if (rsv > *maximum)
 		*maximum = rsv;
@@ -502,7 +506,7 @@ docid = -1;
 while (current_tf < end)
 	{
 	docid += *current_docid;
-	*current_tf = (unsigned short)quantize(rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency), maximum, minimum);
+	*current_tf = (unsigned short)quantize(rank(docid, document_lengths[docid], *current_tf, collection_frequency, document_frequency, 1), maximum, minimum);
 	current_tf++;
 	current_docid++;
 	}

@@ -19,7 +19,7 @@ public:
 	long long current_max_quantum;
 	long long quantum_count;
 	ANT_search_engine_btree_leaf *term_details;
-	double prescalar, postscalar;
+	double prescalar, postscalar, query_frequency;
 
 	struct compare
 		{
