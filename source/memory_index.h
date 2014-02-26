@@ -141,6 +141,7 @@ private:
 	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
+	void serialise_one_node(ANT_file *file, ANT_memory_index_hash_node *root);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
 public:

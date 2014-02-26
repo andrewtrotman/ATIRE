@@ -644,6 +644,28 @@ else
 long ANT_memory_index::serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root)
 {
 long terms = 0;
+
+if (root->right != NULL)
+	terms += serialise_all_nodes(file, root->right);
+
+if (!should_prune(root))
+	{
+	terms++;
+	serialise_one_node(file, root);
+	}
+
+if (root->left != NULL)
+	terms += serialise_all_nodes(file, root->left);
+
+return terms;
+}
+
+/*
+	ANT_MEMORY_INDEX::SERIALISE_ONE_NODE()
+	--------------------------------------
+*/
+void ANT_memory_index::serialise_one_node(ANT_file *file, ANT_memory_index_hash_node *root)
+{
 long long doc_size, tf_size, len, impacted_postings_length, current_disk_position;
 #ifdef IMPACT_HEADER
 	unsigned char *compressed_header_ptr, *compressed_postings_ptr;
@@ -653,36 +675,29 @@ long long doc_size, tf_size, len, impacted_postings_length, current_disk_positio
 	ANT_compressable_integer temp;
 #endif
 
-if (root->right != NULL)
-	terms += serialise_all_nodes(file, root->right);
+stats->term_occurences += root->collection_frequency;
+get_serialised_postings(root, &doc_size, &tf_size);
 
-if (!should_prune(root))
-	{
-	terms += 1;
+stats->bytes_to_store_docids += doc_size;
+stats->bytes_to_store_tfs += tf_size;
 
-	stats->term_occurences += root->collection_frequency;
-	get_serialised_postings(root, &doc_size, &tf_size);
+impacted_postings_length = node_to_postings(root);
 
-	stats->bytes_to_store_docids += doc_size;
-	stats->bytes_to_store_tfs += tf_size;
+/*
+	At this point the impact ordered (not compressed) postings list is in impacted_postings
+	and the first 2 elements of decompressed_postings_list are the first 2 numbers (which are
+	then shoved in the vocab file to save space (and a seek)).  impacted_postings_length stores
+	the length of the impacted_postings array (in integers)
+*/
+#ifdef SPECIAL_COMPRESSION
+	if (root->document_frequency <= 2)
+		{
+		/*
+			Store the first postings(4 bytes) in the higher order of the 8 bytes
+			and store the first term frequency (4 bytes) in the lower order of the 8 bytes
+		*/
 
-	impacted_postings_length = node_to_postings(root);
-
-	/*
-		At this point the impact ordered (not compressed) postings list is in impacted_postings
-		and the first 2 elements of decompressed_postings_list are the first 2 numbers (which are
-		then shoved in the vocab file to save space (and a seek)).  impacted_postings_length stores
-		the length of the impacted_postings array (in integers)
-	*/
-	#ifdef SPECIAL_COMPRESSION
-		if (root->document_frequency <= 2)
-			{
-			/*
-				Store the first postings(4 bytes) in the higher order of the 8 bytes
-				and store the first term frequency (4 bytes) in the lower order of the 8 bytes
-			*/
-
-#ifndef IMPACT_HEADER
+		#ifndef IMPACT_HEADER
 			/*
 				If we aren't using IMPACT_HEADER then not doing this will
 				lead to SPECIAL_COMPRESSION errors, so we have to do these manipulations
@@ -697,105 +712,43 @@ if (!should_prune(root))
 					serialised_tfs[1] = (unsigned short)(impacted_postings[2] == 0 ? impacted_postings[3] : impacted_postings[0]);
 					}
 				}
-#else
+		#else
 			/*
 				We get the docids difference encoded, but if we have different tfs then they don't need to be
 			*/
 			if (root->document_frequency == 2 && serialised_tfs[0] != serialised_tfs[1])
 				decompressed_postings_list[1] += decompressed_postings_list[0];
-#endif
+		#endif
 
-			/*
-				We can _still_ get the tfs around the wrong way, still so put them around the right way
-			*/
-			if (root->document_frequency == 2 && serialised_tfs[1] > serialised_tfs[0])
-				{
-				temp = serialised_tfs[0];
-				serialised_tfs[0] = serialised_tfs[1];
-				serialised_tfs[1] = (unsigned short)temp;
+		/*
+			We can _still_ get the tfs around the wrong way, still so put them around the right way
+		*/
+		if (root->document_frequency == 2 && serialised_tfs[1] > serialised_tfs[0])
+			{
+			temp = serialised_tfs[0];
+			serialised_tfs[0] = serialised_tfs[1];
+			serialised_tfs[1] = (unsigned short)temp;
 
-				temp = decompressed_postings_list[0];
-				decompressed_postings_list[0] = decompressed_postings_list[1];
-				decompressed_postings_list[1] = temp;
-				}
+			temp = decompressed_postings_list[0];
+			decompressed_postings_list[0] = decompressed_postings_list[1];
+			decompressed_postings_list[1] = temp;
+			}
 
-			root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
+		root->in_disk.docids_pos_on_disk = ((long long)decompressed_postings_list[0]) << 32 | serialised_tfs[0];
 
-			/*
-				Use impacted_length and end_pos_on_disk to store the second postings and term frequency
-			*/
-			if (root->document_frequency == 2)
-				{
-				root->in_disk.impacted_length = decompressed_postings_list[1];
-				root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk; // because root->docids_pos_on_disk is subtracted later
-				}
-			else
-				root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
+		/*
+			Use impacted_length and end_pos_on_disk to store the second postings and term frequency
+		*/
+		if (root->document_frequency == 2)
+			{
+			root->in_disk.impacted_length = decompressed_postings_list[1];
+			root->in_disk.end_pos_on_disk = serialised_tfs[1] + root->in_disk.docids_pos_on_disk; // because root->docids_pos_on_disk is subtracted later
 			}
 		else
-			{
-			#ifdef IMPACT_HEADER
-				if (root->string[0] == '~')
-					{
-					len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
-
-					current_disk_position = file->tell();
-					file->write(compressed_postings_list, len);
-
-					root->in_disk.docids_pos_on_disk = current_disk_position;
-					root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-					root->in_disk.end_pos_on_disk = file->tell();
-					}
-				else
-					{
-					impact_header.impact_value_start = impact_header.header_buffer;
-					impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
-					impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
-
-					// compress the impact postings, one quantum at time, and update the corresponding offsets in the header
-					end = impact_header.impact_offset_start + impact_header.the_quantum_count;
-					impact_header.impact_offset_ptr = impact_header.impact_offset_start;
-
-					compressed_postings_ptr = compressed_postings_list;
-					for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++)
-						{
-						len = factory->compress(compressed_postings_ptr, (long long)1 + *impact_header.doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
-						// convert the pointer into offset
-						*impact_header.impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
-						compressed_postings_ptr += len;
-						}
-
-					// compress the impact header
-					compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
-					len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
-					// the offset for the beginning of the postings
-					impact_header.beginning_of_the_postings = (beginning_of_the_postings_type)(ANT_impact_header::INFO_SIZE + len);
-					impact_header.set_INFO(compressed_impact_header_buffer);
-					compressed_header_ptr += len;
-
-					// write the impact header to disk
-					current_disk_position = file->tell();
-					file->write(compressed_impact_header_buffer, compressed_header_ptr - compressed_impact_header_buffer);
-
-					// write the compressed postings to disk
-					file->write(compressed_postings_list, compressed_postings_ptr - compressed_postings_list);
-
-					root->in_disk.docids_pos_on_disk = current_disk_position;
-					root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-					root->in_disk.end_pos_on_disk = file->tell();
-				}
-			#else
-				len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
-
-				current_disk_position = file->tell();
-				file->write(compressed_postings_list, len);
-
-				root->in_disk.docids_pos_on_disk = current_disk_position;
-				root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
-				root->in_disk.end_pos_on_disk = file->tell();
-			#endif
-			}
-	#else // else #ifdef SPECIAL_COMPRESSION
+			root->in_disk.impacted_length = root->in_disk.end_pos_on_disk = 0;
+		}
+	else
+		{
 		#ifdef IMPACT_HEADER
 			if (root->string[0] == '~')
 				{
@@ -831,7 +784,7 @@ if (!should_prune(root))
 				compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
 				len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
 				// the offset for the beginning of the postings
-				impact_header.beginning_of_the_postings = ANT_impact_header::INFO_SIZE + len;
+				impact_header.beginning_of_the_postings = (beginning_of_the_postings_type)(ANT_impact_header::INFO_SIZE + len);
 				impact_header.set_INFO(compressed_impact_header_buffer);
 				compressed_header_ptr += len;
 
@@ -855,14 +808,70 @@ if (!should_prune(root))
 			root->in_disk.docids_pos_on_disk = current_disk_position;
 			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
 			root->in_disk.end_pos_on_disk = file->tell();
-		#endif //end of #ifdef IMPACT_HEADER
-	#endif // end of #ifdef SPECIAL_COMPRESSION
-	}
+		#endif
+		}
+#else // else #ifdef SPECIAL_COMPRESSION
+	#ifdef IMPACT_HEADER
+		if (root->string[0] == '~')
+			{
+			len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
 
-if (root->left != NULL)
-	terms += serialise_all_nodes(file, root->left);
+			current_disk_position = file->tell();
+			file->write(compressed_postings_list, len);
 
-return terms;
+			root->in_disk.docids_pos_on_disk = current_disk_position;
+			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+			root->in_disk.end_pos_on_disk = file->tell();
+			}
+		else
+			{
+			impact_header.impact_value_start = impact_header.header_buffer;
+			impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
+			impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
+
+			// compress the impact postings, one quantum at time, and update the corresponding offsets in the header
+			end = impact_header.impact_offset_start + impact_header.the_quantum_count;
+			impact_header.impact_offset_ptr = impact_header.impact_offset_start;
+
+			compressed_postings_ptr = compressed_postings_list;
+			for (impact_header.impact_offset_ptr = impact_header.impact_offset_start, impact_header.doc_count_ptr = impact_header.doc_count_start; impact_header.impact_offset_ptr != end; impact_header.impact_offset_ptr++, impact_header.doc_count_ptr++)
+				{
+				len = factory->compress(compressed_postings_ptr, (long long)1 + *impact_header.doc_count_ptr * sizeof(ANT_compressable_integer), impacted_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
+				// convert the pointer into offset
+				*impact_header.impact_offset_ptr = compressed_postings_ptr - compressed_postings_list;
+				compressed_postings_ptr += len;
+				}
+
+			// compress the impact header
+			compressed_header_ptr = compressed_impact_header_buffer + ANT_impact_header::INFO_SIZE;
+			len = factory->compress(compressed_header_ptr, compressed_impact_header_size, impact_header.header_buffer, impact_header.the_quantum_count * 3);
+			// the offset for the beginning of the postings
+			impact_header.beginning_of_the_postings = ANT_impact_header::INFO_SIZE + len;
+			impact_header.set_INFO(compressed_impact_header_buffer);
+			compressed_header_ptr += len;
+
+			// write the impact header to disk
+			current_disk_position = file->tell();
+			file->write(compressed_impact_header_buffer, compressed_header_ptr - compressed_impact_header_buffer);
+
+			// write the compressed postings to disk
+			file->write(compressed_postings_list, compressed_postings_ptr - compressed_postings_list);
+
+			root->in_disk.docids_pos_on_disk = current_disk_position;
+			root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+			root->in_disk.end_pos_on_disk = file->tell();
+			}
+	#else
+		len = factory->compress(compressed_postings_list, compressed_postings_list_length, impacted_postings, impacted_postings_length);
+
+		current_disk_position = file->tell();
+		file->write(compressed_postings_list, len);
+
+		root->in_disk.docids_pos_on_disk = current_disk_position;
+		root->in_disk.impacted_length = impacted_postings_length;		// length of the impacted list measured in integers (for decompression purposes)
+		root->in_disk.end_pos_on_disk = file->tell();
+	#endif //end of #ifdef IMPACT_HEADER
+#endif // end of #ifdef SPECIAL_COMPRESSION
 }
 
 /*

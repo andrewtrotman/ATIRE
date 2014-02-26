@@ -16,6 +16,8 @@ ANT_search_engine_memory_index::ANT_search_engine_memory_index(ANT_memory_index 
 this->index = index;
 this->memory = memory;
 index->quantization_bits = 8;
+postings_buffer_location = postings_buffer = NULL;
+postings_buffer_length = 0;
 }
 
 /*
@@ -55,25 +57,54 @@ return 1;
 }
 
 /*
+	ANT_SEARCH_ENGINE_MEMORY_INDEX::WRITE()
+	---------------------------------------
+*/
+long ANT_search_engine_memory_index::write(unsigned char *data, long long size)
+{
+char *tmp;
+long long used;
+
+if (postings_buffer_location + size > postings_buffer + postings_buffer_length)
+	{
+	used = postings_buffer_location - postings_buffer;
+	postings_buffer_length = postings_buffer_length + size;			// used + size would be the exact size, this creates a bit of spare.
+	tmp = (char *)memory->malloc(postings_buffer_length);
+	memcpy(tmp, postings_buffer, used);
+	postings_buffer = tmp;
+	postings_buffer_location = postings_buffer + used;
+	}
+
+memcpy(postings_buffer_location, data, size);
+postings_buffer_location += size;
+
+return 1;
+}
+
+/*
 	ANT_SEARCH_ENGINE_MEMORY_INDEX::GET_POSTINGS()
 	----------------------------------------------
 */
 unsigned char *ANT_search_engine_memory_index::get_postings(ANT_search_engine_btree_leaf *term_details, unsigned char *destination)
 {
 ANT_memory_index_hash_node *index_node;
-long long length;
-long long doc_size, tf_size;
-
-index_node = (ANT_memory_index_hash_node *)term_details->postings_position_on_disk;
-
-index->get_serialised_postings(index_node, &doc_size, &tf_size);
-length = index->node_to_postings(index_node);
 
 /*
-	Somehow in here we need to compress the impact ordered postings we just got back, and return that
+	Get the node
 */
+index_node = (ANT_memory_index_hash_node *)term_details->postings_position_on_disk;
 
-return (unsigned char *)index->impacted_postings;
+/*
+	Rewind the buffer
+*/
+postings_buffer_location = postings_buffer;
+
+/*
+	Serialise it
+*/
+index->serialise_one_node(this, index_node);
+
+return (unsigned char *)postings_buffer;
 }
 
 /*
