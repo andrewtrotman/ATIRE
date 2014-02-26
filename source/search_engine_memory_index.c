@@ -37,11 +37,10 @@ delete index;
 int ANT_search_engine_memory_index::open(const char *filename)
 {
 documents = index->largest_docno;
+memory->realign();
 #ifdef IMPACT_HEADER
 	impact_header.header_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*impact_header.header_buffer) * ANT_impact_header::NUM_OF_QUANTUMS * 3 + ANT_COMPRESSION_FACTORY_END_PADDING);
-	memory->realign();
 	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (documents + ANT_COMPRESSION_FACTORY_END_PADDING));
-	memory->realign();
 #else
 	/*
 		Allocate space for decompression.
@@ -50,8 +49,11 @@ documents = index->largest_docno;
 			Further add ANT_COMPRESSION_FACTORY_END_PADDING so that compression schemes that don't know when to stop (such as Simple-9) can overflow without problems.
 	*/
 	decompress_buffer = (ANT_compressable_integer *)memory->malloc(sizeof(*decompress_buffer) * (512 + documents + ANT_COMPRESSION_FACTORY_END_PADDING));
-	memory->realign();
 #endif
+
+memory->realign();
+stem_buffer = (ANT_weighted_tf *)memory->malloc(stem_buffer_length_in_bytes = (sizeof(*stem_buffer) * documents));
+memory->realign();
 
 return 1;
 }
