@@ -1387,7 +1387,6 @@ ANT_NEXI_term_iterator term_iterator;
 ANT_search_engine_result_id_iterator iterator;
 ANT_NEXI_term_ant *term_string;
 double normalizer, term_normaliser, document_score, document_term_score;
-double *term_weight;
 ANT_search_engine_btree_leaf term_details;
 long long id, docid;
 long long term;
@@ -1400,7 +1399,6 @@ long long document_frequency, collection_frequency;
 term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next())
 	term++;
-term_weight = new double [term];
 
 /*
 	Build an index from the top_k documents
@@ -1474,10 +1472,8 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		document_score = search_engine->results_list->accumulator[docid].get_rsv();
 		ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
 		}
-	term_weight[term] = exp(term_normaliser) * feedback_lambda + (1 - feedback_lambda) * 1 / feedback_terms;
+	term_string->query_frequency = exp(term_normaliser) * feedback_lambda + (1 - feedback_lambda) * 1 / feedback_terms;
 	}
-
-delete [] term_weight;
 
 /*
 	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*
