@@ -1777,6 +1777,10 @@ long long ATIRE_API::set_trim_postings_k(long long static_prune_point)
 return search_engine->set_trim_postings_k(static_prune_point);
 }
 
+/*
+	ATIRE_API::SET_PROCESSING_STRATEGY()
+	------------------------------------
+*/
 void ATIRE_API::set_processing_strategy(long new_strategy, uint8_t early_termination_strategy)
 {
 long long i;

@@ -50,6 +50,7 @@ private:
 	long long highest_df;
 	const char *index_filename;
 	long memory_model;
+	unsigned char *special_compression_buffer;
 
 	/*
 		If the index contains the documents then we need to deserialise the positions and store them

@@ -192,10 +192,14 @@ get_postings_details("~length", &collection_details);
 documents = collection_details.local_document_frequency;
 
 if (this->memory_model) //INDEX_IN_MEMORY, no need to allocate memory
+	{
 	postings_buffer = NULL;
+	special_compression_buffer = (unsigned char *)memory->malloc(1024);// must be long enough to store the worst case of two posintgs + impact_headers, etc.  1024 is probably way too large.
+	}
 else
 	{
 	postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
+	special_compression_buffer = NULL;
 	memory->realign();
 	}
 
@@ -519,7 +523,8 @@ else
 	ANT_SEARCH_ENGINE::GET_ONE_QUANTUM()
 	-------------------------------------
 */
-unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination) {
+unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination)
+{
 #ifdef SPECIAL_COMPRESSION
 	if (term_details->local_document_frequency <= 2)
 		{
@@ -638,6 +643,12 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
 		{
+		/*
+			We can't return a pointer to a location in the file because there isn't one... so we have to decode the postings and put them somewhere.
+		*/
+		if (special_compression_buffer != NULL)
+			destination = special_compression_buffer;
+
 #ifdef IMPACT_HEADER
 		ANT_compressable_integer *postings;
 		quantum_count_type the_quantum_count = 1;
@@ -826,11 +837,7 @@ return stemmed_term_details;
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_QUANTUM()
 	--------------------------------------------------------
 */
-void *ANT_search_engine::read_and_decompress_for_one_quantum(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_impact_header *the_impact_header,
-					ANT_quantum *the_quantum,
-					ANT_compressable_integer *the_decompressed_buffer)
+void *ANT_search_engine::read_and_decompress_for_one_quantum(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, ANT_compressable_integer *the_decompressed_buffer)
 {
 void *verify = NULL;
 long long now, bytes_already_read;
@@ -862,9 +869,7 @@ return verify;
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_IMPACT_HEADER()
 	--------------------------------------------------------------
 */
-void *ANT_search_engine::read_and_decompress_for_one_impact_header(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_impact_header *the_impact_header)
+void *ANT_search_engine::read_and_decompress_for_one_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header)
 {
 void *verify = NULL;
 long long now, bytes_already_read;
@@ -909,14 +914,9 @@ return verify;
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_TERM()
 	-----------------------------------------------------
 */
-void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_impact_header *the_impact_header,
-					ANT_compressable_integer *the_decompressed_buffer)
+void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_compressable_integer *the_decompressed_buffer)
 #else
-void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_compressable_integer *the_decompressed_buffer)
+void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_compressable_integer *the_decompressed_buffer)
 #endif
 {
 void *verify = NULL;
