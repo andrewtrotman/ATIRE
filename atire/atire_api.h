@@ -132,7 +132,7 @@ protected:
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
 	long process_topsig_query(ANT_NEXI_term_ant *parse_tree);
 	void boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves);
-	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function);
+	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function, double fake_terms_in_query = -1);
 	long process_boolean_query(char *query);
 	long process_topsig_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);

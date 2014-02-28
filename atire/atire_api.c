@@ -873,7 +873,7 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 	ATIRE_API::PROCESS_NEXI_QUERY()
 	-------------------------------
 */
-long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function)
+long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function, double fake_terms_in_query)
 {
 ANT_NEXI_term_ant *term_string;
 ANT_NEXI_term_iterator term;
@@ -911,7 +911,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 /*
 	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
 */
-search_engine->results_list->set_term_count(terms_in_query);
+search_engine->results_list->set_term_count(fake_terms_in_query <= 0 ? terms_in_query : fake_terms_in_query);
 
 /*
    Check if the number of terms exceed the limit
@@ -1389,28 +1389,25 @@ ANT_NEXI_term_ant *term_string;
 double normalizer, term_normaliser, document_score, document_term_score;
 ANT_search_engine_btree_leaf term_details;
 long long id, docid;
-long long term;
+long long term, terms_in_the_query;
 unsigned short term_frequency;
 long long document_frequency, collection_frequency;
+double sum_of_query_frequencies;
 
 /*
-	Create space for the feedback weights
+	Build an index from the top feedback_documents documents
 */
-term = 0;
-for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next())
-	term++;
 
-/*
-	Build an index from the top_k documents
-*/
-memory_index = rerank(top_k);
+memory_index = rerank(feedback_documents);
 
 /*
 	Compute the term-specific weighting component normlizer
 */
 normalizer = 0;
+terms_in_the_query = 0;
 for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
 	{
+	terms_in_the_query += term_string->query_frequency;
 	/*
 		get the search term and its stats in the top few documents
 	*/
@@ -1421,11 +1418,11 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		Turn the poistings list into an array[index] where index is the document number in the rankge 1..feedback_documents.  The
 		attat is search_engine->stem_buffer
 	*/
-	memset(memory_index->stem_buffer, 0, top_k * sizeof(*memory_index->stem_buffer));
+	memset(memory_index->stem_buffer, 0, feedback_documents * sizeof(*memory_index->stem_buffer));
 	memory_index->place_into_internal_buffers(&term_details);
 
 	term_normaliser = 0;
-	for (id = 0; id < top_k; id++)
+	for (id = 0; id < feedback_documents; id++)
 		{
 		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
 
@@ -1433,16 +1430,17 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		collection_frequency = term_details.global_collection_frequency;
 		document_frequency = term_details.global_document_frequency;
 
-		document_term_score = ranking_function->rank((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1);
+		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, search_engine->results_list->get_term_count());
 		document_score = search_engine->results_list->accumulator[docid].get_rsv();
-		ANT_logsum(term_normaliser, document_term_score + document_score);
+		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score);
 		}
-	ANT_logsum(normalizer, term_normaliser);
+	normalizer = ANT_logsum(normalizer, term_normaliser);
 	}
 
 /*
 	Build the term specific weight
 */
+sum_of_query_frequencies = 0;
 for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
 	{
 	/*
@@ -1455,12 +1453,12 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		Turn the poistings list into an array[index] where index is the document number in the rankge 1..feedback_documents.  The
 		attat is search_engine->stem_buffer
 	*/
-	memset(memory_index->stem_buffer, 0, top_k * sizeof(*memory_index->stem_buffer));
+	memset(memory_index->stem_buffer, 0, feedback_documents * sizeof(*memory_index->stem_buffer));
 	memory_index->place_into_internal_buffers(&term_details);
 
 	term_normaliser = 0;
 
-	for (id = 0; id < top_k; id++)
+	for (id = 0; id < feedback_documents; id++)
 		{
 		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
 
@@ -1468,42 +1466,35 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		collection_frequency = term_details.global_collection_frequency;
 		document_frequency = term_details.global_document_frequency;
 
-		document_term_score = ranking_function->rank((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1);
+		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, search_engine->results_list->get_term_count());
 		document_score = search_engine->results_list->accumulator[docid].get_rsv();
-		ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
+		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
 		}
-	term_string->query_frequency = exp(term_normaliser) * feedback_lambda + (1 - feedback_lambda) * 1 / feedback_terms;
+	term_string->query_frequency = ((1 - feedback_lambda) * term_string->query_frequency / terms_in_the_query) + (feedback_lambda * exp(term_normaliser));
+	sum_of_query_frequencies += term_string->query_frequency;
 	}
 
 /*
-	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*
-	in the index then there will be no feedback terms an so this will not happen
+	Re-do the query with the new weights
 */
-if (parsed_query->feedback_terms_in_query != 0)
-	{
-	/*
-		Initialise
-	*/
-	search_engine->init_accumulators(top_k);
+/*
+	Initialise
+*/
+search_engine->init_accumulators(top_k);
 
-	/*
-		Generate query, search, and clean up
-	*/
-	if (feedback_mode == FEEDBACK_INTERPOLATED)
-		query_object_turn_feedback_into_NEXI_query();
-	else
-		query_object_with_feedback_to_NEXI_query();
+/*
+	Search
+*/
+process_NEXI_query(parsed_query->NEXI_query, feedback_ranking_function == NULL ? ranking_function : feedback_ranking_function, sum_of_query_frequencies);
 
-	process_NEXI_query(parsed_query->NEXI_query, feedback_ranking_function == NULL ? ranking_function : feedback_ranking_function);
-	delete [] parsed_query->feedback_terms;
-	delete [] parsed_query->NEXI_query;
+/*
+	Rank
+*/
+search_engine->sort_results_list(top_k, &hits);
 
-	/*
-		Rank
-	*/
-	search_engine->sort_results_list(top_k, &hits);
-	}
-
+/*
+	Clean up
+*/
 delete memory_index;
 }
 
@@ -1515,7 +1506,7 @@ void ATIRE_API::feedback(long long top_k)
 {
 if (feedback_mode == FEEDBACK_INTERPOLATED)
 	{
-	feedback_interpolated(feedback_documents);
+	feedback_interpolated(top_k);
 	return;
 	}
 /*

@@ -126,6 +126,12 @@ public:
 	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
 	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
 	double quantize(double rsv, double maximum, double minimum);
+
+	/*
+		This method is called at search time in order to get the ranking score for an individual document
+		which, in turn, is used as part of Relevance Models (RM3 and so on).
+	*/
+	virtual double score_one_document(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency, double terms_in_query);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

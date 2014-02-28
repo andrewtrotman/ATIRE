@@ -524,3 +524,13 @@ double ANT_ranking_function::quantize(double rsv, double maximum, double minimum
 */
 return quantization ? (((rsv - minimum) / (maximum - minimum)) * ((1 << quantization_bits) - 2)) + 1 : rsv;
 }
+
+/*
+	ANT_RANKING_FUNCTION::SCORE_ONE_DOCUMENT()
+	------------------------------------------
+*/
+double ANT_ranking_function::score_one_document(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency, double terms_in_query)
+{
+return 1.0;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}

@@ -130,7 +130,7 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbt][-rT][NI][wW]Query type");
+puts("-Q[nbt][-rmT][NI][wW][R]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  N:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>arrative, <d>escription [default=t]");
