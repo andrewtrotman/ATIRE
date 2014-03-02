@@ -38,6 +38,7 @@ friend class ANT_mean_average_precision;
 friend class ANT_search_engine_result_iterator;
 friend class ANT_relevance_feedback;
 friend class ATIRE_API;
+friend class ANT_search_engine_memory_index;
 
 private:
 	ANT_stats_search_engine *stats;

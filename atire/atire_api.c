@@ -32,6 +32,7 @@
 
 #include "stemmer.h"
 #include "stemmer_factory.h"
+#include "stem_stemmer.h"
 
 #include "thesaurus.h"
 
@@ -1389,16 +1390,20 @@ ANT_NEXI_term_ant *term_string;
 double normalizer, term_normaliser, document_score, document_term_score;
 ANT_search_engine_btree_leaf term_details;
 long long id, docid;
-long long term, terms_in_the_query;
+long long term;
+double terms_in_the_query;
 unsigned short term_frequency;
 long long document_frequency, collection_frequency;
 double sum_of_query_frequencies;
+size_t documents_to_examine;
+char raw_token_buffer[MAX_TERM_LENGTH];
 
 /*
-	Build an index from the top feedback_documents documents
+	Build an index from the top feedback_documents documents.  Note that if there's a stemmer being used then the
+	resultant search_engine_memory_index will behave as a stemmed index.
 */
-
-memory_index = rerank(feedback_documents);
+documents_to_examine = ANT_min((size_t)feedback_documents, (size_t)search_engine->results_list->results_list_length);
+memory_index = rerank(documents_to_examine);
 
 /*
 	Compute the term-specific weighting component normlizer
@@ -1411,18 +1416,25 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 	/*
 		get the search term and its stats in the top few documents
 	*/
-	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	if (stemmer == NULL)
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	else
+		{
+		string_pair_to_term(raw_token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+		stemmer->stem(raw_token_buffer, token_buffer);
+		}
+
 	memory_index->process_one_term(token_buffer, &term_details);
 
 	/*
-		Turn the poistings list into an array[index] where index is the document number in the rankge 1..feedback_documents.  The
-		attat is search_engine->stem_buffer
+		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
+		result is in search_engine->stem_buffer
 	*/
-	memset(memory_index->stem_buffer, 0, feedback_documents * sizeof(*memory_index->stem_buffer));
+	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
 	memory_index->place_into_internal_buffers(&term_details);
 
 	term_normaliser = 0;
-	for (id = 0; id < feedback_documents; id++)
+	for (id = 0; id < documents_to_examine; id++)
 		{
 		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
 
@@ -1446,19 +1458,26 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 	/*
 		get the search term and its stats in the top few documents
 	*/
-	string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	if (stemmer == NULL)
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	else
+		{
+		string_pair_to_term(raw_token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+		stemmer->stem(raw_token_buffer, token_buffer);
+		}
+
 	memory_index->process_one_term(token_buffer, &term_details);
 
 	/*
-		Turn the poistings list into an array[index] where index is the document number in the rankge 1..feedback_documents.  The
-		attat is search_engine->stem_buffer
+		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
+		result is in search_engine->stem_buffer
 	*/
-	memset(memory_index->stem_buffer, 0, feedback_documents * sizeof(*memory_index->stem_buffer));
+	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
 	memory_index->place_into_internal_buffers(&term_details);
 
 	term_normaliser = 0;
 
-	for (id = 0; id < feedback_documents; id++)
+	for (id = 0; id < documents_to_examine; id++)
 		{
 		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
 
@@ -1674,6 +1693,7 @@ ANT_directory_iterator_object object;
 ANT_readability_factory *readability;
 ANT_parser *parser;
 ANT_memory *memory;
+ANT_stem_stemmer stemming_function(stemmer);
 
 parser = new ANT_parser(TRUE);
 readability = new ANT_readability_factory;
@@ -1695,7 +1715,7 @@ for (current = 0; current < top_n; current++)
 		Now index the document.
 	*/
 	object.file = document_buffer;
-	document_indexer->index_document(indexer, NULL, TRUE, readability, current, object.file);
+	document_indexer->index_document(indexer, stemmer == NULL ? NULL : &stemming_function, TRUE, readability, current + 1, object.file);		// indexing counts from 1 (searching counts from 0)
 	}
 
 delete [] document_buffer;
