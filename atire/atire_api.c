@@ -1424,7 +1424,8 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		stemmer->stem(raw_token_buffer, token_buffer);
 		}
 
-	memory_index->process_one_term(token_buffer, &term_details);
+	if (memory_index->process_one_term(token_buffer, &term_details) == NULL)
+		continue;		// term not found in the top document
 
 	/*
 		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
@@ -1466,7 +1467,8 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		stemmer->stem(raw_token_buffer, token_buffer);
 		}
 
-	memory_index->process_one_term(token_buffer, &term_details);
+	if (memory_index->process_one_term(token_buffer, &term_details) == NULL)
+		continue;		// term not found in the top document
 
 	/*
 		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The

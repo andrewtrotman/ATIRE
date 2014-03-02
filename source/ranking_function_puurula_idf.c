@@ -75,7 +75,7 @@ double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current;
 
 query_length = quantum_parameters->accumulator->get_term_count();
-query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query
+query_occurences = quantum_parameters->query_frequency;
 
 df = 1.0 / (double)unique_terms_in_collection;
 
@@ -112,7 +112,7 @@ double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current, *end;
 
 query_length = accumulator->get_term_count();
-query_occurences = 1.0;		// this is a hack and should be the number of times the term occurs in the query (which is almost always 1 anyway)
+query_occurences = query_frequency;
 
 df = 1.0 / (double)unique_terms_in_collection;
 
@@ -168,5 +168,26 @@ void ANT_ranking_function_puurula_idf::relevance_rank_top_k(ANT_search_engine_re
 double ANT_ranking_function_puurula_idf::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 return term_frequency;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
+}
+
+/*
+	ANT_RANKING_FUNCTION_PUURULA_IDF::SCORE_ONE_DOCUMENT()
+	------------------------------------------------------
+*/
+double ANT_ranking_function_puurula_idf::score_one_document(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency, double terms_in_query)
+{
+double prior, rsv, df, tf = term_frequency;
+
+df = 1.0 / (double)unique_terms_in_collection;
+
+tf = log(1.0 + tf / discounted_document_lengths[docid]) * log((double)documents / (double)document_frequency);
+tf = max(tf - g * pow(tf, g), 0);
+
+rsv = query_frequency * log(tf / (u * df) + 1.0);
+
+prior = terms_in_query * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+
+return rsv + prior;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
