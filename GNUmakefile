@@ -7,7 +7,7 @@ OS_TYPE := $(shell uname)
 # debugging or normal compiling and linking
 USE_GCC := 1
 USE_GCC_VERBOSE := 0
-USE_GCC_DEBUG := 1
+USE_GCC_DEBUG := 0
 
 # use intel c/c++ compile
 USE_INTEL_C := 0
@@ -175,7 +175,7 @@ endif
 
 # common flags
 LDFLAGS += -ldl
-CFLAGS +=  -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS \
+CFLAGS +=  -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DDOUBLE_BUFFER \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 

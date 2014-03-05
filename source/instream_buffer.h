@@ -21,19 +21,20 @@ protected:
 
 	struct background_read_params {
 		unsigned char ***buffer;
-		ANT_semaphores *sem;
+		ANT_semaphores *sem, *sem2;
 		ANT_instream *source;
+		long long **read_result;
 	} params;
 
 protected:
-	unsigned char *primary_buffer;
-	unsigned char *secondary_buffer;
-	unsigned char **buffer_to_read_into;
+	unsigned char *primary_buffer, *secondary_buffer;
+	unsigned char **buffer_to_read_into, **buffer_to_read_from;
+	long long *end_of_buffer, *end_of_second_buffer;
 	long long position;
-	long long position_of_end_of_buffer;
+	long long position_of_end_of_buffer, position_of_end_of_second_buffer;
 
 	static void *background_read(void *);
-	ANT_semaphores *sem;
+	ANT_semaphores *sem, *sem2;
 
 public:
 	ANT_instream_buffer(ANT_memory *memory, ANT_instream *source);

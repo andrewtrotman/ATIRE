@@ -61,11 +61,11 @@ long long ANT_instream_bz2::read(unsigned char *data, long long size)
 #ifdef ANT_HAS_BZLIB
 	long long got;
 	long state;
-	printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 
 	if (size == 0)
 	{
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		return 0;
 	}
 
@@ -74,7 +74,7 @@ long long ANT_instream_bz2::read(unsigned char *data, long long size)
 		buffer = (unsigned char *)memory->malloc(buffer_length);
 		if (BZ2_bzDecompressInit(&internals->stream, 0, 0) != BZ_OK)
 		{
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 			return -1;		// error
 		}
 		}
@@ -86,11 +86,11 @@ long long ANT_instream_bz2::read(unsigned char *data, long long size)
 		{
 		if (internals->stream.avail_in <= 0)
 			{
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 			if ((got = source->read(buffer, buffer_length)) < 0)
 				return -1;			// the instream is at EOF and so we are too
 
-	printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 			internals->stream.avail_in = (unsigned int)got;
 			internals->stream.next_in = (char *)buffer;	
 			}
@@ -102,20 +102,20 @@ long long ANT_instream_bz2::read(unsigned char *data, long long size)
 			got = size - internals->stream.avail_out;		// number of bytes that were decompressed
 			total_written += got;
 
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 			return got;			// at EOF
 			}
 
 		if (internals->stream.avail_out == 0)
 			{
 			total_written += size;
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 			return size;			// filled the output buffer and so return bytes read
 			}
 		}
 	while (state == BZ_OK);
 
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 	return -1;			// something has gone wrong
 #else
 	return -1;

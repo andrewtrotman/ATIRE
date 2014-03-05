@@ -84,19 +84,19 @@ ANT_directory_iterator_object *ANT_directory_iterator_tar::first(ANT_directory_i
 bytes_read = 0;
 if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 	{
-	printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 	length_of_file_in_bytes = detox(header.filesize_in_bytes);
 	if (header.file_type == '0' || header.file_type == 0)
 		{
 		filename(object);		// we're a file
 		if (get_file)
 			read_entire_file(object);
-		printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		return object;
 		}
 	else
 		{
-		printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		return next(object);			// we're not a file so go and get one
 		}
 	}
@@ -111,7 +111,7 @@ return NULL;
 ANT_directory_iterator_object *ANT_directory_iterator_tar::next(ANT_directory_iterator_object *object)
 {
 long long extras;
-printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 
 /*
 	read up to the end of the current block
@@ -119,9 +119,9 @@ printf("%sstart_process %lld\n", message, clock->start_timer());
 if (bytes_read % TAR_BLOCK_SIZE != 0)
 	if ((extras = TAR_BLOCK_SIZE - (bytes_read % TAR_BLOCK_SIZE)) != 0)
 		{
-		printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		source->read(buffer, extras);
-		printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 		}
 
 /*
@@ -129,9 +129,9 @@ if (bytes_read % TAR_BLOCK_SIZE != 0)
 */
 while (bytes_read < length_of_file_in_bytes)
 	{
-	printf("%send_process %lld\n", message, clock->start_timer());
+END;
 	source->read(buffer, TAR_BLOCK_SIZE);				// read to end of file
-	printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 	bytes_read += TAR_BLOCK_SIZE;
 	}
 
@@ -143,13 +143,13 @@ bytes_read = 0;
 /*
 	Read the header of the next file
 */
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 	{
-	printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 	if (header.filename[0] == '\0')
 		{
-		printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		return NULL;		// at end of archive (kinda-sorta, there should be two of these)
 		}
 
@@ -159,12 +159,12 @@ if (source->read((unsigned char *)&header, TAR_BLOCK_SIZE) == TAR_BLOCK_SIZE)
 		filename(object);		// we're a file
 		if (get_file)
 			read_entire_file(object);
-		printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		return object;
 		}
 	else
 		{
-		printf("%send_process %lld\n", message, clock->start_timer());
+END;
 		return next(object);			// we're not a file so go and get one
 		}
 	}

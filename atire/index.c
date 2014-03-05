@@ -285,6 +285,8 @@ if (param_block.num_pregen_fields)
 */
 bytes_indexed = 0;
 
+printf("%ld arguments!\n", argc - first_param);
+
 for (param = first_param; param < argc; param++)
 	{
 #ifdef PARALLEL_INDEXING
