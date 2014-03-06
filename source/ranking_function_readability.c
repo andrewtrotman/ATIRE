@@ -16,16 +16,15 @@
 	ANT_RANKING_FUNCTION_READABILITY::ANT_RANKING_FUNCTION_READABILITY()
 	--------------------------------------------------------------------
 */
-ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_engine_readability *engine, double mix, double cutoff, double k1, double b) : ANT_ranking_function(engine, false, -1)
+ANT_ranking_function_readability::ANT_ranking_function_readability(ANT_search_engine *engine, double mix, double cutoff, double k1, double b) : ANT_ranking_function(engine, false, -1)
 {
-this->cutoff = cutoff ? cutoff : engine->hardest_document / 1000.0;
+this->cutoff = cutoff ? cutoff : ((ANT_search_engine_readability *)engine)->hardest_document / 1000.0;
 this->mix = mix;
 this->k1 = k1;
 this->b = b;
 
-this->document_readability = engine->document_readability;
+this->document_readability = ((ANT_search_engine_readability *)engine)->document_readability;
 }
-
 
 #ifdef IMPACT_HEADER
 /*
@@ -67,7 +66,7 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_READABILITY::RELEVANCE_RANK_TOP_K()
 	--------------------------------------------------------
 */
-void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
@@ -107,7 +106,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
-void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_readability::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 const double k1_plus_1 = k1 + 1.0;
 const double one_minus_b = 1.0 - b;
@@ -149,7 +148,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_READABILITY::RANK()
 	----------------------------------------
 */
-double ANT_ranking_function_readability::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_readability::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 exit(printf("Cannot pre-compute the impact of the readability similarity function (it is meaningless)\n"));
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

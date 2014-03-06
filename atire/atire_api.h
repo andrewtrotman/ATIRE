@@ -44,6 +44,7 @@ class ANT_index_document_topsig_signature;
 class ANT_thesaurus;
 class ANT_evaluator;
 class ANT_ANT_param_block;
+class ANT_search_engine_memory_index;
 
 /*
 	class ATIRE_API
@@ -52,6 +53,7 @@ class ANT_ANT_param_block;
 class ATIRE_API
 {
 public:
+	enum {FEEDBACK_REPLACE, FEEDBACK_INTERPOLATED};
 	enum {INDEX_IN_FILE = 0, INDEX_IN_MEMORY = 1, READABILITY_SEARCH_ENGINE = 2};
 	enum {QUERY_NEXI = 1, QUERY_BOOLEAN = 2, QUERY_TOPSIG = 4, QUERY_FEEDBACK = 8, QUERY_EXPANSION_INPLACE_WORDNET = 16, QUERY_EXPANSION_WORDNET = 32, QUERY_TREC_FILE = 64, QUERY_INEX_FILE = 128};
 	static const int MAX_ALLOWED_TERMS_IN_QUERY = 1024;
@@ -72,6 +74,8 @@ private:
 	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
 	long feedback_documents;				// documents to analyse in relevance feedback
 	long feedback_terms;					// terms (extracted from top documents) to use in relevance feedback
+	double feedback_lambda;					// linear interpolate initial and feedback result sets
+	long feedback_mode;						// interpolate or replace
 	ANT_ranking_function *feedback_ranking_function;	// the ranking function to use with relevance feedback
 	long query_type_is_all_terms;			// use the DISJUNCTIVE ranker but only find documents containing all of the search terms (CONJUNCTIVE)
 	long long hits;							// how many documents were found at the last query
@@ -123,15 +127,17 @@ private:
 protected:
 	char **read_docid_list(char * doclist_filename, long long *documents_in_id_list, char ***filename_list, char **mem1, char **mem2);
 	static char *max(char *a, char *b, char *c);
-	ANT_ranking_function *decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
+	ANT_ranking_function *decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3);
 	long process_NEXI_query(char *query);
 	ANT_bitstring *process_boolean_query(ANT_query_parse_tree *root, long *leaves);
 	long process_topsig_query(ANT_NEXI_term_ant *parse_tree);
 	void boolean_to_NEXI(ANT_NEXI_term_ant *into, ANT_query_parse_tree *root, long *leaves);
-	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function);
+	long process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function, double fake_terms_in_query = -1);
 	long process_boolean_query(char *query);
 	long process_topsig_query(char *query);
 	char *string_pair_to_term(char *destination, ANT_string_pair *source, size_t destination_length, long case_fold = 0);
+	void feedback_interpolated(long long top_k);
+	void query_object_turn_feedback_into_NEXI_query(void);
 	void query_object_with_feedback_to_NEXI_query(void);
 	void feedback(long long top_k);
 	void topsig_feedback(long long top_k);
@@ -188,10 +194,10 @@ public:
 		for LMD:  u = p1
 		for LMJM: l = p1
 	*/
-	long set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
-	long set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2);
+	long set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3);
+	long set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3);
 	long set_ranking_function_pregen(const char *fieldname, double p1);
-
+	void set_feedback_interpolation(double lambda) { feedback_lambda = lambda; feedback_mode = FEEDBACK_INTERPOLATED; }
 	ANT_pregen *get_pregen();
 
 	/*
@@ -231,10 +237,9 @@ public:
 	long long search(char *query, long long top_k = LLONG_MAX, long query_type = QUERY_NEXI);
 
 	/*
-		Call the re-ranker.  This takes the top few results and re-orders based on
-		analysis of the result set.
+		Call the re-ranker.  This takes the top few results and builds an index from them
 	*/
-	void rerank(void);
+	ANT_search_engine_memory_index *rerank(long long top_k);
 
 #ifdef FILENAME_INDEX
 	/*

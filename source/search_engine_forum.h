@@ -23,7 +23,11 @@ protected:
 
 public:
 	virtual ~ANT_search_engine_forum();
+#ifdef FILENAME_INDEX
+	virtual void write(long topic_id, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results) = 0;
+#else
 	virtual void write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results) = 0;
+#endif
 } ;
 
 #endif  /* SEARCH_ENGINE_FORUM_H_ */

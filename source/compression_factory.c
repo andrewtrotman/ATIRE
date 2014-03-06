@@ -13,6 +13,8 @@
 #include "compress_variable_byte.h"
 #include "compress_sigma.h"
 #include "compress_none.h"
+#include "compress_simple16.h"
+#include "compress_four_integer_variable_byte.h"
 #include "stats.h"
 
 #ifndef FALSE
@@ -38,6 +40,8 @@ static ANT_compress_elias_delta elias_delta;
 static ANT_compress_elias_gamma elias_gamma;
 static ANT_compress_golomb golomb;
 static ANT_compress_sigma sigma;
+static ANT_compress_simple16 simple16;
+static ANT_compress_four_integer_variable_byte four_integer_variable_byte;
 
 /*
 	ANT_compression_factory::scheme[]
@@ -54,7 +58,9 @@ ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {SIGMA, &sigma, "Sigma"},
 {ELIAS_DELTA, &elias_delta, "Elias-Delta"},
 {ELIAS_GAMMA, &elias_gamma, "Elias-Gamma"},
-{GOLOMB, &golomb, "Golomb"}
+{GOLOMB, &golomb, "Golomb"},
+{SIMPLE_16, &simple16, "Simple-16"},
+{FOUR_INTEGER_VARIABLE_BYTE, &four_integer_variable_byte, "Four Integer Variable Byte"}
 };
 
 long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::scheme) / sizeof(*ANT_compression_factory::scheme);

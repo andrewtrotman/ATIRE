@@ -11,6 +11,7 @@
 ANT_parser_token *ANT_parser_readability::get_next_token(void)
 {
 unsigned char *start;
+char *into, *from;
 
 while (!ANT_isheadchar(*current) && !issentenceend(*current))
 	current++;
@@ -34,10 +35,13 @@ else if (ANT_isalpha(*current))
 		current++;
 	while (issentenceend(*current))
 		current++;
-	
+
 	current_token.type = TT_WORD;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
+	for (into = current_token.normalized.start, from = (char *)start; into < current_token.normalized.start + current_token.string_length; into++)
+		*into = ANT_tolower(*from++);
+	current_token.normalized.string_length = current_token.string_length; 
 	}
 else if (ANT_isdigit(*current))
 	{
@@ -50,6 +54,10 @@ else if (ANT_isdigit(*current))
 	current_token.type = TT_NUMBER;
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
+	current_token.string_length = current - start;
+	for (into = current_token.normalized.start, from = (char *)start; into < current_token.normalized.start + current_token.string_length; into++)
+		*into = *from++;
+	current_token.normalized.string_length = current_token.string_length; 
 	}
 else if (*current == '\0')						// end of string
 	return NULL;

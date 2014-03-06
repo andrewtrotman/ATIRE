@@ -12,6 +12,7 @@
 #include "memory_index.h"
 #include "memory_index_hash_node.h"
 #include "term_divergence.h"
+#include "maths.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -39,6 +40,7 @@ ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index 
 hashed_squiggle_length = hash(&squiggle_length);
 this->memory = memory;
 this->final_index = index;
+this->stopwords = new ANT_stop_word(index->stopwords->get_type());		// re-use the same stop words list for each instance of this class
 rewind();
 
 term_details = NULL;
@@ -52,6 +54,7 @@ token_as_string = NULL;
 ANT_memory_index_one::~ANT_memory_index_one()
 {
 delete memory;
+delete stopwords;
 }
 
 /*
@@ -452,29 +455,48 @@ return top_terms;
 	ANT_MEMORY_INDEX_ONE::TREE_GET_FREQUENCIES()
 	--------------------------------------------
 */
-void ANT_memory_index_one::tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency)
+void ANT_memory_index_one::tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency, long long tf_cap)
 {
+long long use;
+
 if (node->string[0] != '~' && !ANT_isupper(node->string[0]))
-	frequency[node->term_frequency]++;
+	{
+	use = ANT_min(node->term_frequency, tf_cap);
+	frequency[use]++;
+	}
 
 if  (node->left != NULL)
-	tree_get_frequencies(node->left, frequency);
+	tree_get_frequencies(node->left, frequency, tf_cap);
 if  (node->right != NULL)
-	tree_get_frequencies(node->right, frequency);
+	tree_get_frequencies(node->right, frequency, tf_cap);
 }
 
 /*
 	ANT_MEMORY_INDEX_ONE::GET_FREQUENCIES()
 	---------------------------------------
 */
-short *ANT_memory_index_one::get_frequencies(short *frequency)
+short *ANT_memory_index_one::get_frequencies(short *frequency, long long tf_cap)
 {
 long node;
 
 for (node = 0; node < HASH_TABLE_SIZE; node++)
 	if (hash_table[node] != NULL)
-		tree_get_frequencies(hash_table[node], frequency);
+		tree_get_frequencies(hash_table[node], frequency, tf_cap);
 
 return frequency;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::GET_TERM_NODE()
+	-------------------------------------
+*/
+ANT_memory_index_one_node *ANT_memory_index_one::get_term_node(ANT_string_pair *term)
+{
+size_t hash_value = hash(term);
+
+if (hash_table[hash_value] == NULL)
+	return 0;
+
+return find_node(hash_table[hash_value], term);
 }
 

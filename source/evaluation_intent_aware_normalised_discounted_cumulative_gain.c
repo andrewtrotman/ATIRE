@@ -42,8 +42,8 @@ if (got_topic == NULL)
 
 *valid = true;
 
-dcg = new double[precision_point];
-subtopicGain = new double[got_topic->number_of_subtopics];
+dcg = new double[(size_t)precision_point];
+subtopicGain = new double[(size_t)got_topic->number_of_subtopics];
 
 for (i = 0; i < precision_point; i++)
 	dcg[i] = 0;
@@ -132,7 +132,7 @@ long long this_subtopic_position;
 
 ANT_evaluation::set_lists(relevant_topic_list, relevant_topic_list_length);
 
-ideal_gains = new double[relevant_topic_list_length];
+ideal_gains = new double[(size_t)relevant_topic_list_length];
 for (topic = 0; topic < relevant_topic_list_length; topic++)
 	{
 	ideal_gains[topic] = 0;
@@ -140,7 +140,7 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 	relevant_documents = total_documents = 0;
 
 	delete [] subtopicGain;
-	subtopicGain = new double[got_top->number_of_subtopics];
+	subtopicGain = new double[(size_t)got_top->number_of_subtopics];
 
 	for (subtopic = 0; subtopic < got_top->number_of_subtopics; subtopic++)
 		{

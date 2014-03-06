@@ -22,7 +22,11 @@ this->run_id[sizeof(this->run_id) - 1] = '\0';
 	ANT_SEARCH_ENGINE_FORUM_INEX_BEP::WRITE()
 	-----------------------------------------
 */
+#ifdef FILENAME_INDEX
+void ANT_search_engine_forum_INEX_bep::write(long topic_id, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#else
 void ANT_search_engine_forum_INEX_bep::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#endif
 {
 long which;
 ANT_focus_result *current;

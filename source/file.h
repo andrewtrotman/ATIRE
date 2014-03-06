@@ -9,7 +9,6 @@
 #include "fundamental_types.h"
 
 class ANT_file_internals;
-class ANT_critical_section;
 
 /*
 	class ANT_FILE
@@ -21,7 +20,6 @@ private:
 	ANT_file_internals *internals;
 	long long buffer_size, buffer_used;
 	long long bytes_written, bytes_read;
-	static ANT_critical_section *mutex;
 
 protected:
 	long long file_position;

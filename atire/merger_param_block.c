@@ -98,13 +98,14 @@ puts("-I <fn>         Remove terms not in file fn, i.e. return intersection of (
 puts("-K<n>           Static pruning. Write no more than <n> postings per list (0=all) [default=0]");
 puts("                Static pruning will be performed to the minimum of the parameter given");
 puts("                and the sum of static prune points in the indexes to be merged.");
-puts("-k[-l0t][L<n>][s<n>] Term culling");
+puts("-k[-l0t][n|p][L<n>][s<n>] Term culling");
 puts("   -            All terms remain in the indes [default]");
 puts("   0            Do not index numbers");
 puts("   l            Remove (stop) low frequency terms (where collection frequency == 1)");
 puts("   L<n>         Remove (stop) low frequency terms (where document frequency <= <n>)");
 puts("   s<n>         Remove (stop) words that occur in more than <n>% of documents");
-puts("   S            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   n            Remove (stop) words that are on the NCBI PubMed MBR 313 word stopword list: wrd_stop");
+puts("   p            Remove (stop) words that are on Puurula's 988 stopword list use at ADCS/ALTA 2013");
 puts("   t            Do not index XML tag names");
 puts("");
 

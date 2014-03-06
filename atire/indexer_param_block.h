@@ -50,6 +50,9 @@ public:
 	long filter_method;
 	char *filter_filename;				// file containing documents to filter out
 	double puurula_length_g;			// value to use for tf discounting when computing the Puurula document length vector
+	long quantization_bits;				// how many bits to quantize into
+	long quantization;					// whether or not we should quantize
+
 protected:
 	void document_compression(char *scheme);
 	void compression(char *schemes);

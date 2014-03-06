@@ -17,6 +17,7 @@
 #include "snippet_factory.h"
 #include "thesaurus.h"
 #include "evaluator.h"
+#include "ranking_function_factory_object.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -54,6 +55,7 @@ feedbacker = NONE;
 query_type = ATIRE_API::QUERY_NEXI;
 feedback_documents = 17;
 feedback_terms = 5;
+feedback_lambda = 0.5;
 index_filename = strnew("index.aspt");
 doclist_filename = strnew("doclist.aspt");
 pregen_count = 0;
@@ -128,7 +130,7 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbt][-rT][NI][wW]Query type");
+puts("-Q[nbt][-rmT][NI][wW][R]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  N:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>arrative, <d>escription [default=t]");
@@ -136,6 +138,7 @@ puts("  I:<t><c><n><d>INEX query file (from inex.otago.ac.nz) <t>itle, <c>astitl
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits, density <d>%, and globalstats <f>");
 puts("  -             no relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=17 t=5]");
+puts("  m:<d>:<l>     Relevance Model feedback (Puurula ALATA paper) using top <d> documents and lambda=l [default d=17 l=0.5]");
 puts("  R<ranker>     Use <ranker> as the relevance feedback ranking function (<ranker> is a valid RANKING FUNCTION, excludes pregen)");
 puts("  T:<d>         TopSig blind relevance feedback, analysing <d> top documents [default d=10]");
 puts("  w:<t>         WordNet tf-merging (wordnet.aspt) <t>=[<s>ynonym <a>ntonym <h>olonym <m>eronym hyp<o>nym hyp<e>rnym][default=s]");
@@ -188,7 +191,7 @@ puts("------------------------");
 puts("-pregen name    Load pregen file with given field name on startup");
 puts("");
 
-ANT_indexer_param_block_rank::help("RANKING FUNCTION", 'R', search_functions);		// ranking functions
+ANT_indexer_param_block_rank::help("RANKING FUNCTION", 'R', ANT_ranking_function_factory_object::INDEXABLE | ANT_ranking_function_factory_object::NONINDEXABLE);		// ranking functions
 puts("-r[n]           Quantize search results in n bits [default n=maths!]");
 puts("");
 
@@ -411,6 +414,20 @@ do
 				feedback_documents = (long)first;
 			if (second != -1)
 				feedback_terms = (long)second;
+			done = TRUE;
+			break;
+		case 'm':
+			if (query_type == ATIRE_API::QUERY_TOPSIG)
+				exit(printf("Cannot do RM with TopSig"));
+
+			query_type |= ATIRE_API::QUERY_FEEDBACK;
+			feedbacker = ANT_relevance_feedback_factory::BLIND_RM;
+			first = second = -1;
+			get_two_parameters(which + 1, &first, &second);
+			if (first != -1)
+				feedback_documents = (long)first;
+			if (second != -1)
+				feedback_lambda = second;
 			done = TRUE;
 			break;
 		case 'R':

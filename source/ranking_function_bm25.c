@@ -68,7 +68,7 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_BM25::RELEVANCE_RANK_TOP_K()
 	-------------------------------------------------
 */
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
@@ -77,20 +77,20 @@ double top_row, tf, idf;
 ANT_compressable_integer *current, *end;
 
 /*
-						N
+	          N
 	IDF = log -
-						n
+	          n
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
 idf = log((double)documents / (double)term_details->global_document_frequency);
 
 /*
-								 tf(td) * (k1 + 1)
+	                tf(td) * (k1 + 1)
 	rsv = ----------------------------------- * IDF
-																		len(d)
-				tf(td) + k1 * (1 - b + b * --------)
-																		av_len_d
+	                                  len(d)
+	      tf(td) + k1 * (1 - b + b * --------)
+	                                 av_len_d
 
 	In this implementation we ignore k3 and the number of times the term occurs in the query.
 */
@@ -107,8 +107,8 @@ impact_header->doc_count_ptr = impact_header->doc_count_start;
 current = impact_ordering;
 while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	{
-	tf = *impact_header->impact_value_ptr;
-	top_row = prescalar * tf * k1_plus_1;
+	tf = *impact_header->impact_value_ptr * prescalar;
+	top_row = tf * k1_plus_1;
 	docid = -1;
 	end = current + *impact_header->doc_count_ptr;
 	while (current < end)
@@ -123,7 +123,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 #else
-void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_BM25::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 const double k1 = this->k1;
 const double k1_plus_1 = k1 + 1.0;
@@ -167,8 +167,8 @@ end = impact_ordering + (term_details->local_document_frequency >= trim_point ? 
 while (current < end)
 	{
 	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;
-	top_row = prescalar * tf * k1_plus_1;
+	tf = *current++ * prescalar;
+	top_row = tf * k1_plus_1;
 	docid = -1;
 	while (*current != 0)
 		{
@@ -184,7 +184,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_BM25::RANK()
 	---------------------------------
 */
-double ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 const double k1_plus_1 = k1 + 1.0;
 double idf, tf, rsv;

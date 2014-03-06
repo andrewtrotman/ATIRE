@@ -103,15 +103,29 @@ return result;
 	ANT_SEARCH_ENGINE_FORUM_INEX::WRITE()
 	-------------------------------------
 */
+#ifdef FILENAME_INDEX
+void ANT_search_engine_forum_INEX::write(long topic_id, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#else
 void ANT_search_engine_forum_INEX::write(long topic_id, char **docids, long long hits, ANT_search_engine *search_engine, ANT_focus_results_list *focused_results)
+#endif
 {
 long long which;
+#ifdef FILENAME_INDEX
+char filename[128];
+#endif
+
 fprintf(file, "<topic topic-id=\"%ld\">\n", topic_id);
 
 for (which = 0; which < hits; which++)
 	{
 	fprintf(file, "<result>\n");
+#ifdef FILENAME_INDEX
+	search_engine->get_document_filename(filename, search_engine->results_list->accumulator_pointers[which] - search_engine->results_list->accumulator);
+	fprintf(file, "<file>%s</file>\n", filename);
+#else
 	fprintf(file, "<file>%s</file>\n", docids[which]);
+#endif
+
 	fprintf(file, "<path>/article[1]</path>\n");
 	fprintf(file, "<rank>%lld</rank>", which);
 	fprintf(file, "</result>\n");

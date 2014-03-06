@@ -29,5 +29,5 @@ ANT_instream_file_star::~ANT_instream_file_star()
 long long ANT_instream_file_star::read(unsigned char *buffer, long long bytes)
 {
 bytes_read += bytes;
-return fread(buffer, bytes, 1, file);
+return fread(buffer, (size_t)bytes, 1, file);
 }

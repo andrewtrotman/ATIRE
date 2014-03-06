@@ -86,8 +86,18 @@ top = (((unsigned long long)value) >> 32) & 0xFFFFFFFF;
 bottom = ((unsigned long long)value) & 0xFFFFFFFF;
 
 collection_frequency += 2;
-insert_docno(top);
-insert_docno(bottom);
+
+#ifdef IMPACT_HEADER
+	insert_docno(top);
+	insert_docno(bottom);
+#else
+	/*
+		when these get decopressed at the other end they are going to converted into an impact ordered postings list.
+		that means that if the two TF values are the same then they will be in the wrong positions for extraction.
+	*/
+	insert_docno(top, 2);				// this word must come first so we set the TF to 2 (high)
+	insert_docno(bottom, 1);			// this word must come second so we set the TF to 1 (low)
+#endif
 }
 
 /*
@@ -342,7 +352,7 @@ else
 		more = where->next == NULL ? docid_node_used : size;
 		if (doc_bytes + more <= *doc_size)
 			{
-			memcpy(doc_into + doc_bytes, where->data, more);			// final block many not be full
+			memcpy(doc_into + doc_bytes, where->data, (size_t)more);			// final block many not be full
 			size = (long)(postings_growth_factor * size);
 			}
 		else
@@ -360,7 +370,7 @@ else
 		more = where->next == NULL ? 2 * tf_node_used : size;
 		if (tf_bytes + more <= *tf_size)
 			{
-			memcpy((unsigned char *)tf_into + tf_bytes, where->data, more);
+			memcpy((unsigned char *)tf_into + tf_bytes, where->data, (size_t)more);
 			size = (long)(postings_growth_factor * size);
 			/*
 				Because the tfs are 2 bytes and have to fit nice, size can get uneven and

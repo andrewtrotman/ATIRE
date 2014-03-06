@@ -33,6 +33,7 @@ protected:
 	long long primary_read_buffer_used;
 	char *secondary_read_buffer;
 	long long secondary_read_buffer_used;
+	long asciiafy;
 	ANT_instream *source;
 	long auto_file_id;
 	char ** doc_tag;

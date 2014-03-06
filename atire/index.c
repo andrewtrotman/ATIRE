@@ -211,6 +211,9 @@ index->set_compression_scheme(param_block.compression_scheme);
 index->set_compression_validation(param_block.compression_validation);
 index->set_static_pruning(param_block.static_prune_point);
 index->set_term_culling(param_block.stop_word_removal, param_block.stop_word_df_threshold, param_block.stop_word_df_frequencies);
+index->set_quantization(param_block.quantization, param_block.quantization_bits);
+index->set_ranking_function(param_block.ranking_function, param_block.p1, param_block.p2, param_block.p3);
+index->set_inverted_index_mode(param_block.inversion_extras, param_block.puurula_length_g);
 
 if (param_block.readability_measure == ANT_readability_factory::NONE
 		|| param_block.readability_measure == ANT_readability_factory::TAG_WEIGHTING)
@@ -221,12 +224,7 @@ else
 if (param_block.inversion_type == ANT_indexer_param_block::TOPSIG)
 	document_indexer = new ANT_index_document_topsig(param_block.stop_word_removal, param_block.topsig_width, param_block.topsig_density, param_block.topsig_global_stats);
 else
-	{
-	if ((param_block.inversion_extras & ANT_indexer_param_block_topsig::PUURULA_LENGTH_VECTORS) == 0)
-		document_indexer = new ANT_index_document(param_block.stop_word_removal);
-	else
-		document_indexer = new ANT_index_document(param_block.stop_word_removal, param_block.puurula_length_g);
-	}
+	document_indexer = new ANT_index_document(param_block.stop_word_removal);
 
 if (param_block.stemmer != 0)
 	{
@@ -621,7 +619,7 @@ else
 		}
 
 	now = stats.start_timer();
-	index->serialise(&param_block);
+	index->serialise();
 	stats.add_disk_output_time(stats.stop_timer(now));
 	index->text_render(param_block.statistics);
 	}

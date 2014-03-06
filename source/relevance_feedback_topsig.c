@@ -136,7 +136,7 @@ return feedback_vector;
 	ANT_RELEVANCE_FEEDBACK_TOPSIG::FEEDBACK()
 	-----------------------------------------
 */
-ANT_memory_index_one_node **ANT_relevance_feedback_topsig::feedback(ANT_search_engine_result *result, long documents_to_examine, long terms_wanted, long *terms_found)
+ANT_memory_index_one_node **ANT_relevance_feedback_topsig::feedback(ANT_search_engine_result *result, ANT_query *query, long documents_to_examine, long terms_wanted, long *terms_found)
 {
 return NULL;			// this kind of feedback is meaningless for TopSig
 }

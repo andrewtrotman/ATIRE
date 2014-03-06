@@ -66,7 +66,7 @@ private:
 
 	void add_term_to_table(ANT_memory_indexer_node **table, ANT_memory_index_one_node *node, long *term_id);
 
-	void tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency);
+	void tree_get_frequencies(ANT_memory_index_one_node *node, short *frequency, long long tf_cap);
 
 public:
 	ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index = NULL);
@@ -79,7 +79,7 @@ public:
 	virtual void set_puurula_length(double length) { set_document_detail(&squiggle_puurula_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ } 
 	virtual long long get_memory_usage(void) { return memory->bytes_used(); }
  	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
-	virtual short *get_frequencies(short *frequency);
+	virtual short *get_frequencies(short *frequency, long long tf_cap);
 
 	ANT_memory_indexer_node **get_term_list(void);
 
@@ -87,6 +87,7 @@ public:
 	double kl_divergence(ANT_term_divergence *divergence, ANT_memory_index_one *collection);
 	ANT_memory_index_one_node **top_n_terms(long terms_wanted, long *terms_found);
 	long long get_document_length() { return document_length; }
+	ANT_memory_index_one_node *get_term_node(ANT_string_pair *term);
 } ;
 
 #endif /* MEMORY_INDEX_ONE_H_ */

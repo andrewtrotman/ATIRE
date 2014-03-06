@@ -87,7 +87,7 @@ return answer;
 */
 void ANT_memory_index_filename_index::text_render(void)
 {
-size_t current, member;
+long long current, member;
 
 if (chunk == NULL)
 	puts("0 elements in array");

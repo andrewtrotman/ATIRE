@@ -33,7 +33,7 @@ obj/compress_text_deflate.o: source/compress_text_deflate.h source/compress_text
 obj/compress_text_none.o: source/compress_text_none.h source/compress_text.h
 obj/compress_text_snappy.o: source/compress_text_snappy.h source/compress_text.h
 obj/compress_variable_byte.o: source/compress_variable_byte.h source/compress.h source/fundamental_types.h
-obj/compression_factory.o: source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compress_relative10.h source/compress_simple9.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compress_sigma.h source/compress_none.h source/stats.h
+obj/compression_factory.o: source/compression_factory.h source/compress.h source/fundamental_types.h source/compression_factory_scheme.h source/compress_relative10.h source/compress_simple9.h source/compress_carryover12.h source/compress_golomb.h source/compress_elias_delta.h source/compress_elias_gamma.h source/compress_simple16.h source/maths.h source/bitstream.h source/compress_variable_byte.h source/compress_sigma.h source/compress_none.h source/stats.h
 obj/compression_text_factory.o: source/compression_text_factory.h source/compression_text_factory_scheme.h source/compress_text.h source/compress_text_deflate.h source/compress_text_bz2.h source/compress_text_snappy.h source/compress_text_none.h
 obj/critical_section.o: source/critical_section.h source/critical_section_internals.h
 obj/ctypes.o: source/ctypes.h

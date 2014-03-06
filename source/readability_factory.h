@@ -15,16 +15,16 @@ class ANT_readability_factory : public ANT_readability
 {
 public:
 	enum {
-		NONE           = 0,
-		DALE_CHALL     = 1,
-		FLESCH_KINCAID = 2,
-		TAG_WEIGHTING  = 4
+		NONE,
+		DALE_CHALL,
+		TAG_WEIGHTING,
+		END_OF_LIST
 		};
 
 private:
 	long number_of_measures;
 	ANT_readability **measure;
-	unsigned long measures_to_use;
+	unsigned long measure_to_use;
 	ANT_parser *parser;
 
 public:
@@ -34,7 +34,7 @@ public:
 	ANT_parser_token *get_next_token(void);
 	virtual void handle_node(ANT_memory_indexer_node *node);
 	using ANT_readability::handle_tag;
-	virtual void handle_tag(ANT_string_pair *token, long tag_open);
+	virtual void handle_tag(ANT_parser_token *token, long tag_open);
 	void index(ANT_memory_indexer *index, long long doc);
 
 	void set_document(unsigned char *document);
