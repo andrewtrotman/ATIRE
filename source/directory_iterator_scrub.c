@@ -40,9 +40,9 @@ if (scrubbing == NONE)
 for (; i < size; i++)
 	if (scrubbing & NUL && *(data + i) == '\0')
 		*(data + i) = ' ';
-	else if (scrubbing & NON_ASCII && *(data + i) & 0x80)
+	if (scrubbing & NON_ASCII && *(data + i) & 0x80)
 		*(data + i) = ' ';
-	else if (scrubbing & UTF8 && *(data + i) >= 0x80)
+	if (scrubbing & UTF8 && *(data + i) >= 0x80)
 		{
 		if ((*(data + i) & 0xC0) == 0x80)
 			{
