@@ -376,8 +376,8 @@ stats->add_stemming_reencode_time(stats->stop_timer(now));
 if (bitstring == NULL)
 	{
 	#ifdef IMPACT_HEADER
-		relevance_rank_quantum(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
-		//relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+		//relevance_rank_quantum(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
+		relevance_rank_top_k(accumulator, term_details, the_impact_header, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
 	#else
 		relevance_rank_top_k(accumulator, term_details, decompress_buffer, trim_point, prescalar, postscalar, query_frequency);
 	#endif

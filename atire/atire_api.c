@@ -1416,7 +1416,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 	/*
 		get the search term and its stats in the top few documents
 	*/
-	if (stemmer == NULL)
+	if (stemmer == NULL || term_string->get_term()->string_length <= 3)
 		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	else
 		{
@@ -1428,7 +1428,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		continue;		// term not found in the top document
 
 	/*
-		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
+		Turn the poistings list into an array[index] where index is the document number in the range 1..documents_to_examine.  The
 		result is in search_engine->stem_buffer
 	*/
 	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
@@ -1459,7 +1459,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 	/*
 		get the search term and its stats in the top few documents
 	*/
-	if (stemmer == NULL)
+	if (stemmer == NULL || term_string->get_term()->string_length <= 3)
 		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	else
 		{
@@ -1471,7 +1471,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		continue;		// term not found in the top document
 
 	/*
-		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
+		Turn the poistings list into an array[index] where index is the document number in the range 1..documents_to_examine.  The
 		result is in search_engine->stem_buffer
 	*/
 	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
