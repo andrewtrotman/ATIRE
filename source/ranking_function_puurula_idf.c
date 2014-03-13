@@ -31,6 +31,7 @@ this->g = g;
 
 documents = (size_t)engine->document_count();
 discounted_document_lengths = new double[documents];
+unique_terms_in_document = new double[documents];
 
 if (engine->get_postings_details("~puurula_tfidf_length", &term_details) == NULL)
 	{
@@ -38,14 +39,14 @@ if (engine->get_postings_details("~puurula_tfidf_length", &term_details) == NULL
 		The index was constructed without discounted TF values so we do the best we can, which is to use undiscounted lengths
 	*/
 	for (current = 0; current < documents; current++)
-		discounted_document_lengths[current] = document_lengths[current];
+		unique_terms_in_document[current] = discounted_document_lengths[current] = document_lengths[current];
 
 	/*
 		We don't know the number of documents in the collection so we'll so we'll estimate it to be the number of documents (Heaps' law of 1:1)
 	*/
 	unique_terms_in_collection = documents;
 
-	puts("Estimating the Puurula parameters as this index does not contain them");
+	puts("Warning:Estimating the Puurula parameters as this index does not contain them");
 	}
 else
 	{
@@ -59,6 +60,20 @@ else
 		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
 
 	unique_terms_in_collection = engine->get_variable("~uniqueterms");
+
+	if (engine->get_postings_details("~unique_terms_in_document", &term_details) == NULL)
+		{
+		puts("Warning: Estimating unique term count in the Puurula ranker because the counts are not in the index");
+		for (current = 0; current < documents; current++)
+			unique_terms_in_document[current] = discounted_document_lengths[current];
+		}
+	else
+		{
+		postings_buffer = engine->get_postings(&term_details, postings_buffer);
+		factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
+		for (current = 0; current < documents; current++)
+			unique_terms_in_document[current] = decompress_buffer[current];
+		}
 	}
 }
 
@@ -75,7 +90,7 @@ double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current;
 
 query_length = quantum_parameters->accumulator->get_term_count();
-query_occurences = quantum_parameters->query_frequency;
+query_occurences = log(1.0 + quantum_parameters->query_frequency / query_length) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
 
 df = 1.0 / (double)unique_terms_in_collection;
 
@@ -112,7 +127,7 @@ double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current, *end;
 
 query_length = accumulator->get_term_count();
-query_occurences = query_frequency;
+query_occurences = log(1.0 + query_frequency / query_length) * log((double)documents / (double)term_details->global_document_frequency);
 
 df = 1.0 / (double)unique_terms_in_collection;
 

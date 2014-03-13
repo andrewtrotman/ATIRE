@@ -1184,10 +1184,13 @@ if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
 			compute_puurula_document_lengths(length_vector, unique_term_vector, hash_table[hash_val]);
 
 	/*
-		Add the lengths to the index
+		Add the lengths and the unique-term-counts to the index
 	*/
 	for (current = 0; current < largest_docno; current++)
+		{
 		set_puurula_tfidf_length(length_vector[current]);					// set_puurula_length() will multiply by 100 to make it accurate to 2 decimal places
+		set_unique_term_count(unique_term_vector[current]);
+		}
 	}
 
 /*

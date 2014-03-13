@@ -16,6 +16,7 @@ private:
 	double g, u;
 	double *discounted_document_lengths;
 	double unique_terms_in_collection;
+	double *unique_terms_in_document;
 
 public:
 	ANT_ranking_function_puurula_idf(ANT_search_engine *engine, long quantize, long long quantization_bits, double u = ANT_RANKING_FUNCTION_PUURULA_U, double g =  ANT_RANKING_FUNCTION_PUURULA_G);
