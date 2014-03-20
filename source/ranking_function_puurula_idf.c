@@ -72,7 +72,7 @@ else
 		postings_buffer = engine->get_postings(&term_details, postings_buffer);
 		factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
 		for (current = 0; current < documents; current++)
-			tfidf_discounted_document_lengths[current] = decompress_buffer[current];
+			tfidf_discounted_document_lengths[current] = decompress_buffer[current] / 100.0;	// accurate to 2 decimal places
 		}
 	}
 }
@@ -108,7 +108,7 @@ while (current < quantum_parameters->quantum_end)
 
 	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
 		{
-		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
 		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
 		}
 	else
@@ -150,7 +150,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 
 		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
 			{
-			prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+			prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
 			accumulator->add_rsv(docid, quantize(postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
 			}
 		else
@@ -201,7 +201,7 @@ tf = max(tf - g * pow(tf, g), 0);
 
 rsv = query_frequency * log(tf / (u * df) + 1.0);
 
-prior = terms_in_query * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+prior = terms_in_query * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
 
 return rsv + prior;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
