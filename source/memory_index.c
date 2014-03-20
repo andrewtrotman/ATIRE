@@ -1202,7 +1202,7 @@ if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
 */
 for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	if (hash_table[hash_val] != NULL)
-		compute_puurula_document_lengths(length_vector, tf_adjusted_length_vector, document_lengths, hash_table[hash_val], PUURULA_LENGTH_VECTORS);
+		compute_puurula_document_lengths(length_vector, NULL, document_lengths, hash_table[hash_val], PUURULA_LENGTH_VECTORS);
 
 /*
 	Add the lengths to the index
