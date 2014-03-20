@@ -63,7 +63,7 @@ else
 
 	if (engine->get_postings_details("~puurula_tfidf_length", &term_details) == NULL)
 		{
-		puts("Warning: Estimating unique term count in the Puurula ranker because the counts are not in the index");
+		puts("Warning: Estimating tfidf discounted document lengths in the Puurula ranker because they are not in the index");
 		for (current = 0; current < documents; current++)
 			tfidf_discounted_document_lengths[current] = discounted_document_lengths[current];
 		}
