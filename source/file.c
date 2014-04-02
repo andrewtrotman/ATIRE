@@ -71,6 +71,7 @@ return buffer == NULL ? 0 : 1;
 */
 long ANT_file::open(const char *filename, char *mode)
 {
+//printf("open %s\n", filename);
 int use_lock = 0;
 #ifdef _MSC_VER
 	char *ch;
@@ -169,6 +170,7 @@ return 1;
 */
 long ANT_file::close(void)
 {
+//printf("close %p\n", this);
 #ifdef _MSC_VER
 	if (internals->fp != INVALID_HANDLE_VALUE)
 		{

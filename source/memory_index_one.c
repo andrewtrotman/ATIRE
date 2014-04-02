@@ -45,6 +45,7 @@ rewind();
 
 term_details = NULL;
 token_as_string = NULL;
+dummy_root = new_hash_node(new ANT_string_pair("@@"));
 }
 
 /*
@@ -68,6 +69,7 @@ memory->rewind();
 // in the next iteration, so set it to NULL so that it will always be malloc'd afresh
 token_as_string = NULL;
 memset(hash_table, 0, sizeof(hash_table));
+memset(hash_table_entries, 0, sizeof(hash_table_entries));
 document_length = 0;
 nodes_used = 0;
 }
@@ -110,20 +112,27 @@ return node;
 	ANT_MEMORY_INDEX_ONE::FIND_ADD_NODE()
 	-------------------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(ANT_memory_index_one_node *root, ANT_string_pair *string)
+ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, ANT_string_pair *string)
 {
+ANT_memory_index_one_node *root = hash_table[hash_value];
 long cmp;
 
 while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
 	if (cmp > 0)
 		if (root->left == NULL)
+			{
+			hash_table_entries[hash_value]++;
 			return root->left = new_hash_node(string);
+			}
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
+			{
+			hash_table_entries[hash_value]++;
 			return root->right = new_hash_node(string);
+			}
 		else
 			root = root->right;
 	}
@@ -169,14 +178,102 @@ ANT_memory_index_one_node *answer;
 long hash_value = hash(string);
 
 if (hash_table[hash_value] == NULL)
+	{
+	hash_table_entries[hash_value]++;
 	answer = hash_table[hash_value] = new_hash_node(string);
+	}
 else
-	answer = find_add_node(hash_table[hash_value], string);
+	answer = find_add_node(hash_value/*hash_table[hash_value]*/, string);
+
+#if REBALANCE_FACTOR > 0
+if ((hash_table_entries[hash_value] % REBALANCE_FACTOR) == 0)
+	rebalance_tree(hash_value);
+#endif
 
 answer->term_frequency += extra_term_frequency;
 answer->mode = MODE_MONOTONIC;
 
 return answer;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::REBALANCE_TREE()
+	--------------------------------------
+	Uses the DSW algorithm to rebalance the tree at a given hash value
+*/
+void ANT_memory_index_one::rebalance_tree(long hash_value)
+{
+dummy_root->right = hash_table[hash_value];
+
+// convert to a singly linked list via right rotations
+int size = tree_to_vine(dummy_root);
+
+int full_size = 1;
+while (full_size <= size)
+	full_size = full_size + full_size + 1;
+full_size /= 2;
+
+// do a series of rotations to get to a balanced tree
+vine_to_tree(dummy_root, size - full_size);
+while (full_size > 1)
+	vine_to_tree(dummy_root, full_size /= 2);
+
+// the root of the tree might have changed of course
+hash_table[hash_value] = dummy_root->right;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::TREE_TO_VINE()
+	------------------------------------
+	Converts a tree to a singly linked list, by left rotations, counting the
+	number of nodes that are in the tree.
+*/
+int ANT_memory_index_one::tree_to_vine(ANT_memory_index_one_node *root)
+{
+ANT_memory_index_one_node *tail = root;
+ANT_memory_index_one_node *remainder = root->right;
+ANT_memory_index_one_node *tmp;
+
+int nodes = 0;
+
+while (remainder != NULL)
+	if (remainder->left == NULL)
+		{
+		tail = remainder;
+		remainder = remainder->right;
+		nodes++;
+		}
+	else
+		{
+		tmp = remainder->left;
+		remainder->left = tmp->right;
+		tmp->right = remainder;
+		remainder = tmp;
+		tail->right = tmp;
+		}
+
+return nodes;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::VINE_TO_TREE()
+	------------------------------------
+	Performs the given number of right rotations on every second node going
+	down the right hand side of the tree.
+*/
+void ANT_memory_index_one::vine_to_tree(ANT_memory_index_one_node *root, int number)
+{
+ANT_memory_index_one_node *current = root;
+ANT_memory_index_one_node *child;
+
+for (int j = 0; j < number; j++)
+	{
+	child = current->right;
+	current->right = child->right;
+	current = current->right;
+	child->right = current->left;
+	current->left = child;
+	}
 }
 
 /*

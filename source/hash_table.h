@@ -31,6 +31,9 @@ return seed;
 /*
 	ANT_RANDOM_HASH_24()
 	--------------------
+	Uses ANT_random_hash_8 on the whole string, excluding the first
+	character and excluding the first two characters to generate
+	three hashes which are combined.
 */
 static inline unsigned long ANT_random_hash_8_24(ANT_string_pair *string)
 {
@@ -87,6 +90,9 @@ goto next_eight_bytes;
 /*
 	ANT_RANDOM_HASH_24()
 	--------------------
+	Uses the same logic as ANT_random_hash_8, but generates three hashes
+	on the 1,4,7... 2,5,8,... 3,6,9,.. characters which are then
+	combined togehter for the final hash.
 */
 static inline uint32_t ANT_random_hash_24(char *string, size_t length)
 {
@@ -132,11 +138,11 @@ unsigned long ans;
 size_t len;
 const long base = 37;
 
-if (ANT_isdigit((*string)[0]))
-	return ANT_atoul(string->start, string->length()) % 0x1000000;
+//if (ANT_isdigit((*string)[0]))
+//	return ANT_atoul(string->start, string->length()) % 0x1000000;
 
-if (((*string)[0] & 0x80) != 0)
-	return ANT_random_hash_24(string->string(), string->length());
+//if (((*string)[0] & 0x80) != 0)
+//	return ANT_random_hash_24(string->string(), string->length());
 
 ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
 
@@ -204,7 +210,7 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 	#error "HASHER must be defined so a hash_table function can be chosen"
 #else
 	#if HASHER == RANDOM_HASHER
-		return ANT_random_hash_8(string);
+		return ANT_random_hash_8(string->string(), string->length(), string->length() & 0xFF);
 	#elif HASHER == HEADER_HASHER
 		return ANT_header_hash_8(string);
 	#else

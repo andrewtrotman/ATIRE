@@ -173,9 +173,15 @@ ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lsocket -lnsl
 endif
 
+ifeq ($(hasher), 1)
+	CFLAGS += -DRANDOM_HASHER=1
+else
+	CFLAGS += -DHEADER_HASHER=1
+endif
+
 # common flags
 LDFLAGS += -ldl
-CFLAGS +=  -x c++ -Wall -DHASHER=1 -DHEADER_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DDOUBLE_BUFFER \
+CFLAGS +=  -x c++ -Wall -DHASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DDOUBLE_BUFFER -DREBALANCE_FACTOR=$(rb) \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 

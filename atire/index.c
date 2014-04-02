@@ -199,7 +199,9 @@ if (param_block.logo)
 if (first_param >= argc)
 	exit(0);				// no files to index so terminate
 
-printf("ATIRE_index 0 start_process %lld\n", stats.start_timer());
+#ifdef LOGGING
+	printf("ATIRE_index 0 start_process %lld\n", stats.start_timer());
+#endif
 
 last_report = 0;
 doc = 0;
@@ -282,8 +284,6 @@ if (param_block.num_pregen_fields)
 	The first parameter that is not a command line switch is the start of the list of files to index
 */
 bytes_indexed = 0;
-
-printf("%ld arguments!\n", argc - first_param);
 
 for (param = first_param; param < argc; param++)
 	{
@@ -632,7 +632,9 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	printf("\n");
 	}
 
-printf("ATIRE_index 0 end_process %lld\n", stats.start_timer());
+#ifdef LOGGING
+	printf("ATIRE_index 0 end_process %lld\n", stats.start_timer());
+#endif
 
 delete index;
 delete disk;

@@ -87,14 +87,14 @@ long long ANT_directory_iterator_file_buffered::read(char *destination, long lon
 long long got;
 
 //long long now = clock->start_timer();
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //printf("%sstart_wait %lld\n", message, now);
 //printf("%sstart_input_wait %lld\n", message, now);
 if ((got = source->read((unsigned char *)destination, length)) < length)
 	destination[got] = '\0';
 
 //printf("%send_wait %lld\n", message, now);
-printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 //wait_input_time += clock->stop_timer(now);
 return got;
 }
@@ -116,7 +116,7 @@ char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
 //printf("%send_upstream_wait %lld\n", message, clock->start_timer());
 //wait_output_time += clock->stop_timer(now);
 //now = clock->start_timer();
-printf("%sstart_process %lld\n", message, clock->start_timer());
+START;
 
 start = primary_read_buffer + primary_read_buffer_used;
 
@@ -135,7 +135,7 @@ if ((document_start = strstr(start, doc_tag[0])) == NULL)
 	//now = clock->start_timer();
 	if ((bytes_read == 0) || (document_start = strstr(primary_read_buffer, doc_tag[0])) == NULL)
 		{
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //		process_time += clock->stop_timer(now);
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
@@ -160,7 +160,7 @@ if ((document_end = strstr(document_start, doc_tag[1])) == NULL)
 	document_start = primary_read_buffer;
 	if ((bytes_read == 0) || (document_end = strstr(document_start, doc_tag[1])) == NULL)
 		{
-printf("%send_process %lld\n", message, clock->start_timer());
+			END;
 //		process_time += clock->stop_timer(now);
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
@@ -214,7 +214,7 @@ else
 		read_entire_file(object);
 	}
 
-printf("%send_process %lld\n", message, clock->start_timer());
+END;
 //process_time += clock->stop_timer(now);
 //printf("%sstart_upstream %lld\n", message, clock->start_timer());
 return object;

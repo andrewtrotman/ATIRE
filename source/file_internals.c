@@ -56,7 +56,7 @@ ANT_critical_section file_critical_section;
 	long long bytes_left_to_read = bytes_to_read;
 	char *dest = (char *)destination;
 
-	file_critical_section.enter();
+	//file_critical_section.enter();
 	while (bytes_read < bytes_to_read)
 		{
 		if (bytes_left_to_read < in_one_go)
@@ -68,7 +68,7 @@ ANT_critical_section file_critical_section;
 //		if (ferror(fp))
 //			return 0;
 		}
-	file_critical_section.leave();
+	//file_critical_section.leave();
 	return bytes_read == bytes_to_read; // will return 0 (fail) or 1 (success)
 	}
 

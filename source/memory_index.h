@@ -54,6 +54,9 @@ public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 
 private:
+	int hash_table_entries[HASH_TABLE_SIZE];
+
+private:
 	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;
 	unsigned char *serialised_docids;
 	unsigned short *serialised_tfs;
@@ -140,7 +143,8 @@ private:
 private:
 	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
-	ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
+	ANT_memory_index_hash_node *find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string);
+	//ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	void serialise_one_node(ANT_file *file, ANT_memory_index_hash_node *root);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
@@ -192,6 +196,10 @@ public:
 	long serialise(void);
 
 	void add_indexed_document(ANT_memory_index_one *index, long long docno);
+
+	void rebalance_tree(long hash_value);
+	int tree_to_vine(ANT_memory_index_hash_node *root);
+	void vine_to_tree(ANT_memory_index_hash_node *root, int size);
 
 	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, long term_frequency = 1);
 	virtual long long get_memory_usage(void) { return dictionary_memory->bytes_used() + postings_memory->bytes_used(); }

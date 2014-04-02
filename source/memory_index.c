@@ -44,6 +44,7 @@ stop_word_removal_mode = NONE;
 stopwords = new ANT_stop_word(ANT_stop_word::NCBI);
 hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
+memset(hash_table_entries, 0, sizeof(hash_table_entries));
 titles_memory = serialisation_memory = dictionary_memory = new ANT_memory;		// if you seperate these then remember to update the stats object
 postings_memory = new ANT_memory;
 stats = new ANT_stats_memory_index(dictionary_memory, postings_memory);
@@ -151,9 +152,10 @@ return (ANT_memory_index_hash_node *)finder;
 	ANT_MEMORY_INDEX::FIND_ADD_NODE()
 	---------------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index::find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string)
+ANT_memory_index_hash_node *ANT_memory_index::find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string)
 {
 long cmp;
+ANT_memory_index_hash_node *root = hash_table[hash_value];
 
 while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
@@ -161,6 +163,7 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		if (root->left == NULL)
 			{
 			ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL);
+			hash_table_entries[hash_value]++;
 			return root->left;
 			}
 		else
@@ -169,6 +172,7 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		if (root->right == NULL)
 			{
 			ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL);
+			hash_table_entries[hash_value]++;
 			return root->right;
 			}
 		else
@@ -176,6 +180,7 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 	}
 return root;
 }
+
 
 /*
 	ANT_MEMORY_INDEX::ADD_TERM()
@@ -193,13 +198,111 @@ if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
 	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL);
+	hash_table_entries[hash_value]++;
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_table[hash_value], string);
+	node = find_add_node(hash_value, string);
+
+/*
+	Assume that with balancing in memory index one, we don't need
+	to balance in this one.
+*/
+#if 0
+#if REBALANCE_FACTOR > 0
+if (hash_table_entries[hash_value] % REBALANCE_FACTOR == 0)
+	rebalance_tree(hash_value);
+#endif
+#endif
 
 node->add_posting(docno, term_frequency);
+
 return node;
+}
+
+/*
+	ANT_MEMORY_INDEX::REBALANCE_TREE()
+	----------------------------------
+	Uses the DSW algorithm to rebalance the tree at a given hash value
+*/
+void ANT_memory_index::rebalance_tree(long hash_value)
+{
+static ANT_memory_index_hash_node dummy_root;
+
+dummy_root.right = hash_table[hash_value];
+
+// convert to a singly linked list
+int size = tree_to_vine(&dummy_root);
+
+// work out how many rotations we need to perform to get it back
+int full_size = 1;
+while (full_size <= size)
+	full_size = full_size + full_size + 1;
+full_size /= 2;
+
+hash_table[hash_value] = dummy_root.right;
+dummy_root.right = hash_table[hash_value];
+
+// do a series of rotations to get to a balanced tree
+vine_to_tree(&dummy_root, size - full_size);
+for (size = full_size; size > 1; size /= 2)
+	vine_to_tree(&dummy_root, size / 2);
+
+hash_table[hash_value] = dummy_root.right;
+}
+
+/*
+	ANT_MEMORY_INDEX::TREE_TO_VINE()
+	--------------------------------
+	Converts a tree to a singly linked list, by rotation, counting the
+	number of rotations that were performed
+*/
+int ANT_memory_index::tree_to_vine(ANT_memory_index_hash_node *root)
+{
+ANT_memory_index_hash_node *tail = root;
+ANT_memory_index_hash_node *remainder = root->right;
+ANT_memory_index_hash_node *tmp;
+
+int rotations = 0;
+
+while (remainder != NULL)
+	if (remainder->left == NULL)
+		{
+		tail = remainder;
+		remainder = remainder->right;
+		rotations++;
+		}
+	else
+		{
+		tmp = remainder->left;
+		remainder->left = tmp->right;
+		tmp->right = remainder;
+		remainder = tmp;
+		tail->right = tmp;
+		}
+
+return rotations;
+}
+
+/*
+	ANT_MEMORY_INDEX::VINE_TO_TREE()
+	--------------------------------
+	Converts a tree in singly linked list form to a balanced tree by
+	performing a set of rotations
+*/
+void ANT_memory_index::vine_to_tree(ANT_memory_index_hash_node *root, int size)
+{
+ANT_memory_index_hash_node *current = root;
+ANT_memory_index_hash_node *child;
+
+for (int j = 0; j < size; j++)
+	{
+	child = current->right;
+	current->right = child->right;
+	current = current->right;
+	child->right = current->left;
+	current->left = child;
+	}
 }
 
 /*
@@ -216,10 +319,11 @@ if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
 	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
+	hash_table_entries[hash_value]++;
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_table[hash_value], measure_name);
+	node = find_add_node(hash_value, measure_name);
 
 if (mode != MODE_MONOTONIC)
 	node->current_docno = -1;			// store the value rather than the diff
@@ -252,10 +356,11 @@ if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
 	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
+	hash_table_entries[hash_value]++;
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_table[hash_value], measure_name);
+	node = find_add_node(hash_value, measure_name);
 
 node->set(score);
 }
@@ -282,10 +387,10 @@ else
 /*
 	Now check the left and the right subtrees for hash collisions
 */
-if  (node->left != NULL)
+if (node->left != NULL)
 	add_indexed_document_node(node->left, docno);
 
-if  (node->right != NULL)
+if (node->right != NULL)
 	add_indexed_document_node(node->right, docno);
 }
 
@@ -1317,7 +1422,7 @@ if (static_prune_point < largest_docno)
 	the relevance ranking functions
 */
 
-node = find_add_node(hash_table[hashed_squiggle_length], &squiggle_length);
+node = find_add_node(hashed_squiggle_length, &squiggle_length);
 
 get_serialised_postings(node, &doc_size, &tf_size);
 document_lengths = (ANT_compressable_integer *)serialisation_memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));

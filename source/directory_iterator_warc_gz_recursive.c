@@ -77,8 +77,8 @@ memory = new ANT_memory(1024 * 1024);
 file_stream = new ANT_instream_file(memory, filename);
 instream_buffer = new ANT_instream_buffer(memory, file_stream);
 decompressor = new ANT_instream_deflate(memory, instream_buffer);
-instream_buffer = new ANT_instream_buffer(memory, decompressor);
-dewarcer = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
+//instream_buffer = new ANT_instream_buffer(memory, decompressor);
+dewarcer = new ANT_directory_iterator_warc(decompressor, ANT_directory_iterator::READ_FILE);
 
 return dewarcer;
 }
