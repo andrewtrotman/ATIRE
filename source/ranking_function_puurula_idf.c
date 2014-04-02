@@ -31,21 +31,22 @@ this->g = g;
 
 documents = (size_t)engine->document_count();
 discounted_document_lengths = new double[documents];
+tfidf_discounted_document_lengths = new double[documents];
 
-if (engine->get_postings_details("~puurula_tfidf_length", &term_details) == NULL)
+if (engine->get_postings_details("~puurula_tfidf_powerlaw_length", &term_details) == NULL)
 	{
 	/*
 		The index was constructed without discounted TF values so we do the best we can, which is to use undiscounted lengths
 	*/
 	for (current = 0; current < documents; current++)
-		discounted_document_lengths[current] = document_lengths[current];
+		tfidf_discounted_document_lengths[current] = discounted_document_lengths[current] = document_lengths[current];
 
 	/*
 		We don't know the number of documents in the collection so we'll so we'll estimate it to be the number of documents (Heaps' law of 1:1)
 	*/
 	unique_terms_in_collection = documents;
 
-	puts("Estimating the Puurula parameters as this index does not contain them");
+	puts("Warning:Estimating the Puurula parameters as this index does not contain them");
 	}
 else
 	{
@@ -59,6 +60,20 @@ else
 		discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
 
 	unique_terms_in_collection = engine->get_variable("~uniqueterms");
+
+	if (engine->get_postings_details("~puurula_tfidf_length", &term_details) == NULL)
+		{
+		puts("Warning: Estimating tfidf discounted document lengths in the Puurula ranker because they are not in the index");
+		for (current = 0; current < documents; current++)
+			tfidf_discounted_document_lengths[current] = discounted_document_lengths[current];
+		}
+	else
+		{
+		postings_buffer = engine->get_postings(&term_details, postings_buffer);
+		factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
+		for (current = 0; current < documents; current++)
+			tfidf_discounted_document_lengths[current] = decompress_buffer[current] / 100.0;	// accurate to 2 decimal places
+		}
 	}
 }
 
@@ -75,7 +90,7 @@ double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current;
 
 query_length = quantum_parameters->accumulator->get_term_count();
-query_occurences = quantum_parameters->query_frequency;
+query_occurences = log(1.0 + quantum_parameters->query_frequency / query_length) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
 
 df = 1.0 / (double)unique_terms_in_collection;
 
@@ -93,7 +108,7 @@ while (current < quantum_parameters->quantum_end)
 
 	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
 		{
-		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+		prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
 		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
 		}
 	else
@@ -112,7 +127,7 @@ double rsv, tf, df, query_length, query_occurences, prior;
 ANT_compressable_integer *current, *end;
 
 query_length = accumulator->get_term_count();
-query_occurences = query_frequency;
+query_occurences = log(1.0 + query_frequency / query_length) * log((double)documents / (double)term_details->global_document_frequency);
 
 df = 1.0 / (double)unique_terms_in_collection;
 
@@ -135,7 +150,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 
 		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
 			{
-			prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+			prior = query_length * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
 			accumulator->add_rsv(docid, quantize(postscalar * (rsv + prior), maximum_collection_rsv, minimum_collection_rsv));
 			}
 		else
@@ -186,7 +201,7 @@ tf = max(tf - g * pow(tf, g), 0);
 
 rsv = query_frequency * log(tf / (u * df) + 1.0);
 
-prior = terms_in_query * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+prior = terms_in_query * log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
 
 return rsv + prior;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER

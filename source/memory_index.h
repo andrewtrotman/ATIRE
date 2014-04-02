@@ -173,7 +173,7 @@ private:
 	long should_prune(ANT_memory_index_hash_node *term);
 
 	long compute_unique_term_count(ANT_compressable_integer *vector, ANT_memory_index_hash_node *root);
-	void compute_puurula_document_lengths(double *length_vector, ANT_compressable_integer *document_lengths, ANT_memory_index_hash_node *root);
+	void compute_puurula_document_lengths(double *length_vector, double *tf_adjusted_length_vector, ANT_compressable_integer *document_lengths, ANT_memory_index_hash_node *root, long mode);
 	void compute_puurula_document_lengths(ANT_compressable_integer *document_lengths);
 
 	void text_render(ANT_memory_index_hash_node *root, unsigned char *serialised_docids, long doc_size, unsigned short *serialised_tfs, long tf_size);
@@ -205,7 +205,9 @@ public:
 	virtual long long get_memory_usage(void) { return dictionary_memory->bytes_used() + postings_memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_puurula_length(double length) { set_document_detail(&squiggle_puurula_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ } 
+	virtual void set_puurula_tfidf_powerlaw_length(double length) { set_document_detail(&squiggle_puurula_tfidf_powerlaw_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ }
 	virtual void set_puurula_tfidf_length(double length) { set_document_detail(&squiggle_puurula_tfidf_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ }
+	virtual void set_unique_term_count(long long length) { set_document_detail(&squiggle_unique_term_count, length); }
 	virtual void set_inverted_index_mode(long mode, double parameter) { inverted_index_mode = mode; inverted_index_parameter = parameter; }
 	virtual void set_quantization(long quantization, long bits) { this->index_quantization = quantization; this->quantization_bits = bits;}
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);

@@ -1416,7 +1416,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 	/*
 		get the search term and its stats in the top few documents
 	*/
-	if (stemmer == NULL)
+	if (stemmer == NULL || term_string->get_term()->string_length <= 3)
 		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	else
 		{
@@ -1428,7 +1428,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		continue;		// term not found in the top document
 
 	/*
-		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
+		Turn the poistings list into an array[index] where index is the document number in the range 1..documents_to_examine.  The
 		result is in search_engine->stem_buffer
 	*/
 	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
@@ -1443,7 +1443,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		collection_frequency = term_details.global_collection_frequency;
 		document_frequency = term_details.global_document_frequency;
 
-		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, search_engine->results_list->get_term_count());
+		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, 1);
 		document_score = search_engine->results_list->accumulator[docid].get_rsv();
 		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score);
 		}
@@ -1459,7 +1459,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 	/*
 		get the search term and its stats in the top few documents
 	*/
-	if (stemmer == NULL)
+	if (stemmer == NULL || term_string->get_term()->string_length <= 3)
 		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
 	else
 		{
@@ -1471,7 +1471,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		continue;		// term not found in the top document
 
 	/*
-		Turn the poistings list into an array[index] where index is the document number in the rankge 1..documents_to_examine.  The
+		Turn the poistings list into an array[index] where index is the document number in the range 1..documents_to_examine.  The
 		result is in search_engine->stem_buffer
 	*/
 	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
@@ -1487,7 +1487,7 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		collection_frequency = term_details.global_collection_frequency;
 		document_frequency = term_details.global_document_frequency;
 
-		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, search_engine->results_list->get_term_count());
+		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, 1);
 		document_score = search_engine->results_list->accumulator[docid].get_rsv();
 		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
 		}
