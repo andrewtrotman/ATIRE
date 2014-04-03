@@ -295,8 +295,8 @@ return internals->read_file_64(internals->fp, data, size);
 }
 
 /*
-	ANT_FILE::READ()
-	----------------
+	ANT_FILE::READ_RETURN_PTR()
+	---------------------------
 */
 unsigned char *ANT_file::read_return_ptr(unsigned char *data, long long size)
 {

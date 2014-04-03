@@ -1,6 +1,6 @@
 /*
 	RANKING_FUNCTION_QUANTUM_PARAMETERS.H
-	-----------------------
+	-------------------------------------
 */
 #ifndef __RANKING_FUNCTION_QUANTUM_PARAMETERS_H__
 #define __RANKING_FUNCTION_QUANTUM_PARAMETERS_H__
@@ -21,6 +21,7 @@ public:
 	long long trim_point;
 	double prescalar;
 	double postscalar;
+	double query_frequency;
 };
 
 #endif  /* __RANKING_FUNCTION_QUANTUM_PARAMETERS_H__ */

@@ -20,13 +20,11 @@
 */
 long ANT_index_document::index_document(ANT_memory_indexer *indexer, ANT_stem *stemmer, long segmentation, ANT_readability_factory *readability, long long doc, unsigned char *file)
 {
-double discounted_document_length, discounted_tf;
 char term[MAX_TERM_LENGTH + 1], token_stem_internals[MAX_TERM_LENGTH + 1];
 ANT_parser_token *token;
-long terms_in_document, length_of_token, is_previous_token_chinese, current;
+long terms_in_document, length_of_token, is_previous_token_chinese;
 size_t length_of_previous_token;
 char *previous_token_start;
-short frequencies[0x200];		// terms can't occur more than 0xFF times
 
 /*
 	Initialise
@@ -137,25 +135,6 @@ while ((token = readability->get_next_token()) != NULL)
 
 if (terms_in_document != 0)
 	{
-	/*
-		Compute the Puurula length
-	*/
-	if (puurula_length_g >= 0)
-		{
-		discounted_document_length = 0;
-		memset(frequencies, 0, sizeof(frequencies));
-
-		indexer->get_frequencies(frequencies, (sizeof(frequencies) / sizeof(*frequencies) - 1));
-		for (current = 0; current < 0x100; current++)
-			if (frequencies[current] != 0)
-				{
-				discounted_tf = ANT_max((double)current - puurula_length_g * pow((double)current, puurula_length_g), 0.0);
-				discounted_document_length += frequencies[current] * discounted_tf;
-				}
-
-		indexer->set_puurula_length(discounted_document_length);
-		}
-
 	/*
 		Set the true length
 	*/

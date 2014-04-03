@@ -13,7 +13,6 @@ class ANT_indexer_param_block_topsig
 {
 public:
 	enum { INVERTED_FILE, TOPSIG };			// inverted file or TopSig file
-	enum { NONE = 0, PUURULA_LENGTH_VECTORS = 1 };	// inverted file "extra" stuff we can generate in the indexes
 
 public:
 	long inversion_type;				// is the index a "standard" inverted file or a TopSig file?

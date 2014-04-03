@@ -6,7 +6,7 @@
 #
 #	DEBUG. set DEBUG=1 for compile in DEBUG mode.  Set DEBUG=0 for RELEASE mode.
 #
-DEBUG = 1
+DEBUG = 0
 
 #
 #	Which compiler are we using
@@ -212,6 +212,7 @@ PARTS = \
 	$(OBJDIR)\atire_api_remote.obj 					\
 	$(OBJDIR)\relevance_feedback.obj 				\
 	$(OBJDIR)\relevance_feedback_blind_kl.obj 		\
+	$(OBJDIR)\relevance_feedback_blind_kl_rm.obj 	\
 	$(OBJDIR)\relevance_feedback_topsig.obj 		\
 	$(OBJDIR)\relevance_feedback_factory.obj 		\
 	$(OBJDIR)\term_divergence_kl.obj 				\
@@ -230,7 +231,7 @@ PARTS = \
 	$(OBJDIR)\index_document_topsig.obj				\
 	$(OBJDIR)\index_document_topsig_signature.obj	\
 	$(OBJDIR)\memory_index_hash_node.obj			\
-	$(OBJDIR)\memory_index_filename_index.obj 						\
+	$(OBJDIR)\memory_index_filename_index.obj 		\
 	$(OBJDIR)\memory_index.obj 						\
 	$(OBJDIR)\memory_indexer.obj 					\
 	$(OBJDIR)\memory_index_one.obj 					\
@@ -252,8 +253,8 @@ PARTS = \
 	$(OBJDIR)\search_engine_result_iterator.obj 	\
 	$(OBJDIR)\search_engine_memory_index.obj 		\
 	$(OBJDIR)\evaluator.obj							\
-	$(OBJDIR)\evaluation.obj							\
-	$(OBJDIR)\evaluation_binary_preference.obj    \
+	$(OBJDIR)\evaluation.obj						\
+	$(OBJDIR)\evaluation_binary_preference.obj    	\
 	$(OBJDIR)\evaluation_discounted_cumulative_gain.obj                             \
 	$(OBJDIR)\evaluation_expected_reciprocal_rank.obj                               \
 	$(OBJDIR)\evaluation_intent_aware_expected_reciprocal_rank.obj                  \
@@ -263,16 +264,16 @@ PARTS = \
 	$(OBJDIR)\evaluation_mean_average_generalised_precision_document.obj            \
 	$(OBJDIR)\evaluation_mean_average_precision.obj                                 \
 	$(OBJDIR)\evaluation_normalised_discounted_cumulative_gain.obj                  \
-	$(OBJDIR)\evaluation_precision_at_n.obj       \
-	$(OBJDIR)\evaluation_rank_effectiveness.obj   \
-	$(OBJDIR)\evaluation_success_at_n.obj         \
+	$(OBJDIR)\evaluation_precision_at_n.obj       	\
+	$(OBJDIR)\evaluation_rank_effectiveness.obj   	\
+	$(OBJDIR)\evaluation_success_at_n.obj         	\
 	$(OBJDIR)\assessment.obj						\
 	$(OBJDIR)\assessment_TREC.obj					\
 	$(OBJDIR)\assessment_INEX.obj					\
 	$(OBJDIR)\assessment_factory.obj				\
 	$(OBJDIR)\relevant_document.obj 				\
-	$(OBJDIR)\relevant_topic.obj \
-	$(OBJDIR)\relevant_subtopic.obj \
+	$(OBJDIR)\relevant_topic.obj					\
+	$(OBJDIR)\relevant_subtopic.obj					\
 	$(OBJDIR)\stats.obj								\
 	$(OBJDIR)\stats_time.obj						\
 	$(OBJDIR)\stats_search_engine.obj				\
@@ -342,7 +343,7 @@ PARTS = \
 	$(OBJDIR)\compression_text_factory.obj			\
 	$(OBJDIR)\readability_dale_chall.obj			\
 	$(OBJDIR)\readability_factory.obj				\
-	$(OBJDIR)\readability_tag_weighting.obj				\
+	$(OBJDIR)\readability_tag_weighting.obj			\
 	$(OBJDIR)\search_engine_readability.obj			\
 	$(OBJDIR)\plugin_manager.obj					\
 	$(OBJDIR)\indexer_param_block_rank.obj			\
@@ -354,19 +355,24 @@ PARTS = \
 	$(OBJDIR)\ant_param_block.obj					\
 	$(OBJDIR)\version.obj							\
 	$(OBJDIR)\ranking_function.obj					\
-	$(OBJDIR)\ranking_function_factory.obj					\
+	$(OBJDIR)\ranking_function_factory.obj			\
 	$(OBJDIR)\ranking_function_impact.obj			\
 	$(OBJDIR)\ranking_function_readability.obj		\
 	$(OBJDIR)\ranking_function_lmds.obj				\
 	$(OBJDIR)\ranking_function_lmd.obj				\
 	$(OBJDIR)\ranking_function_lmjm.obj				\
-	$(OBJDIR)\ranking_function_puurula_idf.obj				\
-	$(OBJDIR)\ranking_function_puurula.obj				\
+	$(OBJDIR)\ranking_function_puurula_idf.obj		\
+	$(OBJDIR)\ranking_function_puurula.obj			\
 	$(OBJDIR)\ranking_function_docid.obj			\
 	$(OBJDIR)\ranking_function_pregen.obj			\
 	$(OBJDIR)\ranking_function_bose_einstein.obj	\
 	$(OBJDIR)\ranking_function_divergence.obj		\
 	$(OBJDIR)\ranking_function_bm25.obj				\
+	$(OBJDIR)\ranking_function_bm25l.obj			\
+	$(OBJDIR)\ranking_function_bm25plus.obj			\
+	$(OBJDIR)\ranking_function_bm25adpt.obj			\
+	$(OBJDIR)\ranking_function_bm25t.obj			\
+	$(OBJDIR)\ranking_function_tflodop.obj			\
 	$(OBJDIR)\ranking_function_dlh13.obj			\
 	$(OBJDIR)\ranking_function_dph.obj				\
 	$(OBJDIR)\ranking_function_dfree.obj			\
@@ -375,19 +381,19 @@ PARTS = \
 	$(OBJDIR)\ranking_function_kbtfidf.obj			\
 	$(OBJDIR)\ranking_function_topsig_positive.obj	\
 	$(OBJDIR)\ranking_function_topsig_negative.obj	\
-	$(OBJDIR)\ranking_function_dfi.obj \
-	$(OBJDIR)\ranking_function_dfiw.obj \
-	$(OBJDIR)\ranking_function_dfiw_idf.obj \
-	$(OBJDIR)\ranking_function_dfi_idf.obj \
-	$(OBJDIR)\instream_memory.obj						\
-	$(OBJDIR)\instream_pkzip.obj						\
-	$(OBJDIR)\instream_file_star.obj						\
+	$(OBJDIR)\ranking_function_dfi.obj 				\
+	$(OBJDIR)\ranking_function_dfiw.obj 			\
+	$(OBJDIR)\ranking_function_dfiw_idf.obj 		\
+	$(OBJDIR)\ranking_function_dfi_idf.obj 			\
+	$(OBJDIR)\instream_memory.obj					\
+	$(OBJDIR)\instream_pkzip.obj					\
+	$(OBJDIR)\instream_file_star.obj				\
 	$(OBJDIR)\instream_file.obj						\
 	$(OBJDIR)\instream_deflate.obj					\
 	$(OBJDIR)\instream_bz2.obj						\
 	$(OBJDIR)\instream_buffer.obj					\
 	$(OBJDIR)\instream_lzo.obj						\
-	$(OBJDIR)\instream_scrub.obj						\
+	$(OBJDIR)\instream_scrub.obj					\
 	$(OBJDIR)\nexi.obj								\
 	$(OBJDIR)\nexi_ant.obj							\
 	$(OBJDIR)\nexi_term_iterator.obj				\

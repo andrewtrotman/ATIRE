@@ -79,26 +79,17 @@ public:
 		You must override these functions if you're going to add a ranking function.
 	*/
 #ifdef IMPACT_HEADER
-	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
-	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_quantum(accumulator, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); };
+	virtual void relevance_rank_quantum(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency);
 	virtual void relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_paramters) = 0;
 #endif
 
 #ifdef IMPACT_HEADER
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency) = 0;
 #else
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar) = 0;
+	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency) = 0;
 #endif
-	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency) = 0;
+	virtual double rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency) = 0;
 
-	/*
-		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
-	*/
-#ifdef IMPACT_HEADER
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); }
-#else
-	virtual void relevance_rank_top_k(ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_top_k(accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
-#endif
 	/*
 		You can override this function if you want fast boolean, otherwise it'll run through the postings list
 		setting bits and then chain through to relevance_rank_top_k().  That is, default behaviour is to double
@@ -106,18 +97,9 @@ public:
 		and example).
 	*/
 #ifdef IMPACT_HEADER
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency);
 #else
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar);
-#endif
-
-	/*
-		If you override this one you can avoid a couple of multiplies when the prescalar and postscalar are both 1
-	*/
-#ifdef IMPACT_HEADER
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_header, impact_ordering, trim_point, 1.0, 1.0); }
-#else
-	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point) { relevance_rank_boolean(documents_touched, accumulators, term_details, impact_ordering, trim_point, 1.0, 1.0); }
+	virtual void relevance_rank_boolean(ANT_bitstring *documents_touched, ANT_search_engine_result *accumulators, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency);
 #endif
 
 	/*
@@ -131,7 +113,7 @@ public:
 		postings list is generated from the tf array it is then (correctly) trimmed thus further reducing the
 		computational cost of the search.
 	*/
-	virtual void relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar);
+	virtual void relevance_rank_tf(ANT_bitstring *bitstring, ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_weighted_tf *tf_array, long long trim_point, double prescalar, double postscalar, double query_frequency);
 
 	/*
 		Functions used for quantised impact ordering.  We need to compute the range of values that will be
@@ -144,6 +126,12 @@ public:
 	virtual void get_max_min(double *maximum, double *minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
 	virtual void quantize(double maximum, double minimum, long long collection_frequency, long long document_frequency, ANT_compressable_integer *document_ids, unsigned short *term_frequencies);
 	double quantize(double rsv, double maximum, double minimum);
+
+	/*
+		This method is called at search time in order to get the ranking score for an individual document
+		which, in turn, is used as part of Relevance Models (RM3 and so on).
+	*/
+	virtual double score_one_document(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency, double terms_in_query);
 } ;
 
 #endif  /* ANT_RANKING_FUNCTION_H_ */

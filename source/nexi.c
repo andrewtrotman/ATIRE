@@ -48,6 +48,8 @@ if (pool_used >= MAX_NEXI_TERMS)
 
 answer->next = answer->parent_path = NULL;
 answer->sign = weight;
+answer->rsv_weight = answer->tf_weight = answer->query_frequency = 1;
+
 if (tag == NULL)
 	{
 	answer->path.start = NULL;

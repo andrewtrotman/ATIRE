@@ -63,7 +63,7 @@ while (current < quantum_parameters->quantum_end)
 	ANT_RANKING_FUNCTION_DFI_IFD::RELEVANCE_RANK_TOP_K()
 	----------------------------------------------------
 */
-void ANT_ranking_function_DFI_IDF::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_DFI_IDF::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 double cf, tf, ef, rsv;
@@ -139,7 +139,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	c is the number of documents in the collection
 	ci is the number of documents containing the term
 */
-void ANT_ranking_function_DFI_IDF::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar)
+void ANT_ranking_function_DFI_IDF::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
 long long docid;
 double tf, cf, ef, score;
@@ -174,7 +174,7 @@ while (current < end)
 	ANT_RANKING_FUNCTION_DFI_IDF::RANK()
 	------------------------------------
 */
-double ANT_ranking_function_DFI_IDF::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency)
+double ANT_ranking_function_DFI_IDF::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
 double tf = (double)term_frequency;
 double cf = (double)collection_frequency;

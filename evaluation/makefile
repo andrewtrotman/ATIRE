@@ -11,8 +11,8 @@ between.exe : between.c
 
 mkqrel.exe : mkqrel.c
 
-trec2query.exe : trec2query.c stop_word.c
-	$(CC) $(CFLAGS) /EHsc /TP trec2query.c stop_word.c
+trec2query.exe : trec2query.c 
+	$(CC) $(CFLAGS) /EHsc /Tp trec2query.c ..\obj\stop_word.c
 
 INEXtopics_to_ANTquery.exe : INEXtopics_to_ANTquery.c
 	$(CC) $(CFLAGS) /EHsc /Tp INEXtopics_to_ANTquery.c ..\obj\ctypes.obj

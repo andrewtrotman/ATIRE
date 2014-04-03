@@ -6,7 +6,7 @@
 #include <sstream>
 #include "maths.h"
 #include "numbers.h"
-#include "ant_param_block.h"			// FIX THIS BY REMOVING ANT.EXE
+#include "ant_param_block.h"
 #include "atire_api.h"
 
 #include "btree_iterator.h"
@@ -28,9 +28,11 @@
 
 #include "search_engine.h"
 #include "search_engine_readability.h"
+#include "search_engine_result_id_iterator.h"
 
 #include "stemmer.h"
 #include "stemmer_factory.h"
+#include "stem_stemmer.h"
 
 #include "thesaurus.h"
 
@@ -109,6 +111,8 @@ more_like_term_chooser = NULL;
 feedbacker = NULL;
 feedback_ranking_function = NULL;
 feedback_documents = feedback_terms = 10;
+feedback_lambda = 0.5;
+feedback_mode = FEEDBACK_REPLACE;
 query_type_is_all_terms = FALSE;
 hits = 0;
 sort_top_k = LLONG_MAX;
@@ -371,7 +375,6 @@ NEXI_parser->set_thesaurus(expander_query);
 NEXI_parser->set_segmentation(segmentation);
 parsed_query->NEXI_query = NEXI_parser->parse(query);
 
-
 return parsed_query->NEXI_query;
 }
 
@@ -419,11 +422,11 @@ return NULL;
 		0 on success
 		1 on failure
 */
-long ATIRE_API::set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+long ATIRE_API::set_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3)
 {
 ANT_ranking_function *new_function;
 
-if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
+if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2, p3)) == NULL)
 	return 1;
 
 delete ranking_function;
@@ -439,14 +442,14 @@ return 0;
 		0 on success
 		1 on failure
 */
-long ATIRE_API::set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+long ATIRE_API::set_feedback_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3)
 {
 ANT_ranking_function *new_function;
 
 if (function == ANT_ANT_param_block::NONE)
 	new_function = NULL;
 else
-	if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2)) == NULL)
+	if ((new_function = decode_ranking_function(function, quantization, quantization_bits, p1, p2, p3)) == NULL)
 		return 1;
 
 feedback_ranking_function = new_function;
@@ -460,7 +463,7 @@ return 0;
 	returns:
 		NULL on failure
 */
-ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2)
+ANT_ranking_function *ATIRE_API::decode_ranking_function(long long function, long quantization, long long quantization_bits, double p1, double p2, double p3)
 {
 long current;
 
@@ -476,7 +479,7 @@ if (search_engine->quantized())
 if (function == ANT_ranking_function_factory_object::ALL_TERMS)
 	query_type_is_all_terms = true;
 
-return ANT_ranking_function_factory::get_searching_ranker(search_engine, function, quantization, quantization_bits, p1, p2);
+return ANT_ranking_function_factory::get_searching_ranker(search_engine, function, quantization, quantization_bits, p1, p2, p3);
 }
 
 /*
@@ -708,6 +711,9 @@ for (current_term = 0, total_quantums = 0; current_term < terms_in_query; curren
 		max_quantums[heap_items].quantum_count = impact_header_buffers[current_term]->the_quantum_count;
 		max_quantums[heap_items].the_impact_header = impact_header_buffers[current_term];
 		max_quantums[heap_items].term_details = &term_string->term_details;
+		max_quantums[heap_items].prescalar = term_string->tf_weight;
+		max_quantums[heap_items].postscalar = term_string->rsv_weight;
+		max_quantums[heap_items].query_frequency = term_string->query_frequency;
 		max_quantums_pointers[heap_items] = &max_quantums[heap_items];
 		max_remaining_quantum += max_quantums[heap_items].current_max_quantum;
 		heap_items++;
@@ -727,8 +733,6 @@ printf("total quantums: %lld\n", total_quantums);
 //
 the_quantum.accumulator = search_engine->results_list;
 the_quantum.trim_point = search_engine->trim_postings_k;
-the_quantum.prescalar = 1.0;
-the_quantum.postscalar = 1.0;
 processed_quantums = 0;
 while (heap_items > 0)
 	{
@@ -743,6 +747,8 @@ while (heap_items > 0)
 	the_quantum.offset = *current_impact_header->impact_offset_ptr;
 	the_quantum.term_details = current_max->term_details;
 	the_quantum.tf = the_quantum.impact_value;
+	the_quantum.prescalar = current_max->prescalar;
+	the_quantum.postscalar = current_max->postscalar;
 
 	//printf("max remaining quantum: %lld, diff of k and k+1: %lld\n", max_remaining_quantum, search_engine->results_list->get_diff_k_and_k_plus_1());
 	if ((early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF) && search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
@@ -845,32 +851,30 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 	term_string = term_list[current_term];
 
 	if (!ANT_islower(*term_string->get_term()->start))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+		search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 	else
 		{
 		if (expander_tf != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 			}
 		else if (stemmer != NULL)
 			{
 			string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 			}
 		else
-			search_engine->process_one_term_detail(&term_string->term_details, ranking_function);
+			search_engine->process_one_term_detail(&term_string->term_details, ranking_function, term_string->tf_weight, term_string->rsv_weight, term_string->query_frequency);
 		}
 	}
 }
-
-
 
 /*
 	ATIRE_API::PROCESS_NEXI_QUERY()
 	-------------------------------
 */
-long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function)
+long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function, double fake_terms_in_query)
 {
 ANT_NEXI_term_ant *term_string;
 ANT_NEXI_term_iterator term;
@@ -908,7 +912,7 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 /*
 	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
 */
-search_engine->results_list->set_term_count(terms_in_query);
+search_engine->results_list->set_term_count(fake_terms_in_query <= 0 ? terms_in_query : fake_terms_in_query);
 
 /*
    Check if the number of terms exceed the limit
@@ -1096,15 +1100,15 @@ if (root->boolean_operator == ANT_query_parse_tree::LEAF_NODE)
 
 	string_pair_to_term(token_buffer, &root->term, sizeof(token_buffer), true);
 	if (!ANT_islower(*token_buffer))		// We don't stem (or expand) numbers and tag names
-		search_engine->process_one_search_term(token_buffer, ranking_function, into);
+		search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, 1, into);
 	else
 		{
 		if (expander_tf != NULL)
-			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, into);
+			search_engine->process_one_thesaurus_search_term(expander_tf, stemmer, token_buffer, ranking_function, 1, 1, 1, into);
 		else if (stemmer == NULL)
-			search_engine->process_one_search_term(token_buffer, ranking_function, into);
+			search_engine->process_one_search_term(token_buffer, ranking_function, 1, 1, 1, into);
 		else
-			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, into);
+			search_engine->process_one_stemmed_search_term(stemmer, token_buffer, ranking_function, 1, 1, 1, into);
 		}
 
 	return into;
@@ -1282,6 +1286,42 @@ return terms_in_query;
 }
 
 /*
+	ATIRE_API::QUERY_OBJECT_TURN_FEEDBACK_INTO_NEXI_QUERY()
+	-------------------------------------------------------
+*/
+void ATIRE_API::query_object_turn_feedback_into_NEXI_query(void)
+{
+ANT_NEXI_term_ant *new_query, *term;
+long current_feedback;
+
+new_query = new ANT_NEXI_term_ant [parsed_query->feedback_terms_in_query];
+
+/*
+	Add the feedback terms
+*/
+for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_query; current_feedback++)
+	{
+	term = new_query + current_feedback;
+	term->next = term + 1;
+	term->parent_path = NULL;
+	term->path.start = NULL;
+	term->sign = 0;
+	term->tf_weight = 1;
+	term->rsv_weight = parsed_query->feedback_terms[current_feedback]->kl_score;
+	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	term->query_frequency = 1;
+	}
+
+parsed_query->terms_in_query = parsed_query->feedback_terms_in_query;
+new_query[parsed_query->terms_in_query - 1].next = NULL;
+
+if (parsed_query->type & QUERY_BOOLEAN)
+	delete [] parsed_query->NEXI_query;
+
+parsed_query->NEXI_query = new_query;
+}
+
+/*
 	ATIRE_API::QUERY_OBJECT_WITH_FEEDBACK_TO_NEXI_QUERY()
 	-----------------------------------------------------
 */
@@ -1311,7 +1351,10 @@ for (current_feedback = 0; current_feedback < parsed_query->feedback_terms_in_qu
 	term->parent_path = NULL;
 	term->path.start = NULL;
 	term->sign = 0;
+	term->tf_weight = 1;
+	term->rsv_weight = parsed_query->feedback_terms[current_feedback]->kl_score;
 	term->term = parsed_query->feedback_terms[current_feedback]->string;
+	term->query_frequency = 1;
 	}
 parsed_query->terms_in_query = parsed_query->terms_in_query + parsed_query->feedback_terms_in_query;
 new_query[parsed_query->terms_in_query - 1].next = NULL;
@@ -1335,20 +1378,167 @@ parsed_query->NEXI_query = new_query;
 }
 
 /*
+	ATIRE_API::FEEDBACK_INTERPOLATED()
+	----------------------------------
+*/
+void ATIRE_API::feedback_interpolated(long long top_k)
+{
+ANT_search_engine_memory_index *memory_index;
+ANT_NEXI_term_iterator term_iterator;
+ANT_search_engine_result_id_iterator iterator;
+ANT_NEXI_term_ant *term_string;
+double normalizer, term_normaliser, document_score, document_term_score;
+ANT_search_engine_btree_leaf term_details;
+long long id, docid;
+long long term;
+double terms_in_the_query;
+unsigned short term_frequency;
+long long document_frequency, collection_frequency;
+double sum_of_query_frequencies;
+size_t documents_to_examine;
+char raw_token_buffer[MAX_TERM_LENGTH];
+
+/*
+	Build an index from the top feedback_documents documents.  Note that if there's a stemmer being used then the
+	resultant search_engine_memory_index will behave as a stemmed index.
+*/
+documents_to_examine = ANT_min((size_t)feedback_documents, (size_t)search_engine->results_list->results_list_length);
+memory_index = rerank(documents_to_examine);
+
+/*
+	Compute the term-specific weighting component normlizer
+*/
+normalizer = 0;
+terms_in_the_query = 0;
+for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
+	{
+	terms_in_the_query += term_string->query_frequency;
+	/*
+		get the search term and its stats in the top few documents
+	*/
+	if (stemmer == NULL || term_string->get_term()->string_length <= 3)
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	else
+		{
+		string_pair_to_term(raw_token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+		stemmer->stem(raw_token_buffer, token_buffer);
+		}
+
+	if (memory_index->process_one_term(token_buffer, &term_details) == NULL)
+		continue;		// term not found in the top document
+
+	/*
+		Turn the poistings list into an array[index] where index is the document number in the range 1..documents_to_examine.  The
+		result is in search_engine->stem_buffer
+	*/
+	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
+	memory_index->place_into_internal_buffers(&term_details);
+
+	term_normaliser = 0;
+	for (id = 0; id < documents_to_examine; id++)
+		{
+		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
+
+		term_frequency = memory_index->stem_buffer[id];			// the number of times the term occurs in the document
+		collection_frequency = term_details.global_collection_frequency;
+		document_frequency = term_details.global_document_frequency;
+
+		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, 1);
+		document_score = search_engine->results_list->accumulator[docid].get_rsv();
+		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score);
+		}
+	normalizer = ANT_logsum(normalizer, term_normaliser);
+	}
+
+/*
+	Build the term specific weight
+*/
+sum_of_query_frequencies = 0;
+for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
+	{
+	/*
+		get the search term and its stats in the top few documents
+	*/
+	if (stemmer == NULL || term_string->get_term()->string_length <= 3)
+		string_pair_to_term(token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+	else
+		{
+		string_pair_to_term(raw_token_buffer, term_string->get_term(), sizeof(token_buffer), true);
+		stemmer->stem(raw_token_buffer, token_buffer);
+		}
+
+	if (memory_index->process_one_term(token_buffer, &term_details) == NULL)
+		continue;		// term not found in the top document
+
+	/*
+		Turn the poistings list into an array[index] where index is the document number in the range 1..documents_to_examine.  The
+		result is in search_engine->stem_buffer
+	*/
+	memset(memory_index->stem_buffer, 0, documents_to_examine * sizeof(*memory_index->stem_buffer));
+	memory_index->place_into_internal_buffers(&term_details);
+
+	term_normaliser = 0;
+
+	for (id = 0; id < documents_to_examine; id++)
+		{
+		docid = search_engine->results_list->accumulator_pointers[id] - search_engine->results_list->accumulator;
+
+		term_frequency = memory_index->stem_buffer[id];			// the number of times the term occurs in the document
+		collection_frequency = term_details.global_collection_frequency;
+		document_frequency = term_details.global_document_frequency;
+
+		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)id, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, 1, 1);
+		document_score = search_engine->results_list->accumulator[docid].get_rsv();
+		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score - normalizer);
+		}
+	term_string->query_frequency = ((1 - feedback_lambda) * term_string->query_frequency / terms_in_the_query) + (feedback_lambda * exp(term_normaliser));
+	sum_of_query_frequencies += term_string->query_frequency;
+	}
+
+/*
+	Re-do the query with the new weights
+*/
+/*
+	Initialise
+*/
+search_engine->init_accumulators(top_k);
+
+/*
+	Search
+*/
+process_NEXI_query(parsed_query->NEXI_query, feedback_ranking_function == NULL ? ranking_function : feedback_ranking_function, sum_of_query_frequencies);
+
+/*
+	Rank
+*/
+search_engine->sort_results_list(top_k, &hits);
+
+/*
+	Clean up
+*/
+delete memory_index;
+}
+
+/*
 	ATIRE_API::FEEDBACK()
 	---------------------
 */
 void ATIRE_API::feedback(long long top_k)
 {
+if (feedback_mode == FEEDBACK_INTERPOLATED)
+	{
+	feedback_interpolated(top_k);
+	return;
+	}
 /*
 	Get the feedback terms
 */
-parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
+parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, parsed_query, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
 
 #ifdef NEVER
 	/*
 		Print out the feedback terms
-	*/
+	*/%
 	printf("\nFEEDBACK TERMS:");
 	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
 		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
@@ -1370,6 +1560,7 @@ if (parsed_query->feedback_terms_in_query != 0)
 		Generate query, search, and clean up
 	*/
 	query_object_with_feedback_to_NEXI_query();
+
 	process_NEXI_query(parsed_query->NEXI_query, feedback_ranking_function == NULL ? ranking_function : feedback_ranking_function);
 	delete [] parsed_query->feedback_terms;
 	delete [] parsed_query->NEXI_query;
@@ -1491,19 +1682,20 @@ return hits;
 	ATIRE_API::RERANK()
 	-------------------
 */
-void ATIRE_API::rerank(void)
+ANT_search_engine_memory_index *ATIRE_API::rerank(long long top_k)
 {
 ANT_memory_index *indexer;
 ANT_search_engine_memory_index *in_memory_index;
 long long current, top_n;
 char *document_buffer;
-const long documents_to_examine = 50;		// load and parse and reindex this many documents;
+long long documents_to_examine = top_k;		// load and parse and reindex this many documents;
 long long docid;
 unsigned long current_document_length;
 ANT_directory_iterator_object object;
 ANT_readability_factory *readability;
 ANT_parser *parser;
 ANT_memory *memory;
+ANT_stem_stemmer stemming_function(stemmer);
 
 parser = new ANT_parser(TRUE);
 readability = new ANT_readability_factory;
@@ -1525,7 +1717,7 @@ for (current = 0; current < top_n; current++)
 		Now index the document.
 	*/
 	object.file = document_buffer;
-	document_indexer->index_document(indexer, NULL, TRUE, readability, current, object.file);
+	document_indexer->index_document(indexer, stemmer == NULL ? NULL : &stemming_function, TRUE, readability, current + 1, object.file);		// indexing counts from 1 (searching counts from 0)
 	}
 
 delete [] document_buffer;
@@ -1535,11 +1727,12 @@ delete parser;
 /*
 	turn the index into a search engine.
 */
+indexer->allocate_decompress_buffer();
 memory = new ANT_memory;
 in_memory_index = new ANT_search_engine_memory_index(indexer, memory);
-delete in_memory_index;
-delete indexer;
-delete memory;
+in_memory_index->open();
+
+return in_memory_index;
 }
 
 #ifdef FILENAME_INDEX
@@ -1593,6 +1786,10 @@ long long ATIRE_API::set_trim_postings_k(long long static_prune_point)
 return search_engine->set_trim_postings_k(static_prune_point);
 }
 
+/*
+	ATIRE_API::SET_PROCESSING_STRATEGY()
+	------------------------------------
+*/
 void ATIRE_API::set_processing_strategy(long new_strategy, uint8_t early_termination_strategy)
 {
 long long i;

@@ -192,10 +192,14 @@ get_postings_details("~length", &collection_details);
 documents = collection_details.local_document_frequency;
 
 if (this->memory_model) //INDEX_IN_MEMORY, no need to allocate memory
+	{
 	postings_buffer = NULL;
+	special_compression_buffer = (unsigned char *)memory->malloc(1024);// must be long enough to store the worst case of two posintgs + impact_headers, etc.  1024 is probably way too large.
+	}
 else
 	{
 	postings_buffer = (unsigned char *)memory->malloc(postings_buffer_length);
+	special_compression_buffer = NULL;
 	memory->realign();
 	}
 
@@ -519,7 +523,8 @@ else
 	ANT_SEARCH_ENGINE::GET_ONE_QUANTUM()
 	-------------------------------------
 */
-unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination) {
+unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, unsigned char *destination)
+{
 #ifdef SPECIAL_COMPRESSION
 	if (term_details->local_document_frequency <= 2)
 		{
@@ -638,6 +643,12 @@ unsigned char *ANT_search_engine::get_postings(ANT_search_engine_btree_leaf *ter
 	ANT_compressable_integer *into;
 	if (term_details->local_document_frequency <= 2)
 		{
+		/*
+			We can't return a pointer to a location in the file because there isn't one... so we have to decode the postings and put them somewhere.
+		*/
+		if (special_compression_buffer != NULL)
+			destination = special_compression_buffer;
+
 #ifdef IMPACT_HEADER
 		ANT_compressable_integer *postings;
 		quantum_count_type the_quantum_count = 1;
@@ -826,11 +837,7 @@ return stemmed_term_details;
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_QUANTUM()
 	--------------------------------------------------------
 */
-void *ANT_search_engine::read_and_decompress_for_one_quantum(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_impact_header *the_impact_header,
-					ANT_quantum *the_quantum,
-					ANT_compressable_integer *the_decompressed_buffer)
+void *ANT_search_engine::read_and_decompress_for_one_quantum(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_quantum *the_quantum, ANT_compressable_integer *the_decompressed_buffer)
 {
 void *verify = NULL;
 long long now, bytes_already_read;
@@ -862,9 +869,7 @@ return verify;
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_IMPACT_HEADER()
 	--------------------------------------------------------------
 */
-void *ANT_search_engine::read_and_decompress_for_one_impact_header(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_impact_header *the_impact_header)
+void *ANT_search_engine::read_and_decompress_for_one_impact_header(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header)
 {
 void *verify = NULL;
 long long now, bytes_already_read;
@@ -909,14 +914,9 @@ return verify;
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_TERM()
 	-----------------------------------------------------
 */
-void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_impact_header *the_impact_header,
-					ANT_compressable_integer *the_decompressed_buffer)
+void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_compressable_integer *the_decompressed_buffer)
 #else
-void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details,
-					unsigned char *raw_postings_buffer,
-					ANT_compressable_integer *the_decompressed_buffer)
+void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_compressable_integer *the_decompressed_buffer)
 #endif
 {
 void *verify = NULL;
@@ -1059,7 +1059,7 @@ return verify;
 	ANT_SEARCH_ENGINE::PROCESS_ONE_TERM_DETAIL()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_term_detail(ANT_search_engine_btree_leaf *term_details, ANT_ranking_function *ranking_function, double prescalar, double postscalar, double query_frequency, ANT_bitstring *bitstring)
 {
 void *verify;
 long long now;
@@ -1079,18 +1079,18 @@ if (verify != NULL)
 	if (bitstring == NULL)
 		{ // it bitstring != NULL then we're boolean ranking hybrid
 		#ifdef IMPACT_HEADER
-			ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_top_k(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k, prescalar, postscalar, query_frequency);
 			//ranking_function->relevance_rank_quantum(results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
 		#else
-			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_top_k(results_list, term_details, decompress_buffer, trim_postings_k, prescalar, postscalar, query_frequency);
 		#endif
 		}
 	else
 		{
 		#ifdef IMPACT_HEADER
-			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, &impact_header, decompress_buffer, trim_postings_k, prescalar, postscalar, query_frequency);
 		#else
-			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k);
+			ranking_function->relevance_rank_boolean(bitstring, results_list, term_details, decompress_buffer, trim_postings_k, prescalar, postscalar, query_frequency);
 		#endif
 		}
 	stats->add_rank_time(stats->stop_timer(now));
@@ -1101,11 +1101,11 @@ if (verify != NULL)
 	ANT_SEARCH_ENGINE::PROCESS_ONE_SEARCH_TERM()
 	--------------------------------------------
 */
-void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_search_term(char *term, ANT_ranking_function *ranking_function, double prescalar, double postscalar, double query_frequency, ANT_bitstring *bitstring)
 {
 ANT_search_engine_btree_leaf term_details;
 
-process_one_term_detail(process_one_term(term, &term_details), ranking_function, bitstring);
+process_one_term_detail(process_one_term(term, &term_details), ranking_function, prescalar, postscalar, query_frequency, bitstring);
 }
 
 /*
@@ -1288,7 +1288,7 @@ return collection_frequency;
 	ANT_SEARCH_ENGINE::PROCESS_ONE_STEMMED_SEARCH_TERM()
 	----------------------------------------------------
 */
-void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_stemmed_search_term(ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, double prescalar, double postscalar, double query_frequency, ANT_bitstring *bitstring)
 {
 long long bytes_already_read;
 ANT_search_engine_btree_leaf stemmed_term_details;
@@ -1319,7 +1319,7 @@ if (collection_frequency != 0)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), 1, 1);
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), prescalar, postscalar, query_frequency);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 
@@ -1333,7 +1333,7 @@ stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_rea
 	ANT_SEARCH_ENGINE::PROCESS_ONE_THESAURUS_SEARCH_TERM()
 	------------------------------------------------------
 */
-void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, ANT_bitstring *bitstring)
+void ANT_search_engine::process_one_thesaurus_search_term(ANT_thesaurus *expander, ANT_stemmer *stemmer, char *base_term, ANT_ranking_function *ranking_function, double prescalar, double postscalar, double query_frequency, ANT_bitstring *bitstring)
 {
 ANT_thesaurus_relationship *expansion;
 void *verify;
@@ -1370,9 +1370,9 @@ if (number_of_terms_in_expansion == 0)
 		its more efficient than decoding and re-encoding
 	*/
 	if (stemmer == NULL)
-		process_one_search_term(base_term, ranking_function, bitstring);
+		process_one_search_term(base_term, ranking_function, prescalar, postscalar, query_frequency, bitstring);
 	else
-		process_one_stemmed_search_term(stemmer, base_term, ranking_function, bitstring);
+		process_one_stemmed_search_term(stemmer, base_term, ranking_function, prescalar, postscalar, query_frequency, bitstring);
 	return;
 	}
 
@@ -1420,7 +1420,7 @@ if (collection_frequency != 0)
 	{
 	now = stats->start_timer();
 	stemmed_term_details.local_collection_frequency = collection_frequency;
-	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), 1, 1);
+	ranking_function->relevance_rank_tf(bitstring, results_list, &stemmed_term_details, stem_buffer, ANT_min(trim_postings_k, global_trim_postings_k), prescalar, postscalar, query_frequency);
 	stats->add_rank_time(stats->stop_timer(now));
 	}
 
@@ -1707,7 +1707,11 @@ if (document_offsets == NULL)
 
 times = 0;
 get = to - from;
+#ifdef FILENAME_INDEX
+for (id = current.first(this->results_list, from); id >= 0 && times < get; id = current.next())
+#else
 for (id = current.first(this, from); id >= 0 && times < get; id = current.next())
+#endif
 	{
 	/*
 		This isn't really the best way to do this but it will suffice in the mean time.  The best way is to

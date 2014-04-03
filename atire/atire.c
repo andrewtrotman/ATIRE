@@ -735,12 +735,12 @@ long ranker_ok;
 if (params.ranking_function == ANT_ranking_function_factory_object::PREGEN)
 	ranker_ok = atire->set_ranking_function_pregen(params.field_name, params.p1) == 0;
 else
-	ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.p1, params.p2) == 0;
+	ranker_ok = atire->set_ranking_function(params.ranking_function, params.quantization, params.quantization_bits, params.p1, params.p2, params.p3) == 0;
 
 if (!ranker_ok)
 	return ranker_ok;
 
-return atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_p1, params.feedback_p2) == 0;
+return atire->set_feedback_ranking_function(params.feedback_ranking_function, params.quantization, params.quantization_bits, params.feedback_p1, params.feedback_p2, params.feedback_p3) == 0;
 }
 
 /*
@@ -765,7 +765,7 @@ if (params.logo)
 	puts(atire->version());				// print the version string if we parsed the parameters OK
 
 if (params.ranking_function == ANT_ranking_function_factory_object::READABLE)
-	fail = atire->open(ANT_ranking_function_factory_object::READABLE | params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
+	fail = atire->open(ATIRE_API::READABILITY_SEARCH_ENGINE | params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
 else
 	fail = atire->open(params.file_or_memory, params.index_filename, params.doclist_filename, params.quantization, params.quantization_bits);
 
@@ -800,6 +800,9 @@ if (params.output_forum != ANT_ANT_param_block::NONE)
 atire->set_trim_postings_k(params.trim_postings_k);
 atire->set_stemmer(params.stemmer, params.stemmer_similarity, params.stemmer_similarity_threshold);
 atire->set_feedbacker(params.feedbacker, params.feedback_documents, params.feedback_terms);
+if (params.feedbacker == ANT_relevance_feedback_factory::BLIND_RM)
+	atire->set_feedback_interpolation(params.feedback_lambda);
+
 if ((params.query_type & ATIRE_API::QUERY_EXPANSION_INPLACE_WORDNET) != 0)
 	{
 	atire->set_inplace_query_expansion(expander = new ANT_thesaurus_wordnet("wordnet.aspt"));
