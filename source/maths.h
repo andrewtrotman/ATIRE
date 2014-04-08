@@ -15,6 +15,12 @@
 #include <limits>
 
 /*
+	ANT_ROUND()
+	-----------
+*/
+template <class Type> inline Type ANT_round(Type x) { return floor(x + 0.5); }
+
+/*
 	ANT_SIGN()
 	----------
 */
