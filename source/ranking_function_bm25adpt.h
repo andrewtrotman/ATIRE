@@ -9,9 +9,9 @@
 #include "ranking_function_quantum_parameters.h"
 
 /*
-	Trained on the INEX Wikipedia Collection and the 2009 query set (b=0.4)
+	Trained on the TREC WSJ collection topics 51-100
 */
-#define ANT_RANKING_FUNCTION_BM25ADPT_DEFAULT_B 0.4
+#define ANT_RANKING_FUNCTION_BM25ADPT_DEFAULT_B 0.3
 
 /*
 	class ANT_RANKING_FUNCTION_BM25ADPT

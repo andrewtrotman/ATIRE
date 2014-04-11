@@ -8,8 +8,11 @@
 #include "ranking_function.h"
 #include "ranking_function_quantum_parameters.h"
 
-#define ANT_RANKING_FUNCTION_TFLODOP_DEFAULT_B 0.4
-#define ANT_RANKING_FUNCTION_TFLODOP_DEFAULT_DELTA 0.5
+/*
+	Trained on TREC WSJ topics 51-100
+*/
+#define ANT_RANKING_FUNCTION_TFLODOP_DEFAULT_B 0.1
+#define ANT_RANKING_FUNCTION_TFLODOP_DEFAULT_DELTA 0.1
 
 /*
 	class ANT_RANKING_FUNCTION_TFLODOP
