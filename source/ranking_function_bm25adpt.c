@@ -43,6 +43,52 @@ exit(printf("Cannot compute BM25ADPT quantum at a time (at the moment)\n"));
 }
 
 /*
+	ANT_RANGE_SEARCH()
+	------------------
+*/
+static inline double ANT_range_search(double end, double err, double (*function)(double, void *parameter), void *function_parameter)
+{
+double best_score, score, jump, where, new_score;
+
+best_score = DBL_MAX;
+jump = 1;
+where = err;
+do
+	{
+	if (where > fabs(jump) + end)
+		break;
+	score = function(where, function_parameter);
+	if (score > best_score)
+		{
+		jump /= 2;
+		/*
+			but we don't know if its before us or after us so we need to check the sign
+		*/
+		if (where + jump < 0)
+			jump = -jump;
+
+		new_score = function(where + jump, function_parameter);
+
+		if (new_score > score)
+			jump = -jump;
+		else
+			{
+			where += jump;
+			best_score = new_score;
+			}
+		}
+	else
+		{
+		where += jump;
+		best_score = score;
+		}
+	}
+while (fabs(jump) > err);
+
+return where;
+}
+
+/*
 	EVALUATE_K1()
 	-------------
 */
@@ -56,7 +102,7 @@ index = 0;
 k_hat = 0;
 while (information_gain[index] >= 0)
 	{
-	score = information_gain[index] / information_gain[1] - (((k1 + 1) * index) / (k1 + index));
+	score = information_gain[index] / information_gain[1] - ((k1 + 1) * index) / (k1 + index);
 	k_hat += score * score;
 
 	index++;
@@ -83,6 +129,7 @@ size_t index, sum;
 	Initialise
 */
 memset(counts, 0, sizeof(counts));
+memset(information_gain, 0, sizeof(information_gain));
 
 /*
 	Compute the number of documents containing each c'(t, d) occurences of t
@@ -101,7 +148,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		{
 		docid += *current++;
 
-		c_prime =  tf / (1 - b + b * ((double)document_lengths[docid] / (double)mean_document_length));
+		c_prime =  tf / (1.0 - b + b * ((double)document_lengths[docid] / (double)mean_document_length));
 		if ((index = (size_t)ANT_round(c_prime)) < MAX_TF)
 			counts[index]++;
 		}
@@ -126,41 +173,25 @@ counts[1] = term_details->global_document_frequency;
 	Compute the Information Gain, IG
 */
 for (index = 0; index < MAX_TF - 1; index++)
-	information_gain[index] = -ANT_log2((term_details->global_document_frequency + 0.5) / (documents + 1.0)) + ANT_log2((counts[index + 1] + 0.5) / (counts[index] + 1.0));
+	information_gain[index] = -ANT_log2(((double)term_details->global_document_frequency + 0.5) / ((double)documents + 1.0)) + ANT_log2(((double)counts[index + 1] + 0.5) / ((double)counts[index] + 1.0));
 
-for (index = 0; index < MAX_TF - 1; index++)
+/*
+	Where to stop
+*/
+for (index = 3; index < MAX_TF - 1; index++)
 	if (information_gain[index] > information_gain[index + 1])
 		{
 		information_gain[index + 1] = -1;
 		break;
 		}
+information_gain[254] = -1;
 
 *ig1 = information_gain[1];
 
 /*
 	find and return the best k1 parameter
 */
-#ifdef NEVER
-	return ANT_secant(1.0, 1.1, evaluate_k1, &information_gain);
-#else
-	{
-	double k1, best_score, best_k1, got;
-
-	best_k1 = 0.1;
-	best_score = evaluate_k1(0.1, &information_gain);
-	for (k1 = 0.2; k1 < 2.0; k1 += 0.1)
-		{
-		got = evaluate_k1(k1, &information_gain);
-		if (got < best_score)
-			{
-			best_score = got;
-			best_k1 = k1;
-			}
-		}
-
-	return best_k1;
-	}
-#endif
+return ANT_range_search(10.0, 0.001, evaluate_k1, information_gain);
 }
 
 /*
@@ -174,8 +205,6 @@ double c_prime, f_prime, rsv, tf, idf, k1;
 ANT_compressable_integer *current, *end;
 
 k1 = compute_k1(term_details, impact_header, impact_ordering, prescalar, &idf);
-
-printf("K1:%0.2f\n", k1);
 
 impact_header->impact_value_ptr = impact_header->impact_value_start;
 impact_header->doc_count_ptr = impact_header->doc_count_start;
