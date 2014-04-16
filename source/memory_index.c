@@ -73,6 +73,7 @@ inverted_index_parameter = 0;
 #endif
 
 quantization_bits = -1;
+dummy_root = new_memory_index_hash_node(new ANT_string_pair("@@"));
 }
 
 /*
@@ -194,6 +195,7 @@ ANT_memory_index_hash_node *node;
 stats->documents = docno;
 
 hash_value = hash(string);
+
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
@@ -227,12 +229,10 @@ return node;
 */
 void ANT_memory_index::rebalance_tree(long hash_value)
 {
-static ANT_memory_index_hash_node dummy_root;
-
-dummy_root.right = hash_table[hash_value];
+dummy_root->right = hash_table[hash_value];
 
 // convert to a singly linked list
-int size = tree_to_vine(&dummy_root);
+int size = tree_to_vine(dummy_root);
 
 // work out how many rotations we need to perform to get it back
 int full_size = 1;
@@ -240,15 +240,12 @@ while (full_size <= size)
 	full_size = full_size + full_size + 1;
 full_size /= 2;
 
-hash_table[hash_value] = dummy_root.right;
-dummy_root.right = hash_table[hash_value];
-
 // do a series of rotations to get to a balanced tree
-vine_to_tree(&dummy_root, size - full_size);
+vine_to_tree(dummy_root, size - full_size);
 for (size = full_size; size > 1; size /= 2)
-	vine_to_tree(&dummy_root, size / 2);
+	vine_to_tree(dummy_root, size / 2);
 
-hash_table[hash_value] = dummy_root.right;
+hash_table[hash_value] = dummy_root->right;
 }
 
 /*
@@ -263,14 +260,14 @@ ANT_memory_index_hash_node *tail = root;
 ANT_memory_index_hash_node *remainder = root->right;
 ANT_memory_index_hash_node *tmp;
 
-int rotations = 0;
+int nodes = 0;
 
 while (remainder != NULL)
 	if (remainder->left == NULL)
 		{
 		tail = remainder;
 		remainder = remainder->right;
-		rotations++;
+		nodes++;
 		}
 	else
 		{
@@ -281,7 +278,7 @@ while (remainder != NULL)
 		tail->right = tmp;
 		}
 
-return rotations;
+return nodes;
 }
 
 /*
@@ -1381,6 +1378,11 @@ long long pos;
 */
 if (index_file == NULL)
 	return 0;
+
+#ifdef PRINT_HASH_TABLE_ENTRIES
+for (int i = 0; i < HASH_TABLE_SIZE; i++)
+	printf("%ld\n", hash_table_entries[i]);
+#endif
 
 allocate_decompress_buffer();
 
