@@ -11,6 +11,8 @@
 #include "directory_iterator_file_buffered.h"
 #include "stats.h"
 #include "memory.h"
+#include "semaphores.h"
+#include "threads.h"
 
 long ANT_directory_iterator_file_buffered::tid = 0;
 
@@ -26,21 +28,49 @@ process_time = 0;
 clock = new ANT_stats(new ANT_memory);
 
 message = new char[50];
-sprintf(message, "ANT_directory_iterator_file_buffered %ld ", ANT_directory_iterator_file_buffered::tid++);
+sprintf(message, "di_file_buffered %ld ", ANT_directory_iterator_file_buffered::tid++);
 
 document_start = document_end = NULL;
 
 source = instream;
 
-primary_read_buffer = new char [buffer_size + 1];
-*primary_read_buffer = primary_read_buffer[buffer_size] = '\0';			// null terminate the end of the buffer, and mark it as empty too
-primary_read_buffer_used = buffer_size;
+primary_buffer = new char[buffer_size + 1];
+secondary_buffer = new char[buffer_size + 1];
 
-secondary_read_buffer = new char [buffer_size + 1];
-*secondary_read_buffer = secondary_read_buffer[buffer_size] = '\0';
-secondary_read_buffer_used = buffer_size;
+*primary_buffer = primary_buffer[buffer_size] = '\0';
+*secondary_buffer = secondary_buffer[buffer_size] = '\0';
+primary_buffer_used = secondary_buffer_used = buffer_size;
 
-//read(primary_read_buffer, primary_read_buffer_used);
+buffer_to_read_from = &primary_buffer;
+end_of_buffer = &primary_buffer_used;
+
+#ifdef NEVER
+buffer_to_read_into = &secondary_buffer;
+end_of_second_buffer = &secondary_buffer_used;
+#else
+buffer_to_read_into = buffer_to_read_from;
+end_of_second_buffer = end_of_buffer;
+#endif
+
+#ifdef NEVER
+primary_buffer_used = read(primary_buffer, buffer_size);
+secondary_buffer_used = 0;
+#endif
+
+read_sem = new ANT_semaphores(1, 1);
+swap_sem = new ANT_semaphores(0, 1);
+
+#ifdef DOUBLE_BUFFER
+params.buffer = &buffer_to_read_into;
+params.read_sem = read_sem;
+params.swap_sem = swap_sem;
+params.source = source;
+params.read_result = &end_of_second_buffer;
+
+#ifdef NEVER
+ANT_thread(background_read, (void *)&params);
+#endif
+#endif
 
 this->auto_file_id = 0;
 
@@ -68,14 +98,35 @@ ANT_directory_iterator_file_buffered::~ANT_directory_iterator_file_buffered()
 
 free_tag();
 
-delete [] primary_read_buffer;
-delete [] secondary_read_buffer;
+delete [] primary_buffer;
+delete [] secondary_buffer;
 
 delete [] doc_tag;
 delete [] docno_tag;
 
 delete source;
 delete clock;
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::BACKGROUND_READ()
+	-------------------------------------------------------
+*/
+void *ANT_directory_iterator_file_buffered::background_read(void *params)
+{
+struct background_read_params *p = (struct background_read_params *)params;
+
+for (;;)
+	{
+	p->read_sem->enter();
+	**(p->read_result) = p->source->read(**p->buffer, buffer_size);
+	p->swap_sem->leave();
+
+	if (**(p->read_result) <= 0)
+		break;
+	}
+
+return NULL;
 }
 
 /*
@@ -86,16 +137,13 @@ long long ANT_directory_iterator_file_buffered::read(char *destination, long lon
 {
 long long got;
 
-//long long now = clock->start_timer();
 END;
-//printf("%sstart_wait %lld\n", message, now);
-//printf("%sstart_input_wait %lld\n", message, now);
+
 if ((got = source->read((unsigned char *)destination, length)) < length)
 	destination[got] = '\0';
 
-//printf("%send_wait %lld\n", message, now);
 START;
-//wait_input_time += clock->stop_timer(now);
+
 return got;
 }
 
@@ -109,16 +157,9 @@ char *start, *document_id_start = NULL, *document_id_end = NULL;
 long long bytes_read;
 char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
 
-//static long long now = clock->start_timer();
-
-//printf("%send_upstream %lld\n", message, clock->start_timer());
-
-//printf("%send_upstream_wait %lld\n", message, clock->start_timer());
-//wait_output_time += clock->stop_timer(now);
-//now = clock->start_timer();
 START;
 
-start = primary_read_buffer + primary_read_buffer_used;
+start = *buffer_to_read_from + *end_of_buffer;
 
 /*
 	Get the start tag
@@ -127,17 +168,19 @@ if ((document_start = strstr(start, doc_tag[0])) == NULL)
 	{
 	/*
 		We might be at the end of a buffer and half-way through a tag so we copy the remainder of the file to the
-		start of the buffer and full the remainder
+		start of the buffer and fill the remainder
 	*/
-	memmove(primary_read_buffer, primary_read_buffer + primary_read_buffer_used, buffer_size - primary_read_buffer_used);
-	//process_time += clock->stop_timer(now);
-	bytes_read = read(primary_read_buffer + (buffer_size - primary_read_buffer_used), primary_read_buffer_used);
-	//now = clock->start_timer();
-	if ((bytes_read == 0) || (document_start = strstr(primary_read_buffer, doc_tag[0])) == NULL)
+	// move the beginning
+	memmove(*buffer_to_read_from, *buffer_to_read_from + *end_of_buffer, buffer_size - *end_of_buffer);
+	// fill the remainder
+	/*
+		Here we need to swap the buffers -- but we have half the document at the end of one buffer
+		and half at the beginning of the next
+	*/
+	bytes_read = read(*buffer_to_read_from + (buffer_size - *end_of_buffer), *end_of_buffer);
+	if ((bytes_read == 0) || (document_start = strstr(*buffer_to_read_from, doc_tag[0])) == NULL)
 		{
-END;
-//		process_time += clock->stop_timer(now);
-//printf("%sstart_upstream %lld\n", message, clock->start_timer());
+		END;
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
 		}
 	}
@@ -152,17 +195,13 @@ if ((document_end = strstr(document_start, doc_tag[1])) == NULL)
 		not in memory.  We play the same game as above and shift the start tag to the
 		start of the buffer
 	*/
-	memmove(primary_read_buffer, document_start, buffer_size - (document_start - primary_read_buffer));
-	//process_time += clock->stop_timer(now);
-	bytes_read = read(primary_read_buffer + buffer_size - (document_start - primary_read_buffer), document_start - primary_read_buffer);
-	//now = clock->start_timer();
+	memmove(*buffer_to_read_from, document_start, buffer_size - (document_start - *buffer_to_read_from));
+	bytes_read = read(*buffer_to_read_from + buffer_size - (document_start - *buffer_to_read_from), document_start - *buffer_to_read_from);
 
-	document_start = primary_read_buffer;
+	document_start = *buffer_to_read_from;
 	if ((bytes_read == 0) || (document_end = strstr(document_start, doc_tag[1])) == NULL)
 		{
-			END;
-//		process_time += clock->stop_timer(now);
-//printf("%sstart_upstream %lld\n", message, clock->start_timer());
+		END;
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
 		}
 	}
@@ -171,7 +210,7 @@ document_end += strlen(doc_tag[1]);			// skip to end of tag
 /*
 	Take a note of how far through the buffer we are
 */
-primary_read_buffer_used = document_end - primary_read_buffer;
+*end_of_buffer = document_end - *buffer_to_read_from;
 
 /*
 	Now get the DOCID (or in the case of NTCIR, the id=)

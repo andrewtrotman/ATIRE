@@ -40,16 +40,16 @@ wait_output_time = 0;
 process_time = 0;
 clock = new ANT_stats(memory);
 
-sem = new ANT_semaphores(1, 1);
-sem2 = new ANT_semaphores(0, 1);
+read_sem = new ANT_semaphores(1, 1);
+swap_sem = new ANT_semaphores(0, 1);
 
 message = new char[50];
 sprintf(message, "buffer %ld ", ANT_instream_buffer::tid++);
 
 #ifdef DOUBLE_BUFFER
 params.buffer = &buffer_to_read_into;
-params.sem = sem;
-params.sem2 = sem2;
+params.read_sem = read_sem;
+params.swap_sem = swap_sem;
 params.source = source;
 params.read_result = &end_of_second_buffer;
 
@@ -75,9 +75,9 @@ struct background_read_params *p = (struct background_read_params *)params;
 
 for (;;)
 	{
-	p->sem->enter();
+	p->read_sem->enter();
 	**(p->read_result) = p->source->read(**p->buffer, buffer_size);
-	p->sem2->leave();
+	p->swap_sem->leave();
 
 	if (**(p->read_result) <= 0)
 		break;
@@ -122,7 +122,7 @@ else
 #ifdef DOUBLE_BUFFER
 		// the background reader might still be reading if we've been fast
 		// so wait for it to say it's safe to swap
-		sem2->enter();
+		swap_sem->enter();
 #endif
 
 		// swap the primary/secondary buffers around
@@ -137,7 +137,7 @@ else
 
 #ifdef DOUBLE_BUFFER
 		// tell the background reader to read into the swapped buffers
-		sem->leave();
+		read_sem->leave();
 
 		if (*end_of_buffer <= 0)
 #else

@@ -1,7 +1,7 @@
 /*
-	DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE.C
-	--------------------------------------
-*/
+	 DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE.C
+	 --------------------------------------
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,7 +77,6 @@ delete memory;
 
 memory = new ANT_memory(1024 * 1024);
 file_stream = new ANT_instream_file(memory, filename);
-
 #ifdef BUFFER_A
 instream_buffer_a = new ANT_instream_buffer(memory, file_stream);
 decompressor = new ANT_instream_deflate(memory, instream_buffer_a);
@@ -108,12 +107,10 @@ START;
 while (more_files != NULL)
 	{
 	END;
-
 	if (first_time)
 		got = dewarcer->first(object);
 	else
 		got = dewarcer->next(object);
-
 	START;
 
 	first_time = false;

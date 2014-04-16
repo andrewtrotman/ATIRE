@@ -16,6 +16,7 @@
 
 #include "directory_iterator.h"
 class ANT_instream;
+class ANT_semaphores;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_FILE_BUFFERED
@@ -27,16 +28,26 @@ private:
 	static const size_t buffer_size = (16 * 1024 * 1024);
 	static long tid;
 
+	struct background_read_params {
+		char ***buffer;
+		ANT_semaphores *read_sem, *swap_sem;
+		ANT_instream *source;
+		long long **read_result;
+	} params;
+
 protected:
 	char *document_start, *document_end;
-	char *primary_read_buffer;
-	long long primary_read_buffer_used;
-	char *secondary_read_buffer;
-	long long secondary_read_buffer_used;
-	long asciiafy;
+
+	char *primary_buffer, *secondary_buffer;
+	char **buffer_to_read_into, **buffer_to_read_from;
+	long long *end_of_buffer, *end_of_second_buffer;
+	long long position_of_end_of_buffer, position_of_end_of_second_buffer;
+
+	long long primary_buffer_used, secondary_buffer_used;
+
 	ANT_instream *source;
 	long auto_file_id;
-	char ** doc_tag;
+	char **doc_tag;
 	char **docno_tag;
 
 private:
@@ -45,6 +56,9 @@ private:
 protected:
 	ANT_directory_iterator_object *read_entire_file(ANT_directory_iterator_object *object);
 	long long read(char *destination, long long length);
+
+	static void *background_read(void *params);
+	ANT_semaphores *read_sem, *swap_sem;
 
 
 public:

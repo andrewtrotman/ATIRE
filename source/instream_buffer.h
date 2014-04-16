@@ -16,12 +16,12 @@ class ANT_semaphores;
 class ANT_instream_buffer : public ANT_instream
 {
 protected:
-	static const long buffer_size = 1024 * 1024 * 16;
+	static const long buffer_size = (16 * 1024 * 1024);
 	static long tid;
 
 	struct background_read_params {
 		unsigned char ***buffer;
-		ANT_semaphores *sem, *sem2;
+		ANT_semaphores *read_sem, *swap_sem;
 		ANT_instream *source;
 		long long **read_result;
 	} params;
@@ -33,8 +33,8 @@ protected:
 	long long position;
 	long long position_of_end_of_buffer, position_of_end_of_second_buffer;
 
-	static void *background_read(void *);
-	ANT_semaphores *sem, *sem2;
+	static void *background_read(void *params);
+	ANT_semaphores *read_sem, *swap_sem;
 
 public:
 	ANT_instream_buffer(ANT_memory *memory, ANT_instream *source);

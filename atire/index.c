@@ -200,7 +200,7 @@ if (first_param >= argc)
 	exit(0);				// no files to index so terminate
 
 #ifdef LOGGING
-	printf("ATIRE_index 0 start_process %lld\n", stats.start_timer());
+	printf("ATIRE_index 0 s %lld\n", stats.start_timer());
 #endif
 
 last_report = 0;
@@ -332,9 +332,19 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::WARC_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+#ifdef BUFFER_A
+		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
+		decompressor = new ANT_instream_deflate(&file_buffer, instream_buffer);
+#else
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
+#endif
+
+#ifdef BUFFER_B
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
+#else
+		source = new ANT_directory_iterator_warc(decompressor, ANT_directory_iterator::READ_FILE);
+#endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_WARC_GZ)
 		source = new ANT_directory_iterator_warc_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
@@ -633,7 +643,7 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	}
 
 #ifdef LOGGING
-	printf("ATIRE_index 0 end_process %lld\n", stats.start_timer());
+	printf("ATIRE_index 0 e %lld\n", stats.start_timer());
 #endif
 
 delete index;
