@@ -20,7 +20,9 @@ class ANT_directory_iterator_warc_gz_recursive : public ANT_directory_iterator
 protected:
 static long tid;
 	char *source;
-	ANT_instream *file_stream, *decompressor, *instream_buffer;
+	ANT_instream *file_stream, *decompressor;
+	ANT_instream *instream_buffer_a;
+	ANT_instream *instream_buffer_b;
 	ANT_directory_iterator *filename_provider;
 	ANT_directory_iterator_warc *dewarcer;
 	ANT_memory *memory;
