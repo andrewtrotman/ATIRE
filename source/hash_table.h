@@ -27,6 +27,10 @@ for (pos = 0; pos < length; pos++)
 
 return seed;
 }
+static inline unsigned int ANT_random_hash_8(ANT_string_pair *string)
+{
+return ANT_random_hash_8(string->string(), string->length(), (unsigned char)(string->length() & 0xFF));
+}
 
 /*
 	ANT_RANDOM_HASH_24()
@@ -43,6 +47,48 @@ hash1 = ANT_random_hash_8(string->string(), string->length(), (unsigned char)(st
 hash2 = string->length() <= 1 ? 0 : ANT_random_hash_8(string->string() + 1, string->length() - 1, (unsigned char)((string->length() - 1) & 0xFF));
 hash3 = string->length() <= 2 ? 0 : ANT_random_hash_8(string->string() + 2, string->length() - 2, (unsigned char)((string->length() - 2) & 0xFF));
 return (hash1 << 16) + (hash2 << 8) + hash3;
+}
+
+static inline unsigned long ANT_random_hash_8_32(ANT_string_pair *string)
+{
+long hash1, hash2, hash3, hash4;
+
+hash1 = ANT_random_hash_8(string->string(), string->length(), (unsigned char)(string->length() & 0xFF));
+hash2 = string->length() <= 1 ? 0 : ANT_random_hash_8(string->string() + 1, string->length() - 1, (unsigned char)((string->length() - 1) & 0xFF));
+hash3 = string->length() <= 2 ? 0 : ANT_random_hash_8(string->string() + 2, string->length() - 2, (unsigned char)((string->length() - 2) & 0xFF));
+hash4 = string->length() <= 3 ? 0 : ANT_random_hash_8(string->string() + 3, string->length() - 3, (unsigned char)((string->length() - 3) & 0xFF));
+return (hash1 << 24) + (hash2 << 16) + (hash3 << 8) + hash4;
+}
+
+static inline uint32_t ANT_random_hash_32(char *string, size_t length)
+{
+unsigned char *ch, *seed, *end;
+uint32_t result;
+
+result = 0;		// this will initialise all four bytes
+seed = (unsigned char *)&result;	// now take a pointer to the array of four bytes so that we can address each individually
+ch = (unsigned char *)string;
+end = ch + length;
+
+while (ch < end)
+	{
+	seed[0] = ANT_hash_table[seed[0] ^ *ch++];
+	if (ch >= end)
+		break;
+	seed[1] = ANT_hash_table[seed[1] ^ *ch++];
+	if (ch >= end)
+		break;
+	seed[2] = ANT_hash_table[seed[2] ^ *ch++];
+	if (ch >= end)
+		break;
+	seed[3] = ANT_hash_table[seed[3] ^ *ch++];
+	}
+
+return result;
+}
+static inline uint32_t ANT_random_hash_32(ANT_string_pair *string)
+{
+return ANT_random_hash_32(string->string(), string->length());
 }
 
 /*
@@ -120,9 +166,55 @@ seed[3] = seed[0];
 return result & 0xFFFFFF;
 }
 
+static inline uint32_t ANT_random_hash_24(ANT_string_pair *string)
+{
+return ANT_random_hash_24(string->string(), string->length());
+}
+
 /*
-	ANT_MEMORY_INDEX::ANT_HEADER_HASH_24()
-	--------------------------------------
+	ANT_HEADER_HASH_32()
+	--------------------
+*/
+static inline unsigned long ANT_header_hash_32(ANT_string_pair *string)
+{
+/*
+	This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer
+	Numbers cause problems with this, especially increasing sequences because they end up with the indexer's direct
+	tree chain in the hash table reducing to a linked list!  Numbers are now encoded as the number itself.
+*/
+unsigned long ans;
+size_t len;
+const long base = 37;
+
+#ifdef HEADER_SPECIAL_CASE_NUMBER
+if (ANT_isdigit((*string)[0]))
+	return ANT_atoul(string->start, string->length());
+#endif
+
+#ifdef HEADER_SPECIAL_CASE_UTF
+if (((*string)[0] & 0x80) != 0)
+	return ANT_random_hash_32(string);
+#endif
+
+ans = (ANT_header_hash_encode[(*string)[0]]) * base * base * base * base * base;
+
+if ((len = string->length()) > 1)
+	ans += (ANT_header_hash_encode[(*string)[1]]) * base * base * base * base;
+if (len > 2)
+	ans += (ANT_header_hash_encode[(*string)[2]]) * base * base * base;
+if (len > 3)
+	ans += (ANT_header_hash_encode[(*string)[3]]) * base * base;
+if (len > 4)
+	ans += (ANT_header_hash_encode[(*string)[4]]) * base;
+if (len > 5)
+	ans += (ANT_header_hash_encode[(*string)[5]]);
+
+return ans;
+}
+
+/*
+	ANT_HEADER_HASH_24()
+	--------------------
 */
 static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 {
@@ -138,11 +230,15 @@ unsigned long ans;
 size_t len;
 const long base = 37;
 
-//if (ANT_isdigit((*string)[0]))
-//	return ANT_atoul(string->start, string->length()) % 0x1000000;
+#ifdef HEADER_SPECIAL_CASE_NUMBER
+if (ANT_isdigit((*string)[0]))
+	return ANT_atoul(string->start, string->length()) % 0x1000000;
+#endif
 
-//if (((*string)[0] & 0x80) != 0)
-//	return ANT_random_hash_24(string->string(), string->length());
+#ifdef HEADER_SPECIAL_CASE_UTF
+if (((*string)[0] & 0x80) != 0)
+	return ANT_random_hash_24(string->string(), string->length());
+#endif
 
 ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
 
@@ -157,6 +253,7 @@ ans += (string->length() & 0x07) << 21;	// top 3 bits are the length
 
 return ans;
 }
+
 
 /*
 	ANT_HEADER_HASH_8()
@@ -182,6 +279,28 @@ return ans;
 }
 
 /*
+	ANT_HASH_32()
+	-------------
+*/
+static inline unsigned long ANT_hash_32(ANT_string_pair *string)
+{
+#ifndef HASHER
+	#error "HASHER must be defined so a hash_table function can be chosen"
+#else
+	#if HASHER == RANDOM_HASHER
+		#ifdef RANDOM_HASHER_STEP
+			return ANT_random_hash_32(string);
+		#endif
+		return ANT_random_hash_8_32(string);
+	#elif HASHER == HEADER_HASHER
+		return ANT_header_hash_32(string);
+	#else
+		#error "Don't know which hash function to use - aborting"
+	#endif
+#endif
+}
+
+/*
 	ANT_HASH_24()
 	-------------
 */
@@ -191,6 +310,9 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 	#error "HASHER must be defined so a hash_table function can be chosen"
 #else
 	#if HASHER == RANDOM_HASHER
+		#ifdef RANDOM_HASHER_STEP
+			return ANT_random_hash_24(string);
+		#endif
 		return ANT_random_hash_8_24(string);
 	#elif HASHER == HEADER_HASHER
 		return ANT_header_hash_24(string);
@@ -210,7 +332,7 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 	#error "HASHER must be defined so a hash_table function can be chosen"
 #else
 	#if HASHER == RANDOM_HASHER
-		return ANT_random_hash_8(string->string(), string->length(), string->length() & 0xFF);
+		return ANT_random_hash_8(string);
 	#elif HASHER == HEADER_HASHER
 		return ANT_header_hash_8(string);
 	#else

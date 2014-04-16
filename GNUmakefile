@@ -56,7 +56,7 @@ USE_TERM_LOCAL_MAX_IMPACT := 0
 
 # print stats without converting millisecond to second, minute, hour
 # for profiling purpose
-USE_PRINT_TIME_NO_CONVERSION := 0
+USE_PRINT_TIME_NO_CONVERSION := 1
 
 # construct impact headers for easy handling the quantums of the postings (version 0.4 of the index)
 USE_IMPACT_HEADER := 1
@@ -76,8 +76,8 @@ USE_TWO_D_ACCUMULATORS := 1
 USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
 
 # what type to use for the accumulators
-CFLAGS += -DANT_ACCUMULATOR_T="double"
-CFLAGS += -DANT_PREGEN_T="unsigned long long"
+override CFLAGS += -DANT_ACCUMULATOR_T="double"
+override CFLAGS += -DANT_PREGEN_T="unsigned long long"
 
 # use mysql database backend
 USE_MYSQL := 0
@@ -145,60 +145,57 @@ SNOWBALL_VERSION := libstemmer_c
 
 ifeq ($(USE_GCC_DEBUG), 1)
 	LDFLAGS += -g -ggdb
-	CFLAGS += -g -ggdb -DDEBUG
+	override CFLAGS += -g -ggdb -DDEBUG
 	ifeq ($(OS_TYPE), Darwin)
 		LDFLAGS += -gdwarf-2
-		CFLAGS += -gdwarf-2
+		override CFLAGS += -gdwarf-2
 	endif
 else
 	#LDFLAGS +=
-	CFLAGS += -O3 -fno-tree-vectorize
+	override CFLAGS += -O3 -fno-tree-vectorize
 endif
 
 ifeq ($(USE_PREPARE_PROFILING), 1)
 	LDFLAGS += -g
-	CFLAGS += -g -O2
+	override CFLAGS += -g -O2
 endif
 
 ifeq ($(USE_GPROF), 1)
 	LDFLAGS += -pg
-	CFLAGS += -pg
+	override CFLAGS += -pg
 endif
 
 ifeq ($(USE_PURIFY), 1)
-	CFLAGS += -DPURIFY
+	override CFLAGS += -DPURIFY
 endif
 
 ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lsocket -lnsl
 endif
 
-ifeq ($(hasher), 1)
-	CFLAGS += -DRANDOM_HASHER=1
-else
-	CFLAGS += -DHEADER_HASHER=1
-endif
+HASHER := HEADER
+rb := -1
 
 # common flags
 LDFLAGS += -ldl
-CFLAGS +=  -x c++ -Wall -DHASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DDOUBLE_BUFFER -DREBALANCE_FACTOR=$(rb) \
+override CFLAGS += -x c++ -Wall -DHASHER=1 -D${HASHER}_HASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DDOUBLE_BUFFER -DREBALANCE_FACTOR=$(rb) \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 
 ifeq ($(USE_FILENAME_INDEX), 1)
-	CFLAGS += -DFILENAME_INDEX
+	override CFLAGS += -DFILENAME_INDEX
 endif
 
 ifeq ($(USE_IMPACT_HEADER), 1)
-	CFLAGS += -DIMPACT_HEADER
+	override CFLAGS += -DIMPACT_HEADER
 endif
 
 ifeq ($(USE_PRINT_QUANTUM_STATS), 1)
-	CFLAGS += -DPRINT_QUANTUM_STATS
+	override CFLAGS += -DPRINT_QUANTUM_STATS
 endif
 
 ifeq ($(USE_SPECIAL_COMPRESSION), 1)
-	CFLAGS += -DSPECIAL_COMPRESSION
+	override CFLAGS += -DSPECIAL_COMPRESSION
 endif
 
 # link the pthread library even if the parallel indexing is not enabled
@@ -209,58 +206,58 @@ else
 endif
 
 ifeq ($(USE_PARALLEL_INDEXING), 1)
-	CFLAGS += -DPARALLEL_INDEXING -DPARALLEL_INDEXING_DOCUMENTS
+	override CFLAGS += -DPARALLEL_INDEXING -DPARALLEL_INDEXING_DOCUMENTS
 endif
 
 ifeq ($(USE_SYSTEM_ZLIB), 1)
-	CFLAGS += -DANT_HAS_ZLIB
+	override CFLAGS += -DANT_HAS_ZLIB
 	LDFLAGS += -lz
 endif
 
 ifeq ($(USE_SYSTEM_BZLIB), 1)
 	# use system libbz2 library
-	CFLAGS += -DANT_HAS_BZLIB
+	override CFLAGS += -DANT_HAS_BZLIB
 	LDFLAGS += -lbz2
 endif
 
 ifeq ($(USE_BUILT_IN_ZLIB), 1)
-	CFLAGS += -DANT_HAS_ZLIB -I $(ZLIB_DIR)/$(ZLIB_VERSION)
+	override CFLAGS += -DANT_HAS_ZLIB -I $(ZLIB_DIR)/$(ZLIB_VERSION)
 	EXTRA_OBJS += $(ZLIB_DIR)/libz.a
 endif
 
 ifeq ($(USE_BUILT_IN_BZLIB), 1)
-	CFLAGS += -DANT_HAS_BZLIB -I $(BZIP_DIR)/$(BZIP_VERSION)
+	override CFLAGS += -DANT_HAS_BZLIB -I $(BZIP_DIR)/$(BZIP_VERSION)
 	EXTRA_OBJS += $(BZIP_DIR)/libbz2.a
 endif
 
 ifeq ($(USE_SYSTEM_LZO), 1)
-	CFLAGS += -DANT_HAS_LZO -I /usr/include/lzo
+	override CFLAGS += -DANT_HAS_LZO -I /usr/include/lzo
 	LDFLAGS += -llzo2
 endif
 
 ifeq ($(USE_BUILT_IN_LZO), 1)
-	CFLAGS += -DANT_HAS_LZO -I $(LZO_DIR)/$(LZO_VERSION)/include/lzo -I $(LZO_DIR)/$(LZO_VERSION)/include
+	override CFLAGS += -DANT_HAS_LZO -I $(LZO_DIR)/$(LZO_VERSION)/include/lzo -I $(LZO_DIR)/$(LZO_VERSION)/include
 	EXTRA_OBJS += $(LZO_DIR)/liblzo2.a
 endif
 
 ifeq ($(USE_TERM_LOCAL_MAX_IMPACT), 1)
-	CFLAGS += -DTERM_LOCAL_MAX_IMPACT
+	override CFLAGS += -DTERM_LOCAL_MAX_IMPACT
 endif
 
 ifeq ($(USE_PDEBUG), 1)
-	CFLAGS += -DPDEBUG
+	override CFLAGS += -DPDEBUG
 endif
 
 ifeq ($(USE_PRINT_TIME_NO_CONVERSION), 1)
-	CFLAGS += -DPRINT_TIME_NO_CONVERSION
+	override CFLAGS += -DPRINT_TIME_NO_CONVERSION
 endif
 
 ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)
-	CFLAGS += -DTOP_K_READ_AND_DECOMPRESSOR
+	override CFLAGS += -DTOP_K_READ_AND_DECOMPRESSOR
 endif
 
 ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
-	CFLAGS += -DTWO_D_ACCUMULATORS
+	override CFLAGS += -DTWO_D_ACCUMULATORS
 endif
 
 ifeq ($(USE_TWO_D_ACCUMULATORS_POW2_WIDTH), 1)
@@ -268,21 +265,21 @@ ifeq ($(USE_TWO_D_ACCUMULATORS_POW2_WIDTH), 1)
 		# The next line has to be spaces indented, not tabs. (something funny with GNU make)
         $(error TWO_D_ACCUMULATORS_POW2_WIDTH requries TWO_D_ACCUMULATORS to be enabled)
 	endif
-	CFLAGS += -DTWO_D_ACCUMULATORS_POW2_WIDTH
+	override CFLAGS += -DTWO_D_ACCUMULATORS_POW2_WIDTH
 endif
 
 ifeq ($(USE_MYSQL), 1)
-	CFLAGS += -DANT_HAS_MYSQL $(shell mysql_config --cflags)
+	override CFLAGS += -DANT_HAS_MYSQL $(shell mysql_config --cflags)
 	LDFLAGS += $(shell mysql_config --libs)
 endif
 
 ifeq ($(USE_SNAPPY), 1)
-	CFLAGS += -DANT_HAS_SNAPPYLIB -I $(SNAPPY_DIR)/$(SNAPPY_VERSION)
+	override CFLAGS += -DANT_HAS_SNAPPYLIB -I $(SNAPPY_DIR)/$(SNAPPY_VERSION)
 	EXTRA_OBJS += $(SNAPPY_DIR)/libsnappy.a
 endif
 
 ifeq ($(USE_SNOWBALL), 1)
-	CFLAGS += -DANT_HAS_SNOWBALL -I $(SNOWBALL_DIR)/$(SNOWBALL_VERSION)/include
+	override CFLAGS += -DANT_HAS_SNOWBALL -I $(SNOWBALL_DIR)/$(SNOWBALL_VERSION)/include
 	EXTRA_OBJS += $(SNOWBALL_DIR)/libstemmer.a
 endif
 
@@ -311,7 +308,7 @@ ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(MAIN_FILES) $(IGNORE_LIST), $(ALL_SOURCES))
 
 ifeq ($(USE_STEM_PAICE_HUSK), 1)
-	CFLAGS += -DANT_HAS_PAICE_HUSK
+	override CFLAGS += -DANT_HAS_PAICE_HUSK
 	SOURCES += $(SRC_DIR)/stem_paice_husk.c
 endif
 

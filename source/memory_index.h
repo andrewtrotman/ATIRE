@@ -40,7 +40,11 @@ friend class ANT_memory_index_one;
 friend class ANT_search_engine_memory_index;
 
 public:
+#ifdef HASH32
+	static const long HASH_TABLE_SIZE = 0x100000000;
+#else
 	static const long HASH_TABLE_SIZE = 0x1000000;
+#endif
 
 public:
 	enum { STAT_MEMORY = 1, STAT_TIME = 2, STAT_COMPRESSION = 4, STAT_SUMMARY = 8 };
@@ -55,6 +59,7 @@ public:
 
 private:
 	int hash_table_entries[HASH_TABLE_SIZE];
+	ANT_memory_index_hash_node *dummy_root;
 
 private:
 	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;
@@ -141,7 +146,11 @@ private:
 	double inverted_index_parameter;
 
 private:
-	static long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
+#ifdef HASH32
+	static unsigned long hash(ANT_string_pair *string) { return ANT_hash_32(string); }
+#else
+	static unsigned long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
+#endif
 	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string);
 	//ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
