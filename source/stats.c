@@ -40,56 +40,58 @@ ANT_stats::~ANT_stats()
 }
 
 #ifdef PRINT_TIME_NO_CONVERSION
-long long ANT_stats::print_time(char *message, long long time_taken, char *end_message) {
-	char *units = "milliseconds";
+	/*
+		ANT_STATS::PRINT_TIME()
+		-----------------------
+	*/
+	long long ANT_stats::print_time(char *message, long long time_taken, char *end_message)
+	{
+	char *units = "microseconds";
 	unsigned long long milliseconds;
 
+	milliseconds = time_taken;//time_to_milliseconds(time_taken);
+
+	printf("%s%lld %s%s\n", message, milliseconds, units, end_message);
+
+	return time_taken;
+	}
+#else
+	/*
+		ANT_STATS::PRINT_TIME()
+		-----------------------
+	*/
+	long long ANT_stats::print_time(char *message, long long time_taken, char *end_message)
+	{
+	char *units = "milliseconds";
+	long long hours, minutes, seconds, milliseconds;
+
 	milliseconds = time_to_milliseconds(time_taken);
+	seconds = milliseconds / 1000;
+	minutes = seconds / 60;
+	hours = minutes / 60;
 
 	printf("%s", message);
 
-	printf("%lld %s%s\n", milliseconds, units, end_message);
+	if (hours > 0)
+		printf("%lld:", hours);
+
+	if (hours > 0 || minutes > 0)
+		printf("%02lld:", minutes % 60);
+
+	if (hours > 0 || minutes > 0 || seconds > 0)
+		printf("%02lld.", seconds % 60);
+
+	if (hours > 0)
+		units = "hours";
+	else if (minutes > 0)
+		units = "minutes";
+	else if (seconds > 0)
+		units = "seconds";
+
+	printf("%03lld %s%s\n", milliseconds % 1000, units, end_message);
 
 	return time_taken;
-}
-#else
-/*
-	ANT_STATS::PRINT_TIME()
-	-----------------------
-*/
-long long ANT_stats::print_time(char *message, long long time_taken, char *end_message)
-{
-char *units = "milliseconds";
-long long hours, minutes, seconds, milliseconds;
-
-milliseconds = time_to_milliseconds(time_taken);
-seconds = milliseconds / 1000;
-minutes = seconds / 60;
-hours = minutes / 60;
-
-printf("%s", message);
-
-if (hours > 0)
-	printf("%lld:", hours);
-
-if (hours > 0 || minutes > 0)
-	printf("%02lld:", minutes % 60);
-
-if (hours > 0 || minutes > 0 || seconds > 0)
-	printf("%02lld.", seconds % 60);
-
-
-if (hours > 0)
-	units = "hours";
-else if (minutes > 0)
-	units = "minutes";
-else if (seconds > 0)
-	units = "seconds";
-
-printf("%03lld %s%s\n", milliseconds % 1000, units, end_message);
-
-return time_taken;
-}
+	}
 #endif
 
 /*

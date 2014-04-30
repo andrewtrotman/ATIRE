@@ -57,10 +57,10 @@ private:
 	long heap_size;			// maximum size of the heap
 
 private:
-	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string);
+	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string, long final_hash_value);
 	ANT_memory_index_one_node *find_node(ANT_memory_index_one_node *root, ANT_string_pair *string);
-	ANT_memory_index_one_node *find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, ANT_string_pair *string);
-	long hash(ANT_string_pair *string);
+	ANT_memory_index_one_node *find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, long final_hash_value, ANT_string_pair *string);
+	long hash(ANT_string_pair *string, long *final_hash_value);
 	ANT_memory_index_one_node *add(ANT_string_pair *string, long long docno, long extra_term_frequency);
 
 	void rebalance_tree(long hash_value);
