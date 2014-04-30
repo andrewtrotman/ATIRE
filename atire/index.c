@@ -78,25 +78,26 @@ stats->print_elapsed_time();
 }
 
 #ifndef ATIRE_LIBRARY
-
-/*
-	MAIN()
-	------
-*/
-int main(int argc, char *argv[])
-{
-return atire_index(argc, argv);
-}
-
+	/*
+		MAIN()
+		------
+	*/
+	int main(int argc, char *argv[])
+	{
+	return atire_index(argc, argv);
+	}
 #else
-
-// do nothing
-int atire_exit(int errno) {
+	/*
+		ATIRE_EXIT()
+		------------
+		Do nothing
+	*/
+	int atire_exit(int errno)
+	{
 	return errno;
-}
+	}
 
-#define exit atire_exit
-
+	#define exit atire_exit
 #endif
 
 /*
