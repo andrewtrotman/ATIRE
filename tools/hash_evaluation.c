@@ -21,91 +21,101 @@ if (argc != 2)
 
 long long number_terms;
 long long number_occurrences = 0;
-char **terms = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(argv[1]), &number_terms);
+char **lines = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(argv[1]), &number_terms);
+long long *times = new long long[number_terms];
 unsigned long long total_hash_time[3] = {0,0,0};
 long long now;
 ANT_stats *clock = new ANT_stats(new ANT_memory);
-ANT_string_pair *s = NULL;
+ANT_string_pair **terms = NULL;
+
+long long hash_table[1 << 24];
 
 #ifndef HASHER
 	exit(printf("No valid hasher defined!\n"));
-#elif HASHER==RANDOM
-	printf("Random hasher\n");
-#elif HASHER==RANDOM_STEP
-	printf("Random (step) hasher\n");
-#elif HASHER==HEADER
-	printf("Header hasher\n");
+#elif HASHER == RANDOM
+	fprintf(stderr, "Random\n");
+#elif HASHER == RANDOM_STEP
+	fprintf(stderr, "Random step\n");
+#elif HASHER == HEADER
+	fprintf(stderr, "Header\n");
+#elif HASHER == SUPERFAST
+	fprintf(stderr, "Superfast\n");
+#elif HASHER == LOOKUP3
+	fprintf(stderr, "Lookup3\n");
 #else
 	exit(printf("Unknown hasher\n"));
 #endif
 
-// shuffle the array to try minimise caching effects
-for (unsigned long i = 0; i < number_terms - 1; i++)
+char *space;
+long long total_terms = 0;
+
+ANT_string_pair *term = NULL;
+
+for (int line = 0; line < number_terms; line++)
 	{
-	unsigned long j = i + rand() / (RAND_MAX / (number_terms - i) + 1);
-	char *t = terms[j];
+	space = strchr(lines[line], ' ');
+	times[line] = ANT_atoul(space + 1, strlen(lines[line]) - (space - lines[line]));
+	delete term;
+	term = new ANT_string_pair(lines[line], space - lines[line]);
+	term->text_render();
+	hash_table[ANT_hash_24(term)] += times[line];
+	printf(" %lld %lld %lld\n", ANT_hash_24(term), 1<<24, times[line]);
+	//total_terms += times[line];
+	}
+
+for (int i = 0; i < (1 << 24); i++)
+	printf("%lld\n", hash_table[i]);
+
+return EXIT_SUCCESS;
+
+long long current_term = 0;
+long long this_term;
+total_terms = number_terms;
+terms = new ANT_string_pair*[total_terms];
+
+fprintf(stderr, "Creating all the terms\n");
+for (int line = 0; line < number_terms; line++)
+	{
+	space = strchr(lines[line], ' ');
+	this_term = current_term;
+	new ANT_string_pair(lines[line], space - lines[line]);
+//	for (int time = 1; time < times[line]; time++)
+//		terms[current_term++] = terms[this_term];
+	}
+
+fprintf(stderr, "Shuffling the terms\n");
+// shuffle the terms
+for (unsigned long i = 0; i < total_terms - 1; i++)
+	{
+	unsigned long j = i + rand() / (RAND_MAX / (total_terms - i) + 1);
+	ANT_string_pair *t = terms[j];
 	terms[j] = terms[i];
 	terms[i] = t;
 	}
 
-char *space = NULL;
-unsigned long times;
-
-for (int repeats = 0; repeats < TOTAL_REPEATS; repeats++)
+fprintf(stderr, "8-bit hashing\n");
+for (int term = 0; term < total_terms; term++)
 	{
-	total_hash_time[0] = total_hash_time[1] = total_hash_time[2] = 0;
-
-	for (int term = 0; term < number_terms; term++)
-		{
-		delete s;
-		space = strchr(terms[term], ' ');
-		s = new ANT_string_pair(terms[term], space - terms[term]);
-		times = ANT_atoul(space + 1, strlen(terms[term]) - s->length());
-
-		for (int j = 0; j < times; j++)
-			{
-			now = clock->start_timer();
-			ANT_hash_8(s);
-			total_hash_time[0] += clock->stop_timer(now);
-			}
-		}
-
-	for (int term = 0; term < number_terms; term++)
-		{
-		delete s;
-		space = strchr(terms[term], ' ');
-		s = new ANT_string_pair(terms[term], space - terms[term]);
-		times = ANT_atoul(space + 1, strlen(terms[term]) - s->length());
-
-		for (int j = 0; j < times; j++)
-			{
-			now = clock->start_timer();
-			ANT_hash_24(s);
-			total_hash_time[1] += clock->stop_timer(now);
-			}
-		}
-
-	for (int term = 0; term < number_terms; term++)
-		{
-		delete s;
-		space = strchr(terms[term], ' ');
-		s = new ANT_string_pair(terms[term], space - terms[term]);
-		times = ANT_atoul(space + 1, strlen(terms[term]) - s->length());
-
-		for (int j = 0; j < times; j++)
-			{
-			now = clock->start_timer();
-			ANT_hash_32(s);
-			total_hash_time[2] += clock->stop_timer(now);
-			}
-		}
-
-	clock->print_time("Hashing  8-bit : ", total_hash_time[0], "");
-	clock->print_time("Hashing 24-bit : ", total_hash_time[1], "");
-	clock->print_time("Hashing 32-bit : ", total_hash_time[2], "");
+	now = clock->start_timer();
+	ANT_hash_8(terms[term]);
+	total_hash_time[0] += clock->stop_timer(now);
+	}
+fprintf(stderr, "24-bit hashing\n");
+for (int term = 0; term < total_terms; term++)
+	{
+	now = clock->start_timer();
+	ANT_hash_24(terms[term]);
+	total_hash_time[1] += clock->stop_timer(now);
+	}
+fprintf(stderr, "32-bit hashing\n");
+for (int term = 0; term < total_terms; term++)
+	{
+	now = clock->start_timer();
+	ANT_hash_32(terms[term]);
+	total_hash_time[2] += clock->stop_timer(now);
 	}
 
-printf("Terms: %lld\n", number_terms);
+printf("%llu %llu %llu ", total_hash_time[0], total_hash_time[1], total_hash_time[2]);
 
 return EXIT_SUCCESS;
 }
