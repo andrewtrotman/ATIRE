@@ -41,9 +41,9 @@ friend class ANT_search_engine_memory_index;
 
 public:
 #ifdef HASH32
-	static const unsigned long HASH_TABLE_SIZE = 0x100000000;
+	static const unsigned long long HASH_TABLE_SIZE = 0x100000000;
 #else
-	static const unsigned long HASH_TABLE_SIZE = 0x1000000;
+	static const unsigned long long HASH_TABLE_SIZE = 0x1000000;
 #endif
 
 public:
@@ -58,7 +58,7 @@ public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 
 private:
-	int hash_table_entries[HASH_TABLE_SIZE];
+	unsigned long hash_table_entries[HASH_TABLE_SIZE];
 	ANT_memory_index_hash_node *dummy_root;
 
 private:

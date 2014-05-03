@@ -26,9 +26,15 @@
 	ANT_MEMORY_INDEX_ONE::HASH()
 	----------------------------
 */
-inline long ANT_memory_index_one::hash(ANT_string_pair *string)
+inline long ANT_memory_index_one::hash(ANT_string_pair *string, long *final_hash_value)
 {
-return ANT_hash_8(string);
+#ifdef DOUBLE_HASH
+	*final_hash_value = -1; // this will cause errors if it ever gets used, which is good
+	return ANT_hash_8(string);
+#else
+	*final_hash_value = ANT_memory_index::hash(string);
+	return *final_hash_value % HASH_TABLE_SIZE;
+#endif
 }
 
 /*
@@ -37,7 +43,8 @@ return ANT_hash_8(string);
 */
 ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index)
 {
-hashed_squiggle_length = hash(&squiggle_length);
+long dummy;
+hashed_squiggle_length = hash(&squiggle_length, &dummy);
 this->memory = memory;
 this->final_index = index;
 this->stopwords = new ANT_stop_word(index->stopwords->get_type());		// re-use the same stop words list for each instance of this class
@@ -45,7 +52,7 @@ rewind();
 
 term_details = NULL;
 token_as_string = NULL;
-dummy_root = new_hash_node(new ANT_string_pair("@@"));
+dummy_root = new_hash_node(new ANT_string_pair("@@"), 0);
 }
 
 /*
@@ -78,9 +85,8 @@ nodes_used = 0;
 	ANT_MEMORY_INDEX_ONE::NEW_HASH_NODE()
 	-------------------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::new_hash_node(ANT_string_pair *pair)
+ANT_memory_index_one_node *ANT_memory_index_one::new_hash_node(ANT_string_pair *pair, long final_hash_value)
 {
-long hash_value;
 ANT_memory_index_hash_node *root = NULL;
 ANT_memory_index_one_node *node;
 
@@ -94,8 +100,10 @@ node->term_frequency = 0;
 
 if (final_index != NULL)
 	{
-	hash_value = final_index->hash(pair);
-	root = final_index->hash_table[hash_value];
+#ifdef DOUBLE_HASH
+	final_hash_value = final_index->hash(pair);
+#endif
+	root = final_index->hash_table[final_hash_value];
 	}
 
 if (root == NULL)
@@ -112,7 +120,7 @@ return node;
 	ANT_MEMORY_INDEX_ONE::FIND_ADD_NODE()
 	-------------------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, ANT_string_pair *string)
+ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, long final_hash_value, ANT_string_pair *string)
 {
 ANT_memory_index_one_node *root = hash_table[hash_value];
 long cmp;
@@ -123,7 +131,7 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		if (root->left == NULL)
 			{
 			hash_table_entries[hash_value]++;
-			return root->left = new_hash_node(string);
+			return root->left = new_hash_node(string, final_hash_value);
 			}
 		else
 			root = root->left;
@@ -131,7 +139,7 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		if (root->right == NULL)
 			{
 			hash_table_entries[hash_value]++;
-			return root->right = new_hash_node(string);
+			return root->right = new_hash_node(string, final_hash_value);
 			}
 		else
 			root = root->right;
@@ -175,15 +183,16 @@ return root;
 ANT_memory_index_one_node *ANT_memory_index_one::add(ANT_string_pair *string, long long docno, long extra_term_frequency)
 {
 ANT_memory_index_one_node *answer;
-long hash_value = hash(string);
+long final_hash_value;
+long hash_value = hash(string, &final_hash_value);
 
 if (hash_table[hash_value] == NULL)
 	{
 	hash_table_entries[hash_value]++;
-	answer = hash_table[hash_value] = new_hash_node(string);
+	answer = hash_table[hash_value] = new_hash_node(string, final_hash_value);
 	}
 else
-	answer = find_add_node(hash_value/*hash_table[hash_value]*/, string);
+	answer = find_add_node(hash_value/*hash_table[hash_value]*/, final_hash_value, string);
 
 #if REBALANCE_FACTOR > 0
 if ((hash_table_entries[hash_value] % REBALANCE_FACTOR) == 0)
@@ -394,6 +403,7 @@ double ANT_memory_index_one::kl_node(ANT_term_divergence *divergence, ANT_memory
 long long collection_frequency;
 double left, right, center;
 ANT_memory_index_one_node *term_details;
+long dummy;
 
 left = right = center = 0.0;
 
@@ -402,7 +412,7 @@ left = right = center = 0.0;
 */
 if (node->string[0] != '~')
 	{
-	if ((term_details = document_collection->find_node(document_collection->hash_table[hash(&node->string)], &node->string)) == NULL)
+	if ((term_details = document_collection->find_node(document_collection->hash_table[hash(&node->string, &dummy)], &node->string)) == NULL)
 		collection_frequency = 0;
 	else
 		collection_frequency = term_details->term_frequency;
@@ -589,7 +599,8 @@ return frequency;
 */
 ANT_memory_index_one_node *ANT_memory_index_one::get_term_node(ANT_string_pair *term)
 {
-size_t hash_value = hash(term);
+long dummy;
+size_t hash_value = hash(term, &dummy);
 
 if (hash_table[hash_value] == NULL)
 	return 0;

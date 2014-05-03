@@ -1380,8 +1380,9 @@ if (index_file == NULL)
 	return 0;
 
 #ifdef PRINT_HASH_TABLE_ENTRIES
-for (int i = 0; i < HASH_TABLE_SIZE; i++)
-	printf("%ld\n", hash_table_entries[i]);
+for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
+	printf("%lu\n", hash_table_entries[i]);
+exit(EXIT_SUCCESS);
 #endif
 
 allocate_decompress_buffer();
