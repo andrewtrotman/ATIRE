@@ -20,15 +20,18 @@ if (argc != 2)
 	exit(printf("Usage: %s <filename>\n", argv[0]));
 
 long long number_terms;
-long long number_occurrences = 0;
 char **lines = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(argv[1]), &number_terms);
-long long *times = new long long[number_terms];
+long long times;
 unsigned long long total_hash_time[3] = {0,0,0};
 long long now;
 ANT_stats *clock = new ANT_stats(new ANT_memory);
 ANT_string_pair **terms = NULL;
 
-long long hash_table[1 << 24];
+const long long hash_table_size = 1 << 24;
+long long *hash_table = new long long[hash_table_size];
+
+for (int i = 0; i < hash_table_size; i++)
+	hash_table[i] = 0;
 
 #ifndef HASHER
 	exit(printf("No valid hasher defined!\n"));
@@ -53,17 +56,18 @@ ANT_string_pair *term = NULL;
 
 for (int line = 0; line < number_terms; line++)
 	{
-	space = strchr(lines[line], ' ');
-	times[line] = ANT_atoul(space + 1, strlen(lines[line]) - (space - lines[line]));
 	delete term;
+
+	space = strchr(lines[line], ' ');
 	term = new ANT_string_pair(lines[line], space - lines[line]);
-	term->text_render();
-	hash_table[ANT_hash_24(term)] += times[line];
-	printf(" %lld %lld %lld\n", ANT_hash_24(term), 1<<24, times[line]);
-	//total_terms += times[line];
+
+	times = ANT_atoul(space + 1, strlen(lines[line]) - (space - lines[line]));
+
+	hash_table[ANT_hash_24(term)] += times;
+	//total_terms += times;
 	}
 
-for (int i = 0; i < (1 << 24); i++)
+for (int i = 0; i < hash_table_size; i++)
 	printf("%lld\n", hash_table[i]);
 
 return EXIT_SUCCESS;
@@ -79,7 +83,7 @@ for (int line = 0; line < number_terms; line++)
 	space = strchr(lines[line], ' ');
 	this_term = current_term;
 	new ANT_string_pair(lines[line], space - lines[line]);
-//	for (int time = 1; time < times[line]; time++)
+//	for (int time = 1; time < times; time++)
 //		terms[current_term++] = terms[this_term];
 	}
 
