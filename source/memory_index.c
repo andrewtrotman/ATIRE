@@ -363,6 +363,59 @@ node->set(score);
 }
 
 /*
+	ANT_MEMORY_INDEX::ITER_ADD_INDEXED_DOCUMENT_NODE()
+	--------------------------------------------------
+	Uses a Morris traversal to perform an iterative in-order traversal of the tree
+	Avoids blowing the stack with recursion
+	TODO: Test this
+*/
+void ANT_memory_index::iter_add_indexed_document_node(ANT_memory_index_one_node *node, long long docno)
+{
+ANT_memory_index_one_node *pre;
+
+while (node != NULL)
+	if (node->left == NULL)
+		{
+		if (node->string[0] == '~')
+			set_document_detail(&node->string, node->term_frequency, node->mode);
+		else
+			{
+			if (node->final_node == NULL)
+				add_term(&node->string, docno, (long)node->term_frequency);
+			else
+				node->final_node->add_posting(docno, (long)node->term_frequency);
+			}
+		node = node->right;
+		}
+	else
+		{
+		pre = node->left;
+		while (pre->right != NULL && pre->right != node)
+			pre = pre->right;
+
+		if (pre->right == NULL)
+			{
+			pre->right = node;
+			node = node->left;
+			}
+		else
+			{
+			pre->right = NULL;
+			if (node->string[0] == '~')
+				set_document_detail(&node->string, node->term_frequency, node->mode);
+			else
+				{
+				if (node->final_node == NULL)
+					add_term(&node->string, docno, (long)node->term_frequency);
+				else
+					node->final_node->add_posting(docno, (long)node->term_frequency);
+				}
+			node = node->right;
+			}
+		}
+}
+
+/*
 	ANT_MEMORY_INDEX::ADD_INDEXED_DOCUMENT_NODE()
 	---------------------------------------------
 */
