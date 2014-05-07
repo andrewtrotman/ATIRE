@@ -9,10 +9,17 @@
 #else
 	#include <stddef.h>
 #endif
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <limits.h>
 #include <limits>
+
+/*
+	ANT_ROUND()
+	-----------
+*/
+template <class Type> inline Type ANT_round(Type x) { return floor(x + 0.5); }
 
 /*
 	ANT_SIGN()
@@ -182,6 +189,10 @@ f1 = function(x1, function_param);
 do
 	{
 	f2 = function(x2, function_param);
+
+	if (fabs(f2 - f1) < E)
+		return x2;
+
 	x3 = (f2 * x1 - f1 * x2) / (f2 - f1);
 
 	x1 = x2;
@@ -191,6 +202,112 @@ do
 while (fabs((x1 - x2) / x2) > E);
 
 return x2;
+}
+
+/*
+	ANT_FALSI_METHOD()
+	------------------
+	This code came from the Wikipedia article "False Position Method".
+
+	s,t: endpoints of an interval where we search
+	e: half of upper bound for relative error
+	m: maximal number of iterations
+*/
+static inline double ANT_falsi_method(double s, double t, double e, int m, double (*function)(double, void *parameter), void *function_param)
+{
+double r = 0, fr;
+int n, side = 0;
+/* starting values at endpoints of interval */
+double fs = function(s, function_param);
+double ft = function(t, function_param);
+
+for (n = 0; n < m; n++)
+	{
+	r = (fs * t - ft * s) / (fs - ft);
+	if (fabs(t - s) < e * fabs(t + s))
+		break;
+	fr = function(r, function_param);
+
+	if (fr * ft > 0)
+		{
+		/* fr and ft have same sign, copy r to t */
+		t = r;
+		ft = fr;
+		if (side == -1)
+			fs /= 2;
+		side = -1;
+		}
+	else if (fs * fr > 0)
+		{
+		/* fr and fs have same sign, copy r to s */
+		s = r;
+		fs = fr;
+		if (side == +1)
+			ft /= 2;
+		side = +1;
+		}
+	else
+		{
+		/* fr * f_ very small (looks like zero) */
+		break;
+		}
+	}
+
+return r;
+}
+
+/*
+	ANT_BISECTION_METHOD()
+	----------------------
+	From: http://www.dailyfreecode.com/code/bisection-method-2361.aspx
+*/
+static inline double ANT_bisection_method(double x0, double x1, double (*function)(double, void *parameter), void *function_parameter)
+{
+static const double ESP = 0.001;
+int i = 1;
+double x2, f1, f2, f0;
+
+do
+	{
+	x2 = (x0 + x1) / 2;
+	f0 = function(x0, function_parameter);
+	f1 = function(x1, function_parameter);
+	f2 = function(x2, function_parameter);
+	if (f0 * f2 < 0)
+		x1 = x2;
+	else
+		x0 = x2;
+	i++;
+	}
+while (fabs(f2) > ESP);
+
+return x2;
+}
+
+/*
+	ANT_GRADIENT_DESCENT()
+	----------------------
+	Based on the Python code from the Wikipedia
+	eps = step size
+	precison = required precision of result
+	d_gap = when computing the derivative from the sample, use f(x+d_gap) - f(x) as the gradient
+*/
+static inline double ANT_gradient_descent(double guess, double eps, double precision, double d_gap, double (*function)(double, void *parameter), void *function_parameter)
+{
+double f_prime;
+double x_old, x_new;
+
+x_new = guess;
+
+do
+	{
+	x_old = x_new;
+	f_prime = (function(x_old + d_gap, function_parameter) - function(x_old, function_parameter)) / d_gap;
+	x_new = x_old - eps * f_prime;
+	}
+while (fabs(x_new - x_old) > precision);
+
+return x_new;
 }
 
 /*

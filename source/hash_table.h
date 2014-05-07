@@ -353,6 +353,7 @@ static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 
 	UNICODE strings now appear to use the random_hash_24 method too.
 */
+#ifndef EXPERIMENTAL_HASH
 unsigned long ans;
 size_t len;
 const long base = 37;
@@ -379,6 +380,30 @@ if (len > 3)
 ans += (string->length() & 0x07) << 21;	// top 3 bits are the length
 
 return ans;
+#else
+/*
+	If the length is bigger than 4, we can't encode the base-37 version directly into the hashtable
+	so use random hashing distributed evenly over the remainder of the space. If it is fewer than 4
+	characters, then it will fit directly as the base-37 encoded version, so use that.
+*/
+unsigned long ans = 0;
+const long base = 37;
+
+#ifdef HEADER_SPECIAL_CASE_NUMBER
+if (ANT_isdigit((*string)[0]))
+	return ANT_atoul(string->start, string->length()) % 0x1000000;
+#endif
+
+switch (string->length())
+	{
+	case 4: ans = ans * base + ANT_header_hash_encode[(*string)[3]];
+	case 3: ans = ans * base + ANT_header_hash_encode[(*string)[2]];
+	case 2: ans = ans * base + ANT_header_hash_encode[(*string)[1]];
+	case 1: return ans * base + ANT_header_hash_encode[(*string)[0]];
+	default: return base * base * base * base + (ANT_random_hash_24(string) % ((1 << 24) - (base * base * base * base)));
+	}
+
+#endif
 }
 
 /*

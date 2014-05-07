@@ -9,9 +9,9 @@
 #include "ranking_function_quantum_parameters.h"
 
 /*
-	Trained on the INEX Wikipedia Collection and the 2009 query set (b=0.4)
+	Trained on the TREC WSJ collection topics 51-100
 */
-#define ANT_RANKING_FUNCTION_BM25ADPT_DEFAULT_B 0.4
+#define ANT_RANKING_FUNCTION_BM25ADPT_DEFAULT_B 0.3
 
 /*
 	class ANT_RANKING_FUNCTION_BM25ADPT
@@ -23,7 +23,7 @@ private:
 	double b;
 
 private:
-	double compute_k1(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, double prescalar);
+	double compute_k1(ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, double prescalar, double *ig1);
 
 public:
 	ANT_ranking_function_BM25ADPT(ANT_search_engine *engine, long quantize, long long quantization_bits, double b = ANT_RANKING_FUNCTION_BM25ADPT_DEFAULT_B);

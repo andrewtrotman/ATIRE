@@ -177,6 +177,7 @@ private:
 	void serialise_filenames_index(void);
 #endif
 
+	void iter_add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 	void add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 
 	long should_prune(ANT_memory_index_hash_node *term);
