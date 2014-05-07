@@ -657,6 +657,8 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	printf("ATIRE_index 0 e %lld\n", stats.start_timer());
 #endif
 
+printf("%llu\n", ANT_string_pair::strcmp_calls);
+
 delete index;
 delete disk;
 delete parser;
