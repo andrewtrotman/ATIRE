@@ -14,9 +14,9 @@ extern unsigned char ANT_header_hash_encode[];
 #include <stdio.h>      /* defines printf for tests */
 #include <time.h>       /* defines time_t for timings in the test */
 #include <stdint.h>     /* defines uint32_t etc */
-#include <sys/param.h>  /* attempt to define endianness */
 #ifdef linux
-# include <endian.h>    /* attempt to define endianness */
+	#include <sys/param.h>  /* attempt to define endianness */
+	#include <endian.h>    /* attempt to define endianness */
 #endif
 
 /*
@@ -701,13 +701,13 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 {
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"
-#elif HASHER == RANDOM || HASHER == RANDOM_STEP
+#elif HASHER == RANDOM_HASHER || HASHER == RANDOM_STEP_HASHER
 	return ANT_random_hash_8(string);
-#elif HASHER == HEADER
+#elif HASHER == HEADER_HASHER
 	return ANT_header_hash_8(string);
-#elif HASHER == SUPERFAST
+#elif HASHER == SUPERFAST_HASHER
 	return ANT_superfasthash_8(string);
-#elif HASHER == LOOKUP3
+#elif HASHER == LOOKUP3_HASHER
 	return ANT_lookup3hash_8(string);
 #else
 	#error "Don't know which hash function to use - aborting"
@@ -722,15 +722,15 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 {
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"
-#elif HASHER == RANDOM
+#elif HASHER == RANDOM_HASHER
 	return ANT_random_hash_8_24(string);
-#elif HASHER == RANDOM_STEP
+#elif HASHER == RANDOM_STEP_HASHER
 	return ANT_random_hash_24(string);
-#elif HASHER == HEADER
+#elif HASHER == HEADER_HASHER
 	return ANT_header_hash_24(string);
-#elif HASHER == SUPERFAST
+#elif HASHER == SUPERFAST_HASHER
 	return ANT_superfasthash_24(string);
-#elif HASHER == LOOKUP3
+#elif HASHER == LOOKUP3_HASHER
 	return ANT_lookup3hash_24(string);
 #else
 	#error "Don't know which hash function to use - aborting"
@@ -745,15 +745,15 @@ static inline unsigned long ANT_hash_32(ANT_string_pair *string)
 {
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"
-#elif HASHER == RANDOM
+#elif HASHER == RANDOM_HASHER
 	return ANT_random_hash_8_32(string);
-#elif HASHER == RANDOM_STEP
+#elif HASHER == RANDOM_STEP_HASHER
 	return ANT_random_hash_32(string);
-#elif HASHER == HEADER
+#elif HASHER == HEADER_HASHER
 	return ANT_header_hash_32(string);
-#elif HASHER == SUPERFAST
+#elif HASHER == SUPERFAST_HASHER
 	return ANT_superfasthash_32(string);
-#elif HASHER == LOOKUP3
+#elif HASHER == LOOKUP3_HASHER
 	return ANT_lookup3hash_32(string);
 #else
 	#error "Don't know which hash function to use - aborting"

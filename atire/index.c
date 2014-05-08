@@ -657,7 +657,9 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	printf("ATIRE_index 0 e %lld\n", stats.start_timer());
 #endif
 
+#if !(defined(__APPLE__) || defined(_MSC_VER))
 printf("%llu\n", ANT_string_pair::strcmp_calls);
+#endif
 
 delete index;
 delete disk;
