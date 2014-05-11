@@ -18,7 +18,9 @@
 class ANT_string_pair : public ANT_string_pair_constant
 {
 public:
+#ifdef COUNT_STRCMP_CALLS
 	static unsigned long long strcmp_calls;
+#endif
 	ANT_string_pair()                                 { }
 	ANT_string_pair(char *name)                       { start = name; string_length = ::strlen(name); }
 	ANT_string_pair(char *source, long len)           { start = source; string_length = len; }
@@ -38,7 +40,11 @@ public:
 	char *str(void) { return strnnew(start, string_length); }
 	char *strcpy(char *dest) { *(::strncpy(dest, start, string_length) + string_length) = '\0'; return dest; }
 	char *strncpy(char *dest, size_t length) { *(::strncpy(dest, start, string_length < length ? string_length : length) + (string_length < length ? string_length : length)) = '\0'; return dest; }
+#ifdef COUNT_STRCMP_CALLS
 	int strcmp(ANT_string_pair *with) { __sync_add_and_fetch(&ANT_string_pair::strcmp_calls, 1); return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1; }
+#else
+	int strcmp(ANT_string_pair *with) { return string_length == with->string_length ? ::memcmp(start, with->start, string_length) : string_length < with->string_length ? -1 : 1; }
+#endif
 
 	int true_strcmp(const char *string);
 	int true_strcmp(ANT_string_pair *with);
@@ -57,7 +63,9 @@ inline int ANT_string_pair::true_strcmp(ANT_string_pair *with)
 {
 int cmp;
 
+#ifdef COUNT_STRCMP_CALLS
 __sync_add_and_fetch(&ANT_string_pair::strcmp_calls, 1);
+#endif
 
 if (string_length == with->string_length)
 	return ::memcmp(start, with->start, string_length);
@@ -80,7 +88,9 @@ inline int ANT_string_pair::true_strcmp(const char *with)
 int cmp;
 size_t len;
 
+#ifdef COUNT_STRCMP_CALLS
 __sync_add_and_fetch(&ANT_string_pair::strcmp_calls, 1);
+#endif
 
 cmp = ::strncmp(start, with, string_length);
 if (cmp == 0)
@@ -100,7 +110,9 @@ inline int ANT_string_pair::true_strncmp(ANT_string_pair *with, size_t len)
 {
 int cmp;
 
+#ifdef COUNT_STRCMP_CALLS
 __sync_add_and_fetch(&ANT_string_pair::strcmp_calls, 1);
+#endif
 
 if (string_length >= len && with->string_length >= len)
 	return ::strncmp(start, with->start, len);

@@ -45,6 +45,9 @@ stopwords = new ANT_stop_word(ANT_stop_word::NCBI);
 hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
 memset(hash_table_entries, 0, sizeof(hash_table_entries));
+#ifdef COUNT_STRCMP_CALLS_HT
+memset(strcmp_calls, 0, sizeof(strcmp_calls));
+#endif
 titles_memory = serialisation_memory = dictionary_memory = new ANT_memory;		// if you seperate these then remember to update the stats object
 postings_memory = new ANT_memory;
 stats = new ANT_stats_memory_index(dictionary_memory, postings_memory);
@@ -125,16 +128,19 @@ if (which_stats & STAT_COMPRESSION)
 	ANT_MEMORY_INDEX::FIND_NODE()
 	-----------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index::find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string)
+ANT_memory_index_hash_node *ANT_memory_index::find_node(/*ANT_memory_index_hash_node *root*/long hash_value, ANT_string_pair *string)
 {
 long cmp;
-volatile ANT_memory_index_hash_node *finder = root;
+volatile ANT_memory_index_hash_node *finder = hash_table[hash_value];
 
 if (finder == NULL)
 	return NULL;
 
 while ((cmp = string->strcmp((ANT_string_pair *)&(finder->string))) != 0)
 	{
+#ifdef COUNT_STRCMP_CALLS_HT
+	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
+#endif
 	if (cmp > 0)
 		if (finder->left == NULL)
 			return NULL;
@@ -146,6 +152,9 @@ while ((cmp = string->strcmp((ANT_string_pair *)&(finder->string))) != 0)
 		else
 			finder = finder->right;
 	}
+#ifdef COUNT_STRCMP_CALLS_HT
+	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
+#endif
 return (ANT_memory_index_hash_node *)finder;
 }
 
@@ -160,6 +169,9 @@ ANT_memory_index_hash_node *root = hash_table[hash_value];
 
 while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
+#ifdef COUNT_STRCMP_CALLS_HT
+	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
+#endif
 	if (cmp > 0)
 		if (root->left == NULL)
 			{
@@ -179,6 +191,9 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		else
 			root = root->right;
 	}
+#ifdef COUNT_STRCMP_CALLS_HT
+	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
+#endif
 return root;
 }
 
@@ -360,59 +375,6 @@ else
 	node = find_add_node(hash_value, measure_name);
 
 node->set(score);
-}
-
-/*
-	ANT_MEMORY_INDEX::ITER_ADD_INDEXED_DOCUMENT_NODE()
-	--------------------------------------------------
-	Uses a Morris traversal to perform an iterative in-order traversal of the tree
-	Avoids blowing the stack with recursion
-	TODO: Test this
-*/
-void ANT_memory_index::iter_add_indexed_document_node(ANT_memory_index_one_node *node, long long docno)
-{
-ANT_memory_index_one_node *pre;
-
-while (node != NULL)
-	if (node->left == NULL)
-		{
-		if (node->string[0] == '~')
-			set_document_detail(&node->string, node->term_frequency, node->mode);
-		else
-			{
-			if (node->final_node == NULL)
-				add_term(&node->string, docno, (long)node->term_frequency);
-			else
-				node->final_node->add_posting(docno, (long)node->term_frequency);
-			}
-		node = node->right;
-		}
-	else
-		{
-		pre = node->left;
-		while (pre->right != NULL && pre->right != node)
-			pre = pre->right;
-
-		if (pre->right == NULL)
-			{
-			pre->right = node;
-			node = node->left;
-			}
-		else
-			{
-			pre->right = NULL;
-			if (node->string[0] == '~')
-				set_document_detail(&node->string, node->term_frequency, node->mode);
-			else
-				{
-				if (node->final_node == NULL)
-					add_term(&node->string, docno, (long)node->term_frequency);
-				else
-					node->final_node->add_posting(docno, (long)node->term_frequency);
-				}
-			node = node->right;
-			}
-		}
 }
 
 /*
@@ -1432,6 +1394,11 @@ long long pos;
 if (index_file == NULL)
 	return 0;
 
+#ifdef COUNT_STRCMP_CALLS_HT
+for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
+	printf("%lu\n", strcmp_calls[i]);
+exit(EXIT_SUCCESS);
+#endif
 #ifdef PRINT_HASH_TABLE_ENTRIES
 for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
 	printf("%lu\n", hash_table_entries[i]);
@@ -1444,7 +1411,7 @@ allocate_decompress_buffer();
 	If we have the documents stored on disk then we need to store the position of the end of the final document.
 	But, only add the position if we are using an index with the documents in it.
 */
-if (find_node(hash_table[hash(&squiggle_document_offsets)], &squiggle_document_offsets) != NULL)
+if (find_node(/*hash_table[*/hash(&squiggle_document_offsets)/*]*/, &squiggle_document_offsets) != NULL)
 	{
 	set_document_detail(&squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
 #ifdef IMPACT_HEADER

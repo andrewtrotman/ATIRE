@@ -10,6 +10,7 @@
 
 extern unsigned char ANT_hash_table[];
 extern unsigned char ANT_header_hash_encode[];
+extern unsigned char ANT_header_hash_encode_27[];
 
 #include <stdio.h>      /* defines printf for tests */
 #include <time.h>       /* defines time_t for timings in the test */
@@ -331,10 +332,14 @@ unsigned long ans;
 */
 ans = ANT_header_hash_encode[(*string)[0]];		// in the range 0..36
 
-/*
-	Top 2 bits are the bottom 2 bits of the string length
-*/
-ans |= (string->length() & 0x03) << 6;
+#ifdef HEADER_EXP
+	ans = ANT_header_hash_encode_27[(*string)[0]]; // range 0..26
+#else
+	/*
+		Top 2 bits are the bottom 2 bits of the string length
+	*/
+	ans |= (string->length() & 0x03) << 6;
+#endif
 
 return ans;
 }
@@ -345,64 +350,61 @@ return ans;
 */
 static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 {
-/*
-	This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer
-	and encodes the length in the top 3 bits.  Numbers cause problems with this, especially increasing sequences
-	because they end up with the indexer's direct tree chain in the hash table reducing to a linked list!  Numbers
-	are now encoded as the sumber itself.
+#ifdef HEADER_EXP
+	/*
+		Because we're special casing numbers, we only need a base-27 number
+		In which case we can use the first 5 characters to encode the number
+	*/
+	unsigned long ans = 0;
+	const long base = 27;
 
-	UNICODE strings now appear to use the random_hash_24 method too.
-*/
-#ifndef EXPERIMENTAL_HASH
-unsigned long ans;
-size_t len;
-const long base = 37;
+	if (ANT_isdigit((*string)[0]))
+		return ANT_atoul(string->start, string->length()) % 0x1000000;
 
-#ifdef HEADER_SPECIAL_CASE_NUMBER
-if (ANT_isdigit((*string)[0]))
-	return ANT_atoul(string->start, string->length()) % 0x1000000;
-#endif
-
-#ifdef HEADER_SPECIAL_CASE_UTF
-if (((*string)[0] & 0x80) != 0)
-	return ANT_random_hash_24(string->string(), string->length());
-#endif
-
-ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
-
-if ((len = string->length()) > 1)
-	ans += (ANT_header_hash_encode[(*string)[1]]) * base * base;
-if (len > 2)
-	ans += (ANT_header_hash_encode[(*string)[2]]) * base;
-if (len > 3)
-	ans += (ANT_header_hash_encode[(*string)[3]]);
-
-ans += (string->length() & 0x07) << 21;	// top 3 bits are the length
-
-return ans;
+	switch (string->length())
+		{
+		default:
+		case 5 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[4]];
+		case 4 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[3]];
+		case 3 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[2]];
+		case 2 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[1]];
+		case 1 : return ans * base + ANT_header_hash_encode_27[(*string)[0]];
+		}
 #else
-/*
-	If the length is bigger than 4, we can't encode the base-37 version directly into the hashtable
-	so use random hashing distributed evenly over the remainder of the space. If it is fewer than 4
-	characters, then it will fit directly as the base-37 encoded version, so use that.
-*/
-unsigned long ans = 0;
-const long base = 37;
+	/*
+		This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer
+		and encodes the length in the top 3 bits.  Numbers cause problems with this, especially increasing sequences
+		because they end up with the indexer's direct tree chain in the hash table reducing to a linked list!  Numbers
+		are now encoded as the sumber itself.
 
-#ifdef HEADER_SPECIAL_CASE_NUMBER
-if (ANT_isdigit((*string)[0]))
-	return ANT_atoul(string->start, string->length()) % 0x1000000;
-#endif
+		UNICODE strings now appear to use the random_hash_24 method too.
+	*/
+	unsigned long ans;
+	size_t len;
+	const long base = 37;
 
-switch (string->length())
-	{
-	case 4: ans = ans * base + ANT_header_hash_encode[(*string)[3]];
-	case 3: ans = ans * base + ANT_header_hash_encode[(*string)[2]];
-	case 2: ans = ans * base + ANT_header_hash_encode[(*string)[1]];
-	case 1: return ans * base + ANT_header_hash_encode[(*string)[0]];
-	default: return base * base * base * base + (ANT_random_hash_24(string) % ((1 << 24) - (base * base * base * base)));
-	}
+	#if HASHER == HEADER_NUM
+	if (ANT_isdigit((*string)[0]))
+		return ANT_atoul(string->start, string->length()) % 0x1000000;
+	#endif
 
+	#ifdef HEADER_SPECIAL_CASE_UTF
+	if (((*string)[0] & 0x80) != 0)
+		return ANT_random_hash_24(string->string(), string->length());
+	#endif
+
+	ans = ANT_header_hash_encode[(*string)[0]] * base * base * base;
+
+	if ((len = string->length()) > 1)
+		ans += (ANT_header_hash_encode[(*string)[1]]) * base * base;
+	if (len > 2)
+		ans += (ANT_header_hash_encode[(*string)[2]]) * base;
+	if (len > 3)
+		ans += (ANT_header_hash_encode[(*string)[3]]);
+
+	ans += (string->length() & 0x07) << 21;	// top 3 bits are the length
+
+	return ans;
 #endif
 }
 
@@ -703,7 +705,7 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 	#error "HASHER must be defined so a hash_table function can be chosen"
 #elif HASHER == RANDOM || HASHER == RANDOM_STEP
 	return ANT_random_hash_8(string);
-#elif HASHER == HEADER
+#elif HASHER == HEADER || HASHER == HEADER_EXP || HASHER == HEADER_NUM
 	return ANT_header_hash_8(string);
 #elif HASHER == SUPERFAST
 	return ANT_superfasthash_8(string);
@@ -726,7 +728,7 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 	return ANT_random_hash_8_24(string);
 #elif HASHER == RANDOM_STEP
 	return ANT_random_hash_24(string);
-#elif HASHER == HEADER
+#elif HASHER == HEADER || HASHER == HEADER_EXP || HASHER == HEADER_NUM
 	return ANT_header_hash_24(string);
 #elif HASHER == SUPERFAST
 	return ANT_superfasthash_24(string);
@@ -749,7 +751,7 @@ static inline unsigned long ANT_hash_32(ANT_string_pair *string)
 	return ANT_random_hash_8_32(string);
 #elif HASHER == RANDOM_STEP
 	return ANT_random_hash_32(string);
-#elif HASHER == HEADER
+#elif HASHER == HEADER || HASHER == HEADER_EXP || HASHER == HEADER_NUM
 	return ANT_header_hash_32(string);
 #elif HASHER == SUPERFAST
 	return ANT_superfasthash_32(string);

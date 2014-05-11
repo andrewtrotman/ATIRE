@@ -59,6 +59,9 @@ public:
 
 private:
 	unsigned long hash_table_entries[HASH_TABLE_SIZE];
+#ifdef COUNT_STRCMP_CALLS_HT
+	unsigned long strcmp_calls[HASH_TABLE_SIZE];
+#endif
 	ANT_memory_index_hash_node *dummy_root;
 
 private:
@@ -151,7 +154,7 @@ private:
 #else
 	static unsigned long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 #endif
-	ANT_memory_index_hash_node *find_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
+	ANT_memory_index_hash_node *find_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string);
 	ANT_memory_index_hash_node *find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string);
 	//ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
 	void serialise_one_node(ANT_file *file, ANT_memory_index_hash_node *root);
@@ -177,7 +180,6 @@ private:
 	void serialise_filenames_index(void);
 #endif
 
-	void iter_add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 	void add_indexed_document_node(ANT_memory_index_one_node *node, long long docno);
 
 	long should_prune(ANT_memory_index_hash_node *term);

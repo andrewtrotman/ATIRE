@@ -109,7 +109,7 @@ if (final_index != NULL)
 if (root == NULL)
 	node->final_node = NULL;
 else
-	node->final_node = final_index->find_node(root, pair);
+	node->final_node = final_index->find_node(final_hash_value/*root*/, pair);
 
 nodes_used++;
 
