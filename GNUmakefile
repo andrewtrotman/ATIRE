@@ -179,7 +179,7 @@ rb := -1
 
 # common flags
 LDFLAGS += -ldl
-override CFLAGS += -x c++ -Wall -D${HASHER}=1 -DHASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DREBALANCE_FACTOR=$(rb) \
+override CFLAGS += -x c++ -Wall -D${HASHER}_HASHER=1 -DHASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DREBALANCE_FACTOR=$(rb) \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 
