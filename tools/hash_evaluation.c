@@ -3,8 +3,6 @@
 #include "hash_table.h"
 #include "string_pair.h"
 #include "disk.h"
-#include "stats.h"
-#include "memory.h"
 
 #define TOTAL_REPEATS 1
 
@@ -22,16 +20,18 @@ if (argc != 2)
 long long number_terms;
 char **lines = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(argv[1]), &number_terms);
 long long times;
-unsigned long long total_hash_time[3] = {0,0,0};
-long long now;
-ANT_stats *clock = new ANT_stats(new ANT_memory);
-ANT_string_pair **terms = NULL;
-
+char *space;
+ANT_string_pair *term = NULL;
 const long long hash_table_size = 1 << 24;
-long long *hash_table = new long long[hash_table_size];
+long long **hash_table = new long long*[3];
+unsigned long hash_value;
 
-for (int i = 0; i < hash_table_size; i++)
-	hash_table[i] = 0;
+for (int j = 0; j < 3; j++)
+	{
+	hash_table[j] = new long long[hash_table_size];
+	for (int i = 0; i < hash_table_size; i++)
+		hash_table[j][i] = 0;
+	}
 
 #ifndef HASHER
 	exit(fprintf(stderr, "No valid hasher defined!\n"));
@@ -53,9 +53,6 @@ for (int i = 0; i < hash_table_size; i++)
 	exit(fprintf(stderr, "Unknown hasher\n"));
 #endif
 
-char *space;
-
-ANT_string_pair *term = NULL;
 
 for (int line = 0; line < number_terms; line++)
 	{
@@ -64,17 +61,28 @@ for (int line = 0; line < number_terms; line++)
 	space = strchr(lines[line], ' ');
 	term = new ANT_string_pair(lines[line], space - lines[line]);
 
-#ifdef COUNT_FREQ
-	times = ANT_atoul(space + 1, strlen(lines[line]) - (space - lines[line]));
-#else
-	times = 1;
-#endif
+	hash_value = ANT_hash_24(term);
 
-	hash_table[ANT_hash_24(term)] += times;
+	if (hash_value == 6067096)
+		printf("%d: %s\n", line, lines[line]);
+	continue;
+
+	// count of unique terms
+	hash_table[0][hash_value] += 1;
+
+	// count of collection frequencies
+	times = ANT_atoul(space + 1, strlen(space));
+	hash_table[1][hash_value] += times;
+
+	// count of document frequencies
+	space = strchr(space + 1, ' ');
+	times = ANT_atoul(space + 1, strlen(space));
+	hash_table[2][hash_value] += times;
 	}
 
-for (int i = 0; i < hash_table_size; i++)
-	printf("%lld\n", hash_table[i]);
+//printf("U C D\n");
+//for (int i = 0; i < hash_table_size; i++)
+//	printf("%lld %lld %lld\n", hash_table[0][i], hash_table[1][i], hash_table[2][i]);
 
 return EXIT_SUCCESS;
 }
