@@ -62,7 +62,7 @@ private:
 #ifdef COUNT_STRCMP_CALLS_HT
 	unsigned long strcmp_calls[HASH_TABLE_SIZE];
 #endif
-	ANT_memory_index_hash_node *dummy_root;
+	ANT_memory_index_hash_node dummy_root;
 
 private:
 	ANT_memory *dictionary_memory, *postings_memory, *serialisation_memory, *titles_memory;

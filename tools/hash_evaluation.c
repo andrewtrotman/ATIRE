@@ -63,10 +63,6 @@ for (int line = 0; line < number_terms; line++)
 
 	hash_value = ANT_hash_24(term);
 
-	if (hash_value == 6067096)
-		printf("%d: %s\n", line, lines[line]);
-	continue;
-
 	// count of unique terms
 	hash_table[0][hash_value] += 1;
 
@@ -80,9 +76,9 @@ for (int line = 0; line < number_terms; line++)
 	hash_table[2][hash_value] += times;
 	}
 
-//printf("U C D\n");
-//for (int i = 0; i < hash_table_size; i++)
-//	printf("%lld %lld %lld\n", hash_table[0][i], hash_table[1][i], hash_table[2][i]);
+printf("U C D\n");
+for (int i = 0; i < hash_table_size; i++)
+	printf("%lld %lld %lld\n", hash_table[0][i], hash_table[1][i], hash_table[2][i]);
 
 return EXIT_SUCCESS;
 }

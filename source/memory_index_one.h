@@ -5,11 +5,11 @@
 #ifndef MEMORY_INDEX_ONE_H_
 #define MEMORY_INDEX_ONE_H_
 
+#include "memory_index_one_node.h"
 #include "memory_indexer.h"
 #include "heap.h"	
 
 class ANT_memory;
-class ANT_memory_index_one_node;
 class ANT_string_pair;
 class ANT_memory_index;
 class ANT_search_engine;
@@ -34,7 +34,7 @@ private:
 
 	ANT_memory_index_one_node *hash_table[HASH_TABLE_SIZE];
 	int hash_table_entries[HASH_TABLE_SIZE];
-	ANT_memory_index_one_node *dummy_root;
+	ANT_memory_index_one_node dummy_root;
 
 	ANT_memory *memory;
 	ANT_memory_index *final_index;

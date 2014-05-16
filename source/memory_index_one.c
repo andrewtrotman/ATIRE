@@ -52,7 +52,6 @@ rewind();
 
 term_details = NULL;
 token_as_string = NULL;
-dummy_root = new_hash_node(new ANT_string_pair("@@"), 0);
 }
 
 /*
@@ -212,10 +211,10 @@ return answer;
 */
 void ANT_memory_index_one::rebalance_tree(long hash_value)
 {
-dummy_root->right = hash_table[hash_value];
+dummy_root.right = hash_table[hash_value];
 
 // convert to a singly linked list via right rotations
-int size = tree_to_vine(dummy_root);
+int size = tree_to_vine(&dummy_root);
 
 int full_size = 1;
 while (full_size <= size)
@@ -223,12 +222,12 @@ while (full_size <= size)
 full_size /= 2;
 
 // do a series of rotations to get to a balanced tree
-vine_to_tree(dummy_root, size - full_size);
+vine_to_tree(&dummy_root, size - full_size);
 while (full_size > 1)
-	vine_to_tree(dummy_root, full_size /= 2);
+	vine_to_tree(&dummy_root, full_size /= 2);
 
 // the root of the tree might have changed of course
-hash_table[hash_value] = dummy_root->right;
+hash_table[hash_value] = dummy_root.right;
 }
 
 /*

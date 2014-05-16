@@ -383,10 +383,10 @@ static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 	size_t len;
 	const long base = 37;
 
-	#if HASHER == HEADER_NUM
+//	#if HASHER == HEADER_NUM
 	if (ANT_isdigit((*string)[0]))
 		return ANT_atoul(string->start, string->length()) % 0x1000000;
-	#endif
+//	#endif
 
 	#ifdef HEADER_SPECIAL_CASE_UTF
 	if (((*string)[0] & 0x80) != 0)
@@ -504,6 +504,10 @@ return hash;
 static inline unsigned long ANT_superfasthash_8(ANT_string_pair *string)
 {
 return ANT_superfasthash_32(string->string(), string->length()) & 0xFF;
+}
+static inline unsigned long ANT_superfasthash_16(ANT_string_pair *string)
+{
+return ANT_superfasthash_32(string->string(), string->length()) & 0xFFFF;
 }
 static inline unsigned long ANT_superfasthash_24(ANT_string_pair *string)
 {
@@ -686,6 +690,10 @@ static inline unsigned long ANT_lookup3hash_8(ANT_string_pair *string)
 {
 return ANT_lookup3hash_32(string->string(), string->length()) & 0xFF;
 }
+static inline unsigned long ANT_lookup3hash_16(ANT_string_pair *string)
+{
+return ANT_lookup3hash_32(string->string(), string->length()) & 0xFFFF;
+}
 static inline unsigned long ANT_lookup3hash_24(ANT_string_pair *string)
 {
 return ANT_lookup3hash_32(string->string(), string->length()) & 0xFFFFFF;
@@ -701,6 +709,7 @@ return ANT_lookup3hash_32(string->string(), string->length());
 */
 static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 {
+return ANT_random_hash_8(string);
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"
 #elif HASHER == RANDOM || HASHER == RANDOM_STEP
@@ -717,11 +726,35 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 }
 
 /*
+	ANT_HASH_16()
+	-------------
+*/
+static inline unsigned long ANT_hash_16(ANT_string_pair *string)
+{
+#ifndef HASHER
+	#error "HASHER must be defined so a hash_table function can be chosen"
+#elif HASHER == RANDOM
+	return ANT_random_hash_8_24(string);
+#elif HASHER == RANDOM_STEP
+	return ANT_random_hash_24(string);
+#elif HASHER == HEADER || HASHER == HEADER_EXP || HASHER == HEADER_NUM
+	return ANT_header_hash_24(string);
+#elif HASHER == SUPERFAST
+	return ANT_superfasthash_16(string);
+#elif HASHER == LOOKUP3
+	return ANT_lookup3hash_16(string);
+#else
+	#error "Don't know which hash function to use - aborting"
+#endif
+}
+
+/*
 	ANT_HASH_24()
 	-------------
 */
 static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 {
+return ANT_header_hash_24(string);
 #ifndef HASHER
 	#error "HASHER must be defined so a hash_table function can be chosen"
 #elif HASHER == RANDOM
