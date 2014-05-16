@@ -174,7 +174,7 @@ ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lsocket -lnsl
 endif
 
-HASHER := HEADER
+HASHER := HEADER_NUM
 rb := -1
 
 # common flags

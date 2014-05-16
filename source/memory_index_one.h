@@ -7,6 +7,7 @@
 
 #include "memory_index_one_node.h"
 #include "memory_indexer.h"
+#include "memory_index_one_node.h"
 #include "heap.h"	
 
 class ANT_memory;
@@ -33,7 +34,7 @@ private:
 	static const long HASH_TABLE_SIZE = 0x100;
 
 	ANT_memory_index_one_node *hash_table[HASH_TABLE_SIZE];
-	int hash_table_entries[HASH_TABLE_SIZE];
+	unsigned long hash_table_entries[HASH_TABLE_SIZE];
 	ANT_memory_index_one_node dummy_root;
 
 	ANT_memory *memory;

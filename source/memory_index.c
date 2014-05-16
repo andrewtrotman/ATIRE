@@ -152,6 +152,7 @@ while ((cmp = string->strcmp((ANT_string_pair *)&(finder->string))) != 0)
 			finder = finder->right;
 	}
 #ifdef COUNT_STRCMP_CALLS_HT
+	// to account for the comparison when cmp == 0
 	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
 #endif
 return (ANT_memory_index_hash_node *)finder;
@@ -1397,8 +1398,8 @@ if (index_file == NULL)
 #ifdef COUNT_STRCMP_CALLS_HT
 for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
 	printf("%lu\n", strcmp_calls[i]);
-exit(EXIT_SUCCESS);
 #endif
+
 #ifdef PRINT_HASH_TABLE_ENTRIES
 for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
 	printf("%lu\n", hash_table_entries[i]);
