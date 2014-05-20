@@ -327,14 +327,19 @@ static inline unsigned long ANT_header_hash_8(ANT_string_pair *string)
 {
 unsigned long ans;
 
-/*
-	Bottom 6 bits are the hash of the first character
-*/
-ans = ANT_header_hash_encode[(*string)[0]];		// in the range 0..36
-
 #ifdef HEADER_EXP
 	ans = ANT_header_hash_encode_27[(*string)[0]]; // range 0..26
+
+	/*
+		Top 3 bits are the bottom 3 bits of the string length
+	*/
+	ans |= (string->length() & 0x07) << 5;
 #else
+	/*
+		Bottom 6 bits are the hash of the first character
+	*/
+	ans = ANT_header_hash_encode[(*string)[0]];		// in the range 0..36
+
 	/*
 		Top 2 bits are the bottom 2 bits of the string length
 	*/
@@ -357,14 +362,18 @@ static inline unsigned long ANT_header_hash_24(ANT_string_pair *string)
 	*/
 	unsigned long ans = 0;
 	const long base = 27;
+	const long num_start = base * base * base * base;
 
+	/*
+		Numbers get distributed across the space for the 5th digit, ensuring that all 
+		words <= 4 bytes long are unique
+	*/
 	if (ANT_isdigit((*string)[0]))
-		return ANT_atoul(string->start, string->length()) % 0x1000000;
+		return num_start + (ANT_atoul(string->start, string->length()) % (0x1000000 - num_start));
 
 	switch (string->length())
 		{
-		default:
-		case 5 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[4]];
+		default:  ans = ans * base + ANT_header_hash_encode_27[(*string)[4]];
 		case 4 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[3]];
 		case 3 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[2]];
 		case 2 :  ans = ans * base + ANT_header_hash_encode_27[(*string)[1]];
