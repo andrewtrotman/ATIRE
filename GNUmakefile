@@ -345,7 +345,7 @@ TESTS_EXES := $(basename $(TESTS_SOURCES))
 TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
 
 
-all: $(EXTRA_OBJS) index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
+all: $(EXTRA_OBJS) GNUmakefile index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
 
 # faster compilation without considering extra objects, useful for repeated make for testing
 internal: index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
