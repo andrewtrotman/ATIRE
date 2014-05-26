@@ -78,7 +78,7 @@ USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
 # what type to use for the accumulators
 override CFLAGS += -DANT_ACCUMULATOR_T="double"
 override CFLAGS += -DANT_PREGEN_T="unsigned long long"
-override CFLAGS += -DASPT_UTF8_METHODS -DDOUBLE_BUFFER -DBUFFER_A -DBUFFER_B -DDOUBLE_HASH
+override CFLAGS += -DDOUBLE_BUFFER -DBUFFER_A -DBUFFER_B -DDOUBLE_HASH
 
 # use mysql database backend
 USE_MYSQL := 0
@@ -174,7 +174,6 @@ ifeq ($(OS_TYPE), SUNOS)
 	LDFLAGS += -lsocket -lnsl
 endif
 
-HASHER := HEADER_NUM
 rb := -1
 
 # common flags
