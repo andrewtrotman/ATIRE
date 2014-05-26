@@ -161,6 +161,9 @@ return (ANT_memory_index_hash_node *)finder;
 /*
 	ANT_MEMORY_INDEX::FIND_ADD_NODE()
 	---------------------------------
+	When we find a NULL node, create a new node and do a compare and swap to put the node in the tree.
+	If the CAS fails, then some other thread created a node there instead, so we should traverse down
+	the tree.
 */
 ANT_memory_index_hash_node *ANT_memory_index::find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string)
 {
@@ -174,20 +177,24 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 #endif
 	if (cmp > 0)
 		if (root->left == NULL)
-			{
-			ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL);
-			hash_table_entries[hash_value]++;
-			return root->left;
-			}
+			if (ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL))
+				{
+				hash_table_entries[hash_value]++;
+				return root->left;
+				}
+			else
+				root = root->left;
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
-			{
-			ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL);
-			hash_table_entries[hash_value]++;
-			return root->right;
-			}
+			if (ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL))
+				{
+				hash_table_entries[hash_value]++;
+				return root->right;
+				}
+			else
+				root = root->right;
 		else
 			root = root->right;
 	}
@@ -214,9 +221,13 @@ hash_value = hash(string);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL);
-	hash_table_entries[hash_value]++;
-	node = hash_table[hash_value];
+	if (ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL))
+		{
+		hash_table_entries[hash_value]++;
+		node = hash_table[hash_value];
+		}
+	else
+		node = find_add_node(hash_value, string);
 	}
 else
 	node = find_add_node(hash_value, string);
@@ -331,9 +342,13 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
-	hash_table_entries[hash_value]++;
-	node = hash_table[hash_value];
+	if (ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL))
+		{
+		hash_table_entries[hash_value]++;
+		node = hash_table[hash_value];
+		}
+	else
+		node = find_add_node(hash_value, measure_name);
 	}
 else
 	node = find_add_node(hash_value, measure_name);
@@ -368,9 +383,13 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
-	hash_table_entries[hash_value]++;
-	node = hash_table[hash_value];
+	if (ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL))
+		{
+		hash_table_entries[hash_value]++;
+		node = hash_table[hash_value];
+		}
+	else
+		node = find_add_node(hash_value, measure_name);
 	}
 else
 	node = find_add_node(hash_value, measure_name);
