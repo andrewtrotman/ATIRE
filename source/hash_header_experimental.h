@@ -45,6 +45,10 @@ const long num_start = base * base * base * base;
 if (ANT_isdigit((*string)[0]))
 	return num_start + (ANT_atoul(string->start, string->length()) % (0x1000000 - num_start));
 
+/*
+	While there are ~2M unused buckets from this, there aren't enough unused buckets
+	to dedicate any bits to the length
+*/
 switch (string->length())
 	{
 	default:  ans = ans * base + ANT_header_hash_encode_27[(*string)[4]];
@@ -61,33 +65,32 @@ switch (string->length())
 */
 static inline unsigned long ANT_hash_header_experimental_32(ANT_string_pair *string)
 {
-// TODO: Adapt this for the base27 version
 /*
-	This code assumes a 37 character alphabet (a..z,A-Z,0..9,(~_@-)) and treats the string as a base 37 integer
-	Numbers cause problems with this, especially increasing sequences because they end up with the indexer's direct
-	tree chain in the hash table reducing to a linked list!  Numbers are now encoded as the number itself.
+	Because we're special casing numbers, we only need a base-27 number
+	In which case we can use the first 5 characters to encode the number
 */
-uint32_t ans;
-size_t len;
-const long base = 37;
+unsigned long ans = 0;
+const long base = 27;
+const long num_start = base * base * base * base * base;
 
+/*
+	Numbers get distributed across the space for the 6th digit, ensuring that all 
+	words <= 5 bytes long are unique
+*/
 if (ANT_isdigit((*string)[0]))
-	return ANT_atoul(string->start, string->length());
+	return num_start + (ANT_atoul(string->start, string->length()) % (0x100000000 - num_start));
 
-ans = (ANT_header_hash_encode[(*string)[0]]) * base * base * base * base;
+switch (string->length())
+	{
+	default: ans = ans * base + ANT_header_hash_encode_27[(*string)[5]];
+	case 5 : ans = ans * base + ANT_header_hash_encode_27[(*string)[4]];
+	case 4 : ans = ans * base + ANT_header_hash_encode_27[(*string)[3]];
+	case 3 : ans = ans * base + ANT_header_hash_encode_27[(*string)[2]];
+	case 2 : ans = ans * base + ANT_header_hash_encode_27[(*string)[1]];
+	case 1 : ans = ans * base + ANT_header_hash_encode_27[(*string)[0]];
+	}
 
-if ((len = string->length()) > 1)
-	ans += (ANT_header_hash_encode[(*string)[1]]) * base * base * base;
-if (len > 2)
-	ans += (ANT_header_hash_encode[(*string)[2]]) * base * base;
-if (len > 3)
-	ans += (ANT_header_hash_encode[(*string)[3]]) * base;
-if (len > 4)
-	ans += (ANT_header_hash_encode[(*string)[4]]);
-
-ans += (len & 0x1F) << 27; // top 5 bits are the length
-
-return ans;
+return ans + ((string->length() & 0x03) << 30);	// top 2 bits are the length
 }
 
 #endif
