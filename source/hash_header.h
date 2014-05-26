@@ -78,8 +78,10 @@ uint32_t ans;
 size_t len;
 const long base = 37;
 
-if (ANT_isdigit((*string)[0]))
-	return ANT_atoul(string->start, string->length());
+#if HASHER == HEADER_NUM
+	if (ANT_isdigit((*string)[0]))
+		return ANT_atoul(string->start, string->length());
+#endif
 
 ans = (ANT_header_hash_encode[(*string)[0]]) * base * base * base * base;
 

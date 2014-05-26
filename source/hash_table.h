@@ -67,7 +67,7 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 #if HASHER == RANDOM
 	return ANT_hash_random_24(string);
 #elif HASHER == RANDOM_STEP
-	return ANT_hash_random_24(string);
+	return ANT_hash_random_step_24(string);
 #elif HASHER == HEADER || HASHER == HEADER_NUM
 	return ANT_hash_header_24(string);
 #elif HASHER == HEADER_EXP
@@ -86,7 +86,7 @@ static inline unsigned long ANT_hash_32(ANT_string_pair *string)
 #if HASHER == RANDOM
 	return ANT_hash_random_32(string);
 #elif HASHER == RANDOM_STEP
-	return ANT_hash_random_32(string);
+	return ANT_hash_random_step_32(string);
 #elif HASHER == HEADER || HASHER == HEADER_NUM
 	return ANT_hash_header_32(string);
 #elif HASHER == HEADER_EXP
