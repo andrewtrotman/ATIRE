@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../source/maths.h"
-#include "../source/memory.h"
-#include "../source/search_engine.h"
-#include "../source/btree_iterator.h"
-#include "../source/search_engine_btree_leaf.h"
-#include "../source/phonetic_double_metaphone.h"
-#include "../source/phonetic_soundex.h"
-#include "../source/impact_header.h"
+#include "maths.h"
+#include "memory.h"
+#include "search_engine.h"
+#include "btree_iterator.h"
+#include "search_engine_btree_leaf.h"
+#include "phonetic_double_metaphone.h"
+#include "phonetic_soundex.h"
+#include "impact_header.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -141,22 +141,6 @@ long metaphone, print_wide, print_postings, one_postings_per_line;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
 
-for (param = 1; param < argc; param++)
-	if (*argv[param] != '-')
-		filename = param;
-search_engine.open(filename == 0 ? "index.aspt" : argv[1]);
-
-global_trim = search_engine.get_global_trim_postings_k();
-ANT_btree_iterator iterator(&search_engine);
-
-#ifdef IMPACT_HEADER
-	quantum_count_type the_quantum_count;
-	beginning_of_the_postings_type beginning_of_the_postings;
-	long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
-	long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
-	ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
-#endif
-
 first_term = last_term = NULL;
 print_postings = print_wide = metaphone = one_postings_per_line = FALSE;
 
@@ -191,11 +175,25 @@ for (param = 1; param < argc; param++)
 		about(argv[0]);
 	else
 		{
-		param_filenames++;
-		if (param_filenames > 1)
+		// already have given an index filename
+		if (filename != 0)
 			about(argv[0]);
+		filename = param;
 		}
 	}
+
+search_engine.open(filename == 0 ? "index.aspt" : argv[filename]);
+
+global_trim = search_engine.get_global_trim_postings_k();
+ANT_btree_iterator iterator(&search_engine);
+
+#ifdef IMPACT_HEADER
+	quantum_count_type the_quantum_count;
+	beginning_of_the_postings_type beginning_of_the_postings;
+	long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
+	long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
+	ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
+#endif
 
 postings_list = (unsigned char *)malloc((size_t)postings_list_size);
 raw = (ANT_compressable_integer *)malloc((size_t)raw_list_size);
