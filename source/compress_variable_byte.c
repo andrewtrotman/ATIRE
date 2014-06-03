@@ -18,7 +18,7 @@ end = source + source_integers;
 for (current = source; current < end; current++)
 	{
 	needed = compress_bytes_needed(*current);
-	if (used + needed >= destination_length)
+	if (used + needed > destination_length)
 		return 0;
 	compress_into(destination + used, *current);
 	used += needed;
@@ -46,6 +46,6 @@ while (destination < end)
 		while (!(*source & 0x80))
 		   *destination = (*destination << 7) | *source++;
 		*destination = (*destination << 7) | (*source++ & 0x7F);
-        destination++;
+		destination++;
 		}
 }
