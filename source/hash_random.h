@@ -1,6 +1,8 @@
 #ifndef HASH_RANDOM_
 #define HASH_RANDOM_
 
+#include "string_pair.h"
+
 extern unsigned char ANT_hash_table[];
 
 /*

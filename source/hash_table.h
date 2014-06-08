@@ -24,6 +24,10 @@
 	#error "Don't know which hash function to use - aborting"
 #endif
 
+/*
+	ANT_HASH_8()
+	------------
+*/
 static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 {
 #if HASHER == RANDOM
@@ -43,25 +47,35 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 #endif
 }
 
-//static inline unsigned long ANT_hash_16(ANT_string_pair *string)
-//{
-//#if HASHER == RANDOM
-//	return ANT_hash_random_16(string);
-//#elif HASHER == RANDOM_STEP
-//	return ANT_hash_random_16(string);
-//#elif HASHER == HEADER || HASHER == HEADER_NUM
-//	return ANT_hash_header_16(string);
-//#elif HASHER == HEADER_EXP
-//	return ANT_hash_header_experimental_16(string);
-//#elif HASHER == SUPERFAST
-//	return ANT_hash_superfast_16(string);
-//#elif HASHER == LOOKUP3
-//	return ANT_hash_lookup3_16(string);
-//#else
-//	return -1;
-//#endif
-//}
+#ifdef NEVER
+/*
+	ANT_HASH_16()
+	-------------
+*/
+static inline unsigned long ANT_hash_16(ANT_string_pair *string)
+{
+#if HASHER == RANDOM
+	return ANT_hash_random_16(string);
+#elif HASHER == RANDOM_STEP
+	return ANT_hash_random_16(string);
+#elif HASHER == HEADER || HASHER == HEADER_NUM
+	return ANT_hash_header_16(string);
+#elif HASHER == HEADER_EXP
+	return ANT_hash_header_experimental_16(string);
+#elif HASHER == SUPERFAST
+	return ANT_hash_superfast_16(string);
+#elif HASHER == LOOKUP3
+	return ANT_hash_lookup3_16(string);
+#else
+	return -1;
+#endif
+}
+#endif
 
+/*
+	ANT_HASH_24()
+	-------------
+*/
 static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 {
 #if HASHER == RANDOM
@@ -81,6 +95,10 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 #endif
 }
 
+/*
+	ANT_HASH_32()
+	-------------
+*/
 static inline unsigned long ANT_hash_32(ANT_string_pair *string)
 {
 #if HASHER == RANDOM

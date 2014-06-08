@@ -1,5 +1,12 @@
+/*
+	HASH_HEADER.H
+	-------------
+*/
+
 #ifndef HASH_HEADER_
 #define HASH_HEADER_
+
+#include "string_pair.h"
 
 extern unsigned char ANT_header_hash_encode[];
 
@@ -37,8 +44,6 @@ static inline unsigned long ANT_hash_header_24(ANT_string_pair *string)
 	and encodes the length in the top 3 bits.  Numbers cause problems with this, especially increasing sequences
 	because they end up with the indexer's direct tree chain in the hash table reducing to a linked list!  Numbers
 	are now encoded as the sumber itself.
-
-	UNICODE strings now appear to use the random_24 method too.
 */
 unsigned long ans;
 size_t len;
