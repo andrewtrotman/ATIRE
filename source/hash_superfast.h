@@ -1,14 +1,20 @@
+/*
+	HASH_SUPERFAST.H
+	----------------
+	Paul Hsieh's SuperFastHash, adapted to conform to ATIRE coding standards (mostly).
+
+	Original from: http://www.azillionmonkeys.com/qed/hash.html
+*/
+
 #ifndef HASH_SUPERFAST_
 #define HASH_SUPERFAST_
 
-/*
-	ANT_SUPERFASTHASH_8()
-	---------------------
-	Paul Hsieh's SuperFastHash
-	www.azillionmonkeys.com/qed/hash.html
-*/
 #define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8) + (uint32_t)(((const uint8_t *)(d))[0]))
 
+/*
+	ANT_HASH_SUPERFAST_32()
+	-----------------------
+*/
 static inline unsigned long ANT_hash_superfast_32(char *string, size_t length)
 {
 uint32_t hash = length, tmp;
@@ -53,18 +59,37 @@ hash += hash >> 6;
 return hash;
 }
 
+/*
+	ANT_HASH_SUPERFAST_8()
+	----------------------
+*/
 static inline unsigned long ANT_hash_superfast_8(ANT_string_pair *string)
 {
 return ANT_hash_superfast_32(string->string(), string->length()) & 0xFF;
 }
+
+/*
+	ANT_HASH_SUPERFAST_16()
+	-----------------------
+*/
 static inline unsigned long ANT_hash_superfast_16(ANT_string_pair *string)
 {
 return ANT_hash_superfast_32(string->string(), string->length()) & 0xFFFF;
 }
+
+/*
+	ANT_HASH_SUPERFAST_24()
+	-----------------------
+*/
 static inline unsigned long ANT_hash_superfast_24(ANT_string_pair *string)
 {
 return ANT_hash_superfast_32(string->string(), string->length()) & 0xFFFFFF;
 }
+
+/*
+	ANT_HASH_SUPERFAST_32()
+	-----------------------
+*/
 static inline unsigned long ANT_hash_superfast_32(ANT_string_pair *string)
 {
 return ANT_hash_superfast_32(string->string(), string->length());

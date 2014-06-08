@@ -6,7 +6,7 @@
 extern unsigned char ANT_hash_table[];
 
 /*
-	ANT_RANDOM_HASH_8()
+	ANT_HASH_RANDOM_8()
 	-------------------
 */
 static inline unsigned int ANT_hash_random_8(char *string, size_t length, unsigned int seed)
@@ -23,7 +23,7 @@ return seed;
 }
 
 /*
-	ANT_RANDOM_HASH_8()
+	ANT_HASH_RANDOM_8()
 	-------------------
 */
 static inline unsigned int ANT_hash_random_8(ANT_string_pair *string)
@@ -32,8 +32,8 @@ return ANT_hash_random_8(string->string(), string->length(), (unsigned char)(str
 }
 
 /*
-	ANT_RANDOM_HASH_8_24()
-	----------------------
+	ANT_HASH_RANDOM_24()
+	--------------------
 	Uses ANT_random_hash_8 on the whole string, excluding the first
 	character and excluding the first two characters to generate
 	three hashes which are combined.
@@ -49,8 +49,8 @@ return (hash1 << 16) + (hash2 << 8) + hash3;
 }
 
 /*
-	ANT_RANDOM_HASH_8_32()
-	----------------------
+	ANT_HASH_RANDOM_32()
+	--------------------
 */
 static inline unsigned long ANT_hash_random_32(ANT_string_pair *string)
 {
@@ -64,8 +64,8 @@ return (hash1 << 24) + (hash2 << 16) + (hash3 << 8) + hash4;
 }
 
 /*
-	ANT_RANDOM_HASH_24()
-	--------------------
+	ANT_HASH_RANDOM_STEP_24()
+	-------------------------
 	Uses the same logic as ANT_random_hash_8, but generates three hashes
 	on the 1,4,7... 2,5,8,... 3,6,9,.. characters which are then
 	combined togehter for the final hash.
@@ -97,8 +97,8 @@ return result & 0xFFFFFF;
 }
 
 /*
-	ANT_hash_RANDOM_HASH_24()
-	--------------------
+	ANT_HASH_RANDOM_HASH_STEP_24()
+	------------------------------
 */
 static inline uint32_t ANT_hash_random_step_24(ANT_string_pair *string)
 {
@@ -106,8 +106,8 @@ return ANT_hash_random_step_24(string->string(), string->length());
 }
 
 /*
-	ANT_RANDOM_HASH_32()
-	--------------------
+	ANT_HASH_RANDOM_STEP_32()
+	-------------------------
 */
 static inline uint32_t ANT_hash_random_step_32(char *string, size_t length)
 {
@@ -137,8 +137,8 @@ return result;
 }
 
 /*
-	ANT_RANDOM_HASH_32()
-	--------------------
+	ANT_HASH_RANDOM_STEP_32()
+	-------------------------
 */
 static inline uint32_t ANT_hash_random_step_32(ANT_string_pair *string)
 {
@@ -146,8 +146,8 @@ return ANT_hash_random_step_32(string->string(), string->length());
 }
 
 /*
-	ANT_RANDOM_HASH_64()
-	-------------------
+	ANT_HASH_RANDOM_STEP_64()
+	-------------------------
 */
 static inline uint64_t ANT_hash_random_step_64(char *string, size_t length)
 {
