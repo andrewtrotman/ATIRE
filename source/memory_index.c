@@ -177,24 +177,20 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 #endif
 	if (cmp > 0)
 		if (root->left == NULL)
-			if (ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL))
-				{
-				hash_table_entries[hash_value]++;
-				return root->left;
-				}
-			else
-				root = root->left;
+			{
+			ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL);
+			hash_table_entries[hash_value]++;
+			return root->left;
+			}
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
-			if (ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL))
-				{
-				hash_table_entries[hash_value]++;
-				return root->right;
-				}
-			else
-				root = root->right;
+			{
+			ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL);
+			hash_table_entries[hash_value]++;
+			return root->right;
+			}
 		else
 			root = root->right;
 	}
@@ -221,13 +217,9 @@ hash_value = hash(string);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	if (ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL))
-		{
-		hash_table_entries[hash_value]++;
-		node = hash_table[hash_value];
-		}
-	else
-		node = find_add_node(hash_value, string);
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL);
+	hash_table_entries[hash_value]++;
+	node = hash_table[hash_value];
 	}
 else
 	node = find_add_node(hash_value, string);
@@ -342,13 +334,9 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	if (ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL))
-		{
-		hash_table_entries[hash_value]++;
-		node = hash_table[hash_value];
-		}
-	else
-		node = find_add_node(hash_value, measure_name);
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
+	hash_table_entries[hash_value]++;
+	node = hash_table[hash_value];
 	}
 else
 	node = find_add_node(hash_value, measure_name);
@@ -383,13 +371,9 @@ hash_value = hash(measure_name);
 if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
-	if (ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL))
-		{
-		hash_table_entries[hash_value]++;
-		node = hash_table[hash_value];
-		}
-	else
-		node = find_add_node(hash_value, measure_name);
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
+	hash_table_entries[hash_value]++;
+	node = hash_table[hash_value];
 	}
 else
 	node = find_add_node(hash_value, measure_name);
