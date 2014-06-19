@@ -7,7 +7,7 @@ OS_TYPE := $(shell uname)
 # debugging or normal compiling and linking
 USE_GCC := 1
 USE_GCC_VERBOSE := 0
-USE_GCC_DEBUG := 0
+USE_GCC_DEBUG := 1
 
 # use intel c/c++ compile
 USE_INTEL_C := 0
@@ -78,7 +78,7 @@ USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
 # what type to use for the accumulators
 override CFLAGS += -DANT_ACCUMULATOR_T="double"
 override CFLAGS += -DANT_PREGEN_T="unsigned long long"
-override CFLAGS += -DASPT_UTF8_METHODS -DDOUBLE_BUFFER -DBUFFER_A -DBUFFER_B -DDOUBLE_HASH
+override CFLAGS += -DDOUBLE_BUFFER -DBUFFER_A -DBUFFER_B -DDOUBLE_HASH
 
 # use mysql database backend
 USE_MYSQL := 0
@@ -334,6 +334,9 @@ ATIRE_MERGE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_MERGE_SOU
 ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
 ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
 
+ATIRE_DOCLIST_SOURCES := atire_doclist.c $(notdir $(SOURCES))
+ATIRE_DOCLIST_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_DOCLIST_SOURCES)))
+
 TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c
 TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)/*.c)))
 TOOLS_EXES := $(basename $(TOOLS_SOURCES))
@@ -424,7 +427,7 @@ $(BIN_DIR)/atire_dictionary : $(ATIRE_DICT_OBJECTS)
 $(BIN_DIR)/atire_merge : $(ATIRE_MERGE_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
-$(BIN_DIR)/atire_doclist : $(ATIRE_BROKER_OBJECTS)
+$(BIN_DIR)/atire_doclist : $(ATIRE_DOCLIST_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 # Hacked to compile every single source in the tools directory.

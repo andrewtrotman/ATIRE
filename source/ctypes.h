@@ -21,6 +21,7 @@ enum {
 	ANT_CTYPE_XML_NAME_START = 2048,
 	ANT_CTYPE_XML_NAME = 4096,
 	ANT_CTYPE_ZERO = 8192,				// used for '\0'
+	ANT_CTYPE_HIGH_BIT = 16384,
 
 	ANT_CTYPE_ISALPHA = ANT_CTYPE_UPPER | ANT_CTYPE_LOWER,
 	ANT_CTYPE_ISALNUM = ANT_CTYPE_ISALPHA | ANT_CTYPE_DIGIT,
@@ -66,6 +67,7 @@ inline int ANT_isascii(int c) { return (unsigned char)(c) <= 0x7f; }
 */
 inline int ANT_isalnumpunc(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISALNUMPUNC) != 0; }
 inline int ANT_isalnumpunczero(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISALNUMPUNCZERO) != 0; }
+inline int ANT_isasciiwhitespace(int c) { return (ANT_to_ctype(c) & (ANT_CTYPE_ISALNUMPUNCZERO | ANT_CTYPE_HIGH_BIT)) == 0; }
 inline int ANT_islowernum(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_ISLOWERNUM) != 0; }
 inline int ANT_isheadchar(int c) { return (ANT_to_ctype(c) & ANT_CTYPE_HEADCHAR) != 0; }
 inline int ANT_ispuncheadchar(int c) { return (ANT_to_ctype(c) & (ANT_CTYPE_HEADCHAR | ANT_CTYPE_PUNC)) != 0; }
