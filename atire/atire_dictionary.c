@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../source/maths.h"
-#include "../source/memory.h"
-#include "../source/search_engine.h"
-#include "../source/btree_iterator.h"
-#include "../source/search_engine_btree_leaf.h"
-#include "../source/phonetic_double_metaphone.h"
-#include "../source/phonetic_soundex.h"
-#include "../source/impact_header.h"
+#include "maths.h"
+#include "memory.h"
+#include "search_engine.h"
+#include "btree_iterator.h"
+#include "search_engine_btree_leaf.h"
+#include "phonetic_double_metaphone.h"
+#include "phonetic_soundex.h"
+#include "impact_header.h"
 
 #ifndef FALSE
 	#define FALSE 0
@@ -39,23 +39,25 @@ int check_postings = 1;
 	long long process(ANT_compression_factory *factory, uint32_t quantum_count, ANT_compressable_integer *impact_header, ANT_compressable_integer *buffer, unsigned char *postings_list, long long trim_point, long verbose, long one_postings_per_line)
 	{
 	long long docid, max_docid, sum;
-	ANT_compressable_integer *current, *end, *end_offset;
+	ANT_compressable_integer *current, *end;
 	ANT_compressable_integer *impact_value_ptr, *doc_count_ptr, *impact_offset_ptr;
+	ANT_compressable_integer *impact_offset_start;
 
 	max_docid = sum = 0;
 	impact_value_ptr = impact_header;
 	doc_count_ptr = impact_header + quantum_count;
-	end_offset = impact_header + quantum_count * 3;
+	impact_offset_start = impact_offset_ptr = impact_header + quantum_count * 2;
 
-	for (impact_offset_ptr = (impact_header + quantum_count * 2); impact_offset_ptr < end_offset; impact_value_ptr++, doc_count_ptr++, impact_offset_ptr++)
+	while (doc_count_ptr < impact_offset_start)
 		{
-		//printf("*doc_count: %lld, impact_offset: %lld\n", (long long)*doc_count_ptr, (long long)*impact_offset_ptr);
 		factory->decompress(buffer, postings_list + *impact_offset_ptr, *doc_count_ptr);
 
+		docid = -1;
+		current = buffer;
 		end = buffer + *doc_count_ptr;
-		for (current = buffer, docid = -1; current < end; current++)
+		while (current < end)
 			{
-			docid += *current;
+			docid += *current++;
 			if (verbose)
 				if (one_postings_per_line)
 					printf("\n<%lld,%lld>", docid, (long long)*impact_value_ptr);
@@ -69,6 +71,10 @@ int check_postings = 1;
 		sum += *doc_count_ptr;
 		if (sum >= trim_point)
 			break;
+
+		impact_value_ptr++;
+		impact_offset_ptr++;
+		doc_count_ptr++;
 		}
 
 	return max_docid;
@@ -129,11 +135,11 @@ int main(int argc, char *argv[])
 ANT_stem *meta = NULL;
 ANT_compressable_integer *raw;
 long long max = 0;
-long long postings_list_size = 100 * 1024 * 1024;
-long long raw_list_size = 100 * 1024 * 1024;
+long long postings_list_size;
+long long raw_list_size;
 long long global_trim;
 unsigned char *postings_list = NULL;
-long param, param_filenames = 0, filename = 0;
+long param, filename = 0;
 char *term, *first_term, *last_term;
 ANT_search_engine_btree_leaf leaf;
 ANT_compression_factory factory;
@@ -141,26 +147,9 @@ long metaphone, print_wide, print_postings, one_postings_per_line;
 ANT_memory memory;
 ANT_search_engine search_engine(&memory);
 
-for (param = 1; param < argc; param++)
-	if (*argv[param] != '-')
-		filename = param;
-search_engine.open(filename == 0 ? "index.aspt" : argv[1]);
-
-global_trim = search_engine.get_global_trim_postings_k();
-ANT_btree_iterator iterator(&search_engine);
-
-#ifdef IMPACT_HEADER
-	quantum_count_type the_quantum_count;
-	beginning_of_the_postings_type beginning_of_the_postings;
-	long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
-	long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
-	ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
-#endif
-
 first_term = last_term = NULL;
 print_postings = print_wide = metaphone = one_postings_per_line = FALSE;
 
-param_filenames = 0;
 for (param = 1; param < argc; param++)
 	{
 	if (strcmp(argv[param], "-s") == 0)
@@ -191,19 +180,40 @@ for (param = 1; param < argc; param++)
 		about(argv[0]);
 	else
 		{
-		param_filenames++;
-		if (param_filenames > 1)
+		// already have been given an index filename
+		if (filename != 0)
 			about(argv[0]);
+		filename = param;
 		}
 	}
 
+search_engine.open(filename == 0 ? "index.aspt" : argv[filename]);
+
+global_trim = search_engine.get_global_trim_postings_k();
+ANT_btree_iterator iterator(&search_engine);
+
+#ifdef IMPACT_HEADER
+	quantum_count_type the_quantum_count;
+	beginning_of_the_postings_type beginning_of_the_postings;
+	long long impact_header_info_size = ANT_impact_header::INFO_SIZE;
+	long long impact_header_size = ANT_impact_header::NUM_OF_QUANTUMS * sizeof(ANT_compressable_integer) * 3;
+	ANT_compressable_integer *impact_header_buffer = (ANT_compressable_integer *)malloc(impact_header_size);
+#endif
+
+postings_list_size = search_engine.get_postings_buffer_length();
+#ifdef IMPACT_HEADER
+	raw_list_size = sizeof(*raw) * (search_engine.document_count() + ANT_COMPRESSION_FACTORY_END_PADDING);
+#else
+	raw_list_size = sizeof(*raw) * (512 + search_engine.document_count() + ANT_COMPRESSION_FACTORY_END_PADDING);
+#endif
+
 postings_list = (unsigned char *)malloc((size_t)postings_list_size);
 raw = (ANT_compressable_integer *)malloc((size_t)raw_list_size);
+
 for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 	{
 	iterator.get_postings_details(&leaf);
-	if ((last_term != NULL && strcmp(last_term, term) < 0)
-			|| (first_term != NULL && last_term == NULL && strncmp(first_term, term, strlen(first_term)) != 0))
+	if (last_term != NULL && strcmp(last_term, term) < 0)
 		break;
 	else
 		{
@@ -232,18 +242,8 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 		printf("%lld %lld", leaf.local_collection_frequency, leaf.local_document_frequency);
 		if (check_postings && *term != '~')		// ~length and others aren't encoded in the usual way
 			{
-			if (leaf.local_document_frequency > 2)
-				if (leaf.postings_length > postings_list_size)
-					{
-					postings_list_size = 2 * leaf.postings_length;
-					postings_list = (unsigned char *)realloc(postings_list, (size_t)postings_list_size);
-					}
 			postings_list = search_engine.get_postings(&leaf, postings_list);
-			if (leaf.impacted_length > raw_list_size)
-				{
-				raw_list_size = 2 * leaf.impacted_length;
-				raw = (ANT_compressable_integer *)realloc(raw, (size_t)raw_list_size);
-				}
+
 #ifdef IMPACT_HEADER
 			// decompress the header
 			the_quantum_count = ANT_impact_header::get_quantum_count(postings_list);
