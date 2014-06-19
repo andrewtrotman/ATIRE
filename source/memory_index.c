@@ -242,6 +242,30 @@ return node;
 }
 
 /*
+	ANT_MEMORY_INDEX::ADD_TERM()
+	----------------------------
+	This does not add postings, should not be used
+	outside of timing hash_table lookup and insertion
+*/
+ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string)
+{
+long hash_value;
+ANT_memory_index_hash_node *node;
+
+hash_value = hash(string);
+
+if (hash_table[hash_value] == NULL)
+	{
+	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL);
+	node = hash_table[hash_value];
+	}
+else
+	node = find_add_node(hash_value, string);
+
+return node;
+}
+
+/*
 	ANT_MEMORY_INDEX::REBALANCE_TREE()
 	----------------------------------
 	Uses the DSW algorithm to rebalance the tree at a given hash value

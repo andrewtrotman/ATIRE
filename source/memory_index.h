@@ -214,6 +214,7 @@ public:
 	void vine_to_tree(ANT_memory_index_hash_node *root, int size);
 
 	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string, long long docno, long term_frequency = 1);
+	virtual ANT_memory_index_hash_node *add_term(ANT_string_pair *string);
 	virtual long long get_memory_usage(void) { return dictionary_memory->bytes_used() + postings_memory->bytes_used(); }
 	virtual void set_document_length(long long docno, long long length) { set_document_detail(&squiggle_length, length); largest_docno = docno; }
 	virtual void set_puurula_length(double length) { set_document_detail(&squiggle_puurula_length, (long long)(length * 100)); /* accurate to 2 decimal places*/ } 
