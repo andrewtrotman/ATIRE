@@ -68,11 +68,11 @@ int main(int argc, char **argv)
 ANT_memory_index *index = new ANT_memory_index(NULL);
 #endif
 
-#define KB(x) (1024 * x)
-#define MB(x) (1024 * KB(x))
-#define GB(x) (1024 * MB(x))
+#define KB(x) (1024ULL * x)
+#define MB(x) (1024ULL * KB(x))
+#define GB(x) (1024ULL * MB(x))
 
-const unsigned long long BUF_SIZE = GB(50);
+const unsigned long long BUF_SIZE = GB(50ULL);
 
 char *buffer = (char *)malloc(sizeof(*buffer) * (BUF_SIZE + 1));
 char *end;
