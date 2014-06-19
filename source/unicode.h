@@ -105,7 +105,7 @@ return unicode_chartype_ASCII_table[character];
 */
 static inline ANT_UNICODE_chartype unicode_chartype_utf8(unsigned char *current, unsigned long *character, long *bytes)
 {
-if (*current < LAST_ASCII_CHAR)
+if (*current <= LAST_ASCII_CHAR)
 	{
 	*bytes = 1;
 	*character = *current;
