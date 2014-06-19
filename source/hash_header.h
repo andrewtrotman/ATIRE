@@ -6,6 +6,7 @@
 #ifndef HASH_HEADER_
 #define HASH_HEADER_
 
+#include "fundamental_types.h"
 #include "string_pair.h"
 
 extern unsigned char ANT_header_hash_encode[];
