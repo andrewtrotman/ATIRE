@@ -154,7 +154,7 @@ if (character_type == CT_LETTER)
 
 	//normalize the word into this buffer
 	buffer_pos = current_token.normalized_buf;
-	buffer_end = buffer_pos + buffer_length;
+	buffer_end = buffer_pos + sizeof(current_token.normalized_buf);
 
 	if (bytes == 1)
 		{
