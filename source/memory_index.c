@@ -1555,13 +1555,6 @@ for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 		if ((terms_in_node = serialise_all_nodes(index_file, hash_table[hash_val])) > max_terms_in_node)
 			max_terms_in_node = terms_in_node;
 		unique_terms += terms_in_node;
-#ifdef PRINT_HASH_ENTRIES
-		printf("%ld\n", terms_in_node);
-		}
-	else
-		{
-		printf("0\n");
-#endif
 		}
 
 /*
