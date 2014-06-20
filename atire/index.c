@@ -640,6 +640,7 @@ else
 		}
 
 	now = stats.start_timer();
+	goto cleanup;
 	index->serialise();
 	stats.add_disk_output_time(stats.stop_timer(now));
 	index->text_render(param_block.statistics);
@@ -661,6 +662,7 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 printf("%llu\n", ANT_string_pair::strcmp_calls);
 #endif
 
+cleanup:
 delete index;
 delete disk;
 delete parser;
