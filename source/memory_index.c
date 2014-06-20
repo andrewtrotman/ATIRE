@@ -199,19 +199,6 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 return root;
 }
 
-void ANT_memory_index::inorder(ANT_memory_index_hash_node *n, int depth)
-{
-for (int i = 0; i < depth; i++)
-	printf("| ");
-n->string.text_render();
-printf("\n");
-
-if (n->left != NULL)
-	inorder(n->left, depth+1);
-if (n->right != NULL)
-	inorder(n->right, depth+1);
-}
-
 /*
 	ANT_MEMORY_INDEX::ADD_TERM()
 	----------------------------
