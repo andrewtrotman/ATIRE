@@ -58,7 +58,6 @@ public:
 	ANT_memory_index_hash_node *hash_table[HASH_TABLE_SIZE];
 
 private:
-	unsigned long hash_table_entries[HASH_TABLE_SIZE];
 #ifdef COUNT_STRCMP_CALLS_HT
 	unsigned long strcmp_calls[HASH_TABLE_SIZE];
 #endif
@@ -154,9 +153,8 @@ private:
 #else
 	static unsigned long hash(ANT_string_pair *string) { return ANT_hash_24(string); }
 #endif
-	ANT_memory_index_hash_node *find_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string);
-	ANT_memory_index_hash_node *find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string);
-	//ANT_memory_index_hash_node *find_add_node(ANT_memory_index_hash_node *root, ANT_string_pair *string);
+	ANT_memory_index_hash_node *find_node(long hash_value, ANT_string_pair *string);
+	ANT_memory_index_hash_node *find_add_node(long hash_value, ANT_string_pair *string, long *depth);
 	void serialise_one_node(ANT_file *file, ANT_memory_index_hash_node *root);
 	long serialise_all_nodes(ANT_file *file, ANT_memory_index_hash_node *root);
 	ANT_memory_index_hash_node *new_memory_index_hash_node(ANT_string_pair *string);
@@ -228,6 +226,8 @@ public:
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
 	virtual void set_term_culling(long mode, double max_df, long df);
 	virtual short *get_frequencies(short *frequency, long long tf_cap) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
+
+	void inorder(ANT_memory_index_hash_node *n, int depth=0);
 } ;
 
 /*

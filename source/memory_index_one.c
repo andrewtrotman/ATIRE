@@ -75,7 +75,6 @@ memory->rewind();
 // in the next iteration, so set it to NULL so that it will always be malloc'd afresh
 token_as_string = NULL;
 memset(hash_table, 0, sizeof(hash_table));
-memset(hash_table_entries, 0, sizeof(hash_table_entries));
 document_length = 0;
 nodes_used = 0;
 }
@@ -119,27 +118,23 @@ return node;
 	ANT_MEMORY_INDEX_ONE::FIND_ADD_NODE()
 	-------------------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, long final_hash_value, ANT_string_pair *string)
+ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(long hash_value, long final_hash_value, ANT_string_pair *string, long *depth)
 {
 ANT_memory_index_one_node *root = hash_table[hash_value];
 long cmp;
+*depth = 1;
 
 while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
+	*depth += 1;
 	if (cmp > 0)
 		if (root->left == NULL)
-			{
-			hash_table_entries[hash_value]++;
 			return root->left = new_hash_node(string, final_hash_value);
-			}
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
-			{
-			hash_table_entries[hash_value]++;
 			return root->right = new_hash_node(string, final_hash_value);
-			}
 		else
 			root = root->right;
 	}
@@ -184,17 +179,15 @@ ANT_memory_index_one_node *ANT_memory_index_one::add(ANT_string_pair *string, lo
 ANT_memory_index_one_node *answer;
 long final_hash_value;
 long hash_value = hash(string, &final_hash_value);
+long depth = 1;
 
 if (hash_table[hash_value] == NULL)
-	{
-	hash_table_entries[hash_value]++;
 	answer = hash_table[hash_value] = new_hash_node(string, final_hash_value);
-	}
 else
-	answer = find_add_node(hash_value/*hash_table[hash_value]*/, final_hash_value, string);
+	answer = find_add_node(hash_value, final_hash_value, string, &depth);
 
 #if REBALANCE_FACTOR > 0
-if ((hash_table_entries[hash_value] % REBALANCE_FACTOR) == 0)
+if (depth >= REBALANCE_FACTOR)
 	rebalance_tree(hash_value);
 #endif
 

@@ -44,7 +44,6 @@ stop_word_removal_mode = NONE;
 stopwords = new ANT_stop_word(ANT_stop_word::NCBI);
 hashed_squiggle_length = hash(&squiggle_length);
 memset(hash_table, 0, sizeof(hash_table));
-memset(hash_table_entries, 0, sizeof(hash_table_entries));
 #ifdef COUNT_STRCMP_CALLS_HT
 memset(strcmp_calls, 0, sizeof(strcmp_calls));
 #endif
@@ -127,7 +126,7 @@ if (which_stats & STAT_COMPRESSION)
 	ANT_MEMORY_INDEX::FIND_NODE()
 	-----------------------------
 */
-ANT_memory_index_hash_node *ANT_memory_index::find_node(/*ANT_memory_index_hash_node *root*/long hash_value, ANT_string_pair *string)
+ANT_memory_index_hash_node *ANT_memory_index::find_node(long hash_value, ANT_string_pair *string)
 {
 long cmp;
 volatile ANT_memory_index_hash_node *finder = hash_table[hash_value];
@@ -165,13 +164,15 @@ return (ANT_memory_index_hash_node *)finder;
 	If the CAS fails, then some other thread created a node there instead, so we should traverse down
 	the tree.
 */
-ANT_memory_index_hash_node *ANT_memory_index::find_add_node(long hash_value/*ANT_memory_index_hash_node *root*/, ANT_string_pair *string)
+ANT_memory_index_hash_node *ANT_memory_index::find_add_node(long hash_value, ANT_string_pair *string, long *depth)
 {
 long cmp;
 ANT_memory_index_hash_node *root = hash_table[hash_value];
+*depth = 1;
 
 while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
+	*depth += 1;
 #ifdef COUNT_STRCMP_CALLS_HT
 	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
 #endif
@@ -179,7 +180,6 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		if (root->left == NULL)
 			{
 			ANT_compare_and_swap(&root->left, new_memory_index_hash_node(string), NULL);
-			hash_table_entries[hash_value]++;
 			return root->left;
 			}
 		else
@@ -188,7 +188,6 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 		if (root->right == NULL)
 			{
 			ANT_compare_and_swap(&root->right, new_memory_index_hash_node(string), NULL);
-			hash_table_entries[hash_value]++;
 			return root->right;
 			}
 		else
@@ -200,6 +199,18 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 return root;
 }
 
+void ANT_memory_index::inorder(ANT_memory_index_hash_node *n, int depth)
+{
+for (int i = 0; i < depth; i++)
+	printf("| ");
+n->string.text_render();
+printf("\n");
+
+if (n->left != NULL)
+	inorder(n->left, depth+1);
+if (n->right != NULL)
+	inorder(n->right, depth+1);
+}
 
 /*
 	ANT_MEMORY_INDEX::ADD_TERM()
@@ -207,7 +218,7 @@ return root;
 */
 ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string, long long docno, long term_frequency)
 {
-long hash_value;
+long hash_value, depth = 1;
 ANT_memory_index_hash_node *node;
 
 stats->documents = docno;
@@ -218,11 +229,11 @@ if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
 	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(string), NULL);
-	hash_table_entries[hash_value]++;
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_value, string);
+	node = find_add_node(hash_value, string, &depth);
+
 
 #ifndef PARALLEL_INDEXING_DOCUMENTS
 	/*
@@ -231,7 +242,7 @@ else
 		won't be done anywhere else.
 	*/
 	#if REBALANCE_FACTOR > 0
-		if (hash_table_entries[hash_value] % REBALANCE_FACTOR == 0)
+		if (depth >= REBALANCE_FACTOR)
 			rebalance_tree(hash_value);
 	#endif
 #endif
@@ -249,7 +260,7 @@ return node;
 */
 ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string)
 {
-long hash_value;
+long hash_value, depth = 1;
 ANT_memory_index_hash_node *node;
 
 hash_value = hash(string);
@@ -260,7 +271,7 @@ if (hash_table[hash_value] == NULL)
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_value, string);
+	node = find_add_node(hash_value, string, &depth);
 
 return node;
 }
@@ -351,7 +362,7 @@ for (int j = 0; j < size; j++)
 */
 void ANT_memory_index::set_document_detail(ANT_string_pair *measure_name, long long score, long mode)
 {
-long hash_value;
+long hash_value, depth = 1;
 ANT_memory_index_hash_node *node;
 
 hash_value = hash(measure_name);
@@ -359,11 +370,10 @@ if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
 	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
-	hash_table_entries[hash_value]++;
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_value, measure_name);
+	node = find_add_node(hash_value, measure_name, &depth);
 
 if (mode != MODE_MONOTONIC)
 	node->current_docno = -1;			// store the value rather than the diff
@@ -388,7 +398,7 @@ set_variable(&squiggle, score);
 */
 void ANT_memory_index::set_variable(ANT_string_pair *measure_name, long long score)
 {
-long hash_value;
+long hash_value, depth = 1;
 ANT_memory_index_hash_node *node;
 
 hash_value = hash(measure_name);
@@ -396,11 +406,10 @@ if (hash_table[hash_value] == NULL)
 	{
 	stats->hash_nodes++;
 	ANT_compare_and_swap(&hash_table[hash_value], new_memory_index_hash_node(measure_name), NULL);
-	hash_table_entries[hash_value]++;
 	node = hash_table[hash_value];
 	}
 else
-	node = find_add_node(hash_value, measure_name);
+	node = find_add_node(hash_value, measure_name, &depth);
 
 node->set(score);
 }
@@ -1421,7 +1430,7 @@ int32_t length_of_longest_term = 0;
 uint32_t longest_postings_size, four_byte;
 int64_t highest_df = 0;
 uint64_t file_position, terms_in_root, eight_byte;
-long terms_in_node, unique_terms = 0, max_terms_in_node = 0, hash_val, where, bytes, btree_root_size;
+long terms_in_node, unique_terms = 0, max_terms_in_node = 0, hash_val, where, bytes, btree_root_size, depth = 1;
 ANT_memory_index_hash_node **term_list, **here;
 ANT_btree_head_node *header, *current_header, *last_header;
 ANT_memory_index_hash_node *node;
@@ -1441,19 +1450,13 @@ for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
 	printf("%lu\n", strcmp_calls[i]);
 #endif
 
-#ifdef PRINT_HASH_TABLE_ENTRIES
-for (unsigned long long i = 0; i < HASH_TABLE_SIZE; i++)
-	printf("%lu\n", hash_table_entries[i]);
-exit(EXIT_SUCCESS);
-#endif
-
 allocate_decompress_buffer();
 
 /*
 	If we have the documents stored on disk then we need to store the position of the end of the final document.
 	But, only add the position if we are using an index with the documents in it.
 */
-if (find_node(/*hash_table[*/hash(&squiggle_document_offsets)/*]*/, &squiggle_document_offsets) != NULL)
+if (find_node(hash(&squiggle_document_offsets), &squiggle_document_offsets) != NULL)
 	{
 	set_document_detail(&squiggle_document_offsets, index_file->tell(), MODE_MONOTONIC);			// store the position of the end of the last document
 #ifdef IMPACT_HEADER
@@ -1494,7 +1497,7 @@ if (static_prune_point < largest_docno)
 	the relevance ranking functions
 */
 
-node = find_add_node(hashed_squiggle_length, &squiggle_length);
+node = find_add_node(hashed_squiggle_length, &squiggle_length, &depth);
 
 get_serialised_postings(node, &doc_size, &tf_size);
 document_lengths = (ANT_compressable_integer *)serialisation_memory->malloc(stats->bytes_to_quantize += ((largest_docno  + 1) * sizeof(ANT_compressable_integer)));
@@ -1565,6 +1568,13 @@ for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 		if ((terms_in_node = serialise_all_nodes(index_file, hash_table[hash_val])) > max_terms_in_node)
 			max_terms_in_node = terms_in_node;
 		unique_terms += terms_in_node;
+#ifdef PRINT_HASH_ENTRIES
+		printf("%ld\n", terms_in_node);
+		}
+	else
+		{
+		printf("0\n");
+#endif
 		}
 
 /*

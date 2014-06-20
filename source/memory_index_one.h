@@ -34,7 +34,6 @@ private:
 	static const long HASH_TABLE_SIZE = 0x100;
 
 	ANT_memory_index_one_node *hash_table[HASH_TABLE_SIZE];
-	unsigned long hash_table_entries[HASH_TABLE_SIZE];
 	ANT_memory_index_one_node dummy_root;
 
 	ANT_memory *memory;
@@ -60,7 +59,7 @@ private:
 private:
 	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string, long final_hash_value);
 	ANT_memory_index_one_node *find_node(ANT_memory_index_one_node *root, ANT_string_pair *string);
-	ANT_memory_index_one_node *find_add_node(long hash_value/*ANT_memory_index_one_node *root*/, long final_hash_value, ANT_string_pair *string);
+	ANT_memory_index_one_node *find_add_node(long hash_value, long final_hash_value, ANT_string_pair *string, long *depth);
 	long hash(ANT_string_pair *string, long *final_hash_value);
 	ANT_memory_index_one_node *add(ANT_string_pair *string, long long docno, long extra_term_frequency);
 
