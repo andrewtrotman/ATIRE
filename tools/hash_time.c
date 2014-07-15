@@ -56,6 +56,8 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Header + Num\n");
 #elif HASHER == HEADER_EXP
 	fprintf(stderr, "Header Exp\n");
+#elif HASHER == HEADER_COLLAPSE
+	fprintf(stderr, "Header Collapse\n");
 #elif HASHER == SUPERFAST
 	fprintf(stderr, "Superfast\n");
 #elif HASHER == LOOKUP3
