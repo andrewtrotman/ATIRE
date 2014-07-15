@@ -17,6 +17,28 @@ int main(int argc, char **argv)
 if (argc != 2)
 	exit(printf("Usage: %s <filename>\n", argv[0]));
 
+#ifndef HASHER
+	exit(fprintf(stderr, "No valid hasher defined!\n"));
+#elif HASHER == RANDOM
+	fprintf(stderr, "Random\n");
+#elif HASHER == RANDOM_STEP
+	fprintf(stderr, "Random step\n");
+#elif HASHER == HEADER
+	fprintf(stderr, "Header\n");
+#elif HASHER == HEADER_NUM
+	fprintf(stderr, "Header + Num\n");
+#elif HASHER == HEADER_EXP
+	fprintf(stderr, "Header Exp\n");
+#elif HASHER == HEADER_COLLAPSE
+	fprintf(stderr, "Header Collapsing\n");
+#elif HASHER == SUPERFAST
+	fprintf(stderr, "Superfast\n");
+#elif HASHER == LOOKUP3
+	fprintf(stderr, "Lookup3\n");
+#else
+	exit(fprintf(stderr, "Unknown hasher\n"));
+#endif
+
 long long number_terms;
 char **lines = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(argv[1]), &number_terms);
 long long times;
@@ -33,29 +55,11 @@ for (int j = 0; j < 3; j++)
 		hash_table[j][i] = 0;
 	}
 
-#ifndef HASHER
-	exit(fprintf(stderr, "No valid hasher defined!\n"));
-#elif HASHER == RANDOM
-	fprintf(stderr, "Random\n");
-#elif HASHER == RANDOM_STEP
-	fprintf(stderr, "Random step\n");
-#elif HASHER == HEADER
-	fprintf(stderr, "Header\n");
-#elif HASHER == HEADER_NUM
-	fprintf(stderr, "Header + Num\n");
-#elif HASHER == HEADER_EXP
-	fprintf(stderr, "Header Exp\n");
-#elif HASHER == SUPERFAST
-	fprintf(stderr, "Superfast\n");
-#elif HASHER == LOOKUP3
-	fprintf(stderr, "Lookup3\n");
-#else
-	exit(fprintf(stderr, "Unknown hasher\n"));
-#endif
-
-
 for (int line = 0; line < number_terms; line++)
 	{
+	if (ANT_isupper(lines[line][0]))
+		continue;
+
 	delete term;
 
 	space = strchr(lines[line], ' ');

@@ -313,9 +313,18 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
+#ifdef BUFFER_A
+		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
+		decompressor = new ANT_instream_bz2(&file_buffer, instream_buffer);
+#else
 		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
-		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
+#endif
+#ifdef BUFFER_B
+		instream_buffer_b = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE);
+#else
+		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE);
+#endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
 		{

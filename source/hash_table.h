@@ -16,6 +16,8 @@
 	#include "hash_header.h"
 #elif HASHER == HEADER_EXP
 	#include "hash_header_experimental.h"
+#elif HASHER == HEADER_COLLAPSE
+	#include "hash_header_collapse.h"
 #elif HASHER == SUPERFAST
 	#include "hash_superfast.h"
 #elif HASHER == LOOKUP3
@@ -86,6 +88,8 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 	return ANT_hash_header_24(string);
 #elif HASHER == HEADER_EXP
 	return ANT_hash_header_experimental_24(string);
+#elif HASHER == HEADER_COLLAPSE
+	return ANT_hash_header_collapse_24(string);
 #elif HASHER == SUPERFAST
 	return ANT_hash_superfast_24(string);
 #elif HASHER == LOOKUP3
