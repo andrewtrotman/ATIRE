@@ -40,7 +40,7 @@ ANT_stats::~ANT_stats()
 }
 
 #ifdef PRINT_TIME_NO_CONVERSION
-long long ANT_stats::print_time(char *message, long long time_taken, char *end_message) {
+long long ANT_stats::print_time(const char *message, long long time_taken, const char *end_message) {
 	char *units = "milliseconds";
 	unsigned long long milliseconds;
 
@@ -57,7 +57,7 @@ long long ANT_stats::print_time(char *message, long long time_taken, char *end_m
 	ANT_STATS::PRINT_TIME()
 	-----------------------
 */
-long long ANT_stats::print_time(char *message, long long time_taken, char *end_message)
+long long ANT_stats::print_time(const char *message, long long time_taken, const char *end_message)
 {
 char *units = "milliseconds";
 long long hours, minutes, seconds, milliseconds;

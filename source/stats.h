@@ -26,7 +26,7 @@ public:
 	long long time_to_milliseconds(long long quantums) { return (long long)(quantums / (get_clock_tick_frequency() / 1000.0)); }
 
 	long long print_elapsed_time(long spaced_out = 0);
-	long long print_time(char *message, long long time_taken, char *end_message = "");
+	long long print_time(const char *message, long long time_taken, const char *end_message = "");
 
 	long long get_clock_tick_frequency(void) { return tick_frequency; }
 
