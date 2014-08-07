@@ -194,6 +194,7 @@ while ((cmp = string->strcmp(&(root->string))) != 0)
 			root = root->right;
 	}
 #ifdef COUNT_STRCMP_CALLS_HT
+	// for when the comparison was a match, it's still a comparison
 	__sync_add_and_fetch(&strcmp_calls[hash_value], 1);
 #endif
 return root;
@@ -222,16 +223,14 @@ else
 	node = find_add_node(hash_value, string, &depth);
 
 
-#ifndef PARALLEL_INDEXING_DOCUMENTS
-	/*
-		If we aren't parallel indexing, then terms get added directly to
-		this main tree, in which case we might need to balance, as it
-		won't be done anywhere else.
-	*/
-	#if REBALANCE_FACTOR > 0
-		if (depth >= REBALANCE_FACTOR)
-			rebalance_tree(hash_value);
-	#endif
+/*
+	If we aren't parallel indexing, then terms get added directly to
+	this main tree, in which case we might need to balance, as it
+	won't be done anywhere else.
+*/
+#if REBALANCE_FACTOR > 0
+	if (depth >= REBALANCE_FACTOR)
+		rebalance_tree(hash_value);
 #endif
 
 node->add_posting(docno, term_frequency);
@@ -261,6 +260,16 @@ else
 	node = find_add_node(hash_value, string, &depth);
 
 return node;
+}
+
+void ANT_memory_index::order(ANT_memory_index_hash_node *node, long depth)
+{
+	return;
+	if (node == NULL)
+		return;
+	order(node->left, depth + 1);
+	printf("%*.*s%s\n", depth, depth, " ", node->string.str());
+	order(node->right, depth + 1);
 }
 
 /*

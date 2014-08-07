@@ -226,6 +226,8 @@ public:
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }
 	virtual void set_term_culling(long mode, double max_df, long df);
 	virtual short *get_frequencies(short *frequency, long long tf_cap) { exit(printf("cannot compute ANT_memory_index::get_frequencies()\n"));}
+
+	void order(ANT_memory_index_hash_node *node, long depth=0);
 } ;
 
 /*

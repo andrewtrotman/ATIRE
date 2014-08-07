@@ -139,6 +139,8 @@ ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_direct
 long instance;
 ANT_directory_iterator_multiple_internals *current;
 
+START;
+
 /*
 	Set up this object
 */
@@ -160,6 +162,8 @@ for (current = thread_details; current < thread_details + sources_used; current+
 	ANT_thread(bootstrap, current);
 	}
 
+END;
+
 /*
 	And then consume
 */
@@ -175,9 +179,8 @@ ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directo
 {
 long finished = FALSE;
 
-START;
-
 mutex.enter();
+START;
 	if (active_threads <= 0)
 		finished = TRUE;
 	else
@@ -191,9 +194,9 @@ mutex.enter();
 					finished = TRUE;				// all sources have dried up
 			}
 		while (!finished);
+END;
 mutex.leave();
 
-END;
 if (finished)
 	return NULL;
 else

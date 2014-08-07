@@ -33,7 +33,6 @@ inline uint64_t rdtsc()
 {
 uint32_t lo, hi;
 __asm__ __volatile__ (
-	"xorl %%eax, %%eax\n"
 	"cpuid\n"
 	"rdtsc\n"
 	: "=a" (lo), "=d" (hi)
