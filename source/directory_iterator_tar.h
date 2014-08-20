@@ -15,6 +15,9 @@
 */
 class ANT_directory_iterator_tar : public ANT_directory_iterator
 {
+public:
+	enum {FLAT, FULL, NAME};			// FLAT filenames drop the path and just keep the filename,  FULL filenames keep the path and the filename, NAME drops both the path and the extension
+
 private:
 	static const long TAR_BLOCK_SIZE = 512;
 
@@ -24,6 +27,7 @@ private:
 	unsigned char buffer[TAR_BLOCK_SIZE];
 	long long length_of_file_in_bytes;
 	long long bytes_read;
+	long filename_mode;
 
 private:
 	long detox(char *octal);
@@ -31,7 +35,7 @@ private:
 	void read_entire_file(ANT_directory_iterator_object *object);
 
 public:
-	ANT_directory_iterator_tar(ANT_instream *source, long get_file = 0) : ANT_directory_iterator("", get_file) { this->source = source; }
+	ANT_directory_iterator_tar(ANT_instream *source, long get_file = 0, long filename_mode = FULL) : ANT_directory_iterator("", get_file) { this->source = source; this->filename_mode = filename_mode; }
 	virtual ~ANT_directory_iterator_tar() {}
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);

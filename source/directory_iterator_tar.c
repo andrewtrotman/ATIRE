@@ -17,10 +17,27 @@
 */
 void ANT_directory_iterator_tar::filename(ANT_directory_iterator_object *object)
 {
+char *dot;
+
 if (header.filename_prefix[0] != '\0')
 	{
-	object->filename = new char[strlen(header.filename_prefix) + 1 + strlen(header.filename) + 1];
-	sprintf(object->filename, "%s/%s", header.filename_prefix, header.filename);
+	if (filename_mode == FLAT)
+		{
+		object->filename = new char[strlen(header.filename) + 1];
+		sprintf(object->filename, "%s", header.filename);
+		}
+	else if (filename_mode == NAME)
+		{
+		object->filename = new char[strlen(header.filename) + 1];
+		sprintf(object->filename, "%s", header.filename);
+		if ((dot = strchr(object->filename, '.')) != NULL)
+			*dot = '\0';						// remove the dot (and everything after it) from the filename
+		}
+	else
+		{
+		object->filename = new char[strlen(header.filename_prefix) + 1 + strlen(header.filename) + 1];
+		sprintf(object->filename, "%s/%s", header.filename_prefix, header.filename);
+		}
 	}
 else
 	object->filename = strnew(header.filename);
