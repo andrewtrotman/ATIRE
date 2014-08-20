@@ -1380,6 +1380,7 @@ parsed_query->NEXI_query = new_query;
 /*
 	ATIRE_API::FEEDBACK_INTERPOLATED()
 	----------------------------------
+	Puurula's ALTA algorithm
 */
 void ATIRE_API::feedback_interpolated(long long top_k)
 {

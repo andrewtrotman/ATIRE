@@ -16,7 +16,7 @@
 class ANT_directory_iterator_tar : public ANT_directory_iterator
 {
 public:
-	enum {FLAT, FULL, NAME};			// FLAT filenames drop the path and just keep the filename,  FULL filenames keep the path and the filename, NAME drops both the path and the extension
+	enum {FULL, NAME};			// FULL filenames keep the path and the filename, NAME drops both the path and the extension
 
 private:
 	static const long TAR_BLOCK_SIZE = 512;
