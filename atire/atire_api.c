@@ -431,6 +431,7 @@ if ((new_function = decode_ranking_function(function, quantization, quantization
 
 delete ranking_function;
 ranking_function = new_function;
+ranking_function_id = function;
 
 return 0;
 }
@@ -876,6 +877,7 @@ for (current_term = 0; current_term < terms_in_query; current_term++)
 */
 long ATIRE_API::process_NEXI_query(ANT_NEXI_term_ant *parse_tree, ANT_ranking_function *ranking_function, double fake_terms_in_query)
 {
+double computed_query_length;
 ANT_NEXI_term_ant *term_string;
 ANT_NEXI_term_iterator term;
 ANT_NEXI_term_ant **term_list;
@@ -910,23 +912,32 @@ for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != N
 	}
 
 /*
-	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
-*/
-search_engine->results_list->set_term_count(fake_terms_in_query <= 0 ? terms_in_query : fake_terms_in_query);
-
-/*
    Check if the number of terms exceed the limit
  */
 if (terms_in_query > MAX_ALLOWED_TERMS_IN_QUERY)
 	exit(printf("Exceeded the allowed number of %d terms per query\n", MAX_ALLOWED_TERMS_IN_QUERY));
 
 /*
-	Prepare an array structure for sorting
+	Prepare an array structure for sorting (and also compute the Puurula PYP_IDF query frequencies
 */
 term_list = new ANT_NEXI_term_ant *[terms_in_query];
 current_term = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	term_list[current_term++] = term_string;
+
+/*
+	Tell the search engine how many terms are in the query (because this is used in Language Models for ranking)
+*/
+current_term = 0;
+computed_query_length = 0;
+for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
+	if (ranking_function_id == ANT_ranking_function_factory_object::PUURULA_IDF)
+		computed_query_length += term_list[current_term++]->query_frequency = log(1.0 + term_list[current_term++]->query_frequency / terms_in_query) * log((double)get_document_count() / (double)term_string->term_details.global_document_frequency);
+	else
+		computed_query_length += 1.0;
+
+search_engine->results_list->set_term_count(fake_terms_in_query <= 0 ? computed_query_length : fake_terms_in_query);
+
 
 #ifdef TERM_LOCAL_MAX_IMPACT
 	/*

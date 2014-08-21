@@ -114,6 +114,7 @@ switch (ranking_function)
 		printf("Error: Unknown ranking function selected in ANT_ranking_function_factory::get_indexing_ranker()\n");
 	}
 return NULL;
+#pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
 /*
