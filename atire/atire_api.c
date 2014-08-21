@@ -932,7 +932,10 @@ current_term = 0;
 computed_query_length = 0;
 for (term_string = (ANT_NEXI_term_ant *)term.first(parse_tree); term_string != NULL; term_string = (ANT_NEXI_term_ant *)term.next())
 	if (ranking_function_id == ANT_ranking_function_factory_object::PUURULA_IDF)
-		computed_query_length += term_list[current_term++]->query_frequency = log(1.0 + term_list[current_term++]->query_frequency / terms_in_query) * log((double)get_document_count() / (double)term_string->term_details.global_document_frequency);
+		{
+		computed_query_length += term_list[current_term]->query_frequency = log(1.0 + term_list[current_term]->query_frequency / terms_in_query) * log((double)get_document_count() / (double)term_string->term_details.global_document_frequency);
+		current_term++;
+		}
 	else
 		computed_query_length += 1.0;
 

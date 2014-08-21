@@ -45,21 +45,21 @@ if (engine->get_postings_details("~puurula_tfidf_powerlaw_length", &term_details
 postings_buffer = engine->get_postings(&term_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
 for (current = 0; current < documents; current++)
-	discounted_document_lengths[current] = decompress_buffer[current] / 100.0;		// accurate to 2 decimal places
+	discounted_document_lengths[current] = (decompress_buffer[current] - 1) / 1000.0;		// accurate to 3 decimal places
 
 
 engine->get_postings_details("~puurula_tfidf_length", &term_details);
 postings_buffer = engine->get_postings(&term_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
 for (current = 0; current < documents; current++)
-	tfidf_discounted_document_lengths[current] = decompress_buffer[current] / 100.0;	// accurate to 2 decimal places
+	tfidf_discounted_document_lengths[current] = (decompress_buffer[current] - 1) / 1000.0;	// accurate to 3 decimal places
 
 
 engine->get_postings_details("~unique_terms_in_document", &term_details);
 postings_buffer = engine->get_postings(&term_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
 for (current = 0; current < documents; current++)
-	unique_terms_in_document[current] = decompress_buffer[current];
+	unique_terms_in_document[current] = decompress_buffer[current] - 1;
 }
 
 #ifdef IMPACT_HEADER
