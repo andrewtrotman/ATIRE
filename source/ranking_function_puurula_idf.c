@@ -84,7 +84,7 @@ while (current < quantum_parameters->quantum_end)
 	docid += *current++;
 
  	tf = quantum_parameters->tf * quantum_parameters->prescalar;
- 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+ 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);		// L0 norm version
  	tf = max(tf - g * pow(tf, g), 0);
 
  	rsv = query_occurences * log((tf * quantum_parameters->prescalar * (double)unique_terms_in_collection) / u + 1.0);
@@ -124,7 +124,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		docid += *current++;
 
 		tf = *impact_header->impact_value_ptr * prescalar;
-	 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)term_details->global_document_frequency);
+	 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)term_details->global_document_frequency);	// L0 norm version
 	 	tf = max(tf - g * pow(tf, g), 0);
 
 	 	rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
