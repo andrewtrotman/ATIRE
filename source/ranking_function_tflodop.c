@@ -38,6 +38,7 @@ ANT_ranking_function_tflodop::ANT_ranking_function_tflodop(ANT_search_engine *en
 {
 this->b = b;
 this->delta = delta;
+printf("using TFlodop with b=%f and delta=%f\n", b, delta);
 }
 
 /*
@@ -53,7 +54,7 @@ this->delta = delta;
 #ifdef IMPACT_HEADER
 /*
 	ANT_RANKING_FUNCTION_TFLODOP::RELEVANCE_RANK_ONE_QUANTUM()
-	--------------------------------------------------------
+	----------------------------------------------------------
 */
 void ANT_ranking_function_tflodop::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
@@ -61,7 +62,7 @@ exit(printf("Cannot compute ANT_RANKING_FUNCTION_TFLODOP quantum at a time (at t
 }
 /*
 	ANT_RANKING_FUNCTION_TFLODOP::RELEVANCE_RANK_TOP_K()
-	--------------------------------------------------
+	----------------------------------------------------
 */
 void ANT_ranking_function_tflodop::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_impact_header *impact_header, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
@@ -104,7 +105,7 @@ void ANT_ranking_function_tflodop::relevance_rank_top_k(ANT_search_engine_result
 
 /*
 	ANT_RANKING_FUNCTION_TFLODOP::RANK()
-	----------------------------------
+	------------------------------------
 */
 double ANT_ranking_function_tflodop::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
 {
