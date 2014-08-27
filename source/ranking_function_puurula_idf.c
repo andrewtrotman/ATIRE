@@ -70,33 +70,7 @@ for (current = 0; current < documents; current++)
 */
 void ANT_ranking_function_puurula_idf::relevance_rank_one_quantum(ANT_ranking_function_quantum_parameters *quantum_parameters)
 {
-long long docid;
-double rsv, tf, query_length, query_occurences, prior;
-ANT_compressable_integer *current;
-
-query_length = quantum_parameters->accumulator->get_term_count();
-query_occurences = quantum_parameters->query_frequency;				// this has already been transformed by the TFxIDF equation.
-
-docid = -1;
-current = quantum_parameters->the_quantum;
-while (current < quantum_parameters->quantum_end)
-	{
-	docid += *current++;
-
- 	tf = quantum_parameters->tf * quantum_parameters->prescalar;
- 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);		// L0 norm version
- 	tf = max(tf - g * pow(tf, g), 0);
-
- 	rsv = query_occurences * log((tf * quantum_parameters->prescalar * (double)unique_terms_in_collection) / u + 1.0);
-
-	if (quantum_parameters->accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
-		{
-		prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)tfidf_discounted_document_lengths[(size_t)docid] + u));
-		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * (query_length * prior + rsv), maximum_collection_rsv, minimum_collection_rsv));
-		}
-	else
-		quantum_parameters->accumulator->add_rsv(docid, quantize(quantum_parameters->postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
-	}
+exit(printf("Cannot use lmptfidf and quantum processing (at the moment)\n"));
 }
 
 /*
@@ -123,19 +97,23 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		{
 		docid += *current++;
 
-		tf = *impact_header->impact_value_ptr * prescalar;
+		tf = *impact_header->impact_value_ptr;
 	 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)term_details->global_document_frequency);	// L0 norm version
 	 	tf = max(tf - g * pow(tf, g), 0);
 
-	 	rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
 
-		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		if (tf != 0)
 			{
-			prior = log(1.0 - discounted_document_lengths[(size_t)docid] / (tfidf_discounted_document_lengths[(size_t)docid] + u));
-			accumulator->add_rsv(docid, quantize(postscalar * (query_length * prior + rsv), maximum_collection_rsv, minimum_collection_rsv));
+		 	rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
+
+			if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+				{
+				prior = log(1.0 - discounted_document_lengths[(size_t)docid] / (tfidf_discounted_document_lengths[(size_t)docid] + u));
+				accumulator->add_rsv(docid, quantize(query_length * prior + rsv, maximum_collection_rsv, minimum_collection_rsv));
+				}
+			else
+				accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 			}
-		else
-			accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;
 	impact_header->impact_value_ptr++;

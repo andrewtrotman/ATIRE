@@ -4,7 +4,7 @@
 	See 
 		A. Puurula. Cumulative Progress in Language Models for Information Retrieval. Australasian Language Technology Workshop, 2013
 */
-#include <math.h>
+#include "maths.h"
 #include "search_engine.h"
 #include "pragma.h"
 #include "ranking_function_puurula.h"
@@ -113,10 +113,11 @@ impact_header->doc_count_ptr = impact_header->doc_count_start;
 current = impact_ordering;
 while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	{
-	tf = *impact_header->impact_value_ptr * prescalar;
+	tf = *impact_header->impact_value_ptr;
 	tf = max(tf - g * pow(tf, g), 0);
 																										
-	rsv = query_occurences * log((tf * prescalar * collection_length_in_terms) / (u * cf) + 1.0);
+//	rsv = query_occurences * log((tf * collection_length_in_terms) / (u * cf) + 1.0);
+	rsv = query_occurences * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 
 	docid = -1;
 	end = current + *impact_header->doc_count_ptr;
@@ -126,10 +127,10 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
 			{
 	 		prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
-			accumulator->add_rsv(docid, quantize(postscalar * (query_length * prior + rsv), maximum_collection_rsv, minimum_collection_rsv));
+			accumulator->add_rsv(docid, quantize(query_length * prior + rsv, maximum_collection_rsv, minimum_collection_rsv));
 			}
 		else
-			accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+			accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;
 	impact_header->impact_value_ptr++;
@@ -147,41 +148,44 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 */
 void ANT_ranking_function_puurula::relevance_rank_top_k(ANT_search_engine_result *accumulator, ANT_search_engine_btree_leaf *term_details, ANT_compressable_integer *impact_ordering, long long trim_point, double prescalar, double postscalar, double query_frequency)
 {
-long long docid;
-double rsv, tf, cf, query_length, query_occurences, prior;
-ANT_compressable_integer *current, *end;
+exit(printf("Cannot use this ranking function with this query processing strategy\n"));
+/*
+	long long docid;
+	double rsv, tf, cf, query_length, query_occurences, prior;
+	ANT_compressable_integer *current, *end;
 
-current = impact_ordering;
-end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
+	current = impact_ordering;
+	end = impact_ordering + (term_details->local_document_frequency >= trim_point ? trim_point : term_details->local_document_frequency);
 
-query_length = accumulator->get_term_count();
-query_occurences = query_frequency;
+	query_length = accumulator->get_term_count();
+	query_occurences = query_frequency;
 
-cf = (double)term_details->global_collection_frequency;
+	cf = (double)term_details->global_collection_frequency;
 
-while (current < end)
-	{
-	end += 2;		// account for the impact_order and the terminator
-	tf = *current++;
-	tf = max(tf - g * pow(tf, g), 0);
-
-	rsv = query_occurences * log((tf * prescalar * collection_length_in_terms) / (u * cf) + 1.0);
-
-	docid = -1;
-	while (*current != 0)
+	while (current < end)
 		{
-		docid += *current++;
+		end += 2;		// account for the impact_order and the terminator
+		tf = *current++;
+		tf = max(tf - g * pow(tf, g), 0);
 
-		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		rsv = query_occurences * log((tf * prescalar * collection_length_in_terms) / (u * cf) + 1.0);
+
+		docid = -1;
+		while (*current != 0)
 			{
-	 		prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
-			accumulator->add_rsv(docid, quantize(postscalar * (query_length * prior + rsv), maximum_collection_rsv, minimum_collection_rsv));
+			docid += *current++;
+
+			if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+				{
+		 		prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
+				accumulator->add_rsv(docid, quantize(postscalar * (query_length * prior + rsv), maximum_collection_rsv, minimum_collection_rsv));
+				}
+			else
+				accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
 			}
-		else
-			accumulator->add_rsv(docid, quantize(postscalar * rsv, maximum_collection_rsv, minimum_collection_rsv));
+		current++;		// skip over the zero
 		}
-	current++;		// skip over the zero
-	}
+*/
 }
 #endif
 
