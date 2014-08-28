@@ -102,18 +102,15 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	 	tf = max(tf - g * pow(tf, g), 0);
 
 
-		if (tf != 0)
-			{
-		 	rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
+	 	rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
 
-			if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
-				{
-				prior = log(1.0 - discounted_document_lengths[(size_t)docid] / (tfidf_discounted_document_lengths[(size_t)docid] + u));
-				accumulator->add_rsv(docid, quantize(query_length * prior + rsv, maximum_collection_rsv, minimum_collection_rsv));
-				}
-			else
-				accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
+		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+			{
+			prior = log(1.0 - discounted_document_lengths[(size_t)docid] / (tfidf_discounted_document_lengths[(size_t)docid] + u));
+			accumulator->add_rsv(docid, quantize(query_length * prior + rsv, maximum_collection_rsv, minimum_collection_rsv));
 			}
+		else
+			accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;
 	impact_header->impact_value_ptr++;
