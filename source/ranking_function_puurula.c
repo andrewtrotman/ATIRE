@@ -144,9 +144,9 @@ double ANT_ranking_function_puurula::score_one_document(ANT_compressable_integer
 double prior, rsv, cf, tf = term_frequency;
 
 tf = max(tf - g * pow(tf, g), 0);
-cf = (double)collection_frequency;
+cf = collection_frequency;
 
-rsv = query_frequency * log((tf * collection_length_in_terms) / (u * cf) + 1.0);
+rsv = query_frequency	 * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
 
 return rsv + prior;
