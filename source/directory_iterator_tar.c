@@ -18,7 +18,7 @@ long ANT_directory_iterator_tar::tid = 0;
 	ANT_DIRECTORY_ITERATOR_TAR::ANT_DIRECTORY_ITERATOR_TAR()
 	--------------------------------------------------------
 */
-ANT_directory_iterator_tar::ANT_directory_iterator_tar(ANT_instream *source, long get_file) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_tar::ANT_directory_iterator_tar(ANT_instream *source, long get_file, long filename_mode) : ANT_directory_iterator("", get_file)
 {
 this->source = source;
 this->filename_mode = filename_mode;
