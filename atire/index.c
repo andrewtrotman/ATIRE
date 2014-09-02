@@ -308,7 +308,7 @@ for (param = first_param; param < argc; param++)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
-		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
@@ -321,9 +321,9 @@ for (param = first_param; param < argc; param++)
 #endif
 #ifdef BUFFER_B
 		instream_buffer_b = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 #else
-		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 #endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
@@ -337,9 +337,9 @@ for (param = first_param; param < argc; param++)
 #endif
 #ifdef BUFFER_B
 		instream_buffer_b = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 #else
-		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 #endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_LZO)
@@ -347,7 +347,7 @@ for (param = first_param; param < argc; param++)
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_lzo(&file_buffer, file_stream);
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::WARC_GZ)
 		{

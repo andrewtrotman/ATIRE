@@ -10,6 +10,7 @@
 #include "pragma.h"
 #include "ctypes.h"
 #include "directory_iterator_tar.h"
+#include "maths.h"
 
 long ANT_directory_iterator_tar::tid = 0;
 
@@ -19,7 +20,8 @@ long ANT_directory_iterator_tar::tid = 0;
 */
 ANT_directory_iterator_tar::ANT_directory_iterator_tar(ANT_instream *source, long get_file) : ANT_directory_iterator("", get_file)
 {
-	this->source = source;
+this->source = source;
+this->filename_mode = filename_mode;
 
 message = new char[50];
 sprintf(message, "ANT_directory_iterator_tar %ld ", ANT_directory_iterator_tar::tid++);
@@ -31,13 +33,26 @@ sprintf(message, "ANT_directory_iterator_tar %ld ", ANT_directory_iterator_tar::
 */
 void ANT_directory_iterator_tar::filename(ANT_directory_iterator_object *object)
 {
-if (header.filename_prefix[0] != '\0')
+char *dot, *slash;
+
+if (filename_mode == FULL)
 	{
-	object->filename = new char[strlen(header.filename_prefix) + 1 + strlen(header.filename) + 1];
-	sprintf(object->filename, "%s/%s", header.filename_prefix, header.filename);
+	if (header.filename_prefix[0] != '\0')
+		{
+		object->filename = new char[strlen(header.filename_prefix) + 1 + strlen(header.filename) + 1];
+		sprintf(object->filename, "%s/%s", header.filename_prefix, header.filename);
+		}
+	else
+		object->filename = strnew(header.filename);
 	}
-else
-	object->filename = strnew(header.filename);
+else			// filename_mode == NAME
+	{
+	object->filename = new char[strlen(header.filename) + 1];
+	slash = ANT_max(strrchr(header.filename, '/'), strrchr(header.filename, '\\'));
+	sprintf(object->filename, "%s", slash == NULL ? header.filename : slash + 1);
+	if ((dot = strchr(object->filename, '.')) != NULL)
+		*dot = '\0';						// remove the dot (and everything after it) from the filename
+	}
 }
 
 /*

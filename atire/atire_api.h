@@ -69,6 +69,7 @@ private:
 	ANT_query *parsed_query;				// the parsed query
 	ANT_search_engine *search_engine;		// the search engine itself
 	ANT_ranking_function *ranking_function;	// the ranking function to use (default is the perameterless Divergence From Randomness)
+	long long ranking_function_id;			// ID of the ranking funciton (so its possible to check it later)
 	ANT_stemmer *stemmer;					// stemming function to use
 	ANT_relevance_feedback *more_like_term_chooser;	// used to choose terms for "more like this"
 	ANT_relevance_feedback *feedbacker;		// relevance feedback algorithm to use (NULL = none)
