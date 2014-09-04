@@ -1075,6 +1075,9 @@ long docid = -1;
 ANT_compressable_integer *current_docid, *end;
 long unique_terms = 0;
 long long doc_size, tf_size;
+unsigned long first_char;
+long bytes_taken;
+ANT_UNICODE_chartype token_type;
 
 /*
 	What is the max from the children of this node?
@@ -1087,7 +1090,8 @@ if (root->left != NULL)
 /*
 	Add one for each term containing a non-zero TF for the given term
 */
-if (root->string[0] != '~')		// ignore "special" terms
+token_type = unicode_chartype_utf8((unsigned char *)root->string.string(), &first_char, &bytes_taken);
+if ((token_type == CT_LETTER && !utf8_isupper(first_char)) || token_type == CT_NUMBER || token_type == CT_CHINESE)		// ignore "special" terms
 	{
 	unique_terms++;
 	get_serialised_postings(root, &doc_size, &tf_size);
