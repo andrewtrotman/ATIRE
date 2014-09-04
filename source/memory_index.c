@@ -27,6 +27,7 @@
 #include "stop_word.h"
 #include "fence.h"
 #include "ranking_function_factory.h"
+#include "unicode.h"
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
@@ -1110,6 +1111,9 @@ long docid;
 unsigned short *current_tf, *end;
 ANT_compressable_integer *current_docid;
 double discounted_tf, tf, unique_terms_in_document;
+unsigned long first_char;
+long bytes_taken;
+ANT_UNICODE_chartype token_type;
 
 /*
 	What is the max from the children of this node?
@@ -1122,7 +1126,8 @@ if (root->left != NULL)
 /*
 	Now we decompress and compute the Puurula IDF-based length vector component from this term
 */
-if (root->string[0] != '~')		// ignore "special" terms
+token_type = unicode_chartype_utf8((unsigned char *)root->string.string(), &first_char, &bytes_taken);
+if ((token_type == CT_LETTER && !utf8_isupper(first_char)) || token_type == CT_NUMBER || token_type == CT_CHINESE)		// ignore "special" terms
 	{
 	/*
 		Get the postings lists (docids and tf scores) for the current node
