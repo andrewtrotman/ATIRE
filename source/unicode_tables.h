@@ -8,10 +8,7 @@
 
 extern const char * ANT_UNICODE_chartype_string[7];
 
-enum ANT_UNICODE_chartype {
-	CT_LETTER = 0, CT_NUMBER = 1, CT_PUNCTUATION = 2, CT_SEPARATOR = 3, CT_OTHER = 4, CT_MARK = 5, CT_ZERO = 6,
-	CT_CHINESE = 128
-};
+enum ANT_UNICODE_chartype { CT_LETTER = 0, CT_NUMBER = 1, CT_PUNCTUATION = 2, CT_SEPARATOR = 3, CT_OTHER = 4, CT_MARK = 5, CT_ZERO = 6, CT_CHINESE = 128 };
 
 /* A UTF codepoint could decompose into this many Unicode characters through Unicode
  * decomposition, at most.
