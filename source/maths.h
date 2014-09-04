@@ -265,13 +265,12 @@ static inline double ANT_bisection_method(double x0, double x1, double (*functio
 {
 static const double ESP = 0.001;
 int i = 1;
-double x2, f1, f2, f0;
+double x2, f2, f0;
 
 do
 	{
 	x2 = (x0 + x1) / 2;
 	f0 = function(x0, function_parameter);
-	f1 = function(x1, function_parameter);
 	f2 = function(x2, function_parameter);
 	if (f0 * f2 < 0)
 		x1 = x2;

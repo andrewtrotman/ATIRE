@@ -89,7 +89,6 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	tf = *impact_header->impact_value_ptr;
 	tf = max(tf - g * pow(tf, g), 0);
 
-//	rsv = query_occurences * log((tf * collection_length_in_terms) / (u * cf) + 1.0);
 	rsv = query_occurences * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 
 	docid = -1;
@@ -146,7 +145,7 @@ double prior, rsv, cf, tf = term_frequency;
 tf = max(tf - g * pow(tf, g), 0);
 cf = collection_frequency;
 
-rsv = query_frequency	 * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
+rsv = query_frequency * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
 
 return rsv + prior;
