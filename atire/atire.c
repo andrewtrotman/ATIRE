@@ -134,8 +134,6 @@ double *evaluations;
 if (params->query_stopping != ANT_ANT_param_block::NONE)
 	stop_query(query, params->query_stopping);
 
-printf("\n\nQUERY:[%s]\n\n\n", query);
-
 /*
 	Search
 */
