@@ -53,6 +53,7 @@ file_or_memory = INDEX_IN_FILE;
 focussing_algorithm = NONE;
 feedbacker = NONE;
 query_type = ATIRE_API::QUERY_NEXI;
+query_stopping = NONE;
 feedback_documents = 17;
 feedback_terms = 5;
 feedback_lambda = 0.5;
@@ -130,13 +131,14 @@ ANT_indexer_param_block_stem::help(TRUE);		// stemmers
 
 puts("QUERY TYPE");
 puts("----------");
-puts("-Q[nbt][-rmT][NI][wW][R]Query type");
+puts("-Q[s][nbt][-rmT][NI][wW][R]Query type");
 puts("  n             NEXI [default]");
 puts("  b             Boolean");
 puts("  N:<t><n><d>   NIST (TREC) query file (from trec.nist.gov) <t>itle, <n>arrative, <d>escription [default=t]");
 puts("  I:<t><c><n><d>INEX query file (from inex.otago.ac.nz) <t>itle, <c>astitle, <n>arrative, <d>escription [default=t]");
+puts("  s:<n><p><0><s><a>Stopword the query: <p>uurula's 988 list, <n>cbi 313 list, <0>numbers, or <s>hort (>=2) words, <a>tire extensions [default=false]");
 puts("  t:<w>:<d>:<f> TopSig index of width <w> bits, density <d>%, and globalstats <f>");
-puts("  -             no relevance feedback [default]");
+puts("  -             No relevance feedback [default]");
 puts("  r:<d>:<t>     Rocchio blind relevance feedback by analysing <d> top documents and extracting <t> terms [default d=17 t=5]");
 puts("  m:<d>:<l>     Relevance Model feedback (Puurula ALATA paper) using top <d> documents and lambda=l [default d=17 l=0.5]");
 puts("  R<ranker>     Use <ranker> as the relevance feedback ranking function (<ranker> is a valid RANKING FUNCTION, excludes pregen)");
@@ -358,6 +360,41 @@ do
 	done = FALSE;
 	switch (*which)
 		{
+		case 's':
+			which++;
+			if (*which != ':')
+				exit(printf("':' expected in stop word selection parameter\n"));
+
+			query_stopping = NONE;
+			for (which++; *which != '\0'; which++)
+				{
+				switch (*which)
+					{
+					case '0':
+						query_stopping |= STOPWORDS_NUMBERS;
+						break;
+					case 's':
+						query_stopping |= STOPWORDS_SHORT;
+						break;
+					case 'n':
+						query_stopping |= STOPWORDS_NCBI;
+						break;
+					case 'p':
+						query_stopping |= STOPWORDS_PUURULA;
+						break;
+					case 'a':
+						query_stopping |= STOPWORDS_ATIRE;
+						break;
+					default:
+						exit(printf("Unknown stopword parameter:'%c'\n", *which));
+					}
+				}
+			if ((query_stopping & STOPWORDS_NCBI) && (query_stopping & STOPWORDS_PUURULA))
+				exit(printf("Can't use both the NCBI and Puurula stop word list, choose one or the other\n"));
+			if ((query_stopping & STOPWORDS_ATIRE) != 0 && (query_stopping & (STOPWORDS_PUURULA | STOPWORDS_NCBI)) == 0)
+				exit(printf("The ATIRE ammendmenst must be used with either the NCBI or Puurula stop word list\n"));
+			done = true;
+			break;
 		case 'n':
 			query_type &= ~perform_query_mask;
 			query_type |= ATIRE_API::QUERY_NEXI;

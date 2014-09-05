@@ -19,44 +19,6 @@
 
 using namespace std;
 
-static const char *new_stop_words[] =
-	{
-//	"alternative",				 Needed for TREC topic 84
-	"arguments",
-	"can",
-	"current",
-	"dangers",
-	"data",
-	"description",
-	"developments",
-	"document",
-	"documents",
-	"done",
-	"discuss",
-	"discusses",
-	"efforts",
-	"enumerate",
-	"examples",
-	"help",
-	"ideas",
-	"identify",
-	"inform",
-	"information",
-	"instances",
-	"latest",
-	"method",
-	"narrative",
-	"occasions",
-	"problems",
-	"provide",
-	"relevant",
-	"report",
-	"reports",
-	"state",
-	"topic",
-	NULL
-	} ;
-
 /*
 	ANT_CHANNEL_TREC::ANT_CHANNEL_TREC()
 	------------------------------------
@@ -64,7 +26,6 @@ static const char *new_stop_words[] =
 */
 ANT_channel_trec::ANT_channel_trec(ANT_channel *in, char *taglist)
 {
-stopper.addstop((const char **)new_stop_words);
 tag = strnew(taglist);
 in_channel = in;
 
@@ -117,23 +78,17 @@ ostringstream stopped_query;
 raw_query << ends;
 from = strnew(strlower((char *)raw_query.str().c_str()));
 for (ch = from; *ch != '\0'; ch++)
-	if (ANT_isspace(*ch))
+	{
+	if (!ANT_isalnum(*ch))
 		*ch = ' ';
+	else
+		*ch = ANT_tolower(*ch);
+	}
 
 strip_space_inplace(from);
 
-stopped_query << number;
-for (ch = strtok(from, SEPERATORS); ch != NULL; ch = strtok(NULL, SEPERATORS))
-	{
-	if (!stopper.isstop(ch))
-		if (strlen(ch) > 2)			// stop words 2 characters or less
-			if (!isdigit(*ch))		// doesn't contain a number
-				stopped_query << ' ' << ch;
-	}
-stopped_query << ends;
+stopped_query << number << ' ' << from << ends;
 delete [] from;
-
-//printf("[%s]\n", (char *)stopped_query.str().c_str());
 
 return strnew((char *)stopped_query.str().c_str());
 }
