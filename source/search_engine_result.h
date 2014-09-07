@@ -27,15 +27,16 @@ friend class ANT_search_engine;
 friend class ANT_search_engine_result_iterator;
 
 private:
+	long long top_k;
+	long long documents;
+
 public:			// remove this line later
 	ANT_search_engine_accumulator *accumulator;
 	ANT_search_engine_accumulator **accumulator_pointers;
-	long long documents;
 	long long results_list_length;
 	double term_count;			// number of terms in the query (which might be fracitonal for RM3 and Language Models)
 	void set_term_count(double terms) { term_count = terms; }
 	double get_term_count(void) { return term_count; }
-	long long top_k;
 	ANT_search_engine_accumulator::ANT_accumulator_t min_in_top_k;
 
 	ANT_heap<ANT_search_engine_accumulator *, ANT_search_engine_accumulator::compare> *heapk;
@@ -235,35 +236,53 @@ public:
 
 	init_partial_accumulators(index);
 
-	if (results_list_length < top_k)
+
+	if (top_k == documents)
 		{
 		/*
-			We haven't got enough to worry about the heap yet, so just plonk it in
+			In this case we're searching to completion so we don't need any of the heap maintenance code
 		*/
 		old_value = which->get_rsv();
 		which->add_rsv(score * pregen_ratio);
 
 		if (old_value == pregen_scores[index].get_rsv())
 			accumulator_pointers[results_list_length++] = which;
-		if (results_list_length == top_k)
-			heapk->build_min_heap();
-		}
-	else if (cmp(which, accumulator_pointers[0]) >= 0)
-		{
-		/*
-			We were already in the heap, so update
-		*/
-		which->add_rsv(score * pregen_ratio);
-		heapk->min_update(which);
 		}
 	else
 		{
 		/*
-			We weren't in the heap, but we could get put there
+			top_k search so we maintain a heap
 		*/
-		which->add_rsv(score * pregen_ratio);
-		if (cmp(which, accumulator_pointers[0]) > 0)
-			heapk->min_insert(which);
+		if (results_list_length < top_k)
+			{
+			/*
+				We haven't got enough to worry about the heap yet, so just plonk it in
+			*/
+			old_value = which->get_rsv();
+			which->add_rsv(score * pregen_ratio);
+
+			if (old_value == pregen_scores[index].get_rsv())
+				accumulator_pointers[results_list_length++] = which;
+			if (results_list_length == top_k)
+				heapk->build_min_heap();
+			}
+		else if (cmp(which, accumulator_pointers[0]) >= 0)
+			{
+			/*
+				We were already in the heap, so update
+			*/
+			which->add_rsv(score * pregen_ratio);
+			heapk->min_update(which);
+			}
+		else
+			{
+			/*
+				We weren't in the heap, but we could get put there
+			*/
+			which->add_rsv(score * pregen_ratio);
+			if (cmp(which, accumulator_pointers[0]) > 0)
+				heapk->min_insert(which);
+			}
 		}
 	}
 
