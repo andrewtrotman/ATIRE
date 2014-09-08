@@ -33,17 +33,26 @@ ANT_critical_section file_critical_section;
 	from = (unsigned char *)destination;
 	while (bytes_to_read > chunk_size)
 		{
+		#ifdef PURIFY
+			memset(from, 0, chunk_size);
+		#endif
+
 		if (ReadFile(fp, from, chunk_size, &got_in_one_read, NULL) == 0)
 			return 0;
 		bytes_to_read -= chunk_size;
 		from += chunk_size;
 		}
 	if (bytes_to_read > 0)			// catches a call to read 0 bytes 
+		{
+		#ifdef PURIFY
+			memset(from, 0, bytes_to_read);
+		#endif
 		if (ReadFile(fp, from, (DWORD)bytes_to_read, &got_in_one_read, NULL) == 0)
 			{
 //			DWORD error_code = GetLastError();			// put a break point on this in the debugger to work out what went wrong.
 			return 0;
 			}
+		}
 
 	return 1;
 	}

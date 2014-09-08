@@ -52,7 +52,9 @@ long long docid;
 double top_row, idf, rsv;
 ANT_compressable_integer *current;
 
-idf = log((double)documents / (double)quantum_parameters->term_details->global_document_frequency);
+if ((idf = log((double)documents / (double)quantum_parameters->term_details->global_document_frequency)) == 0)
+	return;			// no point in searching if rsv == 0
+
 top_row = quantum_parameters->prescalar * quantum_parameters->tf * k1_plus_1;
 docid = -1;
 current = quantum_parameters->the_quantum;
@@ -83,7 +85,8 @@ ANT_compressable_integer *current, *end;
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
-idf = log((double)documents / (double)term_details->global_document_frequency);
+if ((idf = log((double)documents / (double)term_details->global_document_frequency)) == 0)
+	return;			// no point in searching if rsv == 0
 
 /*
 	                tf(td) * (k1 + 1)
@@ -138,7 +141,8 @@ ANT_compressable_integer *current, *end;
 
 	This variant of IDF is better than log((N - n + 0.5) / (n + 0.5)) on the 70 INEX 2008 Wikipedia topics
 */
-idf = log((double)documents / (double)term_details->global_document_frequency);
+if ((idf = log((double)documents / (double)term_details->global_document_frequency)) == 0)
+	return;			// no point in searching if rsv == 0
 
 /*
 	               tf(td) * (k1 + 1)

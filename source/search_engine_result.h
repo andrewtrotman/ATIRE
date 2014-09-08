@@ -246,7 +246,13 @@ public:
 		which->add_rsv(score * pregen_ratio);
 
 		if (old_value == pregen_scores[index].get_rsv())
-			accumulator_pointers[results_list_length++] = which;
+			{
+			/*
+				If we WERE a 0 and we're NO LONGER a 0 then we've found a potentially relevant document
+			*/
+			if (which->get_rsv() != pregen_scores[index].get_rsv())
+				accumulator_pointers[results_list_length++] = which;
+			}
 		}
 	else
 		{
@@ -262,7 +268,16 @@ public:
 			which->add_rsv(score * pregen_ratio);
 
 			if (old_value == pregen_scores[index].get_rsv())
-				accumulator_pointers[results_list_length++] = which;
+				{
+				/*
+					This code will go wrong if the sum of the individual impacts is equal to zero (which is extreemly unlikely, but we'll add a check)
+				*/
+				if (which->get_rsv() != pregen_scores[index].get_rsv())
+					accumulator_pointers[results_list_length++] = which;
+				else
+					exit(printf("ERROR:  Sum of term influences is zero!\n"));
+				}
+
 			if (results_list_length == top_k)
 				heapk->build_min_heap();
 			}
