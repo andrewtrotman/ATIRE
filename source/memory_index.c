@@ -1152,7 +1152,7 @@ if ((token_type == CT_LETTER && !utf8_isupper(first_char)) || token_type == CT_N
 			{
 			unique_terms_in_document = document_lengths[docid];
 			tf = log(1.0 + tf / unique_terms_in_document) * log((double)largest_docno / (double)root->document_frequency);
-			tf_adjusted_length_vector[largest_docno + docid] += tf;
+			tf_adjusted_length_vector[docid] += tf;
 			}
 
 		for (g = 0; g < 10; g++)
@@ -1218,6 +1218,7 @@ if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
 		set_unique_term_count(unique_term_vector[current]);
 		set_puurula_tfidf_length(tf_adjusted_length_vector[current]);
 		}
+	delete [] tf_adjusted_length_vector;
 	}
 
 /*
