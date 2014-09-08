@@ -71,7 +71,6 @@ exit(printf("ANT_channel_trec::block_write not implemented (class only supports 
 */
 char *ANT_channel_trec::clean(long number, ostringstream &raw_query)
 {
-static const char *SEPERATORS = ",./;'[]!@#$%^&*()_+-=\\|<>?:{}\r\n\t \"`~";
 char *from, *ch;
 ostringstream stopped_query;
 
