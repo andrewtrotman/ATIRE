@@ -14,7 +14,7 @@
 class ANT_compression_text_factory : public ANT_compress_text
 {
 public:
-	enum {RAW, DEFLATE, BZ2, SNAPPY, TERMINAL};		// TERMINAL is a sentinal and must not be used
+	enum {NONE, DEFLATE, BZ2, SNAPPY, RAW, TERMINAL};		// TERMINAL is a sentinal and must not be used
 
 private:
 	ANT_compression_text_factory_scheme *scheme;			// array of all possible schemes
