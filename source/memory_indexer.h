@@ -23,7 +23,7 @@ class ANT_memory_indexer
 public:
 	enum { MODE_ABSOLUTE, MODE_MONOTONIC };
 
-protected:
+public:
 	static ANT_string_pair squiggle_length;
 	static ANT_string_pair *squiggle_puurula_length[];
 	static ANT_string_pair *squiggle_puurula_tfidf_powerlaw_length[];

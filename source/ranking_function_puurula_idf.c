@@ -11,6 +11,7 @@
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
 #include "search_engine_accumulator.h"
+#include "memory_index.h"
 
 static inline double max(double a, double b) { return a > b ? a : b; }
 
@@ -39,8 +40,13 @@ decompress_buffer = engine->get_decompress_buffer();
 
 unique_terms_in_collection = (double)engine->get_variable("~uniqueterms");
 
-if (engine->get_postings_details("~puurula_tfidf_powerlaw_length", &term_details) == NULL)
+if ((int)(g * 1000) > 9)
+	exit(printf("g is out of range in the LMPTFIDF ranking function (check your command line parameters"));
+
+if (engine->get_postings_details(ANT_memory_indexer::squiggle_puurula_tfidf_powerlaw_length[(int)(g * 1000)]->string(), &term_details) == NULL)
 	exit(printf("Must be indexed with Puurula length vectors (-Ilmptfidf) to use this ranking function"));
+
+puts(ANT_memory_indexer::squiggle_puurula_tfidf_powerlaw_length[(int)(g * 1000)]->string());
 
 postings_buffer = engine->get_postings(&term_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);

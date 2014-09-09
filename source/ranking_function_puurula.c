@@ -11,6 +11,7 @@
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
 #include "search_engine_accumulator.h"
+#include "memory_indexer.h"
 
 static inline double max(double a, double b) { return a > b ? a : b; }
 
@@ -32,16 +33,11 @@ this->g = g;
 documents = (size_t)engine->document_count();
 discounted_document_lengths = new double[documents];
 
-if (engine->get_postings_details("~puurula_length", &term_details) == NULL)
-	{
-	/*
-		The index was constructed without discounted TF values so we do the best we can, which is to use undiscounted lengths
-	*/
-	for (current = 0; current < documents; current++)
-		discounted_document_lengths[current] = document_lengths[current];
+if ((int)(g * 10) > 9)
+	exit(printf("g is out of range in the LMP ranking function (check your command line parameters"));
 
-	puts("Estimating the Puurula parameters as this index does not contain them");
-	}
+if (engine->get_postings_details(ANT_memory_indexer::squiggle_puurula_length[(int)(g * 10)]->string(), &term_details) == NULL)
+	exit(printf("This index does not contain the Puurula length vectors, reindex using -Ilmp"));
 else
 	{
 	postings_buffer = engine->get_postings_buffer();

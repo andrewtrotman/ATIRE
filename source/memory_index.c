@@ -1153,13 +1153,18 @@ if ((token_type == CT_LETTER && !utf8_isupper(first_char)) || token_type == CT_N
 			unique_terms_in_document = document_lengths[docid];
 			tf = log(1.0 + tf / unique_terms_in_document) * log((double)largest_docno / (double)root->document_frequency);
 			tf_adjusted_length_vector[docid] += tf;
+			for (g = 0; g < 10; g++)
+				{
+				discounted_tf = ANT_max(tf - (g / 1000.0) * pow(tf, g / 1000.0), 0.0);
+				length_vector[10 * docid + g] += discounted_tf;
+				}
 			}
-
-		for (g = 0; g < 10; g++)
-			{
-			discounted_tf = ANT_max(tf - (double)g * pow(tf, (double)g), 0.0);
-			length_vector[10 * docid + g] += discounted_tf;
-			}
+		else
+			for (g = 0; g < 10; g++)
+				{
+				discounted_tf = ANT_max(tf - (g / 10.0) * pow(tf, g / 10.0), 0.0);
+				length_vector[10 * docid + g] += discounted_tf;
+				}
 		current_docid++;
 		}
 	}
