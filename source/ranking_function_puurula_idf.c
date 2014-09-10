@@ -11,6 +11,7 @@
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
 #include "search_engine_accumulator.h"
+#include "memory_index.h"
 
 static inline double max(double a, double b) { return a > b ? a : b; }
 
@@ -39,8 +40,13 @@ decompress_buffer = engine->get_decompress_buffer();
 
 unique_terms_in_collection = (double)engine->get_variable("~uniqueterms");
 
-if (engine->get_postings_details("~puurula_tfidf_powerlaw_length", &term_details) == NULL)
+if ((int)(g * 1000) > 9)
+	exit(printf("g is out of range in the LMPTFIDF ranking function (check your command line parameters"));
+
+if (engine->get_postings_details(ANT_memory_indexer::squiggle_puurula_tfidf_powerlaw_length[(int)(g * 1000)]->string(), &term_details) == NULL)
 	exit(printf("Must be indexed with Puurula length vectors (-Ilmptfidf) to use this ranking function"));
+
+puts(ANT_memory_indexer::squiggle_puurula_tfidf_powerlaw_length[(int)(g * 1000)]->string());
 
 postings_buffer = engine->get_postings(&term_details, postings_buffer);
 factory.decompress(decompress_buffer, postings_buffer, term_details.local_document_frequency);
@@ -101,16 +107,20 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	 	tf = log(1.0 + tf / unique_terms_in_document[docid]) * log((double)documents / (double)term_details->global_document_frequency);	// L0 norm version
 	 	tf = max(tf - g * pow(tf, g), 0);
 
-
-	 	rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
-
-		if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+		if (tf != 0)
 			{
-			prior = log(1.0 - discounted_document_lengths[(size_t)docid] / (tfidf_discounted_document_lengths[(size_t)docid] + u));
-			accumulator->add_rsv(docid, quantize(query_length * prior + rsv, maximum_collection_rsv, minimum_collection_rsv));
+			/*
+				There must be some TF component to the score or else the rsv == 0 which is equivelant to the term not occuring
+			*/
+	 		rsv = query_occurences * log((tf * unique_terms_in_collection) / u + 1.0);
+			if (accumulator->is_zero_rsv(docid))		// unseen before now so add the document prior
+				{
+				prior = log(1.0 - discounted_document_lengths[(size_t)docid] / (tfidf_discounted_document_lengths[(size_t)docid] + u));
+				accumulator->add_rsv(docid, quantize(query_length * prior + rsv, maximum_collection_rsv, minimum_collection_rsv));
+				}
+			else													// seen so we have already added the prior
+				accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 			}
-		else
-			accumulator->add_rsv(docid, quantize(rsv, maximum_collection_rsv, minimum_collection_rsv));
 		}
 	current = end;
 	impact_header->impact_value_ptr++;

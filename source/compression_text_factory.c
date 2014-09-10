@@ -20,9 +20,14 @@
 ANT_compression_text_factory::ANT_compression_text_factory()
 {
 scheme = new ANT_compression_text_factory_scheme[number_of_techniques = TERMINAL];
+
+scheme[NONE].scheme_id = NONE;
+scheme[NONE].scheme = NULL;
+scheme[NONE].name = "none";
+
 scheme[RAW].scheme_id = RAW;
 scheme[RAW].scheme = new ANT_compress_text_none;
-scheme[RAW].name = "none";
+scheme[RAW].name = "uncompressed";
 
 scheme[DEFLATE].scheme_id = DEFLATE;
 scheme[DEFLATE].scheme = new ANT_compress_text_deflate;

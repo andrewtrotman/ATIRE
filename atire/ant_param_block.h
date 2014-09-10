@@ -21,7 +21,7 @@ class ANT_ANT_param_block : public ANT_indexer_param_block_rank, public ANT_inde
 {
 public:
 	enum { NONE = 0, QUERY = 1, SUM = 2, SHORT = 4, PRECISION = 8 };					// statistics to print (bitstring)
-	enum { /* NONE = 0, */ INEX = 1, TREC, INEX_EFFICIENCY, INEX_FOCUS, INEX_BEP } ;	// evaluation forum
+	enum { /* NONE = 0, */ INEX = 1, TREC, INEX_EFFICIENCY, INEX_FOCUS, INEX_BEP }; 	// evaluation forum
 	enum { INDEX_IN_FILE, INDEX_IN_MEMORY};												// read the index from disk or load at startup
 	enum { /* NONE = 0, */ ARTICLE = 1, RANGE };										// focused retrieval method
 	enum { TERM_AT_A_TIME, QUANTUM_AT_A_TIME };											// processing strategy (term or quantum at a time)
@@ -29,7 +29,8 @@ public:
 			 QUANTUM_STOP_DIFF = 1,             // early terminated based on the difference of the top k and k+1
 			 QUANTUM_STOP_DIFF_SMALLEST = 2,    // early terminated based on the smallest difference among the top k documents
 			 QUANTUM_STOP_DIFF_LARGEST = 4      // early terminated based on the difference between the largest and second largest in the top documents
-	};
+			};
+	enum { /*NONE = 0, */ STOPWORDS_PUURULA = 1,  STOPWORDS_NCBI = 2, STOPWORDS_SHORT = 4, STOPWORDS_NUMBERS = 8, STOPWORDS_ATIRE = 16 };
 
 public:
 	int argc;
@@ -79,6 +80,7 @@ public:
 
 	long query_type;					// NEXI, Boolean, and optionally additionally with relevance feedback
 	char *query_fields;					// in the case of a TREC topic file, which fields should we use (i.e. title, etc).
+	long query_stopping;				// type of stop word removal to apply.
 	long feedbacker;					// relevance feedback algorithm to use
 	long feedback_documents;			// documents to analyse for feedback terms
 	long feedback_terms;				// terms to add to the query in relevance feedback

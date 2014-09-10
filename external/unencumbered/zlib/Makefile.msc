@@ -21,7 +21,9 @@
 #	OBJA =
 #
 # Now we try and work it out in the makefile
-#
+
+
+
 !IF [ml64 /nologo /? > nul] == 0
 AS = @ml64 /nologo
 LOC = -DASMV -DASMINF

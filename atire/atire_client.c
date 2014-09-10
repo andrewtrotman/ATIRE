@@ -19,7 +19,6 @@
 
 const long long MAX_RETRIES = 10;
 const char * const PROMPT = "]";		// tribute to Apple
-const long MAX_TITLE_LENGTH = 1024;
 
 /*
 	PROMPT()

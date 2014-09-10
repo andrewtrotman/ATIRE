@@ -17,7 +17,6 @@ class ANT_channel_trec : public ANT_channel
 {
 private:
 	ANT_channel *in_channel;
-	ANT_stop_word stopper;
 	char *buffer;
 	long read, at_eof;
 	long number;

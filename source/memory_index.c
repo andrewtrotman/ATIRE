@@ -1268,6 +1268,7 @@ double discounted_tf, tf, unique_terms_in_document;
 unsigned long first_char;
 long bytes_taken;
 ANT_UNICODE_chartype token_type;
+long g = 0;
 
 /*
 	What is the max from the children of this node?
@@ -1302,10 +1303,18 @@ if ((token_type == CT_LETTER && !utf8_isupper(first_char)) || token_type == CT_N
 			unique_terms_in_document = document_lengths[docid];
 			tf = log(1.0 + tf / unique_terms_in_document) * log((double)largest_docno / (double)root->document_frequency);
 			tf_adjusted_length_vector[docid] += tf;
+			for (g = 0; g < 10; g++)
+				{
+				discounted_tf = ANT_max(tf - (g / 1000.0) * pow(tf, g / 1000.0), 0.0);
+				length_vector[10 * docid + g] += discounted_tf;
+				}
 			}
-
-		discounted_tf = ANT_max(tf - inverted_index_parameter * pow(tf, inverted_index_parameter), 0.0);
-		length_vector[docid] += discounted_tf;
+		else
+			for (g = 0; g < 10; g++)
+				{
+				discounted_tf = ANT_max(tf - (g / 10.0) * pow(tf, g / 10.0), 0.0);
+				length_vector[10 * docid + g] += discounted_tf;
+				}
 		current_docid++;
 		}
 	}
@@ -1321,21 +1330,19 @@ double *length_vector, *tf_adjusted_length_vector;
 ANT_compressable_integer *unique_term_vector = NULL;
 long hash_val, unique_terms = 0;
 long long current;
+long g;
 
 /*
 	Allocate space to compute the Puurula document lengths
 */
-length_vector = new double [largest_docno];
-memset(length_vector, 0, sizeof(*length_vector) * largest_docno);
+length_vector = new double [largest_docno * 10];
+memset(length_vector, 0, sizeof(*length_vector) * largest_docno * 10);
 
 /*
 	Compute the number of unique terms in each document
 */
 if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
 	{
-	tf_adjusted_length_vector = new double [largest_docno];
-	memset(tf_adjusted_length_vector, 0, sizeof(*tf_adjusted_length_vector) * largest_docno);
-
 	unique_term_vector = new ANT_compressable_integer[largest_docno];
 	memset(unique_term_vector, 0, sizeof(*unique_term_vector) * largest_docno);
 
@@ -1348,6 +1355,9 @@ if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
 	/*
 		Compute the lengths
 	*/
+	tf_adjusted_length_vector = new double [largest_docno];
+	memset(tf_adjusted_length_vector, 0, sizeof(*tf_adjusted_length_vector) * largest_docno);
+
 	for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 		if (hash_table[hash_val] != NULL)
 			compute_puurula_document_lengths(length_vector, tf_adjusted_length_vector, unique_term_vector, hash_table[hash_val], PUURULA_LENGTH_VECTORS_TFIDF);		// L0 norm version
@@ -1357,10 +1367,13 @@ if (inverted_index_mode & PUURULA_LENGTH_VECTORS_TFIDF)
 	*/
 	for (current = 0; current < largest_docno; current++)
 		{
-		set_puurula_tfidf_powerlaw_length(length_vector[current]);					// set_puurula_length() will multiply by 100 to make it accurate to 2 decimal places
+		for (g = 0; g < 10; g++)
+			set_puurula_tfidf_powerlaw_length(g, length_vector[10 * current + g]);					// set_puurula_length() will multiply by 100 to make it accurate to 2 decimal places
+
 		set_unique_term_count(unique_term_vector[current]);
 		set_puurula_tfidf_length(tf_adjusted_length_vector[current]);
 		}
+	delete [] tf_adjusted_length_vector;
 	}
 
 /*
@@ -1374,7 +1387,8 @@ for (hash_val = 0; hash_val < HASH_TABLE_SIZE; hash_val++)
 	Add the lengths to the index
 */
 for (current = 0; current < largest_docno; current++)
-	set_puurula_length(length_vector[current]);					// set_puurula_length() will multiply by 100 to make it accurate to 2 decimal places
+	for (g = 0; g < 10; g++)
+		set_puurula_length(g, length_vector[10 * current + g]);					// set_puurula_length() will multiply by 100 to make it accurate to 2 decimal places
 
 /*
 	clean up

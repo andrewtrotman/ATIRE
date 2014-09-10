@@ -30,6 +30,8 @@
 #include "search_engine.h"
 #include "memory_index_one_node.h"
 
+using namespace std;
+
 const char * const PROMPT = "]";		// tribute to Apple
 const long MAX_TITLE_LENGTH = 1024;
 
@@ -39,6 +41,84 @@ ATIRE_API *ant_init(ANT_ANT_param_block & params);
 long ant_init_ranking(ATIRE_API *atire, ANT_ANT_param_block &params);
 int run_atire(int argc, char *argv[]);
 int run_atire(char *files);
+
+ANT_stop_word *stop_word_list = NULL;
+
+static const char *new_stop_words[] =
+	{
+//	"alternative",				 Needed for TREC topic 84
+	"arguments",
+	"can",
+	"current",
+	"dangers",
+	"data",
+	"description",
+	"developments",
+	"document",
+	"documents",
+	"done",
+	"discuss",
+	"discusses",
+	"efforts",
+	"enumerate",
+	"examples",
+	"help",
+	"ideas",
+	"identify",
+	"inform",
+	"information",
+	"instances",
+	"latest",
+	"method",
+	"narrative",
+	"occasions",
+	"problems",
+	"provide",
+	"relevant",
+	"report",
+	"reports",
+	"state",
+	"topic",
+	NULL
+	} ;
+
+/*
+	STOP_QUERY()
+	------------
+*/
+char *stop_query(char *query, long stop_type)
+{
+static const char *SEPERATORS = ",./;'[]!@#$%^&*()_+-=\\|<>?:{}\r\n\t \"`~";
+char *ch, *copy;
+ostringstream stopped_query;
+
+copy = strnew(query);
+strip_space_inplace(query);
+
+for (ch = strtok(query, SEPERATORS); ch != NULL; ch = strtok(NULL, SEPERATORS))
+	{
+	if ((stop_type & ANT_ANT_param_block::STOPWORDS_NCBI | ANT_ANT_param_block::STOPWORDS_PUURULA) && stop_word_list->isstop(ch))
+		continue;
+
+	if ((stop_type & ANT_ANT_param_block::STOPWORDS_NUMBERS) && isdigit(*ch))
+		continue;
+
+	if ((stop_type & ANT_ANT_param_block::STOPWORDS_SHORT) &&strlen(ch) <= 2)
+		continue;
+
+	stopped_query << ' ' << ch;
+	}
+
+if (stopped_query.str().empty())
+	strcpy(query, copy);
+else
+	{
+	stopped_query << ends;
+	strcpy(query, (char *)stopped_query.str().c_str());
+	}
+
+return query;
+}
 
 /*
 	PERFORM_QUERY()
@@ -50,6 +130,9 @@ ANT_stats_time stats;
 long long now, search_time;
 long valid_to_evaluate;
 double *evaluations;
+
+if (params->query_stopping != ANT_ANT_param_block::NONE)
+	stop_query(query, params->query_stopping);
 
 /*
 	Search
@@ -840,15 +923,15 @@ size_t total_length = (options ? strlen(options) : 0) + 7;
 char *copy, *copy_start;
 
 copy = copy_start = new char[total_length];
-
 memset(copy, 0, sizeof(*copy) * total_length);
 
 memcpy(copy, "atire+", 6);
 copy += 6;
-if (options) {
+if (options)
+	{
 	memcpy(copy, options, strlen(options));
 	copy += strlen(options);
-}
+	}
 *copy = '\0';
 
 argv = file_list = new char *[total_length];
@@ -887,6 +970,13 @@ ANT_stats stats;
 ANT_ANT_param_block params(argc, argv);
 
 params.parse();
+if (params.query_stopping & ANT_ANT_param_block::STOPWORDS_NCBI)
+	stop_word_list = new ANT_stop_word(ANT_stop_word::NCBI);
+else if (params.query_stopping & ANT_ANT_param_block::STOPWORDS_PUURULA)
+	stop_word_list = new ANT_stop_word(ANT_stop_word::PUURULA);
+if (params.query_stopping & ANT_ANT_param_block::STOPWORDS_ATIRE)
+	stop_word_list->addstop((const char **)new_stop_words);
+	
 
 atire = ant_init(params);
 

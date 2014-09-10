@@ -11,6 +11,7 @@
 #include "search_engine_btree_leaf.h"
 #include "compress.h"
 #include "search_engine_accumulator.h"
+#include "memory_indexer.h"
 
 static inline double max(double a, double b) { return a > b ? a : b; }
 
@@ -32,16 +33,11 @@ this->g = g;
 documents = (size_t)engine->document_count();
 discounted_document_lengths = new double[documents];
 
-if (engine->get_postings_details("~puurula_length", &term_details) == NULL)
-	{
-	/*
-		The index was constructed without discounted TF values so we do the best we can, which is to use undiscounted lengths
-	*/
-	for (current = 0; current < documents; current++)
-		discounted_document_lengths[current] = document_lengths[current];
+if ((int)(g * 10) > 9)
+	exit(printf("g is out of range in the LMP ranking function (check your command line parameters"));
 
-	puts("Estimating the Puurula parameters as this index does not contain them");
-	}
+if (engine->get_postings_details(ANT_memory_indexer::squiggle_puurula_length[(int)(g * 10)]->string(), &term_details) == NULL)
+	exit(printf("This index does not contain the Puurula length vectors, reindex using -Ilmp"));
 else
 	{
 	postings_buffer = engine->get_postings_buffer();
@@ -89,7 +85,6 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	tf = *impact_header->impact_value_ptr;
 	tf = max(tf - g * pow(tf, g), 0);
 
-//	rsv = query_occurences * log((tf * collection_length_in_terms) / (u * cf) + 1.0);
 	rsv = query_occurences * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 
 	docid = -1;
@@ -146,7 +141,7 @@ double prior, rsv, cf, tf = term_frequency;
 tf = max(tf - g * pow(tf, g), 0);
 cf = collection_frequency;
 
-rsv = query_frequency	 * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
+rsv = query_frequency * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
 
 return rsv + prior;
