@@ -1,88 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "hash_table.h"
+#include "hash_header.h"
+#include "hash_header_collapse.h"
+#include "hash_random.h"
+#include "hash_superfast.h"
 #include "string_pair.h"
 #include "disk.h"
 
-#define TOTAL_REPEATS 1
+typedef unsigned long (*hash_function)(ANT_string_pair *);
+
+struct {
+	hash_function f;
+	char *n;
+} functions[] = {
+	{ANT_hash_random_24, "random"},
+	{ANT_hash_header_24, "header_num"},
+};
 
 /*
 	MAIN()
 	------
-	Loads terms from a file, line by line, and times how long each of the 8,24 and 32-bit
-	hashing functions takes to run on those terms.
+	Decorates a dictionary file by prepending columns with hash values for different hash functions
 */
 int main(int argc, char **argv)
 {
 if (argc != 2)
 	exit(printf("Usage: %s <filename>\n", argv[0]));
 
-#ifndef HASHER
-	exit(fprintf(stderr, "No valid hasher defined!\n"));
-#elif HASHER == RANDOM
-	fprintf(stderr, "Random\n");
-#elif HASHER == RANDOM_STEP
-	fprintf(stderr, "Random step\n");
-#elif HASHER == HEADER
-	fprintf(stderr, "Header\n");
-#elif HASHER == HEADER_NUM
-	fprintf(stderr, "Header + Num\n");
-#elif HASHER == HEADER_EXP
-	fprintf(stderr, "Header Exp\n");
-#elif HASHER == HEADER_COLLAPSE
-	fprintf(stderr, "Header Collapsing\n");
-#elif HASHER == SUPERFAST
-	fprintf(stderr, "Superfast\n");
-#elif HASHER == LOOKUP3
-	fprintf(stderr, "Lookup3\n");
-#else
-	exit(fprintf(stderr, "Unknown hasher\n"));
-#endif
-
 long long number_terms;
 char **lines = ANT_disk::buffer_to_list(ANT_disk::read_entire_file(argv[1]), &number_terms);
-long long times;
 char *space;
 ANT_string_pair *term = NULL;
-const long long hash_table_size = 1 << 24;
-long long **hash_table = new long long*[3];
-unsigned long hash_value;
 
-for (int j = 0; j < 3; j++)
-	{
-	hash_table[j] = new long long[hash_table_size];
-	for (int i = 0; i < hash_table_size; i++)
-		hash_table[j][i] = 0;
-	}
+int function;
+size_t num_functions = sizeof(functions) / sizeof(*functions);
+
+for (function = 0; function < num_functions; function++) {
+	printf("%s ", functions[function].n);
+}
+printf("term cf df\n"); // always include the term, cf and df
 
 for (int line = 0; line < number_terms; line++)
 	{
-	if (ANT_isupper(lines[line][0]))
-		continue;
-
 	delete term;
 
 	space = strchr(lines[line], ' ');
 	term = new ANT_string_pair(lines[line], space - lines[line]);
 
-	hash_value = ANT_hash_24(term);
-
-	// count of unique terms
-	hash_table[0][hash_value] += 1;
-
-	// count of collection frequencies
-	times = ANT_atoul(space + 1, strlen(space));
-	hash_table[1][hash_value] += times;
-
-	// count of document frequencies
-	space = strchr(space + 1, ' ');
-	times = ANT_atoul(space + 1, strlen(space));
-	hash_table[2][hash_value] += times;
+	for (function = 0; function < num_functions; function++)
+		printf("%lu ", functions[function].f(term));
+	printf("%s\n", lines[line]);
 	}
-
-printf("U C D\n");
-for (int i = 0; i < hash_table_size; i++)
-	printf("%lld %lld %lld\n", hash_table[0][i], hash_table[1][i], hash_table[2][i]);
 
 return EXIT_SUCCESS;
 }

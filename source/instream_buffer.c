@@ -32,8 +32,7 @@ buffer_to_read_into = buffer_to_read_from;
 end_of_second_buffer = end_of_buffer;
 #endif
 
-position_of_end_of_buffer = source->read(primary_buffer, buffer_size);
-position_of_end_of_second_buffer = 0;
+position_of_end_of_buffer = position_of_end_of_second_buffer = 0;
 
 wait_input_time = 0;
 wait_output_time = 0;

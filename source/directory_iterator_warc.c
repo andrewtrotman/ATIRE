@@ -16,10 +16,10 @@ long ANT_directory_iterator_warc::tid = 0;
 
 ANT_directory_iterator_warc::ANT_directory_iterator_warc(ANT_instream *source, long get_file) : ANT_directory_iterator("", get_file)
 {
-	this->source = source;
+this->source = source;
 message = new char[50];
 sprintf(message, "warc %ld ", ANT_directory_iterator_warc::tid++);
-	}
+}
 
 /*
 	ANT_DIRECTORY_ITERATOR_WARC::FIND_STRING()
@@ -42,10 +42,10 @@ do
 		do
 			{
 			into++;
-END;
+			END;
 			if (source->read(into, 1) != 1)
 				return NULL;		// at EOF
-START;
+			START;
 			}
 		while (*into != '\n' && into < end);
 		*into = '\0';
@@ -59,10 +59,10 @@ START;
 			{
 			do
 				{
-END;
+				END;
 				if (source->read(into, 1) != 1)
 					return NULL;		// at EOF
-START;
+				START;
 				}
 			while (*into != '\n');
 			continue;
@@ -89,7 +89,7 @@ START;
 */
 if ((filename = find_string("WARC-TREC-ID", 12)) == NULL)
 	{
-END;
+	END;
 	return NULL;
 	}
 
@@ -103,7 +103,7 @@ object->filename = strnew((char *)filename);
 */
 if ((file_length = find_string("Content-Length", 14)) == NULL)
 	{
-END;
+	END;
 	return NULL;
 	}
 object->length = atoll(file_length);

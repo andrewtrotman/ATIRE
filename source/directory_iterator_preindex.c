@@ -82,7 +82,7 @@ ENDV("preindex");
 void ANT_directory_iterator_preindex::work(ANT_directory_iterator_preindex_internals *internals)
 {
 ANT_directory_iterator_object object;
-	static long idd = 0;
+static long idd = 0;
 long id = idd++;
 
 while (source->next(&object) != NULL)

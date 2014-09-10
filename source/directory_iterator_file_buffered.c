@@ -81,8 +81,6 @@ docno_tag = new char*[2];
 docno_tag[0] = NULL;
 docno_tag[1] = NULL;
 set_tags("DOC", "DOCNO");
-
-//printf("%sstart_upstream %lld\n", message, clock->start_timer());
 }
 
 /*
@@ -91,11 +89,6 @@ set_tags("DOC", "DOCNO");
 */
 ANT_directory_iterator_file_buffered::~ANT_directory_iterator_file_buffered()
 {
-//clock->print_time(message, wait_input_time, " input");
-//clock->print_time(message, wait_output_time, " upstream");
-//clock->print_time(message, process_time, " process");
-//printf("%send_upstream %lld\n", message, clock->start_timer());
-
 free_tag();
 
 delete [] primary_buffer;
@@ -254,8 +247,6 @@ else
 	}
 
 END;
-//process_time += clock->stop_timer(now);
-//printf("%sstart_upstream %lld\n", message, clock->start_timer());
 return object;
 }
 
