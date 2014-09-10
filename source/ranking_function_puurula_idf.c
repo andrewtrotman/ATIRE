@@ -30,6 +30,8 @@ ANT_compression_factory factory;
 this->u = u;
 this->g = g;
 
+printf("u=%f g=%f\n", u, g);
+
 documents = (size_t)engine->document_count();
 discounted_document_lengths = new double[documents];
 tfidf_discounted_document_lengths = new double[documents];
