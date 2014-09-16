@@ -113,7 +113,7 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	*into = (*into << 4) | row;		// put the selector in the bottom 4 bits
 
 	into++;
-	if (into >= end)
+	if (into > end)
 		return 0;
 	}
 return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
