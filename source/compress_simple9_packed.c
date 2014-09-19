@@ -163,47 +163,80 @@ int remaining;
 
 long compressed_words = 0;
 
-int blocks_needed[source_integers];
-int masks[source_integers]; // TODO pack the masks into destination and overwrite them, to save space
+// possibly allocate more memory 
+if (source_integers > blocks_length)
+	{
+	delete blocks_needed;
+	delete masks;
+	blocks_needed = new long [source_integers];
+	masks = new unsigned char [source_integers];
+	blocks_length = source_integers;
+	}
+
+words_in_compressed_string = 0;
+
+// optimization fails if we only have one integer (due to out-of-bounds access)
+if (source_integers == 1)
+	{
+	pack(source, into, 8, 1);
+	words_in_compressed_string++;
+	return words_in_compressed_string * sizeof(*into);
+	}
 
 /* initialise */
 pos = 0;
-while (pos < source_integers - 1)
-{
-  blocks_needed[pos] = -1; // INFINITY value
-  masks[pos] = 0;
-  pos++;
-}
-blocks_needed[pos] = 1;
+while (pos < source_integers)
+	{
+	blocks_needed[pos] = -1; // INFINITY value
+	masks[pos] = 0;
+	pos++;
+	}
+
+/* init last value to pack-by-self */
+pos = source_integers - 1;
+blocks_needed[pos] = 0;
 masks[pos] = 8;
+
+/* optimise from second-last value */
+pos = source_integers - 2;
 
 /* optimise packing masks to use */
 while (pos >= 0)
 {
-  for (mask_type = 0; mask_type < 9; mask_type++)
-    if (can_pack(source + pos, mask_type, source_integers - pos))
-    {
-		  num_to_pack = (pos + ints_packed_table[mask_type] > source_integers) ? source_integers - pos : ints_packed_table[mask_type];
-      if (blocks_needed[pos] == -1 || blocks_needed[pos] > blocks_needed[pos+num_to_pack] + 1)
-      {
-        blocks_needed[pos] = blocks_needed[pos+num_to_pack-1] + 1;
-        masks[pos] = mask_type;
-      }
-    }
-  pos--;
+	for (mask_type = 0; mask_type < 9; mask_type++)
+	{
+		num_to_pack = (pos + ints_packed_table[mask_type] > source_integers) ? source_integers - pos : ints_packed_table[mask_type];
+		if (can_pack(source + pos, mask_type, num_to_pack))
+		{
+			if (pos + num_to_pack >= source_integers)
+			{
+				blocks_needed[pos] = 1;
+				masks[pos] = mask_type;
+			}
+			else if (blocks_needed[pos] == -1 || blocks_needed[pos] > blocks_needed[pos+num_to_pack] + 1)
+			{
+				blocks_needed[pos] = blocks_needed[pos+num_to_pack] + 1;
+				masks[pos] = mask_type;
+			}
+		}
+		/* fail case: can't pack current block (i.e. x > 2^28) */
+		else if (mask_type == 8) {
+			return 0;
+		}
+	}
+	pos--;
 }
 
 /* now actually pack */
 pos = 0;
-words_in_compressed_string = 0;
 while (pos < source_integers)
 {
-  mask_type = masks[pos];
+	mask_type = masks[pos];
 	num_to_pack = (pos + ints_packed_table[mask_type] > source_integers) ? source_integers - pos : ints_packed_table[mask_type];
 	pack(source + pos, into, mask_type, num_to_pack);
 	pos += num_to_pack;
-  into++;
-  words_in_compressed_string++;
+	into++;
+	words_in_compressed_string++;
 }
 return words_in_compressed_string * sizeof(*into);
 }
