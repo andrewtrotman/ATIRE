@@ -88,7 +88,7 @@ else
 #ifdef BUFFER_B
 instream_buffer_b = new ANT_instream_buffer(memory, scrubber);
 #else
-instream_bufer_b = scrubber;
+instream_buffer_b = scrubber;
 #endif
 
 detrecer = new ANT_directory_iterator_file_buffered(instream_buffer_b, ANT_directory_iterator::READ_FILE);

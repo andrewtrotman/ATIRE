@@ -79,9 +79,9 @@ size_t len;
 	ascii, otherwise randomly hash over the remaining space
 */
 #if HASHER == MATT_N
-if ((len = string->length()) < 4 && !ANT_isdigit((*string)[0]) && string->ascii())
+if ((len = string->length()) < 4 && !ANT_isdigit((*string)[0]))// && string->ascii())
 #else
-if ((len = string->length()) < 4 && string->ascii())
+if ((len = string->length()) < 4)// && string->ascii())
 #endif
 	{
 	if (len < 4)
