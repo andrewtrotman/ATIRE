@@ -140,6 +140,12 @@ int use_lock = 0;
 	*mode_dest = 0;
 
 	internals->fp = fopen(filename, fixed_mode);
+#ifndef OS_DISABLE
+#define OS_DIABLE 0
+#endif
+#if OS_DISABLE
+	setvbuf(internals->fp, NULL, _IONBF, 0);
+#endif
 
 	delete [] fixed_mode;
 
