@@ -505,7 +505,10 @@ for (param = first_param; param < argc; param++)
 		disk = new ANT_directory_iterator_compressor(disk, 8, factory_text, ANT_directory_iterator::READ_FILE);
 
 	#ifdef PARALLEL_INDEXING_DOCUMENTS
-		disk = new ANT_directory_iterator_preindex(disk, param_block.segmentation, param_block.readability_measure, param_block.stemmer, document_indexer, index, 8, ANT_directory_iterator::READ_FILE);
+#ifndef WORKERS
+#define WORKERS 8
+#endif
+		disk = new ANT_directory_iterator_preindex(disk, param_block.segmentation, param_block.readability_measure, param_block.stemmer, document_indexer, index, WORKERS, ANT_directory_iterator::READ_FILE);
 	#endif
 
 	files_that_match = 0;
