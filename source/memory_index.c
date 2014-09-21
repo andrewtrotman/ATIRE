@@ -221,8 +221,18 @@ if (hash_table[hash_value] == NULL)
 	node = hash_table[hash_value];
 	}
 else
+	{
+#if HASHER == MATT || HASHER == MATT_N
+	/*
+	The MATT hash variants have some guarantees about uniqueness that other hashers don't possess, so take
+	advantage of those, and if the hash is unique then simply return the node rather than searching.
+	*/
+	if (ANT_hash_matt_unique(hash_value))
+		node = hash_table[hash_value];
+	else
+#endif
 	node = find_add_node(hash_value, string, &depth);
-
+	}
 
 /*
 	If we aren't parallel indexing, then terms get added directly to
@@ -242,8 +252,7 @@ return node;
 /*
 	ANT_MEMORY_INDEX::ADD_TERM()
 	----------------------------
-	This does not add postings, should not be used
-	outside of timing hash_table lookup and insertion
+	This does not add postings, should not be used outside of timing hash_table lookup and insertion
 */
 ANT_memory_index_hash_node *ANT_memory_index::add_term(ANT_string_pair *string)
 {
@@ -258,7 +267,18 @@ if (hash_table[hash_value] == NULL)
 	node = hash_table[hash_value];
 	}
 else
+	{
+#if HASHER == MATT || HASHER == MATT_N
+	/*
+	The MATT hash variants have some guarantees about uniqueness that other hashers don't possess, so take
+	advantage of those, and if the hash is unique then simply return the node rather than searching.
+	*/
+	if (ANT_hash_matt_unique(hash_value))
+		node = hash_table[hash_value];
+	else
+#endif
 	node = find_add_node(hash_value, string, &depth);
+	}
 
 return node;
 }

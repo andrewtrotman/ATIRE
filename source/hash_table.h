@@ -22,6 +22,8 @@
 	#include "hash_superfast.h"
 #elif HASHER == LOOKUP3
 	#include "hash_lookup3.h"
+#elif HASHER == MATT || HASHER == MATT_N
+	#include "hash_matt.h"
 #else
 	#error "Don't know which hash function to use - aborting"
 #endif
@@ -44,12 +46,14 @@ static inline unsigned long ANT_hash_8(ANT_string_pair *string)
 	return ANT_hash_superfast_8(string);
 #elif HASHER == LOOKUP3
 	return ANT_hash_lookup3_8(string);
+#elif HASHER == MATT || HASHER == MATT_N
+	return ANT_hash_matt_8(string);
 #else
 	return -1;
 #endif
 }
 
-#ifdef NEVER
+#if 0
 /*
 	ANT_HASH_16()
 	-------------
@@ -68,6 +72,8 @@ static inline unsigned long ANT_hash_16(ANT_string_pair *string)
 	return ANT_hash_superfast_16(string);
 #elif HASHER == LOOKUP3
 	return ANT_hash_lookup3_16(string);
+#elif HASHER == MATT || HASHER == MATT_N
+	return ANT_hash_matt_16(string);
 #else
 	return -1;
 #endif
@@ -94,6 +100,8 @@ static inline unsigned long ANT_hash_24(ANT_string_pair *string)
 	return ANT_hash_superfast_24(string);
 #elif HASHER == LOOKUP3
 	return ANT_hash_lookup3_24(string);
+#elif HASHER == MATT || HASHER == MATT_N
+	return ANT_hash_matt_24(string);
 #else
 	return -1;
 #endif
@@ -117,6 +125,8 @@ static inline unsigned long ANT_hash_32(ANT_string_pair *string)
 	return ANT_hash_superfast_32(string);
 #elif HASHER == LOOKUP3
 	return ANT_hash_lookup3_32(string);
+#elif HASHER == MATT || HASHER == MATT_N
+	return ANT_hash_matt_32(string);
 #else
 	return -1;
 #endif

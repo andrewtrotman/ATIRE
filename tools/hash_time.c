@@ -22,6 +22,10 @@ volatile ANT_memory_index_hash_node *n;
 		total_clock += end_clock - start_clock;
 #endif
 
+#define KB(x) (1024ULL * (x))
+#define MB(x) (1024ULL * KB(x))
+#define GB(x) (1024ULL * MB(x))
+
 /*
 	RDTSC()
 	-------
@@ -41,37 +45,19 @@ __asm__ __volatile__ (
 return (uint64_t)hi << 32 | lo;
 }
 
+/*
+	HASH_TIME
+	---------
+	Designed to measure the time taken to either do the hash function only
+	or time taken to insert into the hash table as well.
+
+	Assumes that each line contains a term to hash/insert.
+*/
 int main(int argc, char **argv)
 {
-#ifndef HASHER
-	exit(fprintf(stderr, "No valid hasher defined!\n"));
-#elif HASHER == RANDOM
-	fprintf(stderr, "Random\n");
-#elif HASHER == RANDOM_STEP
-	fprintf(stderr, "Random step\n");
-#elif HASHER == HEADER
-	fprintf(stderr, "Header\n");
-#elif HASHER == HEADER_NUM
-	fprintf(stderr, "Header + Num\n");
-#elif HASHER == HEADER_EXP
-	fprintf(stderr, "Header Exp\n");
-#elif HASHER == HEADER_COLLAPSE
-	fprintf(stderr, "Header Collapse\n");
-#elif HASHER == SUPERFAST
-	fprintf(stderr, "Superfast\n");
-#elif HASHER == LOOKUP3
-	fprintf(stderr, "Lookup3\n");
-#else
-	exit(fprintf(stderr, "Unknown hasher\n"));
-#endif
-
 #ifndef TIME_HASH
 ANT_memory_index *index = new ANT_memory_index(NULL);
 #endif
-
-#define KB(x) (1024ULL * x)
-#define MB(x) (1024ULL * KB(x))
-#define GB(x) (1024ULL * MB(x))
 
 const unsigned long long BUF_SIZE = GB(50ULL);
 

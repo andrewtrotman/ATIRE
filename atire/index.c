@@ -11,6 +11,7 @@
 #include "directory_iterator_tar.h"
 #include "directory_iterator_warc.h"
 #include "directory_iterator_warc_gz_recursive.h"
+#include "directory_iterator_trec_gz_recursive.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_compressor.h"
@@ -450,14 +451,7 @@ for (param = first_param; param < argc; param++)
 //		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
-		{
-		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
-		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
-			source = new ANT_directory_iterator_deflate(source);		// recursive .gz files
-		if (param_block.scrubbing)
-			dir_scrubber = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
-		source = new ANT_directory_iterator_file(dir_scrubber == NULL ? source : dir_scrubber, ANT_directory_iterator::READ_FILE);
-		}
+		source = new ANT_directory_iterator_trec_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::TSV)
@@ -488,10 +482,9 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_filter_spam(source, param_block.spam_filename, param_block.spam_threshold, ANT_directory_iterator::READ_FILE);
 	
 	/*
-		We may already had to have created a directory iterator scrubber at some other point in the chain, here's looking at you RECURSIVE_TREC,
-		so don't do it again unnecessarily
+		We may already had to have created a directory iterator scrubber at some other point in the chain so don't do it unecessarily
 	*/
-	if (param_block.scrubbing && dir_scrubber == NULL && scrubber == NULL)
+	if (param_block.scrubbing && dir_scrubber == NULL && scrubber == NULL && param_block.recursive != ANT_indexer_param_block::RECURSIVE_TREC)
 		source = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
 
 	stats.add_disk_input_time(stats.stop_timer(now));
