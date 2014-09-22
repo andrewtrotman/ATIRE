@@ -62,6 +62,7 @@ ANT_thread(background_read, (void *)&params); // start reading in the background
 */
 ANT_instream_buffer::~ANT_instream_buffer()
 {
+delete source;
 }
 
 /*

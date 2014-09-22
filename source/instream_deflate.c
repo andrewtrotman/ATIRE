@@ -46,6 +46,7 @@ sprintf(message, "deflate %ld ", ANT_instream_deflate::tid++);
 */
 ANT_instream_deflate::~ANT_instream_deflate()
 {
+delete source;
 #ifdef ANT_HAS_ZLIB
 	inflateEnd(&internals->stream);
 #endif

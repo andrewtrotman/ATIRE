@@ -8,7 +8,6 @@
 #include "directory_iterator.h"
 
 class ANT_instream;
-class ANT_directory_iterator_file_buffered;
 class ANT_memory;
 
 /*
@@ -25,14 +24,14 @@ static long tid;
 	ANT_instream *instream_buffer_b;
 	ANT_instream *scrubber;
 	ANT_directory_iterator *filename_provider;
-	ANT_directory_iterator_file_buffered *detrecer;
+	ANT_directory_iterator *detrecer;
 	ANT_memory *memory;
 	ANT_directory_iterator_object *more_files;
 	long first_time;
 	long long scrubbing_options;
 
 protected:
-	ANT_directory_iterator_file_buffered *new_provider(char *filename);
+	ANT_directory_iterator *new_provider(char *filename);
 
 public:
 	ANT_directory_iterator_trec_gz_recursive(char *source, long get_file = 0, long long scrubbing_options = 0);

@@ -140,17 +140,19 @@ int use_lock = 0;
 	*mode_dest = 0;
 
 	internals->fp = fopen(filename, fixed_mode);
-#ifndef OS_DISABLE
-#define OS_DIABLE 0
-#endif
-#if OS_DISABLE
-	setvbuf(internals->fp, NULL, _IONBF, 0);
-#endif
 
 	delete [] fixed_mode;
 
 	if (internals->fp == NULL)
 		return 0;
+
+#ifndef OS_DISABLE
+#define OS_DISABLE 0
+#endif
+#if OS_DISABLE
+	if (setvbuf(internals->fp, NULL, _IONBF, 0))
+		return 0;
+#endif
 
 	if (use_lock)
 		{
@@ -176,7 +178,6 @@ return 1;
 */
 long ANT_file::close(void)
 {
-//printf("close %p\n", this);
 #ifdef _MSC_VER
 	if (internals->fp != INVALID_HANDLE_VALUE)
 		{

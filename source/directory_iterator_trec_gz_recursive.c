@@ -5,15 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "directory_iterator_trec_gz_recursive.h"
-#include "directory_iterator_scrub.h"
 #include "memory.h"
 #include "instream_file.h"
 #include "instream_deflate.h"
-#include "instream_scrub.h"
 #include "instream_buffer.h"
+#include "instream_scrub.h"
+#include "directory_iterator_scrub.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_file_buffered.h"
+#include "directory_iterator_trec_gz_recursive.h"
 
 long ANT_directory_iterator_trec_gz_recursive::tid = 0;
 
@@ -65,7 +65,7 @@ delete memory;
 	ANT_DIRECTORY_ITERATOR_TREC_GZ_RECURSIVE::NEW_PROVIDER()
 	--------------------------------------------------------
 */
-ANT_directory_iterator_file_buffered *ANT_directory_iterator_trec_gz_recursive::new_provider(char *filename)
+ANT_directory_iterator *ANT_directory_iterator_trec_gz_recursive::new_provider(char *filename)
 {
 delete detrecer;
 delete memory;
@@ -80,18 +80,15 @@ instream_buffer_a = file_stream;
 
 decompressor = new ANT_instream_deflate(memory, instream_buffer_a);
 
-if (scrubbing_options != ANT_directory_iterator_scrub::NONE)
-	scrubber = new ANT_instream_scrub(memory, decompressor, scrubbing_options);
-else
-	scrubber = decompressor;
-
 #ifdef BUFFER_B
-instream_buffer_b = new ANT_instream_buffer(memory, scrubber);
+instream_buffer_b = new ANT_instream_buffer(memory, decompressor);
 #else
-instream_buffer_b = scrubber;
+instream_buffer_b = decompressor;
 #endif
 
-detrecer = new ANT_directory_iterator_file_buffered(instream_buffer_b, ANT_directory_iterator::READ_FILE);
+scrubber = new ANT_instream_scrub(memory, instream_buffer_b, scrubbing_options);
+
+detrecer = new ANT_directory_iterator_file_buffered(scrubber, ANT_directory_iterator::READ_FILE);
 
 return detrecer;
 }
