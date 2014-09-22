@@ -16,6 +16,7 @@
 #include "compress_simple16.h"
 #include "compress_four_integer_variable_byte.h"
 #include "compress_simple9_packed.h"
+#include "compress_simple16_packed.h"
 #include "stats.h"
 
 #ifndef FALSE
@@ -44,6 +45,7 @@ static ANT_compress_sigma sigma;
 static ANT_compress_simple16 simple16;
 static ANT_compress_four_integer_variable_byte four_integer_variable_byte;
 static ANT_compress_simple9_packed simple9_packed;
+static ANT_compress_simple16_packed simple16_packed;
 
 /*
 	ANT_compression_factory::scheme[]
@@ -63,7 +65,8 @@ ANT_compression_factory_scheme ANT_compression_factory::scheme[] =
 {GOLOMB, &golomb, "Golomb"},
 {SIMPLE_16, &simple16, "Simple-16"},
 {FOUR_INTEGER_VARIABLE_BYTE, &four_integer_variable_byte, "Four Integer Variable Byte"},
-{SIMPLE_9_PACKED, &simple9_packed, "Simple-9-Packed"}
+{SIMPLE_9_PACKED, &simple9_packed, "Simple-9-Packed"},
+{SIMPLE_16_PACKED, &simple16_packed, "Simple-16-Packed"}
 };
 
 long ANT_compression_factory::number_of_techniques = sizeof(ANT_compression_factory::scheme) / sizeof(*ANT_compression_factory::scheme);

@@ -31,7 +31,8 @@ public:
 		GOLOMB 			= 256,
 		SIMPLE_16		= 512,
 		FOUR_INTEGER_VARIABLE_BYTE = 1024,
-		SIMPLE_9_PACKED = 2048
+		SIMPLE_9_PACKED = 2048,
+		SIMPLE_16_PACKED = 4096
 		} ;
 private:
 	static long number_of_techniques;
