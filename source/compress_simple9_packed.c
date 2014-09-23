@@ -159,9 +159,6 @@ long long words_in_compressed_string, pos;
 long num_to_pack;
 uint32_t mask_type;
 uint32_t *into = (uint32_t *)destination;
-int remaining;
-
-long compressed_words = 0;
 
 // possibly allocate more memory 
 if (source_integers > blocks_length)

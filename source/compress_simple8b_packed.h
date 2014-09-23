@@ -19,8 +19,9 @@ protected:
 	unsigned char *masks;
 	long blocks_length;
 	
-	static long bits_to_use[];
 	static long ints_packed_table[];
+	static long bits_used_table[];
+	static long bits_to_use[];
 	static long simple8b_packed_shift_table[];
 	static long simple8b_packed_mask_table[];
 private:

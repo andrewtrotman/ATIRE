@@ -39,14 +39,14 @@
 	--------------------------------------------
 	Number of integers packed into a 64-bit word, given its mask type
 */
-const unsigned char ANT_compress_simple8b_packed::ints_packed_table[] = {240, 120, 60, 30, 20, 15, 12, 10, 8, 7, 6, 5, 4, 3, 2, 1};
+long ANT_compress_simple8b_packed::ints_packed_table[] = {240, 120, 60, 30, 20, 15, 12, 10, 8, 7, 6, 5, 4, 3, 2, 1};
 
 /*
 	ANT_COMPRESS_SIMPLE8B_PACKED::BITS_USED_TABLE[]
 	--------------------------------------------
 	Number of bits used to pack integers into the current 64-bit word, given its mask type
 */
-const unsigned char ANT_compress_simple8b_packed::bits_used_table[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 30, 60};
+long ANT_compress_simple8b_packed::bits_used_table[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 30, 60};
 
 /*
 	ANT_COMPRESS_SIMPLE8B_PACKED::BITS_TO_USE[]
@@ -54,7 +54,7 @@ const unsigned char ANT_compress_simple8b_packed::bits_used_table[] = {0, 0, 1, 
 	This is the number of bits that simple-8b_packed has to use to store an integer of the given of number of bits in length
 	(i.e., round 'bits required' up, to fit the next-smallest bit size that we support in this scheme)
 */
-const long ANT_compress_simple8b_packed::bits_to_use[] = 
+long ANT_compress_simple8b_packed::bits_to_use[] = 
 {
  1,  1,  2,  3,  4,  5,  6,  7, 
  8, 10, 10, 12, 12, 15, 15, 15, 
