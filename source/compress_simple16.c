@@ -156,7 +156,7 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	mask_type = 0;
 	while (mask_type < 16)
 		{
-		if (can_pack(source + pos, mask_type, remaining))
+		if (can_pack(source + pos, mask_type, remaining) && ints_packed_table[mask_type] <= remaining)
 			break;
 		mask_type++;
 		}
@@ -165,8 +165,6 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 		return 0;
 
 	num_to_pack = ints_packed_table[mask_type];
-	if (num_to_pack > remaining)
-		num_to_pack = remaining;
 
 	pack(source + pos, into, mask_type, num_to_pack);
 	pos += num_to_pack;
