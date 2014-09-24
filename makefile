@@ -336,6 +336,9 @@ PARTS = \
 	$(OBJDIR)\compress_sigma.obj					\
 	$(OBJDIR)\compress_simple16.obj					\
 	$(OBJDIR)\compress_simple9_packed.obj		\
+	$(OBJDIR)\compress_simple16_packed.obj		\
+	$(OBJDIR)\compress_simple8b.obj		\
+	$(OBJDIR)\compress_simple8b_packed.obj		\
 	$(OBJDIR)\compression_factory.obj				\
 	$(OBJDIR)\compress_text_none.obj				\
 	$(OBJDIR)\compress_text_snappy.obj				\
