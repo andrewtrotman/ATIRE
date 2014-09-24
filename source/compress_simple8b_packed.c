@@ -151,7 +151,7 @@ while (pos < source_integers)
 /* init last value to pack-by-self */
 pos = source_integers - 1;
 blocks_needed[pos] = 0;
-masks[pos] = 8;
+masks[pos] = 15;
 
 /* optimise from second-last value */
 pos = source_integers - 2;
@@ -162,7 +162,7 @@ while (pos >= 0)
 	for (mask_type = 0; mask_type < 16; mask_type++)
 	  {
 		num_to_pack = (pos + ints_packed_table[mask_type] > source_integers) ? source_integers - pos : ints_packed_table[mask_type];
-		if (can_pack(source + pos, mask_type, num_to_pack))
+		if (can_pack(source + pos, mask_type, num_to_pack) && pos + ints_packed_table[mask_type] <= source_integers)
 		  {
 			if (pos + num_to_pack >= source_integers)
 			  {
