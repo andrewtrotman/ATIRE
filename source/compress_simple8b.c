@@ -74,16 +74,21 @@ const long ANT_compress_simple8b::bits_to_use[] =
 */
 long ANT_compress_simple8b::can_pack(ANT_compressable_integer *from, uint32_t mask_type, uint32_t pack_limit)
 {
-ANT_compressable_integer *current = from;
 uint32_t count = 0;
 uint32_t bits_this_block = bits_used_table[mask_type];
 pack_limit = (pack_limit < ints_packed_table[mask_type]) ? pack_limit: ints_packed_table[mask_type];
 while (count < pack_limit)
-  {
-	if (*current++ > (1 << bits_this_block) - 1)
+	{
+	if (*from == 1 && mask_type < 2)
+		{
+		*from++;
+		count++;
+		continue;
+		}
+	if (*from++ >= 1 << bits_this_block)
 		return 0;
-  count++;
-  }
+	count++;
+	}
 return 1;
 }
 
@@ -95,14 +100,15 @@ return 1;
 */
 void ANT_compress_simple8b::pack(ANT_compressable_integer *source, uint64_t *dest, uint32_t mask_type, uint32_t num_to_pack)
 {
-	uint32_t bits_to_shift = 0;
+	uint32_t bits_to_shift = bits_used_table[mask_type];
+	uint32_t bits_shifted = 0;
 	uint32_t offset = 0;
 	*dest = 0;
 	if (mask_type > 1)
 		while (offset < num_to_pack)
 			{
-			*dest |= *(source + offset) << bits_to_shift;
-			bits_to_shift += bits_used_table[mask_type];
+			*dest |= ((uint64_t)*(source + offset)) << bits_shifted;
+			bits_shifted += bits_to_shift;
 			offset++;
 			}
 	*dest = (*dest << 4) | mask_type;
@@ -114,10 +120,10 @@ void ANT_compress_simple8b::pack(ANT_compressable_integer *source, uint64_t *des
 */
 long long ANT_compress_simple8b::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers)
 {
-long long words_in_compressed_string, pos, num_packed;
+long long words_in_compressed_string, pos, remaining;
 long num_to_pack;
+uint32_t mask_type;
 uint64_t *into, *end;
-uint32_t remaining, mask_type;
 
 /* If we're using 32-bit integers, no point storing one or two integers in 64 bits.
    For one integer, we're actually _doubling_ the space required. (32 --> 64)
@@ -130,7 +136,6 @@ into = (uint64_t *)destination;
 end = (uint64_t *)(destination + destination_length);
 
 pos = 0;
-num_packed = 0;
 for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++) // Loop through every word in the source array
 	{
 	remaining = (pos + 240 < source_integers) ? 240 : source_integers - pos;
@@ -138,7 +143,7 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	while (mask_type < 16)
 		{
 		num_to_pack = (pos + ints_packed_table[mask_type] > source_integers) ? source_integers - pos : ints_packed_table[mask_type];
-		if (can_pack(source + pos, mask_type, remaining))
+		if (can_pack(source + pos, mask_type, num_to_pack) && ints_packed_table[mask_type] <= remaining)
 			break;
 		mask_type++;
 		}
@@ -147,9 +152,6 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 		return 0;
 
 	num_to_pack = ints_packed_table[mask_type];
-
-	if (num_to_pack > remaining)
-		num_to_pack = remaining;
 
 	pack(source + pos, into, mask_type, num_to_pack);
 	pos += num_to_pack;
