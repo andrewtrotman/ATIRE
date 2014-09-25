@@ -1430,7 +1430,6 @@ memory_index = rerank(documents_to_examine);
 */
 normalizer = 0;
 terms_in_the_query = 0;
-printf("\n");
 for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_query), term = 0; term_string != NULL; term_string = (ANT_NEXI_term_ant *)term_iterator.next(), term++)
 	{
 	terms_in_the_query += term_string->query_frequency;
@@ -1465,16 +1464,11 @@ for (term_string = (ANT_NEXI_term_ant *)term_iterator.first(parsed_query->NEXI_q
 		document_frequency = term_details.global_document_frequency;
 
 		document_term_score = ranking_function->score_one_document((ANT_compressable_integer)docid, (ANT_compressable_integer)search_engine->document_lengths[docid], term_frequency, collection_frequency, document_frequency, term_string->query_frequency, search_engine->results_list->get_term_count());
-
-printf("%f ", document_term_score);
-
 		document_score = search_engine->results_list->accumulator[docid].get_rsv();
 		term_normaliser = ANT_logsum(term_normaliser, document_term_score + document_score);
 		}
 	normalizer = ANT_logsum(normalizer, term_normaliser);
 	}
-
-printf("Normalizer:%f\n", normalizer);
 
 /*
 	Build the term specific weight

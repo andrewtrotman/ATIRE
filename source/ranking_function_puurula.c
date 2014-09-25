@@ -138,15 +138,11 @@ double ANT_ranking_function_puurula::score_one_document(ANT_compressable_integer
 {
 double prior, rsv, cf, tf = term_frequency;
 
-printf("[ID:%ld length:%ld tf:%ld cf:%ld, df:%ld, qf:%2.2f, ql:%2.2f ", (long)docid, (long)length, (long)term_frequency, (long)collection_frequency, (long)document_frequency, query_frequency, terms_in_query);
-
 tf = max(tf - g * pow(tf, g), 0);
 cf = collection_frequency;
 
 rsv = query_frequency * ANT_logsum(log(tf) + log(collection_length_in_terms) - log(u * cf + 1.0), 0);
 prior = log(1.0 - discounted_document_lengths[(size_t)docid] / ((double)document_lengths[(size_t)docid] + u));
-
-printf("--> tf:%2.2f cf:%2.2f rsv:%2.2f prior:%2.2f]\n", tf, cf, rsv, prior);
 
 return rsv + prior;
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
