@@ -363,8 +363,16 @@ return r; /* Return the rule,stemmed */
 */
 size_t ANT_stem_paice_husk::stem(const char *term, char *destination)
 {
-ANT_paice_husk_rule trule = raw_stem((char *)term);
-strcpy(destination, trule.text);
+if (strlen(term) < maxwdsz)
+	{
+	/*
+		We're smaller than the internal buffers so we can stem
+	*/
+	ANT_paice_husk_rule trule = raw_stem((char *)term);
+	strcpy(destination, trule.text);
+	}
+else
+	strcpy(destination, term);
 return 3;
 }
 
@@ -425,7 +433,7 @@ char *ch;
 
 /* must be a sequence of alphabetic characters (ie, not a number) */
 for (ch = s; *ch != '\0'; ch++)
-	if (!islower(*ch))
+	if (!islower((unsigned char)*ch))
 		return 0;
 
 /* If longer than 3 chars then don't worry */

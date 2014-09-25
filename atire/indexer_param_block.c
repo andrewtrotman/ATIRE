@@ -127,9 +127,9 @@ ANT_indexer_param_block_pregen::help();
 puts("COMPRESSION");
 puts("-----------");
 puts("-c[abBceEgnrstv] Compress postings using any of:");
-puts("   a            try all schemes and choose the best  (same as -cceEfgnrstv)");
+puts("   a            try all schemes and choose the best  (same as -cceEfgnrstTpqQv)");
 puts("   b            try all bitwise schemes and choose the best  (same as -ceEg)");
-puts("   B            try all Bytewise schemes and choose the best (same as -ccfrsStv)");
+puts("   B            try all Bytewise schemes and choose the best (same as -ccfrsStTpqQv)");
 puts("   c            Carryover-12  (bytewise)");
 puts("   e            Elias Delta   (bitwise)");
 puts("   E            Elias Gamma   (bitwise)");
@@ -140,6 +140,10 @@ puts("   r            Relative-10   (bytewise)");
 puts("   s            Simple-9      (bytewise)");
 puts("   S            Sigma         (bytewise)");
 puts("   t            Simple-16     (bytewise)");
+puts("   T            Simple-8b     (64-bit bytewise)");
+puts("   p            Simple-9-Packed      (bytewise)");
+puts("   q            Simple-16-Packed      (bytewise)");
+puts("   Q            Simple-8b-Packed     (64-bit bytewise)");
 puts("   v            Variable Byte (bytewise) [default]");
 puts("-vc             Validate posting compression (and report decompression rates)");
 puts("");
@@ -238,9 +242,9 @@ char *scheme;
 for (scheme = scheme_list; *scheme != '\0'; scheme++)
 	switch (*scheme)
 		{
-		case 'a': compression("ceEfgnrstv"); break;
+		case 'a': compression("ceEfgnrstTpqQv"); break;
 		case 'b': compression("eEg"); break;
-		case 'B': compression("cfrsStv"); break;
+		case 'B': compression("cfrsStTpqQv"); break;
 		case 'c': compression_scheme |= ANT_compression_factory::CARRYOVER_12; break;
 		case 'e': compression_scheme |= ANT_compression_factory::ELIAS_DELTA; break;
 		case 'E': compression_scheme |= ANT_compression_factory::ELIAS_GAMMA; break;
@@ -251,6 +255,10 @@ for (scheme = scheme_list; *scheme != '\0'; scheme++)
 		case 's': compression_scheme |= ANT_compression_factory::SIMPLE_9; break;
 		case 'S': compression_scheme |= ANT_compression_factory::SIGMA; break;
 		case 't': compression_scheme |= ANT_compression_factory::SIMPLE_16; break;
+		case 'T': compression_scheme |= ANT_compression_factory::SIMPLE_8B; break;
+		case 'p': compression_scheme |= ANT_compression_factory::SIMPLE_9_PACKED; break;
+		case 'q': compression_scheme |= ANT_compression_factory::SIMPLE_16_PACKED; break;
+		case 'Q': compression_scheme |= ANT_compression_factory::SIMPLE_8B_PACKED; break;
 		case 'v': compression_scheme |= ANT_compression_factory::VARIABLE_BYTE; break;
 		default : exit(printf("Unknown compression scheme: '%c'\n", *scheme)); break;
 		}
