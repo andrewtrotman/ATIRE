@@ -81,7 +81,7 @@ while (count < pack_limit)
 	{
 	if (*from == 1 && mask_type < 2)
 		{
-		*from++;
+		from++;
 		count++;
 		continue;
 		}

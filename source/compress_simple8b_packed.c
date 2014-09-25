@@ -74,16 +74,21 @@ long ANT_compress_simple8b_packed::bits_to_use[] =
 */
 long ANT_compress_simple8b_packed::can_pack(ANT_compressable_integer *from, uint32_t mask_type, uint32_t pack_limit)
 {
-ANT_compressable_integer *current = from;
 uint32_t count = 0;
 uint32_t bits_this_block = bits_used_table[mask_type];
 pack_limit = (pack_limit < ints_packed_table[mask_type]) ? pack_limit: ints_packed_table[mask_type];
 while (count < pack_limit)
-  {
-	if (*current++ > (1 << bits_this_block) - 1)
+	{
+	if (*from == 1 && mask_type < 2)
+		{
+		from++;
+		count++;
+		continue;
+		}
+	if (*from++ >= 1 << bits_this_block)
 		return 0;
-  count++;
-  }
+	count++;
+	}
 return 1;
 }
 
@@ -95,17 +100,18 @@ return 1;
 */
 void ANT_compress_simple8b_packed::pack(ANT_compressable_integer *source, uint64_t *dest, uint32_t mask_type, uint32_t num_to_pack)
 {
-uint32_t bits_to_shift = 0;
-uint32_t offset = 0;
-*dest = 0;
-if (mask_type > 1)
-	while (offset < num_to_pack)
-		{
-		*dest |= *(source + offset) << bits_to_shift;
-		bits_to_shift += bits_used_table[mask_type];
-		offset++;
-		}
-*dest = (*dest << 4) | mask_type;
+	uint32_t bits_to_shift = bits_used_table[mask_type];
+	uint32_t bits_shifted = 0;
+	uint32_t offset = 0;
+	*dest = 0;
+	if (mask_type > 1)
+		while (offset < num_to_pack)
+			{
+			*dest |= ((uint64_t)*(source + offset)) << bits_shifted;
+			bits_shifted += bits_to_shift;
+			offset++;
+			}
+	*dest = (*dest << 4) | mask_type;
 }
 
 /*
