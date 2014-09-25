@@ -136,17 +136,17 @@ return 1;
 */
 void ANT_compress_simple9_packed::pack(ANT_compressable_integer *source, uint32_t *dest, uint32_t mask_type, uint32_t num_to_pack)
 {
-	int bits_to_shift;
-	int offset = 0;
+	uint32_t offset = 0;
 	int mask_type_offset = 28 * mask_type;
+	uint32_t bits_to_shift = 0;
 	*dest = 0;
 	while (offset < num_to_pack)
 		{
-		bits_to_shift = simple9_packed_shift_table[mask_type_offset + offset];
 		*dest |= *(source + offset) << bits_to_shift;
 		offset++;
+        bits_to_shift = simple9_packed_shift_table[mask_type_offset + offset];
 		}
-	*dest = *dest << 4 | mask_type;
+	*dest = (*dest << 4) | mask_type;
 }
 
 /*
@@ -259,12 +259,12 @@ while (destination < end)
 		Load the details from the lookup table so as to
 		avoid the dereference each decode.
 	*/
-	bits = simple9_packed_table[row].bits;
-	mask = simple9_packed_table[row].mask;
+	bits = simple9_packed_table[8-row].bits;
+	mask = simple9_packed_table[8-row].mask;
 
-	switch (mask)			// unwind the loop
+	switch (row)			// unwind the loop
 		{
-		case 0x01:			// 28 integers
+		case 0:			// 28 integers
 			*destination++ = value & mask;		// mask the current integer
 			value >>= bits;						// shift to the next integer
 			*destination++ = value & mask;
@@ -293,7 +293,7 @@ while (destination < end)
 			value >>= bits;
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x03:		// 14 integers
+		case 1:		// 14 integers
 			*destination++ = value & mask;
 			value >>= bits;
 			*destination++ = value & mask;
@@ -304,29 +304,29 @@ while (destination < end)
 			value >>= bits;
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x07:		// 9 integers
+    case 2:		// 9 integers
 			*destination++ = value & mask;
 			value >>= bits;
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x0F:		// 7 integers
+		case 3:		// 7 integers
 			*destination++ = value & mask;
 			value >>= bits;
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x01F:		// 5 integers
+		case 4:		// 5 integers
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x7F:		// 4 integers
+		case 5:		// 4 integers
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x1FF:		// 3 integers
+		case 6:		// 3 integers
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0x3FFF:	// 2 integers
+		case 7:	// 2 integers
 			*destination++ = value & mask;
 			value >>= bits;
-		case 0xFFFFFFF:	// 1 integer
+		case 8:	// 1 integer
 			*destination++ = value;
 		}
 	}
