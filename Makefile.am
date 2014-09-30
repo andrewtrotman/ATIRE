@@ -49,7 +49,6 @@ core_sources =  \
 	$(SRC_DIR)/arithmetic_model_bigram.c \
 	$(SRC_DIR)/arithmetic_model_tables.c \
 	$(SRC_DIR)/arithmetic_model_unigram.c \
-	$(SRC_DIR)/assessment_ANT.c \
 	$(SRC_DIR)/assessment.c \
 	$(SRC_DIR)/assessment_factory.c \
 	$(SRC_DIR)/assessment_INEX.c \
@@ -60,18 +59,25 @@ core_sources =  \
 	$(SRC_DIR)/bitstring_iterator.c \
 	$(SRC_DIR)/btree_iterator.c \
 	$(SRC_DIR)/channel_file.c \
+	$(SRC_DIR)/channel_inex.c \
 	$(SRC_DIR)/channel_socket.c \
+	$(SRC_DIR)/channel_trec.c \
 	$(SRC_DIR)/compress_carryover12.c \
 	$(SRC_DIR)/compress_elias_delta.c \
 	$(SRC_DIR)/compress_elias_gamma.c \
+	$(SRC_DIR)/compress_four_integer_variable_byte.c \
 	$(SRC_DIR)/compress_golomb.c \
 	$(SRC_DIR)/compression_factory.c \
 	$(SRC_DIR)/compression_text_factory.c \
 	$(SRC_DIR)/compress_none.c \
 	$(SRC_DIR)/compress_relative10.c \
 	$(SRC_DIR)/compress_sigma.c \
-	$(SRC_DIR)/compress_simple9.c \
 	$(SRC_DIR)/compress_simple16.c \
+	$(SRC_DIR)/compress_simple16_packed.c \
+	$(SRC_DIR)/compress_simple8b.c \
+	$(SRC_DIR)/compress_simple8b_packed.c \
+	$(SRC_DIR)/compress_simple9.c \
+	$(SRC_DIR)/compress_simple9_packed.c \
 	$(SRC_DIR)/compress_text_bz2.c \
 	$(SRC_DIR)/compress_text_deflate.c \
 	$(SRC_DIR)/compress_text_none.c \
@@ -83,25 +89,24 @@ core_sources =  \
 	$(SRC_DIR)/directory_iterator_compressor.c \
 	$(SRC_DIR)/directory_iterator_csv.c \
 	$(SRC_DIR)/directory_iterator_deflate.c \
-	$(SRC_DIR)/directory_iterator_file.c \
 	$(SRC_DIR)/directory_iterator_file_buffered.c \
+	$(SRC_DIR)/directory_iterator_file.c \
+	$(SRC_DIR)/directory_iterator_filter.c \
+	$(SRC_DIR)/directory_iterator_filter_spam.c \
 	$(SRC_DIR)/directory_iterator_internals.c \
+	$(SRC_DIR)/directory_iterator_mime_filter.c \
 	$(SRC_DIR)/directory_iterator_multiple.c \
 	$(SRC_DIR)/directory_iterator_mysql.c \
 	$(SRC_DIR)/directory_iterator_pkzip.c \
 	$(SRC_DIR)/directory_iterator_preindex.c \
 	$(SRC_DIR)/directory_iterator_preindex_internals.c \
 	$(SRC_DIR)/directory_iterator_recursive.c \
+	$(SRC_DIR)/directory_iterator_scrub.c \
 	$(SRC_DIR)/directory_iterator_tar.c \
 	$(SRC_DIR)/directory_iterator_tsv.c \
 	$(SRC_DIR)/directory_iterator_warc.c \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.c \
-	$(SRC_DIR)/directory_iterator_scrub.c \
-	$(SRC_DIR)/directory_iterator_filter.c \
-	$(SRC_DIR)/directory_iterator_filter_spam.c \
-	$(SRC_DIR)/directory_iterator_mime_filter.c \
 	$(SRC_DIR)/disk.c \
-	$(SRC_DIR)/event.c \
 	$(SRC_DIR)/evaluation_binary_preference.c \
 	$(SRC_DIR)/evaluation.c \
 	$(SRC_DIR)/evaluation_discounted_cumulative_gain.c \
@@ -117,6 +122,7 @@ core_sources =  \
 	$(SRC_DIR)/evaluation_rank_effectiveness.c \
 	$(SRC_DIR)/evaluation_success_at_n.c \
 	$(SRC_DIR)/evaluator.c \
+	$(SRC_DIR)/event.c \
 	$(SRC_DIR)/file.c \
 	$(SRC_DIR)/file_internals.c \
 	$(SRC_DIR)/file_memory.c \
@@ -132,12 +138,16 @@ core_sources =  \
 	$(SRC_DIR)/instream_bz2.c \
 	$(SRC_DIR)/instream_deflate.c \
 	$(SRC_DIR)/instream_file.c \
+	$(SRC_DIR)/instream_file_star.c \
 	$(SRC_DIR)/instream_lzo.c \
+	$(SRC_DIR)/instream_memory.c \
+	$(SRC_DIR)/instream_pkzip.c \
 	$(SRC_DIR)/instream_scrub.c \
 	$(SRC_DIR)/maths.c \
 	$(SRC_DIR)/memory.c \
 	$(SRC_DIR)/memory_index.c \
 	$(SRC_DIR)/memory_indexer.c \
+	$(SRC_DIR)/memory_index_filename_index.c \
 	$(SRC_DIR)/memory_index_hash_node.c \
 	$(SRC_DIR)/memory_index_one.c \
 	$(SRC_DIR)/mersenne_twister.c \
@@ -161,18 +171,23 @@ core_sources =  \
 	$(SRC_DIR)/query_boolean.c \
 	$(SRC_DIR)/query.c \
 	$(SRC_DIR)/query_parse_tree.c \
+	$(SRC_DIR)/ranking_function_bm25adpt.c \
 	$(SRC_DIR)/ranking_function_bm25.c \
+	$(SRC_DIR)/ranking_function_bm25l.c \
+	$(SRC_DIR)/ranking_function_bm25plus.c \
+	$(SRC_DIR)/ranking_function_bm25t.c \
 	$(SRC_DIR)/ranking_function_bose_einstein.c \
-	$(SRC_DIR)/ranking_function_dfi_idf.c \
-	$(SRC_DIR)/ranking_function_dfi.c \
-	$(SRC_DIR)/ranking_function_dfiw_idf.c \
-	$(SRC_DIR)/ranking_function_dfiw.c \
 	$(SRC_DIR)/ranking_function.c \
+	$(SRC_DIR)/ranking_function_dfi.c \
+	$(SRC_DIR)/ranking_function_dfi_idf.c \
+	$(SRC_DIR)/ranking_function_dfiw.c \
+	$(SRC_DIR)/ranking_function_dfiw_idf.c \
 	$(SRC_DIR)/ranking_function_dfree.c \
 	$(SRC_DIR)/ranking_function_divergence.c \
 	$(SRC_DIR)/ranking_function_dlh13.c \
 	$(SRC_DIR)/ranking_function_docid.c \
 	$(SRC_DIR)/ranking_function_dph.c \
+	$(SRC_DIR)/ranking_function_factory.c \
 	$(SRC_DIR)/ranking_function_impact.c \
 	$(SRC_DIR)/ranking_function_inner_product.c \
 	$(SRC_DIR)/ranking_function_kbtfidf.c \
@@ -180,13 +195,19 @@ core_sources =  \
 	$(SRC_DIR)/ranking_function_lmds.c \
 	$(SRC_DIR)/ranking_function_lmjm.c \
 	$(SRC_DIR)/ranking_function_pregen.c \
+	$(SRC_DIR)/ranking_function_puurula.c \
+	$(SRC_DIR)/ranking_function_puurula_idf.c \
 	$(SRC_DIR)/ranking_function_readability.c \
 	$(SRC_DIR)/ranking_function_term_count.c \
+	$(SRC_DIR)/ranking_function_tflodop.c \
 	$(SRC_DIR)/ranking_function_topsig_negative.c \
 	$(SRC_DIR)/ranking_function_topsig_positive.c \
+	$(SRC_DIR)/readability.c \
 	$(SRC_DIR)/readability_dale_chall.c \
 	$(SRC_DIR)/readability_factory.c \
+	$(SRC_DIR)/readability_tag_weighting.c \
 	$(SRC_DIR)/relevance_feedback_blind_kl.c \
+	$(SRC_DIR)/relevance_feedback_blind_kl_rm.c \
 	$(SRC_DIR)/relevance_feedback.c \
 	$(SRC_DIR)/relevance_feedback_factory.c \
 	$(SRC_DIR)/relevance_feedback_topsig.c \
@@ -204,6 +225,7 @@ core_sources =  \
 	$(SRC_DIR)/search_engine_memory_index.c \
 	$(SRC_DIR)/search_engine_readability.c \
 	$(SRC_DIR)/search_engine_result.c \
+	$(SRC_DIR)/search_engine_result_id_iterator.c \
 	$(SRC_DIR)/search_engine_result_iterator.c \
 	$(SRC_DIR)/semaphores.c \
 	$(SRC_DIR)/snippet_beginning.c \
@@ -249,7 +271,6 @@ core_noinst_headers = \
 	$(SRC_DIR)/arithmetic_model.h \
 	$(SRC_DIR)/arithmetic_model_tables.h \
 	$(SRC_DIR)/arithmetic_model_unigram.h \
-	$(SRC_DIR)/assessment_ANT.h \
 	$(SRC_DIR)/assessment_factory.h \
 	$(SRC_DIR)/assessment.h \
 	$(SRC_DIR)/assessment_INEX.h \
@@ -258,16 +279,20 @@ core_noinst_headers = \
 	$(SRC_DIR)/bitstream.h \
 	$(SRC_DIR)/bitstring.h \
 	$(SRC_DIR)/bitstring_iterator.h \
+	$(SRC_DIR)/bool.h \
 	$(SRC_DIR)/btree.h \
 	$(SRC_DIR)/btree_head_node.h \
 	$(SRC_DIR)/btree_iterator.h \
 	$(SRC_DIR)/channel_file.h \
 	$(SRC_DIR)/channel.h \
+	$(SRC_DIR)/channel_inex.h \
 	$(SRC_DIR)/channel_socket.h \
+	$(SRC_DIR)/channel_trec.h \
 	$(SRC_DIR)/compress_carryover12.h \
 	$(SRC_DIR)/compress_carryover12_internals.h \
 	$(SRC_DIR)/compress_elias_delta.h \
 	$(SRC_DIR)/compress_elias_gamma.h \
+	$(SRC_DIR)/compress_four_integer_variable_byte.h \
 	$(SRC_DIR)/compress_golomb.h \
 	$(SRC_DIR)/compress.h \
 	$(SRC_DIR)/compression_factory.h \
@@ -278,8 +303,12 @@ core_noinst_headers = \
 	$(SRC_DIR)/compress_relative10.h \
 	$(SRC_DIR)/compress_sigma_frequency.h \
 	$(SRC_DIR)/compress_sigma.h \
-	$(SRC_DIR)/compress_simple9.h \
 	$(SRC_DIR)/compress_simple16.h \
+	$(SRC_DIR)/compress_simple16_packed.h \
+	$(SRC_DIR)/compress_simple8b.h \
+	$(SRC_DIR)/compress_simple8b_packed.h \
+	$(SRC_DIR)/compress_simple9.h \
+	$(SRC_DIR)/compress_simple9_packed.h \
 	$(SRC_DIR)/compress_text_bz2.h \
 	$(SRC_DIR)/compress_text_deflate.h \
 	$(SRC_DIR)/compress_text_deflate_internals.h \
@@ -293,10 +322,13 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_compressor.h \
 	$(SRC_DIR)/directory_iterator_csv.h \
 	$(SRC_DIR)/directory_iterator_deflate.h \
-	$(SRC_DIR)/directory_iterator_file.h \
 	$(SRC_DIR)/directory_iterator_file_buffered.h \
+	$(SRC_DIR)/directory_iterator_file.h \
+	$(SRC_DIR)/directory_iterator_filter.h \
+	$(SRC_DIR)/directory_iterator_filter_spam.h \
 	$(SRC_DIR)/directory_iterator.h \
 	$(SRC_DIR)/directory_iterator_internals.h \
+	$(SRC_DIR)/directory_iterator_mime_filter.h \
 	$(SRC_DIR)/directory_iterator_multiple.h \
 	$(SRC_DIR)/directory_iterator_multiple_internals.h \
 	$(SRC_DIR)/directory_iterator_mysql.h \
@@ -306,15 +338,12 @@ core_noinst_headers = \
 	$(SRC_DIR)/directory_iterator_preindex.h \
 	$(SRC_DIR)/directory_iterator_preindex_internals.h \
 	$(SRC_DIR)/directory_iterator_recursive.h \
+	$(SRC_DIR)/directory_iterator_scrub.h \
 	$(SRC_DIR)/directory_iterator_tar_file_header.h \
 	$(SRC_DIR)/directory_iterator_tar.h \
 	$(SRC_DIR)/directory_iterator_tsv.h \
 	$(SRC_DIR)/directory_iterator_warc_gz_recursive.h \
 	$(SRC_DIR)/directory_iterator_warc.h \
-	$(SRC_DIR)/directory_iterator_scrub.h \
-	$(SRC_DIR)/directory_iterator_filter.h \
-	$(SRC_DIR)/directory_iterator_filter_spam.h \
-	$(SRC_DIR)/directory_iterator_mime_filter.h \
 	$(SRC_DIR)/disk_directory.h \
 	$(SRC_DIR)/disk.h \
 	$(SRC_DIR)/encode_char_8bit.h \
@@ -325,8 +354,6 @@ core_noinst_headers = \
 	$(SRC_DIR)/encode_char_base40.h \
 	$(SRC_DIR)/encode_char.h \
 	$(SRC_DIR)/encode_char_printable_ascii.h \
-	$(SRC_DIR)/event.h \
-	$(SRC_DIR)/event_internals.h \
 	$(SRC_DIR)/evaluation_binary_preference.h \
 	$(SRC_DIR)/evaluation_discounted_cumulative_gain.h \
 	$(SRC_DIR)/evaluation_expected_reciprocal_rank.h \
@@ -342,6 +369,8 @@ core_noinst_headers = \
 	$(SRC_DIR)/evaluation_rank_effectiveness.h \
 	$(SRC_DIR)/evaluation_success_at_n.h \
 	$(SRC_DIR)/evaluator.h \
+	$(SRC_DIR)/event.h \
+	$(SRC_DIR)/event_internals.h \
 	$(SRC_DIR)/fence.h \
 	$(SRC_DIR)/file.h \
 	$(SRC_DIR)/file_internals.h \
@@ -366,13 +395,18 @@ core_noinst_headers = \
 	$(SRC_DIR)/instream_deflate.h \
 	$(SRC_DIR)/instream_deflate_internals.h \
 	$(SRC_DIR)/instream_file.h \
+	$(SRC_DIR)/instream_file_star.h \
 	$(SRC_DIR)/instream.h \
 	$(SRC_DIR)/instream_lzo.h \
+	$(SRC_DIR)/instream_memory.h \
+	$(SRC_DIR)/instream_pkzip.h \
 	$(SRC_DIR)/instream_scrub.h \
 	$(SRC_DIR)/maths.h \
+	$(SRC_DIR)/max_quantum.h \
 	$(SRC_DIR)/memory.h \
 	$(SRC_DIR)/memory_indexer.h \
 	$(SRC_DIR)/memory_indexer_node.h \
+	$(SRC_DIR)/memory_index_filename_index.h \
 	$(SRC_DIR)/memory_index.h \
 	$(SRC_DIR)/memory_index_hash_node.h \
 	$(SRC_DIR)/memory_index_one.h \
@@ -399,7 +433,6 @@ core_noinst_headers = \
 	$(SRC_DIR)/pragma.h \
 	$(SRC_DIR)/precision_recall.h \
 	$(SRC_DIR)/pregen_field_type.h \
-	$(SRC_DIR)/pregen_file_header.h \
 	$(SRC_DIR)/pregen.h \
 	$(SRC_DIR)/pregen_kendall_tau.h \
 	$(SRC_DIR)/pregens_writer.h \
@@ -414,18 +447,23 @@ core_noinst_headers = \
 	$(SRC_DIR)/query_boolean.h \
 	$(SRC_DIR)/query.h \
 	$(SRC_DIR)/query_parse_tree.h \
+	$(SRC_DIR)/ranking_function_bm25adpt.h \
 	$(SRC_DIR)/ranking_function_bm25.h \
+	$(SRC_DIR)/ranking_function_bm25l.h \
+	$(SRC_DIR)/ranking_function_bm25plus.h \
+	$(SRC_DIR)/ranking_function_bm25t.h \
 	$(SRC_DIR)/ranking_function_bose_einstein.h \
-	$(SRC_DIR)/ranking_function_dfi_idf.h \
 	$(SRC_DIR)/ranking_function_dfi.h \
-	$(SRC_DIR)/ranking_function_dfiw_idf.h \
+	$(SRC_DIR)/ranking_function_dfi_idf.h \
 	$(SRC_DIR)/ranking_function_dfiw.h \
+	$(SRC_DIR)/ranking_function_dfiw_idf.h \
 	$(SRC_DIR)/ranking_function_dfree.h \
 	$(SRC_DIR)/ranking_function_divergence.h \
 	$(SRC_DIR)/ranking_function_dlh13.h \
 	$(SRC_DIR)/ranking_function_docid.h \
 	$(SRC_DIR)/ranking_function_dph.h \
 	$(SRC_DIR)/ranking_function_factory.h \
+	$(SRC_DIR)/ranking_function_factory_object.h \
 	$(SRC_DIR)/ranking_function.h \
 	$(SRC_DIR)/ranking_function_impact.h \
 	$(SRC_DIR)/ranking_function_inner_product.h \
@@ -434,9 +472,12 @@ core_noinst_headers = \
 	$(SRC_DIR)/ranking_function_lmds.h \
 	$(SRC_DIR)/ranking_function_lmjm.h \
 	$(SRC_DIR)/ranking_function_pregen.h \
+	$(SRC_DIR)/ranking_function_puurula.h \
+	$(SRC_DIR)/ranking_function_puurula_idf.h \
 	$(SRC_DIR)/ranking_function_quantum_parameters.h \
 	$(SRC_DIR)/ranking_function_readability.h \
 	$(SRC_DIR)/ranking_function_term_count.h \
+	$(SRC_DIR)/ranking_function_tflodop.h \
 	$(SRC_DIR)/ranking_function_topsig.h \
 	$(SRC_DIR)/ranking_function_topsig_negative.h \
 	$(SRC_DIR)/ranking_function_topsig_positive.h \
@@ -445,7 +486,9 @@ core_noinst_headers = \
 	$(SRC_DIR)/readability_factory.h \
 	$(SRC_DIR)/readability.h \
 	$(SRC_DIR)/readability_none.h \
+	$(SRC_DIR)/readability_tag_weighting.h \
 	$(SRC_DIR)/relevance_feedback_blind_kl.h \
+	$(SRC_DIR)/relevance_feedback_blind_kl_rm.h \
 	$(SRC_DIR)/relevance_feedback_factory.h \
 	$(SRC_DIR)/relevance_feedback.h \
 	$(SRC_DIR)/relevance_feedback_topsig.h \
@@ -468,6 +511,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/search_engine_memory_index.h \
 	$(SRC_DIR)/search_engine_readability.h \
 	$(SRC_DIR)/search_engine_result.h \
+	$(SRC_DIR)/search_engine_result_id_iterator.h \
 	$(SRC_DIR)/search_engine_result_iterator.h \
 	$(SRC_DIR)/semaphores.h \
 	$(SRC_DIR)/semaphores_internals.h \
@@ -509,6 +553,7 @@ core_noinst_headers = \
 	$(SRC_DIR)/stem_porter.h \
 	$(SRC_DIR)/stem_s.h \
 	$(SRC_DIR)/stem_snowball.h \
+	$(SRC_DIR)/stem_stemmer.h \
 	$(SRC_DIR)/stop_word.h \
 	$(SRC_DIR)/str.h \
 	$(SRC_DIR)/string_pair_constant.h \
@@ -536,7 +581,7 @@ main_sources = $(ATIRE_DIR)/atire.c \
 			  $(ATIRE_DIR)/atire_client.c \
 			  $(ATIRE_DIR)/atire_broker.c \
 			  $(ATIRE_DIR)/atire_dictionary.c \
-			  $(ATIRE_DIR)/get_doclist.c
+			  $(ATIRE_DIR)/atire_doclist.c
 			  
 main_headers = $(ATIRE_DIR)/atire_api_remote.h \
 			$(ATIRE_DIR)/atire_broke_engine.h \
@@ -638,7 +683,7 @@ libatire_ant_param_la_LIBADD = $(ATIRE_INDEX_PARAM_LIB)
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-bin_PROGRAMS = index atire atire_client atire_broker atire_dictionary get_doclist
+bin_PROGRAMS = index atire atire_client atire_broker atire_dictionary atire_doclist
 
 atire_SOURCES = \
 	$(ATIRE_DIR)/atire.c 
@@ -696,9 +741,9 @@ atire_dictionary_SOURCES = $(ATIRE_DIR)/atire_dictionary.c
 atire_dictionary_LDADD = $(ATIRE_CORE_LIB)
 atire_dictionary_DEPENDENCIES = $(ATIRE_CORE_LIB)
 
-get_doclist_SOURCES = $(ATIRE_DIR)/get_doclist.c 
-get_doclist_LDADD = $(ATIRE_CORE_LIB)
-get_doclist_DEPENDENCIES = $(ATIRE_CORE_LIB)
+atire_doclist_SOURCES = $(ATIRE_DIR)/atire_doclist.c 
+atire_doclist_LDADD = $(ATIRE_CORE_LIB)
+atire_doclist_DEPENDENCIES = $(ATIRE_CORE_LIB)
 
 ##############################################################################
 #  use this if it is really necessary to have same source files with $(ATIRE_API_LIB)
