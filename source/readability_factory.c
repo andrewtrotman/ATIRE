@@ -22,6 +22,8 @@ measure[NONE] = new ANT_readability_none();
 measure[DALE_CHALL] = new ANT_readability_dale_chall();
 measure[TAG_WEIGHTING] = new ANT_readability_TAG_WEIGHTING();
 measure[END_OF_LIST] = NULL;//new ANT_readability;
+
+current_file = NULL;
 }
 
 /*
@@ -128,6 +130,15 @@ measure_to_use = what_measure;
 }
 
 /*
+	READABILITY_FACTORY::SET_CURRENT_FILE()
+	----------------------------------
+*/
+void ANT_readability_factory::set_current_file(	ANT_directory_iterator_object* object)
+{
+current_file = object;
+}
+
+/*
 	READABILITY_FACTORY::HANDLE_NODE()
 	----------------------------------
 */
@@ -154,5 +165,5 @@ if (measure[measure_to_use] != NULL)
 void ANT_readability_factory::index(ANT_memory_indexer *index, long long doc)
 {
 if (measure[measure_to_use] != NULL)
-	measure[measure_to_use]->index(index, doc);
+	measure[measure_to_use]->index(index, doc, current_file);
 }

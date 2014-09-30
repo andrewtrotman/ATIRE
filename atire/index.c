@@ -509,6 +509,7 @@ for (param = first_param; param < argc; param++)
 			doc++;
 			bytes_indexed += current_file->length;
 
+			readability->set_current_file(current_file);
 			/*
 				Report
 			*/

@@ -62,6 +62,10 @@ int ischinese(unsigned long character);
 inline int ischinese(const unsigned char *here) { return ischinese(utf8_to_wide(here)); }
 inline int ischinese(const char *here) { return ischinese((const unsigned char *)here); }
 
+int utf8_ispuntuation(unsigned long character);
+inline int utf8_ispuntuation(const unsigned char *here) { return utf8_ispuntuation(utf8_to_wide(here)); }
+inline int utf8_ispuntuation(const char *here) { return utf8_ispuntuation((const unsigned char *)here); }
+
 int utf8_isupper(unsigned long character);
 int utf8_isupper(long character);
 
