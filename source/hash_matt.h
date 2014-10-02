@@ -19,6 +19,13 @@
 
 extern unsigned char ANT_matt_hash_encode[];
 
+static inline long ascii(ANT_string_pair *string, size_t len) {
+	unsigned char ans = (*string)[0];
+	if (len > 1) ans |= (*string)[1];
+	if (len > 2) ans |= (*string)[2];
+	return ans & 0x80;
+}
+
 /*
 	ANT_HASH_MATT_8()
 	-----------------
@@ -77,11 +84,13 @@ size_t len;
 /*
 	Use a header hash if they are less than 3 bytes long and all
 	ascii, otherwise randomly hash over the remaining space
+
+	Ordered from least likely to most likely to succeed to minimise time
 */
 #if HASHER == MATT_N
-if ((len = string->length()) < 4 && !ANT_isdigit((*string)[0]))// && string->ascii())
+if ((len = string->length()) < 4 && !ANT_isdigit((*string)[0]) && ascii(string, len))
 #else
-if ((len = string->length()) < 4)// && string->ascii())
+if ((len = string->length()) < 4 && ascii(string, len))
 #endif
 	{
 	if (len < 4)
