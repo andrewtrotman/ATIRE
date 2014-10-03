@@ -65,7 +65,7 @@ matching_tag = NULL;
 	READABILITY_TAG_WEIGHTING::HANDLE_TAG()
 	---------------------------------------
 */
-void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_string_pair *tag, long tag_open, ANT_parser *parser)
+void ANT_readability_TAG_WEIGHTING::handle_tag(ANT_parser_token *tag, long tag_open, ANT_parser *parser)
 {
 if (tag_open)
 	{
@@ -89,7 +89,7 @@ else
 	}
 }
 
-void ANT_readability_TAG_WEIGHTING::handle_token(ANT_string_pair *token)
+void ANT_readability_TAG_WEIGHTING::handle_token(ANT_parser_token *token)
 {
 /*
   the title may begin with "Wikipedia:", if term_count is greater than 1, then we ignoring it
@@ -139,7 +139,7 @@ if (term_count == 0)
 // now we add the full title, full category information in the dictionary
 char buffer[MAX_TERM_LENGTH];
 char *start, *info_buf_start;
-ANT_string_pair what;
+ANT_parser_token what;
 long long length = 0;
 int i;
 
@@ -186,11 +186,12 @@ unscape_xml(title);
 length = title.length();
 
 memcpy(info_buf_start, title.c_str(), length);
-info_buf_start += length;
-*info_buf_start = '\0';
+//info_buf_start += length;
+*(info_buf_start + length) = '\0';
 what.string_length += length;
 
-info_buf_start = utf8_tolower(info_buf);
+while (*info_buf_start != '\0')
+ info_buf_start = utf8_tolower(info_buf_start);
 
 /* the following solution doesn't work well. we have to have the exact title as it is */
 /*

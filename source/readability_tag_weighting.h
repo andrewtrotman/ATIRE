@@ -15,7 +15,7 @@
 
 class ANT_memory_indexer;
 
-class ANT_string_pair;
+class ANT_parser_token;
 
 class ANT_directory_iterator_object;
 
@@ -42,8 +42,8 @@ public:
 	ANT_readability_TAG_WEIGHTING();
 	virtual ~ANT_readability_TAG_WEIGHTING();
 
-	void handle_tag(ANT_string_pair *token, long tag_open, ANT_parser *parser);
-	void handle_token(ANT_string_pair *token);
+	void handle_tag(ANT_parser_token *token, long tag_open, ANT_parser *parser);
+	void handle_token(ANT_parser_token *token);
 
 	void index(ANT_memory_indexer *index, long long doc, ANT_directory_iterator_object *current_file);
 
