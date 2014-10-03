@@ -548,3 +548,13 @@ return
 	 || (character >= 0x2f800 && character <= 0x2fa1f));	// CJK Compatibility Ideographs Supplement
 }
 
+/*
+	UTF8_ISPUNCTUATION()
+	-----------
+	Is the given character from the punctuation CodePoint?
+	http://www.unicode.org/charts/PDF/U2000.pdf
+*/
+int utf8_ispuntuation(unsigned long character)
+{
+return character >= 0x02000 && character <= 0x0206f;		// General Punctuation, U+206A - U+206F are deprecated
+}

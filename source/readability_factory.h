@@ -26,6 +26,7 @@ private:
 	ANT_readability **measure;
 	unsigned long measure_to_use;
 	ANT_parser *parser;
+	ANT_directory_iterator_object *current_file;
 
 public:
 	ANT_readability_factory();
@@ -41,6 +42,8 @@ public:
 	void set_measure(unsigned long value);
 
 	void set_parser(ANT_parser *parser);
+
+	void set_current_file(ANT_directory_iterator_object *object);
 };
 
 

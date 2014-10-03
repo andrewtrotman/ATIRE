@@ -2,7 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([Atire], [0.3], [BUG-REPORT-ADDRESS])
+AC_INIT([Atire], [0.5-alpha], [BUG-REPORT-ADDRESS])
+
 AC_CONFIG_SRCDIR([atire/atire.c])
 #AC_CONFIG_HEADERS([config.h])
 #AC_CONFIG_MACRO_DIR([m4])
@@ -22,6 +23,8 @@ AM_PROG_CC_C_O
 # Check for macros
 AC_FUNC_MALLOC
 
+AC_CONFIG_MACRO_DIR([m4])
+
 AC_ARG_WITH([pi],
             AC_HELP_STRING([--with-pi],
                        [Define PARALLEL_INDEXING macro]),
@@ -37,6 +40,15 @@ AC_ARG_WITH(mysql,
 		[	
 		]
 		)
+		
+AC_ARG_WITH(doclist, AC_HELP_STRING([--with-doclist],
+                       [Create separated doclist]), [], 
+                       [
+                            CFLAGS="$CFLAGS -DFILENAME_INDEX"
+            				CXXFLAGS="$CXXFLAGS -DFILENAME_INDEX"
+                       ]
+                       )
+	
 		
 # Get MySQL library and include locations if set
 AS_IF([test -z "$HAS_MYSQL"], [],

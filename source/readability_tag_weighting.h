@@ -9,11 +9,15 @@
 #include "readability.h"
 #include "btree_iterator.h"
 
+#include <string>
+
 #define MAX_TERM_COUNT 1000
 
 class ANT_memory_indexer;
 
-class ANT_string_pair;
+class ANT_parser_token;
+
+class ANT_directory_iterator_object;
 
 class ANT_readability_TAG_WEIGHTING : public ANT_readability
 {
@@ -41,7 +45,9 @@ public:
 	void handle_tag(ANT_parser_token *token, long tag_open, ANT_parser *parser);
 	void handle_token(ANT_parser_token *token);
 
-	void index(ANT_memory_indexer *index, long long doc);
+	void index(ANT_memory_indexer *index, long long doc, ANT_directory_iterator_object *current_file);
+
+	static void unscape_xml(std::string& text);
 };
 
 #endif /* READABILITY_TAG_WEIGHTING_H_ */

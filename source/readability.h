@@ -11,6 +11,8 @@
 #include "memory_index.h"
 #include "memory_index_hash_node.h"
 
+class ANT_directory_iterator_object;
+
 /* 
 	class ANT_READABILITY
 	---------------------
@@ -23,7 +25,7 @@ public:
 	ANT_readability() {}
 	virtual ~ANT_readability() {}
 	
-	virtual void index(ANT_memory_indexer *index, long long doc) { (void)index; /* prevent compiler warning */ }
+	virtual void index(ANT_memory_indexer *index, long long doc, ANT_directory_iterator_object *current_file) { (void)index; /* prevent compiler warning */ }
 
 protected:
 	ANT_string_pair *measure_name;
