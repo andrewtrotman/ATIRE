@@ -549,6 +549,45 @@ return
 }
 
 /*
+	ISKOREAN()
+	-----------
+	Is the given character from the Korean CodePoint?
+*/
+int iskorean(unsigned long character)
+{
+return
+	character >= 0x01100 &&
+	((character <= 0x011ff)									// Hangul Jamo
+	 || (character >= 0x0ac00 && character <= 0x0d7a3)		// Hangul Syllables
+	 || (character >= 0x03130 && character <= 0x0318f)		// Hangul Compatibility Jamo
+	 || (character >= 0x0a960 && character <= 0x0a97f)		// Hangul Jamo Extended-A
+	 || (character >= 0x0d7b0 && character <= 0x0d7ff));	// Hangul Jamo Extended-B
+}
+
+/*
+	ISJAPANESE()
+	-----------
+	Is the given character from the Japanese CodePoint?
+*/
+int isjapanese(unsigned long character)
+{
+return
+	character >= 0x03040 &&
+	 ((character <= 0x0309f)								// Hiragana
+	 || (character >= 0x030a0 && character <= 0x030ff));	// Katakana
+}
+
+/*
+	IS_CJK_LANGUAGE()
+	----------------
+	Is the given character from the Chinese, Korean Japanese CodePoint?
+*/
+int is_cjk_language(unsigned long character)
+{
+return ischinese(character) || iskorean(character) || isjapanese(character);
+}
+
+/*
 	UTF8_ISPUNCTUATION()
 	-----------
 	Is the given character from the punctuation CodePoint?

@@ -142,7 +142,7 @@ else
 		/*
 			This is ordered on the most probable character we're going to see (so it isn't that dumb)
 		*/
-		if (character_type == CT_LETTER || character_type == CT_NUMBER || character_type == CT_PUNCTUATION || (character_type == CT_OTHER && (character == SPECIAL_TERM_CHAR || ischinese(character))))
+		if (character_type == CT_LETTER || character_type == CT_NUMBER || character_type == CT_PUNCTUATION || (character_type == CT_OTHER && (character == SPECIAL_TERM_CHAR || is_cjk_language(character))))
 			break;
 
 		current += bytes;
@@ -158,7 +158,7 @@ for (;;)
 
 	character_type = unicode_chartype_set(character);
 
-	if (character_type == CT_LETTER || character_type == CT_NUMBER || character_type == CT_PUNCTUATION || (character_type == CT_OTHER && (character == SPECIAL_TERM_CHAR || ischinese(character))))
+	if (character_type == CT_LETTER || character_type == CT_NUMBER || character_type == CT_PUNCTUATION || (character_type == CT_OTHER && (character == SPECIAL_TERM_CHAR || is_cjk_language(character))))
 		break;
 
 	current += utf8_bytes(current);
@@ -304,7 +304,7 @@ else if (character_type == CT_OTHER && character == SPECIAL_TERM_CHAR)
 	current_token.start = (char *)start;
 	current_token.string_length = current - start;
 	}
-else if (character_type == CT_OTHER && ischinese(character))
+else if (character_type == CT_OTHER && is_cjk_language(character))
 	{
 	pre_length_of_token = 0;
 	word_count = 1;
@@ -318,7 +318,7 @@ else if (character_type == CT_OTHER && ischinese(character))
 
 	if (should_segment)
 		{
-		while (ischinese(current))		// don't need to check for '\0' because that isn't a Chinese character
+		while (is_cjk_language(current))		// don't need to check for '\0' because that isn't a Chinese character
 			{
 			pre_length_of_token = utf8_bytes(current);
 			current += pre_length_of_token;
@@ -339,7 +339,7 @@ else if (character_type == CT_OTHER && ischinese(character))
 	current_token.string_length = current - start;
 
 	// post-processing, for bigram indexing, needs move backward
-	if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && ischinese(current))
+	if ((should_segment & BIGRAM_SEGMENTATION) == BIGRAM_SEGMENTATION && is_cjk_language(current))
 		current -= pre_length_of_token;
 	}
 else											// everything else (that starts with a '<')

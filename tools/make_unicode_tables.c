@@ -380,7 +380,7 @@ for (current = lines; *current != NULL; current++)
 		{
 		chartype = (ANT_UNICODE_chartype) chartypes[character];
 
-		if (ischinese(character))
+		if (is_cjk_language(character))
 			chartype = CT_OTHER;
 
 		switch (chartype)
@@ -413,13 +413,13 @@ for (current = lines; *current != NULL; current++)
 						}
 
 					printf("{%u, (unsigned char)(%s%s)}", character, ANT_UNICODE_chartype_string[(int) chartype],
-							ischinese(character) ? " | CT_CHINESE" : "");
+							is_cjk_language(character) ? " | CT_CHINESE" : "");
 					}
 
 				times++;
 				break;
 			default:
-				if (ischinese(character))
+				if (is_cjk_language(character))
 					{
 					if (times != 0)
 						{
