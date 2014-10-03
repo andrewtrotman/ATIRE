@@ -28,7 +28,7 @@ private:
 
 public:
 	ANT_directory_iterator_tsv(ANT_instream *source, long get_file = 0) : ANT_directory_iterator("", get_file), source(source) {}
-	virtual ~ANT_directory_iterator_tsv() {}
+	virtual ~ANT_directory_iterator_tsv() { delete source; }
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);

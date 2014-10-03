@@ -19,21 +19,19 @@ long ANT_directory_iterator_warc_gz_recursive::tid = 0;
 	ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE::ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE()
 	------------------------------------------------------------------------------------
 */
-ANT_directory_iterator_warc_gz_recursive::ANT_directory_iterator_warc_gz_recursive(char *source, long get_file, long long scrubbing_options) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_warc_gz_recursive::ANT_directory_iterator_warc_gz_recursive(char *source, long get_file) : ANT_directory_iterator("", get_file)
 {
 ANT_directory_iterator_object filename;
 
 this->source = source;
 filename_provider = new ANT_directory_iterator_recursive(source, 0);
 
-this->scrubbing_options = scrubbing_options;
-
 more_files = filename_provider->first(&filename);
 first_time = true;
 
 file_stream = NULL;
 decompressor = NULL;
-instream_buffer_a = instream_buffer_b = NULL;
+instream_buffer = NULL;
 dewarcer = NULL;
 memory = NULL;
 
@@ -54,10 +52,6 @@ sprintf(message, "warc_gz_recursive %ld ", ANT_directory_iterator_warc_gz_recurs
 */
 ANT_directory_iterator_warc_gz_recursive::~ANT_directory_iterator_warc_gz_recursive()
 {
-delete file_stream;
-delete decompressor;
-delete instream_buffer_a;
-delete instream_buffer_b;
 delete dewarcer;
 delete memory;
 }
@@ -66,33 +60,16 @@ delete memory;
 	ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE::NEW_PROVIDER()
 	--------------------------------------------------------
 */
-ANT_directory_iterator_warc *ANT_directory_iterator_warc_gz_recursive::new_provider(char *filename)
+ANT_directory_iterator *ANT_directory_iterator_warc_gz_recursive::new_provider(char *filename)
 {
-delete file_stream;
-delete decompressor;
-delete instream_buffer_a;
-delete instream_buffer_b;
 delete dewarcer;
 delete memory;
 
 memory = new ANT_memory(1024 * 1024);
 file_stream = new ANT_instream_file(memory, filename);
-
-#ifdef BUFFER_A
-instream_buffer_a = new ANT_instream_buffer(memory, file_stream);
-#else
-instream_buffer_a = decompressor;
-#endif
-
-decompressor = new ANT_instream_deflate(memory, instream_buffer_a);
-
-#ifdef BUFFER_B
-instream_buffer_b = new ANT_instream_buffer(memory, decompressor);
-#else
-instream_buffer_b = decompressor;
-#endif
-
-dewarcer = new ANT_directory_iterator_warc(instream_buffer_b, ANT_directory_iterator::READ_FILE);
+decompressor = new ANT_instream_deflate(memory, file_stream);
+instream_buffer = new ANT_instream_buffer(memory, decompressor);
+dewarcer = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
 
 return dewarcer;
 }

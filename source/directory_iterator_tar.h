@@ -37,7 +37,7 @@ private:
 
 public:
 	ANT_directory_iterator_tar(ANT_instream *source, long get_file = 0, long filename_mode = FULL);// : ANT_directory_iterator("", get_file) { this->source = source; this->filename_mode = filename_mode; }
-	virtual ~ANT_directory_iterator_tar() {}
+	virtual ~ANT_directory_iterator_tar() { delete source; }
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);

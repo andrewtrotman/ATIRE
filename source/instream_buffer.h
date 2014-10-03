@@ -9,10 +9,6 @@
 
 class ANT_semaphores;
 
-#ifndef BUFFER_SIZE
-	#define BUFFER_SIZE 16
-#endif
-
 /*
 	class ANT_INSTREAM_BUFFER
 	-------------------------
@@ -20,7 +16,7 @@ class ANT_semaphores;
 class ANT_instream_buffer : public ANT_instream
 {
 protected:
-	static const long buffer_size = (BUFFER_SIZE * 1024 * 1024);
+	static const long buffer_size = (16 * 1024 * 1024);
 	static long tid;
 
 	struct background_read_params {
@@ -39,10 +35,11 @@ protected:
 
 	static void *background_read(void *params);
 	ANT_semaphores *read_sem, *swap_sem;
+	long double_buffered;
 
 public:
-	ANT_instream_buffer(ANT_memory *memory, ANT_instream *source);
-	virtual ~ANT_instream_buffer();
+	ANT_instream_buffer(ANT_memory *memory, ANT_instream *source, long double_buffered=false);
+	virtual ~ANT_instream_buffer() {}
 
 	virtual long long read(unsigned char *data, long long size);
 

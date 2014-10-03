@@ -44,33 +44,8 @@ primary_buffer_used = secondary_buffer_used = buffer_size;
 buffer_to_read_from = &primary_buffer;
 end_of_buffer = &primary_buffer_used;
 
-#ifdef NEVER
-buffer_to_read_into = &secondary_buffer;
-end_of_second_buffer = &secondary_buffer_used;
-#else
 buffer_to_read_into = buffer_to_read_from;
 end_of_second_buffer = end_of_buffer;
-#endif
-
-#ifdef NEVER
-primary_buffer_used = read(primary_buffer, buffer_size);
-secondary_buffer_used = 0;
-#endif
-
-read_sem = new ANT_semaphores(1, 1);
-swap_sem = new ANT_semaphores(0, 1);
-
-#ifdef DOUBLE_BUFFER
-params.buffer = &buffer_to_read_into;
-params.read_sem = read_sem;
-params.swap_sem = swap_sem;
-params.source = source;
-params.read_result = &end_of_second_buffer;
-
-#ifdef NEVER
-ANT_thread(background_read, (void *)&params);
-#endif
-#endif
 
 this->auto_file_id = 0;
 
@@ -99,27 +74,6 @@ delete [] docno_tag;
 
 delete source;
 delete clock;
-}
-
-/*
-	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::BACKGROUND_READ()
-	-------------------------------------------------------
-*/
-void *ANT_directory_iterator_file_buffered::background_read(void *params)
-{
-struct background_read_params *p = (struct background_read_params *)params;
-
-for (;;)
-	{
-	p->read_sem->enter();
-	**(p->read_result) = p->source->read(**p->buffer, buffer_size);
-	p->swap_sem->leave();
-
-	if (**(p->read_result) <= 0)
-		break;
-	}
-
-return NULL;
 }
 
 /*

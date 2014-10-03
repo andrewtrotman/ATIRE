@@ -39,7 +39,6 @@ if (source->first(&object) != NULL)
 ANT_instream_pkzip::~ANT_instream_pkzip()
 {
 delete [] current_file;
-delete source;
 }
 
 /*

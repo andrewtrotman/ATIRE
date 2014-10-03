@@ -33,7 +33,6 @@ sprintf(message, "scrub %ld ", ANT_instream_scrub::tid++);
 ANT_instream_scrub::~ANT_instream_scrub()
 {
 delete clock;
-delete source;
 }
 
 /*

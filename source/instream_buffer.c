@@ -15,8 +15,9 @@ long ANT_instream_buffer::tid = 0;
 	ANT_INSTREAM_BUFFER::ANT_INSTREAM_BUFFER()
 	------------------------------------------
 */
-ANT_instream_buffer::ANT_instream_buffer(ANT_memory *memory, ANT_instream *source) : ANT_instream(memory, source)
+ANT_instream_buffer::ANT_instream_buffer(ANT_memory *memory, ANT_instream *source, long double_buffered) : ANT_instream(memory, source)
 {
+this->double_buffered = double_buffered;
 position = 0;
 primary_buffer = (unsigned char *)memory->malloc(buffer_size);
 secondary_buffer = (unsigned char *)memory->malloc(buffer_size);
@@ -24,13 +25,16 @@ secondary_buffer = (unsigned char *)memory->malloc(buffer_size);
 buffer_to_read_from = &primary_buffer;
 end_of_buffer = &position_of_end_of_buffer;
 
-#ifdef DOUBLE_BUFFER
-buffer_to_read_into = &secondary_buffer;
-end_of_second_buffer = &position_of_end_of_second_buffer;
-#else
-buffer_to_read_into = buffer_to_read_from;
-end_of_second_buffer = end_of_buffer;
-#endif
+if (double_buffered)
+	{
+	buffer_to_read_into = &secondary_buffer;
+	end_of_second_buffer = &position_of_end_of_second_buffer;
+	}
+else
+	{
+	buffer_to_read_into = buffer_to_read_from;
+	end_of_second_buffer = end_of_buffer;
+	}
 
 position_of_end_of_buffer = position_of_end_of_second_buffer = 0;
 
@@ -45,24 +49,16 @@ swap_sem = new ANT_semaphores(0, 1);
 message = new char[50];
 sprintf(message, "buffer %ld ", ANT_instream_buffer::tid++);
 
-#ifdef DOUBLE_BUFFER
-params.buffer = &buffer_to_read_into;
-params.read_sem = read_sem;
-params.swap_sem = swap_sem;
-params.source = source;
-params.read_result = &end_of_second_buffer;
+if (double_buffered)
+	{
+	params.buffer = &buffer_to_read_into;
+	params.read_sem = read_sem;
+	params.swap_sem = swap_sem;
+	params.source = source;
+	params.read_result = &end_of_second_buffer;
 
-ANT_thread(background_read, (void *)&params); // start reading in the background
-#endif
-}
-
-/*
-	ANT_INSTREAM_BUFFER::~ANT_INSTREAM_BUFFER()
-	-------------------------------------------
-*/
-ANT_instream_buffer::~ANT_instream_buffer()
-{
-delete source;
+	ANT_thread(background_read, (void *)&params); // start reading in the background
+	}
 }
 
 /*
@@ -93,6 +89,8 @@ return NULL;
 long long ANT_instream_buffer::read(unsigned char *data, long long size)
 {
 long long where, remainder;
+unsigned char **tmp_buffer;
+long long *tmp_result;
 START;
 
 if (position + size < *end_of_buffer)
@@ -119,30 +117,26 @@ else
 		END;
 		// fill the buffer up with more data from downstream
 
-#ifdef DOUBLE_BUFFER
 		// the background reader might still be reading if we've been fast
 		// so wait for it to say it's safe to swap
-		swap_sem->enter();
-#endif
+		if (double_buffered)
+			swap_sem->enter();
 
 		// swap the primary/secondary buffers around
-		unsigned char **tmp_buffer = buffer_to_read_into;
+		tmp_buffer = buffer_to_read_into;
 		buffer_to_read_into = buffer_to_read_from;
 		buffer_to_read_from = tmp_buffer;
 
 		// swap the pointers to the results around
-		long long *tmp_result = end_of_buffer;
+		tmp_result = end_of_buffer;
 		end_of_buffer = end_of_second_buffer;
 		end_of_second_buffer = tmp_result;
 
-#ifdef DOUBLE_BUFFER
 		// tell the background reader to read into the swapped buffers
-		read_sem->leave();
+		if (double_buffered)
+			read_sem->leave();
 
-		if (*end_of_buffer <= 0)
-#else
-		if ((position_of_end_of_buffer = source->read(primary_buffer, buffer_size)) <= 0)
-#endif
+		if ((!double_buffered && (position_of_end_of_buffer = source->read(primary_buffer, buffer_size)) <= 0) || (double_buffered && *end_of_buffer <= 0))
 			return where;		// at EOF
 
 		START;

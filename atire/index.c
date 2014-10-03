@@ -11,7 +11,7 @@
 #include "directory_iterator_tar.h"
 #include "directory_iterator_warc.h"
 #include "directory_iterator_warc_gz_recursive.h"
-#include "directory_iterator_trec_gz_recursive.h"
+#include "directory_iterator_trec_recursive.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_compressor.h"
@@ -174,7 +174,7 @@ ANT_memory file_buffer(1024 * 1024);
 #endif
 long long files_that_match;
 long long bytes_indexed;
-ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL, *instream_buffer_b = NULL, *scrubber = NULL;
+ANT_instream *file_stream = NULL, *decompressor = NULL, *instream_buffer = NULL, *scrubber = NULL;
 ANT_directory_iterator *dir_scrubber = NULL;
 ANT_directory_iterator_object file_object, *current_file;
 #ifdef PARALLEL_INDEXING
@@ -292,10 +292,6 @@ for (param = first_param; param < argc; param++)
 #ifdef PARALLEL_INDEXING
 #else
 	delete disk;
-	delete file_stream;
-	delete decompressor;
-	delete instream_buffer;
-	delete instream_buffer_b;
 #endif
 
 	now = stats.start_timer();
@@ -308,40 +304,23 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::TAR)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
-		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
+		/* always make a double buffer for tar files */
+		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream, true);
 		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
-#ifdef BUFFER_A
-		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
-		decompressor = new ANT_instream_bz2(&file_buffer, instream_buffer);
-#else
 		decompressor = new ANT_instream_bz2(&file_buffer, file_stream);
-#endif
-#ifdef BUFFER_B
-		instream_buffer_b = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
-#else
-		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
-#endif
+		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
-#ifdef BUFFER_A
-		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
-		decompressor = new ANT_instream_deflate(&file_buffer, instream_buffer);
-#else
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-#endif
-#ifdef BUFFER_B
-		instream_buffer_b = new ANT_instream_buffer(&file_buffer, decompressor);
-		source = new ANT_directory_iterator_tar(instream_buffer_b, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
-#else
-		source = new ANT_directory_iterator_tar(decompressor, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
-#endif
+		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
+		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_LZO)
 		{
@@ -353,22 +332,12 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::WARC_GZ)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
-#ifdef BUFFER_A
-		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
-		decompressor = new ANT_instream_deflate(&file_buffer, instream_buffer);
-#else
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-#endif
-
-#ifdef BUFFER_B
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
-#else
-		source = new ANT_directory_iterator_warc(decompressor, ANT_directory_iterator::READ_FILE);
-#endif
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_WARC_GZ)
-		source = new ANT_directory_iterator_warc_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
+		source = new ANT_directory_iterator_warc_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE);
 
 #ifdef ANT_HAS_MYSQL
 	else if (param_block.recursive == ANT_indexer_param_block::VBULLETIN)
@@ -451,14 +420,17 @@ for (param = first_param; param < argc; param++)
 //		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
-		source = new ANT_directory_iterator_trec_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
+		source = new ANT_directory_iterator_trec_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::TSV)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-		scrubber = new ANT_instream_scrub(&file_buffer, decompressor, param_block.scrubbing);
+		if (param_block.scrubbing)
+			scrubber = new ANT_instream_scrub(&file_buffer, decompressor, param_block.scrubbing);
+		else
+			scrubber = decompressor;
 		instream_buffer = new ANT_instream_buffer(&file_buffer, scrubber);
 		source = new ANT_directory_iterator_tsv(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
