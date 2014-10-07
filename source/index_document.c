@@ -59,7 +59,7 @@ while ((token = readability->get_next_token()) != NULL)
 		case TT_WORD:
 			terms_in_document++;
 
-			if (ischinese(token->start))
+			if (is_cjk_language(token->start))
 				{
 				readability->handle_node(indexer->add_term(token, doc));
 				

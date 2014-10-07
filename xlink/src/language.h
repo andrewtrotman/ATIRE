@@ -43,8 +43,8 @@ public:
 	static int isutf8(const unsigned char *here);
 	static int isutf8(const char *here) { return isutf8((const unsigned char *)here); }
 
-	static int ischinese(const unsigned char *here);
-	static int ischinese(const char *here) { return ischinese((const unsigned char *)here); }
+	static int is_cjk_language(const unsigned char *here);
+	static int is_cjk_language(const char *here) { return is_cjk_language((const unsigned char *)here); }
 
 	static unsigned long utf8_to_wide(const unsigned char *here);
 	static long utf8_bytes(const unsigned char *here);
@@ -106,7 +106,7 @@ return TRUE;
 	-----------------------
 	Is the given character from the Chinese CodePoint?
 */
-inline int language::ischinese(const unsigned char *here)
+inline int language::is_cjk_language(const unsigned char *here)
 {
 unsigned long chinese;
 

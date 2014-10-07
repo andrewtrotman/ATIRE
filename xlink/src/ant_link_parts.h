@@ -533,8 +533,8 @@ while (*where_to != '\0')
 	start = where_to;
 	if ((*where_to & 0x80) &&language::isutf8(where_to))
 		{
-		if (language::ischinese(where_to))
-			while ((*where_to & 0x80) &&language::ischinese(where_to)) {
+		if (language::is_cjk_language(where_to))
+			while ((*where_to & 0x80) &&language::is_cjk_language(where_to)) {
 				char_len = language::utf8_bytes(where_to);
 				where_to += char_len;
 				token_len += char_len;

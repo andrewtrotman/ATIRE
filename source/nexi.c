@@ -122,13 +122,13 @@ else if (length == 1)
 		from_character = utf8_to_wide(from);
 		next_character = utf8_to_wide(next);
 
-		if (ischinese(from_character))
+		if (is_cjk_language(from_character))
 			{
 			/*
 				If we want to generate one Chinese string for later segmentaton then
 				we want to do the following line:
 
-					return ANT_parser::ischinese(next);					// this string will later need to be segmented
+					return ANT_parser::is_cjk_language(next);					// this string will later need to be segmented
 
 				otherwise Chinese words can be at best one character in length so return FALSE
 
@@ -138,7 +138,7 @@ else if (length == 1)
 			*/
 			if (segmentation)
 				return FALSE;
-			return ischinese(next_character);
+			return is_cjk_language(next_character);
 			}
 		else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
 			if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER)
@@ -169,8 +169,8 @@ else
 			return TRUE;
 		else
 			return FALSE;
-	else if (ischinese(from_character))
-		return ischinese(next_character);		// This can only happen if we later segment, it can never happen without segmentation
+	else if (is_cjk_language(from_character))
+		return is_cjk_language(next_character);		// This can only happen if we later segment, it can never happen without segmentation
 	else if ((unicode_xml_class(from_character) & XMLCC_NAME_START) == XMLCC_NAME_START || unicode_chartype(from_character) == CT_LETTER)
 		if ((unicode_xml_class(next_character) & XMLCC_NAME) == XMLCC_NAME || unicode_chartype(next_character) == CT_LETTER
 				|| *next == '-' || *next == '\'')
@@ -225,7 +225,7 @@ if (*at != '\0')
 			break;
 		else
 			{
-			if (ischinese(at))
+			if (is_cjk_language(at))
 				break;
 			bytes = utf8_bytes(at);
 			if (bytes == 1 && !ANT_isspace(*at))
@@ -475,7 +475,7 @@ do
 		{
 		character = utf8_to_wide(token.start);
 
-		if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER && token[0] != '-' && !ischinese(character))
+		if (unicode_chartype(character) != CT_LETTER && unicode_chartype(character) != CT_NUMBER && token[0] != '-' && !is_cjk_language(character))
 			more = FALSE;
 		}
 	if (more)

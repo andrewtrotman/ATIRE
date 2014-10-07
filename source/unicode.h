@@ -62,6 +62,18 @@ int ischinese(unsigned long character);
 inline int ischinese(const unsigned char *here) { return ischinese(utf8_to_wide(here)); }
 inline int ischinese(const char *here) { return ischinese((const unsigned char *)here); }
 
+int iskorean(unsigned long character);
+inline int iskorean(const unsigned char *here) { return iskorean(utf8_to_wide(here)); }
+inline int iskorean(const char *here) { return iskorean((const unsigned char *)here); }
+
+int isjapanese(unsigned long character);
+inline int isjapanese(const unsigned char *here) { return isjapanese(utf8_to_wide(here)); }
+inline int isjapanese(const char *here) { return isjapanese((const unsigned char *)here); }
+
+int is_cjk_language(unsigned long character);
+inline int is_cjk_language(const unsigned char *here) { return is_cjk_language(utf8_to_wide(here)); }
+inline int is_cjk_language(const char *here) { return is_cjk_language((const unsigned char *)here); }
+
 int utf8_ispuntuation(unsigned long character);
 inline int utf8_ispuntuation(const unsigned char *here) { return utf8_ispuntuation(utf8_to_wide(here)); }
 inline int utf8_ispuntuation(const char *here) { return utf8_ispuntuation((const unsigned char *)here); }

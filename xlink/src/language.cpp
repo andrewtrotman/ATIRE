@@ -471,7 +471,7 @@ void language::collect_chinese_from_xml_entities(std::string& text, const char *
 		else
 			cp = strtol(e_start, NULL, 10);
 		codepoint_to_utf8(bytes, cp);
-		if (ischinese(bytes))
+		if (is_cjk_language(bytes))
 			text.append(bytes);
 //		else
 //			e_end = NULL;
@@ -490,12 +490,12 @@ void language::collect_chinese(std::string& text, const char *source, bool segme
 		if (*e_start & 0x80 && isutf8((char *)e_start)) {
 //			if (*e_start == '\351')
 //				puts("I got you");
-			if (ischinese((char *)e_start)) {
+			if (is_cjk_language((char *)e_start)) {
 				int number_of_bytes = utf8_bytes((char *)e_start);
 				std::string ch(e_start, e_start + number_of_bytes);
 				text.append(ch);
 				e_start += number_of_bytes;
-				if (!ischinese((char *)e_start))
+				if (!is_cjk_language((char *)e_start))
 					text.append(" ");
 				else
 					if (segmentation)
@@ -537,7 +537,7 @@ void language::collect_chinese_from_xml_entities(term_freq_map_type& term_map, c
 		else
 			cp = strtol(e_start, NULL, 10);
 		codepoint_to_utf8(bytes, cp);
-		if (ischinese(bytes))
+		if (is_cjk_language(bytes))
 			text.append(bytes);
 //		else
 //			e_end = NULL;
@@ -559,12 +559,12 @@ void language::collect_chinese(term_freq_map_type& term_map, const char *source)
 		if (*e_start & 0x80 && isutf8((char *)e_start)) {
 //			if (*e_start == '\351')
 //				puts("I got you");
-			if (ischinese((char *)e_start)) {
+			if (is_cjk_language((char *)e_start)) {
 				int number_of_bytes = utf8_bytes((char *)e_start);
 				std::string ch(e_start, e_start + number_of_bytes);
 				text.append(ch);
 				e_start += number_of_bytes;
-				if (!ischinese((char *)e_start)) {
+				if (!is_cjk_language((char *)e_start)) {
 					if ((it = term_map.find(text)) != term_map.end())
 						it->second++;
 					else

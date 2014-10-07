@@ -125,7 +125,7 @@ for (ch = query_string; *ch != '\0'; ch++)
 	Fake the bigram segmentation if necessary
 */
 result = start;
-if (ischinese(query_string))
+if (is_cjk_language(query_string))
 	for (ch = query_string; *ch != '\0'; )
 		{
 		bytes = utf8_bytes(ch);
