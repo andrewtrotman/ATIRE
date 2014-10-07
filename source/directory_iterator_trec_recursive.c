@@ -15,8 +15,6 @@
 #include "directory_iterator_file_buffered.h"
 #include "directory_iterator_trec_recursive.h"
 
-long ANT_directory_iterator_trec_recursive::tid = 0;
-
 /*
 	ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE::ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE()
 	------------------------------------------------------------------------------
@@ -41,14 +39,6 @@ detrecer = NULL;
 memory = NULL;
 
 new_provider(filename.filename);
-
-wait_input_time = 0;
-wait_output_time = 0;
-process_time = 0;
-clock = new ANT_stats(new ANT_memory);
-
-message = new char[50];
-sprintf(message, "trec_recursive %ld ", ANT_directory_iterator_trec_recursive::tid++);
 }
 
 /*
@@ -104,16 +94,12 @@ ANT_directory_iterator_object *ANT_directory_iterator_trec_recursive::next(ANT_d
 {
 ANT_directory_iterator_object *got;
 
-START;
-
 while (more_files != NULL)
 	{
-	END;
 	if (first_time)
 		got = detrecer->first(object);
 	else
 		got = detrecer->next(object);
-	START;
 
 	first_time = false;
 
@@ -126,12 +112,8 @@ while (more_files != NULL)
 			}
 		}
 	else
-		{
-		END;
 		return got;
-		}
 	}
 
-END;
 return NULL;
 }

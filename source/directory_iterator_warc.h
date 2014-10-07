@@ -16,7 +16,6 @@ class ANT_directory_iterator_warc : public ANT_directory_iterator
 {
 private:
 	static const long WARC_BLOCK_SIZE = 1024;
-	static long tid;
 
 private:
 	ANT_instream *source;

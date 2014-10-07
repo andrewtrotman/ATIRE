@@ -24,8 +24,6 @@ private:
 	unsigned char *buffer;
 	static const long long buffer_length = 1024 * 1024 * 16;			// did use a 16K buffer, now using 16MB buffer
 
-	static long tid;
-
 public:
 	ANT_instream_bz2(ANT_memory *memory, ANT_instream *source);
 	virtual ~ANT_instream_bz2();

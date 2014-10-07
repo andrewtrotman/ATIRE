@@ -14,22 +14,12 @@
 #include "semaphores.h"
 #include "threads.h"
 
-long ANT_directory_iterator_file_buffered::tid = 0;
-
 /*
 	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::ANT_DIRECTORY_ITERATOR_FILE_BUFFERED()
 	----------------------------------------------------------------------------
 */
 ANT_directory_iterator_file_buffered::ANT_directory_iterator_file_buffered(ANT_instream *instream, long get_file) : ANT_directory_iterator("", get_file) 
 {
-wait_input_time = 0;
-wait_output_time = 0;
-process_time = 0;
-clock = new ANT_stats(new ANT_memory);
-
-message = new char[50];
-sprintf(message, "di_file_buffered %ld ", ANT_directory_iterator_file_buffered::tid++);
-
 document_start = document_end = NULL;
 
 source = instream;
@@ -73,7 +63,6 @@ delete [] doc_tag;
 delete [] docno_tag;
 
 delete source;
-delete clock;
 }
 
 /*
@@ -84,12 +73,8 @@ long long ANT_directory_iterator_file_buffered::read(char *destination, long lon
 {
 long long got;
 
-END;
-
 if ((got = source->read((unsigned char *)destination, length)) < length)
 	destination[got] = '\0';
-
-START;
 
 return got;
 }
@@ -103,8 +88,6 @@ ANT_directory_iterator_object *ANT_directory_iterator_file_buffered::next(ANT_di
 char *start, *document_id_start = NULL, *document_id_end = NULL;
 long long bytes_read;
 char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
-
-START;
 
 start = *buffer_to_read_from + *end_of_buffer;
 
@@ -126,10 +109,7 @@ if ((document_start = strstr(start, doc_tag[0])) == NULL)
 	*/
 	bytes_read = read(*buffer_to_read_from + (buffer_size - *end_of_buffer), *end_of_buffer);
 	if ((bytes_read == 0) || (document_start = strstr(*buffer_to_read_from, doc_tag[0])) == NULL)
-		{
-		END;
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
-		}
 	}
 
 /*
@@ -147,10 +127,7 @@ if ((document_end = strstr(document_start, doc_tag[1])) == NULL)
 
 	document_start = *buffer_to_read_from;
 	if ((bytes_read == 0) || (document_end = strstr(document_start, doc_tag[1])) == NULL)
-		{
-		END;
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
-		}
 	}
 document_end += strlen(doc_tag[1]);			// skip to end of tag
 
@@ -200,7 +177,6 @@ else
 		read_entire_file(object);
 	}
 
-END;
 return object;
 }
 

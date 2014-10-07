@@ -5,19 +5,6 @@
 #ifndef DIRECTORY_ITERATOR_H_
 #define DIRECTORY_ITERATOR_H_
 
-#ifndef START
-	#ifdef LOGGING
-		#define START printf("%ss %lld\n", message, clock->start_timer())
-		#define END printf("%se %lld\n", message, clock->start_timer())
-		#define STARTV(m) printf("%s %lu s %lld\n", m, id, clock->start_timer())
-		#define ENDV(m) printf("%s %lu e %lld\n", m, id, clock->start_timer())
-	#else
-		#define START //
-		#define END //
-		#define STARTV(m) // m
-		#define ENDV(m) // m
-	#endif
-#endif
 
 #include "directory_iterator_object.h"
 
@@ -54,16 +41,6 @@ public:
 	*/
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object);
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
-
-	/*
-		blah de blah
-	*/
-	char *message;
-	unsigned long long wait_input_time;
-	unsigned long long wait_output_time;
-	unsigned long long process_time;
-	ANT_stats *clock;
-	bool printed;
 } ;
 
 #endif  /* DIRECTORY_ITERATOR_H_ */

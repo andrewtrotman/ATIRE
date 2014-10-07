@@ -21,8 +21,6 @@ private:
 	char *filename;
 	long long file_length, bytes_read;
 
-	static long tid;
-
 public:
 	ANT_instream_file(ANT_memory *memory, char *filename);
 	virtual ~ANT_instream_file();

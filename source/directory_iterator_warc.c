@@ -12,13 +12,13 @@
 #include "directory_iterator_warc.h"
 #include "maths.h"
 
-long ANT_directory_iterator_warc::tid = 0;
-
+/*
+	ANT_DIRECTORY_ITERATOR_WARC::ANT_DIRECTORY_ITERATOR_WARC()
+	----------------------------------------------------------
+*/
 ANT_directory_iterator_warc::ANT_directory_iterator_warc(ANT_instream *source, long get_file) : ANT_directory_iterator("", get_file)
 {
 this->source = source;
-message = new char[50];
-sprintf(message, "warc %ld ", ANT_directory_iterator_warc::tid++);
 }
 
 /*
@@ -42,10 +42,8 @@ do
 		do
 			{
 			into++;
-			END;
 			if (source->read(into, 1) != 1)
 				return NULL;		// at EOF
-			START;
 			}
 		while (*into != '\n' && into < end);
 		*into = '\0';
@@ -59,10 +57,8 @@ do
 			{
 			do
 				{
-				END;
 				if (source->read(into, 1) != 1)
 					return NULL;		// at EOF
-				START;
 				}
 			while (*into != '\n');
 			continue;
@@ -82,16 +78,11 @@ ANT_directory_iterator_object *ANT_directory_iterator_warc::next(ANT_directory_i
 {
 unsigned char *filename, *file_length;
 
-START;
-
 /*
 	Get and store the filename
 */
 if ((filename = find_string("WARC-TREC-ID", 12)) == NULL)
-	{
-	END;
 	return NULL;
-	}
 
 while (ANT_isspace(*filename))
 	filename++;
@@ -102,10 +93,8 @@ object->filename = strnew((char *)filename);
 	Get and store the document length
 */
 if ((file_length = find_string("Content-Length", 14)) == NULL)
-	{
-	END;
 	return NULL;
-	}
+
 object->length = atoll(file_length);
 
 /*
@@ -114,7 +103,6 @@ object->length = atoll(file_length);
 if (get_file)
 	read_entire_file(object);
 
-END;
 return object;
 }
 

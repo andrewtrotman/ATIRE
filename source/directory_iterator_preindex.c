@@ -21,8 +21,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-long ANT_directory_iterator_preindex::tid = 0;
-
 /*
 	ANT_DIRECTORY_ITERATOR_PREINDEX::ANT_DIRECTORY_ITERATOR_PREINDEX()
 	------------------------------------------------------------------
@@ -40,10 +38,6 @@ this->stemmer = stemmer;
 this->index_document = index_document_method;
 
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
-
-clock = new ANT_stats(new ANT_memory);
-
-//printf("%sstart_upstream %lld\n", message, clock->start_timer());
 }
 
 /*
@@ -52,7 +46,6 @@ clock = new ANT_stats(new ANT_memory);
 */
 ANT_directory_iterator_preindex::~ANT_directory_iterator_preindex()
 {
-//printf("%send_upstream %lld\n", message, clock->start_timer());
 delete store;
 delete source;
 }
@@ -65,14 +58,11 @@ void ANT_directory_iterator_preindex::work_one(ANT_directory_iterator_object *ob
 {
 long terms;
 
-STARTV("preindex");
-
 object->index = new ANT_memory_index_one(new ANT_memory(1024 * 1024), final_index);
 terms = index_document->index_document(object->index, internals->stemmer, internals->segmentation, internals->readability, 1, object->file);
 object->terms = terms;
 
 store->add(object);
-ENDV("preindex");
 }
 
 /*

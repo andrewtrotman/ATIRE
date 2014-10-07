@@ -25,7 +25,6 @@ class ANT_directory_iterator_file_buffered : public ANT_directory_iterator
 {
 private:
 	static const size_t buffer_size = (16 * 1024 * 1024);
-	static long tid;
 
 protected:
 	char *document_start, *document_end;

@@ -9,8 +9,6 @@
 #include "semaphores.h"
 #include "threads.h"
 
-long ANT_instream_buffer::tid = 0;
-
 /*
 	ANT_INSTREAM_BUFFER::ANT_INSTREAM_BUFFER()
 	------------------------------------------
@@ -38,16 +36,8 @@ else
 
 position_of_end_of_buffer = position_of_end_of_second_buffer = 0;
 
-wait_input_time = 0;
-wait_output_time = 0;
-process_time = 0;
-clock = new ANT_stats(memory);
-
 read_sem = new ANT_semaphores(1, 1);
 swap_sem = new ANT_semaphores(0, 1);
-
-message = new char[50];
-sprintf(message, "buffer %ld ", ANT_instream_buffer::tid++);
 
 if (double_buffered)
 	{
@@ -91,7 +81,6 @@ long long ANT_instream_buffer::read(unsigned char *data, long long size)
 long long where, remainder;
 unsigned char **tmp_buffer;
 long long *tmp_result;
-START;
 
 if (position + size < *end_of_buffer)
 	{
@@ -102,10 +91,7 @@ if (position + size < *end_of_buffer)
 else
 	{
 	if (*end_of_buffer < 0)
-		{
-		END;
 		return -1;			// at EOF
-		}
 
 	// copy the end of the buffer -- the beginning of the requested data
 	where = *end_of_buffer - position;
@@ -114,7 +100,6 @@ else
 
 	do
 		{
-		END;
 		// fill the buffer up with more data from downstream
 
 		// the background reader might still be reading if we've been fast
@@ -139,7 +124,6 @@ else
 		if ((!double_buffered && (position_of_end_of_buffer = source->read(primary_buffer, buffer_size)) <= 0) || (double_buffered && *end_of_buffer <= 0))
 			return where;		// at EOF
 
-		START;
 		// if what we have left to get is larger than buffer, copy it all across
 		if (remainder > *end_of_buffer)
 			{
@@ -159,6 +143,5 @@ else
 	while (remainder > 0);
 	}
 
-END;
 return size;
 }

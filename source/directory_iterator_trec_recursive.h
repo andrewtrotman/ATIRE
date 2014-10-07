@@ -17,7 +17,6 @@ class ANT_memory;
 class ANT_directory_iterator_trec_recursive : public ANT_directory_iterator
 {
 protected:
-static long tid;
 	char *source;
 	ANT_instream *file_stream;
 	ANT_instream *decompressor;

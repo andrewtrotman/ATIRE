@@ -18,7 +18,6 @@ class ANT_memory;
 class ANT_directory_iterator_warc_gz_recursive : public ANT_directory_iterator
 {
 protected:
-static long tid;
 	char *source;
 	ANT_instream *file_stream;
 	ANT_instream *decompressor;

@@ -201,10 +201,6 @@ if (param_block.logo)
 if (first_param >= argc)
 	exit(0);				// no files to index so terminate
 
-#ifdef LOGGING
-	printf("ATIRE_index 0 s %lld\n", stats.start_timer());
-#endif
-
 last_report = 0;
 doc = 0;
 index = new ANT_memory_index(param_block.index_filename);
@@ -630,10 +626,6 @@ if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	stats.text_render();
 	printf("\n");
 	}
-
-#ifdef LOGGING
-	printf("ATIRE_index 0 e %lld\n", stats.start_timer());
-#endif
 
 #ifdef COUNT_STRCMP_CALLS
 printf("%llu\n", ANT_string_pair::strcmp_calls);

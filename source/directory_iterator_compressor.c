@@ -20,8 +20,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-long ANT_directory_iterator_compressor::tid = 0;
-
 /*
 	ANT_DIRECTORY_ITERATOR_COMPRESSOR::ANT_DIRECTORY_ITERATOR_COMPRESSOR()
 	----------------------------------------------------------------------
@@ -32,8 +30,6 @@ this->compressor = compressor;
 this->threads = threads;
 this->source = source;
 store = new ANT_producer_consumer <ANT_directory_iterator_object> (threads);
-
-clock = new ANT_stats(new ANT_memory);
 }
 
 /*
@@ -54,7 +50,6 @@ delete compressor;
 void ANT_directory_iterator_compressor::work_one(ANT_compression_text_factory *compressor, ANT_directory_iterator_object *object, long id)
 {
 unsigned long size;
-STARTV("compressor");
 
 /*
 	The length of the object does not include the '\0' on the end, which we want to store
@@ -67,7 +62,6 @@ if (compressor->compress(object->compressed, &size, object->file, (unsigned long
 	exit(printf("Cannot compress document (name:%s)\n", object->filename));
 object->compressed_length = size;
 store->add(object);
-ENDV("compressor");
 }
 
 /*

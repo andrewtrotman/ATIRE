@@ -19,7 +19,6 @@ class ANT_directory_iterator_multiple : public ANT_directory_iterator
 {
 private:
 	static const long sources_growth_factor = 8;
-	static long tid;
 
 protected:
 	ANT_directory_iterator **sources;

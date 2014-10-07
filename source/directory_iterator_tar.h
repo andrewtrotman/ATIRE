@@ -20,7 +20,6 @@ public:
 
 private:
 	static const long TAR_BLOCK_SIZE = 512;
-	static long tid;
 
 private:
 	ANT_instream *source;

@@ -17,7 +17,6 @@ class ANT_instream_buffer : public ANT_instream
 {
 protected:
 	static const long buffer_size = (16 * 1024 * 1024);
-	static long tid;
 
 	struct background_read_params {
 		unsigned char ***buffer;

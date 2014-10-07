@@ -24,8 +24,6 @@ private:
 	ANT_critical_section mutex;
 	ANT_compression_text_factory *compressor;
 
-	static long tid;
-
 private:
 	void work_one(ANT_compression_text_factory *compressor, ANT_directory_iterator_object *object, long id);
 	void work(void);

@@ -18,8 +18,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-long ANT_directory_iterator_multiple::tid = 0;
-
 /*
 	ANT_DIRECTORY_ITERATOR_MULTIPLE::ANT_DIRECTORY_ITERATOR_MULTIPLE()
 	------------------------------------------------------------------
@@ -30,11 +28,6 @@ sources_length = sources_used = 0;
 sources = NULL;
 thread_details = NULL;
 producer = NULL;
-
-clock = new ANT_stats(new ANT_memory);
-
-message = new char[50];
-sprintf(message, "multiple %ld ", ANT_directory_iterator_multiple::tid);
 }
 
 /*
@@ -84,20 +77,13 @@ sources_used++;
 void ANT_directory_iterator_multiple::produce(ANT_directory_iterator_multiple_internals *my)
 {
 ANT_directory_iterator_object *got;
-char *message = new char[50];
-
-sprintf(message, "multiple %ld ", ANT_directory_iterator_multiple::tid++);
-
-//printf("%sstart_upstream %lld\n", message, clock->start_timer());
 
 /*
 	Exhaust the supply
 */
-//printf("%sstart_wait %lld\n", message, clock->start_timer());
 for (got = my->iterator->first(&my->file_object); got != NULL; got = my->iterator->next(&my->file_object))
 	producer->add(&my->file_object);
 
-//printf("%send_wait %lld\n", message, clock->start_timer());
 /*
 	At this point the thread is finished, but we have the remaining problem of
 	signaling back to the consumer that all the producers are done.
@@ -107,7 +93,6 @@ for (got = my->iterator->first(&my->file_object); got != NULL; got = my->iterato
 */
 my->file_object.filename = NULL;
 producer->add(&my->file_object);
-//printf("%send_upstream %lld\n", message, clock->start_timer());
 
 /*
 	Now the thread is done it'll die its natural death
@@ -139,8 +124,6 @@ ANT_directory_iterator_object *ANT_directory_iterator_multiple::first(ANT_direct
 long instance;
 ANT_directory_iterator_multiple_internals *current;
 
-START;
-
 /*
 	Set up this object
 */
@@ -162,8 +145,6 @@ for (current = thread_details; current < thread_details + sources_used; current+
 	ANT_thread(bootstrap, current);
 	}
 
-END;
-
 /*
 	And then consume
 */
@@ -180,7 +161,6 @@ ANT_directory_iterator_object *ANT_directory_iterator_multiple::next(ANT_directo
 long finished = FALSE;
 
 mutex.enter();
-START;
 	if (active_threads <= 0)
 		finished = TRUE;
 	else
@@ -194,7 +174,6 @@ START;
 					finished = TRUE;				// all sources have dried up
 			}
 		while (!finished);
-END;
 mutex.leave();
 
 if (finished)
@@ -202,4 +181,3 @@ if (finished)
 else
 	return object;
 }
-
