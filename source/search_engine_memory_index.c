@@ -147,7 +147,7 @@ long hash_of_term = index->hash(&term_as_pair);
 if (index->hash_table[hash_of_term] == NULL)
 	return NULL;			// term is not in the index
 
-index_node = index->find_node(index->hash_table[hash_of_term], &term_as_pair);
+index_node = index->find_node(hash_of_term, &term_as_pair);
 
 if (index_node == NULL)
 	return NULL;

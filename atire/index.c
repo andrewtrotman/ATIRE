@@ -11,6 +11,7 @@
 #include "directory_iterator_tar.h"
 #include "directory_iterator_warc.h"
 #include "directory_iterator_warc_gz_recursive.h"
+#include "directory_iterator_trec_recursive.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_multiple.h"
 #include "directory_iterator_compressor.h"
@@ -78,25 +79,26 @@ stats->print_elapsed_time();
 }
 
 #ifndef ATIRE_LIBRARY
-
-/*
-	MAIN()
-	------
-*/
-int main(int argc, char *argv[])
-{
-return atire_index(argc, argv);
-}
-
+	/*
+		MAIN()
+		------
+	*/
+	int main(int argc, char *argv[])
+	{
+	return atire_index(argc, argv);
+	}
 #else
-
-// do nothing
-int atire_exit(int errno) {
+	/*
+		ATIRE_EXIT()
+		------------
+		Do nothing
+	*/
+	int atire_exit(int errno)
+	{
 	return errno;
-}
+	}
 
-#define exit atire_exit
-
+	#define exit atire_exit
 #endif
 
 /*
@@ -186,6 +188,7 @@ char pregen_filename[PATH_MAX + 1];
 long terms_in_document;
 ANT_index_document *document_indexer;
 ANT_compression_text_factory *factory_text = NULL;
+
 
 if (argc < 2)
 	param_block.usage();
@@ -285,9 +288,6 @@ for (param = first_param; param < argc; param++)
 #ifdef PARALLEL_INDEXING
 #else
 	delete disk;
-	delete file_stream;
-	delete decompressor;
-	delete instream_buffer;
 #endif
 
 	now = stats.start_timer();
@@ -300,7 +300,8 @@ for (param = first_param; param < argc; param++)
 	else if (param_block.recursive == ANT_indexer_param_block::TAR)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
-		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream);
+		/* always make a double buffer for tar files */
+		instream_buffer = new ANT_instream_buffer(&file_buffer, file_stream, true);
 		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::TAR_BZ2)
@@ -332,7 +333,7 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_warc(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_WARC_GZ)
-		source = new ANT_directory_iterator_warc_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
+		source = new ANT_directory_iterator_warc_gz_recursive(argv[param], ANT_directory_iterator::READ_FILE);
 
 #ifdef ANT_HAS_MYSQL
 	else if (param_block.recursive == ANT_indexer_param_block::VBULLETIN)
@@ -415,21 +416,17 @@ for (param = first_param; param < argc; param++)
 //		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
-		{
-		source = new ANT_directory_iterator_recursive(argv[param], ANT_directory_iterator::READ_FILE);
-		if (strcmp(argv[param] + strlen(argv[param]) - 3, ".gz") == 0)
-			source = new ANT_directory_iterator_deflate(source);		// recursive .gz files
-		if (param_block.scrubbing)
-			dir_scrubber = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
-		source = new ANT_directory_iterator_file(dir_scrubber == NULL ? source : dir_scrubber, ANT_directory_iterator::READ_FILE);
-		}
+		source = new ANT_directory_iterator_trec_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::TSV)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
-		scrubber = new ANT_instream_scrub(&file_buffer, decompressor, param_block.scrubbing);
+		if (param_block.scrubbing)
+			scrubber = new ANT_instream_scrub(&file_buffer, decompressor, param_block.scrubbing);
+		else
+			scrubber = decompressor;
 		instream_buffer = new ANT_instream_buffer(&file_buffer, scrubber);
 		source = new ANT_directory_iterator_tsv(instream_buffer, ANT_directory_iterator::READ_FILE);
 		}
@@ -453,10 +450,9 @@ for (param = first_param; param < argc; param++)
 		source = new ANT_directory_iterator_filter_spam(source, param_block.spam_filename, param_block.spam_threshold, ANT_directory_iterator::READ_FILE);
 	
 	/*
-		We may already had to have created a directory iterator scrubber at some other point in the chain, here's looking at you RECURSIVE_TREC,
-		so don't do it again unnecessarily
+		We may already had to have created a directory iterator scrubber at some other point in the chain so don't do it unecessarily
 	*/
-	if (param_block.scrubbing && dir_scrubber == NULL && scrubber == NULL)
+	if (param_block.scrubbing && dir_scrubber == NULL && scrubber == NULL && param_block.recursive != ANT_indexer_param_block::RECURSIVE_TREC)
 		source = new ANT_directory_iterator_scrub(source, param_block.scrubbing, ANT_directory_iterator::READ_FILE);
 
 	stats.add_disk_input_time(stats.stop_timer(now));
@@ -619,21 +615,24 @@ else
 	stats.add_disk_output_time(stats.stop_timer(now));
 	index->text_render(param_block.statistics);
 	}
-delete index;
-delete disk;
-delete parser;
-delete readability;
-delete file_stream;
-delete decompressor;
-delete instream_buffer;
-delete pregen;
-delete document_indexer;
 
 if (param_block.statistics & ANT_indexer_param_block::STAT_TIME)
 	{
 	printf("\nTIMINGS\n-------\n");
 	stats.text_render();
 	}
+
+#ifdef COUNT_STRCMP_CALLS
+printf("%llu\n", ANT_string_pair::strcmp_calls);
+#endif
+
+delete index;
+delete disk;
+delete parser;
+delete readability;
+delete decompressor;
+delete pregen;
+delete document_indexer;
 
 return 0;
 }

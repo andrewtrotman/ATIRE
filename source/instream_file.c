@@ -7,7 +7,6 @@
 #include "memory.h"
 #include "file.h"
 
-
 /*
 	ANT_INSTREAM_FILE::ANT_INSTREAM_FILE()
 	--------------------------------------
@@ -49,9 +48,9 @@ if (file == NULL)
 		file_length = file->file_length();
 	bytes_read = 0;
 	}
+
 if (bytes_read >= file_length)
 	return -1;		// at EOF so nothing to read
-
 
 if (bytes_read + bytes > file_length)
 	bytes = file_length - bytes_read;
@@ -59,6 +58,6 @@ if (bytes_read + bytes > file_length)
 bytes_read += bytes;
 
 file->read(buffer, bytes);
+
 return bytes;
 }
-

@@ -179,4 +179,3 @@ if (finished)
 else
 	return object;
 }
-

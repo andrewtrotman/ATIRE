@@ -23,8 +23,7 @@ class ANT_impact_header
 {
 public:
 	static const uint32_t NUM_OF_QUANTUMS = 1 << 16;
-	static const long long INFO_SIZE = sizeof(postings_chain_type) + sizeof(chain_length_type)
-													+ sizeof(quantum_count_type) + sizeof(beginning_of_the_postings_type);
+	static const long long INFO_SIZE = sizeof(postings_chain_type) + sizeof(chain_length_type) + sizeof(quantum_count_type) + sizeof(beginning_of_the_postings_type);
 
 	static const unsigned char pos_postings_chain = 0;
 	static const unsigned char pos_chain_length = sizeof(postings_chain_type);

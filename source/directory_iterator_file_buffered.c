@@ -9,6 +9,8 @@
 #include "str.h"
 #include "instream.h"
 #include "directory_iterator_file_buffered.h"
+#include "semaphores.h"
+#include "threads.h"
 
 /*
 	ANT_DIRECTORY_ITERATOR_FILE_BUFFERED::ANT_DIRECTORY_ITERATOR_FILE_BUFFERED()
@@ -20,9 +22,19 @@ document_start = document_end = NULL;
 
 source = instream;
 
-read_buffer = new char [buffer_size + 1];
-*read_buffer = read_buffer[buffer_size] = '\0';			// null terminate the end of the buffer, and mark it as empty too
-read_buffer_used = buffer_size;
+primary_buffer = new char[buffer_size + 1];
+secondary_buffer = new char[buffer_size + 1];
+
+*primary_buffer = primary_buffer[buffer_size] = '\0';
+*secondary_buffer = secondary_buffer[buffer_size] = '\0';
+primary_buffer_used = secondary_buffer_used = buffer_size;
+
+buffer_to_read_from = &primary_buffer;
+end_of_buffer = &primary_buffer_used;
+
+buffer_to_read_into = buffer_to_read_from;
+end_of_second_buffer = end_of_buffer;
+
 this->auto_file_id = 0;
 
 doc_tag = new char*[2];
@@ -40,10 +52,15 @@ set_tags("DOC", "DOCNO");
 */
 ANT_directory_iterator_file_buffered::~ANT_directory_iterator_file_buffered()
 {
-delete [] read_buffer;
 free_tag();
+
+delete [] primary_buffer;
+delete [] secondary_buffer;
+
 delete [] doc_tag;
 delete [] docno_tag;
+
+delete source;
 }
 
 /*
@@ -70,7 +87,7 @@ char *start, *document_id_start = NULL, *document_id_end = NULL;
 long long bytes_read;
 char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
 
-start = read_buffer + read_buffer_used;
+start = *buffer_to_read_from + *end_of_buffer;
 
 /*
 	Get the start tag
@@ -79,11 +96,17 @@ if ((document_start = strstr(start, doc_tag[0])) == NULL)
 	{
 	/*
 		We might be at the end of a buffer and half-way through a tag so we copy the remainder of the file to the
-		start of the buffer and full the remainder
+		start of the buffer and fill the remainder
 	*/
-	memmove(read_buffer, read_buffer + read_buffer_used, buffer_size - read_buffer_used);
-	bytes_read = read(read_buffer + (buffer_size - read_buffer_used), read_buffer_used);
-	if ((bytes_read == 0) || (document_start = strstr(read_buffer, doc_tag[0])) == NULL)
+	// move the beginning
+	memmove(*buffer_to_read_from, *buffer_to_read_from + *end_of_buffer, buffer_size - *end_of_buffer);
+	// fill the remainder
+	/*
+		Here we need to swap the buffers -- but we have half the document at the end of one buffer
+		and half at the beginning of the next
+	*/
+	bytes_read = read(*buffer_to_read_from + (buffer_size - *end_of_buffer), *end_of_buffer);
+	if ((bytes_read == 0) || (document_start = strstr(*buffer_to_read_from, doc_tag[0])) == NULL)
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
 	}
 
@@ -94,13 +117,13 @@ if ((document_end = strstr(document_start, doc_tag[1])) == NULL)
 	{
 	/*
 		This happens when we move find the start tag in the buffer, but the end tag is
-		not in memoruy.  We play the same game as above and shift the start tag to the
+		not in memory.  We play the same game as above and shift the start tag to the
 		start of the buffer
 	*/
-	memmove(read_buffer, document_start, buffer_size - (document_start - read_buffer));
-	bytes_read = read(read_buffer + buffer_size - (document_start - read_buffer), document_start - read_buffer);
+	memmove(*buffer_to_read_from, document_start, buffer_size - (document_start - *buffer_to_read_from));
+	bytes_read = read(*buffer_to_read_from + buffer_size - (document_start - *buffer_to_read_from), document_start - *buffer_to_read_from);
 
-	document_start = read_buffer;
+	document_start = *buffer_to_read_from;
 	if ((bytes_read == 0) || (document_end = strstr(document_start, doc_tag[1])) == NULL)
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
 	}
@@ -109,7 +132,7 @@ document_end += strlen(doc_tag[1]);			// skip to end of tag
 /*
 	Take a note of how far through the buffer we are
 */
-read_buffer_used = document_end - read_buffer;
+*end_of_buffer = document_end - *buffer_to_read_from;
 
 /*
 	Now get the DOCID (or in the case of NTCIR, the id=)
@@ -132,7 +155,7 @@ if (!auto_file_id)
 			document_start = strchr(document_id_end, '>') + 1;
 		}
 	}
-if (auto_file_id)
+else
 	{
 	document_id_start = document_id_end = file_id_buffer;
 	document_id_end += sprintf(file_id_buffer, "%ld", auto_file_id++);

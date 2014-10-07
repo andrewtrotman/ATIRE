@@ -24,16 +24,21 @@ class ANT_instream;
 class ANT_directory_iterator_file_buffered : public ANT_directory_iterator
 {
 private:
-	static const size_t buffer_size = (32 * 1024 * 1024);
+	static const size_t buffer_size = (16 * 1024 * 1024);
 
 protected:
 	char *document_start, *document_end;
-	char *read_buffer;
-	long long read_buffer_used;
-	long asciiafy;
+
+	char *primary_buffer, *secondary_buffer;
+	char **buffer_to_read_into, **buffer_to_read_from;
+	long long *end_of_buffer, *end_of_second_buffer;
+	long long position_of_end_of_buffer, position_of_end_of_second_buffer;
+
+	long long primary_buffer_used, secondary_buffer_used;
+
 	ANT_instream *source;
 	long auto_file_id;
-	char ** doc_tag;
+	char **doc_tag;
 	char **docno_tag;
 
 private:

@@ -314,8 +314,8 @@ char *stat;
 for (stat = stat_list; *stat != '\0'; stat++)
 	switch (*stat)
 		{
-		case '-': statistics = 0;
-		case 'a': stats("ccmst");
+		case '-': statistics = 0; break;
+		case 'a': stats("cmst"); break;
 		case 'c': statistics |= STAT_COMPRESSION; break;
 		case 'm': statistics |= STAT_MEMORY; break;
 		case 's': statistics |= STAT_SUMMARY; break;
@@ -416,7 +416,7 @@ for (param = 1; param < argc; param++)
 			doc_tag = NULL;
 			docno_tag = NULL;
 			if (strncmp(command + 5, ":clean", 6) == 0)
-				scrub("an");
+				this->scrub("an");
 			else if (strncmp(command + 5, ":tag", 4) == 0)
 				{
 				doc_tag = command + 10;
@@ -431,12 +431,12 @@ for (param = 1; param < argc; param++)
 			{
 			recursive = RECURSIVE_TREC;
 			if (strncmp(command + 6, ":clean", 6) == 0)
-				scrub("an");
+				this->scrub("an");
 			}
 		else if (strcmp(command, "rtrecbig") == 0)
 			{
 			recursive = TREC;
-			scrub("an");
+			this->scrub("an");
 			}
 		else if (strcmp(command, "rcsv") == 0)
 			recursive = CSV;
@@ -475,7 +475,7 @@ for (param = 1; param < argc; param++)
 			filter_filename = argv[++param];
 			}
 		else if (strncmp(command, "iscrub:", 7) == 0)
-			scrub(command + 7);
+			this->scrub(command + 7);
 		else if (*command == 'S')
 			segment(command + 1);
 		else if (strcmp(command, "?") == 0)

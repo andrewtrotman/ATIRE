@@ -5,11 +5,12 @@
 #ifndef MEMORY_INDEX_ONE_H_
 #define MEMORY_INDEX_ONE_H_
 
+#include "memory_index_one_node.h"
 #include "memory_indexer.h"
+#include "memory_index_one_node.h"
 #include "heap.h"	
 
 class ANT_memory;
-class ANT_memory_index_one_node;
 class ANT_string_pair;
 class ANT_memory_index;
 class ANT_search_engine;
@@ -33,6 +34,8 @@ private:
 	static const long HASH_TABLE_SIZE = 0x100;
 
 	ANT_memory_index_one_node *hash_table[HASH_TABLE_SIZE];
+	ANT_memory_index_one_node dummy_root;
+
 	ANT_memory *memory;
 	ANT_memory_index *final_index;
 	long hashed_squiggle_length;
@@ -54,11 +57,15 @@ private:
 	long heap_size;			// maximum size of the heap
 
 private:
-	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string);
+	ANT_memory_index_one_node *new_hash_node(ANT_string_pair *string, long final_hash_value);
 	ANT_memory_index_one_node *find_node(ANT_memory_index_one_node *root, ANT_string_pair *string);
-	ANT_memory_index_one_node *find_add_node(ANT_memory_index_one_node *root, ANT_string_pair *string);
-	long hash(ANT_string_pair *string);
+	ANT_memory_index_one_node *find_add_node(long hash_value, long final_hash_value, ANT_string_pair *string, long *depth);
+	long hash(ANT_string_pair *string, long *final_hash_value);
 	ANT_memory_index_one_node *add(ANT_string_pair *string, long long docno, long extra_term_frequency);
+
+	void rebalance_tree(long hash_value);
+	int tree_to_vine(ANT_memory_index_one_node *root);
+	void vine_to_tree(ANT_memory_index_one_node *root, int size);
 
 	double kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_search_engine *document_collection);
 	double kl_node(ANT_term_divergence *divergence, ANT_memory_index_one_node *node, ANT_memory_index_one *document_collection);

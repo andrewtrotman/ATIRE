@@ -27,7 +27,7 @@ private:
 
 public:
 	ANT_directory_iterator_warc(ANT_instream *source, long get_file = 0) : ANT_directory_iterator("", get_file) { this->source = source; }
-	virtual ~ANT_directory_iterator_warc() {}
+	virtual ~ANT_directory_iterator_warc() { delete source; }
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);

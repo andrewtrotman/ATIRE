@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "directory_iterator_deflate.h"
-#include "directory_iterator_scrub.h"
 #include "compress_text_deflate.h"
 
 #ifdef ANT_HAS_ZLIB

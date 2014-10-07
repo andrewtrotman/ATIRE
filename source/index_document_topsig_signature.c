@@ -6,7 +6,7 @@
 #include <math.h>
 #include <new>
 #include "memory_index.h"
-#include "hash_table.h"
+#include "hash_random.h"
 #include "index_document_topsig_signature.h"
 #include "index_document_topsig.h"
 #include "string_pair.h"
@@ -69,7 +69,7 @@ long bit, num_positive;
 /*
 	Hash the term to seed the random number generator
 */
-seed = ANT_random_hash_64(term->string(), term->length());
+seed = ANT_hash_random_step_64(term->string(), term->length());
 
 /*
 	Look up the collection frequency of the term.  It might not be there because

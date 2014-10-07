@@ -26,9 +26,15 @@
 	ANT_MEMORY_INDEX_ONE::HASH()
 	----------------------------
 */
-inline long ANT_memory_index_one::hash(ANT_string_pair *string)
+inline long ANT_memory_index_one::hash(ANT_string_pair *string, long *final_hash_value)
 {
-return ANT_memory_index::hash(string) % HASH_TABLE_SIZE;
+#ifdef DOUBLE_HASH
+	*final_hash_value = -1; // this will cause errors if it ever gets used, which is good
+	return ANT_hash_8(string);
+#else
+	*final_hash_value = ANT_memory_index::hash(string);
+	return *final_hash_value % HASH_TABLE_SIZE;
+#endif
 }
 
 /*
@@ -37,7 +43,8 @@ return ANT_memory_index::hash(string) % HASH_TABLE_SIZE;
 */
 ANT_memory_index_one::ANT_memory_index_one(ANT_memory *memory, ANT_memory_index *index)
 {
-hashed_squiggle_length = hash(&squiggle_length);
+long dummy;
+hashed_squiggle_length = hash(&squiggle_length, &dummy);
 this->memory = memory;
 this->final_index = index;
 this->stopwords = new ANT_stop_word(index->stopwords->get_type());		// re-use the same stop words list for each instance of this class
@@ -76,9 +83,8 @@ nodes_used = 0;
 	ANT_MEMORY_INDEX_ONE::NEW_HASH_NODE()
 	-------------------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::new_hash_node(ANT_string_pair *pair)
+ANT_memory_index_one_node *ANT_memory_index_one::new_hash_node(ANT_string_pair *pair, long final_hash_value)
 {
-long hash_value;
 ANT_memory_index_hash_node *root = NULL;
 ANT_memory_index_one_node *node;
 
@@ -92,14 +98,16 @@ node->term_frequency = 0;
 
 if (final_index != NULL)
 	{
-	hash_value = final_index->hash(pair);
-	root = final_index->hash_table[hash_value];
+#ifdef DOUBLE_HASH
+	final_hash_value = final_index->hash(pair);
+#endif
+	root = final_index->hash_table[final_hash_value];
 	}
 
 if (root == NULL)
 	node->final_node = NULL;
 else
-	node->final_node = final_index->find_node(root, pair);
+	node->final_node = final_index->find_node(final_hash_value, pair);
 
 nodes_used++;
 
@@ -110,20 +118,23 @@ return node;
 	ANT_MEMORY_INDEX_ONE::FIND_ADD_NODE()
 	-------------------------------------
 */
-ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(ANT_memory_index_one_node *root, ANT_string_pair *string)
+ANT_memory_index_one_node *ANT_memory_index_one::find_add_node(long hash_value, long final_hash_value, ANT_string_pair *string, long *depth)
 {
+ANT_memory_index_one_node *root = hash_table[hash_value];
 long cmp;
+*depth = 1;
 
 while ((cmp = string->strcmp(&(root->string))) != 0)
 	{
+	*depth += 1;
 	if (cmp > 0)
 		if (root->left == NULL)
-			return root->left = new_hash_node(string);
+			return root->left = new_hash_node(string, final_hash_value);
 		else
 			root = root->left;
 	else
 		if (root->right == NULL)
-			return root->right = new_hash_node(string);
+			return root->right = new_hash_node(string, final_hash_value);
 		else
 			root = root->right;
 	}
@@ -166,17 +177,104 @@ return root;
 ANT_memory_index_one_node *ANT_memory_index_one::add(ANT_string_pair *string, long long docno, long extra_term_frequency)
 {
 ANT_memory_index_one_node *answer;
-long hash_value = hash(string);
+long final_hash_value;
+long hash_value = hash(string, &final_hash_value);
+long depth = 1;
 
 if (hash_table[hash_value] == NULL)
-	answer = hash_table[hash_value] = new_hash_node(string);
+	answer = hash_table[hash_value] = new_hash_node(string, final_hash_value);
 else
-	answer = find_add_node(hash_table[hash_value], string);
+	answer = find_add_node(hash_value, final_hash_value, string, &depth);
+
+#if REBALANCE_FACTOR > 0
+if (depth >= REBALANCE_FACTOR)
+	rebalance_tree(hash_value);
+#endif
 
 answer->term_frequency += extra_term_frequency;
 answer->mode = MODE_MONOTONIC;
 
 return answer;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::REBALANCE_TREE()
+	--------------------------------------
+	Uses the DSW algorithm to rebalance the tree at a given hash value
+*/
+void ANT_memory_index_one::rebalance_tree(long hash_value)
+{
+dummy_root.right = hash_table[hash_value];
+
+// convert to a singly linked list via right rotations
+int size = tree_to_vine(&dummy_root);
+
+int full_size = 1;
+while (full_size <= size)
+	full_size = full_size + full_size + 1;
+full_size /= 2;
+
+// do a series of rotations to get to a balanced tree
+vine_to_tree(&dummy_root, size - full_size);
+while (full_size > 1)
+	vine_to_tree(&dummy_root, full_size /= 2);
+
+// the root of the tree might have changed of course
+hash_table[hash_value] = dummy_root.right;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::TREE_TO_VINE()
+	------------------------------------
+	Converts a tree to a singly linked list, by left rotations, counting the
+	number of nodes that are in the tree.
+*/
+int ANT_memory_index_one::tree_to_vine(ANT_memory_index_one_node *root)
+{
+ANT_memory_index_one_node *tail = root;
+ANT_memory_index_one_node *remainder = root->right;
+ANT_memory_index_one_node *tmp;
+
+int nodes = 0;
+
+while (remainder != NULL)
+	if (remainder->left == NULL)
+		{
+		tail = remainder;
+		remainder = remainder->right;
+		nodes++;
+		}
+	else
+		{
+		tmp = remainder->left;
+		remainder->left = tmp->right;
+		tmp->right = remainder;
+		remainder = tmp;
+		tail->right = tmp;
+		}
+
+return nodes;
+}
+
+/*
+	ANT_MEMORY_INDEX_ONE::VINE_TO_TREE()
+	------------------------------------
+	Performs the given number of right rotations on every second node going
+	down the right hand side of the tree.
+*/
+void ANT_memory_index_one::vine_to_tree(ANT_memory_index_one_node *root, int number)
+{
+ANT_memory_index_one_node *current = root;
+ANT_memory_index_one_node *child;
+
+for (int j = 0; j < number; j++)
+	{
+	child = current->right;
+	current->right = child->right;
+	current = current->right;
+	child->right = current->left;
+	current->left = child;
+	}
 }
 
 /*
@@ -297,6 +395,7 @@ double ANT_memory_index_one::kl_node(ANT_term_divergence *divergence, ANT_memory
 long long collection_frequency;
 double left, right, center;
 ANT_memory_index_one_node *term_details;
+long dummy;
 
 left = right = center = 0.0;
 
@@ -305,7 +404,7 @@ left = right = center = 0.0;
 */
 if (node->string[0] != '~')
 	{
-	if ((term_details = document_collection->find_node(document_collection->hash_table[hash(&node->string)], &node->string)) == NULL)
+	if ((term_details = document_collection->find_node(document_collection->hash_table[hash(&node->string, &dummy)], &node->string)) == NULL)
 		collection_frequency = 0;
 	else
 		collection_frequency = term_details->term_frequency;
@@ -492,7 +591,8 @@ return frequency;
 */
 ANT_memory_index_one_node *ANT_memory_index_one::get_term_node(ANT_string_pair *term)
 {
-size_t hash_value = hash(term);
+long dummy;
+size_t hash_value = hash(term, &dummy);
 
 if (hash_table[hash_value] == NULL)
 	return 0;

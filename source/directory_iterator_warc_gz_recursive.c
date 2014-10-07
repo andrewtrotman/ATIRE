@@ -1,7 +1,7 @@
 /*
-	DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE.C
-	--------------------------------------
-*/
+	 DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE.C
+	 --------------------------------------
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,14 +17,12 @@
 	ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE::ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE()
 	------------------------------------------------------------------------------------
 */
-ANT_directory_iterator_warc_gz_recursive::ANT_directory_iterator_warc_gz_recursive(char *source, long get_file, long long scrubbing_options) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_warc_gz_recursive::ANT_directory_iterator_warc_gz_recursive(char *source, long get_file) : ANT_directory_iterator("", get_file)
 {
 ANT_directory_iterator_object filename;
 
 this->source = source;
 filename_provider = new ANT_directory_iterator_recursive(source, 0);
-
-this->scrubbing_options = scrubbing_options;
 
 more_files = filename_provider->first(&filename);
 first_time = true;
@@ -44,9 +42,6 @@ new_provider(filename.filename);
 */
 ANT_directory_iterator_warc_gz_recursive::~ANT_directory_iterator_warc_gz_recursive()
 {
-delete file_stream;
-delete decompressor;
-delete instream_buffer;
 delete dewarcer;
 delete memory;
 }
@@ -55,11 +50,8 @@ delete memory;
 	ANT_DIRECTORY_ITERATOR_WARC_GZ_RECURSIVE::NEW_PROVIDER()
 	--------------------------------------------------------
 */
-ANT_directory_iterator_warc *ANT_directory_iterator_warc_gz_recursive::new_provider(char *filename)
+ANT_directory_iterator *ANT_directory_iterator_warc_gz_recursive::new_provider(char *filename)
 {
-delete file_stream;
-delete decompressor;
-delete instream_buffer;
 delete dewarcer;
 delete memory;
 
@@ -99,7 +91,6 @@ while (more_files != NULL)
 		}
 	else
 		return got;
-		
 	}
 
 return NULL;
