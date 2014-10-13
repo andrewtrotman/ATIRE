@@ -51,7 +51,7 @@ extern unsigned char ANT_header_hash_encode[];
 */
 static inline unsigned long ANT_hash_header_collapse_8(ANT_string_pair *string)
 {
-#warning Hash header collapse 8-bit variant is not fully implemented yet
+/*#warning Hash header collapse 8-bit variant is not fully implemented yet*/
 unsigned long ans;
 
 ans = ANT_header_hash_encode[(*string)[0]]; // range 0..36
@@ -149,7 +149,7 @@ switch (string->length())
 */
 static inline unsigned long ANT_hash_header_collapse_32(ANT_string_pair *string)
 {
-#warning Hash header collapse 32-bit variant not fully implemented yet
+/*#warning Hash header collapse 32-bit variant not fully implemented yet*/
 /*
 	Because we're special casing numbers, we only need a base-27 number
 	In which case we can use the first 5 characters to encode the number

@@ -236,7 +236,6 @@ PARTS = \
 	$(OBJDIR)\memory_indexer.obj 					\
 	$(OBJDIR)\memory_index_one.obj 					\
 	$(OBJDIR)\stats_memory_index.obj				\
-	$(OBJDIR)\hash_table.obj						\
 	$(OBJDIR)\mersenne_twister.obj					\
 	$(OBJDIR)\postings_piece.obj					\
 	$(OBJDIR)\ctypes.obj 							\
@@ -296,6 +295,7 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_tar.obj			\
 	$(OBJDIR)\directory_iterator_warc.obj			\
 	$(OBJDIR)\directory_iterator_warc_gz_recursive.obj		\
+	$(OBJDIR)\directory_iterator_trec_recursive.obj		\
 	$(OBJDIR)\directory_iterator_pkzip.obj			\
 	$(OBJDIR)\directory_iterator_file.obj			\
 	$(OBJDIR)\directory_iterator_file_buffered.obj	\
@@ -306,6 +306,8 @@ PARTS = \
 	$(OBJDIR)\directory_iterator_filter.obj			\
 	$(OBJDIR)\directory_iterator_filter_spam.obj	\
 	$(OBJDIR)\directory_iterator_mime_filter.obj	\
+	$(OBJDIR)\hash_random.obj \
+	$(OBJDIR)\hash_header.obj \
 	$(DIRECTORY_ITERATOR_MYSQL)						\
 	$(OBJDIR)\btree_iterator.obj 					\
 	$(OBJDIR)\thesaurus.obj							\
