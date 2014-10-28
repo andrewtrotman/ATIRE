@@ -19,7 +19,7 @@ ANT_channel *inchannel, *outchannel;
 char *inchannel_word;
 
 if (argc != 3)
-    exit(printf("Usage:%s <trectopicfile> <tag>\n<tag> is any combination of T, D, N (title, desc, narr)\n", argv[0]));
+    exit(printf("Usage:%s <trectopicfile> <tag>\n<tag> is any combination of t, d, n (title, desc, narr)\n", argv[0]));
 
 inchannel = new ANT_channel_file(argv[1]);
 outchannel = new ANT_channel_file(); // Defaults to stdout
