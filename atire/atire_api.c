@@ -471,7 +471,7 @@ long current;
 if (search_engine->quantized())
 	for (current = 0; ANT_list_of_rankers[current].name != NULL; current++)
 		if (function == ANT_list_of_rankers[current].id)
-			if ((ANT_list_of_rankers[current].flags & ANT_ranking_function_factory_object::QUANTABLE) != 0)
+			if ((ANT_list_of_rankers[current].flags & ANT_ranking_function_factory_object::QUANTABLE) == 0)
 				{
 				puts("Cannot set ranking function as the index is quantized");
 				return NULL;		// failure because we're a quantized ranking function and we don't have TF values in the index
