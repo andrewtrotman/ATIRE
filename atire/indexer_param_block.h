@@ -52,6 +52,7 @@ public:
 	double puurula_length_g;			// value to use for tf discounting when computing the Puurula document length vector
 	long quantization_bits;				// how many bits to quantize into
 	long quantization;					// whether or not we should quantize
+	long quantization_automatic;		// whether or not we should calculate the bits to quantize into
 
 protected:
 	void document_compression(char *scheme);

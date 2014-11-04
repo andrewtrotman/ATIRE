@@ -58,6 +58,7 @@ scrubbing = ANT_directory_iterator_scrub::NONE;
 filter_filename = NULL;
 quantization = FALSE;
 quantization_bits = -1; // -1 indicates run-time calculation, wil be overwritten if necessary by the user
+quantization_automatic = FALSE;
 puurula_length_g = ANT_RANKING_FUNCTION_PUURULA_G;
 inversion_extras = ANT_memory_index::NONE;
 }
@@ -564,6 +565,7 @@ for (param = 1; param < argc; param++)
 		else if (*command == 'q')
 			{
 			quantization = TRUE;
+			quantization_automatic = TRUE;
 
 			if (*(command + 1) == '-')
 				quantization = FALSE;
@@ -572,6 +574,7 @@ for (param = 1; param < argc; param++)
 				quantization_bits = atol(command + 1);
 				if (quantization_bits < 2 || quantization_bits > 16)
 					exit(printf("Have to quantize into range 2--16 bits inclusive\n"));
+				quantization_automatic = FALSE;
 				}
 			}
 		else if (*command == 't')

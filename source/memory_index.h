@@ -97,6 +97,7 @@ private:
 	double ranking_function_p3;
 	long long quantization_bits;
 	long index_quantization;
+	long quantization_automatic;
 	double maximum_collection_rsv, minimum_collection_rsv;
 
 	/*
@@ -221,7 +222,7 @@ public:
 	virtual void set_puurula_tfidf_length(double length) { set_document_detail(&squiggle_puurula_tfidf_length, (long long)(length * 1000)); /* accurate to 3 decimal places*/ }
 	virtual void set_unique_term_count(long long length) { set_document_detail(&squiggle_unique_term_count, length); }
 	virtual void set_inverted_index_mode(long mode, double parameter) { inverted_index_mode = mode; inverted_index_parameter = parameter; }
-	virtual void set_quantization(long quantization, long bits) { this->index_quantization = quantization; this->quantization_bits = bits;}
+	virtual void set_quantization(long quantization, long quantization_automatic, long bits) { this->index_quantization = quantization; this->quantization_automatic = quantization_automatic; this->quantization_bits = bits;}
 	virtual void set_document_detail(ANT_string_pair *measure_name, long long length, long mode = MODE_ABSOLUTE);
 	virtual void set_ranking_function(long ranking_function, double p1, double p2, double p3) {ranking_function_id = ranking_function; ranking_function_p1 = p1; ranking_function_p2 = p2; ranking_function_p3 = p3;}
 	virtual void set_static_pruning(long long k) { static_prune_point = k; }

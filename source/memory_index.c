@@ -1550,7 +1550,11 @@ timer = stats->start_timer();
 	see:
 		M. Crane, A. Trotman, R. O'Keefe (2013), Maintaining Discriminatory Power in Quantized Indexes, Proceedings of CIKM 2013
 */
-quantization_bits = (long long)(quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt((double)documents_in_repository) : quantization_bits);
+if (quantization_automatic)
+	quantization_bits = (long long)(quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt((double)documents_in_repository) : quantization_bits);
+else
+	quantization_bits = quantization_bits == -1 ? 8 : quantization_bits;
+
 if ((quantizer = ANT_ranking_function_factory::get_indexing_ranker(ranking_function_id, largest_docno, document_lengths, quantization_bits, ranking_function_p1, ranking_function_p2, ranking_function_p3)) != NULL)
 	{
 	/*
@@ -1578,9 +1582,6 @@ if ((quantizer = ANT_ranking_function_factory::get_indexing_ranker(ranking_funct
 	set_variable("~quantmax", *(long long *)&maximum_collection_rsv);
 	set_variable("~quantmin", *(long long *)&minimum_collection_rsv);
 	}
-
-if (quantizer == NULL || !index_quantization)
-	quantization_bits = 8; // this is by default for tf-indexes
 
 /*
 	Store how long quantizaton took.
