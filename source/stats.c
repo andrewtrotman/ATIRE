@@ -46,10 +46,10 @@ ANT_stats::~ANT_stats()
 	*/
 	long long ANT_stats::print_time(const char *message, long long time_taken, const char *end_message)
 	{
-	char *units = "microseconds";
+	char *units = "milliseconds";
 	unsigned long long milliseconds;
 
-	milliseconds = time_taken;//time_to_milliseconds(time_taken);
+	milliseconds = time_to_milliseconds(time_taken);
 
 	printf("%s%lld %s%s\n", message, milliseconds, units, end_message);
 

@@ -56,7 +56,7 @@ USE_TERM_LOCAL_MAX_IMPACT := 0
 
 # print stats without converting millisecond to second, minute, hour
 # for profiling purpose
-USE_PRINT_TIME_NO_CONVERSION := 1
+USE_PRINT_TIME_NO_CONVERSION := 0
 
 # construct impact headers for easy handling the quantums of the postings (version 0.4 of the index)
 USE_IMPACT_HEADER := 1
