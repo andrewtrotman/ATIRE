@@ -27,8 +27,8 @@
 	Buffers used for compression of postings lists, global because they are
 	shared by write_postings and write_impact_header_postings
 */
-long long postings_list_size = ANT_COMPRESSION_FACTORY_END_PADDING;
-unsigned char *postings_list = new unsigned char[postings_list_size];
+long long postings_list_size = 2;
+unsigned char *postings_list = new unsigned char[postings_list_size + ANT_COMPRESSION_FACTORY_END_PADDING];
 unsigned char *new_postings_list;
 unsigned char *temp;
 const double postings_growth_factor = 1.6;
