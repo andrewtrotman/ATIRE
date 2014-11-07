@@ -27,10 +27,11 @@
 	Buffers used for compression of postings lists, global because they are
 	shared by write_postings and write_impact_header_postings
 */
-long long postings_list_size = 1;
+long long postings_list_size = ANT_COMPRESSION_FACTORY_END_PADDING;
 unsigned char *postings_list = new unsigned char[postings_list_size];
 unsigned char *new_postings_list;
 unsigned char *temp;
+const double postings_growth_factor = 1.6;
 
 ANT_stop_word *stop_words;
 
@@ -251,13 +252,14 @@ else
 	*/
 	while ((len = factory->compress(postings_list, postings_list_size, raw, leaf->impacted_length)) == 1)
 		{
-		new_postings_list = new unsigned char[postings_list_size * 2];
+		printf("Growing postings list size to: %llu\n", (unsigned long long)(postings_list_size * postings_growth_factor));
+		new_postings_list = new unsigned char[(unsigned long long)(postings_list_size * postings_growth_factor) + ANT_COMPRESSION_FACTORY_END_PADDING];
 		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
 		
 		delete [] postings_list;
 		postings_list = new_postings_list;
 		
-		postings_list_size *= 2;
+		postings_list_size = (unsigned long long)(postings_list_size * postings_growth_factor);
 		}
 	
 	current_disk_position = index->tell();
@@ -362,14 +364,15 @@ for (ANT_compressable_integer i = 0; i < quantum_count; impact_value_pointer++, 
 	*/
 	while ((len = factory->compress(postings_ptr, postings_list_size - (postings_ptr - postings_list), raw + *impact_offset_pointer, *document_count_pointer)) == 1)
 		{
-		new_postings_list = new unsigned char[postings_list_size * 2];
+		printf("Growing postings list size to: %llu\n", (unsigned long long)(postings_list_size * postings_growth_factor));
+		new_postings_list = new unsigned char[(unsigned long long)(postings_list_size * postings_growth_factor) + ANT_COMPRESSION_FACTORY_END_PADDING];
 		memcpy(new_postings_list, postings_list, postings_list_size * sizeof(*postings_list));
 		postings_ptr = new_postings_list + (postings_ptr - postings_list);
 		
 		delete [] postings_list;
 		postings_list = new_postings_list;
 		
-		postings_list_size *= 2;
+		postings_list_size = (unsigned long long)(postings_list_size * postings_growth_factor);
 		}
 	*impact_offset_pointer = (ANT_compressable_integer)(postings_ptr - postings_list); // convert pointer to offset
 	postings_ptr += len;
