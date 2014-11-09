@@ -27,8 +27,8 @@
 	Buffers used for compression of postings lists, global because they are
 	shared by write_postings and write_impact_header_postings
 */
-long long postings_list_size = ANT_COMPRESSION_FACTORY_END_PADDING;
-unsigned char *postings_list = new unsigned char[postings_list_size];
+long long postings_list_size = 2;
+unsigned char *postings_list = new unsigned char[postings_list_size + ANT_COMPRESSION_FACTORY_END_PADDING];
 unsigned char *new_postings_list;
 unsigned char *temp;
 const double postings_growth_factor = 1.6;
@@ -41,7 +41,7 @@ ANT_stop_word *stop_words;
 */
 int term_compare(const void *term, const void *list_term_pointer)
 {
-	return strcmp((char *)term, *(char **)list_term_pointer);
+return strcmp((char *)term, *(char **)list_term_pointer);
 }
 
 /*
@@ -174,7 +174,7 @@ long long len = 0, used = 0;
 if (should_prune(term, leaf, param, largest_docno))
 	return NULL;
 
-node = new (memory_stats->postings_memory) ANT_memory_index_hash_node(memory_stats->postings_memory, memory_stats->postings_memory, new ANT_string_pair(term), memory_stats);
+ANT_string_pair *t = new ANT_string_pair(term); node = new (memory_stats->postings_memory) ANT_memory_index_hash_node(memory_stats->postings_memory, memory_stats->postings_memory, t, memory_stats); delete t;
 
 node->collection_frequency = leaf->local_collection_frequency;
 node->document_frequency = leaf->local_document_frequency;
@@ -349,7 +349,7 @@ if (*term == '~')
 if (should_prune(term, leaf, param, largest_docno))
 	return NULL;
 
-node = new (memory_stats->postings_memory) ANT_memory_index_hash_node(memory_stats->postings_memory, memory_stats->postings_memory, new ANT_string_pair(term), memory_stats);
+ANT_string_pair *t = new ANT_string_pair(term); node = new (memory_stats->postings_memory) ANT_memory_index_hash_node(memory_stats->postings_memory, memory_stats->postings_memory, t, memory_stats); delete t;
 
 node->collection_frequency = leaf->local_collection_frequency;
 node->document_frequency = leaf->local_document_frequency;
@@ -673,6 +673,8 @@ if (do_documents)
 #endif
 			index->write((unsigned char *)doc_filenames[document], strlen(doc_filenames[document]) + 1);
 			}
+		free(doc_buf);
+		free(doc_filenames);
 		}
 	
 	document_filenames_finish = index->tell();
@@ -1160,7 +1162,8 @@ for (engine = 0; engine < number_engines; engine++)
 	#endif
 	}
 delete leaves[number_engines];
-delete raw[number_engines];
+delete [] raw[number_engines];
+
 #ifdef IMPACT_HEADER
 	delete [] impact_headers[number_engines];
 	delete [] impact_headers;
@@ -1176,6 +1179,7 @@ delete [] document_compress_buffer;
 delete [] header;
 delete [] iterators;
 delete [] leaves;
+delete [] raw;
 delete [] memory;
 delete [] search_engines;
 delete [] should_process;
@@ -1183,6 +1187,7 @@ delete [] strcmp_results;
 delete [] term_list;
 delete [] terms;
 delete [] trimpoints;
+delete [] filename_index_offsets;
 
 delete [] postings_list;
 
