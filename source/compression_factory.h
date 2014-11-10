@@ -10,7 +10,7 @@
 #include "compression_factory_scheme.h"
 
 
-#define ANT_COMPRESSION_FACTORY_END_PADDING 128	// extra padding at the end because some schemes (Simple-9) don't know when to stop
+#define ANT_COMPRESSION_FACTORY_END_PADDING 1024	// extra padding at the end because some schemes (Simple-9) don't know when to stop
 
 /*
 	class ANT_COMPRESSION_FACTORY
@@ -40,6 +40,9 @@ private:
 	static long number_of_techniques;
 	static ANT_compression_factory_scheme scheme[];
 	long long failures;
+	long long compression_failures;
+	long long decompression_overruns;
+	long long decompression_mismatches;
 	long long integers_compressed;
 	unsigned long schemes_to_use;
 	/*

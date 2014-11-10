@@ -94,8 +94,11 @@ schemes_to_use = VARIABLE_BYTE;
 	Now initialise everything to zero
 */
 failures = integers_compressed = 0;
+compression_failures = 0;
+decompression_overruns = 0;
+decompression_mismatches = 0;
 for (which = 0; which < number_of_techniques; which++)
-	scheme[which].uses = scheme[which].would_take = scheme[which].did_take = scheme[which].did_compress = scheme[which].failures = scheme[which].time = 0;
+	scheme[which].uses = scheme[which].would_take = scheme[which].did_take = scheme[which].did_compress = scheme[which].failures = scheme[which].compress_time = scheme[which].decompress_time = 0;
 
 /*
 	Should we decompress and compare to the uncompressed string (and measure decompresson speed)
@@ -123,6 +126,7 @@ long long ANT_compression_factory::compress(unsigned char *destination, long lon
 long which, preferred = -1;
 long long min_size, size;
 long long start_time;
+long last_successful = -1; /* if we're only testing one scheme, don't compress twice */
 
 min_size = LLONG_MAX;
 integers_compressed += source_integers;
@@ -130,11 +134,14 @@ integers_compressed += source_integers;
 for (which = 0; which < number_of_techniques; which++)
 	if ((scheme[which].scheme_id & schemes_to_use) != 0)
 		{
+		start_time = ANT_stats::start_timer();		// time the compression
 		size = scheme[which].scheme->compress(destination + 1, destination_length - 1, source, source_integers);
+		scheme[which].compress_time += ANT_stats::stop_timer(start_time);
 		if (size == 0)				// failure
 			scheme[which].failures++;
 		else
 			{
+			last_successful = which;
 			scheme[which].would_take += size;
 			if (size < min_size)		// if equal we prefer the first in the list
 				{
@@ -151,7 +158,10 @@ for (which = 0; which < number_of_techniques; which++)
 		if (validate)
 			{
 			if (size == 0)
-				printf("%s: Compression Failure (list length:%lld)\n", scheme[which].name, source_integers);
+				{
+				compression_failures++;
+				scheme[which].failures++; // XXX separate decompression failures from compression failures at some point
+				}
 			else
 				{
 				if (validation_buffer_length < source_integers)
@@ -163,12 +173,12 @@ for (which = 0; which < number_of_techniques; which++)
 
 				start_time = ANT_stats::start_timer();		// time the decompression
 				scheme[which].scheme->decompress(validation_buffer, destination + 1, source_integers);
-				scheme[which].time += ANT_stats::stop_timer(start_time);
+				scheme[which].decompress_time += ANT_stats::stop_timer(start_time);
 
 				if (memcmp(source, validation_buffer, (size_t)(source_integers * sizeof(ANT_compressable_integer))))
-					printf("%s: Raw and decompressed strings do not match (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
+					decompression_mismatches++;
 				if (validation_buffer[source_integers] != 0xCCCCCCCC)
-					printf("%s: Decompression Overrun (list length:%lld, compressed-size:%lld)\n", scheme[which].name, source_integers, size);
+					decompression_overruns++;
 				}
 			}
 		}
@@ -179,18 +189,19 @@ if (preferred < 0)
 	preferred = ANT_compression_factory::NONE;		// in the case of failure to compress resort to storing the postings list on disk uncompressed.
 	}
 
-for (which = 0; which < number_of_techniques; which++)
-	if (scheme[which].scheme_id == preferred)
-		{
-		*destination = (unsigned char)which;
-		min_size = scheme[which].scheme->compress(destination + 1, destination_length - 1, source, source_integers);
-
-		scheme[which].uses++;
-		scheme[which].did_take += min_size;
-		scheme[which].did_compress += source_integers;
-
-		return min_size + 1;
-		}
+if (preferred != last_successful)
+	for (which = 0; which < number_of_techniques; which++)
+		if (scheme[which].scheme_id == preferred)
+			{
+			*destination = (unsigned char)which;
+			min_size = scheme[which].scheme->compress(destination + 1, destination_length - 1, source, source_integers);
+	
+			scheme[which].uses++;
+			scheme[which].did_take += min_size;
+			scheme[which].did_compress += source_integers;
+	
+			return min_size + 1;
+			}
 
 return 0;
 }
@@ -239,8 +250,10 @@ for (which = 0; which < number_of_techniques; which++)
 		printf("Only %-*.*s :%10lld bytes (%2.2f bpi)", 15, 15, scheme[which].name, scheme[which].would_take, (double)(scheme[which].would_take * 8) / (double)integers_compressed);
 		if (scheme[which].failures != 0)
 			printf(" Failed %10lld times ", scheme[which].failures);
-		if (scheme[which].time != 0)
-			printf(" Decompression Rate: %2.0f ips ", (double)integers_compressed / ((double)scheme[which].time / (double)ANT_stats::clock_tick_frequency()));
+		if (scheme[which].compress_time != 0)
+			printf(" Compression Rate: %2.0f ips ", (double)integers_compressed / ((double)scheme[which].compress_time / (double)ANT_stats::clock_tick_frequency()));
+		if (scheme[which].decompress_time != 0)
+			printf(" Decompression Rate: %2.0f ips ", (double)integers_compressed / ((double)scheme[which].decompress_time / (double)ANT_stats::clock_tick_frequency()));
 		printf("\n");
 		if (scheme[which].would_take < best_other)
 			best_other = scheme[which].would_take;
@@ -248,5 +261,18 @@ for (which = 0; which < number_of_techniques; which++)
 printf("Mixed                :%10lld bytes (%2.2f bpi)\n", bytes + terms, (double)((bytes + terms) * 8) / (double)integers_compressed);
 printf("Mixed cf best other  :%10lld bytes saved\n", best_other - (bytes + terms));
 printf("Mixed cf best other  :%2.2f%% saved\n", 100.0 * ((double)(best_other - (bytes + terms)) / (double)best_other));
+puts("\nCOMPRESSION MISCELLANY");
+puts("----------------------");
+printf("Integers compressed  :%10lld\n", integers_compressed);
+printf("Terms                :%10lld\n", terms);
+printf("Bytes                :%10lld\n", bytes);
+if (validate)
+	{
+	puts("\nCOMPRESSION VALIDATION");
+	puts("----------------------");
+	printf("Compression failures :%10lld\n", compression_failures);
+	printf("Decompre. mismatches :%10lld\n", decompression_mismatches);
+	printf("Decompress. overruns :%10lld\n", decompression_overruns);
+	}
 }
 
