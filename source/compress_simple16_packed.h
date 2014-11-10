@@ -19,13 +19,12 @@ protected:
 	unsigned char *masks;
 	long blocks_length;
 	
-	static long bits_to_use[];
 	static long ints_packed_table[];
+	static long can_pack_table[];
+	static long row_for_bits_needed[];
+	static long invalid_masks_for_offset[];
 	static long simple16_packed_shift_table[];
-	static long simple16_packed_mask_table[];
-private:
-	virtual long can_pack(ANT_compressable_integer *from, int mask_type, int pack_limit);
-	virtual void pack(ANT_compressable_integer *source, uint32_t *dest, uint32_t mask_type, uint32_t num_to_pack);
+
 public:
 	ANT_compress_simple16_packed()
 	{

@@ -22,14 +22,6 @@
 #define FIND_LAST_SET fls
 #endif
 
-#ifndef FALSE
-	#define FALSE 0
-#endif
-
-#ifndef TRUE
-	#define TRUE (!FALSE)
-#endif
-
 /*
 	ANT_compress_simple16::simple16_shift_table[]
 	---------------------------------------------
