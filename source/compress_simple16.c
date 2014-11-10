@@ -144,11 +144,12 @@ long long ANT_compress_simple16::compress(unsigned char *destination, long long 
 {
 long long words_in_compressed_string, pos;
 long num_to_pack;
-uint32_t *into;
+uint32_t *into, *end;
 uint32_t mask_type;
 int remaining;
 
 into = (uint32_t *)destination;
+end = (uint32_t *)(destination + destination_length);
 pos = 0;
 for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++) // Loop through every word in source array
 	{
@@ -169,6 +170,9 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	pack(source + pos, into, mask_type, num_to_pack);
 	pos += num_to_pack;
 	into++;
+  /* don't run past end of compression buffer */
+  if (into > end)
+    return 0;
 	}
 
 return words_in_compressed_string * sizeof(*into);  //stores the length of n[]

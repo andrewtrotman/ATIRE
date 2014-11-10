@@ -156,6 +156,8 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	pack(source + pos, into, mask_type, num_to_pack);
 	pos += num_to_pack;
 	into++;
+  if (into > end)
+    return 0;
 	}
 return words_in_compressed_string * sizeof(*into);  //return the length of n[]
 }
