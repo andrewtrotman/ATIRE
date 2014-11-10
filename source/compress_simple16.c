@@ -15,6 +15,13 @@
 #include "compress_simple16.h"
 #include "maths.h"
 
+// XXX need 'ffs' and 'fls' functions for other O/S
+#ifdef __GNUC__
+#include <strings.h>
+#define FIND_FIRST_SET ffs
+#define FIND_LAST_SET fls
+#endif
+
 #ifndef FALSE
 	#define FALSE 0
 #endif
@@ -22,31 +29,6 @@
 #ifndef TRUE
 	#define TRUE (!FALSE)
 #endif
-
-/*
-	ANT_compress_simple16::simple16_mask_table[]
-	---------------------------------------
-	Number of bits required to compress each integer -- used to select the appropriate mask
-*/
-long ANT_compress_simple16::simple16_mask_table[] =
-{
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0,
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-4, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-3, 4, 4, 4, 4, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-5, 5, 5, 5, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-4, 4, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-6, 6, 6, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-5, 5, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-10, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-14, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-}; 
 
 /*
 	ANT_compress_simple16::simple16_shift_table[]
@@ -80,61 +62,46 @@ long ANT_compress_simple16::simple16_shift_table[] =
 */
 long ANT_compress_simple16::ints_packed_table[] = {28, 21, 21, 21, 14, 9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 1};
 
+
 /*
-	ANT_compress_simple16::bits_to_use[]
-	-----------------------------------
-	This is the number of bits that simple-16 will be used to store an integer of the given the number of bits in length
+	ANT_COMPRESS_SIMPLE16::CAN_PACK_TABLE[]
+	---------------------------------------------
+	Bitmask map for valid masks at an offset (column) for some num_bits_needed (row).
 */
-long ANT_compress_simple16::bits_to_use[] = 
+long ANT_compress_simple16::can_pack_table[] =
 {
- 1,  1,  2,  3,  4,  5,  6,  7, 
- 9,  9, 10, 14, 14, 14, 14, 28, 
-28, 28, 28, 28, 28, 28, 28, 28, 
-28, 28, 28, 28, 28, 64, 64, 64,
-64, 64, 64, 64, 64, 64, 64, 64,
-64, 64, 64, 64, 64, 64, 64, 64,
-64, 64, 64, 64, 64, 64, 64, 64,
-64, 64, 64, 64, 64, 64, 64, 64
+0xffff, 0x7fff, 0x3fff, 0x1fff, 0x0fff, 0x03ff, 0x00ff, 0x007f, 0x003f, 0x001f, 0x001f, 0x001f, 0x001f, 0x001f, 0x000f, 0x000f, 0x000f, 0x000f, 0x000f, 0x000f, 0x000f, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001,
+0xfff2, 0x7ff2, 0x3ff2, 0x1ff2, 0x0ff2, 0x03f2, 0x00f2, 0x0074, 0x0034, 0x0014, 0x0014, 0x0014, 0x0014, 0x0014, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xffe0, 0x7fe0, 0x3fe0, 0x1fe0, 0x0fe0, 0x03e0, 0x00e0, 0x0060, 0x0020, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xffa0, 0x7fc0, 0x3fc0, 0x1fc0, 0x0fc0, 0x0380, 0x0080, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xfd00, 0x7d00, 0x3f00, 0x1f00, 0x0e00, 0x0200, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xf400, 0x7400, 0x3c00, 0x1800, 0x0800, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xf000, 0x7000, 0x3000, 0x1000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xe000, 0x6000, 0x2000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xe000, 0x4000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0xc000, 0x4000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x8000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
 /*
-	ANT_COMPRESS_SIMPLE16::CAN_PACK()
-	---------------------------------
-	Try to pack integers according to the mask type
+	ANT_COMPRESS_SIMPLE16::INVALID_MASKS_FOR_OFFSET[]
+	-----------------------------------
+	We AND out masks for offsets where we don't know if we can fully pack for that offset
 */
-long ANT_compress_simple16::can_pack(ANT_compressable_integer *from, int mask_type, int pack_limit)
+long ANT_compress_simple16::invalid_masks_for_offset[] =
 {
-int offset = 0;
-pack_limit = (pack_limit < ints_packed_table[mask_type]) ? pack_limit: ints_packed_table[mask_type];
-while (offset < pack_limit)
-	{
-	if (*from++ >= 1 << simple16_mask_table[offset + 28 * mask_type])
-		return 0;
-	offset++;
-	}
-return 1;
-}
+0x0000, 0x8000, 0xc000, 0xe000, 0xf000, 0xfc00, 0xff00, 0xff80, 0xffc0, 0xffe0, 0xffe0, 0xffe0, 0xffe0, 0xffe0, 0xfff0, 0xfff0, 0xfff0, 0xfff0, 0xfff0, 0xfff0, 0xfff0, 0xfffe, 0xfffe, 0xfffe, 0xfffe, 0xfffe, 0xfffe, 0xfffe, 0xffff
+};
 
 /*
-	ANT_COMPRESS_SIMPLE16:PACK()
-	----------------------------
-	Pack integers into word.
-	TODO unroll this back into the compress() function.
+	ANT_COMPRESS_SIMPLE16::ROW_FOR_BITS_NEEDED[]
+	-----------------------------------
+	Translates the 'bits_needed' to the appropriate 'row' offset for use with can_pack table.
 */
-void ANT_compress_simple16::pack(ANT_compressable_integer *source, uint32_t *dest, uint32_t mask_type, uint32_t num_to_pack)
+long ANT_compress_simple16::row_for_bits_needed[] =
 {
-	int bits_to_shift;
-	int offset = 0;
-	int mask_type_offset = 28 * mask_type;
-	*dest = 0;
-	while (offset < num_to_pack)
-		{
-		bits_to_shift = simple16_shift_table[mask_type_offset + offset];
-		*dest |= *(source + offset) << bits_to_shift;
-		offset++;
-		}
-	*dest = *dest << 4 | mask_type;
-}
+0, 0, 28, 56, 84, 112, 140, 168, 196, 196, 224, 252, 252, 252, 252, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
 
 /*
 	ANT_COMPRESS_SIMPLE16::COMPRESS()
@@ -143,39 +110,43 @@ void ANT_compress_simple16::pack(ANT_compressable_integer *source, uint32_t *des
 long long ANT_compress_simple16::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers)
 {
 long long words_in_compressed_string, pos;
-long num_to_pack;
+uint32_t mask_type, num_to_pack;
 uint32_t *into, *end;
-uint32_t mask_type;
-int remaining;
-
+uint32_t remaining;
+uint32_t offset, mask_type_offset;
+uint16_t last_bitmask, bitmask;
 into = (uint32_t *)destination;
 end = (uint32_t *)(destination + destination_length);
 pos = 0;
-for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++) // Loop through every word in source array
+for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++)
 	{
 	remaining = (pos + 28 < source_integers) ? 28 : source_integers - pos;
-	mask_type = 0;
-	while (mask_type < 16)
+	last_bitmask = 0x0000;
+	bitmask = 0xFFFF;
+	/* constrain last_bitmask to contain only bits for masks we can pack with */
+	for (offset = 0; offset < remaining && bitmask; offset++)
 		{
-		if (can_pack(source + pos, mask_type, remaining) && ints_packed_table[mask_type] <= remaining)
-			break;
-		mask_type++;
+		bitmask &= can_pack_table[row_for_bits_needed[FIND_LAST_SET(source[pos + offset])] + offset];
+		last_bitmask |= (bitmask & invalid_masks_for_offset[offset + 1]);
 		}
-
-	if (mask_type == 16)
+	/* 'ffs' function returns 0 => no bits were set => no valid masks => invalid input */
+	if ((mask_type = FIND_FIRST_SET(last_bitmask)) == 0)
 		return 0;
-
+	/* turn bit position into actual mask to use */
+	mask_type--;
 	num_to_pack = ints_packed_table[mask_type];
-
-	pack(source + pos, into, mask_type, num_to_pack);
+	/* pack the word */
+	*into = 0;
+	mask_type_offset = 28 * mask_type;
+	for (offset = 0; offset < num_to_pack; offset++)
+		*into |= (source[pos + offset] << simple16_shift_table[mask_type_offset + offset]);
+	*into = (*into << 4) | mask_type;
 	pos += num_to_pack;
 	into++;
-  /* don't run past end of compression buffer */
-  if (into > end)
-    return 0;
+	if (into > end)
+		return 0;
 	}
-
-return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
+return words_in_compressed_string * sizeof(*into); //stores the length of n[]
 }
 
 /*
