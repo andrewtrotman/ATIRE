@@ -30,7 +30,7 @@
 #ifdef __GNUC__
 #include <strings.h>
 #define FIND_FIRST_SET ffs
-#define FIND_LAST_SET fls
+#define FIND_LAST_SET ANT_ceiling_log2
 #endif
 
 /*
