@@ -8,7 +8,7 @@
 #include "compress.h"
 
 /*
-	class ANT_COMPRESS_SIMPLE8B_PACKED
+	CLASS ANT_COMPRESS_SIMPLE8B_PACKED
 	----------------------------------
 */
 class ANT_compress_simple8b_packed : public ANT_compress
@@ -24,7 +24,7 @@ protected:
 	static long row_for_bits_needed[];
 	static long invalid_masks_for_offset[];
 	static long simple8b_packed_shift_table[];
-  	
+
 public:
 	ANT_compress_simple8b_packed()
 	{
@@ -42,4 +42,4 @@ public:
 	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
 } ;
 
-#endif  /* __COMPRESS_SIMPLE8B_PACKED_H__ */
+#endif	/* __COMPRESS_SIMPLE8B_PACKED_H__ */

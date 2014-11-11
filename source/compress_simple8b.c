@@ -157,6 +157,7 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 	}
 return words_in_compressed_string * sizeof(*into); //stores the length of n[]
 }
+
 /*
 	ANT_COMPRESS_SIMPLE8B::DECOMPRESS()
 	----------------------------------

@@ -1,6 +1,9 @@
 /*
 	COMPRESS_SIMPLE9.C
 	------------------
+	The current version of this code is an adaptaion of compress_simple8b.c.
+	You can find the original licensing for the old code here.
+
 	Anh and Moffat's Simple-9 Compression scheme from:
 	V. Anh, A. Moffat (2005), Inverted Index Compression Using Word-Alligned Binary Codes, Information Retrieval, 8(1):151-166
 
@@ -14,12 +17,11 @@
 #include "compress_simple9.h"
 #include "maths.h"
 
-#ifndef FALSE
-	#define FALSE 0
-#endif
-
-#ifndef TRUE
-	#define TRUE (!FALSE)
+// XXX need 'ffs' and 'fls' functions for other O/S
+#ifdef __GNUC__
+#include <strings.h>
+#define FIND_FIRST_SET ffs
+#define FIND_LAST_SET fls
 #endif
 
 /*
@@ -71,52 +73,112 @@ long ANT_compress_simple9::table_row[] =
 };
 
 /*
+	ANT_COMPRESS_SIMPLE9::SIMPLE9_SHIFT_TABLE[]
+	---------------------------------------------
+	Number of bits to shift across when packing -- is sum of prior packed ints
+*/
+long ANT_compress_simple9::simple9_shift_table[] =
+{
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
+0, 4, 8, 12, 16, 20, 24, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+0, 5, 10, 15, 20, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+0, 7, 14, 21, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+0, 9, 18, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
+0, 14, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+0, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28
+};
+
+/*
+	ANT_COMPRESS_SIMPLE9::INTS_PACKED_TABLE[]
+	--------------------------------------------
+	Number of integers packed into a 32-bit word, given its mask type
+*/
+long ANT_compress_simple9::ints_packed_table[] = {28, 14, 9, 7, 5, 4, 3, 2, 1};
+
+/*
+	ANT_COMPRESS_SIMPLE9::CAN_PACK_TABLE[]
+	---------------------------------------------
+	Bitmask map for valid masks at an offset (column) for some num_bits_needed (row).
+*/
+long ANT_compress_simple9::can_pack_table[] = 
+{
+0x01ff, 0x00ff, 0x007f, 0x003f, 0x001f, 0x000f, 0x000f, 0x0007, 0x0007, 0x0003, 0x0003, 0x0003, 0x0003, 0x0003, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001,
+0x01fe, 0x00fe, 0x007e, 0x003e, 0x001e, 0x000e, 0x000e, 0x0006, 0x0006, 0x0002, 0x0002, 0x0002, 0x0002, 0x0002, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x01fc, 0x00fc, 0x007c, 0x003c, 0x001c, 0x000c, 0x000c, 0x0004, 0x0004, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x01f8, 0x00f8, 0x0078, 0x0038, 0x0018, 0x0008, 0x0008, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x01f0, 0x00f0, 0x0070, 0x0030, 0x0010, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x01e0, 0x00e0, 0x0060, 0x0020, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x01c0, 0x00c0, 0x0040, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x0180, 0x0080, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+0x0100, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+};
+
+/*
+	ANT_COMPRESS_SIMPLE9::INVALID_MASKS_FOR_OFFSET[]
+	-----------------------------------
+	We AND out masks for offsets where we don't know if we can fully pack for that offset
+*/
+long ANT_compress_simple9::invalid_masks_for_offset[] = 
+{
+0x0000, 0x0100, 0x0180, 0x01c0, 0x01e0, 0x01f0, 0x01f0, 0x01f8, 0x01f8, 0x01fc, 0x01fc, 0x01fc, 0x01fc, 0x01fc, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01fe, 0x01ff
+};
+
+/*
+	ANT_COMPRESS_SIMPLE9::ROW_FOR_BITS_NEEDED[]
+	-----------------------------------
+	Translates the 'bits_needed' to the appropriate 'row' offset for use with can_pack table.
+*/
+long ANT_compress_simple9::row_for_bits_needed[] = 
+{
+0, 0, 28, 56, 84, 112, 140, 140, 168, 168, 196, 196, 196, 196, 196, 224, 224, 224, 224, 224, 224, 224, 224, 224, 224, 224, 224, 224, 224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+/*
 	ANT_COMPRESS_SIMPLE9::COMPRESS()
 	--------------------------------
 */
 long long ANT_compress_simple9::compress(unsigned char *destination, long long destination_length, ANT_compressable_integer *source, long long source_integers)
 {
-ANT_compressable_integer *from;
 long long words_in_compressed_string, pos;
-long row, bits_per_integer, needed_for_this_integer, needed, term;
+uint32_t mask_type, num_to_pack;
 uint32_t *into, *end;
-
+uint32_t remaining;
+uint32_t offset, mask_type_offset;
+uint16_t last_bitmask, bitmask;
 into = (uint32_t *)destination;
 end = (uint32_t *)(destination + destination_length);
-from = source;
 pos = 0;
-for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++)  //outer loop: loops thru' all the elements in source[]
+for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_string++)
 	{
-	needed = 0;
-	for (term = 0; term < 28 && pos + term < source_integers; term++)
+	remaining = (pos + 28 < source_integers) ? 28 : source_integers - pos;
+	last_bitmask = 0x0000;
+	bitmask = 0xFFFF;
+	/* constrain last_bitmask to contain only bits for masks we can pack with */
+	for (offset = 0; offset < remaining && bitmask; offset++)
 		{
-//printf("(D:%ld B:%ld S:%ld)\n", (long)source[pos + term], (long)ANT_ceiling_log2(source[pos + term]), bits_to_use[ANT_ceiling_log2(source[pos + term])]);
-		needed_for_this_integer = bits_to_use[ANT_ceiling_log2(source[pos + term])];
-		if (needed_for_this_integer > 28 || needed_for_this_integer < 1)
-			return 0;					// we fail because there is an integer greater then 2^28 (or 0) and so we cannot pack it
-		if (needed_for_this_integer > needed)
-			needed = needed_for_this_integer;
-		if (needed * (term + 1) > 28)				// then we'll overflow so break out
-			break;
+		bitmask &= can_pack_table[row_for_bits_needed[FIND_LAST_SET(source[pos + offset])] + offset];
+		last_bitmask |= (bitmask & invalid_masks_for_offset[offset + 1]);
 		}
-	row = table_row[term - 1];
-	pos += simple9_table[row].numbers;
-	bits_per_integer = simple9_table[row].bits;
-
-//if (simple9_table[row].numbers != term)
-//	printf("MM ");
-//printf("(N:%ld T:%ld Bpi:%ld n:%ld)\n", (long)needed, (long)term, (long)bits_per_integer, (long)simple9_table[row].numbers);
-
+	/* 'ffs' function returns 0 => no bits were set => no valid masks => invalid input */
+	if ((mask_type = FIND_FIRST_SET(last_bitmask)) == 0)
+		return 0;
+	/* turn bit position into actual mask to use */
+	mask_type--;
+	num_to_pack = ints_packed_table[mask_type];
+	/* pack the word */
 	*into = 0;
-	for (term = 0; from < source + pos; term++)
-		*into |= (*from++ << (term * bits_per_integer));  //left shift the bits to the correct position in n[j]
-	*into = (*into << 4) | row;		// put the selector in the bottom 4 bits
-
+	mask_type_offset = 28 * mask_type;
+	for (offset = 0; offset < num_to_pack; offset++)
+		*into |= ((source[pos + offset]) << simple9_shift_table[mask_type_offset + offset]);
+	*into = (*into << 4) | mask_type;
+	pos += num_to_pack;
 	into++;
 	if (into > end)
 		return 0;
 	}
-return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
+return words_in_compressed_string * sizeof(*into); //stores the length of n[]
 }
 
 /*
@@ -125,91 +187,110 @@ return words_in_compressed_string * sizeof(*into);  //stores the length of n[]
 */
 void ANT_compress_simple9::decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers)
 {
-long mask, bits;
 uint32_t *compressed_sequence = (uint32_t *)source;
-uint32_t value, row;
+uint32_t value, mask_type;
 ANT_compressable_integer *end = destination + destination_integers;
 
 while (destination < end)
 	{
 	value = *compressed_sequence++;
-	row = value & 0x0F;
+	mask_type = value & 0xF;
 	value >>= 4;
 
-	/*
-		Load the details from the lookup table so as to
-		avoid the dereference each decode.
-	*/
-	bits = simple9_table[row].bits;
-	mask = simple9_table[row].mask;
-
-	switch (mask)			// unwind the loop
+	// Unrolled loop to enable pipelining
+	switch (mask_type)
 		{
-		case 0x01:			// 28 integers
-			*destination++ = value & mask;		// mask the current integer
-			value >>= bits;						// shift to the next integer
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x03:		// 14 integers
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x07:		// 9 integers
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x0F:		// 7 integers
-			*destination++ = value & mask;
-			value >>= bits;
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x01F:		// 5 integers
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x7F:		// 4 integers
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x1FF:		// 3 integers
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0x3FFF:	// 2 integers
-			*destination++ = value & mask;
-			value >>= bits;
-		case 0xFFFFFFF:	// 1 integer
-			*destination++ = value;
+		case 0x0:
+			*destination++ = value & 0x1;
+			*destination++ = (value >> 0x1) & 0x1;
+			*destination++ = (value >> 0x2) & 0x1;
+			*destination++ = (value >> 0x3) & 0x1;
+			*destination++ = (value >> 0x4) & 0x1;
+			*destination++ = (value >> 0x5) & 0x1;
+			*destination++ = (value >> 0x6) & 0x1;
+			*destination++ = (value >> 0x7) & 0x1;
+			*destination++ = (value >> 0x8) & 0x1;
+			*destination++ = (value >> 0x9) & 0x1;
+			*destination++ = (value >> 0xA) & 0x1;
+			*destination++ = (value >> 0xB) & 0x1;
+			*destination++ = (value >> 0xC) & 0x1;
+			*destination++ = (value >> 0xD) & 0x1;
+			*destination++ = (value >> 0xE) & 0x1;
+			*destination++ = (value >> 0xF) & 0x1;
+			*destination++ = (value >> 0x10) & 0x1;
+			*destination++ = (value >> 0x11) & 0x1;
+			*destination++ = (value >> 0x12) & 0x1;
+			*destination++ = (value >> 0x13) & 0x1;
+			*destination++ = (value >> 0x14) & 0x1;
+			*destination++ = (value >> 0x15) & 0x1;
+			*destination++ = (value >> 0x16) & 0x1;
+			*destination++ = (value >> 0x17) & 0x1;
+			*destination++ = (value >> 0x18) & 0x1;
+			*destination++ = (value >> 0x19) & 0x1;
+			*destination++ = (value >> 0x1A) & 0x1;
+			*destination++ = (value >> 0x1B) & 0x1;
+			break;
+		case 0x1:
+			*destination++ = value & 0x3;
+			*destination++ = (value >> 0x2) & 0x3;
+			*destination++ = (value >> 0x4) & 0x3;
+			*destination++ = (value >> 0x6) & 0x3;
+			*destination++ = (value >> 0x8) & 0x3;
+			*destination++ = (value >> 0xA) & 0x3;
+			*destination++ = (value >> 0xC) & 0x3;
+			*destination++ = (value >> 0xE) & 0x3;
+			*destination++ = (value >> 0x10) & 0x3;
+			*destination++ = (value >> 0x12) & 0x3;
+			*destination++ = (value >> 0x14) & 0x3;
+			*destination++ = (value >> 0x16) & 0x3;
+			*destination++ = (value >> 0x18) & 0x3;
+			*destination++ = (value >> 0x1A) & 0x3;
+			break;
+		case 0x2:
+			*destination++ = value & 0x7;
+			*destination++ = (value >> 0x3) & 0x7;
+			*destination++ = (value >> 0x6) & 0x7;
+			*destination++ = (value >> 0x9) & 0x7;
+			*destination++ = (value >> 0xC) & 0x7;
+			*destination++ = (value >> 0xF) & 0x7;
+			*destination++ = (value >> 0x12) & 0x7;
+			*destination++ = (value >> 0x15) & 0x7;
+			*destination++ = (value >> 0x18) & 0x7;
+			break;
+		case 0x3:
+			*destination++ = value & 0xF;
+			*destination++ = (value >> 0x4) & 0xF;
+			*destination++ = (value >> 0x8) & 0xF;
+			*destination++ = (value >> 0xC) & 0xF;
+			*destination++ = (value >> 0x10) & 0xF;
+			*destination++ = (value >> 0x14) & 0xF;
+			*destination++ = (value >> 0x18) & 0xF;
+			break;
+		case 0x4:
+			*destination++ = value & 0x1F;
+			*destination++ = (value >> 0x5) & 0x1F;
+			*destination++ = (value >> 0xA) & 0x1F;
+			*destination++ = (value >> 0xF) & 0x1F;
+			*destination++ = (value >> 0x14) & 0x1F;
+			break;
+		case 0x5:
+			*destination++ = value & 0x7F;
+			*destination++ = (value >> 0x7) & 0x7F;
+			*destination++ = (value >> 0xE) & 0x7F;
+			*destination++ = (value >> 0x15) & 0x7F;
+			break;
+		case 0x6:
+			*destination++ = value & 0x1FF;
+			*destination++ = (value >> 0x9) & 0x1FF;
+			*destination++ = (value >> 0x12) & 0x1FF;
+			break;
+		case 0x7:
+			*destination++ = value & 0x3FFF;
+			*destination++ = (value >> 0xE) & 0x3FFF;
+			break;
+		case 0x8:
+			*destination++ = value & 0xFFFFFFF;
+			break;
 		}
 	}
 }
-

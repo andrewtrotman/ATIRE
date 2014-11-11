@@ -8,7 +8,7 @@
 #include "compress.h"
 
 /*
-	class ANT_COMPRESS_SIMPLE8B
+	CLASS ANT_COMPRESS_SIMPLE8B
 	--------------------------
 */
 class ANT_compress_simple8b : public ANT_compress
@@ -28,4 +28,4 @@ public:
 	virtual void decompress(ANT_compressable_integer *destination, unsigned char *source, long long destination_integers);
 } ;
 
-#endif  /* __COMPRESS_SIMPLE8B_H__ */
+#endif	/* __COMPRESS_SIMPLE8B_H__ */

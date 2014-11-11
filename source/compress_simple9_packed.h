@@ -8,35 +8,23 @@
 #include "compress.h"
 
 /*
-	class ANT_COMPRESS_SIMPLE9_PACKED
-	--------------------------
+	CLASS ANT_COMPRESS_SIMPLE9_PACKED
+	---------------------------------
 */
 class ANT_compress_simple9_packed : public ANT_compress
 {
 protected:
-	// lookup for simple9-style decompress
-	class ANT_compress_simple9_packed_lookup
-	{
-	public:
-		long long numbers;
-		long bits;
-		long mask;
-	} ;
-	// lookup for simple16-style compress
-protected:
+	// memory for packing compresser (i.e. determining optimal blocking)
 	long *blocks_needed;
 	unsigned char *masks;
 	long blocks_length;
-	
-	static ANT_compress_simple9_packed_lookup simple9_packed_table[];
-	static long bits_to_use[];
-	static long table_row[];
+
 	static long ints_packed_table[];
+	static long can_pack_table[];
+	static long row_for_bits_needed[];
+	static long invalid_masks_for_offset[];
 	static long simple9_packed_shift_table[];
-	static long simple9_packed_mask_table[];
-private:
-	virtual long can_pack(ANT_compressable_integer *from, int mask_type, int pack_limit);
-	virtual void pack(ANT_compressable_integer *source, uint32_t *dest, uint32_t mask_type, uint32_t num_to_pack);
+
 public:
 	ANT_compress_simple9_packed()
 	{
