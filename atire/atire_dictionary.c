@@ -239,7 +239,12 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 #else
 		printf("%s ", term);
 #endif
-		printf("%lld %lld", leaf.local_collection_frequency, leaf.local_document_frequency);
+#ifdef SPECIAL_COMPRESSION
+    if (leaf.local_document_frequency < 3)
+		  printf("%lld %lld 0", leaf.local_collection_frequency, leaf.local_document_frequency);
+    else
+#endif
+		printf("%lld %lld %lld", leaf.local_collection_frequency, leaf.local_document_frequency, leaf.postings_length);
 		if (check_postings && *term != '~')		// ~length and others aren't encoded in the usual way
 			{
 			postings_list = search_engine.get_postings(&leaf, postings_list);
