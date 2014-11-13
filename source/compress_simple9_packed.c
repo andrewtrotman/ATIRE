@@ -12,12 +12,8 @@
 #include "compress_simple9_packed.h"
 #include "maths.h"
 
-// XXX need 'ffs' and 'fls' functions for other O/S
-#ifdef __GNUC__
-#include <strings.h>
-#define FIND_FIRST_SET ffs
+#define FIND_FIRST_SET 1+ANT_floor_log2
 #define FIND_LAST_SET ANT_ceiling_log2
-#endif
 
 /*
 	ANT_COMPRESS_SIMPLE9_PACKED::SIMPLE9_PACKED_SHIFT_TABLE[]
