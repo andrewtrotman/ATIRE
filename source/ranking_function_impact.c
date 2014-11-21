@@ -25,7 +25,7 @@ current = quantum_parameters->the_quantum;
 while (current < quantum_parameters->quantum_end)
 	{
 	docid += *current++;
-	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->postscalar * quantum_parameters->tf);
+	quantum_parameters->accumulator->add_rsv(docid, quantum_parameters->tf);
 	}
 }
 
@@ -50,7 +50,7 @@ while (impact_header->doc_count_ptr < impact_header->doc_count_trim_ptr)
 	while (current < end)
 		{
 		docid += *current++;
-		accumulator->add_rsv(docid, postscalar * tf);
+		accumulator->add_rsv(docid, tf);
 		}
 	current = end;
 	impact_header->impact_value_ptr++;
@@ -80,7 +80,7 @@ while (current < end)
 	while (*current != 0)
 		{
 		docid += *current++;
-		accumulator->add_rsv(docid, postscalar * tf);
+		accumulator->add_rsv(docid, tf);
 		}
 	current++;
 	}

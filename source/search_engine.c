@@ -537,18 +537,35 @@ unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *
 		// fill in postings
 		if (the_impact_header->the_quantum_count == 1)
 			{
+			/*
+				One quantum one posting (document ID)
+			*/
 			*postings++ = term_details->postings_position_on_disk >> 32;
+			/*
+				One quantum two postings (document IDs)
+			*/
 			if (term_details->local_document_frequency == 2)
 				*postings = (ANT_compressable_integer)term_details->impacted_length;
 			term_details->impacted_length = term_details->local_document_frequency;
 			}
 		else
 			{
+			/*
+				Two quantums (so each one must contain one posting (document ID)
+			*/
+//			term_details->impacted_length = 1;
+			if (the_quantum->offset == 0)
+				*postings = term_details->postings_position_on_disk >> 32;					//	The first of the two postings must be the answer
+			else
+				*postings = (ANT_compressable_integer)term_details->impacted_length;		//  The second of the two postings must be the answer
+
+#ifdef NEVER
 			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
 			*(unsigned char *)postings = 0; // no compression for second docid list
 			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
 			*postings = (ANT_compressable_integer)term_details->impacted_length; // second docid
 			term_details->impacted_length = 2;
+#endif
 			}
 		}
 	else
