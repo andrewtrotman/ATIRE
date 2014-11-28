@@ -301,9 +301,9 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
               $(ATIRE_DIR)/index.c \
               $(ATIRE_DIR)/atire_client.c \
               $(ATIRE_DIR)/atire_broker.c \
-              $(ATIRE_DIR)/atire_dictionary.c \
               $(ATIRE_DIR)/atire_merge.c \
-              $(ATIRE_DIR)/atire_doclist.c
+              $(ATIRE_DIR)/atire_doclist.c \
+              $(ATIRE_DIR)/atire_dictionary.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
 SOURCES := $(filter-out $(MAIN_FILES) $(IGNORE_LIST), $(ALL_SOURCES))

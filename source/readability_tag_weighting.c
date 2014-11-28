@@ -100,26 +100,30 @@ char *term, *start;
 
 if (tag_processing_on && term_count <= MAX_TERM_COUNT)
 	{
-	/*
-	 	Wikipedia abstract file dump give title in such a way "wikipedia : XXXXX", term count is 1 when encounter the colon;
-		for for Chinese, the unicode colon ':' = "\357\274\232" in OCT, and the term count for word Wikipedia is 4.
-	 */
-	if ((term_count == 1 && strncmp(token->start, ":", token->string_length) == 0)
-			|| (term_count == 4 && strncmp(token->start, "\357\274\232", token->string_length) == 0)
-			/*&& strcmp(wiki_prefix, terms[0]) == 0*/)
+
+	if (token->type == TT_WORD || token->type == TT_NUMBER)
 		{
-			while (term_count > 0)
-				delete terms[--term_count];
+		/*
+			Wikipedia abstract file dump give title in such a way "wikipedia : XXXXX", term count is 1 when encounter the colon;
+			for for Chinese, the unicode colon ':' = "\357\274\232" in OCT, and the term count for word Wikipedia is 4.
+		 */
+		if ((term_count == 1 && strncmp(token->start, ":", token->string_length) == 0)
+				|| (term_count == 4 && strncmp(token->start, "\357\274\232", token->string_length) == 0)
+				/*&& strcmp(wiki_prefix, terms[0]) == 0*/)
+			{
+				while (term_count > 0)
+					delete terms[--term_count];
 
-			term_count = 0;
-			return;
+				term_count = 0;
+				return;
+			}
+
+		terms[term_count] = strnnew(token->start, token->string_length);
+		term = start = terms[term_count];
+		while (start != NULL && (start - term) < strlen(term))
+			start = utf8_tolower(start);
+		++term_count;
 		}
-
-	terms[term_count] = strnnew(token->start, token->string_length);
-	term = start = terms[term_count];
-	while (start != NULL && (start - term) < strlen(term))
-		start = utf8_tolower(start);
-	++term_count;
 	}
 }
 
@@ -137,7 +141,7 @@ if (term_count == 0)
  */
 
 // now we add the full title, full category information in the dictionary
-char buffer[MAX_TERM_LENGTH];
+static char buffer[MAX_TERM_LENGTH];
 char *start, *info_buf_start;
 ANT_parser_token what;
 long long length = 0;
@@ -150,21 +154,52 @@ start = buffer + 1;
 
 /*
 	put each special term into index, but term count has be greater than 1
+
+	this might dramatically increase the size of index, we might just use bigram for it
+
+	furthermore, bigram (phrase search) might be more usefull than one word
+
+	also, we apply it on the title with term count of 3 and over
  */
-if (term_count > 1)
-	for (i = 0; i < term_count; ++i)
+if (term_count > 2) {
+	int is_first_term_punct = ANT_ispunct(terms[0][0]) || utf8_ispuntuation(terms[0]);
+
+	for (i = 1; i < term_count; ++i)
 		{
 	//	if (prefix_char == 'T' && i == 0)
 	//		continue;
+		start = buffer + 2;
+		what.string_length = 2; // including prefix string "C:" or "T:"
 
+		/*
+		 * first term
+		 */
+		length = strlen(terms[i-1]);
+		memcpy(start, terms[i-1], length);
+		start += length;
+		what.string_length += length;
+
+		if (!is_first_term_punct && !is_cjk_language(terms[i-1]) && !ANT_ispunct(terms[i-1][0]) && !utf8_ispuntuation(terms[i-1])) // we need to restore the title, so only put spaces between characters that are not puntuations
+			{
+			*start++ = ' ';
+			what.string_length++;
+			}
+
+		/*
+		 * second term
+		 */
 		length = strlen(terms[i]);
 		memcpy(start, terms[i], length);
 		start += length;
+
 		*start = '\0';
-		what.string_length = length + 2; // including prefix string "C:" or "T:"
+		what.string_length += length;
+
 		indexer->add_term(&what, doc, 20);
-		start =  buffer + 2;
+
+		start = buffer + 2;
 		}
+}
 
 /*
    Now the full text enclosed in the node, for example, title "Bill Clinton"
@@ -178,7 +213,7 @@ info_buf_start = info_buf + 3;
 *info_buf_start = '\0';
 
 what.start = info_buf;
-what.string_length = length + 3;
+what.string_length = 3;
 
 std::string title(current_file->filename);
 unscape_xml(title);
@@ -186,12 +221,41 @@ unscape_xml(title);
 length = title.length();
 
 memcpy(info_buf_start, title.c_str(), length);
-//info_buf_start += length;
-*(info_buf_start + length) = '\0';
 what.string_length += length;
+*(info_buf_start + length) = '\0';
 
-while (*info_buf_start != '\0')
- info_buf_start = utf8_tolower(info_buf_start);
+//size_t buffer_length = length * 2 + 1;
+//char *buffer_lowcase_str = new char[buffer_length];
+size_t normalized_string_length = 0;
+strcpy(what.normalized_buf, "tf:");
+start = what.normalized_buf + 3;
+
+int result = ANT_UNICODE_normalize_string_tolowercase(start, MAX_TERM_LENGTH, &normalized_string_length, (char *)title.c_str());
+
+if (result)
+	{
+	what.normalized.string_length = normalized_string_length + 3;
+
+	indexer->add_term(&what.normalized, doc, 99); // avoid being culled of optimization
+//	memcpy(info_buf_start, buffer_lowcase_str, normalized_string_length);
+//	*(info_buf_start + normalized_string_length) = '\0';
+//	what.string_length += normalized_string_length;
+	}
+else
+	{
+	*what.normalized_buf = '\0';
+	what.normalized.string_length = 0;
+
+	//info_buf_start += length;
+//	start = info_buf_start = info_buf + what.string_length;
+
+	while (*info_buf_start != '\0')
+		info_buf_start = utf8_tolower(info_buf_start);
+
+	indexer->add_term(&what, doc, 99); // avoid being culled of optimization
+	}
+
+//delete [] buffer_lowcase_str;
 
 /* the following solution doesn't work well. we have to have the exact title as it is */
 /*
@@ -218,8 +282,6 @@ for (i = 1; i < term_count; ++i)
 	what.string_length += length;
 	}
 */
-
-indexer->add_term(&what, doc, 20); // avoid being culled of optimization
 
 clean_up();
 }

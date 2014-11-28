@@ -257,6 +257,62 @@ else
 }
 
 /*
+	ANT_UNICODE_NORMALIZE_STRING()
+	------------------------------
+
+
+*/
+int ANT_UNICODE_normalize_string_tolowercase(unsigned char *buffer, size_t buffer_length_const, size_t *normalized_string_length, unsigned char *source)
+{
+size_t buffer_length;
+unsigned char *buffer_pos;
+unsigned char *source_end;
+
+unsigned char *current;
+long bytes;
+
+unsigned long character;
+
+current = source;
+
+//normalize the string into this buffer
+buffer_pos = buffer;
+buffer_length = buffer_length_const;
+
+int result = 0;
+
+source_end = source + strlen((char *)source);
+*normalized_string_length = 0;
+
+while (current < source_end)
+	{
+	character = utf8_to_wide(current);
+	bytes = utf8_bytes(character);
+
+	if (bytes < 1)
+		break;
+
+	if (unicode_chartype(character) == CT_LETTER)
+		ANT_UNICODE_normalize_lowercase_toutf8(&buffer_pos, &buffer_length, character);
+	else
+		{
+		memcpy(buffer_pos, current, bytes);
+		buffer_pos += bytes;
+		}
+
+	current += bytes;
+	}
+
+*normalized_string_length = buffer_pos - buffer;
+
+result = (*normalized_string_length) <= buffer_length_const;
+
+if (result)
+	buffer[*normalized_string_length] = '\0';
+
+return result;
+}
+/*
 	UNICODE_CHARTYPE_SET()
 	----------------------
 	Classify the given Unicode character, including flags like CT_CHINESE
