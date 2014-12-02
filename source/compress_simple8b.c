@@ -26,35 +26,7 @@
 #include "compress_simple8b.h"
 #include "maths.h"
 
-//#define FIND_FIRST_SET 1+ANT_floor_log2
 #define FIND_LAST_SET ANT_ceiling_log2
-
-/*
-	ffs_table[]
-	-----------
-	If input mod 255 equals this offset, then highest bit set is...
-*/
-static uint32_t ffs_table[] =
-{
-0,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,6,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,7,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,6,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,8,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,6,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,7,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,6,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1,5,1,2,1,3,1,2,1,4,1,2,1,3,1,2,1
-};
-
-/*
-	ffs
-	---
-	Find MSB for input
-*/
-static inline uint32_t ffs(uint32_t x) {
-	uint32_t bits = 0;
-	if (x == 0)
-		return 0;
-	for (;;) {
-		if (x & 0xFF)
-			return bits + ffs_table[x & 0xFF];
-		x >>= 8;
-		bits += 8;
-	}
-}
 
 /*
 	ANT_compress_simple8b::simple8b_shift_table[]
@@ -157,11 +129,11 @@ for (words_in_compressed_string = 0; pos < source_integers; words_in_compressed_
 		bitmask &= can_pack_table[row_for_bits_needed[FIND_LAST_SET(source[pos + offset])] + offset];
 		last_bitmask |= (bitmask & invalid_masks_for_offset[offset + 1]);
 		}
-	/* 'ffs' function returns 0 => no bits were set => no valid masks => invalid input */
-	if ((mask_type = ffs(last_bitmask)) == 0)
+	/* ensure valid input */
+	if (last_bitmask == 0)
 		return 0;
-	/* turn bit position into actual mask to use */
-	mask_type--;
+	/* get position of lowest set bit */
+	mask_type = ANT_ffs_nonzero32(last_bitmask);
 	num_to_pack = ints_packed_table[mask_type];
 	/* pack the word */
 	*into = 0;

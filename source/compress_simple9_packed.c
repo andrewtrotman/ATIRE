@@ -12,7 +12,6 @@
 #include "compress_simple9_packed.h"
 #include "maths.h"
 
-#define FIND_FIRST_SET 1+ANT_floor_log2
 #define FIND_LAST_SET ANT_ceiling_log2
 
 /*

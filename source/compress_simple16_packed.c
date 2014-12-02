@@ -10,7 +10,6 @@
 #include "compress_simple16_packed.h"
 #include "maths.h"
 
-#define FIND_FIRST_SET 1+ANT_floor_log2
 #define FIND_LAST_SET ANT_ceiling_log2
 
 /*
@@ -187,8 +186,8 @@ while (pos < source_integers)
 	pos += num_to_pack;
 	into++;
 	words_in_compressed_string++;
-  if (into > end)
-    return 0;
+	if (into > end)
+		return 0;
 	}
 return words_in_compressed_string * sizeof(*into);
 }
