@@ -14,9 +14,7 @@
 #include <math.h>
 #include <limits.h>
 #include <limits>
-
-// ANT_ffs_nonzero_table32 needs to reliably cast a multiplication to 32 bits
-#include <fundamental_types.h>
+#include "fundamental_types.h"
 
 /*
 	ANT_ROUND()
