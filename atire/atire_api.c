@@ -29,6 +29,7 @@
 #include "search_engine.h"
 #include "search_engine_readability.h"
 #include "search_engine_result_id_iterator.h"
+#include "stats_search_engine.h"
 
 #include "stemmer.h"
 #include "stemmer_factory.h"
@@ -1647,12 +1648,15 @@ if (feedback_vector != NULL)
 */
 long long ATIRE_API::search(char *query, long long top_k, long query_type)
 {
+long long now;
 /*
 	Initialise
 */
+search_engine->stats_initialise();
 sort_top_k = top_k;
 
-search_engine->stats_initialise();
+now = search_engine->stats->start_timer();
+
 if (processing_strategy == ANT_ANT_param_block::QUANTUM_AT_A_TIME)
 	search_engine->init_accumulators(top_k == LLONG_MAX ? top_k : top_k + 1);
 else
@@ -1690,6 +1694,7 @@ if (feedbacker != NULL)
 	else if (query_type & QUERY_TOPSIG)
 		topsig_feedback(top_k);
 
+search_engine->stats->total_time_to_search = search_engine->stats->stop_timer(now);
 /*
 	Add the time it took to search to the global stats for the search engine
 */

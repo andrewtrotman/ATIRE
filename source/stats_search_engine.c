@@ -25,6 +25,7 @@ thesaurus_reencode_time = thesaurus_time = stemming_reencode_time = stemming_tim
 sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_time = 0;
 disk_bytes_read_on_init = disk_bytes_read_on_search = 0;
 queries = 0;
+total_time_to_search = 0;
 }
 
 /*
@@ -48,6 +49,7 @@ this->thesaurus_reencode_time += which->thesaurus_reencode_time;
 this->queries++;
 this->disk_bytes_read_on_init += which->disk_bytes_read_on_init;
 this->disk_bytes_read_on_search += which->disk_bytes_read_on_search;
+this->total_time_to_search += which->total_time_to_search;
 }
 
 /*
@@ -56,7 +58,7 @@ this->disk_bytes_read_on_search += which->disk_bytes_read_on_search;
 */
 void ANT_stats_search_engine::text_render(void)
 {
-long long min, sum;
+long long min;
 
 if (disk_bytes_read_on_init != 0)
 	printf("Disk Bytes Read Init  :%lld bytes\n", disk_bytes_read_on_init);
@@ -79,22 +81,11 @@ print_time("Rank Time             :", rank_time);
 print_time("Sort Time             :", sort_time);
 print_time("Count Relevant Time   :", count_relevant_time);
 
-sum = 0;
-sum += accumulator_init_time;
-sum += dictionary_time;
-sum += posting_read_time;
-sum += decompress_time;
-sum += rank_time;
-sum += sort_time;
-sum += count_relevant_time;
-sum += stemming_time;
-//sum += stemming_reencode_time;		/* Don't add the re-encode time as it is already part of the rank_time */
-
-print_time("Total Time to Search  :", sum);
+print_time("Total Time to Search  :", total_time_to_search);
 if (queries > 1)
 	{
 	printf("Total Queries         :%lld\n", queries);
-	print_time("Mean Time to Search   :", sum / queries);
+	print_time("Mean Time to Search   :",(double)total_time_to_search / (double)queries);
 	}
 
 min = posting_read_time;

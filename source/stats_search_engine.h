@@ -28,6 +28,7 @@ public:
 	long long queries;						// total number of times stats have been added to this one
 	long long disk_bytes_read_on_init;		// total number of bytes read from the disk on initialisation
 	long long disk_bytes_read_on_search;	// total bytes read from the disk durin the search
+	long long total_time_to_search;			// actual measured total time to search
 
 public:
 	ANT_stats_search_engine(ANT_memory *memory) ;
