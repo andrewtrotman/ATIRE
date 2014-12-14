@@ -29,6 +29,7 @@ public:
 	long long disk_bytes_read_on_init;		// total number of bytes read from the disk on initialisation
 	long long disk_bytes_read_on_search;	// total bytes read from the disk durin the search
 	long long total_time_to_search;			// actual measured total time to search
+	long long early_termination_time;		// time spent deciding whether or not to early terminate (for example QaaT check)
 
 public:
 	ANT_stats_search_engine(ANT_memory *memory) ;
@@ -51,6 +52,7 @@ public:
 	void add_thesaurus_reencode_time(long long time) { thesaurus_reencode_time += time; }
 	void add_disk_bytes_read_on_init(long long bytes) { disk_bytes_read_on_init += bytes; }
 	void add_disk_bytes_read_on_search(long long bytes) { disk_bytes_read_on_search += bytes; }
+	void add_early_termination_time(long long time) { early_termination_time += time; }
 	long long get_cpu_time() { return accumulator_init_time + decompress_time + rank_time + sort_time + count_relevant_time; }
 	long long get_cpu_time_ms() {return (long long)(get_cpu_time() / (get_clock_tick_frequency() / 1000.0)); }
 	long long get_io_time() { return dictionary_time + posting_read_time; }

@@ -559,13 +559,6 @@ unsigned char *ANT_search_engine::get_one_quantum(ANT_search_engine_btree_leaf *
 			else
 				*postings = (ANT_compressable_integer)term_details->impacted_length;		//  The second of the two postings must be the answer
 
-#ifdef NEVER
-			*postings++ = term_details->postings_position_on_disk >> 32; // first docid
-			*(unsigned char *)postings = 0; // no compression for second docid list
-			postings = (ANT_compressable_integer *)((unsigned char *)postings + 1); // move past the compression scheme byte
-			*postings = (ANT_compressable_integer)term_details->impacted_length; // second docid
-			term_details->impacted_length = 2;
-#endif
 			}
 		}
 	else
@@ -904,20 +897,21 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	*/
 	if (verify != NULL)
 		{
-		now = stats->start_timer();
-
 		/*
-		 Decompress the header
-		 */
+			Decompress the header
+		*/
 		the_impact_header->the_quantum_count = ANT_impact_header::get_quantum_count(raw_postings_buffer);
 		the_impact_header->beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(raw_postings_buffer);
+
+		now = stats->start_timer();
 		factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+		stats->add_decompress_time(stats->stop_timer(now));
+
 		the_impact_header->impact_value_start = the_impact_header->header_buffer;
 		the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
 		the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
-
-		stats->add_decompress_time(stats->stop_timer(now));
 		}
+
 	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 	}
 
@@ -926,11 +920,11 @@ return verify;
 #endif // end of #ifdef IMPACT_HEADER
 
 
-#ifdef IMPACT_HEADER
 /*
 	ANT_SEARCH_ENGINE::READ_AND_DECOMPRESS_FOR_ONE_TERM()
 	-----------------------------------------------------
 */
+#ifdef IMPACT_HEADER
 void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_impact_header *the_impact_header, ANT_compressable_integer *the_decompressed_buffer)
 #else
 void *ANT_search_engine::read_and_decompress_for_one_term(ANT_search_engine_btree_leaf *term_details, unsigned char *raw_postings_buffer, ANT_compressable_integer *the_decompressed_buffer)
@@ -974,7 +968,6 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 	*/
 	if (verify != NULL)
 		{
-		now = stats->start_timer();
 #ifndef TOP_K_READ_AND_DECOMPRESSOR
 	#ifdef IMPACT_HEADER
 		/*
@@ -982,7 +975,11 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		*/
 		the_impact_header->the_quantum_count = ANT_impact_header::get_quantum_count(raw_postings_buffer);
 		the_impact_header->beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(raw_postings_buffer);
+
+		now = stats->start_timer();
 		factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+		stats->add_decompress_time(stats->stop_timer(now));
+
 		the_impact_header->impact_value_start = the_impact_header->header_buffer;
 		the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
 		the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
@@ -995,15 +992,21 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
 		while (the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start)
 			{
-
+			now = stats->start_timer();
 			factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
+			stats->add_decompress_time(stats->stop_timer(now));
+
 			sum += *the_impact_header->doc_count_ptr;
 			the_impact_header->doc_count_ptr++;
 			the_impact_header->impact_offset_ptr++;
 			}
 		the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
 	#else // else of #ifdef IMPACT_HEADER
+
+		now = stats->start_timer();
 		factory.decompress(the_decompressed_buffer, raw_postings_buffer, term_details->impacted_length);
+		stats->add_decompress_time(stats->stop_timer(now));
+
 	#endif // end of #ifdef IMPACT_HEADER
 #else
 		/*
@@ -1029,7 +1032,11 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			*/
 			the_impact_header->the_quantum_count = ANT_impact_header::get_quantum_count(raw_postings_buffer);
 			the_impact_header->beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(raw_postings_buffer);
+
+			now = stats->start_timer();
 			factory.decompress(the_impact_header->header_buffer, raw_postings_buffer + ANT_impact_header::INFO_SIZE, the_impact_header->the_quantum_count * 3);
+			stats->add_decompress_time(stats->stop_timer(now));
+
 			the_impact_header->impact_value_start = the_impact_header->header_buffer;
 			the_impact_header->doc_count_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count;
 			the_impact_header->impact_offset_start = the_impact_header->header_buffer + the_impact_header->the_quantum_count * 2;
@@ -1052,7 +1059,10 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 				if (*the_impact_header->doc_count_ptr > end)
 					*the_impact_header->doc_count_ptr = (ANT_compressable_integer)end;
 
+				now = stats->start_timer();
 				factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
+				stats->add_decompress_time(stats->stop_timer(now));
+
 				sum += *the_impact_header->doc_count_ptr;
 				end -= *the_impact_header->doc_count_ptr;
 				the_impact_header->doc_count_ptr++;
@@ -1060,11 +1070,13 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 				}
 			the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
 		#else // else #ifdef IMPACT_HEADER
+			now = stats->start_timer();
 			factory.decompress(the_decompressed_buffer, raw_postings_buffer, end);
+			stats->add_decompress_time(stats->stop_timer(now));
+
 			the_decompressed_buffer[end] = 0;			// and now 0 terminate the list so that searching terminates
 		#endif // end of #ifdef IMPACT_HEADER
 #endif // end of #ifdef TOP_K_READ_AND_DECOMPRESSOR
-		stats->add_decompress_time(stats->stop_timer(now));
 		}
 	stats->add_disk_bytes_read_on_search(index->get_bytes_read() - bytes_already_read);
 	}
@@ -1154,12 +1166,13 @@ if (verify == NULL)			// something has gone wrong
 /*
 	Decompress the postings
 */
-now = stats->start_timer();
 #ifdef IMPACT_HEADER
 // decompress the header
 impact_header.the_quantum_count = ANT_impact_header::get_quantum_count(postings_buffer);
 impact_header.beginning_of_the_postings = ANT_impact_header::get_beginning_of_the_postings(postings_buffer);
+now = stats->start_timer();
 factory.decompress(impact_header.header_buffer, postings_buffer+ANT_impact_header::INFO_SIZE, impact_header.the_quantum_count * 3);
+stats->add_decompress_time(stats->stop_timer(now));
 impact_header.impact_value_start = impact_header.header_buffer;
 impact_header.doc_count_start = impact_header.header_buffer + impact_header.the_quantum_count;
 impact_header.impact_offset_start = impact_header.header_buffer + impact_header.the_quantum_count * 2;
@@ -1179,9 +1192,11 @@ while (impact_header.doc_count_ptr < impact_header.impact_offset_start) {
 	impact_header.impact_offset_ptr++;
 }
 #else
+
+now = stats->start_timer();
 factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
-#endif
 stats->add_decompress_time(stats->stop_timer(now));
+#endif
 
 /*
 	Process the postings list
@@ -1628,7 +1643,6 @@ if (verify == NULL)
 /*
 	And now decompress
 */
-now = stats->start_timer();
 #ifdef IMPACT_HEADER
 #ifdef SPECIAL_COMPRESSION
 	/*
@@ -1643,11 +1657,14 @@ now = stats->start_timer();
 		beginning_of_postings = ((uint32_t *)postings_buffer)[5];
 #endif
 
+	now = stats->start_timer();
 	factory.decompress(decompress_buffer, postings_buffer + beginning_of_postings, term_details->impacted_length);
+	stats->add_decompress_time(stats->stop_timer(now));
 #else
+	now = stats->start_timer();
 	factory.decompress(decompress_buffer, postings_buffer, term_details->impacted_length);
+	stats->add_decompress_time(stats->stop_timer(now));
 #endif
-stats->add_decompress_time(stats->stop_timer(now));
 
 return decompress_buffer;
 }
