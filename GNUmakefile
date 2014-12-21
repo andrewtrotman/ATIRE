@@ -175,7 +175,7 @@ ifeq ($(OS_TYPE), SUNOS)
 endif
 
 rb := -1
-HASHER := HEADER_NUM
+HASHER := LOOKUP3
 
 # common flags
 LDFLAGS += -ldl

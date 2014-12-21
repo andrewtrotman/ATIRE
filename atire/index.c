@@ -630,7 +630,6 @@ delete index;
 delete disk;
 delete parser;
 delete readability;
-delete decompressor;
 delete pregen;
 delete document_indexer;
 

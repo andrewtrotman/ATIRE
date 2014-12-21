@@ -18,7 +18,9 @@ ANT_instream_buffer::ANT_instream_buffer(ANT_memory *memory, ANT_instream *sourc
 this->double_buffered = double_buffered;
 position = 0;
 primary_buffer = (unsigned char *)memory->malloc(buffer_size);
-secondary_buffer = (unsigned char *)memory->malloc(buffer_size);
+
+if (double_buffered)
+	secondary_buffer = (unsigned char *)memory->malloc(buffer_size);
 
 buffer_to_read_from = &primary_buffer;
 end_of_buffer = &position_of_end_of_buffer;
