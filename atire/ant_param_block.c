@@ -676,7 +676,11 @@ for (param = 1; param < argc; param++)
 			{
 			processing_strategy = QUANTUM_AT_A_TIME;
 			// quantum-at-a-time only works when the index is in memory
-			file_or_memory = INDEX_IN_MEMORY;
+			if (file_or_memory != INDEX_IN_MEMORY)
+				{
+				puts("Quantum at a Time (QaaT) processing requires an in-memory index, index will be loaded");
+				file_or_memory = INDEX_IN_MEMORY;
+				}
 			quantum_stopping = QUANTUM_STOP_NONE;
 			if ((command[2] == ':') && (command[3] != '\0'))
 				{

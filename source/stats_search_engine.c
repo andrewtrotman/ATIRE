@@ -26,6 +26,7 @@ sort_time = accumulator_init_time = posting_read_time = decompress_time = rank_t
 disk_bytes_read_on_init = disk_bytes_read_on_search = 0;
 queries = 0;
 total_time_to_search = 0;
+early_termination_time = 0;
 }
 
 /*
@@ -50,6 +51,7 @@ this->queries++;
 this->disk_bytes_read_on_init += which->disk_bytes_read_on_init;
 this->disk_bytes_read_on_search += which->disk_bytes_read_on_search;
 this->total_time_to_search += which->total_time_to_search;
+this->early_termination_time += which->early_termination_time;
 }
 
 /*
@@ -78,6 +80,7 @@ if (thesaurus_time != 0)
 	}
 print_time("Decompress Time       :", decompress_time);
 print_time("Rank Time             :", rank_time);
+print_time("Early Termination Time:", early_termination_time);
 print_time("Sort Time             :", sort_time);
 print_time("Count Relevant Time   :", count_relevant_time);
 

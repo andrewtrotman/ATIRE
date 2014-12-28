@@ -688,6 +688,7 @@ ANT_quantum the_quantum;
 ANT_max_quantum *current_max = NULL;
 ANT_impact_header *current_impact_header = NULL;
 long long trim_postings_k = search_engine->get_trim_postings_k();
+long long now;
 
 //
 // read all the postings and get the decompressed impact headers
@@ -752,6 +753,8 @@ while (heap_items > 0)
 	the_quantum.prescalar = current_max->prescalar;
 	the_quantum.postscalar = current_max->postscalar;
 
+	now = search_engine->stats->start_timer();
+
 	//printf("max remaining quantum: %lld, diff of k and k+1: %lld\n", max_remaining_quantum, search_engine->results_list->get_diff_k_and_k_plus_1());
 	if ((early_termination & ANT_ANT_param_block::QUANTUM_STOP_DIFF) && search_engine->results_list->heap_is_full() && max_remaining_quantum < search_engine->results_list->get_diff_k_and_k_plus_1())
 		{
@@ -777,6 +780,7 @@ while (heap_items > 0)
 			break;
 			}
 		}
+	search_engine->stats->add_early_termination_time(search_engine->stats->stop_timer(now));
 
 	processed_postings += the_quantum.doc_count;
 	// partial process of the last quantum based on the command line option "-K"
@@ -788,7 +792,9 @@ while (heap_items > 0)
 	the_quantum.quantum_end = one_decompressed_quantum + the_quantum.doc_count;
 
 	processed_quantums++;
+	now = search_engine->stats->start_timer();
 	ranking_function->relevance_rank_one_quantum(&the_quantum);
+	search_engine->stats->add_rank_time(search_engine->stats->stop_timer(now));
 
 	// static pruning base on the command line option "-K"
 	if (processed_postings >= trim_postings_k)
