@@ -422,7 +422,7 @@ do
 				else
 					{
 					for (check = fields; *check != '\0'; check++)
-						if (strchr(*which == 'N' ? "tdn" : "tcdn", *check) == NULL)
+						if (strchr(*which == 'N' ? "tdnq" : "tcdn", *check) == NULL)
 							exit(printf("Unknown field combination to extract from query file:%s\n", fields));
 					query_fields = fields;
 					}

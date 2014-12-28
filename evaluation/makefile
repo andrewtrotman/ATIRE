@@ -14,7 +14,7 @@ between.exe : between.c
 mkqrel.exe : mkqrel.c
 
 trec2query.exe : trec2query.c 
-	$(CC) $(CFLAGS) /EHsc /Tp trec2query.c ..\obj\stop_word.obj ..\obj\channel_trec.obj ..\obj\channel_file.obj ..\obj\str.obj ..\obj\ctypes.obj ..\obj\memory.obj ..\obj\instream_file.obj ..\obj\instream_file_star.obj ..\obj\instream_pkzip.obj ..\obj\instream_deflate.obj ..\obj\file.obj ..\obj\file_internals.obj ..\obj\directory_iterator_pkzip.obj ..\obj\critical_section.obj ..\obj\directory_iterator.obj ..\obj\disk.obj  ..\obj\directory_iterator_internals.obj  ..\external\unencumbered\zlib\zlib-1.2.5\zlib.lib ..\external\unencumbered\bzip\bzip2-1.0.6\libbz2.lib advapi32.lib
+	$(CC) $(CFLAGS) /EHsc /Tp trec2query.c ..\obj\stop_word.obj ..\obj\channel_trec.obj ..\obj\channel_file.obj ..\obj\str.obj ..\obj\ctypes.obj ..\obj\memory.obj ..\obj\instream_file.obj ..\obj\instream_file_star.obj ..\obj\instream_pkzip.obj ..\obj\instream_deflate.obj ..\obj\file.obj ..\obj\file_internals.obj ..\obj\directory_iterator_pkzip.obj ..\obj\critical_section.obj ..\obj\directory_iterator.obj ..\obj\disk.obj  ..\obj\directory_iterator_internals.obj  ..\external\unencumbered\zlib\zlib-1.2.5\zlib.lib ..\external\unencumbered\bzip\bzip2-1.0.6\libbz2.lib advapi32.lib /link /FIXED:NO
 
 INEXtopics_to_ANTquery.exe : INEXtopics_to_ANTquery.c
 	$(CC) $(CFLAGS) /EHsc /Tp INEXtopics_to_ANTquery.c ..\obj\ctypes.obj
