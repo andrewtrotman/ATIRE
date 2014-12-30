@@ -990,16 +990,15 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 		long long sum = 0;
 		the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
 		the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
+		now = stats->start_timer();
 		while (the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start)
 			{
-			now = stats->start_timer();
 			factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
-			stats->add_decompress_time(stats->stop_timer(now));
-
 			sum += *the_impact_header->doc_count_ptr;
 			the_impact_header->doc_count_ptr++;
 			the_impact_header->impact_offset_ptr++;
 			}
+		stats->add_decompress_time(stats->stop_timer(now));
 		the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
 	#else // else of #ifdef IMPACT_HEADER
 
@@ -1047,6 +1046,7 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 			long long sum = 0;
 			the_impact_header->doc_count_ptr = the_impact_header->doc_count_start;
 			the_impact_header->impact_offset_ptr = the_impact_header->impact_offset_start;
+			now = stats->start_timer();
 			while (the_impact_header->doc_count_ptr < the_impact_header->impact_offset_start)
 				{
 				if (sum >= trim_postings_k)
@@ -1059,15 +1059,14 @@ if (term_details != NULL && term_details->local_document_frequency > 0)
 				if (*the_impact_header->doc_count_ptr > end)
 					*the_impact_header->doc_count_ptr = (ANT_compressable_integer)end;
 
-				now = stats->start_timer();
 				factory.decompress(the_decompressed_buffer + sum, raw_postings_buffer + the_impact_header->beginning_of_the_postings + *the_impact_header->impact_offset_ptr, *the_impact_header->doc_count_ptr);
-				stats->add_decompress_time(stats->stop_timer(now));
 
 				sum += *the_impact_header->doc_count_ptr;
 				end -= *the_impact_header->doc_count_ptr;
 				the_impact_header->doc_count_ptr++;
 				the_impact_header->impact_offset_ptr++;
 				}
+			stats->add_decompress_time(stats->stop_timer(now));
 			the_impact_header->doc_count_trim_ptr = the_impact_header->doc_count_ptr;
 		#else // else #ifdef IMPACT_HEADER
 			now = stats->start_timer();
@@ -1183,14 +1182,16 @@ long long sum = 0;
 impact_header.doc_count_ptr = impact_header.doc_count_start;
 impact_header.impact_offset_ptr = impact_header.impact_offset_start;
 // impact_offset_start is the end of doc_count
-while (impact_header.doc_count_ptr < impact_header.impact_offset_start) {
-	factory.decompress(decompress_buffer + sum,
-					   postings_buffer+ impact_header.beginning_of_the_postings + *impact_header.impact_offset_ptr,
-					   *impact_header.doc_count_ptr);
+now = stats->start_timer();
+while (impact_header.doc_count_ptr < impact_header.impact_offset_start)
+	{
+	factory.decompress(decompress_buffer + sum, postings_buffer+ impact_header.beginning_of_the_postings + *impact_header.impact_offset_ptr, *impact_header.doc_count_ptr);
 	sum += *impact_header.doc_count_ptr;
 	impact_header.doc_count_ptr++;
 	impact_header.impact_offset_ptr++;
-}
+	}
+stats->add_decompress_time(stats->stop_timer(now));
+
 #else
 
 now = stats->start_timer();
