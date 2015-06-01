@@ -76,7 +76,7 @@ USE_TWO_D_ACCUMULATORS := 1
 USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
 
 # what type to use for the accumulators
-override CFLAGS += -DANT_ACCUMULATOR_T="double"
+override CFLAGS += -DANT_ACCUMULATOR_T="short"
 override CFLAGS += -DANT_PREGEN_T="unsigned long long"
 override CFLAGS += -DDOUBLE_HASH
 
