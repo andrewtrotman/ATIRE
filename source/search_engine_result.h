@@ -202,7 +202,11 @@ public:
 			We haven't got enough to worry about the heap yet, so just plonk it in
 		*/
 		old_value = which->get_rsv();
+#ifdef USE_PREGEN
 		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score  * pregen_ratio);
+#else
+		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score);
+#endif
 
 		if (old_value == pregen_scores[index].get_rsv())
 			accumulator_pointers[results_list_length++] = which;
@@ -214,7 +218,11 @@ public:
 		/*
 			We were already in the heap, so update
 		*/
+#ifdef USE_PREGEN
 		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score  * pregen_ratio);
+#else
+		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score);
+#endif
 		heapk->min_update(which);
 		}
 	else
@@ -222,7 +230,11 @@ public:
 		/*
 			We weren't in the heap, but we could get put there
 		*/
+#ifdef USE_PREGEN
 		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score * pregen_ratio);
+#else
+		which->set_rsv((ANT_search_engine_accumulator::ANT_accumulator_t)score);
+#endif
 		if (cmp(which, accumulator_pointers[0]) > 0)
 			heapk->min_insert(which);
 		}
@@ -243,7 +255,11 @@ public:
 			In this case we're searching to completion so we don't need any of the heap maintenance code
 		*/
 		old_value = which->get_rsv();
+#ifdef USE_PREGEN
 		which->add_rsv(score * pregen_ratio);
+#else
+		which->add_rsv(score);
+#endif
 
 		if (old_value == pregen_scores[index].get_rsv())
 			{
@@ -265,7 +281,11 @@ public:
 				We haven't got enough to worry about the heap yet, so just plonk it in
 			*/
 			old_value = which->get_rsv();
+#ifdef USE_PREGEN
 			which->add_rsv(score * pregen_ratio);
+#else
+			which->add_rsv(score);
+#endif
 
 			if (old_value == pregen_scores[index].get_rsv())
 				{
@@ -286,7 +306,11 @@ public:
 			/*
 				We were already in the heap, so update
 			*/
+#ifdef USE_PREGEN
 			which->add_rsv(score * pregen_ratio);
+#else
+			which->add_rsv(score);
+#endif
 			heapk->min_update(which);
 			}
 		else
@@ -294,7 +318,12 @@ public:
 			/*
 				We weren't in the heap, but we could get put there
 			*/
+#ifdef USE_PREGEN
 			which->add_rsv(score * pregen_ratio);
+#else
+			which->add_rsv(score);
+#endif
+
 			if (cmp(which, accumulator_pointers[0]) > 0)
 				heapk->min_insert(which);
 			}
