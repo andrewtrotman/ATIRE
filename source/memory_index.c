@@ -1551,7 +1551,7 @@ timer = stats->start_timer();
 		M. Crane, A. Trotman, R. O'Keefe (2013), Maintaining Discriminatory Power in Quantized Indexes, Proceedings of CIKM 2013
 */
 if (quantization_automatic)
-	quantization_bits = (long long)(quantization_bits == -1 ? 5.4 + 5.4e-4 * sqrt((double)documents_in_repository) : quantization_bits);
+	quantization_bits = (long long)(5.4 + 5.4e-4 * sqrt((double)node->document_frequency));
 else
 	quantization_bits = quantization_bits == -1 ? 8 : quantization_bits;
 
