@@ -273,6 +273,8 @@ else
 				inchannel = new ANT_channel_inex(inchannel, params->query_fields);
 			else if (strstr(first_bytes, "<top>") != NULL)
 				inchannel = new ANT_channel_trec(inchannel, params->query_fields);
+			else if (strstr(first_bytes, "webtrack") != NULL)
+				inchannel = new ANT_channel_trec(inchannel, params->query_fields);
 			else
 				{
 				/*
