@@ -1,0 +1,371 @@
+OS_TYPE := $(shell uname)
+
+###############################################################################
+# The following options are the default compilation flags.
+###############################################################################
+
+# debugging or normal compiling and linking
+USE_GCC := 1
+USE_GCC_VERBOSE := 0
+USE_GCC_DEBUG := 0
+
+# use intel c/c++ compile
+USE_INTEL_C := 0
+
+# Prepare the binary for profiling
+USE_PREPARE_PROFILING := 0
+
+# profiling using gprof
+USE_GPROF := 0
+
+# if use print for debug
+USE_PDEBUG := 0
+
+# use the system memory management
+USE_PURIFY := 0
+
+# special compression for index file
+# better enabled by defualt
+USE_SPECIAL_COMPRESSION := 1
+
+# parallel compiling and linking
+USE_PARALLEL_INDEXING := 1
+
+# Please use either system or built-in libs, not both
+#
+# use system libz and libbz2 libraries
+USE_SYSTEM_ZLIB := 0
+USE_SYSTEM_BZLIB := 0
+# use ant's built-in libz and libbz2 libraries
+USE_BUILT_IN_ZLIB := 1
+USE_BUILT_IN_BZLIB := 1
+
+# use LZO compression lib
+# Please use either system or built-in libs, not both
+USE_SYSTEM_LZO := 0
+USE_BUILT_IN_LZO := 1
+
+# use google's snappy compression library
+USE_SNAPPY := 1
+
+# if to add a term_max_impact to the structure
+# of the dictionary for each term (This is just
+# a temporary flag. In future, this should be
+# added to the structure by default).
+USE_TERM_LOCAL_MAX_IMPACT := 0
+
+# print stats without converting millisecond to second, minute, hour
+# for profiling purpose
+USE_PRINT_TIME_NO_CONVERSION := 0
+
+# construct impact headers for easy handling the quantums of the postings (version 0.4 of the index)
+USE_IMPACT_HEADER := 1
+
+# place the external document ID (its "filename") in the index and build and index on that for fast access (version 0.5 of the index)
+USE_FILENAME_INDEX := 1
+
+# print extra info for quantum-at-a-time and term-at-a-time
+USE_PRINT_QUANTUM_STATS := 0
+
+# partial decompression of postings list
+USE_PARTIAL_DCOMPRESSION := 1
+
+# represent the static array in two dimensions, reduce accumulators
+# initialisation time
+USE_TWO_D_ACCUMULATORS := 1
+USE_TWO_D_ACCUMULATORS_POW2_WIDTH := 1
+
+# use mysql database backend
+USE_MYSQL := 0
+
+# use Paice Husk Stemmer
+USE_STEM_PAICE_HUSK := 1
+
+# use snowball stemmers
+USE_SNOWBALL := 1
+
+
+# what type to use for the accumulators
+override MINUS_D += -DANT_ACCUMULATOR_T="short"
+override MINUS_D += -DANT_PREGEN_T="unsigned long long"
+override MINUS_D += -DDOUBLE_HASH
+
+ifeq ($(USE_GCC_DEBUG), 1)
+	override MINUS_D += -DDEBUG
+endif
+
+ifeq ($(USE_PURIFY), 1)
+	override MINUS_D += -DPURIFY
+endif
+
+rb := -1
+HASHER := LOOKUP3
+
+override MINUS_D += -D${HASHER}=1 -DHASHER=1 -DONE_PARSER -D__STDC_LIMIT_MACROS -DREBALANCE_FACTOR=$(rb)
+
+ifeq ($(USE_FILENAME_INDEX), 1)
+	override MINUS_D += -DFILENAME_INDEX
+endif
+
+ifeq ($(USE_IMPACT_HEADER), 1)
+	override MINUS_D += -DIMPACT_HEADER
+endif
+
+ifeq ($(USE_PRINT_QUANTUM_STATS), 1)
+	override MINUS_D += -DPRINT_QUANTUM_STATS
+endif
+
+ifeq ($(USE_SPECIAL_COMPRESSION), 1)
+	override MINUS_D += -DSPECIAL_COMPRESSION
+endif
+
+ifeq ($(USE_PARALLEL_INDEXING), 1)
+	override MINUS_D += -DPARALLEL_INDEXING -DPARALLEL_INDEXING_DOCUMENTS
+endif
+
+ifeq ($(USE_SYSTEM_ZLIB), 1)
+	override MINUS_D += -DANT_HAS_ZLIB
+endif
+
+ifeq ($(USE_SYSTEM_BZLIB), 1)
+	override MINUS_D += -DANT_HAS_BZLIB
+endif
+
+ifeq ($(USE_BUILT_IN_ZLIB), 1)
+	override MINUS_D += -DANT_HAS_ZLIB
+endif
+
+ifeq ($(USE_BUILT_IN_BZLIB), 1)
+	override MINUS_D += -DANT_HAS_BZLIB
+endif
+
+ifeq ($(USE_SYSTEM_LZO), 1)
+	override MINUS_D += -DANT_HAS_LZO
+endif
+
+ifeq ($(USE_BUILT_IN_LZO), 1)
+	override MINUS_D += -DANT_HAS_LZO
+endif
+
+ifeq ($(USE_TERM_LOCAL_MAX_IMPACT), 1)
+	override MINUS_D += -DTERM_LOCAL_MAX_IMPACT
+endif
+
+ifeq ($(USE_PDEBUG), 1)
+	override MINUS_D += -DPDEBUG
+endif
+
+ifeq ($(USE_PRINT_TIME_NO_CONVERSION), 1)
+	override MINUS_D += -DPRINT_TIME_NO_CONVERSION
+endif
+
+ifeq ($(USE_PARTIAL_DCOMPRESSION), 1)
+	override MINUS_D += -DTOP_K_READ_AND_DECOMPRESSOR
+endif
+
+ifeq ($(USE_TWO_D_ACCUMULATORS), 1)
+	override MINUS_D += -DTWO_D_ACCUMULATORS
+endif
+
+ifeq ($(USE_TWO_D_ACCUMULATORS_POW2_WIDTH), 1)
+	ifeq ($(USE_TWO_D_ACCUMULATORS), 0)
+		# The next line has to be spaces indented, not tabs. (something funny with GNU make)
+        $(error TWO_D_ACCUMULATORS_POW2_WIDTH requries TWO_D_ACCUMULATORS to be enabled)
+	endif
+	override MINUS_D += -DTWO_D_ACCUMULATORS_POW2_WIDTH
+endif
+
+ifeq ($(USE_MYSQL), 1)
+	override MINUS_D += -DANT_HAS_MYSQL $(shell mysql_config --cflags)
+endif
+
+ifeq ($(USE_SNAPPY), 1)
+	override MINUS_D += -DANT_HAS_SNAPPYLIB
+endif
+
+ifeq ($(USE_SNOWBALL), 1)
+	override MINUS_D += -DANT_HAS_SNOWBALL
+endif
+
+ifeq ($(USE_STEM_PAICE_HUSK), 1)
+	override CFLAGS += -DANT_HAS_PAICE_HUSK
+endif
+
+
+###############################################################################
+# Please use above options to enable corresponding flags
+###############################################################################
+
+ifeq ($(USE_GCC), 1)
+	CC = @g++ 
+	PUT_FILENAME = @echo $<
+	ifeq ($(USE_GCC_VERBOSE), 1)
+		CC = g++ 
+		#CC = /opt/local/bin/g++-mp-4.4
+		PUT_FILENAME =
+	endif
+endif
+
+ifeq ($(USE_INTEL_C), 1)
+	CC = icpc
+endif
+
+ZLIB_DIR := external/unencumbered/zlib
+ZLIB_VERSION := zlib-1.2.5
+
+BZIP_DIR := external/unencumbered/bzip
+BZIP_VERSION := bzip2-1.0.6
+
+SNAPPY_DIR := external/unencumbered/snappy
+SNAPPY_VERSION := snappy-1.0.4
+
+LZO_DIR := external/gpl/lzo
+LZO_VERSION := lzo-2.06
+
+SNOWBALL_DIR := external/unencumbered/snowball
+SNOWBALL_VERSION := libstemmer_c
+
+ifeq ($(USE_GCC_DEBUG), 1)
+	LDFLAGS += -g -ggdb
+	override CFLAGS += -g -ggdb
+	ifeq ($(OS_TYPE), Darwin)
+		LDFLAGS += -gdwarf-2
+		override CFLAGS += -gdwarf-2
+	endif
+else
+	#LDFLAGS +=
+	override CFLAGS += -O3 -fno-tree-vectorize
+endif
+
+ifeq ($(USE_PREPARE_PROFILING), 1)
+	LDFLAGS += -g
+	override CFLAGS += -g -O2
+endif
+
+ifeq ($(USE_GPROF), 1)
+	LDFLAGS += -pg
+	override CFLAGS += -pg
+endif
+
+ifeq ($(OS_TYPE), SUNOS)
+	LDFLAGS += -lsocket -lnsl
+endif
+
+# common flags
+LDFLAGS += -ldl
+override CFLAGS += -x c++ -Wall  \
+					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
+					-Wno-sign-compare -Wno-parentheses
+
+# link the pthread library even if the parallel indexing is not enabled
+ifeq ($(OS_TYPE), SUNOS)
+	LDFLAGS += -lpthread
+else
+	LDFLAGS += -pthread
+endif
+
+ifeq ($(USE_SYSTEM_ZLIB), 1)
+	LDFLAGS += -lz
+endif
+
+ifeq ($(USE_SYSTEM_BZLIB), 1)
+	# use system libbz2 library
+	LDFLAGS += -lbz2
+endif
+
+ifeq ($(USE_BUILT_IN_ZLIB), 1)
+	override CFLAGS += -I $(ZLIB_DIR)/$(ZLIB_VERSION)
+	EXTRA_OBJS += $(ZLIB_DIR)/libz.a
+endif
+
+ifeq ($(USE_BUILT_IN_BZLIB), 1)
+	override CFLAGS += -I $(BZIP_DIR)/$(BZIP_VERSION)
+	EXTRA_OBJS += $(BZIP_DIR)/libbz2.a
+endif
+
+ifeq ($(USE_SYSTEM_LZO), 1)
+	override CFLAGS += -I /usr/include/lzo
+	LDFLAGS += -llzo2
+endif
+
+ifeq ($(USE_BUILT_IN_LZO), 1)
+	override CFLAGS += -I $(LZO_DIR)/$(LZO_VERSION)/include/lzo -I $(LZO_DIR)/$(LZO_VERSION)/include
+	EXTRA_OBJS += $(LZO_DIR)/liblzo2.a
+endif
+
+ifeq ($(USE_MYSQL), 1)
+	LDFLAGS += $(shell mysql_config --libs)
+endif
+
+ifeq ($(USE_SNAPPY), 1)
+	override CFLAGS += -I $(SNAPPY_DIR)/$(SNAPPY_VERSION)
+	EXTRA_OBJS += $(SNAPPY_DIR)/libsnappy.a
+endif
+
+ifeq ($(USE_SNOWBALL), 1)
+	override CFLAGS += -I $(SNOWBALL_DIR)/$(SNOWBALL_VERSION)/include
+	EXTRA_OBJS += $(SNOWBALL_DIR)/libstemmer.a
+endif
+
+###############################################################################
+# source files and compile commands
+###############################################################################
+BASE_DIR := $(CURDIR)
+ATIRE_DIR = $(BASE_DIR)/atire
+SRC_DIR = $(BASE_DIR)/source
+OBJ_DIR = $(BASE_DIR)/obj
+BIN_DIR = $(BASE_DIR)/bin
+LIB_DIR = $(BASE_DIR)/lib
+TOOLS_DIR = $(BASE_DIR)/tools
+TESTS_DIR = $(BASE_DIR)/tests
+
+IGNORE_LIST := $(SRC_DIR)/stem_paice_husk.c
+
+MAIN_FILES := $(ATIRE_DIR)/atire.c \
+              $(ATIRE_DIR)/index.c \
+              $(ATIRE_DIR)/atire_client.c \
+              $(ATIRE_DIR)/atire_broker.c \
+              $(ATIRE_DIR)/atire_merge.c \
+              $(ATIRE_DIR)/atire_doclist.c \
+              $(ATIRE_DIR)/atire_dictionary.c
+
+ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
+SOURCES := $(filter-out $(MAIN_FILES) $(IGNORE_LIST), $(ALL_SOURCES))
+
+ifeq ($(USE_STEM_PAICE_HUSK), 1)
+	SOURCES += $(SRC_DIR)/stem_paice_husk.c
+endif
+
+SOURCES_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(notdir $(SOURCES))))
+
+
+INDEX_SOURCES := index.c $(notdir $(SOURCES))
+INDEX_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(INDEX_SOURCES)))
+
+ATIRE_DICT_SOURCES := atire_dictionary.c $(notdir $(SOURCES))
+ATIRE_DICT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_DICT_SOURCES)))
+
+ATIRE_CLIENT_SOURCES := atire_client.c $(notdir $(SOURCES))
+ATIRE_CLIENT_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_CLIENT_SOURCES)))
+
+ATIRE_SOURCES := atire.c $(notdir $(SOURCES))
+ATIRE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
+
+ATIRE_MERGE_SOURCES := atire_merge.c $(notdir $(SOURCES))
+ATIRE_MERGE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_MERGE_SOURCES)))
+
+ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
+ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
+
+ATIRE_DOCLIST_SOURCES := atire_doclist.c $(notdir $(SOURCES))
+ATIRE_DOCLIST_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_DOCLIST_SOURCES)))
+
+TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c
+TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)/*.c)))
+TOOLS_EXES := $(basename $(TOOLS_SOURCES))
+TOOLS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TOOLS_SOURCES)))
+
+TESTS_IGNORES :=
+TESTS_SOURCES := $(notdir $(filter-out $(TESTS_IGNORES), $(shell ls $(TESTS_DIR)/*.c)))
+TESTS_EXES := $(basename $(TESTS_SOURCES))
+TESTS_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(TESTS_SOURCES)))
