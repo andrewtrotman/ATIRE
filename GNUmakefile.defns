@@ -1,4 +1,9 @@
 OS_TYPE := $(shell uname)
+# Allow for this file to be included and for them to override what
+# BASE_DIR is (relative to their project)
+ifndef BASE_DIR
+BASE_DIR := $(CURDIR)
+endif
 
 ###############################################################################
 # The following options are the default compilation flags.
@@ -210,19 +215,19 @@ ifeq ($(USE_INTEL_C), 1)
 	CC = icpc
 endif
 
-ZLIB_DIR := external/unencumbered/zlib
+ZLIB_DIR := $(BASE_DIR)/external/unencumbered/zlib
 ZLIB_VERSION := zlib-1.2.5
 
-BZIP_DIR := external/unencumbered/bzip
+BZIP_DIR := $(BASE_DIR)/external/unencumbered/bzip
 BZIP_VERSION := bzip2-1.0.6
 
-SNAPPY_DIR := external/unencumbered/snappy
+SNAPPY_DIR := $(BASE_DIR)/external/unencumbered/snappy
 SNAPPY_VERSION := snappy-1.0.4
 
-LZO_DIR := external/gpl/lzo
+LZO_DIR := $(BASE_DIR)/external/gpl/lzo
 LZO_VERSION := lzo-2.06
 
-SNOWBALL_DIR := external/unencumbered/snowball
+SNOWBALL_DIR := $(BASE_DIR)/external/unencumbered/snowball
 SNOWBALL_VERSION := libstemmer_c
 
 ifeq ($(USE_GCC_DEBUG), 1)
@@ -310,7 +315,6 @@ endif
 ###############################################################################
 # source files and compile commands
 ###############################################################################
-BASE_DIR := $(CURDIR)
 ATIRE_DIR = $(BASE_DIR)/atire
 SRC_DIR = $(BASE_DIR)/source
 OBJ_DIR = $(BASE_DIR)/obj
