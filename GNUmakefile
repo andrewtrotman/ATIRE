@@ -115,27 +115,27 @@ $(TESTS_EXES) : $(SOURCES_OBJECTS) $(TESTS_OBJECTS)
 
 
 $(SNAPPY_DIR)/libsnappy.a:
-	$(MAKE) -C $(BASE_DIR)/$(SNAPPY_DIR) -f GNUmakefile.static USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
+	$(MAKE) -C $(SNAPPY_DIR) -f GNUmakefile.static USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
 
 $(ZLIB_DIR)/libz.a:
-	$(MAKE) -C $(BASE_DIR)/$(ZLIB_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
+	$(MAKE) -C $(ZLIB_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
 
 $(BZIP_DIR)/libbz2.a:
-	$(MAKE) -C $(BASE_DIR)/$(BZIP_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
+	$(MAKE) -C $(BZIP_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
 
 $(LZO_DIR)/liblzo2.a:
-	$(MAKE) -C $(BASE_DIR)/$(LZO_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
+	$(MAKE) -C $(LZO_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
 
 $(SNOWBALL_DIR)/libstemmer.a:
-	$(MAKE) -C $(BASE_DIR)/$(SNOWBALL_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
+	$(MAKE) -C $(SNOWBALL_DIR) -f GNUmakefile USE_GCC_VERBOSE=$(USE_GCC_VERBOSE)
 
 .PHONY : clean
 clean :
-	$(MAKE) -C $(BASE_DIR)/$(SNAPPY_DIR) -f GNUmakefile.static clean
-	$(MAKE) -C $(BASE_DIR)/$(ZLIB_DIR) -f GNUmakefile clean
-	$(MAKE) -C $(BASE_DIR)/$(BZIP_DIR) -f GNUmakefile clean
-	$(MAKE) -C $(BASE_DIR)/$(LZO_DIR) -f GNUmakefile clean
-	$(MAKE) -C $(BASE_DIR)/$(SNOWBALL_DIR) -f GNUmakefile clean
+	$(MAKE) -C $(SNAPPY_DIR) -f GNUmakefile.static clean
+	$(MAKE) -C $(ZLIB_DIR) -f GNUmakefile clean
+	$(MAKE) -C $(BZIP_DIR) -f GNUmakefile clean
+	$(MAKE) -C $(LZO_DIR) -f GNUmakefile clean
+	$(MAKE) -C $(SNOWBALL_DIR) -f GNUmakefile clean
 	\rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*
 
 clean-internal:
