@@ -21,10 +21,10 @@
 # for inclusion in other projects that might need them
 include GNUmakefile.defns
 
-all: $(EXTRA_OBJS) GNUmakefile index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
+all: $(EXTRA_OBJS) GNUmakefile index atire atire_client atire_broker atire_dictionary atire_merge atire_reorder atire_doclist
 
 # faster compilation without considering extra objects, useful for repeated make for testing
-internal: index atire atire_client atire_broker atire_dictionary atire_merge atire_doclist
+internal: index atire atire_client atire_broker atire_dictionary atire_merge atire_reorder atire_doclist
 
 index: $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
@@ -32,6 +32,7 @@ atire_client: $(BIN_DIR)/atire_client
 atire_broker: $(BIN_DIR)/atire_broker
 atire_dictionary: $(BIN_DIR)/atire_dictionary
 atire_merge: $(BIN_DIR)/atire_merge
+atire_reorder: $(BIN_DIR)/atire_reorder
 atire_doclist: $(BIN_DIR)/atire_doclist
 
 tools: $(TOOLS_EXES)
@@ -98,6 +99,9 @@ $(BIN_DIR)/atire_dictionary : $(ATIRE_DICT_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_merge : $(ATIRE_MERGE_OBJECTS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
+
+$(BIN_DIR)/atire_reorder : $(ATIRE_REORDER_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_doclist : $(ATIRE_DOCLIST_OBJECTS)

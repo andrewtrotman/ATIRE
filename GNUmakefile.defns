@@ -330,6 +330,7 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
               $(ATIRE_DIR)/atire_client.c \
               $(ATIRE_DIR)/atire_broker.c \
               $(ATIRE_DIR)/atire_merge.c \
+              $(ATIRE_DIR)/atire_reorder.c \
               $(ATIRE_DIR)/atire_doclist.c \
               $(ATIRE_DIR)/atire_dictionary.c
 
@@ -357,6 +358,9 @@ ATIRE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_SOURCES)))
 
 ATIRE_MERGE_SOURCES := atire_merge.c $(notdir $(SOURCES))
 ATIRE_MERGE_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_MERGE_SOURCES)))
+
+ATIRE_REORDER_SOURCES := atire_reorder.c $(notdir $(SOURCES))
+ATIRE_REORDER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_REORDER_SOURCES)))
 
 ATIRE_BROKER_SOURCES := atire_broker.c $(notdir $(SOURCES))
 ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_SOURCES)))
