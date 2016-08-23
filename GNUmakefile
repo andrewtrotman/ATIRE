@@ -148,4 +148,4 @@ clean-internal:
 depend :
 	@makedepend  -f- -Y -o.o -w1024 -pobj/ source/*.c tools/*.c atire/*.c Link-The-Wiki/*.c | sed -e "s/obj\/source/obj/" | sed -e "s/obj\/tools/obj/" | sed -e "s/obj\/atire/obj/" | sed -e "s/obj\/Link-The-Wiki/obj/" > GNUmakefile.dependencies
 
-include $(BASE_DIR)/GNUmakefile.dependencies
+include GNUmakefile.dependencies
