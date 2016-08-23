@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <map>
+#include <string>
 #include "btree.h"
 #include "btree_head_node.h"
 #include "btree_iterator.h"
@@ -442,25 +444,20 @@ long long found = 0;
 ANT_memory_index_hash_node *p;
 ANT_memory_index_hash_node **term_list = new ANT_memory_index_hash_node *[search_engine.get_unique_term_count() + 1];
 
+std::map<std::string, int> old_id;
+for (long long i = 0; i < search_engine.document_count(); i++)
+	{
+	old_id[std::string(search_engine.get_document_filename(filename_buffer, i))] = i;
+	}
+
 // create a mapping such that mapping[old docid] = new docid
 for (long long i = 0; i < new_order_doc_count; i++)
 	{
 	if (i % 1000 == 0)
 		printf("%lld\n", i);
-	auto old_filename = search_engine.get_document_filename(filename_buffer, i);
-	long long j = 0;
-	for (; j < new_order_doc_count; j++)
-		if (strcmp(old_filename, new_order[j]) == 0)
-			{
-			mapping[i] = j;
-			found++;
-			break;
-			}
-	if (j == new_order_doc_count)
-		exit(printf("Failed to find a match for doc: %s\n", old_filename));
+	auto filename = std::string(new_order[i]);
+	mapping[i] = old_id[filename];
 	}
-if (found != new_order_doc_count) 
-	exit(printf("Not all matches found!\n"));
 
 auto start = search_engine.get_variable("~documentfilenamesstart");
 auto end = search_engine.get_variable("~documentfilenamesfinish");
