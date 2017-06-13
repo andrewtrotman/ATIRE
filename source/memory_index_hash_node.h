@@ -14,10 +14,6 @@
 class ANT_postings_piece;
 class ANT_stats_memory_index;
 
-#ifdef _MSC_VER
-	#define inline __forceinline
-#endif
-
 /*
 	class ANT_MEMORY_INDEX_HASH_NODE
 	--------------------------------

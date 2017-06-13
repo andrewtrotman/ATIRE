@@ -9,10 +9,6 @@
 #define FUNDAMENTAL_TYPES_H_
 
 #ifdef _MSC_VER
-	#if (_MSC_VER < 1700)
-		#define inline __forceinline
-	#endif
-
 	typedef signed char int8_t;
 	typedef unsigned char uint8_t;
 

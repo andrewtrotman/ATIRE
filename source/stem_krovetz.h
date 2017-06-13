@@ -30,7 +30,7 @@
 using namespace std;
 
 #if (defined(ANDROID) || defined(__ANDROID__))
-	#include <hash_map>
+	#include <unordered_map>
 	#define ATIRE_KROVETZ_HAS_HASH_MAP
 #elif defined(__APPLE__)
 	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
@@ -54,12 +54,11 @@ using namespace std;
 	using namespace std::tr1;
 //	using namespace __gnu_cxx;
 #elif defined (_MSC_VER)
-	#include <hash_map>
-//	#include <unordered_map>
-//	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
-//	using namespace std::tr1;
+	#include <unordered_map>
+	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
+	using namespace std::tr1;
 #else
-	#include <hash_map>
+	#include <unordered_map>
 	#define ATIRE_KROVETZ_HAS_HASH_MAP
 #endif
 
@@ -97,16 +96,16 @@ private:
 		typedef unordered_map<const char *, dictEntry, hash<string>, eqstr> dictTable;
 	#elif defined (ATIRE_KROVETZ_HAS_HASH_MAP)
 		struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
-		typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
+		typedef unordered_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
 	#else
 		#if defined(_WIN32)
-			//	studio 7 hash_map provides hash_compare, rather than hash
+			//	studio 7 unordered_map provides hash_compare, rather than hash
 			//	needing an < predicate, rather than an == predicate.
 			struct ltstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) < 0; }};
-			typedef stdext::hash_map<const char *, dictEntry, stdext::hash_compare<const char *, ltstr> > dictTable;
+			typedef stdext::unordered_map<const char *, dictEntry, stdext::hash_compare<const char *, ltstr> > dictTable;
 		#else
 			struct eqstr {bool operator()(const char* s1, const char* s2) const { return strcmp(s1, s2) == 0; }};
-			typedef hash_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
+			typedef unordered_map<const char *, dictEntry, hash<const char *>, eqstr> dictTable;
 		#endif
 	#endif
 

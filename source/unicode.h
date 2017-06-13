@@ -13,9 +13,6 @@
 #include "fundamental_types.h"
 #include "unicode_tables.h"
 
-#ifdef _MSC_VER
-	#define inline __forceinline
-#endif
 
 #define LAST_ASCII_CHAR 0x7F
 #define SPECIAL_TERM_CHAR 0x80

@@ -19,9 +19,6 @@
 	#define TRUE (!FALSE)
 #endif
 
-#ifdef _MSC_VER
-	#define inline __forceinline
-#endif
 
 /*
 	class ANT_PARSER
