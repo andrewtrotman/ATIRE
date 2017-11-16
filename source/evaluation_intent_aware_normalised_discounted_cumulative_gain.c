@@ -215,7 +215,7 @@ for (topic = 0; topic < relevant_topic_list_length; topic++)
 				If we've reached the end of the document list, then we should check if this document
 				is the best we've encountered so far for this position
 			*/
-			if (current_doc->topic != got_top->topic && current_doc->docid >= 0)
+			if (current_doc->topic != got_top->topic && *current_doc->docid >= 0)
 				{
 				if (current_score > max_score)
 					{
