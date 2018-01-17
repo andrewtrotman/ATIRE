@@ -654,7 +654,7 @@ if (do_documents)
 		start = search_engines[engine]->get_variable("~documentfilenamesstart");
 		end = search_engines[engine]->get_variable("~documentfilenamesfinish");
 		
-		doc_buf = (char *)realloc(doc_buf, end - start);
+		doc_buf = (char *)malloc(end - start);
 		doc_filenames = search_engines[engine]->get_document_filenames(doc_buf, &buf_len);
 		
 		/*
