@@ -258,7 +258,7 @@ endif
 
 # common flags
 LDFLAGS += -ldl
-override CFLAGS += -x c++ -Wall  \
+override CFLAGS += -x c++ -std=c++11 -Wall  \
 					-Wno-missing-braces -Wno-unknown-pragmas -Wno-write-strings \
 					-Wno-sign-compare -Wno-parentheses
 
