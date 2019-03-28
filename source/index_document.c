@@ -57,6 +57,7 @@ while ((token = readability->get_next_token()) != NULL)
 	switch (token->type)
 		{
 		case TT_WORD:
+//printf(":%ld:%*.*s\n", terms_in_document, (int)token->string_length, (int)token->string_length, token->string());
 			terms_in_document++;
 
 			if (is_cjk_language(token->start))
@@ -111,6 +112,7 @@ while ((token = readability->get_next_token()) != NULL)
 				}
 			break;
 		case TT_NUMBER:
+//printf(":%ld:%*.*s\n", terms_in_document, (int)token->string_length, (int)token->string_length, token->string());
 			if ((stopword_mode & ANT_memory_index::PRUNE_NUMBERS) != 0)
 				break;
 			terms_in_document++;
@@ -138,6 +140,7 @@ if (terms_in_document != 0)
 	/*
 		Set the true length
 	*/
+//printf("set length to %ld\n", terms_in_document);
 	indexer->set_document_length(doc, terms_in_document);
 	readability->index(indexer, doc);
 	}

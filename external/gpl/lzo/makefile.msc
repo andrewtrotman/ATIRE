@@ -5,7 +5,7 @@
 
 .SILENT:
 
-CFI = -Ilzo-2.06\include -Ilzo-2.06 -Ilzo-2.06\src
+CFI = -Ilzo-2.10\include -Ilzo-2.10 -Ilzo-2.10\src
 BLIB = lzo2.lib
 CC = cl -nologo
 !IF "$(DEBUG)" == "1"
