@@ -123,7 +123,7 @@ int check_postings = 1;
 */
 void about(char *exename)
 {
-exit(printf("Usage:%s [index.aspt] [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>] [-l<PrintOnePostingPerLine>]\n", exename));
+exit(printf("Usage:%s [index.aspt] [-s <start word> [-e <end word>]] [-d<oubleMetaphone>] [-x<soundex>] [-u<nicodeWideChars>] [-p<rintPostings>] [-q<uiet (without df and cf)>] [-l<PrintOnePostingPerLine>]\n", exename));
 }
 
 /*
@@ -132,6 +132,7 @@ exit(printf("Usage:%s [index.aspt] [-s <start word> [-e <end word>]] [-d<oubleMe
 */
 int main(int argc, char *argv[])
 {
+bool print_df_cf = true;
 ANT_stem *meta = NULL;
 ANT_compressable_integer *raw;
 long long max = 0;
@@ -170,6 +171,8 @@ for (param = 1; param < argc; param++)
 		print_wide = TRUE;
 	else if (strcmp(argv[param], "-p") == 0)
 		print_postings = TRUE;
+	else if (strcmp(argv[param], "-q") == 0)
+		print_df_cf = FALSE;
 	else if (strcmp(argv[param], "-l") == 0)
 		one_postings_per_line = TRUE;
 	else if (strcmp(argv[param], "-h") == 0)
@@ -239,12 +242,17 @@ for (term = iterator.first(first_term); term != NULL; term = iterator.next())
 #else
 		printf("%s ", term);
 #endif
-#ifdef SPECIAL_COMPRESSION
-		if (leaf.local_document_frequency < 3)
-			printf("%lld %lld 0", leaf.local_collection_frequency, leaf.local_document_frequency);
-		else
-#endif
-		printf("%lld %lld %lld", leaf.local_collection_frequency, leaf.local_document_frequency, leaf.postings_length);
+
+		if (print_df_cf)
+			{
+			#ifdef SPECIAL_COMPRESSION
+				if (leaf.local_document_frequency < 3)
+					printf("%lld %lld 0", leaf.local_collection_frequency, leaf.local_document_frequency);
+				else
+			#endif
+			printf("%lld %lld %lld", leaf.local_collection_frequency, leaf.local_document_frequency, leaf.postings_length);
+			}
+
 		if (check_postings && *term != '~')		// ~length and others aren't encoded in the usual way
 			{
 			postings_list = search_engine.get_postings(&leaf, postings_list);

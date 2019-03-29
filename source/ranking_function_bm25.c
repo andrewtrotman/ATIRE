@@ -26,7 +26,10 @@ this->b = b;
 */
 document_prior_probability = new float [(size_t)documents_as_integer];
 for (current = 0; current < documents_as_integer; current++)
+	{
 	document_prior_probability[current] =  (float)(k1 * (one_minus_b + b * (document_lengths[current] / mean_document_length)));
+//printf("%ld %d %f %f %f %f -> %f\n", current, document_lengths[current], mean_document_length, b, one_minus_b, k1, document_prior_probability[current]);
+	}
 }
 
 /*
@@ -189,13 +192,17 @@ while (current < end)
 	---------------------------------
 */
 double ANT_ranking_function_BM25::rank(ANT_compressable_integer docid, ANT_compressable_integer length, unsigned short term_frequency, long long collection_frequency, long long document_frequency, double query_frequency)
-{
-const double k1_plus_1 = k1 + 1.0;
-double idf, tf, rsv;
+	{
+	const double k1_plus_1 = k1 + 1.0;
+	double idf, tf, rsv;
+	double top_row;
 
-tf = (double)term_frequency;
-idf = log((double)documents / (double)document_frequency);
-rsv = idf * ((tf * k1_plus_1) / (tf + document_prior_probability[docid]));
-return rsv;
-#pragma ANT_PRAGMA_UNUSED_PARAMETER
-}
+	tf = (double)term_frequency;
+	idf = log((double)documents / (double)document_frequency);
+
+	top_row = term_frequency * k1_plus_1;
+	rsv = idf * (top_row / (tf + document_prior_probability[docid]));
+
+	return rsv;
+	#pragma ANT_PRAGMA_UNUSED_PARAMETER
+	}

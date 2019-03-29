@@ -34,7 +34,7 @@ USE_PURIFY := 0
 USE_SPECIAL_COMPRESSION := 1
 
 # parallel compiling and linking
-USE_PARALLEL_INDEXING := 1
+USE_PARALLEL_INDEXING := 0
 
 # Please use either system or built-in libs, not both
 #

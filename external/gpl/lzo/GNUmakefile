@@ -7,7 +7,7 @@ else
 	PUT_FILENAME = @echo $<
 endif
 
-SOURCE_DIR = lzo-2.06/src
+SOURCE_DIR = lzo-2.10/src
 LZO = liblzo2.a
 
 ALL_SOURCES =  $(SOURCE_DIR)/lzo1.c		\

@@ -31,7 +31,6 @@
 
 #define DISK_BUFFER_SIZE (10 * 1024 * 1024)
 
-
 ANT_string_pair ANT_memory_index::squiggle_document_offsets("~documentoffsets");
 ANT_string_pair ANT_memory_index::squiggle_document_longest("~documentlongest");
 
@@ -731,6 +730,7 @@ else
 	{
 	variable_byte.decompress(impacted_postings, serialised_docids, root->document_frequency);
 	quantizer->get_max_min(&max, &min, root->collection_frequency, root->document_frequency, impacted_postings, serialised_tfs);
+
 	/*
 		now return the max of the three
 	*/
