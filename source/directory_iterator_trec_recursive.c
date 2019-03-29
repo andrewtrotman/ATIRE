@@ -5,9 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "memory.h"
 #include "instream_file.h"
 #include "instream_deflate.h"
+#include "instream_Z.h"
 #include "instream_buffer.h"
 #include "instream_scrub.h"
 #include "directory_iterator_scrub.h"
@@ -65,6 +67,10 @@ file_stream = new ANT_instream_file(memory, filename);
 
 if (strcmp(filename + strlen(filename) - 3, ".gz") == 0)
 	decompressor = new ANT_instream_deflate(memory, file_stream);
+else if (strcmp(filename + strlen(filename) - 2, ".Z") == 0)
+	decompressor = new ANT_instream_Z(memory, filename);
+else if ((strcmp(filename + strlen(filename) - 1, "Z") == 0) && isdigit(filename[strlen(filename) - 2]) && (filename[strlen(filename) - 3] == '.'))
+	decompressor = new ANT_instream_Z(memory, filename);
 else
 	decompressor = file_stream;
 
