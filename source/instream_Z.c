@@ -56,8 +56,10 @@ if (binary == NULL)
 		printf("filed to decode .Z file '%s'\n", filename);
 		return -1;
 		}
+#ifdef NEVER
 	else
 		printf("Decoded %lld byte .Z into %zu bytes\n", disk_file_size, file_length);
+#endif
 	}
 
 if (bytes_read >= file_length)
