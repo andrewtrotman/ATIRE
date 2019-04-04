@@ -71,6 +71,10 @@ else if (strcmp(filename + strlen(filename) - 2, ".Z") == 0)
 	decompressor = new ANT_instream_Z(memory, filename);
 else if ((strcmp(filename + strlen(filename) - 1, "Z") == 0) && isdigit(filename[strlen(filename) - 2]) && (filename[strlen(filename) - 3] == '.'))
 	decompressor = new ANT_instream_Z(memory, filename);
+else if (strcmp(filename + strlen(filename) - 2, ".z") == 0)
+	decompressor = new ANT_instream_Z(memory, filename);
+else if ((strcmp(filename + strlen(filename) - 1, "z") == 0) && isdigit(filename[strlen(filename) - 2]) && (filename[strlen(filename) - 3] == '.'))
+	decompressor = new ANT_instream_Z(memory, filename);
 else
 	decompressor = file_stream;
 
