@@ -41,8 +41,8 @@ if (source->first(&object) != NULL)
 */
 ANT_instream_tgz::~ANT_instream_tgz()
 {
-delete deflater;
-delete source;
+//delete deflater;
+//delete source;
 }
 
 /*

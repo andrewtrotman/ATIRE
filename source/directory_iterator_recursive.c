@@ -330,6 +330,7 @@ char *got;
 	if ((got = next_match_wildcard()) == NULL)
 		return NULL;
 	path_length = strlen(file_list->path) - 4;
+	object->filename = new char [path_length + 1 + strlen(got) + 1];
 	sprintf(object->filename, "%*.*s/%s", (int)path_length, (int)path_length, file_list->path, got);
 #else
 	if ((got = next_match_wildcard()) == NULL)
