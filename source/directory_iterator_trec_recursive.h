@@ -30,17 +30,21 @@ protected:
 	long first_time;
 	long long scrubbing_options;
 
+	/*
+		The tag names seperating documents
+	*/
+	char *doc_name;
+	char *docno_name;
+
 protected:
 	ANT_directory_iterator *new_provider(char *filename);
 
 public:
-	ANT_directory_iterator_trec_recursive(char *source, long get_file = 0, long long scrubbing_options = 0);
+	ANT_directory_iterator_trec_recursive(char *source, long get_file = 0, long long scrubbing_options = 0, char *doc_name = "DOC", char *docno_name = "DOCNO");
 	virtual ~ANT_directory_iterator_trec_recursive();
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
-
-	void set_tags(char *doc_name, char *docno_name);
 } ;
 
 #endif /* DIRECTORY_ITERATOR_TREC_RECURSIVE_H_ */

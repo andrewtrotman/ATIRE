@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "str.h"
 #include "memory.h"
 #include "instream_file.h"
 #include "instream_deflate.h"
@@ -18,11 +19,12 @@
 #include "directory_iterator_file_buffered.h"
 #include "directory_iterator_trec_recursive.h"
 
+
 /*
 	ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE::ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE()
 	------------------------------------------------------------------------------
 */
-ANT_directory_iterator_trec_recursive::ANT_directory_iterator_trec_recursive(char *source, long get_file, long long scrubbing_options) : ANT_directory_iterator("", get_file)
+ANT_directory_iterator_trec_recursive::ANT_directory_iterator_trec_recursive(char *source, long get_file, long long scrubbing_options, char *doc_name, char *docno_name) : ANT_directory_iterator("", get_file)
 {
 ANT_directory_iterator_object filename;
 
@@ -40,6 +42,8 @@ instream_buffer = NULL;
 scrubber = NULL;
 detrecer = NULL;
 memory = NULL;
+this->doc_name = strnew(doc_name);
+this->docno_name = strnew(docno_name);
 
 new_provider(filename.filename);
 }
@@ -95,6 +99,7 @@ else
 	scrubber = instream_buffer;
 
 detrecer = new ANT_directory_iterator_file_buffered(scrubber, ANT_directory_iterator::READ_FILE);
+detrecer->set_tags(doc_name, docno_name);
 
 return detrecer;
 }
@@ -110,14 +115,22 @@ ANT_directory_iterator_object *got;
 while (more_files != NULL)
 	{
 	if (first_time)
+		{
+puts("FIRST TIME");
 		got = detrecer->first(object);
+		printf("\n---->%s<---->%s<------\n", object->filename, object->file);
+		}
 	else
+		{
+puts("NOT FIRST TIME");
 		got = detrecer->next(object);
+		}
 
 	first_time = false;
 
 	if (got == NULL)
 		{
+puts("GOT IS NULL");
 		if ((more_files = filename_provider->next(object)) != NULL)
 			{
 			new_provider(object->filename);
@@ -125,17 +138,10 @@ while (more_files != NULL)
 			}
 		}
 	else
+		{
 		return got;
+		}
 	}
 
 return NULL;
-}
-
-/*
-	ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE::SET_TAGS()
-	-------------------------------------------------
-*/
-void ANT_directory_iterator_trec_recursive::set_tags(char *doc_name, char *docno_name)
-{
-detrecer->set_tags(doc_name, docno_name);
 }
