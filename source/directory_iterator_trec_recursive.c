@@ -115,22 +115,14 @@ ANT_directory_iterator_object *got;
 while (more_files != NULL)
 	{
 	if (first_time)
-		{
-puts("FIRST TIME");
 		got = detrecer->first(object);
-		printf("\n---->%s<---->%s<------\n", object->filename, object->file);
-		}
 	else
-		{
-puts("NOT FIRST TIME");
 		got = detrecer->next(object);
-		}
 
 	first_time = false;
 
 	if (got == NULL)
 		{
-puts("GOT IS NULL");
 		if ((more_files = filename_provider->next(object)) != NULL)
 			{
 			new_provider(object->filename);
@@ -138,9 +130,7 @@ puts("GOT IS NULL");
 			}
 		}
 	else
-		{
 		return got;
-		}
 	}
 
 return NULL;

@@ -19,7 +19,6 @@ ANT_instream_tgz::ANT_instream_tgz(ANT_memory *memory, char *filename) : ANT_ins
 {
 ANT_directory_iterator_object object;
 
-puts(filename);
 this->filename = (char *)memory->malloc(strlen(filename) + 1);
 strcpy(this->filename, filename);
 memory->realign();
@@ -74,8 +73,6 @@ if (current_file_pointer >= current_file + current_file_length)
 	current_file = NULL;
 	}
 bytes_read += allowed;
-
-printf("[[[[%*.*s]]]]\n", allowed, allowed, buffer);
 
 return allowed;
 }

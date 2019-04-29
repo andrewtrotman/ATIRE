@@ -83,8 +83,6 @@ return got;
 */
 ANT_directory_iterator_object *ANT_directory_iterator_file_buffered::next(ANT_directory_iterator_object *object)
 {
-printf("ASPT_DIAG:%s %s %s %s\n", doc_tag[0], doc_tag[1], docno_tag[0], docno_tag[1]);
-
 char *start, *document_id_start = NULL, *document_id_end = NULL;
 long long bytes_read;
 char file_id_buffer[24];		// large enough to hold a 64-bit sequence number
@@ -96,7 +94,6 @@ start = *buffer_to_read_from + *end_of_buffer;
 */
 if ((document_start = strstr(start, doc_tag[0])) == NULL)
 	{
-puts("ASPT_DIAG:NULL");
 	/*
 		We might be at the end of a buffer and half-way through a tag so we copy the remainder of the file to the
 		start of the buffer and fill the remainder
@@ -110,19 +107,11 @@ puts("ASPT_DIAG:NULL");
 	*/
 	bytes_read = read(*buffer_to_read_from + (buffer_size - *end_of_buffer), *end_of_buffer);
 
-printf("ASPT_DIAG:bytes_read:%lld\n", (long long)bytes_read);
-
 	if (bytes_read == 0)
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
-printf("ASPT_DIAG:1\n");
-printf("%*.*s\n", (int)bytes_read, (int)bytes_read, *buffer_to_read_from + (buffer_size - *end_of_buffer));
 	if ((document_start = strstr(*buffer_to_read_from, doc_tag[0])) == NULL)
-		{
-printf("ASPT_DIAG:did not find start of document\n");
 		return NULL;		// we are either at end of file of have a document that is too long to index (so pretend EOF)
-		}
 	}
-printf("ASPT_DIAG: document_start:%p\n", document_start);
 
 /*
 	Get the end tag
