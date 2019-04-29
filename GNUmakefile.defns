@@ -225,7 +225,7 @@ SNAPPY_DIR := $(BASE_DIR)/external/unencumbered/snappy
 SNAPPY_VERSION := snappy-1.0.4
 
 LZO_DIR := $(BASE_DIR)/external/gpl/lzo
-LZO_VERSION := lzo-2.06
+LZO_VERSION := lzo-2.10
 
 SNOWBALL_DIR := $(BASE_DIR)/external/unencumbered/snowball
 SNOWBALL_VERSION := libstemmer_c

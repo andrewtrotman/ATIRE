@@ -14,7 +14,6 @@ ANT_instream_memory::ANT_instream_memory(char *infile, long long length) : ANT_i
 file = infile;
 file_length = length;
 bytes_read = 0;
-
 }
 
 /*

@@ -135,7 +135,7 @@ document_end += strlen(doc_tag[1]);			// skip to end of tag
 *end_of_buffer = document_end - *buffer_to_read_from;
 
 /*
-	Now get the DOCID (or in the case of NTCIR, the id=)
+	Now get the DOCID (or in the case of NTCIR, the id=; or in the case of TREC Code, the id-string=)
 */
 if (!auto_file_id)
 	{
@@ -149,10 +149,13 @@ if (!auto_file_id)
 		}
 	else
 		{
-		document_id_start = strstr(document_start, "id=\"");
+		if ((document_id_start = strstr(document_start, "id=\"")) == NULL)		// assume NTCIR, and if not then check TREC 2017 Core (NYTimes)
+			document_id_start = strstr(document_start, "id-string=\"");
+
 		document_id_end = strchr(document_id_start += strlen(doc_tag[0]), '"');
-		if (document_id_end)
-			document_start = strchr(document_id_end, '>') + 1;
+/* Not sure why this code is here, so I've removed it.  All it appears to do is to ignore the DOCID tag's contents in indexing the document */
+//		if (document_id_end)
+//			document_start = strchr(document_id_end, '>') + 1;
 		}
 	}
 else
@@ -218,6 +221,6 @@ docno_tag[0] = new char[strlen(docno_name) + 3];  //"<DOCNO>",  extra 3 bytes in
 docno_tag[1] = new char[strlen(docno_name) + 4];  // </DOCNO>", extra 3 bytes include </ > \0
 sprintf(doc_tag[0], "<%s", doc_name);
 sprintf(doc_tag[1], "</%s>", doc_name);
-sprintf(docno_tag[0], "<%s>", docno_name);
+sprintf(docno_tag[0], "<%s", docno_name);
 sprintf(docno_tag[1], "</%s>", docno_name);
 }

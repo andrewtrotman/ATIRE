@@ -133,7 +133,7 @@ STEM_PAICE_HUSK =
 #
 !IF $(ANT_HAS_LZO) == $(TRUE)
 EXTRA_MINUS_D = $(EXTRA_MINUS_D) -DANT_HAS_LZO
-EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\gpl\lzo\lzo-2.06\include\lzo
+EXTRA_INCLUDE = $(EXTRA_INCLUDE) -I external\gpl\lzo\lzo-2.10\include\lzo
 EXTRA_LIBS = $(EXTRA_LIBS) external\gpl\lzo\lzo2.lib
 !ENDIF
 

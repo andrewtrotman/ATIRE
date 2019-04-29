@@ -12,6 +12,7 @@
 #include "instream_Z.h"
 #include "instream_buffer.h"
 #include "instream_scrub.h"
+#include "instream_tgz.h"
 #include "directory_iterator_scrub.h"
 #include "directory_iterator_recursive.h"
 #include "directory_iterator_file_buffered.h"
@@ -75,6 +76,8 @@ else if (strcmp(filename + strlen(filename) - 2, ".z") == 0)
 	decompressor = new ANT_instream_Z(memory, filename);
 else if ((strcmp(filename + strlen(filename) - 1, "z") == 0) && isdigit(filename[strlen(filename) - 2]) && (filename[strlen(filename) - 3] == '.'))
 	decompressor = new ANT_instream_Z(memory, filename);
+else if (strcmp(filename + strlen(filename) - 4, ".tgz") == 0)
+	decompressor = new ANT_instream_tgz(memory, filename);
 else
 	decompressor = file_stream;
 
@@ -126,4 +129,13 @@ while (more_files != NULL)
 	}
 
 return NULL;
+}
+
+/*
+	ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE::SET_TAGS()
+	-------------------------------------------------
+*/
+void ANT_directory_iterator_trec_recursive::set_tags(char *doc_name, char *docno_name)
+{
+detrecer->set_tags(doc_name, docno_name);
 }

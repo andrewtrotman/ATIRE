@@ -9,6 +9,7 @@
 
 class ANT_instream;
 class ANT_memory;
+class ANT_directory_iterator_file_buffered;
 
 /*
 	class ANT_DIRECTORY_ITERATOR_TREC_RECURSIVE
@@ -23,7 +24,7 @@ protected:
 	ANT_instream *instream_buffer;
 	ANT_instream *scrubber;
 	ANT_directory_iterator *filename_provider;
-	ANT_directory_iterator *detrecer;
+	ANT_directory_iterator_file_buffered *detrecer;
 	ANT_memory *memory;
 	ANT_directory_iterator_object *more_files;
 	long first_time;
@@ -38,6 +39,8 @@ public:
 
 	virtual ANT_directory_iterator_object *first(ANT_directory_iterator_object *object) { return next(object); }
 	virtual ANT_directory_iterator_object *next(ANT_directory_iterator_object *object);
+
+	void set_tags(char *doc_name, char *docno_name);
 } ;
 
 #endif /* DIRECTORY_ITERATOR_TREC_RECURSIVE_H_ */
