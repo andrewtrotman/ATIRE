@@ -153,12 +153,15 @@ if (!auto_file_id)
 	else
 		{
 		if ((document_id_start = strstr(document_start, "id=\"")) == NULL)		// assume NTCIR, and if not then check TREC 2017 Core (NYTimes)
-			document_id_start = strstr(document_start, "id-string=\"");
-
-		document_id_end = strchr(document_id_start += strlen(doc_tag[0]), '"');
-/* Not sure why this code is here, so I've removed it.  All it appears to do is to ignore the DOCID tag's contents in indexing the document */
-//		if (document_id_end)
-//			document_start = strchr(document_id_end, '>') + 1;
+			{
+			document_id_start = strstr(document_start, "id-string=\"") + 11;				// TREC Core 2017
+			document_id_end = strchr(document_id_start, '"');
+			}
+		else
+			{
+			document_start = strchr(document_id_start, '>') + 1;		// NTCIR, start the document at the end of the tag (<DOC id=" is it?)
+			document_id_end = strchr(document_id_start += strlen(doc_tag[0]), '"');
+			}
 		}
 	}
 else

@@ -61,6 +61,9 @@ quantization_bits = -1; // -1 indicates run-time calculation, wil be overwritten
 quantization_automatic = FALSE;
 puurula_length_g = ANT_RANKING_FUNCTION_PUURULA_G;
 inversion_extras = ANT_memory_index::NONE;
+
+doc_tag = "DOC";
+docno_tag = "DOCNO";
 }
 
 /*
@@ -101,8 +104,8 @@ puts("-rt             Search in tar files for indexable files");
 puts("-rtgz           Search in tar.gz files for indexable files");
 puts("-rtbz2          Search in tar.bz2 files for indexable files");
 puts("-rtlzo          Search in tar.lzo files for indexable files");
-puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO>,");
-puts("-rrtrec         Recursive search for TREC formatted <DOC>...</DOC> formatted files,");
+puts("-rtrec          Single file, multiple <DOC>...</DOC> identified <DOCNO>docid</DOCNO> ");
+puts("-rrtrec         Recursive search for TREC formatted <DOC>...</DOC> formatted files, optional \":tag:DOC:DOCID\" (use -rrtrec:tag:nitf:doc-id for TREC 2017 Core NYTimes)");
 puts("-rtrecbig       Equivalent to -rtrec -iscrub:an");
 puts("-rvbulletin <username> <password> <database> <instance> MySQL vBulletin instance");
 puts("-rwarcgz        Search in warc.gz files for indexable files");
@@ -414,8 +417,6 @@ for (param = 1; param < argc; param++)
 		else if (strncmp(command, "rtrec", 5) == 0)
 			{
 			recursive = TREC;
-			doc_tag = NULL;
-			docno_tag = NULL;
 			if (strncmp(command + 5, ":clean", 6) == 0)
 				this->scrub("an");
 			else if (strncmp(command + 5, ":tag", 4) == 0)
@@ -433,6 +434,15 @@ for (param = 1; param < argc; param++)
 			recursive = RECURSIVE_TREC;
 			if (strncmp(command + 6, ":clean", 6) == 0)
 				this->scrub("an");
+			else if (strncmp(command + 6, ":tag", 4) == 0)
+				{
+				doc_tag = command + 11;
+				if ((start = strchr(doc_tag, ':')) != NULL)
+					{
+					*start = '\0';
+					docno_tag = ++start;
+					}
+				}
 			}
 		else if (strcmp(command, "rtrecbig") == 0)
 			{

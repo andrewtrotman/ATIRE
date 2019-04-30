@@ -416,12 +416,7 @@ for (param = first_param; param < argc; param++)
 //		source = new ANT_directory_iterator_file(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 		}
 	else if (param_block.recursive == ANT_indexer_param_block::RECURSIVE_TREC)
-		{
-		if (param_block.doc_tag == NULL)
-			source = new ANT_directory_iterator_trec_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing, "nitf", "doc-id");
-		else
-			source = new ANT_directory_iterator_trec_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing);
-		}
+		source = new ANT_directory_iterator_trec_recursive(argv[param], ANT_directory_iterator::READ_FILE, param_block.scrubbing, param_block.doc_tag, param_block.docno_tag);
 	else if (param_block.recursive == ANT_indexer_param_block::CSV)
 		source = new ANT_directory_iterator_csv(ANT_disk::read_entire_file(argv[param]), ANT_directory_iterator::READ_FILE);
 	else if (param_block.recursive == ANT_indexer_param_block::TSV)
