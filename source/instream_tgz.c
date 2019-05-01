@@ -33,6 +33,7 @@ ANT_instream *instream_buffer = new ANT_instream_buffer(memory, deflater);
 source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
 if (source->first(&object) != NULL)
 	{
+printf("DEBUG: first file of %s is %s\n", this->filename, object.filename);
 	current_file_pointer = current_file = object.file;
 	current_file_length = object.length;
 	}
@@ -69,6 +70,7 @@ if (current_file == NULL)
 allowed = ANT_min(bytes, (long long)(current_file + current_file_length - current_file_pointer));
 memcpy(buffer, current_file_pointer, (size_t)allowed);
 current_file_pointer += allowed;
+
 if (current_file_pointer >= current_file + current_file_length)
 	{
 	delete [] current_file;
@@ -78,4 +80,3 @@ bytes_read += allowed;
 
 return allowed;
 }
-

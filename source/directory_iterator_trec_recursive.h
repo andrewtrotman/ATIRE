@@ -21,8 +21,6 @@ protected:
 	char *source;
 	ANT_instream *file_stream;
 	ANT_instream *decompressor;
-	ANT_instream *instream_buffer;
-	ANT_instream *scrubber;
 	ANT_directory_iterator *filename_provider;
 	ANT_directory_iterator_file_buffered *detrecer;
 	ANT_memory *memory;

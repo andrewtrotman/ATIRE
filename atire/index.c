@@ -315,6 +315,7 @@ for (param = first_param; param < argc; param++)
 		{
 		file_stream = new ANT_instream_file(&file_buffer, argv[param]);
 		decompressor = new ANT_instream_deflate(&file_buffer, file_stream);
+		/* always make a double buffer for tar files */
 		instream_buffer = new ANT_instream_buffer(&file_buffer, decompressor);
 		source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE, ANT_directory_iterator_tar::NAME);
 		}

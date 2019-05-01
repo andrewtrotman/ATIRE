@@ -21,10 +21,10 @@
 # for inclusion in other projects that might need them
 include GNUmakefile.defns
 
-all: $(EXTRA_OBJS) GNUmakefile index atire atire_client atire_broker atire_dictionary atire_merge atire_reorder atire_doclist
+all: $(EXTRA_OBJS) GNUmakefile index atire atire_client atire_broker atire_dictionary atire_merge atire_reorder atire_doclist atire_tar
 
 # faster compilation without considering extra objects, useful for repeated make for testing
-internal: index atire atire_client atire_broker atire_dictionary atire_merge atire_reorder atire_doclist
+internal: index atire atire_client atire_broker atire_dictionary atire_merge atire_reorder atire_doclist atire_tar
 
 index: $(BIN_DIR)/index
 atire: $(BIN_DIR)/atire
@@ -34,6 +34,7 @@ atire_dictionary: $(BIN_DIR)/atire_dictionary
 atire_merge: $(BIN_DIR)/atire_merge
 atire_reorder: $(BIN_DIR)/atire_reorder
 atire_doclist: $(BIN_DIR)/atire_doclist
+atire_tar: $(BIN_DIR)/atire_tar
 
 tools: $(TOOLS_EXES)
 
@@ -105,6 +106,9 @@ $(BIN_DIR)/atire_reorder : $(ATIRE_REORDER_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 $(BIN_DIR)/atire_doclist : $(ATIRE_DOCLIST_OBJECTS)
+	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
+
+$(BIN_DIR)/atire_tar : $(ATIRE_TAR_OBJECTS)
 	$(CC) -o $@  $^ $(EXTRA_OBJS) $(LDFLAGS)
 
 # Hacked to compile every single source in the tools directory.

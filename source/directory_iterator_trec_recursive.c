@@ -38,8 +38,6 @@ first_time = true;
 
 file_stream = NULL;
 decompressor = NULL;
-instream_buffer = NULL;
-scrubber = NULL;
 detrecer = NULL;
 memory = NULL;
 this->doc_name = strnew(doc_name);
@@ -64,6 +62,9 @@ delete memory;
 */
 ANT_directory_iterator *ANT_directory_iterator_trec_recursive::new_provider(char *filename)
 {
+ANT_instream *scrubber;
+ANT_instream *instream_buffer;
+
 delete detrecer;
 delete memory;
 
@@ -85,13 +86,7 @@ else if (strcmp(filename + strlen(filename) - 4, ".tgz") == 0)
 else
 	decompressor = file_stream;
 
-/*
-	We only want a buffer in this position if it comes after a decompressor
-*/
-if (decompressor == instream_buffer)
-	instream_buffer = decompressor;
-else
-	instream_buffer = new ANT_instream_buffer(memory, decompressor, false);
+instream_buffer = new ANT_instream_buffer(memory, decompressor, false);
 
 if (scrubbing_options != ANT_directory_iterator_scrub::NONE)
 	scrubber = new ANT_instream_scrub(memory, instream_buffer, scrubbing_options);

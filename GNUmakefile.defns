@@ -332,6 +332,7 @@ MAIN_FILES := $(ATIRE_DIR)/atire.c \
               $(ATIRE_DIR)/atire_merge.c \
               $(ATIRE_DIR)/atire_reorder.c \
               $(ATIRE_DIR)/atire_doclist.c \
+              $(ATIRE_DIR)/atire_tar.c \
               $(ATIRE_DIR)/atire_dictionary.c
 
 ALL_SOURCES := $(shell ls $(ATIRE_DIR)/*.c $(SRC_DIR)/*.c)
@@ -367,6 +368,9 @@ ATIRE_BROKER_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_BROKER_S
 
 ATIRE_DOCLIST_SOURCES := atire_doclist.c $(notdir $(SOURCES))
 ATIRE_DOCLIST_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_DOCLIST_SOURCES)))
+
+ATIRE_TAR_SOURCES := atire_tar.c $(notdir $(SOURCES))
+ATIRE_TAR_OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst .c,.o, $(ATIRE_TAR_SOURCES)))
 
 TOOLS_IGNORES := $(TOOLS_DIR)/mysql_xml_dump.c
 TOOLS_SOURCES := $(notdir $(filter-out $(TOOLS_IGNORES), $(shell ls $(TOOLS_DIR)/*.c)))
