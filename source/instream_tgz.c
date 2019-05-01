@@ -7,6 +7,7 @@
 #include "instream_tgz.h"
 #include "instream_deflate.h"
 #include "instream_file.h"
+#include "instream_buffer.h"
 #include "memory.h"
 #include "maths.h"
 #include "file.h"
@@ -27,7 +28,9 @@ current_file_pointer = current_file = NULL;
 current_file_length = 0;
 
 deflater = new ANT_instream_deflate(memory, new ANT_instream_file(memory, filename));
-source = new ANT_directory_iterator_tar(deflater, 1);
+ANT_instream *instream_buffer = new ANT_instream_buffer(memory, deflater);
+
+source = new ANT_directory_iterator_tar(instream_buffer, ANT_directory_iterator::READ_FILE);
 if (source->first(&object) != NULL)
 	{
 	current_file_pointer = current_file = object.file;
@@ -41,8 +44,7 @@ if (source->first(&object) != NULL)
 */
 ANT_instream_tgz::~ANT_instream_tgz()
 {
-//delete deflater;
-//delete source;
+delete source;
 }
 
 /*
