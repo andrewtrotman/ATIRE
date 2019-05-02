@@ -512,7 +512,7 @@ for (param = first_param; param < argc; param++)
 			*/
 			if (doc % param_block.reporting_frequency == 0 && doc != last_report)
 				report(last_report = doc, index, &stats, bytes_indexed);
-	
+
 			/*
 				Index, this call returns the number of terms we found in the document
 			*/
