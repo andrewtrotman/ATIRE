@@ -71,7 +71,6 @@ delete memory;
 memory = new ANT_memory(1024 * 1024);
 file_stream = new ANT_instream_file(memory, filename);
 
-printf("DEBUG: !!! filename is :[%s]\n", filename);
 
 if (strcmp(filename + strlen(filename) - 3, ".gz") == 0)
 	decompressor = new ANT_instream_deflate(memory, file_stream);
@@ -85,7 +84,6 @@ else if ((strcmp(filename + strlen(filename) - 1, "z") == 0) && isdigit(filename
 	decompressor = new ANT_instream_Z(memory, filename);
 else if (strcmp(filename + strlen(filename) - 4, ".tgz") == 0)
 	{
-	printf("DEBUG: !!! file is .tgz\n");
 	decompressor = new ANT_instream_tgz(memory, filename);
 	}
 else
