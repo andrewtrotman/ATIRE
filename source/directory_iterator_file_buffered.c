@@ -146,7 +146,10 @@ if (!auto_file_id)
 		{
 		document_id_start = strstr(document_start, docno_tag[0]);
 		if (document_id_start != NULL)
+			{
+			document_id_start++;		// skip over the '>'
 			document_id_end = strstr(document_id_start += strlen(docno_tag[0]), docno_tag[1]);
+			}
 		else
 			auto_file_id++;
 		}
