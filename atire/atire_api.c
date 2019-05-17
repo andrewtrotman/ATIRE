@@ -1562,7 +1562,7 @@ if (feedback_mode == FEEDBACK_INTERPOLATED)
 */
 parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list, parsed_query, feedback_documents, feedback_terms, &parsed_query->feedback_terms_in_query);
 
-//#ifdef NEVER
+#ifdef NEVER
 	/*
 		Print out the feedback terms
 	*/
@@ -1570,7 +1570,7 @@ parsed_query->feedback_terms = feedbacker->feedback(search_engine->results_list,
 	for (ANT_memory_index_one_node **current = parsed_query->feedback_terms; *current != NULL; current++)
 		printf("%*.*s ", (*current)->string.length(), (*current)->string.length(), (*current)->string.start);
 	puts("");
-//#endif
+#endif
 
 /*
 	If we have and feedback terms then do a NEXI query.  Note that if the documents are *not*
