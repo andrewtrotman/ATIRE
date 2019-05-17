@@ -157,8 +157,13 @@ if (!auto_file_id)
 		{
 		if ((document_id_start = strstr(document_start, "id=\"")) == NULL)		// assume NTCIR, and if not then check TREC 2017 Core (NYTimes)
 			{
-			document_id_start = strstr(document_start, "id-string=\"") + 11;				// TREC Core 2017
-			document_id_end = strchr(document_id_start, '"');
+			if ((document_id_start = strstr(document_start, "id-string=\"")) == NULL)				// TREC Core 2017
+				auto_file_id++;
+			else
+				{
+				document_id_start += 11;
+				document_id_end = strchr(document_id_start, '"');
+				}
 			}
 		else
 			{
