@@ -248,7 +248,7 @@ if (*at != '\0')
 token.start = (char *)at;
 token.string_length = length_in_bytes;
 at += length_in_bytes;
-//printf("token.string_length = %i",token.start,token.string_length);
+printf("token.string_length = %i (%*.*s)\n", token.string_length, token.string_length, token.string_length, token.start);
 return &token;
 }
 

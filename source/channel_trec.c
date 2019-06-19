@@ -16,6 +16,7 @@
 #include "stop_word.h"
 #include "ctypes.h"
 #include "channel_trec.h"
+#include "unicode.h"
 
 using namespace std;
 
@@ -65,57 +66,118 @@ exit(printf("ANT_channel_trec::block_write not implemented (class only supports 
 #pragma ANT_PRAGMA_UNUSED_PARAMETER
 }
 
-/*
-	ANT_CHANNEL_TREC::CLEAN()
-	-------------------------
-*/
-char *ANT_channel_trec::clean(long number, ostringstream &raw_query)
-{
-char *from, *to, *destination;
-ostringstream stopped_query;
-string copy;
+#ifdef NEVER
 
-raw_query << ends;
-
-to = destination = new char [raw_query.tellp() * 2 + 1];
-copy = raw_query.str();
-from = (char *)(copy.c_str());
-
-while (*from != '\0')
+	/*
+		ANT_CHANNEL_TREC::CLEAN()
+		-------------------------
+	*/
+	char *ANT_channel_trec::clean(long number, ostringstream &raw_query)
 	{
-	if (ANT_isalpha(*from))
+	char *from, *to, *destination;
+	ostringstream stopped_query;
+	string copy;
+
+	raw_query << ends;
+
+	to = destination = new char [raw_query.tellp() * 2 + 1];
+	copy = raw_query.str();
+	from = (char *)(copy.c_str());
+
+	while (*from != '\0')
 		{
-		do
-			*to++ = ANT_tolower(*from++);
-		while (ANT_isalpha(*from));
-		*to++ = ' ';
-		}
-	else if (ANT_isdigit(*from))
-		{
-		do
-			*to++ = ANT_tolower(*from++);
-		while (ANT_isdigit(*from));
-		*to++ = ' ';
-		}
-	else
-		{
-		from++;
-		while (!ANT_isalnum(*from) && *from != '\0')
+		if (ANT_isalpha(*from))
 			{
+			do
+				*to++ = ANT_tolower(*from++);
+			while (ANT_isalpha(*from));
 			*to++ = ' ';
+			}
+		else if (ANT_isdigit(*from))
+			{
+			do
+				*to++ = ANT_tolower(*from++);
+			while (ANT_isdigit(*from));
+			*to++ = ' ';
+			}
+		else
+			{
 			from++;
+			while (!ANT_isalnum(*from) && *from != '\0')
+				{
+				*to++ = ' ';
+				from++;
+				}
 			}
 		}
+
+	*to = '\0';
+	strip_space_inplace(destination);
+
+	stopped_query << number << ' ' << destination << ends;
+	delete [] destination;
+
+	return strnew((char *)stopped_query.str().c_str());
 	}
 
-*to = '\0';
-strip_space_inplace(destination);
+#else
 
-stopped_query << number << ' ' << destination << ends;
-delete [] destination;
+	/*
+		ANT_CHANNEL_TREC::CLEAN()
+		-------------------------
+	*/
+	char *ANT_channel_trec::clean(long topic_number, ostringstream &raw_query)
+	{
+	unsigned char character_type;
+	unsigned char *from, *to, *destination;
+	ostringstream stopped_query;
+	long bytes;
+	unsigned long character;
+	size_t buffer_length;
+	
+	raw_query << ends;
+	string copy = raw_query.str();
+	buffer_length = copy.size() * 20 + 1;
+	to = destination = (unsigned char *)(new char [buffer_length]);
+	from = (unsigned char *)(copy.c_str());
 
-return strnew((char *)stopped_query.str().c_str());
-}
+	while (*from != '\0')
+		{
+		character_type = unicode_chartype_utf8(from, &character, &bytes);
+
+		if (character_type == CT_LETTER)
+			{
+			while (unicode_chartype_utf8(from, &character, &bytes) == CT_LETTER)
+				{
+				ANT_UNICODE_normalize_lowercase_toutf8(&to, &buffer_length, character);
+				from += bytes;
+				}
+			}
+		else if (character_type == CT_NUMBER)
+			{
+			while (unicode_chartype_utf8(from, &character, &bytes) == CT_LETTER)
+				{
+				ANT_UNICODE_normalize_lowercase_toutf8(&to, &buffer_length, character);
+				from += bytes;
+				}
+			}
+		else
+			{
+			from += bytes;
+			*to++ = ' ';
+			}
+		}
+
+	*to = '\0';
+	strip_space_inplace((char *)destination);
+
+	stopped_query << topic_number << ' ' << destination << ends;
+	delete [] destination;
+
+	return strnew((char *)stopped_query.str().c_str());
+	}
+
+#endif
 
 /*
 	ANT_CHANNEL_TREC::GETSZ()
@@ -153,6 +215,7 @@ for (;;)
 		old_number = number;
 		number = atol(strchr(buffer_start, ':') + 1);
 		delete [] buffer;
+		buffer = NULL;
 
 		if (old_number >= 0)
 			return clean(old_number, raw_query);
@@ -165,6 +228,7 @@ for (;;)
 		old_number = number;
 		number = atol(strchr(buffer_start, '"') + 1);
 		delete [] buffer;
+		buffer = NULL;
 
 		if (old_number >= 0)
 			return clean(old_number, raw_query);
@@ -194,6 +258,7 @@ for (;;)
 				buffer_start = strchr(buffer_start, '>') + 1;
 				raw_query.write(buffer_start, buffer_end - buffer_start);
 				delete [] buffer;
+				buffer = NULL;
 				}
 			else
 				{
@@ -202,6 +267,7 @@ for (;;)
 				else
 					raw_query << strchr(buffer_start, '>') + 1;			// character after the "<desc>"
 				delete [] buffer;
+				buffer = NULL;
 				while ((buffer = in_channel->gets()) != NULL)
 					{
 					if (*buffer == '<')
@@ -212,11 +278,15 @@ for (;;)
 					strip_space_inplace(buffer);
 					raw_query << ' ' << buffer;
 					delete [] buffer;
+					buffer = NULL;
 					}
 				}
 			}
 		else
+			{
 			delete [] buffer;
+			buffer = NULL;
+			}
 		}
 	}
 
