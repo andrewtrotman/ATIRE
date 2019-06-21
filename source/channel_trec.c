@@ -155,7 +155,7 @@ exit(printf("ANT_channel_trec::block_write not implemented (class only supports 
 			}
 		else if (character_type == CT_NUMBER)
 			{
-			while (unicode_chartype_utf8(from, &character, &bytes) == CT_LETTER)
+			while (unicode_chartype_utf8(from, &character, &bytes) == CT_NUMBER)
 				{
 				ANT_UNICODE_normalize_lowercase_toutf8(&to, &buffer_length, character);
 				from += bytes;
