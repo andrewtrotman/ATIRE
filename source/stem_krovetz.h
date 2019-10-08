@@ -49,12 +49,17 @@ using namespace std;
 		#include <unordered_map>
 	#endif
 #elif defined(__GNUC__)
-//	#include <tr1/unordered_map>
-	#include <unordered_map>
-	#define ATIRE_KROVETZ_HAS_HASH_MAP
-//	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
-//	using namespace std::tr1;
-	using namespace __gnu_cxx;
+	#if (__GNUC__ > 5)
+		#include <unordered_map>
+		#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
+	#else
+	//	#include <tr1/unordered_map>
+		#include <unordered_map>
+		#define ATIRE_KROVETZ_HAS_HASH_MAP
+	//	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
+	//	using namespace std::tr1;
+		using namespace __gnu_cxx;
+	#endif 
 #elif defined (_MSC_VER)
 	#include <unordered_map>
 	#define ATIRE_KROVETZ_HAS_UNORDERED_MAP
