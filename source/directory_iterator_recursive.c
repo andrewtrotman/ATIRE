@@ -249,7 +249,25 @@ file_list = handle_stack;
 #ifdef _MSC_VER
 	file_list->first_time = TRUE;
 	GetCurrentDirectory(sizeof(file_list->path), file_list->path);
-	strcat(file_list->path, "/*.*");
+
+	/*
+		ASPT: 28 Feb 2020
+		For compatibility with Linux we take the command line parameter and split it into path and wildcard then append the path to the current directory and search for wildcard matching files there.
+	*/
+	if (strpbrk(wildcard, "/\\") == NULL)
+		strcat(file_list->path, "/*.*");
+	else
+		{
+		char *last_slash = strrchr(wildcard, '/');
+		char *last_slosh = strrchr(wildcard, '\\');
+		char *last = last_slash > last_slosh ? last_slash : last_slosh;
+
+		*last++ = '\0';
+		strcat(file_list->path, "\\");
+		strcat(file_list->path, wildcard);
+		strcat(file_list->path, "\\*.*");
+		memmove(wildcard, last, strlen(last) + 1);
+		}
 
 	return next(object);
 #else
