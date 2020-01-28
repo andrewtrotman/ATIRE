@@ -499,6 +499,7 @@ for (param = first_param; param < argc; param++)
 		 */
 		if (current_file->file != NULL)
 			{
+//puts(current_file->filename);
 			/*
 				How much data do we have?
 			*/
@@ -531,7 +532,7 @@ for (param = first_param; param < argc; param++)
 
 			if (terms_in_document == 0)
 				{
-	//			puts(current_file->filename);
+//				puts(current_file->filename);
 				/*
 					pretend we never saw the document
 				*/
