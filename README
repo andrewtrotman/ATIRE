@@ -4,7 +4,7 @@ ATIRE builds with the native compilers on Mac (Xcode), Linux (gcc), and Windows 
 
 First, get the source code:
 
-> hg clone http://www.atire.org/hg/atire
+> git clone https://github.com/andrewtrotman/ATIRE.git
 
 Second, build
 
