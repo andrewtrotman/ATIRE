@@ -161,3 +161,14 @@ The impact values are the tf values, or the option specified by -Q when indexing
 ### Non Impact Header ###
 Postings lists are impact ordered, and stored in decreasing order of impact, with 0 identifying the end of the docid list for a given impact. For example: impact, docid, 0, impact, docid, docid, 0. Docid's are difference encoded for each impact, and the whole impact ordering is compressed.
 
+### Diagrammatic overview (may be outdated) ###
+[PDF Diagram](Docs/index-structure-v2.pdf)
+
+### Pre-gen Structure ###
+The pregen file starts with the string: "ANT Search Engine Pregen File\n\0"
+
+Then the string which identifies the field name for this pregenerated ranking.
+
+Then a sequence of ANT_pregen_t's which encode the RSV's for each document.
+
+Finally a "header" of 5 uint32_t's containing the following information: the version of the pregen file, the number of documents, sizeof(ANT_pregen_t), the type of pregen and finally the length of the field name string.
