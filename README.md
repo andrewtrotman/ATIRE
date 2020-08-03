@@ -120,14 +120,16 @@ Then for each node, the first B_TREE_PREFIX_SIZE bytes (currently set to 4), or 
 ### Second Level ###
 Each section of the second level begins with 4 bytes containing the number of terms in this section. Then for each term in the node:
 
-Variable	Number of Bytes	Notes
-Collection frequency	4	
-Document frequency	4	
-Position of postings on disk	8	DOCID_1 << 32 | IMPACT_1
-Length of postings	4	DOCID_2
-Length of postings in bytes	4	IMPACT_2
-Term local max impact	1	Only if TERM_LOCAL_MAX_IMPACT is defined.
-Position of string in string block	4	
+| Variable | Number of Bytes | Notes |
+|----------|----------------------|--------|
+| Collection frequency | 4 | |
+| Document frequency | 4 | |	
+| Position of postings on disk | 8 | DOCID_1 << 32 \| IMPACT_1 |
+| Length of postings | 4 | DOCID_2 |
+| Length of postings in bytes | 4 | IMPACT_2 |
+| Term local max impact | 1 | Only if TERM_LOCAL_MAX_IMPACT is defined. |
+| Position of string in string block | 4 | |
+
 Then the strings for the tails of the terms in this node, NUL terminated (following the example above, n, p, pish, t etc.
 
 In the case where SPECIAL_COMPRESSION is defined, then the postings position and postings length variables get replaced by the respective docid and impact values, as shown in the above table.
@@ -145,11 +147,13 @@ See known issues for some known issues with regards to ~ variables.
 ### Impact Header ###
 Each postings list is preceded by an impact header:
 
-Variable	Number of Bytes	Notes
-Postings chain	8	For chaining postings lists together, currently unused
-Chain length	8	As above
-Quantum count	4	
-Beginning of the postings	4	Pointer to the beginning of the postings on disk
+| Variable | Number of Bytes | Notes |
+|----------|---------------------|---------|
+| Postings chain | 8 | For chaining postings lists together, currently unused |
+| Chain length | 8 | As above |
+| Quantum count | 4 | |  	
+| Beginning of the postings | 4 | Pointer to the beginning of the postings on disk |
+
 Following this data is a compressed block of 3 * quantum_count values the contain the impact values, document counts and postings start.
 
 The impact values are the tf values, or the option specified by -Q when indexing. The document counts contain the number of documents for each impact value. The postings start is a location on disk for the postings for that impact value. That is, there are document_counts[i] documents with impact impact_values[i] and the docids start at postings_start[i]. The docids are difference encoded for each impact. Each docid list for each impact value is compressed separately.
