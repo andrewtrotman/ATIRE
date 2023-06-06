@@ -349,7 +349,10 @@ while((result = rulewalk(tx, ttable, isintact, &r)) != stop)
 	}
 
 /* Package stemmer output along with rule */
-strcpy(r.text, (result == stop) ? tx : trail);
+if (!acceptable(tx))
+	strcpy(r.text, trail);
+else
+	strcpy(r.text, (result == stop) ? tx : trail);
 
 /* -------Remove apostrophe if it exists ---------------- */
 r.text[strcspn(r.text,"\'")] = '\0';
